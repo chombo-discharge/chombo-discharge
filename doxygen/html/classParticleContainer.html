@@ -79,6 +79,7 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-types">Protected Types</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
@@ -123,6 +124,9 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>LevelParticles</b> =
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a2503981971f7735e94f3d64d4f372d4b" id="r_a2503981971f7735e94f3d64d4f372d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">findDestination</a> (const RealVect &amp;a_pos) const</td></tr>
+<tr class="memdesc:a2503981971f7735e94f3d64d4f372d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
+<tr class="separator:a2503981971f7735e94f3d64d4f372d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Construction and lifetime</div></td></tr>
 <tr class="memitem:a436bc8a55380fbea2d491d02ba5b7466" id="r_a436bc8a55380fbea2d491d02ba5b7466"><td class="memItemLeft" align="right" valign="top"><a id="a436bc8a55380fbea2d491d02ba5b7466" name="a436bc8a55380fbea2d491d02ba5b7466"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ParticleContainer</b> ()</td></tr>
@@ -304,9 +308,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setupGrownGrids</b> (
 <tr class="memitem:ae5d2b7253a850abaa2752709ef603fb8" id="r_ae5d2b7253a850abaa2752709ef603fb8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ae5d2b7253a850abaa2752709ef603fb8">inValidBox</a> (const int a_lvl, const Box &amp;a_box, const RealVect &amp;a_pos) const</td></tr>
 <tr class="memdesc:ae5d2b7253a850abaa2752709ef603fb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if a position's cell lies inside a (grid) box on a given level.  <br /></td></tr>
 <tr class="separator:ae5d2b7253a850abaa2752709ef603fb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2503981971f7735e94f3d64d4f372d4b" id="r_a2503981971f7735e94f3d64d4f372d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">findDestination</a> (const RealVect &amp;a_pos) const</td></tr>
-<tr class="memdesc:a2503981971f7735e94f3d64d4f372d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
-<tr class="separator:a2503981971f7735e94f3d64d4f372d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -900,13 +901,13 @@ template&lt;typename P , typename Traits &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Map a position to its owning (level, grid index, rank) via the finest containing tile. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Public because the distributed nearest-neighbor particle merge (<a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsRound</a>) locates each newly created merged particle's owning patch/rank through the SAME tile-hash query <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> uses internally, rather than a linear scan over patches &ndash; see NNParticleLocation / PositionLocator in <a class="el" href="CD__NearestNeighborParticleMerge_8H.html" title="Declaration of a distributed, MPI-safe nearest-neighbor particle-merge algorithm.">CD_NearestNeighborParticleMerge.H</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Particle position. </td></tr>
   </table>

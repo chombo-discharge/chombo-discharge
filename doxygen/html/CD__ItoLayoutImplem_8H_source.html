@@ -359,300 +359,314 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
 <div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span><span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00229" data-start="{" data-end="}">
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">  229</a></span><a class="code hl_function" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout&lt;T&gt;::depositParticles</a>()</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>{</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>  this-&gt;depositParticles(ItoSolver::WhichContainer::Bulk);</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>}</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="classItoLayout.html#a933fc992a078360495250a521edc1eda">  229</a></span><a class="code hl_function" href="classItoLayout.html#a1ce54d1788882b20dbeff5cd3a61b6b2">ItoLayout&lt;T&gt;::makeSuperparticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a>               a_whichContainer,</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>                                 <span class="keyword">const</span> Vector&lt;int&gt;&amp;                            a_ppc,</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>                                 <span class="keyword">const</span> <a class="code hl_enumeration" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> a_method)</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>{</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    iter()-&gt;makeSuperparticles(a_whichContainer, a_ppc, a_method);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  }</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>}</div>
 </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00236" data-start="{" data-end="}">
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="classItoLayout.html#a8bfc754b6cb4a6a8c664e6e2a24c7633">  236</a></span><a class="code hl_function" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout&lt;T&gt;::depositParticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_whichContainer)</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>{</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    iter()-&gt;depositParticles(a_whichContainer);</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  }</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>}</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span><span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00240" data-start="{" data-end="}">
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno"><a class="line" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">  240</a></span><a class="code hl_function" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout&lt;T&gt;::depositParticles</a>()</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>{</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>  this-&gt;depositParticles(ItoSolver::WhichContainer::Bulk);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>}</div>
 </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00245" data-start="{" data-end="}">
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">  245</a></span><a class="code hl_function" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout&lt;T&gt;::remap</a>()</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>{</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  this-&gt;remap(ItoSolver::WhichContainer::Bulk);</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>}</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00247" data-start="{" data-end="}">
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="classItoLayout.html#a8bfc754b6cb4a6a8c664e6e2a24c7633">  247</a></span><a class="code hl_function" href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout&lt;T&gt;::depositParticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_whichContainer)</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>{</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    iter()-&gt;depositParticles(a_whichContainer);</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>  }</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>}</div>
 </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00252" data-start="{" data-end="}">
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="classItoLayout.html#a76a326dbb0416bb29e4d92394b4e42d8">  252</a></span><a class="code hl_function" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout&lt;T&gt;::remap</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_whichContainer)</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>{</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    iter()-&gt;remap(a_whichContainer);</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>  }</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>}</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00256" data-start="{" data-end="}">
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno"><a class="line" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">  256</a></span><a class="code hl_function" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout&lt;T&gt;::remap</a>()</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>{</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  this-&gt;remap(ItoSolver::WhichContainer::Bulk);</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>}</div>
 </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><span class="keywordtype">size_t</span></div>
-<div class="foldopen" id="foldopen00261" data-start="{" data-end="}">
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno"><a class="line" href="classItoLayout.html#acf3f0dd1324433928f00d6da4e81af50">  261</a></span><a class="code hl_function" href="classItoLayout.html#acf3f0dd1324433928f00d6da4e81af50">ItoLayout&lt;T&gt;::getNumParticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_whichContainer, <span class="keyword">const</span> <span class="keywordtype">bool</span> a_localOnly)</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>{</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>  <span class="keywordtype">size_t</span> ret = 0;</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span> iter = this-&gt;iterator(); iter.ok(); ++iter) {</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    ret += iter()-&gt;getNumParticles(a_whichContainer, a_localOnly);</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>  }</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>}</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00263" data-start="{" data-end="}">
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="classItoLayout.html#a76a326dbb0416bb29e4d92394b4e42d8">  263</a></span><a class="code hl_function" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout&lt;T&gt;::remap</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_whichContainer)</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>{</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    iter()-&gt;remap(a_whichContainer);</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  }</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>}</div>
 </div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>Real</div>
-<div class="foldopen" id="foldopen00273" data-start="{" data-end="}">
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">  273</a></span><a class="code hl_function" href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">ItoLayout&lt;T&gt;::computeDt</a>()</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>{</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeDt();</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    minDt             = std::min(minDt, thisDt);</div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>  }</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span><span class="keywordtype">size_t</span></div>
+<div class="foldopen" id="foldopen00272" data-start="{" data-end="}">
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="classItoLayout.html#acf3f0dd1324433928f00d6da4e81af50">  272</a></span><a class="code hl_function" href="classItoLayout.html#acf3f0dd1324433928f00d6da4e81af50">ItoLayout&lt;T&gt;::getNumParticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_whichContainer, <span class="keyword">const</span> <span class="keywordtype">bool</span> a_localOnly)</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>{</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>  <span class="keywordtype">size_t</span> ret = 0;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span> iter = this-&gt;iterator(); iter.ok(); ++iter) {</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    ret += iter()-&gt;getNumParticles(a_whichContainer, a_localOnly);</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>  }</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>}</div>
+</div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>  <span class="keywordflow">return</span> minDt;</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>}</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>Real</div>
+<div class="foldopen" id="foldopen00284" data-start="{" data-end="}">
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">  284</a></span><a class="code hl_function" href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">ItoLayout&lt;T&gt;::computeDt</a>()</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>{</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeDt();</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    minDt             = std::min(minDt, thisDt);</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  }</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>  <span class="keywordflow">return</span> minDt;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>}</div>
 </div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>Real</div>
-<div class="foldopen" id="foldopen00287" data-start="{" data-end="}">
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno"><a class="line" href="classItoLayout.html#a0bb2d4789da3ebae621cf520b00953e9">  287</a></span><a class="code hl_function" href="classItoLayout.html#a0bb2d4789da3ebae621cf520b00953e9">ItoLayout&lt;T&gt;::computeAdvectiveDt</a>()</div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>{</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeAdvectiveDt();</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    minDt             = std::min(minDt, thisDt);</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>  }</div>
 <div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>  <span class="keywordflow">return</span> minDt;</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>}</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>Real</div>
+<div class="foldopen" id="foldopen00298" data-start="{" data-end="}">
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno"><a class="line" href="classItoLayout.html#a0bb2d4789da3ebae621cf520b00953e9">  298</a></span><a class="code hl_function" href="classItoLayout.html#a0bb2d4789da3ebae621cf520b00953e9">ItoLayout&lt;T&gt;::computeAdvectiveDt</a>()</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>{</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeAdvectiveDt();</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    minDt             = std::min(minDt, thisDt);</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  }</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span> </div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>  <span class="keywordflow">return</span> minDt;</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>}</div>
 </div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>Real</div>
-<div class="foldopen" id="foldopen00301" data-start="{" data-end="}">
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno"><a class="line" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">  301</a></span><a class="code hl_function" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout&lt;T&gt;::computeHopDt</a>(<span class="keyword">const</span> Real a_maxCellsToMove)</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>{</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeHopDt(a_maxCellsToMove);</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    minDt             = std::min(minDt, thisDt);</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>  }</div>
 <div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>  <span class="keywordflow">return</span> minDt;</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>}</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>Real</div>
+<div class="foldopen" id="foldopen00312" data-start="{" data-end="}">
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno"><a class="line" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">  312</a></span><a class="code hl_function" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout&lt;T&gt;::computeHopDt</a>(<span class="keyword">const</span> Real a_maxCellsToMove)</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>{</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeHopDt(a_maxCellsToMove);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>    minDt             = std::min(minDt, thisDt);</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>  }</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>  <span class="keywordflow">return</span> minDt;</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>}</div>
 </div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>Real</div>
-<div class="foldopen" id="foldopen00315" data-start="{" data-end="}">
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno"><a class="line" href="classItoLayout.html#a3d0d90c09ed56e8a1760829599cd8404">  315</a></span><a class="code hl_function" href="classItoLayout.html#a3d0d90c09ed56e8a1760829599cd8404">ItoLayout&lt;T&gt;::computeDiffusiveDt</a>()</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>{</div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeDiffusiveDt();</div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    minDt             = std::min(minDt, thisDt);</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>  }</div>
 <div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>  <span class="keywordflow">return</span> minDt;</div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>}</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>Real</div>
+<div class="foldopen" id="foldopen00326" data-start="{" data-end="}">
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno"><a class="line" href="classItoLayout.html#a3d0d90c09ed56e8a1760829599cd8404">  326</a></span><a class="code hl_function" href="classItoLayout.html#a3d0d90c09ed56e8a1760829599cd8404">ItoLayout&lt;T&gt;::computeDiffusiveDt</a>()</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>{</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>  Real minDt = std::numeric_limits&lt;Real&gt;::max();</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span> </div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>    <span class="keyword">const</span> Real thisDt = iter()-&gt;computeDiffusiveDt();</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    minDt             = std::min(minDt, thisDt);</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>  }</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>  <span class="keywordflow">return</span> minDt;</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>}</div>
 </div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>Vector&lt;RefCountedPtr&lt;T&gt;&gt;&amp;</div>
-<div class="foldopen" id="foldopen00329" data-start="{" data-end="}">
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno"><a class="line" href="classItoLayout.html#ac9dd701a299cb04c26b580487ed552db">  329</a></span><a class="code hl_function" href="classItoLayout.html#ac9dd701a299cb04c26b580487ed552db">ItoLayout&lt;T&gt;::getSolvers</a>()</div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>{</div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>  <span class="keywordflow">return</span> m_solvers;</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>}</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span> </div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>Vector&lt;RefCountedPtr&lt;T&gt;&gt;&amp;</div>
+<div class="foldopen" id="foldopen00340" data-start="{" data-end="}">
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno"><a class="line" href="classItoLayout.html#ac9dd701a299cb04c26b580487ed552db">  340</a></span><a class="code hl_function" href="classItoLayout.html#ac9dd701a299cb04c26b580487ed552db">ItoLayout&lt;T&gt;::getSolvers</a>()</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>{</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>  <span class="keywordflow">return</span> m_solvers;</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>}</div>
 </div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>Vector&lt;RefCountedPtr&lt;ItoSpecies&gt;&gt;&amp;</div>
-<div class="foldopen" id="foldopen00336" data-start="{" data-end="}">
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno"><a class="line" href="classItoLayout.html#a45312bb8ba651b1fb9a9df7b7c84fd94">  336</a></span><a class="code hl_function" href="classItoLayout.html#a45312bb8ba651b1fb9a9df7b7c84fd94">ItoLayout&lt;T&gt;::getSpecies</a>()</div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>{</div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>  <span class="keywordflow">return</span> m_species;</div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>}</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>Vector&lt;RefCountedPtr&lt;ItoSpecies&gt;&gt;&amp;</div>
+<div class="foldopen" id="foldopen00347" data-start="{" data-end="}">
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno"><a class="line" href="classItoLayout.html#a45312bb8ba651b1fb9a9df7b7c84fd94">  347</a></span><a class="code hl_function" href="classItoLayout.html#a45312bb8ba651b1fb9a9df7b7c84fd94">ItoLayout&lt;T&gt;::getSpecies</a>()</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>{</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>  <span class="keywordflow">return</span> m_species;</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>}</div>
 </div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>Vector&lt;EBAMRCellData*&gt;</div>
-<div class="foldopen" id="foldopen00343" data-start="{" data-end="}">
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno"><a class="line" href="classItoLayout.html#a6831aa11fe15a1c73c7c90c0df8ccbe7">  343</a></span><a class="code hl_function" href="classItoLayout.html#a6831aa11fe15a1c73c7c90c0df8ccbe7">ItoLayout&lt;T&gt;::getVelocityFunctions</a>()</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>{</div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>    ret[iter.index()] = &amp;(iter()-&gt;getVelocityFunction());</div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>  }</div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>}</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span> </div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>Vector&lt;EBAMRCellData*&gt;</div>
+<div class="foldopen" id="foldopen00354" data-start="{" data-end="}">
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno"><a class="line" href="classItoLayout.html#a6831aa11fe15a1c73c7c90c0df8ccbe7">  354</a></span><a class="code hl_function" href="classItoLayout.html#a6831aa11fe15a1c73c7c90c0df8ccbe7">ItoLayout&lt;T&gt;::getVelocityFunctions</a>()</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>{</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>    ret[iter.index()] = &amp;(iter()-&gt;getVelocityFunction());</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>  }</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>}</div>
 </div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>Vector&lt;EBAMRCellData*&gt;</div>
-<div class="foldopen" id="foldopen00355" data-start="{" data-end="}">
-<div class="line"><a id="l00355" name="l00355"></a><span class="lineno"><a class="line" href="classItoLayout.html#aeedf236c882abc1a1fbdd55a696604a9">  355</a></span><a class="code hl_function" href="classItoLayout.html#aeedf236c882abc1a1fbdd55a696604a9">ItoLayout&lt;T&gt;::getDensities</a>()</div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>{</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>    ret[iter.index()] = &amp;(iter()-&gt;getPhi());</div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>  }</div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span> </div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>}</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>Vector&lt;EBAMRCellData*&gt;</div>
+<div class="foldopen" id="foldopen00366" data-start="{" data-end="}">
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno"><a class="line" href="classItoLayout.html#aeedf236c882abc1a1fbdd55a696604a9">  366</a></span><a class="code hl_function" href="classItoLayout.html#aeedf236c882abc1a1fbdd55a696604a9">ItoLayout&lt;T&gt;::getDensities</a>()</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>{</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    ret[iter.index()] = &amp;(iter()-&gt;getPhi());</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>  }</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>}</div>
 </div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span> </div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>Vector&lt;EBAMRCellData*&gt;</div>
-<div class="foldopen" id="foldopen00367" data-start="{" data-end="}">
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno"><a class="line" href="classItoLayout.html#a15b80eca2a0591577636d04020f85bec">  367</a></span><a class="code hl_function" href="classItoLayout.html#a15b80eca2a0591577636d04020f85bec">ItoLayout&lt;T&gt;::getDiffusionFunctions</a>()</div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>{</div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    ret[iter.index()] = &amp;(iter()-&gt;getDiffusionFunction());</div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>  }</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span> </div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>}</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>Vector&lt;EBAMRCellData*&gt;</div>
+<div class="foldopen" id="foldopen00378" data-start="{" data-end="}">
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno"><a class="line" href="classItoLayout.html#a15b80eca2a0591577636d04020f85bec">  378</a></span><a class="code hl_function" href="classItoLayout.html#a15b80eca2a0591577636d04020f85bec">ItoLayout&lt;T&gt;::getDiffusionFunctions</a>()</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>{</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    ret[iter.index()] = &amp;(iter()-&gt;getDiffusionFunction());</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>  }</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>}</div>
 </div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>Vector&lt;EBAMRCellData*&gt;</div>
-<div class="foldopen" id="foldopen00379" data-start="{" data-end="}">
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno"><a class="line" href="classItoLayout.html#a1b22c07d176dbd22e98a73a889cfc44e">  379</a></span><a class="code hl_function" href="classItoLayout.html#a1b22c07d176dbd22e98a73a889cfc44e">ItoLayout&lt;T&gt;::getMobilityFunctions</a>()</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>{</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    ret[iter.index()] = &amp;(iter()-&gt;getMobilityFunction());</div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>  }</div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span> </div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>}</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span> </div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>Vector&lt;EBAMRCellData*&gt;</div>
+<div class="foldopen" id="foldopen00390" data-start="{" data-end="}">
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno"><a class="line" href="classItoLayout.html#a1b22c07d176dbd22e98a73a889cfc44e">  390</a></span><a class="code hl_function" href="classItoLayout.html#a1b22c07d176dbd22e98a73a889cfc44e">ItoLayout&lt;T&gt;::getMobilityFunctions</a>()</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>{</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>  Vector&lt;EBAMRCellData*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    ret[iter.index()] = &amp;(iter()-&gt;getMobilityFunction());</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>  }</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>}</div>
 </div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>Vector&lt;ParticleContainer&lt;ItoParticle&gt;*&gt;</div>
-<div class="foldopen" id="foldopen00391" data-start="{" data-end="}">
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno"><a class="line" href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">  391</a></span><a class="code hl_function" href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">ItoLayout&lt;T&gt;::getParticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_container)</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>{</div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>  Vector&lt;ParticleContainer&lt;ItoParticle&gt;*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    ret[iter.index()] = &amp;(iter()-&gt;getParticles(a_container));</div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>  }</div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span> </div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>}</div>
-</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span> </div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span><a class="code hl_enumeration" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></div>
-<div class="foldopen" id="foldopen00403" data-start="{" data-end="}">
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno"><a class="line" href="classItoLayout.html#a7f975920e2160066097e3e5812aca24b">  403</a></span><a class="code hl_function" href="classItoLayout.html#a7f975920e2160066097e3e5812aca24b">ItoLayout&lt;T&gt;::getPhase</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>  <span class="keywordflow">return</span> m_phase;</div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>}</div>
-</div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span> </div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
-<div class="foldopen" id="foldopen00409" data-start="{" data-end="}">
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno"><a class="line" href="classItoFactory.html#a3dcffa8ba8762f1acb6d2b4cc384fc0f">  409</a></span><a class="code hl_function" href="classItoFactory.html#a3dcffa8ba8762f1acb6d2b4cc384fc0f">ItoFactory&lt;T, S&gt;::ItoFactory</a>()</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>{}</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span> </div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>Vector&lt;ParticleContainer&lt;ItoParticle&gt;*&gt;</div>
+<div class="foldopen" id="foldopen00402" data-start="{" data-end="}">
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno"><a class="line" href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">  402</a></span><a class="code hl_function" href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">ItoLayout&lt;T&gt;::getParticles</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a> a_container)</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>{</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  Vector&lt;ParticleContainer&lt;ItoParticle&gt;*&gt; ret(m_solvers.size(), <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>  <span class="keywordflow">for</span> (<a class="code hl_class" href="classItoIterator.html">ItoIterator&lt;T&gt;</a> iter = this-&gt;iterator(); iter.<a class="code hl_function" href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ok</a>(); ++iter) {</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    ret[iter.index()] = &amp;(iter()-&gt;getParticles(a_container));</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>  }</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span> </div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>}</div>
 </div>
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span> </div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
-<div class="foldopen" id="foldopen00413" data-start="{" data-end="}">
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno"><a class="line" href="classItoFactory.html#a0938743285a319eeebe4cfcb8a526e39">  413</a></span><a class="code hl_function" href="classItoFactory.html#a0938743285a319eeebe4cfcb8a526e39">ItoFactory&lt;T, S&gt;::~ItoFactory</a>()</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>{}</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span><a class="code hl_enumeration" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></div>
+<div class="foldopen" id="foldopen00414" data-start="{" data-end="}">
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno"><a class="line" href="classItoLayout.html#a7f975920e2160066097e3e5812aca24b">  414</a></span><a class="code hl_function" href="classItoLayout.html#a7f975920e2160066097e3e5812aca24b">ItoLayout&lt;T&gt;::getPhase</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>  <span class="keywordflow">return</span> m_phase;</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>}</div>
 </div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span> </div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>RefCountedPtr&lt;ItoLayout&lt;T&gt;&gt;</div>
-<div class="foldopen" id="foldopen00418" data-start="{" data-end="}">
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno"><a class="line" href="classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587">  418</a></span><a class="code hl_function" href="classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587">ItoFactory&lt;T, S&gt;::newLayout</a>(<span class="keyword">const</span> Vector&lt;RefCountedPtr&lt;ItoSpecies&gt;&gt;&amp; a_species)<span class="keyword"> const</span></div>
-<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
-<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>  <span class="keyword">auto</span> itoLayout = RefCountedPtr&lt;ItoLayout&lt;T&gt;&gt;(<span class="keyword">new</span> <a class="code hl_class" href="classItoLayout.html">ItoLayout&lt;T&gt;</a>(a_species));</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
+<div class="foldopen" id="foldopen00420" data-start="{" data-end="}">
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno"><a class="line" href="classItoFactory.html#a3dcffa8ba8762f1acb6d2b4cc384fc0f">  420</a></span><a class="code hl_function" href="classItoFactory.html#a3dcffa8ba8762f1acb6d2b4cc384fc0f">ItoFactory&lt;T, S&gt;::ItoFactory</a>()</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>{}</div>
+</div>
 <div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span> </div>
-<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>  <span class="comment">// Cast solvers and instantiate them</span></div>
-<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; a_species.size(); i++) {</div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    RefCountedPtr&lt;T&gt; solver = RefCountedPtr&lt;T&gt;(<span class="keyword">static_cast&lt;</span>T*<span class="keyword">&gt;</span>(<span class="keyword">new</span> S()));</div>
-<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>    solver-&gt;setSpecies(a_species[i]);</div>
-<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    solver-&gt;setVerbosity(-1);</div>
-<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>    itoLayout-&gt;addSolver(solver);</div>
-<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>  }</div>
-<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span> </div>
-<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>  <span class="keywordflow">return</span> itoLayout;</div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>}</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
+<div class="foldopen" id="foldopen00424" data-start="{" data-end="}">
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno"><a class="line" href="classItoFactory.html#a0938743285a319eeebe4cfcb8a526e39">  424</a></span><a class="code hl_function" href="classItoFactory.html#a0938743285a319eeebe4cfcb8a526e39">ItoFactory&lt;T, S&gt;::~ItoFactory</a>()</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>{}</div>
 </div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span> </div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> S&gt;</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>RefCountedPtr&lt;ItoLayout&lt;T&gt;&gt;</div>
+<div class="foldopen" id="foldopen00429" data-start="{" data-end="}">
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno"><a class="line" href="classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587">  429</a></span><a class="code hl_function" href="classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587">ItoFactory&lt;T, S&gt;::newLayout</a>(<span class="keyword">const</span> Vector&lt;RefCountedPtr&lt;ItoSpecies&gt;&gt;&amp; a_species)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span> </div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>  <span class="keyword">auto</span> itoLayout = RefCountedPtr&lt;ItoLayout&lt;T&gt;&gt;(<span class="keyword">new</span> <a class="code hl_class" href="classItoLayout.html">ItoLayout&lt;T&gt;</a>(a_species));</div>
 <div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span> </div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span> </div>
-<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>  <span class="comment">// Cast solvers and instantiate them</span></div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; a_species.size(); i++) {</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>    RefCountedPtr&lt;T&gt; solver = RefCountedPtr&lt;T&gt;(<span class="keyword">static_cast&lt;</span>T*<span class="keyword">&gt;</span>(<span class="keyword">new</span> S()));</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>    solver-&gt;setSpecies(a_species[i]);</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>    solver-&gt;setVerbosity(-1);</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>    itoLayout-&gt;addSolver(solver);</div>
+<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>  }</div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span> </div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>  <span class="keywordflow">return</span> itoLayout;</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>}</div>
+</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span> </div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span> </div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ItoIterator_8H_html"><div class="ttname"><a href="CD__ItoIterator_8H.html">CD_ItoIterator.H</a></div><div class="ttdoc">Declaration of an iterator class for ItoLayout.</div></div>
 <div class="ttc" id="aCD__ItoLayout_8H_html"><div class="ttname"><a href="CD__ItoLayout_8H.html">CD_ItoLayout.H</a></div><div class="ttdoc">Declaration of a class that holds a set of ItoSolvers.</div></div>
-<div class="ttc" id="aclassItoFactory_html_a0938743285a319eeebe4cfcb8a526e39"><div class="ttname"><a href="classItoFactory.html#a0938743285a319eeebe4cfcb8a526e39">ItoFactory::~ItoFactory</a></div><div class="ttdeci">~ItoFactory()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:413</div></div>
-<div class="ttc" id="aclassItoFactory_html_a2e7bc11e6eb0e50f1fa6ab868ce62587"><div class="ttname"><a href="classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587">ItoFactory::newLayout</a></div><div class="ttdeci">RefCountedPtr&lt; ItoLayout&lt; T &gt; &gt; newLayout(const Vector&lt; RefCountedPtr&lt; ItoSpecies &gt; &gt; &amp;a_species) const</div><div class="ttdoc">Factory method which creates a new layout from a set of species. This can do automated casting betwee...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:418</div></div>
-<div class="ttc" id="aclassItoFactory_html_a3dcffa8ba8762f1acb6d2b4cc384fc0f"><div class="ttname"><a href="classItoFactory.html#a3dcffa8ba8762f1acb6d2b4cc384fc0f">ItoFactory::ItoFactory</a></div><div class="ttdeci">ItoFactory()</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:409</div></div>
+<div class="ttc" id="aclassItoFactory_html_a0938743285a319eeebe4cfcb8a526e39"><div class="ttname"><a href="classItoFactory.html#a0938743285a319eeebe4cfcb8a526e39">ItoFactory::~ItoFactory</a></div><div class="ttdeci">~ItoFactory()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:424</div></div>
+<div class="ttc" id="aclassItoFactory_html_a2e7bc11e6eb0e50f1fa6ab868ce62587"><div class="ttname"><a href="classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587">ItoFactory::newLayout</a></div><div class="ttdeci">RefCountedPtr&lt; ItoLayout&lt; T &gt; &gt; newLayout(const Vector&lt; RefCountedPtr&lt; ItoSpecies &gt; &gt; &amp;a_species) const</div><div class="ttdoc">Factory method which creates a new layout from a set of species. This can do automated casting betwee...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:429</div></div>
+<div class="ttc" id="aclassItoFactory_html_a3dcffa8ba8762f1acb6d2b4cc384fc0f"><div class="ttname"><a href="classItoFactory.html#a3dcffa8ba8762f1acb6d2b4cc384fc0f">ItoFactory::ItoFactory</a></div><div class="ttdeci">ItoFactory()</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:420</div></div>
 <div class="ttc" id="aclassItoIterator_html"><div class="ttname"><a href="classItoIterator.html">ItoIterator</a></div><div class="ttdoc">&quot;Iterator&quot; class for going through solvers in an ItoLayout.</div><div class="ttdef"><b>Definition</b> CD_ItoIterator.H:25</div></div>
 <div class="ttc" id="aclassItoIterator_html_a0eef3c01711cada7a98e7d83bc56c962"><div class="ttname"><a href="classItoIterator.html#a0eef3c01711cada7a98e7d83bc56c962">ItoIterator::ok</a></div><div class="ttdeci">virtual bool ok()</div><div class="ttdoc">Ok or not.</div><div class="ttdef"><b>Definition</b> CD_ItoIteratorImplem.H:72</div></div>
 <div class="ttc" id="aclassItoLayout_html"><div class="ttname"><a href="classItoLayout.html">ItoLayout</a></div><div class="ttdoc">Class for holding a set of ItoSolvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayout.H:31</div></div>
-<div class="ttc" id="aclassItoLayout_html_a0bb2d4789da3ebae621cf520b00953e9"><div class="ttname"><a href="classItoLayout.html#a0bb2d4789da3ebae621cf520b00953e9">ItoLayout::computeAdvectiveDt</a></div><div class="ttdeci">virtual Real computeAdvectiveDt()</div><div class="ttdoc">Compute the classical advection time step for all solvers. This returns dt = dx/max(v) where max(v) t...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:287</div></div>
+<div class="ttc" id="aclassItoLayout_html_a0bb2d4789da3ebae621cf520b00953e9"><div class="ttname"><a href="classItoLayout.html#a0bb2d4789da3ebae621cf520b00953e9">ItoLayout::computeAdvectiveDt</a></div><div class="ttdeci">virtual Real computeAdvectiveDt()</div><div class="ttdoc">Compute the classical advection time step for all solvers. This returns dt = dx/max(v) where max(v) t...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:298</div></div>
 <div class="ttc" id="aclassItoLayout_html_a0eee7349cccb3dd9122338054760a836"><div class="ttname"><a href="classItoLayout.html#a0eee7349cccb3dd9122338054760a836">ItoLayout::allocate</a></div><div class="ttdeci">virtual void allocate()</div><div class="ttdoc">Allocate internals for all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:87</div></div>
 <div class="ttc" id="aclassItoLayout_html_a13a2b671fbfb2399ad54664ae89d2fd7"><div class="ttname"><a href="classItoLayout.html#a13a2b671fbfb2399ad54664ae89d2fd7">ItoLayout::parseRuntimeOptions</a></div><div class="ttdeci">virtual void parseRuntimeOptions()</div><div class="ttdoc">Utility function – parse runtime options for all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:78</div></div>
-<div class="ttc" id="aclassItoLayout_html_a15b80eca2a0591577636d04020f85bec"><div class="ttname"><a href="classItoLayout.html#a15b80eca2a0591577636d04020f85bec">ItoLayout::getDiffusionFunctions</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getDiffusionFunctions()</div><div class="ttdoc">Get all diffusion coefficients.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:367</div></div>
-<div class="ttc" id="aclassItoLayout_html_a170888ebad47acf7773c2117d506a42b"><div class="ttname"><a href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">ItoLayout::computeDt</a></div><div class="ttdeci">virtual Real computeDt()</div><div class="ttdoc">Compute smallest possible time step.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:273</div></div>
+<div class="ttc" id="aclassItoLayout_html_a15b80eca2a0591577636d04020f85bec"><div class="ttname"><a href="classItoLayout.html#a15b80eca2a0591577636d04020f85bec">ItoLayout::getDiffusionFunctions</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getDiffusionFunctions()</div><div class="ttdoc">Get all diffusion coefficients.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:378</div></div>
+<div class="ttc" id="aclassItoLayout_html_a170888ebad47acf7773c2117d506a42b"><div class="ttname"><a href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">ItoLayout::computeDt</a></div><div class="ttdeci">virtual Real computeDt()</div><div class="ttdoc">Compute smallest possible time step.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:284</div></div>
 <div class="ttc" id="aclassItoLayout_html_a1715149114a9ae478e9de51f965313f9"><div class="ttname"><a href="classItoLayout.html#a1715149114a9ae478e9de51f965313f9">ItoLayout::addSolver</a></div><div class="ttdeci">virtual void addSolver(RefCountedPtr&lt; T &gt; &amp;a_solver)</div><div class="ttdoc">Add solver to the list of solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:96</div></div>
-<div class="ttc" id="aclassItoLayout_html_a1b22c07d176dbd22e98a73a889cfc44e"><div class="ttname"><a href="classItoLayout.html#a1b22c07d176dbd22e98a73a889cfc44e">ItoLayout::getMobilityFunctions</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getMobilityFunctions()</div><div class="ttdoc">Get all mobility mesh functions.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:379</div></div>
+<div class="ttc" id="aclassItoLayout_html_a1b22c07d176dbd22e98a73a889cfc44e"><div class="ttname"><a href="classItoLayout.html#a1b22c07d176dbd22e98a73a889cfc44e">ItoLayout::getMobilityFunctions</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getMobilityFunctions()</div><div class="ttdoc">Get all mobility mesh functions.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:390</div></div>
 <div class="ttc" id="aclassItoLayout_html_a1ce54d1788882b20dbeff5cd3a61b6b2"><div class="ttname"><a href="classItoLayout.html#a1ce54d1788882b20dbeff5cd3a61b6b2">ItoLayout::makeSuperparticles</a></div><div class="ttdeci">virtual void makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const int a_ppc)</div><div class="ttdoc">Rearrange the input container particle into new superparticles – this is done for all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:211</div></div>
 <div class="ttc" id="aclassItoLayout_html_a277d1e7992c41be6db8fbb3bc381179a"><div class="ttname"><a href="classItoLayout.html#a277d1e7992c41be6db8fbb3bc381179a">ItoLayout::iterator</a></div><div class="ttdeci">virtual ItoIterator&lt; T &gt; iterator()</div><div class="ttdoc">Return a fresh iterator. The iterator is a simple random access object that can iterate through the s...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:37</div></div>
 <div class="ttc" id="aclassItoLayout_html_a2810ca1868c14c77fe5180dd3fa86fe8"><div class="ttname"><a href="classItoLayout.html#a2810ca1868c14c77fe5180dd3fa86fe8">ItoLayout::setVerbosity</a></div><div class="ttdeci">virtual void setVerbosity(const int a_verbosity)</div><div class="ttdoc">Set verbosity for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:175</div></div>
 <div class="ttc" id="aclassItoLayout_html_a2eac76ab0a3b323ebcc4d2967b746705"><div class="ttname"><a href="classItoLayout.html#a2eac76ab0a3b323ebcc4d2967b746705">ItoLayout::initialData</a></div><div class="ttdeci">virtual void initialData()</div><div class="ttdoc">Fill all solvers with initial data.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:121</div></div>
 <div class="ttc" id="aclassItoLayout_html_a3449e6168e656f0ca53e7da2765a0598"><div class="ttname"><a href="classItoLayout.html#a3449e6168e656f0ca53e7da2765a0598">ItoLayout::organizeParticlesByCell</a></div><div class="ttdeci">virtual void organizeParticlesByCell(const ItoSolver::WhichContainer a_whichContainer)</div><div class="ttdoc">Sort ItoSolver particles by cell – this is done for all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:193</div></div>
 <div class="ttc" id="aclassItoLayout_html_a3c6aa7f42f1d99ab8187cb21bf9e424f"><div class="ttname"><a href="classItoLayout.html#a3c6aa7f42f1d99ab8187cb21bf9e424f">ItoLayout::interpolateVelocities</a></div><div class="ttdeci">virtual void interpolateVelocities()</div><div class="ttdoc">Interpolate velocities.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:103</div></div>
-<div class="ttc" id="aclassItoLayout_html_a3d0d90c09ed56e8a1760829599cd8404"><div class="ttname"><a href="classItoLayout.html#a3d0d90c09ed56e8a1760829599cd8404">ItoLayout::computeDiffusiveDt</a></div><div class="ttdeci">virtual Real computeDiffusiveDt()</div><div class="ttdoc">Compute the classical diffusive time step dt = dx*dx/(2*D) where D is the diffusion coefficient (not ...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:315</div></div>
+<div class="ttc" id="aclassItoLayout_html_a3d0d90c09ed56e8a1760829599cd8404"><div class="ttname"><a href="classItoLayout.html#a3d0d90c09ed56e8a1760829599cd8404">ItoLayout::computeDiffusiveDt</a></div><div class="ttdeci">virtual Real computeDiffusiveDt()</div><div class="ttdoc">Compute the classical diffusive time step dt = dx*dx/(2*D) where D is the diffusion coefficient (not ...</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:326</div></div>
 <div class="ttc" id="aclassItoLayout_html_a3e5f9c44c668f16438a02bd302d7d778"><div class="ttname"><a href="classItoLayout.html#a3e5f9c44c668f16438a02bd302d7d778">ItoLayout::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)</div><div class="ttdoc">Regrid method – calls the regrid method for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:130</div></div>
-<div class="ttc" id="aclassItoLayout_html_a45312bb8ba651b1fb9a9df7b7c84fd94"><div class="ttname"><a href="classItoLayout.html#a45312bb8ba651b1fb9a9df7b7c84fd94">ItoLayout::getSpecies</a></div><div class="ttdeci">virtual Vector&lt; RefCountedPtr&lt; ItoSpecies &gt; &gt; &amp; getSpecies()</div><div class="ttdoc">Get species.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:336</div></div>
+<div class="ttc" id="aclassItoLayout_html_a45312bb8ba651b1fb9a9df7b7c84fd94"><div class="ttname"><a href="classItoLayout.html#a45312bb8ba651b1fb9a9df7b7c84fd94">ItoLayout::getSpecies</a></div><div class="ttdeci">virtual Vector&lt; RefCountedPtr&lt; ItoSpecies &gt; &gt; &amp; getSpecies()</div><div class="ttdoc">Get species.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:347</div></div>
 <div class="ttc" id="aclassItoLayout_html_a4927e9cb365524c206b234ea5c808a66"><div class="ttname"><a href="classItoLayout.html#a4927e9cb365524c206b234ea5c808a66">ItoLayout::parseOptions</a></div><div class="ttdeci">virtual void parseOptions()</div><div class="ttdoc">Utility function – parse options for all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:69</div></div>
-<div class="ttc" id="aclassItoLayout_html_a4d1ed43f584e39ac180a7d8e5b42d770"><div class="ttname"><a href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout::computeHopDt</a></div><div class="ttdeci">virtual Real computeHopDt(const Real a_maxCellsToMove)</div><div class="ttdoc">Compute the largest dt which restricts all particles to move less than a_maxCellsToMove.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:301</div></div>
+<div class="ttc" id="aclassItoLayout_html_a4d1ed43f584e39ac180a7d8e5b42d770"><div class="ttname"><a href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout::computeHopDt</a></div><div class="ttdeci">virtual Real computeHopDt(const Real a_maxCellsToMove)</div><div class="ttdoc">Compute the largest dt which restricts all particles to move less than a_maxCellsToMove.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:312</div></div>
 <div class="ttc" id="aclassItoLayout_html_a52beea7383f06a65d811ffc9ce305ab2"><div class="ttname"><a href="classItoLayout.html#a52beea7383f06a65d811ffc9ce305ab2">ItoLayout::define</a></div><div class="ttdeci">virtual void define(const Vector&lt; RefCountedPtr&lt; ItoSpecies &gt; &gt; &amp;a_species)</div><div class="ttdoc">Define function.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:62</div></div>
 <div class="ttc" id="aclassItoLayout_html_a54819233a8038186ee047cdc4772e301"><div class="ttname"><a href="classItoLayout.html#a54819233a8038186ee047cdc4772e301">ItoLayout::organizeParticlesByPatch</a></div><div class="ttdeci">virtual void organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer)</div><div class="ttdoc">Sort ItoSolver particles by patch – this is done for all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:202</div></div>
 <div class="ttc" id="aclassItoLayout_html_a5f6317322d5f1a2c13e08911a008e93b"><div class="ttname"><a href="classItoLayout.html#a5f6317322d5f1a2c13e08911a008e93b">ItoLayout::ItoLayout</a></div><div class="ttdeci">ItoLayout()=delete</div><div class="ttdoc">Disallowed weak construction.</div></div>
-<div class="ttc" id="aclassItoLayout_html_a6831aa11fe15a1c73c7c90c0df8ccbe7"><div class="ttname"><a href="classItoLayout.html#a6831aa11fe15a1c73c7c90c0df8ccbe7">ItoLayout::getVelocityFunctions</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getVelocityFunctions()</div><div class="ttdoc">Get all velocity functions.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:343</div></div>
-<div class="ttc" id="aclassItoLayout_html_a7f8bb364130ae7655bc1b794acfead38"><div class="ttname"><a href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">ItoLayout::getParticles</a></div><div class="ttdeci">virtual Vector&lt; ParticleContainer&lt; ItoParticle &gt; * &gt; getParticles(const ItoSolver::WhichContainer a_whichContainer)</div><div class="ttdoc">Get particle containers of a particular container type.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:391</div></div>
-<div class="ttc" id="aclassItoLayout_html_a7f975920e2160066097e3e5812aca24b"><div class="ttname"><a href="classItoLayout.html#a7f975920e2160066097e3e5812aca24b">ItoLayout::getPhase</a></div><div class="ttdeci">virtual phase::which_phase getPhase() const</div><div class="ttdoc">Return phase where the solvers are defined.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:403</div></div>
+<div class="ttc" id="aclassItoLayout_html_a6831aa11fe15a1c73c7c90c0df8ccbe7"><div class="ttname"><a href="classItoLayout.html#a6831aa11fe15a1c73c7c90c0df8ccbe7">ItoLayout::getVelocityFunctions</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getVelocityFunctions()</div><div class="ttdoc">Get all velocity functions.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:354</div></div>
+<div class="ttc" id="aclassItoLayout_html_a7f8bb364130ae7655bc1b794acfead38"><div class="ttname"><a href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">ItoLayout::getParticles</a></div><div class="ttdeci">virtual Vector&lt; ParticleContainer&lt; ItoParticle &gt; * &gt; getParticles(const ItoSolver::WhichContainer a_whichContainer)</div><div class="ttdoc">Get particle containers of a particular container type.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:402</div></div>
+<div class="ttc" id="aclassItoLayout_html_a7f975920e2160066097e3e5812aca24b"><div class="ttname"><a href="classItoLayout.html#a7f975920e2160066097e3e5812aca24b">ItoLayout::getPhase</a></div><div class="ttdeci">virtual phase::which_phase getPhase() const</div><div class="ttdoc">Return phase where the solvers are defined.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:414</div></div>
 <div class="ttc" id="aclassItoLayout_html_a88a3437f8d72a3f76939fbeb9b2dd656"><div class="ttname"><a href="classItoLayout.html#a88a3437f8d72a3f76939fbeb9b2dd656">ItoLayout::setTime</a></div><div class="ttdeci">virtual void setTime(const int a_step, const Real a_time, const Real a_dt)</div><div class="ttdoc">Set time for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:184</div></div>
 <div class="ttc" id="aclassItoLayout_html_a8e040559711960e757bb1b8f8260b3c6"><div class="ttname"><a href="classItoLayout.html#a8e040559711960e757bb1b8f8260b3c6">ItoLayout::~ItoLayout</a></div><div class="ttdeci">virtual ~ItoLayout()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:32</div></div>
 <div class="ttc" id="aclassItoLayout_html_a93496c63ddcf3f27b7d7261b2cbaecad"><div class="ttname"><a href="classItoLayout.html#a93496c63ddcf3f27b7d7261b2cbaecad">ItoLayout::setComputationalGeometry</a></div><div class="ttdeci">virtual void setComputationalGeometry(const RefCountedPtr&lt; ComputationalGeometry &gt; &amp;a_computationalGeometry)</div><div class="ttdoc">Set the computational geometry. This sets the computational geometry for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:157</div></div>
-<div class="ttc" id="aclassItoLayout_html_a9393f9e3ba2f8869bdc579ea37faf5c3"><div class="ttname"><a href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout::remap</a></div><div class="ttdeci">virtual void remap()</div><div class="ttdoc">Remap function – calls remap(ItoSolver::WhichContainer::bulk) for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:245</div></div>
-<div class="ttc" id="aclassItoLayout_html_abafc762fe43f647bcb2f316f715550db"><div class="ttname"><a href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout::depositParticles</a></div><div class="ttdeci">virtual void depositParticles()</div><div class="ttdoc">All solvers deposit their particles.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:229</div></div>
+<div class="ttc" id="aclassItoLayout_html_a9393f9e3ba2f8869bdc579ea37faf5c3"><div class="ttname"><a href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout::remap</a></div><div class="ttdeci">virtual void remap()</div><div class="ttdoc">Remap function – calls remap(ItoSolver::WhichContainer::bulk) for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:256</div></div>
+<div class="ttc" id="aclassItoLayout_html_abafc762fe43f647bcb2f316f715550db"><div class="ttname"><a href="classItoLayout.html#abafc762fe43f647bcb2f316f715550db">ItoLayout::depositParticles</a></div><div class="ttdeci">virtual void depositParticles()</div><div class="ttdoc">All solvers deposit their particles.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:240</div></div>
 <div class="ttc" id="aclassItoLayout_html_abd922ec049f4e26646be483927b27f8f"><div class="ttname"><a href="classItoLayout.html#abd922ec049f4e26646be483927b27f8f">ItoLayout::getRealm</a></div><div class="ttdeci">virtual const std::string getRealm() const</div><div class="ttdoc">Get the realm name where the solvers are defined.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:44</div></div>
 <div class="ttc" id="aclassItoLayout_html_ac342176b629b5be9b8729c5c57c460fb"><div class="ttname"><a href="classItoLayout.html#ac342176b629b5be9b8729c5c57c460fb">ItoLayout::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lbase, const int a_finestLevel)</div><div class="ttdoc">Utility function which caches states before regrid step.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:112</div></div>
-<div class="ttc" id="aclassItoLayout_html_ac9dd701a299cb04c26b580487ed552db"><div class="ttname"><a href="classItoLayout.html#ac9dd701a299cb04c26b580487ed552db">ItoLayout::getSolvers</a></div><div class="ttdeci">virtual Vector&lt; RefCountedPtr&lt; T &gt; &gt; &amp; getSolvers()</div><div class="ttdoc">Get solvers all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:329</div></div>
-<div class="ttc" id="aclassItoLayout_html_acf3f0dd1324433928f00d6da4e81af50"><div class="ttname"><a href="classItoLayout.html#acf3f0dd1324433928f00d6da4e81af50">ItoLayout::getNumParticles</a></div><div class="ttdeci">virtual size_t getNumParticles(const ItoSolver::WhichContainer a_ptype, const bool a_localOnly)</div><div class="ttdoc">Get total number of particles.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:261</div></div>
+<div class="ttc" id="aclassItoLayout_html_ac9dd701a299cb04c26b580487ed552db"><div class="ttname"><a href="classItoLayout.html#ac9dd701a299cb04c26b580487ed552db">ItoLayout::getSolvers</a></div><div class="ttdeci">virtual Vector&lt; RefCountedPtr&lt; T &gt; &gt; &amp; getSolvers()</div><div class="ttdoc">Get solvers all solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:340</div></div>
+<div class="ttc" id="aclassItoLayout_html_acf3f0dd1324433928f00d6da4e81af50"><div class="ttname"><a href="classItoLayout.html#acf3f0dd1324433928f00d6da4e81af50">ItoLayout::getNumParticles</a></div><div class="ttdeci">virtual size_t getNumParticles(const ItoSolver::WhichContainer a_ptype, const bool a_localOnly)</div><div class="ttdoc">Get total number of particles.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:272</div></div>
 <div class="ttc" id="aclassItoLayout_html_ad14722bb431a490188f5ea9146608303"><div class="ttname"><a href="classItoLayout.html#ad14722bb431a490188f5ea9146608303">ItoLayout::setAmr</a></div><div class="ttdeci">virtual void setAmr(const RefCountedPtr&lt; AmrMesh &gt; &amp;a_amr)</div><div class="ttdoc">Set AmrMesh object for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:148</div></div>
 <div class="ttc" id="aclassItoLayout_html_ad297e28c22a20e40e5125c58041e97be"><div class="ttname"><a href="classItoLayout.html#ad297e28c22a20e40e5125c58041e97be">ItoLayout::setRealm</a></div><div class="ttdeci">virtual void setRealm(const std::string &amp;a_realm)</div><div class="ttdoc">Set the realm where the solvers are defined.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:51</div></div>
 <div class="ttc" id="aclassItoLayout_html_aec9a9f5ba42f7a51eecba610ca81933a"><div class="ttname"><a href="classItoLayout.html#aec9a9f5ba42f7a51eecba610ca81933a">ItoLayout::registerOperators</a></div><div class="ttdeci">virtual void registerOperators()</div><div class="ttdoc">Register operators. Calls registerOperators for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:139</div></div>
-<div class="ttc" id="aclassItoLayout_html_aeedf236c882abc1a1fbdd55a696604a9"><div class="ttname"><a href="classItoLayout.html#aeedf236c882abc1a1fbdd55a696604a9">ItoLayout::getDensities</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getDensities()</div><div class="ttdoc">Get all densities.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:355</div></div>
+<div class="ttc" id="aclassItoLayout_html_aeedf236c882abc1a1fbdd55a696604a9"><div class="ttname"><a href="classItoLayout.html#aeedf236c882abc1a1fbdd55a696604a9">ItoLayout::getDensities</a></div><div class="ttdeci">virtual Vector&lt; EBAMRCellData * &gt; getDensities()</div><div class="ttdoc">Get all densities.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:366</div></div>
 <div class="ttc" id="aclassItoLayout_html_af85937396084de69027ddcbf67f0361c"><div class="ttname"><a href="classItoLayout.html#af85937396084de69027ddcbf67f0361c">ItoLayout::setPhase</a></div><div class="ttdeci">virtual void setPhase(phase::which_phase a_phase)</div><div class="ttdoc">Set phase for each solver.</div><div class="ttdef"><b>Definition</b> CD_ItoLayoutImplem.H:166</div></div>
 <div class="ttc" id="aclassItoSolver_html_a070d75d0d3ac16e04013d25574c1ffa5"><div class="ttname"><a href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">ItoSolver::WhichContainer</a></div><div class="ttdeci">WhichContainer</div><div class="ttdoc">Enum class for distinguishing various types of particle containers.</div><div class="ttdef"><b>Definition</b> CD_ItoSolver.H:49</div></div>
+<div class="ttc" id="anamespaceParticleManagement_html_ac69666866ee6c0eaed03b81381b9ce95"><div class="ttname"><a href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a></div><div class="ttdeci">ParticleMergeMethod</div><div class="ttdoc">The specific super-particle merge methods.</div><div class="ttdef"><b>Definition</b> CD_ParticleManagement.H:40</div></div>
 <div class="ttc" id="anamespacephase_html_a23c76f548a5eb1955ed8c929c541108b"><div class="ttname"><a href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a></div><div class="ttdeci">which_phase</div><div class="ttdoc">Enumeration of supported phases.</div><div class="ttdef"><b>Definition</b> CD_MultiFluidIndexSpace.H:38</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

@@ -1,0 +1,10 @@
+<map id="Source/Particle/CD_NearestNeighborParticleMerge.H" name="Source/Particle/CD_NearestNeighborParticleMerge.H">
+<area shape="rect" id="Node000001" title="Declaration of a distributed, MPI&#45;safe nearest&#45;neighbor particle&#45;merge algorithm." alt="" coords="167,5,410,45"/>
+<area shape="rect" id="Node000002" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="5,101,151,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,53,122,103,119,98,232,48"/>
+<area shape="rect" id="Node000003" href="$CD__NearestNeighborParticleMergeImplem_8H.html" title="Implementation of CD_NearestNeighborParticleMerge.H." alt="" coords="175,93,403,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="283,59,283,93,278,93,277,59"/>
+<area shape="rect" id="Node000004" href="$CD__ParticleMergers_8H.html" title="Umbrella header pulling in every ParticleManagement super&#45;particle merge algorithm." alt="" coords="427,101,571,141"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="345,48,458,98,456,103,343,53"/>
+<area shape="poly" id="edge3_Node000003_Node000001" title=" " alt="" coords="295,80,293,46,299,45,300,80"/>
+</map>

@@ -3,7 +3,17 @@ var searchData=
   ['needleif_0',['NeedleIF',['../classNeedleIF.html',1,'']]],
   ['neutralspeciesjson_1',['NeutralSpeciesJSON',['../classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html',1,'Physics::CdrPlasma']]],
   ['newintersectionif_2',['NewIntersectionIF',['../classNewIntersectionIF.html',1,'']]],
-  ['noiseplane_3',['NoisePlane',['../classNoisePlane.html',1,'']]],
-  ['noncommparticle_4',['NonCommParticle',['../classNonCommParticle.html',1,'']]],
-  ['nopayload_5',['NoPayload',['../structNoPayload.html',1,'']]]
+  ['nncellkeyhasher_3',['NNCellKeyHasher',['../structParticleManagement_1_1detail_1_1NNCellKeyHasher.html',1,'ParticleManagement::detail']]],
+  ['nnfallbackcandidate_4',['NNFallbackCandidate',['../structParticleManagement_1_1detail_1_1NNFallbackCandidate.html',1,'ParticleManagement::detail']]],
+  ['nnmergeedge_5',['NNMergeEdge',['../structParticleManagement_1_1detail_1_1NNMergeEdge.html',1,'ParticleManagement::detail']]],
+  ['nnmergeparticle_6',['NNMergeParticle',['../structParticleManagement_1_1NNMergeParticle.html',1,'ParticleManagement']]],
+  ['nnmergeproposal_7',['NNMergeProposal',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html',1,'ParticleManagement::detail']]],
+  ['nnmergeresult_8',['NNMergeResult',['../structParticleManagement_1_1detail_1_1NNMergeResult.html',1,'ParticleManagement::detail']]],
+  ['nnmergeverdict_9',['NNMergeVerdict',['../structParticleManagement_1_1detail_1_1NNMergeVerdict.html',1,'ParticleManagement::detail']]],
+  ['nnparticlelocation_10',['NNParticleLocation',['../structParticleManagement_1_1detail_1_1NNParticleLocation.html',1,'ParticleManagement::detail']]],
+  ['nnpooledparticle_11',['NNPooledParticle',['../structParticleManagement_1_1detail_1_1NNPooledParticle.html',1,'ParticleManagement::detail']]],
+  ['nnspatialindex_12',['NNSpatialIndex',['../structParticleManagement_1_1detail_1_1NNSpatialIndex.html',1,'ParticleManagement::detail']]],
+  ['noiseplane_13',['NoisePlane',['../classNoisePlane.html',1,'']]],
+  ['noncommparticle_14',['NonCommParticle',['../classNonCommParticle.html',1,'']]],
+  ['nopayload_15',['NoPayload',['../structNoPayload.html',1,'']]]
 ];

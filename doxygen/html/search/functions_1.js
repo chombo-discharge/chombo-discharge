@@ -19,8 +19,9 @@ var searchData=
   ['buildgasgeometry_16',['buildGasGeometry',['../classComputationalGeometry.html#ab756f82ea473094f13ee0945694139fb',1,'ComputationalGeometry']]],
   ['buildgeometries_17',['buildGeometries',['../classComputationalGeometry.html#a01a9788004e72269e1b6a1421090bd0d',1,'ComputationalGeometry']]],
   ['buildgrids_18',['buildGrids',['../classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e',1,'AmrMesh']]],
-  ['buildsolidgeometry_19',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
-  ['bytespan_20',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
-  ['bytespanimpl_21',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
-  ['bytesperparticle_22',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
+  ['buildnnspatialindex_19',['buildNNSpatialIndex',['../CD__NearestNeighborParticleMerge_8H.html#a89a54a12aa6a266015a188f4b26d3d04',1,'ParticleManagement::detail']]],
+  ['buildsolidgeometry_20',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
+  ['bytespan_21',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
+  ['bytespanimpl_22',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
+  ['bytesperparticle_23',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
 ];

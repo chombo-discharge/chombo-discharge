@@ -22,7 +22,8 @@ var searchData=
   ['itokmcsurfacereactionset_19',['ItoKMCSurfaceReactionSet',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html',1,'Physics::ItoKMC']]],
   ['itokmctagger_20',['ItoKMCTagger',['../classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html',1,'Physics::ItoKMC']]],
   ['itolayout_21',['ItoLayout',['../classItoLayout.html',1,'']]],
-  ['itoparticle_22',['ItoParticle',['../structItoParticle.html',1,'']]],
-  ['itosolver_23',['ItoSolver',['../classItoSolver.html',1,'']]],
-  ['itospecies_24',['ItoSpecies',['../classItoSpecies.html',1,'']]]
+  ['itomergeparticle_22',['ItoMergeParticle',['../structItoMergeParticle.html',1,'']]],
+  ['itoparticle_23',['ItoParticle',['../structItoParticle.html',1,'']]],
+  ['itosolver_24',['ItoSolver',['../classItoSolver.html',1,'']]],
+  ['itospecies_25',['ItoSpecies',['../classItoSpecies.html',1,'']]]
 ];

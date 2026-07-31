@@ -255,10 +255,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setVelocity</b> ()</t
 <tr class="memitem:a6fd4186c9795fc0afece3cf3d849c559" id="r_a6fd4186c9795fc0afece3cf3d849c559"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a6fd4186c9795fc0afece3cf3d849c559">setDiffusion</a> ()</td></tr>
 <tr class="memdesc:a6fd4186c9795fc0afece3cf3d849c559"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the mesh diffusion function on the solver.  <br /></td></tr>
 <tr class="separator:a6fd4186c9795fc0afece3cf3d849c559"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ca4b5d910f842b23cad9ebe90fe088d" id="r_a5ca4b5d910f842b23cad9ebe90fe088d"><td class="memItemLeft" align="right" valign="top"><a id="a5ca4b5d910f842b23cad9ebe90fe088d" name="a5ca4b5d910f842b23cad9ebe90fe088d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>makeSuperParticles</b> ()</td></tr>
-<tr class="memdesc:a5ca4b5d910f842b23cad9ebe90fe088d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort particles by cell, merge to m_ppc per cell, then re-sort by patch. <br /></td></tr>
+<tr class="memitem:a5ca4b5d910f842b23cad9ebe90fe088d" id="r_a5ca4b5d910f842b23cad9ebe90fe088d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d">makeSuperParticles</a> ()</td></tr>
+<tr class="memdesc:a5ca4b5d910f842b23cad9ebe90fe088d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort particles by cell, merge to m_ppc per cell, then re-sort by patch.  <br /></td></tr>
 <tr class="separator:a5ca4b5d910f842b23cad9ebe90fe088d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae90567b471e6bacf91a289240948fc32" id="r_ae90567b471e6bacf91a289240948fc32"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ae90567b471e6bacf91a289240948fc32">computeTotalWeight</a> ()</td></tr>
+<tr class="memdesc:ae90567b471e6bacf91a289240948fc32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the global total weight of the bulk particles.  <br /></td></tr>
+<tr class="separator:ae90567b471e6bacf91a289240948fc32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade5031f929e5bae14376fa0f7946e87e" id="r_ade5031f929e5bae14376fa0f7946e87e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ade5031f929e5bae14376fa0f7946e87e">loadBalanceBoxesMesh</a> (Vector&lt; Vector&lt; int &gt; &gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const std::string &amp;a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel)</td></tr>
 <tr class="memdesc:ade5031f929e5bae14376fa0f7946e87e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance using particle counts estimated from mesh-deposited data.  <br /></td></tr>
 <tr class="separator:ade5031f929e5bae14376fa0f7946e87e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -312,6 +314,9 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_omega</b></td></tr>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ppc</b></td></tr>
 <tr class="memdesc:a819431715e0f36978cf6f96ad085015d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target number of computational particles per cell after superparticle merging. <br /></td></tr>
 <tr class="separator:a819431715e0f36978cf6f96ad085015d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a375ca67c03c4edf60258eef810b901e0" id="r_a375ca67c03c4edf60258eef810b901e0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a375ca67c03c4edf60258eef810b901e0">m_verifyConservation</a></td></tr>
+<tr class="memdesc:a375ca67c03c4edf60258eef810b901e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, verify that the superparticle merge conserves the total particle weight.  <br /></td></tr>
+<tr class="separator:a375ca67c03c4edf60258eef810b901e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b4c0282a3818c570d62a86d7c9c477a" id="r_a4b4c0282a3818c570d62a86d7c9c477a"><td class="memItemLeft" align="right" valign="top"><a id="a4b4c0282a3818c570d62a86d7c9c477a" name="a4b4c0282a3818c570d62a86d7c9c477a"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_cfl</b></td></tr>
 <tr class="memdesc:a4b4c0282a3818c570d62a86d7c9c477a"><td class="mdescLeft">&#160;</td><td class="mdescRight">CFL-like scaling factor applied to the solver's intrinsic time step estimate. <br /></td></tr>
@@ -508,6 +513,34 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 <dl class="section return"><dt>Returns</dt><dd>Time step size in seconds. </dd></dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
+
+</div>
+</div>
+<a id="ae90567b471e6bacf91a289240948fc32" name="ae90567b471e6bacf91a289240948fc32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae90567b471e6bacf91a289240948fc32">&#9670;&#160;</a></span>computeTotalWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real BrownianWalkerStepper::computeTotalWeight </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the global total weight of the bulk particles. </p>
+<p>Folds the weight column over every leaf of the bulk container with <a class="el" href="namespaceParticleLoops.html#aedc38b74dab3bc859f00c7176dabd6b1" title="Fold a kernel over every particle in a ParticleSoA, accumulating a reduction value.">ParticleLoops::reduce</a> and MPI-reduces the result. Reads the container as-is, independent of whether it is organized by cell or by patch. Used by the conservation check. </p><dl class="section return"><dt>Returns</dt><dd>Global (MPI-reduced) sum of all bulk particle weights. </dd></dl>
 
 </div>
 </div>
@@ -903,6 +936,34 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 <dl class="section return"><dt>Returns</dt><dd>True if a_realm matches m_realm and load balancing is enabled. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classTimeStepper.html#a4e4adb87e49889bae84ff140f3e783bd">TimeStepper</a>.</p>
+
+</div>
+</div>
+<a id="a5ca4b5d910f842b23cad9ebe90fe088d" name="a5ca4b5d910f842b23cad9ebe90fe088d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ca4b5d910f842b23cad9ebe90fe088d">&#9670;&#160;</a></span>makeSuperParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void BrownianWalkerStepper::makeSuperParticles </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sort particles by cell, merge to m_ppc per cell, then re-sort by patch. </p>
+<p>If m_verifyConservation is set, the total particle weight is checked for conservation across the merge and the run is aborted if it is violated. </p>
 
 </div>
 </div>
@@ -1409,6 +1470,32 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </dl>
 
 <p>Implements <a class="el" href="classTimeStepper.html#a25e6e41b52aa1bd6d0a64818996185df">TimeStepper</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a375ca67c03c4edf60258eef810b901e0" name="a375ca67c03c4edf60258eef810b901e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a375ca67c03c4edf60258eef810b901e0">&#9670;&#160;</a></span>m_verifyConservation</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Physics::BrownianWalker::BrownianWalkerStepper::m_verifyConservation</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If true, verify that the superparticle merge conserves the total particle weight. </p>
+<p>When set, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d" title="Sort particles by cell, merge to m_ppc per cell, then re-sort by patch.">makeSuperParticles()</a> sums the global (MPI-reduced) particle weight before and after the merge and calls MayDay::Abort if the two differ by more than a small relative tolerance. Off by default &ndash; it costs two global reductions per merge, so it is intended for regression testing rather than production runs. </p>
 
 </div>
 </div>

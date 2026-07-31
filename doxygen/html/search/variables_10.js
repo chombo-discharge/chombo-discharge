@@ -16,5 +16,7 @@ var searchData=
   ['scratch_5fx_13',['scratch_x',['../structItoParticle.html#a9c5a7e6256b8d83c295f1bf3fea70339',1,'ItoParticle']]],
   ['scratch_5fy_14',['scratch_y',['../structItoParticle.html#ac863ced85fcb703f3fa45b1a82815ef4',1,'ItoParticle']]],
   ['scratch_5fz_15',['scratch_z',['../structItoParticle.html#ada630493e16ac46fd67f4d3303e456e1',1,'ItoParticle']]],
-  ['solvers_16',['solvers',['../structEllipticSolverChain_1_1Settings.html#a2a73ad95fe0c257f99fbfddc91259e98',1,'EllipticSolverChain::Settings']]]
+  ['secondid_16',['secondID',['../structParticleManagement_1_1detail_1_1NNMergeResult.html#a38fcc65395bc31e4409a2938c72f4c52',1,'ParticleManagement::detail::NNMergeResult']]],
+  ['solvers_17',['solvers',['../structEllipticSolverChain_1_1Settings.html#a2a73ad95fe0c257f99fbfddc91259e98',1,'EllipticSolverChain::Settings']]],
+  ['source_18',['source',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html#a1479a61adcdf69b87cba02a2042b7ed0',1,'ParticleManagement::detail::NNMergeProposal']]]
 ];

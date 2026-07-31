@@ -654,10 +654,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_dualGrid</b></td></
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></tr>
 <tr class="memdesc:a1ca218ff1d6f707572816653fa225078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile kernels or not. <br /></td></tr>
 <tr class="separator:a1ca218ff1d6f707572816653fa225078"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a69d9ee6f988806e516a7577187cc4375" id="r_a69d9ee6f988806e516a7577187cc4375"><td class="memItemLeft" align="right" valign="top"><a id="a69d9ee6f988806e516a7577187cc4375" name="a69d9ee6f988806e516a7577187cc4375"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_regridSuperparticles</b></td></tr>
-<tr class="memdesc:a69d9ee6f988806e516a7577187cc4375"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do or do not superparticle merging/splitting on regrids. <br /></td></tr>
-<tr class="separator:a69d9ee6f988806e516a7577187cc4375"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4e9a561348aae7416e1c12838207d85" id="r_aa4e9a561348aae7416e1c12838207d85"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aa4e9a561348aae7416e1c12838207d85">m_regridMergeMethod</a></td></tr>
+<tr class="memdesc:aa4e9a561348aae7416e1c12838207d85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Super-particle merge method used on regrids.  <br /></td></tr>
+<tr class="separator:aa4e9a561348aae7416e1c12838207d85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0015cd4cc2ea3f82b54c90085b84a1e" id="r_af0015cd4cc2ea3f82b54c90085b84a1e"><td class="memItemLeft" align="right" valign="top"><a id="af0015cd4cc2ea3f82b54c90085b84a1e" name="af0015cd4cc2ea3f82b54c90085b84a1e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_loadBalanceParticles</b></td></tr>
 <tr class="memdesc:af0015cd4cc2ea3f82b54c90085b84a1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance particle realm or not. <br /></td></tr>
@@ -6622,6 +6621,33 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 <p>Phase where we solve for the plasma. </p>
 <dl class="section note"><dt>Note</dt><dd>This is hardcoded to <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108bad0a7c1eb8fd916c8b7ec85be0fd23b38" title="Gas phase.">phase::gas</a> </dd></dl>
+
+</div>
+</div>
+<a id="aa4e9a561348aae7416e1c12838207d85" name="aa4e9a561348aae7416e1c12838207d85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4e9a561348aae7416e1c12838207d85">&#9670;&#160;</a></span>m_regridMergeMethod</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;<a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a>&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_regridMergeMethod</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Super-particle merge method used on regrids. </p>
+<p>Set from ItoKMCGodunovStepper.regrid_superparticles, mirroring the ItoSolver.merge_algorithm selectors plus a 'solver' value. std::nullopt means "solver" &ndash; defer to whatever each <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> has configured; a value means run that specific method (ParticleMergeMethod::None turns the regrid merge off). Lets the regrid-time merge use a different (e.g. cheaper) method than the per-step merge. </p>
 
 </div>
 </div>

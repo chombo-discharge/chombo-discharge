@@ -198,7 +198,23 @@ The vector term <span class="math notranslate nohighlight">\(\mathbf{W}\)</span>
 <span id="chap-itoparticle"></span><h2>ItoParticle<a class="headerlink" href="#itoparticle" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> is used as the underlying particle type for running the Ito drift-diffusion solvers.
 It is a Struct-of-Arrays payload (see <a class="reference internal" href="../Source/Particles.html#chap-particlesoa"><span class="std std-ref">ParticleSoA</span></a>) whose columns are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, z-component.</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">ItoParticle</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">mobility</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Mobility coefficient.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">diffusion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Diffusion coefficient.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">energy</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Average particle energy.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">scratch</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Scratch scalar storage.</span>
+
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">old_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Previous position, x-component.</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">old_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Previous position, y-component.</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">old_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Previous position, z-component.</span>
+<span class="cp">#endif</span>
+
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, x-component.</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, y-component.</span>
+<span class="cp">#if CH_SPACEDIM == 3</span>
+<span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">vz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Interpolated velocity, z-component.</span>
 <span class="cp">#endif</span>
 
 <span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">scratch_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Scratch vector storage, x-component.</span>
@@ -207,19 +223,6 @@ It is a Struct-of-Arrays payload (see <a class="reference internal" href="../Sou
 <span class="w">  </span><span class="n">ParticleReal</span><span class="w"> </span><span class="n">scratch_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; Scratch vector storage, z-component.</span>
 <span class="cp">#endif</span>
 <span class="p">};</span>
-
-<span class="cm">/**</span>
-<span class="cm">  @brief ParticleTraits specialization listing the payload columns of ItoParticle.</span>
-<span class="cm">  @details Only the velocity columns are written to HDF5 (h5Columns); position and weight are always</span>
-<span class="cm">  checkpointed by the container.</span>
-<span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">ParticleTraits</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">     @brief Payload column member-pointers, listed one field group at a time (SpaceDim entries per vector group).</span>
-<span class="cm">  */</span>
-<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span>
 </pre></div>
 </div>
 <p>In addition to the container-owned position and weight, <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> stores the payload columns above.
@@ -612,7 +615,7 @@ This routine is implemented as</p>
 <h2>Superparticle management<a class="headerlink" href="#superparticle-management" title="Permalink to this heading"></a></h2>
 <p>It can occasionally be necessary to merge or split computational particles.
 This occurs in, e.g., plasma simulations where chemical reactions lead to exponential growth of particles.
-<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles superparticles via a configurable merger functor selected at parse time through <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code>; the user can also supply a custom functor through <code class="docutils literal notranslate"><span class="pre">setParticleMerger</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles superparticles via a configurable merger functor selected at parse time through <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code>; the user can also supply a custom functor through <code class="docutils literal notranslate"><span class="pre">setParticleCellMerger</span></code>.
 The entry point for splitting and merging is in all cases</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm">  @brief Make superparticles for a full container -- this is the AMR version that users will usually call. </span>
@@ -626,7 +629,8 @@ The entry point for splitting and merging is in all cases</p>
 <p>Calling this function will merge/split the particles.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Particle merging is currently performed within each grid cell, and particles must therefore be sorted by their cell index before calling the merging routine.</p>
+<p>Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (<code class="docutils literal notranslate"><span class="pre">organizeParticlesByCell</span></code>) before calling the merging routine.
+The exception is <code class="docutils literal notranslate"><span class="pre">nn_pair</span></code>, which is a distributed AMR-level merge that matches particles across patch and rank boundaries; it instead requires that a width-1 particle ghost halo has been filled, and is dispatched over the whole container rather than cell by cell.</p>
 </div>
 <p>In order to specify the merging algorithm the user must set the <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code> to one of the following:</p>
 <ul class="simple">
@@ -634,17 +638,20 @@ The entry point for splitting and merging is in all cases</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">reinitialize</span></code> Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sfc_nn</span></code> Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through <code class="docutils literal notranslate"><span class="pre">setParticleMerger</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code> Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nn_pair</span></code> A distributed, MPI-safe nearest-neighbour <em>pair</em> merge that reaches the target particle count over the whole AMR hierarchy. Over-full cells are drained by matching each over-crowded particle with its true nearest neighbour across patch and rank boundaries (a propose/judge/verdict protocol over a width-1 particle ghost halo) and merging the pair to its weighted centroid; because a single round merges pairs, the round is repeated until every cell reaches the target. Under-full cells are then brought up to the target by splitting the heaviest particle into two co-located daughters (floor/ceil weights, so integer weights stay integer). Tunable through <code class="docutils literal notranslate"><span class="pre">ItoSolver.nn_pair_iterate</span></code>, <code class="docutils literal notranslate"><span class="pre">ItoSolver.nn_pair_fallback</span></code> and <code class="docutils literal notranslate"><span class="pre">ItoSolver.nn_pair_max_cell_dist</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through <code class="docutils literal notranslate"><span class="pre">setParticleCellMerger</span></code>.</p></li>
 </ul>
 <p>The user can set the merging algorithm through the input script (see <a class="reference internal" href="#chap-itoinput"><span class="std std-ref">Input options</span></a>), or supply one externally by setting the merge algorithm to <code class="docutils literal notranslate"><span class="pre">external</span></code>.
 In addition, the user must first supply a particle merging function:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm">  @brief Set the particle merger. This will get called when merging particles using makeSuperparticles.</span>
-<span class="cm">  @param[in] a_particleMerger Particle merger</span>
+<span class="cm">  @brief Set the user-supplied per-cell particle merger used by merge_algorithm = external.</span>
+<span class="cm">  @details The built-in merge methods build their own per-cell merger internally; this one is used</span>
+<span class="cm">  only when merge_algorithm = external, applied cell-by-cell by makeSuperparticles().</span>
+<span class="cm">  @param[in] a_particleCellMerger Per-cell particle merger.</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setParticleMerger</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleManagement</span><span class="o">::</span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particleMerger</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">setParticleCellMerger</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleManagement</span><span class="o">::</span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particleCellMerger</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>In the code above, <code class="docutils literal notranslate"><span class="pre">ParticleManagement::ParticleMerger&lt;P&gt;</span></code> is an alias:</p>
@@ -710,22 +717,26 @@ All options are run-time configurable.</span><a class="headerlink" href="#itoinp
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># ItoSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>              <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                 <span class="c1">## Class verbosity</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>        <span class="o">=</span> <span class="n">equal_weight_kd</span>    <span class="c1">## Particle merging algorithm. One of &#39;reinitialize&#39;, &#39;equal_weight_kd&#39;, &#39;reinitialize_bvh&#39;, &#39;sfc_nn&#39;, &#39;none&#39;, or &#39;external&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>               <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>        <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>       <span class="o">=</span> <span class="n">bisection</span>          <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>            <span class="o">=</span> <span class="mf">1.E-4</span>              <span class="c1">## Bisection step length for intersection tests</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>             <span class="o">=</span> <span class="mf">5.0</span>                <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>           <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off redistribution.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>     <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>          <span class="o">=</span> <span class="n">particles</span>          <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>            <span class="o">=</span> <span class="mi">32</span>                 <span class="c1">## Maximum number of computational particles to generate for restarts.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>     <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular deposition in cut cells or not</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>         <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular interpolation in cut cells or not</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>        <span class="o">=</span> <span class="n">direct</span>             <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>        <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Cloud-in-cell for plotting particles.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>             <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Deposition type.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>          <span class="o">=</span> <span class="n">transition</span>         <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>                 <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                 <span class="c1">## Class verbosity</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>           <span class="o">=</span> <span class="n">equal_weight_kd</span>    <span class="c1">## Particle merging algorithm. One of &#39;reinitialize&#39;, &#39;equal_weight_kd&#39;, &#39;reinitialize_bvh&#39;, &#39;nn_sfc&#39;, &#39;nn_pair&#39;, &#39;none&#39;, or &#39;external&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_iterate</span>           <span class="o">=</span> <span class="n">true</span>               <span class="c1">## nn_pair: iterate the local tier to convergence within each round</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_fallback</span>          <span class="o">=</span> <span class="mi">1</span>                  <span class="c1">## nn_pair: fallback candidates per query (k-NN graph built with k = 1 + this)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_cell_dist</span>     <span class="o">=</span> <span class="mi">1</span>                  <span class="c1">## nn_pair: max merge distance in cells (Chebyshev);</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_rounds</span>        <span class="o">=</span> <span class="mi">3</span>                  <span class="c1">## nn_pair: max drain rounds per merge (stops early on convergence)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>                  <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>        <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>          <span class="o">=</span> <span class="n">bisection</span>          <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>               <span class="o">=</span> <span class="mf">1.E-4</span>              <span class="c1">## Bisection step length for intersection tests</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>                <span class="o">=</span> <span class="mf">5.0</span>                <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>              <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off redistribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>        <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>             <span class="o">=</span> <span class="n">particles</span>          <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>               <span class="o">=</span> <span class="mi">32</span>                 <span class="c1">## Maximum number of computational particles to generate for restarts.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>        <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular deposition in cut cells or not</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>            <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular interpolation in cut cells or not</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>           <span class="o">=</span> <span class="n">direct</span>             <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>           <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Cloud-in-cell for plotting particles.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>                <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Deposition type.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>             <span class="o">=</span> <span class="n">transition</span>         <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
 </pre></div>
 </div>
 </div>

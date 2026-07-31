@@ -122,7 +122,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#kd-tree-merging-equal-weight-kd">KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#kd-tree-with-reinitialization-reinitialize-bvh">KD-tree with reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reinitialization-reinitialize">Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sfc-nearest-neighbour-merging-sfc-nn">SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">sfc_nn</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sfc-nearest-neighbour-merging-nn-sfc">SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nearest-neighbour-pair-merging-nn-pair">Nearest-neighbour pair merging (<code class="docutils literal notranslate"><span class="pre">nn_pair</span></code>)</a></li>
 </ul>
 </li>
 </ul>
@@ -275,6 +276,15 @@ A representative payload (the tracer-particle velocity + Runge-Kutta scratch) lo
 <span class="w">    </span><span class="n">D_DECL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k1_x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k1_y</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k1_z</span><span class="p">),</span>
 <span class="w">    </span><span class="n">D_DECL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k2_x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k2_y</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k2_z</span><span class="p">),</span>
 <span class="w">    </span><span class="n">D_DECL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k3_x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k3_y</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">k3_z</span><span class="p">));</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">     @brief Payload columns written to H5Part visualization files: the interpolated velocity vector (id,</span>
+<span class="cm">            position and weight are written automatically; the position snapshot and Runge-Kutta stage</span>
+<span class="cm">            columns are internal and not plotted).</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">h5PartColumns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_tuple</span><span class="p">(</span>
+<span class="w">    </span><span class="n">H5Part</span><span class="o">::</span><span class="n">Vector</span><span class="p">{</span><span class="s">&quot;v&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">D_DECL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">v_x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">v_y</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">TracerParticle</span><span class="o">::</span><span class="n">v_z</span><span class="p">)});</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>Per-component vectors are declared as individual scalar columns (there is no <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> column type); the <code class="docutils literal notranslate"><span class="pre">D_DECL</span></code> macro expands to the <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components.
@@ -573,8 +583,8 @@ This functionality is unlikely to be used directly by users of chombo-discharge,
 This functionality is for example used for some of the particle deposition methods in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> where we deposit particles that live near the refinement boundary with special deposition functions.</p>
 <p>To fill the masked particles, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code> has member functions for copying the particles into internal data containers which the user can later fetch.
 The function signature for this is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">*/</span>
-<span class="kt">void</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">copyMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The argument <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> holds a bool at each cell in the AMR hierarchy.
@@ -970,11 +980,13 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 </div>
 <p>and the merged result is accumulated into an output <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> (via <code class="docutils literal notranslate"><span class="pre">append</span></code>) which finally replaces the leaf with <code class="docutils literal notranslate"><span class="pre">swap</span></code>.
 A complete worked example is <code class="docutils literal notranslate"><span class="pre">ItoSolver::makeSuperparticles</span></code> in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports four merger strategies, all implemented as factory functions in <code class="docutils literal notranslate"><span class="pre">ParticleManagement</span></code> that return a <code class="docutils literal notranslate"><span class="pre">ParticleMerger&lt;P,</span> <span class="pre">Traits&gt;</span></code> functor.
-Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> payload type.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports several merger strategies.
+The four cell-granularity strategies below are implemented as factory functions in <code class="docutils literal notranslate"><span class="pre">ParticleManagement</span></code> that return a <code class="docutils literal notranslate"><span class="pre">ParticleMerger&lt;P,</span> <span class="pre">Traits&gt;</span></code> functor.
+Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> payload type.
+A fifth strategy, <code class="docutils literal notranslate"><span class="pre">nn_pair</span></code>, merges nearest-neighbour pairs collectively across the AMR hierarchy rather than one cell at a time; it is not a per-cell factory and is described at the end of this section.</p>
 <section id="kd-trees">
 <h3>kD-trees<a class="headerlink" href="#kd-trees" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> partitions particles using kD-trees as the internal basis for the <code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> and <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> mergers; user code reaches this through the <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory described below, never by calling the partitioner directly.
 kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
 At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
 <a class="reference internal" href="#fig-partitionkd"><span class="std std-numref">Fig. 14</span></a> shows an example where a set of initial particles are partitioned using such a tree.</p>
@@ -984,9 +996,10 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 <p><span class="caption-number">Fig. 14 </span><span class="caption-text">Example of a kD-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The source code for the kD-tree partitioner is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code> (<code class="docutils literal notranslate"><span class="pre">ParticleManagement::buildEqualWeightKDLeaves</span></code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>) is an internal helper – it implements the partitioning below but is not part of the public interface.
+The public entry point is the <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory (see <a class="reference internal" href="#kd-tree-merging"><span class="std std-ref">below</span></a>), which wraps it.</p>
 </div>
 <p>The kD-tree partitioner operates on a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.
 The partitioner <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible – at each bisection the two halves differ by at most one physical particle.
@@ -1008,7 +1021,7 @@ Right: Merged particles.</span><a class="headerlink" href="#id6" title="Permalin
 </figure>
 </section>
 <section id="kd-tree-merging-equal-weight-kd">
-<h3>KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)<a class="headerlink" href="#kd-tree-merging-equal-weight-kd" title="Permalink to this heading"></a></h3>
+<span id="kd-tree-merging"></span><h3>KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)<a class="headerlink" href="#kd-tree-merging-equal-weight-kd" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeEqualWeightKDMerger</span></code> wraps <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> into a <code class="docutils literal notranslate"><span class="pre">ParticleMerger</span></code> functor.
 The caller provides three lambdas:</p>
 <ul class="simple">
@@ -1058,8 +1071,8 @@ This method requires that particle weights are (close to) integers.</p>
 The cell-centre position is computed internally as <code class="docutils literal notranslate"><span class="pre">probLo</span> <span class="pre">+</span> <span class="pre">dx</span> <span class="pre">*</span> <span class="pre">(gridIndex</span> <span class="pre">+</span> <span class="pre">0.5)</span></code>, so no grid pointer needs to be retained in the returned functor.</p>
 </div>
 </section>
-<section id="sfc-nearest-neighbour-merging-sfc-nn">
-<h3>SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">sfc_nn</span></code>)<a class="headerlink" href="#sfc-nearest-neighbour-merging-sfc-nn" title="Permalink to this heading"></a></h3>
+<section id="sfc-nearest-neighbour-merging-nn-sfc">
+<h3>SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)<a class="headerlink" href="#sfc-nearest-neighbour-merging-nn-sfc" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeSfcNearestNeighborMerger</span></code> sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most <code class="docutils literal notranslate"><span class="pre">ppc</span></code>.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Packed</span><span class="p">,</span>
 <span class="w">          </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">)(),</span>
@@ -1085,6 +1098,26 @@ The Hilbert ordering ensures that merged pairs are spatially close, which better
 <p class="admonition-title">Tip</p>
 <p>The source code for all merger factories is in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>.</p>
 </div>
+</section>
+<section id="nearest-neighbour-pair-merging-nn-pair">
+<span id="nn-pair-merging"></span><h3>Nearest-neighbour pair merging (<code class="docutils literal notranslate"><span class="pre">nn_pair</span></code>)<a class="headerlink" href="#nearest-neighbour-pair-merging-nn-pair" title="Permalink to this heading"></a></h3>
+<p>Unlike the four strategies above, <code class="docutils literal notranslate"><span class="pre">nn_pair</span></code> is not a per-cell factory that returns a <code class="docutils literal notranslate"><span class="pre">ParticleMerger</span></code> functor.
+It is a distributed, MPI-safe merge that operates collectively across the whole AMR hierarchy, implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsRound</span></code> in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H</span></code>.
+Each call performs one <em>round</em>:</p>
+<ol class="arabic simple">
+<li><p>Ghost particles are refilled (fresh, exactly once per round) so that a particle’s nearest neighbour may be one owned by another patch or rank.</p></li>
+<li><p>Every particle’s nearest neighbour is located, and pairs lying entirely within one patch are merged immediately (the <em>trivial tier</em>).</p></li>
+<li><p>Pairs that straddle a patch or rank boundary are resolved through a single cross-patch propose/judge/verdict exchange, so both owners agree on exactly one merge and no particle is merged twice.</p></li>
+</ol>
+<p>Because a round merges <em>pairs</em>, a cell far above the target count is not necessarily drained in a single call; the merge is invoked once per time step and relies on repeated rounds – and, in a running simulation, on particle motion between them – for further convergence.
+Merged particles need globally unique ids that cannot collide across ranks or rounds, so the caller supplies an id allocator (a rank-namespaced counter suffices).</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><code class="docutils literal notranslate"><span class="pre">nn_pair</span></code> requires a width-1 particle ghost mask, which is only built during a regrid.
+The mask must therefore be registered <em>before</em> the grids are (re)built – registering it late leaves it empty and the neighbour search will not see cross-patch particles.
+<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles this automatically when <code class="docutils literal notranslate"><span class="pre">merge_algorithm</span> <span class="pre">=</span> <span class="pre">nn_pair</span></code>, and <code class="docutils literal notranslate"><span class="pre">ItoKMCStepper</span></code> does the same when its regrid-time merge is set to <code class="docutils literal notranslate"><span class="pre">nn_pair</span></code>.</p>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> the behaviour is tuned through <code class="docutils literal notranslate"><span class="pre">nn_pair_iterate</span></code> (repeat the local trivial-tier merges within a round until no further local pairs remain), <code class="docutils literal notranslate"><span class="pre">nn_pair_fallback</span></code> (how many additional candidate neighbours to consider when the nearest is unavailable), and <code class="docutils literal notranslate"><span class="pre">nn_pair_max_cell_dist</span></code> (cap the neighbour search radius in cells).</p>
 </section>
 </section>
 </section>

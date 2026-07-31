@@ -1004,10 +1004,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_finestLevel; lvl++) {</div>
 <div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>    <span class="keywordflow">if</span> (!a_mask[lvl].isNull()) {</div>
 <div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>      this-&gt;copyMaskParticles(lvl, *a_mask[lvl]);</div>
-<div class="foldopen" id="foldopen00888" data-start="{" data-end="}">
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a3e5be9f836e89ceab4ed846de0880b4d">  888</a></span>    }</div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>    }</div>
 <div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>  }</div>
 <div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>}</div>
+</div>
 <div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span> </div>
 <div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
 <div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
@@ -1028,8 +1028,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span> </div>
 <div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
 <div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
-<div class="foldopen" id="foldopen00910" data-start="{" data-end="}">
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a565736db892977b62293eef688f8fd07">  910</a></span>    <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>    <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
 <div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span> </div>
 <div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>    maskLevel[din].clear();</div>
 <div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span> </div>
@@ -1038,27 +1037,27 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>      <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>    }</div>
 <div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>    <span class="keyword">const</span> Box maskBox = mask.box();</div>
-<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span> </div>
-<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>    <span class="keyword">const</span> Leaf&amp; src = srcLevel[din];</div>
-<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>    Leaf&amp;       dst = maskLevel[din];</div>
+<div class="foldopen" id="foldopen00919" data-start="{" data-end="}">
+<div class="line"><a id="l00919" name="l00919"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">  919</a></span> </div>
+<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>    <span class="keyword">const</span> <a class="code hl_class" href="classParticleSoA.html">Leaf</a>&amp; src = srcLevel[din];</div>
+<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>    <a class="code hl_class" href="classParticleSoA.html">Leaf</a>&amp;       dst = maskLevel[din];</div>
 <div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span> </div>
-<div class="foldopen" id="foldopen00923" data-start="{" data-end="}">
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a3f0a8ff5bd653a029d686fc83c511f34">  923</a></span>    <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; src.size(); i++) {</div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>      <span class="keyword">const</span> IntVect iv = this-&gt;cellIndex(a_level, src.position(i));</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>    <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; src.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>(); i++) {</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>      <span class="keyword">const</span> IntVect iv = this-&gt;cellIndex(a_level, src.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i));</div>
 <div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span> </div>
-<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>      <span class="keywordflow">if</span> (maskBox.contains(iv) &amp;&amp; mask(iv, 0)) {</div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>        dst.append(src.position(i), src.weight(i), src.gather(i));</div>
+<div class="foldopen" id="foldopen00926" data-start="{" data-end="}">
+<div class="line"><a id="l00926" name="l00926"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a3e5be9f836e89ceab4ed846de0880b4d">  926</a></span>      <span class="keywordflow">if</span> (maskBox.contains(iv) &amp;&amp; mask(iv, 0)) {</div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>        dst.<a class="code hl_function" href="classParticleSoA.html#a1209500183bdfbfff59b17c5939ef7ca">append</a>(src.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i), src.<a class="code hl_function" href="classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf">weight</a>(i), src.<a class="code hl_function" href="classParticleSoA.html#a837eccce37083ca02366259ab0e99b14">gather</a>(i));</div>
 <div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span> </div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>        <span class="keyword">const</span> std::size_t k = dst.size() - 1;</div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>        <span class="keyword">const</span> std::size_t k = dst.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>() - 1;</div>
 <div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span> </div>
-<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>        dst.particleID(k) = src.particleID(i);</div>
-<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>        dst.rankID(k)     = src.rankID(i);</div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>        dst.<a class="code hl_function" href="classParticleSoA.html#a9ba0faddec296ec840250f17a6cd8a6f">particleID</a>(k) = src.<a class="code hl_function" href="classParticleSoA.html#a9ba0faddec296ec840250f17a6cd8a6f">particleID</a>(i);</div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>        dst.<a class="code hl_function" href="classParticleSoA.html#a1017bf12403b02c80cc776d247e8e852">rankID</a>(k)     = src.<a class="code hl_function" href="classParticleSoA.html#a1017bf12403b02c80cc776d247e8e852">rankID</a>(i);</div>
 <div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>      }</div>
 <div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>    }</div>
 <div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>  }</div>
 <div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>}</div>
-<div class="foldopen" id="foldopen00937" data-start="{" data-end="}">
-<div class="line"><a id="l00937" name="l00937"></a><span class="lineno"><a class="line" href="classParticleContainer.html#aec5c8dabea7fd0f167d6ef8999f14e6a">  937</a></span> </div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span> </div>
 <div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
 <div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00940" data-start="{" data-end="}">
@@ -1070,10 +1069,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span> </div>
 <div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_finestLevel; lvl++) {</div>
 <div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>    <span class="keywordflow">if</span> (!a_mask[lvl].isNull()) {</div>
-<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>      this-&gt;transferMaskParticles(lvl, *a_mask[lvl]);</div>
+<div class="foldopen" id="foldopen00948" data-start="{" data-end="}">
+<div class="line"><a id="l00948" name="l00948"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a565736db892977b62293eef688f8fd07">  948</a></span>      this-&gt;transferMaskParticles(lvl, *a_mask[lvl]);</div>
 <div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>    }</div>
-<div class="foldopen" id="foldopen00950" data-start="{" data-end="}">
-<div class="line"><a id="l00950" name="l00950"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a875be5d3149509f288985a60387c3bc5">  950</a></span>  }</div>
+<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>  }</div>
 <div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>}</div>
 <div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span> </div>
 <div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
@@ -1085,7 +1084,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span> </div>
 <div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>  CH_assert(m_isDefined);</div>
 <div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span> </div>
-<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>  <a class="code hl_typedef" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a>&amp; maskLevel = *m_maskParticles[a_level];</div>
+<div class="foldopen" id="foldopen00961" data-start="{" data-end="}">
+<div class="line"><a id="l00961" name="l00961"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a3f0a8ff5bd653a029d686fc83c511f34">  961</a></span>  <a class="code hl_typedef" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a>&amp; maskLevel = *m_maskParticles[a_level];</div>
 <div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>  <a class="code hl_typedef" href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">LevelParticles</a>&amp; srcLevel  = *m_particles[a_level];</div>
 <div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span> </div>
 <div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span>  <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_grids[a_level];</div>
@@ -1099,26 +1099,28 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span> </div>
 <div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>    <span class="keyword">const</span> BaseFab&lt;bool&gt;&amp; mask = a_mask[din];</div>
 <div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>    <span class="keywordflow">if</span> (!mask.isUsable()) {</div>
-<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>      <span class="keywordflow">continue</span>;</div>
+<div class="foldopen" id="foldopen00975" data-start="{" data-end="}">
+<div class="line"><a id="l00975" name="l00975"></a><span class="lineno"><a class="line" href="classParticleContainer.html#aec5c8dabea7fd0f167d6ef8999f14e6a">  975</a></span>      <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>    }</div>
 <div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span>    <span class="keyword">const</span> Box maskBox = mask.box();</div>
 <div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span> </div>
-<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>    <a class="code hl_class" href="classParticleSoA.html">Leaf</a>&amp; src = srcLevel[din];</div>
-<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>    <a class="code hl_class" href="classParticleSoA.html">Leaf</a>&amp; dst = maskLevel[din];</div>
+<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>    Leaf&amp; src = srcLevel[din];</div>
+<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>    Leaf&amp; dst = maskLevel[din];</div>
 <div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span> </div>
 <div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>    std::size_t i = 0;</div>
-<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>    <span class="keywordflow">while</span> (i &lt; src.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>()) {</div>
-<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span>      <span class="keyword">const</span> IntVect iv = this-&gt;cellIndex(a_level, src.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i));</div>
+<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>    <span class="keywordflow">while</span> (i &lt; src.size()) {</div>
+<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span>      <span class="keyword">const</span> IntVect iv = this-&gt;cellIndex(a_level, src.position(i));</div>
 <div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span> </div>
 <div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span>      <span class="keywordflow">if</span> (maskBox.contains(iv) &amp;&amp; mask(iv, 0)) {</div>
-<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>        dst.<a class="code hl_function" href="classParticleSoA.html#a1209500183bdfbfff59b17c5939ef7ca">append</a>(src.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i), src.<a class="code hl_function" href="classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf">weight</a>(i), src.<a class="code hl_function" href="classParticleSoA.html#a837eccce37083ca02366259ab0e99b14">gather</a>(i));</div>
-<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span> </div>
-<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>        <span class="keyword">const</span> std::size_t k = dst.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>() - 1;</div>
+<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>        dst.append(src.position(i), src.weight(i), src.gather(i));</div>
+<div class="foldopen" id="foldopen00988" data-start="{" data-end="}">
+<div class="line"><a id="l00988" name="l00988"></a><span class="lineno"><a class="line" href="classParticleContainer.html#a875be5d3149509f288985a60387c3bc5">  988</a></span> </div>
+<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>        <span class="keyword">const</span> std::size_t k = dst.size() - 1;</div>
 <div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span> </div>
-<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span>        dst.<a class="code hl_function" href="classParticleSoA.html#a9ba0faddec296ec840250f17a6cd8a6f">particleID</a>(k) = src.<a class="code hl_function" href="classParticleSoA.html#a9ba0faddec296ec840250f17a6cd8a6f">particleID</a>(i);</div>
-<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>        dst.<a class="code hl_function" href="classParticleSoA.html#a1017bf12403b02c80cc776d247e8e852">rankID</a>(k)     = src.<a class="code hl_function" href="classParticleSoA.html#a1017bf12403b02c80cc776d247e8e852">rankID</a>(i);</div>
+<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span>        dst.particleID(k) = src.particleID(i);</div>
+<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>        dst.rankID(k)     = src.rankID(i);</div>
 <div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span> </div>
-<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>        src.<a class="code hl_function" href="classParticleSoA.html#aaba606bce519a92e6ddb2ff0d42edf8f">remove</a>(i); <span class="comment">// swap-and-pop; the swapped-in particle now occupies index i</span></div>
+<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>        src.remove(i); <span class="comment">// swap-and-pop; the swapped-in particle now occupies index i</span></div>
 <div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span>      }</div>
 <div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span>      <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span>        ++i;</div>
@@ -1126,11 +1128,11 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span>    }</div>
 <div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span>  }</div>
 <div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>}</div>
-</div>
 <div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span> </div>
 <div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
 <div class="line"><a id="l01004" name="l01004"></a><span class="lineno"> 1004</span> </div>
 <div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span><span class="preprocessor">#endif</span></div>
+</div>
 </div>
 </div>
 </div>
@@ -1172,7 +1174,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassParticleContainer_html_a3e5be9f836e89ceab4ed846de0880b4d"><div class="ttname"><a href="classParticleContainer.html#a3e5be9f836e89ceab4ed846de0880b4d">ParticleContainer::setupGrownGrids</a></div><div class="ttdeci">void setupGrownGrids()</div><div class="ttdoc">Build the grown grids (buffer-particle layout): boxes grown by the refinement factor.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:855</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a3f0a8ff5bd653a029d686fc83c511f34"><div class="ttname"><a href="classParticleContainer.html#a3f0a8ff5bd653a029d686fc83c511f34">ParticleContainer::gatherMoversToPool</a></div><div class="ttdeci">MoverPool gatherMoversToPool()</div><div class="ttdoc">Mask fast path for remap(): pool ONLY the movers, leaving stayers in place.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:152</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a4e9dd5a2f8637551bb1dfbc7d5239380"><div class="ttname"><a href="classParticleContainer.html#a4e9dd5a2f8637551bb1dfbc7d5239380">ParticleContainer::clearGhostParticles</a></div><div class="ttdeci">void clearGhostParticles()</div><div class="ttdoc">Remove every ghost particle (any non-Valid GhostType) from all levels and patches.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:576</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a55ca1dc0711b599cf86dc2e4036c832a"><div class="ttname"><a href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">ParticleContainer::MoverPool</a></div><div class="ttdeci">std::vector&lt; std::map&lt; PoolKey, Leaf &gt; &gt; MoverPool</div><div class="ttdoc">Per-rank pool of movers: pool[rank] maps a destination patch to a small SoA of particles.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:898</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a55ca1dc0711b599cf86dc2e4036c832a"><div class="ttname"><a href="classParticleContainer.html#a55ca1dc0711b599cf86dc2e4036c832a">ParticleContainer::MoverPool</a></div><div class="ttdeci">std::vector&lt; std::map&lt; PoolKey, Leaf &gt; &gt; MoverPool</div><div class="ttdoc">Per-rank pool of movers: pool[rank] maps a destination patch to a small SoA of particles.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:936</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a565736db892977b62293eef688f8fd07"><div class="ttname"><a href="classParticleContainer.html#a565736db892977b62293eef688f8fd07">ParticleContainer::gatherToPool</a></div><div class="ttdeci">MoverPool gatherToPool(const AMRParticlesSoA&lt; P, Traits &gt; &amp;a_source, const Vector&lt; DisjointBoxLayout &gt; &amp;a_sourceGrids)</div><div class="ttdoc">Gather every particle of a source holder into a per-rank, per-destination-patch pool.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:74</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a59356226c69f0aaad9bbb1a36756ee9f"><div class="ttname"><a href="classParticleContainer.html#a59356226c69f0aaad9bbb1a36756ee9f">ParticleContainer::preRegrid</a></div><div class="ttdeci">void preRegrid()</div><div class="ttdoc">Cache the current valid particles ahead of a regrid.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:501</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a70dca850979d671abcb3990e6b77cf2b"><div class="ttname"><a href="classParticleContainer.html#a70dca850979d671abcb3990e6b77cf2b">ParticleContainer::claimOwnership</a></div><div class="ttdeci">void claimOwnership(const bool a_onlyValidRegion)</div><div class="ttdoc">Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:612</div></div>
@@ -1181,7 +1183,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:470</div></div>
 <div class="ttc" id="aclassParticleContainer_html_ac062ccbae3ee7ce005703a85ec15e1a5"><div class="ttname"><a href="classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5">ParticleContainer::LevelParticles</a></div><div class="ttdeci">LayoutData&lt; Leaf &gt; LevelParticles</div><div class="ttdoc">The per-level holder type (one Leaf per box on the level's DisjointBoxLayout).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:133</div></div>
 <div class="ttc" id="aclassParticleContainer_html_ad12fc7d10652f6aa1b9e543517c64279"><div class="ttname"><a href="classParticleContainer.html#ad12fc7d10652f6aa1b9e543517c64279">ParticleContainer::copyMaskParticles</a></div><div class="ttdeci">void copyMaskParticles(const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; &amp;a_mask)</div><div class="ttdoc">Copy the valid particles selected by a per-cell mask into the mask holder, all levels.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:879</div></div>
-<div class="ttc" id="aclassParticleContainer_html_ae2cce85a255d04a2418fc69832343a2f"><div class="ttname"><a href="classParticleContainer.html#ae2cce85a255d04a2418fc69832343a2f">ParticleContainer::PoolKey</a></div><div class="ttdeci">std::pair&lt; int, unsigned int &gt; PoolKey</div><div class="ttdoc">Pool key identifying a destination patch: (level, grid index within the level).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:893</div></div>
+<div class="ttc" id="aclassParticleContainer_html_ae2cce85a255d04a2418fc69832343a2f"><div class="ttname"><a href="classParticleContainer.html#ae2cce85a255d04a2418fc69832343a2f">ParticleContainer::PoolKey</a></div><div class="ttdeci">std::pair&lt; int, unsigned int &gt; PoolKey</div><div class="ttdoc">Pool key identifying a destination patch: (level, grid index within the level).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:931</div></div>
 <div class="ttc" id="aclassParticleContainer_html_aec5c8dabea7fd0f167d6ef8999f14e6a"><div class="ttname"><a href="classParticleContainer.html#aec5c8dabea7fd0f167d6ef8999f14e6a">ParticleContainer::gatherGhostsFromMasks</a></div><div class="ttdeci">MoverPool gatherGhostsFromMasks(const AMRParticleGhostMask &amp;a_maskSame, const AMRParticleGhostMask &amp;a_maskCoarToFine, const AMRParticleGhostMask &amp;a_maskFineToCoar)</div><div class="ttdoc">Gather ghost copies into a per-rank pool using prebuilt particle ghost masks.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:732</div></div>
 <div class="ttc" id="aclassParticleGhostMask_html"><div class="ttname"><a href="classParticleGhostMask.html">ParticleGhostMask</a></div><div class="ttdoc">Per-box CSR lookup from a source cell to the destination boxes whose ghosted region covers it.</div><div class="ttdef"><b>Definition</b> CD_ParticleGhostMask.H:53</div></div>
 <div class="ttc" id="aclassParticleGhostMask_html_a154eabc6d391b95a598f020c13a44aaa"><div class="ttname"><a href="classParticleGhostMask.html#a154eabc6d391b95a598f020c13a44aaa">ParticleGhostMask::box</a></div><div class="ttdeci">const Box &amp; box() const noexcept</div><div class="ttdoc">Get the box that the source cells live on.</div><div class="ttdef"><b>Definition</b> CD_ParticleGhostMaskImplem.H:90</div></div>
@@ -1205,11 +1207,11 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassParticleSoA_html_afed7ea6fe15e375cafecb6f4ce1e54b6"><div class="ttname"><a href="classParticleSoA.html#afed7ea6fe15e375cafecb6f4ce1e54b6">ParticleSoA::reserve</a></div><div class="ttdeci">void reserve(const std::size_t a_capacity)</div><div class="ttdoc">Ensure capacity for at least a_capacity particles (reallocates + moves on growth).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoAImplem.H:64</div></div>
 <div class="ttc" id="anamespaceParallelOps_html_a591e504a4d50fd1d8aec80a8a1ef112b"><div class="ttname"><a href="namespaceParallelOps.html#a591e504a4d50fd1d8aec80a8a1ef112b">ParallelOps::gather</a></div><div class="ttdeci">Vector&lt; int &gt; gather(const int &amp;a_localValue) noexcept</div><div class="ttdoc">Gather local values – return a vector of local values.</div><div class="ttdef"><b>Definition</b> CD_ParallelOpsImplem.H:540</div></div>
 <div class="ttc" id="anamespaceParallelOps_html_acee1ea4f1dc471622d322bef1c3e9028"><div class="ttname"><a href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">ParallelOps::sum</a></div><div class="ttdeci">Real sum(const Real &amp;a_value) noexcept</div><div class="ttdoc">Compute the sum across all MPI ranks.</div><div class="ttdef"><b>Definition</b> CD_ParallelOpsImplem.H:354</div></div>
-<div class="ttc" id="astructParticleContainer_1_1Destination_html"><div class="ttname"><a href="structParticleContainer_1_1Destination.html">ParticleContainer::Destination</a></div><div class="ttdoc">Resolved remap destination of a particle: owning (level, grid index, rank).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:1086</div></div>
-<div class="ttc" id="astructParticleContainer_1_1Destination_html_a60056e53120f94d69012aa815e318d9e"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#a60056e53120f94d69012aa815e318d9e">ParticleContainer::Destination::level</a></div><div class="ttdeci">int level</div><div class="ttdoc">Owning level (finest tile that contains the particle).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:1090</div></div>
-<div class="ttc" id="astructParticleContainer_1_1Destination_html_a690f348bc479d674906d404079233967"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#a690f348bc479d674906d404079233967">ParticleContainer::Destination::gridIndex</a></div><div class="ttdeci">unsigned int gridIndex</div><div class="ttdoc">Owning grid index within that level's LevelTiles.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:1095</div></div>
-<div class="ttc" id="astructParticleContainer_1_1Destination_html_a8de302109907bf8c5ef37874460c56b8"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#a8de302109907bf8c5ef37874460c56b8">ParticleContainer::Destination::found</a></div><div class="ttdeci">bool found</div><div class="ttdoc">False if the particle is off-domain (owned by no tile).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:1105</div></div>
-<div class="ttc" id="astructParticleContainer_1_1Destination_html_ace6090b45fd84f4d327bbb1b128b0027"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#ace6090b45fd84f4d327bbb1b128b0027">ParticleContainer::Destination::rank</a></div><div class="ttdeci">int rank</div><div class="ttdoc">Owning rank.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:1100</div></div>
+<div class="ttc" id="astructParticleContainer_1_1Destination_html"><div class="ttname"><a href="structParticleContainer_1_1Destination.html">ParticleContainer::Destination</a></div><div class="ttdoc">Resolved remap destination of a particle: owning (level, grid index, rank).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:887</div></div>
+<div class="ttc" id="astructParticleContainer_1_1Destination_html_a60056e53120f94d69012aa815e318d9e"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#a60056e53120f94d69012aa815e318d9e">ParticleContainer::Destination::level</a></div><div class="ttdeci">int level</div><div class="ttdoc">Owning level (finest tile that contains the particle).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:891</div></div>
+<div class="ttc" id="astructParticleContainer_1_1Destination_html_a690f348bc479d674906d404079233967"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#a690f348bc479d674906d404079233967">ParticleContainer::Destination::gridIndex</a></div><div class="ttdeci">unsigned int gridIndex</div><div class="ttdoc">Owning grid index within that level's LevelTiles.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:896</div></div>
+<div class="ttc" id="astructParticleContainer_1_1Destination_html_a8de302109907bf8c5ef37874460c56b8"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#a8de302109907bf8c5ef37874460c56b8">ParticleContainer::Destination::found</a></div><div class="ttdeci">bool found</div><div class="ttdoc">False if the particle is off-domain (owned by no tile).</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:906</div></div>
+<div class="ttc" id="astructParticleContainer_1_1Destination_html_ace6090b45fd84f4d327bbb1b128b0027"><div class="ttname"><a href="structParticleContainer_1_1Destination.html#ace6090b45fd84f4d327bbb1b128b0027">ParticleContainer::Destination::rank</a></div><div class="ttdeci">int rank</div><div class="ttdoc">Owning rank.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:901</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
