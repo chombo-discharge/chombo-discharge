@@ -377,9 +377,10 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
     pout() << "BrownianWalkerStepper::preRegrid" << endl;
   }
 
-  // TLDR: This does two things. The first is to deposit the number of particles per cell (ish) to the mesh. This can be
-  // used to load balance the application
+  // clang-format off
+  // TLDR: This does two things. The first is to deposit the number of particles per cell (ish) to the mesh. This can be used to load balance the application
   //       in the regrid step. The second this is that it puts all particle data holders in "regrid" mode.
+  // clang-format on
   m_amr->allocate(m_regridPPC, m_realm, m_phase, 1);
 
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
@@ -649,14 +650,15 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
-  // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need
-  // for building operators. We happen to
-  //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values
-  //       are returned by a call to EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the
-  //       new grids. This requires us to manually build an operator which can do that interpolation.
+  // clang-format off
+  // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
+  //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
+  //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
+  //       can do that interpolation.
   //
-  //       Once we've put that data on the new mesh, we can simply compute the sum of all mesh data in each grid patch.
-  //       That sum is equal to the number of particles in the patch, which we can use for load balancing.
+  //       Once we've put that data on the new mesh, we can simply compute the sum of all mesh data in each grid patch. That sum is equal to the number of particles
+  //       in the patch, which we can use for load balancing.
+  // clang-format on
 
   constexpr int comp = 0;
 
@@ -790,12 +792,12 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
-  // TLDR: This load balancing method computes the number of particles in the new grids directly. It does so by
-  // remapping the particles
-  //       to the new grids and then simply counting them. This is then used for load balancing. The downside of this
-  //       method is that the particles needs to be remapped twice (once here, and once in
-  //       BrownianWalkerStepper::regrid). So, this method is usually slower than the other one when the number of
-  //       particles is large.
+  // clang-format off
+  // TLDR: This load balancing method computes the number of particles in the new grids directly. It does so by remapping the particles
+  //       to the new grids and then simply counting them. This is then used for load balancing. The downside of this method is that the
+  //       particles needs to be remapped twice (once here, and once in BrownianWalkerStepper::regrid). So, this method is usually slower
+  //       than the other one when the number of particles is large.
+  // clang-format on
 
   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 

@@ -52,10 +52,11 @@ MFHelmholtzEBBC::defineMultiPhase()
   CH_assert(m_jumpBC->getOrder() > 0);
   CH_assert(m_jumpBC->getWeight() >= 0);
 
-  // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is
-  // an "almost-Dirichlet" type of boundary condition
-  //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for
-  //       that flux, using the value on the boundary as a known term in the expansion.
+  // clang-format off
+  // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is an "almost-Dirichlet" type of boundary condition
+  //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for that flux, using the value on the boundary as
+  //       a known term in the expansion.
+  // clang-format on
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const DataIterator&      dit = dbl.dataIterator();
 

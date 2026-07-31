@@ -187,11 +187,11 @@ FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const 
   CH_assert(a_displacementField[0]->nComp() == SpaceDim);
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
 
-  // TLDR: This computes the displacement field D = eps*E on both phases. The data is either cell-centered or
-  // centroid-centered, and the
-  //       permittivity can be spatially varying (in the dielectric). So, for the gas phase we only need to compute
-  //       eps0*E while for the dielectric phase we have to iterate through each cell and find the corresponding
-  //       permittivity.
+  // clang-format off
+  // TLDR: This computes the displacement field D = eps*E on both phases. The data is either cell-centered or centroid-centered, and the
+  //       permittivity can be spatially varying (in the dielectric). So, for the gas phase we only need to compute eps0*E while for the
+  //       dielectric phase we have to iterate through each cell and find the corresponding permittivity.
+  // clang-format on
 
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
@@ -283,9 +283,10 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
 
-  // TLDR: This routine computes Int(E*D dV) over the entire domain. Since we use conservative averaging, we coarsen E*D
-  // onto
+  // clang-format off
+  // TLDR: This routine computes Int(E*D dV) over the entire domain. Since we use conservative averaging, we coarsen E*D onto
   //       the coarsest grid level and do the integratino there.
+  // clang-format on
 
   const bool reallyMultiPhase = (m_multifluidIndexSpace->numPhases() > 1);
 
@@ -375,11 +376,12 @@ FieldSolver::computeCapacitance()
 
   CH_assert(m_isVoltageSet);
 
-  // TLDR: The energy density U = 0.5*C*V^2, or U = Int(E*D dV). We set the potential to one and solve the Poisson
-  // equation.
-  //       We then compute U from E*D without sources and use C = 2*U/(V*V). The caveat to this approach is that the
-  //       solver may have been set with a zero voltage, non-zero space charge and non-zero surface charge. Here, we do
-  //       a "clean" solve with voltage set to 1, and without charges.
+  // clang-format off
+  // TLDR: The energy density U = 0.5*C*V^2, or U = Int(E*D dV). We set the potential to one and solve the Poisson equation.
+  //       We then compute U from E*D without sources and use C = 2*U/(V*V). The caveat to this approach is that the solver
+  //       may have been set with a zero voltage, non-zero space charge and non-zero surface charge. Here, we do a "clean" solve
+  //       with voltage set to 1, and without charges.
+  // clang-format on
 
   MFAMRCellData phi;
   MFAMRCellData E;
@@ -839,17 +841,17 @@ FieldSolver::parseDomainBc()
     pout() << "FieldSolver::parseDomainBc()" << endl;
   }
 
-  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object
-  // which returns some value
-  //       anywhere in space and time on a domain edge (face). The FieldSolver class supports Dirichlet and Neumann, and
-  //       the below code simply creates those functions and associates them with an edge.
+  // clang-format off
+  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
+  //       anywhere in space and time on a domain edge (face). The FieldSolver class supports Dirichlet and Neumann, and the below code simply
+  //       creates those functions and associates them with an edge.
   //
-  //       For flexibility we want to be able to specify the potential directly without invoking m_voltage, while at the
-  //       same time we want to offer the simplistic method of setting a domain side to be "grounded", "live", or
-  //       otherwise given by some fraction of m_voltage. We thus make a distinction between "dirichlet" and
-  //       "dirichlet_custom". The difference between these is that for "dirichlet_custom" the contents of
-  //       m_domainBcFunctions are used as boundary conditions. For "dirichlet 0.5" the contents of m_domainBcFunctions
-  //       are multiplied by 0.5*m_voltage. The same approach is used for Neumann boundary conditions.
+  //       For flexibility we want to be able to specify the potential directly without invoking m_voltage, while at the same time we want to offer
+  //       the simplistic method of setting a domain side to be "grounded", "live", or otherwise given by some fraction of m_voltage.
+  //       We thus make a distinction between "dirichlet" and "dirichlet_custom". The difference between these is that for "dirichlet_custom" the contents
+  //       of m_domainBcFunctions are used as boundary conditions. For "dirichlet 0.5" the contents of m_domainBcFunctions are multiplied by 0.5*m_voltage.
+  //       The same approach is used for Neumann boundary conditions.
+  // clang-format on
 
   ParmParse pp(m_className.c_str());
 

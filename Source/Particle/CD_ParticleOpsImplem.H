@@ -130,10 +130,10 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
                                 Real&           a_s)
 {
 
-  // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the
-  // intersection
-  //       happened. We do this by checking if the particle moves towards a particular domain side and ends up outside
-  //       of it.
+  // clang-format off
+  // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection
+  //       happened. We do this by checking if the particle moves towards a particular domain side and ends up outside of it.
+  // clang-format on
 
   a_s = std::numeric_limits<Real>::max();
 
@@ -179,9 +179,10 @@ ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
                                   Real&                        a_s)
 {
 
-  // TLDR: We compute the intersection point using a bisection algorithm. We divide the full path into intervals and
-  // check if an interval
+  // clang-format off
+  // TLDR: We compute the intersection point using a bisection algorithm. We divide the full path into intervals and check if an interval
   //       has a root. If it does, we compute it using Brent's algorithm.
+  // clang-format on
 
   a_s = std::numeric_limits<Real>::max();
 

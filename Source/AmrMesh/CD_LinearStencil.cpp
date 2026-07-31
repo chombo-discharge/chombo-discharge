@@ -253,9 +253,10 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
       }
 #endif
 
-      // 2. Check if we can make stencils from the neighboring cells and into the "corner cell". I.e. DC and BC in the
-      // figure
+      // clang-format off
+      // 2. Check if we can make stencils from the neighboring cells and into the "corner cell". I.e. DC and BC in the figure
       //    above. We actually don't need to do both of them, but we do it anyways.
+      // clang-format on
       VoFStencil otherVoFsInterpStencilDir0;
       VoFStencil otherVoFsInterpStencilDir1;
 
@@ -296,11 +297,12 @@ LinearStencil::computeInterpStencil2D(VoFStencil&                a_stencil,
         }
       }
 
-      // 3. Check if we could get the interpolation stencil from the other VoFs. If we could, scale them with the number
-      // of VoFs
-      //    we accessed. otherVoFsInterpStencilDir0 then contains the interpolation stencil along dir0 from the cell
-      //    that was displaced along dir1 from a_vof. E.g. if dir0=x and dir1=y, then otherVoFsInterpStencilDir0
-      //    contains the interpolation stencil B-C in the figure above.
+      // clang-format off
+      // 3. Check if we could get the interpolation stencil from the other VoFs. If we could, scale them with the number of VoFs
+      //    we accessed. otherVoFsInterpStencilDir0 then contains the interpolation stencil along dir0 from the cell that
+      //    was displaced along dir1 from a_vof. E.g. if dir0=x and dir1=y, then otherVoFsInterpStencilDir0 contains the
+      //    interpolation stencil B-C in the figure above.
+      // clang-format on
       if (numStencilsAdded0 > 0) {
         otherVoFsInterpStencilDir0 *= 1. / numStencilsAdded0;
       }

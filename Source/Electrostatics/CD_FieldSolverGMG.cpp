@@ -720,9 +720,10 @@ FieldSolverGMG::setupHelmholtzFactory()
     MayDay::Abort("FieldSolverGMG.gmg_relax_factor must be 0 < gmg_relax_factor <= 2 ");
   }
 
-  // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid.
-  // We
+  // clang-format off
+  // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We
   //       should already have registered the operators when we come to this routine.
+  // clang-format on
 
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);

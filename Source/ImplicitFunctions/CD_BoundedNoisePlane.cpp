@@ -90,9 +90,10 @@ BoundedNoisePlane::~BoundedNoisePlane() = default;
 Real
 BoundedNoisePlane::value(const RealVect& a_pos) const
 {
-  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise
-  // function),
+  // clang-format off
+  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function),
   //       clamped with a boxcar function.
+  // clang-format on
 
   const RealVect  n  = m_normal.second * BASISREALV(m_normal.first);
   const RealVect  x0 = m_point;

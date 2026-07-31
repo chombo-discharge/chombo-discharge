@@ -225,9 +225,10 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
                                              const bool&            a_homogeneousPhysBC) const
 {
 
+  // clang-format off
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored
-  //       the term b*A*phi/B in the interpolation stencil and return it to the operator. The other term we compute
-  //       below.
+  //       the term b*A*phi/B in the interpolation stencil and return it to the operator. The other term we compute below.
+  // clang-format on
 
   if (!a_homogeneousPhysBC) {
     auto kernel = [&](const VolIndex& vof) -> void {
@@ -273,10 +274,11 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
 
   CH_assert(a_order > 0);
 
-  // TLDR: This routine will compute a stencil for interpolating the mesh data to the embedded boundary centroid using
-  // least squares reconstruction
-  //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default,
-  //       the radius of the stencil is the same as the order.
+  // clang-format off
+  // TLDR: This routine will compute a stencil for interpolating the mesh data to the embedded boundary centroid using least squares reconstruction
+  //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
+  //       the same as the order.
+  // clang-format on
 
   const EBISBox& ebisbox     = m_eblg.getEBISL()[a_dit];
   const bool     useStartVof = !(

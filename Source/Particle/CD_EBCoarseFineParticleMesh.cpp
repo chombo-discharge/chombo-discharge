@@ -275,10 +275,11 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   CH_assert(a_coarData.ghostVect() == m_ghost);
   CH_assert(a_fineData.ghostVect() == m_ghost);
 
-  // TLDR: This routine will take the ghost cells that are in a_fineData and add them to the coarse level. We use
-  // buffers for this,
-  //       copying the data from a_fineData to our nifty m_bufferFine buffer holder. The ghost cells in that scratch
-  //       data are coarsened onto yet another buffer. Finally, we add the contents in that buffer to the coarse data.
+  // clang-format off
+  // TLDR: This routine will take the ghost cells that are in a_fineData and add them to the coarse level. We use buffers for this,
+  //       copying the data from a_fineData to our nifty m_bufferFine buffer holder. The ghost cells in that scratch data are
+  //       coarsened onto yet another buffer. Finally, we add the contents in that buffer to the coarse data.
+  // clang-format on
 
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
@@ -457,14 +458,14 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   CH_assert(a_fineData.ghostVect() == m_ghost);
   CH_assert(a_coarData.ghostVect() == m_ghost);
 
-  // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by
-  // going through the coarse-grid data
-  //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in
-  //       the buffer to the fine level.
+  // clang-format off
+  // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by going through the coarse-grid data
+  //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in the buffer to the fine level.
   //
-  //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid
-  //       region on the fine grid. Note that the function signature indicates that we only add invalid coarse data, we
-  //       do run kernels over all data. The addition is done only at the end in copyTo.
+  //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid region on the fine grid. Note that
+  //       the function signature indicates that we only add invalid coarse data, we do run kernels over all data. The addition is done only at the end in
+  //       copyTo.
+  // clang-format on
   const DisjointBoxLayout& dblCoar   = m_eblgCoar.getDBL();
   const EBISLayout&        ebislCoar = m_eblgCoar.getEBISL();
 

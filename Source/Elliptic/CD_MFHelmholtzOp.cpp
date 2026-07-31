@@ -710,10 +710,10 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
 {
   CH_TIME("MFHelmholtzOp::interpolateCF");
 
-  // TLDR: This is a wrapper for interpolating ghost cells on each phase. The user can put a_homogeneousCF = false if he
-  // wants inhomogeneous interpolation. This routine
-  //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during
-  //       every smoothing step.
+  // clang-format off
+  // TLDR: This is a wrapper for interpolating ghost cells on each phase. The user can put a_homogeneousCF = false if he wants inhomogeneous interpolation. This routine
+  //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during every smoothing step.
+  // clang-format on
 
   if (m_hasCoar) {
     if (a_homogeneousCF) {
@@ -863,9 +863,10 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxPointJacobi");
 
-  // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|.
-  // Here, diag(L) is captured
+  // clang-format off
+  // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|. Here, diag(L) is captured
   //       in m_relCoef. For performance integration, EBHelmholtzOp has a public function for the kernel.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -916,11 +917,12 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxGSRedBlack");
 
-  // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) =
-  // phi^k - (res - L(phi))/|diag(L)| but
+  // clang-format off
+  // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       for a red-black update pattern:
   //
   //       For performance integration, this calls the EBHelmholtzOp red-black kernel directly.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -1034,12 +1036,13 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxGSMultiColor");
 
-  // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) =
-  // phi^k - (res - L(phi))/|diag(L)| but
-  //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D.
-  //       This is just like red-black except that we have four/eight colors in 2D/3D.
+  // clang-format off
+  // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
+  //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D. This is just like red-black except that
+  //       we have four/eight colors in 2D/3D.
   //
   //       For performance integration, this calls the EBHelmholtzOp multi-color kernel directly.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);

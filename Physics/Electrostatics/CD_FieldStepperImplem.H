@@ -419,10 +419,11 @@ FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
-  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This
-  // means that the load
-  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic,
-  //       and enlargened stencils near the embedded boundary.
+  // clang-format off
+  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
+  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
+  //       near the embedded boundary.
+  // clang-format on
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);

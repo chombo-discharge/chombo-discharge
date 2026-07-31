@@ -422,11 +422,11 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     pout() << "CdrPlasmaGodunovStepper::regrid(int, int, int)" << endl;
   }
 
-  // TLDR: If we are not using a semi-implicit scheme then we can just call the parent method. Modifications are needed
-  // for the
-  //       semi-implicit scheme because we solve for the field using div((eps + dt*sigma^k/eps0)E^(k+1)) =
-  //       -rho^(k+1)/eps0 but this means we need the conductivity and space charge at the previous time step for
-  //       restoring the field on the new mesh.
+  // clang-format off
+  // TLDR: If we are not using a semi-implicit scheme then we can just call the parent method. Modifications are needed for the
+  //       semi-implicit scheme because we solve for the field using div((eps + dt*sigma^k/eps0)E^(k+1)) = -rho^(k+1)/eps0 but
+  //       this means we need the conductivity and space charge at the previous time step for restoring the field on the new mesh.
+  // clang-format on
 
   // Just use regular regrid when we start the simulation.
   if (m_fieldCoupling != FieldCoupling::SemiImplicit || m_timeStep == 0) {
@@ -532,9 +532,10 @@ CdrPlasmaGodunovStepper::postCheckpointSetup()
     pout() << "CdrPlasmaGodunovStepper::postCheckpointSetup()" << endl;
   }
 
-  // TLDR: Only the semi-implicit part overrides the parent method, and it is done because the field needs to be
-  // computed from
+  // clang-format off
+  // TLDR: Only the semi-implicit part overrides the parent method, and it is done because the field needs to be computed from
   //       a different equation.
+  // clang-format on
 
   if (m_fieldCoupling == FieldCoupling::SemiImplicit) {
 
@@ -868,10 +869,11 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
     pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToEB()" << endl;
   }
 
-  // TLDR: This routine is responsible for computing the cell-centered states and gradients at the EB. This is necessary
-  // because
-  //       the boundary condition routines require these things to be known at the EB. This is the routine that computes
-  //       them. We will later fetch these quantities and pass them into our boundary condition routines.
+  // clang-format off
+  // TLDR: This routine is responsible for computing the cell-centered states and gradients at the EB. This is necessary because
+  //       the boundary condition routines require these things to be known at the EB. This is the routine that computes them. We
+  //       will later fetch these quantities and pass them into our boundary condition routines.
+  // clang-format on
 
   Vector<EBAMRCellData*> cdrDensities;   // Cell-centered densities used when extrapolating to EBs and domains when
                                          // parsing boundary conditions.
@@ -887,10 +889,11 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
-    // Note: For the CDR densities we use the extrap data holder in the scratch storage. The routine
-    // extrapolateWithSourceTerm will have
-    //       been called prior to this routine. If we center advective discretizations at the half time step, we need to
-    //       increment the edge centered states by 0.5*S*dt.
+    // clang-format off
+    // Note: For the CDR densities we use the extrap data holder in the scratch storage. The routine extrapolateWithSourceTerm will have
+    //       been called prior to this routine. If we center advective discretizations at the half time step, we need to increment the
+    //       edge centered states by 0.5*S*dt.
+    // clang-format on
 
     // Populate the data.
     cdrDensities.push_back(&(storage->getExtrap()));
@@ -927,10 +930,11 @@ CdrPlasmaGodunovStepper::computeCdrFluxesEB()
     pout() << "CdrPlasmaGodunovStepper::computeCdrFluxesEB()";
   }
 
-  // TLDR: This is the main routine for computing the CDR fluxes on the EB, i.e. the boundary conditions. When we enter
-  // this routine
-  //       we will have populated the states we use for extrapolation, and the gradients. The velocities on the EB and
-  //       the extrapoalted fluxes on the EB will not have been computed, so we do those here.
+  // clang-format off
+  // TLDR: This is the main routine for computing the CDR fluxes on the EB, i.e. the boundary conditions. When we enter this routine
+  //       we will have populated the states we use for extrapolation, and the gradients. The velocities on the EB and the extrapoalted
+  //       fluxes on the EB will not have been computed, so we do those here.
+  // clang-format on
 
   // Holds the CDR densities.
   Vector<EBAMRCellData*> cdrDensities;
@@ -1005,10 +1009,11 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain()
     pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToDomain()" << endl;
   }
 
-  // TLDR: This routine is responsible for computing the cell-centered states and gradients at domainfaces. This is
-  // necessary because
+  // clang-format off
+  // TLDR: This routine is responsible for computing the cell-centered states and gradients at domainfaces. This is necessary because
   //       the boundary condition routines require these things to be known. This is the routine that computes them. We
   //       will later fetch these quantities and pass them into our boundary condition routines.
+  // clang-format on
 
   Vector<EBAMRCellData*> cdrDensities;       // CDR densities on the cell center
   Vector<EBAMRCellData*> cdrGradients;       // CDR gradients on the cell center
@@ -1052,10 +1057,11 @@ CdrPlasmaGodunovStepper::computeCdrDomainFluxes()
     pout() << "CdrPlasmaGodunovStepper::computeCdrDomainFluxes()" << endl;
   }
 
-  // TLDR: This is the main routine for computing the CDR fluxes on the domain faces, i.e. the boundary conditions. When
-  // we enter this routine
-  //       we will have populated the states we use for extrapolation, and the gradients. The velocities on the domain
-  //       faces and the extrapolated fluxes on the domain faces will not have been computed, so we do those here.
+  // clang-format off
+  // TLDR: This is the main routine for computing the CDR fluxes on the domain faces, i.e. the boundary conditions. When we enter this routine
+  //       we will have populated the states we use for extrapolation, and the gradients. The velocities on the domain faces and the extrapolated
+  //       fluxes on the domain faces will not have been computed, so we do those here.
+  // clang-format on
 
   Vector<EBAMRCellData*> cdrDensities; // For holding the cell-centered states used for extrapolation.
   Vector<EBAMRCellData*> cdrGradients; // For holding the cell-centered gradients.
@@ -1191,10 +1197,11 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
     pout() << "CdrPlasmaGodunovStepper::advanceTransportExplicitField(Real)" << endl;
   }
 
-  // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be
-  // explicitly discretized, or
-  //       with implicit diffusion. If we use implicit diffusion we first advance the advective problem to the end state
-  //       and use that as an initial condition in the diffusion equation.
+  // clang-format off
+  // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be explicitly discretized, or
+  //       with implicit diffusion. If we use implicit diffusion we first advance the advective problem to the end state and use that as
+  //       an initial condition in the diffusion equation.
+  // clang-format on
 
   // First, update everything we need for consistently computing boundary conditions on the EBs and
   // domain faces.

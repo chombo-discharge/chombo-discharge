@@ -149,9 +149,10 @@ CdrSolver::getPlotVariableNames() const
     pout() << m_name + "::getPlotVariableNames()" << endl;
   }
 
-  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux.
-  // This
+  // clang-format off
+  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
   //       function returns the associated plot variable names, and will be used in the plot files.
+  // clang-format on
 
   Vector<std::string> plotVarNames(0);
 
@@ -188,9 +189,10 @@ CdrSolver::getNumberOfPlotVariables() const
     pout() << m_name + "::getNumberOfPlotVariables()" << endl;
   }
 
-  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux.
-  // This
+  // clang-format off
+  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
   //       function returns the number of variables that this sum up to (a vector field is 2/3 variables in 2D/3D)
+  // clang-format on
 
   int numPlotVars = 0;
 
@@ -224,9 +226,10 @@ CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, 
   CH_assert(a_newPhi[0]->nComp() == 1);
   CH_assert(a_oldPhi[0]->nComp() == 1);
 
-  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the
-  // implementation
+  // clang-format off
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
   //       version.
+  // clang-format on
   if (m_isDiffusive) {
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, m_nComp);
@@ -250,9 +253,10 @@ CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a
   CH_assert(a_newPhi[0]->nComp() == 1);
   CH_assert(a_oldPhi[0]->nComp() == 1);
 
-  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the
-  // implementation
+  // clang-format off
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
   //       version.
+  // clang-format on
   if (m_isDiffusive) {
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, m_nComp);
@@ -425,10 +429,11 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
   CH_assert(a_G[0]->nComp() == 1);
   CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and
-  // eb faces. The routine uses
-  //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which
-  //       is missed by the hybrid divergence is smooshed back in through through redistribution.
+  // clang-format off
+  // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and eb faces. The routine uses
+  //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which is missed by the hybrid
+  //       divergence is smooshed back in through through redistribution.
+  // clang-format on
 
   DataOps::setValue(a_divG, 0.0);
 
@@ -606,12 +611,13 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
   CH_assert(a_flux.nComp() == 1);
   CH_assert(a_phi.nComp() == 1);
 
-  // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered
-  // differencing
+  // clang-format off
+  // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered differencing
   //       and we don't have valid data outside the computational domain we only do the differencing for interior faces,
-  //       setting the flux to zero on domain faces. Note that we need to fill flux in the tangential ghost face centers
-  //       because the face centroid flux is interpolated between face centers.
+  //       setting the flux to zero on domain faces. Note that we need to fill flux in the tangential ghost face centers because
+  //       the face centroid flux is interpolated between face centers.
   //
+  // clang-format on
 
   const Real               dx        = m_amr->getDx()[a_lvl];
   const Real               inverseDx = 1. / dx;
@@ -876,10 +882,10 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
 
   CH_assert(a_flux.nComp() == 1);
 
-  // TLDR: This iterates through all domain faces and sets the BC flux to either data-based, function-based, wall bc, or
-  // extrapolated outflow. This
-  //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go
-  //       through a very small number of faces.
+  // clang-format off
+  // TLDR: This iterates through all domain faces and sets the BC flux to either data-based, function-based, wall bc, or extrapolated outflow. This
+  //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go through a very small number of faces.
+  // clang-format on
 
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
   const ProblemDomain&     domain = m_amr->getDomains()[a_level];
@@ -1479,9 +1485,10 @@ CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, c
   CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
   CH_assert(a_divG[0]->nComp() == 1);
 
-  // TLDR: This routine computes the non-conservative divergence divNC(G) = sum(kappa*div(G))/sum(kappa). This is done
-  // through
+  // clang-format off
+  // TLDR: This routine computes the non-conservative divergence divNC(G) = sum(kappa*div(G))/sum(kappa). This is done through
   //       AmrMesh's stencil in cut cells. The neighborhood consists of cells that can be reached with a monotone path.
+  // clang-format on
 
   if (m_blendConservation) {
     m_amr->nonConservativeDivergence(a_nonConservativeDivergence, a_divG, m_realm, m_phase);
@@ -2032,10 +2039,10 @@ CdrSolver::computeAdvectionDt()
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
-  // TLDR: For advection we must have dt <= dx/(|vx|+|vy|+|vz|). E.g., with first order upwind phi^(k+1)_i = phi^k_i -
-  // (v*dt) * (phi^k_i - phi^k_(i-1))/dx so
-  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis when
-  //       we have limiters is probably possible...)
+  // clang-format off
+  // TLDR: For advection we must have dt <= dx/(|vx|+|vy|+|vz|). E.g., with first order upwind phi^(k+1)_i = phi^k_i - (v*dt) * (phi^k_i - phi^k_(i-1))/dx so
+  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis when we have limiters is probably possible...)
+  // clang-format on
 
   Real minDt = std::numeric_limits<Real>::max();
 
@@ -2104,14 +2111,15 @@ CdrSolver::computeDiffusionDt()
     pout() << m_name + "::computeDiffusionDt()" << endl;
   }
 
-  // TLDR: For advection we must have dt <= (dx*dx)/(2*d*D) where D is diffusion coefficient and d is spatial
-  // dimensions.
+  // clang-format off
+  // TLDR: For advection we must have dt <= (dx*dx)/(2*d*D) where D is diffusion coefficient and d is spatial dimensions.
   //       E.g. in 1D, centered differencing yields
   //
   //          phi^(k+1)_i = phi^k_i - dt*D*(phi^k_(i+1) - 2*phi^k_i + phi^k_(i-1))/(dx*dx).
   //
-  //       So for phi^k_(i-1) = phi^k_(i+1) = 0 we have phi^(k+1)_i = phi^k * (1 - 2*dt*D/(dx*dx)) which is positive
-  //       definite only for dt < (dx*dx)/(2*D). Again, a more general analysis could be made.
+  //       So for phi^k_(i-1) = phi^k_(i+1) = 0 we have phi^(k+1)_i = phi^k * (1 - 2*dt*D/(dx*dx)) which is positive definite only for dt < (dx*dx)/(2*D). Again,
+  //       a more general analysis could be made.
+  // clang-format on
 
   Real minDt = std::numeric_limits<Real>::max();
 
@@ -3060,15 +3068,15 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
   CH_assert(a_facePhi[0]->nComp() == 1);
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
-  // This routine is taken from  Kim et. al. "Stochastic Simulation of Reaction-Diffusion Systems: A
-  // Fluctuating-Hydrodynamics Approach" (10.1063/1.4978775). It is inspired by a desire to gradually turn off
-  // fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we compute the
-  // value of phi on faces with the following rules:
+  // clang-format off
+  // This routine is taken from  Kim et. al. "Stochastic Simulation of Reaction-Diffusion Systems: A Fluctuating-Hydrodynamics Approach" (10.1063/1.4978775).
+  // It is inspired by a desire to gradually turn off fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we
+  // compute the value of phi on faces with the following rules:
   //
   //    1. If there's more than one particle in the cells, we take the arithmetic average as usual.
-  //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo +
-  //    phiHi) * loFactor * hiFactor
+  //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo + phiHi) * loFactor * hiFactor
   //       where loFactor and hiFactor are the number of particles in the grid cell.
+  // clang-format on
 
   // Loop over levels.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

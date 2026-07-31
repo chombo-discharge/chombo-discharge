@@ -346,9 +346,10 @@ EBGradient::defineLevelStencils() noexcept
   CH_TIMER("EBGradient::defineLevelStencils::define_iterators", t3);
   CH_TIMER("EBGradient::defineLevelStencils::irreg_loop", t4);
 
-  // TLDR: This just defines finite-difference stencils on this level. We need explicit stencils at the domain boundary
-  // AND at
+  // clang-format off
+  // TLDR: This just defines finite-difference stencils on this level. We need explicit stencils at the domain boundary AND at
   //       the EB. There are other cases, too, but those are handled by defineStencilsEBCF.
+  // clang-format on
   CH_START(t1);
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const DataIterator&      dit    = dbl.dataIterator();
@@ -565,11 +566,11 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
   CH_TIMER("EBGradient::defineIteratorsEBCF::define_patch", t4);
   CH_TIMER("EBGradient::defineIteratorsEBCF::reduce_ebcf", t5);
 
-  // TLDR: This defines which cells need explicit two-level stencils. We move along the refinement boundary on the
-  // coarse
+  // clang-format off
+  // TLDR: This defines which cells need explicit two-level stencils. We move along the refinement boundary on the coarse
   //       level and check if we can use finite-differencing. If not, we flag the cell and the box. We then generate the
-  //       buffer grids, which consist of all boxes that contain at least one cell that requires a least squares
-  //       stencil.
+  //       buffer grids, which consist of all boxes that contain at least one cell that requires a least squares stencil.
+  // clang-format on
 
   constexpr Real zero = 0.0;
 
@@ -785,9 +786,10 @@ EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
 {
   CH_TIME("EBGradient::getFiniteDifferenceStencil");
 
-  // TLDR: This routine computes a finite difference stencil. If it does not have any valid cells to use (defined by
-  // a_validRegion)
+  // clang-format off
+  // TLDR: This routine computes a finite difference stencil. If it does not have any valid cells to use (defined by a_validRegion)
   //       it will not return a stencil.
+  // clang-format on
 
   a_stencil.clear();
 
@@ -878,14 +880,14 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
 {
   CH_TIME("EBGradient::getLeastSquaresStencil");
 
-  // TLDR: This routine computes a two-level least squares stencil. We include cells that are within a range of 1 on the
-  // coarse level, but only
-  //       those in a monotone path from the input vof. The fine cells are defined as the cells that are available
-  //       through a coarsening of the coarse cells. Since the resulting system might sometimes be too big, we trim the
-  //       system down to a specified size. Once the least squares system has been "solved", i.e. a minimization of the
-  //       truncation order for the various expansions has been achieved, we formulate the stencil using the output of
-  //       LeastSquares::computeDualLevelStencils. Note that the solution on the input vof is known, so it is pruned
-  //       from the system of equations.
+  // clang-format off
+  // TLDR: This routine computes a two-level least squares stencil. We include cells that are within a range of 1 on the coarse level, but only
+  //       those in a monotone path from the input vof. The fine cells are defined as the cells that are available through a coarsening of the
+  //       coarse cells. Since the resulting system might sometimes be too big, we trim the system down to a specified size. Once the least squares
+  //       system has been "solved", i.e. a minimization of the truncation order for the various expansions has been achieved, we formulate the stencil
+  //       using the output of LeastSquares::computeDualLevelStencils. Note that the solution on the input vof is known, so it is pruned from the
+  //       system of equations.
+  // clang-format on
 
   bool foundStencil;
 

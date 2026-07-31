@@ -637,9 +637,10 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
            << endl;
   }
 
-  // TLDR: This is the level version of advanceReactionNetwork. It's purpose is to compute the source terms for the CDR
-  // and RTE equations. It will expose
+  // clang-format off
+  // TLDR: This is the level version of advanceReactionNetwork. It's purpose is to compute the source terms for the CDR and RTE equations. It will expose
   //       all the input parameters on a per-patch basis and then call the patch version.
+  // clang-format on
 
   CH_assert(a_E.nComp() == SpaceDim);
   CH_assert(a_dt >= 0.0);
@@ -1267,11 +1268,11 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
     pout() << "CdrPlasmaStepper::computeCdrDiffusion(EBAMRCellData, EBAMRIVData)" << endl;
   }
 
-  // TLDR: We want to compute the CDR solver diffusion coefficients on the face centers (very important) and on the EB
-  // (less important). When we do the faces
-  //       we actually compute the diffusion coefficient on the cell center, which we later average to faces. This is
-  //       what computeCdrDiffusionFace does. On the EB, we instead extrapolate the things that we need directly to it,
-  //       and call the same physics coupling function as we did for the cells.
+  // clang-format off
+  // TLDR: We want to compute the CDR solver diffusion coefficients on the face centers (very important) and on the EB (less important). When we do the faces
+  //       we actually compute the diffusion coefficient on the cell center, which we later average to faces. This is what computeCdrDiffusionFace does. On the EB,
+  //       we instead extrapolate the things that we need directly to it, and call the same physics coupling function as we did for the cells.
+  // clang-format on
 
   CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
   CH_assert(a_electricFieldEB[0]->nComp() == SpaceDim);
@@ -1291,9 +1292,10 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
   // 1. Compute the diffusion coefficients on faces.
   this->computeCdrDiffusionFace(cdrDcoFace, cdrDensities, a_electricFieldCell, m_time);
 
-  // 2a. Allocate some storage that allows us to extrapolate the CDR densities to the EB so we can call the same physics
-  // on the EB instead of the
+  // clang-format off
+  // 2a. Allocate some storage that allows us to extrapolate the CDR densities to the EB so we can call the same physics on the EB instead of the
   //     grid faces.
+  // clang-format on
   Vector<EBAMRIVData*> cdrDensitiesExtrap(numCdrSpecies, nullptr);
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1632,13 +1634,14 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
       << endl;
   }
 
-  // TLDR: This is a routine for computing the CDR diffusion coefficients on face centers (not centroids!). It does so
-  // by first
-  //       computing the diffusion coefficient on cell centers and then averaging those to face centers. To do this, we
-  //       need to allocate some transient memory (which is automatically released).
+  // clang-format off
+  // TLDR: This is a routine for computing the CDR diffusion coefficients on face centers (not centroids!). It does so by first
+  //       computing the diffusion coefficient on cell centers and then averaging those to face centers. To do this, we need
+  //       to allocate some transient memory (which is automatically released).
   //
-  //       The cell-to-face averaging will also fill one ghost face. This is important because the CDR solvers will
-  //       interpolate face-centered fluxes to face centroids and will thus reach into one ghost face.
+  //       The cell-to-face averaging will also fill one ghost face. This is important because the CDR solvers will interpolate
+  //       face-centered fluxes to face centroids and will thus reach into one ghost face.
+  // clang-format on
 
   CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
 
@@ -1706,9 +1709,10 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_cdrDcoEB,
     pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>x2, EBAMRIVData, Real)" << endl;
   }
 
-  // TLDR: This is responsible for computing the CDR diffusion coefficients on EB faces. This is necessary because the
-  // finite-volume
+  // clang-format off
+  // TLDR: This is responsible for computing the CDR diffusion coefficients on EB faces. This is necessary because the finite-volume
   //       method needs it. This routine will go through each level and call an equivalent routine.
+  // clang-format on
 
   CH_assert(a_electricFieldEB[0]->nComp() == SpaceDim);
 
@@ -1751,9 +1755,10 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
       << endl;
   }
 
-  // TLDR: This is the level version which computes the CDR diffusion coefficients on EB centroids. It will go through
-  // all patches and
+  // clang-format off
+  // TLDR: This is the level version which computes the CDR diffusion coefficients on EB centroids. It will go through all patches and
   //       call an irregular kernel.
+  // clang-format on
 
   CH_assert(a_electricFieldEB.nComp() == SpaceDim);
 
@@ -3969,9 +3974,10 @@ CdrPlasmaStepper::computeElectrodeCurrent()
 
   constexpr int comp = 0;
 
-  // TLDR: We first compute the total charge flux on the EB and then reset the flux (i.e., set it to zero) on dielectric
-  // interface cells. After
+  // clang-format off
+  // TLDR: We first compute the total charge flux on the EB and then reset the flux (i.e., set it to zero) on dielectric interface cells. After
   //       that we simply integrate the contribution.
+  // clang-format on
 
   // Allocate a data holder for storing the total charge flux, i.e. J.
   EBAMRIVData currentDensity;
@@ -4061,9 +4067,10 @@ CdrPlasmaStepper::computeDielectricCurrent()
 
   constexpr int comp = 0;
 
-  // TLDR: We first compute the total charge flux on the EB and then reset the flux (i.e., set it to zero) on electrode
-  // interface cells. After
+  // clang-format off
+  // TLDR: We first compute the total charge flux on the EB and then reset the flux (i.e., set it to zero) on electrode interface cells. After
   //       that we simply integrate the contribution.
+  // clang-format on
 
   // Allocate a data holder for storing the total charge flux, i.e. J.
   EBAMRIVData currentDensity;

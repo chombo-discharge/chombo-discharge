@@ -438,14 +438,15 @@ TracerParticleStepper<P>::initialParticles()
     pout() << "TracerParticleStepper::initialParticles()" << endl;
   }
 
-  // TLDR: This code draws distributed particles. Thanks to our nifty ParticleManagement and Random static classes this
-  // is just
-  //       a matter of defining a distribution function. We define this as a lambda that draws particles uniformly
-  //       distributed inside a box.
+  // clang-format off
+  // TLDR: This code draws distributed particles. Thanks to our nifty ParticleManagement and Random static classes this is just
+  //       a matter of defining a distribution function. We define this as a lambda that draws particles uniformly distributed
+  //       inside a box.
   //
-  //       After creating the distribution we draw the particles (MPI rank distribution being taken care of under the
-  //       hood) and set their weight to one. Finally, we add these particles to the ParticleContainer and remove the
-  //       particles that lie inside the EB.
+  //       After creating the distribution we draw the particles (MPI rank distribution being taken care of under the hood) and
+  //       set their weight to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
+  //       the EB.
+  // clang-format on
 
   // Create a random distribution which draw particles uniformly distributed in the domain.
   const RealVect probLo = m_amr->getProbLo();

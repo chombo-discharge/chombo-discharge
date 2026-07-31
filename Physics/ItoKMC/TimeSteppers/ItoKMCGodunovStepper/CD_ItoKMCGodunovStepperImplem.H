@@ -386,12 +386,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_timer.startEvent("EB/Particle intersection");
   if (m_extendConductivityEB) {
 
-    // TLDR: This hook does a special intersection routine where instead of transferring the particles that were
-    // intersected, they
-    //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the
-    //       particle densities near the EB. The way we do this is that we flag the particles during the intersection;
-    //       particles that are flagged are transferred to a container which is added to the conductivity-related
-    //       particles. The particles are later removed.
+    // clang-format off
+    // TLDR: This hook does a special intersection routine where instead of transferring the particles that were intersected, they
+    //       are put in a separate data container. We want to do this in order to reduce artificial gradients in the particle
+    //       densities near the EB. The way we do this is that we flag the particles during the intersection; particles that are flagged
+    //       are transferred to a container which is added to the conductivity-related particles. The particles are later removed.
+    // clang-format on
     const std::function<void(ParticleSoA<ItoParticle>&, std::size_t)> setFlag = [](ParticleSoA<ItoParticle>& leaf,
                                                                                    const std::size_t i) -> void {
       leaf.template get<&ItoParticle::scratch>(i) = 1.0;

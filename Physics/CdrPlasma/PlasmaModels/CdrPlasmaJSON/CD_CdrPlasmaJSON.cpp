@@ -3120,6 +3120,7 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
     pout() << "CdrPlasmaJSON::parsePlasmaReactionScaling()" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine tries to figure out how we should scale reactions. In general, reactions are scaled parametrically by a function f = f(E,x)
   //       where E is the electric field magnitude and x is the physical position. This is completely general, but there are many, many ways that
   //       such functions could be formed. Currently, we put these functions as one of the following:
@@ -3139,6 +3140,7 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
   //          kq -> quenching rate
   //          nu -> photoionization efficiency
   //          mu -> excitation efficiency efficiency
+  // clang-format on
 
   // This is the reaction name. We need it for debugging.
   const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -3178,20 +3180,25 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
 
     // These fields are required.
     if (!(photoi.contains("kr"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'kr' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "got 'photoionization' but field 'kr' is missing");
+    }
     if (!(photoi.contains("kp"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'kp' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "got 'photoionization' but field 'kp' is missing");
+    }
     if (!(photoi.contains("kq/N"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'kq/N' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "got 'photoionization' but field 'kq/N' is missing");
+    }
     if (!(photoi.contains("photoi eff"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'photoi eff' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "got 'photoionization' but field 'photoi eff' is missing");
+    }
     if (!(photoi.contains("excite eff"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'excite eff' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "got 'photoionization' but field 'excite eff' is missing");
+    }
 
     kr        = photoi["kr"].get<Real>();
     kp        = photoi["kp"].get<Real>();
@@ -3207,22 +3214,24 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
 
   // Now make ourselves a lambda that we can use for scaling the reactions.
   if (doPhotoIonization && doPressureQuenching) {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
   }
   else if (doPressureQuenching && !doPhotoIonization) {
-    func = [scale, pq, p = this->m_gasPressure](const Real  /*E*/, const RealVect& x) {
+    func = [scale, pq, p = this->m_gasPressure](const Real /*E*/, const RealVect& x) {
       return scale * pq / (pq + p(x));
     };
   }
   else if (!doPressureQuenching && doPhotoIonization) {
-    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real  /*E*/, const RealVect& x) -> Real {
+    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real /*E*/,
+                                                                               const RealVect& x) -> Real {
       const Real kq = kqN * N(x);
 
       return scale * kr / (kr + kp + kq) * photoiEff * exciteEff;
     };
   }
   else {
-    func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
+    func = [scale](const Real /*E*/, const RealVect& /*x*/) -> Real {
       return scale;
     };
   }
@@ -3284,7 +3293,8 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
     pout() << "CdrPlasmaJSON::parsePlasmaReactionScaling" << endl;
   }
 
-  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based models.
+  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based
+  // models.
   if (a_R.contains("soloviev")) {
 
     const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -3293,19 +3303,22 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
     const json& solo = a_R["soloviev"];
 
     if (!solo.contains("correction")) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'correction'");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                           "but did not find field 'correction'");
+    }
     if (!solo.contains("species")) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                           "but did not find field 'species'");
+    }
 
     const auto correct = solo["correction"].get<bool>();
     const auto species = solo["species"].get<std::string>();
 
     if (correct) {
       if (!isPlasmaSpecies(species)) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but '").append(species).append("' is not a plasma species"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but '").append(species).append("' is not a plasma species"));
+      }
 
       const int plasmaSpecies = m_cdrSpeciesMap.at(species);
 
@@ -3313,11 +3326,13 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
       const bool isDiffusive = m_cdrSpecies[plasmaSpecies]->isDiffusive();
 
       if (!isMobile) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species  + '").append(species).append("' isn't mobile."));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species  + '").append(species).append("' isn't mobile."));
+      }
       if (!isDiffusive) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species  + '").append(species).append("' isn't diffusive."));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species  + '").append(species).append("' isn't diffusive."));
+      }
 
       m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(true, plasmaSpecies));
     }
@@ -3342,7 +3357,8 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
 
   std::map<int, std::pair<ReactiveEnergyLoss, Real>> reactionEnergyLosses;
 
-  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based models.
+  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based
+  // models.
   if (a_R.contains("energy losses")) {
 
     const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -3351,37 +3367,49 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                             "but did not find field 'species'");
+      }
       if (!energyLoss.contains("eV")) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
-}
-
-      // Get the species name (string) and associated energy loss.
-      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
-
-      // It's an error if the species name is not in the list of plasma species, or if the user has specified an energy solver as a plasma species.
-      if (!(this->isPlasmaSpecies(speciesName))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
-}
-      const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
-}
-
-      // It's also an error to specify the reactive energy loss twice. Make sure the species is not already in the list of losses.
-      if (reactionEnergyLosses.find(speciesIndex) != reactionEnergyLosses.end()) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but it's an error to specify a loss more than once (for species '").append(speciesName).append("')"));
       }
 
-      // Now parse the energy loss. If the 'eV' field is a string then we check if we should add the average energy loss or not.
+      // Get the species name (string) and associated energy loss.
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        energyLoss["species"].get<std::string>());
+
+      // It's an error if the species name is not in the list of plasma species, or if the user has specified an energy
+      // solver as a plasma species.
+      if (!(this->isPlasmaSpecies(speciesName))) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
+      }
+      const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
+      if (m_cdrIsEnergySolver.at(speciesIndex)) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
+      }
+
+      // It's also an error to specify the reactive energy loss twice. Make sure the species is not already in the list
+      // of losses.
+      if (reactionEnergyLosses.find(speciesIndex) != reactionEnergyLosses.end()) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}
+            .append("but it's an error to specify a loss more than once (for species '")
+            .append(speciesName)
+            .append("')"));
+      }
+
+      // Now parse the energy loss. If the 'eV' field is a string then we check if we should add the average energy loss
+      // or not.
       Real loss = 0.0;
 
       ReactiveEnergyLoss lossMethod;
 
       const auto& j = energyLoss["eV"];
       if (j.type() == json::value_t::string) {
-        const std::string str = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["eV"].get<std::string>());
+        const std::string str = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+          energyLoss["eV"].get<std::string>());
 
         if (str == "+mean" || str == "+avg") {
           lossMethod = ReactiveEnergyLoss::AddMean;
@@ -3396,11 +3424,12 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
           lossMethod = ReactiveEnergyLoss::SubtractDirect;
         }
         else {
-          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("and got 'eV' = '").append(str).append("', which is not supported"));
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            std::string{baseError}.append("and got 'eV' = '").append(str).append("', which is not supported"));
         }
 
-        // In the reaction routines we will compute the loss/gain using the mean energy. I'm leaving the number as a back door in case we ever want
-        // to use this number for scaling the mean energy loss.
+        // In the reaction routines we will compute the loss/gain using the mean energy. I'm leaving the number as a
+        // back door in case we ever want to use this number for scaling the mean energy loss.
         loss = 1.0;
       }
       else {
@@ -3409,8 +3438,9 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
         loss = energyLoss["eV"].get<Real>();
       }
 
-      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
-      // us to ignore all energy losses for a species by just turning off energy transport in the input script.
+      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
+      // specified species. This allows us to ignore all energy losses for a species by just turning off energy
+      // transport in the input script.
       if (m_cdrHasEnergySolver.at(speciesIndex)) {
         reactionEnergyLosses.emplace(speciesIndex, std::make_pair(lossMethod, loss));
       }
@@ -3421,7 +3451,7 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
     for (const auto& p : reactionEnergyLosses) {
       if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
-}
+      }
     }
 
     m_plasmaReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -3444,8 +3474,8 @@ CdrPlasmaJSON::parsePhotoReactions()
   for (const auto& R : m_json["photo reactions"]) {
     if (!(R.contains("reaction"))) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
-                             "CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
-}
+        "CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
+    }
 
     const std::string reaction = trim(R["reaction"].get<std::string>());
 
@@ -3503,6 +3533,7 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
     pout() << "CdrPlasmaJSON::parsePhotoReactionScale" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine tries to figure out how we should scale photo-reactions. In general, reactions are scaled parametrically by a function f = f(E,x)
   //       where E is the electric field magnitude and x is the physical position. This is completely general, but there are many, many ways that
   //       such functions could be formed. Currently, we put these functions as one of the following:
@@ -3516,6 +3547,7 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
   //         A  -> Helmholtz constants
   //         pX -> Partial pressure
   //         pq -> quenching pressure (in atm)
+  // clang-format on
 
   // This is the reaction name. We need it for debugging.
   const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -3536,14 +3568,17 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
     const json& helm = a_R["helmholtz"];
 
     if (!(helm.contains("A"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but field 'A' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'helmholtz' kappa but field 'A' is missing");
+    }
     if (!(helm.contains("lambda"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but field 'lambda' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'helmholtz' kappa but field 'lambda' is missing");
+    }
     if (!(helm.contains("species"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but field 'neutral' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'helmholtz' kappa but field 'neutral' is missing");
+    }
 
     const auto A       = helm["A"].get<Real>();
     const auto lambda  = helm["lambda"].get<Real>();
@@ -3552,7 +3587,11 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
     // Get the specified species and it's molar fraction.
     // Make sure that it's a neutral species.
     if (!(this->isNeutralSpecies(neutral))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append(" and got 'helmholtz' kappa but species '").append(neutral).append("' is not a neutral species"));
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        std::string{baseError}
+          .append(" and got 'helmholtz' kappa but species '")
+          .append(neutral)
+          .append("' is not a neutral species"));
     }
 
     // Make the Helmholtz factor
@@ -3567,12 +3606,12 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
   FunctionEX func;
 
   if (doHelmholtz) {
-    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real  /*E*/, const RealVect& x) {
+    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real /*E*/, const RealVect& x) {
       return scale * helmholtzFactor * p(x);
     };
   }
   else {
-    func = [scale](const Real  /*E*/, const RealVect&  /*x*/) {
+    func = [scale](const Real /*E*/, const RealVect& /*x*/) {
       return scale;
     };
   }
@@ -3591,7 +3630,8 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
 
   std::list<std::pair<int, Real>> reactionEnergyLosses;
 
-  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based models.
+  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based
+  // models.
   if (a_R.contains("energy losses")) {
 
     const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -3600,29 +3640,34 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                             "but did not find field 'species'");
+      }
       if (!energyLoss.contains("eV")) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
-}
+      }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
-      const Real        loss        = energyLoss["eV"].get<Real>();
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        energyLoss["species"].get<std::string>());
+      const Real loss = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
+      }
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
+      }
 
-      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
-      // us to ignore all energy losses for a species by just turning off energy transport in the input script.
+      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
+      // specified species. This allows us to ignore all energy losses for a species by just turning off energy
+      // transport in the input script.
       if (m_cdrHasEnergySolver.at(speciesIndex)) {
         reactionEnergyLosses.emplace_back(speciesIndex, loss);
       }
@@ -3633,7 +3678,7 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
     for (const auto& p : reactionEnergyLosses) {
       if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
-}
+      }
     }
 
     m_photoReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -3671,9 +3716,11 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
       // Get the reaction string
       if (!(electrodeReaction.contains("reaction"))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
-}
-      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(electrodeReaction["reaction"].get<std::string>());
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
+      }
+      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        electrodeReaction["reaction"].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3687,7 +3734,8 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
       // Define special case. If the right-hand side is just 'extrap', we enable m_electrodeExtrapBC for
       // the specified species.
-      const bool specialCase1 = products.size() == 1 && ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
+      const bool specialCase1 = products.size() == 1 &&
+                                ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
 
       // Go through cases.
       if (specialCase1) { // Enable m_electrodeExtrapBC for the specified species.
@@ -3709,8 +3757,9 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
         // Get the lookup string
         if (!(electrodeReaction.contains("lookup"))) {
-          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
-}
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
+        }
 
         // Go through all the reactions now.
         for (const auto& curReaction : reactionSets) {
@@ -3772,11 +3821,13 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
   if (!(a_reactionJSON.contains("lookup"))) {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but field 'lookup' was not specified");
-}
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                         "but field 'lookup' was not specified");
+  }
 
   // Get the lookup method
-  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_reactionJSON["lookup"].get<std::string>());
+  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+    a_reactionJSON["lookup"].get<std::string>());
 
   // Now go through the various rate-computation methods and populated the
   // relevant data holders.
@@ -3784,8 +3835,9 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
     // If using a constant emission rate, we must get the field 'value'.
 
     if (!(a_reactionJSON.contains("value"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'constant' lookup but field 'value' is missing");
+    }
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
@@ -3794,7 +3846,8 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
     m_electrodeReactionConstants.emplace(a_reactionIndex, rate);
   }
   else {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but lookup specification '").append(lookup).append("' is not supported"));
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      std::string{baseError}.append("but lookup specification '").append(lookup).append("' is not supported"));
   }
 }
 
@@ -3813,7 +3866,7 @@ CdrPlasmaJSON::parseElectrodeReactionScaling(const int a_reactionIndex, const js
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
+  auto func = [scale](const Real /*E*/, const RealVect& /*x*/) -> Real {
     return scale;
   };
 
@@ -3831,7 +3884,8 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
 
   std::list<std::pair<int, Real>> reactionEnergyLosses;
 
-  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based models.
+  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based
+  // models.
   if (a_R.contains("energy losses")) {
 
     const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -3840,29 +3894,34 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                             "but did not find field 'species'");
+      }
       if (!energyLoss.contains("eV")) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
-}
+      }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
-      const Real        loss        = energyLoss["eV"].get<Real>();
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        energyLoss["species"].get<std::string>());
+      const Real loss = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
+      }
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
+      }
 
-      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
-      // us to ignore all energy losses for a species by just turning off energy transport in the input script.
+      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
+      // specified species. This allows us to ignore all energy losses for a species by just turning off energy
+      // transport in the input script.
       if (m_cdrHasEnergySolver.at(speciesIndex)) {
         reactionEnergyLosses.emplace_back(speciesIndex, loss);
       }
@@ -3873,7 +3932,7 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
     for (const auto& p : reactionEnergyLosses) {
       if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
-}
+      }
     }
 
     m_electrodeReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -3911,9 +3970,11 @@ CdrPlasmaJSON::parseDielectricReactions()
 
       // Get the reaction string
       if (!(dielectricReaction.contains("reaction"))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
-}
-      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(dielectricReaction["reaction"].get<std::string>());
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
+      }
+      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        dielectricReaction["reaction"].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3927,7 +3988,8 @@ CdrPlasmaJSON::parseDielectricReactions()
 
       // Define special case. If the right-hand side just 'extrap', we enable m_dielectricExtrapBC for
       // the specified species.
-      const bool specialCase1 = products.size() == 1 && ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
+      const bool specialCase1 = products.size() == 1 &&
+                                ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
 
       // Go through cases.
       if (specialCase1) {
@@ -3949,8 +4011,9 @@ CdrPlasmaJSON::parseDielectricReactions()
 
         // Get the lookup string
         if (!(dielectricReaction.contains("lookup"))) {
-          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");
-}
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");
+        }
 
         // Go through all the reactions now.
         for (const auto& curReaction : reactionSets) {
@@ -4012,11 +4075,13 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
   if (!(a_reactionJSON.contains("lookup"))) {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but field 'lookup' was not specified");
-}
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                         "but field 'lookup' was not specified");
+  }
 
   // Get the lookup method
-  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_reactionJSON["lookup"].get<std::string>());
+  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+    a_reactionJSON["lookup"].get<std::string>());
 
   // Now go through the various rate-computation methods and populated the
   // relevant data holders.
@@ -4024,8 +4089,9 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
     // If using a constant emission rate, we must get the field 'value'.
 
     if (!(a_reactionJSON.contains("value"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'constant' lookup but field 'value' is missing");
+    }
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
@@ -4034,7 +4100,8 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
     m_dielectricReactionConstants.emplace(a_reactionIndex, rate);
   }
   else {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but lookup specification '").append(lookup).append("' is not supported"));
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      std::string{baseError}.append("but lookup specification '").append(lookup).append("' is not supported"));
   }
 }
 
@@ -4053,7 +4120,7 @@ CdrPlasmaJSON::parseDielectricReactionScaling(const int a_reactionIndex, const j
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
+  auto func = [scale](const Real /*E*/, const RealVect& /*x*/) -> Real {
     return scale;
   };
 
@@ -4094,23 +4161,26 @@ CdrPlasmaJSON::parseDomainReactions()
     // Base error when parsing the reactions
     const std::string baseError = "CdrPlasmaJSON::parseDomainReactions ";
 
-    //const std::map<char, int> dirMap{{'x', 0}, {'y', 1}, {'z', 2}};
-    //const std::map<std::string, Side::LoHiSide> sideMap{{"lo", Side::Lo}, {"hi", Side::Hi}};
+    // const std::map<char, int> dirMap{{'x', 0}, {'y', 1}, {'z', 2}};
+    // const std::map<std::string, Side::LoHiSide> sideMap{{"lo", Side::Lo}, {"hi", Side::Hi}};
 
     // Iterate through the reactions
     for (const auto& domainReaction : domainReactions) {
 
       // These fields are required
       if (!(domainReaction.contains("reaction"))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'reaction' was not specified");
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + " - found 'domain reactions' but field 'reaction' was not specified");
+      }
       if (!(domainReaction.contains("side"))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'side' was not specified");
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + " - found 'domain reactions' but field 'side' was not specified");
+      }
 
       // Get the reaction string and sides
-      const std::string              reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(domainReaction["reaction"].get<std::string>());
-      const std::vector<std::string> sides    = domainReaction["side"].get<std::vector<std::string>>();
+      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        domainReaction["reaction"].get<std::string>());
+      const std::vector<std::string> sides = domainReaction["side"].get<std::vector<std::string>>();
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -4123,12 +4193,14 @@ CdrPlasmaJSON::parseDomainReactions()
 
       // Define special case. If the right-hand side is just "extrap" then the specified species influx will
       // be extrapolated from the interior.
-      const bool specialCase1 = products.size() == 1 && ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
+      const bool specialCase1 = products.size() == 1 &&
+                                ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
 
       // Go through cases.
       if (specialCase1) { // Enable m_domainExtrapBC for the specified species and sides.
 
-        // Go through reactants and then specify that we should use an extrapolated condition on the specified species and dir-side.
+        // Go through reactants and then specify that we should use an extrapolated condition on the specified species
+        // and dir-side.
         for (const auto& curReaction : reactionSets) {
 
           const std::vector<std::string> curReactants = std::get<1>(curReaction);
@@ -4158,8 +4230,9 @@ CdrPlasmaJSON::parseDomainReactions()
 
         // Get reaction lookup string
         if (!(domainReaction.contains("lookup"))) {
-          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified");
-}
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + " - found 'domain reactions' but field 'lookup' was not specified");
+        }
 
         // Go through reaction sets.
         for (const auto& curReaction : reactionSets) {
@@ -4194,8 +4267,8 @@ CdrPlasmaJSON::parseDomainReactions()
                                    curReactants,
                                    curProducts);
 
-          // Now create the reaction -- note that the surface reactions support both plasma species and photon species on the
-          // left hand side of the reaction
+          // Now create the reaction -- note that the surface reactions support both plasma species and photon species
+          // on the left hand side of the reaction
           domainReactionsVec.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
         }
 
@@ -4224,7 +4297,8 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
     pout() << "CdrPlasmaJSON::parseDomainReactionRate()" << endl;
   }
 
-  // This is the reaction string -- it exists if we make it to this code (we know this based on tests earlier in the code)
+  // This is the reaction string -- it exists if we make it to this code (we know this based on tests earlier in the
+  // code)
   const std::string reaction = trim(a_reactionJSON["reaction"].get<std::string>());
 
   // Create a basic error message for error handling
@@ -4232,23 +4306,27 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions
   if (!(a_reactionJSON.contains("lookup"))) {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but field 'lookup' was not specified");
-}
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                         "but field 'lookup' was not specified");
+  }
 
   // Get the lookup method
-  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_reactionJSON["lookup"].get<std::string>());
+  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+    a_reactionJSON["lookup"].get<std::string>());
 
   // Now go through the various rate-computation methods and fill the relevant containers
   if (lookup == "constant") {
     // If using a constant emission rate, we must get the field 'value'
     if (!(a_reactionJSON.contains("value"))) {
-      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
-}
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'constant' lookup but field 'value' is missing");
+    }
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
     for (std::string curSide : a_sides) {
-      // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
+      // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and
+      // m_domainReactionConstants-map
       curSide                                = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(curSide);
       std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
                                                               m_sideStringToSide.at(curSide.substr(2, 2)));
@@ -4260,7 +4338,8 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
     }
   }
   else {
-    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but lookup specification '").append(lookup).append("' is not supported"));
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      std::string{baseError}.append("but lookup specification '").append(lookup).append("' is not supported"));
   }
 }
 
@@ -4281,7 +4360,7 @@ CdrPlasmaJSON::parseDomainReactionScaling(const int                       a_reac
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
+  auto func = [scale](const Real /*E*/, const RealVect& /*x*/) -> Real {
     return scale;
   };
 
@@ -4309,7 +4388,7 @@ CdrPlasmaJSON::getNumberOfPlotVariables() const
   for (const auto& m : m_plasmaReactionPlot) {
     if (m.second) {
       ret++;
-}
+    }
   }
 
   if (m_plotAlpha) {
@@ -4333,7 +4412,8 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
 
   std::list<std::pair<int, Real>> reactionEnergyLosses;
 
-  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based models.
+  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based
+  // models.
   if (a_R.contains("energy losses")) {
 
     const std::string reaction  = a_R["reaction"].get<std::string>();
@@ -4342,29 +4422,34 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                             "but did not find field 'species'");
+      }
       if (!energyLoss.contains("eV")) {
         ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
-}
+      }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
-      const Real        loss        = energyLoss["eV"].get<Real>();
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(
+        energyLoss["species"].get<std::string>());
+      const Real loss = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is not a plasma species"));
+      }
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
-}
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          std::string{baseError}.append("but species '").append(speciesName).append("' is an energy solver"));
+      }
 
-      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
-      // us to ignore all energy losses for a species by just turning off energy transport in the input script.
+      // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the
+      // specified species. This allows us to ignore all energy losses for a species by just turning off energy
+      // transport in the input script.
       if (m_cdrHasEnergySolver.at(speciesIndex)) {
         reactionEnergyLosses.emplace_back(speciesIndex, loss);
       }
@@ -4375,7 +4460,7 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
     for (const auto& p : reactionEnergyLosses) {
       if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
-}
+      }
     }
 
     m_dielectricReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -4429,13 +4514,13 @@ CdrPlasmaJSON::getPlotVariableNames() const
 Vector<Real>
 CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
                                 const Vector<RealVect>& a_cdrGradients,
-                                const Vector<Real>&     /*a_rteDensities*/,
-                                const RealVect&         a_E,
-                                const RealVect&         a_pos,
-                                const Real              /*a_dx*/,
-                                const Real              /*a_dt*/,
-                                const Real              a_time,
-                                const Real              /*a_kappa*/) const
+                                const Vector<Real>& /*a_rteDensities*/,
+                                const RealVect& a_E,
+                                const RealVect& a_pos,
+                                const Real /*a_dx*/,
+                                const Real /*a_dt*/,
+                                const Real a_time,
+                                const Real /*a_kappa*/) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::getPlotVariables" << endl;
@@ -4516,7 +4601,7 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>&     a_cdrDensities,
 }
 
 bool
-CdrPlasmaJSON::isNeutralSpecies(const std::string& a_name) const 
+CdrPlasmaJSON::isNeutralSpecies(const std::string& a_name) const
 {
   bool found = false;
 
@@ -4531,7 +4616,7 @@ CdrPlasmaJSON::isNeutralSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::isPlasmaSpecies(const std::string& a_name) const 
+CdrPlasmaJSON::isPlasmaSpecies(const std::string& a_name) const
 {
   bool found = false;
 
@@ -4546,7 +4631,7 @@ CdrPlasmaJSON::isPlasmaSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) const 
+CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) const
 {
   bool found = false;
 
@@ -4561,7 +4646,7 @@ CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::doesFileExist(const std::string& a_filename) 
+CdrPlasmaJSON::doesFileExist(const std::string& a_filename)
 {
   std::ifstream istream(a_filename);
 
@@ -4619,10 +4704,10 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
       }
       case LookupMethod::TableEN: {
         // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that.
-        const LookupTable1D<Real,1>& mobilityTable = m_mobilityTablesEN.at(i);
+        const LookupTable1D<Real, 1>& mobilityTable = m_mobilityTablesEN.at(i);
 
         mu[i] = mobilityTable.interpolate<1>(Etd); // Get mu*N
-        mu[i] /= N;                             // Get mu
+        mu[i] /= N;                                // Get mu
 
         break;
       }
@@ -4697,7 +4782,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect&          a_pos,
         const LookupTable1D<Real, 1>& diffusionTable = m_diffusionTablesEN.at(i);
 
         Dco = diffusionTable.interpolate<1>(Etd); // Get D*N
-        Dco /= N;                              // Get D
+        Dco /= N;                                 // Get D
 
         break;
       }
@@ -4781,7 +4866,8 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
       const bool hasEnergySolver = m_cdrHasEnergySolver.at(i);
 
       if (hasEnergySolver) {
-        // Energy solver solves for the energy in electron volts. We compute average_energy = n_energy/n_density and avoid division by zero.
+        // Energy solver solves for the energy in electron volts. We compute average_energy = n_energy/n_density and
+        // avoid division by zero.
         const int energyIdx = m_cdrTransportEnergyMap.at(i);
 
         const Real& minEnergy = std::get<0>(m_cdrEnergyComputation.at(i));
@@ -4814,7 +4900,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
         }
         default: {
           MayDay::Error(
-                        "CdrPlasmaJSON::computePlasmaSpeciesTemperatures -- logic bust when computing species energies");
+            "CdrPlasmaJSON::computePlasmaSpeciesTemperatures -- logic bust when computing species energies");
 
           break;
         }
@@ -4852,7 +4938,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
                                          const Real&                  a_N,
                                          const Real&                  a_alpha,
                                          const Real&                  a_eta,
-                                         const Real&                   /*a_time*/) const 
+                                         const Real& /*a_time*/) const
 {
   const LookupMethod&          method   = m_plasmaReactionLookup.at(a_reactionIndex);
   const CdrPlasmaReactionJSON& reaction = m_plasmaReactions[a_reactionIndex];
@@ -4899,7 +4985,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     break;
   }
   case LookupMethod::TableEnergy: {
-    const int&              speciesIndex  = m_plasmaReactionTablesEnergy.at(a_reactionIndex).first;
+    const int&                    speciesIndex  = m_plasmaReactionTablesEnergy.at(a_reactionIndex).first;
     const LookupTable1D<Real, 1>& reactionTable = m_plasmaReactionTablesEnergy.at(a_reactionIndex).second;
 
     const Real energy = a_cdrEnergies[speciesIndex];
@@ -4931,10 +5017,10 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   case LookupMethod::FunctionT: {
     const std::pair<int, FunctionT>& p = m_plasmaReactionFunctionsT.at(a_reactionIndex);
 
-    const int idx = p.first;
+    const int        idx  = p.first;
     const FunctionT& func = p.second;
 
-    const Real T = (idx < 0) ? m_gasTemperature(a_pos): a_cdrTemperatures[idx];
+    const Real T = (idx < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx];
 
     k = func(T);
 
@@ -4969,8 +5055,8 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   }
   }
 
-  // Now multiply by the rest of the left-hand side -- all neutrals should be done above so we are only missing the plasma
-  // reactants. After this, the reaction is essentially k -> k * n[A] * n[B] * ... as it should be. 
+  // Now multiply by the rest of the left-hand side -- all neutrals should be done above so we are only missing the
+  // plasma reactants. After this, the reaction is essentially k -> k * n[A] * n[B] * ... as it should be.
   for (const auto& r : plasmaReactants) {
     k *= a_cdrDensities[r];
   }
@@ -4978,8 +5064,8 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   // Modify by user-provided reaction efficiencies and scales.
   k *= m_plasmaReactionEfficiencies.at(a_reactionIndex)(a_E, a_pos);
 
-  // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
-  // K is the electron mobility.
+  // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 +
+  // (E.D*grad(n))/(K * n * E^2) where K is the electron mobility.
   if ((m_plasmaReactionSolovievCorrection.at(a_reactionIndex)).first) {
     const int species = (m_plasmaReactionSolovievCorrection.at(a_reactionIndex)).second;
 
@@ -5013,7 +5099,7 @@ CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect& a_position) const
   switch (m_alphaLookup) {
   case LookupMethod::TableEN: {
     alpha = m_alphaTableEN.interpolate<1>(Etd); // Get alpha/N
-    alpha *= N;                              // Get alpha
+    alpha *= N;                                 // Get alpha
 
     break;
   }
@@ -5048,7 +5134,7 @@ CdrPlasmaJSON::computeEta(const Real a_E, const RealVect& a_position) const
   }
   case LookupMethod::TableEN: {
     eta = m_etaTableEN.interpolate<1>(Etd); // Get eta/N
-    eta *= N;                            // Get eta
+    eta *= N;                               // Get eta
 
     break;
   }
@@ -5104,8 +5190,8 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
   // Hook for turning off all reactions.
   if (!m_skipReactions) {
 
-    // Solve the reactive problem. The first hook will INTEGRATE the reactive problem (and then linearize the source terms). The other hook
-    // will just fill the source terms.
+    // Solve the reactive problem. The first hook will INTEGRATE the reactive problem (and then linearize the source
+    // terms). The other hook will just fill the source terms.
     if (m_reactionIntegrator != ReactionIntegrator::None) {
       std::vector<Real> finalCdrDensities = cdrDensities;
       std::vector<Real> photonProduction(m_numRtSpecies, 0.0);
@@ -5150,16 +5236,15 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&           a_cdrSources,
       S = Real(poissonSample);
     }
   }
-
-  }
+}
 
 Vector<RealVect>
-CdrPlasmaJSON::computeCdrDriftVelocities(const Real          /*a_time*/,
+CdrPlasmaJSON::computeCdrDriftVelocities(const Real /*a_time*/,
                                          const RealVect&     a_position,
                                          const RealVect&     a_E,
                                          const Vector<Real>& a_cdrDensities) const
 {
-  CH_TIME("CdrPlasmaJSON::computeCdrDriftVelocities");  
+  CH_TIME("CdrPlasmaJSON::computeCdrDriftVelocities");
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDriftVelocities" << endl;
   }
@@ -5201,12 +5286,12 @@ CdrPlasmaJSON::computeCdrDriftVelocities(const Real          /*a_time*/,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real          /*a_time*/,
+CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real /*a_time*/,
                                                const RealVect&     a_position,
                                                const RealVect&     a_E,
                                                const Vector<Real>& a_cdrDensities) const
 {
-  CH_TIME("CdrPlasmaJSON::computeCdrDiffusionCoefficients");    
+  CH_TIME("CdrPlasmaJSON::computeCdrDiffusionCoefficients");
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDiffusionCoefficients" << endl;
   }
@@ -5220,7 +5305,7 @@ CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real          /*a_time*/,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
+CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real /*a_time*/,
                                          const RealVect&     a_pos,
                                          const RealVect&     a_normal,
                                          const RealVect&     a_E,
@@ -5230,14 +5315,16 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
                                          const Vector<Real>& a_rteFluxes,
                                          const Vector<Real>& a_extrapCdrFluxes) const
 {
-  CH_TIME("CdrPlasmaJSON::computeCdrElectrodeFluxes");      
+  CH_TIME("CdrPlasmaJSON::computeCdrElectrodeFluxes");
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrElectrodeFluxes" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
   //       use these fluxes to specify an inflow due to secondary emission.
+  // clang-format on
 
   // Storage for "natural" outflow fluxes, and inflow fluxes due to secondary emission.
   std::vector<Real> outflowFluxes(m_numCdrSpecies, 0.0);
@@ -5251,8 +5338,10 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
   const Real E = a_E.vectorLength();
 
   // Compute temperatures
-  const std::vector<Real> cdrTemperatures =
-    this->computePlasmaSpeciesTemperatures(a_pos, a_E, ((Vector<Real>&)a_cdrDensities).stdVector());
+  const std::vector<Real> cdrTemperatures = this->computePlasmaSpeciesTemperatures(
+    a_pos,
+    a_E,
+    ((Vector<Real>&)a_cdrDensities).stdVector());
 
   // Compute the outflow fluxes.
   for (int i = 0; i < m_numCdrSpecies; i++) {
@@ -5261,14 +5350,14 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
     // Outflow on of negative species on anodes.
     if (Z < 0 && isAnode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-}
+    }
     if (Z > 0 && isCathode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-}
+    }
   }
 
-  // Go through our list of electrode reactions and compute the inflow fluxes from secondary emission from plasma species
-  // and photon species.
+  // Go through our list of electrode reactions and compute the inflow fluxes from secondary emission from plasma
+  // species and photon species.
   for (int i = 0; i < m_electrodeReactions.size(); i++) {
 
     // Get the reaction and lookup method.
@@ -5320,8 +5409,8 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
       inflowFluxes[p] += inflow;
     }
 
-    // If there is an energy loss associated with this reaction we need to add the energies to the relevant energy transport
-    // equations.
+    // If there is an energy loss associated with this reaction we need to add the energies to the relevant energy
+    // transport equations.
     if (m_electrodeReactionHasEnergyLoss.at(i)) {
       const std::list<std::pair<int, Real>>& energyLosses = m_electrodeReactionEnergyLosses.at(i);
 
@@ -5335,8 +5424,8 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
     }
   }
 
-  // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the magnitude, but in our
-  // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
+  // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the
+  // magnitude, but in our finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
@@ -5365,7 +5454,7 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
+CdrPlasmaJSON::computeCdrDielectricFluxes(const Real /*a_time*/,
                                           const RealVect&     a_pos,
                                           const RealVect&     a_normal,
                                           const RealVect&     a_E,
@@ -5378,9 +5467,11 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDielectricFluxes" << endl;
   }
+  // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
   //       use these fluxes to specify an inflow due to secondary emission.
+  // clang-format on
 
   // Storage for "natural" outflow fluxes, and inflow fluxes due to secondary emission.
   std::vector<Real> outflowFluxes(m_numCdrSpecies, 0.0);
@@ -5399,18 +5490,20 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
     // Outflow on of negative species on anodes.
     if (Z < 0 && isAnode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-}
+    }
     if (Z > 0 && isCathode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-}
+    }
   }
 
   // Compute temperatures
-  const std::vector<Real> cdrTemperatures =
-    this->computePlasmaSpeciesTemperatures(a_pos, a_E, ((Vector<Real>&)a_cdrDensities).stdVector());
+  const std::vector<Real> cdrTemperatures = this->computePlasmaSpeciesTemperatures(
+    a_pos,
+    a_E,
+    ((Vector<Real>&)a_cdrDensities).stdVector());
 
-  // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species
-  // and photon species.
+  // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma
+  // species and photon species.
   for (int i = 0; i < m_dielectricReactions.size(); i++) {
 
     // Get the reaction and lookup method.
@@ -5462,8 +5555,8 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
       inflowFluxes[p] += inflow;
     }
 
-    // If there is an energy loss associated with this reaction we need to add the energies to the relevant energy transport
-    // equations.
+    // If there is an energy loss associated with this reaction we need to add the energies to the relevant energy
+    // transport equations.
     if (m_dielectricReactionHasEnergyLoss.at(i)) {
       const std::list<std::pair<int, Real>>& energyLosses = m_dielectricReactionEnergyLosses.at(i);
 
@@ -5477,8 +5570,8 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
     }
   }
 
-  // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the magnitude, but in our
-  // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
+  // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the
+  // magnitude, but in our finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   for (int i = 0; i < m_numCdrSpecies; i++) {
@@ -5507,24 +5600,26 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrDomainFluxes(const Real            /*a_time*/,
+CdrPlasmaJSON::computeCdrDomainFluxes(const Real /*a_time*/,
                                       const RealVect&      a_pos,
                                       const int            a_dir,
                                       const Side::LoHiSide a_side,
                                       const RealVect&      a_E,
-                                      const Vector<Real>&   /*a_cdrDensities*/,
-                                      const Vector<Real>&   /*a_cdrVelocities*/,
-                                      const Vector<Real>&   /*a_cdrGradients*/,
-                                      const Vector<Real>&  a_rteFluxes,
-                                      const Vector<Real>&  a_extrapCdrFluxes) const
+                                      const Vector<Real>& /*a_cdrDensities*/,
+                                      const Vector<Real>& /*a_cdrVelocities*/,
+                                      const Vector<Real>& /*a_cdrGradients*/,
+                                      const Vector<Real>& a_rteFluxes,
+                                      const Vector<Real>& a_extrapCdrFluxes) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::computeCdrDomainFluxes" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine computes the finite volume fluxes on the domain. The input argument a_extrapCdrFluxes are the fluxes
   //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
   //       use these fluxes to specify an inflow due to secondary emission.
+  // clang-format on
 
   // The finite volume fluxes. In our finite-volume implementation, a mass inflow will have a negative sign.
   std::vector<Real> outflowFluxes(m_numCdrSpecies, 0.0);
@@ -5548,14 +5643,14 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real            /*a_time*/,
     // Outflow on of negative species on anodes.
     if (Z < 0 && isAnode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-}
+    }
     if (Z > 0 && isCathode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-}
+    }
   }
 
-  // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species
-  // and photon species
+  // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma
+  // species and photon species
   for (int i = 0; i < m_domainReactions.at(dirSide).size(); ++i) {
 
     // Get the reaction and lookup method.
@@ -5638,7 +5733,7 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
                                   const RealVect&          a_position,
                                   const Real               a_E,
                                   const Real               a_dt,
-                                  const Real               /*a_dx*/) const
+                                  const Real /*a_dx*/) const
 {
   // Add photo-ionization.
   for (int i = 0; i < m_photoReactions.size(); i++) {
@@ -5655,8 +5750,8 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
       k = m_photoReactionEfficiencies.at(i)(a_E, a_position);
     }
     else {
-      // This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in the source terms,
-      // but the API says that we need to compute the rate, so we put rate = Psi/dt
+      // This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in
+      // the source terms, but the API says that we need to compute the rate, so we put rate = Psi/dt
 
       k = m_photoReactionEfficiencies.at(i)(a_E, a_position) / a_dt;
     }
@@ -5670,7 +5765,8 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
       a_cdrSources[p] += k;
     }
 
-    // If there is an energy loss associated with this reaction, we need to add the losses to the corresponding energy transport solvers.
+    // If there is an energy loss associated with this reaction, we need to add the losses to the corresponding energy
+    // transport solvers.
     if (m_photoReactionHasEnergyLoss.at(i)) {
       const std::list<std::pair<int, Real>>& energyLosses = m_photoReactionEnergyLosses.at(i);
 
@@ -5686,17 +5782,18 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
 }
 
 void
-CdrPlasmaJSON::integrateReactions(std::vector<Real>&               a_cdrDensities,
-                                  std::vector<Real>&               a_photonProduction,
-                                  const std::vector<RealVect>&     a_cdrGradients,
-                                  const RealVect&                  a_E,
-                                  const RealVect&                  a_pos,
-                                  const Real                  a_dx,
-                                  const Real                  a_dt,
-                                  const Real                  a_time,
-                                  const Real                  a_kappa) const
+CdrPlasmaJSON::integrateReactions(std::vector<Real>&           a_cdrDensities,
+                                  std::vector<Real>&           a_photonProduction,
+                                  const std::vector<RealVect>& a_cdrGradients,
+                                  const RealVect&              a_E,
+                                  const RealVect&              a_pos,
+                                  const Real                   a_dx,
+                                  const Real                   a_dt,
+                                  const Real                   a_time,
+                                  const Real                   a_kappa) const
 {
-  // Do substeps. We happen to know that we have m_reactionIntegrator.second substeps for the whole integration interval.
+  // Do substeps. We happen to know that we have m_reactionIntegrator.second substeps for the whole integration
+  // interval.
   const int numSteps = std::ceil(a_dt / m_chemistryDt);
 
   for (int step = 0; step < numSteps; step++) {
@@ -5766,15 +5863,15 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&               a_cdrDensitie
 }
 
 void
-CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
-                               std::vector<Real>&          a_rteSources,
+CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&           a_cdrSources,
+                               std::vector<Real>&           a_rteSources,
                                const std::vector<Real>&     a_cdrDensities,
                                const std::vector<RealVect>& a_cdrGradients,
                                const RealVect&              a_E,
                                const RealVect&              a_pos,
-                               const Real                   /*a_dx*/,
-                               const Real                  a_time,
-                               const Real                   /*a_kappa*/) const
+                               const Real /*a_dx*/,
+                               const Real a_time,
+                               const Real /*a_kappa*/) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::fillSourceTerms" << endl;
@@ -5847,7 +5944,8 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
       a_rteSources[p] += k;
     }
 
-    // If there is an energy loss associated with this reaction, we need to add the losses to the corresponding energy transport solvers.
+    // If there is an energy loss associated with this reaction, we need to add the losses to the corresponding energy
+    // transport solvers.
     if (m_plasmaReactionHasEnergyLoss.at(i)) {
       const auto& energyLosses = m_plasmaReactionEnergyLosses.at(i);
 
@@ -5894,9 +5992,9 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
     const int transportIdx = m.first;
     const int energyIdx    = m.second;
 
-    const Real     mu    = cdrMobilities[transportIdx];
-    const Real     D     = cdrDiffusionCoefficients[transportIdx];
-    const Real     n     = a_cdrDensities[transportIdx];
+    const Real      mu    = cdrMobilities[transportIdx];
+    const Real      D     = cdrDiffusionCoefficients[transportIdx];
+    const Real      n     = a_cdrDensities[transportIdx];
     const RealVect& gradn = a_cdrGradients[transportIdx];
 
     const int Z = m_cdrSpecies[transportIdx]->getChargeNumber();
@@ -5917,15 +6015,15 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
 }
 
 void
-CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
-                                               std::vector<Real>&          a_photonProduction,
+CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cdrDensities,
+                                               std::vector<Real>&           a_photonProduction,
                                                const std::vector<RealVect>& a_cdrGradients,
                                                const RealVect&              a_E,
                                                const RealVect&              a_pos,
-                                               const Real                  a_dx,
-                                               const Real                  a_dt,
-                                               const Real                  a_time,
-                                               const Real                  a_kappa) const
+                                               const Real                   a_dx,
+                                               const Real                   a_dt,
+                                               const Real                   a_time,
+                                               const Real                   a_kappa) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::integrateReactionsExplicitEuler" << endl;
@@ -5947,16 +6045,16 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          a_cdr
 }
 
 void
-CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
-                                             std::vector<Real>&          a_photonProduction,
+CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrDensities,
+                                             std::vector<Real>&           a_photonProduction,
                                              const std::vector<RealVect>& a_cdrGradients,
                                              const RealVect&              a_E,
                                              const RealVect&              a_pos,
-                                             const Real                  a_dx,
-                                             const Real                  a_dt,
-                                             const Real                  a_time,
-                                             const Real                  a_kappa,
-                                             const Real                  a_tableuAlpha) const
+                                             const Real                   a_dx,
+                                             const Real                   a_dt,
+                                             const Real                   a_time,
+                                             const Real                   a_kappa,
+                                             const Real                   a_tableuAlpha) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::integrateReactionsRK2" << endl;
@@ -5992,15 +6090,15 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDe
 }
 
 void
-CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
-                                             std::vector<Real>&          a_photonProduction,
+CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrDensities,
+                                             std::vector<Real>&           a_photonProduction,
                                              const std::vector<RealVect>& a_cdrGradients,
                                              const RealVect&              a_E,
                                              const RealVect&              a_pos,
-                                             const Real                  a_dx,
-                                             const Real                  a_dt,
-                                             const Real                  a_time,
-                                             const Real                  a_kappa) const
+                                             const Real                   a_dx,
+                                             const Real                   a_dt,
+                                             const Real                   a_time,
+                                             const Real                   a_kappa) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::integrateReactionsRK4" << endl;

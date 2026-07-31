@@ -147,9 +147,10 @@ MFHelmholtzJumpBC::defineStencils()
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have
-  // multi-valued cells we use an average formulation. These
+  // clang-format off
+  // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
   //       stencils can later be used to compute the boundary value on the interface.
+  // clang-format on
 
   // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {
@@ -449,10 +450,11 @@ MFHelmholtzJumpBC::defineIterators()
 {
   CH_TIME("MFHelmholtzJumpBC::defineIterators()");
 
-  // TLDR: This function defines iterators for iterating over regular cut-cells and over multi-fluid cut-cells. The
-  // iterators
-  //       must exist for both single-phase and multi-phase vofs. This is true even if we're not actually solving a
-  //       multiphase problem because the boundary conditions classes will still need the iterators.
+  // clang-format off
+  // TLDR: This function defines iterators for iterating over regular cut-cells and over multi-fluid cut-cells. The iterators
+  //       must exist for both single-phase and multi-phase vofs. This is true even if we're not actually solving a multiphase
+  //       problem because the boundary conditions classes will still need the iterators.
+  // clang-format on
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
   const DataIterator&      dit = dbl.dataIterator();
@@ -509,9 +511,10 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
 {
   CH_TIME("MFHelmholtzJumpBC::getLeastSquarseBoundaryGradStencil(...)");
 
-  // TLDR: This routine computes a stencil for approximating dphi/dn using least squares gradient reconstruction on the
-  // EB centroid. We assume that the value
+  // clang-format off
+  // TLDR: This routine computes a stencil for approximating dphi/dn using least squares gradient reconstruction on the EB centroid. We assume that the value
   //       is a "known term" in the expansion.
+  // clang-format on
 
   bool       foundStencil = false;
   const bool addStartVof  = false;

@@ -597,11 +597,11 @@ ItoSolver::initialData()
 
   CH_assert(!m_species.isNull());
 
-  // TLDR: This function will fetch the initial particles from the species and deposit them on the mesh. In most cases
-  // the various MPI ranks
-  //       will have drawn a different set of initial particles (the only sane way to do it) and so those particles are
-  //       put directly in the 'bulk' particle container. After that we remove the particles that fell inside the EB and
-  //       deposit the particles on the mesh.
+  // clang-format off
+  // TLDR: This function will fetch the initial particles from the species and deposit them on the mesh. In most cases the various MPI ranks
+  //       will have drawn a different set of initial particles (the only sane way to do it) and so those particles are put directly in
+  //       the 'bulk' particle container. After that we remove the particles that fell inside the EB and deposit the particles on the mesh.
+  // clang-format on
 
   ParticleContainer<ItoParticle>& bulkParticles = m_particleContainers.at(WhichContainer::Bulk);
   bulkParticles.clearParticles();
@@ -1150,11 +1150,12 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
     pout() << m_name + "::writeCheckPointLevelFluid" << endl;
   }
 
-  // TLDR: This routine checkpoints the particle data using the number of particles in a grid cell. When the simulation
-  // is restarted, we read the
-  //       number of particles per cell from the HDF5 file and re-initialize the particles. However, this function does
-  //       NOT currently store the energy (or other parameters of interest) in the HDF5 file. Only the number of
-  //       particles is available. I don't expect this function to be widely used by anyone.
+  // clang-format off
+  // TLDR: This routine checkpoints the particle data using the number of particles in a grid cell. When the simulation is restarted, we read the
+  //       number of particles per cell from the HDF5 file and re-initialize the particles. However, this function does NOT currently store the energy
+  //       (or other parameters of interest) in the HDF5 file. Only the number of particles is available. I don't expect this function to be widely used
+  //       by anyone.
+  // clang-format on
 
   // I call this _particlesF to distinguish it from the "particle" checkpointing method.
   const std::string str = m_name + "_particlesF";
@@ -1247,10 +1248,10 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::readCheckpointLevelParticles" << endl;
   }
 
-  // TLDR: This function is the one that reads SimpleItoParticles from the checkpoint file and instantiates full
-  // ItoParticle's from that. Recalling
-  //       writeCheckpointLevelParticles we only stored the weight, position, and energy of the particles. Here we read
-  //       that information back in.
+  // clang-format off
+  // TLDR: This function is the one that reads SimpleItoParticles from the checkpoint file and instantiates full ItoParticle's from that. Recalling
+  //       writeCheckpointLevelParticles we only stored the weight, position, and energy of the particles. Here we read that information back in.
+  // clang-format on
 
   // This is the particle container that we will fill.
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
@@ -1995,17 +1996,18 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
     pout() << m_name + "::redistributeAMR" << endl;
   }
 
-  // TLDR: When we entered this routine we had a_phi = m_i/dV but we actually want to have phi = m_i/(kappa*dV) so as to
-  // have
-  //       meaningful densities. Thus, we can either run with a_phi just as it is, in which case it must be interpreted
-  //       as an extended state into the EB. That is perfectly fine. But we can also use O(1) accurate redistribution in
-  //       order to make the scheme completely conservative, if that is important.
+  // clang-format off
+  // TLDR: When we entered this routine we had a_phi = m_i/dV but we actually want to have phi = m_i/(kappa*dV) so as to have
+  //       meaningful densities. Thus, we can either run with a_phi just as it is, in which case it must be interpreted as an extended
+  //       state into the EB. That is perfectly fine. But we can also use O(1) accurate redistribution in order to make the scheme
+  //       completely conservative, if that is important.
   //
-  //       If we use redistribution then we compute a hybrid update phiH = kappa*phi = a_phi in each cell. But we are
-  //       then "missing" a mass kappa*phi - kappa*phiH = a_phi(1 - kappa). This mass can be smooshed into the
-  //       neighboring grid cells. The code below does even more than that -- it can compute an update phiH = kappa*phi
-  //       + (1-kappa)*phiNC where phiNC is a non-conservative type of update. In this case the mass loss is just like
-  //       for fluid models: dM = kappa*(1-kappa)(phiC - phiNC). But this update is not strictly non-negative.
+  //       If we use redistribution then we compute a hybrid update phiH = kappa*phi = a_phi in each cell. But we are then "missing"
+  //       a mass kappa*phi - kappa*phiH = a_phi(1 - kappa). This mass can be smooshed into the neighboring grid cells. The code
+  //       below does even more than that -- it can compute an update phiH = kappa*phi + (1-kappa)*phiNC where phiNC is a non-conservative
+  //       type of update. In this case the mass loss is just like for fluid models: dM = kappa*(1-kappa)(phiC - phiNC). But this update
+  //       is not strictly non-negative.
+  // clang-format on
 
   if (m_useRedistribution) {
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
@@ -2508,9 +2510,10 @@ ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
   CH_assert(a_velocityMagnitude.nComp() == 1);
   CH_assert(m_mobilityInterp == WhichMobilityInterpolation::Velocity);
 
-  // TLDR: This function computes the particle mobilities by interpolating mu*V to the particle position and then
-  // setting
+  // clang-format off
+  // TLDR: This function computes the particle mobilities by interpolating mu*V to the particle position and then setting
   //       the mobility as mu = [mu*V(Xp)]/V(Xp).
+  // clang-format on
 
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
   const Box            cellBox = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2825,9 +2828,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove) const
 
   CH_assert(a_maxCellsToMove > 0.0);
 
-  // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove
-  // during
+  // clang-format off
+  // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove during
   //       a standard Ito kernel step. This is the AMR version.
+  // clang-format on
 
   Real dt = std::numeric_limits<Real>::max();
 
@@ -2851,9 +2855,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const
 
   CH_assert(a_maxCellsToMove > 0.0);
 
-  // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove
-  // during
+  // clang-format off
+  // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove during
   //       a standard Ito kernel step. This is the level version.
+  // clang-format on
 
   Real dt = std::numeric_limits<Real>::max();
 
@@ -2885,9 +2890,10 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const Data
 
   CH_assert(a_maxCellsToMove > 0.0);
 
-  // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove
-  // during
+  // clang-format off
+  // TLDR: This routine computes the largest possible time step such that no particles move more than a_maxCellsToMove during
   //       a standard Ito kernel step. This is the patch version.
+  // clang-format on
 
   Real dt = std::numeric_limits<Real>::max();
 

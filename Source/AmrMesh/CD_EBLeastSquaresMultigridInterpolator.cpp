@@ -280,10 +280,11 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
 
   CH_assert(a_phi.nComp() > a_variables.end());
 
-  // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. This is the kernel
-  // version,
-  //       operating on a grid patch. It first does a direct kernel for regular data, and then does the interpolation
-  //       near the EB after that.
+  // clang-format off
+  // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. This is the kernel version,
+  //       operating on a grid patch. It first does a direct kernel for regular data, and then does the interpolation near the
+  //       EB after that.
+  // clang-format on
   const Real dxFine = 1.0;
   const Real dxCoar = 1.0 * m_refRat;
   const Real c1     = 2 * (dxCoar - dxFine) / (dxCoar + dxFine);

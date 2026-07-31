@@ -189,18 +189,17 @@ EddingtonSP1::parseDomainBC()
     pout() << m_name + "::parseDomainBC" << endl;
   }
 
-  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object
-  // which returns some value
-  //       anywhere in space and time on a domain edge (face). The code below simply creates those functions and
-  //       associates them with an edge (face in 3D)
+  // clang-format off
+  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
+  //       anywhere in space and time on a domain edge (face). The code below simply creates those functions and associates them with an edge (face in 3D)
   //
-  //       Because of the stationary interface of EBHelmholtzOp and the transient interface of the radiative transfer
-  //       solvers, we capture the time by solver time (RtSolver::m_time) by reference in these functions. That allows
-  //       us to pass the functions in as stationary-looking functions in EBHelmholtzOp, yet retain transient BCs.
+  //       Because of the stationary interface of EBHelmholtzOp and the transient interface of the radiative transfer solvers, we capture the time by solver
+  //       time (RtSolver::m_time) by reference in these functions. That allows us to pass the functions in as stationary-looking functions in EBHelmholtzOp,
+  //       yet retain transient BCs.
   //
-  //       For flexibility we want to be able to specify the BC functions in two forms, using a multiplier or not. The
-  //       specification for this is e.g. "dirichlet <number>" in which case the bc function is multiplied by <number>.
-  //       Use "dirichlet_custom" to use the bc functions directly.
+  //       For flexibility we want to be able to specify the BC functions in two forms, using a multiplier or not. The specification for this is e.g.
+  //       "dirichlet <number>" in which case the bc function is multiplied by <number>. Use "dirichlet_custom" to use the bc functions directly.
+  // clang-format on
 
   ParmParse pp(m_className.c_str());
 
@@ -975,10 +974,10 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   a_helmBcoIrreg.setVal(std::numeric_limits<Real>::max());
 #endif
 
-  // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa,
-  // B = 1/(3*kappa). We happen to know that
-  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces"
-  //       around the B-coefficient grid patch.
+  // clang-format off
+  // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa, B = 1/(3*kappa). We happen to know that
+  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
+  // clang-format on
 
   const RealVect probLo = m_amr->getProbLo();
   const Real     dx     = m_amr->getDx()[a_lvl];

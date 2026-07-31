@@ -592,9 +592,10 @@ AmrMesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, con
 
   CH_assert(a_lmin >= 0);
 
-  // TLDR: This reallocates data from a_lmin on the same realm as before. Phase needs to be specified because
-  // EBAMRCellData does not know about phases.
+  // clang-format off
+  // TLDR: This reallocates data from a_lmin on the same realm as before. Phase needs to be specified because EBAMRCellData does not know about phases.
   //       Data under a_lmin is not touched.
+  // clang-format on
 
   const std::string a_realm = a_data.getRealm();
 
@@ -1386,15 +1387,15 @@ AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
     pout() << "AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)" << endl;
   }
 
-  // TLDR: This routine first computes the cell-centered gradient and it averages that to faces. For regular cells this
-  // will yield
-  //       an 8-point stencil in 2D. We want to reduce that to a six-point stencil in 2D so that the normal derivative
-  //       does not reach over a differencing distance of 2*dx (which the tangential derivatives do). So, after
-  //       averaging the cell-centered gradient to faces we replace the component normal to the face with its tighter
-  //       stencil variant.
+  // clang-format off
+  // TLDR: This routine first computes the cell-centered gradient and it averages that to faces. For regular cells this will yield
+  //       an 8-point stencil in 2D. We want to reduce that to a six-point stencil in 2D so that the normal derivative does not reach
+  //       over a differencing distance of 2*dx (which the tangential derivatives do). So, after averaging the cell-centered gradient to
+  //       faces we replace the component normal to the face with its tighter stencil variant.
   //
-  //       Finally, we set the coarse-face gradients to be the arithmetic average of the fine faces. We do this to avoid
-  //       having stencils that reach under the embedded boundary (where bogus data could be found).
+  //       Finally, we set the coarse-face gradients to be the arithmetic average of the fine faces. We do this to avoid having stencils
+  //       that reach under the embedded boundary (where bogus data could be found).
+  // clang-format on
 
   CH_assert(a_gradient[0]->nComp() == SpaceDim);
   CH_assert(a_phi[0]->nComp() == 1);
@@ -2590,10 +2591,11 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
     pout() << "AmrMesh::setGrids(Vector<Vector<Box> >, std::map<string, Vector<Vector<long int> >)" << endl;
   }
 
-  // TLDR: This routine is called by driver when restarting from an HDF5 file. The boxes are the same for all realms,
-  // but
-  //       the restart feature can use checkpointed loads. These are read from file and sent to this routine so we can
-  //       call LoadBalancing.
+  // clang-format off
+  // TLDR: This routine is called by driver when restarting from an HDF5 file. The boxes are the same for all realms, but
+  //       the restart feature can use checkpointed loads. These are read from file and sent to this routine so we can call
+  //       LoadBalancing.
+  // clang-format on
 
   const int lmin = 0;
 

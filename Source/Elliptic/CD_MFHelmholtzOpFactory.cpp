@@ -206,10 +206,11 @@ MFHelmholtzOpFactory::defineJump()
 {
   CH_TIME("MFHelmholtzOpFactory::defineJump()");
 
-  // TLDR: This defines m_amrJump on the first phase (gas phase). This is irregular data intended to be interfaced into
-  // the
+  // clang-format off
+  // TLDR: This defines m_amrJump on the first phase (gas phase). This is irregular data intended to be interfaced into the
   //       boundary condition class. When we match the BC we get the data from here (the gas phase). Note that we define
   //       m_amrJump on all irregular cells, but the operators will do matching on a subset of them.
+  // clang-format on
 
   m_amrJump.resize(m_numAmrLevels);
 

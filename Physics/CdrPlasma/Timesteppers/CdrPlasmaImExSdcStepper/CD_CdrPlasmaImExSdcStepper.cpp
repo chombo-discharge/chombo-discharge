@@ -558,12 +558,14 @@ CdrPlasmaImExSdcStepper::advance(const Real a_dt)
     pout() << "CdrPlasmaImExSdcStepper::advance(Real)" << endl;
   }
 
+  // clang-format off
   // ---------------------------------------------------------------------------------------------------
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
-  // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit. If we do adaptive_dt, we
-  // should also a
+  // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit. If we do adaptive_dt, we should
+  // also a
+  // clang-format on
   CdrPlasmaImExSdcStepper::copyCdrToPhiM0();
   CdrPlasmaImExSdcStepper::copySigmaToM0();
   CdrPlasmaImExSdcStepper::computeFD0();

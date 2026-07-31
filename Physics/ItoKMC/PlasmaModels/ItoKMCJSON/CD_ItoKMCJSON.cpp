@@ -313,9 +313,10 @@ ItoKMCJSON::initializeGasLaw()
 
   const std::string baseError = m_className + "::initializeGasLaw";
 
-  // TLDR: This routine exists for populating m_gasPressure, m_gasTemperature, and m_gasNumberDensity. If you want to
-  // add a new gas law, this
+  // clang-format off
+  // TLDR: This routine exists for populating m_gasPressure, m_gasTemperature, and m_gasNumberDensity. If you want to add a new gas law, this
   //       routine is where you would do it.
+  // clang-format on
 
   if (!(m_json["gas"]["law"].contains("id"))) {
     this->throwParserError(baseError + " but field 'gas/law/id' is missing");
@@ -876,9 +877,10 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string& a_coeff)
     pout() << m_className + "::initializeAutomaticTownsend" << endl;
   }
 
-  // TLDR: This computes the alpha-coefficient as alpha/N = k_k/(mu * E) where k_k is the rate coefficient for purely
-  // ionizing reactions that
+  // clang-format off
+  // TLDR: This computes the alpha-coefficient as alpha/N = k_k/(mu * E) where k_k is the rate coefficient for purely ionizing reactions that
   //       lead to electron growth (similarly is done for eta)
+  // clang-format on
 
   std::pair<bool, std::string> whichCoeff;
 
@@ -2683,19 +2685,18 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     pout() << m_className + "::parsePlasmaReactionRate" << endl;
   }
 
-  // TLDR: ItoKMCPhysics uses KMCDualStateReaction which computes propensities for reactions S + S -> null as a = 0.5 *
-  // c * X * (X-1), where c is the
-  //       "rate" in the KMC sense. This is correct since there are 0.5 * X * (X-1) distinct pairs of particles. But
-  //       ItoKMCJSON expects that the input rates corresponding to the rates in the reaction rate equation, so for S +
-  //       S -> null we would have dn/dt = -2*k*n*n, or dX/dt = -(2k/dV) * X * X. On the other hand, the deterministic
-  //       limit of the tau-leaping equation becomes dX/dt = -2 * a = c*X*(X-1). For consistency we must therefore have
-  //       c = 2*k/dV. Likewise, we would have c = k/dV for the reaction S1 + S2 => null (S1 and S2 being different
-  //       species). In this latter case we do not need to account for the scaling.
+  // clang-format off
+  // TLDR: ItoKMCPhysics uses KMCDualStateReaction which computes propensities for reactions S + S -> null as a = 0.5 * c * X * (X-1), where c is the
+  //       "rate" in the KMC sense. This is correct since there are 0.5 * X * (X-1) distinct pairs of particles. But ItoKMCJSON expects that the input
+  //       rates corresponding to the rates in the reaction rate equation, so for S + S -> null we would have dn/dt = -2*k*n*n, or dX/dt = -(2k/dV) * X * X.
+  //       On the other hand, the deterministic limit of the tau-leaping equation becomes dX/dt = -2 * a = c*X*(X-1). For consistency we must therefore have
+  //       c = 2*k/dV. Likewise, we would have c = k/dV for the reaction S1 + S2 => null (S1 and S2 being different species). In this latter case we do not
+  //       need to account for the scaling.
   //
-  //       This subtle scaling is important for consistency between the KMC algorithm and the reaction rate equation.
-  //       Because KMCDualStateReaction operates using the microscopic rates, we must add this scaling back in. Also
-  //       note that this scaling does not matter if background species enter on the left hand side because the rates
-  //       are simply absorbed into the rate itself.
+  //       This subtle scaling is important for consistency between the KMC algorithm and the reaction rate equation. Because KMCDualStateReaction operates
+  //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
+  //       hand side because the rates are simply absorbed into the rate itself.
+  // clang-format on
 
   FunctionEX fluidRate = [](const Real /*E*/, const RealVect& /*x*/) -> Real {
     return 0.0;

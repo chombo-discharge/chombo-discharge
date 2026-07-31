@@ -125,12 +125,12 @@ EBFluxRedistribution::defineStencils() noexcept
 {
   CH_TIMERS("EBFluxRedistribution::defineStencils");
 
-  // TLDR: This is a bit involved since we need to define stencils on the valid cut-cells on this level. If there's an
-  // EBCF interface we
+  // clang-format off
+  // TLDR: This is a bit involved since we need to define stencils on the valid cut-cells on this level. If there's an EBCF interface we
   //       need to know about it because we don't want to:
-  //       1) Redistribute from this level into ghost cells on the other side of the coarse-fine interface. That mass
-  //       should go on the coarse level. 2) Redistribute from this level into regions covered by the finer grid. That
-  //       mass should go on the fine level instead.
+  //       1) Redistribute from this level into ghost cells on the other side of the coarse-fine interface. That mass should go on the coarse level.
+  //       2) Redistribute from this level into regions covered by the finer grid. That mass should go on the fine level instead.
+  // clang-format on
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const DataIterator&      dit   = dbl.dataIterator();

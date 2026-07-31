@@ -4406,12 +4406,12 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
     pout() << m_name + "::reconcileParticles(patch)" << endl;
   }
 
-  // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We
-  // have
-  //       already computed the number of particles in each grid cell, and we now need to generate them. To do that we
-  //       use the reconciliation routines from the physics interface, which takes the per-cell responsibility for that.
-  //       The main work done in this routine is to expose the per-patch data to per-cell data that the physics
-  //       interface can then use.
+  // clang-format off
+  // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We have
+  //       already computed the number of particles in each grid cell, and we now need to generate them. To do that we use
+  //       the reconciliation routines from the physics interface, which takes the per-cell responsibility for that. The main
+  //       work done in this routine is to expose the per-patch data to per-cell data that the physics interface can then use.
+  // clang-format on
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
   const int numCdrSpecies    = m_physics->getNumCdrSpecies();
@@ -5880,10 +5880,11 @@ ItoKMCStepper<I, C, R, F>::loadBalanceFluidRealm(Vector<Vector<int>>&           
   CH_assert(m_loadBalanceFluid);
   CH_assert(a_realm == m_fluidRealm);
 
-  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This
-  // means that the load
-  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic,
-  //       and enlargened stencils near the embedded boundary.
+  // clang-format off
+  // TLDR: This code tries to compute a load for each grid patch by applying a relaxation operator to each box. This means that the load
+  //       should be a decent estimate that takes into account boundary conditions, coarse-fine interface arithmetic, and enlargened stencils
+  //       near the embedded boundary.
+  // clang-format on
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
@@ -5977,21 +5978,21 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
   CH_assert(m_EdotJ.getRealm() == m_fluidRealm);
 
-  // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves
-  // from
-  //       position A to position B, excluding friction from collision with other molecules. We compute this energy
-  //       increase as
+  // clang-format off
+  // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves from
+  //       position A to position B, excluding friction from collision with other molecules. We compute this energy increase as
   //
   //          q * V(B) - V(A)
   //
   //       which means that the energy rate is q*(V(B) - V(A))/a_dt.
   //
-  //       We simply assign this factor to the particles and then deposit them on the mesh. However, this is more
-  //       complex than it sounds because the particles m_EdotJ live on different realms. The way we do this is that we
-  //       copy the potential over into the particle realm and we interpolate V(B) and V(A) onto some storage in the
-  //       particle container. We then assign an effective weight w * [V(B) - V(A)] to the particles which we deposit
-  //       onto the mesh using the appropriate deposition scheme that the user has assgned.
+  //       We simply assign this factor to the particles and then deposit them on the mesh. However, this is more complex than
+  //       it sounds because the particles m_EdotJ live on different realms. The way we do this is that we copy the potential
+  //       over into the particle realm and we interpolate V(B) and V(A) onto some storage in the particle container. We then
+  //       assign an effective weight w * [V(B) - V(A)] to the particles which we deposit onto the mesh using the appropriate
+  //       deposition scheme that the user has assgned.
   //
+  // clang-format on
 
   // Allocate a transient SoA particle holder. The container owns the weight and position; the payload holds
   // V(A), V(B), and the per-component "other" position (alt) so we can interpolate the potential at both A and B.

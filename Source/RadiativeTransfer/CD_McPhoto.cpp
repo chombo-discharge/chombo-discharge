@@ -51,19 +51,17 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
     pout() << m_name + "::advance" << endl;
   }
 
-  // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is
-  // primarily
-  //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will
-  //       use a different approach and will probably fill m_sourcePhotons through a kinetic interface and use
-  //       advancePhotonsInstantaneous or advancePhotonsTransient.
+  // clang-format off
+  // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is primarily
+  //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will use a different
+  //       approach and will probably fill m_sourcePhotons through a kinetic interface and use advancePhotonsInstantaneous or advancePhotonsTransient.
   //
-  //       If you find yourself calling this routine with a pure particle method, you're may be doing something you
-  //       shouldn't....
+  //       If you find yourself calling this routine with a pure particle method, you're may be doing something you shouldn't....
   //
-  //       This routine is a bit convoluted because it permits sub-sampling of the photons generated in the grid cells.
-  //       That is, instead of generating all photons at once and moving them, we divide them into packets and advance
-  //       the packets independently of one another. This results in additional MPI calls, but can reduce memory when
-  //       many photons are generated per cell.
+  //       This routine is a bit convoluted because it permits sub-sampling of the photons generated in the grid cells. That is, instead of generating
+  //       all photons at once and moving them, we divide them into packets and advance the packets independently of one another. This results in additional
+  //       MPI calls, but can reduce memory when many photons are generated per cell.
+  // clang-format on
 
   DataOps::setValue(a_phi, 0.0);
 
@@ -75,12 +73,12 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
   m_amr->allocate(numPhysPhotonsTotal, m_realm, m_phase, 1);
   m_amr->allocate(numPhysPhotonsPacket, m_realm, m_phase, m_numSamplingPackets);
 
-  // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before
-  // transport over dt,
+  // clang-format off
+  // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before transport over dt,
   //         and m_ebPhotons and m_domainPhotons are photons that strike the EB or domain boundaries.
   //
-  //         If we're doing an instantaneous solver, do a safety cleanout of m_photons first (past photons have been
-  //         absorbed on the mesh).
+  //         If we're doing an instantaneous solver, do a safety cleanout of m_photons first (past photons have been absorbed on the mesh).
+  // clang-format on
   if (m_instantaneous) {
     this->clear(m_photons);
   }

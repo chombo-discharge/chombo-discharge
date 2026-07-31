@@ -106,9 +106,10 @@ BaseIF*
 RoundedCylinderIF::makeBaseIF3D()
 {
 
-  // TLDR: Construct m_baseIF from a main cylinderk.  on each we put a torus and then a smaller cylinder between
-  // everything. Default orientation
+  // clang-format off
+  // TLDR: Construct m_baseIF from a main cylinderk.  on each we put a torus and then a smaller cylinder between everything. Default orientation
   //       is along +z.
+  // clang-format on
 
   const RealVect up = BASISREALV(SpaceDim - 1);
 
