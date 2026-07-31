@@ -33,11 +33,6 @@ namespace ParticleManagement {
 
   namespace detail {
 
-    // ---------------------------------------------------------------------------------------------
-    // Private helpers (not declared in CD_NearestNeighborParticleMerge.H -- implementation details
-    // only, consumed exclusively within this file).
-    // ---------------------------------------------------------------------------------------------
-
     /**
       @brief Squared Euclidean distance between two physical positions.
       @param[in] a_a First position.
@@ -48,10 +43,13 @@ namespace ParticleManagement {
     nnMergeDistSquared(const RealVect& a_a, const RealVect& a_b) noexcept
     {
       Real d2 = 0.0;
+
       for (int dir = 0; dir < SpaceDim; dir++) {
         const Real delta = a_a[dir] - a_b[dir];
+
         d2 += delta * delta;
       }
+
       return d2;
     }
 
@@ -66,9 +64,11 @@ namespace ParticleManagement {
     nnMergeChebyshevCellDistance(const IntVect& a_a, const IntVect& a_b) noexcept
     {
       int dist = 0;
+
       for (int dir = 0; dir < SpaceDim; dir++) {
         dist = std::max(dist, std::abs(a_a[dir] - a_b[dir]));
       }
+
       return dist;
     }
 
@@ -123,6 +123,7 @@ namespace ParticleManagement {
                             Real&           a_mergedWeight) noexcept
     {
       a_mergedWeight = a_weightA + a_weightB;
+
       for (int dir = 0; dir < SpaceDim; dir++) {
         a_mergedPos[dir] = (a_posA[dir] * a_weightA + a_posB[dir] * a_weightB) / a_mergedWeight;
       }
@@ -152,6 +153,7 @@ namespace ParticleManagement {
       }
 
       std::vector<int> sendCounts(numRanks, 0);
+
       for (int r = 0; r < numRanks; r++) {
         sendCounts[r] = static_cast<int>(a_sendByRank[r].size());
       }
@@ -164,6 +166,7 @@ namespace ParticleManagement {
 
       long stot = 0;
       long rtot = 0;
+
       for (int r = 0; r < numRanks; r++) {
         sdispl[r] = static_cast<int>(stot);
         stot += sendCounts[r];
@@ -173,6 +176,7 @@ namespace ParticleManagement {
       }
 
       std::vector<T> sflat(stot);
+
       for (int r = 0; r < numRanks; r++) {
         if (sendCounts[r] > 0) {
           std::copy(a_sendByRank[r].begin(), a_sendByRank[r].end(), sflat.begin() + sdispl[r]);
@@ -186,6 +190,7 @@ namespace ParticleManagement {
       std::vector<int> recvBytes(numRanks);
       std::vector<int> sdisplBytes(numRanks);
       std::vector<int> rdisplBytes(numRanks);
+
       for (int r = 0; r < numRanks; r++) {
         sendBytes[r]   = sendCounts[r] * static_cast<int>(sizeof(T));
         recvBytes[r]   = recvCounts[r] * static_cast<int>(sizeof(T));
@@ -209,17 +214,15 @@ namespace ParticleManagement {
 #endif
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // Public API (declared in CD_NearestNeighborParticleMerge.H).
-    // ---------------------------------------------------------------------------------------------
-
     inline IntVect
     cellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept
     {
       IntVect iv;
+
       for (int dir = 0; dir < SpaceDim; dir++) {
         iv[dir] = static_cast<int>(std::floor((a_position[dir] - a_probLo[dir]) / a_dx[dir]));
       }
+
       return iv;
     }
 
@@ -257,19 +260,24 @@ namespace ParticleManagement {
       // low-average patch can still hold one over-threshold cell).
       std::unordered_map<NNWalkCell, int, LevelTiles::TileHasher> cellCount;
       cellCount.reserve(total);
+
       for (const auto& p : a_localValid) {
         cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
       }
+
       for (const auto& p : a_ghosts) {
         cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
       }
+
       bool anyCellCrowded = false;
+
       for (const auto& kv : cellCount) {
         if (kv.second > a_numParticlesPerCellThresh) {
           anyCellCrowded = true;
           break;
         }
       }
+
       if (!anyCellCrowded) {
         return;
       }
@@ -277,22 +285,29 @@ namespace ParticleManagement {
       // Assemble the whole-patch point cloud (local valid first, then ghosts). Metadata is each
       // point's globalID; a hit's cloud index decodes ownership (< nLocal => local valid, else
       // ghost). Positions are embedded into 3D (z = 0 in 2D) for EBGeometry's Vec3T.
-      const std::size_t                    nLocal = a_localValid.size();
+      const std::size_t nLocal = a_localValid.size();
+
       std::vector<EBGeometry::Vec3T<Real>> positions;
       std::vector<ParticleID>              metadata;
+
       positions.reserve(total);
       metadata.reserve(total);
+
       auto pushPoint = [&](const NNMergeParticle<Packed>& a_p) {
         EBGeometry::Vec3T<Real> v(0.0, 0.0, 0.0);
+
         for (int dir = 0; dir < SpaceDim; dir++) {
           v[dir] = a_p.position[dir];
         }
+
         positions.push_back(v);
         metadata.push_back(a_p.globalID);
       };
+
       for (const auto& p : a_localValid) {
         pushPoint(p);
       }
+
       for (const auto& p : a_ghosts) {
         pushPoint(p);
       }
@@ -335,9 +350,11 @@ namespace ParticleManagement {
       std::optional<Real> maxDistBoundSquared;
       if (a_maxCellDistance.has_value()) {
         Real minDx = a_dx[0];
+
         for (int dir = 1; dir < SpaceDim; dir++) {
           minDx = std::min(minDx, a_dx[dir]);
         }
+
         const Real bound = static_cast<Real>(a_maxCellDistance.value()) * minDx *
                            std::sqrt(static_cast<Real>(SpaceDim));
         maxDistBoundSquared = bound * bound;
@@ -376,13 +393,16 @@ namespace ParticleManagement {
           if (static_cast<int>(best.size()) == K && a_d2 >= best.back().d2) {
             return;
           }
+
           const auto insertPos = std::upper_bound(best.begin(),
                                                   best.end(),
                                                   a_d2,
                                                   [](const Real a_val, const RankedCandidate& a_c) {
                                                     return a_val < a_c.d2;
                                                   });
+
           best.insert(insertPos, RankedCandidate{a_d2, a_idx, a_isLocal});
+
           if (static_cast<int>(best.size()) > K) {
             best.pop_back();
           }
@@ -396,12 +416,15 @@ namespace ParticleManagement {
         // the distance-sorted k-nearest by the bound yields exactly the within-bound k-nearest.
         // pointCloud is null only for a patch with no crowded cell, which generates no query.
         if (a_spatialIndex.pointCloud) {
-          using PCBVH                = EBGeometry::PointCloudBVH<Real, ParticleID>;
+          using PCBVH = EBGeometry::PointCloudBVH<Real, ParticleID>;
+
           const std::size_t nLocalPC = a_spatialIndex.pointCloudNLocal;
           const int         Kgraph   = a_spatialIndex.pointCloudK;
           const std::size_t rowStart = qi * static_cast<std::size_t>(Kgraph);
+
           for (int h = 0; h < Kgraph; h++) {
             const typename PCBVH::Hit& hit = a_spatialIndex.pointCloudGraph[rowStart + static_cast<std::size_t>(h)];
+
             // A hit with distanceSquared == max() is an empty slot (fewer than k neighbors existed).
             if (hit.distanceSquared == std::numeric_limits<Real>::max()) {
               break;
@@ -410,13 +433,17 @@ namespace ParticleManagement {
             const bool        isLocal = c < nLocalPC;
             const std::size_t idx     = isLocal ? c : c - nLocalPC;
             const Real        d2      = hit.distanceSquared;
+
             if (maxDistBoundSquared.has_value() && d2 > maxDistBoundSquared.value()) {
               continue;
             }
+
             const ParticleID gid = isLocal ? a_localValid[idx].globalID : a_ghosts[idx].globalID;
+
             if (a_consumedIDs.count(gid) > 0) {
               continue;
             }
+
             considerCandidate(d2, idx, isLocal);
           }
         }
@@ -426,6 +453,7 @@ namespace ParticleManagement {
         }
 
         NNMergeEdge<Packed> edge;
+
         edge.distanceSquared  = best[0].d2;
         edge.queryID          = q.globalID;
         edge.candidateID      = best[0].isLocal ? a_localValid[best[0].idx].globalID : a_ghosts[best[0].idx].globalID;
@@ -433,9 +461,11 @@ namespace ParticleManagement {
 
         for (std::size_t k = 1; k < best.size(); k++) {
           NNFallbackCandidate fc;
+
           fc.candidateID      = best[k].isLocal ? a_localValid[best[k].idx].globalID : a_ghosts[best[k].idx].globalID;
           fc.distanceSquared  = best[k].d2;
           fc.candidateIsLocal = best[k].isLocal;
+
           edge.fallbackCandidates.push_back(fc);
         }
 
@@ -445,23 +475,22 @@ namespace ParticleManagement {
 
     template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
     inline void
-    resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
-                       const std::unordered_map<ParticleID, bool>&                    a_exposed,
-                       const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                       const Combine&                                                 a_combine,
-                       std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
-                       std::unordered_set<ParticleID>&                                a_consumedIDs,
-                       const int                                                      a_numParticlesPerCellThresh,
-                       std::unordered_set<ParticleID>&                                a_hasOutgoingCommitment,
-                       std::vector<NNMergeResult<Packed>>&                            a_results,
-                       const RealVect&                                                a_probLo,
-                       const std::vector<RealVect>&                                   a_dxByLevel,
-                       const PosValid&                                                a_isPositionValid,
-                       const Allocator&                                               a_allocateID,
-                       const int                                                      a_maxFallbackCandidates,
-                       const std::optional<int>                                       a_maxCellDistance,
-                       unsigned long long*                                            a_crossLevelMergeCount,
-                       const OnMerge&                                                 a_onMergeCommitted) noexcept
+    resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                         a_edges,
+                       const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                       const Combine&                                                  a_combine,
+                       std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
+                       std::unordered_set<ParticleID>&                                 a_consumedIDs,
+                       const int                                                       a_numParticlesPerCellThresh,
+                       std::unordered_set<ParticleID>&                                 a_hasOutgoingCommitment,
+                       std::vector<NNMergeResult<Packed>>&                             a_results,
+                       const RealVect&                                                 a_probLo,
+                       const std::vector<RealVect>&                                    a_dxByLevel,
+                       const PosValid&                                                 a_isPositionValid,
+                       const Allocator&                                                a_allocateID,
+                       const int                                                       a_maxFallbackCandidates,
+                       const std::optional<int>                                        a_maxCellDistance,
+                       unsigned long long*                                             a_crossLevelMergeCount,
+                       const OnMerge&                                                  a_onMergeCommitted) noexcept
     {
       CH_TIME("ParticleManagement::resolveTrivialTier");
 
@@ -471,16 +500,20 @@ namespace ParticleManagement {
       //    docs for why the deterministic tiebreak is required, not optional.
       std::vector<const NNMergeEdge<Packed>*> sorted;
       sorted.reserve(a_edges.size());
+
       for (const auto& e : a_edges) {
         sorted.push_back(&e);
       }
+
       std::sort(sorted.begin(), sorted.end(), [](const NNMergeEdge<Packed>* a_a, const NNMergeEdge<Packed>* a_b) {
         if (a_a->distanceSquared != a_b->distanceSquared) {
           return a_a->distanceSquared < a_b->distanceSquared;
         }
+
         if (a_a->queryID != a_b->queryID) {
           return a_a->queryID < a_b->queryID;
         }
+
         return a_a->candidateID < a_b->candidateID;
       });
 
@@ -492,20 +525,21 @@ namespace ParticleManagement {
           continue;
         }
 
-        const auto queryExposedIt = a_exposed.find(edge.queryID);
-        const bool queryExposed   = (queryExposedIt != a_exposed.end()) && queryExposedIt->second;
-
         const auto queryDataIt = a_particlesByID.find(edge.queryID);
+
         if (queryDataIt == a_particlesByID.end()) {
           continue;
         }
-        const NNMergeParticle<Packed>& query = queryDataIt->second;
+
+        const NNMergeParticle<Packed>& query        = queryDataIt->second.particle;
+        const bool                     queryExposed = queryDataIt->second.exposed;
 
         bool resolved           = false; // an outcome (commit, or a legitimate "leave unmatched") was reached
         bool originalStale      = false;
         bool originalIneligible = false; // too far or invalid position, evaluated on the ORIGINAL candidate
 
         const int numAttempts = a_maxFallbackCandidates + 1;
+
         for (int attempt = 0; attempt < numAttempts; attempt++) {
           ParticleID candidateID;
           bool       candidateIsLocal;
@@ -516,9 +550,11 @@ namespace ParticleManagement {
           }
           else {
             const std::size_t fbIdx = static_cast<std::size_t>(attempt - 1);
+
             if (fbIdx >= edge.fallbackCandidates.size()) {
               break;
             }
+
             candidateID      = edge.fallbackCandidates[fbIdx].candidateID;
             candidateIsLocal = edge.fallbackCandidates[fbIdx].candidateIsLocal;
           }
@@ -527,22 +563,21 @@ namespace ParticleManagement {
           const bool candidateBusy  = candidateIsLocal && !candidateStale &&
                                      (a_hasOutgoingCommitment.count(candidateID) > 0);
 
-          bool candidateExposed = false;
-          if (candidateIsLocal) {
-            const auto exposedIt = a_exposed.find(candidateID);
-            candidateExposed     = (exposedIt != a_exposed.end()) && exposedIt->second;
-          }
-
           const auto candDataIt      = a_particlesByID.find(candidateID);
           const bool candidateExists = candDataIt != a_particlesByID.end();
 
-          bool     tooFar     = false;
-          bool     invalidPos = false;
+          // exposed is meaningful only for local candidates (ghosts carry false); the single
+          // particlesByID lookup above now also yields it, so there is no separate exposed map.
+          const bool candidateExposed = candidateIsLocal && candidateExists && candDataIt->second.exposed;
+
+          bool tooFar     = false;
+          bool invalidPos = false;
+
           RealVect mergedPos(D_DECL(0.0, 0.0, 0.0));
           Real     mergedWeight = 0.0;
 
           if (!candidateStale && candidateExists) {
-            const NNMergeParticle<Packed>& cand = candDataIt->second;
+            const NNMergeParticle<Packed>& cand = candDataIt->second.particle;
 
             if (a_maxCellDistance.has_value()) {
               tooFar = nnMergeCrossLevelTooFar(query.position,
@@ -576,7 +611,7 @@ namespace ParticleManagement {
                                  !candidateExposed && !queryExposed && !ineligible;
 
           if (trivialOk) {
-            const NNMergeParticle<Packed>& cand = candDataIt->second;
+            const NNMergeParticle<Packed>& cand = candDataIt->second.particle;
 
             // Each participant's OWN level's dx -- see a_dxByLevel's docs. The cell key must match
             // the one a_liveCellCount was populated under for that participant, so a single shared
@@ -586,12 +621,14 @@ namespace ParticleManagement {
 
             const auto qCountIt = a_liveCellCount.find(qKey);
             const auto cCountIt = a_liveCellCount.find(cKey);
-            const int  qCount   = (qCountIt != a_liveCellCount.end()) ? qCountIt->second : 0;
-            const int  cCount   = (cCountIt != a_liveCellCount.end()) ? cCountIt->second : 0;
+
+            const int qCount = (qCountIt != a_liveCellCount.end()) ? qCountIt->second : 0;
+            const int cCount = (cCountIt != a_liveCellCount.end()) ? cCountIt->second : 0;
 
             if (qCount > a_numParticlesPerCellThresh && cCount > a_numParticlesPerCellThresh) {
               // d. COMMIT.
               NNMergeResult<Packed> result;
+
               result.firstID  = query.globalID;
               result.secondID = cand.globalID;
 
@@ -599,6 +636,7 @@ namespace ParticleManagement {
               result.merged.weight    = mergedWeight;
               result.merged.globalID  = a_allocateID();
               result.merged.ownerRank = query.ownerRank;
+
               // Provisional -- placeMergedParticles() determines the TRUE destination level (and
               // patch/rank) from the merged position via findDestination(), never from this field.
               result.merged.level   = query.level;
@@ -615,6 +653,7 @@ namespace ParticleManagement {
               if (a_crossLevelMergeCount != nullptr && query.level != cand.level) {
                 (*a_crossLevelMergeCount)++;
               }
+
               a_onMergeCommitted(query, cand, result.merged);
 
               resolved = true;
@@ -643,11 +682,11 @@ namespace ParticleManagement {
 
     template <typename Packed>
     inline void
-    generateProposals(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
-                      const std::unordered_set<ParticleID>&                          a_hasOutgoingCommitment,
-                      const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                      const int                                                      a_numRanks,
-                      std::vector<std::vector<NNMergeProposal<Packed>>>&             a_proposalsByDestRank) noexcept
+    generateProposals(const std::vector<NNMergeEdge<Packed>>&                         a_edges,
+                      const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
+                      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                      const int                                                       a_numRanks,
+                      std::vector<std::vector<NNMergeProposal<Packed>>>&              a_proposalsByDestRank) noexcept
     {
       CH_TIME("ParticleManagement::generateProposals");
 
@@ -661,40 +700,44 @@ namespace ParticleManagement {
 
         const auto sourceIt = a_particlesByID.find(edge.queryID);
         const auto targetIt = a_particlesByID.find(edge.candidateID);
+
         if (sourceIt == a_particlesByID.end() || targetIt == a_particlesByID.end()) {
           continue;
         }
 
         NNMergeProposal<Packed> proposal;
-        proposal.source          = sourceIt->second;
+
+        proposal.source          = sourceIt->second.particle;
         proposal.targetID        = edge.candidateID;
         proposal.distanceSquared = edge.distanceSquared;
 
-        const int destRank = static_cast<int>(targetIt->second.ownerRank);
+        const int destRank = static_cast<int>(targetIt->second.particle.ownerRank);
+
         CH_assert(destRank >= 0 && destRank < a_numRanks);
+
         a_proposalsByDestRank[destRank].push_back(proposal);
       }
     }
 
     template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
     inline void
-    judgeProposals(const std::vector<NNMergeProposal<Packed>>&                    a_incomingProposals,
-                   const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                   const std::unordered_set<ParticleID>&                          a_consumedIDs,
-                   const std::unordered_set<ParticleID>&                          a_hasOutgoingCommitment,
-                   const std::map<ParticleID, ParticleID>&                        a_outgoingTargetOf,
-                   const Combine&                                                 a_combine,
-                   std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
-                   const int                                                      a_numParticlesPerCellThresh,
-                   const RealVect&                                                a_probLo,
-                   const std::vector<RealVect>&                                   a_dxByLevel,
-                   const PosValid&                                                a_isPositionValid,
-                   const Allocator&                                               a_allocateID,
-                   std::vector<NNMergeResult<Packed>>&                            a_results,
-                   std::vector<std::vector<NNMergeVerdict>>&                      a_verdictsByDestRank,
-                   const std::optional<int>                                       a_maxCellDistance,
-                   unsigned long long*                                            a_crossLevelMergeCount,
-                   const OnMerge&                                                 a_onMergeCommitted) noexcept
+    judgeProposals(const std::vector<NNMergeProposal<Packed>>&                     a_incomingProposals,
+                   const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                   const std::unordered_set<ParticleID>&                           a_consumedIDs,
+                   const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
+                   const std::map<ParticleID, ParticleID>&                         a_outgoingTargetOf,
+                   const Combine&                                                  a_combine,
+                   std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
+                   const int                                                       a_numParticlesPerCellThresh,
+                   const RealVect&                                                 a_probLo,
+                   const std::vector<RealVect>&                                    a_dxByLevel,
+                   const PosValid&                                                 a_isPositionValid,
+                   const Allocator&                                                a_allocateID,
+                   std::vector<NNMergeResult<Packed>>&                             a_results,
+                   std::vector<std::vector<NNMergeVerdict>>&                       a_verdictsByDestRank,
+                   const std::optional<int>                                        a_maxCellDistance,
+                   unsigned long long*                                             a_crossLevelMergeCount,
+                   const OnMerge&                                                  a_onMergeCommitted) noexcept
     {
       CH_TIME("ParticleManagement::judgeProposals");
 
@@ -705,6 +748,7 @@ namespace ParticleManagement {
 
       // 1. Group incoming proposals by target id.
       std::map<ParticleID, std::vector<const NNMergeProposal<Packed>*>> byTarget;
+
       for (const auto& p : a_incomingProposals) {
         byTarget[p.targetID].push_back(&p);
       }
@@ -723,12 +767,14 @@ namespace ParticleManagement {
         auto&            proposals = kv.second;
 
         const auto targetDataIt = a_particlesByID.find(targetID);
+
         if (targetDataIt == a_particlesByID.end() || a_consumedIDs.count(targetID) > 0) {
           // Target no longer alive -- defensive skip, reject every incoming proposal.
           for (const NNMergeProposal<Packed>* p : proposals) {
             const int destRank = static_cast<int>(p->source.ownerRank);
             a_verdictsByDestRank[destRank].push_back(NNMergeVerdict{p->source.globalID, false});
           }
+
           continue;
         }
 
@@ -750,11 +796,13 @@ namespace ParticleManagement {
           const auto ownTargetIt = a_outgoingTargetOf.find(targetID);
           if (ownTargetIt != a_outgoingTargetOf.end()) {
             const ParticleID ownTarget = ownTargetIt->second;
+
             for (const NNMergeProposal<Packed>* p : proposals) {
               if (p->source.globalID == ownTarget) {
                 if (targetID < ownTarget) {
                   winner = p;
                 }
+
                 break;
               }
             }
@@ -770,6 +818,7 @@ namespace ParticleManagement {
         for (const NNMergeProposal<Packed>* p : proposals) {
           if (p != winner) {
             const int destRank = static_cast<int>(p->source.ownerRank);
+
             a_verdictsByDestRank[destRank].push_back(NNMergeVerdict{p->source.globalID, false});
           }
         }
@@ -780,14 +829,17 @@ namespace ParticleManagement {
         if (a_a.winner->distanceSquared != a_b.winner->distanceSquared) {
           return a_a.winner->distanceSquared < a_b.winner->distanceSquared;
         }
+
         return a_a.targetID < a_b.targetID;
       });
 
       for (const TargetDecision& decision : decisions) {
         const NNMergeProposal<Packed>& proposal = *decision.winner;
         const auto                     targetIt = a_particlesByID.find(decision.targetID);
+
         CH_assert(targetIt != a_particlesByID.end() && a_consumedIDs.count(decision.targetID) == 0);
-        const NNMergeParticle<Packed>& target = targetIt->second;
+
+        const NNMergeParticle<Packed>& target = targetIt->second.particle;
         const NNMergeParticle<Packed>& source = proposal.source;
 
         const int sourceDestRank = static_cast<int>(source.ownerRank);
@@ -795,6 +847,7 @@ namespace ParticleManagement {
         // 6. a_maxCellDistance / a_isPositionValid: a physical-validity rule, applies here exactly
         // as in resolveTrivialTier(), regardless of the mutual-match exception above.
         bool tooFar = false;
+
         if (a_maxCellDistance.has_value()) {
           tooFar = nnMergeCrossLevelTooFar(target.position,
                                            target.level,
@@ -804,6 +857,7 @@ namespace ParticleManagement {
                                            a_dxByLevel,
                                            a_maxCellDistance.value());
         }
+
         if (tooFar) {
           a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
           continue;
@@ -811,6 +865,7 @@ namespace ParticleManagement {
 
         RealVect mergedPos(D_DECL(0.0, 0.0, 0.0));
         Real     mergedWeight = 0.0;
+
         nnMergeWeightedCentroid(target.position,
                                 target.weight,
                                 source.position,
@@ -820,6 +875,7 @@ namespace ParticleManagement {
 
         if (!a_isPositionValid(mergedPos)) {
           a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
+
           continue;
         }
 
@@ -832,18 +888,22 @@ namespace ParticleManagement {
         // unknown target count.
         const NNCellKey tKey(target.level, cellKeyOf(target.position, a_probLo, a_dxByLevel[target.level]));
         const NNCellKey sKey(source.level, cellKeyOf(source.position, a_probLo, a_dxByLevel[source.level]));
-        const auto      tCountIt = a_liveCellCount.find(tKey);
-        const auto      sCountIt = a_liveCellCount.find(sKey);
-        const int       tCount   = (tCountIt != a_liveCellCount.end()) ? tCountIt->second : 0;
-        const int       sCount   = (sCountIt != a_liveCellCount.end()) ? sCountIt->second : 0;
+
+        const auto tCountIt = a_liveCellCount.find(tKey);
+        const auto sCountIt = a_liveCellCount.find(sKey);
+
+        const int tCount = (tCountIt != a_liveCellCount.end()) ? tCountIt->second : 0;
+        const int sCount = (sCountIt != a_liveCellCount.end()) ? sCountIt->second : 0;
 
         if (tCount <= a_numParticlesPerCellThresh || sCount <= a_numParticlesPerCellThresh) {
           a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
+
           continue;
         }
 
         // Accept.
         NNMergeResult<Packed> result;
+
         result.firstID  = target.globalID;
         result.secondID = source.globalID;
 
@@ -851,6 +911,7 @@ namespace ParticleManagement {
         result.merged.weight    = mergedWeight;
         result.merged.globalID  = a_allocateID();
         result.merged.ownerRank = target.ownerRank;
+
         // Provisional -- placeMergedParticles() determines the TRUE destination level (and
         // patch/rank) from the merged position via findDestination(), never from this field.
         result.merged.level   = target.level;
@@ -862,6 +923,7 @@ namespace ParticleManagement {
         // live entry for the source's cell (sCountIt found above); otherwise there is nothing local
         // to decrement -- the source's owning rank updates its own copy on the accepted verdict.
         a_liveCellCount[tKey] -= 1;
+
         if (sCountIt != a_liveCellCount.end()) {
           a_liveCellCount[sKey] -= 1;
         }
@@ -869,6 +931,7 @@ namespace ParticleManagement {
         if (a_crossLevelMergeCount != nullptr && target.level != source.level) {
           (*a_crossLevelMergeCount)++;
         }
+
         a_onMergeCommitted(target, source, result.merged);
 
         a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, true});
@@ -981,19 +1044,23 @@ namespace ParticleManagement {
     std::vector<std::vector<NNMergeParticle<Packed>>> patchGhosts;       // parallel to patchWork
     std::vector<NNSpatialIndex<Packed>>               patchSpatialIndex; // parallel to patchWork
 
-    std::unordered_map<ParticleID, NNMergeParticle<Packed>> particlesByID; // pooled, this rank's own patches
-    std::unordered_map<ParticleID, bool>                    exposed;       // pooled, this rank's own valid particles
-    std::unordered_map<NNCellKey, int, NNCellKeyHasher>     liveCellCount; // pooled, level-qualified cell key
+    // pooled over this rank's own patches; each value carries the particle plus its boundary-exposure
+    // flag (folded in from what used to be a separate exposed map, halving the gather's per-particle
+    // inserts and resolveTrivialTier()'s per-query/candidate lookups)
+    std::unordered_map<ParticleID, NNPooledParticle<Packed>> particlesByID;
+    std::unordered_map<NNCellKey, int, NNCellKeyHasher>      liveCellCount; // pooled, level-qualified cell key
 
     // Per-level dx, indexed by level -- every cell-key computation below and downstream (in
     // resolveTrivialTier()/judgeProposals()) MUST use the dx of the PARTICLE'S OWN level (see
     // NNMergeParticle::level's docs), never a single dx shared across levels.
     std::vector<RealVect> dxByLevel(finestLevel + 1);
+
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
       dxByLevel[lvl] = RealVect(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
     }
 
     constexpr int ghostWidth = 1;
+
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
       const RealVect& dx = dxByLevel[lvl];
 
@@ -1013,14 +1080,22 @@ namespace ParticleManagement {
 
         std::vector<NNMergeParticle<Packed>> localValid;
         std::vector<NNMergeParticle<Packed>> ghosts;
+
         localValid.reserve(leaf.size());
         ghosts.reserve(leaf.size());
 
-        // Reserve to the running total -- particlesByID/exposed are pooled across every patch this
-        // rank owns, so reserving up front avoids repeated rehashes as they grow. leaf.size() is
-        // O(1).
+        // Reserve to the running total -- particlesByID is pooled across every patch this rank owns,
+        // so reserving up front avoids repeated rehashes as it grows. leaf.size() is O(1).
         particlesByID.reserve(particlesByID.size() + leaf.size());
-        exposed.reserve(exposed.size() + leaf.size());
+
+        // Boundary-exposure masks for THIS patch (din), resolved ONCE here rather than per particle:
+        // din/lvl are fixed within this box, so the RefCountedPtr null-checks and the LayoutData[din]
+        // lookups are loop-invariant. A null pointer means the mask does not apply at this level (no
+        // coarser/finer neighbour, or none defined).
+        const ParticleGhostMask* maskSameDin = maskSame[lvl].isNull() ? nullptr : &(*maskSame[lvl])[din];
+        const ParticleGhostMask* maskC2FDin  = (lvl < finestLevel && !maskC2F[lvl].isNull()) ? &(*maskC2F[lvl])[din]
+                                                                                             : nullptr;
+        const ParticleGhostMask* maskF2CDin  = (lvl > 0 && !maskF2C[lvl].isNull()) ? &(*maskF2C[lvl])[din] : nullptr;
 
         for (std::size_t i = 0; i < leaf.size(); i++) {
           const bool isGhost = leaf.isGhost(i);
@@ -1031,19 +1106,26 @@ namespace ParticleManagement {
           int originLevel = lvl;
           if (isGhost) {
             switch (leaf.ghost(i)) {
-            case GhostType::Coarse:
+            case GhostType::Coarse: {
               originLevel = lvl - 1;
+
               break;
-            case GhostType::Fine:
+            }
+            case GhostType::Fine: {
               originLevel = lvl + 1;
+
               break;
-            default:
+            }
+            default: {
               originLevel = lvl; // GhostType::SameLevel
+
               break;
+            }
             }
           }
 
           NNMergeParticle<Packed> p;
+
           p.position  = leaf.position(i);
           p.weight    = leaf.weight(i);
           p.globalID  = leaf.particleID(i);
@@ -1058,21 +1140,23 @@ namespace ParticleManagement {
             // REQUIRED -- generateProposals()'s a_particlesByID contract is "every currently-alive
             // local valid particle AND every ghost". A ghost whose true owning patch is not among
             // this rank's own patches has no native entry anywhere in this loop, so without this
-            // insert generateProposals()'s lookup fails and the proposal is dropped.
-            particlesByID[p.globalID] = p;
+            // insert generateProposals()'s lookup fails and the proposal is dropped. Ghosts are never
+            // exposed (a ghost never initiates a query).
+            particlesByID[p.globalID] = NNPooledParticle<Packed>{p, false};
           }
           else {
-            localValid.push_back(p);
-            particlesByID[p.globalID] = p;
+            bool isExposed = (maskSameDin != nullptr) && isBoundaryExposed(cell, *maskSameDin);
 
-            bool isExposed = !maskSame[lvl].isNull() && isBoundaryExposed(cell, (*maskSame[lvl])[din]);
-            if (!isExposed && lvl < finestLevel && !maskC2F[lvl].isNull()) {
-              isExposed = isBoundaryExposed(cell, (*maskC2F[lvl])[din]);
+            if (!isExposed && maskC2FDin != nullptr) {
+              isExposed = isBoundaryExposed(cell, *maskC2FDin);
             }
-            if (!isExposed && lvl > 0 && !maskF2C[lvl].isNull()) {
-              isExposed = isBoundaryExposed(cell, (*maskF2C[lvl])[din]);
+
+            if (!isExposed && maskF2CDin != nullptr) {
+              isExposed = isBoundaryExposed(cell, *maskF2CDin);
             }
-            exposed[p.globalID] = isExposed;
+
+            localValid.push_back(p);
+            particlesByID[p.globalID] = NNPooledParticle<Packed>{p, isExposed};
           }
         }
 
@@ -1080,6 +1164,7 @@ namespace ParticleManagement {
         // consumption this round -- and reused across every internal a_iterateLocalTierToConvergence
         // pass via lazy deletion (see findNearestNeighborCandidates()'s docs).
         NNSpatialIndex<Packed> spatialIndex;
+
         buildNNSpatialIndex(localValid,
                             ghosts,
                             probLo,
@@ -1100,8 +1185,9 @@ namespace ParticleManagement {
     // occurrence would multiply-count it. particlesByID is keyed by globalID, so those repeated
     // occurrences collapse to one entry -- deriving the count from it counts each particle once.
     for (const auto& kv : particlesByID) {
-      const NNMergeParticle<Packed>& p    = kv.second;
+      const NNMergeParticle<Packed>& p    = kv.second.particle;
       const IntVect                  cell = cellKeyOf(p.position, probLo, dxByLevel[p.level]);
+
       liveCellCount[NNCellKey(p.level, cell)] += 1;
     }
 
@@ -1128,6 +1214,7 @@ namespace ParticleManagement {
         // was built once over them before the local-tier passes began. findNearestNeighborCandidates()
         // filters against consumedIDs itself (see its docs), so nothing is rebuilt or re-filtered here.
         std::vector<NNMergeEdge<Packed>> patchEdges;
+
         findNearestNeighborCandidates(patchLocalValid[pw],
                                       patchGhosts[pw],
                                       consumedIDs,
@@ -1144,8 +1231,8 @@ namespace ParticleManagement {
       }
 
       std::vector<NNMergeResult<Packed>> passResults;
+
       resolveTrivialTier(lastPooledEdges,
-                         exposed,
                          particlesByID,
                          a_combine,
                          liveCellCount,
@@ -1169,10 +1256,12 @@ namespace ParticleManagement {
 
     if (a_iterateLocalTierToConvergence) {
       constexpr int safetyCap = 1000;
+
       for (int iter = 0; iter < safetyCap; iter++) {
         // hasOutgoingCommitment must NOT accumulate across internal iterations -- each iteration
         // re-derives it from scratch via a fresh candidate search over the currently-alive set.
         hasOutgoingCommitment.clear();
+
         if (!runLocalTierPass()) {
           break;
         }
@@ -1224,12 +1313,14 @@ namespace ParticleManagement {
                    a_onMergeCommitted);
 
     allResults.insert(allResults.end(), judgeResults.begin(), judgeResults.end());
+
     for (const auto& r : judgeResults) {
       consumedIDs.insert(r.firstID);
     }
 
     // 6. Exchange verdicts and applyVerdicts().
     const std::vector<NNMergeVerdict> incomingVerdicts = nnMergeExchangeByRank(verdictsByDestRank);
+
     applyVerdicts(incomingVerdicts, consumedIDs);
 
     // 7. placeMergedParticles(), then exchange and apply the scatter bucket.
@@ -1240,6 +1331,7 @@ namespace ParticleManagement {
     // instead of a linear scan or a parallel implementation that could drift.
     const PositionLocator locate = [&a_particles](const RealVect& a_pos) -> NNParticleLocation {
       const auto dst = a_particles.findDestination(a_pos);
+
       return NNParticleLocation{dst.found, dst.level, dst.gridIndex, dst.rank};
     };
 
@@ -1265,6 +1357,7 @@ namespace ParticleManagement {
         }
       }
     }
+
     a_particles.clearGhostParticles();
 
     // Scatter in every locally-placed merged particle. (level, gridIndex) -> DataIndex is a single
@@ -1277,6 +1370,7 @@ namespace ParticleManagement {
       const DataIndex din = a_amr.getLevelTiles(realm)[level]->getMyGrids().at(gridIndex);
 
       ParticleSoA<P, Traits>& leaf = a_particles[level][din];
+
       for (const auto& merged : kv.second) {
         // Correct the provisional ownerRank to this rank -- placeMergedParticles() has resolved the
         // TRUE owner via findDestination() and it is this rank. The provisional value (inherited
@@ -1285,7 +1379,8 @@ namespace ParticleManagement {
         // NNMergeParticle::ownerRank, so a stale rank would send the removal to the wrong rank and
         // the particle would survive while its weight is also merged elsewhere -- created mass.
         NNMergeParticle<Packed> corrected = merged;
-        corrected.ownerRank               = myRank;
+
+        corrected.ownerRank = myRank;
         a_scatter(leaf, corrected);
       }
     }

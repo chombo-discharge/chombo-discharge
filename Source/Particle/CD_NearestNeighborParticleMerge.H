@@ -7,6 +7,11 @@
 /**
   @file   CD_NearestNeighborParticleMerge.H
   @brief  Declaration of a distributed, MPI-safe nearest-neighbor particle-merge algorithm.
+  @details This file adds a nearest-neighbor super-particle merge that is safe across patch and rank
+  boundaries. Candidates are found against a particle's full neighborhood (its own patch plus every
+  ghost, filled once per round); a pair where neither participant is reachable from outside the patch
+  resolves immediately (the "trivial tier"), and everything else goes through a propose/judge/verdict
+  protocol that is safe for any number of simultaneous cross-patch suitors.  
   @author Robert Marskar
 */
 
@@ -38,26 +43,17 @@
 
 class AmrMesh;
 
-/**
-  @brief Namespace for various particle management tools.
-  @details This file adds a nearest-neighbor super-particle merge that is safe across patch and rank
-  boundaries. Candidates are found against a particle's full neighborhood (its own patch plus every
-  ghost, filled once per round); a pair where neither participant is reachable from outside the patch
-  resolves immediately (the "trivial tier"), and everything else goes through a propose/judge/verdict
-  protocol that is safe for any number of simultaneous cross-patch suitors.
-*/
 namespace ParticleManagement {
 
   /**
-    @brief Minimal, payload-agnostic description of one particle as input to the nearest-neighbor
-    merge.
+    @brief Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.
     @details Carries what the matching/decision logic needs -- position, weight, a globally unique
     id, the particle's current owning rank, and its AMR level -- plus an opaque, caller-defined
     reconciliation payload. The matching/decision logic never inspects @c payload; it is unpacked
     only by the caller-supplied combine callback when a pair is finalized.
-    @tparam Packed Caller-defined payload type (e.g. a single Real energy for ItoParticle, or an
-    empty struct if no type-specific reconciliation data is required). Must be copyable and
-    trivially linearizable (NNMergeProposal ships two of these as one atomic pair).
+    @tparam Packed Caller-defined payload type (e.g. a single Real energy for ItoParticle, or an empty struct if no
+    type-specific reconciliation data is required). Must be copyable and trivially linearizable (NNMergeProposal ships
+    two of these as one atomic pair).
   */
   template <typename Packed>
   struct NNMergeParticle
@@ -103,6 +99,32 @@ namespace ParticleManagement {
   };
 
   namespace detail {
+
+    /**
+      @brief Pooled per-round record for one particle: the particle plus its cached boundary-exposure
+      flag.
+      @details particlesByID maps every local valid particle and every ghost to one of these. Folding
+      the exposure flag in (it used to live in a separate id->bool map filled in the same gather loop)
+      lets the gather do one hash insert per particle instead of two, and resolveTrivialTier() one
+      lookup per query/candidate instead of two. exposed is meaningful only for local valid particles;
+      ghosts always carry false (a ghost never initiates a query, and candidate-side exposure is gated
+      on locality).
+      @tparam Packed Caller-defined payload type (see NNMergeParticle).
+    */
+    template <typename Packed>
+    struct NNPooledParticle
+    {
+      /**
+        @brief The pooled particle (position/weight/ids/level/payload).
+      */
+      NNMergeParticle<Packed> particle;
+
+      /**
+        @brief Whether this local valid particle's cell touches a patch boundary (has ghost targets).
+        Always false for ghosts.
+      */
+      bool exposed = false;
+    };
 
     /**
       @brief One additional ranked candidate beyond a query's primary nearest neighbor.
@@ -271,7 +293,7 @@ namespace ParticleManagement {
     parameter (not this std::function) so it inlines on the per-merge hot path. Position and weight
     are handled by the algorithm directly (weighted centroid, summed weight); this callback produces
     only the opaque @c Packed payload (e.g. weighted-average energy for ItoParticle).
-    @param[in] a_first  First parent's payload.
+    @param[in] a_first First parent's payload.
     @param[in] a_firstWeight First parent's weight.
     @param[in] a_second Second parent's payload.
     @param[in] a_secondWeight Second parent's weight.
@@ -314,7 +336,7 @@ namespace ParticleManagement {
     data and the resulting merged particle (finalized but not yet placed; see
     placeMergedParticles()). Default is a no-op. Intended for invariant checks, e.g. recomputing the
     weighted centroid from the parents and comparing against a_merged.position.
-    @param[in] a_first  First parent (pre-merge, full data).
+    @param[in] a_first First parent (pre-merge, full data).
     @param[in] a_second Second parent (pre-merge, full data).
     @param[in] a_merged The resulting merged particle.
   */
@@ -335,8 +357,8 @@ namespace ParticleManagement {
       only meaningful together with that level; NNCellKey pairs the two so they cannot be conflated
       (pooling bare cell keys from different levels aliases coarse- and fine-level cell counts).
       @param[in] a_position Physical position.
-      @param[in] a_probLo   Physical position of the domain's low corner.
-      @param[in] a_dx       Cell spacing (per direction) of the position's OWN level.
+      @param[in] a_probLo Physical position of the domain's low corner.
+      @param[in] a_dx Cell spacing (per direction) of the position's OWN level.
       @return floor((a_position - a_probLo) / a_dx), component-wise.
     */
     inline IntVect
@@ -454,17 +476,15 @@ namespace ParticleManagement {
       a lightweight per-cell tally of the patch's own particles, keyed exactly as the crowding trigger
       (cellKeyOf(pos, probLo, dx), local and ghost alike), decides it directly.
       @tparam Packed See NNMergeParticle.
-      @param[in]  a_localValid                This patch's own full valid-particle set.
-      @param[in]  a_ghosts                    Every ghost shipped to this patch this round.
-      @param[in]  a_probLo                    Physical position of the domain's low corner.
-      @param[in]  a_dx                        Cell spacing of THIS PATCH's own level.
-      @param[in]  a_numParticlesPerCellThresh The physics-facing crowding threshold used elsewhere
-                                              this round (see mergeNearestNeighborsRound()'s own
-                                              a_numParticlesPerCellThresh) -- used ONLY for the
-                                              per-cell pre-filter above.
-      @param[in]  a_kNearest                  k = 1 + a_maxFallbackCandidates -- the neighbor count to
-                                              precompute per point into NNSpatialIndex::pointCloudGraph.
-      @param[out] a_index                     The resulting spatial index.
+      @param[in] a_localValid This patch's own full valid-particle set.
+      @param[in] a_ghosts Every ghost shipped to this patch this round.
+      @param[in] a_probLo Physical position of the domain's low corner.
+      @param[in] a_dx Cell spacing of THIS PATCH's own level.
+      @param[in] a_numParticlesPerCellThresh The physics-facing crowding threshold used elsewhere this round (see
+      mergeNearestNeighborsRound()'s own a_numParticlesPerCellThresh) -- used ONLY for the per-cell pre-filter above.
+      @param[in] a_kNearest k = 1 + a_maxFallbackCandidates -- the neighbor count to precompute per point into
+      NNSpatialIndex::pointCloudGraph.
+      @param[out] a_index The resulting spatial index.
     */
     template <typename Packed>
     inline void
@@ -484,16 +504,12 @@ namespace ParticleManagement {
       destination (@c ParticleGhostMask::numTargets()) -- not "same rank" and not "same ParticleSoA": a
       particle can be exposed to a different patch owned by the same rank, and can be exposed while its
       candidate sits in the same ParticleSoA.
-      @param[in] a_cellIndex Cell index (IntVect) of the particle, in this patch's own local frame
-                              -- i.e. whatever a_ghostMask itself is keyed by (see
-                              ParticleGhostMask::define()/addTarget()).
+      @param[in] a_cellIndex Cell index (IntVect) of the particle, in this patch's own local frame -- i.e. whatever
+      a_ghostMask itself is keyed by (see ParticleGhostMask::define()/addTarget()).
       @param[in] a_ghostMask This patch's own OUTGOING particle ghost mask, as returned by
-                              AmrMesh::getParticleGhostMask() (or getParticleGhostMaskCoarToFine()/
-                              getParticleGhostMaskFineToCoar() for cross-level exposure -- a
-                              particle can be boundary-exposed toward a coarser or finer level
-                              too, not just the same level; see mergeNearestNeighborsRound() for
-                              how the three mask kinds are combined into one boundary-exposed
-                              test).
+      AmrMesh::getParticleGhostMask() (or getParticleGhostMaskCoarToFine()/ getParticleGhostMaskFineToCoar() for
+      cross-level exposure -- a particle can be boundary-exposed toward a coarser or finer level too, not just the same
+      level; see mergeNearestNeighborsRound() for how the three mask kinds are combined into one boundary-exposed test).
       @return True iff the particle's cell has at least one outgoing ghost-shipment target.
     */
     inline bool
@@ -534,50 +550,37 @@ namespace ParticleManagement {
       without re-querying the index.
 
       @tparam Packed See NNMergeParticle.
-      @param[in]  a_localValid       This patch's own FULL valid-particle set for this round (query
-                                      sources AND candidates) -- see the contract-change note above;
-                                      not pre-filtered by a_consumedIDs.
-      @param[in]  a_ghosts           Every ghost shipped to this patch this round (candidates
-                                      only; ghosts never initiate a query) -- also not pre-filtered.
-      @param[in]  a_consumedIDs      Lazy-deletion skip set: ids already consumed earlier this
-                                      round (by an earlier a_iterateLocalTierToConvergence pass, or
-                                      an earlier query within this same pass). Checked against both
-                                      the query and every candidate encountered during the walk.
-      @param[in]  a_spatialIndex     This patch's spatial index for this round (see NNSpatialIndex),
-                                      built once via buildNNSpatialIndex() over the FULL a_localValid/
-                                      a_ghosts sets before any consumption happens.
-      @param[in]  a_liveCellCount    Live particle count (valid + ghost) per level-qualified cell
-                                      key (see NNCellKey), already reflecting this round's frozen
-                                      ghost-fill snapshot.
-      @param[in]  a_probLo           Physical position of the domain's low corner (see cellKeyOf()).
-      @param[in]  a_dx               Cell spacing of THIS PATCH's own level (see cellKeyOf()'s
-                                      warning) -- valid here because every query in a_localValid is
-                                      necessarily on this same level; candidates never have their
-                                      crowding checked by this function, so a cross-level ghost
-                                      candidate needs no dx here.
-      @param[in]  a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it
-                                      holds strictly more than this many particles.
-      @param[out] a_edges            One entry per over-threshold, currently-alive query particle
-                                      that has at least one candidate (empty if none found).
-      @param[in]  a_maxFallbackCandidates Forwarded from resolveTrivialTier() (see its docs); 0
-                                      (default) means an ordinary single-nearest query and every
-                                      edge's fallbackCandidates stays empty.
-      @param[in]  a_maxCellDistance  Same hard cutoff as resolveTrivialTier()'s own a_maxCellDistance
-                                      (see its docs); std::nullopt (default) disables it. Applied here
-                                      purely as an additional, always-safe filter on the graph row --
-                                      resolveTrivialTier()/judgeProposals() still apply the exact,
-                                      level-aware, per-axis Chebyshev check (nnMergeCrossLevelTooFar())
-                                      downstream regardless, unchanged. The bound used here is
-                                      deliberately looser: a candidate is dropped only once its
-                                      EUCLIDEAN distance exceeds a_maxCellDistance * min(a_dx) *
-                                      sqrt(SpaceDim) -- the sqrt(SpaceDim) factor is required because a
-                                      per-axis Chebyshev cell distance of N does not bound Euclidean
-                                      physical distance by N * dx alone (a diagonal candidate exactly N
-                                      cells away in both directions is N * dx * sqrt(SpaceDim) away in a
-                                      straight line), and this bound must never be tighter than the
-                                      true Chebyshev cutoff or it could wrongly drop a candidate
-                                      resolveTrivialTier()/judgeProposals() would still have accepted.
-                                      Safe but not maximally tight.
+      @param[in] a_localValid This patch's own FULL valid-particle set for this round (query sources AND candidates) --
+      see the contract-change note above; not pre-filtered by a_consumedIDs.
+      @param[in] a_ghosts Every ghost shipped to this patch this round (candidates only; ghosts never initiate a query)
+      -- also not pre-filtered.
+      @param[in] a_consumedIDs Lazy-deletion skip set: ids already consumed earlier this round (by an earlier
+      a_iterateLocalTierToConvergence pass, or an earlier query within this same pass). Checked against both the query
+      and every candidate encountered during the walk.
+      @param[in] a_spatialIndex This patch's spatial index for this round (see NNSpatialIndex), built once via
+      buildNNSpatialIndex() over the FULL a_localValid/ a_ghosts sets before any consumption happens.
+      @param[in] a_liveCellCount Live particle count (valid + ghost) per level-qualified cell key (see NNCellKey),
+      already reflecting this round's frozen ghost-fill snapshot.
+      @param[in] a_probLo Physical position of the domain's low corner (see cellKeyOf()).
+      @param[in] a_dx Cell spacing of THIS PATCH's own level (see cellKeyOf()'s warning) -- valid here because every
+      query in a_localValid is necessarily on this same level; candidates never have their crowding checked by this
+      function, so a cross-level ghost candidate needs no dx here.
+      @param[in] a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it holds strictly more
+      than this many particles.
+      @param[out] a_edges One entry per over-threshold, currently-alive query particle that has at least one candidate
+      (empty if none found).
+      @param[in] a_maxFallbackCandidates Forwarded from resolveTrivialTier() (see its docs); 0 (default) means an
+      ordinary single-nearest query and every edge's fallbackCandidates stays empty.
+      @param[in] a_maxCellDistance Same hard cutoff as resolveTrivialTier()'s own a_maxCellDistance (see its docs);
+      std::nullopt (default) disables it. Applied here purely as an additional, always-safe filter on the graph row --
+      resolveTrivialTier()/judgeProposals() still apply the exact, level-aware, per-axis Chebyshev check
+      (nnMergeCrossLevelTooFar()) downstream regardless, unchanged. The bound used here is deliberately looser: a
+      candidate is dropped only once its EUCLIDEAN distance exceeds a_maxCellDistance * min(a_dx) * sqrt(SpaceDim) --
+      the sqrt(SpaceDim) factor is required because a per-axis Chebyshev cell distance of N does not bound Euclidean
+      physical distance by N * dx alone (a diagonal candidate exactly N cells away in both directions is N * dx *
+      sqrt(SpaceDim) away in a straight line), and this bound must never be tighter than the true Chebyshev cutoff or it
+      could wrongly drop a candidate resolveTrivialTier()/judgeProposals() would still have accepted. Safe but not
+      maximally tight.
     */
     template <typename Packed>
     inline void
@@ -637,112 +640,79 @@ namespace ParticleManagement {
           particle to claim as an ordinary trivial candidate later in this same sorted pass, or via
           a_maxFallbackCandidates below.
 
-      @tparam Packed  See NNMergeParticle.
+      @tparam Packed See NNMergeParticle.
       @tparam Combine See PayloadCombine.
-      @param[in]     a_edges           Candidate edges from findNearestNeighborCandidates(), for
-                                        ALL patches this rank owns (pooled together so the global
-                                        distance sort spans the whole rank, not just one patch).
-      @param[in]     a_exposed         Boundary-exposed flag (isBoundaryExposed()) per particle id,
-                                        for every locally-valid particle across all of this rank's
-                                        patches.
-      @param[in]     a_particlesByID   Full particle data (position/weight/id/rank/payload) for
-                                        every currently-alive local valid particle and every ghost
-                                        across all of this rank's patches, keyed by id -- needed to
-                                        actually compute a merge's weighted-centroid position and
-                                        call a_combine (an edge only carries ids/distance, not full
-                                        particle data).
-      @param[in]     a_combine         Opaque-payload combine callback (see PayloadCombine).
-      @param[in,out] a_liveCellCount   Live per-cell counts; decremented in place as trivial merges
-                                        commit, so later edges in the same pass see the up-to-date
-                                        occupancy.
-      @param[in,out] a_consumedIDs     Ids already consumed this round (by an earlier trivial merge,
-                                        or found dead for any other reason); an edge referencing a
-                                        consumed id is stale and skipped. Updated in place.
-      @param[in]     a_numParticlesPerCellThresh Crowding threshold N, for the dynamic per-cell
-                                        recheck (same value used everywhere else this round).
-      @param[out]    a_hasOutgoingCommitment Set of query-particle ids that were NOT resolved
-                                        trivially (excluding the stale-candidate case, see above)
-                                        and must go on to generateProposals().
-      @param[out]    a_results         One entry per trivial-tier merge actually committed, in the
-                                        order they were processed.
-      @param[in]     a_maxFallbackCandidates Default 0 (disabled). When a query particle's chosen
-                                        candidate is blocked (already consumed, or has its own outgoing
-                                        commitment, or exposed/a ghost) and the query particle itself is
-                                        NOT exposed, try the edge's NNMergeEdge::fallbackCandidates in
-                                        order (pre-fetched by findNearestNeighborCandidates() via one
-                                        K-nearest query, K = 1 + a_maxFallbackCandidates), up to this
-                                        many extra attempts, before giving up. No fresh query and no
-                                        already-tried bookkeeping -- the list is ascending-distance with
-                                        no duplicates, so trying the next is advancing an index. Retries
-                                        resolve immediately at the point of failure rather than being
-                                        re-sorted into the global order (a retry only fires for an edge
-                                        whose first choice already failed). A query particle that
-                                        exhausts every fallback still proposes with its true, original
-                                        nearest neighbor -- fallbacks affect only local trivial-tier
-                                        eligibility, never what is proposed cross-patch.
-      @param[in]     a_maxCellDistance User-selectable physical merge-eligibility cap, in whole grid
-                                        cells, using Chebyshev (max-per-axis) distance between the same
-                                        unclamped, position-derived cell key used for the crowding
-                                        trigger (`floor(pos/dx)`, see findNearestNeighborCandidates())
-                                        -- same cell = 0, any Moore-adjacent cell (incl. diagonals) = 1,
-                                        and so on. The position-derived key (not each patch's local
-                                        IntVect) is what makes the comparison meaningful across a patch
-                                        boundary. `std::nullopt` (default) disables it. A query whose
-                                        nearest neighbor exceeds the cap is NOT proposed to -- this is a
-                                        physical-validity rule, not a coordination one: the pair is
-                                        exactly as invalid via judgeProposals() as it would be
-                                        trivially. If a_maxFallbackCandidates is nonzero the query gets a
-                                        fallback retry for a closer candidate; otherwise it is left
-                                        unmatched with no side effects. The cap is inclusive.
-      @param[in]     a_probLo          Physical position of the domain's low corner (see
-                                        cellKeyOf()); needed for the dynamic crowding recheck and
-                                        a_maxCellDistance.
-      @param[in]     a_dxByLevel       Cell spacing PER AMR LEVEL (index 0 = level 0, etc.) -- see
-                                        cellKeyOf()'s warning. Each participant's OWN cell key is
-                                        computed with a_dxByLevel[participant.level], never a single
-                                        shared dx: a candidate can legitimately be a ghost from a
-                                        coarser or finer level than the query's own patch, and
-                                        getting this wrong silently breaks the dynamic crowding
-                                        recheck for every level but one.
-      @param[in]     a_isPositionValid Position-validity predicate (see PositionValid), called once
-                                        per otherwise-eligible pair with the weighted-centroid
-                                        position already computed. Treated exactly like
-                                        a_maxCellDistance's "too far" case on failure: no proposal
-                                        for the original candidate, a fallback retry if available,
-                                        otherwise left unmatched with no side effects.
-      @param[in]     a_allocateID      Fresh-id allocator (see IDAllocator), called once per
-                                        committed trivial-tier merge.
-      @param[in,out] a_crossLevelMergeCount Optional diagnostic counter (nullptr, the default,
-                                        disables it entirely -- zero cost when not needed):
-                                        incremented once per committed merge whose two participants
-                                        were on DIFFERENT AMR levels (query.level != cand.level).
-                                        NOT reset by this function -- the caller owns its lifetime,
-                                        so counts can be accumulated across a_iterateLocalTierToConvergence's
-                                        internal iterations, or across this rank's judgeProposals()
-                                        acceptances too (see that function's own parameter).
-      @param[in]     a_onMergeCommitted Optional per-merge diagnostic callback (see
-                                        MergeCommittedCallback); default is a no-op.
+      @param[in] a_edges Candidate edges from findNearestNeighborCandidates(), for ALL patches this rank owns (pooled
+      together so the global distance sort spans the whole rank, not just one patch).
+      @param[in] a_particlesByID Full particle data for every currently-alive local valid particle and every ghost across
+      all of this rank's patches, keyed by id. Each value is an NNPooledParticle: the particle (position/weight/id/rank/
+      payload, needed to compute a merge's weighted-centroid position and call a_combine, since an edge only carries
+      ids/distance) plus its cached boundary-exposure flag (isBoundaryExposed(); false for ghosts).
+      @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
+      @param[in,out] a_liveCellCount Live per-cell counts; decremented in place as trivial merges commit, so later edges
+      in the same pass see the up-to-date occupancy.
+      @param[in,out] a_consumedIDs Ids already consumed this round (by an earlier trivial merge, or found dead for any
+      other reason); an edge referencing a consumed id is stale and skipped. Updated in place.
+      @param[in] a_numParticlesPerCellThresh Crowding threshold N, for the dynamic per-cell recheck (same value used
+      everywhere else this round).
+      @param[out] a_hasOutgoingCommitment Set of query-particle ids that were NOT resolved trivially (excluding the
+      stale-candidate case, see above) and must go on to generateProposals().
+      @param[out] a_results One entry per trivial-tier merge actually committed, in the order they were processed.
+      @param[in] a_maxFallbackCandidates Default 0 (disabled). When a query particle's chosen candidate is blocked
+      (already consumed, or has its own outgoing commitment, or exposed/a ghost) and the query particle itself is NOT
+      exposed, try the edge's NNMergeEdge::fallbackCandidates in order (pre-fetched by findNearestNeighborCandidates()
+      via one K-nearest query, K = 1 + a_maxFallbackCandidates), up to this many extra attempts, before giving up. No
+      fresh query and no already-tried bookkeeping -- the list is ascending-distance with no duplicates, so trying the
+      next is advancing an index. Retries resolve immediately at the point of failure rather than being re-sorted into
+      the global order (a retry only fires for an edge whose first choice already failed). A query particle that
+      exhausts every fallback still proposes with its true, original nearest neighbor -- fallbacks affect only local
+      trivial-tier eligibility, never what is proposed cross-patch.
+      @param[in] a_maxCellDistance User-selectable physical merge-eligibility cap, in whole grid cells, using Chebyshev
+      (max-per-axis) distance between the same unclamped, position-derived cell key used for the crowding trigger
+      (`floor(pos/dx)`, see findNearestNeighborCandidates()) -- same cell = 0, any Moore-adjacent cell (incl. diagonals)
+      = 1, and so on. The position-derived key (not each patch's local IntVect) is what makes the comparison meaningful
+      across a patch boundary. `std::nullopt` (default) disables it. A query whose nearest neighbor exceeds the cap is
+      NOT proposed to -- this is a physical-validity rule, not a coordination one: the pair is exactly as invalid via
+      judgeProposals() as it would be trivially. If a_maxFallbackCandidates is nonzero the query gets a fallback retry
+      for a closer candidate; otherwise it is left unmatched with no side effects. The cap is inclusive.
+      @param[in] a_probLo Physical position of the domain's low corner (see cellKeyOf()); needed for the dynamic
+      crowding recheck and a_maxCellDistance.
+      @param[in] a_dxByLevel Cell spacing PER AMR LEVEL (index 0 = level 0, etc.) -- see cellKeyOf()'s warning. Each
+      participant's OWN cell key is computed with a_dxByLevel[participant.level], never a single shared dx: a candidate
+      can legitimately be a ghost from a coarser or finer level than the query's own patch, and getting this wrong
+      silently breaks the dynamic crowding recheck for every level but one.
+      @param[in] a_isPositionValid Position-validity predicate (see PositionValid), called once per otherwise-eligible
+      pair with the weighted-centroid position already computed. Treated exactly like a_maxCellDistance's "too far" case
+      on failure: no proposal for the original candidate, a fallback retry if available, otherwise left unmatched with
+      no side effects.
+      @param[in] a_allocateID Fresh-id allocator (see IDAllocator), called once per committed trivial-tier merge.
+      @param[in,out] a_crossLevelMergeCount Optional diagnostic counter (nullptr, the default, disables it entirely --
+      zero cost when not needed): incremented once per committed merge whose two participants were on DIFFERENT AMR
+      levels (query.level != cand.level). NOT reset by this function -- the caller owns its lifetime, so counts can be
+      accumulated across a_iterateLocalTierToConvergence's internal iterations, or across this rank's judgeProposals()
+      acceptances too (see that function's own parameter).
+      @param[in] a_onMergeCommitted Optional per-merge diagnostic callback (see MergeCommittedCallback); default is a
+      no-op.
     */
     template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
     inline void
     resolveTrivialTier(
-      const std::vector<NNMergeEdge<Packed>>&                        a_edges,
-      const std::unordered_map<ParticleID, bool>&                    a_exposed,
-      const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-      const Combine&                                                 a_combine,
-      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
-      std::unordered_set<ParticleID>&                                a_consumedIDs,
-      const int                                                      a_numParticlesPerCellThresh,
-      std::unordered_set<ParticleID>&                                a_hasOutgoingCommitment,
-      std::vector<NNMergeResult<Packed>>&                            a_results,
-      const RealVect&                                                a_probLo,
-      const std::vector<RealVect>&                                   a_dxByLevel,
-      const PosValid&                                                a_isPositionValid,
-      const Allocator&                                               a_allocateID,
-      const int                                                      a_maxFallbackCandidates = 0,
-      const std::optional<int>                                       a_maxCellDistance       = std::nullopt,
-      unsigned long long*                                            a_crossLevelMergeCount  = nullptr,
-      const OnMerge&                                                 a_onMergeCommitted =
+      const std::vector<NNMergeEdge<Packed>>&                         a_edges,
+      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+      const Combine&                                                  a_combine,
+      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
+      std::unordered_set<ParticleID>&                                 a_consumedIDs,
+      const int                                                       a_numParticlesPerCellThresh,
+      std::unordered_set<ParticleID>&                                 a_hasOutgoingCommitment,
+      std::vector<NNMergeResult<Packed>>&                             a_results,
+      const RealVect&                                                 a_probLo,
+      const std::vector<RealVect>&                                    a_dxByLevel,
+      const PosValid&                                                 a_isPositionValid,
+      const Allocator&                                                a_allocateID,
+      const int                                                       a_maxFallbackCandidates = 0,
+      const std::optional<int>                                        a_maxCellDistance       = std::nullopt,
+      unsigned long long*                                             a_crossLevelMergeCount  = nullptr,
+      const OnMerge&                                                  a_onMergeCommitted =
         [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
         }) noexcept;
 
@@ -759,26 +729,23 @@ namespace ParticleManagement {
       unaware of whether a given proposal arrived locally or over the network -- it still goes through
       the exact same pooled judge logic, never a shortcut.
       @tparam Packed See NNMergeParticle.
-      @param[in]  a_edges                 Candidate edges from findNearestNeighborCandidates(), for
-                                           all of this rank's patches.
-      @param[in]  a_hasOutgoingCommitment Query-particle ids that resolveTrivialTier() could not
-                                           resolve (i.e. exactly the edges this function packages).
-      @param[in]  a_particlesByID         Full particle data (position/weight/id/rank/payload) for
-                                           every currently-alive local valid particle and every
-                                           ghost, keyed by id -- needed to build the full
-                                           NNMergeParticle bundle for each proposal.
-      @param[in]  a_numRanks              Total MPI rank count (size of the returned bucket vector).
-      @param[out] a_proposalsByDestRank   One bucket per rank; a_proposalsByDestRank[r] holds every
-                                           proposal whose candidate is owned by rank r (including
-                                           r == this rank's own).
+      @param[in] a_edges Candidate edges from findNearestNeighborCandidates(), for all of this rank's patches.
+      @param[in] a_hasOutgoingCommitment Query-particle ids that resolveTrivialTier() could not resolve (i.e. exactly
+      the edges this function packages).
+      @param[in] a_particlesByID Full particle data for every currently-alive local valid particle and every ghost,
+      keyed by id (each value an NNPooledParticle wrapping the particle) -- needed to build the full NNMergeParticle
+      bundle for each proposal.
+      @param[in] a_numRanks Total MPI rank count (size of the returned bucket vector).
+      @param[out] a_proposalsByDestRank One bucket per rank; a_proposalsByDestRank[r] holds every proposal whose
+      candidate is owned by rank r (including r == this rank's own).
     */
     template <typename Packed>
     inline void
-    generateProposals(const std::vector<NNMergeEdge<Packed>>&                        a_edges,
-                      const std::unordered_set<ParticleID>&                          a_hasOutgoingCommitment,
-                      const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-                      const int                                                      a_numRanks,
-                      std::vector<std::vector<NNMergeProposal<Packed>>>&             a_proposalsByDestRank) noexcept;
+    generateProposals(const std::vector<NNMergeEdge<Packed>>&                         a_edges,
+                      const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
+                      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                      const int                                                       a_numRanks,
+                      std::vector<std::vector<NNMergeProposal<Packed>>>&              a_proposalsByDestRank) noexcept;
 
     /**
       @brief Judge every incoming proposal that targets a particle this rank owns, and produce the
@@ -821,92 +788,67 @@ namespace ParticleManagement {
       generateProposals()-produced bucket addressed to itself (an in-process handoff, no network
       round-trip -- see generateProposals()).
 
-      @tparam Packed  See NNMergeParticle.
+      @tparam Packed See NNMergeParticle.
       @tparam Combine See PayloadCombine.
       @tparam PosValid See PositionValid.
-      @param[in]     a_incomingProposals All proposals targeting a particle this rank owns, pooled
-                                         from every source rank (including this rank's own
-                                         in-process bucket).
-      @param[in]     a_particlesByID     Full particle data (position/weight/id/rank/payload) for
-                                         every currently-alive local valid particle and every ghost
-                                         across all of this rank's patches, keyed by id -- a target
-                                         is a potential judge target only if its id is present here
-                                         AND absent from a_consumedIDs (see that param).
-      @param[in]     a_consumedIDs       Ids already consumed this round (by an earlier trivial or
-                                         judged merge). A target id present in a_particlesByID but
-                                         ALSO in a_consumedIDs is treated as not-alive -- this
-                                         replaces what used to be a separate, pre-filtered
-                                         a_myParticlesByID copy of a_particlesByID; checking both
-                                         containers at the point of use instead avoids rebuilding
-                                         that copy every round.
-      @param[in]     a_hasOutgoingCommitment Ids (among a_particlesByID, not in a_consumedIDs) that
-                                         have their own outgoing commitment this round (needed for
-                                         rule 3 above).
-      @param[in]     a_outgoingTargetOf  For an id in a_hasOutgoingCommitment, the id of the
-                                         particle it is itself proposing to (needed to detect the
-                                         mutual-match exception in rule 3).
-      @param[in]     a_combine           Opaque-payload combine callback (see PayloadCombine).
-      @param[in,out] a_liveCellCount     Live per-cell counts for this rank's own patches;
-                                         decremented in place as targets are accepted, in the same
-                                         distance-sorted processing order (see rule 4 above). Used to
-                                         dynamically recheck BOTH the target's AND the source's own
-                                         cell -- mirrors resolveTrivialTier()'s symmetric recheck
-                                         exactly; accepting a proposal whose source's own cell is no
-                                         longer over threshold (e.g. drained by an earlier merge
-                                         within this same round) would silently violate the crowding
-                                         trigger on the source side. If this rank has no live
-                                         visibility into the source's cell (it was never shipped here
-                                         as a ghost), the source count defaults to 0 -- i.e. rejected
-                                         -- the same conservative default already used when a
-                                         target's own count is unknown.
-      @param[in]     a_numParticlesPerCellThresh Crowding threshold N (same value used everywhere
-                                         else this round).
-      @param[in]     a_probLo            Physical position of the domain's low corner (see
-                                         cellKeyOf()).
-      @param[in]     a_dxByLevel         Cell spacing PER AMR LEVEL -- see resolveTrivialTier()'s
-                                         a_dxByLevel docs for why this must never be a single shared
-                                         dx (a proposal's source and this rank's target can be on
-                                         different levels).
-      @param[in]     a_isPositionValid   Position-validity predicate (see PositionValid and rule 6
-                                         above).
-      @param[in]     a_allocateID        Fresh-id allocator (see IDAllocator), called once per
-                                         accepted target.
-      @param[in]     a_maxCellDistance   Same physical merge-eligibility cap as
-                                         resolveTrivialTier()'s (see rule 6 above); std::nullopt
-                                         (default) disables it.
-      @param[out]    a_results           One entry per target actually accepted, in the order
-                                         processed.
-      @param[out]    a_verdictsByDestRank One bucket per proposer rank (pre-sized to the total rank
-                                         count by the caller); every proposal (accepted or not) gets
-                                         exactly one verdict, addressed back to
-                                         NNMergeProposal::source's owning rank.
-      @param[in,out] a_crossLevelMergeCount Optional diagnostic counter -- see
-                                         resolveTrivialTier()'s docs; incremented once per accepted
-                                         target whose target/source were on different AMR levels.
-      @param[in]     a_onMergeCommitted  Optional per-merge diagnostic callback -- see
-                                         resolveTrivialTier()'s docs; called with (target, source,
-                                         merged) for every accepted target.
+      @param[in] a_incomingProposals All proposals targeting a particle this rank owns, pooled from every source rank
+      (including this rank's own in-process bucket).
+      @param[in] a_particlesByID Full particle data for every currently-alive local valid particle and every ghost across
+      all of this rank's patches, keyed by id (each value an NNPooledParticle wrapping the particle) -- a target is a
+      potential judge target only if its id is present here AND absent from a_consumedIDs (see that param).
+      @param[in] a_consumedIDs Ids already consumed this round (by an earlier trivial or judged merge). A target id
+      present in a_particlesByID but ALSO in a_consumedIDs is treated as not-alive -- this replaces what used to be a
+      separate, pre-filtered a_myParticlesByID copy of a_particlesByID; checking both containers at the point of use
+      instead avoids rebuilding that copy every round.
+      @param[in] a_hasOutgoingCommitment Ids (among a_particlesByID, not in a_consumedIDs) that have their own outgoing
+      commitment this round (needed for rule 3 above).
+      @param[in] a_outgoingTargetOf For an id in a_hasOutgoingCommitment, the id of the particle it is itself proposing
+      to (needed to detect the mutual-match exception in rule 3).
+      @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
+      @param[in,out] a_liveCellCount Live per-cell counts for this rank's own patches; decremented in place as targets
+      are accepted, in the same distance-sorted processing order (see rule 4 above). Used to dynamically recheck BOTH
+      the target's AND the source's own cell -- mirrors resolveTrivialTier()'s symmetric recheck exactly; accepting a
+      proposal whose source's own cell is no longer over threshold (e.g. drained by an earlier merge within this same
+      round) would silently violate the crowding trigger on the source side. If this rank has no live visibility into
+      the source's cell (it was never shipped here as a ghost), the source count defaults to 0 -- i.e. rejected -- the
+      same conservative default already used when a target's own count is unknown.
+      @param[in] a_numParticlesPerCellThresh Crowding threshold N (same value used everywhere else this round).
+      @param[in] a_probLo Physical position of the domain's low corner (see cellKeyOf()).
+      @param[in] a_dxByLevel Cell spacing PER AMR LEVEL -- see resolveTrivialTier()'s a_dxByLevel docs for why this must
+      never be a single shared dx (a proposal's source and this rank's target can be on different levels).
+      @param[in] a_isPositionValid Position-validity predicate (see PositionValid and rule 6 above).
+      @param[in] a_allocateID Fresh-id allocator (see IDAllocator), called once per accepted target.
+      @param[in] a_maxCellDistance Same physical merge-eligibility cap as resolveTrivialTier()'s (see rule 6 above);
+      std::nullopt (default) disables it.
+      @param[out] a_results One entry per target actually accepted, in the order processed.
+      @param[out] a_verdictsByDestRank One bucket per proposer rank (pre-sized to the total rank count by the caller);
+      every proposal (accepted or not) gets exactly one verdict, addressed back to NNMergeProposal::source's owning
+      rank.
+      @param[in,out] a_crossLevelMergeCount Optional diagnostic counter -- see resolveTrivialTier()'s docs; incremented
+      once per accepted target whose target/source were on different AMR levels.
+      @param[in] a_onMergeCommitted Optional per-merge diagnostic callback -- see resolveTrivialTier()'s docs; called
+      with (target, source, merged) for every accepted target.
     */
     template <typename Packed, typename Combine, typename PosValid, typename Allocator, typename OnMerge>
     inline void
     judgeProposals(
-      const std::vector<NNMergeProposal<Packed>>&                    a_incomingProposals,
-      const std::unordered_map<ParticleID, NNMergeParticle<Packed>>& a_particlesByID,
-      const std::unordered_set<ParticleID>&                          a_consumedIDs,
-      const std::unordered_set<ParticleID>&                          a_hasOutgoingCommitment,
-      const std::map<ParticleID, ParticleID>&                        a_outgoingTargetOf,
-      const Combine&                                                 a_combine,
-      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&           a_liveCellCount,
-      const int                                                      a_numParticlesPerCellThresh,
-      const RealVect&                                                a_probLo,
-      const std::vector<RealVect>&                                   a_dxByLevel,
-      const PosValid&                                                a_isPositionValid,
-      const Allocator&                                               a_allocateID,
-      std::vector<NNMergeResult<Packed>>&                            a_results,
-      std::vector<std::vector<NNMergeVerdict>>&                      a_verdictsByDestRank,
-      const std::optional<int>                                       a_maxCellDistance      = std::nullopt,
-      unsigned long long*                                            a_crossLevelMergeCount = nullptr,
-      const OnMerge&                                                 a_onMergeCommitted =
+      const std::vector<NNMergeProposal<Packed>>&                     a_incomingProposals,
+      const std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+      const std::unordered_set<ParticleID>&                           a_consumedIDs,
+      const std::unordered_set<ParticleID>&                           a_hasOutgoingCommitment,
+      const std::map<ParticleID, ParticleID>&                         a_outgoingTargetOf,
+      const Combine&                                                  a_combine,
+      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
+      const int                                                       a_numParticlesPerCellThresh,
+      const RealVect&                                                 a_probLo,
+      const std::vector<RealVect>&                                    a_dxByLevel,
+      const PosValid&                                                 a_isPositionValid,
+      const Allocator&                                                a_allocateID,
+      std::vector<NNMergeResult<Packed>>&                             a_results,
+      std::vector<std::vector<NNMergeVerdict>>&                       a_verdictsByDestRank,
+      const std::optional<int>                                        a_maxCellDistance      = std::nullopt,
+      unsigned long long*                                             a_crossLevelMergeCount = nullptr,
+      const OnMerge&                                                  a_onMergeCommitted =
         [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
         }) noexcept;
 
@@ -916,11 +858,10 @@ namespace ParticleManagement {
       @details Rejected proposals are deliberately a no-op -- the source particle is simply left
       alone and reconsidered in next round's fresh candidate search. This algorithm never internally
       retries a rejected proposal against a second-best candidate within the same round.
-      @param[in]  a_incomingVerdicts All verdicts addressed to this rank, pooled from every judge
-                                     rank (including this rank's own in-process verdict for
-                                     proposals it judged for itself).
-      @param[out] a_consumedIDs      Ids of every source particle whose proposal was accepted --
-                                     the caller removes these from its own valid particle lists.
+      @param[in] a_incomingVerdicts All verdicts addressed to this rank, pooled from every judge rank (including this
+      rank's own in-process verdict for proposals it judged for itself).
+      @param[out] a_consumedIDs Ids of every source particle whose proposal was accepted -- the caller removes these
+      from its own valid particle lists.
     */
     inline void
     applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
@@ -983,17 +924,15 @@ namespace ParticleManagement {
       PositionLocator/NNParticleLocation) -- NEVER a linear scan over every patch, which would turn
       this function into a real bottleneck at large patch counts.
       @tparam Packed See NNMergeParticle.
-      @param[in]  a_results        Every merge result produced this round by resolveTrivialTier()
-                                    and judgeProposals(), pooled together.
-      @param[in]  a_locate         Locate-by-position callback (see PositionLocator).
-      @param[in]  a_thisRank       This rank's own number -- an NNParticleLocation whose ownerRank
-                                    equals this is what makes a result "local" rather than needing a
-                                    scatter.
-      @param[out] a_localByPatch   Results whose merged particle lands in one of this rank's own
-                                    patches, bucketed by (level, NNParticleLocation::gridIndex).
-      @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank,
-                                    bucketed by destination rank (pre-sized to the total rank count
-                                    by the caller), for one final exchange.
+      @param[in] a_results Every merge result produced this round by resolveTrivialTier() and judgeProposals(), pooled
+      together.
+      @param[in] a_locate Locate-by-position callback (see PositionLocator).
+      @param[in] a_thisRank This rank's own number -- an NNParticleLocation whose ownerRank equals this is what makes a
+      result "local" rather than needing a scatter.
+      @param[out] a_localByPatch Results whose merged particle lands in one of this rank's own patches, bucketed by
+      (level, NNParticleLocation::gridIndex).
+      @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank, bucketed by destination
+      rank (pre-sized to the total rank count by the caller), for one final exchange.
     */
     template <typename Packed>
     inline void
@@ -1037,78 +976,51 @@ namespace ParticleManagement {
     protocol itself left unresolved. What a_iterateLocalTierToConvergence changes is only the LOCAL
     (trivial-tier) portion of a single call -- see its own documentation below.
 
-    @tparam P       SoA payload type (e.g. ItoParticle).
-    @tparam Packed  Opaque reconciliation payload type for the merge decision layer (see
-                    NNMergeParticle) -- typically much smaller than P's full column set (e.g.
-                    just energy for ItoParticle; velocity/mobility/diffusion are already
-                    established as safe to drop across a merge, since they are recomputed from
-                    field interpolation immediately afterward).
-    @tparam Traits  Column descriptor for P (defaults to ParticleTraits<P>).
-    @tparam Gather  Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed` -- packs one
-                    SoA slot's payload columns into the opaque Packed representation.
+    @tparam P SoA payload type (e.g. ItoParticle).
+    @tparam Packed Opaque reconciliation payload type for the merge decision layer (see NNMergeParticle) -- typically
+    much smaller than P's full column set (e.g. just energy for ItoParticle; velocity/mobility/diffusion are already
+    established as safe to drop across a merge, since they are recomputed from field interpolation immediately
+    afterward).
+    @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
+    @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed` -- packs one SoA slot's payload
+    columns into the opaque Packed representation.
     @tparam Combine See PayloadCombine.
-    @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void` --
-                    appends one surviving/merged particle back into the real SoA container.
-    @param[in,out] a_amr                       AMR mesh -- source of ghost masks, per-level dx, and
-                                                the patch layout used to place merged particles.
-    @param[in,out] a_particles                 The real particle container to merge, for every
-                                                patch this rank owns.
-    @param[in]     a_numParticlesPerCellThresh Crowding threshold N.
-    @param[in]     a_gather                    Per-slot gather callback (see Gather).
-    @param[in]     a_combine                   Opaque-payload combine callback (see
-                                                PayloadCombine).
-    @param[in]     a_scatter                   Per-surviving-particle scatter callback (see
-                                                Scatter).
-    @param[in]     a_iterateLocalTierToConvergence Default false. When false,
-                                                findNearestNeighborCandidates() and
-                                                resolveTrivialTier() each run once. When true, that
-                                                candidate-search-plus-trivial-tier pair repeats
-                                                (reusing the same ghost-fill from step 1; only which
-                                                local particles are still alive changes) until a full
-                                                local pass commits zero further trivial merges, and
-                                                only then does generateProposals()/judgeProposals()
-                                                run (still exactly once, unaffected by this option).
-                                                It helps because a single pass fixes each query's edge
-                                                once: if that candidate is consumed by a closer edge
-                                                first, the query is left unmatched for the rest of the
-                                                pass even though another partner may exist nearby. The
-                                                gain is modest -- re-running only helps when a
-                                                particle's best available choice actually changes
-                                                between iterations; a_maxFallbackCandidates below
-                                                addresses the more common, stable loss.
-    @param[in]     a_maxFallbackCandidates     Forwarded to resolveTrivialTier() (see its docs).
-                                                Default 0 (disabled). Lets a query blocked from a good
-                                                local partner (because that partner is already "busy"
-                                                with its own outgoing commitment -- a condition
-                                                iteration alone does not clear) fall back to its next
-                                                nearest candidates. A single fallback recovers most of
-                                                the achievable improvement.
-    @param[in]     a_maxCellDistance           Forwarded to resolveTrivialTier() (see its docs).
-                                                `std::nullopt` (default) disables it. A physical cap,
-                                                in whole grid cells, on how far apart two particles
-                                                may be and still merge -- e.g. 1 permits merging within
-                                                the same cell or any Moore-adjacent cell, never
-                                                farther. Composes with the options above.
-    @param[in]     a_isPositionValid           Forwarded to resolveTrivialTier()/judgeProposals()
-                                                (see PositionValid). Default always-true. Composes
-                                                with the options above -- e.g. an embedded-boundary
-                                                point query for an EB-aware caller (see
-                                                ItoSolver::mergeSuperparticlesNearestNeighbor).
-    @param[in]     a_allocateID                Fresh-id allocator (see IDAllocator). Mandatory --
-                                                there is no universally safe default; the caller
-                                                must supply a scheme that stays collision-free
-                                                across every rank and every past/future call.
-    @param[in,out] a_crossLevelMergeCount      Optional diagnostic counter (nullptr, the default,
-                                                disables it entirely): incremented once for every
-                                                merge this call commits (trivial-tier or judge-side)
-                                                whose two participants were on DIFFERENT AMR levels.
-                                                NOT reset by this function -- accumulates across
-                                                a_iterateLocalTierToConvergence's internal
-                                                iterations and across repeated calls if the caller
-                                                keeps reusing the same counter, so it is safe to use
-                                                to track cross-level activity over several rounds.
-    @param[in]     a_onMergeCommitted          Optional per-merge diagnostic callback (see
-                                                MergeCommittedCallback); default is a no-op.
+    @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void` -- appends one
+    surviving/merged particle back into the real SoA container.
+    @param[in,out] a_amr AMR mesh -- source of ghost masks, per-level dx, and the patch layout used to place merged
+    particles.
+    @param[in,out] a_particles The real particle container to merge, for every patch this rank owns.
+    @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+    @param[in] a_gather Per-slot gather callback (see Gather).
+    @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
+    @param[in] a_scatter Per-surviving-particle scatter callback (see Scatter).
+    @param[in] a_iterateLocalTierToConvergence Default false. When false, findNearestNeighborCandidates() and
+    resolveTrivialTier() each run once. When true, that candidate-search-plus-trivial-tier pair repeats (reusing the
+    same ghost-fill from step 1; only which local particles are still alive changes) until a full local pass commits
+    zero further trivial merges, and only then does generateProposals()/judgeProposals() run (still exactly once,
+    unaffected by this option). It helps because a single pass fixes each query's edge once: if that candidate is
+    consumed by a closer edge first, the query is left unmatched for the rest of the pass even though another partner
+    may exist nearby. The gain is modest -- re-running only helps when a particle's best available choice actually
+    changes between iterations; a_maxFallbackCandidates below addresses the more common, stable loss.
+    @param[in] a_maxFallbackCandidates Forwarded to resolveTrivialTier() (see its docs). Default 0 (disabled). Lets a
+    query blocked from a good local partner (because that partner is already "busy" with its own outgoing commitment --
+    a condition iteration alone does not clear) fall back to its next nearest candidates. A single fallback recovers
+    most of the achievable improvement.
+    @param[in] a_maxCellDistance Forwarded to resolveTrivialTier() (see its docs). `std::nullopt` (default) disables it.
+    A physical cap, in whole grid cells, on how far apart two particles may be and still merge -- e.g. 1 permits merging
+    within the same cell or any Moore-adjacent cell, never farther. Composes with the options above.
+    @param[in] a_isPositionValid Forwarded to resolveTrivialTier()/judgeProposals() (see PositionValid). Default
+    always-true. Composes with the options above -- e.g. an embedded-boundary point query for an EB-aware caller (see
+    ItoSolver::mergeSuperparticlesNearestNeighbor).
+    @param[in] a_allocateID Fresh-id allocator (see IDAllocator). Mandatory -- there is no universally safe default; the
+    caller must supply a scheme that stays collision-free across every rank and every past/future call.
+    @param[in,out] a_crossLevelMergeCount Optional diagnostic counter (nullptr, the default, disables it entirely):
+    incremented once for every merge this call commits (trivial-tier or judge-side) whose two participants were on
+    DIFFERENT AMR levels. NOT reset by this function -- accumulates across a_iterateLocalTierToConvergence's internal
+    iterations and across repeated calls if the caller keeps reusing the same counter, so it is safe to use to track
+    cross-level activity over several rounds.
+    @param[in] a_onMergeCommitted Optional per-merge diagnostic callback (see MergeCommittedCallback); default is a
+    no-op.
   */
   template <typename P,
             typename Packed,
