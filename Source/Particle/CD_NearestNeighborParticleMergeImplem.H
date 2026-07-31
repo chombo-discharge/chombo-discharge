@@ -541,6 +541,16 @@ namespace ParticleManagement {
         const int numAttempts = a_maxFallbackCandidates + 1;
 
         for (int attempt = 0; attempt < numAttempts; attempt++) {
+          // A boundary-exposed query can never merge trivially -- trivialOk requires !queryExposed
+          // unconditionally, so no fallback candidate could ever help. Run the ORIGINAL candidate
+          // (attempt 0) to set originalStale/originalIneligible, then stop rather than walking doomed
+          // fallbacks: each would cost consumed/busy lookups plus, for an alive candidate, a
+          // cross-level distance calc and an a_isPositionValid() call (an EB point query for EB-aware
+          // callers). Outcome is identical -- the query still proposes off its original candidate.
+          if (queryExposed && attempt > 0) {
+            break;
+          }
+
           ParticleID candidateID;
           bool       candidateIsLocal;
 
