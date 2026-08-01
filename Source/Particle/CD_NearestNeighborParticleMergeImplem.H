@@ -1328,13 +1328,13 @@ mergeNearestNeighborsRound(AmrMesh&                      a_amr,
   // 7. placeMergedParticles(), then exchange and apply the scatter bucket.
   //
   // O(1) point->block query (see NNParticleLocation/PositionLocator). ParticleContainer::
-  // findDestination() is the same tile-hash lookup a_particles uses to route its own particles
-  // during remap(); reusing it keeps one source of truth for "which box owns this position"
-  // instead of a linear scan or a parallel implementation that could drift.
+  // findDestination() delegates to the shared LevelTiles::findDestination core -- the same tile-hash
+  // lookup a_particles uses to route its own particles during remap(); reusing it keeps one source of
+  // truth for "which box owns this position" instead of a linear scan or a parallel copy that could drift.
   const PositionLocator locate = [&a_particles](const RealVect& a_pos) -> NNParticleLocation {
     const auto dst = a_particles.findDestination(a_pos);
 
-    return NNParticleLocation{dst.found, dst.level, dst.gridIndex, dst.rank};
+    return NNParticleLocation{dst.valid, dst.level, dst.gridIndex, dst.rank};
   };
 
   std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>> localByPatch;

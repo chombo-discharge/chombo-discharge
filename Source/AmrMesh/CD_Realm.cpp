@@ -1804,34 +1804,18 @@ Realm::getTrivialParticleGhostMask() const noexcept
   return trivial;
 }
 
-Realm::LevelAndBox
+LevelTiles::LevelAndBox
 Realm::getLevelAndBox(const RealVect& a_pos) const noexcept
 {
-  // Finest level whose min-tile contains the point wins.
-  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    IntVect tile;
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      tile[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / (m_minBlockSize * m_dx[lvl])));
-    }
+  // Adapt the isotropic per-level scalar dx to the per-direction form the shared core takes, then delegate to
+  // LevelTiles::findDestination -- the single point->block core that ParticleContainer also routes through.
+  Vector<RealVect> dx(m_finestLevel + 1);
 
-    const LevelTiles& tiles = *m_levelTiles[lvl];
-
-    const auto& myTiles = tiles.getMyTiles();
-    const auto  mit     = myTiles.find(tile);
-    if (mit != myTiles.end()) {
-      return LevelAndBox{lvl, mit->second, procID(), true};
-    }
-
-#ifdef CH_MPI
-    const auto& otherTiles = tiles.getOtherTiles();
-    const auto  oit        = otherTiles.find(tile);
-    if (oit != otherTiles.end()) {
-      return LevelAndBox{lvl, oit->second.first, static_cast<int>(oit->second.second), true};
-    }
-#endif
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    dx[lvl] = m_dx[lvl] * RealVect::Unit;
   }
 
-  return LevelAndBox{-1, 0u, -1, false};
+  return LevelTiles::findDestination(a_pos, m_probLo, dx, m_minBlockSize, m_levelTiles, m_finestLevel);
 }
 
 #ifdef CH_USE_PETSC

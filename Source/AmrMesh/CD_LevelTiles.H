@@ -14,12 +14,17 @@
 #define CD_LEVELTILES_H
 
 // Std includes
+#include <cmath>
 #include <cstddef>
 #include <unordered_map>
 #include <vector>
 
 // Chombo includes
 #include <IntVect.H>
+#include <RealVect.H>
+#include <Vector.H>
+#include <RefCountedPtr.H>
+#include <SPMD.H>
 #include <DisjointBoxLayout.H>
 #include <DataIndex.H>
 
@@ -110,6 +115,85 @@ public:
    */
   virtual const std::unordered_map<unsigned int, DataIndex>&
   getMyGrids() const noexcept;
+
+  /**
+   * @brief Result of a point->block query. See findDestination.
+   */
+  struct LevelAndBox
+  {
+    /**
+     * @brief Owning AMR level (finest tile that contains the point), or -1 if not found.
+     */
+    int level;
+
+    /**
+     * @brief Global grid/box index of the covering box within that level's LevelTiles.
+     */
+    unsigned int gridIndex;
+
+    /**
+     * @brief MPI rank owning that box.
+     */
+    int rank;
+
+    /**
+     * @brief True if a covering tile/box was found (false when the point is off-domain).
+     */
+    bool valid;
+  };
+
+  /**
+   * @brief Map a physical position to its owning (level, grid index, rank) via the finest containing tile.
+   * @details Shared, header-inlined point->block core used by both ParticleContainer::findDestination (the
+   * per-particle remap hot path) and Realm::getLevelAndBox. The position is mapped to a min-block-size tile by
+   * integer division, then looked up in each level's tile->box hash, finest level first. It is O(1) per level (a
+   * tile computation plus an unordered_map lookup), never a linear scan over patches, and works for
+   * variable-sized/anisotropic boxes because every box is registered under all the min tiles it covers.
+   * @param[in] a_pos          Physical position to locate.
+   * @param[in] a_probLo       Lower-left corner of the domain.
+   * @param[in] a_dx           Per-level grid spacing, indexed [level][dir] (isotropic per level).
+   * @param[in] a_minBlockSize Tile size in cells (min_block_size).
+   * @param[in] a_levelTiles   Per-level tile->box maps (the single source of truth).
+   * @param[in] a_finestLevel  Finest AMR level to search.
+   * @return {level, gridIndex, rank, valid}; valid==false (other fields unspecified) if no tile owns the cell.
+   */
+  static inline LevelAndBox
+  findDestination(const RealVect&                          a_pos,
+                  const RealVect&                          a_probLo,
+                  const Vector<RealVect>&                  a_dx,
+                  const int                                a_minBlockSize,
+                  const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                  const int                                a_finestLevel) noexcept
+  {
+    // Finest level whose min-block tile contains the point wins.
+    for (int lvl = a_finestLevel; lvl >= 0; lvl--) {
+      IntVect tile;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        tile[dir] = static_cast<int>(std::floor((a_pos[dir] - a_probLo[dir]) / (a_minBlockSize * a_dx[lvl][dir])));
+      }
+
+      const LevelTiles& tiles = *a_levelTiles[lvl];
+
+      const auto& myTiles = tiles.getMyTiles();
+      const auto  mit     = myTiles.find(tile);
+
+      if (mit != myTiles.end()) {
+        return LevelAndBox{lvl, mit->second, procID(), true};
+      }
+
+#ifdef CH_MPI
+      const auto& otherTiles = tiles.getOtherTiles();
+      const auto  oit        = otherTiles.find(tile);
+
+      if (oit != otherTiles.end()) {
+        return LevelAndBox{lvl, oit->second.first, static_cast<int>(oit->second.second), true};
+      }
+#endif
+    }
+
+    return LevelAndBox{-1, 0u, -1, false};
+  }
 
 protected:
   /**
