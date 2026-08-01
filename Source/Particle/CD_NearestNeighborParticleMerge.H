@@ -869,7 +869,7 @@ applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
 /**
  * @brief Result of locating a physical position against the AMR grid -- see placeMergedParticles().
  * @details Deliberately independent of any AmrMesh/Realm/ParticleContainer type (this header
- * stays Amr-agnostic) -- mirrors ParticleContainer::Destination's fields exactly,
+ * stays Amr-agnostic) -- mirrors LevelTiles::LevelAndBox's fields exactly,
  * since that IS the intended real implementation: an O(1) point->block query on the realm's
  * LevelTiles tile->box hash (the SAME lookup a ParticleContainer already uses internally to
  * route its own particles during remap()), never a linear scan over patches. Reusing

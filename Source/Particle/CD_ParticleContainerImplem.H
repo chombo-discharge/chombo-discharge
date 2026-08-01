@@ -36,37 +36,10 @@
 #include <CD_NamespaceHeader.H>
 
 template <typename P, typename Traits>
-inline typename ParticleContainer<P, Traits>::Destination
+inline LevelTiles::LevelAndBox
 ParticleContainer<P, Traits>::findDestination(const RealVect& a_pos) const
 {
-  // Finest level whose tile contains the particle wins.
-  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    IntVect tile;
-
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      tile[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / (m_minBlockSize * m_dx[lvl][dir])));
-    }
-
-    const LevelTiles& tiles = *m_levelTiles[lvl];
-
-    const auto& myTiles = tiles.getMyTiles();
-    const auto  mit     = myTiles.find(tile);
-
-    if (mit != myTiles.end()) {
-      return Destination{lvl, mit->second, procID(), true};
-    }
-
-#ifdef CH_MPI
-    const auto& otherTiles = tiles.getOtherTiles();
-    const auto  oit        = otherTiles.find(tile);
-
-    if (oit != otherTiles.end()) {
-      return Destination{lvl, oit->second.first, static_cast<int>(oit->second.second), true};
-    }
-#endif
-  }
-
-  return Destination{-1, 0u, -1, false};
+  return LevelTiles::findDestination(a_pos, m_probLo, m_dx, m_minBlockSize, m_levelTiles, m_finestLevel);
 }
 
 template <typename P, typename Traits>
@@ -86,10 +59,10 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
     unsigned long long outcast = 0;
 
     for (std::size_t i = 0; i < a_leaf.size(); i++) {
-      const RealVect    pos = a_leaf.position(i);
-      const Destination dst = this->findDestination(pos);
+      const RealVect pos = a_leaf.position(i);
+      const auto     dst = this->findDestination(pos);
 
-      if (!dst.found) {
+      if (!dst.valid) {
         outcast++;
         continue;
       }
@@ -189,8 +162,8 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
             // Debug self-check of that invariant -- the destination the gather-all path would compute
             // must be exactly this (level, grid, rank). If this ever fires, the skip is unsound.
 #ifndef NDEBUG
-            const Destination chk = this->findDestination(pos);
-            CH_assert(chk.found && chk.level == lvl && chk.rank == procID() &&
+            const auto chk = this->findDestination(pos);
+            CH_assert(chk.valid && chk.level == lvl && chk.rank == procID() &&
                       m_levelTiles[lvl]->getMyGrids().at(chk.gridIndex) == a_din);
 #endif
             i++;
@@ -199,9 +172,9 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
           }
         }
 
-        const Destination dst = this->findDestination(pos); // mover: route it
+        const auto dst = this->findDestination(pos); // mover: route it
 
-        if (dst.found) {
+        if (dst.valid) {
           Leaf& bin = a_target[dst.rank][PoolKey(dst.level, dst.gridIndex)];
 
           bin.append(pos, a_leaf.weight(i), a_leaf.gather(i));
