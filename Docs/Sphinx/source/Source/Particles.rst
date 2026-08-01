@@ -726,7 +726,7 @@ A complete worked example is ``ItoSolver::makeSuperparticles`` in :file:`$DISCHA
 ``chombo-discharge`` supports several merger strategies.
 The four cell-granularity strategies below are implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
 Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
-A fifth strategy, ``nn_pair``, merges nearest-neighbour pairs collectively across the AMR hierarchy rather than one cell at a time; it is not a per-cell factory and is described at the end of this section.
+Three further strategies, ``nn_pair_tree``, ``nn_pair_onecell``, and ``nn_pair_hash``, merge nearest-neighbour pairs collectively across the AMR hierarchy rather than one cell at a time; none is a per-cell factory, and all three are described at the end of this section.
 
 kD-trees
 ________
@@ -806,7 +806,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 273-277
+   :lines: 277-281
 
 The returned functor proceeds as follows:
 
@@ -829,7 +829,7 @@ ___________________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 188-196
+   :lines: 192-200
 
 The caller provides three lambdas:
 
@@ -847,11 +847,16 @@ The Hilbert ordering ensures that merged pairs are spatially close, which better
 
 .. _nn-pair-merging:
 
-Nearest-neighbour pair merging (``nn_pair``)
-_____________________________________________
+Nearest-neighbour pair merging (``nn_pair_tree`` / ``nn_pair_onecell`` / ``nn_pair_hash``)
+____________________________________________________________________________________________
 
-Unlike the four strategies above, ``nn_pair`` is not a per-cell factory that returns a ``ParticleMerger`` functor.
-It is a distributed, MPI-safe merge that operates collectively across the whole AMR hierarchy, implemented as ``ParticleManagement::mergeNearestNeighborsRound`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H`.
+Unlike the four strategies above, none of ``nn_pair_tree``, ``nn_pair_onecell``, or ``nn_pair_hash`` is a per-cell factory that returns a ``ParticleMerger`` functor.
+All three are distributed, MPI-safe merges that operate collectively across the whole AMR hierarchy, sharing the same propose/judge/verdict protocol and differing only in how merge candidates are found:
+
+* ``nn_pair_tree`` is implemented as ``ParticleManagement::mergeNearestNeighborsTree`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H`, and searches for candidates via one whole-patch ``PointCloudBVH`` per patch.
+* ``nn_pair_hash`` is implemented as ``ParticleManagement::mergeNearestNeighborsHash`` in the same file -- identical algorithm and tunables to ``nn_pair_tree``, but searches via one whole-patch ``PointCloudHashGrid`` (a uniform spatial hash grid) per patch instead of a ``PointCloudBVH``. Both point-cloud types expose an identical query interface, and the two entry points share one generic implementation selected via a template parameter over the point-cloud type.
+* ``nn_pair_onecell`` is implemented as ``ParticleManagement::mergeNearestNeighborsOneCell`` in the same file, and instead builds one ``PointCloudBVH`` per occupied grid cell; a query only ever searches its own cell and its Moore-adjacent neighbours, so its merge distance is structurally fixed at Chebyshev cell distance 1.
+
 Each call performs one *round*:
 
 #. Ghost particles are refilled (fresh, exactly once per round) so that a particle's nearest neighbour may be one owned by another patch or rank.
@@ -863,8 +868,8 @@ Merged particles need globally unique ids that cannot collide across ranks or ro
 
 .. important::
 
-   ``nn_pair`` requires a width-1 particle ghost mask, which is only built during a regrid.
+   All three methods require a particle ghost mask (width-1 for ``nn_pair_onecell``; width equal to the configured merge distance, or 1, for ``nn_pair_tree``/``nn_pair_hash``), which is only built during a regrid.
    The mask must therefore be registered *before* the grids are (re)built -- registering it late leaves it empty and the neighbour search will not see cross-patch particles.
-   ``ItoSolver`` handles this automatically when ``merge_algorithm = nn_pair``, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to ``nn_pair``.
+   ``ItoSolver`` handles this automatically when ``merge_algorithm`` selects any of the three, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to any of the three.
 
-In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), and ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells).
+In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).

@@ -884,7 +884,7 @@ public:
    * @brief Map a position to its owning (level, grid index, rank) via the finest containing tile.
    * @details Thin wrapper over the shared LevelTiles::findDestination point->block core, passing this
    * container's aliased grid metadata (probLo, dx, minBlockSize, level tiles). Public because the distributed
-   * nearest-neighbor particle merge (ParticleManagement::mergeNearestNeighborsRound) locates each newly created
+   * nearest-neighbor particle merge (ParticleManagement::mergeNearestNeighborsTree) locates each newly created
    * merged particle's owning patch/rank through the SAME tile-hash query remap() uses internally, rather than a
    * linear scan over patches -- see NNParticleLocation / PositionLocator in CD_NearestNeighborParticleMerge.H.
    * @param[in] a_pos Particle position.

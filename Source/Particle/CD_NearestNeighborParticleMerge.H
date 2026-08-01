@@ -278,7 +278,7 @@ struct NNMergeResult
    * @brief The newly created merged particle: weighted-centroid position, weighted-average
    * opaque payload (computed by the caller-supplied combine callback), summed weight, and a
    * FRESH globally-unique id (never colliding with any existing particle's id -- see
-   * mergeNearestNeighborsRound() for the id-allocation requirement this implies).
+   * mergeNearestNeighborsTree() for the id-allocation requirement this implies).
    */
   NNMergeParticle<Packed> merged;
 };
@@ -411,42 +411,47 @@ struct NNCellKeyHasher
 using NNWalkCell = IntVect;
 
 /**
- * @brief A patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole
- * patch (every local valid particle followed by every ghost) plus its precomputed k-nearest-
- * neighbor graph.
- * @details Built once per patch per mergeNearestNeighborsRound() call via buildNNSpatialIndex()
- * and reused across every internal a_iterateLocalTierToConvergence pass via lazy deletion (see
- * findNearestNeighborCandidates()'s own docs). A patch with no crowded cell gets no index at all
- * (pointCloud stays null -- see buildNNSpatialIndex()'s per-cell pre-filter). The point cloud's
- * metadata is each point's globalID; a hit's cloud index c decodes ownership directly:
- * c < pointCloudNLocal => local valid a_localValid[c], else ghost a_ghosts[c - pointCloudNLocal].
+ * @brief A patch's spatial index for one round: an EBGeometry point-cloud index (PointCloudBVH or
+ * PointCloudHashGrid, selected via @c Cloud) over the whole patch (every local valid particle
+ * followed by every ghost) plus its precomputed k-nearest-neighbor graph.
+ * @details Built once per patch per mergeNearestNeighborsTree()/mergeNearestNeighborsHash() call
+ * via buildNNSpatialIndex() and reused across every internal a_iterateLocalTierToConvergence pass
+ * via lazy deletion (see findNearestNeighborCandidates()'s own docs). A patch with no crowded cell
+ * gets no index at all (pointCloud stays null -- see buildNNSpatialIndex()'s per-cell pre-filter).
+ * The point cloud's metadata is each point's globalID; a hit's cloud index c decodes ownership
+ * directly: c < pointCloudNLocal => local valid a_localValid[c], else ghost
+ * a_ghosts[c - pointCloudNLocal].
+ * @tparam Packed See NNMergeParticle.
+ * @tparam Cloud EBGeometry point-cloud index type -- @c EBGeometry::PointCloudBVH<Real,ParticleID> (default, used
+ * by mergeNearestNeighborsTree()) or @c EBGeometry::PointCloudHashGrid<Real,ParticleID> (used by
+ * mergeNearestNeighborsHash()). The two expose an identical query interface (same @c Hit shape, same method names),
+ * so every consumer of this struct is written once and works for either.
  */
-template <typename Packed>
+template <typename Packed, typename Cloud = EBGeometry::PointCloudBVH<Real, ParticleID>>
 struct NNSpatialIndex
 {
   /**
-   * @brief The SIMD PointCloudBVH over this patch's whole point set (local valid first, then
+   * @brief The point-cloud index over this patch's whole point set (local valid first, then
    * ghosts). Null iff there were no particles at all, or no cell in this patch could possibly be
    * crowded (see buildNNSpatialIndex()'s per-cell pre-filter).
    */
-  std::shared_ptr<EBGeometry::PointCloudBVH<Real, ParticleID>> pointCloud;
+  std::shared_ptr<Cloud> pointCloud;
 
   /**
-   * @brief Number of local-valid points at the front of the PointCloudBVH's cloud order (used to
-   * decode a hit's local-vs-ghost ownership from its cloud index). Only meaningful when
-   * pointCloud is non-null.
+   * @brief Number of local-valid points at the front of the point cloud's order (used to decode a
+   * hit's local-vs-ghost ownership from its cloud index). Only meaningful when pointCloud is
+   * non-null.
    */
   std::size_t pointCloudNLocal = 0;
 
   /**
-   * @brief The whole k-nearest-neighbor graph, precomputed once via PointCloudBVH::
-   * allNearestNeighbors(pointCloudK) at build time (batched, leaf-order / cache-warm, seeded from
-   * each point's own leaf -- strictly cheaper than per-query calls). Row-major: entry
-   * [c * pointCloudK + j] is the j-th nearest OTHER point of cloud index c. Only the local-valid
-   * rows (c < pointCloudNLocal) are ever read by findNearestNeighborCandidates(); ghost rows are
+   * @brief The whole k-nearest-neighbor graph, precomputed once via @c Cloud::allNearestNeighbors(pointCloudK) at
+   * build time (batched, cache-warm, seeded from each point's own spatial locality -- strictly cheaper than
+   * per-query calls). Row-major: entry [c * pointCloudK + j] is the j-th nearest OTHER point of cloud index c. Only
+   * the local-valid rows (c < pointCloudNLocal) are ever read by findNearestNeighborCandidates(); ghost rows are
    * computed but unused. Empty iff pointCloud is null.
    */
-  std::vector<typename EBGeometry::PointCloudBVH<Real, ParticleID>::Hit> pointCloudGraph;
+  std::vector<typename Cloud::Hit> pointCloudGraph;
 
   /**
    * @brief k used to build pointCloudGraph (= 1 + a_maxFallbackCandidates); the row stride.
@@ -455,14 +460,13 @@ struct NNSpatialIndex
 };
 
 /**
- * @brief Build a patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the
- * whole patch (every local valid particle then every ghost) plus its precomputed k-nearest-
- * neighbor graph -- UNLESS no cell in this patch could possibly be crowded, in which case nothing
- * is built.
+ * @brief Build a patch's spatial index for one round: an EBGeometry point-cloud index (see @c Cloud) over the whole
+ * patch (every local valid particle then every ghost) plus its precomputed k-nearest-neighbor graph -- UNLESS no
+ * cell in this patch could possibly be crowded, in which case nothing is built.
  * @details The point cloud carries each point's globalID as metadata; a hit's cloud index decodes
  * ownership (c < nLocal => local valid, else ghost). After the cloud is built, its whole
- * a_kNearest-nearest-neighbor graph is precomputed once via PointCloudBVH::allNearestNeighbors()
- * (batched, leaf-order/cache-warm, own-leaf-seeded) into a_index.pointCloudGraph and reused across
+ * a_kNearest-nearest-neighbor graph is precomputed once via @c Cloud::allNearestNeighbors()
+ * (batched, own-locality-seeded) into a_index.pointCloudGraph and reused across
  * every internal a_iterateLocalTierToConvergence pass (positions never change within a round; only
  * consumed status does, and that is filtered at lookup time -- see
  * findNearestNeighborCandidates()).
@@ -475,17 +479,21 @@ struct NNSpatialIndex
  * a lightweight per-cell tally of the patch's own particles, keyed exactly as the crowding trigger
  * (cellKeyOf(pos, probLo, dx), local and ghost alike), decides it directly.
  * @tparam Packed See NNMergeParticle.
+ * @tparam Cloud See NNSpatialIndex. Constructed with its two-argument constructor (positions, metadata), so this
+ * function relies on each @c Cloud's own default for whatever third construction parameter it takes (target leaf
+ * size for PointCloudBVH, target points per cell for PointCloudHashGrid) -- both defaults are reasonable, general
+ * choices, so neither backend needs bespoke construction logic here.
  * @param[in] a_localValid This patch's own full valid-particle set.
  * @param[in] a_ghosts Every ghost shipped to this patch this round.
  * @param[in] a_probLo Physical position of the domain's low corner.
  * @param[in] a_dx Cell spacing of THIS PATCH's own level.
  * @param[in] a_numParticlesPerCellThresh The physics-facing crowding threshold used elsewhere this round (see
- * mergeNearestNeighborsRound()'s own a_numParticlesPerCellThresh) -- used ONLY for the per-cell pre-filter above.
+ * mergeNearestNeighborsTree()'s own a_numParticlesPerCellThresh) -- used ONLY for the per-cell pre-filter above.
  * @param[in] a_kNearest k = 1 + a_maxFallbackCandidates -- the neighbor count to precompute per point into
  * NNSpatialIndex::pointCloudGraph.
  * @param[out] a_index The resulting spatial index.
  */
-template <typename Packed>
+template <typename Packed, typename Cloud = EBGeometry::PointCloudBVH<Real, ParticleID>>
 inline void
 buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                     const std::vector<NNMergeParticle<Packed>>& a_ghosts,
@@ -493,7 +501,7 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                     const RealVect&                             a_dx,
                     const int                                   a_numParticlesPerCellThresh,
                     const int                                   a_kNearest,
-                    NNSpatialIndex<Packed>&                     a_index) noexcept;
+                    NNSpatialIndex<Packed, Cloud>&              a_index) noexcept;
 
 /**
  * @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
@@ -508,7 +516,7 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
  * @param[in] a_ghostMask This patch's own OUTGOING particle ghost mask, as returned by
  * AmrMesh::getParticleGhostMask() (or getParticleGhostMaskCoarToFine()/ getParticleGhostMaskFineToCoar() for
  * cross-level exposure -- a particle can be boundary-exposed toward a coarser or finer level too, not just the same
- * level; see mergeNearestNeighborsRound() for how the three mask kinds are combined into one boundary-exposed test).
+ * level; see mergeNearestNeighborsTree() for how the three mask kinds are combined into one boundary-exposed test).
  * @return True iff the particle's cell has at least one outgoing ghost-shipment target.
  */
 inline bool
@@ -527,7 +535,7 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  *
  * a_localValid/a_ghosts are this patch's full, unfiltered sets for the round; this function does the
  * alive-filtering itself via a_consumedIDs (checked against both the query and every candidate).
- * a_spatialIndex is built once per patch per mergeNearestNeighborsRound() call over the full set and
+ * a_spatialIndex is built once per patch per mergeNearestNeighborsTree() call over the full set and
  * reused across every a_iterateLocalTierToConvergence pass via this same lazy-deletion check, so it
  * is never rebuilt per pass.
  *
@@ -549,6 +557,7 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  * without re-querying the index.
  *
  * @tparam Packed See NNMergeParticle.
+ * @tparam Cloud See NNSpatialIndex.
  * @param[in] a_localValid This patch's own FULL valid-particle set for this round (query sources AND candidates) --
  * see the contract-change note above; not pre-filtered by a_consumedIDs.
  * @param[in] a_ghosts Every ghost shipped to this patch this round (candidates only; ghosts never initiate a query)
@@ -581,12 +590,12 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  * could wrongly drop a candidate resolveTrivialTier()/judgeProposals() would still have accepted. Safe but not
  * maximally tight.
  */
-template <typename Packed>
+template <typename Packed, typename Cloud = EBGeometry::PointCloudBVH<Real, ParticleID>>
 inline void
 findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
                               const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
                               const std::unordered_set<ParticleID>&                      a_consumedIDs,
-                              const NNSpatialIndex<Packed>&                              a_spatialIndex,
+                              const NNSpatialIndex<Packed, Cloud>&                       a_spatialIndex,
                               const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                               const RealVect&                                            a_probLo,
                               const RealVect&                                            a_dx,
@@ -594,6 +603,111 @@ findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&       
                               std::vector<NNMergeEdge<Packed>>&                          a_edges,
                               const int                                                  a_maxFallbackCandidates = 0,
                               const std::optional<int> a_maxCellDistance = std::nullopt) noexcept;
+
+/**
+ * @brief Per-point metadata carried by a one-cell spatial index's PointCloudBVH: a particle's
+ * global id and whether it is a local-valid particle of the patch the index was built for.
+ * @details Unlike NNSpatialIndex (one whole-patch cloud, ownership decoded from cloud-index
+ * position), each one-cell cloud is built independently per cell, so ownership is carried directly
+ * as metadata instead.
+ */
+struct NNCellMeta
+{
+  /**
+   * @brief Global id of this particle.
+   */
+  ParticleID globalID;
+
+  /**
+   * @brief True iff this particle is a locally-valid particle of the patch the enclosing
+   * NNCellSpatialIndex was built for (i.e. not a ghost) -- same meaning as
+   * NNMergeEdge::candidateIsLocal.
+   */
+  bool isLocal;
+};
+
+/**
+ * @brief One cell's PointCloudBVH for the one-cell nearest-neighbor merge, over every local valid
+ * and ghost particle whose cellKeyOf() falls in that cell.
+ */
+using NNCellCloud = EBGeometry::PointCloudBVH<Real, NNCellMeta>;
+
+/**
+ * @brief A patch's one-cell spatial index: one NNCellCloud per occupied cell, keyed by NNWalkCell
+ * (see its docs for the single-frame convention this uses).
+ * @details Empty (no entries) iff no cell in the patch could possibly be crowded -- the same
+ * per-cell pre-filter as buildNNSpatialIndex(); see buildNNCellSpatialIndex().
+ */
+using NNCellSpatialIndex = std::unordered_map<NNWalkCell, std::shared_ptr<NNCellCloud>, LevelTiles::TileHasher>;
+
+/**
+ * @brief Build a patch's one-cell spatial index for the one-cell nearest-neighbor merge: one
+ * PointCloudBVH per occupied cell -- UNLESS no cell in this patch could possibly be crowded, in
+ * which case nothing is built.
+ * @details Every OCCUPIED cell gets a cloud, not just crowded ones -- an under-threshold cell can
+ * still hold a valid Moore-neighbor candidate for a query in an adjacent crowded cell (see
+ * findNearestNeighborCandidatesOneCell()). Uses the same exact per-cell tally as
+ * buildNNSpatialIndex() to decide whether to build anything at all for this patch.
+ * @tparam Packed See NNMergeParticle.
+ * @param[in] a_localValid This patch's own full valid-particle set.
+ * @param[in] a_ghosts Every ghost shipped to this patch this round.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dx Cell spacing of THIS PATCH's own level.
+ * @param[in] a_numParticlesPerCellThresh The physics-facing crowding threshold used elsewhere this round; used
+ * ONLY for the per-cell pre-filter above.
+ * @param[out] a_index The resulting one-cell spatial index.
+ */
+template <typename Packed>
+inline void
+buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                        const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                        const RealVect&                             a_probLo,
+                        const RealVect&                             a_dx,
+                        const int                                   a_numParticlesPerCellThresh,
+                        NNCellSpatialIndex&                         a_index) noexcept;
+
+/**
+ * @brief For every over-threshold, currently-alive valid particle in a patch, find its single TRUE
+ * nearest neighbor restricted to its own cell and its Moore-adjacent neighbor cells (Chebyshev cell
+ * distance <= 1) -- the one-cell counterpart of findNearestNeighborCandidates().
+ * @details Visits the query's own cell plus every occupied Moore-neighbor cell (up to
+ * 3^SpaceDim - 1 of them), ordered by ascending squared point-to-cell distance, querying each
+ * cell's PointCloudBVH (the own cell via an external query that also matches the query particle
+ * itself, filtered out by id; neighbor cells via an ordinary external query, no self match
+ * possible). Stops visiting further cells once a full top-K candidate set has been found and the
+ * next cell's minimum possible distance cannot beat or tie the current worst of K -- an exact, not
+ * approximate, prune, since point-to-cell-AABB distance is a true lower bound on any point inside
+ * that cell.
+ *
+ * Because only the query's own cell and its Moore neighbors are ever visited, any candidate this
+ * function returns is at Chebyshev cell distance <= 1 by construction; callers MUST forward exactly
+ * that cap (not std::nullopt) as a_maxCellDistance to resolveTrivialTier()/judgeProposals() so their
+ * own exact, level-aware check agrees for cross-level candidates.
+ * @tparam Packed See NNMergeParticle.
+ * @param[in] a_localValid This patch's own FULL valid-particle set for this round (query sources).
+ * @param[in] a_consumedIDs Lazy-deletion skip set: ids already consumed earlier this round.
+ * @param[in] a_cellIndex This patch's one-cell spatial index (see NNCellSpatialIndex), built once via
+ * buildNNCellSpatialIndex() over the FULL a_localValid/a_ghosts sets before any consumption happens.
+ * @param[in] a_liveCellCount Live particle count (valid + ghost) per level-qualified cell key (see NNCellKey).
+ * @param[in] a_probLo Physical position of the domain's low corner (see cellKeyOf()).
+ * @param[in] a_dx Cell spacing of THIS PATCH's own level (see cellKeyOf()'s warning).
+ * @param[in] a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it holds strictly more
+ * than this many particles.
+ * @param[out] a_edges One entry per over-threshold, currently-alive query particle that has at least one candidate.
+ * @param[in] a_maxFallbackCandidates Same meaning as findNearestNeighborCandidates()'s own parameter; 0 (default)
+ * means an ordinary single-nearest query and every edge's fallbackCandidates stays empty.
+ */
+template <typename Packed>
+inline void
+findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
+                                     const std::unordered_set<ParticleID>&                      a_consumedIDs,
+                                     const NNCellSpatialIndex&                                  a_cellIndex,
+                                     const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
+                                     const RealVect&                                            a_probLo,
+                                     const RealVect&                                            a_dx,
+                                     const int                         a_numParticlesPerCellThresh,
+                                     std::vector<NNMergeEdge<Packed>>& a_edges,
+                                     const int                         a_maxFallbackCandidates = 0) noexcept;
 
 /**
  * @brief Resolve every candidate edge that is safely mergeable with zero cross-rank
@@ -722,7 +836,7 @@ resolveTrivialTier(
  * owning rank) -- never by any id comparison (see NNMergeProposal). If the destination rank equals
  * this rank's own (a boundary-exposed candidate that happens to live in a DIFFERENT patch owned by
  * the same rank), the proposal still goes into the normal per-destination-rank bucket -- the
- * caller (mergeNearestNeighborsRound()) is expected to hand the "bucket addressed to myself"
+ * caller (mergeNearestNeighborsTree()) is expected to hand the "bucket addressed to myself"
  * directly to judgeProposals() in-process, without an actual MPI round-trip, while every other
  * bucket goes out over MPI. This keeps the decision logic in judgeProposals() completely
  * unaware of whether a given proposal arrived locally or over the network -- it still goes through
@@ -941,6 +1055,191 @@ placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                  
                      std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
                      std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept;
 
+/**
+ * @brief One patch's identity for the duration of a merge round: its AMR level, local DataIndex,
+ * and its own level's cell spacing.
+ * @details Shared by every backend (mergeNearestNeighborsTree()/mergeNearestNeighborsOneCell())
+ * as the parallel index into their own per-patch vectors (patchLocalValid/patchGhosts/...).
+ */
+struct NNPatchWork
+{
+  /**
+   * @brief AMR level this patch lives on.
+   */
+  int level;
+
+  /**
+   * @brief This patch's local DataIndex on its level.
+   */
+  DataIndex din;
+
+  /**
+   * @brief Cell spacing of this patch's own level.
+   */
+  RealVect dx;
+};
+
+/**
+ * @brief Gather every patch this rank owns into the backend-agnostic per-patch particle sets and
+ * pooled bookkeeping a merge round needs, shared by every search backend.
+ * @details For every patch: splits its leaf into local-valid/ghost NNMergeParticle vectors (ghosts
+ * carrying their TRUE origin AMR level, see NNMergeParticle::level), computes each local-valid
+ * particle's boundary-exposure flag from the realm's same/coarse-to-fine/fine-to-coarse particle
+ * ghost masks at the given a_ghostWidth, and pools everything rank-wide into a_particlesByID.
+ * a_liveCellCount is derived from the pooled a_particlesByID afterward (once per particle, not
+ * once per occurrence, since a ghost can appear in several of this rank's own patches at once).
+ * Builds no spatial index -- that is backend-specific and is the caller's next step.
+ * @tparam P SoA payload type (see mergeNearestNeighborsTree()).
+ * @tparam Packed Opaque reconciliation payload type (see NNMergeParticle).
+ * @tparam Traits Column descriptor for P.
+ * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
+ * @param[in,out] a_amr AMR mesh -- source of ghost masks and the patch layout.
+ * @param[in,out] a_particles The real particle container being merged.
+ * @param[in] a_realm Realm name (a_particles.getRealm()).
+ * @param[in] a_finestLevel Finest AMR level (a_amr.getFinestLevel()).
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dxByLevel Cell spacing per AMR level.
+ * @param[in] a_ghostWidth Particle ghost halo width already filled by the caller (see
+ * mergeNearestNeighborsTree()'s own a_ghostWidth docs).
+ * @param[in] a_gather Per-slot gather callback.
+ * @param[out] a_patchWork One entry per patch this rank owns.
+ * @param[out] a_patchLocalValid This patch's own local-valid particles, parallel to a_patchWork.
+ * @param[out] a_patchGhosts Every ghost shipped to this patch, parallel to a_patchWork.
+ * @param[out] a_particlesByID Every currently-alive local-valid particle and every ghost, pooled rank-wide by id.
+ * @param[out] a_liveCellCount Live particle count (valid + ghost) per level-qualified cell key, derived from
+ * a_particlesByID.
+ */
+template <typename P, typename Packed, typename Traits, typename Gather>
+inline void
+gatherMergeParticles(AmrMesh&                                                  a_amr,
+                     ParticleContainer<P, Traits>&                             a_particles,
+                     const std::string&                                        a_realm,
+                     const int                                                 a_finestLevel,
+                     const RealVect&                                           a_probLo,
+                     const std::vector<RealVect>&                              a_dxByLevel,
+                     const int                                                 a_ghostWidth,
+                     const Gather&                                             a_gather,
+                     std::vector<NNPatchWork>&                                 a_patchWork,
+                     std::vector<std::vector<NNMergeParticle<Packed>>>&        a_patchLocalValid,
+                     std::vector<std::vector<NNMergeParticle<Packed>>>&        a_patchGhosts,
+                     std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                     std::unordered_map<NNCellKey, int, NNCellKeyHasher>&      a_liveCellCount) noexcept;
+
+/**
+ * @brief Finish a merge round: propose/judge/verdict the edges the local tier could not resolve,
+ * place every merge result, and apply everything to the real particle containers -- the
+ * backend-agnostic tail shared by mergeNearestNeighborsTree() and mergeNearestNeighborsOneCell().
+ * @details Runs, in order: derive outgoingTargetOf from a_pooledEdges/a_hasOutgoingCommitment;
+ * generateProposals(); exchange proposals; judgeProposals(); exchange verdicts; applyVerdicts();
+ * placeMergedParticles(); exchange the scatter bucket; remove every consumed local-valid particle
+ * from the real containers; scatter in every locally-placed and every incoming-scattered merged
+ * particle. Identical to steps 3-7 of mergeNearestNeighborsTree()'s own docs.
+ * @tparam P SoA payload type.
+ * @tparam Packed Opaque reconciliation payload type.
+ * @tparam Traits Column descriptor for P.
+ * @tparam Combine See PayloadCombine.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void`.
+ * @tparam PosValid See PositionValid.
+ * @tparam Allocator See IDAllocator.
+ * @tparam OnMerge See MergeCommittedCallback.
+ * @param[in,out] a_amr AMR mesh -- source of the LevelTiles used to place merged particles.
+ * @param[in,out] a_particles The real particle container being merged.
+ * @param[in] a_realm Realm name.
+ * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+ * @param[in] a_combine Opaque-payload combine callback.
+ * @param[in] a_scatter Per-surviving-particle scatter callback.
+ * @param[in] a_allocateID Fresh-id allocator.
+ * @param[in] a_maxCellDistance Physical merge-eligibility cap forwarded to judgeProposals() (see its own docs);
+ * the caller's own cap for a tree-backed round, or a hardcoded 1 for a one-cell round (see
+ * findNearestNeighborCandidatesOneCell()'s docs on why that value is mandatory there).
+ * @param[in] a_isPositionValid Position-validity predicate.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dxByLevel Cell spacing per AMR level.
+ * @param[in] a_patchWork One entry per patch this rank owns (see NNPatchWork), from gatherMergeParticles().
+ * @param[in] a_pooledEdges Every candidate edge produced by the local tier's LAST candidate-search pass, pooled
+ * across every patch this rank owns (used to derive outgoingTargetOf; nothing is consumed between the last pass and
+ * here, so these are still current).
+ * @param[in] a_hasOutgoingCommitment Query ids the local tier could not resolve trivially.
+ * @param[in,out] a_particlesByID Every currently-alive local-valid particle and every ghost, pooled rank-wide by id.
+ * @param[in,out] a_consumedIDs Ids already consumed this round; updated in place as judge-side merges commit.
+ * @param[in,out] a_liveCellCount Live per-cell counts; decremented in place as judge-side merges commit.
+ * @param[in,out] a_allResults Every merge result committed this round (trivial-tier results already inside on entry);
+ * judge-side results are appended.
+ * @param[in,out] a_crossLevelMergeCount Optional diagnostic counter (see MergeCommittedCallback's sibling docs).
+ * @param[in] a_onMergeCommitted Optional per-merge diagnostic callback.
+ */
+template <typename P,
+          typename Packed,
+          typename Traits,
+          typename Combine,
+          typename Scatter,
+          typename PosValid,
+          typename Allocator,
+          typename OnMerge>
+inline void
+finishMergeRound(AmrMesh&                                                  a_amr,
+                 ParticleContainer<P, Traits>&                             a_particles,
+                 const std::string&                                        a_realm,
+                 const int                                                 a_numParticlesPerCellThresh,
+                 const Combine&                                            a_combine,
+                 const Scatter&                                            a_scatter,
+                 const Allocator&                                          a_allocateID,
+                 const std::optional<int>                                  a_maxCellDistance,
+                 const PosValid&                                           a_isPositionValid,
+                 const RealVect&                                           a_probLo,
+                 const std::vector<RealVect>&                              a_dxByLevel,
+                 const std::vector<NNPatchWork>&                           a_patchWork,
+                 const std::vector<NNMergeEdge<Packed>>&                   a_pooledEdges,
+                 const std::unordered_set<ParticleID>&                     a_hasOutgoingCommitment,
+                 std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
+                 std::unordered_set<ParticleID>&                           a_consumedIDs,
+                 std::unordered_map<NNCellKey, int, NNCellKeyHasher>&      a_liveCellCount,
+                 std::vector<NNMergeResult<Packed>>&                       a_allResults,
+                 unsigned long long*                                       a_crossLevelMergeCount,
+                 const OnMerge&                                            a_onMergeCommitted) noexcept;
+
+/**
+ * @brief Shared implementation behind mergeNearestNeighborsTree() and mergeNearestNeighborsHash(): one full round of
+ * the whole-patch-tree nearest-neighbor merge, generic over which EBGeometry point-cloud index backs the per-patch
+ * spatial search.
+ * @details Identical algorithm and public contract to mergeNearestNeighborsTree() (see its own docs for the full
+ * step-by-step description) -- the only difference between the two public entry points is which @c Cloud this
+ * function is instantiated with: @c EBGeometry::PointCloudBVH<Real,ParticleID> for
+ * mergeNearestNeighborsTree(), @c EBGeometry::PointCloudHashGrid<Real,ParticleID> for
+ * mergeNearestNeighborsHash(). Both point-cloud types expose an identical query interface, so this one
+ * implementation serves both without any backend-specific branching.
+ * @tparam Cloud EBGeometry point-cloud index type (see NNSpatialIndex).
+ * @tparam P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge See mergeNearestNeighborsTree().
+ * @param a_amr,a_particles,a_numParticlesPerCellThresh,a_gather,a_combine,a_scatter,a_allocateID,
+ * a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,
+ * a_crossLevelMergeCount,a_onMergeCommitted See mergeNearestNeighborsTree().
+ */
+template <typename P,
+          typename Packed,
+          typename Traits,
+          typename Cloud,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid,
+          typename OnMerge>
+inline void
+mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
+                               ParticleContainer<P, Traits>& a_particles,
+                               const int                     a_numParticlesPerCellThresh,
+                               const Gather&                 a_gather,
+                               const Combine&                a_combine,
+                               const Scatter&                a_scatter,
+                               const Allocator&              a_allocateID,
+                               const bool                    a_iterateLocalTierToConvergence,
+                               const int                     a_maxFallbackCandidates,
+                               const std::optional<int>      a_maxCellDistance,
+                               const int                     a_ghostWidth,
+                               const PosValid&               a_isPositionValid,
+                               unsigned long long*           a_crossLevelMergeCount,
+                               const OnMerge&                a_onMergeCommitted);
+
 } // namespace detail
 
 /**
@@ -1039,7 +1338,7 @@ template <typename P,
           typename OnMerge  = std::function<
              void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
 inline void
-mergeNearestNeighborsRound(
+mergeNearestNeighborsTree(
   AmrMesh&                      a_amr,
   ParticleContainer<P, Traits>& a_particles,
   const int                     a_numParticlesPerCellThresh,
@@ -1051,6 +1350,123 @@ mergeNearestNeighborsRound(
   const int                     a_maxFallbackCandidates         = 0,
   const std::optional<int>      a_maxCellDistance               = std::nullopt,
   const int                     a_ghostWidth                    = 1,
+  const PosValid&               a_isPositionValid =
+    [](const RealVect&) {
+      return true;
+    },
+  unsigned long long* a_crossLevelMergeCount = nullptr,
+  const OnMerge&      a_onMergeCommitted =
+    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    });
+
+/**
+ * @brief Run one full round of the nearest-neighbor merge algorithm, identical in every respect to
+ * mergeNearestNeighborsTree() except that the per-patch spatial search is backed by an
+ * EBGeometry::PointCloudHashGrid (a uniform-grid index) instead of an EBGeometry::PointCloudBVH.
+ * @details See mergeNearestNeighborsTree() for the full algorithm description, parameter contracts, and
+ * defaults -- every one of them applies here unchanged; only the underlying point-cloud index differs (see
+ * detail::mergeNearestNeighborsRoundImpl(), which both this function and mergeNearestNeighborsTree() forward to,
+ * selecting the point-cloud type via its @c Cloud template parameter). PointCloudHashGrid trades PointCloudBVH's
+ * adaptivity to non-uniform density for an O(1) expected build/query cost at near-uniform density; prefer it when a
+ * crowded cell's neighborhood is not also badly clustered in density, and measure before relying on it being faster
+ * in a given workload (see PointCloudHashGrid's own docs in EBGeometry for when it is and is not a good fit).
+ * @tparam P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge See mergeNearestNeighborsTree().
+ * @param a_amr,a_particles,a_numParticlesPerCellThresh,a_gather,a_combine,a_scatter,a_allocateID,
+ * a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,
+ * a_crossLevelMergeCount,a_onMergeCommitted See mergeNearestNeighborsTree().
+ */
+template <typename P,
+          typename Packed,
+          typename Traits = ParticleTraits<P>,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid = std::function<bool(const RealVect&)>,
+          typename OnMerge  = std::function<
+             void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
+inline void
+mergeNearestNeighborsHash(
+  AmrMesh&                      a_amr,
+  ParticleContainer<P, Traits>& a_particles,
+  const int                     a_numParticlesPerCellThresh,
+  const Gather&                 a_gather,
+  const Combine&                a_combine,
+  const Scatter&                a_scatter,
+  const Allocator&              a_allocateID,
+  const bool                    a_iterateLocalTierToConvergence = false,
+  const int                     a_maxFallbackCandidates         = 0,
+  const std::optional<int>      a_maxCellDistance               = std::nullopt,
+  const int                     a_ghostWidth                    = 1,
+  const PosValid&               a_isPositionValid =
+    [](const RealVect&) {
+      return true;
+    },
+  unsigned long long* a_crossLevelMergeCount = nullptr,
+  const OnMerge&      a_onMergeCommitted =
+    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    });
+
+/**
+ * @brief Run one full round of the one-cell nearest-neighbor merge: the same distributed
+ * propose/judge/verdict protocol as mergeNearestNeighborsTree(), but with candidates found via a
+ * per-cell PointCloudBVH spatial index (see NNCellSpatialIndex) instead of one whole-patch tree.
+ * @details Orchestrates, in order: 1. gatherMergeParticles() (ghosts assumed already filled by the
+ * caller, exactly as mergeNearestNeighborsTree() requires -- see its own docs). 2. Per patch:
+ * buildNNCellSpatialIndex(), then findNearestNeighborCandidatesOneCell() + resolveTrivialTier(),
+ * optionally repeated to convergence (see a_iterateLocalTierToConvergence). 3. finishMergeRound()
+ * for everything the local tier could not resolve.
+ *
+ * The merge distance is structurally fixed at Chebyshev cell distance 1 -- only the query's own
+ * cell and its Moore-adjacent neighbors are ever visited (see
+ * findNearestNeighborCandidatesOneCell()) -- so, unlike mergeNearestNeighborsTree(), this function
+ * takes no a_maxCellDistance parameter, and requires exactly a width-1 particle ghost halo (already
+ * filled by the caller) rather than a configurable a_ghostWidth.
+ * @tparam P SoA payload type (e.g. ItoParticle).
+ * @tparam Packed Opaque reconciliation payload type (see NNMergeParticle).
+ * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
+ * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
+ * @tparam Combine See PayloadCombine.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void`.
+ * @param[in,out] a_amr AMR mesh -- source of ghost masks, per-level dx, and the patch layout.
+ * @param[in,out] a_particles The real particle container to merge, for every patch this rank owns.
+ * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+ * @param[in] a_gather Per-slot gather callback (see Gather).
+ * @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
+ * @param[in] a_scatter Per-surviving-particle scatter callback (see Scatter).
+ * @param[in] a_allocateID Fresh-id allocator (see IDAllocator). Mandatory, same requirement as
+ * mergeNearestNeighborsTree().
+ * @param[in] a_iterateLocalTierToConvergence Default false. See mergeNearestNeighborsTree()'s own docs.
+ * @param[in] a_maxFallbackCandidates Forwarded to resolveTrivialTier(). Default 0 (disabled). See
+ * mergeNearestNeighborsTree()'s own docs.
+ * @param[in] a_isPositionValid Forwarded to resolveTrivialTier()/judgeProposals() (see PositionValid). Default
+ * always-true.
+ * @param[in,out] a_crossLevelMergeCount Optional diagnostic counter (nullptr, the default, disables it). See
+ * mergeNearestNeighborsTree()'s own docs.
+ * @param[in] a_onMergeCommitted Optional per-merge diagnostic callback (see MergeCommittedCallback); default is a
+ * no-op.
+ */
+template <typename P,
+          typename Packed,
+          typename Traits = ParticleTraits<P>,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid = std::function<bool(const RealVect&)>,
+          typename OnMerge  = std::function<
+             void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
+inline void
+mergeNearestNeighborsOneCell(
+  AmrMesh&                      a_amr,
+  ParticleContainer<P, Traits>& a_particles,
+  const int                     a_numParticlesPerCellThresh,
+  const Gather&                 a_gather,
+  const Combine&                a_combine,
+  const Scatter&                a_scatter,
+  const Allocator&              a_allocateID,
+  const bool                    a_iterateLocalTierToConvergence = false,
+  const int                     a_maxFallbackCandidates         = 0,
   const PosValid&               a_isPositionValid =
     [](const RealVect&) {
       return true;

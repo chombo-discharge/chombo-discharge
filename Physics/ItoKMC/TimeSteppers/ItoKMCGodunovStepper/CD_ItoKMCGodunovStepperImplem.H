@@ -539,8 +539,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_timer.stopEvent("Reaction network");
 
   // Merge super-particles down to the target after the chemistry advance created/removed particles.
-  // Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide (nn_pair)
-  // merge algorithms run, chosen by ItoSolver.merge_algorithm. makeSuperparticles() cell-sorts
+  // Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide
+  // (nn_pair_tree/nn_pair_onecell/nn_pair_hash) merge algorithms run, chosen by ItoSolver.merge_algorithm.
+  // makeSuperparticles() cell-sorts
   // internally as needed and returns the container patch-organized.
   this->barrier();
   m_timer.startEvent("Make superparticles");

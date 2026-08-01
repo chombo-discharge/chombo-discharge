@@ -52,8 +52,14 @@ mergeMethodFromString(const std::string& a_str) noexcept
   else if (a_str == "nn_sfc") {
     return ParticleMergeMethod::NnSfc;
   }
-  else if (a_str == "nn_pair") {
-    return ParticleMergeMethod::NnPair;
+  else if (a_str == "nn_pair_tree") {
+    return ParticleMergeMethod::NnPairTree;
+  }
+  else if (a_str == "nn_pair_onecell") {
+    return ParticleMergeMethod::NnPairOneCell;
+  }
+  else if (a_str == "nn_pair_hash") {
+    return ParticleMergeMethod::NnPairHash;
   }
   else if (a_str == "external") {
     return ParticleMergeMethod::External;

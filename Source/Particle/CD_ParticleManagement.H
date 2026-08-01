@@ -43,7 +43,9 @@ enum class ParticleMergeMethod
   Reinitialize,    ///< Cell: makeReinitializeMerger.
   ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
   NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
-  NnPair,          ///< AMR: mergeNearestNeighborsRound.
+  NnPairTree,      ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
+  NnPairOneCell,   ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
+  NnPairHash,      ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
   External         ///< Cell: caller-supplied per-cell merger.
 };
 
@@ -55,7 +57,9 @@ enum class ParticleMergeMethod
  * 'reinitialize' -> Reinitialize
  * 'reinitialize_bvh' -> ReinitializeBVH
  * 'nn_sfc' -> NnSfc
- * 'nn_pair' -> NnPair
+ * 'nn_pair_tree' -> NnPairTree
+ * 'nn_pair_onecell' -> NnPairOneCell
+ * 'nn_pair_hash' -> NnPairHash
  * 'external' -> External
  * @param[in] a_str String selector. Must take one of the above strings.
  * @return The corresponding method; aborts on an unknown selector.
