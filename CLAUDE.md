@@ -16,6 +16,10 @@ These rules override anything else in this file and any default tooling behaviou
   every PR with the upstream repo as the base and the fork branch as the head
   (`chombo-discharge/chombo-discharge` ← `<fork-owner>:<branch>`). Never open a PR against the
   fork itself.
+- **Never create branches in the upstream repository `chombo-discharge/chombo-discharge`; create
+  branches only in a fork.** All development branches live in the fork (`origin`, e.g.
+  `rmrsk/chombo-discharge`) and are used as the head of a cross-fork PR. Do not push a new branch
+  to the upstream repo under any circumstances.
 - **If Claude fills in the PR top post (the conversation's opening description), it must use the
   repository's `.github/pull_request_template.md`** — reproduce its section headings verbatim and
   fill them in from the actual changes.
