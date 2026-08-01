@@ -27,7 +27,7 @@ var searchData=
   ['finalizeerrors_24',['finalizeErrors',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#ac20aa1addb20d1dc131567c41fde2430',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper']]],
   ['findamrlevel_25',['findamrlevel',['../classEBHelmholtzOpFactory.html#a2c30095f596d9ab8ef2e9f0c5b172be8',1,'EBHelmholtzOpFactory::findAmrLevel()'],['../classMFHelmholtzOpFactory.html#aad97b4f76d0dd7151c20c38afa7fb40b',1,'MFHelmholtzOpFactory::findAmrLevel()']]],
   ['finddestination_26',['findDestination',['../classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b',1,'ParticleContainer']]],
-  ['findnearestneighborcandidates_27',['findNearestNeighborCandidates',['../CD__NearestNeighborParticleMerge_8H.html#acf870c29c40c0b54fe41caf828a86382',1,'ParticleManagement::detail']]],
+  ['findnearestneighborcandidates_27',['findNearestNeighborCandidates',['../namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382',1,'ParticleManagement::detail']]],
   ['fine_28',['Fine',['../CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa5999b8900bb8b90cfa1af137d355ff14',1,'CD_ParticleSoA.H']]],
   ['firstderivstencil_29',['FirstDerivStencil',['../classCoarseInterpQuadCF.html#a77dee0c0cae78ce203c5bcb5636c934a',1,'CoarseInterpQuadCF']]],
   ['firstid_30',['firstID',['../structParticleManagement_1_1detail_1_1NNMergeResult.html#ad1ba8a6a9d3e0697fb0a6615211e4bce',1,'ParticleManagement::detail::NNMergeResult']]],

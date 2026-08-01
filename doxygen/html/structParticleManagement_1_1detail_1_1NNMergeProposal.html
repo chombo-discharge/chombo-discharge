@@ -76,7 +76,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceParticleManagement.html">ParticleManagement</a></li><li class="navelem"><b>detail</b></li><li class="navelem"><a class="el" href="structParticleManagement_1_1detail_1_1NNMergeProposal.html">NNMergeProposal</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceParticleManagement.html">ParticleManagement</a></li><li class="navelem"><a class="el" href="namespaceParticleManagement_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="structParticleManagement_1_1detail_1_1NNMergeProposal.html">NNMergeProposal</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -110,7 +110,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>distanceSquared</b></
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename Packed&gt;<br />
 struct ParticleManagement::detail::NNMergeProposal&lt; Packed &gt;</div><p>A cross-patch merge proposal: one particle's own nearest-neighbor query result, bundled as a self-contained, atomic pair for shipment to whichever rank owns the candidate. </p>
-<p>Carries full data for both participants (not a bare id reference) so the judge's decision is self-contained and it can never recombine pieces across different incoming proposals. Routing rule (see <a class="el" href="CD__NearestNeighborParticleMerge_8H.html#a804e860074bebad0ec202a2763c2d3e2" title="Package one outgoing proposal for every edge that resolveTrivialTier() could not resolve locally,...">generateProposals()</a>): a proposal is always sent to the owner of the querying particle's best candidate, never by any id comparison. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Carries full data for both participants (not a bare id reference) so the judge's decision is self-contained and it can never recombine pieces across different incoming proposals. Routing rule (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a804e860074bebad0ec202a2763c2d3e2" title="Package one outgoing proposal for every edge that resolveTrivialTier() could not resolve locally,...">generateProposals()</a>): a proposal is always sent to the owner of the querying particle's best candidate, never by any id comparison. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
   </table>

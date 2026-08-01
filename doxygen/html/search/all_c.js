@@ -1350,7 +1350,7 @@ var searchData=
   ['memberpointertraits_3c_20t_20c_3a_3a_2a_20_3e_1347',['MemberPointerTraits&lt; T C::* &gt;',['../structdetail_1_1MemberPointerTraits_3_01T_01C_1_1_5_01_4.html',1,'detail']]],
   ['members_1348',['members',['../structH5Part_1_1Vector.html#aaf2d8b28d4e1e494254b4f98a45cfb18',1,'H5Part::Vector']]],
   ['memoryreport_1349',['MemoryReport',['../namespaceMemoryReport.html',1,'']]],
-  ['mergeadjacentnearest_1350',['mergeAdjacentNearest',['../namespaceParticleManagement.html#ad70134a1661f2195054d82a45bf757d4',1,'ParticleManagement']]],
+  ['mergeadjacentnearest_1350',['mergeAdjacentNearest',['../namespaceParticleManagement_1_1detail.html#a5bbb6d2c11766c23bb63548c63ba356b',1,'ParticleManagement::detail']]],
   ['mergecommittedcallback_1351',['MergeCommittedCallback',['../namespaceParticleManagement.html#a718b64b306ea29d6e3865c486206a15d',1,'ParticleManagement']]],
   ['merged_1352',['merged',['../structParticleManagement_1_1detail_1_1NNMergeResult.html#a0d56bb406e9adfc783663df3b4b29014',1,'ParticleManagement::detail::NNMergeResult']]],
   ['mergemethodfromstring_1353',['mergeMethodFromString',['../namespaceParticleManagement.html#ace7541e61134b0af1e86e6e0e2a260b9',1,'ParticleManagement']]],

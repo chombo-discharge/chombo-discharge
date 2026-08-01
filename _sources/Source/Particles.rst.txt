@@ -745,7 +745,7 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
 .. note::
 
-   ``buildEqualWeightKDLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) is an internal helper -- it implements the partitioning below but is not part of the public interface.
+   The kD partitioner ``ParticleManagement::detail::buildEqualWeightKDLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) lives in the internal ``detail`` namespace -- it implements the partitioning below but is not part of the public interface and is not meant to be called directly.
    The public entry point is the ``makeEqualWeightKDMerger`` factory (see :ref:`below <kd-tree-merging>`), which wraps it.
 
 The kD-tree partitioner operates on a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
@@ -806,7 +806,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 263-267
+   :lines: 273-277
 
 The returned functor proceeds as follows:
 
@@ -829,7 +829,7 @@ ___________________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 178-186
+   :lines: 188-196
 
 The caller provides three lambdas:
 

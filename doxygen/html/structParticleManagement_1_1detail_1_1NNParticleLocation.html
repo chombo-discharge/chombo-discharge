@@ -76,7 +76,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceParticleManagement.html">ParticleManagement</a></li><li class="navelem"><b>detail</b></li><li class="navelem"><a class="el" href="structParticleManagement_1_1detail_1_1NNParticleLocation.html">NNParticleLocation</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceParticleManagement.html">ParticleManagement</a></li><li class="navelem"><a class="el" href="namespaceParticleManagement_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="structParticleManagement_1_1detail_1_1NNParticleLocation.html">NNParticleLocation</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -87,7 +87,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Result of locating a physical position against the AMR grid &ndash; see <a class="el" href="CD__NearestNeighborParticleMerge_8H.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>.  
+<p>Result of locating a physical position against the AMR grid &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>.  
  <a href="structParticleManagement_1_1detail_1_1NNParticleLocation.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__NearestNeighborParticleMerge_8H_source.html">CD_NearestNeighborParticleMerge.H</a>&gt;</code></p>
@@ -112,7 +112,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>ownerRank</b></td></tr
 <tr class="separator:a900127152a15f568ef00af5c5108d796"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Result of locating a physical position against the AMR grid &ndash; see <a class="el" href="CD__NearestNeighborParticleMerge_8H.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>. </p>
+<div class="textblock"><p>Result of locating a physical position against the AMR grid &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>. </p>
 <p>Deliberately independent of any AmrMesh/Realm/ParticleContainer type (this header stays Amr-agnostic) &ndash; mirrors <a class="el" href="structParticleContainer_1_1Destination.html" title="Resolved remap destination of a particle: owning (level, grid index, rank).">ParticleContainer::Destination</a>'s fields exactly, since that IS the intended real implementation: an O(1) point-&gt;block query on the realm's <a class="el" href="classLevelTiles.html" title="Class for storing the AMR hierarchy as a collection of tiles.">LevelTiles</a> tile-&gt;box hash (the SAME lookup a <a class="el" href="classParticleContainer.html" title="AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.">ParticleContainer</a> already uses internally to route its own particles during remap()), never a linear scan over patches. Reusing <a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b" title="Map a position to its owning (level, grid index, rank) via the finest containing tile.">ParticleContainer::findDestination()</a> rather than adding a second, parallel point-location method keeps this one mapping the single source of truth for "which box owns this position". </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Source/Particle/<a class="el" href="CD__NearestNeighborParticleMerge_8H_source.html">CD_NearestNeighborParticleMerge.H</a></li>

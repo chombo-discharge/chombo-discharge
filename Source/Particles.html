@@ -998,7 +998,7 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 </figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>) is an internal helper – it implements the partitioning below but is not part of the public interface.
+<p>The kD partitioner <code class="docutils literal notranslate"><span class="pre">ParticleManagement::detail::buildEqualWeightKDLeaves</span></code> (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>) lives in the internal <code class="docutils literal notranslate"><span class="pre">detail</span></code> namespace – it implements the partitioning below but is not part of the public interface and is not meant to be called directly.
 The public entry point is the <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory (see <a class="reference internal" href="#kd-tree-merging"><span class="std std-ref">below</span></a>), which wraps it.</p>
 </div>
 <p>The kD-tree partitioner operates on a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.

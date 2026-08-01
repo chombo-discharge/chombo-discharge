@@ -76,7 +76,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceParticleManagement.html">ParticleManagement</a></li><li class="navelem"><b>detail</b></li><li class="navelem"><a class="el" href="structParticleManagement_1_1detail_1_1NNFallbackCandidate.html">NNFallbackCandidate</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceParticleManagement.html">ParticleManagement</a></li><li class="navelem"><a class="el" href="namespaceParticleManagement_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="structParticleManagement_1_1detail_1_1NNFallbackCandidate.html">NNFallbackCandidate</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -109,7 +109,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>candidateIsLocal</b><
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>One additional ranked candidate beyond a query's primary nearest neighbor. </p>
-<p>Populated only when a_maxFallbackCandidates &gt; 0 is requested from <a class="el" href="CD__NearestNeighborParticleMerge_8H.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a> (see <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#aa63dab1bf8ec1892d5ca9e2c863d4b38" title="Next-nearest candidates beyond candidateID, in ascending distanceSquared order.">NNMergeEdge::fallbackCandidates</a>). Fetched via a single K-nearest query at generation time (K = 1 + a_maxFallbackCandidates); <a class="el" href="CD__NearestNeighborParticleMerge_8H.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> walks this pre-fetched, distance-sorted list when a closer candidate is blocked, without re-querying the spatial index. </p>
+<p>Populated only when a_maxFallbackCandidates &gt; 0 is requested from <a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a> (see <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#aa63dab1bf8ec1892d5ca9e2c863d4b38" title="Next-nearest candidates beyond candidateID, in ascending distanceSquared order.">NNMergeEdge::fallbackCandidates</a>). Fetched via a single K-nearest query at generation time (K = 1 + a_maxFallbackCandidates); <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> walks this pre-fetched, distance-sorted list when a closer candidate is blocked, without re-querying the spatial index. </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Source/Particle/<a class="el" href="CD__NearestNeighborParticleMerge_8H_source.html">CD_NearestNeighborParticleMerge.H</a></li>
 </ul>
