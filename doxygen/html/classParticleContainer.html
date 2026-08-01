@@ -77,7 +77,6 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-types">Protected Types</a> &#124;
@@ -105,12 +104,6 @@ Inheritance diagram for ParticleContainer&lt; P, Traits &gt;:</div>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolved remap destination of a particle: owning (level, grid index, rank).  <a href="structParticleContainer_1_1Destination.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a87b7cf2ff4c56fb0ee98ebca42fdd839" id="r_a87b7cf2ff4c56fb0ee98ebca42fdd839"><td class="memItemLeft" align="right" valign="top"><a id="a87b7cf2ff4c56fb0ee98ebca42fdd839" name="a87b7cf2ff4c56fb0ee98ebca42fdd839"></a>
@@ -124,9 +117,9 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>LevelParticles</b> =
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2503981971f7735e94f3d64d4f372d4b" id="r_a2503981971f7735e94f3d64d4f372d4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structParticleContainer_1_1Destination.html">Destination</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2503981971f7735e94f3d64d4f372d4b">findDestination</a> (const RealVect &amp;a_pos) const</td></tr>
-<tr class="memdesc:a2503981971f7735e94f3d64d4f372d4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
-<tr class="separator:a2503981971f7735e94f3d64d4f372d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aceb244841067af1ac950741902a56150" id="r_aceb244841067af1ac950741902a56150"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structLevelTiles_1_1LevelAndBox.html">LevelTiles::LevelAndBox</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aceb244841067af1ac950741902a56150">findDestination</a> (const RealVect &amp;a_pos) const</td></tr>
+<tr class="memdesc:aceb244841067af1ac950741902a56150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
+<tr class="separator:aceb244841067af1ac950741902a56150"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Construction and lifetime</div></td></tr>
 <tr class="memitem:a436bc8a55380fbea2d491d02ba5b7466" id="r_a436bc8a55380fbea2d491d02ba5b7466"><td class="memItemLeft" align="right" valign="top"><a id="a436bc8a55380fbea2d491d02ba5b7466" name="a436bc8a55380fbea2d491d02ba5b7466"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ParticleContainer</b> ()</td></tr>
@@ -427,7 +420,7 @@ class ParticleContainer&lt; P, Traits &gt;</div><p>AMR-hierarchy container of co
 <div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:123</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a76b35ee8a07d588f7070ccd6f658ad47"><div class="ttname"><a href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47">ParticleContainer::define</a></div><div class="ttdeci">void define(const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const RealVect &amp;a_probLo, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; LevelTiles &gt; &gt; &amp;a_levelTiles, const int a_finestLevel, const std::string &amp;a_realm, const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt; &gt; &gt; *a_validCells)</div><div class="ttdoc">Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:193</div></div>
 <div class="ttc" id="aclassParticleContainer_html_a8123d5012822f5fafe8ee7198d594c3c"><div class="ttname"><a href="classParticleContainer.html#a8123d5012822f5fafe8ee7198d594c3c">ParticleContainer::getGrids</a></div><div class="ttdeci">const Vector&lt; DisjointBoxLayout &gt; &amp; getGrids() const</div><div class="ttdoc">Per-level AMR grids.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainer.H:260</div></div>
-<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:470</div></div>
+<div class="ttc" id="aclassParticleContainer_html_aad7d26975f869cee92354c1d14e16be1"><div class="ttname"><a href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Redistribute every valid particle to the patch/level/rank that owns its cell.</div><div class="ttdef"><b>Definition</b> CD_ParticleContainerImplem.H:443</div></div>
 <div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:653</div></div>
 <div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1172</div></div>
 <div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:872</div></div>
@@ -880,8 +873,8 @@ template&lt;typename P , typename Traits &gt; </div>
 
 </div>
 </div>
-<a id="a2503981971f7735e94f3d64d4f372d4b" name="a2503981971f7735e94f3d64d4f372d4b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2503981971f7735e94f3d64d4f372d4b">&#9670;&#160;</a></span>findDestination()</h2>
+<a id="aceb244841067af1ac950741902a56150" name="aceb244841067af1ac950741902a56150"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aceb244841067af1ac950741902a56150">&#9670;&#160;</a></span>findDestination()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -892,7 +885,7 @@ template&lt;typename P , typename Traits &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::Destination <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::findDestination </td>
+          <td class="memname"><a class="el" href="structLevelTiles_1_1LevelAndBox.html">LevelTiles::LevelAndBox</a> <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt;::findDestination </td>
           <td>(</td>
           <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_pos</em></td><td>)</td>
@@ -907,13 +900,13 @@ template&lt;typename P , typename Traits &gt; </div>
 </div><div class="memdoc">
 
 <p>Map a position to its owning (level, grid index, rank) via the finest containing tile. </p>
-<p>Public because the distributed nearest-neighbor particle merge (<a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsRound</a>) locates each newly created merged particle's owning patch/rank through the SAME tile-hash query <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> uses internally, rather than a linear scan over patches &ndash; see NNParticleLocation / PositionLocator in <a class="el" href="CD__NearestNeighborParticleMerge_8H.html" title="Declaration of a distributed, MPI-safe nearest-neighbor particle-merge algorithm.">CD_NearestNeighborParticleMerge.H</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Thin wrapper over the shared <a class="el" href="classLevelTiles.html#abe32c7514d0d86daafdcdf94861f876f" title="Map a physical position to its owning (level, grid index, rank) via the finest containing tile.">LevelTiles::findDestination</a> point-&gt;block core, passing this container's aliased grid metadata (probLo, dx, minBlockSize, level tiles). Public because the distributed nearest-neighbor particle merge (<a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsRound</a>) locates each newly created merged particle's owning patch/rank through the SAME tile-hash query <a class="el" href="classParticleContainer.html#aad7d26975f869cee92354c1d14e16be1" title="Redistribute every valid particle to the patch/level/rank that owns its cell.">remap()</a> uses internally, rather than a linear scan over patches &ndash; see NNParticleLocation / PositionLocator in <a class="el" href="CD__NearestNeighborParticleMerge_8H.html" title="Declaration of a distributed, MPI-safe nearest-neighbor particle-merge algorithm.">CD_NearestNeighborParticleMerge.H</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Particle position. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The resolved destination; found==false if no tile on any level owns the cell. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The resolved destination; valid==false if no tile on any level owns the cell. </dd></dl>
 
 </div>
 </div>

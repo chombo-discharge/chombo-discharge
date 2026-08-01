@@ -184,11 +184,11 @@ A position is therefore mapped to its owning box in <span class="math notranslat
 A box that spans more than one tile (i.e. larger than <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code>) is simply registered under each of its tiles; when <code class="docutils literal notranslate"><span class="pre">min_block_size</span></code> equals <code class="docutils literal notranslate"><span class="pre">max_block_size</span></code> every box is a single tile and the map holds one entry per box.
 The hash grid is rebuilt during every regrid, so it always reflects the realm’s current grids and rank ownership.</p>
 <p>The lookup is exposed through <code class="docutils literal notranslate"><span class="pre">Realm::getLevelAndBox</span></code>, which returns the finest level whose box covers a given position:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Realm</span><span class="o">::</span><span class="n">LevelAndBox</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realm</span><span class="p">.</span><span class="n">getLevelAndBox</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
-<span class="c1">// result.level    -- AMR level containing the point (-1 if none)</span>
-<span class="c1">// result.boxIndex -- global grid-box index on that level</span>
-<span class="c1">// result.rank     -- MPI rank owning that box</span>
-<span class="c1">// result.valid    -- false if no box covers the point (i.e. off-domain)</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">LevelTiles</span><span class="o">::</span><span class="n">LevelAndBox</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realm</span><span class="p">.</span><span class="n">getLevelAndBox</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
+<span class="c1">// result.level     -- AMR level containing the point (-1 if none)</span>
+<span class="c1">// result.gridIndex -- global grid-box index on that level</span>
+<span class="c1">// result.rank      -- MPI rank owning that box</span>
+<span class="c1">// result.valid     -- false if no box covers the point (i.e. off-domain)</span>
 </pre></div>
 </div>
 <p>This is the same mapping the particle infrastructure uses to bin particles during <code class="docutils literal notranslate"><span class="pre">remap()</span></code> (see <a class="reference internal" href="Particles.html#chap-particles"><span class="std std-ref">Particles</span></a>).

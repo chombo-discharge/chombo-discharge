@@ -1,7 +1,7 @@
 var searchData=
 [
   ['leastsquares_0',['LeastSquares',['../classLeastSquares.html',1,'']]],
-  ['levelandbox_1',['LevelAndBox',['../structRealm_1_1LevelAndBox.html',1,'Realm']]],
+  ['levelandbox_1',['LevelAndBox',['../structLevelTiles_1_1LevelAndBox.html',1,'LevelTiles']]],
   ['leveltiles_2',['LevelTiles',['../classLevelTiles.html',1,'']]],
   ['linearstencil_3',['LinearStencil',['../classLinearStencil.html',1,'']]],
   ['loadbalancing_4',['LoadBalancing',['../classLoadBalancing.html',1,'']]],

@@ -47,11 +47,11 @@ The lookup is exposed through ``Realm::getLevelAndBox``, which returns the fines
 
 .. code-block:: c++
 
-   const Realm::LevelAndBox result = realm.getLevelAndBox(position);
-   // result.level    -- AMR level containing the point (-1 if none)
-   // result.boxIndex -- global grid-box index on that level
-   // result.rank     -- MPI rank owning that box
-   // result.valid    -- false if no box covers the point (i.e. off-domain)
+   const LevelTiles::LevelAndBox result = realm.getLevelAndBox(position);
+   // result.level     -- AMR level containing the point (-1 if none)
+   // result.gridIndex -- global grid-box index on that level
+   // result.rank      -- MPI rank owning that box
+   // result.valid     -- false if no box covers the point (i.e. off-domain)
 
 This is the same mapping the particle infrastructure uses to bin particles during ``remap()`` (see :ref:`Chap:Particles`).
 ``ParticleContainer`` aliases the realm's tile hash grid rather than building its own, so the ``Realm`` is the single source of truth for point-to-patch ownership.

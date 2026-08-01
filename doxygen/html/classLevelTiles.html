@@ -80,6 +80,7 @@ $(function() {
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classLevelTiles-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">LevelTiles Class Reference</div></div>
@@ -93,6 +94,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1LevelAndBox.html">LevelAndBox</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a point-&gt;block query. See findDestination.  <a href="structLevelTiles_1_1LevelAndBox.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structLevelTiles_1_1TileHasher.html">TileHasher</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash functor for using IntVect tiles as unordered_map keys.  <a href="structLevelTiles_1_1TileHasher.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -129,6 +133,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~LevelTiles</b> ()
 <tr class="memitem:acc1a8c262d886137ba317fe35b6c8c1c" id="r_acc1a8c262d886137ba317fe35b6c8c1c"><td class="memItemLeft" align="right" valign="top">virtual const std::unordered_map&lt; unsigned int, DataIndex &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#acc1a8c262d886137ba317fe35b6c8c1c">getMyGrids</a> () const noexcept</td></tr>
 <tr class="memdesc:acc1a8c262d886137ba317fe35b6c8c1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the mapping of grid index to DataIndex.  <br /></td></tr>
 <tr class="separator:acc1a8c262d886137ba317fe35b6c8c1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:abe32c7514d0d86daafdcdf94861f876f" id="r_abe32c7514d0d86daafdcdf94861f876f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structLevelTiles_1_1LevelAndBox.html">LevelAndBox</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLevelTiles.html#abe32c7514d0d86daafdcdf94861f876f">findDestination</a> (const RealVect &amp;a_pos, const RealVect &amp;a_probLo, const Vector&lt; RealVect &gt; &amp;a_dx, const int a_minBlockSize, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;a_levelTiles, const int a_finestLevel) noexcept</td></tr>
+<tr class="memdesc:abe32c7514d0d86daafdcdf94861f876f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a physical position to its owning (level, grid index, rank) via the finest containing tile.  <br /></td></tr>
+<tr class="separator:abe32c7514d0d86daafdcdf94861f876f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -241,6 +251,80 @@ std::unordered_map&lt; unsigned int, DataIndex &gt;&#160;</td><td class="memItem
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="abe32c7514d0d86daafdcdf94861f876f" name="abe32c7514d0d86daafdcdf94861f876f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe32c7514d0d86daafdcdf94861f876f">&#9670;&#160;</a></span>findDestination()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structLevelTiles_1_1LevelAndBox.html">LevelAndBox</a> LevelTiles::findDestination </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_pos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; RealVect &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_minBlockSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_levelTiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_finestLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map a physical position to its owning (level, grid index, rank) via the finest containing tile. </p>
+<p>Shared, header-inlined point-&gt;block core used by both <a class="el" href="classParticleContainer.html#aceb244841067af1ac950741902a56150" title="Map a position to its owning (level, grid index, rank) via the finest containing tile.">ParticleContainer::findDestination</a> (the per-particle remap hot path) and <a class="el" href="classRealm.html#aee559491c405845d7b80b9ef1e19543c" title="Find the (finest) grid box covering a physical position.">Realm::getLevelAndBox</a>. The position is mapped to a min-block-size tile by integer division, then looked up in each level's tile-&gt;box hash, finest level first. It is O(1) per level (a tile computation plus an unordered_map lookup), never a linear scan over patches, and works for variable-sized/anisotropic boxes because every box is registered under all the min tiles it covers. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position to locate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Per-level grid spacing, indexed [level][dir] (isotropic per level). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Tile size in cells (min_block_size). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_levelTiles</td><td>Per-level tile-&gt;box maps (the single source of truth). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest AMR level to search. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>{level, gridIndex, rank, valid}; valid==false (other fields unspecified) if no tile owns the cell. </dd></dl>
 
 </div>
 </div>
