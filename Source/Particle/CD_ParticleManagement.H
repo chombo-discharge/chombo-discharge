@@ -157,7 +157,7 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
  *
  * When the cell contains more particles than the target:
  *   1. The intermediate list is sorted along a 21-bit Hilbert curve computed from particle positions.
- *   2. `mergeAdjacentNearest` merges the closest adjacent pair repeatedly until the target count is
+ *   2. `detail::mergeAdjacentNearest` merges the closest adjacent pair repeatedly until the target count is
  *      reached, delegating payload arithmetic to @c a_combine.
  *
  * When the cell contains fewer particles than the target: the heaviest particle (by @c packWeight) is
@@ -177,7 +177,7 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
  * @tparam packWeight  Member-function pointer `Real& (Packed::*)()` giving mutable access to the weight.
  *                     Used only for the split path.
  * @tparam packPosition Member-function pointer `const RealVect& (Packed::*)() const` giving the position.
- *                     Used for Hilbert-key computation and forwarded to mergeAdjacentNearest.
+ *                     Used for Hilbert-key computation and forwarded to detail::mergeAdjacentNearest.
  * @tparam P           SoA payload type.
  * @tparam Traits      Column descriptor for @c P (defaults to ParticleTraits<P>).
  * @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
@@ -204,7 +204,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  *   1. Packs each SoA slot into a lightweight intermediate (@c Packed) via @c a_gather and accumulates
  *      total weight @c W.
  *   2. Returns early if @c W < 2 or the target is non-positive.
- *   3. Calls buildEqualWeightKDLeaves to partition the packed list into at most @c a_numTargetParticles
+ *   3. Calls detail::buildEqualWeightKDLeaves to partition the packed list into at most @c a_numTargetParticles
  *      leaves, using @c a_reconcile to fix up daughter particles whenever the median is split.
  *   4. Clears the SoA container, then reduces each leaf by calling @c a_scatterLeaf once per leaf.
  *
@@ -217,9 +217,9 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  *
  * @tparam Packed       Lightweight AoS intermediate type (e.g. NonCommParticle<M,N>). Must be copyable.
  * @tparam packWeight   Member-function pointer `Real& (Packed::*)()` giving mutable access to the weight.
- *                      Forwarded to buildEqualWeightKDLeaves for median splitting.
+ *                      Forwarded to detail::buildEqualWeightKDLeaves for median splitting.
  * @tparam packPosition Member-function pointer `const RealVect& (Packed::*)() const` giving the position.
- *                      Forwarded to buildEqualWeightKDLeaves for bounding-box splitting.
+ *                      Forwarded to detail::buildEqualWeightKDLeaves for bounding-box splitting.
  * @tparam P            SoA payload type.
  * @tparam Traits       Column descriptor for @c P (defaults to ParticleTraits<P>).
  * @param[in] a_gather      Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
@@ -310,6 +310,12 @@ template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 static inline std::vector<T>
 partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
 
+/**
+ * @brief Internal-only implementation details of the ParticleManagement API (continued).
+ * @details Reopens the @c detail namespace introduced above to house @c partitionParticles alongside the
+ * other internal helpers; see the first @c detail block for the full rationale. Not part of the public
+ * interface -- public callers qualify with @c detail::.
+ */
 namespace detail {
 
 /**
