@@ -268,6 +268,50 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
   return a_ghostMask.numTargets(a_cellIndex) > 0;
 }
 
+/**
+ * @brief Exact per-cell crowding pre-filter shared by buildNNSpatialIndex()/buildNNCellSpatialIndex(): is any
+ * cell in this patch's local+ghost particle set over a_numParticlesPerCellThresh?
+ * @details A count-only tally keyed as the crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost
+ * alike); checks the true per-cell maximum, not an average density (a low-average patch can still hold one
+ * over-threshold cell).
+ * @tparam Packed See NNMergeParticle.
+ * @param[in] a_localValid This patch's own full valid-particle set.
+ * @param[in] a_ghosts Every ghost shipped to this patch this round.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dx Cell spacing of THIS PATCH's own level.
+ * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+ * @return True iff some cell holds strictly more than a_numParticlesPerCellThresh particles.
+ */
+template <typename Packed>
+inline bool
+nnMergeAnyCellCrowded(const std::vector<NNMergeParticle<Packed>>& a_localValid,
+                      const std::vector<NNMergeParticle<Packed>>& a_ghosts,
+                      const RealVect&                             a_probLo,
+                      const RealVect&                             a_dx,
+                      const int                                   a_numParticlesPerCellThresh) noexcept
+{
+  const std::size_t total = a_localValid.size() + a_ghosts.size();
+
+  std::unordered_map<NNWalkCell, int, LevelTiles::TileHasher> cellCount;
+  cellCount.reserve(total);
+
+  for (const auto& p : a_localValid) {
+    cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
+  }
+
+  for (const auto& p : a_ghosts) {
+    cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
+  }
+
+  for (const auto& kv : cellCount) {
+    if (kv.second > a_numParticlesPerCellThresh) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 template <typename Packed, typename Cloud>
 inline void
 buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
@@ -290,31 +334,9 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
     return;
   }
 
-  // Exact per-cell pre-filter (see this function's own docs): a count-only tally keyed as the
-  // crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost alike). Build nothing unless
-  // some cell is over threshold. Checks the true per-cell maximum, not an average density (a
-  // low-average patch can still hold one over-threshold cell).
-  std::unordered_map<NNWalkCell, int, LevelTiles::TileHasher> cellCount;
-  cellCount.reserve(total);
-
-  for (const auto& p : a_localValid) {
-    cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
-  }
-
-  for (const auto& p : a_ghosts) {
-    cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
-  }
-
-  bool anyCellCrowded = false;
-
-  for (const auto& kv : cellCount) {
-    if (kv.second > a_numParticlesPerCellThresh) {
-      anyCellCrowded = true;
-      break;
-    }
-  }
-
-  if (!anyCellCrowded) {
+  // Exact per-cell pre-filter (see this function's own docs): build nothing unless some cell is
+  // over threshold.
+  if (!nnMergeAnyCellCrowded(a_localValid, a_ghosts, a_probLo, a_dx, a_numParticlesPerCellThresh)) {
     return;
   }
 
@@ -526,27 +548,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
 
   // Exact per-cell pre-filter, same contract as buildNNSpatialIndex()'s own: build nothing for
   // this patch unless some cell is over threshold.
-  std::unordered_map<NNWalkCell, int, LevelTiles::TileHasher> cellCount;
-  cellCount.reserve(total);
-
-  for (const auto& p : a_localValid) {
-    cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
-  }
-
-  for (const auto& p : a_ghosts) {
-    cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
-  }
-
-  bool anyCellCrowded = false;
-
-  for (const auto& kv : cellCount) {
-    if (kv.second > a_numParticlesPerCellThresh) {
-      anyCellCrowded = true;
-      break;
-    }
-  }
-
-  if (!anyCellCrowded) {
+  if (!nnMergeAnyCellCrowded(a_localValid, a_ghosts, a_probLo, a_dx, a_numParticlesPerCellThresh)) {
     return;
   }
 
@@ -557,7 +559,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
                      std::pair<std::vector<EBGeometry::Vec3T<Real>>, std::vector<NNCellMeta>>,
                      LevelTiles::TileHasher>
     perCell;
-  perCell.reserve(cellCount.size());
+  perCell.reserve(total);
 
   auto pushPoint = [&](const NNMergeParticle<Packed>& a_p, const bool a_isLocal) {
     const NNWalkCell cell = cellKeyOf(a_p.position, a_probLo, a_dx);
@@ -571,7 +573,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
     auto& bucket = perCell[cell];
 
     bucket.first.push_back(v);
-    bucket.second.push_back(NNCellMeta{a_p.globalID, a_isLocal});
+    bucket.second.push_back(NNCellMeta{a_p.globalID, a_isLocal, a_p.level});
   };
 
   for (const auto& p : a_localValid) {
@@ -597,6 +599,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
                                      const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                                      const RealVect&                                            a_probLo,
                                      const RealVect&                                            a_dx,
+                                     const std::vector<RealVect>&                               a_dxByLevel,
                                      const int                         a_numParticlesPerCellThresh,
                                      std::vector<NNMergeEdge<Packed>>& a_edges,
                                      const int                         a_maxFallbackCandidates) noexcept
@@ -739,6 +742,21 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
 
         if (a_consumedIDs.count(meta.globalID) > 0) {
           continue;
+        }
+
+        // Own-cell/Moore-adjacency in the query patch's own-level frame does not by itself bound
+        // the Chebyshev distance in the finer-of-the-two-levels frame that resolveTrivialTier()/
+        // judgeProposals() actually enforce (see this function's own docs) -- a same-level
+        // candidate needs no extra check (query and candidate already share one frame), but a
+        // cross-level one is re-checked here, exactly, before ever being considered.
+        if (meta.level != q.level) {
+          const EBGeometry::Vec3T<Real>& candVec = cloud.position(hit.index);
+
+          RealVect candPos(D_DECL(candVec[0], candVec[1], candVec[2]));
+
+          if (nnMergeCrossLevelTooFar(q.position, q.level, candPos, meta.level, a_probLo, a_dxByLevel, 1)) {
+            continue;
+          }
         }
 
         considerCandidate(hit.distanceSquared, meta.globalID, meta.isLocal);
@@ -1943,6 +1961,7 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
                                            liveCellCount,
                                            probLo,
                                            patchWork[pw].dx,
+                                           dxByLevel,
                                            a_numParticlesPerCellThresh,
                                            patchEdges,
                                            a_maxFallbackCandidates);

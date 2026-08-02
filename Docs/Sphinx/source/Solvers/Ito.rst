@@ -384,8 +384,6 @@ Calling this function will merge/split the particles.
    Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (``organizeParticlesByCell``) before calling the merging routine.
    The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, and ``nn_pair_hash``, which are distributed AMR-level merges that match particles across patch and rank boundaries; they instead require that a particle ghost halo has been filled, and are dispatched over the whole container rather than cell by cell.
 
-
-
 In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
 
 * ``none`` - No particle merging/splitting is performed.

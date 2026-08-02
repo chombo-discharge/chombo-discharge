@@ -26,7 +26,7 @@
 #include <CD_NamespaceHeader.H>
 
 /**
- * @brief Minimal particle payload used internally by the nn_pair_tree/nn_pair_onecell merges.
+ * @brief Minimal particle payload used internally by the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges.
  * @details Defined in CD_ItoSolver.cpp; forward-declared here only so
  * extractIntoMergeContainer()/splitAndRebuildFromMergeContainer() can name
  * ParticleContainer<ItoMergeParticle>& in their declarations.

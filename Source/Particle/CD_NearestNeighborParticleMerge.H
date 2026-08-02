@@ -624,6 +624,14 @@ struct NNCellMeta
    * NNMergeEdge::candidateIsLocal.
    */
   bool isLocal;
+
+  /**
+   * @brief This particle's TRUE AMR level (see NNMergeParticle::level) -- needed by
+   * findNearestNeighborCandidatesOneCell() to re-check a cross-level candidate's Chebyshev
+   * distance in the correct (finer-of-the-two-levels) frame, since the cell buckets themselves are
+   * all keyed in the query patch's own level's frame.
+   */
+  int level;
 };
 
 /**
@@ -679,10 +687,16 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
  * approximate, prune, since point-to-cell-AABB distance is a true lower bound on any point inside
  * that cell.
  *
- * Because only the query's own cell and its Moore neighbors are ever visited, any candidate this
- * function returns is at Chebyshev cell distance <= 1 by construction; callers MUST forward exactly
- * that cap (not std::nullopt) as a_maxCellDistance to resolveTrivialTier()/judgeProposals() so their
- * own exact, level-aware check agrees for cross-level candidates.
+ * The cell buckets themselves are all keyed in the query patch's OWN level's frame (see
+ * buildNNCellSpatialIndex()), so Moore-adjacency in that frame does not, by itself, bound the
+ * Chebyshev distance between the query and a candidate on a DIFFERENT AMR level in the
+ * finer-of-the-two-levels frame that nnMergeCrossLevelTooFar() (and so resolveTrivialTier()/
+ * judgeProposals()) actually enforce. A same-level candidate is unaffected (query and candidate
+ * already share one frame). For a cross-level candidate, this function re-checks it exactly, in that
+ * same finer-of-the-two-levels frame, before it is ever considered -- so every candidate this
+ * function returns is guaranteed at Chebyshev distance <= 1 in the frame the downstream exact check
+ * uses, not merely in the query patch's own frame. Callers MUST still forward that same cap (not
+ * std::nullopt) as a_maxCellDistance to resolveTrivialTier()/judgeProposals().
  * @tparam Packed See NNMergeParticle.
  * @param[in] a_localValid This patch's own FULL valid-particle set for this round (query sources).
  * @param[in] a_consumedIDs Lazy-deletion skip set: ids already consumed earlier this round.
@@ -691,6 +705,8 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
  * @param[in] a_liveCellCount Live particle count (valid + ghost) per level-qualified cell key (see NNCellKey).
  * @param[in] a_probLo Physical position of the domain's low corner (see cellKeyOf()).
  * @param[in] a_dx Cell spacing of THIS PATCH's own level (see cellKeyOf()'s warning).
+ * @param[in] a_dxByLevel Cell spacing per AMR level (see resolveTrivialTier()'s own docs) -- needed for the exact
+ * cross-level re-check described above.
  * @param[in] a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it holds strictly more
  * than this many particles.
  * @param[out] a_edges One entry per over-threshold, currently-alive query particle that has at least one candidate.
@@ -705,6 +721,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
                                      const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                                      const RealVect&                                            a_probLo,
                                      const RealVect&                                            a_dx,
+                                     const std::vector<RealVect>&                               a_dxByLevel,
                                      const int                         a_numParticlesPerCellThresh,
                                      std::vector<NNMergeEdge<Packed>>& a_edges,
                                      const int                         a_maxFallbackCandidates = 0) noexcept;
