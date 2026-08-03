@@ -83,19 +83,19 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Minimal particle payload for the nn_pair merge &ndash; only the energy has to survive.  
+<p>Minimal particle payload for the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges &ndash; only the energy has to survive.  
  <a href="structItoMergeParticle.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ad16887c8fef3321a571033689d7351d6" id="r_ad16887c8fef3321a571033689d7351d6"><td class="memItemLeft" align="right" valign="top"><a id="ad16887c8fef3321a571033689d7351d6" name="ad16887c8fef3321a571033689d7351d6"></a>
 <a class="el" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>&#160;</td><td class="memItemRight" valign="bottom"><b>energy</b> = 0.0</td></tr>
-<tr class="memdesc:ad16887c8fef3321a571033689d7351d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average particle energy &ndash; the only payload the nn_pair merge carries. <br /></td></tr>
+<tr class="memdesc:ad16887c8fef3321a571033689d7351d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average particle energy &ndash; the only payload the merge carries. <br /></td></tr>
 <tr class="separator:ad16887c8fef3321a571033689d7351d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Minimal particle payload for the nn_pair merge &ndash; only the energy has to survive. </p>
-<p>makeSuperparticlesNnPair() reduces particles by weight and position, carrying a single reconciliation scalar (energy). <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>'s other columns (mobility, diffusion, velocity, ...) are recomputed from the field immediately after merging, so they need not ride the repeated, cross-rank ghost exchange. Merging on this much smaller particle &ndash; then rebuilding ItoParticles &ndash; keeps the per-round ghost fill and container churn proportional to what the merge actually needs. </p>
+<div class="textblock"><p>Minimal particle payload for the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges &ndash; only the energy has to survive. </p>
+<p>extractIntoMergeContainer() reduces particles by weight and position, carrying a single reconciliation scalar (energy). <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>'s other columns (mobility, diffusion, velocity, ...) are recomputed from the field immediately after merging, so they need not ride the repeated, cross-rank ghost exchange. Merging on this much smaller particle &ndash; then rebuilding ItoParticles &ndash; keeps the per-round ghost fill and container churn proportional to what the merge actually needs. </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Source/ItoDiffusion/<a class="el" href="CD__ItoSolver_8cpp.html">CD_ItoSolver.cpp</a></li>
 </ul>

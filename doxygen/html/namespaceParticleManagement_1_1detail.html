@@ -96,6 +96,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash functor for NNCellKey &ndash; REQUIRED whenever NNCellKey is used as a hash-map key; NNCellKey must never be used as an ordered (std::map or std::set) key.  <a href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNCellMeta.html">NNCellMeta</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-point metadata carried by a one-cell spatial index's PointCloudBVH: a particle's global id and whether it is a local-valid particle of the patch the index was built for.  <a href="structParticleManagement_1_1detail_1_1NNCellMeta.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNFallbackCandidate.html">NNFallbackCandidate</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One additional ranked candidate beyond a query's primary nearest neighbor.  <a href="structParticleManagement_1_1detail_1_1NNFallbackCandidate.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -114,11 +117,14 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNParticleLocation.html">NNParticleLocation</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of locating a physical position against the AMR grid &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>.  <a href="structParticleManagement_1_1detail_1_1NNParticleLocation.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNPatchWork.html">NNPatchWork</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One patch's identity for the duration of a merge round: its AMR level, local DataIndex, and its own level's cell spacing.  <a href="structParticleManagement_1_1detail_1_1NNPatchWork.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html">NNPooledParticle</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pooled per-round record for one particle: the particle plus its cached boundary-exposure flag.  <a href="structParticleManagement_1_1detail_1_1NNPooledParticle.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole patch (every local valid particle followed by every ghost) plus its precomputed k-nearest- neighbor graph.  <a href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A patch's spatial index for one round: an EBGeometry point-cloud index (PointCloudBVH or PointCloudHashGrid, selected via <code>Cloud</code>) over the whole patch (every local valid particle followed by every ghost) plus its precomputed k-nearest-neighbor graph.  <a href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -129,6 +135,13 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a6f1cbd27bb38183eb31c62651530ef4c" id="r_a6f1cbd27bb38183eb31c62651530ef4c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6f1cbd27bb38183eb31c62651530ef4c">NNWalkCell</a> = IntVect</td></tr>
 <tr class="memdesc:a6f1cbd27bb38183eb31c62651530ef4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A non-level-qualified cell index, distinct from NNCellKey, used where a cell is expressed in a single consistent frame (the query patch's own level).  <br /></td></tr>
 <tr class="separator:a6f1cbd27bb38183eb31c62651530ef4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b4d30ca36f21e7cae396c120c165a31" id="r_a2b4d30ca36f21e7cae396c120c165a31"><td class="memItemLeft" align="right" valign="top"><a id="a2b4d30ca36f21e7cae396c120c165a31" name="a2b4d30ca36f21e7cae396c120c165a31"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>NNCellCloud</b> = EBGeometry::PointCloudBVH&lt; Real, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellMeta.html">NNCellMeta</a> &gt;</td></tr>
+<tr class="memdesc:a2b4d30ca36f21e7cae396c120c165a31"><td class="mdescLeft">&#160;</td><td class="mdescRight">One cell's PointCloudBVH for the one-cell nearest-neighbor merge, over every local valid and ghost particle whose <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a> falls in that cell. <br /></td></tr>
+<tr class="separator:a2b4d30ca36f21e7cae396c120c165a31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c0869884660810af91b9c87da4bdf7a" id="r_a6c0869884660810af91b9c87da4bdf7a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6c0869884660810af91b9c87da4bdf7a">NNCellSpatialIndex</a> = std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#a6f1cbd27bb38183eb31c62651530ef4c">NNWalkCell</a>, std::shared_ptr&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#a2b4d30ca36f21e7cae396c120c165a31">NNCellCloud</a> &gt;, <a class="el" href="structLevelTiles_1_1TileHasher.html">LevelTiles::TileHasher</a> &gt;</td></tr>
+<tr class="memdesc:a6c0869884660810af91b9c87da4bdf7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A patch's one-cell spatial index: one NNCellCloud per occupied cell, keyed by NNWalkCell (see its docs for the single-frame convention this uses).  <br /></td></tr>
+<tr class="separator:a6c0869884660810af91b9c87da4bdf7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad310cb115de59ea90e04e5a75c076b4e" id="r_ad310cb115de59ea90e04e5a75c076b4e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#ad310cb115de59ea90e04e5a75c076b4e">PositionLocator</a> = std::function&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNParticleLocation.html">NNParticleLocation</a>(const RealVect &amp;a_position)&gt;</td></tr>
 <tr class="memdesc:ad310cb115de59ea90e04e5a75c076b4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Locate-by-position callback &ndash; see <a class="el" href="structParticleManagement_1_1detail_1_1NNParticleLocation.html" title="Result of locating a physical position against the AMR grid – see placeMergedParticles().">NNParticleLocation</a> and <a class="el" href="namespaceParticleManagement_1_1detail.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>.  <br /></td></tr>
 <tr class="separator:ad310cb115de59ea90e04e5a75c076b4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,17 +151,25 @@ Functions</h2></td></tr>
 <tr class="memitem:a0945d2c0224d83fd1e28e3d77861df57" id="r_a0945d2c0224d83fd1e28e3d77861df57"><td class="memItemLeft" align="right" valign="top">IntVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57">cellKeyOf</a> (const RealVect &amp;a_position, const RealVect &amp;a_probLo, const RealVect &amp;a_dx) noexcept</td></tr>
 <tr class="memdesc:a0945d2c0224d83fd1e28e3d77861df57"><td class="mdescLeft">&#160;</td><td class="mdescRight">The unclamped, position-derived cell index a given physical position falls in.  <br /></td></tr>
 <tr class="separator:a0945d2c0224d83fd1e28e3d77861df57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89a54a12aa6a266015a188f4b26d3d04" id="r_a89a54a12aa6a266015a188f4b26d3d04"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
-<tr class="memitem:a89a54a12aa6a266015a188f4b26d3d04"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a89a54a12aa6a266015a188f4b26d3d04">buildNNSpatialIndex</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const int a_numParticlesPerCellThresh, const int a_kNearest, <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed &gt; &amp;a_index) noexcept</td></tr>
-<tr class="memdesc:a89a54a12aa6a266015a188f4b26d3d04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole patch (every local valid particle then every ghost) plus its precomputed k-nearest- neighbor graph &ndash; UNLESS no cell in this patch could possibly be crowded, in which case nothing is built.  <br /></td></tr>
-<tr class="separator:a89a54a12aa6a266015a188f4b26d3d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78bbfc90bd1d8166716de2eb5c73b7ea" id="r_a78bbfc90bd1d8166716de2eb5c73b7ea"><td class="memTemplParams" colspan="2">template&lt;typename Packed , typename Cloud  = EBGeometry::PointCloudBVH&lt;Real, ParticleID&gt;&gt; </td></tr>
+<tr class="memitem:a78bbfc90bd1d8166716de2eb5c73b7ea"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea">buildNNSpatialIndex</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const int a_numParticlesPerCellThresh, const int a_kNearest, <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed, Cloud &gt; &amp;a_index) noexcept</td></tr>
+<tr class="memdesc:a78bbfc90bd1d8166716de2eb5c73b7ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a patch's spatial index for one round: an EBGeometry point-cloud index (see <code>Cloud</code>) over the whole patch (every local valid particle then every ghost) plus its precomputed k-nearest-neighbor graph &ndash; UNLESS no cell in this patch could possibly be crowded, in which case nothing is built.  <br /></td></tr>
+<tr class="separator:a78bbfc90bd1d8166716de2eb5c73b7ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23bc202663527b6ea91350248322e987" id="r_a23bc202663527b6ea91350248322e987"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a23bc202663527b6ea91350248322e987">isBoundaryExposed</a> (const IntVect &amp;a_cellIndex, const <a class="el" href="classParticleGhostMask.html">ParticleGhostMask</a> &amp;a_ghostMask) noexcept</td></tr>
 <tr class="memdesc:a23bc202663527b6ea91350248322e987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a particle is boundary-exposed &ndash; i.e. would be shipped as a ghost to at least one neighboring patch.  <br /></td></tr>
 <tr class="separator:a23bc202663527b6ea91350248322e987"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf870c29c40c0b54fe41caf828a86382" id="r_acf870c29c40c0b54fe41caf828a86382"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
-<tr class="memitem:acf870c29c40c0b54fe41caf828a86382"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382">findNearestNeighborCandidates</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_consumedIDs, const <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed &gt; &amp;a_spatialIndex, const std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;a_liveCellCount, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const int a_numParticlesPerCellThresh, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;a_edges, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt) noexcept</td></tr>
-<tr class="memdesc:acf870c29c40c0b54fe41caf828a86382"><td class="mdescLeft">&#160;</td><td class="mdescRight">For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest neighbor among {this patch's own other valid particles} union {every ghost shipped to this patch}.  <br /></td></tr>
-<tr class="separator:acf870c29c40c0b54fe41caf828a86382"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5948456a53b4942f62de050435f7d3d2" id="r_a5948456a53b4942f62de050435f7d3d2"><td class="memTemplParams" colspan="2">template&lt;typename Packed , typename Cloud  = EBGeometry::PointCloudBVH&lt;Real, ParticleID&gt;&gt; </td></tr>
+<tr class="memitem:a5948456a53b4942f62de050435f7d3d2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2">findNearestNeighborCandidates</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_consumedIDs, const <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed, Cloud &gt; &amp;a_spatialIndex, const std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;a_liveCellCount, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const int a_numParticlesPerCellThresh, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;a_edges, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt) noexcept</td></tr>
+<tr class="memdesc:a5948456a53b4942f62de050435f7d3d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest neighbor among {this patch's own other valid particles} union {every ghost shipped to this patch}.  <br /></td></tr>
+<tr class="separator:a5948456a53b4942f62de050435f7d3d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14418eb3f56522f631f806caedcf49fd" id="r_a14418eb3f56522f631f806caedcf49fd"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:a14418eb3f56522f631f806caedcf49fd"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a14418eb3f56522f631f806caedcf49fd">buildNNCellSpatialIndex</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const int a_numParticlesPerCellThresh, <a class="el" href="namespaceParticleManagement_1_1detail.html#a6c0869884660810af91b9c87da4bdf7a">NNCellSpatialIndex</a> &amp;a_index) noexcept</td></tr>
+<tr class="memdesc:a14418eb3f56522f631f806caedcf49fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a patch's one-cell spatial index for the one-cell nearest-neighbor merge: one PointCloudBVH per occupied cell &ndash; UNLESS no cell in this patch could possibly be crowded, in which case nothing is built.  <br /></td></tr>
+<tr class="separator:a14418eb3f56522f631f806caedcf49fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9c1ac0e5b0c73f04505ff544b662b3a" id="r_ad9c1ac0e5b0c73f04505ff544b662b3a"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:ad9c1ac0e5b0c73f04505ff544b662b3a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#ad9c1ac0e5b0c73f04505ff544b662b3a">findNearestNeighborCandidatesOneCell</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_consumedIDs, const <a class="el" href="namespaceParticleManagement_1_1detail.html#a6c0869884660810af91b9c87da4bdf7a">NNCellSpatialIndex</a> &amp;a_cellIndex, const std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;a_liveCellCount, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const std::vector&lt; RealVect &gt; &amp;a_dxByLevel, const int a_numParticlesPerCellThresh, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;a_edges, const int a_maxFallbackCandidates=0) noexcept</td></tr>
+<tr class="memdesc:ad9c1ac0e5b0c73f04505ff544b662b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest neighbor restricted to its own cell and its Moore-adjacent neighbor cells (Chebyshev cell distance &lt;= 1) &ndash; the one-cell counterpart of <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>.  <br /></td></tr>
+<tr class="separator:ad9c1ac0e5b0c73f04505ff544b662b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa75c6aafc640a75785b41db90f979b4" id="r_afa75c6aafc640a75785b41db90f979b4"><td class="memTemplParams" colspan="2">template&lt;typename Packed , typename Combine , typename PosValid , typename Allocator , typename OnMerge &gt; </td></tr>
 <tr class="memitem:afa75c6aafc640a75785b41db90f979b4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4">resolveTrivialTier</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;a_edges, const std::unordered_map&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>, <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html">NNPooledParticle</a>&lt; Packed &gt; &gt; &amp;a_particlesByID, const Combine &amp;a_combine, std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;a_liveCellCount, std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_consumedIDs, const int a_numParticlesPerCellThresh, std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_hasOutgoingCommitment, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeResult.html">NNMergeResult</a>&lt; Packed &gt; &gt; &amp;a_results, const RealVect &amp;a_probLo, const std::vector&lt; RealVect &gt; &amp;a_dxByLevel, const PosValid &amp;a_isPositionValid, const Allocator &amp;a_allocateID, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { }) noexcept</td></tr>
 <tr class="memdesc:afa75c6aafc640a75785b41db90f979b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve every candidate edge that is safely mergeable with zero cross-rank coordination, and mark which remaining particles have committed to a non-trivial outgoing proposal.  <br /></td></tr>
@@ -168,6 +189,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a597b8eb0db4d9348fa114f87c3402327"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a597b8eb0db4d9348fa114f87c3402327">placeMergedParticles</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeResult.html">NNMergeResult</a>&lt; Packed &gt; &gt; &amp;a_results, const <a class="el" href="namespaceParticleManagement_1_1detail.html#ad310cb115de59ea90e04e5a75c076b4e">PositionLocator</a> &amp;a_locate, const int a_thisRank, std::map&lt; std::pair&lt; int, unsigned int &gt;, std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &gt; &amp;a_localByPatch, std::vector&lt; std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &gt; &amp;a_scatterByDestRank) noexcept</td></tr>
 <tr class="memdesc:a597b8eb0db4d9348fa114f87c3402327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchange if it belongs to someone else.  <br /></td></tr>
 <tr class="separator:a597b8eb0db4d9348fa114f87c3402327"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a607cfd01a5a729d5e160ef324fc92b3c" id="r_a607cfd01a5a729d5e160ef324fc92b3c"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits , typename Gather &gt; </td></tr>
+<tr class="memitem:a607cfd01a5a729d5e160ef324fc92b3c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a607cfd01a5a729d5e160ef324fc92b3c">gatherMergeParticles</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const std::string &amp;a_realm, const int a_finestLevel, const RealVect &amp;a_probLo, const std::vector&lt; RealVect &gt; &amp;a_dxByLevel, const int a_ghostWidth, const Gather &amp;a_gather, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNPatchWork.html">NNPatchWork</a> &gt; &amp;a_patchWork, std::vector&lt; std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &gt; &amp;a_patchLocalValid, std::vector&lt; std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &gt; &amp;a_patchGhosts, std::unordered_map&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>, <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html">NNPooledParticle</a>&lt; Packed &gt; &gt; &amp;a_particlesByID, std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;a_liveCellCount) noexcept</td></tr>
+<tr class="memdesc:a607cfd01a5a729d5e160ef324fc92b3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather every patch this rank owns into the backend-agnostic per-patch particle sets and pooled bookkeeping a merge round needs, shared by every search backend.  <br /></td></tr>
+<tr class="separator:a607cfd01a5a729d5e160ef324fc92b3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a6e997cb3c56fc012e9079c1538775d" id="r_a1a6e997cb3c56fc012e9079c1538775d"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits , typename Combine , typename Scatter , typename PosValid , typename Allocator , typename OnMerge &gt; </td></tr>
+<tr class="memitem:a1a6e997cb3c56fc012e9079c1538775d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a1a6e997cb3c56fc012e9079c1538775d">finishMergeRound</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const std::string &amp;a_realm, const int a_numParticlesPerCellThresh, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const std::optional&lt; int &gt; a_maxCellDistance, const PosValid &amp;a_isPositionValid, const RealVect &amp;a_probLo, const std::vector&lt; RealVect &gt; &amp;a_dxByLevel, const std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNPatchWork.html">NNPatchWork</a> &gt; &amp;a_patchWork, const std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;a_pooledEdges, const std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_hasOutgoingCommitment, std::unordered_map&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>, <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html">NNPooledParticle</a>&lt; Packed &gt; &gt; &amp;a_particlesByID, std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;a_consumedIDs, std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;a_liveCellCount, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeResult.html">NNMergeResult</a>&lt; Packed &gt; &gt; &amp;a_allResults, unsigned long long *a_crossLevelMergeCount, const OnMerge &amp;a_onMergeCommitted) noexcept</td></tr>
+<tr class="memdesc:a1a6e997cb3c56fc012e9079c1538775d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finish a merge round: propose/judge/verdict the edges the local tier could not resolve, place every merge result, and apply everything to the real particle containers &ndash; the backend-agnostic tail shared by <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> and <a class="el" href="namespaceParticleManagement.html#af2c9acd083d602fdfb2183033dd95f7b" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">mergeNearestNeighborsOneCell()</a>.  <br /></td></tr>
+<tr class="separator:a1a6e997cb3c56fc012e9079c1538775d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93e3e867ed41d57e5db5d4293c60d800" id="r_a93e3e867ed41d57e5db5d4293c60d800"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits , typename Cloud , typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename OnMerge &gt; </td></tr>
+<tr class="memitem:a93e3e867ed41d57e5db5d4293c60d800"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a93e3e867ed41d57e5db5d4293c60d800">mergeNearestNeighborsRoundImpl</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numParticlesPerCellThresh, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence, const int a_maxFallbackCandidates, const std::optional&lt; int &gt; a_maxCellDistance, const int a_ghostWidth, const PosValid &amp;a_isPositionValid, unsigned long long *a_crossLevelMergeCount, const OnMerge &amp;a_onMergeCommitted)</td></tr>
+<tr class="memdesc:a93e3e867ed41d57e5db5d4293c60d800"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared implementation behind <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> and <a class="el" href="namespaceParticleManagement.html#af2e889b9bbc72cf4e9578cb18120a4b2" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">mergeNearestNeighborsHash()</a>: one full round of the whole-patch-tree nearest-neighbor merge, generic over which EBGeometry point-cloud index backs the per-patch spatial search.  <br /></td></tr>
+<tr class="separator:a93e3e867ed41d57e5db5d4293c60d800"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b4527b08debf6dd54d431a7a05b34c8" id="r_a6b4527b08debf6dd54d431a7a05b34c8"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6b4527b08debf6dd54d431a7a05b34c8">nnMergeDistSquared</a> (const RealVect &amp;a_a, const RealVect &amp;a_b) noexcept</td></tr>
 <tr class="memdesc:a6b4527b08debf6dd54d431a7a05b34c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Squared Euclidean distance between two physical positions.  <br /></td></tr>
 <tr class="separator:a6b4527b08debf6dd54d431a7a05b34c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,10 +213,17 @@ Functions</h2></td></tr>
 <tr class="memitem:ab5df1365b60efb14c82511ac536e1dcb" id="r_ab5df1365b60efb14c82511ac536e1dcb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#ab5df1365b60efb14c82511ac536e1dcb">nnMergeWeightedCentroid</a> (const RealVect &amp;a_posA, const Real a_weightA, const RealVect &amp;a_posB, const Real a_weightB, RealVect &amp;a_mergedPos, Real &amp;a_mergedWeight) noexcept</td></tr>
 <tr class="memdesc:ab5df1365b60efb14c82511ac536e1dcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weighted-centroid merge of two positions/weights &ndash; shared by <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> and <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> so the formula is written exactly once.  <br /></td></tr>
 <tr class="separator:ab5df1365b60efb14c82511ac536e1dcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a" id="r_a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a">nnMergePointToCellDistSquared</a> (const RealVect &amp;a_point, const IntVect &amp;a_cell, const RealVect &amp;a_probLo, const RealVect &amp;a_dx) noexcept</td></tr>
+<tr class="memdesc:a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Squared distance from a physical point to a cell's axis-aligned bounding box (0 if the point is inside).  <br /></td></tr>
+<tr class="separator:a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9362f5cbbf7b28e732b0fe86f3868e29" id="r_a9362f5cbbf7b28e732b0fe86f3868e29"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a9362f5cbbf7b28e732b0fe86f3868e29"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a9362f5cbbf7b28e732b0fe86f3868e29">nnMergeExchangeByRank</a> (const std::vector&lt; std::vector&lt; T &gt; &gt; &amp;a_sendByRank)</td></tr>
 <tr class="memdesc:a9362f5cbbf7b28e732b0fe86f3868e29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic alltoallv-style exchange: send a per-destination-rank bucket of trivially- copyable records, return the flat concatenation of everything received.  <br /></td></tr>
 <tr class="separator:a9362f5cbbf7b28e732b0fe86f3868e29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f28987da4a6f860b654f840d0f44ea7" id="r_a9f28987da4a6f860b654f840d0f44ea7"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:a9f28987da4a6f860b654f840d0f44ea7"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a9f28987da4a6f860b654f840d0f44ea7">nnMergeAnyCellCrowded</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const int a_numParticlesPerCellThresh) noexcept</td></tr>
+<tr class="memdesc:a9f28987da4a6f860b654f840d0f44ea7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exact per-cell crowding pre-filter shared by <a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea" title="Build a patch&#39;s spatial index for one round: an EBGeometry point-cloud index (see Cloud) over the who...">buildNNSpatialIndex()</a>/buildNNCellSpatialIndex(): is any cell in this patch's local+ghost particle set over a_numParticlesPerCellThresh?  <br /></td></tr>
+<tr class="separator:a9f28987da4a6f860b654f840d0f44ea7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fc7b40dd364f95d53d3cba126eb614b" id="r_a6fc7b40dd364f95d53d3cba126eb614b"><td class="memTemplParams" colspan="2">template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </td></tr>
 <tr class="memitem:a6fc7b40dd364f95d53d3cba126eb614b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b">buildEqualWeightKDLeaves</a> (const std::vector&lt; P &gt; &amp;a_particles, const int a_maxLeaves, const <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; P &gt; &amp;a_particleReconcile, std::vector&lt; std::pair&lt; const P *, const P * &gt; &gt; &amp;a_leaves) noexcept</td></tr>
 <tr class="memdesc:a6fc7b40dd364f95d53d3cba126eb614b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.  <br /></td></tr>
@@ -217,6 +257,23 @@ Functions</h2></td></tr>
 
 <p>A cell key together with the AMR level it was computed on &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>'s warning. </p>
 <p>Two NNCellKeys are equal only if BOTH the level and the cell index match; a coarse- level cell and an unrelated fine-level cell that happen to share the same bare IntVect are correctly kept distinct because their level differs. This is the key type for every live per-cell count pooled across multiple levels (see a_liveCellCount in <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>/ <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a>/findNearestNeighborCandidates()). </p>
+
+</div>
+</div>
+<a id="a6c0869884660810af91b9c87da4bdf7a" name="a6c0869884660810af91b9c87da4bdf7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c0869884660810af91b9c87da4bdf7a">&#9670;&#160;</a></span>NNCellSpatialIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespaceParticleManagement_1_1detail.html#a6c0869884660810af91b9c87da4bdf7a">ParticleManagement::detail::NNCellSpatialIndex</a> = typedef std::unordered_map&lt;<a class="el" href="namespaceParticleManagement_1_1detail.html#a6f1cbd27bb38183eb31c62651530ef4c">NNWalkCell</a>, std::shared_ptr&lt;<a class="el" href="namespaceParticleManagement_1_1detail.html#a2b4d30ca36f21e7cae396c120c165a31">NNCellCloud</a>&gt;, <a class="el" href="structLevelTiles_1_1TileHasher.html">LevelTiles::TileHasher</a>&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A patch's one-cell spatial index: one NNCellCloud per occupied cell, keyed by NNWalkCell (see its docs for the single-frame convention this uses). </p>
+<p>Empty (no entries) iff no cell in the patch could possibly be crowded &ndash; the same per-cell pre-filter as <a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea" title="Build a patch&#39;s spatial index for one round: an EBGeometry point-cloud index (see Cloud) over the who...">buildNNSpatialIndex()</a>; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a14418eb3f56522f631f806caedcf49fd" title="Build a patch&#39;s one-cell spatial index for the one-cell nearest-neighbor merge: one PointCloudBVH per...">buildNNCellSpatialIndex()</a>. </p>
 
 </div>
 </div>
@@ -372,13 +429,94 @@ template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() co
 
 </div>
 </div>
-<a id="a89a54a12aa6a266015a188f4b26d3d04" name="a89a54a12aa6a266015a188f4b26d3d04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89a54a12aa6a266015a188f4b26d3d04">&#9670;&#160;</a></span>buildNNSpatialIndex()</h2>
+<a id="a14418eb3f56522f631f806caedcf49fd" name="a14418eb3f56522f631f806caedcf49fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14418eb3f56522f631f806caedcf49fd">&#9670;&#160;</a></span>buildNNCellSpatialIndex()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename Packed &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::detail::buildNNCellSpatialIndex </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_localValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_ghosts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6c0869884660810af91b9c87da4bdf7a">NNCellSpatialIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_index</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build a patch's one-cell spatial index for the one-cell nearest-neighbor merge: one PointCloudBVH per occupied cell &ndash; UNLESS no cell in this patch could possibly be crowded, in which case nothing is built. </p>
+<p>Every OCCUPIED cell gets a cloud, not just crowded ones &ndash; an under-threshold cell can still hold a valid Moore-neighbor candidate for a query in an adjacent crowded cell (see <a class="el" href="namespaceParticleManagement_1_1detail.html#ad9c1ac0e5b0c73f04505ff544b662b3a" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidatesOneCell()</a>). Uses the same exact per-cell tally as <a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea" title="Build a patch&#39;s spatial index for one round: an EBGeometry point-cloud index (see Cloud) over the who...">buildNNSpatialIndex()</a> to decide whether to build anything at all for this patch. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_localValid</td><td>This patch's own full valid-particle set. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghosts</td><td>Every ghost shipped to this patch this round. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Cell spacing of THIS PATCH's own level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>The physics-facing crowding threshold used elsewhere this round; used ONLY for the per-cell pre-filter above. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_index</td><td>The resulting one-cell spatial index. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a78bbfc90bd1d8166716de2eb5c73b7ea" name="a78bbfc90bd1d8166716de2eb5c73b7ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78bbfc90bd1d8166716de2eb5c73b7ea">&#9670;&#160;</a></span>buildNNSpatialIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Packed , typename Cloud  = EBGeometry::PointCloudBVH&lt;Real, ParticleID&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -422,7 +560,7 @@ template&lt;typename Packed &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed, Cloud &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_index</em>&#160;</td>
         </tr>
         <tr>
@@ -438,11 +576,12 @@ template&lt;typename Packed &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Build a patch's spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole patch (every local valid particle then every ghost) plus its precomputed k-nearest- neighbor graph &ndash; UNLESS no cell in this patch could possibly be crowded, in which case nothing is built. </p>
-<p>The point cloud carries each point's globalID as metadata; a hit's cloud index decodes ownership (c &lt; nLocal =&gt; local valid, else ghost). After the cloud is built, its whole a_kNearest-nearest-neighbor graph is precomputed once via PointCloudBVH::allNearestNeighbors() (batched, leaf-order/cache-warm, own-leaf-seeded) into a_index.pointCloudGraph and reused across every internal a_iterateLocalTierToConvergence pass (positions never change within a round; only consumed status does, and that is filtered at lookup time &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>).</p>
+<p>Build a patch's spatial index for one round: an EBGeometry point-cloud index (see <code>Cloud</code>) over the whole patch (every local valid particle then every ghost) plus its precomputed k-nearest-neighbor graph &ndash; UNLESS no cell in this patch could possibly be crowded, in which case nothing is built. </p>
+<p>The point cloud carries each point's globalID as metadata; a hit's cloud index decodes ownership (c &lt; nLocal =&gt; local valid, else ghost). After the cloud is built, its whole a_kNearest-nearest-neighbor graph is precomputed once via <code>Cloud::allNearestNeighbors()</code> (batched, own-locality-seeded) into a_index.pointCloudGraph and reused across every internal a_iterateLocalTierToConvergence pass (positions never change within a round; only consumed status does, and that is filtered at lookup time &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>).</p>
 <p><b>Per-cell</b> pre-filter: if NO cell in this patch has more than a_numParticlesPerCellThresh particles, nothing is built (a_index.pointCloud stays null, exactly as if the patch had zero particles) &ndash; the SAME cheap "is this even worth it" check equal_weight_kd effectively gets for free by dispatching per cell. This is an EXACT check (not an average-density heuristic, which would be a real bug: a low-average patch can still hold one badly-clustered over-threshold cell): a lightweight per-cell tally of the patch's own particles, keyed exactly as the crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost alike), decides it directly. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+    <tr><td class="paramname">Cloud</td><td>See <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html" title="A patch&#39;s spatial index for one round: an EBGeometry point-cloud index (PointCloudBVH or PointCloudHa...">NNSpatialIndex</a>. Constructed with its two-argument constructor (positions, metadata), so this function relies on each <code>Cloud's</code> own default for whatever third construction parameter it takes (target leaf size for PointCloudBVH, target points per cell for PointCloudHashGrid) &ndash; both defaults are reasonable, general choices, so neither backend needs bespoke construction logic here. </td></tr>
   </table>
   </dd>
 </dl>
@@ -452,8 +591,8 @@ template&lt;typename Packed &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghosts</td><td>Every ghost shipped to this patch this round. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Cell spacing of THIS PATCH's own level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>The physics-facing crowding threshold used elsewhere this round (see <a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsRound()</a>'s own a_numParticlesPerCellThresh) &ndash; used ONLY for the per-cell pre-filter above. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_kNearest</td><td>k = 1 + a_maxFallbackCandidates &ndash; the neighbor count to precompute per point into <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html#a45e3b4abf6d3a6d4ccf1b59ec4671d9f" title="The whole k-nearest-neighbor graph, precomputed once via PointCloudBVH:: allNearestNeighbors(pointClo...">NNSpatialIndex::pointCloudGraph</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>The physics-facing crowding threshold used elsewhere this round (see <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own a_numParticlesPerCellThresh) &ndash; used ONLY for the per-cell pre-filter above. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_kNearest</td><td>k = 1 + a_maxFallbackCandidates &ndash; the neighbor count to precompute per point into <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html#a3b3691ce6ab235131f2d9091a7a7873e" title="The whole k-nearest-neighbor graph, precomputed once via Cloud::allNearestNeighbors(pointCloudK) at b...">NNSpatialIndex::pointCloudGraph</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_index</td><td>The resulting spatial index. </td></tr>
   </table>
   </dd>
@@ -515,13 +654,13 @@ template&lt;typename Packed &gt; </div>
 
 </div>
 </div>
-<a id="acf870c29c40c0b54fe41caf828a86382" name="acf870c29c40c0b54fe41caf828a86382"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf870c29c40c0b54fe41caf828a86382">&#9670;&#160;</a></span>findNearestNeighborCandidates()</h2>
+<a id="a5948456a53b4942f62de050435f7d3d2" name="a5948456a53b4942f62de050435f7d3d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5948456a53b4942f62de050435f7d3d2">&#9670;&#160;</a></span>findNearestNeighborCandidates()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Packed &gt; </div>
+template&lt;typename Packed , typename Cloud  = EBGeometry::PointCloudBVH&lt;Real, ParticleID&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -547,7 +686,7 @@ template&lt;typename Packed &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html">NNSpatialIndex</a>&lt; Packed, Cloud &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_spatialIndex</em>, </td>
         </tr>
         <tr>
@@ -607,13 +746,14 @@ template&lt;typename Packed &gt; </div>
 
 <p>For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest neighbor among {this patch's own other valid particles} union {every ghost shipped to this patch}. </p>
 <p>This is the only place a nearest-neighbor search happens, and it always runs against the full (local + ghost) view, never a local-only view: restricting it biases boundary-adjacent particles toward worse matches than interior ones. Crowding eligibility (is the query's own cell over threshold) is checked here at generation time from the live per-cell counts over valid + ghost occupancy; the symmetric check on the candidate's cell is done later, dynamically, by <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>/judgeProposals(), since earlier merges this round can change it.</p>
-<p>a_localValid/a_ghosts are this patch's full, unfiltered sets for the round; this function does the alive-filtering itself via a_consumedIDs (checked against both the query and every candidate). a_spatialIndex is built once per patch per <a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsRound()</a> call over the full set and reused across every a_iterateLocalTierToConvergence pass via this same lazy-deletion check, so it is never rebuilt per pass.</p>
-<p>Each query's precomputed row is read from a_spatialIndex's k-nearest-neighbor graph (see <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html#a45e3b4abf6d3a6d4ccf1b59ec4671d9f" title="The whole k-nearest-neighbor graph, precomputed once via PointCloudBVH:: allNearestNeighbors(pointClo...">NNSpatialIndex::pointCloudGraph</a> / <a class="el" href="namespaceParticleManagement_1_1detail.html#a89a54a12aa6a266015a188f4b26d3d04" title="Build a patch&#39;s spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole patch (e...">buildNNSpatialIndex()</a>), computed once for the whole patch via the EBGeometry SIMD PointCloudBVH's batched allNearestNeighbors(). Per-query work is a row lookup plus filtering: a hit is skipped if its id is in a_consumedIDs, or (when a_maxCellDistance is set) if it lies beyond the bound; survivors feed the shared top-K logic that builds the edge. Self is excluded by the graph (each row is the nearest OTHER points).</p>
+<p>a_localValid/a_ghosts are this patch's full, unfiltered sets for the round; this function does the alive-filtering itself via a_consumedIDs (checked against both the query and every candidate). a_spatialIndex is built once per patch per <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> call over the full set and reused across every a_iterateLocalTierToConvergence pass via this same lazy-deletion check, so it is never rebuilt per pass.</p>
+<p>Each query's precomputed row is read from a_spatialIndex's k-nearest-neighbor graph (see <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html#a3b3691ce6ab235131f2d9091a7a7873e" title="The whole k-nearest-neighbor graph, precomputed once via Cloud::allNearestNeighbors(pointCloudK) at b...">NNSpatialIndex::pointCloudGraph</a> / <a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea" title="Build a patch&#39;s spatial index for one round: an EBGeometry point-cloud index (see Cloud) over the who...">buildNNSpatialIndex()</a>), computed once for the whole patch via the EBGeometry SIMD PointCloudBVH's batched allNearestNeighbors(). Per-query work is a row lookup plus filtering: a hit is skipped if its id is in a_consumedIDs, or (when a_maxCellDistance is set) if it lies beyond the bound; survivors feed the shared top-K logic that builds the edge. Self is excluded by the graph (each row is the nearest OTHER points).</p>
 <p>a_maxCellDistance, when set, filters the graph row: rows are distance-sorted, so an out-of-bound candidate is farther than the bound and can never displace a within-bound one, and filtering yields exactly the within-bound k-nearest (see its param docs for the exact, safe-but-not-tight bound).</p>
 <p>When a_maxFallbackCandidates &gt; 0, the graph is built with k = 1 + a_maxFallbackCandidates, so each row holds the K nearest and <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#aa63dab1bf8ec1892d5ca9e2c863d4b38" title="Next-nearest candidates beyond candidateID, in ascending distanceSquared order.">NNMergeEdge::fallbackCandidates</a> is populated with candidates 2..K (distance-sorted); <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> walks that pre-fetched list when the primary is blocked, without re-querying the index.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+    <tr><td class="paramname">Cloud</td><td>See <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html" title="A patch&#39;s spatial index for one round: an EBGeometry point-cloud index (PointCloudBVH or PointCloudHa...">NNSpatialIndex</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -622,7 +762,7 @@ template&lt;typename Packed &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_localValid</td><td>This patch's own FULL valid-particle set for this round (query sources AND candidates) &ndash; see the contract-change note above; not pre-filtered by a_consumedIDs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghosts</td><td>Every ghost shipped to this patch this round (candidates only; ghosts never initiate a query) &ndash; also not pre-filtered. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_consumedIDs</td><td>Lazy-deletion skip set: ids already consumed earlier this round (by an earlier a_iterateLocalTierToConvergence pass, or an earlier query within this same pass). Checked against both the query and every candidate encountered during the walk. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_spatialIndex</td><td>This patch's spatial index for this round (see <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html" title="A patch&#39;s spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole patch (every l...">NNSpatialIndex</a>), built once via <a class="el" href="namespaceParticleManagement_1_1detail.html#a89a54a12aa6a266015a188f4b26d3d04" title="Build a patch&#39;s spatial index for one round: an EBGeometry SIMD PointCloudBVH over the whole patch (e...">buildNNSpatialIndex()</a> over the FULL a_localValid/ a_ghosts sets before any consumption happens. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_spatialIndex</td><td>This patch's spatial index for this round (see <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html" title="A patch&#39;s spatial index for one round: an EBGeometry point-cloud index (PointCloudBVH or PointCloudHa...">NNSpatialIndex</a>), built once via <a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea" title="Build a patch&#39;s spatial index for one round: an EBGeometry point-cloud index (see Cloud) over the who...">buildNNSpatialIndex()</a> over the FULL a_localValid/ a_ghosts sets before any consumption happens. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_liveCellCount</td><td>Live particle count (valid + ghost) per level-qualified cell key (see NNCellKey), already reflecting this round's frozen ghost-fill snapshot. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Cell spacing of THIS PATCH's own level (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>'s warning) &ndash; valid here because every query in a_localValid is necessarily on this same level; candidates never have their crowding checked by this function, so a cross-level ghost candidate needs no dx here. </td></tr>
@@ -630,6 +770,435 @@ template&lt;typename Packed &gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_edges</td><td>One entry per over-threshold, currently-alive query particle that has at least one candidate (empty if none found). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_maxFallbackCandidates</td><td>Forwarded from <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> (see its docs); 0 (default) means an ordinary single-nearest query and every edge's fallbackCandidates stays empty. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_maxCellDistance</td><td>Same hard cutoff as <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>'s own a_maxCellDistance (see its docs); std::nullopt (default) disables it. Applied here purely as an additional, always-safe filter on the graph row &ndash; <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>/judgeProposals() still apply the exact, level-aware, per-axis Chebyshev check (<a class="el" href="namespaceParticleManagement_1_1detail.html#a5d12e7b8d1c9516266a727a6937daafc" title="a_maxCellDistance check for two positions that may be on DIFFERENT AMR levels.">nnMergeCrossLevelTooFar()</a>) downstream regardless, unchanged. The bound used here is deliberately looser: a candidate is dropped only once its EUCLIDEAN distance exceeds a_maxCellDistance * min(a_dx) * sqrt(SpaceDim) &ndash; the sqrt(SpaceDim) factor is required because a per-axis Chebyshev cell distance of N does not bound Euclidean physical distance by N * dx alone (a diagonal candidate exactly N cells away in both directions is N * dx * sqrt(SpaceDim) away in a straight line), and this bound must never be tighter than the true Chebyshev cutoff or it could wrongly drop a candidate <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>/judgeProposals() would still have accepted. Safe but not maximally tight. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad9c1ac0e5b0c73f04505ff544b662b3a" name="ad9c1ac0e5b0c73f04505ff544b662b3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9c1ac0e5b0c73f04505ff544b662b3a">&#9670;&#160;</a></span>findNearestNeighborCandidatesOneCell()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Packed &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::detail::findNearestNeighborCandidatesOneCell </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_localValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_consumedIDs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespaceParticleManagement_1_1detail.html#a6c0869884660810af91b9c87da4bdf7a">NNCellSpatialIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_liveCellCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; RealVect &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dxByLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_edges</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_maxFallbackCandidates</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest neighbor restricted to its own cell and its Moore-adjacent neighbor cells (Chebyshev cell distance &lt;= 1) &ndash; the one-cell counterpart of <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>. </p>
+<p>Visits the query's own cell plus every occupied Moore-neighbor cell (up to 3^SpaceDim - 1 of them), ordered by ascending squared point-to-cell distance, querying each cell's PointCloudBVH (the own cell via an external query that also matches the query particle itself, filtered out by id; neighbor cells via an ordinary external query, no self match possible). Stops visiting further cells once a full top-K candidate set has been found and the next cell's minimum possible distance cannot beat or tie the current worst of K &ndash; an exact, not approximate, prune, since point-to-cell-AABB distance is a true lower bound on any point inside that cell.</p>
+<p>The cell buckets themselves are all keyed in the query patch's OWN level's frame (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a14418eb3f56522f631f806caedcf49fd" title="Build a patch&#39;s one-cell spatial index for the one-cell nearest-neighbor merge: one PointCloudBVH per...">buildNNCellSpatialIndex()</a>), so Moore-adjacency in that frame does not, by itself, bound the Chebyshev distance between the query and a candidate on a DIFFERENT AMR level in the finer-of-the-two-levels frame that <a class="el" href="namespaceParticleManagement_1_1detail.html#a5d12e7b8d1c9516266a727a6937daafc" title="a_maxCellDistance check for two positions that may be on DIFFERENT AMR levels.">nnMergeCrossLevelTooFar()</a> (and so <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>/ <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a>) actually enforce. A same-level candidate is unaffected (query and candidate already share one frame). For a cross-level candidate, this function re-checks it exactly, in that same finer-of-the-two-levels frame, before it is ever considered &ndash; so every candidate this function returns is guaranteed at Chebyshev distance &lt;= 1 in the frame the downstream exact check uses, not merely in the query patch's own frame. Callers MUST still forward that same cap (not std::nullopt) as a_maxCellDistance to <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>/judgeProposals(). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_localValid</td><td>This patch's own FULL valid-particle set for this round (query sources). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_consumedIDs</td><td>Lazy-deletion skip set: ids already consumed earlier this round. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellIndex</td><td>This patch's one-cell spatial index (see NNCellSpatialIndex), built once via <a class="el" href="namespaceParticleManagement_1_1detail.html#a14418eb3f56522f631f806caedcf49fd" title="Build a patch&#39;s one-cell spatial index for the one-cell nearest-neighbor merge: one PointCloudBVH per...">buildNNCellSpatialIndex()</a> over the FULL a_localValid/a_ghosts sets before any consumption happens. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_liveCellCount</td><td>Live particle count (valid + ghost) per level-qualified cell key (see NNCellKey). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Cell spacing of THIS PATCH's own level (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>'s warning). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dxByLevel</td><td>Cell spacing per AMR level (see <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>'s own docs) &ndash; needed for the exact cross-level re-check described above. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Crowding threshold N &ndash; a cell is eligible while it holds strictly more than this many particles. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_edges</td><td>One entry per over-threshold, currently-alive query particle that has at least one candidate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxFallbackCandidates</td><td>Same meaning as <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>'s own parameter; 0 (default) means an ordinary single-nearest query and every edge's fallbackCandidates stays empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1a6e997cb3c56fc012e9079c1538775d" name="a1a6e997cb3c56fc012e9079c1538775d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a6e997cb3c56fc012e9079c1538775d">&#9670;&#160;</a></span>finishMergeRound()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Packed , typename Traits , typename Combine , typename Scatter , typename PosValid , typename Allocator , typename OnMerge &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::detail::finishMergeRound </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Combine &amp;&#160;</td>
+          <td class="paramname"><em>a_combine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Scatter &amp;&#160;</td>
+          <td class="paramname"><em>a_scatter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Allocator &amp;&#160;</td>
+          <td class="paramname"><em>a_allocateID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::optional&lt; int &gt;&#160;</td>
+          <td class="paramname"><em>a_maxCellDistance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PosValid &amp;&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; RealVect &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dxByLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNPatchWork.html">NNPatchWork</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_patchWork</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html">NNMergeEdge</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_pooledEdges</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_hasOutgoingCommitment</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unordered_map&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>, <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html">NNPooledParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particlesByID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unordered_set&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_consumedIDs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_liveCellCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeResult.html">NNMergeResult</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_allResults</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long *&#160;</td>
+          <td class="paramname"><em>a_crossLevelMergeCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const OnMerge &amp;&#160;</td>
+          <td class="paramname"><em>a_onMergeCommitted</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Finish a merge round: propose/judge/verdict the edges the local tier could not resolve, place every merge result, and apply everything to the real particle containers &ndash; the backend-agnostic tail shared by <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> and <a class="el" href="namespaceParticleManagement.html#af2c9acd083d602fdfb2183033dd95f7b" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">mergeNearestNeighborsOneCell()</a>. </p>
+<p>Runs, in order: derive outgoingTargetOf from a_pooledEdges/a_hasOutgoingCommitment; <a class="el" href="namespaceParticleManagement_1_1detail.html#a804e860074bebad0ec202a2763c2d3e2" title="Package one outgoing proposal for every edge that resolveTrivialTier() could not resolve locally,...">generateProposals()</a>; exchange proposals; <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a>; exchange verdicts; <a class="el" href="namespaceParticleManagement_1_1detail.html#a0fc0a1a6c20a6dd49d58215d2017ddbd" title="Apply every verdict addressed to one of this rank&#39;s own outgoing proposals: remove the source particl...">applyVerdicts()</a>; <a class="el" href="namespaceParticleManagement_1_1detail.html#a597b8eb0db4d9348fa114f87c3402327" title="Point-locate a newly created merged particle against the AMR grid, and bucket it for a scatter exchan...">placeMergedParticles()</a>; exchange the scatter bucket; remove every consumed local-valid particle from the real containers; scatter in every locally-placed and every incoming-scattered merged particle. Identical to steps 3-7 of <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for P. </td></tr>
+    <tr><td class="paramname">Combine</td><td>See PayloadCombine. </td></tr>
+    <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
+    <tr><td class="paramname">PosValid</td><td>See PositionValid. </td></tr>
+    <tr><td class="paramname">Allocator</td><td>See IDAllocator. </td></tr>
+    <tr><td class="paramname">OnMerge</td><td>See MergeCommittedCallback. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of the <a class="el" href="classLevelTiles.html" title="Class for storing the AMR hierarchy as a collection of tiles.">LevelTiles</a> used to place merged particles. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container being merged. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Crowding threshold N. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>Opaque-payload combine callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-surviving-particle scatter callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxCellDistance</td><td>Physical merge-eligibility cap forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> (see its own docs); the caller's own cap for a tree-backed round, or a hardcoded 1 for a one-cell round (see <a class="el" href="namespaceParticleManagement_1_1detail.html#ad9c1ac0e5b0c73f04505ff544b662b3a" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidatesOneCell()</a>'s docs on why that value is mandatory there). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dxByLevel</td><td>Cell spacing per AMR level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_patchWork</td><td>One entry per patch this rank owns (see <a class="el" href="structParticleManagement_1_1detail_1_1NNPatchWork.html" title="One patch&#39;s identity for the duration of a merge round: its AMR level, local DataIndex,...">NNPatchWork</a>), from <a class="el" href="namespaceParticleManagement_1_1detail.html#a607cfd01a5a729d5e160ef324fc92b3c" title="Gather every patch this rank owns into the backend-agnostic per-patch particle sets and pooled bookke...">gatherMergeParticles()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pooledEdges</td><td>Every candidate edge produced by the local tier's LAST candidate-search pass, pooled across every patch this rank owns (used to derive outgoingTargetOf; nothing is consumed between the last pass and here, so these are still current). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hasOutgoingCommitment</td><td>Query ids the local tier could not resolve trivially. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particlesByID</td><td>Every currently-alive local-valid particle and every ghost, pooled rank-wide by id. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_consumedIDs</td><td>Ids already consumed this round; updated in place as judge-side merges commit. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_liveCellCount</td><td>Live per-cell counts; decremented in place as judge-side merges commit. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_allResults</td><td>Every merge result committed this round (trivial-tier results already inside on entry); judge-side results are appended. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_crossLevelMergeCount</td><td>Optional diagnostic counter (see MergeCommittedCallback's sibling docs). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_onMergeCommitted</td><td>Optional per-merge diagnostic callback. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a607cfd01a5a729d5e160ef324fc92b3c" name="a607cfd01a5a729d5e160ef324fc92b3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a607cfd01a5a729d5e160ef324fc92b3c">&#9670;&#160;</a></span>gatherMergeParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Packed , typename Traits , typename Gather &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::detail::gatherMergeParticles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_finestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; RealVect &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dxByLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghostWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Gather &amp;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1NNPatchWork.html">NNPatchWork</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_patchWork</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_patchLocalValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_patchGhosts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unordered_map&lt; <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>, <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html">NNPooledParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particlesByID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unordered_map&lt; <a class="el" href="namespaceParticleManagement_1_1detail.html#aeb66a972dd92448f3cc4ca5bd400d079">NNCellKey</a>, int, <a class="el" href="structParticleManagement_1_1detail_1_1NNCellKeyHasher.html">NNCellKeyHasher</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_liveCellCount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gather every patch this rank owns into the backend-agnostic per-patch particle sets and pooled bookkeeping a merge round needs, shared by every search backend. </p>
+<p>For every patch: splits its leaf into local-valid/ghost <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a> vectors (ghosts carrying their TRUE origin AMR level, see <a class="el" href="structParticleManagement_1_1NNMergeParticle.html#a080a153df7a305cd0d04b334c36f974d" title="The AMR level this particle currently lives on.">NNMergeParticle::level</a>), computes each local-valid particle's boundary-exposure flag from the realm's same/coarse-to-fine/fine-to-coarse particle ghost masks at the given a_ghostWidth, and pools everything rank-wide into a_particlesByID. a_liveCellCount is derived from the pooled a_particlesByID afterward (once per particle, not once per occurrence, since a ghost can appear in several of this rank's own patches at once). Builds no spatial index &ndash; that is backend-specific and is the caller's next step. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>SoA payload type (see <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>). </td></tr>
+    <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type (see <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>). </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for P. </td></tr>
+    <tr><td class="paramname">Gather</td><td>Callable <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, std::size_t) -&gt; Packed</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of ghost masks and the patch layout. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container being merged. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name (a_particles.getRealm()). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest AMR level (a_amr.getFinestLevel()). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dxByLevel</td><td>Cell spacing per AMR level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostWidth</td><td>Particle ghost halo width already filled by the caller (see <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own a_ghostWidth docs). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather callback. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_patchWork</td><td>One entry per patch this rank owns. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_patchLocalValid</td><td>This patch's own local-valid particles, parallel to a_patchWork. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_patchGhosts</td><td>Every ghost shipped to this patch, parallel to a_patchWork. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_particlesByID</td><td>Every currently-alive local-valid particle and every ghost, pooled rank-wide by id. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_liveCellCount</td><td>Live particle count (valid + ghost) per level-qualified cell key, derived from a_particlesByID. </td></tr>
   </table>
   </dd>
 </dl>
@@ -691,7 +1260,7 @@ template&lt;typename Packed &gt; </div>
 </div><div class="memdoc">
 
 <p>Package one outgoing proposal for every edge that <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> could not resolve locally, bucketed by destination rank. </p>
-<p>Routing rule: ALWAYS to the owner of the candidate (<a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#a06f75ce53f197d23e00985a4ecf60281" title="Global id of the candidate (query&#39;s nearest neighbor). May be a local valid particle (same patch) or ...">NNMergeEdge::candidateID</a>'s owning rank) &ndash; never by any id comparison (see <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeProposal.html" title="A cross-patch merge proposal: one particle&#39;s own nearest-neighbor query result, bundled as a self-con...">NNMergeProposal</a>). If the destination rank equals this rank's own (a boundary-exposed candidate that happens to live in a DIFFERENT patch owned by the same rank), the proposal still goes into the normal per-destination-rank bucket &ndash; the caller (<a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsRound()</a>) is expected to hand the "bucket addressed to myself" directly to <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> in-process, without an actual MPI round-trip, while every other bucket goes out over MPI. This keeps the decision logic in <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> completely unaware of whether a given proposal arrived locally or over the network &ndash; it still goes through the exact same pooled judge logic, never a shortcut. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Routing rule: ALWAYS to the owner of the candidate (<a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#a06f75ce53f197d23e00985a4ecf60281" title="Global id of the candidate (query&#39;s nearest neighbor). May be a local valid particle (same patch) or ...">NNMergeEdge::candidateID</a>'s owning rank) &ndash; never by any id comparison (see <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeProposal.html" title="A cross-patch merge proposal: one particle&#39;s own nearest-neighbor query result, bundled as a self-con...">NNMergeProposal</a>). If the destination rank equals this rank's own (a boundary-exposed candidate that happens to live in a DIFFERENT patch owned by the same rank), the proposal still goes into the normal per-destination-rank bucket &ndash; the caller (<a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>) is expected to hand the "bucket addressed to myself" directly to <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> in-process, without an actual MPI round-trip, while every other bucket goes out over MPI. This keeps the decision logic in <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> completely unaware of whether a given proposal arrived locally or over the network &ndash; it still goes through the exact same pooled judge logic, never a shortcut. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
   </table>
@@ -699,7 +1268,7 @@ template&lt;typename Packed &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_edges</td><td>Candidate edges from <a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>, for all of this rank's patches. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_edges</td><td>Candidate edges from <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>, for all of this rank's patches. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hasOutgoingCommitment</td><td>Query-particle ids that <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a> could not resolve (i.e. exactly the edges this function packages). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesByID</td><td>Full particle data for every currently-alive local valid particle and every ghost, keyed by id (each value an <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html" title="Pooled per-round record for one particle: the particle plus its cached boundary-exposure flag.">NNPooledParticle</a> wrapping the particle) &ndash; needed to build the full <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a> bundle for each proposal. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numRanks</td><td>Total MPI rank count (size of the returned bucket vector). </td></tr>
@@ -748,7 +1317,7 @@ template&lt;typename Packed &gt; </div>
 <p>The eligibility test for the trivial tier (see <a class="el" href="namespaceParticleManagement_1_1detail.html#afa75c6aafc640a75785b41db90f979b4" title="Resolve every candidate edge that is safely mergeable with zero cross-rank coordination,...">resolveTrivialTier()</a>). A direct lookup against the patch's own outgoing ghost mask &ndash; whether this particle's cell has any registered destination (<code><a class="el" href="classParticleGhostMask.html#a402a9bac8b70b84602846882664a5d56" title="Get the number of scatter targets for a cell.">ParticleGhostMask::numTargets()</a></code>) &ndash; not "same rank" and not "same ParticleSoA": a particle can be exposed to a different patch owned by the same rank, and can be exposed while its candidate sits in the same <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellIndex</td><td>Cell index (IntVect) of the particle, in this patch's own local frame &ndash; i.e. whatever a_ghostMask itself is keyed by (see <a class="el" href="classParticleGhostMask.html#a054754e5c679a606201b81d268379b35" title="Reset to an empty table over a box (every cell has zero targets).">ParticleGhostMask::define()</a>/addTarget()). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostMask</td><td>This patch's own OUTGOING particle ghost mask, as returned by <a class="el" href="classAmrMesh.html#a441a5e5724ed0d2b6abc316fe4624607" title="Get the same-level particle ghost mask on a realm for a registered width.">AmrMesh::getParticleGhostMask()</a> (or getParticleGhostMaskCoarToFine()/ getParticleGhostMaskFineToCoar() for cross-level exposure &ndash; a particle can be boundary-exposed toward a coarser or finer level too, not just the same level; see <a class="el" href="namespaceParticleManagement.html#a21017543d38eec1906abcaed4b6f4d29" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsRound()</a> for how the three mask kinds are combined into one boundary-exposed test). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostMask</td><td>This patch's own OUTGOING particle ghost mask, as returned by <a class="el" href="classAmrMesh.html#a441a5e5724ed0d2b6abc316fe4624607" title="Get the same-level particle ghost mask on a realm for a registered width.">AmrMesh::getParticleGhostMask()</a> (or getParticleGhostMaskCoarToFine()/ getParticleGhostMaskFineToCoar() for cross-level exposure &ndash; a particle can be boundary-exposed toward a coarser or finer level too, not just the same level; see <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> for how the three mask kinds are combined into one boundary-exposed test). </td></tr>
   </table>
   </dd>
 </dl>
@@ -979,6 +1548,206 @@ template&lt;class P , const RealVect &amp;(P::*)() const position&gt; </div>
 
 </div>
 </div>
+<a id="a93e3e867ed41d57e5db5d4293c60d800" name="a93e3e867ed41d57e5db5d4293c60d800"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93e3e867ed41d57e5db5d4293c60d800">&#9670;&#160;</a></span>mergeNearestNeighborsRoundImpl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Packed , typename Traits , typename Cloud , typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename OnMerge &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::detail::mergeNearestNeighborsRoundImpl </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Gather &amp;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Combine &amp;&#160;</td>
+          <td class="paramname"><em>a_combine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Scatter &amp;&#160;</td>
+          <td class="paramname"><em>a_scatter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Allocator &amp;&#160;</td>
+          <td class="paramname"><em>a_allocateID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_iterateLocalTierToConvergence</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_maxFallbackCandidates</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::optional&lt; int &gt;&#160;</td>
+          <td class="paramname"><em>a_maxCellDistance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghostWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PosValid &amp;&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long *&#160;</td>
+          <td class="paramname"><em>a_crossLevelMergeCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const OnMerge &amp;&#160;</td>
+          <td class="paramname"><em>a_onMergeCommitted</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Shared implementation behind <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> and <a class="el" href="namespaceParticleManagement.html#af2e889b9bbc72cf4e9578cb18120a4b2" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">mergeNearestNeighborsHash()</a>: one full round of the whole-patch-tree nearest-neighbor merge, generic over which EBGeometry point-cloud index backs the per-patch spatial search. </p>
+<p>Identical algorithm and public contract to <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> (see its own docs for the full step-by-step description) &ndash; the only difference between the two public entry points is which <code>Cloud</code> this function is instantiated with: <code>EBGeometry::PointCloudBVH&lt;Real,ParticleID&gt;</code> for <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, <code>EBGeometry::PointCloudHashGrid&lt;Real,ParticleID&gt;</code> for <a class="el" href="namespaceParticleManagement.html#af2e889b9bbc72cf4e9578cb18120a4b2" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">mergeNearestNeighborsHash()</a>. Both point-cloud types expose an identical query interface, so this one implementation serves both without any backend-specific branching. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Cloud</td><td>EBGeometry point-cloud index type (see <a class="el" href="structParticleManagement_1_1detail_1_1NNSpatialIndex.html" title="A patch&#39;s spatial index for one round: an EBGeometry point-cloud index (PointCloudBVH or PointCloudHa...">NNSpatialIndex</a>). </td></tr>
+    <tr><td class="paramname">P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge</td><td>See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a_amr,a_particles,a_numParticlesPerCellThresh,a_gather,a_combine,a_scatter,a_allocateID,a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,a_crossLevelMergeCount,a_onMergeCommitted</td><td>See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9f28987da4a6f860b654f840d0f44ea7" name="a9f28987da4a6f860b654f840d0f44ea7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f28987da4a6f860b654f840d0f44ea7">&#9670;&#160;</a></span>nnMergeAnyCellCrowded()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Packed &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ParticleManagement::detail::nnMergeAnyCellCrowded </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_localValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_ghosts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_numParticlesPerCellThresh</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exact per-cell crowding pre-filter shared by <a class="el" href="namespaceParticleManagement_1_1detail.html#a78bbfc90bd1d8166716de2eb5c73b7ea" title="Build a patch&#39;s spatial index for one round: an EBGeometry point-cloud index (see Cloud) over the who...">buildNNSpatialIndex()</a>/buildNNCellSpatialIndex(): is any cell in this patch's local+ghost particle set over a_numParticlesPerCellThresh? </p>
+<p>A count-only tally keyed as the crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost alike); checks the true per-cell maximum, not an average density (a low-average patch can still hold one over-threshold cell). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_localValid</td><td>This patch's own full valid-particle set. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghosts</td><td>Every ghost shipped to this patch this round. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Cell spacing of THIS PATCH's own level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Crowding threshold N. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True iff some cell holds strictly more than a_numParticlesPerCellThresh particles. </dd></dl>
+
+</div>
+</div>
 <a id="a1706a4fbee07113983168f8f2ac7bc1f" name="a1706a4fbee07113983168f8f2ac7bc1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1706a4fbee07113983168f8f2ac7bc1f">&#9670;&#160;</a></span>nnMergeChebyshevCellDistance()</h2>
 
@@ -1192,6 +1961,66 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Flat vector of every record received from every rank (including this rank's own bucket addressed to itself). </dd></dl>
+
+</div>
+</div>
+<a id="a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a" name="a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a">&#9670;&#160;</a></span>nnMergePointToCellDistSquared()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ParticleManagement::detail::nnMergePointToCellDistSquared </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_point</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Squared distance from a physical point to a cell's axis-aligned bounding box (0 if the point is inside). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_point</td><td>Physical position. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>Cell index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Cell spacing. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Squared distance from a_point to [a_probLo + a_cell*a_dx, a_probLo + (a_cell + 1)*a_dx]. </dd></dl>
 
 </div>
 </div>
@@ -1516,7 +2345,7 @@ template&lt;typename Packed , typename Combine , typename PosValid , typename Al
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_edges</td><td>Candidate edges from <a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>, for ALL patches this rank owns (pooled together so the global distance sort spans the whole rank, not just one patch). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_edges</td><td>Candidate edges from <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>, for ALL patches this rank owns (pooled together so the global distance sort spans the whole rank, not just one patch). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesByID</td><td>Full particle data for every currently-alive local valid particle and every ghost across all of this rank's patches, keyed by id. Each value is an <a class="el" href="structParticleManagement_1_1detail_1_1NNPooledParticle.html" title="Pooled per-round record for one particle: the particle plus its cached boundary-exposure flag.">NNPooledParticle</a>: the particle (position/weight/id/rank/ payload, needed to compute a merge's weighted-centroid position and call a_combine, since an edge only carries ids/distance) plus its cached boundary-exposure flag (<a class="el" href="namespaceParticleManagement_1_1detail.html#a23bc202663527b6ea91350248322e987" title="Whether a particle is boundary-exposed – i.e. would be shipped as a ghost to at least one neighboring...">isBoundaryExposed()</a>; false for ghosts). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>Opaque-payload combine callback (see PayloadCombine). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_liveCellCount</td><td>Live per-cell counts; decremented in place as trivial merges commit, so later edges in the same pass see the up-to-date occupancy. </td></tr>
@@ -1524,8 +2353,8 @@ template&lt;typename Packed , typename Combine , typename PosValid , typename Al
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Crowding threshold N, for the dynamic per-cell recheck (same value used everywhere else this round). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_hasOutgoingCommitment</td><td>Set of query-particle ids that were NOT resolved trivially (excluding the stale-candidate case, see above) and must go on to <a class="el" href="namespaceParticleManagement_1_1detail.html#a804e860074bebad0ec202a2763c2d3e2" title="Package one outgoing proposal for every edge that resolveTrivialTier() could not resolve locally,...">generateProposals()</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_results</td><td>One entry per trivial-tier merge actually committed, in the order they were processed. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxFallbackCandidates</td><td>Default 0 (disabled). When a query particle's chosen candidate is blocked (already consumed, or has its own outgoing commitment, or exposed/a ghost) and the query particle itself is NOT exposed, try the edge's <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#aa63dab1bf8ec1892d5ca9e2c863d4b38" title="Next-nearest candidates beyond candidateID, in ascending distanceSquared order.">NNMergeEdge::fallbackCandidates</a> in order (pre-fetched by <a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a> via one K-nearest query, K = 1 + a_maxFallbackCandidates), up to this many extra attempts, before giving up. No fresh query and no already-tried bookkeeping &ndash; the list is ascending-distance with no duplicates, so trying the next is advancing an index. Retries resolve immediately at the point of failure rather than being re-sorted into the global order (a retry only fires for an edge whose first choice already failed). A query particle that exhausts every fallback still proposes with its true, original nearest neighbor &ndash; fallbacks affect only local trivial-tier eligibility, never what is proposed cross-patch. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxCellDistance</td><td>User-selectable physical merge-eligibility cap, in whole grid cells, using Chebyshev (max-per-axis) distance between the same unclamped, position-derived cell key used for the crowding trigger (<code>floor(pos/dx)</code>, see <a class="el" href="namespaceParticleManagement_1_1detail.html#acf870c29c40c0b54fe41caf828a86382" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>) &ndash; same cell = 0, any Moore-adjacent cell (incl. diagonals) = 1, and so on. The position-derived key (not each patch's local IntVect) is what makes the comparison meaningful across a patch boundary. <code>std::nullopt</code> (default) disables it. A query whose nearest neighbor exceeds the cap is NOT proposed to &ndash; this is a physical-validity rule, not a coordination one: the pair is exactly as invalid via <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> as it would be trivially. If a_maxFallbackCandidates is nonzero the query gets a fallback retry for a closer candidate; otherwise it is left unmatched with no side effects. The cap is inclusive. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxFallbackCandidates</td><td>Default 0 (disabled). When a query particle's chosen candidate is blocked (already consumed, or has its own outgoing commitment, or exposed/a ghost) and the query particle itself is NOT exposed, try the edge's <a class="el" href="structParticleManagement_1_1detail_1_1NNMergeEdge.html#aa63dab1bf8ec1892d5ca9e2c863d4b38" title="Next-nearest candidates beyond candidateID, in ascending distanceSquared order.">NNMergeEdge::fallbackCandidates</a> in order (pre-fetched by <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a> via one K-nearest query, K = 1 + a_maxFallbackCandidates), up to this many extra attempts, before giving up. No fresh query and no already-tried bookkeeping &ndash; the list is ascending-distance with no duplicates, so trying the next is advancing an index. Retries resolve immediately at the point of failure rather than being re-sorted into the global order (a retry only fires for an edge whose first choice already failed). A query particle that exhausts every fallback still proposes with its true, original nearest neighbor &ndash; fallbacks affect only local trivial-tier eligibility, never what is proposed cross-patch. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxCellDistance</td><td>User-selectable physical merge-eligibility cap, in whole grid cells, using Chebyshev (max-per-axis) distance between the same unclamped, position-derived cell key used for the crowding trigger (<code>floor(pos/dx)</code>, see <a class="el" href="namespaceParticleManagement_1_1detail.html#a5948456a53b4942f62de050435f7d3d2" title="For every over-threshold, currently-alive valid particle in a patch, find its single TRUE nearest nei...">findNearestNeighborCandidates()</a>) &ndash; same cell = 0, any Moore-adjacent cell (incl. diagonals) = 1, and so on. The position-derived key (not each patch's local IntVect) is what makes the comparison meaningful across a patch boundary. <code>std::nullopt</code> (default) disables it. A query whose nearest neighbor exceeds the cap is NOT proposed to &ndash; this is a physical-validity rule, not a coordination one: the pair is exactly as invalid via <a class="el" href="namespaceParticleManagement_1_1detail.html#a03ac2ce7c454ed125141c7d8d7acfc43" title="Judge every incoming proposal that targets a particle this rank owns, and produce the verdicts to sen...">judgeProposals()</a> as it would be trivially. If a_maxFallbackCandidates is nonzero the query gets a fallback retry for a closer candidate; otherwise it is left unmatched with no side effects. The cap is inclusive. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>); needed for the dynamic crowding recheck and a_maxCellDistance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dxByLevel</td><td>Cell spacing PER AMR LEVEL (index 0 = level 0, etc.) &ndash; see <a class="el" href="namespaceParticleManagement_1_1detail.html#a0945d2c0224d83fd1e28e3d77861df57" title="The unclamped, position-derived cell index a given physical position falls in.">cellKeyOf()</a>'s warning. Each participant's OWN cell key is computed with a_dxByLevel[participant.level], never a single shared dx: a candidate can legitimately be a ghost from a coarser or finer level than the query's own patch, and getting this wrong silently breaks the dynamic crowding recheck for every level but one. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate (see PositionValid), called once per otherwise-eligible pair with the weighted-centroid position already computed. Treated exactly like a_maxCellDistance's "too far" case on failure: no proposal for the original candidate, a fallback retry if available, otherwise left unmatched with no side effects. </td></tr>
