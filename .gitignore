@@ -55,6 +55,7 @@ Docs/*
 !Docs/Sphinx/
 !Docs/doxygen.conf
 !Docs/README.md
+!Docs/DesignNotes/
 Docs/Sphinx/build
 Docs/**/*.dat
 
