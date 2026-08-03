@@ -26,6 +26,14 @@
 #include <CD_NamespaceHeader.H>
 
 /**
+ * @brief Minimal particle payload used internally by the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges.
+ * @details Defined in CD_ItoSolver.cpp; forward-declared here only so
+ * extractIntoMergeContainer()/splitAndRebuildFromMergeContainer() can name
+ * ParticleContainer<ItoMergeParticle>& in their declarations.
+ */
+struct ItoMergeParticle;
+
+/**
  * @brief Base class for Ito diffusion particle models.
  * @details This is a particle class for solving Ito diffusion problems dX = v*dt + sqrt(2*D)*dW_t (dW_t is a Wiener
  * process over dt) over an AMR hierarchy. The diffusion coefficient is related to the hydrodynamic diffusion
@@ -882,17 +890,47 @@ public:
   makeSuperparticlesNnSfc(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Make superparticles with the distributed nearest-neighbour pair merge, regardless of
-   * merge_algorithm.
+   * @brief Make superparticles with the distributed nearest-neighbour pair merge (whole-patch
+   * PointCloudBVH search), regardless of merge_algorithm.
    * @details Whole-container, cross-patch/cross-rank AMR merge (see
-   * ParticleManagement::mergeNearestNeighborsRound). Requires the width-1 particle ghost mask registered
-   * on this realm (see registerOperators()); it does its own ghost fill and does NOT need cell sorting.
+   * ParticleManagement::mergeNearestNeighborsTree). Requires the particle ghost mask registered on
+   * this realm (see registerOperators()); it does its own ghost fill and does NOT need cell sorting.
    * Uses a single crowding threshold -- the coarsest level's a_particlesPerCell entry.
    * @param[in] a_container        Which container to repartition.
    * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
    */
   virtual void
-  makeSuperparticlesNnPair(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+  makeSuperparticlesNnPairTree(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+   * @brief Make superparticles with the distributed nearest-neighbour pair merge (whole-patch
+   * PointCloudHashGrid search), regardless of merge_algorithm.
+   * @details Whole-container, cross-patch/cross-rank AMR merge (see
+   * ParticleManagement::mergeNearestNeighborsHash) -- identical algorithm and tunables to
+   * makeSuperparticlesNnPairTree(), differing only in the per-patch spatial-index backend. Requires
+   * the particle ghost mask registered on this realm (see registerOperators()); it does its own
+   * ghost fill and does NOT need cell sorting. Uses a single crowding threshold -- the coarsest
+   * level's a_particlesPerCell entry.
+   * @param[in] a_container        Which container to repartition.
+   * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   */
+  virtual void
+  makeSuperparticlesNnPairHash(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+   * @brief Make superparticles with the distributed nearest-neighbour pair merge (per-cell
+   * PointCloudBVH search), regardless of merge_algorithm.
+   * @details Whole-container, cross-patch/cross-rank AMR merge (see
+   * ParticleManagement::mergeNearestNeighborsOneCell). Merge distance is structurally fixed at
+   * Chebyshev cell distance 1 (own cell and Moore-adjacent neighbors only), so nn_pair_max_cell_dist
+   * is not honored by this method. Requires a width-1 particle ghost mask registered on this realm
+   * (see registerOperators()); it does its own ghost fill and does NOT need cell sorting. Uses a
+   * single crowding threshold -- the coarsest level's a_particlesPerCell entry.
+   * @param[in] a_container        Which container to repartition.
+   * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   */
+  virtual void
+  makeSuperparticlesNnPairOneCell(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Remap the bulk particle container.
@@ -1157,28 +1195,32 @@ protected:
   ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
 
   /**
-   * @brief nn_pair: iterate the local trivial tier to convergence within each round.
-   * @details Forwarded to ParticleManagement::mergeNearestNeighborsRound(). Only used for nn_pair.
+   * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local trivial tier to convergence within each
+   * round.
+   * @details Forwarded to ParticleManagement::mergeNearestNeighborsTree()/mergeNearestNeighborsOneCell()/
+   * mergeNearestNeighborsHash(). Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash.
    */
   bool m_nnPairIterate = true;
 
   /**
-   * @brief nn_pair: number of fallback candidates per query. The k-nearest graph is
-   * built with k = 1 + this. Only used for nn_pair.
+   * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: number of fallback candidates per query. The k-nearest
+   * search is done with k = 1 + this. Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash.
    */
   int m_nnPairFallback = 1;
 
   /**
-   * @brief nn_pair: maximum merge distance in whole cells (Chebyshev). A negative
-   * value means unbounded (std::nullopt). Only used for nn_pair.
+   * @brief nn_pair_tree/nn_pair_hash: maximum merge distance in whole cells (Chebyshev). A negative
+   * value means unbounded (std::nullopt). Only used for nn_pair_tree/nn_pair_hash -- nn_pair_onecell's merge
+   * distance is structurally fixed at 1 and does not read this.
    */
   int m_nnPairMaxCellDistance = -1;
 
   /**
-   * @brief nn_pair: maximum number of drain rounds run per makeSuperparticles() call.
+   * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: maximum number of drain rounds run per makeSuperparticles()
+   * call.
    * @details Each round merges nearest-neighbor pairs and roughly halves an over-full cell's surplus; the
    * loop also stops early once a round merges nothing. This caps the round count so the cost stays bounded
-   * and predictable rather than running to full convergence. Only used for nn_pair.
+   * and predictable rather than running to full convergence. Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash.
    */
   int m_nnPairMaxRounds = 3;
 
@@ -1434,6 +1476,61 @@ protected:
   applyCellMerger(WhichContainer                                         a_container,
                   const Vector<int>&                                     a_particlesPerCell,
                   const ParticleManagement::ParticleMerger<ItoParticle>& a_merger);
+
+  /**
+   * @brief Extract a container's ItoParticles into a minimal ItoMergeParticle container on the
+   * same realm/patch, then clear the ItoParticles -- shared setup for
+   * makeSuperparticlesNnPairSearch()/makeSuperparticlesNnPairOneCell().
+   * @details Copies position + weight + energy only; velocity/mobility/diffusion are dropped (they
+   * are recomputed from the field after the merge). No remap is needed since positions/ownership
+   * are unchanged.
+   * @param[in]  a_container Which container to extract from.
+   * @param[out] a_merge     The resulting minimal-payload container, allocated on m_realm.
+   */
+  void
+  extractIntoMergeContainer(WhichContainer a_container, ParticleContainer<ItoMergeParticle>& a_merge);
+
+  /**
+   * @brief Split every under-full cell up to the target count, then rebuild a container's
+   * ItoParticles from the merged/split ItoMergeParticles -- shared tail for
+   * makeSuperparticlesNnPairSearch()/makeSuperparticlesNnPairOneCell().
+   * @details The merge/drain phase only reduces over-full cells; this brings cells below the target
+   * back up to it via greedy heaviest-particle splitting (same rule as nn_sfc), then rebuilds the
+   * ItoParticles into the same patch (no remap). velocity/mobility/diffusion default to zero and
+   * are recomputed from the field before use. Leaves a_container patch-organized.
+   * @param[in]     a_container            Which container to rebuild into.
+   * @param[in,out] a_merge                The minimal-payload container to split (cell-sorted internally); consumed.
+   * @param[in]     a_numParticlesPerCellThresh Target particle count per cell.
+   */
+  void
+  splitAndRebuildFromMergeContainer(WhichContainer                       a_container,
+                                    ParticleContainer<ItoMergeParticle>& a_merge,
+                                    int                                  a_numParticlesPerCellThresh);
+
+  /**
+   * @brief Which EBGeometry point-cloud index backs makeSuperparticlesNnPairSearch()'s per-patch
+   * spatial search -- see ParticleManagement::mergeNearestNeighborsTree()/mergeNearestNeighborsHash().
+   */
+  enum class NnPairSearchBackend
+  {
+    Tree, ///< EBGeometry::PointCloudBVH -- ParticleManagement::mergeNearestNeighborsTree().
+    Hash  ///< EBGeometry::PointCloudHashGrid -- ParticleManagement::mergeNearestNeighborsHash().
+  };
+
+  /**
+   * @brief Make superparticles with the distributed nearest-neighbour pair merge, regardless of merge_algorithm --
+   * shared implementation behind makeSuperparticlesNnPairTree()/makeSuperparticlesNnPairHash().
+   * @details Identical in every respect between the two backends (extraction, callbacks, id allocation, drain loop,
+   * split/rebuild); only the ParticleManagement::mergeNearestNeighborsTree()/mergeNearestNeighborsHash() call inside
+   * the drain loop differs, selected at compile time via @c Backend. See makeSuperparticlesNnPairTree()'s own docs
+   * for the full behavioral contract, which applies unchanged to either backend.
+   * @tparam Backend Which point-cloud index to search with (see NnPairSearchBackend).
+   * @param[in] a_container        Which container to repartition.
+   * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   */
+  template <NnPairSearchBackend Backend>
+  void
+  makeSuperparticlesNnPairSearch(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Parse EB intersection algorithms
