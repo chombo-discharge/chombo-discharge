@@ -157,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 935-946
+   :lines: 951-962
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -321,7 +321,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1070-1075
+   :lines: 1086-1091
    :dedent: 2
 
 which returns a CFL-like condition
@@ -337,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1094-1099
+   :lines: 1110-1115
    :dedent: 2
 
 which returns a CFL-like condition
@@ -355,7 +355,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 972-982
+   :lines: 988-998
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -382,7 +382,7 @@ Calling this function will merge/split the particles.
 .. important::
 
    Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (``organizeParticlesByCell``) before calling the merging routine.
-   The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, and ``nn_pair_hash``, which are distributed AMR-level merges that match particles across patch and rank boundaries; they instead require that a particle ghost halo has been filled, and are dispatched over the whole container rather than cell by cell.
+   The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, and ``bucket_tree_carve``, which are distributed AMR-level merges that match particles across patch and rank boundaries; they instead require that a particle ghost halo has been filled, and are dispatched over the whole container rather than cell by cell.
 
 In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
 
@@ -394,6 +394,7 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 * ``nn_pair_tree`` A distributed, MPI-safe nearest-neighbour *pair* merge that reaches the target particle count over the whole AMR hierarchy, searching for candidates via one whole-patch PointCloudBVH per patch. Over-full cells are drained by matching each over-crowded particle with its true nearest neighbour across patch and rank boundaries (a propose/judge/verdict protocol over a particle ghost halo) and merging the pair to its weighted centroid; because a single round merges pairs, the round is repeated until every cell reaches the target. Under-full cells are then brought up to the target by splitting the heaviest particle into two co-located daughters (floor/ceil weights, so integer weights stay integer). Tunable through ``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback`` and ``ItoSolver.nn_pair_max_cell_dist``.
 * ``nn_pair_onecell`` The same distributed nearest-neighbour pair merge and drain/split protocol as ``nn_pair_tree``, but candidates are found via one PointCloudBVH per occupied grid cell instead of one per patch: a query only ever searches its own cell and its Moore-adjacent neighbours, so the merge distance is structurally fixed at Chebyshev cell distance 1 and ``ItoSolver.nn_pair_max_cell_dist`` does not apply. Tunable through ``ItoSolver.nn_pair_iterate`` and ``ItoSolver.nn_pair_fallback``.
 * ``nn_pair_hash`` The same distributed nearest-neighbour pair merge and drain/split protocol as ``nn_pair_tree``, but candidates are found via one PointCloudHashGrid (a uniform spatial hash grid) per patch instead of a PointCloudBVH. Identical tunables and behaviour to ``nn_pair_tree`` (``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback``, ``ItoSolver.nn_pair_max_cell_dist``); only the per-patch spatial-index backend differs.
+* ``bucket_tree_carve`` A distributed, MPI-safe whole-patch merge built around a spatial partition ("bucket tree") rather than a nearest-neighbour graph: each patch splits its local-plus-ghost particles purely by position (never snapped to the grid, so particles near a cell face can merge across it) down to groups of roughly the target count. A group entirely clear of any patch/rank boundary merges immediately with no communication; a group that touches one is resolved by a single, non-iterative "z-buffer carve" -- competing groups from neighbouring patches are ranked by a deterministic key and the tightest one wins each contested particle. Unlike the ``nn_pair_*`` family there is no drain loop and no ``nn_pair_iterate``/``nn_pair_fallback``/``nn_pair_max_cell_dist`` equivalent to tune; the ghost width is fixed at 1.
 * ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through ``setParticleCellMerger``.
 
 The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.
@@ -408,7 +409,7 @@ In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 70-78
+   :lines: 72-80
 
 .. tip::
    

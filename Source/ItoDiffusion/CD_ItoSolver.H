@@ -933,6 +933,22 @@ public:
   makeSuperparticlesNnPairOneCell(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
+   * @brief Make superparticles with the whole-patch bucket-tree carve merge, regardless of
+   * merge_algorithm.
+   * @details Whole-container, cross-patch/cross-rank AMR merge (see
+   * ParticleManagement::mergeBucketTreeCarve). Unlike makeSuperparticlesNnPairTree/Hash/OneCell,
+   * this is a single, non-iterative pass (no drain loop, no nn_pair_iterate/nn_pair_fallback/
+   * nn_pair_max_cell_dist equivalents -- there is no configurable search radius or convergence
+   * loop to tune). Requires a width-1 particle ghost mask registered on this realm (see
+   * registerOperators()); it does its own ghost fill and does NOT need cell sorting. Uses a single
+   * crowding threshold -- the coarsest level's a_particlesPerCell entry.
+   * @param[in] a_container        Which container to repartition.
+   * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   */
+  virtual void
+  makeSuperparticlesBucketZCarve(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
    * @brief Remap the bulk particle container.
    */
   virtual void

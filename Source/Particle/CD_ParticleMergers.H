@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_ParticleManagement.H>
 #include <CD_NearestNeighborParticleMerge.H>
+#include <CD_BucketTreeCarveParticleMerge.H>
 
 /**
  * @brief Convenience header that makes ALL ParticleManagement merge algorithms available in one

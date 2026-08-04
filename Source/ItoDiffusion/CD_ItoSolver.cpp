@@ -31,6 +31,7 @@
 #include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NearestNeighborParticleMerge.H>
+#include <CD_BucketTreeCarveParticleMerge.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -557,6 +558,14 @@ ItoSolver::registerOperators() const
     // makeSuperparticlesNnPairOneCell() / ParticleManagement::mergeNearestNeighborsOneCell()), so it
     // always needs a width-1 mask regardless of nn_pair_max_cell_dist; register it too (a no-op if
     // nnPairSearchGhostWidth is already 1).
+    m_amr->registerParticleGhostMask(m_realm, 1);
+
+    // bucket_tree_carve's ghost width is hardcoded to 1 -- every merge-eligible leaf/box is <= 1
+    // cell in extent by construction (see makeSuperparticlesBucketZCarve() /
+    // ParticleManagement::mergeBucketTreeCarve()), so there is no configurable distance the way
+    // nn_pair_tree/nn_pair_hash have. Registered unconditionally here too, same as the two calls
+    // above -- a no-op given the width-1 registration already present for nn_pair_onecell, kept
+    // explicit so this doesn't silently depend on that other registration continuing to exist.
     m_amr->registerParticleGhostMask(m_realm, 1);
   }
 }
@@ -3333,6 +3342,11 @@ ItoSolver::makeSuperparticles(const WhichContainer                          a_co
 
     break;
   }
+  case ParticleManagement::ParticleMergeMethod::BucketZCarve: {
+    this->makeSuperparticlesBucketZCarve(a_container, a_particlesPerCell);
+
+    break;
+  }
   case ParticleManagement::ParticleMergeMethod::External: {
     // The user supplies the per-cell merger through setParticleCellMerger().
     this->applyCellMerger(a_container, a_particlesPerCell, m_particleCellMerger);
@@ -4168,6 +4182,124 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
   }
 
   // 4-5. Split under-full cells and rebuild the ItoParticles.
+  this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);
+}
+
+void
+ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+{
+  CH_TIME("ItoSolver::makeSuperparticlesBucketZCarve");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::makeSuperparticlesBucketZCarve" << endl;
+  }
+
+  // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
+  // using the whole-patch bucket-tree carve merge (see ParticleManagement::mergeBucketTreeCarve).
+  // Unlike makeSuperparticlesNnPairTree/Hash/OneCell, there is no drain-loop round here -- the
+  // carve protocol is a single, fixed, non-iterative pass -- in four steps:
+  //
+  //   1. extractIntoMergeContainer(): copy the ItoParticles into a minimal ItoMergeParticle
+  //      container (position + weight + energy) on the same realm/patch, then clear the
+  //      ItoParticles.
+  //   2. Build the merge callbacks (gather/N-ary combine/scatter), the EB position-validity
+  //      predicate, and the rank-namespaced fresh-id allocator.
+  //   3. Assign every particle a fresh id/rank, fill the width-1 same-level/coarse-to-fine/
+  //      fine-to-coarse particle ghost masks, then run mergeBucketTreeCarve() once.
+  //   4. splitAndRebuildFromMergeContainer(): bring under-full cells up to the target by repeatedly
+  //      halving the heaviest particle, then rebuild the ItoParticles.
+
+  // The bucket-tree carve merge has no per-level notion -- it uses a SINGLE crowding threshold over
+  // the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is uniform
+  // wherever bucket_tree_carve is used.
+  const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
+
+  // 1. Extract.
+  ParticleContainer<ItoMergeParticle> merge;
+  this->extractIntoMergeContainer(a_container, merge);
+
+  // 2. Merge callbacks -- identical reconciliation rule to the nn_pair variants, just N-ary.
+  auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
+    return a_leaf.template get<&ItoMergeParticle::energy>(a_idx);
+  };
+
+  auto combine = [](const Real* a_energies, const Real* a_weights, const std::size_t a_count) -> Real {
+    Real weightedSum = 0.0;
+    Real totalWeight = 0.0;
+
+    for (std::size_t i = 0; i < a_count; i++) {
+      weightedSum += a_weights[i] * a_energies[i];
+      totalWeight += a_weights[i];
+    }
+
+    return weightedSum / totalWeight;
+  };
+
+  auto scatter = [](ParticleSoA<ItoMergeParticle>&                  a_leaf,
+                    const ParticleManagement::BucketParticle<Real>& a_p) -> void {
+    ItoMergeParticle p;
+    p.energy = a_p.payload;
+
+    a_leaf.append(a_p.position, a_p.weight, p);
+    a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
+    a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
+  };
+
+  const RefCountedPtr<BaseIF>& implicitFunction = m_computationalGeometry->getImplicitFunction(m_phase);
+
+  auto isPositionValid = [&implicitFunction](const RealVect& a_pos) -> bool {
+    if (implicitFunction.isNull()) {
+      return true;
+    }
+
+    return implicitFunction->value(a_pos) < 0.0;
+  };
+
+  // See makeSuperparticlesNnPairTree() for the id-allocator rationale.
+  constexpr ParticleID rankStride = 1000000000000LL;
+  const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
+
+  ParticleID nextID = rankBase;
+
+  auto allocateID = [&nextID, rankBase]() -> ParticleID {
+    CH_assert(nextID < rankBase + rankStride);
+
+    return nextID++;
+  };
+
+  // 3. Fresh ids, ghost fill, single merge pass.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+    // Serial (no omp): allocateID() hands out ids from a single shared counter, so parallelising
+    // the box loop would race on it and mint duplicate ids.
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      ParticleSoA<ItoMergeParticle>& leaf = merge[lvl][dit[mybox]];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        leaf.particleID(i) = allocateID();
+        leaf.rankID(i)     = procID();
+      }
+    }
+  }
+
+  merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
+                           m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
+                           m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+
+  // Merge particles -- this is the most expensive part of the merge algorithm.
+  ParticleManagement::mergeBucketTreeCarve<ItoMergeParticle, Real>(*m_amr,
+                                                                   merge,
+                                                                   a_numParticlesPerCellThresh,
+                                                                   gather,
+                                                                   combine,
+                                                                   scatter,
+                                                                   allocateID,
+                                                                   isPositionValid);
+
+  // 4. Split under-full cells and rebuild the ItoParticles.
   this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);
 }
 

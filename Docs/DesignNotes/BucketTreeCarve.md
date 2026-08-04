@@ -309,6 +309,46 @@ proposer's own box.
   in `CD_ItoSolver.H`/`CD_ParticleManagement.H`, per this repo's own documented convention for that
   (`CLAUDE.md` §"Sphinx literalinclude line references").
 
+## Bugs found during initial implementation and testing
+
+The design above was locked before any code was written. Four genuine correctness bugs were still
+found via actual multi-rank test execution (`BrownianWalker.verify_conservation=true` tripping),
+not via design review — worth recording since all four trace back to the same root cause: an
+insufficiently precise notion of "identity" once a rank can hold more than one competing box.
+
+1. **Self-claims must accumulate, not overwrite.** The same particle can be a member of more than
+   one of a rank's *own* boxes at once — gathered once as a local member of its home patch's build,
+   and again as a ghost in a neighboring patch's independent build on that same rank. An
+   `unordered_map<ParticleID, optional<BucketBoxKey>>` that assigns (rather than appends) silently
+   drops the earlier claim, so only one of the two competing same-rank boxes was ever argmin'd —
+   double-counting the particle's weight if both went on to commit. Fixed by making self-claims a
+   `vector<pair<BucketBoxKey,int>>` per particle.
+2. **"Owned by this rank" is not "physically resident in this patch."** Exposure and
+   interior-vs-boundary classification must be evaluated over a leaf's *locally-resident* (non-ghost)
+   members only, never over "owner == myRank" — the same particle is a ghost in every patch except
+   its home one, even on the rank that owns it. Testing a ghost's cell against a *different* patch's
+   own `ParticleGhostMask` is also undefined behavior (violates `numTargets()`'s precondition that
+   the cell lie within that mask's own box). Fixed by adding an explicit `BucketParticle::isGhost`
+   field, set at gather time, and switching every relevant check to it.
+3. **A verdict needs the winning claim's own box index, not just its rank.** Two of the same rank's
+   own boxes (different patches) can both claim the same foreign particle; a `{memberID, winnerRank}`
+   verdict cannot tell them apart, so both claimants were told "your rank won" and both counted it.
+   Fixed by adding `proposerBoxIdx` to a claim and redesigning the verdict to
+   `{memberID, claimantBoxIdx, won}`, sent one per incoming claim rather than one per rank.
+4. **A verdict must compare winning *identity*, not key *value*.** Comparing key values
+   (`!(bestKey < claim.key)`) to decide `won` lets an exact tie between two genuinely independent
+   claims — plausible here, since `BrownianWalker`'s regular initial particle distribution can give
+   two independently-built boxes the exact same AABB volume — tell both tied claimants "you won".
+   Fixed by comparing the winning claim's identity `(rank, boxIdx)` instead, which required Step 3 to
+   record the actual winning foreign claim's own box index rather than a `-1` sentinel (needed so the
+   identity comparison can ever match a foreign winner at all).
+
+All four were caught by `verify_conservation`'s weight-drift check, confirmed root-caused via
+temporary per-rank weight-diff instrumentation (removed once each fix was confirmed), and reproduced
+only at multi-rank counts (bugs 1–2 also reproduce single-rank, since a single rank already owns
+multiple patches; bugs 3–4 need ≥2 ranks). After all four fixes, single-rank and 4/8-rank 2D runs
+pass cleanly with no asserts, NaNs, or conservation errors.
+
 ## Verification plan
 
 - Build 2D and 3D, `OPT=HIGH` and `DEBUG=TRUE`, with MPI.

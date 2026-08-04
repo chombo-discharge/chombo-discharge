@@ -806,7 +806,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 277-281
+   :lines: 279-283
 
 The returned functor proceeds as follows:
 
@@ -829,7 +829,7 @@ ___________________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 192-200
+   :lines: 194-202
 
 The caller provides three lambdas:
 
@@ -873,3 +873,26 @@ Merged particles need globally unique ids that cannot collide across ranks or ro
    ``ItoSolver`` handles this automatically when ``merge_algorithm`` selects any of the three, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to any of the three.
 
 In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).
+
+.. _bucket-tree-carve-merging:
+
+Bucket-tree carve merging (``bucket_tree_carve``)
+____________________________________________________________________________________________
+
+Unlike every strategy above, ``bucket_tree_carve`` is not built around pairwise nearest-neighbour matching at all -- it is implemented as ``ParticleManagement::mergeBucketTreeCarve`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_BucketTreeCarveParticleMerge.H`, and is a distinct, distributed, MPI-safe whole-container merge in its own right.
+
+Each patch's local-plus-ghost particles are split purely by position into a "bucket tree": the longest axis is bisected, never snapped to the grid (particles near a cell face must be able to merge across it), down to groups of roughly the target particle count. A group is classified in one of three ways:
+
+* *Interior* -- none of its members' cells are exposed to any neighbouring patch or level. Such a group merges immediately, with zero communication -- it cannot be near any kind of patch/level interface.
+* *Unmergeable* -- the group is spread across more than one grid cell but already has few enough particles that it isn't worth reducing further (a genuinely sparse region, not a hidden crowded cell). Left untouched; an under-populated cell like this is brought back up to target afterward the same way as for every other merge algorithm, not by this one.
+* *Boundary* -- otherwise. Such a group becomes a candidate "box" for the carve step below.
+
+The boundary/carve step ("z-buffer carve") resolves every contested particle in a single, fixed, non-iterative protocol: each box is keyed by ``(AABB volume, anchor particle id)``, compared so that the tightest box wins a contested particle (the anchor id is a deterministic tiebreak, since volume alone is not a strict total order). Because a box's membership can be whittled down by losing individual particles to other, unrelated competing boxes, a box that nominally wins one particle is not guaranteed to end up with enough survivors to actually commit a merge -- so the protocol runs in three rounds rather than two: (1) claims are routed to each particle's owner, (2) each owner replies with the nominal winner, and (3) once a box's final, post-contest membership and validity are known, it tells each surviving foreign member's owner to actually delete it. Only this last step authorizes a deletion; a box's participants are never removed on the strength of the nominal result in step 2 alone, since that could otherwise delete a particle whose "winning" box turns out not to commit.
+
+Because every group is at most one grid cell across, only a patch's direct neighbours can ever contest one of its particles -- the exchange is bounded and fixed-shape, not a drain loop, regardless of the third round.
+
+.. important::
+
+   ``bucket_tree_carve`` requires a width-1 particle ghost mask, registered unconditionally by ``ItoSolver`` (the same requirement and registration timing as the ``nn_pair_*`` family -- see above).
+
+Unlike ``nn_pair_tree``/``nn_pair_onecell``/``nn_pair_hash``, there are no tunables: no iteration/fallback/max-cell-distance equivalent exists, since there is no drain loop and no configurable search radius.

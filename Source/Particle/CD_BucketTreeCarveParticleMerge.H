@@ -71,9 +71,23 @@ struct BucketParticle
 
   /**
    * @brief The rank that currently owns this particle. Always read from the particle's own data,
-   * never inferred from MPI transport metadata.
+   * never inferred from MPI transport metadata. NOT the same question as isGhost below -- a
+   * particle can be owned by this rank (via one of this rank's OTHER patches) while still being a
+   * ghost in the patch whose build currently holds it.
    */
   RankID ownerRank;
+
+  /**
+   * @brief True iff this particle is a ghost copy in the patch whose build currently holds it
+   * (i.e. not physically stored there). Build-internal bookkeeping, not part of the payload the
+   * caller-supplied callbacks see meaningfully -- always false on a freshly merged result. This is
+   * deliberately a per-particle field (not inferred from ownerRank) because ownership and physical
+   * residency are different questions: a particle owned by this rank via one patch can be a ghost
+   * in a NEIGHBORING patch this same rank also owns, and treating "owner == this rank" as "no
+   * further contest possible" there is exactly the bug this field exists to prevent -- see
+   * mergeBucketTreeCarve()'s own docs.
+   */
+  bool isGhost = false;
 
   /**
    * @brief Opaque, caller-defined payload. Never inspected by the build/carve logic -- only
@@ -249,19 +263,31 @@ struct BucketClaim
    * @brief The claiming box's proposer rank -- where the verdict should be sent back to.
    */
   RankID proposerRank;
+
+  /**
+   * @brief The claiming box's own index into the proposer's local box list, echoed back verbatim
+   * in the reply. NOT redundant with proposerRank: two DIFFERENT boxes on the SAME rank (from two
+   * different patches that same rank owns) can both claim the same foreign particle at once, and
+   * the reply must let each of them individually learn whether IT specifically won -- a rank-level
+   * "your rank won" answer cannot distinguish which of that rank's own competing boxes it was. See
+   * mergeBucketTreeCarve()'s own docs for the double-count this caused before this field existed.
+   */
+  int proposerBoxIdx;
 };
 
 /**
- * @brief One reply to a claim: "you nominally won or lost this member" -- the wire record for the
- * carve protocol's Phase 2 (verdicts routed back to proposers, foreign members only).
- * @details Trivially copyable (see BucketClaim). NOMINAL, not final: winning the argmin for one
- * member does not by itself guarantee the winning box will actually commit -- it can
- * independently lose OTHER members to OTHER, unrelated lower-keyed competitors and end up under
- * the merge threshold itself (a box's key is one fixed value, so any two boxes' pairwise win/loss
- * outcome is identical for every member they share, but that says nothing about a box's OTHER
- * contests). An owner must NOT delete a member on the strength of this verdict alone -- it must
- * wait for the corresponding BucketCommit in Phase 3. See mergeBucketTreeCarve()'s own docs for a
- * worked counterexample of the conservation bug that results from deleting here instead.
+ * @brief One reply to a single claim: "your specific box nominally won or lost this member" --
+ * the wire record for the carve protocol's Phase 2 (verdicts routed back to proposers, foreign
+ * members only).
+ * @details Trivially copyable (see BucketClaim). Answers exactly the claim identified by
+ * (memberID, claimantBoxIdx) -- one BucketVerdict per incoming BucketClaim, not one per rank, so
+ * that two of the SAME rank's own boxes claiming the same particle each get their own, individually
+ * correct answer (see BucketClaim::proposerBoxIdx). NOMINAL, not final: winning the argmin for one
+ * member does not by itself guarantee the winning box will actually commit -- it can independently
+ * lose OTHER members to OTHER, unrelated lower-keyed competitors and end up under the merge
+ * threshold itself. An owner must NOT delete a member on the strength of this verdict alone -- it
+ * must wait for the corresponding BucketCommit in Phase 3. See mergeBucketTreeCarve()'s own docs
+ * for a worked counterexample of the conservation bug that results from deleting here instead.
  */
 struct BucketVerdict
 {
@@ -271,10 +297,15 @@ struct BucketVerdict
   ParticleID memberID;
 
   /**
-   * @brief The rank whose box nominally won the argmin for this particle (may or may not be the
-   * recipient proposer's own rank -- the recipient checks).
+   * @brief Echo of the claim's own BucketClaim::proposerBoxIdx -- identifies which of the
+   * recipient's own boxes this verdict answers for.
    */
-  RankID winnerRank;
+  int claimantBoxIdx;
+
+  /**
+   * @brief True iff THIS specific box (memberID, claimantBoxIdx) won the argmin for this particle.
+   */
+  bool won;
 };
 
 /**
@@ -378,8 +409,8 @@ bucketTreeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * the nearest-neighbor merge's own entry points document.
  *
  * @tparam P SoA payload type (e.g. ItoParticle).
- * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Packed Opaque reconciliation payload type (see BucketParticle).
+ * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See BucketPayloadCombine -- N-ary, not pairwise.
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const BucketParticle<Packed>&) -> void`.
@@ -397,8 +428,8 @@ bucketTreeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in] a_isPositionValid Position-validity predicate.
  */
 template <typename P,
-          typename Traits,
           typename Packed,
+          typename Traits = ParticleTraits<P>,
           typename Gather,
           typename Combine,
           typename Scatter,

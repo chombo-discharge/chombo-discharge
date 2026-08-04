@@ -2,7 +2,7 @@
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity                 = -1                 ## Class verbosity
-ItoSolver.merge_algorithm           = equal_weight_kd    ## Particle merging algorithm. One of 'reinitialize', 'equal_weight_kd', 'reinitialize_bvh', 'nn_sfc', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'none', or 'external'
+ItoSolver.merge_algorithm           = equal_weight_kd    ## Particle merging algorithm. One of 'reinitialize', 'equal_weight_kd', 'reinitialize_bvh', 'nn_sfc', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'bucket_tree_carve', 'none', or 'external'
 ItoSolver.nn_pair_iterate           = true               ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local tier to convergence within each round
 ItoSolver.nn_pair_fallback          = 1                  ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: fallback candidates per query
 ItoSolver.nn_pair_max_cell_dist     = 1                  ## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)
