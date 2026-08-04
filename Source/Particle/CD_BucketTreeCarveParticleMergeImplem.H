@@ -18,7 +18,6 @@
 #include <cmath>
 #include <functional>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -421,11 +420,16 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     int                    patchIdx; // which patch's leaf produced this -- the cheap placement guess
   };
 
-  std::vector<PatchWork>                                 patchWork;
-  std::unordered_map<ParticleID, BucketParticle<Packed>> particlesByID; // pooled: locals + ghosts, rank-wide
-  std::vector<RuntimeBox>                                myBoxes;
-  std::unordered_set<ParticleID>                         consumedIDs;
-  std::vector<MergedResult>                              mergedResults;
+  std::vector<PatchWork> patchWork;
+
+  // Pooled: locals + ghosts, rank-wide. One entry per (id, patch-occurrence) is appended during
+  // STEP 1 -- deduplicated (sorted + collapsed, preferring the non-ghost copy) once STEP 1 finishes,
+  // rather than via a per-particle hash lookup while gathering. Point lookups after that go through
+  // findParticle() (binary search) below.
+  std::vector<std::pair<ParticleID, BucketParticle<Packed>>> particlesByID;
+  std::vector<RuntimeBox>                                    myBoxes;
+  std::vector<ParticleID>                                    consumedIDs; // sorted once, before STEP 7
+  std::vector<MergedResult>                                  mergedResults;
 
   // selfClaims[id] = every one of MY OWN boxes that lists this (locally-owned, boundary-exposed)
   // particle as a member, as (key, index into myBoxes) pairs. An empty vector (but a present map
@@ -442,9 +446,10 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // the particle's weight if both boxes go on to commit.
   std::unordered_map<ParticleID, std::vector<std::pair<BucketBoxKey, int>>> selfClaims;
 
-  // Cheap pre-pass (patch sizes only, no per-particle work) so the hash containers below can be
-  // sized once up front instead of rehashing repeatedly as STEP 1 fills them. combinedCountUpperBound
-  // includes ghosts, so it's also a safe (if slightly generous) upper bound for the local-only maps.
+  // Cheap pre-pass (patch sizes only, no per-particle work) so the containers below can be sized
+  // once up front instead of growing (and, for selfClaims, rehashing) repeatedly as STEP 1 fills
+  // them. combinedCountUpperBound includes ghosts, so it's also a safe (if slightly generous) upper
+  // bound for the local-only ones.
   std::size_t combinedCountUpperBound = 0;
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl  = a_amr.getGrids(realm)[lvl];
@@ -494,13 +499,10 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
         combined.push_back(p);
 
-        // Pool by id, but never let a ghost copy clobber the authoritative (non-ghost) entry for a
-        // particle this rank owns via a DIFFERENT patch -- see BucketParticle::isGhost's own docs.
-        // Ghost-vs-ghost or non-ghost-vs-non-ghost overwrites are harmless (identical data).
-        auto poolIt = particlesByID.find(p.globalID);
-        if (poolIt == particlesByID.end() || !p.isGhost) {
-          particlesByID[p.globalID] = p;
-        }
+        // Append unconditionally -- deduplicated by id (preferring the non-ghost copy, per
+        // BucketParticle::isGhost's own docs) in the one pass below once STEP 1 finishes gathering,
+        // rather than via a per-particle hash lookup here.
+        particlesByID.emplace_back(p.globalID, p);
       }
 
       patchWork.push_back(PatchWork{lvl, din, dxByLevel[lvl], dbl[din]});
@@ -634,7 +636,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
               mergedResults.push_back(MergedResult{merged, patchIdx});
 
               for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-                consumedIDs.insert(combined[idx].globalID);
+                consumedIDs.push_back(combined[idx].globalID);
               }
             }
           }
@@ -672,6 +674,60 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       }
     }
   }
+
+  // particlesByID was appended to once per (id, patch-occurrence) above -- an id can appear more
+  // than once (its home patch, plus any neighboring patch that gathered it as a ghost). Sort once
+  // and collapse each run to a single entry, preferring the non-ghost copy when the run has one
+  // (ghost-vs-ghost or non-ghost-vs-non-ghost duplicates carry identical data, so it doesn't matter
+  // which of those survives) -- this is the dedup rule the old per-particle hash lookup used to
+  // enforce inline.
+  std::sort(particlesByID.begin(), particlesByID.end(), [](const auto& a_lhs, const auto& a_rhs) {
+    return a_lhs.first < a_rhs.first;
+  });
+  {
+    std::size_t writeIdx = 0;
+
+    for (std::size_t readIdx = 0; readIdx < particlesByID.size();) {
+      std::size_t runEnd = readIdx + 1;
+
+      while (runEnd < particlesByID.size() && particlesByID[runEnd].first == particlesByID[readIdx].first) {
+        runEnd++;
+      }
+
+      std::size_t chosen = readIdx;
+      for (std::size_t k = readIdx; k < runEnd; k++) {
+        if (!particlesByID[k].second.isGhost) {
+          chosen = k;
+
+          break;
+        }
+      }
+
+      if (writeIdx != chosen) {
+        particlesByID[writeIdx] = particlesByID[chosen];
+      }
+      writeIdx++;
+      readIdx = runEnd;
+    }
+
+    particlesByID.resize(writeIdx);
+  }
+
+  // Binary-search lookup into the now-sorted, deduplicated particlesByID -- replaces the old
+  // unordered_map's .at().
+  auto findParticle = [&particlesByID](const ParticleID a_id) -> const BucketParticle<Packed>& {
+    const auto it = std::lower_bound(
+      particlesByID.begin(),
+      particlesByID.end(),
+      a_id,
+      [](const std::pair<ParticleID, BucketParticle<Packed>>& a_entry, const ParticleID a_key) {
+        return a_entry.first < a_key;
+      });
+
+    CH_assert(it != particlesByID.end() && it->first == a_id);
+
+    return it->second;
+  };
 
   // ==== STEP 2: Phase 1 -- claims to owners ====
   std::vector<std::vector<BucketClaim>> claimSendByRank(numRanks);
@@ -778,12 +834,14 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   const std::vector<BucketVerdict> incomingVerdicts = bucketTreeExchangeByRank(verdictSendByRank);
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
-  std::unordered_map<int, std::unordered_set<ParticleID>> wonForeignByBox;
-  wonForeignByBox.reserve(myBoxes.size());
+  // Indexed directly by boxIdx (a dense range over myBoxes) rather than hashed -- each box's own
+  // list is short (bounded by its own membership), so a linear scan at the read site below is both
+  // simpler and faster than hashing into it.
+  std::vector<std::vector<ParticleID>> wonForeignByBox(myBoxes.size());
 
   for (const BucketVerdict& v : incomingVerdicts) {
     if (v.won) {
-      wonForeignByBox[v.claimantBoxIdx].insert(v.memberID);
+      wonForeignByBox[v.claimantBoxIdx].push_back(v.memberID);
     }
   }
 
@@ -804,8 +862,9 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         }
       }
       else {
-        const auto it = wonForeignByBox.find(static_cast<int>(boxIdx));
-        if (it != wonForeignByBox.end() && it->second.count(m.id) > 0) {
+        const std::vector<ParticleID>& won = wonForeignByBox[boxIdx];
+
+        if (std::find(won.begin(), won.end(), m.id) != won.end()) {
           survivingForeign.push_back(m.id);
         }
       }
@@ -825,7 +884,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       weights.reserve(totalSurvivors);
 
       auto accumulate = [&](const ParticleID a_id) {
-        const BucketParticle<Packed>& p = particlesByID.at(a_id);
+        const BucketParticle<Packed>& p = findParticle(a_id);
 
         payloads.push_back(p.payload);
         weights.push_back(p.weight);
@@ -857,7 +916,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         mergedResults.push_back(MergedResult{merged, box.patchIdx});
 
         for (const ParticleID id : survivingLocal) {
-          consumedIDs.insert(id); // I own these -- confirmed now, no need to wait for anything.
+          consumedIDs.push_back(id); // I own these -- confirmed now, no need to wait for anything.
         }
       }
     }
@@ -866,7 +925,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     // whether this box committed or not -- its owner is otherwise stuck not knowing whether to
     // delete it (see mergeBucketTreeCarve()'s own docs for why this can't be skipped).
     for (const ParticleID id : survivingForeign) {
-      commitSendByRank[particlesByID.at(id).ownerRank].push_back(BucketCommit{id, committed});
+      commitSendByRank[findParticle(id).ownerRank].push_back(BucketCommit{id, committed});
     }
   }
 
@@ -875,9 +934,11 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
   for (const BucketCommit& c : incomingCommits) {
     if (c.committed) {
-      consumedIDs.insert(c.memberID);
+      consumedIDs.push_back(c.memberID);
     }
   }
+
+  std::sort(consumedIDs.begin(), consumedIDs.end());
 
   // ==== STEP 7: remove consumed particles ====
   for (const PatchWork& pw : patchWork) {
@@ -886,7 +947,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     std::size_t i = 0;
 
     while (i < leaf.size()) {
-      if (!leaf.isGhost(i) && consumedIDs.count(leaf.particleID(i)) > 0) {
+      if (!leaf.isGhost(i) && std::binary_search(consumedIDs.begin(), consumedIDs.end(), leaf.particleID(i))) {
         leaf.remove(i);
       }
       else {
