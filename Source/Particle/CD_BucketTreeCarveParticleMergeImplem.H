@@ -236,6 +236,7 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
   }
 
   Real cellVolume = 1.0;
+
   for (int dir = 0; dir < SpaceDim; dir++) {
     cellVolume *= a_dx[dir];
   }
@@ -296,6 +297,7 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
     Real leafVolume = 1.0;
+
     for (int dir = 0; dir < SpaceDim; dir++) {
       leafVolume *= (boxHi[dir] - boxLo[dir]);
     }
@@ -389,6 +391,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   const Vector<Real>& dxScalar    = a_amr.getDx();
 
   std::vector<RealVect> dxByLevel(finestLevel + 1);
+
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
   }
@@ -495,6 +498,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       buildBucketTreeLeaves(combined, a_ppc, dxByLevel[lvl], leaves);
 
       Real cellVolume = 1.0;
+
       for (int dir = 0; dir < SpaceDim; dir++) {
         cellVolume *= dxByLevel[lvl][dir];
       }
@@ -521,6 +525,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         }
 
         Real leafVolume = 1.0;
+
         for (int dir = 0; dir < SpaceDim; dir++) {
           leafVolume *= (bl.boxHi[dir] - bl.boxLo[dir]);
         }
@@ -624,6 +629,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         // Boundary candidate.
         if (members.size() >= 2) {
           ParticleID anchor = members[0].id;
+
           for (const BucketMember& m : members) {
             anchor = std::min(anchor, m.id);
           }
@@ -667,6 +673,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   const std::vector<BucketClaim> incomingClaims = bucketTreeExchangeByRank(claimSendByRank);
 
   std::unordered_map<ParticleID, std::vector<BucketClaim>> claimsByMember;
+
   for (const BucketClaim& c : incomingClaims) {
     claimsByMember[c.memberID].push_back(c);
   }
@@ -754,6 +761,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
   std::unordered_map<int, std::unordered_set<ParticleID>> wonForeignByBox;
+
   for (const BucketVerdict& v : incomingVerdicts) {
     if (v.won) {
       wonForeignByBox[v.claimantBoxIdx].insert(v.memberID);
@@ -809,6 +817,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       for (const ParticleID id : survivingLocal) {
         accumulate(id);
       }
+
       for (const ParticleID id : survivingForeign) {
         accumulate(id);
       }
@@ -856,6 +865,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     ParticleSoA<P, Traits>& leaf = a_particles[pw.level][pw.din];
 
     std::size_t i = 0;
+
     while (i < leaf.size()) {
       if (!leaf.isGhost(i) && consumedIDs.count(leaf.particleID(i)) > 0) {
         leaf.remove(i);
@@ -881,12 +891,14 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     const PatchWork& pw = patchWork[mr.patchIdx];
 
     RealVect boxRealLo, boxRealHi;
+
     for (int dir = 0; dir < SpaceDim; dir++) {
       boxRealLo[dir] = probLo[dir] + pw.box.smallEnd(dir) * pw.dx[dir];
       boxRealHi[dir] = probLo[dir] + (pw.box.bigEnd(dir) + 1) * pw.dx[dir];
     }
 
     bool inOwnBox = true;
+
     for (int dir = 0; dir < SpaceDim && inOwnBox; dir++) {
       if (mr.particle.position[dir] < boxRealLo[dir] || mr.particle.position[dir] >= boxRealHi[dir]) {
         inOwnBox = false;

@@ -4,8 +4,10 @@ Working notes for a new particle-merge algorithm, `bucket_tree_carve`, requested
 [chombo-discharge/chombo-discharge#665](https://github.com/chombo-discharge/chombo-discharge/issues/665).
 This document is the hardened design produced by an extended design review before any
 implementation was written, kept in the repository so the reasoning behind the design travels with
-the branch rather than living only in chat history. It is a starting point for implementation, not
-a finished feature — nothing described here has been implemented yet.
+the branch rather than living only in chat history. The "Goal and scope" through "Naming and
+integration" sections below describe that pre-implementation design as it was locked before any code
+was written; the implementation has since landed in this same PR, and the "Bugs found during initial
+implementation and testing" section further down records what changed during that process.
 
 ## Goal and scope
 
