@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -420,6 +419,19 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     int                    patchIdx; // which patch's leaf produced this -- the cheap placement guess
   };
 
+  // One entry per (locally-owned, boundary-exposed particle) x (one of MY OWN boxes that lists it),
+  // appended during STEP 1 and sorted by id once STEP 1 finishes -- see selfClaims' declaration
+  // below for why an id can have more than one entry, and boxIdx < 0 for what a sentinel entry means.
+  struct SelfClaimEntry
+  {
+    ParticleID   id;
+    BucketBoxKey key;    // meaningless when boxIdx < 0.
+    int          boxIdx; // -1 => listen-only sentinel: no actual claim from any of my own boxes, just
+                         // marks that this rank must still process this id (an unmergeable leaf's
+                         // exposed member, or a boundary leaf with < 2 members) when combining with
+                         // foreign claims in STEP 3.
+  };
+
   std::vector<PatchWork> patchWork;
 
   // Pooled: locals + ghosts, rank-wide. One entry per (id, patch-occurrence) is appended during
@@ -431,25 +443,20 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   std::vector<ParticleID>                                    consumedIDs; // sorted once, before STEP 7
   std::vector<MergedResult>                                  mergedResults;
 
-  // selfClaims[id] = every one of MY OWN boxes that lists this (locally-owned, boundary-exposed)
-  // particle as a member, as (key, index into myBoxes) pairs. An empty vector (but a present map
-  // entry) means "listening only, no self-claim" -- an unmergeable leaf's exposed member, or a
-  // boundary leaf with fewer than 2 members (which could never reach the merge threshold on its
-  // own even if it wins the argmin). This is a VECTOR, not a single optional key, because the SAME
-  // particle can be a member of more than one of my own boxes at once: it is gathered once into
-  // its own home patch's build (as a local member there) but can ALSO be gathered as a ghost into
-  // a NEIGHBORING patch's build on this SAME rank, and that patch's build is entirely independent
-  // -- it may propose its own, different box that also lists this particle. Treating "owner ==
-  // myRank" as "no contest possible" (a single overwritten self-claim) is exactly the bug this
-  // comment is warning against: two of my own boxes can genuinely compete for the same particle
-  // with no other rank involved at all, and silently overwriting the earlier claim double-counts
-  // the particle's weight if both boxes go on to commit.
-  std::unordered_map<ParticleID, std::vector<std::pair<BucketBoxKey, int>>> selfClaims;
+  // A particle can be listed by more than one of MY OWN boxes at once -- it is gathered once into
+  // its own home patch's build (as a local member there) but can ALSO be gathered as a ghost into a
+  // NEIGHBORING patch's build on this SAME rank, and that patch's build is entirely independent -- it
+  // may propose its own, different box that also lists this particle. Treating "owner == myRank" as
+  // "no contest possible" (collapsing to a single entry per id) is exactly the bug this vector-of-
+  // entries shape exists to prevent: two of my own boxes can genuinely compete for the same particle
+  // with no other rank involved at all, and collapsing the earlier entry double-counts the particle's
+  // weight if both boxes go on to commit. Sorted by id once STEP 1 finishes (see below); STEP 3
+  // processes it as grouped runs of equal id rather than hashing.
+  std::vector<SelfClaimEntry> selfClaims;
 
   // Cheap pre-pass (patch sizes only, no per-particle work) so the containers below can be sized
-  // once up front instead of growing (and, for selfClaims, rehashing) repeatedly as STEP 1 fills
-  // them. combinedCountUpperBound includes ghosts, so it's also a safe (if slightly generous) upper
-  // bound for the local-only ones.
+  // once up front instead of growing repeatedly as STEP 1 fills them. combinedCountUpperBound
+  // includes ghosts, so it's also a safe (if slightly generous) upper bound for the local-only ones.
   std::size_t combinedCountUpperBound = 0;
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl  = a_amr.getGrids(realm)[lvl];
@@ -521,14 +528,58 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         cellVolume *= dxByLevel[lvl][dir];
       }
 
+      // Per-patch exposure cache: leaves are ~1 cell in extent and not grid-aligned, so many leaves
+      // (and many members within one leaf) end up querying the SAME actual cell's exposure. A
+      // resident (non-ghost) member's cell always lies within this patch's OWN box (that's what
+      // "resident" means), so a dense array indexed by cell offset within the box is safe -- compute
+      // each distinct cell's exposure (up to 3 mask lookups) once, then reuse the cached bit for
+      // every subsequent member/leaf that touches the same cell.
+      const IntVect patchLo   = dbl[din].smallEnd();
+      const IntVect patchSize = dbl[din].size();
+      std::size_t   cacheSize = 1;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        cacheSize *= static_cast<std::size_t>(patchSize[dir]);
+      }
+      std::vector<signed char> exposureCache(cacheSize, -1); // -1 = uncached, 0 = not exposed, 1 = exposed
+
+      auto isExposedCached = [&](const IntVect& a_iv) -> bool {
+        std::size_t cellIdx = 0;
+        std::size_t stride  = 1;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          cellIdx += static_cast<std::size_t>(a_iv[dir] - patchLo[dir]) * stride;
+          stride *= static_cast<std::size_t>(patchSize[dir]);
+        }
+
+        if (exposureCache[cellIdx] < 0) {
+          bool isExposed = (maskSameDin != nullptr) && bucketTreeIsBoundaryExposed(a_iv, *maskSameDin);
+
+          if (!isExposed && maskC2FDin != nullptr) {
+            isExposed = bucketTreeIsBoundaryExposed(a_iv, *maskC2FDin);
+          }
+          if (!isExposed && maskF2CDin != nullptr) {
+            isExposed = bucketTreeIsBoundaryExposed(a_iv, *maskF2CDin);
+          }
+
+          exposureCache[cellIdx] = isExposed ? 1 : 0;
+        }
+
+        return exposureCache[cellIdx] != 0;
+      };
+
       for (const BucketLeaf& bl : leaves) {
         std::vector<BucketMember> members;
         members.reserve(bl.hi - bl.lo);
 
-        bool anyLocal = false;
+        bool       anyLocal = false;
+        ParticleID anchor   = combined[bl.lo].globalID; // running min over ALL members (bl.hi > bl.lo
+                                                        // always holds for a leaf); folded into this
+                                                        // loop so the boundary branch below doesn't
+                                                        // need its own separate pass just to compute it.
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
           members.push_back(BucketMember{combined[idx].globalID, combined[idx].ownerRank});
+          anchor = std::min(anchor, combined[idx].globalID);
 
           // "Local" here means physically resident in THIS patch, not merely owned by this rank --
           // a particle owned by this rank via a DIFFERENT one of its own patches, appearing here
@@ -566,16 +617,8 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
             continue;
           }
 
-          const IntVect cell = bucketTreeCellKeyOf(combined[idx].position, probLo, dxByLevel[lvl]);
-
-          bool isExposed = (maskSameDin != nullptr) && bucketTreeIsBoundaryExposed(cell, *maskSameDin);
-
-          if (!isExposed && maskC2FDin != nullptr) {
-            isExposed = bucketTreeIsBoundaryExposed(cell, *maskC2FDin);
-          }
-          if (!isExposed && maskF2CDin != nullptr) {
-            isExposed = bucketTreeIsBoundaryExposed(cell, *maskF2CDin);
-          }
+          const IntVect cell      = bucketTreeCellKeyOf(combined[idx].position, probLo, dxByLevel[lvl]);
+          const bool    isExposed = isExposedCached(cell);
 
           exposed[idx - bl.lo] = isExposed;
           anyExposed           = anyExposed || isExposed;
@@ -587,7 +630,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
             // skips them), so this is equivalent to also checking !isGhost -- kept explicit anyway
             // as the actual invariant being relied on, not an implicit one.
             if (!combined[idx].isGhost && exposed[idx - bl.lo]) {
-              selfClaims[combined[idx].globalID]; // present-but-empty entry: listen only.
+              selfClaims.push_back(SelfClaimEntry{combined[idx].globalID, BucketBoxKey{}, -1}); // listen only.
             }
           }
 
@@ -646,12 +689,6 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
         // Boundary candidate.
         if (members.size() >= 2) {
-          ParticleID anchor = members[0].id;
-
-          for (const BucketMember& m : members) {
-            anchor = std::min(anchor, m.id);
-          }
-
           const BucketBoxKey key{leafVolume, anchor};
 
           const int boxIdx = static_cast<int>(myBoxes.size());
@@ -659,17 +696,17 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
           for (const BucketMember& m : members) {
             if (m.owner == myRank) {
-              // Append, never overwrite -- see selfClaims' own docs: this same particle can
-              // already carry a claim from a DIFFERENT one of my own boxes (a different patch's
-              // independent build), and both must survive to be argmin'd together in step 3.
-              selfClaims[m.id].push_back(std::make_pair(key, boxIdx));
+              // Append, never collapse -- see selfClaims' own docs: this same particle can already
+              // carry an entry from a DIFFERENT one of my own boxes (a different patch's independent
+              // build), and both must survive to be argmin'd together in step 3.
+              selfClaims.push_back(SelfClaimEntry{m.id, key, boxIdx});
             }
           }
         }
         else {
           // Exactly one member, and it must be the resident, exposed one (members.size()>=1 and
           // anyLocal both hold) -- can never reach the merge threshold alone, listen only.
-          selfClaims[members[0].id];
+          selfClaims.push_back(SelfClaimEntry{members[0].id, BucketBoxKey{}, -1});
         }
       }
     }
@@ -729,6 +766,13 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     return it->second;
   };
 
+  // selfClaims was appended to during STEP 1 -- sort by id once so STEP 3 can process it as grouped
+  // runs of equal id (a particle's possibly-several self-claim entries, see SelfClaimEntry's own
+  // docs) instead of hashing.
+  std::sort(selfClaims.begin(), selfClaims.end(), [](const SelfClaimEntry& a_lhs, const SelfClaimEntry& a_rhs) {
+    return a_lhs.id < a_rhs.id;
+  });
+
   // ==== STEP 2: Phase 1 -- claims to owners ====
   std::vector<std::vector<BucketClaim>> claimSendByRank(numRanks);
 
@@ -742,14 +786,29 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     }
   }
 
-  const std::vector<BucketClaim> incomingClaims = bucketTreeExchangeByRank(claimSendByRank);
+  // Sorted by memberID once received, so STEP 3's point lookups (claimsRange, below) and STEP 4's
+  // full pass (grouped runs) don't need a hash map either.
+  std::vector<BucketClaim> incomingClaims = bucketTreeExchangeByRank(claimSendByRank);
+  std::sort(incomingClaims.begin(), incomingClaims.end(), [](const BucketClaim& a_lhs, const BucketClaim& a_rhs) {
+    return a_lhs.memberID < a_rhs.memberID;
+  });
 
-  std::unordered_map<ParticleID, std::vector<BucketClaim>> claimsByMember;
-  claimsByMember.reserve(incomingClaims.size());
+  auto claimsRange = [&incomingClaims](const ParticleID a_id) {
+    const auto lo = std::lower_bound(incomingClaims.begin(),
+                                     incomingClaims.end(),
+                                     a_id,
+                                     [](const BucketClaim& a_c, const ParticleID a_key) {
+                                       return a_c.memberID < a_key;
+                                     });
+    const auto hi = std::upper_bound(incomingClaims.begin(),
+                                     incomingClaims.end(),
+                                     a_id,
+                                     [](const ParticleID a_key, const BucketClaim& a_c) {
+                                       return a_key < a_c.memberID;
+                                     });
 
-  for (const BucketClaim& c : incomingClaims) {
-    claimsByMember[c.memberID].push_back(c);
-  }
+    return std::make_pair(lo, hi);
+  };
 
   // ==== STEP 3: local argmin -- nominal winner only, no deletion yet ====
   // The winner of a particle is either one of MY OWN boxes (rank == myRank, boxIdx identifies
@@ -764,48 +823,81 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
                       // individually (won iff that claim's own key is not strictly worse than this).
   };
 
-  std::unordered_map<ParticleID, Winner> nominalWinner;
+  struct WinnerEntry
+  {
+    ParticleID id;
+    Winner     winner;
+  };
+
+  // Built in ascending-id order for free -- selfClaims is sorted by id, and its grouped runs are
+  // visited in that same order below -- so no separate sort is needed before findWinner's binary
+  // search.
+  std::vector<WinnerEntry> nominalWinner;
   nominalWinner.reserve(selfClaims.size());
 
-  for (const auto& kv : selfClaims) {
-    const ParticleID                                 id   = kv.first;
-    const std::vector<std::pair<BucketBoxKey, int>>& mine = kv.second;
+  for (std::size_t idx = 0; idx < selfClaims.size();) {
+    const ParticleID id = selfClaims[idx].id;
+
+    std::size_t idxEnd = idx + 1;
+
+    while (idxEnd < selfClaims.size() && selfClaims[idxEnd].id == id) {
+      idxEnd++;
+    }
 
     bool         haveWinner = false;
     BucketBoxKey bestKey{};
     RankID       bestRank   = myRank;
     int          bestBoxIdx = -1;
 
-    for (const auto& claim : mine) {
-      if (!haveWinner || claim.first < bestKey) {
+    for (std::size_t k = idx; k < idxEnd; k++) {
+      if (selfClaims[k].boxIdx < 0) {
+        continue; // Listen-only sentinel -- not an actual self-claim.
+      }
+      if (!haveWinner || selfClaims[k].key < bestKey) {
         haveWinner = true;
-        bestKey    = claim.first;
+        bestKey    = selfClaims[k].key;
         bestRank   = myRank;
-        bestBoxIdx = claim.second;
+        bestBoxIdx = selfClaims[k].boxIdx;
       }
     }
 
-    const auto it = claimsByMember.find(id);
-    if (it != claimsByMember.end()) {
-      for (const BucketClaim& c : it->second) {
-        if (!haveWinner || c.key < bestKey) {
-          haveWinner = true;
-          bestKey    = c.key;
-          bestRank   = c.proposerRank;
-          // The winning claim's OWN box index (on ITS rank), not a sentinel -- step 4 compares
-          // (rank, boxIdx) as the winning claim's IDENTITY, not just its key value, precisely so
-          // that an exact key tie between two INDEPENDENT claims doesn't tell both of them "you
-          // won" (see step 4's own comment). This must be the real index even for a foreign
-          // winner, or that identity comparison could never match a foreign claim at all.
-          bestBoxIdx = c.proposerBoxIdx;
-        }
+    const auto range = claimsRange(id);
+
+    for (auto cit = range.first; cit != range.second; ++cit) {
+      const BucketClaim& c = *cit;
+
+      if (!haveWinner || c.key < bestKey) {
+        haveWinner = true;
+        bestKey    = c.key;
+        bestRank   = c.proposerRank;
+        // The winning claim's OWN box index (on ITS rank), not a sentinel -- step 4 compares
+        // (rank, boxIdx) as the winning claim's IDENTITY, not just its key value, precisely so
+        // that an exact key tie between two INDEPENDENT claims doesn't tell both of them "you
+        // won" (see step 4's own comment). This must be the real index even for a foreign
+        // winner, or that identity comparison could never match a foreign claim at all.
+        bestBoxIdx = c.proposerBoxIdx;
       }
     }
 
     if (haveWinner) {
-      nominalWinner[id] = Winner{bestRank, bestBoxIdx, bestKey};
+      nominalWinner.push_back(WinnerEntry{id, Winner{bestRank, bestBoxIdx, bestKey}});
     }
+
+    idx = idxEnd;
   }
+
+  // Binary-search lookup into the now-sorted nominalWinner -- replaces the old unordered_map's
+  // .find()/.at().
+  auto findWinner = [&nominalWinner](const ParticleID a_id) -> const Winner* {
+    const auto it = std::lower_bound(nominalWinner.begin(),
+                                     nominalWinner.end(),
+                                     a_id,
+                                     [](const WinnerEntry& a_entry, const ParticleID a_key) {
+                                       return a_entry.id < a_key;
+                                     });
+
+    return (it != nominalWinner.end() && it->id == a_id) ? &it->winner : nullptr;
+  };
 
   // ==== STEP 4: Phase 2 -- verdicts to proposers, foreign members only ====
   // One verdict PER INCOMING CLAIM, not per rank: two of the SAME rank's own boxes can both claim
@@ -813,11 +905,27 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // answer -- a rank-level "your rank won" cannot tell them apart. See BucketClaim::proposerBoxIdx.
   std::vector<std::vector<BucketVerdict>> verdictSendByRank(numRanks);
 
-  for (const auto& kv : claimsByMember) {
-    const ParticleID id     = kv.first;
-    const Winner&    winner = nominalWinner.at(id);
+  for (std::size_t idx = 0; idx < incomingClaims.size();) {
+    const ParticleID id = incomingClaims[idx].memberID;
 
-    for (const BucketClaim& c : kv.second) {
+    std::size_t idxEnd = idx + 1;
+
+    while (idxEnd < incomingClaims.size() && incomingClaims[idxEnd].memberID == id) {
+      idxEnd++;
+    }
+
+    const Winner* winner = findWinner(id);
+
+    // Every id that shows up in incomingClaims was claimed on one of MY OWN, locally-owned,
+    // boundary-exposed particles -- STEP 1's classification is exhaustive over exposed members, so
+    // it always left a (possibly listen-only) selfClaims entry for it, which always yields a
+    // nominalWinner entry (haveWinner requires only ONE candidate, and the incoming claim itself
+    // is one). This is a correctness invariant, not a defensive fallback.
+    CH_assert(winner != nullptr);
+
+    for (std::size_t k = idx; k < idxEnd; k++) {
+      const BucketClaim& c = incomingClaims[k];
+
       // Compare IDENTITY (which specific claim was chosen), not key VALUE: an exact key tie
       // between two INDEPENDENT claims is real and not vanishingly rare here (BrownianWalker's
       // regular initial distribution can make two independently-built boxes end up with the exact
@@ -825,10 +933,12 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       // exactly the kind of double-count this whole protocol exists to prevent. Step 3 already
       // deterministically picked exactly one winner among any tie; only that specific claim,
       // identified by (rank, box index), is told so.
-      const bool won = (c.proposerRank == winner.rank) && (c.proposerBoxIdx == winner.boxIdx);
+      const bool won = (c.proposerRank == winner->rank) && (c.proposerBoxIdx == winner->boxIdx);
 
       verdictSendByRank[c.proposerRank].push_back(BucketVerdict{id, c.proposerBoxIdx, won});
     }
+
+    idx = idxEnd;
   }
 
   const std::vector<BucketVerdict> incomingVerdicts = bucketTreeExchangeByRank(verdictSendByRank);
@@ -856,8 +966,9 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
     for (const BucketMember& m : box.members) {
       if (m.owner == myRank) {
-        const auto it = nominalWinner.find(m.id);
-        if (it != nominalWinner.end() && it->second.rank == myRank && it->second.boxIdx == static_cast<int>(boxIdx)) {
+        const Winner* winner = findWinner(m.id);
+
+        if (winner != nullptr && winner->rank == myRank && winner->boxIdx == static_cast<int>(boxIdx)) {
           survivingLocal.push_back(m.id);
         }
       }
