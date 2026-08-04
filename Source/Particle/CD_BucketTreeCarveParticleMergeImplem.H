@@ -442,6 +442,22 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // the particle's weight if both boxes go on to commit.
   std::unordered_map<ParticleID, std::vector<std::pair<BucketBoxKey, int>>> selfClaims;
 
+  // Cheap pre-pass (patch sizes only, no per-particle work) so the hash containers below can be
+  // sized once up front instead of rehashing repeatedly as STEP 1 fills them. combinedCountUpperBound
+  // includes ghosts, so it's also a safe (if slightly generous) upper bound for the local-only maps.
+  std::size_t combinedCountUpperBound = 0;
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl  = a_amr.getGrids(realm)[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      combinedCountUpperBound += a_particles[lvl][dit[mybox]].size();
+    }
+  }
+  particlesByID.reserve(combinedCountUpperBound);
+  selfClaims.reserve(combinedCountUpperBound);
+  consumedIDs.reserve(combinedCountUpperBound);
+
   // ==== STEP 1: gather + build + classify + commit interior, per patch ====
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
@@ -673,6 +689,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   const std::vector<BucketClaim> incomingClaims = bucketTreeExchangeByRank(claimSendByRank);
 
   std::unordered_map<ParticleID, std::vector<BucketClaim>> claimsByMember;
+  claimsByMember.reserve(incomingClaims.size());
 
   for (const BucketClaim& c : incomingClaims) {
     claimsByMember[c.memberID].push_back(c);
@@ -692,6 +709,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   };
 
   std::unordered_map<ParticleID, Winner> nominalWinner;
+  nominalWinner.reserve(selfClaims.size());
 
   for (const auto& kv : selfClaims) {
     const ParticleID                                 id   = kv.first;
@@ -761,6 +779,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
   std::unordered_map<int, std::unordered_set<ParticleID>> wonForeignByBox;
+  wonForeignByBox.reserve(myBoxes.size());
 
   for (const BucketVerdict& v : incomingVerdicts) {
     if (v.won) {
