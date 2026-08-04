@@ -46,6 +46,7 @@ enum class ParticleMergeMethod
   NnPairTree,      ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
   NnPairOneCell,   ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
   NnPairHash,      ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
+  BucketZCarve,    ///< AMR: mergeBucketTreeCarve (whole-patch bucket-tree build, z-buffer carve boundary).
   External         ///< Cell: caller-supplied per-cell merger.
 };
 
@@ -60,6 +61,7 @@ enum class ParticleMergeMethod
  * 'nn_pair_tree' -> NnPairTree
  * 'nn_pair_onecell' -> NnPairOneCell
  * 'nn_pair_hash' -> NnPairHash
+ * 'bucket_tree_carve' -> BucketZCarve
  * 'external' -> External
  * @param[in] a_str String selector. Must take one of the above strings.
  * @return The corresponding method; aborts on an unknown selector.

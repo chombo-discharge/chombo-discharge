@@ -47,21 +47,29 @@ small N; the same lesson applies here, so this build is one whole-patch tree, no
   synthetic median-particle division, unlike `equal_weight_kd`). Weight and energy ride along as
   payload only and are never used to choose a split — the simplest thing that could work, to be
   measured before adding weight-awareness.
-- **Stop rule**: at each node, recompute `spannedCells = product over axes of ceil(extent[d] / dx)`
-  from that node's own (data-driven) bounding box. The node's local leaf budget is
-  `spannedCells * ppc`, re-derived per node (not inherited as a fraction of the parent's budget) —
-  this is what prevents a single, spatially-isolated hot cell in an otherwise near-empty patch from
-  being allowed to fragment into far more leaves than `ppc`, which a flat `numCellsInPatch * ppc`
-  ceiling alone would fail to prevent (a hot cell can trivially satisfy a ceiling sized for the whole
-  patch while still needing its own, much smaller, local budget enforced). Once `spannedCells == 1`,
-  behave exactly like `equal_weight_kd`'s existing single-cell logic (count-balanced split, no
-  weight-splitting) until reaching `ppc` leaves or running out of particles. If a node's count
-  already satisfies `ppc` but its AABB is still bigger than one cell (a sparse region), stop and mark
-  it **unmergeable** — leave those particles untouched. `spannedCells`'s integer rounding (a
-  barely-straddling sliver leaf counts as 2 cells) is a known, direction-safe over-estimate,
-  deliberately left uncorrected until profiling says otherwise — it only ever matters when a node is
-  both near a cell face *and* still holds enough particles to want splitting, and in that case a
-  slightly looser budget is harmless.
+- **Stop rule**: at each node, compute `fractionalSpan(node) = volume(bbox(node)) / volume(cell)`
+  from that node's own (data-driven) bounding box — an exact real-valued ratio, not an integer count,
+  and not a new computation: it reuses the same AABB-volume quantity the carve key already needs.
+  This is deliberately *not* used as a scaled budget (`fractionalSpan * ppc`) gating when to stop —
+  an earlier version of this design tried that and it's buggy: a multi-cell node containing one
+  genuinely hot cell among several near-empty ones can have `count ≤ fractionalSpan * ppc` even
+  though that one hot cell alone badly needs reducing, so a scaled-budget stop check can silently
+  leave a crowded cell untouched (a reintroduction, one level up, of exactly the per-cell-not-per-patch
+  averaging failure this design exists to avoid). The actual rule:
+  - While `fractionalSpan(node) > 1` (still spanning more than one cell): keep splitting (longest
+    axis, unsnapped) as long as `count(node) > ppc` — flat `ppc`, never scaled by `fractionalSpan`.
+    Once `count(node) ≤ ppc` while `fractionalSpan` is still `> 1`: stop and mark the node
+    **unmergeable** — leave those particles untouched (a genuinely sparse, spread-out region, not a
+    hidden hot cell, since a real hot cell would still have `count > ppc` and keep splitting).
+  - Once `fractionalSpan(node) ≤ 1` (the node's own footprint no longer exceeds one cell's volume):
+    switch to `equal_weight_kd`'s existing single-cell logic (count-balanced split, no
+    weight-splitting) targeting exactly `ppc` leaves for this node's subtree, until reaching that
+    target or running out of particles (a naturally sparse sub-region just bottoms out at singleton
+    leaves, which is fine — see the merge threshold below).
+  Because `fractionalSpan` is an exact ratio with no rounding step, there's no "barely-straddling
+  sliver" imprecision to worry about the way an integer `ceil(extent/dx)`-based cell count would
+  have — a leaf at `1.02×` a cell's volume is genuinely, exactly just over threshold, not an artifact
+  of rounding.
 - **Splitting under-full cells is not this algorithm's job.** `ItoSolver::splitAndRebuildFromMergeContainer`
   (`Source/ItoDiffusion/CD_ItoSolver.cpp`) already exists as a separate, algorithm-agnostic step,
   called unconditionally after every existing `makeSuperparticlesNnPair*` method, using the same
@@ -147,8 +155,13 @@ destination lookup at all.
   bit-for-bit, no epsilon needed.
 - **Eligibility is by membership, not geometry**: a particle may only join a box that explicitly
   listed it when built, never by raw AABB containment.
-- **Dynamics — exactly two fixed communication phases, no iteration, no drain loop**, unlike
-  `nn_pair`'s drain-based protocol:
+- **Dynamics — three fixed communication phases, no iteration, no drain loop**, unlike `nn_pair`'s
+  drain-based protocol. An earlier version of this design used two phases and deleted a member the
+  moment its owner learned who'd nominally won it; that is **unsafe** and was corrected (see the
+  worked example below) — a box's win doesn't mean it will actually commit, since it can
+  independently lose *other* members to *other*, unrelated competitors and end up under the merge
+  threshold itself. Deletion must wait for that box's own outcome to be known, which needs a third,
+  still-bounded round:
   1. Every rank builds its tree, classifies leaves, commits interior merges immediately. Boundary
      leaves become boxes.
   2. Barrier.
@@ -159,25 +172,53 @@ destination lookup at all.
      the existing `nnMergeExchangeByRank` helper.
   4. *(local, per rank as owner)* For each of its own particles, gather every claim on it — including
      its own box's claim if any, which costs no message since the rank already knows its own key —
-     and take the argmin. This resolves the fate of every locally-owned member instantly, no
-     round-trip. The owner can delete any particle whose winner isn't itself right away; nothing
-     later changes the outcome.
+     and take the argmin. This resolves the *nominal* winner of every locally-owned member instantly,
+     no round-trip — but the owner does **not** delete anything yet (see above).
   5. **Phase 2 — verdicts to proposers, foreign members only.** Every rank replies, to whoever claimed
-     one of its particles, with the winner. A box already knows the fate of its own local members for
-     free from step 4; the round-trip is only needed for the foreign (ghost-origin) members it
-     listed.
+     one of its particles, with the nominal winner. A box already knows the nominal fate of its own
+     local members for free from step 4; the round-trip is only needed for the foreign (ghost-origin)
+     members it listed.
   6. *(local, per rank as proposer)* Once all verdicts for a box's foreign members arrive, assemble
-     final post-chop membership (self-owned from step 4 + foreign from step 5). Apply `PosValid`
-     (reject → leave untouched, same handling as an under-threshold chop). If the surviving count is
-     **≥2**, gather (all data already available locally — either truly local, or already held as a
-     ghost copy from the original ghost-fill, so no new data transfer is needed here either),
-     combine, insert the result via the placement rule below. If under 2 survive: leave whatever
-     remains untouched.
-- **Why this is bounded and non-iterative**: ghost width is hardcoded to 1 and every box is ≤1 cell
-  (a direct consequence of the tree's stop rule), so only *direct* neighbors can ever hold a
-  competing claim on a given particle — a rank 2+ hops away has no visibility into it at all. Fan-in/
-  fan-out per particle is small and fixed, same shape as the existing ghost exchange. No third
-  communication phase, no re-proposal/convergence loop.
+     its *provisional* final membership (self-owned from step 4 + foreign-won from step 5). Apply
+     `PosValid` (reject → the box does not commit, same handling as an under-threshold chop below).
+     If the surviving count is **≥2** and `PosValid` passes: the box commits — gather (all data
+     already available locally, either truly local or already held as a ghost copy from the original
+     ghost-fill, so no new data transfer is needed here), combine, insert the result via the
+     placement rule below. If under 2 survive, or `PosValid` rejects: the box does not commit.
+  7. **Phase 3 — commit/release, only for a box's foreign members.** Every proposer tells each foreign
+     member's owner, from step 6's outcome, either "commit" (this box actually merged you — delete
+     your copy now) or "release" (this box did not commit — you're untouched, exactly as if you'd
+     never been claimed). Only now does an owner ever delete a particle. A locally-owned member whose
+     nominal winner (step 4) was the owner's own box needs no message for this — the owner already
+     knows its own box's step-6 outcome directly.
+- **Worked example showing why step 7 is necessary** (three ranks at a junction; boxes' keys satisfy
+  `Kx < Ky < Kz`): `Bx{p1(X-owned), p2(Y-owned)}`, `By{p2(Y-owned), p3(Z-owned)}`,
+  `Bz{p3(Z-owned), p4(X-owned)}`. Argmin: `p1→Bx`, `p2→Bx` (beats `By`), `p3→By` (beats `Bz`),
+  `p4→Bz`. Assembling actual memberships: `Bx` ends up with `{p1,p2}` (2 → commits); `By` loses `p2`
+  to `Bx`, leaving only `{p3}` (1 → does **not** commit); `Bz` loses `p3` to `By`, leaving only `{p4}`
+  (1 → does **not** commit). `p3`'s owner (Z) learns via Phase 2 that `By` nominally won `p3` — if Z
+  deleted `p3` right then, `p3` would vanish with no merged particle anywhere holding its weight,
+  since `By` never actually commits. Phase 3 is what tells Z "release, not commit" for `p3`, so Z
+  correctly keeps it as an ordinary unmerged particle instead. This generalizes to chains of any
+  length, not just three ranks — any cascade of pairwise box comparisons can produce a box that wins
+  something but still ends up under threshold once its other members are independently contested
+  elsewhere.
+- **Options considered for closing this and why Phase 3 was chosen**: (a) collapse to winner-take-all
+  per connected cluster of overlapping boxes, so a commit is unconditional once decided (like
+  `nn_pair`'s pairwise accept) — rejected because resolving a cluster correctly is the same
+  cascading problem again (a cluster "loser" can itself have been the effective winner over a third
+  box), so it doesn't actually avoid a third round, and it merges strictly less (anything not held by
+  the single cluster winner goes untouched, even members no one else contests); (b) accept the data
+  loss as a documented, rare limitation — rejected outright, this is a real conservation violation in
+  a codebase that explicitly tests for it (`BrownianWalker.verify_conservation=true`), not a
+  cosmetic issue.
+- **Why this is still bounded and non-iterative despite the third phase**: ghost width is hardcoded
+  to 1 and every box is ≤1 cell (a direct consequence of the tree's stop rule), so only *direct*
+  neighbors can ever hold a competing claim on a given particle — a rank 2+ hops away has no
+  visibility into it at all. Fan-in/fan-out per particle is small and fixed, same shape as the
+  existing ghost exchange, for all three phases. Three is still a FIXED number of rounds, not a
+  drain/convergence loop — no re-proposal, nothing repeats. The added round-trip's actual cost is
+  worth measuring once there's a running prototype rather than assumed.
 
 ## Template hooks (the "as general as `nn_pair`" requirement)
 
@@ -196,9 +237,11 @@ Five hooks, same style as `nn_pair`'s own customization surface:
 - **Scatter** — writes the merged result back into the real container: deletes only this leaf's/box's
   *local* originals, reconstructs a full particle from the merged payload, inserts it. The same
   function serves both tiers unchanged — for an interior leaf "local originals" is the whole leaf;
-  for a carve box it's only the locally-owned subset, since foreign members were already
-  independently deleted by their own owning rank in step 4 of the dynamics above. `Scatter` never
-  needs to know which tier it's finishing.
+  for a carve box it's only the locally-owned subset. Foreign members are never touched by `Scatter`
+  at all (it can't reach another rank's container) — their deletion happens on their own owning
+  rank's side, outside the `Scatter` callback entirely, triggered by that owner receiving "commit" in
+  Phase 3 of the dynamics above. `Scatter` never needs to know which tier it's finishing, or anything
+  about the carve protocol's phases.
 - **Allocator** — fresh, rank-namespaced global id for the new particle, reusing `nn_pair`'s existing
   convention as-is.
 - **PosValid** — EB-aware check on the computed merge position, reusing `nn_pair`'s convention.
