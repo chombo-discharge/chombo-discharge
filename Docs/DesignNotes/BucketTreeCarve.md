@@ -351,6 +351,77 @@ only at multi-rank counts (bugs 1–2 also reproduce single-rank, since a single
 multiple patches; bugs 3–4 need ≥2 ranks). After all four fixes, single-rank and 4/8-rank 2D runs
 pass cleanly with no asserts, NaNs, or conservation errors.
 
+## Performance
+
+An initial profile (`CH_TIMER`, 256→16 ppc, 12 ranks) found that `mergeBucketTreeCarve`'s own named
+children (`buildBucketTreeLeaves`) accounted for only ~15% of its self time — the remaining ~85% was
+un-instrumented, so nothing beyond the tree build itself could be attributed to a specific step
+without adding temporary timers. Doing so (per-step `MPI_Wtime` deltas, since removed) showed the
+actual bottleneck wasn't the tree build at all:
+
+- **STEP 1 (gather + build + classify + commit-interior) dominated at ~64%**, and within it the tree
+  build was only ~15% of the *total* — the per-particle gather/classify bookkeeping around it cost
+  more than the build itself. The common thread: `particlesByID`, `consumedIDs`, `selfClaims`,
+  `claimsByMember`, `nominalWinner`, and `wonForeignByBox` were all `std::unordered_map`/
+  `unordered_set`, none `.reserve()`d, each paying per-insert heap allocation and poor cache locality
+  on a workload of hundreds of thousands of particles per rank.
+
+Three landed fixes, each measured independently on the same 256→16 ppc / 12-rank scenario:
+
+1. **Reserve every hash container up front** (a cheap patch-size pre-pass gives an exact/upper-bound
+   count before each container is populated) — **0.321s → 0.252s** (~21% faster).
+2. **Replace `wonForeignByBox`/`particlesByID`/`consumedIDs`** with dense-boxIdx indexing / sorted-
+   vector-plus-binary-search respectively (all three fit a clean build-once-then-query pattern) —
+   **0.252s → 0.236s** (~6% further).
+3. **Replace `selfClaims`/`claimsByMember`/`nominalWinner`** the same way (grouped-run iteration over
+   a sorted flat vector instead of hashing), add a per-patch exposure cache (leaves are ~1 cell and
+   not grid-aligned, so many leaves/members query the same actual cell's exposure redundantly), and
+   fold a leaf's anchor (min member id) computation into the existing members-building pass instead
+   of a second one — **0.236s → 0.213s** (~10% further; **~34% faster than the original baseline**).
+
+Each step was verified conservation-clean at 2D 1/4/8 ranks, 3D 1/4 ranks, and the 256→16 stress
+scenario itself (thousands of boxes, hundreds of carve failures) before landing.
+
+**Re-profiling after all three fixes** (128→16 ppc) shows the cost distribution shifted materially:
+STEP 1 dropped to ~40% of the total, and the three still-untouched `MPI_Alltoall`/`Alltoallv`
+exchanges (claims/verdicts/commits, STEPs 2/4/6) are now the *largest* category at ~39% combined —
+container hygiene closed the gap enough that communication overhead, not bookkeeping, is now the
+dominant cost.
+
+**Deferred, not landed here**: replacing those `Alltoall`/`Alltoallv` calls with point-to-point
+`Isend`/`Irecv` restricted to a precomputed neighbor-rank set. A prototype (`Realm`/`AmrMesh`
+neighbor-rank-set infrastructure, zero MPI to derive) exists on branch `point_to_point_particle`, and
+the idea — applicable here, to ghost-fill's `distributeFromPool`, and to `nn_pair`'s own exchange
+helper — is tracked in issue #679. It was **not** finished for this PR because a measurement at only
+12 ranks found each rank's neighbor set was NOT small (avg 5.5–6.4, max 9, out of 11 possible other
+ranks) — the point-to-point argument depends on a small bounded neighbor set, which didn't hold at
+this scale with `load_balance = volume`. The idea should pay off much more clearly at high rank
+counts if load balancing preserves spatial locality there, but that's unverified; #679 records this
+caveat explicitly so it's re-checked before the follow-up work assumes it.
+
+**Comparison against `nn_pair_tree` and `equal_weight_kd`** (128→16 ppc, 12 ranks, identical
+pre-merge state confirmed across all three runs):
+
+| Algorithm | Wall time | post-merge mean/std/max/min (target 16) |
+|---|---|---|
+| `equal_weight_kd` | 0.049s | 16 / 0 / 16 / 16 (exact, zero variance) |
+| `bucket_tree_carve` | 0.094s | 18.06 / 1.80 / 27 / 16 |
+| `nn_pair_tree` | 0.626s | 32.67 / 7.07 / 66 / 22 (doesn't converge in one call) |
+
+`equal_weight_kd` is both faster and exact here because it's a purely per-cell algorithm with no
+cross-boundary coordination at all — it has no boundary problem to solve, so nothing to spend time
+or accuracy on. `bucket_tree_carve` costs ~2x more than `equal_weight_kd` specifically to solve that
+problem (particles must be able to merge across a cell face); `nn_pair_tree`, at its default
+`nn_pair_max_rounds`, pays substantial communication cost *and* still doesn't converge to the target
+in one call, since it drains via bounded rounds rather than a single non-iterative pass.
+
+**Remaining opportunities identified but not pursued in this PR** (see issue #679 and the PR
+discussion for the full list): a small-buffer optimization for the per-box `payloads`/`weights`
+vectors allocated fresh in STEP 5 (thousands of small heap allocations per merge call), and OpenMP
+parallelism across patches in STEP 1 (largely independent work, blocked on making the shared
+accumulators thread-safe). `ParticleSoA::remove()` (STEP 7's per-particle removal) was checked and
+confirmed O(1) swap-and-pop, not a hidden O(n^2).
+
 ## Verification plan
 
 - Build 2D and 3D, `OPT=HIGH` and `DEBUG=TRUE`, with MPI.
