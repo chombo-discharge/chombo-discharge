@@ -11,10 +11,9 @@
  * ghost particle, splitting purely by position (never snapped to the grid, so particles near a
  * cell face can merge across it). A leaf whose local members are never boundary-exposed commits
  * immediately with zero communication (the interior tier); every other leaf becomes a candidate
- * "box" resolved by a single, non-iterative, two-phase distributed protocol keyed by
+ * "box" resolved by a single, non-iterative, three-phase distributed protocol keyed by
  * (AABB volume, anchor id) -- a "z-buffer carve" of the boundary/skin region where neighboring
- * patches' independently-built trees disagree. See Docs/DesignNotes/BucketTreeCarve.md for the
- * full design history and the alternatives considered and rejected.
+ * patches' independently-built trees disagree.
  * @author Robert Marskar
  */
 
@@ -153,8 +152,7 @@ struct BucketLeaf
 
 /**
  * @brief Build one whole-patch bucket tree: recursively partition @a a_particles by position into
- * leaves targeting @a a_ppc particles per cell, honoring the stop rule documented in
- * Docs/DesignNotes/BucketTreeCarve.md.
+ * leaves targeting @a a_ppc particles per cell, per the stop rule documented below.
  * @details Split choice is always the longest (real-space) axis, data-driven, and deliberately
  * UNSNAPPED to the grid -- particles must be able to merge across a cell face. @a a_particles is
  * reordered IN PLACE (each returned leaf's [lo,hi) range is contiguous in the reordered buffer);
@@ -402,11 +400,10 @@ bucketTreeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  *      interior leaf's result skips this step entirely -- see point 2.
  *
  * Unlike the nearest-neighbor merge, this is a FIXED, three-round pass with no drain loop and no
- * iteration -- see Docs/DesignNotes/BucketTreeCarve.md for why that's sound (bounded fan-in/fan-out
- * given ghost width 1 and every box being <= 1 cell; three is still a fixed count, not a
- * convergence loop -- no re-proposal, nothing repeats). A caller wanting further convergence across
- * multiple cells' worth of surplus is expected to rely on repeated per-timestep calls, exactly as
- * the nearest-neighbor merge's own entry points document.
+ * iteration: bounded fan-in/fan-out given ghost width 1 and every box being <= 1 cell means three
+ * is still a fixed count, not a convergence loop -- no re-proposal, nothing repeats. A caller
+ * wanting further convergence across multiple cells' worth of surplus is expected to rely on
+ * repeated per-timestep calls, exactly as the nearest-neighbor merge's own entry points document.
  *
  * @tparam P SoA payload type (e.g. ItoParticle).
  * @tparam Packed Opaque reconciliation payload type (see BucketParticle).
