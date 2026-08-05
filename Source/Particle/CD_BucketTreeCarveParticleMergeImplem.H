@@ -458,14 +458,17 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // once up front instead of growing repeatedly as STEP 1 fills them. combinedCountUpperBound
   // includes ghosts, so it's also a safe (if slightly generous) upper bound for the local-only ones.
   std::size_t combinedCountUpperBound = 0;
+
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl  = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit  = dbl.dataIterator();
     const int                nbox = dit.size();
+
     for (int mybox = 0; mybox < nbox; mybox++) {
       combinedCountUpperBound += a_particles[lvl][dit[mybox]].size();
     }
   }
+
   particlesByID.reserve(combinedCountUpperBound);
   selfClaims.reserve(combinedCountUpperBound);
   consumedIDs.reserve(combinedCountUpperBound);
@@ -945,14 +948,20 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
   // Indexed directly by boxIdx (a dense range over myBoxes) rather than hashed -- each box's own
-  // list is short (bounded by its own membership), so a linear scan at the read site below is both
-  // simpler and faster than hashing into it.
+  // list is bounded by its own membership (at most ppc), so sorting it once and using binary_search
+  // at the read site below avoids both a per-box hash-table allocation (unordered_set would add one
+  // per box, of which there can be thousands) and, for large ppc, the O(box size^2) cost a linear
+  // scan would have across all of a box's foreign-member lookups.
   std::vector<std::vector<ParticleID>> wonForeignByBox(myBoxes.size());
 
   for (const BucketVerdict& v : incomingVerdicts) {
     if (v.won) {
       wonForeignByBox[v.claimantBoxIdx].push_back(v.memberID);
     }
+  }
+
+  for (std::vector<ParticleID>& won : wonForeignByBox) {
+    std::sort(won.begin(), won.end());
   }
 
   // ==== STEP 5: assemble each of my boxes' provisional membership, commit or not ====
@@ -975,7 +984,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       else {
         const std::vector<ParticleID>& won = wonForeignByBox[boxIdx];
 
-        if (std::find(won.begin(), won.end(), m.id) != won.end()) {
+        if (std::binary_search(won.begin(), won.end(), m.id)) {
           survivingForeign.push_back(m.id);
         }
       }
