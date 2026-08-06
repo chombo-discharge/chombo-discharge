@@ -453,6 +453,12 @@ ItoSolver::parseParticleMerger()
   pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
   pp.get("nn_pair_max_rounds", m_nnPairMaxRounds);
 
+  // Same rationale as the nn_pair_* reads above -- bucket_tree_carve can also be selected as the
+  // regrid-time method, bypassing m_mergeMethod, so this is a mandatory input like everything else
+  // here rather than gated on m_mergeMethod.
+  pp.get("bucket_tree_carve_boundary", m_bucketTreeCarveBoundary);
+  pp.get("bucket_tree_weight_split_scale", m_bucketTreeWeightSplitScale);
+
   // A bad value here silently produces a degenerate merge, so fail loudly (in every build, not just
   // DEBUG) rather than assert.
   if (m_nnPairFallback < 0) {
@@ -463,6 +469,9 @@ ItoSolver::parseParticleMerger()
   }
   if (m_nnPairMaxRounds < 1) {
     MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
+  }
+  if (m_bucketTreeWeightSplitScale < 0.0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'bucket_tree_weight_split_scale' must be >= 0");
   }
 }
 
@@ -560,12 +569,14 @@ ItoSolver::registerOperators() const
     // nnPairSearchGhostWidth is already 1).
     m_amr->registerParticleGhostMask(m_realm, 1);
 
-    // bucket_tree_carve's ghost width is hardcoded to 1 -- every merge-eligible leaf/box is <= 1
-    // cell in extent by construction (see makeSuperparticlesBucketZCarve() /
-    // ParticleManagement::mergeBucketTreeCarve()), so there is no configurable distance the way
-    // nn_pair_tree/nn_pair_hash have. Registered unconditionally here too, same as the two calls
-    // above -- a no-op given the width-1 registration already present for nn_pair_onecell, kept
-    // explicit so this doesn't silently depend on that other registration continuing to exist.
+    // bucket_tree_carve's ghost width is hardcoded to 1, unlike nn_pair_tree/nn_pair_hash's
+    // nn_pair_max_cell_dist-driven width. mergeBucketTreeCarve() likewise bounds a mergeable leaf's
+    // own extent at a fixed one cell width, which the width-1 fill here already matches exactly:
+    // buildBucketTreeLeaves() can never see a particle farther away than this fill provides, so a
+    // looser leaf bound could not be honoured even if one existed. Registered unconditionally here, same as
+    // the two calls above -- a no-op given the width-1 registration already present for
+    // nn_pair_onecell, kept explicit so this doesn't silently depend on that other registration
+    // continuing to exist.
     m_amr->registerParticleGhostMask(m_realm, 1);
   }
 }
@@ -4204,7 +4215,9 @@ ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, cons
   //   2. Build the merge callbacks (gather/N-ary combine/scatter), the EB position-validity
   //      predicate, and the rank-namespaced fresh-id allocator.
   //   3. Assign every particle a fresh id/rank, fill the width-1 same-level/coarse-to-fine/
-  //      fine-to-coarse particle ghost masks, then run mergeBucketTreeCarve() once.
+  //      fine-to-coarse particle ghost masks, then run mergeBucketTreeCarve() once. Forwards
+  //      m_bucketTreeCarveBoundary (ItoSolver.bucket_tree_carve_boundary) as the debug on/off switch
+  //      for the boundary/carve protocol -- see mergeBucketTreeCarve()'s own @param docs.
   //   4. splitAndRebuildFromMergeContainer(): bring under-full cells up to the target by repeatedly
   //      halving the heaviest particle, then rebuild the ItoParticles.
 
@@ -4293,11 +4306,13 @@ ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, cons
   ParticleManagement::mergeBucketTreeCarve<ItoMergeParticle, Real>(*m_amr,
                                                                    merge,
                                                                    a_numParticlesPerCellThresh,
+                                                                   m_bucketTreeWeightSplitScale,
                                                                    gather,
                                                                    combine,
                                                                    scatter,
                                                                    allocateID,
-                                                                   isPositionValid);
+                                                                   isPositionValid,
+                                                                   m_bucketTreeCarveBoundary);
 
   // 4. Split under-full cells and rebuild the ItoParticles.
   this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);

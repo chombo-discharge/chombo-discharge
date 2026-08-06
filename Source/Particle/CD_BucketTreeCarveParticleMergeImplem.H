@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -149,47 +150,94 @@ bucketTreeBBox(const std::vector<BucketParticle<Packed>>& a_particles,
 }
 
 /**
- * @brief Split particles[a_lo,a_hi) in place by the longest axis at the data-driven midpoint --
- * the multi-cell phase's split rule, deliberately unsnapped to the grid.
- * @details Clamps the resulting index so neither child is empty (never produces a degenerate
- * 0-size range, which would recurse forever).
- * @param[in,out] a_particles Particle buffer; reordered in [a_lo,a_hi).
- * @param[in] a_lo Start of the range (inclusive).
- * @param[in] a_hi End of the range (exclusive); a_hi - a_lo must be >= 2.
- * @return The split index: [a_lo,mid) and [mid,a_hi) are the two children.
+ * @brief Largest per-axis extent of [a_boxLo,a_boxHi], expressed as a fraction of that axis's own
+ * cell width.
+ * @details The correctness backstop buildBucketTreeLeaves()/mergeBucketTreeCarve() rely on to
+ * decide whether a leaf is compact enough to merge: unlike an aggregate VOLUME ratio (a product
+ * across axes), this cannot be fooled by an anisotropic (long-and-thin) bounding box -- e.g. a box
+ * 5 cells long in one axis and 0.2 cells wide in another has volume ratio 1.0 (deceptively "one
+ * cell's worth") but a maxAxisSpan of 5.0 (correctly flagged as still spanning several cells).
+ * Particles hugging a curved EB surface, or funneled along a narrow L-shaped coarse-fine strip,
+ * produce exactly this kind of elongated cluster.
+ * @param[in] a_boxLo Low corner.
+ * @param[in] a_boxHi High corner.
+ * @param[in] a_dx    Cell spacing.
+ * @return max_dir (a_boxHi[dir] - a_boxLo[dir]) / a_dx[dir].
  */
-template <typename Packed>
-inline std::size_t
-bucketTreeSplitMidpoint(std::vector<BucketParticle<Packed>>& a_particles,
-                        const std::size_t                    a_lo,
-                        const std::size_t                    a_hi) noexcept
+inline Real
+bucketTreeMaxAxisSpan(const RealVect& a_boxLo, const RealVect& a_boxHi, const RealVect& a_dx) noexcept
 {
-  RealVect boxLo, boxHi;
-  bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
+  Real maxAxisSpan = 0.0;
 
-  const int  axis       = (boxHi - boxLo).maxDir(true);
-  const Real splitCoord = 0.5 * (boxLo[axis] + boxHi[axis]);
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    maxAxisSpan = std::max(maxAxisSpan, (a_boxHi[dir] - a_boxLo[dir]) / a_dx[dir]);
+  }
 
-  auto splitIter = std::partition(a_particles.begin() + a_lo,
-                                  a_particles.begin() + a_hi,
-                                  [axis, splitCoord](const BucketParticle<Packed>& a_p) noexcept -> bool {
-                                    return a_p.position[axis] < splitCoord;
-                                  });
-
-  std::size_t mid = static_cast<std::size_t>(splitIter - a_particles.begin());
-
-  mid = std::max(a_lo + 1, std::min(a_hi - 1, mid));
-
-  return mid;
+  return maxAxisSpan;
 }
 
 /**
- * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the
- * single-cell phase's split rule.
- * @details Same axis choice as bucketTreeSplitMidpoint(), but the split point is the position-
- * sorted median particle (via nth_element), balancing COUNT as evenly as possible -- mirrors
- * equal_weight_kd's own single-cell logic, but by count, never by weight, and with NO synthetic
- * particle splitting (a particle is never divided across the two children).
+ * @brief The unclamped, position-derived cell index a physical position falls in.
+ * @details Same convention as the nearest-neighbor merge's cellKeyOf() -- not clamped to any
+ * patch's box, so positions in different patches' local frames stay directly comparable.
+ * @param[in] a_position Physical position.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dx Cell spacing.
+ * @return floor((a_position - a_probLo) / a_dx), component-wise.
+ */
+inline IntVect
+bucketTreeCellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept
+{
+  IntVect iv;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    iv[dir] = static_cast<int>(std::floor((a_position[dir] - a_probLo[dir]) / a_dx[dir]));
+  }
+
+  return iv;
+}
+
+/**
+ * @brief Strict weak ordering over IntVect, lexicographic component-wise.
+ * @details Used to sort/binary-search the per-patch, per-cell TRUE particle-count histogram (see
+ * buildBucketTreeLeaves()'s own docs) -- IntVect has no built-in total order.
+ * @param[in] a_lhs Left-hand cell index.
+ * @param[in] a_rhs Right-hand cell index.
+ * @return True iff a_lhs sorts strictly before a_rhs.
+ */
+inline bool
+bucketTreeIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
+{
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (a_lhs[dir] != a_rhs[dir]) {
+      return a_lhs[dir] < a_rhs[dir];
+    }
+  }
+
+  return false;
+}
+
+/**
+ * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the sole
+ * split rule used by buildBucketTreeLeaves().
+ * @details The split point is the position-sorted median particle (via nth_element), balancing
+ * COUNT as evenly as possible -- mirrors equal_weight_kd's own single-cell logic, but by count,
+ * never by weight, and with NO synthetic particle splitting (a particle is never divided across
+ * the two children).
+ *
+ * NOTE: an earlier design split at a fixed GEOMETRIC midpoint here instead --
+ * splitCoord = 0.5*(boxLo[axis]+boxHi[axis]), applied via std::partition. That rule is wrong and
+ * was replaced. Once particles are heavily clustered (as they routinely become after repeated
+ * merging, since a merged particle sits exactly at its parents' weighted centroid) plus even one
+ * outlier stretching the node's bounding box, EVERY clustered particle falls on the same side of
+ * that fixed coordinate threshold. The degenerate-split clamp (forcing the smaller side to at
+ * least 1 particle) then peels off exactly one particle per split instead of dividing the range in
+ * half, degrading the partition from O(log n) depth to O(n) and shattering an entire crowded cell
+ * into near-singleton leaves -- confirmed empirically (leaf count approximately equal to particle
+ * count, and crowded cells holding thousands of particles left completely untouched by an entire
+ * merge pass). A count-median split has no such failure mode: nth_element always divides the range
+ * in half BY COUNT regardless of how the values are distributed, so it degrades gracefully even
+ * under extreme clustering.
  * @param[in,out] a_particles Particle buffer; reordered in [a_lo,a_hi).
  * @param[in] a_lo Start of the range (inclusive).
  * @param[in] a_hi End of the range (exclusive); a_hi - a_lo must be >= 2.
@@ -218,11 +266,77 @@ bucketTreeSplitCountMedian(std::vector<BucketParticle<Packed>>& a_particles,
   return mid;
 }
 
+/**
+ * @brief Split particles[a_lo,a_hi) in place by the longest axis at the WEIGHT median -- the plane
+ * with half this node's total particle weight on either side.
+ * @details Used instead of the count median so that the resulting leaves carry roughly equal total
+ * weight, and therefore so do the super-particles they collapse into. Uniform super-particle weight
+ * is what keeps statistical noise down, and is the defining property of the equal_weight_kd merge.
+ *
+ * Unlike equal_weight_kd this NEVER divides a particle synthetically, so exact equality is not
+ * attainable: once a single particle's weight exceeds a leaf's target weight, that particle alone
+ * sets a floor no partition can get under. The bound equal_weight_kd guarantees (max/min <= 2) is
+ * bought precisely by that synthetic division and is therefore out of reach here by construction.
+ *
+ * A weight median can land very unevenly BY COUNT -- one dominant particle carrying half the node's
+ * weight forces a 1-vs-(n-1) split. That is harmless here only because buildBucketTreeLeaves()
+ * enforces a hard per-cell leaf quota independently of how the split plane behaves: an uneven split
+ * can cost merge quality but cannot leave a cell above target. Under any of the earlier,
+ * quota-less formulations the same degeneracy was fatal.
+ * @param[in,out] a_particles Particle buffer; reordered in [a_lo,a_hi).
+ * @param[in] a_lo Start of the range (inclusive).
+ * @param[in] a_hi End of the range (exclusive); a_hi - a_lo must be >= 2.
+ * @return The split index: [a_lo,mid) and [mid,a_hi) are the two children, each non-empty.
+ */
 template <typename Packed>
+inline std::size_t
+bucketTreeSplitWeightMedian(std::vector<BucketParticle<Packed>>& a_particles,
+                            const std::size_t                    a_lo,
+                            const std::size_t                    a_hi) noexcept
+{
+  RealVect boxLo, boxHi;
+  bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
+
+  const int axis = (boxHi - boxLo).maxDir(true);
+
+  std::sort(a_particles.begin() + a_lo,
+            a_particles.begin() + a_hi,
+            [axis](const BucketParticle<Packed>& a_p1, const BucketParticle<Packed>& a_p2) noexcept -> bool {
+              return a_p1.position[axis] < a_p2.position[axis];
+            });
+
+  Real totalWeight = 0.0;
+
+  for (std::size_t idx = a_lo; idx < a_hi; idx++) {
+    totalWeight += a_particles[idx].weight;
+  }
+
+  const Real half = 0.5 * totalWeight;
+
+  Real        acc = 0.0;
+  std::size_t mid = a_lo + 1;
+
+  for (std::size_t idx = a_lo; idx < a_hi; idx++) {
+    acc += a_particles[idx].weight;
+
+    if (acc >= half) {
+      mid = idx + 1;
+
+      break;
+    }
+  }
+
+  return std::max(a_lo + 1, std::min(a_hi - 1, mid));
+}
+
+template <typename Packed, typename CellTrueCount>
 inline void
 buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
                       const int                            a_ppc,
+                      const Real                           a_weightSplitScale,
                       const RealVect&                      a_dx,
+                      const RealVect&                      a_probLo,
+                      const CellTrueCount&                 a_cellTrueCount,
                       std::vector<BucketLeaf>&             a_leaves) noexcept
 {
   CH_TIME("ParticleManagement::buildBucketTreeLeaves");
@@ -233,95 +347,194 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     return;
   }
 
-  Real cellVolume = 1.0;
+  // Partition into the particles that may be merged (those in TRUE-crowded cells) and those that
+  // may not, moving the mergeable ones to the front so every leaf below is still a contiguous range.
+  // Particles in uncrowded cells are emitted as singleton leaves: the merge threshold is 2 members,
+  // so a singleton is never merged, and an uncrowded cell can therefore never be drained below
+  // target by a neighbour's merge.
+  const auto firstUnmergeable = std::stable_partition(
+    a_particles.begin(),
+    a_particles.end(),
+    [&](const BucketParticle<Packed>& a_p) {
+      return a_cellTrueCount(bucketTreeCellKeyOf(a_p.position, a_probLo, a_dx)) > a_ppc;
+    });
 
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    cellVolume *= a_dx[dir];
+  const std::size_t numMergeable = static_cast<std::size_t>(firstUnmergeable - a_particles.begin());
+
+  for (std::size_t idx = numMergeable; idx < a_particles.size(); idx++) {
+    RealVect boxLo, boxHi;
+    bucketTreeBBox(a_particles, idx, idx + 1, boxLo, boxHi);
+
+    a_leaves.push_back(BucketLeaf{idx, idx + 1, boxLo, boxHi});
   }
 
-  // Single-cell (sub-cell) phase: breadth-first, count-balanced split, no synthetic particle
-  // splitting, targeting exactly a_ppc leaves for particles[a_lo,a_hi) -- mirrors
-  // equal_weight_kd's own buildEqualWeightKDLeaves() loop shape, but by count, not weight.
-  auto singleCellSplit = [&](const std::size_t a_lo, const std::size_t a_hi) -> void {
-    std::vector<std::pair<std::size_t, std::size_t>> curNodes;
-    curNodes.emplace_back(a_lo, a_hi);
+  if (numMergeable == 0) {
+    return;
+  }
 
-    bool keepGoing = true;
+  // LIVE PER-CELL LEAF BUDGET, enforced as a hard constraint at split time rather than computed
+  // per node and hoped for afterwards.
+  //
+  // Every leaf becomes exactly ONE super-particle, placed at its own weighted centroid, so the
+  // number of leaves whose centroid falls in a cell IS that cell's post-merge population. Track that
+  // count live, and simply refuse any split that would push a cell past a_ppc. Splitting stops when
+  // nothing may be split any further, at which point every cell holds at most a_ppc leaves -- and as
+  // close to a_ppc as the constraint permits, since the loop always splits while it legally can.
+  // No cell can be left crowded by construction; that is the property every earlier formulation
+  // only approximated, and measurably failed to reach.
+  //
+  // Why a per-node budget test cannot do this: consider a cell holding 39 particles at a_ppc = 32.
+  // It needs exactly 32 leaves, i.e. 7 pairs and 25 singletons. Each particle's share is 32/39 =
+  // 0.82, so a pair scores 1.64 -- and a per-node rule must either split every pair (39 singletons,
+  // over target, cell never reduced) or keep every pair (20 leaves, well under target, badly
+  // over-merged). It cannot know WHICH 7 pairs to keep, because that is a property of the cell's
+  // quota, not of any individual node. A live quota expresses it directly.
+  //
+  // Splits are handed out largest-first: with a finite quota the split order determines who gets
+  // it, and spending it on the leaf holding the most particles is what drives the population down
+  // fastest. (Under an unconstrained threshold recursion the order would be irrelevant, since every
+  // node decides independently.)
+  auto centroidCellOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> IntVect {
+    RealVect centroid = RealVect::Zero;
+    Real     totalW   = 0.0;
 
-    while (keepGoing && curNodes.size() < static_cast<std::size_t>(a_ppc)) {
-      keepGoing = false;
-
-      std::vector<std::pair<std::size_t, std::size_t>> nextNodes;
-      nextNodes.reserve(curNodes.size() + 1);
-
-      std::size_t splitBudget = static_cast<std::size_t>(a_ppc) - curNodes.size();
-
-      for (const auto& node : curNodes) {
-        const std::size_t count = node.second - node.first;
-
-        if (count >= 2 && splitBudget > 0) {
-          splitBudget--;
-          keepGoing = true;
-
-          const std::size_t mid = bucketTreeSplitCountMedian(a_particles, node.first, node.second);
-
-          nextNodes.emplace_back(node.first, mid);
-          nextNodes.emplace_back(mid, node.second);
-        }
-        else {
-          nextNodes.push_back(node);
-        }
-      }
-
-      curNodes = std::move(nextNodes);
+    for (std::size_t idx = a_lo; idx < a_hi; idx++) {
+      centroid += a_particles[idx].weight * a_particles[idx].position;
+      totalW += a_particles[idx].weight;
     }
 
-    for (const auto& node : curNodes) {
-      RealVect boxLo, boxHi;
-      bucketTreeBBox(a_particles, node.first, node.second, boxLo, boxHi);
-
-      a_leaves.push_back(BucketLeaf{node.first, node.second, boxLo, boxHi});
+    if (totalW > 0.0) {
+      centroid /= totalW;
     }
+    else {
+      centroid = a_particles[a_lo].position;
+    }
+
+    return bucketTreeCellKeyOf(centroid, a_probLo, a_dx);
   };
 
-  // Multi-cell phase, recursive: keep splitting (longest axis, unsnapped midpoint) while
-  // fractionalSpan > 1 AND count > a_ppc -- flat a_ppc, never scaled by fractionalSpan (see this
-  // function's own docs for why scaling is buggy). Once fractionalSpan <= 1: hand off to the
-  // single-cell phase. Once fractionalSpan > 1 but count <= a_ppc: stop, this leaf is later
-  // classified unmergeable by the caller (recomputing fractionalSpan from the returned leaf is the
-  // single source of truth -- nothing is tagged here).
-  std::function<void(std::size_t, std::size_t)> recurse = [&](const std::size_t a_lo, const std::size_t a_hi) -> void {
+  struct BucketCand
+  {
+    Real        weight;
+    std::size_t count;
+    std::size_t lo;
+    std::size_t hi;
+    IntVect     cell;
+  };
+
+  // Hand out each cell's finite quota to its HEAVIEST candidate leaf first, not its most populous.
+  // The quota is a scarce resource claimed first-come-first-served, so ordering by count lets light
+  // leaves consume a cell's slots before a heavy leaf is ever considered -- the heavy one is then
+  // refused and retired whole, becoming a single very heavy super-particle sitting next to the light
+  // ones that took its slots. Ordering by weight makes the leaves that most need subdividing claim
+  // slots first.
+  const auto byWeight = [](const BucketCand& a_lhs, const BucketCand& a_rhs) noexcept -> bool {
+    return a_lhs.weight < a_rhs.weight;
+  };
+
+  auto rangeWeight = [&](const std::size_t a_lo, const std::size_t a_hi) -> Real {
+    Real w = 0.0;
+
+    for (std::size_t idx = a_lo; idx < a_hi; idx++) {
+      w += a_particles[idx].weight;
+    }
+
+    return w;
+  };
+
+  // Whether [a_lo,a_hi) has shrunk to the scale at which the weight median takes over from the
+  // count median (see the split site below for why the crossover exists and where it sits).
+  auto atWeightSplitScale = [&](const std::size_t a_lo, const std::size_t a_hi) -> bool {
     RealVect boxLo, boxHi;
     bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
-    Real leafVolume = 1.0;
-
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      leafVolume *= (boxHi[dir] - boxLo[dir]);
-    }
-
-    const Real        fractionalSpan = leafVolume / cellVolume;
-    const std::size_t count          = a_hi - a_lo;
-
-    if (fractionalSpan <= 1.0) {
-      singleCellSplit(a_lo, a_hi);
-
-      return;
-    }
-
-    if (count <= static_cast<std::size_t>(a_ppc) || count < 2) {
-      a_leaves.push_back(BucketLeaf{a_lo, a_hi, boxLo, boxHi});
-
-      return;
-    }
-
-    const std::size_t mid = bucketTreeSplitMidpoint(a_particles, a_lo, a_hi);
-
-    recurse(a_lo, mid);
-    recurse(mid, a_hi);
+    return bucketTreeMaxAxisSpan(boxLo, boxHi, a_dx) <= a_weightSplitScale;
   };
 
-  recurse(0, a_particles.size());
+  const auto cellLess = [](const IntVect& a_lhs, const IntVect& a_rhs) noexcept -> bool {
+    return bucketTreeIntVectLess(a_lhs, a_rhs);
+  };
+
+  std::map<IntVect, int, decltype(cellLess)> used(cellLess);
+
+  std::vector<BucketCand> heap;
+  std::vector<BucketCand> finalLeaves;
+
+  {
+    const IntVect rootCell = centroidCellOf(0, numMergeable);
+
+    used[rootCell]++;
+    heap.push_back(BucketCand{rangeWeight(0, numMergeable), numMergeable, 0, numMergeable, rootCell});
+  }
+
+  while (!heap.empty()) {
+    std::pop_heap(heap.begin(), heap.end(), byWeight);
+
+    const BucketCand node = heap.back();
+    heap.pop_back();
+
+    if (node.count < 2) {
+      finalLeaves.push_back(node);
+
+      continue;
+    }
+
+    // The split itself only reorders within [lo,hi), which is harmless even if the split is then
+    // refused -- the range stays one contiguous leaf either way.
+    // The split rule changes with scale, and both ends of that crossover were measured.
+    //
+    // While a node still spans many cells, a split's job is to apportion leaves BETWEEN cells, which
+    // is a question about counts. Using the weight median there lets one heavy particle drag the
+    // plane, producing nodes wildly lopsided by count, and the distortion propagates through every
+    // later split: applied patch-wide it pushed the worst in-cell max/min weight ratio to 224 and
+    // left 1.156% of cells above target.
+    //
+    // Restricting it to nodes inside a single cell is the opposite error. The quota stops splitting
+    // once a cell's leaves are spent, so most leaves are emitted while still spanning cells and the
+    // weight median then almost never fires -- the worst ratio went to 752, worse than not doing it
+    // at all, though cells-over-target did improve to 0.784%.
+    //
+    // Hence a crossover at one cell width: keep the count median while a node is still large enough
+    // that leaves must be shared out among several cells, and switch to the weight median once the
+    // node is no wider than a cell, where there is little left to apportion but the weights of the
+    // resulting super-particles are still very much in play. Note this is an EXTENT test, not a
+    // "both corners in the same cell" test -- the latter is far stricter (a node 0.1 cells wide
+    // straddling a face fails it) and made the weight median fire so rarely it was worse than not
+    // doing it at all.
+    const std::size_t mid = atWeightSplitScale(node.lo, node.hi)
+                              ? bucketTreeSplitWeightMedian(a_particles, node.lo, node.hi)
+                              : bucketTreeSplitCountMedian(a_particles, node.lo, node.hi);
+
+    const IntVect cellLeft  = centroidCellOf(node.lo, mid);
+    const IntVect cellRight = centroidCellOf(mid, node.hi);
+
+    used[node.cell]--;
+    used[cellLeft]++;
+    used[cellRight]++;
+
+    if (used[cellLeft] > a_ppc || used[cellRight] > a_ppc) {
+      used[cellLeft]--;
+      used[cellRight]--;
+      used[node.cell]++;
+
+      finalLeaves.push_back(node);
+
+      continue;
+    }
+
+    heap.push_back(BucketCand{rangeWeight(node.lo, mid), mid - node.lo, node.lo, mid, cellLeft});
+    std::push_heap(heap.begin(), heap.end(), byWeight);
+
+    heap.push_back(BucketCand{rangeWeight(mid, node.hi), node.hi - mid, mid, node.hi, cellRight});
+    std::push_heap(heap.begin(), heap.end(), byWeight);
+  }
+
+  for (const BucketCand& node : finalLeaves) {
+    RealVect boxLo, boxHi;
+    bucketTreeBBox(a_particles, node.lo, node.hi, boxLo, boxHi);
+
+    a_leaves.push_back(BucketLeaf{node.lo, node.hi, boxLo, boxHi});
+  }
 }
 
 /**
@@ -339,24 +552,40 @@ bucketTreeIsBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask&
 }
 
 /**
- * @brief The unclamped, position-derived cell index a physical position falls in.
- * @details Same convention as the nearest-neighbor merge's cellKeyOf() -- not clamped to any
- * patch's box, so positions in different patches' local frames stay directly comparable.
- * @param[in] a_position Physical position.
- * @param[in] a_probLo Physical position of the domain's low corner.
- * @param[in] a_dx Cell spacing.
- * @return floor((a_position - a_probLo) / a_dx), component-wise.
+ * @brief Debug-only sanity check on a merged particle's position: a weighted centroid of positions
+ * that all lie within [a_boxLo,a_boxHi], using strictly positive weights, is mathematically
+ * guaranteed to itself lie within that same box.
+ * @details CH_assert this explicitly (rather than trust the arithmetic silently) so that a stray
+ * sign error, a mis-set/negative weight, or a wrong id feeding the wrong position into the
+ * accumulation surfaces immediately as an assertion in a DEBUG build, instead of silently producing
+ * a merged superparticle placed somewhere non-physical. A relative tolerance accounts for floating-
+ * point round-off in the summation, not for any real violation.
+ * @param[in] a_centroid Computed weighted centroid.
+ * @param[in] a_totalWeight Sum of weights used to compute a_centroid.
+ * @param[in] a_boxLo Low corner of the bounding box every contributing position lies within.
+ * @param[in] a_boxHi High corner of the bounding box every contributing position lies within.
  */
-inline IntVect
-bucketTreeCellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept
+inline void
+bucketTreeCheckCentroid(const RealVect& a_centroid,
+                        const Real      a_totalWeight,
+                        const RealVect& a_boxLo,
+                        const RealVect& a_boxHi) noexcept
 {
-  IntVect iv;
+#ifndef NDEBUG
+  CH_assert(a_totalWeight > 0.0);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
-    iv[dir] = static_cast<int>(std::floor((a_position[dir] - a_probLo[dir]) / a_dx[dir]));
-  }
+    const Real tol = 1.0e-9 * (std::abs(a_boxLo[dir]) + std::abs(a_boxHi[dir]) + 1.0);
 
-  return iv;
+    CH_assert(a_centroid[dir] >= a_boxLo[dir] - tol);
+    CH_assert(a_centroid[dir] <= a_boxHi[dir] + tol);
+  }
+#else
+  (void)a_centroid;
+  (void)a_totalWeight;
+  (void)a_boxLo;
+  (void)a_boxHi;
+#endif
 }
 
 } // namespace detail
@@ -373,11 +602,13 @@ inline void
 mergeBucketTreeCarve(AmrMesh&                      a_amr,
                      ParticleContainer<P, Traits>& a_particles,
                      const int                     a_ppc,
+                     const Real                    a_weightSplitScale,
                      const Gather&                 a_gather,
                      const Combine&                a_combine,
                      const Scatter&                a_scatter,
                      const Allocator&              a_allocateID,
-                     const PosValid&               a_isPositionValid)
+                     const PosValid&               a_isPositionValid,
+                     const bool                    a_enableBoundaryCarve)
 {
   using namespace detail;
 
@@ -522,16 +753,57 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         continue;
       }
 
-      std::vector<BucketLeaf> leaves;
-      buildBucketTreeLeaves(combined, a_ppc, dxByLevel[lvl], leaves);
+      // Per-patch, per-cell TRUE particle-count histogram -- computed once, directly from every
+      // particle's own position, so it is unaffected by how buildBucketTreeLeaves() later happens to
+      // carve up the space. This is what makes cellTrueCount (below) a reliable ground truth rather
+      // than a node-local approximation -- see buildBucketTreeLeaves()'s own docs for why the
+      // difference matters. Built the same sort-and-collapse-runs way as particlesByID above.
+      std::vector<std::pair<IntVect, int>> cellCounts;
+      cellCounts.reserve(combined.size());
 
-      Real cellVolume = 1.0;
-
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        cellVolume *= dxByLevel[lvl][dir];
+      for (const BucketParticle<Packed>& p : combined) {
+        cellCounts.emplace_back(bucketTreeCellKeyOf(p.position, probLo, dxByLevel[lvl]), 1);
       }
 
-      // Per-patch exposure cache: leaves are ~1 cell in extent and not grid-aligned, so many leaves
+      std::sort(cellCounts.begin(), cellCounts.end(), [](const auto& a_lhs, const auto& a_rhs) {
+        return bucketTreeIntVectLess(a_lhs.first, a_rhs.first);
+      });
+
+      {
+        std::size_t writeIdx = 0;
+
+        for (std::size_t readIdx = 0; readIdx < cellCounts.size();) {
+          std::size_t runEnd = readIdx + 1;
+          int         total  = cellCounts[readIdx].second;
+
+          while (runEnd < cellCounts.size() && cellCounts[runEnd].first == cellCounts[readIdx].first) {
+            total += cellCounts[runEnd].second;
+            runEnd++;
+          }
+
+          cellCounts[writeIdx] = std::make_pair(cellCounts[readIdx].first, total);
+          writeIdx++;
+          readIdx = runEnd;
+        }
+
+        cellCounts.resize(writeIdx);
+      }
+
+      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
+        const auto it = std::lower_bound(cellCounts.begin(),
+                                         cellCounts.end(),
+                                         a_cell,
+                                         [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
+                                           return bucketTreeIntVectLess(a_entry.first, a_key);
+                                         });
+
+        return (it != cellCounts.end() && it->first == a_cell) ? it->second : 0;
+      };
+
+      std::vector<BucketLeaf> leaves;
+      buildBucketTreeLeaves(combined, a_ppc, a_weightSplitScale, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+
+      // Per-patch exposure cache: leaves are about a cell in extent and not grid-aligned, so many leaves
       // (and many members within one leaf) end up querying the SAME actual cell's exposure. A
       // resident (non-ghost) member's cell always lies within this patch's OWN box (that's what
       // "resident" means), so a dense array indexed by cell offset within the box is safe -- compute
@@ -602,7 +874,11 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
           leafVolume *= (bl.boxHi[dir] - bl.boxLo[dir]);
         }
 
-        const bool unmergeable = (leafVolume / cellVolume) > 1.0;
+        // Per-axis extent, not aggregate volume -- see bucketTreeMaxAxisSpan()'s own docs for why a
+        // volume ratio alone cannot be trusted here (a long, thin leaf can have volume <=
+        // one cell while still spanning several cells along one axis). leafVolume itself
+        // is still needed below, unrelated to this check -- it's the box key's tie-break priority.
+        const bool unmergeable = bucketTreeMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > 1.0;
 
         // Per-resident-member exposure -- needed either way (leaf-wide OR for the interior/
         // boundary decision below; per-particle for the unmergeable-leaf listen-only case). Ghosts
@@ -614,9 +890,12 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         // a ghost here, position-wise, as one owned by a different rank entirely.
         std::vector<bool> exposed(bl.hi - bl.lo, false);
         bool              anyExposed = false;
+        bool              anyGhost   = false;
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
           if (combined[idx].isGhost) {
+            anyGhost = true;
+
             continue;
           }
 
@@ -640,14 +919,22 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
           continue;
         }
 
-        if (!anyExposed) {
-          // Interior: commit immediately, zero communication. Every member is expected resident
-          // here, not a ghost -- a leaf whose bounding box is <= 1 cell (fractionalSpan <= 1, which
-          // is what got it here) and that contains a ghost would need at least one of its OWN
-          // resident members to also be within ghost-width-1 of that ghost's cell, which -- given
-          // ghost-fill is symmetric at width 1 -- makes that resident member's own cell exposed
-          // too, forcing anyExposed above. So a leaf reaching this branch should never actually
-          // contain a ghost; CH_assert it rather than silently trust the geometry.
+        if (!anyExposed && !anyGhost) {
+          // Interior: commit immediately, zero communication, direct insert -- safe ONLY because
+          // anyGhost is false, i.e. this leaf genuinely contains no foreign data at all. Explicitly
+          // requiring !anyGhost (not just !anyExposed) matters whenever a leaf spans cells: the old
+          // argument ("a leaf whose members are all non-exposed can never contain a ghost, since
+          // ghost-fill is symmetric at width 1") only holds when a leaf's own extent is <= 1 cell --
+          // every member is then automatically within ghost-reach of every other member, so a ghost's
+          // presence would force at least one resident's own cell to be exposed too. Once a leaf can
+          // span SEVERAL cells, a ghost near one edge and a resident several
+          // cells away at the other edge can coexist in the SAME leaf without that resident itself
+          // ever being within ghost-width-1 of anything -- anyExposed alone would then be false even
+          // though the leaf holds a foreign particle, and committing it here would merge that
+          // particle's weight locally while its true home patch independently wins the SAME
+          // particle's argmin via its own boundary box, double-counting it. Falling through to the
+          // boundary-candidate branch below instead (rather than committing) is what lets a real
+          // self-claim be raised for that foreign member, so the argmin actually arbitrates it.
           if (bl.hi - bl.lo >= 2) {
             std::vector<Packed> payloads;
             std::vector<Real>   weights;
@@ -670,6 +957,8 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
             centroid /= totalW;
 
+            bucketTreeCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
+
             if (a_isPositionValid(centroid)) {
               BucketParticle<Packed> merged;
 
@@ -690,8 +979,11 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
           continue;
         }
 
-        // Boundary candidate.
-        if (members.size() >= 2) {
+        // Boundary candidate. Debug knob: when a_enableBoundaryCarve is false, no box is ever
+        // proposed here -- these particles are simply left untouched this pass (see
+        // mergeBucketTreeCarve()'s own @param docs), so a suspected bug can be isolated to the carve
+        // protocol below versus the interior-tier commit path above.
+        if (a_enableBoundaryCarve && members.size() >= 2) {
           const BucketBoxKey key{leafVolume, anchor};
 
           const int boxIdx = static_cast<int>(myBoxes.size());
@@ -706,7 +998,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
             }
           }
         }
-        else {
+        else if (a_enableBoundaryCarve) {
           // Exactly one member, and it must be the resident, exposed one (members.size()>=1 and
           // anyLocal both hold) -- can never reach the merge threshold alone, listen only.
           selfClaims.push_back(SelfClaimEntry{members[0].id, BucketBoxKey{}, -1});
@@ -999,6 +1291,8 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       std::vector<Real>   weights;
       RealVect            centroid = RealVect::Zero;
       Real                totalW   = 0.0;
+      RealVect            surviveBoxLo, surviveBoxHi;
+      bool                haveSurviveBox = false;
 
       payloads.reserve(totalSurvivors);
       weights.reserve(totalSurvivors);
@@ -1010,6 +1304,18 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         weights.push_back(p.weight);
         centroid += p.weight * p.position;
         totalW += p.weight;
+
+        if (!haveSurviveBox) {
+          surviveBoxLo   = p.position;
+          surviveBoxHi   = p.position;
+          haveSurviveBox = true;
+        }
+        else {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            surviveBoxLo[dir] = std::min(surviveBoxLo[dir], p.position[dir]);
+            surviveBoxHi[dir] = std::max(surviveBoxHi[dir], p.position[dir]);
+          }
+        }
       };
 
       for (const ParticleID id : survivingLocal) {
@@ -1021,6 +1327,8 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       }
 
       centroid /= totalW;
+
+      bucketTreeCheckCentroid(centroid, totalW, surviveBoxLo, surviveBoxHi);
 
       if (a_isPositionValid(centroid)) {
         committed = true;

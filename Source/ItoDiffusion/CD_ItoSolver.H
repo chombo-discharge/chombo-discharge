@@ -1241,6 +1241,26 @@ protected:
   int m_nnPairMaxRounds = 3;
 
   /**
+   * @brief bucket_tree_carve: enable the boundary/carve protocol.
+   * @details Debug knob -- when false, ParticleManagement::mergeBucketTreeCarve() only commits
+   * interior (whole-cell, zero-communication) leaves; every boundary-exposed particle is left
+   * untouched for the pass. Comparing a run with this true against one with this false isolates
+   * whether suspected non-physical behavior originates in the carve protocol or in the interior-
+   * tier commit path. Only used for bucket_tree_carve.
+   */
+  bool m_bucketTreeCarveBoundary = true;
+
+  /**
+   * @brief bucket_tree_carve: leaf size, in cell widths, at or below which the tree build switches
+   * from count-median to weight-median splitting.
+   * @details Forwarded to ParticleManagement::mergeBucketTreeCarve()'s a_weightSplitScale -- see
+   * that function's own docs. Larger values apply the weight median at coarser scales, giving more
+   * uniform super-particle weights at some cost to how evenly leaves are apportioned between cells;
+   * 0 disables it entirely. Only used for bucket_tree_carve.
+   */
+  Real m_bucketTreeWeightSplitScale = 1.0;
+
+  /**
    * @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a
    * "fluid" checkpoint file.
    */
