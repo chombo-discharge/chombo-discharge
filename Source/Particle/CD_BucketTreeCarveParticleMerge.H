@@ -425,9 +425,9 @@ bucketTreeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  *      interior leaf's result skips this step entirely -- see point 2.
  *
  * Unlike the nearest-neighbor merge, this is a FIXED, three-round pass with no drain loop and no
- * iteration: bounded fan-in/fan-out given ghost width 1 and every box being <= one cell
- * cells per axis means three is still a fixed count, not a convergence loop -- no re-proposal,
- * nothing repeats. A caller wanting further convergence across multiple cells' worth of surplus is
+ * iteration: bounded fan-in/fan-out given ghost width 1 and every box spanning at most one cell per
+ * axis means three is still a fixed count, not a convergence loop -- no re-proposal, nothing
+ * repeats. A caller wanting further convergence across multiple cells' worth of surplus is
  * expected to rely on repeated per-timestep calls, exactly as the nearest-neighbor merge's own
  * entry points document.
  *
