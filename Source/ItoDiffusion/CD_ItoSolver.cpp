@@ -31,7 +31,7 @@
 #include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NearestNeighborParticleMerge.H>
-#include <CD_BucketTreeCarveParticleMerge.H>
+#include <CD_KDParticleMerge.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -453,11 +453,10 @@ ItoSolver::parseParticleMerger()
   pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
   pp.get("nn_pair_max_rounds", m_nnPairMaxRounds);
 
-  // Same rationale as the nn_pair_* reads above -- bucket_tree_carve can also be selected as the
+  // Same rationale as the nn_pair_* reads above -- kd_carve can also be selected as the
   // regrid-time method, bypassing m_mergeMethod, so this is a mandatory input like everything else
   // here rather than gated on m_mergeMethod.
-  pp.get("bucket_tree_carve_boundary", m_bucketTreeCarveBoundary);
-  pp.get("bucket_tree_weight_split_scale", m_bucketTreeWeightSplitScale);
+  pp.get("kd_weight_split_scale", m_kdWeightSplitScale);
 
   // A bad value here silently produces a degenerate merge, so fail loudly (in every build, not just
   // DEBUG) rather than assert.
@@ -470,8 +469,8 @@ ItoSolver::parseParticleMerger()
   if (m_nnPairMaxRounds < 1) {
     MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
   }
-  if (m_bucketTreeWeightSplitScale < 0.0) {
-    MayDay::Abort("ItoSolver::parseParticleMerger - 'bucket_tree_weight_split_scale' must be >= 0");
+  if (m_kdWeightSplitScale < 0.0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'kd_weight_split_scale' must be >= 0");
   }
 }
 
@@ -569,10 +568,10 @@ ItoSolver::registerOperators() const
     // nnPairSearchGhostWidth is already 1).
     m_amr->registerParticleGhostMask(m_realm, 1);
 
-    // bucket_tree_carve's ghost width is hardcoded to 1, unlike nn_pair_tree/nn_pair_hash's
-    // nn_pair_max_cell_dist-driven width. mergeBucketTreeCarve() likewise bounds a mergeable leaf's
+    // kd_carve's ghost width is hardcoded to 1, unlike nn_pair_tree/nn_pair_hash's
+    // nn_pair_max_cell_dist-driven width. mergeKD() likewise bounds a mergeable leaf's
     // own extent at a fixed one cell width, which the width-1 fill here already matches exactly:
-    // buildBucketTreeLeaves() can never see a particle farther away than this fill provides, so a
+    // buildKDQuotaLeaves() can never see a particle farther away than this fill provides, so a
     // looser leaf bound could not be honoured even if one existed. Registered unconditionally here, same as
     // the two calls above -- a no-op given the width-1 registration already present for
     // nn_pair_onecell, kept explicit so this doesn't silently depend on that other registration
@@ -3353,8 +3352,13 @@ ItoSolver::makeSuperparticles(const WhichContainer                          a_co
 
     break;
   }
-  case ParticleManagement::ParticleMergeMethod::BucketZCarve: {
-    this->makeSuperparticlesBucketZCarve(a_container, a_particlesPerCell);
+  case ParticleManagement::ParticleMergeMethod::KdCarve: {
+    this->makeSuperparticlesKD(a_container, a_particlesPerCell, true);
+
+    break;
+  }
+  case ParticleManagement::ParticleMergeMethod::KdPatch: {
+    this->makeSuperparticlesKD(a_container, a_particlesPerCell, false);
 
     break;
   }
@@ -4197,15 +4201,17 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
 }
 
 void
-ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::makeSuperparticlesKD(const WhichContainer a_container,
+                                const Vector<int>&   a_particlesPerCell,
+                                const bool           a_enableBoundaryCarve)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesBucketZCarve");
+  CH_TIME("ItoSolver::makeSuperparticlesKD");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesBucketZCarve" << endl;
+    pout() << m_name + "::makeSuperparticlesKD" << endl;
   }
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
-  // using the whole-patch bucket-tree carve merge (see ParticleManagement::mergeBucketTreeCarve).
+  // using the whole-patch kd-tree carve merge (see ParticleManagement::mergeKD).
   // Unlike makeSuperparticlesNnPairTree/Hash/OneCell, there is no drain-loop round here -- the
   // carve protocol is a single, fixed, non-iterative pass -- in four steps:
   //
@@ -4215,15 +4221,14 @@ ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, cons
   //   2. Build the merge callbacks (gather/N-ary combine/scatter), the EB position-validity
   //      predicate, and the rank-namespaced fresh-id allocator.
   //   3. Assign every particle a fresh id/rank, fill the width-1 same-level/coarse-to-fine/
-  //      fine-to-coarse particle ghost masks, then run mergeBucketTreeCarve() once. Forwards
-  //      m_bucketTreeCarveBoundary (ItoSolver.bucket_tree_carve_boundary) as the debug on/off switch
-  //      for the boundary/carve protocol -- see mergeBucketTreeCarve()'s own @param docs.
+  //      fine-to-coarse particle ghost masks, then run mergeKD() once. Forwards
+  //      whether the boundary/carve tier runs.
   //   4. splitAndRebuildFromMergeContainer(): bring under-full cells up to the target by repeatedly
   //      halving the heaviest particle, then rebuild the ItoParticles.
 
-  // The bucket-tree carve merge has no per-level notion -- it uses a SINGLE crowding threshold over
+  // The kd-tree carve merge has no per-level notion -- it uses a SINGLE crowding threshold over
   // the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is uniform
-  // wherever bucket_tree_carve is used.
+  // wherever kd_carve is used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
 
   // 1. Extract.
@@ -4247,8 +4252,7 @@ ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, cons
     return weightedSum / totalWeight;
   };
 
-  auto scatter = [](ParticleSoA<ItoMergeParticle>&                  a_leaf,
-                    const ParticleManagement::BucketParticle<Real>& a_p) -> void {
+  auto scatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::KDParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
     p.energy = a_p.payload;
 
@@ -4298,21 +4302,26 @@ ItoSolver::makeSuperparticlesBucketZCarve(const WhichContainer a_container, cons
     }
   }
 
-  merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
-                           m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                           m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+  // Ghosts are only needed by the boundary/carve tier. With the carve disabled each patch merges
+  // its own particles alone, so filling them would serve no purpose -- and mergeKD()
+  // relies on their absence to treat every leaf as interior.
+  if (a_enableBoundaryCarve) {
+    merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
+                             m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
+                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+  }
 
   // Merge particles -- this is the most expensive part of the merge algorithm.
-  ParticleManagement::mergeBucketTreeCarve<ItoMergeParticle, Real>(*m_amr,
-                                                                   merge,
-                                                                   a_numParticlesPerCellThresh,
-                                                                   m_bucketTreeWeightSplitScale,
-                                                                   gather,
-                                                                   combine,
-                                                                   scatter,
-                                                                   allocateID,
-                                                                   isPositionValid,
-                                                                   m_bucketTreeCarveBoundary);
+  ParticleManagement::mergeKD<ItoMergeParticle, Real>(*m_amr,
+                                                      merge,
+                                                      a_numParticlesPerCellThresh,
+                                                      m_kdWeightSplitScale,
+                                                      gather,
+                                                      combine,
+                                                      scatter,
+                                                      allocateID,
+                                                      isPositionValid,
+                                                      a_enableBoundaryCarve);
 
   // 4. Split under-full cells and rebuild the ItoParticles.
   this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);

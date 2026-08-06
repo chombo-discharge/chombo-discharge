@@ -5,13 +5,13 @@
  */
 
 /**
- * @file   CD_BucketTreeCarveParticleMergeImplem.H
- * @brief  Implementation of CD_BucketTreeCarveParticleMerge.H
+ * @file   CD_KDParticleMergeImplem.H
+ * @brief  Implementation of CD_KDParticleMerge.H
  * @author Robert Marskar
  */
 
-#ifndef CD_BUCKETTREECARVEPARTICLEMERGEIMPLEM_H
-#define CD_BUCKETTREECARVEPARTICLEMERGEIMPLEM_H
+#ifndef CD_KDPARTICLEMERGEIMPLEM_H
+#define CD_KDPARTICLEMERGEIMPLEM_H
 
 // Std includes
 #include <algorithm>
@@ -30,7 +30,7 @@
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ParticleGhostMask.H>
-#include <CD_BucketTreeCarveParticleMerge.H>
+#include <CD_KDParticleMerge.H>
 #include <CD_NamespaceHeader.H>
 
 namespace ParticleManagement {
@@ -38,7 +38,7 @@ namespace ParticleManagement {
 namespace detail {
 
 inline bool
-operator<(const BucketBoxKey& a_lhs, const BucketBoxKey& a_rhs) noexcept
+operator<(const KDBoxKey& a_lhs, const KDBoxKey& a_rhs) noexcept
 {
   if (a_lhs.volume != a_rhs.volume) {
     return a_lhs.volume < a_rhs.volume;
@@ -49,7 +49,7 @@ operator<(const BucketBoxKey& a_lhs, const BucketBoxKey& a_rhs) noexcept
 
 template <typename T>
 inline std::vector<T>
-bucketTreeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
+kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
 {
   const int numRanks = static_cast<int>(a_sendByRank.size());
 
@@ -130,11 +130,11 @@ bucketTreeExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
  */
 template <typename Packed>
 inline void
-bucketTreeBBox(const std::vector<BucketParticle<Packed>>& a_particles,
-               const std::size_t                          a_lo,
-               const std::size_t                          a_hi,
-               RealVect&                                  a_boxLo,
-               RealVect&                                  a_boxHi) noexcept
+kdBBox(const std::vector<KDParticle<Packed>>& a_particles,
+       const std::size_t                      a_lo,
+       const std::size_t                      a_hi,
+       RealVect&                              a_boxLo,
+       RealVect&                              a_boxHi) noexcept
 {
   a_boxLo = a_particles[a_lo].position;
   a_boxHi = a_particles[a_lo].position;
@@ -151,16 +151,16 @@ bucketTreeBBox(const std::vector<BucketParticle<Packed>>& a_particles,
 
 /**
  * @brief Largest per-axis leaf extent, in cell widths, that may still be merged.
- * @details buildBucketTreeLeaves() and mergeBucketTreeCarve() must use the same value: the former
+ * @details buildKDQuotaLeaves() and mergeKD() must use the same value: the former
  * sets each cell's leaf budget assuming a leaf merges to one particle, the latter vetoes leaves
  * exceeding this bound. A disagreement spends budget on leaves that are then rejected.
  */
-static constexpr Real s_bucketTreeMaxLeafExtent = 1.0;
+static constexpr Real s_kdMaxLeafExtent = 1.0;
 
 /**
  * @brief Largest per-axis extent of [a_boxLo,a_boxHi], expressed as a fraction of that axis's own
  * cell width.
- * @details The correctness backstop buildBucketTreeLeaves()/mergeBucketTreeCarve() rely on to
+ * @details The correctness backstop buildKDQuotaLeaves()/mergeKD() rely on to
  * decide whether a leaf is compact enough to merge: unlike an aggregate VOLUME ratio (a product
  * across axes), this cannot be fooled by an anisotropic (long-and-thin) bounding box -- e.g. a box
  * 5 cells long in one axis and 0.2 cells wide in another has volume ratio 1.0 (deceptively "one
@@ -173,7 +173,7 @@ static constexpr Real s_bucketTreeMaxLeafExtent = 1.0;
  * @return max_dir (a_boxHi[dir] - a_boxLo[dir]) / a_dx[dir].
  */
 inline Real
-bucketTreeMaxAxisSpan(const RealVect& a_boxLo, const RealVect& a_boxHi, const RealVect& a_dx) noexcept
+kdMaxAxisSpan(const RealVect& a_boxLo, const RealVect& a_boxHi, const RealVect& a_dx) noexcept
 {
   Real maxAxisSpan = 0.0;
 
@@ -194,7 +194,7 @@ bucketTreeMaxAxisSpan(const RealVect& a_boxLo, const RealVect& a_boxHi, const Re
  * @return floor((a_position - a_probLo) / a_dx), component-wise.
  */
 inline IntVect
-bucketTreeCellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept
+kdCellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx) noexcept
 {
   IntVect iv;
 
@@ -208,13 +208,13 @@ bucketTreeCellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const 
 /**
  * @brief Strict weak ordering over IntVect, lexicographic component-wise.
  * @details Used to sort/binary-search the per-patch, per-cell TRUE particle-count histogram (see
- * buildBucketTreeLeaves()'s own docs) -- IntVect has no built-in total order.
+ * buildKDQuotaLeaves()'s own docs) -- IntVect has no built-in total order.
  * @param[in] a_lhs Left-hand cell index.
  * @param[in] a_rhs Right-hand cell index.
  * @return True iff a_lhs sorts strictly before a_rhs.
  */
 inline bool
-bucketTreeIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
+kdIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
 {
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_lhs[dir] != a_rhs[dir]) {
@@ -227,7 +227,7 @@ bucketTreeIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
 
 /**
  * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the sole
- * split rule used by buildBucketTreeLeaves().
+ * split rule used by buildKDQuotaLeaves().
  * @details The split point is the position-sorted median particle (via nth_element), balancing
  * COUNT as evenly as possible -- mirrors equal_weight_kd's own single-cell logic, but by count,
  * never by weight, and with NO synthetic particle splitting (a particle is never divided across
@@ -240,12 +240,12 @@ bucketTreeIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
  */
 template <typename Packed>
 inline std::size_t
-bucketTreeSplitCountMedian(std::vector<BucketParticle<Packed>>& a_particles,
-                           const std::size_t                    a_lo,
-                           const std::size_t                    a_hi) noexcept
+kdSplitCountMedian(std::vector<KDParticle<Packed>>& a_particles,
+                   const std::size_t                a_lo,
+                   const std::size_t                a_hi) noexcept
 {
   RealVect boxLo, boxHi;
-  bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
+  kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
   const int axis = (boxHi - boxLo).maxDir(true);
 
@@ -254,7 +254,7 @@ bucketTreeSplitCountMedian(std::vector<BucketParticle<Packed>>& a_particles,
   std::nth_element(a_particles.begin() + a_lo,
                    a_particles.begin() + mid,
                    a_particles.begin() + a_hi,
-                   [axis](const BucketParticle<Packed>& a_p1, const BucketParticle<Packed>& a_p2) noexcept -> bool {
+                   [axis](const KDParticle<Packed>& a_p1, const KDParticle<Packed>& a_p2) noexcept -> bool {
                      return a_p1.position[axis] < a_p2.position[axis];
                    });
 
@@ -274,7 +274,7 @@ bucketTreeSplitCountMedian(std::vector<BucketParticle<Packed>>& a_particles,
  * bought precisely by that synthetic division and is therefore out of reach here by construction.
  *
  * A weight median can land very unevenly BY COUNT -- one dominant particle carrying half the node's
- * weight forces a 1-vs-(n-1) split. That is harmless here only because buildBucketTreeLeaves()
+ * weight forces a 1-vs-(n-1) split. That is harmless here only because buildKDQuotaLeaves()
  * enforces a hard per-cell leaf quota independently of how the split plane behaves: an uneven split
  * can cost merge quality but cannot leave a cell above target. Under any of the earlier,
  * quota-less formulations the same degeneracy was fatal.
@@ -285,18 +285,18 @@ bucketTreeSplitCountMedian(std::vector<BucketParticle<Packed>>& a_particles,
  */
 template <typename Packed>
 inline std::size_t
-bucketTreeSplitWeightMedian(std::vector<BucketParticle<Packed>>& a_particles,
-                            const std::size_t                    a_lo,
-                            const std::size_t                    a_hi) noexcept
+kdSplitWeightMedian(std::vector<KDParticle<Packed>>& a_particles,
+                    const std::size_t                a_lo,
+                    const std::size_t                a_hi) noexcept
 {
   RealVect boxLo, boxHi;
-  bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
+  kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
   const int axis = (boxHi - boxLo).maxDir(true);
 
   std::sort(a_particles.begin() + a_lo,
             a_particles.begin() + a_hi,
-            [axis](const BucketParticle<Packed>& a_p1, const BucketParticle<Packed>& a_p2) noexcept -> bool {
+            [axis](const KDParticle<Packed>& a_p1, const KDParticle<Packed>& a_p2) noexcept -> bool {
               return a_p1.position[axis] < a_p2.position[axis];
             });
 
@@ -326,15 +326,15 @@ bucketTreeSplitWeightMedian(std::vector<BucketParticle<Packed>>& a_particles,
 
 template <typename Packed, typename CellTrueCount>
 inline void
-buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
-                      const int                            a_ppc,
-                      const Real                           a_weightSplitScale,
-                      const RealVect&                      a_dx,
-                      const RealVect&                      a_probLo,
-                      const CellTrueCount&                 a_cellTrueCount,
-                      std::vector<BucketLeaf>&             a_leaves) noexcept
+buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
+                   const int                        a_ppc,
+                   const Real                       a_weightSplitScale,
+                   const RealVect&                  a_dx,
+                   const RealVect&                  a_probLo,
+                   const CellTrueCount&             a_cellTrueCount,
+                   std::vector<KDLeaf>&             a_leaves) noexcept
 {
-  CH_TIME("ParticleManagement::buildBucketTreeLeaves");
+  CH_TIME("ParticleManagement::buildKDQuotaLeaves");
 
   a_leaves.clear();
 
@@ -347,20 +347,20 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
   // Particles in uncrowded cells are emitted as singleton leaves: the merge threshold is 2 members,
   // so a singleton is never merged, and an uncrowded cell can therefore never be drained below
   // target by a neighbour's merge.
-  const auto firstUnmergeable = std::stable_partition(
-    a_particles.begin(),
-    a_particles.end(),
-    [&](const BucketParticle<Packed>& a_p) {
-      return a_cellTrueCount(bucketTreeCellKeyOf(a_p.position, a_probLo, a_dx)) > a_ppc;
-    });
+  const auto firstUnmergeable = std::stable_partition(a_particles.begin(),
+                                                      a_particles.end(),
+                                                      [&](const KDParticle<Packed>& a_p) {
+                                                        return a_cellTrueCount(
+                                                                 kdCellKeyOf(a_p.position, a_probLo, a_dx)) > a_ppc;
+                                                      });
 
   const std::size_t numMergeable = static_cast<std::size_t>(firstUnmergeable - a_particles.begin());
 
   for (std::size_t idx = numMergeable; idx < a_particles.size(); idx++) {
     RealVect boxLo, boxHi;
-    bucketTreeBBox(a_particles, idx, idx + 1, boxLo, boxHi);
+    kdBBox(a_particles, idx, idx + 1, boxLo, boxHi);
 
-    a_leaves.push_back(BucketLeaf{idx, idx + 1, boxLo, boxHi});
+    a_leaves.push_back(KDLeaf{idx, idx + 1, boxLo, boxHi});
   }
 
   if (numMergeable == 0) {
@@ -394,10 +394,10 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
       centroid = a_particles[a_lo].position;
     }
 
-    return bucketTreeCellKeyOf(centroid, a_probLo, a_dx);
+    return kdCellKeyOf(centroid, a_probLo, a_dx);
   };
 
-  struct BucketCand
+  struct KDCand
   {
     Real        weight;
     std::size_t count;
@@ -412,7 +412,7 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
   // refused and retired whole, becoming a single very heavy super-particle sitting next to the light
   // ones that took its slots. Ordering by weight makes the leaves that most need subdividing claim
   // slots first.
-  const auto byWeight = [](const BucketCand& a_lhs, const BucketCand& a_rhs) noexcept -> bool {
+  const auto byWeight = [](const KDCand& a_lhs, const KDCand& a_rhs) noexcept -> bool {
     return a_lhs.weight < a_rhs.weight;
   };
 
@@ -426,39 +426,39 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     return w;
   };
 
-  // Whether [a_lo,a_hi) is still too wide to be merged at all. mergeBucketTreeCarve() vetoes any
+  // Whether [a_lo,a_hi) is still too wide to be merged at all. mergeKD() vetoes any
   // final leaf whose largest per-axis extent exceeds one cell width and leaves every one of its
   // members behind as an individual particle, so such a node does NOT cost its cell one particle --
   // it costs its full member count.
   auto maxAxisSpanOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> Real {
     RealVect boxLo, boxHi;
-    bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
+    kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
-    return bucketTreeMaxAxisSpan(boxLo, boxHi, a_dx);
+    return kdMaxAxisSpan(boxLo, boxHi, a_dx);
   };
 
   // Whether [a_lo,a_hi) has shrunk to the scale at which the weight median takes over from the
   // count median (see the split site below for why the crossover exists and where it sits).
   const auto cellLess = [](const IntVect& a_lhs, const IntVect& a_rhs) noexcept -> bool {
-    return bucketTreeIntVectLess(a_lhs, a_rhs);
+    return kdIntVectLess(a_lhs, a_rhs);
   };
 
   std::map<IntVect, int, decltype(cellLess)> used(cellLess);
 
-  std::vector<BucketCand> heap;
-  std::vector<BucketCand> finalLeaves;
+  std::vector<KDCand> heap;
+  std::vector<KDCand> finalLeaves;
 
   {
     const IntVect rootCell = centroidCellOf(0, numMergeable);
 
     used[rootCell]++;
-    heap.push_back(BucketCand{rangeWeight(0, numMergeable), numMergeable, 0, numMergeable, rootCell});
+    heap.push_back(KDCand{rangeWeight(0, numMergeable), numMergeable, 0, numMergeable, rootCell});
   }
 
   while (!heap.empty()) {
     std::pop_heap(heap.begin(), heap.end(), byWeight);
 
-    const BucketCand node = heap.back();
+    const KDCand node = heap.back();
     heap.pop_back();
 
     if (node.count < 2) {
@@ -475,9 +475,8 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     // straddling a face still qualifies.
     const Real nodeSpan = maxAxisSpanOf(node.lo, node.hi);
 
-    const std::size_t mid = (nodeSpan <= a_weightSplitScale)
-                              ? bucketTreeSplitWeightMedian(a_particles, node.lo, node.hi)
-                              : bucketTreeSplitCountMedian(a_particles, node.lo, node.hi);
+    const std::size_t mid = (nodeSpan <= a_weightSplitScale) ? kdSplitWeightMedian(a_particles, node.lo, node.hi)
+                                                             : kdSplitCountMedian(a_particles, node.lo, node.hi);
 
     const IntVect cellLeft  = centroidCellOf(node.lo, mid);
     const IntVect cellRight = centroidCellOf(mid, node.hi);
@@ -487,10 +486,10 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     used[cellRight]++;
 
     // The quota constrains only leaves that can actually merge. A node wider than
-    // s_bucketTreeMaxLeafExtent is vetoed by the caller and leaves every member behind
+    // s_kdMaxLeafExtent is vetoed by the caller and leaves every member behind
     // individually, so it costs its cell its full member count rather than one particle; splitting
     // it further lowers that cell's final population even though it raises the leaf count.
-    if (nodeSpan <= s_bucketTreeMaxLeafExtent && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
+    if (nodeSpan <= s_kdMaxLeafExtent && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
       used[cellLeft]--;
       used[cellRight]--;
       used[node.cell]++;
@@ -500,18 +499,18 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
       continue;
     }
 
-    heap.push_back(BucketCand{rangeWeight(node.lo, mid), mid - node.lo, node.lo, mid, cellLeft});
+    heap.push_back(KDCand{rangeWeight(node.lo, mid), mid - node.lo, node.lo, mid, cellLeft});
     std::push_heap(heap.begin(), heap.end(), byWeight);
 
-    heap.push_back(BucketCand{rangeWeight(mid, node.hi), node.hi - mid, mid, node.hi, cellRight});
+    heap.push_back(KDCand{rangeWeight(mid, node.hi), node.hi - mid, mid, node.hi, cellRight});
     std::push_heap(heap.begin(), heap.end(), byWeight);
   }
 
-  for (const BucketCand& node : finalLeaves) {
+  for (const KDCand& node : finalLeaves) {
     RealVect boxLo, boxHi;
-    bucketTreeBBox(a_particles, node.lo, node.hi, boxLo, boxHi);
+    kdBBox(a_particles, node.lo, node.hi, boxLo, boxHi);
 
-    a_leaves.push_back(BucketLeaf{node.lo, node.hi, boxLo, boxHi});
+    a_leaves.push_back(KDLeaf{node.lo, node.hi, boxLo, boxHi});
   }
 }
 
@@ -524,7 +523,7 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
  * @return True iff the cell has at least one outgoing ghost-shipment target.
  */
 inline bool
-bucketTreeIsBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept
+kdIsBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept
 {
   return a_ghostMask.numTargets(a_cellIndex) > 0;
 }
@@ -544,10 +543,10 @@ bucketTreeIsBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask&
  * @param[in] a_boxHi High corner of the bounding box every contributing position lies within.
  */
 inline void
-bucketTreeCheckCentroid(const RealVect& a_centroid,
-                        const Real      a_totalWeight,
-                        const RealVect& a_boxLo,
-                        const RealVect& a_boxHi) noexcept
+kdCheckCentroid(const RealVect& a_centroid,
+                const Real      a_totalWeight,
+                const RealVect& a_boxLo,
+                const RealVect& a_boxHi) noexcept
 {
 #ifndef NDEBUG
   CH_assert(a_totalWeight > 0.0);
@@ -577,20 +576,20 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeBucketTreeCarve(AmrMesh&                      a_amr,
-                     ParticleContainer<P, Traits>& a_particles,
-                     const int                     a_ppc,
-                     const Real                    a_weightSplitScale,
-                     const Gather&                 a_gather,
-                     const Combine&                a_combine,
-                     const Scatter&                a_scatter,
-                     const Allocator&              a_allocateID,
-                     const PosValid&               a_isPositionValid,
-                     const bool                    a_enableBoundaryCarve)
+mergeKD(AmrMesh&                      a_amr,
+        ParticleContainer<P, Traits>& a_particles,
+        const int                     a_ppc,
+        const Real                    a_weightSplitScale,
+        const Gather&                 a_gather,
+        const Combine&                a_combine,
+        const Scatter&                a_scatter,
+        const Allocator&              a_allocateID,
+        const PosValid&               a_isPositionValid,
+        const bool                    a_enableBoundaryCarve)
 {
   using namespace detail;
 
-  CH_TIME("ParticleManagement::mergeBucketTreeCarve");
+  CH_TIME("ParticleManagement::mergeKD");
 
   const std::string   realm       = a_particles.getRealm();
   const int           finestLevel = a_amr.getFinestLevel();
@@ -617,15 +616,15 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
   struct RuntimeBox
   {
-    BucketBoxKey              key;
-    int                       patchIdx;
-    std::vector<BucketMember> members;
+    KDBoxKey              key;
+    int                   patchIdx;
+    std::vector<KDMember> members;
   };
 
   struct MergedResult
   {
-    BucketParticle<Packed> particle;
-    int                    patchIdx; // which patch's leaf produced this -- the cheap placement guess
+    KDParticle<Packed> particle;
+    int                patchIdx; // which patch's leaf produced this -- the cheap placement guess
   };
 
   // One entry per (locally-owned, boundary-exposed particle) x (one of MY OWN boxes that lists it),
@@ -633,12 +632,12 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // below for why an id can have more than one entry, and boxIdx < 0 for what a sentinel entry means.
   struct SelfClaimEntry
   {
-    ParticleID   id;
-    BucketBoxKey key;    // meaningless when boxIdx < 0.
-    int          boxIdx; // -1 => listen-only sentinel: no actual claim from any of my own boxes, just
-                         // marks that this rank must still process this id (an unmergeable leaf's
-                         // exposed member, or a boundary leaf with < 2 members) when combining with
-                         // foreign claims in STEP 3.
+    ParticleID id;
+    KDBoxKey   key;    // meaningless when boxIdx < 0.
+    int        boxIdx; // -1 => listen-only sentinel: no actual claim from any of my own boxes, just
+                       // marks that this rank must still process this id (an unmergeable leaf's
+                       // exposed member, or a boundary leaf with < 2 members) when combining with
+                       // foreign claims in STEP 3.
   };
 
   std::vector<PatchWork> patchWork;
@@ -647,10 +646,10 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // STEP 1 -- deduplicated (sorted + collapsed, preferring the non-ghost copy) once STEP 1 finishes,
   // rather than via a per-particle hash lookup while gathering. Point lookups after that go through
   // findParticle() (binary search) below.
-  std::vector<std::pair<ParticleID, BucketParticle<Packed>>> particlesByID;
-  std::vector<RuntimeBox>                                    myBoxes;
-  std::vector<ParticleID>                                    consumedIDs; // sorted once, before STEP 7
-  std::vector<MergedResult>                                  mergedResults;
+  std::vector<std::pair<ParticleID, KDParticle<Packed>>> particlesByID;
+  std::vector<RuntimeBox>                                myBoxes;
+  std::vector<ParticleID>                                consumedIDs; // sorted once, before STEP 7
+  std::vector<MergedResult>                              mergedResults;
 
   // A particle can be listed by more than one of MY OWN boxes at once -- it is gathered once into
   // its own home patch's build (as a local member there) but can ALSO be gathered as a ghost into a
@@ -703,11 +702,11 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
                                                                                            : nullptr;
       const ParticleGhostMask* maskF2CDin  = (lvl > 0 && !maskF2C[lvl].isNull()) ? &(*maskF2C[lvl])[din] : nullptr;
 
-      std::vector<BucketParticle<Packed>> combined;
+      std::vector<KDParticle<Packed>> combined;
       combined.reserve(leaf.size());
 
       for (std::size_t i = 0; i < leaf.size(); i++) {
-        BucketParticle<Packed> p;
+        KDParticle<Packed> p;
 
         p.position  = leaf.position(i);
         p.weight    = leaf.weight(i);
@@ -719,7 +718,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         combined.push_back(p);
 
         // Append unconditionally -- deduplicated by id (preferring the non-ghost copy, per
-        // BucketParticle::isGhost's own docs) in the one pass below once STEP 1 finishes gathering,
+        // KDParticle::isGhost's own docs) in the one pass below once STEP 1 finishes gathering,
         // rather than via a per-particle hash lookup here.
         particlesByID.emplace_back(p.globalID, p);
       }
@@ -732,19 +731,19 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       }
 
       // Per-patch, per-cell TRUE particle-count histogram -- computed once, directly from every
-      // particle's own position, so it is unaffected by how buildBucketTreeLeaves() later happens to
+      // particle's own position, so it is unaffected by how buildKDQuotaLeaves() later happens to
       // carve up the space. This is what makes cellTrueCount (below) a reliable ground truth rather
-      // than a node-local approximation -- see buildBucketTreeLeaves()'s own docs for why the
+      // than a node-local approximation -- see buildKDQuotaLeaves()'s own docs for why the
       // difference matters. Built the same sort-and-collapse-runs way as particlesByID above.
       std::vector<std::pair<IntVect, int>> cellCounts;
       cellCounts.reserve(combined.size());
 
-      for (const BucketParticle<Packed>& p : combined) {
-        cellCounts.emplace_back(bucketTreeCellKeyOf(p.position, probLo, dxByLevel[lvl]), 1);
+      for (const KDParticle<Packed>& p : combined) {
+        cellCounts.emplace_back(kdCellKeyOf(p.position, probLo, dxByLevel[lvl]), 1);
       }
 
       std::sort(cellCounts.begin(), cellCounts.end(), [](const auto& a_lhs, const auto& a_rhs) {
-        return bucketTreeIntVectLess(a_lhs.first, a_rhs.first);
+        return kdIntVectLess(a_lhs.first, a_rhs.first);
       });
 
       {
@@ -772,14 +771,14 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
                                          cellCounts.end(),
                                          a_cell,
                                          [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
-                                           return bucketTreeIntVectLess(a_entry.first, a_key);
+                                           return kdIntVectLess(a_entry.first, a_key);
                                          });
 
         return (it != cellCounts.end() && it->first == a_cell) ? it->second : 0;
       };
 
-      std::vector<BucketLeaf> leaves;
-      buildBucketTreeLeaves(combined, a_ppc, a_weightSplitScale, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      std::vector<KDLeaf> leaves;
+      buildKDQuotaLeaves(combined, a_ppc, a_weightSplitScale, dxByLevel[lvl], probLo, cellTrueCount, leaves);
 
       // Per-patch exposure cache: leaves are about a cell in extent and not grid-aligned, so many leaves
       // (and many members within one leaf) end up querying the SAME actual cell's exposure. A
@@ -805,13 +804,13 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         }
 
         if (exposureCache[cellIdx] < 0) {
-          bool isExposed = (maskSameDin != nullptr) && bucketTreeIsBoundaryExposed(a_iv, *maskSameDin);
+          bool isExposed = (maskSameDin != nullptr) && kdIsBoundaryExposed(a_iv, *maskSameDin);
 
           if (!isExposed && maskC2FDin != nullptr) {
-            isExposed = bucketTreeIsBoundaryExposed(a_iv, *maskC2FDin);
+            isExposed = kdIsBoundaryExposed(a_iv, *maskC2FDin);
           }
           if (!isExposed && maskF2CDin != nullptr) {
-            isExposed = bucketTreeIsBoundaryExposed(a_iv, *maskF2CDin);
+            isExposed = kdIsBoundaryExposed(a_iv, *maskF2CDin);
           }
 
           exposureCache[cellIdx] = isExposed ? 1 : 0;
@@ -820,8 +819,8 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         return exposureCache[cellIdx] != 0;
       };
 
-      for (const BucketLeaf& bl : leaves) {
-        std::vector<BucketMember> members;
+      for (const KDLeaf& bl : leaves) {
+        std::vector<KDMember> members;
         members.reserve(bl.hi - bl.lo);
 
         bool       anyLocal = false;
@@ -831,12 +830,12 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
                                                         // need its own separate pass just to compute it.
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-          members.push_back(BucketMember{combined[idx].globalID, combined[idx].ownerRank});
+          members.push_back(KDMember{combined[idx].globalID, combined[idx].ownerRank});
           anchor = std::min(anchor, combined[idx].globalID);
 
           // "Local" here means physically resident in THIS patch, not merely owned by this rank --
           // a particle owned by this rank via a DIFFERENT one of its own patches, appearing here
-          // only as a ghost, gives this leaf no standing (see BucketParticle::isGhost's own docs).
+          // only as a ghost, gives this leaf no standing (see KDParticle::isGhost's own docs).
           if (!combined[idx].isGhost) {
             anyLocal = true;
           }
@@ -852,11 +851,11 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
           leafVolume *= (bl.boxHi[dir] - bl.boxLo[dir]);
         }
 
-        // Per-axis extent, not aggregate volume -- see bucketTreeMaxAxisSpan()'s own docs for why a
+        // Per-axis extent, not aggregate volume -- see kdMaxAxisSpan()'s own docs for why a
         // volume ratio alone cannot be trusted here (a long, thin leaf can have volume <=
         // one cell while still spanning several cells along one axis). leafVolume itself
         // is still needed below, unrelated to this check -- it's the box key's tie-break priority.
-        const bool unmergeable = bucketTreeMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_bucketTreeMaxLeafExtent;
+        const bool unmergeable = kdMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_kdMaxLeafExtent;
 
         // Per-resident-member exposure -- needed either way (leaf-wide OR for the interior/
         // boundary decision below; per-particle for the unmergeable-leaf listen-only case). Ghosts
@@ -877,7 +876,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
             continue;
           }
 
-          const IntVect cell      = bucketTreeCellKeyOf(combined[idx].position, probLo, dxByLevel[lvl]);
+          const IntVect cell      = kdCellKeyOf(combined[idx].position, probLo, dxByLevel[lvl]);
           const bool    isExposed = isExposedCached(cell);
 
           exposed[idx - bl.lo] = isExposed;
@@ -890,16 +889,19 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
             // skips them), so this is equivalent to also checking !isGhost -- kept explicit anyway
             // as the actual invariant being relied on, not an implicit one.
             if (!combined[idx].isGhost && exposed[idx - bl.lo]) {
-              selfClaims.push_back(SelfClaimEntry{combined[idx].globalID, BucketBoxKey{}, -1}); // listen only.
+              selfClaims.push_back(SelfClaimEntry{combined[idx].globalID, KDBoxKey{}, -1}); // listen only.
             }
           }
 
           continue;
         }
 
-        if (!anyExposed && !anyGhost) {
+        if (!anyGhost && (!a_enableBoundaryCarve || !anyExposed)) {
           // Interior: commit immediately, zero communication, direct insert -- safe ONLY because
-          // anyGhost is false, i.e. this leaf genuinely contains no foreign data at all. Explicitly
+          // anyGhost is false, i.e. this leaf genuinely contains no foreign data at all. With the
+          // carve disabled every leaf takes this path regardless of exposure, since the caller then
+          // supplies no ghosts and each patch merges only its own particles; the !anyGhost guard
+          // still holds, so a caller that fills ghosts anyway cannot double-count through here. Explicitly
           // requiring !anyGhost (not just !anyExposed) matters whenever a leaf spans cells: the old
           // argument ("a leaf whose members are all non-exposed can never contain a ghost, since
           // ghost-fill is symmetric at width 1") only holds when a leaf's own extent is <= 1 cell --
@@ -923,7 +925,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
             weights.reserve(bl.hi - bl.lo);
 
             for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-              const BucketParticle<Packed>& p = combined[idx];
+              const KDParticle<Packed>& p = combined[idx];
 
               CH_assert(!p.isGhost);
 
@@ -935,10 +937,10 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
             centroid /= totalW;
 
-            bucketTreeCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
+            kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
 
             if (a_isPositionValid(centroid)) {
-              BucketParticle<Packed> merged;
+              KDParticle<Packed> merged;
 
               merged.position  = centroid;
               merged.weight    = totalW;
@@ -957,17 +959,16 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
           continue;
         }
 
-        // Boundary candidate. Debug knob: when a_enableBoundaryCarve is false, no box is ever
-        // proposed here -- these particles are simply left untouched this pass (see
-        // mergeBucketTreeCarve()'s own @param docs), so a suspected bug can be isolated to the carve
-        // protocol below versus the interior-tier commit path above.
+        // Boundary candidate. Unreachable when the carve is disabled, since every ghost-free leaf
+        // committed above; a leaf can only arrive here then if the caller filled ghosts against the
+        // documented contract, and is left untouched.
         if (a_enableBoundaryCarve && members.size() >= 2) {
-          const BucketBoxKey key{leafVolume, anchor};
+          const KDBoxKey key{leafVolume, anchor};
 
           const int boxIdx = static_cast<int>(myBoxes.size());
           myBoxes.push_back(RuntimeBox{key, patchIdx, members});
 
-          for (const BucketMember& m : members) {
+          for (const KDMember& m : members) {
             if (m.owner == myRank) {
               // Append, never collapse -- see selfClaims' own docs: this same particle can already
               // carry an entry from a DIFFERENT one of my own boxes (a different patch's independent
@@ -979,7 +980,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         else if (a_enableBoundaryCarve) {
           // Exactly one member, and it must be the resident, exposed one (members.size()>=1 and
           // anyLocal both hold) -- can never reach the merge threshold alone, listen only.
-          selfClaims.push_back(SelfClaimEntry{members[0].id, BucketBoxKey{}, -1});
+          selfClaims.push_back(SelfClaimEntry{members[0].id, KDBoxKey{}, -1});
         }
       }
     }
@@ -1025,12 +1026,12 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
   // Binary-search lookup into the now-sorted, deduplicated particlesByID -- replaces the old
   // unordered_map's .at().
-  auto findParticle = [&particlesByID](const ParticleID a_id) -> const BucketParticle<Packed>& {
+  auto findParticle = [&particlesByID](const ParticleID a_id) -> const KDParticle<Packed>& {
     const auto it = std::lower_bound(
       particlesByID.begin(),
       particlesByID.end(),
       a_id,
-      [](const std::pair<ParticleID, BucketParticle<Packed>>& a_entry, const ParticleID a_key) {
+      [](const std::pair<ParticleID, KDParticle<Packed>>& a_entry, const ParticleID a_key) {
         return a_entry.first < a_key;
       });
 
@@ -1047,22 +1048,22 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   });
 
   // ==== STEP 2: Phase 1 -- claims to owners ====
-  std::vector<std::vector<BucketClaim>> claimSendByRank(numRanks);
+  std::vector<std::vector<KDClaim>> claimSendByRank(numRanks);
 
   for (std::size_t boxIdx = 0; boxIdx < myBoxes.size(); boxIdx++) {
     const RuntimeBox& box = myBoxes[boxIdx];
 
-    for (const BucketMember& m : box.members) {
+    for (const KDMember& m : box.members) {
       if (m.owner != myRank) {
-        claimSendByRank[m.owner].push_back(BucketClaim{m.id, box.key, myRank, static_cast<int>(boxIdx)});
+        claimSendByRank[m.owner].push_back(KDClaim{m.id, box.key, myRank, static_cast<int>(boxIdx)});
       }
     }
   }
 
   // Sorted by memberID once received, so STEP 3's point lookups (claimsRange, below) and STEP 4's
   // full pass (grouped runs) don't need a hash map either.
-  std::vector<BucketClaim> incomingClaims = bucketTreeExchangeByRank(claimSendByRank);
-  std::sort(incomingClaims.begin(), incomingClaims.end(), [](const BucketClaim& a_lhs, const BucketClaim& a_rhs) {
+  std::vector<KDClaim> incomingClaims = kdExchangeByRank(claimSendByRank);
+  std::sort(incomingClaims.begin(), incomingClaims.end(), [](const KDClaim& a_lhs, const KDClaim& a_rhs) {
     return a_lhs.memberID < a_rhs.memberID;
   });
 
@@ -1070,13 +1071,13 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     const auto lo = std::lower_bound(incomingClaims.begin(),
                                      incomingClaims.end(),
                                      a_id,
-                                     [](const BucketClaim& a_c, const ParticleID a_key) {
+                                     [](const KDClaim& a_c, const ParticleID a_key) {
                                        return a_c.memberID < a_key;
                                      });
     const auto hi = std::upper_bound(incomingClaims.begin(),
                                      incomingClaims.end(),
                                      a_id,
-                                     [](const ParticleID a_key, const BucketClaim& a_c) {
+                                     [](const ParticleID a_key, const KDClaim& a_c) {
                                        return a_key < a_c.memberID;
                                      });
 
@@ -1090,10 +1091,10 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // rank (boxIdx meaningless).
   struct Winner
   {
-    RankID       rank;
-    int          boxIdx;
-    BucketBoxKey key; // the winning key itself -- needed in step 4 to answer EACH incoming claim
-                      // individually (won iff that claim's own key is not strictly worse than this).
+    RankID   rank;
+    int      boxIdx;
+    KDBoxKey key; // the winning key itself -- needed in step 4 to answer EACH incoming claim
+                  // individually (won iff that claim's own key is not strictly worse than this).
   };
 
   struct WinnerEntry
@@ -1117,10 +1118,10 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       idxEnd++;
     }
 
-    bool         haveWinner = false;
-    BucketBoxKey bestKey{};
-    RankID       bestRank   = myRank;
-    int          bestBoxIdx = -1;
+    bool     haveWinner = false;
+    KDBoxKey bestKey{};
+    RankID   bestRank   = myRank;
+    int      bestBoxIdx = -1;
 
     for (std::size_t k = idx; k < idxEnd; k++) {
       if (selfClaims[k].boxIdx < 0) {
@@ -1137,7 +1138,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     const auto range = claimsRange(id);
 
     for (auto cit = range.first; cit != range.second; ++cit) {
-      const BucketClaim& c = *cit;
+      const KDClaim& c = *cit;
 
       if (!haveWinner || c.key < bestKey) {
         haveWinner = true;
@@ -1175,8 +1176,8 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // ==== STEP 4: Phase 2 -- verdicts to proposers, foreign members only ====
   // One verdict PER INCOMING CLAIM, not per rank: two of the SAME rank's own boxes can both claim
   // this particle (from two different patches that rank owns), and each needs its own, correct
-  // answer -- a rank-level "your rank won" cannot tell them apart. See BucketClaim::proposerBoxIdx.
-  std::vector<std::vector<BucketVerdict>> verdictSendByRank(numRanks);
+  // answer -- a rank-level "your rank won" cannot tell them apart. See KDClaim::proposerBoxIdx.
+  std::vector<std::vector<KDVerdict>> verdictSendByRank(numRanks);
 
   for (std::size_t idx = 0; idx < incomingClaims.size();) {
     const ParticleID id = incomingClaims[idx].memberID;
@@ -1197,7 +1198,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     CH_assert(winner != nullptr);
 
     for (std::size_t k = idx; k < idxEnd; k++) {
-      const BucketClaim& c = incomingClaims[k];
+      const KDClaim& c = incomingClaims[k];
 
       // Compare IDENTITY (which specific claim was chosen), not key VALUE: an exact key tie
       // between two INDEPENDENT claims is real and not vanishingly rare here (BrownianWalker's
@@ -1208,13 +1209,13 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       // identified by (rank, box index), is told so.
       const bool won = (c.proposerRank == winner->rank) && (c.proposerBoxIdx == winner->boxIdx);
 
-      verdictSendByRank[c.proposerRank].push_back(BucketVerdict{id, c.proposerBoxIdx, won});
+      verdictSendByRank[c.proposerRank].push_back(KDVerdict{id, c.proposerBoxIdx, won});
     }
 
     idx = idxEnd;
   }
 
-  const std::vector<BucketVerdict> incomingVerdicts = bucketTreeExchangeByRank(verdictSendByRank);
+  const std::vector<KDVerdict> incomingVerdicts = kdExchangeByRank(verdictSendByRank);
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
   // Indexed directly by boxIdx (a dense range over myBoxes) rather than hashed -- each box's own
@@ -1224,7 +1225,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   // scan would have across all of a box's foreign-member lookups.
   std::vector<std::vector<ParticleID>> wonForeignByBox(myBoxes.size());
 
-  for (const BucketVerdict& v : incomingVerdicts) {
+  for (const KDVerdict& v : incomingVerdicts) {
     if (v.won) {
       wonForeignByBox[v.claimantBoxIdx].push_back(v.memberID);
     }
@@ -1235,7 +1236,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   }
 
   // ==== STEP 5: assemble each of my boxes' provisional membership, commit or not ====
-  std::vector<std::vector<BucketCommit>> commitSendByRank(numRanks);
+  std::vector<std::vector<KDCommit>> commitSendByRank(numRanks);
 
   for (std::size_t boxIdx = 0; boxIdx < myBoxes.size(); boxIdx++) {
     const RuntimeBox& box = myBoxes[boxIdx];
@@ -1243,7 +1244,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     std::vector<ParticleID> survivingLocal;
     std::vector<ParticleID> survivingForeign;
 
-    for (const BucketMember& m : box.members) {
+    for (const KDMember& m : box.members) {
       if (m.owner == myRank) {
         const Winner* winner = findWinner(m.id);
 
@@ -1276,7 +1277,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       weights.reserve(totalSurvivors);
 
       auto accumulate = [&](const ParticleID a_id) {
-        const BucketParticle<Packed>& p = findParticle(a_id);
+        const KDParticle<Packed>& p = findParticle(a_id);
 
         payloads.push_back(p.payload);
         weights.push_back(p.weight);
@@ -1306,12 +1307,12 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
       centroid /= totalW;
 
-      bucketTreeCheckCentroid(centroid, totalW, surviveBoxLo, surviveBoxHi);
+      kdCheckCentroid(centroid, totalW, surviveBoxLo, surviveBoxHi);
 
       if (a_isPositionValid(centroid)) {
         committed = true;
 
-        BucketParticle<Packed> merged;
+        KDParticle<Packed> merged;
 
         merged.position  = centroid;
         merged.weight    = totalW;
@@ -1329,16 +1330,16 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
 
     // Phase 3 outgoing: every foreign member this box nominally won needs to hear the outcome,
     // whether this box committed or not -- its owner is otherwise stuck not knowing whether to
-    // delete it (see mergeBucketTreeCarve()'s own docs for why this can't be skipped).
+    // delete it (see mergeKD()'s own docs for why this can't be skipped).
     for (const ParticleID id : survivingForeign) {
-      commitSendByRank[findParticle(id).ownerRank].push_back(BucketCommit{id, committed});
+      commitSendByRank[findParticle(id).ownerRank].push_back(KDCommit{id, committed});
     }
   }
 
   // ==== STEP 6: Phase 3 -- commit/release, foreign members only ====
-  const std::vector<BucketCommit> incomingCommits = bucketTreeExchangeByRank(commitSendByRank);
+  const std::vector<KDCommit> incomingCommits = kdExchangeByRank(commitSendByRank);
 
-  for (const BucketCommit& c : incomingCommits) {
+  for (const KDCommit& c : incomingCommits) {
     if (c.committed) {
       consumedIDs.push_back(c.memberID);
     }
@@ -1365,9 +1366,9 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
   a_particles.clearGhostParticles();
 
   // ==== STEP 8: place merged results ====
-  std::vector<std::vector<BucketParticle<Packed>>> scatterByDestRank(numRanks);
+  std::vector<std::vector<KDParticle<Packed>>> scatterByDestRank(numRanks);
 
-  auto insertHere = [&](const BucketParticle<Packed>& a_p, const int a_level, const DataIndex& a_din) {
+  auto insertHere = [&](const KDParticle<Packed>& a_p, const int a_level, const DataIndex& a_din) {
     ParticleSoA<P, Traits>& leaf = a_particles[a_level][a_din];
 
     a_scatter(leaf, a_p);
@@ -1400,7 +1401,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
     const auto dst = a_particles.findDestination(mr.particle.position);
 
     if (!dst.valid) {
-      MayDay::Error("ParticleManagement::mergeBucketTreeCarve -- merged particle not found in any patch");
+      MayDay::Error("ParticleManagement::mergeKD -- merged particle not found in any patch");
     }
 
     if (dst.rank == myRank) {
@@ -1409,27 +1410,27 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
       insertHere(mr.particle, dst.level, din);
     }
     else {
-      BucketParticle<Packed> corrected = mr.particle;
-      corrected.ownerRank              = dst.rank;
+      KDParticle<Packed> corrected = mr.particle;
+      corrected.ownerRank          = dst.rank;
 
       scatterByDestRank[dst.rank].push_back(corrected);
     }
   }
 
-  const std::vector<BucketParticle<Packed>> incomingScattered = bucketTreeExchangeByRank(scatterByDestRank);
+  const std::vector<KDParticle<Packed>> incomingScattered = kdExchangeByRank(scatterByDestRank);
 
-  for (const BucketParticle<Packed>& p : incomingScattered) {
+  for (const KDParticle<Packed>& p : incomingScattered) {
     const auto dst = a_particles.findDestination(p.position);
 
     if (!dst.valid || dst.rank != myRank) {
-      MayDay::Error("ParticleManagement::mergeBucketTreeCarve -- incoming scattered particle not "
+      MayDay::Error("ParticleManagement::mergeKD -- incoming scattered particle not "
                     "found in any of this rank's own patches");
     }
 
     const DataIndex din = a_amr.getLevelTiles(realm)[dst.level]->getMyGrids().at(dst.gridIndex);
 
-    BucketParticle<Packed> corrected = p;
-    corrected.ownerRank              = myRank;
+    KDParticle<Packed> corrected = p;
+    corrected.ownerRank          = myRank;
 
     insertHere(corrected, dst.level, din);
   }

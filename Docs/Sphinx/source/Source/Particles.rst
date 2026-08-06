@@ -806,7 +806,7 @@ _____________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 279-283
+   :lines: 281-285
 
 The returned functor proceeds as follows:
 
@@ -829,7 +829,7 @@ ___________________________________________
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 194-202
+   :lines: 196-204
 
 The caller provides three lambdas:
 
@@ -874,14 +874,14 @@ Merged particles need globally unique ids that cannot collide across ranks or ro
 
 In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).
 
-.. _bucket-tree-carve-merging:
+.. _kd-tree-carve-merging:
 
-Bucket-tree carve merging (``bucket_tree_carve``)
+KD-tree carve merging (``kd_carve``)
 ____________________________________________________________________________________________
 
-Unlike every strategy above, ``bucket_tree_carve`` is not built around pairwise nearest-neighbour matching at all -- it is implemented as ``ParticleManagement::mergeBucketTreeCarve`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_BucketTreeCarveParticleMerge.H`, and is a distinct, distributed, MPI-safe whole-container merge in its own right.
+Unlike every strategy above, ``kd_carve`` is not built around pairwise nearest-neighbour matching at all -- it is implemented as ``ParticleManagement::mergeKD`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_KDParticleMerge.H`, and is a distinct, distributed, MPI-safe whole-container merge in its own right.
 
-Each patch's local-plus-ghost particles are split purely by position into a "bucket tree", never snapped to the grid, since particles near a cell face must be able to merge across it. The longest axis is bisected at the *count median* -- the plane putting half the node's particles on either side -- while the node is still larger than ``bucket_tree_weight_split_scale`` cell widths, and at the *weight median* -- half the node's particle weight on either side -- once it is smaller. Above that scale a split's job is to apportion leaves between cells, which is a question about counts; below it there is little left to apportion and the weight median drives the resulting super-particles toward equal weight. Splitting is governed by a **live per-cell quota**. Every group becomes exactly one super-particle, placed at its weighted centroid, so the number of groups centred in a cell is that cell's post-merge population; that count is tracked while splitting, and a split that would push a cell past the target is refused. Groups are split heaviest-first, because the quota is claimed first-come-first-served: ordering by particle count instead lets light groups take a cell's slots before a heavy group is considered, stranding the heavy one whole as a single very heavy super-particle.
+Each patch's local-plus-ghost particles are split purely by position into a "kd tree", never snapped to the grid, since particles near a cell face must be able to merge across it. The longest axis is bisected at the *count median* -- the plane putting half the node's particles on either side -- while the node is still larger than ``kd_weight_split_scale`` cell widths, and at the *weight median* -- half the node's particle weight on either side -- once it is smaller. Above that scale a split's job is to apportion leaves between cells, which is a question about counts; below it there is little left to apportion and the weight median drives the resulting super-particles toward equal weight. Splitting is governed by a **live per-cell quota**. Every group becomes exactly one super-particle, placed at its weighted centroid, so the number of groups centred in a cell is that cell's post-merge population; that count is tracked while splitting, and a split that would push a cell past the target is refused. Groups are split heaviest-first, because the quota is claimed first-come-first-served: ordering by particle count instead lets light groups take a cell's slots before a heavy group is considered, stranding the heavy one whole as a single very heavy super-particle.
 
 The quota constrains only those groups that can actually merge. A group wider than one cell is vetoed later (see *Unmergeable* below) and leaves all its members behind individually, so it costs its cell its full member count rather than one particle, and the quota does not block splitting it further. A cell can therefore finish slightly above target when a group is both too wide to merge and in a cell already at quota, since either choice overshoots.
 
@@ -897,9 +897,10 @@ A patch only ever sees its own particles plus a width-1 ghost halo, so a group c
 
 .. important::
 
-   ``bucket_tree_carve`` requires a width-1 particle ghost mask, registered unconditionally by ``ItoSolver`` (the same requirement and registration timing as the ``nn_pair_*`` family -- see above).
+   ``kd_carve`` requires a width-1 particle ghost mask, registered unconditionally by ``ItoSolver`` (the same requirement and registration timing as the ``nn_pair_*`` family -- see above).
 
-Unlike ``nn_pair_tree``/``nn_pair_onecell``/``nn_pair_hash``, there is no iteration, fallback or max-cell-distance equivalent, since there is no drain loop and the per-cell quota alone governs how far splitting goes. The maximum extent of a mergeable group is fixed at one cell width rather than exposed as an option: it is a physical bound rather than a dial, and it matches the hardcoded width-1 ghost halo. Two options do apply:
+Unlike ``nn_pair_tree``/``nn_pair_onecell``/``nn_pair_hash``, there is no iteration, fallback or max-cell-distance equivalent, since there is no drain loop and the per-cell quota alone governs how far splitting goes. The maximum extent of a mergeable group is fixed at one cell width rather than exposed as an option: it is a physical bound rather than a dial, and it matches the hardcoded width-1 ghost halo. One option applies:
 
-* ``bucket_tree_weight_split_scale`` -- the group size, in cell widths, at or below which the split plane switches from the count median to the weight median. 0 disables the weight median entirely.
-* ``bucket_tree_carve_boundary`` -- a debug switch for whether the boundary/carve tier runs at all.
+* ``kd_weight_split_scale`` -- the group size, in cell widths, at or below which the split plane switches from the count median to the weight median. 0 disables the weight median entirely.
+
+``kd_patch`` selects the same tree build and per-cell quota without the boundary tier: no ghost halo is filled, every group merges regardless of boundary exposure, and no particle is ever contested, so each patch reduces only its own particles.

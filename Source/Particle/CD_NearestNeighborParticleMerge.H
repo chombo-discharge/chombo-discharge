@@ -350,7 +350,7 @@ namespace detail {
 /**
  * @brief The unclamped, position-derived cell index a given physical position falls in.
  * @details The cell-key convention used throughout for the crowding trigger and a_maxCellDistance.
- * Not clamped to any patch's box, so a ghost buckets into its true origin cell and particles in
+ * Not clamped to any patch's box, so a ghost groups into its true origin cell and particles in
  * different patches' local frames stay directly comparable.
  * @warning a_dx MUST be the cell spacing of the AMR level the position's particle lives on (see
  * NNMergeParticle::level), never a single fixed dx shared across levels. The returned IntVect is
@@ -628,7 +628,7 @@ struct NNCellMeta
   /**
    * @brief This particle's TRUE AMR level (see NNMergeParticle::level) -- needed by
    * findNearestNeighborCandidatesOneCell() to re-check a cross-level candidate's Chebyshev
-   * distance in the correct (finer-of-the-two-levels) frame, since the cell buckets themselves are
+   * distance in the correct (finer-of-the-two-levels) frame, since the cell groups themselves are
    * all keyed in the query patch's own level's frame.
    */
   int level;
@@ -687,7 +687,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
  * approximate, prune, since point-to-cell-AABB distance is a true lower bound on any point inside
  * that cell.
  *
- * The cell buckets themselves are all keyed in the query patch's OWN level's frame (see
+ * The cell groups themselves are all keyed in the query patch's OWN level's frame (see
  * buildNNCellSpatialIndex()), so Moore-adjacency in that frame does not, by itself, bound the
  * Chebyshev distance between the query and a candidate on a DIFFERENT AMR level in the
  * finer-of-the-two-levels frame that nnMergeCrossLevelTooFar() (and so resolveTrivialTier()/
@@ -848,7 +848,7 @@ resolveTrivialTier(
 
 /**
  * @brief Package one outgoing proposal for every edge that resolveTrivialTier() could not
- * resolve locally, bucketed by destination rank.
+ * resolve locally, grouped by destination rank.
  * @details Routing rule: ALWAYS to the owner of the candidate (NNMergeEdge::candidateID's
  * owning rank) -- never by any id comparison (see NNMergeProposal). If the destination rank equals
  * this rank's own (a boundary-exposed candidate that happens to live in a DIFFERENT patch owned by
@@ -1059,9 +1059,9 @@ using PositionLocator = std::function<NNParticleLocation(const RealVect& a_posit
  * @param[in] a_locate Locate-by-position callback (see PositionLocator).
  * @param[in] a_thisRank This rank's own number -- an NNParticleLocation whose ownerRank equals this is what makes a
  * result "local" rather than needing a scatter.
- * @param[out] a_localByPatch Results whose merged particle lands in one of this rank's own patches, bucketed by
+ * @param[out] a_localByPatch Results whose merged particle lands in one of this rank's own patches, grouped by
  * (level, NNParticleLocation::gridIndex).
- * @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank, bucketed by destination
+ * @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank, grouped by destination
  * rank (pre-sized to the total rank count by the caller), for one final exchange.
  */
 template <typename Packed>

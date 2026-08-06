@@ -933,20 +933,26 @@ public:
   makeSuperparticlesNnPairOneCell(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Make superparticles with the whole-patch bucket-tree carve merge, regardless of
-   * merge_algorithm.
-   * @details Whole-container, cross-patch/cross-rank AMR merge (see
-   * ParticleManagement::mergeBucketTreeCarve). Unlike makeSuperparticlesNnPairTree/Hash/OneCell,
-   * this is a single, non-iterative pass (no drain loop, no nn_pair_iterate/nn_pair_fallback/
-   * nn_pair_max_cell_dist equivalents -- there is no configurable search radius or convergence
-   * loop to tune). Requires a width-1 particle ghost mask registered on this realm (see
-   * registerOperators()); it does its own ghost fill and does NOT need cell sorting. Uses a single
-   * crowding threshold -- the coarsest level's a_particlesPerCell entry.
+   * @brief Make superparticles with the whole-patch kd-tree merge, regardless of merge_algorithm.
+   * @details Backs both kd_carve and kd_patch (see ParticleManagement::mergeKD), selected by
+   * @a a_enableBoundaryCarve. Unlike makeSuperparticlesNnPairTree/Hash/OneCell this is a single,
+   * non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/
+   * nn_pair_max_cell_dist equivalents, since there is no configurable search radius or convergence
+   * loop. With the carve enabled it fills a width-1 particle ghost mask itself, which must be
+   * registered on this realm (see registerOperators()); with it disabled no ghosts are filled at
+   * all. Does NOT need cell sorting. Uses a single crowding threshold -- the coarsest level's
+   * a_particlesPerCell entry.
    * @param[in] a_container        Which container to repartition.
    * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   * @param[in] a_enableBoundaryCarve True selects kd_carve: ghosts are filled and leaves touching a
+   * patch or level interface are arbitrated by the carve. False selects kd_patch: no ghosts are
+   * filled and every leaf merges regardless of boundary exposure, so each patch reduces only the
+   * particles it owns.
    */
   virtual void
-  makeSuperparticlesBucketZCarve(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+  makeSuperparticlesKD(WhichContainer     a_container,
+                       const Vector<int>& a_particlesPerCell,
+                       const bool         a_enableBoundaryCarve);
 
   /**
    * @brief Remap the bulk particle container.
@@ -1241,24 +1247,14 @@ protected:
   int m_nnPairMaxRounds = 3;
 
   /**
-   * @brief bucket_tree_carve: enable the boundary/carve protocol.
-   * @details Debug knob -- when false, ParticleManagement::mergeBucketTreeCarve() only commits
-   * interior (whole-cell, zero-communication) leaves; every boundary-exposed particle is left
-   * untouched for the pass. Comparing a run with this true against one with this false isolates
-   * whether suspected non-physical behavior originates in the carve protocol or in the interior-
-   * tier commit path. Only used for bucket_tree_carve.
-   */
-  bool m_bucketTreeCarveBoundary = true;
-
-  /**
-   * @brief bucket_tree_carve: leaf size, in cell widths, at or below which the tree build switches
+   * @brief kd_carve: leaf size, in cell widths, at or below which the tree build switches
    * from count-median to weight-median splitting.
-   * @details Forwarded to ParticleManagement::mergeBucketTreeCarve()'s a_weightSplitScale -- see
+   * @details Forwarded to ParticleManagement::mergeKD()'s a_weightSplitScale -- see
    * that function's own docs. Larger values apply the weight median at coarser scales, giving more
    * uniform super-particle weights at some cost to how evenly leaves are apportioned between cells;
-   * 0 disables it entirely. Only used for bucket_tree_carve.
+   * 0 disables it entirely. Only used for kd_carve.
    */
-  Real m_bucketTreeWeightSplitScale = 1.0;
+  Real m_kdWeightSplitScale = 1.0;
 
   /**
    * @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a
