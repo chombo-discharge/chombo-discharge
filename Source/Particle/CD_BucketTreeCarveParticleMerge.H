@@ -153,93 +153,40 @@ struct BucketLeaf
 /**
  * @brief Build one whole-patch bucket tree: partition @a a_particles by position into leaves, each
  * of which becomes exactly one super-particle, subject to a live per-cell leaf quota of @a a_ppc.
- * @details Splits are always taken along the longest (real-space) axis and are deliberately
- * UNSNAPPED to the grid, so a leaf may straddle a cell face and draw members from both sides. The
- * split plane is the COUNT median (half the node's particles either side) while the node is larger
- * than @a a_weightSplitScale cell widths, and the WEIGHT median (half its particle weight either
- * side) once it is smaller -- above that scale a split apportions leaves BETWEEN cells, which is a
- * question about counts, while below it there is little left to apportion and the weight median is
- * what drives the resulting super-particles toward equal weight. @a a_particles is
- * reordered IN PLACE (each returned leaf's [lo,hi) range is contiguous in the reordered buffer); no
- * particle is ever copied or split synthetically.
+ * @details @a a_particles is reordered IN PLACE, so each returned leaf's [lo,hi) range is contiguous
+ * in the reordered buffer; no particle is ever copied or split synthetically.
  *
- * The controlling idea: a leaf becomes exactly ONE super-particle, placed at its own weighted
- * centroid, so the number of leaves whose centroid falls in a cell IS that cell's post-merge
- * population. That count is therefore tracked LIVE while splitting, and any split that would push a
- * cell past @a a_ppc is refused outright. Splitting proceeds HEAVIEST-first and stops when nothing
- * may legally be split, at which point every cell holds at most @a a_ppc leaves,
- * and as close to @a a_ppc as the quota permits -- since the loop always splits while it legally
- * can. No cell can be left crowded by construction.
+ * A leaf collapses to exactly ONE super-particle at its own weighted centroid, so the number of
+ * leaves whose centroid falls in a cell is that cell's post-merge population. That count is tracked
+ * live in a per-cell map while splitting, and a split that would push a cell past @a a_ppc is
+ * refused. Splitting takes the heaviest candidate leaf first and stops when nothing may legally be
+ * split.
  *
- * Ordering by weight rather than member count is deliberate and was measured: the quota is a scarce
- * resource claimed first-come-first-served, so a count ordering lets light leaves consume a cell's
- * slots before a heavy leaf is considered, and the heavy one is then refused and retired whole --
- * emerging as a single very heavy super-particle beside the light ones that took its slots. Switching
- * the ordering alone cut the worst in-cell super-particle weight ratio from 682 to 228 and the mean
- * from 48.9 to 16.9, dwarfing the effect of the split-plane crossover above (a further ~15%).
+ * Splits are along the longest real-space axis and are deliberately UNSNAPPED to the grid, so a leaf
+ * may straddle a cell face and draw members from either side. The split plane is the count median
+ * while the node is wider than @a a_weightSplitScale cell widths, and the weight median once it is
+ * narrower: above that scale a split apportions leaves between cells, which is a question of counts;
+ * below it the weight median drives the resulting super-particles toward equal weight.
  *
- * The quota governs leaves that will actually MERGE, and only those. mergeBucketTreeCarve() vetoes
- * any final leaf wider than one cell and leaves every one of its members behind individually, so a
- * still-too-wide node does not cost its cell one particle -- it costs its full member count.
- * Refusing to split such a node to protect the quota is therefore a false economy, saving one
- * notional slot at the price of N real particles, and the quota deliberately does not block it.
- * This matters because the budget is decided here while the extent veto is applied later by the
- * caller: before the exemption, every vetoed leaf silently spent a slot it was never going to
- * honour, which measured as 18855 of 26651 excess particles. Adding the exemption drove
- * extent-vetoed leaves to exactly zero and cut cells-over-target from 1.089% to 0.738%, for a 0.09%
- * increase in leaf count.
+ * The quota constrains only leaves that can actually merge. mergeBucketTreeCarve() vetoes any leaf
+ * wider than @c s_bucketTreeMaxLeafExtent and leaves its members behind individually, so such a leaf
+ * costs its cell its full member count rather than one particle; the quota therefore does not block
+ * splitting it further. As a result a cell can finish slightly above @a a_ppc when a leaf is both
+ * too wide to merge and in a cell already at quota, since both available choices overshoot.
  *
- * Particles in cells that are NOT crowded (@a a_cellTrueCount at most @a a_ppc) are excluded from
- * the partition entirely and emitted as singleton leaves. Since the merge threshold is 2 members, a
- * singleton is never merged, so an uncrowded cell can never be drained below target by a
- * neighbouring cell's merge.
- *
- * Why the quota must be live, rather than a budget each node evaluates for itself: consider a cell
- * holding 39 particles at @a a_ppc = 32. It needs exactly 32 leaves, i.e. 7 pairs and 25 singletons.
- * Each particle is worth 32/39 = 0.82 of a leaf, so a PAIR scores 1.64 -- and any per-node rule must
- * therefore either split every pair (giving 39 singletons, over target, cell never reduced) or keep
- * every pair (giving 20 leaves, far under target, badly over-merged). It cannot know WHICH 7 pairs
- * to keep, because that is a property of the cell's quota and not of any individual node. Only an
- * enforced, shared quota can express it. Both natural thresholds were implemented and measured, and
- * both failed exactly this way: stopping at budget <= 1 produced 98% singleton leaves (a 50-particle
- * cell yielding 50 leaves), and stopping at budget < 1.5 left 96 of 100 crowded cells completely
- * unchanged.
- *
- * There is likewise NO leaf-extent test in this partition. An earlier design drove the recursion by
- * extent -- splitting while the node's largest per-axis extent exceeded the caller's max merge
- * distance -- which was the algorithm's single biggest defect. Extent is a purely geometric
- * criterion with no regard for how many particles remain in a node, so it kept splitting long past
- * the point where the pieces were still worth merging, shredding crowded cells into 1-member nodes
- * that then passed through unmerged. Measured on the BrownianWalker regression case, singletons were
- * 83%/72%/64%/38% of all leaves landing in crowded cells at max merge distances of
- * 0.25/0.5/1.0/2.0 -- scaling inversely with the distance exactly as an extent-driven recursion
- * predicts, and leaving up to 45 leaves in a single cell against a target of 32. It is also why the
- * achieved particles-per-cell used to depend on the max merge distance at all. The extent bound is
- * still enforced, but by mergeBucketTreeCarve() as a per-leaf FILTER on this function's FINISHED
- * output (a leaf exceeding it is classified unmergeable and left alone), never as a driver of the
- * partition.
- *
- * Grid-aligned grouping -- sorting by cell and splitting within each cell -- is a tempting way to
- * make the per-cell count exact, and it does, but it is NOT acceptable here: leaves confined to a
- * single cell lock the merge pattern to the mesh and produce aliasing artifacts. Leaves must remain
- * free to cross a cell face, which the quota design preserves.
+ * Particles in cells at or below @a a_ppc are excluded from the partition and emitted as singleton
+ * leaves. A singleton never merges (the merge threshold is two members), so an uncrowded cell cannot
+ * be drained by a neighbour's merge.
  * @tparam Packed See BucketParticle.
- * @tparam CellTrueCount Callable `(const IntVect&) -> int`; returns that cell's TRUE particle count
- * (from a histogram built once, up front, over every particle regardless of where the partition
- * currently holds it), or 0 for a cell with no members at all. A cell is crowded iff this count
- * exceeds @a a_ppc.
+ * @tparam CellTrueCount Callable `(const IntVect&) -> int` giving that cell's total particle count,
+ * or 0 for an empty cell. A cell is crowded iff this exceeds @a a_ppc.
  * @param[in,out] a_particles Particles to partition; reordered in place.
- * @param[in] a_ppc Target particles per cell (same value used by every other merge method), enforced
- * here as a hard per-cell ceiling on leaf count.
- * @param[in] a_weightSplitScale Leaf size, in cell widths, at or below which splitting switches from
- * the count median to the WEIGHT median (the plane with half the node's particle weight on each
- * side). Above this size a split's job is to apportion leaves between cells, which is a question
- * about counts; at or below it there is little left to apportion and the weight median is what
- * drives the resulting super-particles toward equal weight. 0 disables the weight median entirely.
+ * @param[in] a_ppc Target particles per cell, enforced here as a per-cell ceiling on leaf count.
+ * @param[in] a_weightSplitScale Leaf size, in cell widths, at or below which the split plane
+ * switches from the count median to the weight median. 0 disables the weight median.
  * @param[in] a_dx This patch's own cell spacing.
- * @param[in] a_probLo Physical position of the domain's low corner (needed to compute each
- * particle's own cell index, for the @a a_cellTrueCount lookup and the quota bookkeeping).
- * @param[in] a_cellTrueCount Per-cell TRUE particle-count lookup -- see @tparam CellTrueCount.
+ * @param[in] a_probLo Physical position of the domain's low corner, for computing cell indices.
+ * @param[in] a_cellTrueCount Per-cell particle-count lookup -- see @tparam CellTrueCount.
  * @param[out] a_leaves Every resulting leaf, in no particular order.
  */
 template <typename Packed, typename CellTrueCount>

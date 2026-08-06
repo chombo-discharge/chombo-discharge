@@ -150,6 +150,14 @@ bucketTreeBBox(const std::vector<BucketParticle<Packed>>& a_particles,
 }
 
 /**
+ * @brief Largest per-axis leaf extent, in cell widths, that may still be merged.
+ * @details buildBucketTreeLeaves() and mergeBucketTreeCarve() must use the same value: the former
+ * sets each cell's leaf budget assuming a leaf merges to one particle, the latter vetoes leaves
+ * exceeding this bound. A disagreement spends budget on leaves that are then rejected.
+ */
+static constexpr Real s_bucketTreeMaxLeafExtent = 1.0;
+
+/**
  * @brief Largest per-axis extent of [a_boxLo,a_boxHi], expressed as a fraction of that axis's own
  * cell width.
  * @details The correctness backstop buildBucketTreeLeaves()/mergeBucketTreeCarve() rely on to
@@ -223,21 +231,8 @@ bucketTreeIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
  * @details The split point is the position-sorted median particle (via nth_element), balancing
  * COUNT as evenly as possible -- mirrors equal_weight_kd's own single-cell logic, but by count,
  * never by weight, and with NO synthetic particle splitting (a particle is never divided across
- * the two children).
- *
- * NOTE: an earlier design split at a fixed GEOMETRIC midpoint here instead --
- * splitCoord = 0.5*(boxLo[axis]+boxHi[axis]), applied via std::partition. That rule is wrong and
- * was replaced. Once particles are heavily clustered (as they routinely become after repeated
- * merging, since a merged particle sits exactly at its parents' weighted centroid) plus even one
- * outlier stretching the node's bounding box, EVERY clustered particle falls on the same side of
- * that fixed coordinate threshold. The degenerate-split clamp (forcing the smaller side to at
- * least 1 particle) then peels off exactly one particle per split instead of dividing the range in
- * half, degrading the partition from O(log n) depth to O(n) and shattering an entire crowded cell
- * into near-singleton leaves -- confirmed empirically (leaf count approximately equal to particle
- * count, and crowded cells holding thousands of particles left completely untouched by an entire
- * merge pass). A count-median split has no such failure mode: nth_element always divides the range
- * in half BY COUNT regardless of how the values are distributed, so it degrades gracefully even
- * under extreme clustering.
+ * the two children). nth_element divides the range in half by count however the positions are
+ * distributed, so a tightly clustered node still splits evenly.
  * @param[in,out] a_particles Particle buffer; reordered in [a_lo,a_hi).
  * @param[in] a_lo Start of the range (inclusive).
  * @param[in] a_hi End of the range (exclusive); a_hi - a_lo must be >= 2.
@@ -375,25 +370,14 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
   // LIVE PER-CELL LEAF BUDGET, enforced as a hard constraint at split time rather than computed
   // per node and hoped for afterwards.
   //
-  // Every leaf becomes exactly ONE super-particle, placed at its own weighted centroid, so the
-  // number of leaves whose centroid falls in a cell IS that cell's post-merge population. Track that
-  // count live, and simply refuse any split that would push a cell past a_ppc. Splitting stops when
-  // nothing may be split any further, at which point every cell holds at most a_ppc leaves -- and as
-  // close to a_ppc as the constraint permits, since the loop always splits while it legally can.
-  // No cell can be left crowded by construction; that is the property every earlier formulation
-  // only approximated, and measurably failed to reach.
+  // Every leaf becomes exactly ONE super-particle at its own weighted centroid, so the number of
+  // leaves whose centroid falls in a cell is that cell's post-merge population. Track that count
+  // live and refuse any split that would push a cell past a_ppc. The per-cell ceiling is a shared
+  // resource and cannot be expressed by any test a node applies to itself alone.
   //
-  // Why a per-node budget test cannot do this: consider a cell holding 39 particles at a_ppc = 32.
-  // It needs exactly 32 leaves, i.e. 7 pairs and 25 singletons. Each particle's share is 32/39 =
-  // 0.82, so a pair scores 1.64 -- and a per-node rule must either split every pair (39 singletons,
-  // over target, cell never reduced) or keep every pair (20 leaves, well under target, badly
-  // over-merged). It cannot know WHICH 7 pairs to keep, because that is a property of the cell's
-  // quota, not of any individual node. A live quota expresses it directly.
-  //
-  // Splits are handed out largest-first: with a finite quota the split order determines who gets
-  // it, and spending it on the leaf holding the most particles is what drives the population down
-  // fastest. (Under an unconstrained threshold recursion the order would be irrelevant, since every
-  // node decides independently.)
+  // Splits are handed out heaviest-first: the quota is claimed first-come-first-served, so a
+  // lighter ordering lets light leaves take a cell's slots before a heavy leaf is considered, and
+  // the heavy one is then refused and retired whole as a single very heavy super-particle.
   auto centroidCellOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> IntVect {
     RealVect centroid = RealVect::Zero;
     Real     totalW   = 0.0;
@@ -446,22 +430,15 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
   // final leaf whose largest per-axis extent exceeds one cell width and leaves every one of its
   // members behind as an individual particle, so such a node does NOT cost its cell one particle --
   // it costs its full member count.
-  auto tooWideToMerge = [&](const std::size_t a_lo, const std::size_t a_hi) -> bool {
+  auto maxAxisSpanOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> Real {
     RealVect boxLo, boxHi;
     bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
-    return bucketTreeMaxAxisSpan(boxLo, boxHi, a_dx) > 1.0;
+    return bucketTreeMaxAxisSpan(boxLo, boxHi, a_dx);
   };
 
   // Whether [a_lo,a_hi) has shrunk to the scale at which the weight median takes over from the
   // count median (see the split site below for why the crossover exists and where it sits).
-  auto atWeightSplitScale = [&](const std::size_t a_lo, const std::size_t a_hi) -> bool {
-    RealVect boxLo, boxHi;
-    bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
-
-    return bucketTreeMaxAxisSpan(boxLo, boxHi, a_dx) <= a_weightSplitScale;
-  };
-
   const auto cellLess = [](const IntVect& a_lhs, const IntVect& a_rhs) noexcept -> bool {
     return bucketTreeIntVectLess(a_lhs, a_rhs);
   };
@@ -492,27 +469,13 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
 
     // The split itself only reorders within [lo,hi), which is harmless even if the split is then
     // refused -- the range stays one contiguous leaf either way.
-    // The split rule changes with scale, and both ends of that crossover were measured.
-    //
-    // While a node still spans many cells, a split's job is to apportion leaves BETWEEN cells, which
-    // is a question about counts. Using the weight median there lets one heavy particle drag the
-    // plane, producing nodes wildly lopsided by count, and the distortion propagates through every
-    // later split: applied patch-wide it pushed the worst in-cell max/min weight ratio to 224 and
-    // left 1.156% of cells above target.
-    //
-    // Restricting it to nodes inside a single cell is the opposite error. The quota stops splitting
-    // once a cell's leaves are spent, so most leaves are emitted while still spanning cells and the
-    // weight median then almost never fires -- the worst ratio went to 752, worse than not doing it
-    // at all, though cells-over-target did improve to 0.784%.
-    //
-    // Hence a crossover at one cell width: keep the count median while a node is still large enough
-    // that leaves must be shared out among several cells, and switch to the weight median once the
-    // node is no wider than a cell, where there is little left to apportion but the weights of the
-    // resulting super-particles are still very much in play. Note this is an EXTENT test, not a
-    // "both corners in the same cell" test -- the latter is far stricter (a node 0.1 cells wide
-    // straddling a face fails it) and made the weight median fire so rarely it was worse than not
-    // doing it at all.
-    const std::size_t mid = atWeightSplitScale(node.lo, node.hi)
+    // While a node spans several cells a split apportions leaves BETWEEN cells, which is a question
+    // of counts; once it is narrow the weight median is what drives the super-particles toward equal
+    // weight. This is an extent test, not a "both corners in one cell" test, so a narrow node
+    // straddling a face still qualifies.
+    const Real nodeSpan = maxAxisSpanOf(node.lo, node.hi);
+
+    const std::size_t mid = (nodeSpan <= a_weightSplitScale)
                               ? bucketTreeSplitWeightMedian(a_particles, node.lo, node.hi)
                               : bucketTreeSplitCountMedian(a_particles, node.lo, node.hi);
 
@@ -523,19 +486,11 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     used[cellLeft]++;
     used[cellRight]++;
 
-    // The quota governs leaves that will actually MERGE, and only those. A node still too wide to
-    // merge is not worth one particle to its cell but its whole member count, since the caller will
-    // veto it and leave every member behind individually. Refusing to split it in order to protect
-    // the leaf quota is therefore a false economy -- it saves one notional slot and spends N real
-    // particles -- so the quota deliberately does not block it. Splitting on toward mergeable size
-    // always lowers the cell's final population, even though it raises the leaf count.
-    //
-    // The budget is decided here while the extent veto is applied later by the caller, so without
-    // this exemption every vetoed leaf silently spent a slot it was never going to honour: measured
-    // at 18855 of 26651 excess particles, against carve-dropped boxes and post-carve centroid drift
-    // together under 8000. Adding it drove extent-vetoed leaves to exactly zero and cut
-    // cells-over-target from 1.089% to 0.738%, for a 0.09% increase in leaf count.
-    if (!tooWideToMerge(node.lo, node.hi) && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
+    // The quota constrains only leaves that can actually merge. A node wider than
+    // s_bucketTreeMaxLeafExtent is vetoed by the caller and leaves every member behind
+    // individually, so it costs its cell its full member count rather than one particle; splitting
+    // it further lowers that cell's final population even though it raises the leaf count.
+    if (nodeSpan <= s_bucketTreeMaxLeafExtent && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
       used[cellLeft]--;
       used[cellRight]--;
       used[node.cell]++;
@@ -901,7 +856,7 @@ mergeBucketTreeCarve(AmrMesh&                      a_amr,
         // volume ratio alone cannot be trusted here (a long, thin leaf can have volume <=
         // one cell while still spanning several cells along one axis). leafVolume itself
         // is still needed below, unrelated to this check -- it's the box key's tie-break priority.
-        const bool unmergeable = bucketTreeMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > 1.0;
+        const bool unmergeable = bucketTreeMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_bucketTreeMaxLeafExtent;
 
         // Per-resident-member exposure -- needed either way (leaf-wide OR for the interior/
         // boundary decision below; per-particle for the unmergeable-leaf listen-only case). Ghosts
