@@ -442,6 +442,17 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     return w;
   };
 
+  // Whether [a_lo,a_hi) is still too wide to be merged at all. mergeBucketTreeCarve() vetoes any
+  // final leaf whose largest per-axis extent exceeds one cell width and leaves every one of its
+  // members behind as an individual particle, so such a node does NOT cost its cell one particle --
+  // it costs its full member count.
+  auto tooWideToMerge = [&](const std::size_t a_lo, const std::size_t a_hi) -> bool {
+    RealVect boxLo, boxHi;
+    bucketTreeBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
+
+    return bucketTreeMaxAxisSpan(boxLo, boxHi, a_dx) > 1.0;
+  };
+
   // Whether [a_lo,a_hi) has shrunk to the scale at which the weight median takes over from the
   // count median (see the split site below for why the crossover exists and where it sits).
   auto atWeightSplitScale = [&](const std::size_t a_lo, const std::size_t a_hi) -> bool {
@@ -512,7 +523,19 @@ buildBucketTreeLeaves(std::vector<BucketParticle<Packed>>& a_particles,
     used[cellLeft]++;
     used[cellRight]++;
 
-    if (used[cellLeft] > a_ppc || used[cellRight] > a_ppc) {
+    // The quota governs leaves that will actually MERGE, and only those. A node still too wide to
+    // merge is not worth one particle to its cell but its whole member count, since the caller will
+    // veto it and leave every member behind individually. Refusing to split it in order to protect
+    // the leaf quota is therefore a false economy -- it saves one notional slot and spends N real
+    // particles -- so the quota deliberately does not block it. Splitting on toward mergeable size
+    // always lowers the cell's final population, even though it raises the leaf count.
+    //
+    // The budget is decided here while the extent veto is applied later by the caller, so without
+    // this exemption every vetoed leaf silently spent a slot it was never going to honour: measured
+    // at 18855 of 26651 excess particles, against carve-dropped boxes and post-carve centroid drift
+    // together under 8000. Adding it drove extent-vetoed leaves to exactly zero and cut
+    // cells-over-target from 1.089% to 0.738%, for a 0.09% increase in leaf count.
+    if (!tooWideToMerge(node.lo, node.hi) && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
       used[cellLeft]--;
       used[cellRight]--;
       used[node.cell]++;

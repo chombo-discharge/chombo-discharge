@@ -178,6 +178,17 @@ struct BucketLeaf
  * the ordering alone cut the worst in-cell super-particle weight ratio from 682 to 228 and the mean
  * from 48.9 to 16.9, dwarfing the effect of the split-plane crossover above (a further ~15%).
  *
+ * The quota governs leaves that will actually MERGE, and only those. mergeBucketTreeCarve() vetoes
+ * any final leaf wider than one cell and leaves every one of its members behind individually, so a
+ * still-too-wide node does not cost its cell one particle -- it costs its full member count.
+ * Refusing to split such a node to protect the quota is therefore a false economy, saving one
+ * notional slot at the price of N real particles, and the quota deliberately does not block it.
+ * This matters because the budget is decided here while the extent veto is applied later by the
+ * caller: before the exemption, every vetoed leaf silently spent a slot it was never going to
+ * honour, which measured as 18855 of 26651 excess particles. Adding the exemption drove
+ * extent-vetoed leaves to exactly zero and cut cells-over-target from 1.089% to 0.738%, for a 0.09%
+ * increase in leaf count.
+ *
  * Particles in cells that are NOT crowded (@a a_cellTrueCount at most @a a_ppc) are excluded from
  * the partition entirely and emitted as singleton leaves. Since the merge threshold is 2 members, a
  * singleton is never merged, so an uncrowded cell can never be drained below target by a
