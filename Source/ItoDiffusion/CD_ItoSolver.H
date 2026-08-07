@@ -846,7 +846,7 @@ public:
                      const ParticleManagement::ParticleMergeMethod a_method);
 
   /**
-   * @brief Make superparticles with the equal-weight KD-tree merge, regardless of merge_algorithm.
+   * @brief Make superparticles with the equal-weight KD-tree merge.
    * @details Recursively partitions each cell into at most a_particlesPerCell equal-weight KD leaves and
    * reduces each to one weighted-centroid particle. The container must be cell-sorted
    * (organizeParticlesByCell()) first.
@@ -858,7 +858,7 @@ public:
   makeSuperparticlesEqualWeightKD(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Make superparticles with the reinitialize merge, regardless of merge_algorithm.
+   * @brief Make superparticles with the reinitialize merge.
    * @details Redistributes each cell's physical particles into at most a_particlesPerCell computational
    * particles with near-uniform integer weights at random cell positions. The container must be
    * cell-sorted (organizeParticlesByCell()) first.
@@ -869,7 +869,7 @@ public:
   makeSuperparticlesReinitialize(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Make superparticles with the reinitialize-BVH merge, regardless of merge_algorithm.
+   * @brief Make superparticles with the reinitialize-BVH merge.
    * @details Like makeSuperparticlesEqualWeightKD() but reinitializes leaf positions (weighted centroid
    * in cut-cells, a random point in full cells). The container must be cell-sorted first.
    * @param[in] a_container        Which container to repartition.
@@ -880,7 +880,7 @@ public:
 
   /**
    * @brief Make superparticles with the space-filling-curve nearest-neighbour merge, regardless of
-   * merge_algorithm.
+   * the m_mergeMethod specification.
    * @details Sorts particles along a Hilbert curve and merges adjacent pairs until the target is reached
    * (splitting the heaviest when below target). The container must be cell-sorted first.
    * @param[in] a_container        Which container to repartition.
@@ -891,7 +891,7 @@ public:
 
   /**
    * @brief Make superparticles with the distributed nearest-neighbour pair merge (whole-patch
-   * PointCloudBVH search), regardless of merge_algorithm.
+   * PointCloudBVH search).
    * @details Whole-container, cross-patch/cross-rank AMR merge (see
    * ParticleManagement::mergeNearestNeighborsTree). Requires the particle ghost mask registered on
    * this realm (see registerOperators()); it does its own ghost fill and does NOT need cell sorting.
@@ -904,7 +904,7 @@ public:
 
   /**
    * @brief Make superparticles with the distributed nearest-neighbour pair merge (whole-patch
-   * PointCloudHashGrid search), regardless of merge_algorithm.
+   * PointCloudHashGrid search).
    * @details Whole-container, cross-patch/cross-rank AMR merge (see
    * ParticleManagement::mergeNearestNeighborsHash) -- identical algorithm and tunables to
    * makeSuperparticlesNnPairTree(), differing only in the per-patch spatial-index backend. Requires
@@ -919,7 +919,7 @@ public:
 
   /**
    * @brief Make superparticles with the distributed nearest-neighbour pair merge (per-cell
-   * PointCloudBVH search), regardless of merge_algorithm.
+   * PointCloudBVH search).
    * @details Whole-container, cross-patch/cross-rank AMR merge (see
    * ParticleManagement::mergeNearestNeighborsOneCell). Merge distance is structurally fixed at
    * Chebyshev cell distance 1 (own cell and Moore-adjacent neighbors only), so nn_pair_max_cell_dist
@@ -933,7 +933,7 @@ public:
   makeSuperparticlesNnPairOneCell(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Make superparticles with the whole-patch kd-tree merge, regardless of merge_algorithm.
+   * @brief Make superparticles with the whole-patch kd-tree merge.
    * @details Backs both kd_carve and kd_patch (see ParticleManagement::mergeKD), selected by
    * @a a_enableBoundaryCarve. Unlike makeSuperparticlesNnPairTree/Hash/OneCell this is a single,
    * non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/
@@ -1247,14 +1247,15 @@ protected:
   int m_nnPairMaxRounds = 3;
 
   /**
-   * @brief kd_carve: leaf size, in cell widths, at or below which the tree build switches
-   * from count-median to weight-median splitting.
-   * @details Forwarded to ParticleManagement::mergeKD()'s a_weightSplitScale -- see
-   * that function's own docs. Larger values apply the weight median at coarser scales, giving more
+   * @brief Leaf size, in cell widths, at or below which the tree build switches from count-median
+   * to weight-median splitting.
+   * @details Forwarded to ParticleManagement::mergeKD()'s a_splitWeightLeafDx -- see that
+   * function's own docs. Larger values apply the weight median to bigger leaves, giving more
    * uniform super-particle weights at some cost to how evenly leaves are apportioned between cells;
-   * 0 disables it entirely. Only used for kd_carve.
+   * 0 disables it entirely. Governs the shared tree build, so it applies to both kd_carve and
+   * kd_patch.
    */
-  Real m_kdWeightSplitScale = 1.0;
+  Real m_kdSplitWeightLeafDx = 1.0;
 
   /**
    * @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a

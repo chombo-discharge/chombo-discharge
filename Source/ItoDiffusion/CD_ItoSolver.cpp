@@ -456,7 +456,7 @@ ItoSolver::parseParticleMerger()
   // Same rationale as the nn_pair_* reads above -- kd_carve can also be selected as the
   // regrid-time method, bypassing m_mergeMethod, so this is a mandatory input like everything else
   // here rather than gated on m_mergeMethod.
-  pp.get("kd_weight_split_scale", m_kdWeightSplitScale);
+  pp.get("kd_split_weight_leaf_dx", m_kdSplitWeightLeafDx);
 
   // A bad value here silently produces a degenerate merge, so fail loudly (in every build, not just
   // DEBUG) rather than assert.
@@ -469,8 +469,8 @@ ItoSolver::parseParticleMerger()
   if (m_nnPairMaxRounds < 1) {
     MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
   }
-  if (m_kdWeightSplitScale < 0.0) {
-    MayDay::Abort("ItoSolver::parseParticleMerger - 'kd_weight_split_scale' must be >= 0");
+  if (m_kdSplitWeightLeafDx < 0.0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'kd_split_weight_leaf_dx' must be >= 0");
   }
 }
 
@@ -4315,7 +4315,7 @@ ItoSolver::makeSuperparticlesKD(const WhichContainer a_container,
   ParticleManagement::mergeKD<ItoMergeParticle, Real>(*m_amr,
                                                       merge,
                                                       a_numParticlesPerCellThresh,
-                                                      m_kdWeightSplitScale,
+                                                      m_kdSplitWeightLeafDx,
                                                       gather,
                                                       combine,
                                                       scatter,

@@ -31,9 +31,8 @@
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
+#include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>
-
-class AmrMesh;
 
 namespace ParticleManagement {
 
@@ -164,7 +163,7 @@ struct KDLeaf
  *
  * Splits are along the longest real-space axis and are deliberately UNSNAPPED to the grid, so a leaf
  * may straddle a cell face and draw members from either side. The split plane is the count median
- * while the node is wider than @a a_weightSplitScale cell widths, and the weight median once it is
+ * while the node is wider than @a a_splitWeightLeafDx cell widths, and the weight median once it is
  * narrower: above that scale a split apportions leaves between cells, which is a question of counts;
  * below it the weight median drives the resulting super-particles toward equal weight.
  *
@@ -182,7 +181,7 @@ struct KDLeaf
  * or 0 for an empty cell. A cell is crowded iff this exceeds @a a_ppc.
  * @param[in,out] a_particles Particles to partition; reordered in place.
  * @param[in] a_ppc Target particles per cell, enforced here as a per-cell ceiling on leaf count.
- * @param[in] a_weightSplitScale Leaf size, in cell widths, at or below which the split plane
+ * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the split plane
  * switches from the count median to the weight median. 0 disables the weight median.
  * @param[in] a_dx This patch's own cell spacing.
  * @param[in] a_probLo Physical position of the domain's low corner, for computing cell indices.
@@ -193,7 +192,7 @@ template <typename Packed, typename CellTrueCount>
 inline void
 buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
                    const int                        a_ppc,
-                   const Real                       a_weightSplitScale,
+                   const Real                       a_splitWeightLeafDx,
                    const RealVect&                  a_dx,
                    const RealVect&                  a_probLo,
                    const CellTrueCount&             a_cellTrueCount,
@@ -444,7 +443,7 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in,out] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
  * @param[in,out] a_particles The real particle container being merged.
  * @param[in] a_ppc Target particles per cell.
- * @param[in] a_weightSplitScale Leaf size, in cell widths, at or below which the tree build switches
+ * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build switches
  * from count-median to weight-median splitting -- forwarded verbatim to buildKDQuotaLeaves(), see
  * that function's own docs. 0 disables the weight median entirely.
  * @param[in] a_gather Per-slot gather callback.
@@ -472,7 +471,7 @@ inline void
 mergeKD(AmrMesh&                      a_amr,
         ParticleContainer<P, Traits>& a_particles,
         const int                     a_ppc,
-        const Real                    a_weightSplitScale,
+        const Real                    a_splitWeightLeafDx,
         const Gather&                 a_gather,
         const Combine&                a_combine,
         const Scatter&                a_scatter,

@@ -28,7 +28,6 @@
 #include <DataIterator.H>
 
 // Our includes
-#include <CD_AmrMesh.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_KDParticleMerge.H>
 #include <CD_NamespaceHeader.H>
@@ -328,7 +327,7 @@ template <typename Packed, typename CellTrueCount>
 inline void
 buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
                    const int                        a_ppc,
-                   const Real                       a_weightSplitScale,
+                   const Real                       a_splitWeightLeafDx,
                    const RealVect&                  a_dx,
                    const RealVect&                  a_probLo,
                    const CellTrueCount&             a_cellTrueCount,
@@ -475,8 +474,8 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     // straddling a face still qualifies.
     const Real nodeSpan = maxAxisSpanOf(node.lo, node.hi);
 
-    const std::size_t mid = (nodeSpan <= a_weightSplitScale) ? kdSplitWeightMedian(a_particles, node.lo, node.hi)
-                                                             : kdSplitCountMedian(a_particles, node.lo, node.hi);
+    const std::size_t mid = (nodeSpan <= a_splitWeightLeafDx) ? kdSplitWeightMedian(a_particles, node.lo, node.hi)
+                                                              : kdSplitCountMedian(a_particles, node.lo, node.hi);
 
     const IntVect cellLeft  = centroidCellOf(node.lo, mid);
     const IntVect cellRight = centroidCellOf(mid, node.hi);
@@ -579,7 +578,7 @@ inline void
 mergeKD(AmrMesh&                      a_amr,
         ParticleContainer<P, Traits>& a_particles,
         const int                     a_ppc,
-        const Real                    a_weightSplitScale,
+        const Real                    a_splitWeightLeafDx,
         const Gather&                 a_gather,
         const Combine&                a_combine,
         const Scatter&                a_scatter,
@@ -778,7 +777,7 @@ mergeKD(AmrMesh&                      a_amr,
       };
 
       std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_weightSplitScale, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
 
       // Per-patch exposure cache: leaves are about a cell in extent and not grid-aligned, so many leaves
       // (and many members within one leaf) end up querying the SAME actual cell's exposure. A
