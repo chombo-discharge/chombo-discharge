@@ -1272,11 +1272,10 @@ protected:
   /**
    * @brief Leaf size, in cell widths, at or below which the tree build switches from count-median
    * to weight-median splitting.
-   * @details Forwarded to ParticleManagement::mergeKD()'s a_splitWeightLeafDx -- see that
-   * function's own docs. Larger values apply the weight median to bigger leaves, giving more
-   * uniform super-particle weights at some cost to how evenly leaves are apportioned between cells;
-   * 0 disables it entirely. Governs the shared tree build, so it applies to both kd_carve and
-   * kd_patch.
+   * @details Forwarded to the a_splitWeightLeafDx argument of ParticleManagement::mergeKDCarve()
+   * and mergeKDPatch() -- see those functions' own docs. Larger values apply the weight median to bigger leaves, giving
+   * more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells; 0 disables it
+   * entirely. Governs the shared tree build, so it applies to both kd_carve and kd_patch.
    */
   Real m_kdSplitWeightLeafDx = 1.0;
 

@@ -46,8 +46,8 @@ enum class ParticleMergeMethod
   NnPairTree,      ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
   NnPairOneCell,   ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
   NnPairHash,      ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
-  KdCarve,         ///< AMR: mergeKD with the carve tier (whole-patch kd-tree build, arbitrated patch boundaries).
-  KdPatch,         ///< AMR: mergeKD without it (same build, patch-local -- no ghosts, no contested particles).
+  KdCarve,         ///< AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries).
+  KdPatch,         ///< AMR: mergeKDPatch (same build, patch-local -- no ghosts, no contested particles).
   External         ///< Cell: caller-supplied per-cell merger.
 };
 

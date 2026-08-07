@@ -569,7 +569,7 @@ ItoSolver::registerOperators() const
     m_amr->registerParticleGhostMask(m_realm, 1);
 
     // kd_carve's ghost width is hardcoded to 1, unlike nn_pair_tree/nn_pair_hash's
-    // nn_pair_max_cell_dist-driven width. mergeKD() likewise bounds a mergeable leaf's
+    // nn_pair_max_cell_dist-driven width. mergeKDCarve() likewise bounds a mergeable leaf's
     // own extent at a fixed one cell width, which the width-1 fill here already matches exactly:
     // buildKDQuotaLeaves() can never see a particle farther away than this fill provides, so a
     // looser leaf bound could not be honoured even if one existed. Registered unconditionally here, same as
@@ -4230,24 +4230,24 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
   CH_TIME("ItoSolver::makeSuperparticlesKDImpl");
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
-  // using the whole-patch kd-tree carve merge (see ParticleManagement::mergeKD).
-  // Unlike makeSuperparticlesNnPairTree/Hash/OneCell, there is no drain-loop round here -- the
-  // carve protocol is a single, fixed, non-iterative pass -- in four steps:
+  // using the whole-patch kd-tree merge (ParticleManagement::mergeKDCarve or mergeKDPatch).
+  // Unlike makeSuperparticlesNnPairTree/Hash/OneCell, there is no drain-loop round here -- both
+  // are a single, fixed, non-iterative pass -- in four steps:
   //
   //   1. extractIntoMergeContainer(): copy the ItoParticles into a minimal ItoMergeParticle
   //      container (position + weight + energy) on the same realm/patch, then clear the
   //      ItoParticles.
   //   2. Build the merge callbacks (gather/N-ary combine/scatter), the EB position-validity
   //      predicate, and the rank-namespaced fresh-id allocator.
-  //   3. Assign every particle a fresh id/rank, fill the width-1 same-level/coarse-to-fine/
-  //      fine-to-coarse particle ghost masks, then run mergeKD() once. Forwards
-  //      whether the boundary/carve tier runs.
+  //   3. Assign every particle a fresh id/rank, then run the selected merge once: mergeKDCarve()
+  //      after filling the width-1 same-level/coarse-to-fine/fine-to-coarse particle ghost masks,
+  //      or mergeKDPatch() with no ghost fill at all.
   //   4. splitAndRebuildFromMergeContainer(): bring under-full cells up to the target by repeatedly
   //      halving the heaviest particle, then rebuild the ItoParticles.
 
-  // The kd-tree carve merge has no per-level notion -- it uses a SINGLE crowding threshold over
-  // the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is uniform
-  // wherever kd_carve is used.
+  // The whole-patch kd-tree merges have no per-level notion -- they use a SINGLE crowding threshold
+  // over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is uniform
+  // wherever kd_carve/kd_patch are used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
 
   // 1. Extract.

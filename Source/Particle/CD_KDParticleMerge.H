@@ -76,7 +76,7 @@ struct KDParticle
    * residency are different questions: a particle owned by this rank via one patch can be a ghost
    * in a NEIGHBORING patch this same rank also owns, and treating "owner == this rank" as "no
    * further contest possible" there is exactly the bug this field exists to prevent -- see
-   * mergeKD()'s own docs.
+   * mergeKDCarve()'s own docs.
    */
   bool isGhost = false;
 
@@ -101,7 +101,7 @@ struct KDParticle
  * @param[in] a_weights  Pointer to the first of @c a_count parents' weights, parallel to
  * @c a_payloads.
  * @param[in] a_count    Number of parents being combined (always >= 2 -- see the merge threshold
- * in mergeKD()'s own docs).
+ * in mergeKDCarve()/mergeKDPatch()'s own docs).
  * @return The merged particle's payload.
  */
 template <typename Packed>
@@ -116,7 +116,7 @@ namespace detail {
  * @details Leaves are never grid-aligned by construction (see buildKDQuotaLeaves()) -- a
  * leaf's box can legitimately straddle a cell face. Whether a leaf is interior, a boundary
  * candidate, or unmergeable is NOT stored here; it is derived at classification time from the
- * leaf's own members/box (see mergeKD()'s implementation) so there is exactly one
+ * leaf's own members/box (see mergeKDCarve()'s implementation) so there is exactly one
  * source of truth for that decision.
  */
 struct KDLeaf
@@ -160,7 +160,8 @@ struct KDLeaf
  * narrower: above that scale a split apportions leaves between cells, which is a question of counts;
  * below it the weight median drives the resulting super-particles toward equal weight.
  *
- * The quota constrains only leaves that can actually merge. mergeKD() vetoes any leaf
+ * The quota constrains only leaves that can actually merge. mergeKDCarve() and mergeKDPatch()
+ * veto any leaf
  * wider than @c s_kdMaxLeafExtent and leaves its members behind individually, so such a leaf
  * costs its cell its full member count rather than one particle; the quota therefore does not block
  * splitting it further. As a result a cell can finish slightly above @a a_ppc when a leaf is both
@@ -272,7 +273,7 @@ struct KDClaim
    * different patches that same rank owns) can both claim the same foreign particle at once, and
    * the reply must let each of them individually learn whether IT specifically won -- a rank-level
    * "your rank won" answer cannot distinguish which of that rank's own competing boxes it was. See
-   * mergeKD()'s own docs for the double-count this caused before this field existed.
+   * mergeKDCarve()'s own docs for the double-count this caused before this field existed.
    */
   int proposerBoxIdx;
 };
@@ -288,7 +289,7 @@ struct KDClaim
  * member does not by itself guarantee the winning box will actually commit -- it can independently
  * lose OTHER members to OTHER, unrelated lower-keyed competitors and end up under the merge
  * threshold itself. An owner must NOT delete a member on the strength of this verdict alone -- it
- * must wait for the corresponding KDCommit in Phase 3. See mergeKD()'s own docs
+ * must wait for the corresponding KDCommit in Phase 3. See mergeKDCarve()'s own docs
  * for a worked counterexample of the conservation bug that results from deleting here instead.
  */
 struct KDVerdict

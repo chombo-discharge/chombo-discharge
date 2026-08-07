@@ -153,7 +153,7 @@ kdBBox(const std::vector<KDParticle<Packed>>& a_particles,
 
 /**
  * @brief Largest per-axis leaf extent, in cell widths, that may still be merged.
- * @details buildKDQuotaLeaves() and mergeKD() must use the same value: the former
+ * @details buildKDQuotaLeaves() and both merge entry points must use the same value: the former
  * sets each cell's leaf budget assuming a leaf merges to one particle, the latter vetoes leaves
  * exceeding this bound. A disagreement spends budget on leaves that are then rejected.
  */
@@ -162,7 +162,7 @@ static constexpr Real s_kdMaxLeafExtent = 1.0;
 /**
  * @brief Largest per-axis extent of [a_boxLo,a_boxHi], expressed as a fraction of that axis's own
  * cell width.
- * @details The correctness backstop buildKDQuotaLeaves()/mergeKD() rely on to
+ * @details The correctness backstop buildKDQuotaLeaves(), mergeKDCarve() and mergeKDPatch() rely on to
  * decide whether a leaf is compact enough to merge: unlike an aggregate VOLUME ratio (a product
  * across axes), this cannot be fooled by an anisotropic (long-and-thin) bounding box -- e.g. a box
  * 5 cells long in one axis and 0.2 cells wide in another has volume ratio 1.0 (deceptively "one
@@ -515,7 +515,7 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     return w;
   };
 
-  // Whether [a_lo,a_hi) is still too wide to be merged at all. mergeKD() vetoes any
+  // Whether [a_lo,a_hi) is still too wide to be merged at all. Both merges veto any
   // final leaf whose largest per-axis extent exceeds one cell width and leaves every one of its
   // members behind as an individual particle, so such a node does NOT cost its cell one particle --
   // it costs its full member count.
@@ -1506,7 +1506,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
     const auto dst = a_particles.findDestination(mr.particle.position);
 
     if (!dst.valid) {
-      MayDay::Error("ParticleManagement::mergeKD -- merged particle not found in any patch");
+      MayDay::Error("ParticleManagement::mergeKDCarve -- merged particle not found in any patch");
     }
 
     if (dst.rank == myRank) {
@@ -1528,7 +1528,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
     const auto dst = a_particles.findDestination(p.position);
 
     if (!dst.valid || dst.rank != myRank) {
-      MayDay::Error("ParticleManagement::mergeKD -- incoming scattered particle not "
+      MayDay::Error("ParticleManagement::mergeKDCarve -- incoming scattered particle not "
                     "found in any of this rank's own patches");
     }
 

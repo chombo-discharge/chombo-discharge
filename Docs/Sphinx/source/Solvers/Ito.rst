@@ -382,14 +382,15 @@ Calling this function will merge/split the particles.
 .. important::
 
    Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (``organizeParticlesByCell``) before calling the merging routine.
-   The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, and ``kd_carve``, which are distributed AMR-level merges that match particles across patch and rank boundaries; they instead require that a particle ghost halo has been filled, and are dispatched over the whole container rather than cell by cell.
+   The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, and ``kd_patch``, which are distributed AMR-level merges dispatched over the whole container rather than cell by cell.
+   All of these except ``kd_patch`` match particles across patch and rank boundaries and therefore require that a particle ghost halo has been filled; ``kd_patch`` is patch-local and instead requires that no ghost halo is present.
 
 In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
 
 * ``none`` - No particle merging/splitting is performed.
-* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
+* ``equal_weight_kd`` Use a kd-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
-* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.
+* ``reinitialize_bvh`` Re-initialize the particles in each node of a kd-tree. Weights are as uniform as possible.
 * ``nn_sfc`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
 * ``nn_pair_tree`` A distributed, MPI-safe nearest-neighbour *pair* merge that reaches the target particle count over the whole AMR hierarchy, searching for candidates via one whole-patch PointCloudBVH per patch. Over-full cells are drained by matching each over-crowded particle with its true nearest neighbour across patch and rank boundaries (a propose/judge/verdict protocol over a particle ghost halo) and merging the pair to its weighted centroid; because a single round merges pairs, the round is repeated until every cell reaches the target. Under-full cells are then brought up to the target by splitting the heaviest particle into two co-located daughters (floor/ceil weights, so integer weights stay integer). Tunable through ``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback`` and ``ItoSolver.nn_pair_max_cell_dist``.
 * ``nn_pair_onecell`` The same distributed nearest-neighbour pair merge and drain/split protocol as ``nn_pair_tree``, but candidates are found via one PointCloudBVH per occupied grid cell instead of one per patch: a query only ever searches its own cell and its Moore-adjacent neighbours, so the merge distance is structurally fixed at Chebyshev cell distance 1 and ``ItoSolver.nn_pair_max_cell_dist`` does not apply. Tunable through ``ItoSolver.nn_pair_iterate`` and ``ItoSolver.nn_pair_fallback``.
@@ -414,7 +415,7 @@ In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. tip::
    
-   ``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
+   ``ItoSolver`` uses the kd-tree implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
 
 Example transport kernel
 ------------------------
