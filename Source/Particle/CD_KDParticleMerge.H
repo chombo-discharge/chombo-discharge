@@ -455,8 +455,8 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in] a_enableBoundaryCarve Selects between two merges. True (default) runs the full
  * algorithm above: the caller fills ghosts, leaves clear of any patch/level interface commit
  * locally, and the rest are arbitrated by the carve. False makes this a purely patch-local merge --
- * the caller supplies NO ghosts, every leaf commits regardless of boundary exposure, and steps 3
- * through 6 propose nothing, so each patch merges only its own particles and no particle is ever
+ * the caller supplies NO ghosts, every leaf commits regardless of boundary exposure, and the carve
+ * protocol proposes nothing, so each patch merges only its own particles and no particle is ever
  * contested. Passing false while still filling ghosts is a contract violation; leaves holding a
  * ghost are then left untouched rather than merged, so weight is never double-counted.
  */
