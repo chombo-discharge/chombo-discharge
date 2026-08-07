@@ -135,6 +135,9 @@ kdBBox(const std::vector<KDParticle<Packed>>& a_particles,
        RealVect&                              a_boxLo,
        RealVect&                              a_boxHi) noexcept
 {
+  CH_assert(a_hi > a_lo);
+  CH_assert(a_hi <= a_particles.size());
+
   a_boxLo = a_particles[a_lo].position;
   a_boxHi = a_particles[a_lo].position;
 
@@ -268,7 +271,9 @@ public:
       }
 
       m_counts[writeIdx] = std::make_pair(m_counts[readIdx].first, total);
+
       writeIdx++;
+
       readIdx = runEnd;
     }
 
@@ -319,6 +324,8 @@ kdSplitCountMedian(std::vector<KDParticle<Packed>>& a_particles,
                    const std::size_t                a_lo,
                    const std::size_t                a_hi) noexcept
 {
+  CH_assert(a_hi - a_lo >= 2);
+
   RealVect boxLo, boxHi;
   kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
@@ -364,6 +371,8 @@ kdSplitWeightMedian(std::vector<KDParticle<Packed>>& a_particles,
                     const std::size_t                a_lo,
                     const std::size_t                a_hi) noexcept
 {
+  CH_assert(a_hi - a_lo >= 2);
+
   RealVect boxLo, boxHi;
   kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
 
@@ -396,7 +405,12 @@ kdSplitWeightMedian(std::vector<KDParticle<Packed>>& a_particles,
     }
   }
 
-  return std::max(a_lo + 1, std::min(a_hi - 1, mid));
+  const std::size_t clamped = std::max(a_lo + 1, std::min(a_hi - 1, mid));
+
+  // Both children must be non-empty or the caller's recursion cannot terminate.
+  CH_assert(clamped > a_lo && clamped < a_hi);
+
+  return clamped;
 }
 
 template <typename Packed, typename CellTrueCount>
@@ -587,6 +601,22 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
 
     a_leaves.push_back(KDLeaf{node.lo, node.hi, boxLo, boxHi});
   }
+
+  // The leaves must partition the input exactly: every particle in exactly one leaf, no overlap and
+  // nothing dropped. Callers rely on this both for the merge itself and for the invariant that
+  // total weight is conserved.
+#ifndef NDEBUG
+  std::size_t coveredMembers = 0;
+
+  for (const KDLeaf& bl : a_leaves) {
+    CH_assert(bl.hi > bl.lo);
+    CH_assert(bl.hi <= a_particles.size());
+
+    coveredMembers += bl.hi - bl.lo;
+  }
+
+  CH_assert(coveredMembers == a_particles.size());
+#endif
 }
 
 /**
@@ -663,7 +693,11 @@ mergeKDCarve(AmrMesh&                      a_amr,
 {
   using namespace detail;
 
-  CH_TIME("ParticleManagement::mergeKDCarve");
+  CH_TIMERS("ParticleManagement::mergeKDCarve");
+  CH_TIMER("ParticleManagement::mergeKDCarve::build_classify", t_build);
+  CH_TIMER("ParticleManagement::mergeKDCarve::carve_exchange", t_carve);
+  CH_TIMER("ParticleManagement::mergeKDCarve::remove_consumed", t_remove);
+  CH_TIMER("ParticleManagement::mergeKDCarve::place_results", t_place);
 
   const std::string   realm       = a_particles.getRealm();
   const int           finestLevel = a_amr.getFinestLevel();
@@ -695,34 +729,44 @@ mergeKDCarve(AmrMesh&                      a_amr,
     std::vector<KDMember> members;
   };
 
+  // particle: the merged super-particle itself.
+  // patchIdx: which patch's leaf produced it, used as the cheap first guess when placing it.
   struct MergedResult
   {
     KDParticle<Packed> particle;
-    int                patchIdx; // which patch's leaf produced this -- the cheap placement guess
+    int                patchIdx;
   };
 
   // One entry per (locally-owned, boundary-exposed particle) x (one of MY OWN boxes that lists it),
   // appended during STEP 1 and sorted by id once STEP 1 finishes -- see selfClaims' declaration
   // below for why an id can have more than one entry, and boxIdx < 0 for what a sentinel entry means.
+  // id:     the locally-owned, boundary-exposed particle this entry concerns.
+  // key:    the claiming box's key. Meaningless when boxIdx is negative.
+  // boxIdx: index into myBoxes, or -1 for a listen-only sentinel. A sentinel carries no claim from
+  //         any of this rank's own boxes; it records that this id must still be processed against
+  //         foreign claims in STEP 3, which is the case for an unmergeable leaf's exposed member or
+  //         a boundary leaf holding fewer than two members.
   struct SelfClaimEntry
   {
     ParticleID id;
-    KDBoxKey   key;    // meaningless when boxIdx < 0.
-    int        boxIdx; // -1 => listen-only sentinel: no actual claim from any of my own boxes, just
-                       // marks that this rank must still process this id (an unmergeable leaf's
-                       // exposed member, or a boundary leaf with < 2 members) when combining with
-                       // foreign claims in STEP 3.
+    KDBoxKey   key;
+    int        boxIdx;
   };
 
   std::vector<PatchWork> patchWork;
 
-  // Pooled: locals + ghosts, rank-wide. One entry per (id, patch-occurrence) is appended during
-  // STEP 1 -- deduplicated (sorted + collapsed, preferring the non-ghost copy) once STEP 1 finishes,
-  // rather than via a per-particle hash lookup while gathering. Point lookups after that go through
-  // findParticle() (binary search) below.
+  // particlesByID:  every particle this rank gathered, locals and ghosts alike. One entry per
+  //                 (id, patch-occurrence) is appended during STEP 1, then deduplicated once STEP 1
+  //                 finishes by sorting and collapsing runs, preferring the non-ghost copy -- which
+  //                 is cheaper than a per-particle hash lookup while gathering. Point lookups after
+  //                 that go through findParticle() below, which binary-searches it.
+  // myBoxes:        this rank's own boundary boxes, indexed by the boxIdx carried in claims.
+  // consumedIDs:    ids whose particle has been merged away and must be deleted. Sorted once,
+  //                 before STEP 7 consumes it by binary search.
+  // mergedResults:  super-particles produced this pass, placed in STEP 8.
   std::vector<std::pair<ParticleID, KDParticle<Packed>>> particlesByID;
   std::vector<RuntimeBox>                                myBoxes;
-  std::vector<ParticleID>                                consumedIDs; // sorted once, before STEP 7
+  std::vector<ParticleID>                                consumedIDs;
   std::vector<MergedResult>                              mergedResults;
 
   // A particle can be listed by more than one of MY OWN boxes at once -- it is gathered once into
@@ -756,6 +800,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
   consumedIDs.reserve(combinedCountUpperBound);
 
   // ==== STEP 1: gather + build + classify + commit interior, per patch ====
+  CH_START(t_build);
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -822,7 +867,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
       for (int dir = 0; dir < SpaceDim; dir++) {
         cacheSize *= static_cast<std::size_t>(patchSize[dir]);
       }
-      std::vector<signed char> exposureCache(cacheSize, -1); // -1 = uncached, 0 = not exposed, 1 = exposed
+      // Tri-state per cell: -1 uncached, 0 not exposed, 1 exposed.
+      std::vector<signed char> exposureCache(cacheSize, -1);
 
       auto isExposedCached = [&](const IntVect& a_iv) -> bool {
         std::size_t cellIdx = 0;
@@ -853,11 +899,11 @@ mergeKDCarve(AmrMesh&                      a_amr,
         std::vector<KDMember> members;
         members.reserve(bl.hi - bl.lo);
 
-        bool       anyLocal = false;
-        ParticleID anchor   = combined[bl.lo].globalID; // running min over ALL members (bl.hi > bl.lo
-                                                        // always holds for a leaf); folded into this
-                                                        // loop so the boundary branch below doesn't
-                                                        // need its own separate pass just to compute it.
+        bool anyLocal = false;
+
+        // Running minimum over ALL members; bl.hi > bl.lo always holds for a leaf. Folded into the
+        // loop below so the boundary branch does not need a separate pass just to compute it.
+        ParticleID anchor = combined[bl.lo].globalID;
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
           members.push_back(KDMember{combined[idx].globalID, combined[idx].ownerRank});
@@ -872,7 +918,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
         }
 
         if (!anyLocal) {
-          continue; // Nothing physically resident here -- no standing to act on it.
+          // Nothing physically resident here, so this rank has no standing to act on it.
+          continue;
         }
 
         Real leafVolume = 1.0;
@@ -919,7 +966,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
             // skips them), so this is equivalent to also checking !isGhost -- kept explicit anyway
             // as the actual invariant being relied on, not an implicit one.
             if (!combined[idx].isGhost && exposed[idx - bl.lo]) {
-              selfClaims.push_back(SelfClaimEntry{combined[idx].globalID, KDBoxKey{}, -1}); // listen only.
+              // Listen-only sentinel; see SelfClaimEntry.
+              selfClaims.push_back(SelfClaimEntry{combined[idx].globalID, KDBoxKey{}, -1});
             }
           }
 
@@ -1072,7 +1120,10 @@ mergeKDCarve(AmrMesh&                      a_amr,
     return a_lhs.id < a_rhs.id;
   });
 
+  CH_STOP(t_build);
+
   // ==== STEP 2: Phase 1 -- claims to owners ====
+  CH_START(t_carve);
   std::vector<std::vector<KDClaim>> claimSendByRank(numRanks);
 
   for (std::size_t boxIdx = 0; boxIdx < myBoxes.size(); boxIdx++) {
@@ -1114,12 +1165,15 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // WHICH one -- see selfClaims' own docs for why this can't just be "myRank", plural competing
   // boxes on this same rank are exactly the bug that distinction exists to prevent) or a foreign
   // rank (boxIdx meaningless).
+  // rank:   the rank owning the winning box.
+  // boxIdx: that box's index within the winning rank's own box list.
+  // key:    the winning key itself, needed in STEP 4 to answer each incoming claim individually --
+  //         a claim won iff its own key is not strictly worse than this one.
   struct Winner
   {
     RankID   rank;
     int      boxIdx;
-    KDBoxKey key; // the winning key itself -- needed in step 4 to answer EACH incoming claim
-                  // individually (won iff that claim's own key is not strictly worse than this).
+    KDBoxKey key;
   };
 
   struct WinnerEntry
@@ -1150,7 +1204,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
     for (std::size_t k = idx; k < idxEnd; k++) {
       if (selfClaims[k].boxIdx < 0) {
-        continue; // Listen-only sentinel -- not an actual self-claim.
+        // Listen-only sentinel, not an actual self-claim.
+        continue;
       }
       if (!haveWinner || selfClaims[k].key < bestKey) {
         haveWinner = true;
@@ -1348,7 +1403,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
         mergedResults.push_back(MergedResult{merged, box.patchIdx});
 
         for (const ParticleID id : survivingLocal) {
-          consumedIDs.push_back(id); // I own these -- confirmed now, no need to wait for anything.
+          // This rank owns these, and the outcome is already known, so nothing need be awaited.
+          consumedIDs.push_back(id);
         }
       }
     }
@@ -1387,7 +1443,13 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
   std::sort(consumedIDs.begin(), consumedIDs.end());
 
+  // STEP 7 below finds entries by binary search, which silently misses on an unsorted range.
+  CH_assert(std::is_sorted(consumedIDs.begin(), consumedIDs.end()));
+
+  CH_STOP(t_carve);
+
   // ==== STEP 7: remove consumed particles ====
+  CH_START(t_remove);
   for (const PatchWork& pw : patchWork) {
     ParticleSoA<P, Traits>& leaf = a_particles[pw.level][pw.din];
 
@@ -1405,7 +1467,10 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
   a_particles.clearGhostParticles();
 
+  CH_STOP(t_remove);
+
   // ==== STEP 8: place merged results ====
+  CH_START(t_place);
   std::vector<std::vector<KDParticle<Packed>>> scatterByDestRank(numRanks);
 
   auto insertHere = [&](const KDParticle<Packed>& a_p, const int a_level, const DataIndex& a_din) {
@@ -1474,6 +1539,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
     insertHere(corrected, dst.level, din);
   }
+
+  CH_STOP(t_place);
 }
 
 template <typename P,
@@ -1497,7 +1564,10 @@ mergeKDPatch(AmrMesh&                      a_amr,
 {
   using namespace detail;
 
-  CH_TIME("ParticleManagement::mergeKDPatch");
+  CH_TIMERS("ParticleManagement::mergeKDPatch");
+  CH_TIMER("ParticleManagement::mergeKDPatch::build", t_build);
+  CH_TIMER("ParticleManagement::mergeKDPatch::commit", t_commit);
+  CH_TIMER("ParticleManagement::mergeKDPatch::remove_place", t_place);
 
   const std::string   realm       = a_particles.getRealm();
   const int           finestLevel = a_amr.getFinestLevel();
@@ -1551,11 +1621,16 @@ mergeKDPatch(AmrMesh&                      a_amr,
         continue;
       }
 
+      CH_START(t_build);
+
       // Ground truth for how crowded each cell really is -- see KDCellHistogram.
       const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
 
       std::vector<KDLeaf> leaves;
       buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+
+      CH_STOP(t_build);
+      CH_START(t_commit);
 
       // Commit every leaf that can merge. Unlike the carve there is no classification step: nothing
       // is exposed to arbitration, so the only questions are whether the leaf is compact enough and
@@ -1582,6 +1657,10 @@ mergeKDPatch(AmrMesh&                      a_amr,
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
           const KDParticle<Packed>& p = combined[idx];
+
+          // Ghosts were filtered out while gathering; merging one here would double-count its
+          // weight against its true owner, which is the contract this merge relies on.
+          CH_assert(!p.isGhost);
 
           payloads.push_back(p.payload);
           weights.push_back(p.weight);
@@ -1613,14 +1692,21 @@ mergeKDPatch(AmrMesh&                      a_amr,
         }
       }
 
+      CH_STOP(t_commit);
+
       if (mergedResults.empty()) {
         continue;
       }
+
+      CH_START(t_place);
 
       // Remove the consumed originals, then insert the merged results. Both are confined to this
       // patch, so no exchange is needed -- but a centroid can still land outside the patch's own
       // box, so placement keeps the same cheap-test-then-general-search shape the carve uses.
       std::sort(consumedIDs.begin(), consumedIDs.end());
+
+      // Removal below finds entries by binary search, which silently misses on an unsorted range.
+      CH_assert(std::is_sorted(consumedIDs.begin(), consumedIDs.end()));
 
       {
         std::size_t i = 0;
@@ -1670,6 +1756,8 @@ mergeKDPatch(AmrMesh&                      a_amr,
 
         a_scatter(a_particles[dst.level][dstDin], mr);
       }
+
+      CH_STOP(t_place);
     }
   }
 }
