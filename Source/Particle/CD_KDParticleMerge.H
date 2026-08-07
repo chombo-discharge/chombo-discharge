@@ -6,14 +6,7 @@
 
 /**
  * @file   CD_KDParticleMerge.H
- * @brief  Declaration of a distributed, MPI-safe whole-patch kd-tree super-particle merge.
- * @details Builds one spatial partition ("kd tree") per patch over local-valid plus every
- * ghost particle, splitting purely by position (never snapped to the grid, so particles near a
- * cell face can merge across it). A leaf whose local members are never boundary-exposed commits
- * immediately with zero communication (the interior tier); every other leaf becomes a candidate
- * "box" resolved by a single, non-iterative, three-phase distributed protocol keyed by
- * (AABB volume, anchor id) -- a "z-buffer carve" of the boundary/skin region where neighboring
- * patches' independently-built trees disagree.
+ * @brief  Declaration of distributed, MPI-safe whole-patch kd-tree super-particle merge algorithms.
  * @author Robert Marskar
  */
 

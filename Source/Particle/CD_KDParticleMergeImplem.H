@@ -225,6 +225,82 @@ kdIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
 }
 
 /**
+ * @brief Per-cell particle-count histogram over one patch's gathered particles.
+ * @details Built once from every particle's own position, so it is unaffected by how
+ * buildKDQuotaLeaves() later partitions the space -- a node-local count is NOT a safe substitute,
+ * see that function's own docs for why. Stored sorted by cell index and looked up by binary search,
+ * and callable directly, so it satisfies buildKDQuotaLeaves()'s CellTrueCount requirement as-is.
+ * Shared by mergeKDCarve() and mergeKDPatch(): both need the same ground truth, and the invariant
+ * that it is built from true positions rather than from the partition is easy to break if each
+ * keeps its own copy.
+ */
+class KDCellHistogram
+{
+public:
+  /**
+   * @brief Build the histogram from one patch's gathered particles.
+   * @param[in] a_particles Gathered particles for this patch.
+   * @param[in] a_probLo Physical position of the domain's low corner.
+   * @param[in] a_dx This patch's own cell spacing.
+   */
+  template <typename Packed>
+  KDCellHistogram(const std::vector<KDParticle<Packed>>& a_particles, const RealVect& a_probLo, const RealVect& a_dx)
+  {
+    m_counts.reserve(a_particles.size());
+
+    for (const KDParticle<Packed>& p : a_particles) {
+      m_counts.emplace_back(kdCellKeyOf(p.position, a_probLo, a_dx), 1);
+    }
+
+    std::sort(m_counts.begin(), m_counts.end(), [](const auto& a_lhs, const auto& a_rhs) {
+      return kdIntVectLess(a_lhs.first, a_rhs.first);
+    });
+
+    std::size_t writeIdx = 0;
+
+    for (std::size_t readIdx = 0; readIdx < m_counts.size();) {
+      std::size_t runEnd = readIdx + 1;
+      int         total  = m_counts[readIdx].second;
+
+      while (runEnd < m_counts.size() && m_counts[runEnd].first == m_counts[readIdx].first) {
+        total += m_counts[runEnd].second;
+        runEnd++;
+      }
+
+      m_counts[writeIdx] = std::make_pair(m_counts[readIdx].first, total);
+      writeIdx++;
+      readIdx = runEnd;
+    }
+
+    m_counts.resize(writeIdx);
+  }
+
+  /**
+   * @brief This cell's total particle count.
+   * @param[in] a_cell Cell index.
+   * @return The cell's particle count, or 0 for a cell holding none.
+   */
+  int
+  operator()(const IntVect& a_cell) const noexcept
+  {
+    const auto it = std::lower_bound(m_counts.begin(),
+                                     m_counts.end(),
+                                     a_cell,
+                                     [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
+                                       return kdIntVectLess(a_entry.first, a_key);
+                                     });
+
+    return (it != m_counts.end() && it->first == a_cell) ? it->second : 0;
+  }
+
+private:
+  /**
+   * @brief Cell index to particle count, sorted by cell index so lookups can binary-search.
+   */
+  std::vector<std::pair<IntVect, int>> m_counts;
+};
+
+/**
  * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the sole
  * split rule used by buildKDQuotaLeaves().
  * @details The split point is the position-sorted median particle (via nth_element), balancing
@@ -728,52 +804,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
         continue;
       }
 
-      // Per-patch, per-cell TRUE particle-count histogram -- computed once, directly from every
-      // particle's own position, so it is unaffected by how buildKDQuotaLeaves() later happens to
-      // carve up the space. This is what makes cellTrueCount (below) a reliable ground truth rather
-      // than a node-local approximation -- see buildKDQuotaLeaves()'s own docs for why the
-      // difference matters. Built the same sort-and-collapse-runs way as particlesByID above.
-      std::vector<std::pair<IntVect, int>> cellCounts;
-      cellCounts.reserve(combined.size());
-
-      for (const KDParticle<Packed>& p : combined) {
-        cellCounts.emplace_back(kdCellKeyOf(p.position, probLo, dxByLevel[lvl]), 1);
-      }
-
-      std::sort(cellCounts.begin(), cellCounts.end(), [](const auto& a_lhs, const auto& a_rhs) {
-        return kdIntVectLess(a_lhs.first, a_rhs.first);
-      });
-
-      {
-        std::size_t writeIdx = 0;
-
-        for (std::size_t readIdx = 0; readIdx < cellCounts.size();) {
-          std::size_t runEnd = readIdx + 1;
-          int         total  = cellCounts[readIdx].second;
-
-          while (runEnd < cellCounts.size() && cellCounts[runEnd].first == cellCounts[readIdx].first) {
-            total += cellCounts[runEnd].second;
-            runEnd++;
-          }
-
-          cellCounts[writeIdx] = std::make_pair(cellCounts[readIdx].first, total);
-          writeIdx++;
-          readIdx = runEnd;
-        }
-
-        cellCounts.resize(writeIdx);
-      }
-
-      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
-        const auto it = std::lower_bound(cellCounts.begin(),
-                                         cellCounts.end(),
-                                         a_cell,
-                                         [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
-                                           return kdIntVectLess(a_entry.first, a_key);
-                                         });
-
-        return (it != cellCounts.end() && it->first == a_cell) ? it->second : 0;
-      };
+      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
+      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
 
       std::vector<KDLeaf> leaves;
       buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
@@ -1519,50 +1551,8 @@ mergeKDPatch(AmrMesh&                      a_amr,
         continue;
       }
 
-      // Per-cell particle-count histogram, built once from every particle's own position so it is
-      // unaffected by how buildKDQuotaLeaves() later carves up the space -- see that function's own
-      // docs for why a node-local count is not a safe substitute.
-      std::vector<std::pair<IntVect, int>> cellCounts;
-      cellCounts.reserve(combined.size());
-
-      for (const KDParticle<Packed>& p : combined) {
-        cellCounts.emplace_back(kdCellKeyOf(p.position, probLo, dxByLevel[lvl]), 1);
-      }
-
-      std::sort(cellCounts.begin(), cellCounts.end(), [](const auto& a_lhs, const auto& a_rhs) {
-        return kdIntVectLess(a_lhs.first, a_rhs.first);
-      });
-
-      {
-        std::size_t writeIdx = 0;
-
-        for (std::size_t readIdx = 0; readIdx < cellCounts.size();) {
-          std::size_t runEnd = readIdx + 1;
-          int         total  = cellCounts[readIdx].second;
-
-          while (runEnd < cellCounts.size() && cellCounts[runEnd].first == cellCounts[readIdx].first) {
-            total += cellCounts[runEnd].second;
-            runEnd++;
-          }
-
-          cellCounts[writeIdx] = std::make_pair(cellCounts[readIdx].first, total);
-          writeIdx++;
-          readIdx = runEnd;
-        }
-
-        cellCounts.resize(writeIdx);
-      }
-
-      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
-        const auto it = std::lower_bound(cellCounts.begin(),
-                                         cellCounts.end(),
-                                         a_cell,
-                                         [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
-                                           return kdIntVectLess(a_entry.first, a_key);
-                                         });
-
-        return (it != cellCounts.end() && it->first == a_cell) ? it->second : 0;
-      };
+      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
+      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
 
       std::vector<KDLeaf> leaves;
       buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
