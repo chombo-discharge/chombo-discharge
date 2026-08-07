@@ -575,20 +575,19 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKD(AmrMesh&                      a_amr,
-        ParticleContainer<P, Traits>& a_particles,
-        const int                     a_ppc,
-        const Real                    a_splitWeightLeafDx,
-        const Gather&                 a_gather,
-        const Combine&                a_combine,
-        const Scatter&                a_scatter,
-        const Allocator&              a_allocateID,
-        const PosValid&               a_isPositionValid,
-        const bool                    a_enableBoundaryCarve)
+mergeKDCarve(AmrMesh&                      a_amr,
+             ParticleContainer<P, Traits>& a_particles,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
+             const Gather&                 a_gather,
+             const Combine&                a_combine,
+             const Scatter&                a_scatter,
+             const Allocator&              a_allocateID,
+             const PosValid&               a_isPositionValid)
 {
   using namespace detail;
 
-  CH_TIME("ParticleManagement::mergeKD");
+  CH_TIME("ParticleManagement::mergeKDCarve");
 
   const std::string   realm       = a_particles.getRealm();
   const int           finestLevel = a_amr.getFinestLevel();
@@ -895,12 +894,9 @@ mergeKD(AmrMesh&                      a_amr,
           continue;
         }
 
-        if (!anyGhost && (!a_enableBoundaryCarve || !anyExposed)) {
+        if (!anyExposed && !anyGhost) {
           // Interior: commit immediately, zero communication, direct insert -- safe ONLY because
-          // anyGhost is false, i.e. this leaf genuinely contains no foreign data at all. With the
-          // carve disabled every leaf takes this path regardless of exposure, since the caller then
-          // supplies no ghosts and each patch merges only its own particles; the !anyGhost guard
-          // still holds, so a caller that fills ghosts anyway cannot double-count through here. Explicitly
+          // anyGhost is false, i.e. this leaf genuinely contains no foreign data at all. Explicitly
           // requiring !anyGhost (not just !anyExposed) matters whenever a leaf spans cells: the old
           // argument ("a leaf whose members are all non-exposed can never contain a ghost, since
           // ghost-fill is symmetric at width 1") only holds when a leaf's own extent is <= 1 cell --
@@ -958,10 +954,8 @@ mergeKD(AmrMesh&                      a_amr,
           continue;
         }
 
-        // Boundary candidate. Unreachable when the carve is disabled, since every ghost-free leaf
-        // committed above; a leaf can only arrive here then if the caller filled ghosts against the
-        // documented contract, and is left untouched.
-        if (a_enableBoundaryCarve && members.size() >= 2) {
+        // Boundary candidate.
+        if (members.size() >= 2) {
           const KDBoxKey key{leafVolume, anchor};
 
           const int boxIdx = static_cast<int>(myBoxes.size());
@@ -976,7 +970,7 @@ mergeKD(AmrMesh&                      a_amr,
             }
           }
         }
-        else if (a_enableBoundaryCarve) {
+        else {
           // Exactly one member, and it must be the resident, exposed one (members.size()>=1 and
           // anyLocal both hold) -- can never reach the merge threshold alone, listen only.
           selfClaims.push_back(SelfClaimEntry{members[0].id, KDBoxKey{}, -1});
@@ -1328,8 +1322,23 @@ mergeKD(AmrMesh&                      a_amr,
     }
 
     // Phase 3 outgoing: every foreign member this box nominally won needs to hear the outcome,
-    // whether this box committed or not -- its owner is otherwise stuck not knowing whether to
-    // delete it (see mergeKD()'s own docs for why this can't be skipped).
+    // whether this box committed or not, since its owner is otherwise left not knowing whether to
+    // delete it.
+    //
+    // This round cannot be collapsed into Phase 2. Winning a member's nominal argmin does not mean
+    // the winning box will actually commit: it can independently lose OTHER members to OTHER,
+    // unrelated lower-keyed boxes and end up under the merge threshold itself. Deleting on the
+    // Phase 2 verdict alone then destroys that particle's weight, because no merged particle
+    // anywhere ends up holding it. Concretely, with three ranks and box keys Kx < Ky < Kz:
+    //
+    //   Bx{p1(X), p2(Y)},  By{p2(Y), p3(Z)},  Bz{p3(Z), p4(X)}
+    //
+    // Argmin gives p1,p2 -> Bx (Bx beats By on p2) and p3 -> By (By beats Bz). Assembling actual
+    // memberships: Bx = {p1,p2} commits; By has lost p2 to Bx and is left with {p3} alone, so it
+    // does NOT commit; Bz has lost p3 to By and is left with {p4} alone, so it does not either.
+    // Z learns from Phase 2 only that By nominally won p3 -- deleting p3 there would lose it
+    // outright. Phase 3 is what tells Z to release it instead. The same holds for chains of any
+    // length.
     for (const ParticleID id : survivingForeign) {
       commitSendByRank[findParticle(id).ownerRank].push_back(KDCommit{id, committed});
     }
@@ -1432,6 +1441,246 @@ mergeKD(AmrMesh&                      a_amr,
     corrected.ownerRank          = myRank;
 
     insertHere(corrected, dst.level, din);
+  }
+}
+
+template <typename P,
+          typename Packed,
+          typename Traits,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid>
+inline void
+mergeKDPatch(AmrMesh&                      a_amr,
+             ParticleContainer<P, Traits>& a_particles,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
+             const Gather&                 a_gather,
+             const Combine&                a_combine,
+             const Scatter&                a_scatter,
+             const Allocator&              a_allocateID,
+             const PosValid&               a_isPositionValid)
+{
+  using namespace detail;
+
+  CH_TIME("ParticleManagement::mergeKDPatch");
+
+  const std::string   realm       = a_particles.getRealm();
+  const int           finestLevel = a_amr.getFinestLevel();
+  const RealVect      probLo      = a_amr.getProbLo();
+  const Vector<Real>& dxScalar    = a_amr.getDx();
+
+  std::vector<RealVect> dxByLevel(finestLevel + 1);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
+  }
+
+  const int myRank = procID();
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      // Pack this patch's own particles. No ghosts are involved at all: nothing here is contested,
+      // so there is no owner to arbitrate with and no reason to look outside the patch. A ghost
+      // reaching this point would be merged here AND by its true owner, double-counting its weight,
+      // which is why the caller must not have filled any.
+      std::vector<KDParticle<Packed>> combined;
+      combined.reserve(leaf.size());
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        if (leaf.isGhost(i)) {
+          continue;
+        }
+
+        KDParticle<Packed> p;
+
+        p.position  = leaf.position(i);
+        p.weight    = leaf.weight(i);
+        p.globalID  = leaf.particleID(i);
+        p.ownerRank = leaf.rankID(i);
+        p.isGhost   = false;
+        p.payload   = a_gather(leaf, i);
+
+        combined.push_back(p);
+      }
+
+      if (combined.empty()) {
+        continue;
+      }
+
+      // Per-cell particle-count histogram, built once from every particle's own position so it is
+      // unaffected by how buildKDQuotaLeaves() later carves up the space -- see that function's own
+      // docs for why a node-local count is not a safe substitute.
+      std::vector<std::pair<IntVect, int>> cellCounts;
+      cellCounts.reserve(combined.size());
+
+      for (const KDParticle<Packed>& p : combined) {
+        cellCounts.emplace_back(kdCellKeyOf(p.position, probLo, dxByLevel[lvl]), 1);
+      }
+
+      std::sort(cellCounts.begin(), cellCounts.end(), [](const auto& a_lhs, const auto& a_rhs) {
+        return kdIntVectLess(a_lhs.first, a_rhs.first);
+      });
+
+      {
+        std::size_t writeIdx = 0;
+
+        for (std::size_t readIdx = 0; readIdx < cellCounts.size();) {
+          std::size_t runEnd = readIdx + 1;
+          int         total  = cellCounts[readIdx].second;
+
+          while (runEnd < cellCounts.size() && cellCounts[runEnd].first == cellCounts[readIdx].first) {
+            total += cellCounts[runEnd].second;
+            runEnd++;
+          }
+
+          cellCounts[writeIdx] = std::make_pair(cellCounts[readIdx].first, total);
+          writeIdx++;
+          readIdx = runEnd;
+        }
+
+        cellCounts.resize(writeIdx);
+      }
+
+      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
+        const auto it = std::lower_bound(cellCounts.begin(),
+                                         cellCounts.end(),
+                                         a_cell,
+                                         [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
+                                           return kdIntVectLess(a_entry.first, a_key);
+                                         });
+
+        return (it != cellCounts.end() && it->first == a_cell) ? it->second : 0;
+      };
+
+      std::vector<KDLeaf> leaves;
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+
+      // Commit every leaf that can merge. Unlike the carve there is no classification step: nothing
+      // is exposed to arbitration, so the only questions are whether the leaf is compact enough and
+      // whether it has members enough to be worth collapsing.
+      std::vector<ParticleID>         consumedIDs;
+      std::vector<KDParticle<Packed>> mergedResults;
+
+      for (const KDLeaf& bl : leaves) {
+        if (bl.hi - bl.lo < 2) {
+          continue;
+        }
+
+        if (kdMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_kdMaxLeafExtent) {
+          continue;
+        }
+
+        std::vector<Packed> payloads;
+        std::vector<Real>   weights;
+        RealVect            centroid = RealVect::Zero;
+        Real                totalW   = 0.0;
+
+        payloads.reserve(bl.hi - bl.lo);
+        weights.reserve(bl.hi - bl.lo);
+
+        for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
+          const KDParticle<Packed>& p = combined[idx];
+
+          payloads.push_back(p.payload);
+          weights.push_back(p.weight);
+          centroid += p.weight * p.position;
+          totalW += p.weight;
+        }
+
+        centroid /= totalW;
+
+        kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
+
+        if (!a_isPositionValid(centroid)) {
+          continue;
+        }
+
+        KDParticle<Packed> merged;
+
+        merged.position  = centroid;
+        merged.weight    = totalW;
+        merged.globalID  = a_allocateID();
+        merged.ownerRank = myRank;
+        merged.isGhost   = false;
+        merged.payload   = a_combine(payloads.data(), weights.data(), payloads.size());
+
+        mergedResults.push_back(merged);
+
+        for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
+          consumedIDs.push_back(combined[idx].globalID);
+        }
+      }
+
+      if (mergedResults.empty()) {
+        continue;
+      }
+
+      // Remove the consumed originals, then insert the merged results. Both are confined to this
+      // patch, so no exchange is needed -- but a centroid can still land outside the patch's own
+      // box, so placement keeps the same cheap-test-then-general-search shape the carve uses.
+      std::sort(consumedIDs.begin(), consumedIDs.end());
+
+      {
+        std::size_t i = 0;
+
+        while (i < leaf.size()) {
+          if (!leaf.isGhost(i) && std::binary_search(consumedIDs.begin(), consumedIDs.end(), leaf.particleID(i))) {
+            leaf.remove(i);
+          }
+          else {
+            i++;
+          }
+        }
+      }
+
+      RealVect boxRealLo, boxRealHi;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        boxRealLo[dir] = probLo[dir] + dbl[din].smallEnd(dir) * dxByLevel[lvl][dir];
+        boxRealHi[dir] = probLo[dir] + (dbl[din].bigEnd(dir) + 1) * dxByLevel[lvl][dir];
+      }
+
+      for (const KDParticle<Packed>& mr : mergedResults) {
+        bool inOwnBox = true;
+
+        for (int dir = 0; dir < SpaceDim && inOwnBox; dir++) {
+          if (mr.position[dir] < boxRealLo[dir] || mr.position[dir] >= boxRealHi[dir]) {
+            inOwnBox = false;
+          }
+        }
+
+        if (inOwnBox) {
+          a_scatter(leaf, mr);
+
+          continue;
+        }
+
+        // A weighted centroid of positions inside this patch lies inside it too, so this branch is
+        // unreachable in exact arithmetic and exists only for round-off at a patch face. It must
+        // still land on this rank: there is no exchange here to carry a particle anywhere else.
+        const auto dst = a_particles.findDestination(mr.position);
+
+        if (!dst.valid || dst.rank != myRank) {
+          MayDay::Error("ParticleManagement::mergeKDPatch -- merged particle left this rank's own patches");
+        }
+
+        const DataIndex dstDin = a_amr.getLevelTiles(realm)[dst.level]->getMyGrids().at(dst.gridIndex);
+
+        a_scatter(a_particles[dst.level][dstDin], mr);
+      }
+    }
   }
 }
 

@@ -933,26 +933,49 @@ public:
   makeSuperparticlesNnPairOneCell(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Make superparticles with the whole-patch kd-tree merge.
-   * @details Backs both kd_carve and kd_patch (see ParticleManagement::mergeKD), selected by
-   * @a a_enableBoundaryCarve. Unlike makeSuperparticlesNnPairTree/Hash/OneCell this is a single,
-   * non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/
-   * nn_pair_max_cell_dist equivalents, since there is no configurable search radius or convergence
-   * loop. With the carve enabled it fills a width-1 particle ghost mask itself, which must be
-   * registered on this realm (see registerOperators()); with it disabled no ghosts are filled at
-   * all. Does NOT need cell sorting. Uses a single crowding threshold -- the coarsest level's
-   * a_particlesPerCell entry.
+   * @brief Make superparticles with the whole-patch kd-tree carve merge, regardless of
+   * merge_algorithm.
+   * @details Whole-container, cross-patch/cross-rank AMR merge (see
+   * ParticleManagement::mergeKDCarve). A single, non-iterative pass: no drain loop, and no
+   * nn_pair_iterate/nn_pair_fallback/nn_pair_max_cell_dist equivalents, since there is no
+   * configurable search radius or convergence loop. Fills a width-1 particle ghost mask itself,
+   * which must be registered on this realm (see registerOperators()). Does NOT need cell sorting.
+   * Uses a single crowding threshold -- the coarsest level's a_particlesPerCell entry.
    * @param[in] a_container        Which container to repartition.
    * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
-   * @param[in] a_enableBoundaryCarve True selects kd_carve: ghosts are filled and leaves touching a
-   * patch or level interface are arbitrated by the carve. False selects kd_patch: no ghosts are
-   * filled and every leaf merges regardless of boundary exposure, so each patch reduces only the
-   * particles it owns.
    */
   virtual void
-  makeSuperparticlesKD(WhichContainer     a_container,
-                       const Vector<int>& a_particlesPerCell,
-                       const bool         a_enableBoundaryCarve);
+  makeSuperparticlesKDCarve(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+   * @brief Make superparticles with the patch-local kd-tree merge, regardless of merge_algorithm.
+   * @details Same tree build and per-cell quota as makeSuperparticlesKDCarve, without the boundary
+   * tier (see ParticleManagement::mergeKDPatch). Fills no ghosts and performs no communication;
+   * each patch reduces only the particles it owns, so a cell straddled by two patches is reduced by
+   * each independently. Does NOT need cell sorting. Uses a single crowding threshold -- the
+   * coarsest level's a_particlesPerCell entry.
+   * @param[in] a_container        Which container to repartition.
+   * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   */
+  virtual void
+  makeSuperparticlesKDPatch(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
+   * @brief Shared body of makeSuperparticlesKDCarve/makeSuperparticlesKDPatch.
+   * @details The two differ only in whether a ghost halo is filled and which merge entry point is
+   * called; everything else -- extracting the merge container, the gather/combine/scatter and
+   * position-validity callbacks, id allocation, and the final split-and-rebuild -- is identical, so
+   * it lives here rather than being duplicated. Not part of the public selection surface: callers
+   * choose an algorithm by calling one of the two methods above, never by passing a flag.
+   * @param[in] a_container           Which container to repartition.
+   * @param[in] a_particlesPerCell    Target particle count (only the first entry is used).
+   * @param[in] a_enableBoundaryCarve True to fill ghosts and run the carve tier, false for the
+   * patch-local merge.
+   */
+  void
+  makeSuperparticlesKDImpl(WhichContainer     a_container,
+                           const Vector<int>& a_particlesPerCell,
+                           const bool         a_enableBoundaryCarve);
 
   /**
    * @brief Remap the bulk particle container.

@@ -3353,12 +3353,12 @@ ItoSolver::makeSuperparticles(const WhichContainer                          a_co
     break;
   }
   case ParticleManagement::ParticleMergeMethod::KdCarve: {
-    this->makeSuperparticlesKD(a_container, a_particlesPerCell, true);
+    this->makeSuperparticlesKDCarve(a_container, a_particlesPerCell);
 
     break;
   }
   case ParticleManagement::ParticleMergeMethod::KdPatch: {
-    this->makeSuperparticlesKD(a_container, a_particlesPerCell, false);
+    this->makeSuperparticlesKDPatch(a_container, a_particlesPerCell);
 
     break;
   }
@@ -4201,14 +4201,33 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
 }
 
 void
-ItoSolver::makeSuperparticlesKD(const WhichContainer a_container,
-                                const Vector<int>&   a_particlesPerCell,
-                                const bool           a_enableBoundaryCarve)
+ItoSolver::makeSuperparticlesKDCarve(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesKD");
+  CH_TIME("ItoSolver::makeSuperparticlesKDCarve");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesKD" << endl;
+    pout() << m_name + "::makeSuperparticlesKDCarve" << endl;
   }
+
+  this->makeSuperparticlesKDImpl(a_container, a_particlesPerCell, true);
+}
+
+void
+ItoSolver::makeSuperparticlesKDPatch(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+{
+  CH_TIME("ItoSolver::makeSuperparticlesKDPatch");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::makeSuperparticlesKDPatch" << endl;
+  }
+
+  this->makeSuperparticlesKDImpl(a_container, a_particlesPerCell, false);
+}
+
+void
+ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
+                                    const Vector<int>&   a_particlesPerCell,
+                                    const bool           a_enableBoundaryCarve)
+{
+  CH_TIME("ItoSolver::makeSuperparticlesKDImpl");
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
   // using the whole-patch kd-tree carve merge (see ParticleManagement::mergeKD).
@@ -4302,26 +4321,35 @@ ItoSolver::makeSuperparticlesKD(const WhichContainer a_container,
     }
   }
 
-  // Ghosts are only needed by the boundary/carve tier. With the carve disabled each patch merges
-  // its own particles alone, so filling them would serve no purpose -- and mergeKD()
-  // relies on their absence to treat every leaf as interior.
+  // Merge particles -- this is the most expensive part of the merge algorithm. Only the carve tier
+  // needs a ghost halo; mergeKDPatch() requires its absence, since a ghost it merged would be
+  // merged again by its true owner.
   if (a_enableBoundaryCarve) {
     merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
                              m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
-  }
 
-  // Merge particles -- this is the most expensive part of the merge algorithm.
-  ParticleManagement::mergeKD<ItoMergeParticle, Real>(*m_amr,
-                                                      merge,
-                                                      a_numParticlesPerCellThresh,
-                                                      m_kdSplitWeightLeafDx,
-                                                      gather,
-                                                      combine,
-                                                      scatter,
-                                                      allocateID,
-                                                      isPositionValid,
-                                                      a_enableBoundaryCarve);
+    ParticleManagement::mergeKDCarve<ItoMergeParticle, Real>(*m_amr,
+                                                             merge,
+                                                             a_numParticlesPerCellThresh,
+                                                             m_kdSplitWeightLeafDx,
+                                                             gather,
+                                                             combine,
+                                                             scatter,
+                                                             allocateID,
+                                                             isPositionValid);
+  }
+  else {
+    ParticleManagement::mergeKDPatch<ItoMergeParticle, Real>(*m_amr,
+                                                             merge,
+                                                             a_numParticlesPerCellThresh,
+                                                             m_kdSplitWeightLeafDx,
+                                                             gather,
+                                                             combine,
+                                                             scatter,
+                                                             allocateID,
+                                                             isPositionValid);
+  }
 
   // 4. Split under-full cells and rebuild the ItoParticles.
   this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);

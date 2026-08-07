@@ -361,103 +361,38 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
 } // namespace detail
 
 /**
- * @brief Run one full, non-iterative pass of the kd-tree carve merge over every patch this
- * rank owns.
+ * @brief Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.
  * @details Orchestrates, in order:
- *   1. Build one whole-patch kd tree per patch (local-valid + every ghost already filled by
- *      the caller -- this function does not fill ghosts itself, exactly like the nearest-neighbor
- *      merge's own entry points; see mergeKD's caller, e.g.
- *      ItoSolver::makeSuperparticlesKD, for the required width-1 same-level/coarse-to-
- *      fine/fine-to-coarse ghost fill).
- *   2. Classify every leaf: first, unmergeable -- computes maxAxisSpan (largest per-axis extent as
- *      a fraction of that axis's own cell width, see kdMaxAxisSpan()) from the FINAL leaf's
- *      box and rejects it (untouched, left for ItoSolver::splitAndRebuildFromMergeContainer) if it
- *      exceeds one cell width. This fixed 1*dx bound is the ONLY place extent is enforced:
- *      buildKDQuotaLeaves() partitions purely by particle count under a live per-cell quota and
- *      never tests extent at all, deliberately -- see its own docs for why an extent-driven
- *      partition was removed. Otherwise, a
- *      leaf is interior iff (a) none of its LOCAL members' cells are boundary-exposed (same-level,
- *      coarse-to-fine, and fine-to-coarse masks together), OR'd over every distinct cell its local
- *      members touch, AND (b) it contains no ghost member at all. Both conditions are needed once
- *      a leaf spans several cells: a ghost near one edge can
- *      share a leaf with a resident several cells away at the other edge WITHOUT that resident's own
- *      cell ever being exposed -- condition (a) alone would then miss the ghost's presence entirely,
- *      committing a foreign particle's weight locally while its true owner independently commits the
- *      SAME particle via its own competing box, double-counting it (see the design notes for the
- *      worked case that first exposed this). Interior leaves commit immediately, zero communication,
- *      direct insert into the proposer's own container (guaranteed safe -- an interior leaf cannot be
- *      near any kind of patch/level interface, and is now guaranteed ghost-free too). Every other
- *      leaf with >= 1 local member becomes a boundary "box"; a leaf with zero local members is
- *      skipped entirely (no rank has standing to act on particles it doesn't own).
- *   3. The three-phase, non-iterative carve protocol (see detail::KDClaim/KDVerdict/
- *      KDCommit): Phase 1 routes claims to owners; each owner computes a local per-particle
- *      argmin (immediate for locally-owned box members, including any particle whose own leaf
- *      turned out unmergeable or whose own box had fewer than 2 initial members -- an owner still
- *      listens for and honors a foreign claim on any of its boundary-exposed particles even when
- *      it isn't proposing a viable box of its own for them) -- but this only determines a NOMINAL
- *      winner, nothing is deleted yet. Phase 2 routes those nominal verdicts back to proposers for
- *      foreign members only. Each proposer then assembles its box's provisional final membership
- *      and checks the merge threshold and `a_isPositionValid` -- ONLY NOW is the box's actual
- *      commit/no-commit outcome known. Phase 3 routes that outcome back to each foreign member's
- *      owner as a commit-or-release instruction; an owner deletes a particle only upon receiving
- *      "commit", never on a Phase 2 verdict alone. This third phase is not optional: a box winning
- *      one member's nominal argmin does not guarantee that box will actually commit, since it can
- *      independently lose OTHER members to OTHER, unrelated lower-keyed competitors and end up
- *      under threshold itself -- deleting on the Phase 2 verdict alone silently destroys a
- *      particle's weight whenever that happens. Concrete counterexample (three ranks, boxes with
- *      keys `Kx < Ky < Kz`): `Bx{p1(X-owned),p2(Y-owned)}`, `By{p2(Y-owned),p3(Z-owned)}`,
- *      `Bz{p3(Z-owned),p4(X-owned)}`. Argmin: `p1`,`p2` -> `Bx` (beats `By` on `p2`); `p3` -> `By`
- *      (beats `Bz`). Actual memberships once assembled: `Bx = {p1,p2}` (2, commits); `By` loses
- *      `p2` to `Bx`, left with only `{p3}` (1, does NOT commit); `Bz` loses `p3` to `By`, left with
- *      only `{p4}` (1, does NOT commit). `p3`'s owner (Z) learns via Phase 2 that `By` nominally
- *      won `p3` -- deleting `p3` right then would lose it with no merged particle anywhere holding
- *      its weight, since `By` never actually commits; Phase 3 is what tells Z "release" instead.
- *      This generalizes to chains of any length, not just three ranks.
- *   4. Merge threshold: a leaf/box collapses to a merged particle only if >= 2 members survive
- *      (post-carve chop, or the `a_isPositionValid` check below); fewer than 2 are left untouched.
- *      An under-full cell is not this function's concern -- the caller's own
- *      ItoSolver::splitAndRebuildFromMergeContainer (or equivalent) handles that separately,
- *      decoupled from whatever this build's leaf shapes were.
- *   5. Placement: a carve box's result tries a cheap point-in-the-proposer's-own-box test first;
- *      only on failure does it fall through to ParticleContainer::findDestination() (the same
- *      general AMR-hierarchy-aware placement already used for ordinary particle drift). An
- *      interior leaf's result skips this step entirely -- see point 2.
+ *   1. Build one kd tree per patch over its local particles plus every ghost. The caller must have
+ *      filled ghosts at width 1; this function does not fill them itself.
+ *   2. Classify each leaf as unmergeable (too wide to merge), interior (no boundary exposure and no
+ *      ghost member), or a boundary box.
+ *   3. Commit interior leaves immediately, with no communication.
+ *   4. Resolve boundary boxes against competing patches in three fixed exchange rounds -- claim,
+ *      nominal verdict, commit-or-release -- keyed by (AABB volume, anchor id).
+ *   5. Collapse a leaf or box only if at least two members survive and @a a_isPositionValid accepts
+ *      the centroid, then place the result. Anything else is left untouched.
  *
- * Unlike the nearest-neighbor merge, this is a FIXED, three-round pass with no drain loop and no
- * iteration: bounded fan-in/fan-out given ghost width 1 and every box spanning at most one cell per
- * axis means three is still a fixed count, not a convergence loop -- no re-proposal, nothing
- * repeats. A caller wanting further convergence across multiple cells' worth of surplus is
- * expected to rely on repeated per-timestep calls, exactly as the nearest-neighbor merge's own
- * entry points document.
- *
- * @tparam P SoA payload type (e.g. ItoParticle).
+ * The round count is fixed, not a convergence loop; further reduction comes from calling again.
+ * @tparam P SoA payload type.
  * @tparam Packed Opaque reconciliation payload type (see KDParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
- * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge; a
- * rank-namespaced counter suffices (same convention as the nearest-neighbor merge).
- * @tparam PosValid Callable `(const RealVect&) -> bool`; false rejects the merge (leaves the
- * group's members untouched, same handling as an under-threshold chop).
+ * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
+ * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the group's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
  * @param[in,out] a_particles The real particle container being merged.
  * @param[in] a_ppc Target particles per cell.
- * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build switches
- * from count-median to weight-median splitting -- forwarded verbatim to buildKDQuotaLeaves(), see
- * that function's own docs. 0 disables the weight median entirely.
+ * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
+ * switches from count-median to weight-median splitting -- forwarded verbatim to
+ * buildKDQuotaLeaves(). 0 disables the weight median entirely.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
  * @param[in] a_allocateID Fresh-id allocator.
  * @param[in] a_isPositionValid Position-validity predicate.
- * @param[in] a_enableBoundaryCarve Selects between two merges. True (default) runs the full
- * algorithm above: the caller fills ghosts, leaves clear of any patch/level interface commit
- * locally, and the rest are arbitrated by the carve. False makes this a purely patch-local merge --
- * the caller supplies NO ghosts, every leaf commits regardless of boundary exposure, and the carve
- * protocol proposes nothing, so each patch merges only its own particles and no particle is ever
- * contested. Passing false while still filling ghosts is a contract violation; leaves holding a
- * ghost are then left untouched rather than merged, so weight is never double-counted.
  */
 template <typename P,
           typename Packed,
@@ -468,16 +403,70 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKD(AmrMesh&                      a_amr,
-        ParticleContainer<P, Traits>& a_particles,
-        const int                     a_ppc,
-        const Real                    a_splitWeightLeafDx,
-        const Gather&                 a_gather,
-        const Combine&                a_combine,
-        const Scatter&                a_scatter,
-        const Allocator&              a_allocateID,
-        const PosValid&               a_isPositionValid,
-        const bool                    a_enableBoundaryCarve = true);
+mergeKDCarve(AmrMesh&                      a_amr,
+             ParticleContainer<P, Traits>& a_particles,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
+             const Gather&                 a_gather,
+             const Combine&                a_combine,
+             const Scatter&                a_scatter,
+             const Allocator&              a_allocateID,
+             const PosValid&               a_isPositionValid);
+
+/**
+ * @brief Run one patch-local kd-tree merge over every patch this rank owns.
+ * @details Same tree build and per-cell quota as mergeKDCarve(), with no boundary tier:
+ *   1. Build one kd tree per patch over that patch's own particles. The caller must NOT have filled
+ *      ghosts; a ghost here would be merged locally while its true owner merges it too.
+ *   2. Every leaf whose largest per-axis extent is within detail::s_kdMaxLeafExtent commits
+ *      immediately, regardless of boundary exposure. No leaf is ever contested, so there is no
+ *      claim/verdict/commit exchange and no communication at all.
+ *   3. A leaf collapses to one merged particle only if it has at least two members and
+ *      @a a_isPositionValid accepts the centroid; otherwise its members are left untouched.
+ *   4. Merged results are placed by a cheap point-in-the-owning-patch test, falling back to
+ *      ParticleContainer::findDestination().
+ *
+ * Each patch therefore reduces only the particles it owns. Cheaper than mergeKDCarve() and free of
+ * communication, at the cost of no coordination across a patch boundary: a cell straddled by two
+ * patches is reduced by each of them independently.
+ * @tparam P SoA payload type.
+ * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
+ * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
+ * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
+ * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
+ * @param[in,out] a_amr AMR mesh -- source of the grid layout.
+ * @param[in,out] a_particles The real particle container being merged.
+ * @param[in] a_ppc Target particles per cell.
+ * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
+ * switches from count-median to weight-median splitting -- forwarded verbatim to
+ * buildKDQuotaLeaves(). 0 disables the weight median entirely.
+ * @param[in] a_gather Per-slot gather callback.
+ * @param[in] a_combine N-ary opaque-payload combine callback.
+ * @param[in] a_scatter Per-merged-particle scatter callback.
+ * @param[in] a_allocateID Fresh-id allocator.
+ * @param[in] a_isPositionValid Position-validity predicate.
+ */
+template <typename P,
+          typename Packed,
+          typename Traits = ParticleTraits<P>,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid>
+inline void
+mergeKDPatch(AmrMesh&                      a_amr,
+             ParticleContainer<P, Traits>& a_particles,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
+             const Gather&                 a_gather,
+             const Combine&                a_combine,
+             const Scatter&                a_scatter,
+             const Allocator&              a_allocateID,
+             const PosValid&               a_isPositionValid);
 
 } // namespace ParticleManagement
 
