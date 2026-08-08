@@ -61,6 +61,12 @@ mergeMethodFromString(const std::string& a_str) noexcept
   else if (a_str == "nn_pair_hash") {
     return ParticleMergeMethod::NnPairHash;
   }
+  else if (a_str == "kd_carve") {
+    return ParticleMergeMethod::KdCarve;
+  }
+  else if (a_str == "kd_patch") {
+    return ParticleMergeMethod::KdPatch;
+  }
   else if (a_str == "external") {
     return ParticleMergeMethod::External;
   }
