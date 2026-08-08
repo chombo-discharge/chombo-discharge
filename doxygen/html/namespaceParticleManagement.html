@@ -100,6 +100,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1KDParticle.html">KDParticle</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.  <a href="structParticleManagement_1_1KDParticle.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The per-cell particle count this merge drains each cell down to.  <a href="classParticleManagement_1_1NNCellBudget.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.  <a href="structParticleManagement_1_1NNMergeParticle.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,6 +151,7 @@ Enumerations</h2></td></tr>
 , <br />
 &#160;&#160;<a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95acaaff4f921b4ea1d4d99fa5bc70236a8">KdCarve</a>
 , <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a715a3f206ccc83c1f36548e530f71de0">KdPatch</a>
+, <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a6e9276cad5a8181e6f921278fde74d3c">KdSkinNn</a>
 , <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779">External</a>
 <br />
  }</td></tr>
@@ -164,18 +168,22 @@ Functions</h2></td></tr>
 <tr class="memitem:a41307c92d88082530835eafc35a0c7e1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a41307c92d88082530835eafc35a0c7e1">mergeKDPatch</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_ppc, const Real a_splitWeightLeafDx, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
 <tr class="memdesc:a41307c92d88082530835eafc35a0c7e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one patch-local kd-tree merge over every patch this rank owns.  <br /></td></tr>
 <tr class="separator:a41307c92d88082530835eafc35a0c7e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa522903df11ab969f76ba1dc020c20f7" id="r_aa522903df11ab969f76ba1dc020c20f7"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
-<tr class="memitem:aa522903df11ab969f76ba1dc020c20f7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7">mergeNearestNeighborsTree</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numParticlesPerCellThresh, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, const int a_ghostWidth=1, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
-<tr class="memdesc:aa522903df11ab969f76ba1dc020c20f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.  <br /></td></tr>
-<tr class="separator:aa522903df11ab969f76ba1dc020c20f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2e889b9bbc72cf4e9578cb18120a4b2" id="r_af2e889b9bbc72cf4e9578cb18120a4b2"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
-<tr class="memitem:af2e889b9bbc72cf4e9578cb18120a4b2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#af2e889b9bbc72cf4e9578cb18120a4b2">mergeNearestNeighborsHash</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numParticlesPerCellThresh, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, const int a_ghostWidth=1, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
-<tr class="memdesc:af2e889b9bbc72cf4e9578cb18120a4b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round of the nearest-neighbor merge algorithm, identical in every respect to <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> except that the per-patch spatial search is backed by an EBGeometry::PointCloudHashGrid (a uniform-grid index) instead of an EBGeometry::PointCloudBVH.  <br /></td></tr>
-<tr class="separator:af2e889b9bbc72cf4e9578cb18120a4b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2c9acd083d602fdfb2183033dd95f7b" id="r_af2c9acd083d602fdfb2183033dd95f7b"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
-<tr class="memitem:af2c9acd083d602fdfb2183033dd95f7b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#af2c9acd083d602fdfb2183033dd95f7b">mergeNearestNeighborsOneCell</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numParticlesPerCellThresh, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
-<tr class="memdesc:af2c9acd083d602fdfb2183033dd95f7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict protocol as <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, but with candidates found via a per-cell PointCloudBVH spatial index (see NNCellSpatialIndex) instead of one whole-patch tree.  <br /></td></tr>
-<tr class="separator:af2c9acd083d602fdfb2183033dd95f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a113306b375868bb5479b665faa6dbaa1" id="r_a113306b375868bb5479b665faa6dbaa1"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </td></tr>
+<tr class="memitem:a113306b375868bb5479b665faa6dbaa1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a113306b375868bb5479b665faa6dbaa1">mergeKDInterior</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_interior, const int a_ppc, const Real a_splitWeightLeafDx, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
+<tr class="memdesc:a113306b375868bb5479b665faa6dbaa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the uncontested tier of the kd merge, splitting the input into merged and leftover.  <br /></td></tr>
+<tr class="separator:a113306b375868bb5479b665faa6dbaa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac357c1be83a41f099d73b348bed971df" id="r_ac357c1be83a41f099d73b348bed971df"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
+<tr class="memitem:ac357c1be83a41f099d73b348bed971df"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df">mergeNearestNeighborsTree</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;a_cellBudget, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, const int a_ghostWidth=1, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
+<tr class="memdesc:ac357c1be83a41f099d73b348bed971df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.  <br /></td></tr>
+<tr class="separator:ac357c1be83a41f099d73b348bed971df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0831223a8a54cd1ade098514e125943b" id="r_a0831223a8a54cd1ade098514e125943b"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
+<tr class="memitem:a0831223a8a54cd1ade098514e125943b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a0831223a8a54cd1ade098514e125943b">mergeNearestNeighborsHash</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;a_cellBudget, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, const int a_ghostWidth=1, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
+<tr class="memdesc:a0831223a8a54cd1ade098514e125943b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round of the nearest-neighbor merge algorithm, identical in every respect to <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> except that the per-patch spatial search is backed by an EBGeometry::PointCloudHashGrid (a uniform-grid index) instead of an EBGeometry::PointCloudBVH.  <br /></td></tr>
+<tr class="separator:a0831223a8a54cd1ade098514e125943b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb73f7455b6f4a100124ae245948dba9" id="r_aeb73f7455b6f4a100124ae245948dba9"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
+<tr class="memitem:aeb73f7455b6f4a100124ae245948dba9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#aeb73f7455b6f4a100124ae245948dba9">mergeNearestNeighborsOneCell</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;a_cellBudget, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
+<tr class="memdesc:aeb73f7455b6f4a100124ae245948dba9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict protocol as <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, but with candidates found via a per-cell PointCloudBVH spatial index (see NNCellSpatialIndex) instead of one whole-patch tree.  <br /></td></tr>
+<tr class="separator:aeb73f7455b6f4a100124ae245948dba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace7541e61134b0af1e86e6e0e2a260b9" id="r_ace7541e61134b0af1e86e6e0e2a260b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleMergeMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ace7541e61134b0af1e86e6e0e2a260b9">mergeMethodFromString</a> (const std::string &amp;a_str) noexcept</td></tr>
 <tr class="memdesc:ace7541e61134b0af1e86e6e0e2a260b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a merge-algorithm selector string to a ParticleMergeMethod.  <br /></td></tr>
 <tr class="separator:ace7541e61134b0af1e86e6e0e2a260b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -431,6 +439,8 @@ template&lt;typename Packed &gt; </div>
 <tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95acaaff4f921b4ea1d4d99fa5bc70236a8" name="ac69666866ee6c0eaed03b81381b9ce95acaaff4f921b4ea1d4d99fa5bc70236a8"></a>KdCarve&#160;</td><td class="fielddoc"><p>AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95a715a3f206ccc83c1f36548e530f71de0" name="ac69666866ee6c0eaed03b81381b9ce95a715a3f206ccc83c1f36548e530f71de0"></a>KdPatch&#160;</td><td class="fielddoc"><p>AMR: mergeKDPatch (same build, patch-local &ndash; no ghosts, no contested particles). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95a6e9276cad5a8181e6f921278fde74d3c" name="ac69666866ee6c0eaed03b81381b9ce95a6e9276cad5a8181e6f921278fde74d3c"></a>KdSkinNn&#160;</td><td class="fielddoc"><p>AMR: mergeKDInterior for the uncontested tier, nearest-neighbor pairs for the skin. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779" name="ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779"></a>External&#160;</td><td class="fielddoc"><p>Cell: caller-supplied per-cell merger. </p>
 </td></tr>
@@ -1105,6 +1115,133 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 
 </div>
 </div>
+<a id="a113306b375868bb5479b665faa6dbaa1" name="a113306b375868bb5479b665faa6dbaa1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a113306b375868bb5479b665faa6dbaa1">&#9670;&#160;</a></span>mergeKDInterior()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::mergeKDInterior </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_interior</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ppc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_splitWeightLeafDx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Gather &amp;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Combine &amp;&#160;</td>
+          <td class="paramname"><em>a_combine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Scatter &amp;&#160;</td>
+          <td class="paramname"><em>a_scatter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Allocator &amp;&#160;</td>
+          <td class="paramname"><em>a_allocateID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PosValid &amp;&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Run the uncontested tier of the kd merge, splitting the input into merged and leftover. </p>
+<p>Same tree build and per-cell quota as <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>, but with no arbitration tier at all. In order:</p><ol type="1">
+<li>Build one kd tree per patch over that patch's own particles plus every ghost, which the caller must already have filled at width 1. Ghosts are never merged, but they take part in the partition: a ghost marks the leaf it lands in as contested, and the quota needs the cell's true occupancy.</li>
+<li>Commit every leaf that holds at least two members, is within detail::s_kdMaxLeafExtent, holds no ghost, and whose centroid <em>a_isPositionValid</em> accepts. Each such leaf becomes one super-particle in <em>a_interior</em> and its members are removed from <em>a_particles</em>.</li>
+<li>Everything else is left untouched in <em>a_particles</em> &ndash; leaves holding a ghost, leaves too wide to collapse, and leaves with a single member.</li>
+</ol>
+<p>"Holds no ghost" is the whole safety condition, and it needs no communication to evaluate. Every member of such a leaf is resident in this patch, and any other patch that draws one of those members into a leaf of its own sees it as a ghost, so that leaf fails this same test there. No two patches can commit the same particle and no weight is counted twice. Boundary exposure is deliberately not consulted: an exposed but uncontested leaf merges here.</p>
+<p>The result is a split, not a finished merge &ndash; <em>a_particles</em> is left holding exactly the contested particles, for a caller that means to reduce them by some other means. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type (see <a class="el" href="structParticleManagement_1_1KDParticle.html" title="Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.">KDParticle</a>). </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for P (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Gather</td><td>Callable <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, std::size_t) -&gt; Packed</code>. </td></tr>
+    <tr><td class="paramname">Combine</td><td>See KDPayloadCombine &ndash; N-ary, not pairwise. </td></tr>
+    <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1KDParticle.html" title="Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.">KDParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
+    <tr><td class="paramname">Allocator</td><td>Callable <code>() -&gt; ParticleID</code>, a fresh globally-unique id per committed merge. </td></tr>
+    <tr><td class="paramname">PosValid</td><td>Callable <code>(const RealVect&amp;) -&gt; bool</code>; false leaves the leaf's members untouched. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of the grid layout. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to reduce. On return holds only what was not committed. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_interior</td><td>Receives one super-particle per committed leaf. Must be allocated on the same realm as <em>a_particles</em>, since a leaf is written to the patch it was built on. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ppc</td><td>Target particles per cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_splitWeightLeafDx</td><td>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting &ndash; forwarded verbatim to buildKDQuotaLeaves(). 0 disables the weight median entirely. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>N-ary opaque-payload combine callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-merged-particle scatter callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a41307c92d88082530835eafc35a0c7e1" name="a41307c92d88082530835eafc35a0c7e1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a41307c92d88082530835eafc35a0c7e1">&#9670;&#160;</a></span>mergeKDPatch()</h2>
 
@@ -1250,7 +1387,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 </div><div class="memdoc">
 
 <p>Map a merge-algorithm selector string to a ParticleMergeMethod. </p>
-<p>Valid input options are: 'none' -&gt; None 'equal_weight_kd' -&gt; EqualWeightKD 'reinitialize' -&gt; Reinitialize 'reinitialize_bvh' -&gt; ReinitializeBVH 'nn_sfc' -&gt; NnSfc 'nn_pair_tree' -&gt; NnPairTree 'nn_pair_onecell' -&gt; NnPairOneCell 'nn_pair_hash' -&gt; NnPairHash 'kd_carve' -&gt; KdCarve 'kd_patch' -&gt; KdPatch 'external' -&gt; External </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Valid input options are: 'none' -&gt; None 'equal_weight_kd' -&gt; EqualWeightKD 'reinitialize' -&gt; Reinitialize 'reinitialize_bvh' -&gt; ReinitializeBVH 'nn_sfc' -&gt; NnSfc 'nn_pair_tree' -&gt; NnPairTree 'nn_pair_onecell' -&gt; NnPairOneCell 'nn_pair_hash' -&gt; NnPairHash 'kd_carve' -&gt; KdCarve 'kd_patch' -&gt; KdPatch 'kd_skin_nn' -&gt; KdSkinNn 'external' -&gt; External </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_str</td><td>String selector. Must take one of the above strings. </td></tr>
   </table>
@@ -1260,8 +1397,8 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 
 </div>
 </div>
-<a id="af2e889b9bbc72cf4e9578cb18120a4b2" name="af2e889b9bbc72cf4e9578cb18120a4b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af2e889b9bbc72cf4e9578cb18120a4b2">&#9670;&#160;</a></span>mergeNearestNeighborsHash()</h2>
+<a id="a0831223a8a54cd1ade098514e125943b" name="a0831223a8a54cd1ade098514e125943b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0831223a8a54cd1ade098514e125943b">&#9670;&#160;</a></span>mergeNearestNeighborsHash()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1286,8 +1423,8 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+          <td class="paramtype">const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellBudget</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1368,24 +1505,24 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 </table>
 </div><div class="memdoc">
 
-<p>Run one full round of the nearest-neighbor merge algorithm, identical in every respect to <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> except that the per-patch spatial search is backed by an EBGeometry::PointCloudHashGrid (a uniform-grid index) instead of an EBGeometry::PointCloudBVH. </p>
-<p>See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> for the full algorithm description, parameter contracts, and defaults &ndash; every one of them applies here unchanged; only the underlying point-cloud index differs (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a93e3e867ed41d57e5db5d4293c60d800" title="Shared implementation behind mergeNearestNeighborsTree() and mergeNearestNeighborsHash(): one full ro...">detail::mergeNearestNeighborsRoundImpl()</a>, which both this function and <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> forward to, selecting the point-cloud type via its <code>Cloud</code> template parameter). PointCloudHashGrid trades PointCloudBVH's adaptivity to non-uniform density for an O(1) expected build/query cost at near-uniform density; prefer it when a crowded cell's neighborhood is not also badly clustered in density, and measure before relying on it being faster in a given workload (see PointCloudHashGrid's own docs in EBGeometry for when it is and is not a good fit). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Run one full round of the nearest-neighbor merge algorithm, identical in every respect to <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> except that the per-patch spatial search is backed by an EBGeometry::PointCloudHashGrid (a uniform-grid index) instead of an EBGeometry::PointCloudBVH. </p>
+<p>See <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> for the full algorithm description, parameter contracts, and defaults &ndash; every one of them applies here unchanged; only the underlying point-cloud index differs (see detail::mergeNearestNeighborsRoundImpl(), which both this function and <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> forward to, selecting the point-cloud type via its <code>Cloud</code> template parameter). PointCloudHashGrid trades PointCloudBVH's adaptivity to non-uniform density for an O(1) expected build/query cost at near-uniform density; prefer it when a crowded cell's neighborhood is not also badly clustered in density, and measure before relying on it being faster in a given workload (see PointCloudHashGrid's own docs in EBGeometry for when it is and is not a good fit). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge</td><td>See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
+    <tr><td class="paramname">P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge</td><td>See <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">a_amr,a_particles,a_numParticlesPerCellThresh,a_gather,a_combine,a_scatter,a_allocateID,a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,a_crossLevelMergeCount,a_onMergeCommitted</td><td>See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
+    <tr><td class="paramname">a_amr,a_particles,a_cellBudget,a_gather,a_combine,a_scatter,a_allocateID,a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,a_crossLevelMergeCount,a_onMergeCommitted</td><td>See <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="af2c9acd083d602fdfb2183033dd95f7b" name="af2c9acd083d602fdfb2183033dd95f7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af2c9acd083d602fdfb2183033dd95f7b">&#9670;&#160;</a></span>mergeNearestNeighborsOneCell()</h2>
+<a id="aeb73f7455b6f4a100124ae245948dba9" name="aeb73f7455b6f4a100124ae245948dba9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb73f7455b6f4a100124ae245948dba9">&#9670;&#160;</a></span>mergeNearestNeighborsOneCell()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1410,8 +1547,8 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+          <td class="paramtype">const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellBudget</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1480,9 +1617,9 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 </table>
 </div><div class="memdoc">
 
-<p>Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict protocol as <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, but with candidates found via a per-cell PointCloudBVH spatial index (see NNCellSpatialIndex) instead of one whole-patch tree. </p>
-<p>Orchestrates, in order: 1. gatherMergeParticles() (ghosts assumed already filled by the caller, exactly as <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> requires &ndash; see its own docs). 2. Per patch: buildNNCellSpatialIndex(), then findNearestNeighborCandidatesOneCell() + resolveTrivialTier(), optionally repeated to convergence (see a_iterateLocalTierToConvergence). 3. finishMergeRound() for everything the local tier could not resolve.</p>
-<p>The merge distance is structurally fixed at Chebyshev cell distance 1 &ndash; only the query's own cell and its Moore-adjacent neighbors are ever visited (see findNearestNeighborCandidatesOneCell()) &ndash; so, unlike <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, this function takes no a_maxCellDistance parameter, and requires exactly a width-1 particle ghost halo (already filled by the caller) rather than a configurable a_ghostWidth. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict protocol as <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, but with candidates found via a per-cell PointCloudBVH spatial index (see NNCellSpatialIndex) instead of one whole-patch tree. </p>
+<p>Orchestrates, in order: 1. gatherMergeParticles() (ghosts assumed already filled by the caller, exactly as <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> requires &ndash; see its own docs). 2. Per patch: buildNNCellSpatialIndex(), then findNearestNeighborCandidatesOneCell() + resolveTrivialTier(), optionally repeated to convergence (see a_iterateLocalTierToConvergence). 3. finishMergeRound() for everything the local tier could not resolve.</p>
+<p>The merge distance is structurally fixed at Chebyshev cell distance 1 &ndash; only the query's own cell and its Moore-adjacent neighbors are ever visited (see findNearestNeighborCandidatesOneCell()) &ndash; so, unlike <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>, this function takes no a_maxCellDistance parameter, and requires exactly a width-1 particle ghost halo (already filled by the caller) rather than a configurable a_ghostWidth. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>SoA payload type (e.g. <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>). </td></tr>
     <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type (see <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>). </td></tr>
@@ -1502,15 +1639,15 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of ghost masks, per-level dx, and the patch layout. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container to merge, for every patch this rank owns. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Crowding threshold N. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBudget</td><td>The count each cell is drained down to &ndash; see <a class="el" href="classParticleManagement_1_1NNCellBudget.html" title="The per-cell particle count this merge drains each cell down to.">NNCellBudget</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather callback (see Gather). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>Opaque-payload combine callback (see PayloadCombine). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-surviving-particle scatter callback (see Scatter). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator (see IDAllocator). Mandatory, same requirement as <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_iterateLocalTierToConvergence</td><td>Default false. See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxFallbackCandidates</td><td>Forwarded to resolveTrivialTier(). Default 0 (disabled). See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator (see IDAllocator). Mandatory, same requirement as <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_iterateLocalTierToConvergence</td><td>Default false. See <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxFallbackCandidates</td><td>Forwarded to resolveTrivialTier(). Default 0 (disabled). See <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Forwarded to resolveTrivialTier()/judgeProposals() (see PositionValid). Default always-true. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_crossLevelMergeCount</td><td>Optional diagnostic counter (nullptr, the default, disables it). See <a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_crossLevelMergeCount</td><td>Optional diagnostic counter (nullptr, the default, disables it). See <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a>'s own docs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_onMergeCommitted</td><td>Optional per-merge diagnostic callback (see MergeCommittedCallback); default is a no-op. </td></tr>
   </table>
   </dd>
@@ -1518,8 +1655,8 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 
 </div>
 </div>
-<a id="aa522903df11ab969f76ba1dc020c20f7" name="aa522903df11ab969f76ba1dc020c20f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa522903df11ab969f76ba1dc020c20f7">&#9670;&#160;</a></span>mergeNearestNeighborsTree()</h2>
+<a id="ac357c1be83a41f099d73b348bed971df" name="ac357c1be83a41f099d73b348bed971df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac357c1be83a41f099d73b348bed971df">&#9670;&#160;</a></span>mergeNearestNeighborsTree()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1544,8 +1681,8 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numParticlesPerCellThresh</em>, </td>
+          <td class="paramtype">const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellBudget</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1658,7 +1795,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of ghost masks, per-level dx, and the patch layout used to place merged particles. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container to merge, for every patch this rank owns. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Crowding threshold N. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBudget</td><td>The count each cell is drained down to &ndash; see <a class="el" href="classParticleManagement_1_1NNCellBudget.html" title="The per-cell particle count this merge drains each cell down to.">NNCellBudget</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather callback (see Gather). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>Opaque-payload combine callback (see PayloadCombine). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-surviving-particle scatter callback (see Scatter). </td></tr>
