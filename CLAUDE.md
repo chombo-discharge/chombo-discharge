@@ -1,6 +1,6 @@
 # chombo-discharge — Claude Code guidelines
 
-## 0. Working agreement — git, branches, and pull requests (read first)
+## 0. Working agreement — git, pull requests, and code design (read first)
 
 These rules override anything else in this file and any default tooling behaviour.
 
@@ -28,6 +28,36 @@ These rules override anything else in this file and any default tooling behaviou
 - **Claude is never allowed to tick the PR-review checklist items.** Leave every checkbox in the
   template unchecked (`- [ ]`); the human author is the only one who may check them off after
   actually performing each step.
+
+### Data structures and new types
+
+These are ask-first rules in the same sense as the git rules above: propose the choice, then wait for
+an answer. They exist because this codebase already provides the containers in question, and
+hand-rolled substitutes have repeatedly hidden invariants instead of enforcing them.
+
+- **Per-cell data must use the existing mesh containers unless the user has agreed otherwise.**
+  `EBAMRCellData`, `LevelData`, and `FArrayBox`/`BaseFab` already provide per-cell storage together
+  with ghost filling, coarsening, interpolation, and accumulation *out of* ghost cells (`Copier` with
+  `LDaddOp`, reverse copiers) — all tested at scale. Do not hand-roll a per-cell store: neither a
+  dense `std::vector` indexed by a computed cell offset, nor a container keyed by `IntVect`. If a
+  hand-rolled store is genuinely required, ask first and state the reason in the PR description.
+- **Ask before introducing a `std::map` or `std::unordered_map`.** Say what the key is, why an
+  existing container will not serve, and whether the key space is genuinely sparse. Associative
+  containers suit sparse, unbounded keys such as rank-namespaced particle ids. They are usually the
+  wrong choice for cells, where the addressable region is knowable (a patch box plus its ghosts) and
+  the data is dense: a map silently accepts any key, which hides the indexing invariant rather than
+  enforcing it.
+- **`IntVect::operator<` must never be used as an ordered-container comparator.** It is a
+  component-wise partial order, not a strict weak ordering, so `std::map`/`std::set` treat unrelated
+  cells as equal keys and silently pool them. Use `LevelTiles::TileHasher` with a hashed container,
+  or preferably cell-indexed mesh data.
+- **Ask before adding a helper or scaffolding class/struct.** First check whether an existing type
+  already carries the information; a struct that merely renames the fields of an existing type is not
+  worth adding. POD wire formats exchanged over MPI, and genuinely new domain concepts, are
+  legitimate — say which of the two it is when proposing it.
+
+Worked examples of what these rules exist to prevent are collected in
+`chombo-discharge/chombo-discharge#682`.
 
 ## 1. Building the code
 
