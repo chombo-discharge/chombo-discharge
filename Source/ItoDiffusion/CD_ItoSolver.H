@@ -961,6 +961,26 @@ public:
   makeSuperparticlesKDPatch(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
 
   /**
+   * @brief Make superparticles with the kd-tree merge and a nearest-neighbor skin, regardless of
+   * merge_algorithm.
+   * @details Same tree build and per-cell quota as makeSuperparticlesKDCarve, but the boundary tier
+   * is the nearest-neighbor pair merge instead of the carve arbitration. The particles are split
+   * across two containers: ParticleManagement::mergeKDInterior() commits every leaf holding no ghost
+   * into one, and what is left -- the contested skin -- is drained from the other by
+   * ParticleManagement::mergeNearestNeighborsOneCell(), whose search radius is fixed at Chebyshev
+   * cell distance 1 and so matches the width-1 halo exactly. The skin tier drains each cell to what
+   * remains of its target after the interior results are counted against it, so the two tiers share
+   * one budget. Fills a width-1 particle ghost mask itself, which must be registered on this realm
+   * (see registerOperators()). Tuned by nn_pair_iterate/nn_pair_fallback/nn_pair_max_rounds, shared
+   * with the nn_pair family; nn_pair_max_cell_dist does not apply. Does NOT need cell sorting. Uses
+   * a single crowding threshold -- the coarsest level's a_particlesPerCell entry.
+   * @param[in] a_container        Which container to repartition.
+   * @param[in] a_particlesPerCell Target particle count (only the first entry is used).
+   */
+  virtual void
+  makeSuperparticlesKDSkinNn(WhichContainer a_container, const Vector<int>& a_particlesPerCell);
+
+  /**
    * @brief Shared body of makeSuperparticlesKDCarve/makeSuperparticlesKDPatch.
    * @details The two differ only in whether a ghost halo is filled and which merge entry point is
    * called; everything else -- extracting the merge container, the gather/combine/scatter and

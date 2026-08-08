@@ -48,6 +48,7 @@ enum class ParticleMergeMethod
   NnPairHash,      ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
   KdCarve,         ///< AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries).
   KdPatch,         ///< AMR: mergeKDPatch (same build, patch-local -- no ghosts, no contested particles).
+  KdSkinNn,        ///< AMR: mergeKDInterior for the uncontested tier, nearest-neighbor pairs for the skin.
   External         ///< Cell: caller-supplied per-cell merger.
 };
 
@@ -64,6 +65,7 @@ enum class ParticleMergeMethod
  * 'nn_pair_hash' -> NnPairHash
  * 'kd_carve' -> KdCarve
  * 'kd_patch' -> KdPatch
+ * 'kd_skin_nn' -> KdSkinNn
  * 'external' -> External
  * @param[in] a_str String selector. Must take one of the above strings.
  * @return The corresponding method; aborts on an unknown selector.

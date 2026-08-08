@@ -67,6 +67,9 @@ mergeMethodFromString(const std::string& a_str) noexcept
   else if (a_str == "kd_patch") {
     return ParticleMergeMethod::KdPatch;
   }
+  else if (a_str == "kd_skin_nn") {
+    return ParticleMergeMethod::KdSkinNn;
+  }
   else if (a_str == "external") {
     return ParticleMergeMethod::External;
   }

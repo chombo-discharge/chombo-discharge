@@ -462,6 +462,70 @@ mergeKDPatch(AmrMesh&                      a_amr,
              const Allocator&              a_allocateID,
              const PosValid&               a_isPositionValid);
 
+/**
+ * @brief Run the uncontested tier of the kd merge, splitting the input into merged and leftover.
+ * @details Same tree build and per-cell quota as mergeKDCarve(), but with no arbitration tier at
+ * all. In order:
+ *   1. Build one kd tree per patch over that patch's own particles plus every ghost, which the
+ *      caller must already have filled at width 1. Ghosts are never merged, but they take part in
+ *      the partition: a ghost marks the leaf it lands in as contested, and the quota needs the
+ *      cell's true occupancy.
+ *   2. Commit every leaf that holds at least two members, is within detail::s_kdMaxLeafExtent, holds
+ *      no ghost, and whose centroid @a a_isPositionValid accepts. Each such leaf becomes one
+ *      super-particle in @a a_interior and its members are removed from @a a_particles.
+ *   3. Everything else is left untouched in @a a_particles -- leaves holding a ghost, leaves too
+ *      wide to collapse, and leaves with a single member.
+ *
+ * "Holds no ghost" is the whole safety condition, and it needs no communication to evaluate. Every
+ * member of such a leaf is resident in this patch, and any other patch that draws one of those
+ * members into a leaf of its own sees it as a ghost, so that leaf fails this same test there. No two
+ * patches can commit the same particle and no weight is counted twice. Boundary exposure is
+ * deliberately not consulted: an exposed but uncontested leaf merges here.
+ *
+ * The result is a split, not a finished merge -- @a a_particles is left holding exactly the
+ * contested particles, for a caller that means to reduce them by some other means.
+ * @tparam P SoA payload type.
+ * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
+ * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
+ * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
+ * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
+ * @param[in,out] a_amr AMR mesh -- source of the grid layout.
+ * @param[in,out] a_particles Particles to reduce. On return holds only what was not committed.
+ * @param[in,out] a_interior Receives one super-particle per committed leaf. Must be allocated on the
+ * same realm as @a a_particles, since a leaf is written to the patch it was built on.
+ * @param[in] a_ppc Target particles per cell.
+ * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
+ * switches from count-median to weight-median splitting -- forwarded verbatim to
+ * buildKDQuotaLeaves(). 0 disables the weight median entirely.
+ * @param[in] a_gather Per-slot gather callback.
+ * @param[in] a_combine N-ary opaque-payload combine callback.
+ * @param[in] a_scatter Per-merged-particle scatter callback.
+ * @param[in] a_allocateID Fresh-id allocator.
+ * @param[in] a_isPositionValid Position-validity predicate.
+ */
+template <typename P,
+          typename Packed,
+          typename Traits = ParticleTraits<P>,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid>
+inline void
+mergeKDInterior(AmrMesh&                      a_amr,
+                ParticleContainer<P, Traits>& a_particles,
+                ParticleContainer<P, Traits>& a_interior,
+                const int                     a_ppc,
+                const Real                    a_splitWeightLeafDx,
+                const Gather&                 a_gather,
+                const Combine&                a_combine,
+                const Scatter&                a_scatter,
+                const Allocator&              a_allocateID,
+                const PosValid&               a_isPositionValid);
+
 } // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>

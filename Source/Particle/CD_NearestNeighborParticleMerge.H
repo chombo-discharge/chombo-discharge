@@ -19,6 +19,7 @@
 #define CD_NEARESTNEIGHBORPARTICLEMERGE_H
 
 // Std includes
+#include <algorithm>
 #include <functional>
 #include <limits>
 #include <map>
@@ -400,6 +401,114 @@ struct NNCellKeyHasher
   }
 };
 
+} // namespace detail
+
+/**
+ * @brief The per-cell particle count this merge drains each cell down to.
+ * @details Every crowding decision in this algorithm asks the same question -- "does this cell hold
+ * more particles than it is allowed to?" -- so this type is the single place that answers it. The
+ * plain case is one uniform count for every cell, and an implicit constructor from @c int provides
+ * it, so a caller with nothing special to say simply passes the count.
+ *
+ * A caller may additionally RESERVE slots in individual cells. A reserved slot is one already spoken
+ * for by particles this call cannot see, which must nonetheless count against the cell's total. The
+ * budget such a cell is drained to is the uniform count minus its reservations, floored at zero. The
+ * motivating case is a two-container merge in which one container has already been reduced and its
+ * results must still occupy room in the shared per-cell target.
+ *
+ * Reservations are keyed by (level, cell), not by cell alone, for the reason given in
+ * detail::NNCellKey: a coarse and a fine cell can share a bare IntVect.
+ * @note Lookup is a single branch when nothing is reserved, so the uniform case costs no more than
+ * the bare integer it replaces.
+ */
+class NNCellBudget
+{
+public:
+  /**
+   * @brief Construct a uniform budget. Deliberately implicit -- a bare count is the common case.
+   * @param[in] a_uniform Particle count every cell is drained down to.
+   */
+  NNCellBudget(const int a_uniform) noexcept : m_uniform(a_uniform)
+  {}
+
+  /**
+   * @brief Reserve one slot in a cell, lowering that cell's budget by one.
+   * @details Call once per particle that is invisible to this merge but still occupies the cell.
+   * @param[in] a_level AMR level the cell lives on.
+   * @param[in] a_cell Cell index, in the convention of detail::cellKeyOf().
+   */
+  inline void
+  reserveOne(const int a_level, const IntVect& a_cell)
+  {
+    const int count = ++m_reserved[detail::NNCellKey(a_level, a_cell)];
+
+    m_minBudget = std::min(m_minBudget, std::max(0, m_uniform - count));
+  }
+
+  /**
+   * @brief Reserve one slot in the cell a position falls in.
+   * @details Preferred over the IntVect overload for a caller holding positions: the cell index is
+   * derived here, so it cannot disagree with the convention this algorithm buckets particles under.
+   * @param[in] a_level AMR level the position's particle lives on.
+   * @param[in] a_position Physical position of the particle occupying the slot.
+   * @param[in] a_probLo Physical position of the domain's low corner.
+   * @param[in] a_dx Cell spacing (per direction) of that particle's OWN level.
+   */
+  inline void
+  reserveOne(const int a_level, const RealVect& a_position, const RealVect& a_probLo, const RealVect& a_dx)
+  {
+    this->reserveOne(a_level, detail::cellKeyOf(a_position, a_probLo, a_dx));
+  }
+
+  /**
+   * @brief The budget for one cell: the uniform count less that cell's reservations, floored at 0.
+   * @param[in] a_key Cell to look up.
+   * @return Particle count this cell is drained down to.
+   */
+  inline int
+  operator()(const detail::NNCellKey& a_key) const noexcept
+  {
+    if (m_reserved.empty()) {
+      return m_uniform;
+    }
+
+    const auto it = m_reserved.find(a_key);
+
+    return (it == m_reserved.end()) ? m_uniform : std::max(0, m_uniform - it->second);
+  }
+
+  /**
+   * @brief The smallest budget any cell has.
+   * @details For use where a cell's own budget cannot be looked up -- a conservative stand-in, since
+   * no cell is drained to fewer particles than this. Equals the uniform count when nothing is
+   * reserved.
+   * @return The minimum over every cell's budget.
+   */
+  inline int
+  minimum() const noexcept
+  {
+    return m_reserved.empty() ? m_uniform : std::min(m_uniform, m_minBudget);
+  }
+
+private:
+  /**
+   * @brief Particle count every cell is drained to before its own reservations are subtracted.
+   */
+  int m_uniform;
+
+  /**
+   * @brief Running minimum of every reserved cell's budget, maintained by reserveOne().
+   */
+  int m_minBudget = std::numeric_limits<int>::max();
+
+  /**
+   * @brief Slots already spoken for, per (level, cell). Empty for a uniform budget.
+   */
+  std::unordered_map<detail::NNCellKey, int, detail::NNCellKeyHasher> m_reserved;
+};
+
+namespace detail {
+
 /**
  * @brief A non-level-qualified cell index, distinct from NNCellKey, used where a cell is expressed
  * in a single consistent frame (the query patch's own level).
@@ -471,7 +580,7 @@ struct NNSpatialIndex
  * consumed status does, and that is filtered at lookup time -- see
  * findNearestNeighborCandidates()).
  *
- * @b Per-cell pre-filter: if NO cell in this patch has more than a_numParticlesPerCellThresh
+ * @b Per-cell pre-filter: if NO cell in this patch is over its a_cellBudget
  * particles, nothing is built (a_index.pointCloud stays null, exactly as if the patch had zero
  * particles) -- the SAME cheap "is this even worth it" check equal_weight_kd effectively gets for
  * free by dispatching per cell. This is an EXACT check (not an average-density heuristic, which
@@ -487,8 +596,8 @@ struct NNSpatialIndex
  * @param[in] a_ghosts Every ghost shipped to this patch this round.
  * @param[in] a_probLo Physical position of the domain's low corner.
  * @param[in] a_dx Cell spacing of THIS PATCH's own level.
- * @param[in] a_numParticlesPerCellThresh The physics-facing crowding threshold used elsewhere this round (see
- * mergeNearestNeighborsTree()'s own a_numParticlesPerCellThresh) -- used ONLY for the per-cell pre-filter above.
+ * @param[in] a_cellBudget The physics-facing per-cell budget used elsewhere this round (see
+ * mergeNearestNeighborsTree()'s own a_cellBudget) -- used ONLY for the per-cell pre-filter above.
  * @param[in] a_kNearest k = 1 + a_maxFallbackCandidates -- the neighbor count to precompute per point into
  * NNSpatialIndex::pointCloudGraph.
  * @param[out] a_index The resulting spatial index.
@@ -499,7 +608,7 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                     const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                     const RealVect&                             a_probLo,
                     const RealVect&                             a_dx,
-                    const int                                   a_numParticlesPerCellThresh,
+                    const NNCellBudget&                         a_cellBudget,
                     const int                                   a_kNearest,
                     NNSpatialIndex<Packed, Cloud>&              a_index) noexcept;
 
@@ -573,7 +682,7 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  * @param[in] a_dx Cell spacing of THIS PATCH's own level (see cellKeyOf()'s warning) -- valid here because every
  * query in a_localValid is necessarily on this same level; candidates never have their crowding checked by this
  * function, so a cross-level ghost candidate needs no dx here.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it holds strictly more
+ * @param[in] a_cellBudget Per-cell budget -- a cell is eligible while it holds strictly more
  * than this many particles.
  * @param[out] a_edges One entry per over-threshold, currently-alive query particle that has at least one candidate
  * (empty if none found).
@@ -599,7 +708,7 @@ findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&       
                               const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                               const RealVect&                                            a_probLo,
                               const RealVect&                                            a_dx,
-                              const int                                                  a_numParticlesPerCellThresh,
+                              const NNCellBudget&                                        a_cellBudget,
                               std::vector<NNMergeEdge<Packed>>&                          a_edges,
                               const int                                                  a_maxFallbackCandidates = 0,
                               const std::optional<int> a_maxCellDistance = std::nullopt) noexcept;
@@ -661,7 +770,7 @@ using NNCellSpatialIndex = std::unordered_map<NNWalkCell, std::shared_ptr<NNCell
  * @param[in] a_ghosts Every ghost shipped to this patch this round.
  * @param[in] a_probLo Physical position of the domain's low corner.
  * @param[in] a_dx Cell spacing of THIS PATCH's own level.
- * @param[in] a_numParticlesPerCellThresh The physics-facing crowding threshold used elsewhere this round; used
+ * @param[in] a_cellBudget The physics-facing per-cell budget used elsewhere this round; used
  * ONLY for the per-cell pre-filter above.
  * @param[out] a_index The resulting one-cell spatial index.
  */
@@ -671,7 +780,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
                         const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                         const RealVect&                             a_probLo,
                         const RealVect&                             a_dx,
-                        const int                                   a_numParticlesPerCellThresh,
+                        const NNCellBudget&                         a_cellBudget,
                         NNCellSpatialIndex&                         a_index) noexcept;
 
 /**
@@ -707,7 +816,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
  * @param[in] a_dx Cell spacing of THIS PATCH's own level (see cellKeyOf()'s warning).
  * @param[in] a_dxByLevel Cell spacing per AMR level (see resolveTrivialTier()'s own docs) -- needed for the exact
  * cross-level re-check described above.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N -- a cell is eligible while it holds strictly more
+ * @param[in] a_cellBudget Per-cell budget -- a cell is eligible while it holds strictly more
  * than this many particles.
  * @param[out] a_edges One entry per over-threshold, currently-alive query particle that has at least one candidate.
  * @param[in] a_maxFallbackCandidates Same meaning as findNearestNeighborCandidates()'s own parameter; 0 (default)
@@ -722,9 +831,9 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
                                      const RealVect&                                            a_probLo,
                                      const RealVect&                                            a_dx,
                                      const std::vector<RealVect>&                               a_dxByLevel,
-                                     const int                         a_numParticlesPerCellThresh,
-                                     std::vector<NNMergeEdge<Packed>>& a_edges,
-                                     const int                         a_maxFallbackCandidates = 0) noexcept;
+                                     const NNCellBudget&                                        a_cellBudget,
+                                     std::vector<NNMergeEdge<Packed>>&                          a_edges,
+                                     const int a_maxFallbackCandidates = 0) noexcept;
 
 /**
  * @brief Resolve every candidate edge that is safely mergeable with zero cross-rank
@@ -783,7 +892,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
  * in the same pass see the up-to-date occupancy.
  * @param[in,out] a_consumedIDs Ids already consumed this round (by an earlier trivial merge, or found dead for any
  * other reason); an edge referencing a consumed id is stale and skipped. Updated in place.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N, for the dynamic per-cell recheck (same value used
+ * @param[in] a_cellBudget Per-cell budget, for the dynamic per-cell recheck (same budget used
  * everywhere else this round).
  * @param[out] a_hasOutgoingCommitment Set of query-particle ids that were NOT resolved trivially (excluding the
  * stale-candidate case, see above) and must go on to generateProposals().
@@ -832,7 +941,7 @@ resolveTrivialTier(
   const Combine&                                                  a_combine,
   std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
   std::unordered_set<ParticleID>&                                 a_consumedIDs,
-  const int                                                       a_numParticlesPerCellThresh,
+  const NNCellBudget&                                             a_cellBudget,
   std::unordered_set<ParticleID>&                                 a_hasOutgoingCommitment,
   std::vector<NNMergeResult<Packed>>&                             a_results,
   const RealVect&                                                 a_probLo,
@@ -942,7 +1051,7 @@ generateProposals(const std::vector<NNMergeEdge<Packed>>&                       
  * round) would silently violate the crowding trigger on the source side. If this rank has no live visibility into
  * the source's cell (it was never shipped here as a ghost), the source count defaults to 0 -- i.e. rejected -- the
  * same conservative default already used when a target's own count is unknown.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N (same value used everywhere else this round).
+ * @param[in] a_cellBudget Per-cell budget (the same budget used everywhere else this round).
  * @param[in] a_probLo Physical position of the domain's low corner (see cellKeyOf()).
  * @param[in] a_dxByLevel Cell spacing PER AMR LEVEL -- see resolveTrivialTier()'s a_dxByLevel docs for why this must
  * never be a single shared dx (a proposal's source and this rank's target can be on different levels).
@@ -969,7 +1078,7 @@ judgeProposals(
   const std::map<ParticleID, ParticleID>&                         a_outgoingTargetOf,
   const Combine&                                                  a_combine,
   std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
-  const int                                                       a_numParticlesPerCellThresh,
+  const NNCellBudget&                                             a_cellBudget,
   const RealVect&                                                 a_probLo,
   const std::vector<RealVect>&                                    a_dxByLevel,
   const PosValid&                                                 a_isPositionValid,
@@ -1162,7 +1271,7 @@ gatherMergeParticles(AmrMesh&                                                  a
  * @param[in,out] a_amr AMR mesh -- source of the LevelTiles used to place merged particles.
  * @param[in,out] a_particles The real particle container being merged.
  * @param[in] a_realm Realm name.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+ * @param[in] a_cellBudget The count each cell is drained down to -- see NNCellBudget.
  * @param[in] a_combine Opaque-payload combine callback.
  * @param[in] a_scatter Per-surviving-particle scatter callback.
  * @param[in] a_allocateID Fresh-id allocator.
@@ -1197,7 +1306,7 @@ inline void
 finishMergeRound(AmrMesh&                                                  a_amr,
                  ParticleContainer<P, Traits>&                             a_particles,
                  const std::string&                                        a_realm,
-                 const int                                                 a_numParticlesPerCellThresh,
+                 const NNCellBudget&                                       a_cellBudget,
                  const Combine&                                            a_combine,
                  const Scatter&                                            a_scatter,
                  const Allocator&                                          a_allocateID,
@@ -1227,7 +1336,7 @@ finishMergeRound(AmrMesh&                                                  a_amr
  * implementation serves both without any backend-specific branching.
  * @tparam Cloud EBGeometry point-cloud index type (see NNSpatialIndex).
  * @tparam P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge See mergeNearestNeighborsTree().
- * @param a_amr,a_particles,a_numParticlesPerCellThresh,a_gather,a_combine,a_scatter,a_allocateID,
+ * @param a_amr,a_particles,a_cellBudget,a_gather,a_combine,a_scatter,a_allocateID,
  * a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,
  * a_crossLevelMergeCount,a_onMergeCommitted See mergeNearestNeighborsTree().
  */
@@ -1244,7 +1353,7 @@ template <typename P,
 inline void
 mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
                                ParticleContainer<P, Traits>& a_particles,
-                               const int                     a_numParticlesPerCellThresh,
+                               const NNCellBudget&           a_cellBudget,
                                const Gather&                 a_gather,
                                const Combine&                a_combine,
                                const Scatter&                a_scatter,
@@ -1305,7 +1414,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
  * @param[in,out] a_amr AMR mesh -- source of ghost masks, per-level dx, and the patch layout used to place merged
  * particles.
  * @param[in,out] a_particles The real particle container to merge, for every patch this rank owns.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+ * @param[in] a_cellBudget The count each cell is drained down to -- see NNCellBudget.
  * @param[in] a_gather Per-slot gather callback (see Gather).
  * @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
  * @param[in] a_scatter Per-surviving-particle scatter callback (see Scatter).
@@ -1358,7 +1467,7 @@ inline void
 mergeNearestNeighborsTree(
   AmrMesh&                      a_amr,
   ParticleContainer<P, Traits>& a_particles,
-  const int                     a_numParticlesPerCellThresh,
+  const NNCellBudget&           a_cellBudget,
   const Gather&                 a_gather,
   const Combine&                a_combine,
   const Scatter&                a_scatter,
@@ -1388,7 +1497,7 @@ mergeNearestNeighborsTree(
  * crowded cell's neighborhood is not also badly clustered in density, and measure before relying on it being faster
  * in a given workload (see PointCloudHashGrid's own docs in EBGeometry for when it is and is not a good fit).
  * @tparam P,Packed,Traits,Gather,Combine,Scatter,Allocator,PosValid,OnMerge See mergeNearestNeighborsTree().
- * @param a_amr,a_particles,a_numParticlesPerCellThresh,a_gather,a_combine,a_scatter,a_allocateID,
+ * @param a_amr,a_particles,a_cellBudget,a_gather,a_combine,a_scatter,a_allocateID,
  * a_iterateLocalTierToConvergence,a_maxFallbackCandidates,a_maxCellDistance,a_ghostWidth,a_isPositionValid,
  * a_crossLevelMergeCount,a_onMergeCommitted See mergeNearestNeighborsTree().
  */
@@ -1406,7 +1515,7 @@ inline void
 mergeNearestNeighborsHash(
   AmrMesh&                      a_amr,
   ParticleContainer<P, Traits>& a_particles,
-  const int                     a_numParticlesPerCellThresh,
+  const NNCellBudget&           a_cellBudget,
   const Gather&                 a_gather,
   const Combine&                a_combine,
   const Scatter&                a_scatter,
@@ -1447,7 +1556,7 @@ mergeNearestNeighborsHash(
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void`.
  * @param[in,out] a_amr AMR mesh -- source of ghost masks, per-level dx, and the patch layout.
  * @param[in,out] a_particles The real particle container to merge, for every patch this rank owns.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
+ * @param[in] a_cellBudget The count each cell is drained down to -- see NNCellBudget.
  * @param[in] a_gather Per-slot gather callback (see Gather).
  * @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
  * @param[in] a_scatter Per-surviving-particle scatter callback (see Scatter).
@@ -1477,7 +1586,7 @@ inline void
 mergeNearestNeighborsOneCell(
   AmrMesh&                      a_amr,
   ParticleContainer<P, Traits>& a_particles,
-  const int                     a_numParticlesPerCellThresh,
+  const NNCellBudget&           a_cellBudget,
   const Gather&                 a_gather,
   const Combine&                a_combine,
   const Scatter&                a_scatter,

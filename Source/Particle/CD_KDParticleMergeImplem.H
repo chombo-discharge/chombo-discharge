@@ -1762,6 +1762,239 @@ mergeKDPatch(AmrMesh&                      a_amr,
   }
 }
 
+template <typename P,
+          typename Packed,
+          typename Traits,
+          typename Gather,
+          typename Combine,
+          typename Scatter,
+          typename Allocator,
+          typename PosValid>
+inline void
+mergeKDInterior(AmrMesh&                      a_amr,
+                ParticleContainer<P, Traits>& a_particles,
+                ParticleContainer<P, Traits>& a_interior,
+                const int                     a_ppc,
+                const Real                    a_splitWeightLeafDx,
+                const Gather&                 a_gather,
+                const Combine&                a_combine,
+                const Scatter&                a_scatter,
+                const Allocator&              a_allocateID,
+                const PosValid&               a_isPositionValid)
+{
+  using namespace detail;
+
+  CH_TIMERS("ParticleManagement::mergeKDInterior");
+  CH_TIMER("ParticleManagement::mergeKDInterior::build", t_build);
+  CH_TIMER("ParticleManagement::mergeKDInterior::commit", t_commit);
+  CH_TIMER("ParticleManagement::mergeKDInterior::remove_place", t_place);
+
+  const std::string   realm       = a_particles.getRealm();
+  const int           finestLevel = a_amr.getFinestLevel();
+  const RealVect      probLo      = a_amr.getProbLo();
+  const Vector<Real>& dxScalar    = a_amr.getDx();
+
+  // A leaf committed from patch (lvl,din) is written to the SAME patch of a_interior, which is only
+  // meaningful when the two containers share a layout.
+  CH_assert(a_interior.getRealm() == realm);
+
+  std::vector<RealVect> dxByLevel(finestLevel + 1);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
+  }
+
+  const int myRank = procID();
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      // Ghosts ARE gathered, unlike mergeKDPatch(). They are never merged here, but they must take
+      // part in the partition: a ghost is what marks the leaf it lands in as contested, and the
+      // per-cell quota has to see the cell's true occupancy to hand out the right number of slots.
+      std::vector<KDParticle<Packed>> combined;
+      combined.reserve(leaf.size());
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        KDParticle<Packed> p;
+
+        p.position  = leaf.position(i);
+        p.weight    = leaf.weight(i);
+        p.globalID  = leaf.particleID(i);
+        p.ownerRank = leaf.rankID(i);
+        p.isGhost   = leaf.isGhost(i);
+        p.payload   = a_gather(leaf, i);
+
+        combined.push_back(p);
+      }
+
+      if (combined.empty()) {
+        continue;
+      }
+
+      CH_START(t_build);
+
+      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
+      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
+
+      std::vector<KDLeaf> leaves;
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+
+      CH_STOP(t_build);
+      CH_START(t_commit);
+
+      std::vector<ParticleID>         consumedIDs;
+      std::vector<KDParticle<Packed>> mergedResults;
+
+      for (const KDLeaf& bl : leaves) {
+        if (bl.hi - bl.lo < 2) {
+          continue;
+        }
+
+        // Cheap geometric test before the O(members) ghost scan below.
+        if (kdMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_kdMaxLeafExtent) {
+          continue;
+        }
+
+        // THE rule for this tier: commit iff the leaf holds no ghost. Every member is then a
+        // particle physically resident in this patch, so no other patch can commit any of them --
+        // a patch that draws one of them into a leaf of its own necessarily sees it as a ghost, and
+        // that leaf is disqualified here by this very test. Committed leaves therefore never share
+        // a member across patches, and no weight is counted twice. Boundary exposure is deliberately
+        // NOT consulted: an exposed leaf that happens to hold no ghost is uncontested and merges
+        // here, which is exactly what shrinks the skin relative to the carve.
+        bool anyGhost = false;
+
+        for (std::size_t idx = bl.lo; idx < bl.hi && !anyGhost; idx++) {
+          anyGhost = combined[idx].isGhost;
+        }
+
+        if (anyGhost) {
+          continue;
+        }
+
+        std::vector<Packed> payloads;
+        std::vector<Real>   weights;
+        RealVect            centroid = RealVect::Zero;
+        Real                totalW   = 0.0;
+
+        payloads.reserve(bl.hi - bl.lo);
+        weights.reserve(bl.hi - bl.lo);
+
+        for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
+          const KDParticle<Packed>& p = combined[idx];
+
+          // Guaranteed by the anyGhost test above; merging a ghost here would double-count its
+          // weight against its true owner.
+          CH_assert(!p.isGhost);
+
+          payloads.push_back(p.payload);
+          weights.push_back(p.weight);
+          centroid += p.weight * p.position;
+          totalW += p.weight;
+        }
+
+        centroid /= totalW;
+
+        kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
+
+        if (!a_isPositionValid(centroid)) {
+          continue;
+        }
+
+        KDParticle<Packed> merged;
+
+        merged.position  = centroid;
+        merged.weight    = totalW;
+        merged.globalID  = a_allocateID();
+        merged.ownerRank = myRank;
+        merged.isGhost   = false;
+        merged.payload   = a_combine(payloads.data(), weights.data(), payloads.size());
+
+        mergedResults.push_back(merged);
+
+        for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
+          consumedIDs.push_back(combined[idx].globalID);
+        }
+      }
+
+      CH_STOP(t_commit);
+
+      if (mergedResults.empty()) {
+        continue;
+      }
+
+      CH_START(t_place);
+
+      // Consumed originals leave a_particles; the super-particles they became are written to
+      // a_interior instead of back here. What is left behind in a_particles is precisely the skin.
+      std::sort(consumedIDs.begin(), consumedIDs.end());
+
+      // Removal below finds entries by binary search, which silently misses on an unsorted range.
+      CH_assert(std::is_sorted(consumedIDs.begin(), consumedIDs.end()));
+
+      {
+        std::size_t i = 0;
+
+        while (i < leaf.size()) {
+          if (!leaf.isGhost(i) && std::binary_search(consumedIDs.begin(), consumedIDs.end(), leaf.particleID(i))) {
+            leaf.remove(i);
+          }
+          else {
+            i++;
+          }
+        }
+      }
+
+      RealVect boxRealLo, boxRealHi;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        boxRealLo[dir] = probLo[dir] + dbl[din].smallEnd(dir) * dxByLevel[lvl][dir];
+        boxRealHi[dir] = probLo[dir] + (dbl[din].bigEnd(dir) + 1) * dxByLevel[lvl][dir];
+      }
+
+      for (const KDParticle<Packed>& mr : mergedResults) {
+        bool inOwnBox = true;
+
+        for (int dir = 0; dir < SpaceDim && inOwnBox; dir++) {
+          if (mr.position[dir] < boxRealLo[dir] || mr.position[dir] >= boxRealHi[dir]) {
+            inOwnBox = false;
+          }
+        }
+
+        if (inOwnBox) {
+          a_scatter(a_interior[lvl][din], mr);
+
+          continue;
+        }
+
+        // Every member was resident in this patch, so their weighted centroid is too -- this branch
+        // is unreachable in exact arithmetic and exists only for round-off at a patch face. It must
+        // still land on this rank: there is no exchange here to carry a particle anywhere else.
+        const auto dst = a_particles.findDestination(mr.position);
+
+        if (!dst.valid || dst.rank != myRank) {
+          MayDay::Error("ParticleManagement::mergeKDInterior -- merged particle left this rank's own patches");
+        }
+
+        const DataIndex dstDin = a_amr.getLevelTiles(realm)[dst.level]->getMyGrids().at(dst.gridIndex);
+
+        a_scatter(a_interior[dst.level][dstDin], mr);
+      }
+
+      CH_STOP(t_place);
+    }
+  }
+}
+
 } // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>

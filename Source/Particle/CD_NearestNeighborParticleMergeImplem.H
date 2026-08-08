@@ -270,7 +270,7 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
 
 /**
  * @brief Exact per-cell crowding pre-filter shared by buildNNSpatialIndex()/buildNNCellSpatialIndex(): is any
- * cell in this patch's local+ghost particle set over a_numParticlesPerCellThresh?
+ * cell in this patch's local+ghost particle set over its a_cellBudget?
  * @details A count-only tally keyed as the crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost
  * alike); checks the true per-cell maximum, not an average density (a low-average patch can still hold one
  * over-threshold cell).
@@ -279,8 +279,8 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  * @param[in] a_ghosts Every ghost shipped to this patch this round.
  * @param[in] a_probLo Physical position of the domain's low corner.
  * @param[in] a_dx Cell spacing of THIS PATCH's own level.
- * @param[in] a_numParticlesPerCellThresh Crowding threshold N.
- * @return True iff some cell holds strictly more than a_numParticlesPerCellThresh particles.
+ * @param[in] a_cellBudget The count each cell is drained down to -- see NNCellBudget.
+ * @return True iff some cell holds strictly more particles than its own budget allows.
  */
 template <typename Packed>
 inline bool
@@ -288,7 +288,7 @@ nnMergeAnyCellCrowded(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                       const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                       const RealVect&                             a_probLo,
                       const RealVect&                             a_dx,
-                      const int                                   a_numParticlesPerCellThresh) noexcept
+                      const NNCellBudget&                         a_cellBudget) noexcept
 {
   const std::size_t total = a_localValid.size() + a_ghosts.size();
 
@@ -303,8 +303,16 @@ nnMergeAnyCellCrowded(const std::vector<NNMergeParticle<Packed>>& a_localValid,
     cellCount[cellKeyOf(p.position, a_probLo, a_dx)]++;
   }
 
+  // Compared against the SMALLEST budget any cell has rather than this cell's own. The count above
+  // is pooled per bare cell, in the query patch's single frame, so it has no level to look a budget
+  // up with -- and this is only a pre-filter guarding whether the patch gets a spatial index at all.
+  // Taking the most permissive budget keeps it strictly conservative: it can never skip a patch the
+  // real per-cell tests downstream would have found work in. For a uniform budget this is exactly
+  // the plain threshold comparison it replaced.
+  const int minBudget = a_cellBudget.minimum();
+
   for (const auto& kv : cellCount) {
-    if (kv.second > a_numParticlesPerCellThresh) {
+    if (kv.second > minBudget) {
       return true;
     }
   }
@@ -318,7 +326,7 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
                     const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                     const RealVect&                             a_probLo,
                     const RealVect&                             a_dx,
-                    const int                                   a_numParticlesPerCellThresh,
+                    const NNCellBudget&                         a_cellBudget,
                     const int                                   a_kNearest,
                     NNSpatialIndex<Packed, Cloud>&              a_index) noexcept
 {
@@ -336,7 +344,7 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
 
   // Exact per-cell pre-filter (see this function's own docs): build nothing unless some cell is
   // over threshold.
-  if (!nnMergeAnyCellCrowded(a_localValid, a_ghosts, a_probLo, a_dx, a_numParticlesPerCellThresh)) {
+  if (!nnMergeAnyCellCrowded(a_localValid, a_ghosts, a_probLo, a_dx, a_cellBudget)) {
     return;
   }
 
@@ -389,7 +397,7 @@ findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&       
                               const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
                               const RealVect&                                            a_probLo,
                               const RealVect&                                            a_dx,
-                              const int                                                  a_numParticlesPerCellThresh,
+                              const NNCellBudget&                                        a_cellBudget,
                               std::vector<NNMergeEdge<Packed>>&                          a_edges,
                               const int                                                  a_maxFallbackCandidates,
                               const std::optional<int>                                   a_maxCellDistance) noexcept
@@ -435,11 +443,12 @@ findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&       
 
     // a_dx is this patch's own level's dx -- correct here since every query in a_localValid is
     // necessarily on this same level (see this function's a_dx docs).
-    const IntVect qCell = cellKeyOf(q.position, a_probLo, a_dx);
-    const auto    cntIt = a_liveCellCount.find(NNCellKey{q.level, qCell});
-    const int     count = (cntIt != a_liveCellCount.end()) ? cntIt->second : 0;
+    const IntVect   qCell = cellKeyOf(q.position, a_probLo, a_dx);
+    const NNCellKey qKey{q.level, qCell};
+    const auto      cntIt = a_liveCellCount.find(qKey);
+    const int       count = (cntIt != a_liveCellCount.end()) ? cntIt->second : 0;
 
-    if (count <= a_numParticlesPerCellThresh) {
+    if (count <= a_cellBudget(qKey)) {
       continue;
     }
 
@@ -534,7 +543,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
                         const std::vector<NNMergeParticle<Packed>>& a_ghosts,
                         const RealVect&                             a_probLo,
                         const RealVect&                             a_dx,
-                        const int                                   a_numParticlesPerCellThresh,
+                        const NNCellBudget&                         a_cellBudget,
                         NNCellSpatialIndex&                         a_index) noexcept
 {
   CH_TIME("ParticleManagement::buildNNCellSpatialIndex");
@@ -548,7 +557,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
 
   // Exact per-cell pre-filter, same contract as buildNNSpatialIndex()'s own: build nothing for
   // this patch unless some cell is over threshold.
-  if (!nnMergeAnyCellCrowded(a_localValid, a_ghosts, a_probLo, a_dx, a_numParticlesPerCellThresh)) {
+  if (!nnMergeAnyCellCrowded(a_localValid, a_ghosts, a_probLo, a_dx, a_cellBudget)) {
     return;
   }
 
@@ -600,9 +609,9 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
                                      const RealVect&                                            a_probLo,
                                      const RealVect&                                            a_dx,
                                      const std::vector<RealVect>&                               a_dxByLevel,
-                                     const int                         a_numParticlesPerCellThresh,
-                                     std::vector<NNMergeEdge<Packed>>& a_edges,
-                                     const int                         a_maxFallbackCandidates) noexcept
+                                     const NNCellBudget&                                        a_cellBudget,
+                                     std::vector<NNMergeEdge<Packed>>&                          a_edges,
+                                     const int a_maxFallbackCandidates) noexcept
 {
   CH_TIME("ParticleManagement::findNearestNeighborCandidatesOneCell");
 
@@ -636,11 +645,12 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
       continue;
     }
 
-    const IntVect qCell = cellKeyOf(q.position, a_probLo, a_dx);
-    const auto    cntIt = a_liveCellCount.find(NNCellKey{q.level, qCell});
-    const int     count = (cntIt != a_liveCellCount.end()) ? cntIt->second : 0;
+    const IntVect   qCell = cellKeyOf(q.position, a_probLo, a_dx);
+    const NNCellKey qKey{q.level, qCell};
+    const auto      cntIt = a_liveCellCount.find(qKey);
+    const int       count = (cntIt != a_liveCellCount.end()) ? cntIt->second : 0;
 
-    if (count <= a_numParticlesPerCellThresh) {
+    if (count <= a_cellBudget(qKey)) {
       continue;
     }
 
@@ -795,7 +805,7 @@ resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                      
                    const Combine&                                                  a_combine,
                    std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
                    std::unordered_set<ParticleID>&                                 a_consumedIDs,
-                   const int                                                       a_numParticlesPerCellThresh,
+                   const NNCellBudget&                                             a_cellBudget,
                    std::unordered_set<ParticleID>&                                 a_hasOutgoingCommitment,
                    std::vector<NNMergeResult<Packed>>&                             a_results,
                    const RealVect&                                                 a_probLo,
@@ -945,7 +955,7 @@ resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                      
         const int qCount = (qCountIt != a_liveCellCount.end()) ? qCountIt->second : 0;
         const int cCount = (cCountIt != a_liveCellCount.end()) ? cCountIt->second : 0;
 
-        if (qCount > a_numParticlesPerCellThresh && cCount > a_numParticlesPerCellThresh) {
+        if (qCount > a_cellBudget(qKey) && cCount > a_cellBudget(cKey)) {
           // d. COMMIT.
           NNMergeResult<Packed> result;
 
@@ -1048,7 +1058,7 @@ judgeProposals(const std::vector<NNMergeProposal<Packed>>&                     a
                const std::map<ParticleID, ParticleID>&                         a_outgoingTargetOf,
                const Combine&                                                  a_combine,
                std::unordered_map<NNCellKey, int, NNCellKeyHasher>&            a_liveCellCount,
-               const int                                                       a_numParticlesPerCellThresh,
+               const NNCellBudget&                                             a_cellBudget,
                const RealVect&                                                 a_probLo,
                const std::vector<RealVect>&                                    a_dxByLevel,
                const PosValid&                                                 a_isPositionValid,
@@ -1210,7 +1220,7 @@ judgeProposals(const std::vector<NNMergeProposal<Packed>>&                     a
     const int tCount = (tCountIt != a_liveCellCount.end()) ? tCountIt->second : 0;
     const int sCount = (sCountIt != a_liveCellCount.end()) ? sCountIt->second : 0;
 
-    if (tCount <= a_numParticlesPerCellThresh || sCount <= a_numParticlesPerCellThresh) {
+    if (tCount <= a_cellBudget(tKey) || sCount <= a_cellBudget(sKey)) {
       a_verdictsByDestRank[sourceDestRank].push_back(NNMergeVerdict{source.globalID, false});
 
       continue;
@@ -1439,7 +1449,7 @@ inline void
 finishMergeRound(AmrMesh&                                                  a_amr,
                  ParticleContainer<P, Traits>&                             a_particles,
                  const std::string&                                        a_realm,
-                 const int                                                 a_numParticlesPerCellThresh,
+                 const NNCellBudget&                                       a_cellBudget,
                  const Combine&                                            a_combine,
                  const Scatter&                                            a_scatter,
                  const Allocator&                                          a_allocateID,
@@ -1488,7 +1498,7 @@ finishMergeRound(AmrMesh&                                                  a_amr
                  outgoingTargetOf,
                  a_combine,
                  a_liveCellCount,
-                 a_numParticlesPerCellThresh,
+                 a_cellBudget,
                  a_probLo,
                  a_dxByLevel,
                  a_isPositionValid,
@@ -1589,7 +1599,7 @@ template <typename P,
 inline void
 mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
                                ParticleContainer<P, Traits>& a_particles,
-                               const int                     a_numParticlesPerCellThresh,
+                               const NNCellBudget&           a_cellBudget,
                                const Gather&                 a_gather,
                                const Combine&                a_combine,
                                const Scatter&                a_scatter,
@@ -1662,7 +1672,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
                         patchGhosts[pw],
                         probLo,
                         patchWork[pw].dx,
-                        a_numParticlesPerCellThresh,
+                        a_cellBudget,
                         1 + a_maxFallbackCandidates,
                         spatialIndex);
 
@@ -1698,7 +1708,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
                                     liveCellCount,
                                     probLo,
                                     patchWork[pw].dx,
-                                    a_numParticlesPerCellThresh,
+                                    a_cellBudget,
                                     patchEdges,
                                     a_maxFallbackCandidates,
                                     a_maxCellDistance);
@@ -1713,7 +1723,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
                        a_combine,
                        liveCellCount,
                        consumedIDs,
-                       a_numParticlesPerCellThresh,
+                       a_cellBudget,
                        hasOutgoingCommitment,
                        passResults,
                        probLo,
@@ -1752,7 +1762,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
   finishMergeRound<P, Packed, Traits>(a_amr,
                                       a_particles,
                                       realm,
-                                      a_numParticlesPerCellThresh,
+                                      a_cellBudget,
                                       a_combine,
                                       a_scatter,
                                       a_allocateID,
@@ -1785,7 +1795,7 @@ template <typename P,
 inline void
 mergeNearestNeighborsTree(AmrMesh&                      a_amr,
                           ParticleContainer<P, Traits>& a_particles,
-                          const int                     a_numParticlesPerCellThresh,
+                          const NNCellBudget&           a_cellBudget,
                           const Gather&                 a_gather,
                           const Combine&                a_combine,
                           const Scatter&                a_scatter,
@@ -1803,7 +1813,7 @@ mergeNearestNeighborsTree(AmrMesh&                      a_amr,
   detail::mergeNearestNeighborsRoundImpl<P, Packed, Traits, EBGeometry::PointCloudBVH<Real, ParticleID>>(
     a_amr,
     a_particles,
-    a_numParticlesPerCellThresh,
+    a_cellBudget,
     a_gather,
     a_combine,
     a_scatter,
@@ -1829,7 +1839,7 @@ template <typename P,
 inline void
 mergeNearestNeighborsHash(AmrMesh&                      a_amr,
                           ParticleContainer<P, Traits>& a_particles,
-                          const int                     a_numParticlesPerCellThresh,
+                          const NNCellBudget&           a_cellBudget,
                           const Gather&                 a_gather,
                           const Combine&                a_combine,
                           const Scatter&                a_scatter,
@@ -1847,7 +1857,7 @@ mergeNearestNeighborsHash(AmrMesh&                      a_amr,
   detail::mergeNearestNeighborsRoundImpl<P, Packed, Traits, EBGeometry::PointCloudHashGrid<Real, ParticleID>>(
     a_amr,
     a_particles,
-    a_numParticlesPerCellThresh,
+    a_cellBudget,
     a_gather,
     a_combine,
     a_scatter,
@@ -1873,7 +1883,7 @@ template <typename P,
 inline void
 mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
                              ParticleContainer<P, Traits>& a_particles,
-                             const int                     a_numParticlesPerCellThresh,
+                             const NNCellBudget&           a_cellBudget,
                              const Gather&                 a_gather,
                              const Combine&                a_combine,
                              const Scatter&                a_scatter,
@@ -1933,12 +1943,7 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
   for (std::size_t pw = 0; pw < patchWork.size(); pw++) {
     NNCellSpatialIndex cellIndex;
 
-    buildNNCellSpatialIndex(patchLocalValid[pw],
-                            patchGhosts[pw],
-                            probLo,
-                            patchWork[pw].dx,
-                            a_numParticlesPerCellThresh,
-                            cellIndex);
+    buildNNCellSpatialIndex(patchLocalValid[pw], patchGhosts[pw], probLo, patchWork[pw].dx, a_cellBudget, cellIndex);
 
     patchCellSpatialIndex.push_back(std::move(cellIndex));
   }
@@ -1962,7 +1967,7 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
                                            probLo,
                                            patchWork[pw].dx,
                                            dxByLevel,
-                                           a_numParticlesPerCellThresh,
+                                           a_cellBudget,
                                            patchEdges,
                                            a_maxFallbackCandidates);
 
@@ -1976,7 +1981,7 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
                        a_combine,
                        liveCellCount,
                        consumedIDs,
-                       a_numParticlesPerCellThresh,
+                       a_cellBudget,
                        hasOutgoingCommitment,
                        passResults,
                        probLo,
@@ -2011,7 +2016,7 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
   finishMergeRound<P, Packed, Traits>(a_amr,
                                       a_particles,
                                       realm,
-                                      a_numParticlesPerCellThresh,
+                                      a_cellBudget,
                                       a_combine,
                                       a_scatter,
                                       a_allocateID,
