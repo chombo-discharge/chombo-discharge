@@ -97,12 +97,19 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1KDParticle.html">KDParticle</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.  <a href="structParticleManagement_1_1KDParticle.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.  <a href="structParticleManagement_1_1NNMergeParticle.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:a02a8ea5701b39e8582247fbaca3c4d82" id="r_a02a8ea5701b39e8582247fbaca3c4d82"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:a02a8ea5701b39e8582247fbaca3c4d82"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a02a8ea5701b39e8582247fbaca3c4d82">KDPayloadCombine</a> = std::function&lt; Packed(const Packed *a_payloads, const Real *a_weights, const std::size_t a_count)&gt;</td></tr>
+<tr class="memdesc:a02a8ea5701b39e8582247fbaca3c4d82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Illustrative signature of the N-ary combine callback: produce a merged particle's opaque payload from an arbitrary-size group of parents' payloads and weights.  <br /></td></tr>
+<tr class="separator:a02a8ea5701b39e8582247fbaca3c4d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac790674227a2c8b519fe7f96a45d704b" id="r_ac790674227a2c8b519fe7f96a45d704b"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
 <tr class="memitem:ac790674227a2c8b519fe7f96a45d704b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ac790674227a2c8b519fe7f96a45d704b">PayloadCombine</a> = std::function&lt; Packed(const Packed &amp;a_first, const Real a_firstWeight, const Packed &amp;a_second, const Real a_secondWeight)&gt;</td></tr>
 <tr class="memdesc:ac790674227a2c8b519fe7f96a45d704b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Illustrative signature of the combine callback: produce a merged particle's opaque payload from its two parents' payloads and weights.  <br /></td></tr>
@@ -139,7 +146,9 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95aa769e4c4be95a51878de2a1894428c51">NnPairOneCell</a>
 , <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95afc928d730bf608b4c127462c37eed005">NnPairHash</a>
 , <br />
-&#160;&#160;<a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779">External</a>
+&#160;&#160;<a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95acaaff4f921b4ea1d4d99fa5bc70236a8">KdCarve</a>
+, <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a715a3f206ccc83c1f36548e530f71de0">KdPatch</a>
+, <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779">External</a>
 <br />
  }</td></tr>
 <tr class="memdesc:ac69666866ee6c0eaed03b81381b9ce95"><td class="mdescLeft">&#160;</td><td class="mdescRight">The specific super-particle merge methods.  <a href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">More...</a><br /></td></tr>
@@ -147,6 +156,14 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:af681e1151a79c53180360eb01e53fbe0" id="r_af681e1151a79c53180360eb01e53fbe0"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </td></tr>
+<tr class="memitem:af681e1151a79c53180360eb01e53fbe0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0">mergeKDCarve</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_ppc, const Real a_splitWeightLeafDx, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
+<tr class="memdesc:af681e1151a79c53180360eb01e53fbe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.  <br /></td></tr>
+<tr class="separator:af681e1151a79c53180360eb01e53fbe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41307c92d88082530835eafc35a0c7e1" id="r_a41307c92d88082530835eafc35a0c7e1"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </td></tr>
+<tr class="memitem:a41307c92d88082530835eafc35a0c7e1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a41307c92d88082530835eafc35a0c7e1">mergeKDPatch</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_ppc, const Real a_splitWeightLeafDx, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
+<tr class="memdesc:a41307c92d88082530835eafc35a0c7e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one patch-local kd-tree merge over every patch this rank owns.  <br /></td></tr>
+<tr class="separator:a41307c92d88082530835eafc35a0c7e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa522903df11ab969f76ba1dc020c20f7" id="r_aa522903df11ab969f76ba1dc020c20f7"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;, const NNMergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
 <tr class="memitem:aa522903df11ab969f76ba1dc020c20f7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#aa522903df11ab969f76ba1dc020c20f7">mergeNearestNeighborsTree</a> (<a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const int a_numParticlesPerCellThresh, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, const int a_ghostWidth=1, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
 <tr class="memdesc:aa522903df11ab969f76ba1dc020c20f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.  <br /></td></tr>
@@ -239,6 +256,33 @@ template&lt;class P &gt; </div>
 
 <p>Illustrative signature of the fresh-id allocator: produce one globally-unique id for a newly created merged particle. </p>
 <p>Documents the expected callback shape; consumed as a template parameter (not this std::function). Called once per committed merge (trivial-tier or judge-side). The caller must ensure ids never collide &ndash; not just within one call, but across every rank and every past/future call for the life of the simulation; a rank-namespaced counter (this rank's index times a stride plus a monotonically increasing local count) suffices. </p><dl class="section return"><dt>Returns</dt><dd>A fresh globally-unique particle id. </dd></dl>
+
+</div>
+</div>
+<a id="a02a8ea5701b39e8582247fbaca3c4d82" name="a02a8ea5701b39e8582247fbaca3c4d82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02a8ea5701b39e8582247fbaca3c4d82">&#9670;&#160;</a></span>KDPayloadCombine</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Packed &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespaceParticleManagement.html#a02a8ea5701b39e8582247fbaca3c4d82">ParticleManagement::KDPayloadCombine</a> = typedef std::function&lt; Packed(const Packed* a_payloads, const Real* a_weights, const std::size_t a_count)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Illustrative signature of the N-ary combine callback: produce a merged particle's opaque payload from an arbitrary-size group of parents' payloads and weights. </p>
+<p>Deliberately N-ary, not pairwise like the nearest-neighbor merge's PayloadCombine &ndash; leaves/boxes here are groups by construction (kd-tree leaves, carve boxes), not pairs off a k-NN graph, so the natural callback shape takes a whole group at once rather than needing a caller-chosen fold order for reproducibility. This alias documents the expected shape only; it is NOT the type used at the call sites (consumed as a template parameter so it inlines on the per-merge hot path). Position and total weight are handled by the algorithm directly (weighted centroid, summed weight); this callback produces only the opaque <code>Packed</code> payload. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_payloads</td><td>Pointer to the first of <code>a_count</code> parents' payloads. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weights</td><td>Pointer to the first of <code>a_count</code> parents' weights, parallel to <code>a_payloads</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_count</td><td>Number of parents being combined (always &gt;= 2 &ndash; see the merge threshold in <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>/mergeKDPatch()'s own docs). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The merged particle's payload. </dd></dl>
 
 </div>
 </div>
@@ -383,6 +427,10 @@ template&lt;typename Packed &gt; </div>
 <tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95aa769e4c4be95a51878de2a1894428c51" name="ac69666866ee6c0eaed03b81381b9ce95aa769e4c4be95a51878de2a1894428c51"></a>NnPairOneCell&#160;</td><td class="fielddoc"><p>AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95afc928d730bf608b4c127462c37eed005" name="ac69666866ee6c0eaed03b81381b9ce95afc928d730bf608b4c127462c37eed005"></a>NnPairHash&#160;</td><td class="fielddoc"><p>AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95acaaff4f921b4ea1d4d99fa5bc70236a8" name="ac69666866ee6c0eaed03b81381b9ce95acaaff4f921b4ea1d4d99fa5bc70236a8"></a>KdCarve&#160;</td><td class="fielddoc"><p>AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95a715a3f206ccc83c1f36548e530f71de0" name="ac69666866ee6c0eaed03b81381b9ce95a715a3f206ccc83c1f36548e530f71de0"></a>KdPatch&#160;</td><td class="fielddoc"><p>AMR: mergeKDPatch (same build, patch-local &ndash; no ghosts, no contested particles). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779" name="ac69666866ee6c0eaed03b81381b9ce95ab206a1b4ea1097761f78e8876f6da779"></a>External&#160;</td><td class="fielddoc"><p>Cell: caller-supplied per-cell merger. </p>
 </td></tr>
@@ -936,6 +984,247 @@ template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &a
 
 </div>
 </div>
+<a id="af681e1151a79c53180360eb01e53fbe0" name="af681e1151a79c53180360eb01e53fbe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af681e1151a79c53180360eb01e53fbe0">&#9670;&#160;</a></span>mergeKDCarve()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::mergeKDCarve </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ppc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_splitWeightLeafDx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Gather &amp;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Combine &amp;&#160;</td>
+          <td class="paramname"><em>a_combine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Scatter &amp;&#160;</td>
+          <td class="paramname"><em>a_scatter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Allocator &amp;&#160;</td>
+          <td class="paramname"><em>a_allocateID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PosValid &amp;&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns. </p>
+<p>Orchestrates, in order:</p><ol type="1">
+<li>Build one kd tree per patch over its local particles plus every ghost. The caller must have filled ghosts at width 1; this function does not fill them itself.</li>
+<li>Classify each leaf as unmergeable (too wide to merge), interior (no boundary exposure and no ghost member), or a boundary box.</li>
+<li>Commit interior leaves immediately, with no communication.</li>
+<li>Resolve boundary boxes against competing patches in three fixed exchange rounds &ndash; claim, nominal verdict, commit-or-release &ndash; keyed by (AABB volume, anchor id).</li>
+<li>Collapse a leaf or box only if at least two members survive and <em>a_isPositionValid</em> accepts the centroid, then place the result. Anything else is left untouched.</li>
+</ol>
+<p>The round count is fixed, not a convergence loop; further reduction comes from calling again. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type (see <a class="el" href="structParticleManagement_1_1KDParticle.html" title="Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.">KDParticle</a>). </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for P (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Gather</td><td>Callable <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, std::size_t) -&gt; Packed</code>. </td></tr>
+    <tr><td class="paramname">Combine</td><td>See KDPayloadCombine &ndash; N-ary, not pairwise. </td></tr>
+    <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1KDParticle.html" title="Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.">KDParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
+    <tr><td class="paramname">Allocator</td><td>Callable <code>() -&gt; ParticleID</code>, a fresh globally-unique id per committed merge. </td></tr>
+    <tr><td class="paramname">PosValid</td><td>Callable <code>(const RealVect&amp;) -&gt; bool</code>; false leaves the group's members untouched. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of the particle ghost masks and grid layout. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container being merged. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ppc</td><td>Target particles per cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_splitWeightLeafDx</td><td>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting &ndash; forwarded verbatim to buildKDQuotaLeaves(). 0 disables the weight median entirely. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>N-ary opaque-payload combine callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-merged-particle scatter callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a41307c92d88082530835eafc35a0c7e1" name="a41307c92d88082530835eafc35a0c7e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41307c92d88082530835eafc35a0c7e1">&#9670;&#160;</a></span>mergeKDPatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::mergeKDPatch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ppc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_splitWeightLeafDx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Gather &amp;&#160;</td>
+          <td class="paramname"><em>a_gather</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Combine &amp;&#160;</td>
+          <td class="paramname"><em>a_combine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Scatter &amp;&#160;</td>
+          <td class="paramname"><em>a_scatter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Allocator &amp;&#160;</td>
+          <td class="paramname"><em>a_allocateID</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PosValid &amp;&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Run one patch-local kd-tree merge over every patch this rank owns. </p>
+<p>Same tree build and per-cell quota as <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>, with no boundary tier:</p><ol type="1">
+<li>Build one kd tree per patch over that patch's own particles. The caller must NOT have filled ghosts; a ghost here would be merged locally while its true owner merges it too.</li>
+<li>Every leaf whose largest per-axis extent is within detail::s_kdMaxLeafExtent commits immediately, regardless of boundary exposure. No leaf is ever contested, so there is no claim/verdict/commit exchange and no communication at all.</li>
+<li>A leaf collapses to one merged particle only if it has at least two members and <em>a_isPositionValid</em> accepts the centroid; otherwise its members are left untouched.</li>
+<li>Merged results are placed by a cheap point-in-the-owning-patch test, falling back to <a class="el" href="classParticleContainer.html#aceb244841067af1ac950741902a56150" title="Map a position to its owning (level, grid index, rank) via the finest containing tile.">ParticleContainer::findDestination()</a>.</li>
+</ol>
+<p>Each patch therefore reduces only the particles it owns. Cheaper than <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and free of communication, at the cost of no coordination across a patch boundary: a cell straddled by two patches is reduced by each of them independently. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
+    <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type (see <a class="el" href="structParticleManagement_1_1KDParticle.html" title="Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.">KDParticle</a>). </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for P (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
+  </table>
+  </dd>
+</dl>
+<p>). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Gather</td><td>Callable <code>(const <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, std::size_t) -&gt; Packed</code>. </td></tr>
+    <tr><td class="paramname">Combine</td><td>See KDPayloadCombine &ndash; N-ary, not pairwise. </td></tr>
+    <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1KDParticle.html" title="Minimal, payload-agnostic description of one particle as input to the kd-tree carve merge.">KDParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
+    <tr><td class="paramname">Allocator</td><td>Callable <code>() -&gt; ParticleID</code>, a fresh globally-unique id per committed merge. </td></tr>
+    <tr><td class="paramname">PosValid</td><td>Callable <code>(const RealVect&amp;) -&gt; bool</code>; false leaves the leaf's members untouched. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of the grid layout. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container being merged. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ppc</td><td>Target particles per cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_splitWeightLeafDx</td><td>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting &ndash; forwarded verbatim to buildKDQuotaLeaves(). 0 disables the weight median entirely. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gather</td><td>Per-slot gather callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_combine</td><td>N-ary opaque-payload combine callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-merged-particle scatter callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ace7541e61134b0af1e86e6e0e2a260b9" name="ace7541e61134b0af1e86e6e0e2a260b9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ace7541e61134b0af1e86e6e0e2a260b9">&#9670;&#160;</a></span>mergeMethodFromString()</h2>
 
@@ -961,7 +1250,7 @@ template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &a
 </div><div class="memdoc">
 
 <p>Map a merge-algorithm selector string to a ParticleMergeMethod. </p>
-<p>Valid input options are: 'none' -&gt; None 'equal_weight_kd' -&gt; EqualWeightKD 'reinitialize' -&gt; Reinitialize 'reinitialize_bvh' -&gt; ReinitializeBVH 'nn_sfc' -&gt; NnSfc 'nn_pair_tree' -&gt; NnPairTree 'nn_pair_onecell' -&gt; NnPairOneCell 'nn_pair_hash' -&gt; NnPairHash 'external' -&gt; External </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Valid input options are: 'none' -&gt; None 'equal_weight_kd' -&gt; EqualWeightKD 'reinitialize' -&gt; Reinitialize 'reinitialize_bvh' -&gt; ReinitializeBVH 'nn_sfc' -&gt; NnSfc 'nn_pair_tree' -&gt; NnPairTree 'nn_pair_onecell' -&gt; NnPairOneCell 'nn_pair_hash' -&gt; NnPairHash 'kd_carve' -&gt; KdCarve 'kd_patch' -&gt; KdPatch 'external' -&gt; External </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_str</td><td>String selector. Must take one of the above strings. </td></tr>
   </table>

@@ -1,0 +1,5 @@
+<map id="ParticleManagement::detail::KDClaim" name="ParticleManagement::detail::KDClaim">
+<area shape="rect" id="Node000001" title="One outgoing claim: &quot;my box, with this key, lists you as a member&quot; – the wire record for the carve pr..." alt="" coords="5,108,161,148"/>
+<area shape="rect" id="Node000002" href="$structParticleManagement_1_1detail_1_1KDBoxKey.html" title="A boundary box&#39;s key: the total order the carve protocol&#39;s argmin resolves ownership conflicts with." alt="" coords="5,5,161,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,59,86,108,81,108,81,59"/>
+</map>

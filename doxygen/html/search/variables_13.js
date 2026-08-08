@@ -1,4 +1,15 @@
 var searchData=
 [
-  ['weight_0',['weight',['../structParticleManagement_1_1NNMergeParticle.html#a467b90f0cd73cfcebae75d19a4b5bdb2',1,'ParticleManagement::NNMergeParticle']]]
+  ['v_5fx_0',['v_x',['../structTracerParticle.html#a13c77f09403349300fefc3622632fdd9',1,'TracerParticle::v_x'],['../structDischargeInceptionParticle.html#acaf0482efc462d0082dd91a8f01167ac',1,'DischargeInceptionParticle::v_x'],['../structPhoton.html#a7d1169e47d33ca6bdbf70c6a81f57d71',1,'Photon::v_x']]],
+  ['v_5fy_1',['v_y',['../structPhoton.html#a1ad6e30a2f1b6a4421d0557ed2a96e56',1,'Photon::v_y'],['../structTracerParticle.html#aed8702c048252133a8a180f090abb73e',1,'TracerParticle::v_y'],['../structDischargeInceptionParticle.html#a37829b191beb27523945e698e25fc3f4',1,'DischargeInceptionParticle::v_y']]],
+  ['v_5fz_2',['v_z',['../structPhoton.html#ac223dd0701bade0eb47762b23a04a57a',1,'Photon::v_z'],['../structTracerParticle.html#ae303d2b158eac759d7aac95d0528cb36',1,'TracerParticle::v_z'],['../structDischargeInceptionParticle.html#aa1c1515d9c2144698324b9da3026519f',1,'DischargeInceptionParticle::v_z']]],
+  ['valid_3',['valid',['../structLevelTiles_1_1LevelAndBox.html#af5eb5b94527719b500fa709a1ef0e59d',1,'LevelTiles::LevelAndBox::valid'],['../structParticleManagement_1_1detail_1_1NNParticleLocation.html#a6c91a5e2f91ca65997e3d06fc233c9cf',1,'ParticleManagement::detail::NNParticleLocation::valid']]],
+  ['verbosity_4',['verbosity',['../structEllipticSolverChain_1_1Settings.html#ad8175651d4bda6b6b0f988ea57966e88',1,'EllipticSolverChain::Settings']]],
+  ['vk_5fx_5',['vk_x',['../structDischargeInceptionParticle.html#aaa0cc26b90e101ad71e42d45c00522b1',1,'DischargeInceptionParticle']]],
+  ['vk_5fy_6',['vk_y',['../structDischargeInceptionParticle.html#a37192e8936c282ec30d421ffbaeeac11',1,'DischargeInceptionParticle']]],
+  ['vk_5fz_7',['vk_z',['../structDischargeInceptionParticle.html#ab92a6176af3451e788efbd8aaf593169',1,'DischargeInceptionParticle']]],
+  ['volume_8',['volume',['../structParticleManagement_1_1detail_1_1KDBoxKey.html#a3d8a9eb59a592eac207d9bd6068e0b3f',1,'ParticleManagement::detail::KDBoxKey']]],
+  ['vx_9',['vx',['../structItoParticle.html#aac76b006b52e47bbe54ceec005f7a98b',1,'ItoParticle']]],
+  ['vy_10',['vy',['../structItoParticle.html#a325ca2011475b0d447b6ea82abbfc342',1,'ItoParticle']]],
+  ['vz_11',['vz',['../structItoParticle.html#a54b1861e51f6eae5011b45ca2139ce15',1,'ItoParticle']]]
 ];

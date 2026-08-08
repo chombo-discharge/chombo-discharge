@@ -1,0 +1,10 @@
+<map id="Source/Particle/CD_KDParticleMerge.H" name="Source/Particle/CD_KDParticleMerge.H">
+<area shape="rect" id="Node000001" title="Declaration of distributed, MPI&#45;safe whole&#45;patch kd&#45;tree super&#45;particle merge algorithms." alt="" coords="200,5,351,45"/>
+<area shape="rect" id="Node000002" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="5,93,151,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,53,122,96,120,91,219,48"/>
+<area shape="rect" id="Node000003" href="$CD__KDParticleMergeImplem_8H.html" title="Implementation of CD_KDParticleMerge.H." alt="" coords="175,93,376,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="269,59,270,93,265,93,264,59"/>
+<area shape="rect" id="Node000004" href="$CD__ParticleMergers_8H.html" title="Umbrella header pulling in every ParticleManagement super&#45;particle merge algorithm." alt="" coords="401,93,545,133"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="332,48,431,91,428,96,330,53"/>
+<area shape="poly" id="edge3_Node000003_Node000001" title=" " alt="" coords="281,80,280,46,286,46,287,80"/>
+</map>

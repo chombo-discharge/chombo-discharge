@@ -157,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 935-946
+   :lines: 980-991
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -321,7 +321,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1070-1075
+   :lines: 1115-1120
    :dedent: 2
 
 which returns a CFL-like condition
@@ -337,7 +337,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1094-1099
+   :lines: 1139-1144
    :dedent: 2
 
 which returns a CFL-like condition
@@ -355,7 +355,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 972-982
+   :lines: 1017-1027
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -382,18 +382,21 @@ Calling this function will merge/split the particles.
 .. important::
 
    Most merging algorithms are performed within each grid cell, and particles must therefore be sorted by their cell index (``organizeParticlesByCell``) before calling the merging routine.
-   The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, and ``nn_pair_hash``, which are distributed AMR-level merges that match particles across patch and rank boundaries; they instead require that a particle ghost halo has been filled, and are dispatched over the whole container rather than cell by cell.
+   The exceptions are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, and ``kd_patch``, which are distributed AMR-level merges dispatched over the whole container rather than cell by cell.
+   All of these except ``kd_patch`` match particles across patch and rank boundaries and therefore require that a particle ghost halo has been filled; ``kd_patch`` is patch-local and instead requires that no ghost halo is present.
 
 In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
 
 * ``none`` - No particle merging/splitting is performed.
-* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
+* ``equal_weight_kd`` Use a kd-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
-* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.
+* ``reinitialize_bvh`` Re-initialize the particles in each node of a kd-tree. Weights are as uniform as possible.
 * ``nn_sfc`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
 * ``nn_pair_tree`` A distributed, MPI-safe nearest-neighbour *pair* merge that reaches the target particle count over the whole AMR hierarchy, searching for candidates via one whole-patch PointCloudBVH per patch. Over-full cells are drained by matching each over-crowded particle with its true nearest neighbour across patch and rank boundaries (a propose/judge/verdict protocol over a particle ghost halo) and merging the pair to its weighted centroid; because a single round merges pairs, the round is repeated until every cell reaches the target. Under-full cells are then brought up to the target by splitting the heaviest particle into two co-located daughters (floor/ceil weights, so integer weights stay integer). Tunable through ``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback`` and ``ItoSolver.nn_pair_max_cell_dist``.
 * ``nn_pair_onecell`` The same distributed nearest-neighbour pair merge and drain/split protocol as ``nn_pair_tree``, but candidates are found via one PointCloudBVH per occupied grid cell instead of one per patch: a query only ever searches its own cell and its Moore-adjacent neighbours, so the merge distance is structurally fixed at Chebyshev cell distance 1 and ``ItoSolver.nn_pair_max_cell_dist`` does not apply. Tunable through ``ItoSolver.nn_pair_iterate`` and ``ItoSolver.nn_pair_fallback``.
 * ``nn_pair_hash`` The same distributed nearest-neighbour pair merge and drain/split protocol as ``nn_pair_tree``, but candidates are found via one PointCloudHashGrid (a uniform spatial hash grid) per patch instead of a PointCloudBVH. Identical tunables and behaviour to ``nn_pair_tree`` (``ItoSolver.nn_pair_iterate``, ``ItoSolver.nn_pair_fallback``, ``ItoSolver.nn_pair_max_cell_dist``); only the per-patch spatial-index backend differs.
+* ``kd_carve`` A distributed, MPI-safe whole-patch merge built around a spatial partition ("kd tree") rather than a nearest-neighbour graph: each patch splits its local-plus-ghost particles purely by position, bisecting the longest axis and never snapping to the grid, so particles near a cell face can merge across it -- at the count median while a node is still larger than ``ItoSolver.kd_split_weight_leaf_dx`` cell widths, and at the weight median once it is smaller, so that the resulting super-particles come out with comparable weights. How far splitting goes is set by a live per-cell quota: every group becomes exactly one super-particle at its weighted centroid, so the number of groups centred in a cell is that cell's post-merge population, and any split that would push a cell past the target count is refused. A group entirely clear of any patch/rank boundary merges immediately with no communication; a group that touches one is resolved by a single, non-iterative "z-buffer carve" -- competing groups from neighbouring patches are ranked by a deterministic key and the tightest one wins each contested particle. Unlike the ``nn_pair_*`` family there is no drain loop and no ``nn_pair_iterate``/``nn_pair_fallback``/``nn_pair_max_cell_dist`` equivalent to tune; the ghost width is fixed at 1. The maximum per-axis extent of a mergeable group is fixed at one cell width -- a physical safety bound applied as a filter on the finished partition, not a tunable, and matching the hardcoded width-1 ghost halo. Tunable through ``ItoSolver.kd_split_weight_leaf_dx`` (count-median/weight-median crossover, in cell widths; 0 disables the weight median).
+* ``kd_patch`` The same whole-patch kd-tree build and per-cell quota as ``kd_carve``, but with no boundary tier: no particle ghost halo is filled, every group merges regardless of boundary exposure, and no particle is ever contested, so each patch reduces only the particles it owns. Cheaper and communication-free, at the cost of no coordination across patch boundaries.
 * ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through ``setParticleCellMerger``.
 
 The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.
@@ -408,11 +411,11 @@ In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 70-78
+   :lines: 72-80
 
 .. tip::
    
-   ``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
+   ``ItoSolver`` uses the kd-tree implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
 
 Example transport kernel
 ------------------------

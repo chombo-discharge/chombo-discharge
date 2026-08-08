@@ -117,13 +117,29 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#particle-visualization">Particle visualization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#superparticles">Superparticles</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#kd-trees">kD-trees</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kd-tree-merging-equal-weight-kd">KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kd-tree-with-reinitialization-reinitialize-bvh">KD-tree with reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reinitialization-reinitialize">Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sfc-nearest-neighbour-merging-nn-sfc">SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nearest-neighbour-pair-merging-nn-pair-tree-nn-pair-onecell-nn-pair-hash">Nearest-neighbour pair merging (<code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code> / <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code> / <code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#merging-and-splitting-particles">Merging and splitting particles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kd-trees">kd-trees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#per-cell-kd-merges">Per-cell kd-merges</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#equal-weight-merging-equal-weight-kd">Equal-weight merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#reinitialization-algorithms">Reinitialization algorithms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reinitialization-reinitialize">Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kd-tree-reinitialization-reinitialize-bvh">kd-tree reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nearest-neighbour-algorithms">Nearest-neighbour algorithms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sfc-pair-merging-nn-sfc">SFC pair merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#whole-patch-bvh-search-nn-pair-tree">Whole-patch BVH search (<code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#per-cell-bvh-search-nn-pair-onecell">Per-cell BVH search (<code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#whole-patch-hash-grid-search-nn-pair-hash">Whole-patch hash-grid search (<code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#whole-patch-kd-merges">Whole-patch kd-merges</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#carved-patch-boundaries-kd-carve">Carved patch boundaries (<code class="docutils literal notranslate"><span class="pre">kd_carve</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#patch-local-merging-kd-patch">Patch-local merging (<code class="docutils literal notranslate"><span class="pre">kd_patch</span></code>)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -948,10 +964,19 @@ For example, <code class="docutils literal notranslate"><span class="pre">Partic
 If a particle type declares no <code class="docutils literal notranslate"><span class="pre">h5PartColumns</span></code> (or an empty one), only <code class="docutils literal notranslate"><span class="pre">id</span></code>, position, and <code class="docutils literal notranslate"><span class="pre">weight</span></code> are written.
 The argument <code class="docutils literal notranslate"><span class="pre">a_shift</span></code> will simply shift the particle positions in the output HDF5 file.</p>
 </section>
-<section id="superparticles">
-<span id="chap-superparticles"></span><h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading"></a></h2>
+<section id="merging-and-splitting-particles">
+<span id="chap-superparticles"></span><h2>Merging and splitting particles<a class="headerlink" href="#merging-and-splitting-particles" title="Permalink to this heading"></a></h2>
 <p>Often, merging or splitting of particles is required.
-The recommended pattern operates on one cell at a time: cell-sort the leaf, extract a cell’s particles into a small scratch <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code>, merge/split them, and rebuild the leaf.
+<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports several strategies, which fall into two families:</p>
+<ul class="simple">
+<li><p><strong>Per-cell mergers</strong> operate on one cell at a time and are implemented as factory functions in <code class="docutils literal notranslate"><span class="pre">ParticleManagement</span></code> that return a <code class="docutils literal notranslate"><span class="pre">ParticleMerger&lt;P,</span> <span class="pre">Traits&gt;</span></code> functor.
+Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> payload type.
+These are <code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>, <code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>, <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>, and <code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>.</p></li>
+<li><p><strong>Whole-hierarchy mergers</strong> operate collectively across the entire AMR hierarchy rather than one cell at a time.
+None is a per-cell factory, and all are distributed and MPI-safe.
+These are <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>, <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>, <code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>, <code class="docutils literal notranslate"><span class="pre">kd_carve</span></code>, and <code class="docutils literal notranslate"><span class="pre">kd_patch</span></code>.</p></li>
+</ul>
+<p>The recommended pattern for the per-cell family is to cell-sort the leaf, extract a cell’s particles into a small scratch <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code>, merge/split them, and rebuild the leaf.
 <code class="docutils literal notranslate"><span class="pre">ParticleSoA&lt;P&gt;::extractCell</span></code> performs the per-cell extraction</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Extract cell c&#39;s particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.</span>
@@ -980,75 +1005,73 @@ The recommended pattern operates on one cell at a time: cell-sort the leaf, extr
 </div>
 <p>and the merged result is accumulated into an output <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> (via <code class="docutils literal notranslate"><span class="pre">append</span></code>) which finally replaces the leaf with <code class="docutils literal notranslate"><span class="pre">swap</span></code>.
 A complete worked example is <code class="docutils literal notranslate"><span class="pre">ItoSolver::makeSuperparticles</span></code> in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/ItoDiffusion/CD_ItoSolver.cpp</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports several merger strategies.
-The four cell-granularity strategies below are implemented as factory functions in <code class="docutils literal notranslate"><span class="pre">ParticleManagement</span></code> that return a <code class="docutils literal notranslate"><span class="pre">ParticleMerger&lt;P,</span> <span class="pre">Traits&gt;</span></code> functor.
-Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> payload type.
-Three further strategies, <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>, <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>, and <code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>, merge nearest-neighbour pairs collectively across the AMR hierarchy rather than one cell at a time; none is a per-cell factory, and all three are described at the end of this section.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The source code for all per-cell merger factories is in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>.</p>
+</div>
 <section id="kd-trees">
-<h3>kD-trees<a class="headerlink" href="#kd-trees" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> partitions particles using kD-trees as the internal basis for the <code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> and <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> mergers; user code reaches this through the <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory described below, never by calling the partitioner directly.
-kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
+<h3>kd-trees<a class="headerlink" href="#kd-trees" title="Permalink to this heading"></a></h3>
+<p>Several of the mergers below partition particles using kd-trees.
+kd-trees operate by partitioning a set of input primitives into spatially coherent subsets.
 At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
 <a class="reference internal" href="#fig-partitionkd"><span class="std std-numref">Fig. 14</span></a> shows an example where a set of initial particles are partitioned using such a tree.</p>
 <figure class="align-center" id="id5">
 <span id="fig-partitionkd"></span><a class="reference internal image-reference" href="../_images/PartitionKD.png"><img alt="../_images/PartitionKD.png" src="../_images/PartitionKD.png" style="width: 90%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 14 </span><span class="caption-text">Example of a kD-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">Example of a kd-tree partitioning of particles in a single cell.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
+<p>The particles in each leaf of the tree can then be merged into new particles, one per leaf.
+What distinguishes the kd-based mergers from one another is the rule used to choose each split plane, the rule used to stop the recursion, and whether the tree is built per cell or per patch:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> and <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> build one tree <strong>per cell</strong>, splitting so that the two halves carry as nearly equal <em>weight</em> as possible.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kd_carve</span></code> and <code class="docutils literal notranslate"><span class="pre">kd_patch</span></code> build one tree <strong>per patch</strong>, splitting at the count or weight median and stopping on a live per-cell quota.</p></li>
+</ul>
+</section>
+<section id="per-cell-kd-merges">
+<h3>Per-cell kd-merges<a class="headerlink" href="#per-cell-kd-merges" title="Permalink to this heading"></a></h3>
+<p>The per-cell partitioner <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> operates on a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.
+It recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible – at each bisection the two halves differ by at most one physical particle.
+It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The kD partitioner <code class="docutils literal notranslate"><span class="pre">ParticleManagement::detail::buildEqualWeightKDLeaves</span></code> (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>) lives in the internal <code class="docutils literal notranslate"><span class="pre">detail</span></code> namespace – it implements the partitioning below but is not part of the public interface and is not meant to be called directly.
+<p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::detail::buildEqualWeightKDLeaves</span></code> (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>) lives in the internal <code class="docutils literal notranslate"><span class="pre">detail</span></code> namespace – it implements the partitioning but is not part of the public interface and is not meant to be called directly.
 The public entry point is the <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory (see <a class="reference internal" href="#kd-tree-merging"><span class="std std-ref">below</span></a>), which wraps it.</p>
 </div>
-<p>The kD-tree partitioner operates on a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.
-The partitioner <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible – at each bisection the two halves differ by at most one physical particle.
-It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
 In this case any other members in the particle type are copied over into the new particles.</p>
 </div>
-<p>The particles in each leaf of the kD-tree can then be merged into new particles.
-Since the weight in the nodes of the tree differ by at most one, the resulting computational particles also have weights that differ by at most one.</p>
-<figure class="align-center" id="id6">
-<span id="fig-superkd"></span><a class="reference internal image-reference" href="../_images/SuperKD.png"><img alt="../_images/SuperKD.png" src="../_images/SuperKD.png" style="width: 75%;" /></a>
-<figcaption>
-<p><span class="caption-number">Fig. 15 </span><span class="caption-text">kD-tree partitioning of particles into new particles whose weight differ by at most one.
-Left: Original particles with weights between 1 and 100.
-Right: Merged particles.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
-</figcaption>
-</figure>
-</section>
-<section id="kd-tree-merging-equal-weight-kd">
-<span id="kd-tree-merging"></span><h3>KD-tree merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)<a class="headerlink" href="#kd-tree-merging-equal-weight-kd" title="Permalink to this heading"></a></h3>
+<section id="equal-weight-merging-equal-weight-kd">
+<span id="kd-tree-merging"></span><h4>Equal-weight merging (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>)<a class="headerlink" href="#equal-weight-merging-equal-weight-kd" title="Permalink to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeEqualWeightKDMerger</span></code> wraps <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> into a <code class="docutils literal notranslate"><span class="pre">ParticleMerger</span></code> functor.
 The caller provides three lambdas:</p>
 <ul class="simple">
 <li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>.</p></li>
-<li><p>A <em>reconcile</em> function (<code class="docutils literal notranslate"><span class="pre">BinaryParticleReconcile</span></code>) that propagates payload fields to both daughter particles when the median particle is split across a KD boundary.</p></li>
+<li><p>A <em>reconcile</em> function (<code class="docutils literal notranslate"><span class="pre">BinaryParticleReconcile</span></code>) that propagates payload fields to both daughter particles when the median particle is split across a kd boundary.</p></li>
 <li><p>A <em>scatter-leaf</em> function that receives the raw <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">last)</span></code> pointer range of one leaf and appends exactly one merged particle to the SoA.</p></li>
 </ul>
+<p>Since the weight in the leaves of the tree differ by at most one, the resulting computational particles also have weights that differ by at most one, as shown in <a class="reference internal" href="#fig-superkd"><span class="std std-numref">Fig. 15</span></a>.</p>
+<figure class="align-center" id="id6">
+<span id="fig-superkd"></span><a class="reference internal image-reference" href="../_images/SuperKD.png"><img alt="../_images/SuperKD.png" src="../_images/SuperKD.png" style="width: 75%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 15 </span><span class="caption-text">kd-tree partitioning of particles into new particles whose weight differ by at most one.
+Left: Original particles with weights between 1 and 100.
+Right: Merged particles.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
 <p>In the weighted-centroid variant (<code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> in <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
-Particle weights need not be integers, but <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> may create new particles at the KD boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.</p>
+Particle weights need not be integers, but <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> may create new particles at the kd boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.</p>
 </section>
-<section id="kd-tree-with-reinitialization-reinitialize-bvh">
-<h3>KD-tree with reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)<a class="headerlink" href="#kd-tree-with-reinitialization-reinitialize-bvh" title="Permalink to this heading"></a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> variant uses the same <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory and the same KD partition, but replaces the centroid scatter with a position-reinitialising scatter:</p>
-<ul class="simple">
-<li><p><strong>Cut-cells</strong> (<code class="docutils literal notranslate"><span class="pre">volFrac</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>): the weighted centroid is used to keep the merged particle inside the embedded boundary.</p></li>
-<li><p><strong>Full cells</strong>: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each KD partition rather than collapsing it to a single point.</p></li>
-</ul>
-<p>This avoids accumulating all merged particles at a cluster of centroid positions in full cells, at the cost of discarding the fine-scale spatial information within each leaf.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In the full-cell branch, energy is accumulated over the leaf but is <em>not</em> normalised by weight – the stored value is the total (not average) energy of the leaf.
-This is intentional and matches the original <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> behaviour.</p>
-</div>
 </section>
+<section id="reinitialization-algorithms">
+<h3>Reinitialization algorithms<a class="headerlink" href="#reinitialization-algorithms" title="Permalink to this heading"></a></h3>
+<p>Reinitialization algorithms discard some or all of the spatial information within a cell and redraw particle positions rather than collapsing each group onto its centroid.
+This avoids accumulating merged particles at a cluster of centroid positions, at the cost of discarding fine-scale spatial information.</p>
 <section id="reinitialization-reinitialize">
-<h3>Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)<a class="headerlink" href="#reinitialization-reinitialize" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeReinitializeMerger</span></code> discards all spatial information and rebuilds the cell from scratch.</p>
+<h4>Reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>)<a class="headerlink" href="#reinitialization-reinitialize" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeReinitializeMerger</span></code> discards <em>all</em> spatial information and rebuilds the cell from scratch.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Context</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
 <span class="n">makeReinitializeMerger</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_aggregate</span><span class="p">,</span>
@@ -1070,8 +1093,44 @@ This method requires that particle weights are (close to) integers.</p>
 The cell-centre position is computed internally as <code class="docutils literal notranslate"><span class="pre">probLo</span> <span class="pre">+</span> <span class="pre">dx</span> <span class="pre">*</span> <span class="pre">(gridIndex</span> <span class="pre">+</span> <span class="pre">0.5)</span></code>, so no grid pointer needs to be retained in the returned functor.</p>
 </div>
 </section>
-<section id="sfc-nearest-neighbour-merging-nn-sfc">
-<h3>SFC nearest-neighbour merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)<a class="headerlink" href="#sfc-nearest-neighbour-merging-nn-sfc" title="Permalink to this heading"></a></h3>
+<section id="kd-tree-reinitialization-reinitialize-bvh">
+<h4>kd-tree reinitialization (<code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code>)<a class="headerlink" href="#kd-tree-reinitialization-reinitialize-bvh" title="Permalink to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> variant uses the same <code class="docutils literal notranslate"><span class="pre">makeEqualWeightKDMerger</span></code> factory and the same per-cell kd partition as <code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code>, but replaces the centroid scatter with a position-reinitialising scatter:</p>
+<ul class="simple">
+<li><p><strong>Cut-cells</strong> (<code class="docutils literal notranslate"><span class="pre">volFrac</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>): the weighted centroid is used to keep the merged particle inside the embedded boundary.</p></li>
+<li><p><strong>Full cells</strong>: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each kd partition rather than collapsing it to a single point.</p></li>
+</ul>
+<p>Unlike <code class="docutils literal notranslate"><span class="pre">reinitialize</span></code>, the spatial information is discarded only <em>within</em> each leaf, so the coarse-grained distribution across the cell is preserved.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the full-cell branch, energy is accumulated over the leaf but is <em>not</em> normalised by weight – the stored value is the total (not average) energy of the leaf.
+This is intentional and matches the original <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> behaviour.</p>
+</div>
+</section>
+</section>
+<section id="nearest-neighbour-algorithms">
+<h3>Nearest-neighbour algorithms<a class="headerlink" href="#nearest-neighbour-algorithms" title="Permalink to this heading"></a></h3>
+<p>Nearest-neighbour algorithms merge each particle with a spatially close partner rather than with everything in its cell.
+<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code> does this per cell, using a space-filling-curve ordering.</p>
+<p id="nn-pair-merging">The three <code class="docutils literal notranslate"><span class="pre">nn_pair_*</span></code> variants are distributed, MPI-safe merges that operate collectively across the whole AMR hierarchy.
+All three share the same propose/judge/verdict protocol and differ only in how merge candidates are found.
+Each call performs one <em>round</em>:</p>
+<ol class="arabic simple">
+<li><p>Ghost particles are refilled (fresh, exactly once per round) so that a particle’s nearest neighbour may be one owned by another patch or rank.</p></li>
+<li><p>Every particle’s nearest neighbour is located, and pairs lying entirely within one patch are merged immediately (the <em>trivial tier</em>).</p></li>
+<li><p>Pairs that straddle a patch or rank boundary are resolved through a single cross-patch propose/judge/verdict exchange, so both owners agree on exactly one merge and no particle is merged twice.</p></li>
+</ol>
+<p>Because a round merges <em>pairs</em>, a cell far above the target count is not necessarily drained in a single call; the merge is invoked once per time step and relies on repeated rounds – and, in a running simulation, on particle motion between them – for further convergence.
+Merged particles need globally unique ids that cannot collide across ranks or rounds, so the caller supplies an id allocator (a rank-namespaced counter suffices).</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>All three <code class="docutils literal notranslate"><span class="pre">nn_pair_*</span></code> methods require a particle ghost mask (width-1 for <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>; width equal to the configured merge distance, or 1, for <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>/<code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>), which is only built during a regrid.
+The mask must therefore be registered <em>before</em> the grids are (re)built – registering it late leaves it empty and the neighbour search will not see cross-patch particles.
+<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles this automatically when <code class="docutils literal notranslate"><span class="pre">merge_algorithm</span></code> selects any of the three, and <code class="docutils literal notranslate"><span class="pre">ItoKMCStepper</span></code> does the same when its regrid-time merge is set to any of the three.</p>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> the behaviour is tuned through <code class="docutils literal notranslate"><span class="pre">nn_pair_iterate</span></code> (repeat the local trivial-tier merges within a round until no further local pairs remain), <code class="docutils literal notranslate"><span class="pre">nn_pair_fallback</span></code> (how many additional candidate neighbours to consider when the nearest is unavailable), and, for <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>/<code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code> only, <code class="docutils literal notranslate"><span class="pre">nn_pair_max_cell_dist</span></code> (cap the neighbour search radius in cells; <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>’s search radius is fixed at 1 and does not read this).</p>
+<section id="sfc-pair-merging-nn-sfc">
+<h4>SFC pair merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)<a class="headerlink" href="#sfc-pair-merging-nn-sfc" title="Permalink to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeSfcNearestNeighborMerger</span></code> sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most <code class="docutils literal notranslate"><span class="pre">ppc</span></code>.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Packed</span><span class="p">,</span>
 <span class="w">          </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">)(),</span>
@@ -1090,38 +1149,85 @@ The cell-centre position is computed internally as <code class="docutils literal
 <li><p>A <em>combine</em> function that merges two adjacent intermediates in place (typically a weighted average of position and energy).</p></li>
 <li><p>A <em>scatter</em> function that unpacks one merged intermediate back into the SoA.</p></li>
 </ul>
-<p>Unlike the KD-tree methods, SFC merging does not require integer weights.
+<p>Unlike the kd-tree methods, SFC merging does not require integer weights.
 Particle counts below <code class="docutils literal notranslate"><span class="pre">ppc</span></code> are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight <span class="math notranslate nohighlight">\(\geq 2\)</span>).
-The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the KD centroid.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The source code for all merger factories is in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H</span></code>.</p>
-</div>
+The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the kd centroid.</p>
 </section>
-<section id="nearest-neighbour-pair-merging-nn-pair-tree-nn-pair-onecell-nn-pair-hash">
-<span id="nn-pair-merging"></span><h3>Nearest-neighbour pair merging (<code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code> / <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code> / <code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>)<a class="headerlink" href="#nearest-neighbour-pair-merging-nn-pair-tree-nn-pair-onecell-nn-pair-hash" title="Permalink to this heading"></a></h3>
-<p>Unlike the four strategies above, none of <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>, <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>, or <code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code> is a per-cell factory that returns a <code class="docutils literal notranslate"><span class="pre">ParticleMerger</span></code> functor.
-All three are distributed, MPI-safe merges that operate collectively across the whole AMR hierarchy, sharing the same propose/judge/verdict protocol and differing only in how merge candidates are found:</p>
+<section id="whole-patch-bvh-search-nn-pair-tree">
+<h4>Whole-patch BVH search (<code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>)<a class="headerlink" href="#whole-patch-bvh-search-nn-pair-tree" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsTree</span></code> in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H</span></code>, and searches for candidates via one whole-patch <code class="docutils literal notranslate"><span class="pre">PointCloudBVH</span></code> per patch.</p>
+</section>
+<section id="per-cell-bvh-search-nn-pair-onecell">
+<h4>Per-cell BVH search (<code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>)<a class="headerlink" href="#per-cell-bvh-search-nn-pair-onecell" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsOneCell</span></code> in the same file, and instead builds one <code class="docutils literal notranslate"><span class="pre">PointCloudBVH</span></code> per occupied grid cell.
+A query only ever searches its own cell and its Moore-adjacent neighbours, so its merge distance is structurally fixed at Chebyshev cell distance 1.</p>
+</section>
+<section id="whole-patch-hash-grid-search-nn-pair-hash">
+<h4>Whole-patch hash-grid search (<code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>)<a class="headerlink" href="#whole-patch-hash-grid-search-nn-pair-hash" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsHash</span></code> in the same file – identical algorithm and tunables to <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>, but searches via one whole-patch <code class="docutils literal notranslate"><span class="pre">PointCloudHashGrid</span></code> (a uniform spatial hash grid) per patch instead of a <code class="docutils literal notranslate"><span class="pre">PointCloudBVH</span></code>.
+Both point-cloud types expose an identical query interface, and the two entry points share one generic implementation selected via a template parameter over the point-cloud type.</p>
+</section>
+</section>
+<section id="whole-patch-kd-merges">
+<h3>Whole-patch kd-merges<a class="headerlink" href="#whole-patch-kd-merges" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">kd_carve</span></code> and <code class="docutils literal notranslate"><span class="pre">kd_patch</span></code> are not built around pairwise nearest-neighbour matching at all.
+Both are distributed, MPI-safe whole-container merges declared in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_KDParticleMerge.H</span></code>, and both use the same tree build and the same per-cell quota; they differ only in how patch boundaries are treated.</p>
+<p>Each patch’s particles are split purely by position into a kd-tree, never snapped to the grid, since particles near a cell face must be able to merge across it.
+The longest axis is bisected at the <em>count median</em> – the plane putting half the node’s particles on either side – while the node is still larger than <code class="docutils literal notranslate"><span class="pre">kd_split_weight_leaf_dx</span></code> cell widths, and at the <em>weight median</em> – half the node’s particle weight on either side – once it is smaller.
+Above that scale a split’s job is to apportion leaves between cells, which is a question about counts; below it there is little left to apportion and the weight median drives the resulting super-particles toward equal weight.</p>
+<p>Splitting is governed by a <strong>live per-cell quota</strong>.
+Every group becomes exactly one super-particle, placed at its weighted centroid, so the number of groups centred in a cell is that cell’s post-merge population; that count is tracked while splitting, and a split that would push a cell past the target is refused.
+Groups are split heaviest-first, because the quota is claimed first-come-first-served: ordering by particle count instead lets light groups take a cell’s slots before a heavy group is considered, stranding the heavy one whole as a single very heavy super-particle.</p>
+<p>The quota constrains only those groups that can actually merge.
+A group whose largest per-axis extent exceeds one cell width is left untouched, so its members survive individually; it therefore costs its cell its full member count rather than one particle, and the quota does not block splitting it further.
+A cell can consequently finish slightly above target when a group is both too wide to merge and in a cell already at quota, since either choice overshoots.
+This extent bound is applied only as a filter on the finished partition; it never drives the splitting itself.</p>
+<p>Particles in cells at or below target are excluded from the partition and emitted as singletons.
+A singleton never merges (the merge threshold is two members), so an under-populated cell cannot be drained by a neighbour’s merge.</p>
+<p>Unlike the <code class="docutils literal notranslate"><span class="pre">nn_pair_*</span></code> family there is no iteration, fallback or max-cell-distance equivalent, since there is no drain loop and the per-cell quota alone governs how far splitting goes.
+The maximum extent of a mergeable group is fixed at one cell width rather than exposed as an option: it is a physical bound rather than a dial, and it matches the hardcoded width-1 ghost halo.
+One option applies to both algorithms:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsTree</span></code> in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H</span></code>, and searches for candidates via one whole-patch <code class="docutils literal notranslate"><span class="pre">PointCloudBVH</span></code> per patch.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsHash</span></code> in the same file – identical algorithm and tunables to <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>, but searches via one whole-patch <code class="docutils literal notranslate"><span class="pre">PointCloudHashGrid</span></code> (a uniform spatial hash grid) per patch instead of a <code class="docutils literal notranslate"><span class="pre">PointCloudBVH</span></code>. Both point-cloud types expose an identical query interface, and the two entry points share one generic implementation selected via a template parameter over the point-cloud type.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeNearestNeighborsOneCell</span></code> in the same file, and instead builds one <code class="docutils literal notranslate"><span class="pre">PointCloudBVH</span></code> per occupied grid cell; a query only ever searches its own cell and its Moore-adjacent neighbours, so its merge distance is structurally fixed at Chebyshev cell distance 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kd_split_weight_leaf_dx</span></code> – the group size, in cell widths, at or below which the split plane switches from the count median to the weight median. 0 disables the weight median entirely.</p></li>
 </ul>
-<p>Each call performs one <em>round</em>:</p>
+<section id="carved-patch-boundaries-kd-carve">
+<span id="kd-tree-carve-merging"></span><h4>Carved patch boundaries (<code class="docutils literal notranslate"><span class="pre">kd_carve</span></code>)<a class="headerlink" href="#carved-patch-boundaries-kd-carve" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">kd_carve</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeKDCarve</span></code>.
+It builds the tree over each patch’s local <em>plus ghost</em> particles, and then classifies every group in one of three ways:</p>
+<ul class="simple">
+<li><p><em>Interior</em> – none of its members’ cells are exposed to any neighbouring patch or level, and it holds no ghost member. Such a group merges immediately, with zero communication.</p></li>
+<li><p><em>Unmergeable</em> – the group’s largest per-axis extent exceeds one cell width, so merging it would combine particles more than a cell apart. Left untouched.</p></li>
+<li><p><em>Boundary</em> – otherwise. Such a group becomes a candidate “box” for the carve step.</p></li>
+</ul>
+<p>The boundary/carve step (“z-buffer carve”) resolves every contested particle in a single, fixed, non-iterative protocol.
+Each box is keyed by <code class="docutils literal notranslate"><span class="pre">(AABB</span> <span class="pre">volume,</span> <span class="pre">anchor</span> <span class="pre">particle</span> <span class="pre">id)</span></code>, compared so that the tightest box wins a contested particle (the anchor id is a deterministic tiebreak, since volume alone is not a strict total order).
+Because a box’s membership can be whittled down by losing individual particles to other, unrelated competing boxes, a box that nominally wins one particle is not guaranteed to end up with enough survivors to actually commit a merge – so the protocol runs in three rounds rather than two:</p>
 <ol class="arabic simple">
-<li><p>Ghost particles are refilled (fresh, exactly once per round) so that a particle’s nearest neighbour may be one owned by another patch or rank.</p></li>
-<li><p>Every particle’s nearest neighbour is located, and pairs lying entirely within one patch are merged immediately (the <em>trivial tier</em>).</p></li>
-<li><p>Pairs that straddle a patch or rank boundary are resolved through a single cross-patch propose/judge/verdict exchange, so both owners agree on exactly one merge and no particle is merged twice.</p></li>
+<li><p>Claims are routed to each particle’s owner.</p></li>
+<li><p>Each owner replies with the nominal winner.</p></li>
+<li><p>Once a box’s final, post-contest membership and validity are known, it tells each surviving foreign member’s owner to actually delete it.</p></li>
 </ol>
-<p>Because a round merges <em>pairs</em>, a cell far above the target count is not necessarily drained in a single call; the merge is invoked once per time step and relies on repeated rounds – and, in a running simulation, on particle motion between them – for further convergence.
-Merged particles need globally unique ids that cannot collide across ranks or rounds, so the caller supplies an id allocator (a rank-namespaced counter suffices).</p>
+<p>Only this last step authorizes a deletion; a box’s participants are never removed on the strength of the nominal result in step 2 alone, since that could otherwise delete a particle whose “winning” box turns out not to commit.</p>
+<p>A patch only ever sees its own particles plus a width-1 ghost halo, so a group can only ever list members drawn from that halo, and claims therefore only ever travel to a patch’s direct neighbours – the exchange is bounded and fixed-shape, not a drain loop, regardless of the third round.
+This also matches the leaf-extent bound exactly: a mergeable group is at most one cell across, and the halo supplies precisely that reach.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>All three methods require a particle ghost mask (width-1 for <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>; width equal to the configured merge distance, or 1, for <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>/<code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code>), which is only built during a regrid.
-The mask must therefore be registered <em>before</em> the grids are (re)built – registering it late leaves it empty and the neighbour search will not see cross-patch particles.
-<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> handles this automatically when <code class="docutils literal notranslate"><span class="pre">merge_algorithm</span></code> selects any of the three, and <code class="docutils literal notranslate"><span class="pre">ItoKMCStepper</span></code> does the same when its regrid-time merge is set to any of the three.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kd_carve</span></code> requires a width-1 particle ghost mask, registered unconditionally by <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> (the same requirement and registration timing as the <code class="docutils literal notranslate"><span class="pre">nn_pair_*</span></code> family – see above).</p>
 </div>
-<p>In <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> the behaviour is tuned through <code class="docutils literal notranslate"><span class="pre">nn_pair_iterate</span></code> (repeat the local trivial-tier merges within a round until no further local pairs remain), <code class="docutils literal notranslate"><span class="pre">nn_pair_fallback</span></code> (how many additional candidate neighbours to consider when the nearest is unavailable), and, for <code class="docutils literal notranslate"><span class="pre">nn_pair_tree</span></code>/<code class="docutils literal notranslate"><span class="pre">nn_pair_hash</span></code> only, <code class="docutils literal notranslate"><span class="pre">nn_pair_max_cell_dist</span></code> (cap the neighbour search radius in cells; <code class="docutils literal notranslate"><span class="pre">nn_pair_onecell</span></code>’s search radius is fixed at 1 and does not read this).</p>
+</section>
+<section id="patch-local-merging-kd-patch">
+<h4>Patch-local merging (<code class="docutils literal notranslate"><span class="pre">kd_patch</span></code>)<a class="headerlink" href="#patch-local-merging-kd-patch" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">kd_patch</span></code> is implemented as <code class="docutils literal notranslate"><span class="pre">ParticleManagement::mergeKDPatch</span></code>.
+It selects the same tree build and per-cell quota without the boundary tier: no ghost halo is filled, and every group within the extent bound merges immediately regardless of boundary exposure.
+No particle is ever contested, so there is no claim/verdict/commit exchange and no communication at all.</p>
+<p>Each patch therefore reduces only the particles it owns.
+This is cheaper than <code class="docutils literal notranslate"><span class="pre">kd_carve</span></code> and free of communication, at the cost of no coordination across a patch boundary: a cell straddled by two patches is reduced by each of them independently.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The caller must <em>not</em> fill a ghost halo before calling <code class="docutils literal notranslate"><span class="pre">kd_patch</span></code>.
+A ghost particle reaching the merge would be merged locally while its true owner merges it too, double-counting its weight.</p>
+</div>
+</section>
 </section>
 </section>
 </section>
