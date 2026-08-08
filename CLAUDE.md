@@ -35,6 +35,13 @@ These are ask-first rules in the same sense as the git rules above: propose the 
 an answer. They exist because this codebase already provides the containers in question, and
 hand-rolled substitutes have repeatedly hidden invariants instead of enforcing them.
 
+- **Before introducing any new type or container, state what already exists and why it does not
+  serve.** Name the existing type that was considered, and say in one line why it is insufficient.
+  Search the codebase for it first; do not write from the local requirement alone. This applies even
+  when the new type looks obviously justified, because the recurring failure is not misjudging a
+  type's merit — it is never having looked for the type that already does the job. `NNParticleLocation`
+  was written to rename the four fields of `LevelTiles::LevelAndBox`, in a file that was already
+  calling the function returning it.
 - **Per-cell data must use the existing mesh containers unless the user has agreed otherwise.**
   `EBAMRCellData`, `LevelData`, and `FArrayBox`/`BaseFab` already provide per-cell storage together
   with ghost filling, coarsening, interpolation, and accumulation *out of* ghost cells (`Copier` with
@@ -55,6 +62,10 @@ hand-rolled substitutes have repeatedly hidden invariants instead of enforcing t
   already carries the information; a struct that merely renames the fields of an existing type is not
   worth adding. POD wire formats exchanged over MPI, and genuinely new domain concepts, are
   legitimate — say which of the two it is when proposing it.
+
+When a change introduces more than one new type, list them in the PR description with their use
+counts. Each type is usually defensible on its own; the cost only becomes visible in aggregate, and a
+type with a handful of uses is nearly always a candidate for removal.
 
 Worked examples of what these rules exist to prevent are collected in
 `chombo-discharge/chombo-discharge#682`.
