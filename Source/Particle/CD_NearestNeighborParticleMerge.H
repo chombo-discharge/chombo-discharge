@@ -1107,51 +1107,21 @@ applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
               std::unordered_set<ParticleID>&    a_consumedIDs) noexcept;
 
 /**
- * @brief Result of locating a physical position against the AMR grid -- see placeMergedParticles().
- * @details Deliberately independent of any AmrMesh/Realm/ParticleContainer type (this header
- * stays Amr-agnostic) -- mirrors LevelTiles::LevelAndBox's fields exactly,
- * since that IS the intended real implementation: an O(1) point->block query on the realm's
- * LevelTiles tile->box hash (the SAME lookup a ParticleContainer already uses internally to
- * route its own particles during remap()), never a linear scan over patches. Reusing
- * ParticleContainer::findDestination() rather than adding a second, parallel point-location
- * method keeps this one mapping the single source of truth for "which box owns this position".
- */
-struct NNParticleLocation
-{
-  /**
-   * @brief True iff a covering box was found (false near/outside the domain boundary).
-   */
-  bool valid;
-
-  /**
-   * @brief AMR level containing the point.
-   */
-  int level;
-
-  /**
-   * @brief Global grid index of the covering box within that level (NOT a local DataIndex --
-   * the caller is expected to convert this to whatever local indexing it needs, e.g. via
-   * LevelTiles::getMyGrids(), only when ownerRank is this rank).
-   */
-  unsigned int gridIndex;
-
-  /**
-   * @brief The rank that owns the covering box.
-   */
-  int ownerRank;
-};
-
-/**
- * @brief Locate-by-position callback -- see NNParticleLocation and placeMergedParticles().
- * @details Deliberately a template parameter wherever consumed, NOT required to be exactly this
- * std::function type -- this alias exists purely to document the expected signature (mirrors
- * PayloadCombine's role). Unlike PayloadCombine, call frequency here is bounded by the number of
- * MERGE RESULTS this round (not by the number of candidate pairs squared), so a non-inlined
- * indirect call is an acceptable cost -- this is not a hot inner-loop path.
+ * @brief Locate-by-position callback -- see placeMergedParticles().
+ * @details Returns LevelTiles::LevelAndBox, which is what
+ * ParticleContainer::findDestination() already produces: an O(1) point->block query on the realm's
+ * LevelTiles tile->box hash, the SAME lookup a ParticleContainer uses internally to route its own
+ * particles during remap(), never a linear scan over patches. Going through that one mapping keeps
+ * it the single source of truth for "which box owns this position".
+ *
+ * The callback itself remains, so this header does not depend on ParticleContainer; only the result
+ * type is shared. Call frequency is bounded by the number of MERGE RESULTS this round (not by the
+ * number of candidate pairs), so a non-inlined indirect call is an acceptable cost -- this is not a
+ * hot inner-loop path.
  * @param[in] a_position Physical position to locate.
- * @return Which box (level, global grid index) and rank covers it.
+ * @return Which box (level, global grid index) and rank covers it; @c valid is false off-domain.
  */
-using PositionLocator = std::function<NNParticleLocation(const RealVect& a_position)>;
+using PositionLocator = std::function<LevelTiles::LevelAndBox(const RealVect& a_position)>;
 
 /**
  * @brief Point-locate a newly created merged particle against the AMR grid, and bucket it for a
@@ -1160,16 +1130,16 @@ using PositionLocator = std::function<NNParticleLocation(const RealVect& a_posit
  * union of two patches is not generally convex (T-junctions, corners, refinement boundaries), so
  * even a purely local (same-rank) merge's result can legitimately belong to a third patch,
  * possibly owned by a different rank. Point-location must be O(1) per result (see
- * PositionLocator/NNParticleLocation) -- NEVER a linear scan over every patch, which would turn
+ * PositionLocator) -- NEVER a linear scan over every patch, which would turn
  * this function into a real bottleneck at large patch counts.
  * @tparam Packed See NNMergeParticle.
  * @param[in] a_results Every merge result produced this round by resolveTrivialTier() and judgeProposals(), pooled
  * together.
  * @param[in] a_locate Locate-by-position callback (see PositionLocator).
- * @param[in] a_thisRank This rank's own number -- an NNParticleLocation whose ownerRank equals this is what makes a
+ * @param[in] a_thisRank This rank's own number -- a located box whose rank equals this is what makes a
  * result "local" rather than needing a scatter.
  * @param[out] a_localByPatch Results whose merged particle lands in one of this rank's own patches, bucketed by
- * (level, NNParticleLocation::gridIndex).
+ * (level, LevelTiles::LevelAndBox::gridIndex).
  * @param[out] a_scatterByDestRank Results whose merged particle belongs to a different rank, bucketed by destination
  * rank (pre-sized to the total rank count by the caller), for one final exchange.
  */

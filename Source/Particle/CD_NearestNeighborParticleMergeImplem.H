@@ -1290,9 +1290,9 @@ placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                  
   // a_scatterByDestRank is APPENDED to, never resized here -- see its own docs.
 
   for (const auto& result : a_results) {
-    // O(1) point->block query -- see PositionLocator/NNParticleLocation. Never a linear scan over
+    // O(1) point->block query -- see PositionLocator. Never a linear scan over
     // patches (the bottleneck this avoids at large patch counts).
-    const NNParticleLocation loc = a_locate(result.merged.position);
+    const LevelTiles::LevelAndBox loc = a_locate(result.merged.position);
 
     // A merged particle landing outside every known patch (e.g. exactly on/outside the domain
     // boundary due to floating-point roundoff in the weighted centroid) is not expected in
@@ -1302,11 +1302,11 @@ placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                  
                     "found in any patch");
     }
 
-    if (loc.ownerRank == a_thisRank) {
+    if (loc.rank == a_thisRank) {
       a_localByPatch[std::make_pair(loc.level, loc.gridIndex)].push_back(result.merged);
     }
     else {
-      a_scatterByDestRank[loc.ownerRank].push_back(result.merged);
+      a_scatterByDestRank[loc.rank].push_back(result.merged);
     }
   }
 }
@@ -1519,12 +1519,11 @@ finishMergeRound(AmrMesh&                                                  a_amr
 
   applyVerdicts(incomingVerdicts, a_consumedIDs);
 
-  // O(1) point->block query (see NNParticleLocation/PositionLocator). ParticleContainer::
-  // findDestination() delegates to the shared LevelTiles::findDestination core.
-  const PositionLocator locate = [&a_particles](const RealVect& a_pos) -> NNParticleLocation {
-    const auto dst = a_particles.findDestination(a_pos);
-
-    return NNParticleLocation{dst.valid, dst.level, dst.gridIndex, dst.rank};
+  // O(1) point->block query. ParticleContainer::findDestination() delegates to the shared
+  // LevelTiles::findDestination core, so this is the same mapping remap() routes its own particles
+  // through -- never a linear scan over patches.
+  const PositionLocator locate = [&a_particles](const RealVect& a_pos) -> LevelTiles::LevelAndBox {
+    return a_particles.findDestination(a_pos);
   };
 
   std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>> localByPatch;
@@ -1569,9 +1568,9 @@ finishMergeRound(AmrMesh&                                                  a_amr
   }
 
   for (const auto& merged : incomingScattered) {
-    const NNParticleLocation loc = locate(merged.position);
+    const LevelTiles::LevelAndBox loc = locate(merged.position);
 
-    if (!loc.valid || loc.ownerRank != myRank) {
+    if (!loc.valid || loc.rank != myRank) {
       MayDay::Error("ParticleManagement::finishMergeRound -- incoming scattered particle not "
                     "found in any of this rank's own patches");
     }

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -28,6 +28,7 @@
 #include <DataIterator.H>
 
 // Our includes
+#include <CD_LevelTiles.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_KDParticleMerge.H>
 #include <CD_NamespaceHeader.H>
@@ -526,13 +527,11 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     return kdMaxAxisSpan(boxLo, boxHi, a_dx);
   };
 
-  // Whether [a_lo,a_hi) has shrunk to the scale at which the weight median takes over from the
-  // count median (see the split site below for why the crossover exists and where it sits).
-  const auto cellLess = [](const IntVect& a_lhs, const IntVect& a_rhs) noexcept -> bool {
-    return kdIntVectLess(a_lhs, a_rhs);
-  };
-
-  std::map<IntVect, int, decltype(cellLess)> used(cellLess);
+  // Live per-cell leaf count: how many leaves are currently centred in each cell. Hashed, not
+  // ordered -- this is only ever point-queried, never iterated, so an ordering buys nothing and an
+  // ordered container would need a bespoke comparator to avoid IntVect::operator< silently pooling
+  // unrelated cells (it is a component-wise partial order, not a strict weak ordering).
+  std::unordered_map<IntVect, int, LevelTiles::TileHasher> used;
 
   std::vector<KDCand> heap;
   std::vector<KDCand> finalLeaves;
