@@ -4257,7 +4257,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
 
   // Like the other whole-container merges, this one has no per-level notion -- a SINGLE crowding
   // threshold over the whole AMR hierarchy. Use the coarsest level's value.
-  const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
+  const int numParticlesPerCellThresh = a_particlesPerCell[0];
 
   // 1. Extract. `merge` becomes the skin container once the interior tier has taken its share.
   ParticleContainer<ItoMergeParticle> merge;
@@ -4371,7 +4371,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
   ParticleManagement::mergeKDInterior<ItoMergeParticle, Real>(*m_amr,
                                                               merge,
                                                               interior,
-                                                              a_numParticlesPerCellThresh,
+                                                              numParticlesPerCellThresh,
                                                               m_kdSplitWeightLeafDx,
                                                               gather,
                                                               kdCombine,
@@ -4386,7 +4386,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
   // Ghosts are counted too, and deliberately: the nn tier consults the occupancy of cells owned by
   // a NEIGHBOURING patch when it judges a cross-patch pair, and a width-1 fill is exactly the reach
   // over which it can do so. Without this the budget would be right locally and wrong at the seam.
-  ParticleManagement::NNCellBudget cellBudget(a_numParticlesPerCellThresh);
+  ParticleManagement::NNCellBudget cellBudget(numParticlesPerCellThresh);
 
   fillWidthOneGhosts(interior);
 
@@ -4498,7 +4498,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
     }
   }
 
-  this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);
+  this->splitAndRebuildFromMergeContainer(a_container, merge, numParticlesPerCellThresh);
 }
 
 void
