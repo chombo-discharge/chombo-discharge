@@ -13,6 +13,7 @@
 // Std includes
 #include <chrono>
 #include <array>
+#include <unordered_set>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -568,7 +569,7 @@ ItoSolver::registerOperators() const
     // nnPairSearchGhostWidth is already 1).
     m_amr->registerParticleGhostMask(m_realm, 1);
 
-    // kd_carve's ghost width is hardcoded to 1, unlike nn_pair_tree/nn_pair_hash's
+    // kd_carve and kd_skin_nn both hardcode their ghost width to 1, unlike nn_pair_tree/nn_pair_hash's
     // nn_pair_max_cell_dist-driven width. mergeKDCarve() likewise bounds a mergeable leaf's
     // own extent at a fixed one cell width, which the width-1 fill here already matches exactly:
     // buildKDQuotaLeaves() can never see a particle farther away than this fill provides, so a
@@ -3362,6 +3363,11 @@ ItoSolver::makeSuperparticles(const WhichContainer                          a_co
 
     break;
   }
+  case ParticleManagement::ParticleMergeMethod::KdSkinNn: {
+    this->makeSuperparticlesKDSkinNn(a_container, a_particlesPerCell);
+
+    break;
+  }
   case ParticleManagement::ParticleMergeMethod::External: {
     // The user supplies the per-cell merger through setParticleCellMerger().
     this->applyCellMerger(a_container, a_particlesPerCell, m_particleCellMerger);
@@ -4220,6 +4226,279 @@ ItoSolver::makeSuperparticlesKDPatch(const WhichContainer a_container, const Vec
   }
 
   this->makeSuperparticlesKDImpl(a_container, a_particlesPerCell, false);
+}
+
+void
+ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+{
+  CH_TIME("ItoSolver::makeSuperparticlesKDSkinNn");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::makeSuperparticlesKDSkinNn" << endl;
+  }
+
+  // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
+  // with a whole-patch kd-tree merge whose boundary tier is the nearest-neighbor pair merge rather
+  // than kd_carve's arbitration. The particles are split across TWO containers so the two tiers
+  // cannot interfere: what one tier has already merged must not be merged again by the other, but
+  // must still occupy room in the shared per-cell target. In six steps:
+  //
+  //   1. extractIntoMergeContainer(): copy the ItoParticles into a minimal ItoMergeParticle
+  //      container, then clear the ItoParticles. A second, empty container of the same type takes
+  //      the interior results.
+  //   2. Build the merge callbacks. Two combine callbacks are needed: the kd tier collapses a whole
+  //      leaf at once (N-ary) while the nn tier merges two particles at a time (pairwise).
+  //   3. Interior tier: mergeKDInterior() commits every leaf holding no ghost into the interior
+  //      container and leaves the contested particles -- the skin -- behind in the merge container.
+  //   4. Budget: count the interior superparticles per cell so the skin tier drains each cell to
+  //      what is LEFT of its target rather than to the whole of it.
+  //   5. Skin tier: drain the skin with mergeNearestNeighborsOneCell(), whose Chebyshev-1 search
+  //      radius matches the width-1 halo and the kd tier's one-cell leaf bound exactly.
+  //   6. Fold the interior container back in and splitAndRebuildFromMergeContainer().
+
+  // Like the other whole-container merges, this one has no per-level notion -- a SINGLE crowding
+  // threshold over the whole AMR hierarchy. Use the coarsest level's value.
+  const int numParticlesPerCellThresh = a_particlesPerCell[0];
+
+  // 1. Extract. `merge` becomes the skin container once the interior tier has taken its share.
+  ParticleContainer<ItoMergeParticle> merge;
+  this->extractIntoMergeContainer(a_container, merge);
+
+  ParticleContainer<ItoMergeParticle> interior;
+  m_amr->allocate(interior, m_realm);
+
+  // 2. Merge callbacks.
+  auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
+    return a_leaf.template get<&ItoMergeParticle::energy>(a_idx);
+  };
+
+  // N-ary: the kd tier collapses an entire leaf in one go.
+  auto kdCombine = [](const Real* a_energies, const Real* a_weights, const std::size_t a_count) -> Real {
+    Real weightedSum = 0.0;
+    Real totalWeight = 0.0;
+
+    for (std::size_t i = 0; i < a_count; i++) {
+      weightedSum += a_weights[i] * a_energies[i];
+      totalWeight += a_weights[i];
+    }
+
+    return weightedSum / totalWeight;
+  };
+
+  // Pairwise: the nn tier merges exactly two particles. Same weighted average as above, so the two
+  // tiers reconcile energy identically.
+  auto nnCombine = [](const Real a_firstEnergy,
+                      const Real a_firstWeight,
+                      const Real a_secondEnergy,
+                      const Real a_secondWeight) -> Real {
+    return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
+  };
+
+  auto kdScatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::KDParticle<Real>& a_p) -> void {
+    ItoMergeParticle p;
+    p.energy = a_p.payload;
+
+    a_leaf.append(a_p.position, a_p.weight, p);
+    a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
+    a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
+  };
+
+  auto nnScatter = [](ParticleSoA<ItoMergeParticle>&                   a_leaf,
+                      const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+    ItoMergeParticle p;
+    p.energy = a_p.payload;
+
+    a_leaf.append(a_p.position, a_p.weight, p);
+    a_leaf.particleID(a_leaf.size() - 1) = a_p.globalID;
+    a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
+  };
+
+  const RefCountedPtr<BaseIF>& implicitFunction = m_computationalGeometry->getImplicitFunction(m_phase);
+
+  auto isPositionValid = [&implicitFunction](const RealVect& a_pos) -> bool {
+    if (implicitFunction.isNull()) {
+      return true;
+    }
+
+    return implicitFunction->value(a_pos) < 0.0;
+  };
+
+  // See makeSuperparticlesNnPairTree() for the id-allocator rationale.
+  constexpr ParticleID rankStride = 1000000000000LL;
+  const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
+
+  ParticleID nextID = rankBase;
+
+  auto allocateID = [&nextID, rankBase]() -> ParticleID {
+    CH_assert(nextID < rankBase + rankStride);
+
+    return nextID++;
+  };
+
+  // Assign fresh ids to every valid particle. Done before any ghost exists so fillGhostParticles()
+  // copies each ghost's id from its (now-numbered) source and a particle and its ghosts agree.
+  auto renumber = [&]() -> void {
+    nextID = rankBase;
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+      // Serial (no omp): allocateID() hands out ids from a single shared counter, so parallelising
+      // the box loop would race on it and mint duplicate ids.
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        ParticleSoA<ItoMergeParticle>& leaf = merge[lvl][dit[mybox]];
+
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          leaf.particleID(i) = allocateID();
+          leaf.rankID(i)     = procID();
+        }
+      }
+    }
+  };
+
+  auto fillWidthOneGhosts = [&](ParticleContainer<ItoMergeParticle>& a_c) -> void {
+    a_c.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
+                           m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
+                           m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+  };
+
+  // 3. Interior tier -- one local pass, no communication beyond the ghost fill it reads.
+  renumber();
+  fillWidthOneGhosts(merge);
+
+  ParticleManagement::mergeKDInterior<ItoMergeParticle, Real>(*m_amr,
+                                                              merge,
+                                                              interior,
+                                                              numParticlesPerCellThresh,
+                                                              m_kdSplitWeightLeafDx,
+                                                              gather,
+                                                              kdCombine,
+                                                              kdScatter,
+                                                              allocateID,
+                                                              isPositionValid);
+
+  merge.clearGhostParticles();
+
+  // 4. Per-cell budget for the skin tier. The interior superparticles are invisible to the nn tier
+  // (they live in the other container) but still occupy their cells, so each one reserves a slot.
+  // Ghosts are counted too, and deliberately: the nn tier consults the occupancy of cells owned by
+  // a NEIGHBOURING patch when it judges a cross-patch pair, and a width-1 fill is exactly the reach
+  // over which it can do so. Without this the budget would be right locally and wrong at the seam.
+  ParticleManagement::NNCellBudget cellBudget(numParticlesPerCellThresh);
+
+  fillWidthOneGhosts(interior);
+
+  // One reservation per DISTINCT particle. A single interior super-particle is resident in its own
+  // patch and simultaneously a ghost in every neighbouring patch this rank also owns, so booking it
+  // once per occurrence would reserve its cell several times over and starve the skin tier. The nn
+  // tier collapses the same way when it builds its live per-cell count (see gatherMergeParticles()),
+  // and the two counts have to agree or the budget is measured against the wrong denominator.
+  std::unordered_set<ParticleID> reservedIDs;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const ParticleSoA<ItoMergeParticle>& leaf = interior[lvl][dit[mybox]];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        if (!reservedIDs.insert(leaf.particleID(i)).second) {
+          continue;
+        }
+
+        // A ghost must be booked against the level it came FROM, with that level's dx -- exactly
+        // how the nn tier buckets it (see gatherMergeParticles()). Booking a coarse or fine ghost
+        // under this patch's level would key it to a cell that tier never looks up, silently losing
+        // the reservation at precisely the refinement boundaries where it matters most.
+        int originLevel = lvl;
+
+        if (leaf.isGhost(i)) {
+          switch (leaf.ghost(i)) {
+          case GhostType::Coarse: {
+            originLevel = lvl - 1;
+
+            break;
+          }
+          case GhostType::Fine: {
+            originLevel = lvl + 1;
+
+            break;
+          }
+          default: {
+            originLevel = lvl;
+
+            break;
+          }
+          }
+        }
+
+        const RealVect dx = m_amr->getDx()[originLevel] * RealVect::Unit;
+
+        cellBudget.reserveOne(originLevel, leaf.position(i), m_amr->getProbLo(), dx);
+      }
+    }
+  }
+
+  interior.clearGhostParticles();
+
+  // 5. Skin tier -- same drain loop as makeSuperparticlesNnPairOneCell(), against the budget above.
+  unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
+
+  for (int round = 0; round < m_nnPairMaxRounds; round++) {
+    const unsigned long long nBefore = nAfter;
+
+    if (round > 0) {
+      merge.clearGhostParticles();
+    }
+
+    renumber();
+    fillWidthOneGhosts(merge);
+
+    ParticleManagement::mergeNearestNeighborsOneCell<ItoMergeParticle, Real>(*m_amr,
+                                                                             merge,
+                                                                             cellBudget,
+                                                                             gather,
+                                                                             nnCombine,
+                                                                             nnScatter,
+                                                                             allocateID,
+                                                                             m_nnPairIterate,
+                                                                             m_nnPairFallback,
+                                                                             isPositionValid);
+
+    nAfter = merge.getNumberOfValidParticlesGlobal();
+
+    if (nAfter >= nBefore) {
+      break;
+    }
+  }
+
+  merge.clearGhostParticles();
+
+  // 6. Fold the interior results back in. Both containers share a layout and neither tier moved a
+  // particle between patches, so this is a per-patch concatenation with no exchange. Ids may collide
+  // between the two containers -- renumber() restarts this rank's block every round and the interior
+  // ids were minted before that -- which is harmless: ids are a per-round labelling consumed by the
+  // merge tiers, both of which are finished, and nothing downstream identifies a particle by id.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      merge[lvl][din].append(interior[lvl][din]);
+    }
+  }
+
+  this->splitAndRebuildFromMergeContainer(a_container, merge, numParticlesPerCellThresh);
 }
 
 void

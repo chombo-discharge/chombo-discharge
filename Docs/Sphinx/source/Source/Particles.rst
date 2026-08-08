@@ -75,7 +75,7 @@ For particles that do not need to checkpoint all payload columns, the ``Particle
 .. _Chap:ParticleContainer:
 
 ParticleContainer
---------------------
+-----------------
 
 The ``ParticleContainer<P, Traits>`` is a template class that
 
@@ -813,7 +813,7 @@ Reinitialization (``reinitialize``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 281-285
+   :lines: 283-287
 
 The returned functor proceeds as follows:
 
@@ -878,7 +878,7 @@ SFC pair merging (``nn_sfc``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 196-204
+   :lines: 198-206
 
 The caller provides three lambdas:
 
@@ -978,3 +978,28 @@ This is cheaper than ``kd_carve`` and free of communication, at the cost of no c
 
    The caller must *not* fill a ghost halo before calling ``kd_patch``.
    A ghost particle reaching the merge would be merged locally while its true owner merges it too, double-counting its weight.
+
+Nearest-neighbour skin (``kd_skin_nn``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``kd_skin_nn`` keeps the tree build and per-cell quota but replaces the carve with the nearest-neighbour pair merge, splitting the particles across two containers so that neither tier can merge what the other already did.
+
+First, ``ParticleManagement::mergeKDInterior`` commits every group that holds **no ghost** into a separate container, and removes its members from the working one.
+Holding no ghost is the whole safety condition, and it costs no communication to check: every member of such a group is resident in this patch, and any other patch that draws one of them into a group of its own necessarily sees it as a ghost, which disqualifies that group there by the same test.
+No two patches can therefore commit the same particle.
+Note this is a *weaker* condition than ``kd_carve``'s -- boundary exposure is not consulted at all, so an exposed but uncontested group merges here rather than going to arbitration, which is what makes the skin smaller.
+
+What remains in the working container is the skin: groups holding a ghost, plus groups too wide to collapse.
+It is drained by ``ParticleManagement::mergeNearestNeighborsOneCell`` (see :ref:`above <nn-pair-merging>`), whose search radius is fixed at Chebyshev cell distance 1 and so matches the width-1 halo and the one-cell extent bound exactly.
+The skin tier drains each cell not to the full target but to what is *left* of it: every interior super-particle reserves a slot in the cell it landed in, so the two tiers share one budget.
+Reservations are counted over ghosts as well as local particles, because the nearest-neighbour tier consults the occupancy of cells owned by a neighbouring patch when it judges a cross-patch pair.
+
+Finally the interior container is folded back in, and under-full cells are brought up to the target in the usual way.
+
+.. important::
+
+   ``kd_skin_nn`` requires a width-1 particle ghost mask, exactly as ``kd_carve`` does.
+   It is tuned by ``nn_pair_iterate``, ``nn_pair_fallback`` and ``nn_pair_max_rounds``, shared with the ``nn_pair_*`` family; ``nn_pair_max_cell_dist`` does not apply, since the skin tier's radius is structurally fixed at 1.
+
+Because a skin particle and an interior super-particle live in different containers, they can never merge with each other.
+A cell holding interior results plus a single leftover skin particle therefore finishes one particle above the target -- the same class of residual as ``kd_carve``'s, and not a conservation error.
