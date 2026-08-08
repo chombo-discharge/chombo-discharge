@@ -22,6 +22,8 @@
 #include <vector>
 
 // Chombo includes
+#include <BaseFab.H>
+#include <Box.H>
 #include <CH_Timer.H>
 #include <MayDay.H>
 #include <SPMD.H>
@@ -229,82 +231,41 @@ kdIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
 }
 
 /**
- * @brief Per-cell particle-count histogram over one patch's gathered particles.
- * @details Built once from every particle's own position, so it is unaffected by how
- * buildKDQuotaLeaves() later partitions the space -- a node-local count is NOT a safe substitute,
- * see that function's own docs for why. Stored sorted by cell index and looked up by binary search,
- * and callable directly, so it satisfies buildKDQuotaLeaves()'s CellTrueCount requirement as-is.
- * Shared by mergeKDCarve() and mergeKDPatch(): both need the same ground truth, and the invariant
- * that it is built from true positions rather than from the partition is easy to break if each
- * keeps its own copy.
+ * @brief Tally a per-cell particle-count histogram over one patch's gathered particles.
+ * @details Built from every particle's own position, so it is unaffected by how buildKDQuotaLeaves()
+ * later partitions the space -- a node-local count is NOT a safe substitute, see that function's own
+ * docs for why. Shared by mergeKDCarve()/mergeKDPatch()/mergeKDInterior(): all three need the same
+ * ground truth, and the invariant that it comes from true positions rather than from the partition is
+ * easy to break if each keeps its own copy.
+ *
+ * @a a_counts must include at least one ghost cell, since a gathered ghost sits up to one cell
+ * outside the patch's own box.
+ * @tparam Packed See KDParticle.
+ * @param[in] a_particles Gathered particles for this patch.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dx This patch's own cell spacing.
+ * @param[out] a_counts Per-cell counts, zeroed here before tallying.
  */
-class KDCellHistogram
+template <typename Packed>
+inline void
+kdFillCellHistogram(const std::vector<KDParticle<Packed>>& a_particles,
+                    const RealVect&                        a_probLo,
+                    const RealVect&                        a_dx,
+                    FArrayBox&                             a_counts) noexcept
 {
-public:
-  /**
-   * @brief Build the histogram from one patch's gathered particles.
-   * @param[in] a_particles Gathered particles for this patch.
-   * @param[in] a_probLo Physical position of the domain's low corner.
-   * @param[in] a_dx This patch's own cell spacing.
-   */
-  template <typename Packed>
-  KDCellHistogram(const std::vector<KDParticle<Packed>>& a_particles, const RealVect& a_probLo, const RealVect& a_dx)
-  {
-    m_counts.reserve(a_particles.size());
+  a_counts.setVal(0);
 
-    for (const KDParticle<Packed>& p : a_particles) {
-      m_counts.emplace_back(kdCellKeyOf(p.position, a_probLo, a_dx), 1);
-    }
+  for (const KDParticle<Packed>& p : a_particles) {
+    const IntVect cell = kdCellKeyOf(p.position, a_probLo, a_dx);
 
-    std::sort(m_counts.begin(), m_counts.end(), [](const auto& a_lhs, const auto& a_rhs) {
-      return kdIntVectLess(a_lhs.first, a_rhs.first);
-    });
+    // Every gathered particle is resident in this patch or a ghost within one cell of it, so its
+    // cell lies inside a_counts' box. The previous map tolerated any key silently; a cell-indexed
+    // holder does not, which is the point -- the invariant is now checked instead of assumed.
+    CH_assert(a_counts.box().contains(cell));
 
-    std::size_t writeIdx = 0;
-
-    for (std::size_t readIdx = 0; readIdx < m_counts.size();) {
-      std::size_t runEnd = readIdx + 1;
-      int         total  = m_counts[readIdx].second;
-
-      while (runEnd < m_counts.size() && m_counts[runEnd].first == m_counts[readIdx].first) {
-        total += m_counts[runEnd].second;
-        runEnd++;
-      }
-
-      m_counts[writeIdx] = std::make_pair(m_counts[readIdx].first, total);
-
-      writeIdx++;
-
-      readIdx = runEnd;
-    }
-
-    m_counts.resize(writeIdx);
+    a_counts(cell, 0)++;
   }
-
-  /**
-   * @brief This cell's total particle count.
-   * @param[in] a_cell Cell index.
-   * @return The cell's particle count, or 0 for a cell holding none.
-   */
-  int
-  operator()(const IntVect& a_cell) const noexcept
-  {
-    const auto it = std::lower_bound(m_counts.begin(),
-                                     m_counts.end(),
-                                     a_cell,
-                                     [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
-                                       return kdIntVectLess(a_entry.first, a_key);
-                                     });
-
-    return (it != m_counts.end() && it->first == a_cell) ? it->second : 0;
-  }
-
-private:
-  /**
-   * @brief Cell index to particle count, sorted by cell index so lookups can binary-search.
-   */
-  std::vector<std::pair<IntVect, int>> m_counts;
-};
+}
 
 /**
  * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the sole
@@ -421,6 +382,7 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
                    const Real                       a_splitWeightLeafDx,
                    const RealVect&                  a_dx,
                    const RealVect&                  a_probLo,
+                   FArrayBox&                       a_used,
                    const CellTrueCount&             a_cellTrueCount,
                    std::vector<KDLeaf>&             a_leaves) noexcept
 {
@@ -527,11 +489,11 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     return kdMaxAxisSpan(boxLo, boxHi, a_dx);
   };
 
-  // Live per-cell leaf count: how many leaves are currently centred in each cell. Hashed, not
-  // ordered -- this is only ever point-queried, never iterated, so an ordering buys nothing and an
-  // ordered container would need a bespoke comparator to avoid IntVect::operator< silently pooling
-  // unrelated cells (it is a component-wise partial order, not a strict weak ordering).
-  std::unordered_map<IntVect, int, LevelTiles::TileHasher> used;
+  // Live per-cell leaf count: how many leaves are currently centred in each cell. Caller-owned mesh
+  // data, zeroed here; its ghost cell must cover every cell a leaf centroid can fall in, since
+  // gathered ghosts sit up to one cell outside this patch.
+  FArrayBox& used = a_used;
+  used.setVal(0.0);
 
   std::vector<KDCand> heap;
   std::vector<KDCand> finalLeaves;
@@ -539,7 +501,12 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
   {
     const IntVect rootCell = centroidCellOf(0, numMergeable);
 
-    used[rootCell]++;
+    // A centroid of positions gathered for this patch cannot fall outside the patch grown by the
+    // ghost width. Asserted rather than assumed: the map this replaced would have accepted any cell
+    // silently, which is exactly the class of bug a bounded holder is meant to surface.
+    CH_assert(used.box().contains(rootCell));
+
+    used(rootCell, 0)++;
     heap.push_back(KDCand{rangeWeight(0, numMergeable), numMergeable, 0, numMergeable, rootCell});
   }
 
@@ -569,18 +536,21 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     const IntVect cellLeft  = centroidCellOf(node.lo, mid);
     const IntVect cellRight = centroidCellOf(mid, node.hi);
 
-    used[node.cell]--;
-    used[cellLeft]++;
-    used[cellRight]++;
+    CH_assert(used.box().contains(cellLeft));
+    CH_assert(used.box().contains(cellRight));
+
+    used(node.cell, 0)--;
+    used(cellLeft, 0)++;
+    used(cellRight, 0)++;
 
     // The quota constrains only leaves that can actually merge. A node wider than
     // s_kdMaxLeafExtent is vetoed by the caller and leaves every member behind
     // individually, so it costs its cell its full member count rather than one particle; splitting
     // it further lowers that cell's final population even though it raises the leaf count.
-    if (nodeSpan <= s_kdMaxLeafExtent && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
-      used[cellLeft]--;
-      used[cellRight]--;
-      used[node.cell]++;
+    if (nodeSpan <= s_kdMaxLeafExtent && (used(cellLeft, 0) > a_ppc || used(cellRight, 0) > a_ppc)) {
+      used(cellLeft, 0)--;
+      used(cellRight, 0)--;
+      used(node.cell, 0)++;
 
       finalLeaves.push_back(node);
 
@@ -708,6 +678,15 @@ mergeKDCarve(AmrMesh&                      a_amr,
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
   }
+
+  // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
+  // cell data, and this is what the rest of the code uses for cell data. One ghost cell, which is
+  // what the gathered ghosts and any just-outside leaf centroid need.
+  EBAMRFAB histogram;
+  EBAMRFAB leafQuota;
+
+  a_amr.allocate(histogram, realm, 1, 1);
+  a_amr.allocate(leafQuota, realm, 1, 1);
 
   const int myRank   = procID();
   const int numRanks = numProc();
@@ -848,37 +827,37 @@ mergeKDCarve(AmrMesh&                      a_amr,
         continue;
       }
 
-      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
-      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
+      // Ground truth for how crowded each cell really is -- see kdFillCellHistogram(). Both this and
+      // the live quota are cell data, so they live in the mesh holders allocated once above rather
+      // than in per-patch scratch. Their ghost cell covers the gathered ghosts, which sit up to one
+      // cell outside this patch, and any leaf centroid that lands just outside it.
+      FArrayBox& cellCounts = (*histogram[lvl])[din];
+      FArrayBox& quota      = (*leafQuota[lvl])[din];
+
+      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
+
+      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
+        return cellCounts.box().contains(a_cell) ? static_cast<int>(cellCounts(a_cell, 0)) : 0;
+      };
 
       std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellTrueCount, leaves);
 
-      // Per-patch exposure cache: leaves are about a cell in extent and not grid-aligned, so many leaves
-      // (and many members within one leaf) end up querying the SAME actual cell's exposure. A
-      // resident (non-ghost) member's cell always lies within this patch's OWN box (that's what
-      // "resident" means), so a dense array indexed by cell offset within the box is safe -- compute
-      // each distinct cell's exposure (up to 3 mask lookups) once, then reuse the cached bit for
-      // every subsequent member/leaf that touches the same cell.
-      const IntVect patchLo   = dbl[din].smallEnd();
-      const IntVect patchSize = dbl[din].size();
-      std::size_t   cacheSize = 1;
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        cacheSize *= static_cast<std::size_t>(patchSize[dir]);
-      }
-      // Tri-state per cell: -1 uncached, 0 not exposed, 1 exposed.
-      std::vector<signed char> exposureCache(cacheSize, -1);
+      // Per-patch exposure cache. Leaves are about a cell in extent and not grid-aligned, so many
+      // leaves (and many members within one leaf) end up querying the SAME cell's exposure; compute
+      // it (up to 3 mask lookups) once per distinct cell and reuse the cached bit. Tri-state: -1
+      // uncached, 0 not exposed, 1 exposed.
+      //
+      // Held over the patch's OWN box, ungrown: only resident (non-ghost) members are ever queried,
+      // and resident is exactly what it means for a cell to lie in this box. That is why this one
+      // does not need the growth the histogram and the live quota do.
+      BaseFab<signed char> exposureCache(dbl[din], 1);
+      exposureCache.setVal(-1);
 
       auto isExposedCached = [&](const IntVect& a_iv) -> bool {
-        std::size_t cellIdx = 0;
-        std::size_t stride  = 1;
+        CH_assert(exposureCache.box().contains(a_iv));
 
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          cellIdx += static_cast<std::size_t>(a_iv[dir] - patchLo[dir]) * stride;
-          stride *= static_cast<std::size_t>(patchSize[dir]);
-        }
-
-        if (exposureCache[cellIdx] < 0) {
+        if (exposureCache(a_iv, 0) < 0) {
           bool isExposed = (maskSameDin != nullptr) && kdIsBoundaryExposed(a_iv, *maskSameDin);
 
           if (!isExposed && maskC2FDin != nullptr) {
@@ -888,10 +867,10 @@ mergeKDCarve(AmrMesh&                      a_amr,
             isExposed = kdIsBoundaryExposed(a_iv, *maskF2CDin);
           }
 
-          exposureCache[cellIdx] = isExposed ? 1 : 0;
+          exposureCache(a_iv, 0) = isExposed ? 1 : 0;
         }
 
-        return exposureCache[cellIdx] != 0;
+        return exposureCache(a_iv, 0) != 0;
       };
 
       for (const KDLeaf& bl : leaves) {
@@ -1579,6 +1558,15 @@ mergeKDPatch(AmrMesh&                      a_amr,
     dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
   }
 
+  // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
+  // cell data, and this is what the rest of the code uses for cell data. One ghost cell, which is
+  // what the gathered ghosts and any just-outside leaf centroid need.
+  EBAMRFAB histogram;
+  EBAMRFAB leafQuota;
+
+  a_amr.allocate(histogram, realm, 1, 1);
+  a_amr.allocate(leafQuota, realm, 1, 1);
+
   const int myRank = procID();
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
@@ -1622,11 +1610,21 @@ mergeKDPatch(AmrMesh&                      a_amr,
 
       CH_START(t_build);
 
-      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
-      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
+      // Ground truth for how crowded each cell really is -- see kdFillCellHistogram(). Both this and
+      // the live quota are cell data, so they live in the mesh holders allocated once above rather
+      // than in per-patch scratch. Their ghost cell covers the gathered ghosts, which sit up to one
+      // cell outside this patch, and any leaf centroid that lands just outside it.
+      FArrayBox& cellCounts = (*histogram[lvl])[din];
+      FArrayBox& quota      = (*leafQuota[lvl])[din];
+
+      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
+
+      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
+        return cellCounts.box().contains(a_cell) ? static_cast<int>(cellCounts(a_cell, 0)) : 0;
+      };
 
       std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellTrueCount, leaves);
 
       CH_STOP(t_build);
       CH_START(t_commit);
@@ -1803,6 +1801,15 @@ mergeKDInterior(AmrMesh&                      a_amr,
     dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
   }
 
+  // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
+  // cell data, and this is what the rest of the code uses for cell data. One ghost cell, which is
+  // what the gathered ghosts and any just-outside leaf centroid need.
+  EBAMRFAB histogram;
+  EBAMRFAB leafQuota;
+
+  a_amr.allocate(histogram, realm, 1, 1);
+  a_amr.allocate(leafQuota, realm, 1, 1);
+
   const int myRank = procID();
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
@@ -1841,11 +1848,21 @@ mergeKDInterior(AmrMesh&                      a_amr,
 
       CH_START(t_build);
 
-      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
-      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
+      // Ground truth for how crowded each cell really is -- see kdFillCellHistogram(). Both this and
+      // the live quota are cell data, so they live in the mesh holders allocated once above rather
+      // than in per-patch scratch. Their ghost cell covers the gathered ghosts, which sit up to one
+      // cell outside this patch, and any leaf centroid that lands just outside it.
+      FArrayBox& cellCounts = (*histogram[lvl])[din];
+      FArrayBox& quota      = (*leafQuota[lvl])[din];
+
+      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
+
+      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
+        return cellCounts.box().contains(a_cell) ? static_cast<int>(cellCounts(a_cell, 0)) : 0;
+      };
 
       std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellTrueCount, leaves);
 
       CH_STOP(t_build);
       CH_START(t_commit);

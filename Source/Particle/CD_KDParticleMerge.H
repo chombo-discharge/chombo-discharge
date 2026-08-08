@@ -19,6 +19,8 @@
 #include <vector>
 
 // Chombo includes
+#include <Box.H>
+#include <FArrayBox.H>
 #include <RealVect.H>
 
 // Our includes
@@ -179,6 +181,8 @@ struct KDLeaf
  * switches from the count median to the weight median. 0 disables the weight median.
  * @param[in] a_dx This patch's own cell spacing.
  * @param[in] a_probLo Physical position of the domain's low corner, for computing cell indices.
+ * @param[in,out] a_used Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover
+ * every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell.
  * @param[in] a_cellTrueCount Per-cell particle-count lookup -- see @tparam CellTrueCount.
  * @param[out] a_leaves Every resulting leaf, in no particular order.
  */
@@ -189,6 +193,7 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
                    const Real                       a_splitWeightLeafDx,
                    const RealVect&                  a_dx,
                    const RealVect&                  a_probLo,
+                   FArrayBox&                       a_used,
                    const CellTrueCount&             a_cellTrueCount,
                    std::vector<KDLeaf>&             a_leaves) noexcept;
 
