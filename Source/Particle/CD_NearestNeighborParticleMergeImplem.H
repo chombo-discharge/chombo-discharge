@@ -172,7 +172,7 @@ nnMergePointToCellDistSquared(const RealVect& a_point,
  * (payload). In a serial (non-MPI) build, or with a single rank, this returns this rank's own
  * bucket unchanged.
  * @tparam T Trivially-copyable record type (NNMergeProposal<Packed>, NNMergeVerdict, or
- * NNMergeParticle<Packed> -- all satisfy this given Packed itself is required to).
+ * MergeParticle<Packed> -- all satisfy this given Packed itself is required to).
  * @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
  * @return Flat vector of every record received from every rank (including this rank's own
  * bucket addressed to itself).
@@ -274,7 +274,7 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  * @details A count-only tally keyed as the crowding trigger (cellKeyOf(pos, probLo, dx), local and ghost
  * alike); checks the true per-cell maximum, not an average density (a low-average patch can still hold one
  * over-threshold cell).
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @param[in] a_localValid This patch's own full valid-particle set.
  * @param[in] a_ghosts Every ghost shipped to this patch this round.
  * @param[in] a_probLo Physical position of the domain's low corner.
@@ -284,11 +284,11 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  */
 template <typename Packed>
 inline bool
-nnMergeAnyCellCrowded(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                      const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                      const RealVect&                             a_probLo,
-                      const RealVect&                             a_dx,
-                      const NNCellBudget&                         a_cellBudget) noexcept
+nnMergeAnyCellCrowded(const std::vector<MergeParticle<Packed>>& a_localValid,
+                      const std::vector<MergeParticle<Packed>>& a_ghosts,
+                      const RealVect&                           a_probLo,
+                      const RealVect&                           a_dx,
+                      const NNCellBudget&                       a_cellBudget) noexcept
 {
   const std::size_t total = a_localValid.size() + a_ghosts.size();
 
@@ -322,13 +322,13 @@ nnMergeAnyCellCrowded(const std::vector<NNMergeParticle<Packed>>& a_localValid,
 
 template <typename Packed, typename Cloud>
 inline void
-buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                    const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                    const RealVect&                             a_probLo,
-                    const RealVect&                             a_dx,
-                    const NNCellBudget&                         a_cellBudget,
-                    const int                                   a_kNearest,
-                    NNSpatialIndex<Packed, Cloud>&              a_index) noexcept
+buildNNSpatialIndex(const std::vector<MergeParticle<Packed>>& a_localValid,
+                    const std::vector<MergeParticle<Packed>>& a_ghosts,
+                    const RealVect&                           a_probLo,
+                    const RealVect&                           a_dx,
+                    const NNCellBudget&                       a_cellBudget,
+                    const int                                 a_kNearest,
+                    NNSpatialIndex<Packed, Cloud>&            a_index) noexcept
 {
   CH_TIME("ParticleManagement::buildNNSpatialIndex");
 
@@ -359,7 +359,7 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
   positions.reserve(total);
   metadata.reserve(total);
 
-  auto pushPoint = [&](const NNMergeParticle<Packed>& a_p) {
+  auto pushPoint = [&](const MergeParticle<Packed>& a_p) {
     EBGeometry::Vec3T<Real> v(0.0, 0.0, 0.0);
 
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -390,8 +390,8 @@ buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
 
 template <typename Packed, typename Cloud>
 inline void
-findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
-                              const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
+findNearestNeighborCandidates(const std::vector<MergeParticle<Packed>>&                  a_localValid,
+                              const std::vector<MergeParticle<Packed>>&                  a_ghosts,
                               const std::unordered_set<ParticleID>&                      a_consumedIDs,
                               const NNSpatialIndex<Packed, Cloud>&                       a_spatialIndex,
                               const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
@@ -433,7 +433,7 @@ findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&       
   };
 
   for (std::size_t qi = 0; qi < nLocal; qi++) {
-    const NNMergeParticle<Packed>& q = a_localValid[qi];
+    const MergeParticle<Packed>& q = a_localValid[qi];
 
     // Lazy deletion -- a_localValid is the FULL per-patch set (see this function's own docs), so
     // a query already consumed by an earlier pass/query this round is skipped explicitly here.
@@ -539,12 +539,12 @@ findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&       
 
 template <typename Packed>
 inline void
-buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                        const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                        const RealVect&                             a_probLo,
-                        const RealVect&                             a_dx,
-                        const NNCellBudget&                         a_cellBudget,
-                        NNCellSpatialIndex&                         a_index) noexcept
+buildNNCellSpatialIndex(const std::vector<MergeParticle<Packed>>& a_localValid,
+                        const std::vector<MergeParticle<Packed>>& a_ghosts,
+                        const RealVect&                           a_probLo,
+                        const RealVect&                           a_dx,
+                        const NNCellBudget&                       a_cellBudget,
+                        NNCellSpatialIndex&                       a_index) noexcept
 {
   CH_TIME("ParticleManagement::buildNNCellSpatialIndex");
 
@@ -570,7 +570,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
     perCell;
   perCell.reserve(total);
 
-  auto pushPoint = [&](const NNMergeParticle<Packed>& a_p, const bool a_isLocal) {
+  auto pushPoint = [&](const MergeParticle<Packed>& a_p, const bool a_isLocal) {
     const NNWalkCell cell = cellKeyOf(a_p.position, a_probLo, a_dx);
 
     EBGeometry::Vec3T<Real> v(0.0, 0.0, 0.0);
@@ -602,7 +602,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
 
 template <typename Packed>
 inline void
-findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
+findNearestNeighborCandidatesOneCell(const std::vector<MergeParticle<Packed>>&                  a_localValid,
                                      const std::unordered_set<ParticleID>&                      a_consumedIDs,
                                      const NNCellSpatialIndex&                                  a_cellIndex,
                                      const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
@@ -639,7 +639,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
 
   using PCBVH = NNCellCloud;
 
-  for (const NNMergeParticle<Packed>& q : a_localValid) {
+  for (const MergeParticle<Packed>& q : a_localValid) {
     // Lazy deletion -- see findNearestNeighborCandidates()'s own docs.
     if (a_consumedIDs.count(q.globalID) > 0) {
       continue;
@@ -856,8 +856,8 @@ resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                      
       continue;
     }
 
-    const NNMergeParticle<Packed>& query        = queryDataIt->second.particle;
-    const bool                     queryExposed = queryDataIt->second.exposed;
+    const MergeParticle<Packed>& query        = queryDataIt->second.particle;
+    const bool                   queryExposed = queryDataIt->second.exposed;
 
     bool resolved           = false; // an outcome (commit, or a legitimate "leave unmatched") was reached
     bool originalStale      = false;
@@ -912,7 +912,7 @@ resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                      
       Real     mergedWeight = 0.0;
 
       if (!candidateStale && candidateExists) {
-        const NNMergeParticle<Packed>& cand = candDataIt->second.particle;
+        const MergeParticle<Packed>& cand = candDataIt->second.particle;
 
         if (a_maxCellDistance.has_value()) {
           tooFar = nnMergeCrossLevelTooFar(query.position,
@@ -941,7 +941,7 @@ resolveTrivialTier(const std::vector<NNMergeEdge<Packed>>&                      
                              !candidateExposed && !queryExposed && !ineligible;
 
       if (trivialOk) {
-        const NNMergeParticle<Packed>& cand = candDataIt->second.particle;
+        const MergeParticle<Packed>& cand = candDataIt->second.particle;
 
         // Each participant's OWN level's dx -- see a_dxByLevel's docs. The cell key must match
         // the one a_liveCellCount was populated under for that participant, so a single shared
@@ -1169,8 +1169,8 @@ judgeProposals(const std::vector<NNMergeProposal<Packed>>&                     a
 
     CH_assert(targetIt != a_particlesByID.end() && a_consumedIDs.count(decision.targetID) == 0);
 
-    const NNMergeParticle<Packed>& target = targetIt->second.particle;
-    const NNMergeParticle<Packed>& source = proposal.source;
+    const MergeParticle<Packed>& target = targetIt->second.particle;
+    const MergeParticle<Packed>& source = proposal.source;
 
     const int sourceDestRank = static_cast<int>(source.ownerRank);
 
@@ -1278,11 +1278,11 @@ applyVerdicts(const std::vector<NNMergeVerdict>& a_incomingVerdicts,
 
 template <typename Packed>
 inline void
-placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                     a_results,
-                     const PositionLocator&                                                        a_locate,
-                     const int                                                                     a_thisRank,
-                     std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
-                     std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept
+placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                   a_results,
+                     const PositionLocator&                                                      a_locate,
+                     const int                                                                   a_thisRank,
+                     std::map<std::pair<int, unsigned int>, std::vector<MergeParticle<Packed>>>& a_localByPatch,
+                     std::vector<std::vector<MergeParticle<Packed>>>& a_scatterByDestRank) noexcept
 {
   CH_TIME("ParticleManagement::placeMergedParticles");
 
@@ -1322,8 +1322,8 @@ gatherMergeParticles(AmrMesh&                                                  a
                      const int                                                 a_ghostWidth,
                      const Gather&                                             a_gather,
                      std::vector<NNPatchWork>&                                 a_patchWork,
-                     std::vector<std::vector<NNMergeParticle<Packed>>>&        a_patchLocalValid,
-                     std::vector<std::vector<NNMergeParticle<Packed>>>&        a_patchGhosts,
+                     std::vector<std::vector<MergeParticle<Packed>>>&          a_patchLocalValid,
+                     std::vector<std::vector<MergeParticle<Packed>>>&          a_patchGhosts,
                      std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
                      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&      a_liveCellCount) noexcept
 {
@@ -1352,8 +1352,8 @@ gatherMergeParticles(AmrMesh&                                                  a
 
       ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
 
-      std::vector<NNMergeParticle<Packed>> localValid;
-      std::vector<NNMergeParticle<Packed>> ghosts;
+      std::vector<MergeParticle<Packed>> localValid;
+      std::vector<MergeParticle<Packed>> ghosts;
 
       localValid.reserve(leaf.size());
       ghosts.reserve(leaf.size());
@@ -1389,7 +1389,7 @@ gatherMergeParticles(AmrMesh&                                                  a
           }
         }
 
-        NNMergeParticle<Packed> p;
+        MergeParticle<Packed> p;
 
         p.position  = leaf.position(i);
         p.weight    = leaf.weight(i);
@@ -1430,8 +1430,8 @@ gatherMergeParticles(AmrMesh&                                                  a
   // appear as a ghost in several of this rank's own patches at once, so counting per occurrence
   // would multiply-count it; particlesByID collapses those to one entry per id.
   for (const auto& kv : a_particlesByID) {
-    const NNMergeParticle<Packed>& p    = kv.second.particle;
-    const IntVect                  cell = cellKeyOf(p.position, a_probLo, a_dxByLevel[p.level]);
+    const MergeParticle<Packed>& p    = kv.second.particle;
+    const IntVect                cell = cellKeyOf(p.position, a_probLo, a_dxByLevel[p.level]);
 
     a_liveCellCount[NNCellKey(p.level, cell)] += 1;
   }
@@ -1526,12 +1526,12 @@ finishMergeRound(AmrMesh&                                                  a_amr
     return a_particles.findDestination(a_pos);
   };
 
-  std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>> localByPatch;
-  std::vector<std::vector<NNMergeParticle<Packed>>>                            scatterByDestRank(numRanks);
+  std::map<std::pair<int, unsigned int>, std::vector<MergeParticle<Packed>>> localByPatch;
+  std::vector<std::vector<MergeParticle<Packed>>>                            scatterByDestRank(numRanks);
 
   placeMergedParticles(a_allResults, locate, myRank, localByPatch, scatterByDestRank);
 
-  const std::vector<NNMergeParticle<Packed>> incomingScattered = nnMergeExchangeByRank(scatterByDestRank);
+  const std::vector<MergeParticle<Packed>> incomingScattered = nnMergeExchangeByRank(scatterByDestRank);
 
   // ---- Apply everything to the real ParticleSoA containers ----
   for (std::size_t pw = 0; pw < a_patchWork.size(); pw++) {
@@ -1560,7 +1560,7 @@ finishMergeRound(AmrMesh&                                                  a_amr
     for (const auto& merged : kv.second) {
       // Correct the provisional ownerRank to this rank -- see mergeNearestNeighborsTree()'s own
       // docs on why this matters (a stale rank would misroute a later merge's verdict).
-      NNMergeParticle<Packed> corrected = merged;
+      MergeParticle<Packed> corrected = merged;
 
       corrected.ownerRank = myRank;
       a_scatter(leaf, corrected);
@@ -1577,8 +1577,8 @@ finishMergeRound(AmrMesh&                                                  a_amr
 
     const DataIndex din = a_amr.getLevelTiles(a_realm)[loc.level]->getMyGrids().at(loc.gridIndex);
 
-    NNMergeParticle<Packed> corrected = merged;
-    corrected.ownerRank               = myRank;
+    MergeParticle<Packed> corrected = merged;
+    corrected.ownerRank             = myRank;
 
     ParticleSoA<P, Traits>& leaf = a_particles[loc.level][din];
     a_scatter(leaf, corrected);
@@ -1620,7 +1620,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
 
   // Per-level dx, indexed by level -- every cell-key computation below and downstream (in
   // resolveTrivialTier()/judgeProposals()) MUST use the dx of the PARTICLE'S OWN level (see
-  // NNMergeParticle::level's docs), never a single dx shared across levels.
+  // MergeParticle::level's docs), never a single dx shared across levels.
   std::vector<RealVect> dxByLevel(finestLevel + 1);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
@@ -1638,8 +1638,8 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
   // must have been registered on this realm before the grids were (re)built, and every rank must use
   // the same a_ghostWidth (see the a_ghostWidth docs -- it defines boundary-exposure).
   std::vector<NNPatchWork>                                 patchWork;
-  std::vector<std::vector<NNMergeParticle<Packed>>>        patchLocalValid; // parallel to patchWork
-  std::vector<std::vector<NNMergeParticle<Packed>>>        patchGhosts;     // parallel to patchWork
+  std::vector<std::vector<MergeParticle<Packed>>>          patchLocalValid; // parallel to patchWork
+  std::vector<std::vector<MergeParticle<Packed>>>          patchGhosts;     // parallel to patchWork
   std::unordered_map<ParticleID, NNPooledParticle<Packed>> particlesByID;
   std::unordered_map<NNCellKey, int, NNCellKeyHasher>      liveCellCount;
 
@@ -1915,8 +1915,8 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
   const std::optional<int> maxCellDistance = 1;
 
   std::vector<NNPatchWork>                                 patchWork;
-  std::vector<std::vector<NNMergeParticle<Packed>>>        patchLocalValid;
-  std::vector<std::vector<NNMergeParticle<Packed>>>        patchGhosts;
+  std::vector<std::vector<MergeParticle<Packed>>>          patchLocalValid;
+  std::vector<std::vector<MergeParticle<Packed>>>          patchGhosts;
   std::unordered_map<ParticleID, NNPooledParticle<Packed>> particlesByID;
   std::unordered_map<NNCellKey, int, NNCellKeyHasher>      liveCellCount;
 

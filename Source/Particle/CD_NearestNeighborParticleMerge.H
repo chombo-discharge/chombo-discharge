@@ -39,65 +39,13 @@
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleManagement.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_NamespaceHeader.H>
 
 class AmrMesh;
 
 namespace ParticleManagement {
-
-/**
- * @brief Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.
- * @details Carries what the matching/decision logic needs -- position, weight, a globally unique
- * id, the particle's current owning rank, and its AMR level -- plus an opaque, caller-defined
- * reconciliation payload. The matching/decision logic never inspects @c payload; it is unpacked
- * only by the caller-supplied combine callback when a pair is finalized.
- * @tparam Packed Caller-defined payload type (e.g. a single Real energy for ItoParticle, or an empty struct if no
- * type-specific reconciliation data is required). Must be copyable and trivially linearizable (NNMergeProposal ships
- * two of these as one atomic pair).
- */
-template <typename Packed>
-struct NNMergeParticle
-{
-  /**
-   * @brief Particle position.
-   */
-  RealVect position;
-
-  /**
-   * @brief Particle weight (used for the crowding count and the merged-particle centroid; not
-   * required to be an integer).
-   */
-  Real weight;
-
-  /**
-   * @brief Globally unique particle id. Used to break cross-patch merge ties deterministically
-   * (see judgeProposals()).
-   */
-  ParticleID globalID;
-
-  /**
-   * @brief The rank that currently owns this particle. Always read from the particle's own data --
-   * the single source of truth, never inferred from MPI transport/source-rank metadata.
-   */
-  RankID ownerRank;
-
-  /**
-   * @brief The AMR level this particle currently lives on.
-   * @details Required for multi-level correctness: cellKeyOf() needs the dx of the level the
-   * particle lives on, and a ghost candidate can be on a different level than the querying patch
-   * (GhostType::Coarse/Fine, not just SameLevel). Every cell-key computation uses the per-level dx
-   * for this field, never a single global dx (see a_dxByLevel in resolveTrivialTier()/
-   * judgeProposals()).
-   */
-  int level;
-
-  /**
-   * @brief Opaque, caller-defined reconciliation payload. Never inspected by this algorithm's
-   * matching/decision logic -- only carried through to the caller-supplied combine callback.
-   */
-  Packed payload;
-};
 
 namespace detail {
 
@@ -110,7 +58,7 @@ namespace detail {
  * lookup per query/candidate instead of two. exposed is meaningful only for local valid particles;
  * ghosts always carry false (a ghost never initiates a query, and candidate-side exposure is gated
  * on locality).
- * @tparam Packed Caller-defined payload type (see NNMergeParticle).
+ * @tparam Packed Caller-defined payload type (see MergeParticle).
  */
 template <typename Packed>
 struct NNPooledParticle
@@ -118,7 +66,7 @@ struct NNPooledParticle
   /**
    * @brief The pooled particle (position/weight/ids/level/payload).
    */
-  NNMergeParticle<Packed> particle;
+  MergeParticle<Packed> particle;
 
   /**
    * @brief Whether this local valid particle's cell touches a patch boundary (has ghost targets).
@@ -161,7 +109,7 @@ struct NNFallbackCandidate
  * neighbor among {this patch's own other valid particles} union {every ghost}. Distance is carried
  * explicitly (never recomputed downstream) so trivial-tier resolution and the judge apply the same
  * "closest-first, with a deterministic id tiebreak on exact ties" ordering.
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  */
 template <typename Packed>
 struct NNMergeEdge
@@ -209,7 +157,7 @@ struct NNMergeEdge
  * decision is self-contained and it can never recombine pieces across different incoming
  * proposals. Routing rule (see generateProposals()): a proposal is always sent to the owner of the
  * querying particle's best candidate, never by any id comparison.
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  */
 template <typename Packed>
 struct NNMergeProposal
@@ -218,7 +166,7 @@ struct NNMergeProposal
    * @brief The proposer's own particle (full data) -- always locally valid/owned by the
    * sending rank.
    */
-  NNMergeParticle<Packed> source;
+  MergeParticle<Packed> source;
 
   /**
    * @brief Global id of the particle being proposed to. Owned by the receiving (judge) rank.
@@ -258,7 +206,7 @@ struct NNMergeVerdict
 /**
  * @brief One resolved merge: the two consumed particles' ids and the newly created merged
  * particle (not yet placed into any patch -- see placeMergedParticles()).
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  */
 template <typename Packed>
 struct NNMergeResult
@@ -281,7 +229,7 @@ struct NNMergeResult
    * FRESH globally-unique id (never colliding with any existing particle's id -- see
    * mergeNearestNeighborsTree() for the id-allocation requirement this implies).
    */
-  NNMergeParticle<Packed> merged;
+  MergeParticle<Packed> merged;
 };
 
 } // namespace detail
@@ -342,9 +290,9 @@ using IDAllocator = std::function<ParticleID()>;
  * @param[in] a_merged The resulting merged particle.
  */
 template <typename Packed>
-using MergeCommittedCallback = std::function<void(const NNMergeParticle<Packed>& a_first,
-                                                  const NNMergeParticle<Packed>& a_second,
-                                                  const NNMergeParticle<Packed>& a_merged)>;
+using MergeCommittedCallback = std::function<void(const MergeParticle<Packed>& a_first,
+                                                  const MergeParticle<Packed>& a_second,
+                                                  const MergeParticle<Packed>& a_merged)>;
 
 namespace detail {
 
@@ -354,7 +302,7 @@ namespace detail {
  * Not clamped to any patch's box, so a ghost buckets into its true origin cell and particles in
  * different patches' local frames stay directly comparable.
  * @warning a_dx MUST be the cell spacing of the AMR level the position's particle lives on (see
- * NNMergeParticle::level), never a single fixed dx shared across levels. The returned IntVect is
+ * MergeParticle::level), never a single fixed dx shared across levels. The returned IntVect is
  * only meaningful together with that level; NNCellKey pairs the two so they cannot be conflated
  * (pooling bare cell keys from different levels aliases coarse- and fine-level cell counts).
  * @param[in] a_position Physical position.
@@ -530,7 +478,7 @@ using NNWalkCell = IntVect;
  * The point cloud's metadata is each point's globalID; a hit's cloud index c decodes ownership
  * directly: c < pointCloudNLocal => local valid a_localValid[c], else ghost
  * a_ghosts[c - pointCloudNLocal].
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @tparam Cloud EBGeometry point-cloud index type -- @c EBGeometry::PointCloudBVH<Real,ParticleID> (default, used
  * by mergeNearestNeighborsTree()) or @c EBGeometry::PointCloudHashGrid<Real,ParticleID> (used by
  * mergeNearestNeighborsHash()). The two expose an identical query interface (same @c Hit shape, same method names),
@@ -587,7 +535,7 @@ struct NNSpatialIndex
  * would be a real bug: a low-average patch can still hold one badly-clustered over-threshold cell):
  * a lightweight per-cell tally of the patch's own particles, keyed exactly as the crowding trigger
  * (cellKeyOf(pos, probLo, dx), local and ghost alike), decides it directly.
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @tparam Cloud See NNSpatialIndex. Constructed with its two-argument constructor (positions, metadata), so this
  * function relies on each @c Cloud's own default for whatever third construction parameter it takes (target leaf
  * size for PointCloudBVH, target points per cell for PointCloudHashGrid) -- both defaults are reasonable, general
@@ -604,13 +552,13 @@ struct NNSpatialIndex
  */
 template <typename Packed, typename Cloud = EBGeometry::PointCloudBVH<Real, ParticleID>>
 inline void
-buildNNSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                    const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                    const RealVect&                             a_probLo,
-                    const RealVect&                             a_dx,
-                    const NNCellBudget&                         a_cellBudget,
-                    const int                                   a_kNearest,
-                    NNSpatialIndex<Packed, Cloud>&              a_index) noexcept;
+buildNNSpatialIndex(const std::vector<MergeParticle<Packed>>& a_localValid,
+                    const std::vector<MergeParticle<Packed>>& a_ghosts,
+                    const RealVect&                           a_probLo,
+                    const RealVect&                           a_dx,
+                    const NNCellBudget&                       a_cellBudget,
+                    const int                                 a_kNearest,
+                    NNSpatialIndex<Packed, Cloud>&            a_index) noexcept;
 
 /**
  * @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
@@ -665,7 +613,7 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  * (distance-sorted); resolveTrivialTier() walks that pre-fetched list when the primary is blocked,
  * without re-querying the index.
  *
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @tparam Cloud See NNSpatialIndex.
  * @param[in] a_localValid This patch's own FULL valid-particle set for this round (query sources AND candidates) --
  * see the contract-change note above; not pre-filtered by a_consumedIDs.
@@ -701,8 +649,8 @@ isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMa
  */
 template <typename Packed, typename Cloud = EBGeometry::PointCloudBVH<Real, ParticleID>>
 inline void
-findNearestNeighborCandidates(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
-                              const std::vector<NNMergeParticle<Packed>>&                a_ghosts,
+findNearestNeighborCandidates(const std::vector<MergeParticle<Packed>>&                  a_localValid,
+                              const std::vector<MergeParticle<Packed>>&                  a_ghosts,
                               const std::unordered_set<ParticleID>&                      a_consumedIDs,
                               const NNSpatialIndex<Packed, Cloud>&                       a_spatialIndex,
                               const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
@@ -735,7 +683,7 @@ struct NNCellMeta
   bool isLocal;
 
   /**
-   * @brief This particle's TRUE AMR level (see NNMergeParticle::level) -- needed by
+   * @brief This particle's TRUE AMR level (see MergeParticle::level) -- needed by
    * findNearestNeighborCandidatesOneCell() to re-check a cross-level candidate's Chebyshev
    * distance in the correct (finer-of-the-two-levels) frame, since the cell buckets themselves are
    * all keyed in the query patch's own level's frame.
@@ -765,7 +713,7 @@ using NNCellSpatialIndex = std::unordered_map<NNWalkCell, std::shared_ptr<NNCell
  * still hold a valid Moore-neighbor candidate for a query in an adjacent crowded cell (see
  * findNearestNeighborCandidatesOneCell()). Uses the same exact per-cell tally as
  * buildNNSpatialIndex() to decide whether to build anything at all for this patch.
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @param[in] a_localValid This patch's own full valid-particle set.
  * @param[in] a_ghosts Every ghost shipped to this patch this round.
  * @param[in] a_probLo Physical position of the domain's low corner.
@@ -776,12 +724,12 @@ using NNCellSpatialIndex = std::unordered_map<NNWalkCell, std::shared_ptr<NNCell
  */
 template <typename Packed>
 inline void
-buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid,
-                        const std::vector<NNMergeParticle<Packed>>& a_ghosts,
-                        const RealVect&                             a_probLo,
-                        const RealVect&                             a_dx,
-                        const NNCellBudget&                         a_cellBudget,
-                        NNCellSpatialIndex&                         a_index) noexcept;
+buildNNCellSpatialIndex(const std::vector<MergeParticle<Packed>>& a_localValid,
+                        const std::vector<MergeParticle<Packed>>& a_ghosts,
+                        const RealVect&                           a_probLo,
+                        const RealVect&                           a_dx,
+                        const NNCellBudget&                       a_cellBudget,
+                        NNCellSpatialIndex&                       a_index) noexcept;
 
 /**
  * @brief For every over-threshold, currently-alive valid particle in a patch, find its single TRUE
@@ -806,7 +754,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
  * function returns is guaranteed at Chebyshev distance <= 1 in the frame the downstream exact check
  * uses, not merely in the query patch's own frame. Callers MUST still forward that same cap (not
  * std::nullopt) as a_maxCellDistance to resolveTrivialTier()/judgeProposals().
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @param[in] a_localValid This patch's own FULL valid-particle set for this round (query sources).
  * @param[in] a_consumedIDs Lazy-deletion skip set: ids already consumed earlier this round.
  * @param[in] a_cellIndex This patch's one-cell spatial index (see NNCellSpatialIndex), built once via
@@ -824,7 +772,7 @@ buildNNCellSpatialIndex(const std::vector<NNMergeParticle<Packed>>& a_localValid
  */
 template <typename Packed>
 inline void
-findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&                a_localValid,
+findNearestNeighborCandidatesOneCell(const std::vector<MergeParticle<Packed>>&                  a_localValid,
                                      const std::unordered_set<ParticleID>&                      a_consumedIDs,
                                      const NNCellSpatialIndex&                                  a_cellIndex,
                                      const std::unordered_map<NNCellKey, int, NNCellKeyHasher>& a_liveCellCount,
@@ -879,7 +827,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<NNMergeParticle<Packed>>&
  *     particle to claim as an ordinary trivial candidate later in this same sorted pass, or via
  *     a_maxFallbackCandidates below.
  *
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @tparam Combine See PayloadCombine.
  * @param[in] a_edges Candidate edges from findNearestNeighborCandidates(), for ALL patches this rank owns (pooled
  * together so the global distance sort spans the whole rank, not just one patch).
@@ -952,7 +900,7 @@ resolveTrivialTier(
   const std::optional<int>                                        a_maxCellDistance       = std::nullopt,
   unsigned long long*                                             a_crossLevelMergeCount  = nullptr,
   const OnMerge&                                                  a_onMergeCommitted =
-    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    [](const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&) {
     }) noexcept;
 
 /**
@@ -967,12 +915,12 @@ resolveTrivialTier(
  * bucket goes out over MPI. This keeps the decision logic in judgeProposals() completely
  * unaware of whether a given proposal arrived locally or over the network -- it still goes through
  * the exact same pooled judge logic, never a shortcut.
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @param[in] a_edges Candidate edges from findNearestNeighborCandidates(), for all of this rank's patches.
  * @param[in] a_hasOutgoingCommitment Query-particle ids that resolveTrivialTier() could not resolve (i.e. exactly
  * the edges this function packages).
  * @param[in] a_particlesByID Full particle data for every currently-alive local valid particle and every ghost,
- * keyed by id (each value an NNPooledParticle wrapping the particle) -- needed to build the full NNMergeParticle
+ * keyed by id (each value an NNPooledParticle wrapping the particle) -- needed to build the full MergeParticle
  * bundle for each proposal.
  * @param[in] a_numRanks Total MPI rank count (size of the returned bucket vector).
  * @param[out] a_proposalsByDestRank One bucket per rank; a_proposalsByDestRank[r] holds every proposal whose
@@ -1027,7 +975,7 @@ generateProposals(const std::vector<NNMergeEdge<Packed>>&                       
  * generateProposals()-produced bucket addressed to itself (an in-process handoff, no network
  * round-trip -- see generateProposals()).
  *
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @tparam Combine See PayloadCombine.
  * @tparam PosValid See PositionValid.
  * @param[in] a_incomingProposals All proposals targeting a particle this rank owns, pooled from every source rank
@@ -1088,7 +1036,7 @@ judgeProposals(
   const std::optional<int>                                        a_maxCellDistance      = std::nullopt,
   unsigned long long*                                             a_crossLevelMergeCount = nullptr,
   const OnMerge&                                                  a_onMergeCommitted =
-    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    [](const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&) {
     }) noexcept;
 
 /**
@@ -1132,7 +1080,7 @@ using PositionLocator = std::function<LevelTiles::LevelAndBox(const RealVect& a_
  * possibly owned by a different rank. Point-location must be O(1) per result (see
  * PositionLocator) -- NEVER a linear scan over every patch, which would turn
  * this function into a real bottleneck at large patch counts.
- * @tparam Packed See NNMergeParticle.
+ * @tparam Packed See MergeParticle.
  * @param[in] a_results Every merge result produced this round by resolveTrivialTier() and judgeProposals(), pooled
  * together.
  * @param[in] a_locate Locate-by-position callback (see PositionLocator).
@@ -1145,11 +1093,11 @@ using PositionLocator = std::function<LevelTiles::LevelAndBox(const RealVect& a_
  */
 template <typename Packed>
 inline void
-placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                     a_results,
-                     const PositionLocator&                                                        a_locate,
-                     const int                                                                     a_thisRank,
-                     std::map<std::pair<int, unsigned int>, std::vector<NNMergeParticle<Packed>>>& a_localByPatch,
-                     std::vector<std::vector<NNMergeParticle<Packed>>>& a_scatterByDestRank) noexcept;
+placeMergedParticles(const std::vector<NNMergeResult<Packed>>&                                   a_results,
+                     const PositionLocator&                                                      a_locate,
+                     const int                                                                   a_thisRank,
+                     std::map<std::pair<int, unsigned int>, std::vector<MergeParticle<Packed>>>& a_localByPatch,
+                     std::vector<std::vector<MergeParticle<Packed>>>& a_scatterByDestRank) noexcept;
 
 /**
  * @brief One patch's identity for the duration of a merge round: its AMR level, local DataIndex,
@@ -1178,15 +1126,15 @@ struct NNPatchWork
 /**
  * @brief Gather every patch this rank owns into the backend-agnostic per-patch particle sets and
  * pooled bookkeeping a merge round needs, shared by every search backend.
- * @details For every patch: splits its leaf into local-valid/ghost NNMergeParticle vectors (ghosts
- * carrying their TRUE origin AMR level, see NNMergeParticle::level), computes each local-valid
+ * @details For every patch: splits its leaf into local-valid/ghost MergeParticle vectors (ghosts
+ * carrying their TRUE origin AMR level, see MergeParticle::level), computes each local-valid
  * particle's boundary-exposure flag from the realm's same/coarse-to-fine/fine-to-coarse particle
  * ghost masks at the given a_ghostWidth, and pools everything rank-wide into a_particlesByID.
  * a_liveCellCount is derived from the pooled a_particlesByID afterward (once per particle, not
  * once per occurrence, since a ghost can appear in several of this rank's own patches at once).
  * Builds no spatial index -- that is backend-specific and is the caller's next step.
  * @tparam P SoA payload type (see mergeNearestNeighborsTree()).
- * @tparam Packed Opaque reconciliation payload type (see NNMergeParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P.
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @param[in,out] a_amr AMR mesh -- source of ghost masks and the patch layout.
@@ -1216,8 +1164,8 @@ gatherMergeParticles(AmrMesh&                                                  a
                      const int                                                 a_ghostWidth,
                      const Gather&                                             a_gather,
                      std::vector<NNPatchWork>&                                 a_patchWork,
-                     std::vector<std::vector<NNMergeParticle<Packed>>>&        a_patchLocalValid,
-                     std::vector<std::vector<NNMergeParticle<Packed>>>&        a_patchGhosts,
+                     std::vector<std::vector<MergeParticle<Packed>>>&          a_patchLocalValid,
+                     std::vector<std::vector<MergeParticle<Packed>>>&          a_patchGhosts,
                      std::unordered_map<ParticleID, NNPooledParticle<Packed>>& a_particlesByID,
                      std::unordered_map<NNCellKey, int, NNCellKeyHasher>&      a_liveCellCount) noexcept;
 
@@ -1234,7 +1182,7 @@ gatherMergeParticles(AmrMesh&                                                  a
  * @tparam Packed Opaque reconciliation payload type.
  * @tparam Traits Column descriptor for P.
  * @tparam Combine See PayloadCombine.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam PosValid See PositionValid.
  * @tparam Allocator See IDAllocator.
  * @tparam OnMerge See MergeCommittedCallback.
@@ -1371,7 +1319,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
  * (trivial-tier) portion of a single call -- see its own documentation below.
  *
  * @tparam P SoA payload type (e.g. ItoParticle).
- * @tparam Packed Opaque reconciliation payload type for the merge decision layer (see NNMergeParticle) -- typically
+ * @tparam Packed Opaque reconciliation payload type for the merge decision layer (see MergeParticle) -- typically
  * much smaller than P's full column set (e.g. just energy for ItoParticle; velocity/mobility/diffusion are already
  * established as safe to drop across a merge, since they are recomputed from field interpolation immediately
  * afterward).
@@ -1379,7 +1327,7 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed` -- packs one SoA slot's payload
  * columns into the opaque Packed representation.
  * @tparam Combine See PayloadCombine.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void` -- appends one
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void` -- appends one
  * surviving/merged particle back into the real SoA container.
  * @param[in,out] a_amr AMR mesh -- source of ghost masks, per-level dx, and the patch layout used to place merged
  * particles.
@@ -1432,7 +1380,7 @@ template <typename P,
           typename Allocator,
           typename PosValid = std::function<bool(const RealVect&)>,
           typename OnMerge  = std::function<
-             void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
+             void(const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&)>>
 inline void
 mergeNearestNeighborsTree(
   AmrMesh&                      a_amr,
@@ -1452,7 +1400,7 @@ mergeNearestNeighborsTree(
     },
   unsigned long long* a_crossLevelMergeCount = nullptr,
   const OnMerge&      a_onMergeCommitted =
-    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    [](const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&) {
     });
 
 /**
@@ -1480,7 +1428,7 @@ template <typename P,
           typename Allocator,
           typename PosValid = std::function<bool(const RealVect&)>,
           typename OnMerge  = std::function<
-             void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
+             void(const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&)>>
 inline void
 mergeNearestNeighborsHash(
   AmrMesh&                      a_amr,
@@ -1500,7 +1448,7 @@ mergeNearestNeighborsHash(
     },
   unsigned long long* a_crossLevelMergeCount = nullptr,
   const OnMerge&      a_onMergeCommitted =
-    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    [](const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&) {
     });
 
 /**
@@ -1519,11 +1467,11 @@ mergeNearestNeighborsHash(
  * takes no a_maxCellDistance parameter, and requires exactly a width-1 particle ghost halo (already
  * filled by the caller) rather than a configurable a_ghostWidth.
  * @tparam P SoA payload type (e.g. ItoParticle).
- * @tparam Packed Opaque reconciliation payload type (see NNMergeParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See PayloadCombine.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const NNMergeParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @param[in,out] a_amr AMR mesh -- source of ghost masks, per-level dx, and the patch layout.
  * @param[in,out] a_particles The real particle container to merge, for every patch this rank owns.
  * @param[in] a_cellBudget The count each cell is drained down to -- see NNCellBudget.
@@ -1551,7 +1499,7 @@ template <typename P,
           typename Allocator,
           typename PosValid = std::function<bool(const RealVect&)>,
           typename OnMerge  = std::function<
-             void(const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&)>>
+             void(const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&)>>
 inline void
 mergeNearestNeighborsOneCell(
   AmrMesh&                      a_amr,
@@ -1569,7 +1517,7 @@ mergeNearestNeighborsOneCell(
     },
   unsigned long long* a_crossLevelMergeCount = nullptr,
   const OnMerge&      a_onMergeCommitted =
-    [](const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&, const NNMergeParticle<Packed>&) {
+    [](const MergeParticle<Packed>&, const MergeParticle<Packed>&, const MergeParticle<Packed>&) {
     });
 
 } // namespace ParticleManagement

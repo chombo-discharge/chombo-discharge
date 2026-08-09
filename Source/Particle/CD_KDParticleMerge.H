@@ -26,68 +26,11 @@
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleManagement.H>
 #include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>
 
 namespace ParticleManagement {
-
-/**
- * @brief Minimal, payload-agnostic description of one particle as input to the kd-tree carve
- * merge.
- * @details Carries what the tree build/carve protocol needs -- position, weight, a globally
- * unique id, and the particle's current owning rank -- plus an opaque, caller-defined payload
- * (e.g. energy). The build/carve logic never inspects @c payload; it is unpacked only by the
- * caller-supplied combine callback when a leaf/box is finalized. No AMR-level field is carried
- * (unlike the nearest-neighbor merge's NNMergeParticle): the tree build only ever needs physical
- * position (level-independent) and this patch's own cell spacing, never a per-particle level.
- * @tparam Packed Caller-defined payload type (e.g. a single Real energy for ItoParticle).
- */
-template <typename Packed>
-struct KDParticle
-{
-  /**
-   * @brief Particle position.
-   */
-  RealVect position;
-
-  /**
-   * @brief Particle weight (used for the merged-particle centroid; not required to be an integer).
-   */
-  Real weight;
-
-  /**
-   * @brief Globally unique particle id -- also the source of a box's key anchor (see
-   * detail::KDBoxKey) and the deterministic tiebreak needed since AABB volume alone is not a
-   * strict total order.
-   */
-  ParticleID globalID;
-
-  /**
-   * @brief The rank that currently owns this particle. Always read from the particle's own data,
-   * never inferred from MPI transport metadata. NOT the same question as isGhost below -- a
-   * particle can be owned by this rank (via one of this rank's OTHER patches) while still being a
-   * ghost in the patch whose build currently holds it.
-   */
-  RankID ownerRank;
-
-  /**
-   * @brief True iff this particle is a ghost copy in the patch whose build currently holds it
-   * (i.e. not physically stored there). Build-internal bookkeeping, not part of the payload the
-   * caller-supplied callbacks see meaningfully -- always false on a freshly merged result. This is
-   * deliberately a per-particle field (not inferred from ownerRank) because ownership and physical
-   * residency are different questions: a particle owned by this rank via one patch can be a ghost
-   * in a NEIGHBORING patch this same rank also owns, and treating "owner == this rank" as "no
-   * further contest possible" there is exactly the bug this field exists to prevent -- see
-   * mergeKDCarve()'s own docs.
-   */
-  bool isGhost = false;
-
-  /**
-   * @brief Opaque, caller-defined payload. Never inspected by the build/carve logic -- only
-   * carried through to the caller-supplied combine callback.
-   */
-  Packed payload;
-};
 
 /**
  * @brief Illustrative signature of the N-ary combine callback: produce a merged particle's opaque
@@ -172,7 +115,7 @@ struct KDLeaf
  * Particles in cells at or below @a a_ppc are excluded from the partition and emitted as singleton
  * leaves. A singleton never merges (the merge threshold is two members), so an uncrowded cell cannot
  * be drained by a neighbour's merge.
- * @tparam Packed See KDParticle.
+ * @tparam Packed See MergeParticle.
  * @tparam CellTrueCount Callable `(const IntVect&) -> int` giving that cell's total particle count,
  * or 0 for an empty cell. A cell is crowded iff this exceeds @a a_ppc.
  * @param[in,out] a_particles Particles to partition; reordered in place.
@@ -188,14 +131,14 @@ struct KDLeaf
  */
 template <typename Packed, typename CellTrueCount>
 inline void
-buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
-                   const int                        a_ppc,
-                   const Real                       a_splitWeightLeafDx,
-                   const RealVect&                  a_dx,
-                   const RealVect&                  a_probLo,
-                   FArrayBox&                       a_used,
-                   const CellTrueCount&             a_cellTrueCount,
-                   std::vector<KDLeaf>&             a_leaves) noexcept;
+buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
+                   const int                           a_ppc,
+                   const Real                          a_splitWeightLeafDx,
+                   const RealVect&                     a_dx,
+                   const RealVect&                     a_probLo,
+                   FArrayBox&                          a_used,
+                   const CellTrueCount&                a_cellTrueCount,
+                   std::vector<KDLeaf>&                a_leaves) noexcept;
 
 /**
  * @brief Generic Alltoallv-style exchange for a trivially-copyable record type: send a
@@ -206,7 +149,7 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
  * not depend on (see this file's own @details). In a serial (non-MPI) build, or with a single
  * rank, returns this rank's own bucket unchanged.
  * @tparam T Trivially-copyable record type (KDClaim, KDVerdict, KDCommit, or
- * KDParticle<Packed> with Packed itself trivially copyable).
+ * MergeParticle<Packed> with Packed itself trivially copyable).
  * @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
  * @return Flat vector of every record received from every rank (including this rank's own bucket
  * addressed to itself).
@@ -232,11 +175,11 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  *
  * The round count is fixed, not a convergence loop; further reduction comes from calling again.
  * @tparam P SoA payload type.
- * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the group's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
@@ -287,11 +230,11 @@ mergeKDCarve(AmrMesh&                      a_amr,
  * communication, at the cost of no coordination across a patch boundary: a cell straddled by two
  * patches is reduced by each of them independently.
  * @tparam P SoA payload type.
- * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the grid layout.
@@ -348,11 +291,11 @@ mergeKDPatch(AmrMesh&                      a_amr,
  * The result is a split, not a finished merge -- @a a_particles is left holding exactly the
  * contested particles, for a caller that means to reduce them by some other means.
  * @tparam P SoA payload type.
- * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the grid layout.
