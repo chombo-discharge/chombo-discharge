@@ -398,7 +398,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1825-1826
+   :lines: 1839-1840
    :language: c++
    :dedent: 2
 
@@ -525,7 +525,7 @@ Conversely, if the particle is close to the EB a small step will be used.
 The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and the ray-casting variant is called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1207-1216
+   :lines: 1221-1230
    :language: c++
    :dedent: 2
 
@@ -559,7 +559,7 @@ ___________________
 To deposit the particle weight on the mesh, the user can call ``AmrMesh::depositWeight``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 976-984
+   :lines: 990-998
    :language: c++
    :dedent: 2
 
@@ -570,7 +570,7 @@ To deposit a *derived* per-particle quantity (e.g. weight times a payload column
 Surface (EB) deposition of the weight column onto an ``EBAMRIVData`` is available through an overload of ``AmrMesh::depositParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 957-962
+   :lines: 971-976
    :language: c++
    :dedent: 2
 
@@ -655,7 +655,7 @@ ______________________
 To interpolate mesh data onto a payload column, the user can call ``AmrMesh::interpolateParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1072-1079
+   :lines: 1086-1093
    :language: c++
    :dedent: 2
 
