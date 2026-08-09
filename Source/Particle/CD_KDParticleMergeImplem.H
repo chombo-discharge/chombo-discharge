@@ -39,16 +39,6 @@ namespace ParticleManagement {
 
 namespace detail {
 
-inline bool
-operator<(const KDBoxKey& a_lhs, const KDBoxKey& a_rhs) noexcept
-{
-  if (a_lhs.volume != a_rhs.volume) {
-    return a_lhs.volume < a_rhs.volume;
-  }
-
-  return a_lhs.anchor < a_rhs.anchor;
-}
-
 template <typename T>
 inline std::vector<T>
 kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
@@ -661,6 +651,54 @@ mergeKDCarve(AmrMesh&                      a_amr,
              const PosValid&               a_isPositionValid)
 {
   using namespace detail;
+
+  // Carve-protocol types. Local to this function because nothing else constructs or consumes them:
+  // they describe one pass of the claim/verdict/commit exchange and have no meaning outside it.
+
+  // Box ranking key. Tightest box wins a contested particle; the anchor id is the deterministic
+  // tiebreak, since AABB volume alone is not a strict total order.
+  struct KDBoxKey
+  {
+    Real       volume;
+    ParticleID anchor;
+
+    bool
+    operator<(const KDBoxKey& a_rhs) const noexcept
+    {
+      return (volume != a_rhs.volume) ? (volume < a_rhs.volume) : (anchor < a_rhs.anchor);
+    }
+  };
+
+  // One member of a boundary box: the particle and the rank that owns it.
+  struct KDMember
+  {
+    ParticleID id;
+    RankID     owner;
+  };
+
+  // Phase 1 wire type: a box's claim on one member, routed to that member's owner.
+  struct KDClaim
+  {
+    ParticleID memberID;
+    KDBoxKey   key;
+    RankID     proposerRank;
+    int        proposerBoxIdx; // which of the proposer's own boxes claimed it
+  };
+
+  // Phase 2 wire type: the owner's nominal argmin winner, answered per claiming box.
+  struct KDVerdict
+  {
+    ParticleID memberID;
+    int        claimantBoxIdx;
+    bool       won;
+  };
+
+  // Phase 3 wire type: the proposer's actual outcome. Only this authorizes a deletion.
+  struct KDCommit
+  {
+    ParticleID memberID;
+    bool       committed;
+  };
 
   CH_TIMERS("ParticleManagement::mergeKDCarve");
   CH_TIMER("ParticleManagement::mergeKDCarve::build_classify", t_build);
