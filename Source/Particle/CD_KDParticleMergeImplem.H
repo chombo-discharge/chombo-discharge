@@ -707,13 +707,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
   CH_TIMER("ParticleManagement::mergeKDCarve::remove_consumed", t_remove);
   CH_TIMER("ParticleManagement::mergeKDCarve::place_results", t_place);
 
-  // Always-on wall-clock breakdown reported to pout() with an MPI min/max/avg reduction. Mirrors the
-  // CH_TIMER phases above, but needs neither CH_TIMER=TRUE nor a time.table to read -- and adds two
-  // cross-cutting accumulators, "KD-tree build" and "MPI Alltoallv", that answer the first question a
-  // slow production run raises: is the cost compute or communication? Reported once per call; gate or
-  // remove once the hotspot is known.
-  Timer timer("ParticleManagement::mergeKDCarve");
-
   const std::string   realm       = a_particles.getRealm();
   const int           finestLevel = a_amr.getFinestLevel();
   const RealVect      probLo      = a_amr.getProbLo();
@@ -850,7 +843,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
     const int nbox = dit.size();
 
     for (int mybox = 0; mybox < nbox; mybox++) {
-      timer.startEvent("Gather-0");
       const DataIndex& din = dit[mybox];
 
       ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
@@ -883,9 +875,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
         particlesByID.emplace_back(p.globalID, gatheredParticles.size() - 1);
       }
 
-      timer.stopEvent("Gather-0");
-
-      timer.startEvent("Gather-1");
       patchWork.push_back(PatchWork{lvl, din, dxByLevel[lvl], dbl[din]});
       const int patchIdx = static_cast<int>(patchWork.size()) - 1;
 
@@ -901,11 +890,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
       FArrayBox& quota      = (*leafQuota[lvl])[din];
 
       kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
-      timer.stopEvent("Gather-1");
 
-      timer.startEvent("Gather-2");
       buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
-      timer.stopEvent("Gather-2");
 
       // Per-patch exposure cache. Leaves are about a cell in extent and not grid-aligned, so many
       // leaves (and many members within one leaf) end up querying the SAME cell's exposure; compute
@@ -915,7 +901,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
       // Held over the patch's OWN box, ungrown: only resident (non-ghost) members are ever queried,
       // and resident is exactly what it means for a cell to lie in this box. That is why this one
       // does not need the growth the histogram and the live quota do.
-      timer.startEvent("Gather-3");
       BaseFab<signed char> exposureCache(dbl[din], 1);
       exposureCache.setVal(-1);
 
@@ -937,9 +922,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
         return exposureCache(a_iv, 0) != 0;
       };
-      timer.stopEvent("Gather-3");
-
-      timer.startEvent("Gather-4");
 
       for (const KDLeaf& bl : leaves) {
         members.clear();
@@ -1102,7 +1084,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
           selfClaims.push_back(SelfClaimEntry{members[0].id, KDBoxKey{}, -1});
         }
       }
-      timer.stopEvent("Gather-4");
     }
   }
 
@@ -1112,7 +1093,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // (ghost-vs-ghost or non-ghost-vs-non-ghost duplicates carry identical data, so it doesn't matter
   // which of those survives) -- this is the dedup rule the old per-particle hash lookup used to
   // enforce inline.
-  timer.startEvent("Dedup particlesByID");
   std::sort(particlesByID.begin(), particlesByID.end(), [](const auto& a_lhs, const auto& a_rhs) {
     return a_lhs.first < a_rhs.first;
   });
@@ -1145,8 +1125,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
     particlesByID.resize(writeIdx);
   }
 
-  timer.stopEvent("Dedup particlesByID");
-
   // Binary-search lookup into the now-sorted, deduplicated particlesByID -- replaces the old
   // unordered_map's .at().
   auto findParticle = [&particlesByID, &gatheredParticles](const ParticleID a_id) -> const MergeParticle<Packed>& {
@@ -1162,7 +1140,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
     return gatheredParticles[it->second];
   };
 
-  timer.startEvent("Self-claims sort");
   // selfClaims was appended to during STEP 1 -- sort by id once so STEP 3 can process it as grouped
   // runs of equal id (a particle's possibly-several self-claim entries, see SelfClaimEntry's own
   // docs) instead of hashing.
@@ -1170,12 +1147,10 @@ mergeKDCarve(AmrMesh&                      a_amr,
     return a_lhs.id < a_rhs.id;
   });
 
-  timer.stopEvent("Self-claims sort");
   CH_STOP(t_build);
 
   // ==== STEP 2: Phase 1 -- claims to owners ====
   CH_START(t_carve);
-  timer.startEvent("Carve exchange (sort)");
   std::vector<std::vector<KDClaim>> claimSendByRank(numRanks);
 
   for (std::size_t boxIdx = 0; boxIdx < myBoxes.size(); boxIdx++) {
@@ -1187,16 +1162,13 @@ mergeKDCarve(AmrMesh&                      a_amr,
       }
     }
   }
-  timer.stopEvent("Carve exchange (sort)");
 
   // Sorted by memberID once received, so STEP 3's point lookups (claimsRange, below) and STEP 4's
   // full pass (grouped runs) don't need a hash map either.
-  timer.startEvent("Carve exchange (all-to-all)");
   std::vector<KDClaim> incomingClaims = kdExchangeByRank(claimSendByRank);
   std::sort(incomingClaims.begin(), incomingClaims.end(), [](const KDClaim& a_lhs, const KDClaim& a_rhs) {
     return a_lhs.memberID < a_rhs.memberID;
   });
-  timer.stopEvent("Carve exchange (all-to-all)");
 
   auto claimsRange = [&incomingClaims](const ParticleID a_id) {
     const auto lo = std::lower_bound(incomingClaims.begin(),
@@ -1242,7 +1214,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // search.
   std::vector<WinnerEntry> nominalWinner;
   nominalWinner.reserve(selfClaims.size());
-  timer.startEvent("Nominal-winner");
+
   for (std::size_t idx = 0; idx < selfClaims.size();) {
     const ParticleID id = selfClaims[idx].id;
 
@@ -1294,7 +1266,6 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
     idx = idxEnd;
   }
-  timer.stopEvent("Nominal-winner");
 
   // Binary-search lookup into the now-sorted nominalWinner -- replaces the old unordered_map's
   // .find()/.at().
@@ -1313,7 +1284,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // One verdict PER INCOMING CLAIM, not per rank: two of the SAME rank's own boxes can both claim
   // this particle (from two different patches that rank owns), and each needs its own, correct
   // answer -- a rank-level "your rank won" cannot tell them apart. See KDClaim::proposerBoxIdx.
-  timer.startEvent("step-4 phase-2");
+
   std::vector<std::vector<KDVerdict>> verdictSendByRank(numRanks);
 
   for (std::size_t idx = 0; idx < incomingClaims.size();) {
@@ -1351,11 +1322,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
     idx = idxEnd;
   }
-  timer.stopEvent("step-4 phase-2");
 
-  timer.startEvent("MPI Alltoallv");
   const std::vector<KDVerdict> incomingVerdicts = kdExchangeByRank(verdictSendByRank);
-  timer.stopEvent("MPI Alltoallv");
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
   // Indexed directly by boxIdx (a dense range over myBoxes) rather than hashed -- each box's own
@@ -1363,7 +1331,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // at the read site below avoids both a per-box hash-table allocation (unordered_set would add one
   // per box, of which there can be thousands) and, for large ppc, the O(box size^2) cost a linear
   // scan would have across all of a box's foreign-member lookups.
-  timer.startEvent("Remainder");
+
   std::vector<std::vector<ParticleID>> wonForeignByBox(myBoxes.size());
 
   for (const KDVerdict& v : incomingVerdicts) {
@@ -1492,14 +1460,10 @@ mergeKDCarve(AmrMesh&                      a_amr,
       commitSendByRank[findParticle(id).ownerRank].push_back(KDCommit{id, committed});
     }
   }
-  timer.stopEvent("Remainder");
 
   // ==== STEP 6: Phase 3 -- commit/release, foreign members only ====
-  timer.startEvent("MPI Alltoallv");
   const std::vector<KDCommit> incomingCommits = kdExchangeByRank(commitSendByRank);
-  timer.stopEvent("MPI Alltoallv");
 
-  timer.startEvent("Finalize");
   for (const KDCommit& c : incomingCommits) {
     if (c.committed) {
       consumedIDs.push_back(c.memberID);
@@ -1587,9 +1551,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
     }
   }
 
-  timer.startEvent("MPI Alltoallv");
   const std::vector<MergeParticle<Packed>> incomingScattered = kdExchangeByRank(scatterByDestRank);
-  timer.stopEvent("MPI Alltoallv");
 
   for (const MergeParticle<Packed>& p : incomingScattered) {
     const auto dst = a_particles.findDestination(p.position);
@@ -1607,10 +1569,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
     insertHere(corrected, dst.level, din);
   }
 
-  timer.stopEvent("Finalize");
   CH_STOP(t_place);
-
-  timer.eventReport(pout(), false);
 }
 
 template <typename P,
