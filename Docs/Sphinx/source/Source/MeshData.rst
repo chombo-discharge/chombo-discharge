@@ -199,6 +199,7 @@ Multiple signatures for this functionality exist, see the code-block below.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
    :lines: 712-720,745-753,782-794
+   :dedent: 2
    :language: c++
 	    
 See the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
@@ -219,12 +220,14 @@ The signatures for updating the ghost cells are:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
    :lines: 1259-1267
+   :dedent: 2
    :language: c++
 
 As one alternative, one can update ghost cells on a single grid level:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
    :lines: 1268-1282
+   :dedent: 2
    :language: c++
 
 
@@ -246,6 +249,7 @@ The interpolation function that fills fine-grid data from a coarse grid has the 
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
    :lines: 1348-1368
+   :dedent: 2
    :language: c++
 
 Here, the user must supply both the old data and the new data, as well as on which grid levels the interpolation will take place.

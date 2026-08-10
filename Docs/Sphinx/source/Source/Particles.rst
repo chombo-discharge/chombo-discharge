@@ -235,10 +235,11 @@ To return to patch-ordered particles:
 Allocating particles
 --------------------
 
-``AmrMesh`` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
+:ref:`Chap:AmrMesh` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
    :lines: 213-223
+   :dedent: 2
    :language: c++
 
 which will allocate the container on the realm ``a_realm``.
