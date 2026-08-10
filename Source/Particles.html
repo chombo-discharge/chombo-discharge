@@ -488,17 +488,17 @@ Iteration over cell-sorted particles visits the cells in Fortran order (matching
 </section>
 <section id="allocating-particles">
 <h2>Allocating particles<a class="headerlink" href="#allocating-particles" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> has a simple function for allocating a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Allocate a struct-of-arrays particle container on the given realm.</span>
-<span class="cm">   * @param[out] a_container SoA particle container to be allocated.</span>
-<span class="cm">   * @param[in]  a_realm     Realm on which the particles will be allocated.</span>
-<span class="cm">   * @tparam P      Payload type of the container.</span>
-<span class="cm">   * @tparam Traits Column descriptor for the payload.</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<p><a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has a simple function for allocating a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P,</span> <span class="pre">Traits&gt;</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Allocate a struct-of-arrays particle container on the given realm.</span>
+<span class="cm"> * @param[out] a_container SoA particle container to be allocated.</span>
+<span class="cm"> * @param[in]  a_realm     Realm on which the particles will be allocated.</span>
+<span class="cm"> * @tparam P      Payload type of the container.</span>
+<span class="cm"> * @tparam Traits Column descriptor for the payload.</span>
+<span class="cm"> */</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which will allocate the container on the realm <code class="docutils literal notranslate"><span class="pre">a_realm</span></code>.</p>
@@ -671,8 +671,7 @@ There is one mask per direction, and the collection type is</p>
 <p>The masks live on the <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> and are rebuilt at every regrid.
 Downstream code must first <em>register</em> the ghost width(s) it needs; only registered widths are built.
 The ghost width is a <strong>minimum</strong>, measured in <em>destination</em> cells:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
-<span class="nf">registerParticleGhostMask</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_width</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">registerParticleGhostMask</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_width</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>and the per-direction masks for a registered width are then fetched with</p>
@@ -778,9 +777,8 @@ The ray-casting algorithm will check if the particle can move from <span class="
 This step is selected from the signed distance from the particle position to the EB such that it uses a large step if the particle is far away from the EB.
 Conversely, if the particle is close to the EB a small step will be used.</p>
 <p>The algorithms that intersect the particles are part of <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, and the ray-casting variant is called as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">auto</span><span class="p">...</span><span class="w"> </span><span class="n">OldPosition</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">intersectParticlesRaycastIF</span><span class="p">(</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">intersectParticlesRaycastIF</span><span class="p">(</span>
 <span class="w">  </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w">                                    </span><span class="n">a_activeParticles</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w">                                    </span><span class="n">a_ebParticles</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w">                                    </span><span class="n">a_domainParticles</span><span class="p">,</span>
@@ -814,9 +812,8 @@ There are two main operations involved:</p>
 <section id="particle-deposition">
 <h3>Particle deposition<a class="headerlink" href="#particle-deposition" title="Permalink to this heading"></a></h3>
 <p>To deposit the particle weight on the mesh, the user can call <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositWeight</span></code>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">depositWeight</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                      </span><span class="n">a_meshData</span><span class="p">,</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">depositWeight</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                      </span><span class="n">a_meshData</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_phase</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
@@ -829,9 +826,8 @@ There are two main operations involved:</p>
 The last flag is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.</p>
 <p>To deposit a <em>derived</em> per-particle quantity (e.g. weight times a payload column), use <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositGathered</span></code> with a gatherer callback, or <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles&lt;Members...&gt;</span></code> to deposit one or more payload columns directly.
 Surface (EB) deposition of the weight column onto an <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> is available through an overload of <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles</span></code>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w">                        </span><span class="n">a_meshData</span><span class="p">,</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">depositParticles</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w">                        </span><span class="n">a_meshData</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_phase</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
@@ -903,9 +899,8 @@ The <code class="docutils literal notranslate"><span class="pre">CoarseFineDepos
 <section id="particle-interpolation">
 <h3>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this heading"></a></h3>
 <p>To interpolate mesh data onto a payload column, the user can call <code class="docutils literal notranslate"><span class="pre">AmrMesh::interpolateParticles</span></code>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">auto</span><span class="p">...</span><span class="w"> </span><span class="n">Members</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">            </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">     </span><span class="n">a_phase</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_meshField</span><span class="p">,</span>

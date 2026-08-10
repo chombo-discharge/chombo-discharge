@@ -102,17 +102,17 @@ Public Attributes</h2></td></tr>
 <a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>&#160;</td><td class="memItemRight" valign="bottom"><b>secondID</b></td></tr>
 <tr class="memdesc:a38fcc65395bc31e4409a2938c72f4c52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Global id of the second consumed particle. For a trivial-tier result, this is the local candidate. For a judge-side result, this is the winning proposer. <br /></td></tr>
 <tr class="separator:a38fcc65395bc31e4409a2938c72f4c52"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d56bb406e9adfc783663df3b4b29014" id="r_a0d56bb406e9adfc783663df3b4b29014"><td class="memItemLeft" align="right" valign="top"><a id="a0d56bb406e9adfc783663df3b4b29014" name="a0d56bb406e9adfc783663df3b4b29014"></a>
-<a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>merged</b></td></tr>
-<tr class="memdesc:a0d56bb406e9adfc783663df3b4b29014"><td class="mdescLeft">&#160;</td><td class="mdescRight">The newly created merged particle: weighted-centroid position, weighted-average opaque payload (computed by the caller-supplied combine callback), summed weight, and a FRESH globally-unique id (never colliding with any existing particle's id &ndash; see <a class="el" href="namespaceParticleManagement.html#ac357c1be83a41f099d73b348bed971df" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> for the id-allocation requirement this implies). <br /></td></tr>
-<tr class="separator:a0d56bb406e9adfc783663df3b4b29014"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42b7babeada34cd9a6735fffad69ad99" id="r_a42b7babeada34cd9a6735fffad69ad99"><td class="memItemLeft" align="right" valign="top"><a id="a42b7babeada34cd9a6735fffad69ad99" name="a42b7babeada34cd9a6735fffad69ad99"></a>
+<a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>merged</b></td></tr>
+<tr class="memdesc:a42b7babeada34cd9a6735fffad69ad99"><td class="mdescLeft">&#160;</td><td class="mdescRight">The newly created merged particle: weighted-centroid position, weighted-average opaque payload (computed by the caller-supplied combine callback), summed weight, and a FRESH globally-unique id (never colliding with any existing particle's id &ndash; see <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">mergeNearestNeighborsTree()</a> for the id-allocation requirement this implies). <br /></td></tr>
+<tr class="separator:a42b7babeada34cd9a6735fffad69ad99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename Packed&gt;<br />
 struct ParticleManagement::detail::NNMergeResult&lt; Packed &gt;</div><p>One resolved merge: the two consumed particles' ids and the newly created merged particle (not yet placed into any patch &ndash; see placeMergedParticles()). </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>. </td></tr>
   </table>
   </dd>
 </dl>

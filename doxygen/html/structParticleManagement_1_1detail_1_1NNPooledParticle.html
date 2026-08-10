@@ -94,10 +94,10 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a5c791ee61fc49ce3cb6eafe012ca9768" id="r_a5c791ee61fc49ce3cb6eafe012ca9768"><td class="memItemLeft" align="right" valign="top"><a id="a5c791ee61fc49ce3cb6eafe012ca9768" name="a5c791ee61fc49ce3cb6eafe012ca9768"></a>
-<a class="el" href="structParticleManagement_1_1NNMergeParticle.html">NNMergeParticle</a>&lt; Packed &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>particle</b></td></tr>
-<tr class="memdesc:a5c791ee61fc49ce3cb6eafe012ca9768"><td class="mdescLeft">&#160;</td><td class="mdescRight">The pooled particle (position/weight/ids/level/payload). <br /></td></tr>
-<tr class="separator:a5c791ee61fc49ce3cb6eafe012ca9768"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95738f647d7d536371bce6e8694ec881" id="r_a95738f647d7d536371bce6e8694ec881"><td class="memItemLeft" align="right" valign="top"><a id="a95738f647d7d536371bce6e8694ec881" name="a95738f647d7d536371bce6e8694ec881"></a>
+<a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>particle</b></td></tr>
+<tr class="memdesc:a95738f647d7d536371bce6e8694ec881"><td class="mdescLeft">&#160;</td><td class="mdescRight">The pooled particle (position/weight/ids/level/payload). <br /></td></tr>
+<tr class="separator:a95738f647d7d536371bce6e8694ec881"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af64107c51c6c0f88217b817e96cc0891" id="r_af64107c51c6c0f88217b817e96cc0891"><td class="memItemLeft" align="right" valign="top"><a id="af64107c51c6c0f88217b817e96cc0891" name="af64107c51c6c0f88217b817e96cc0891"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>exposed</b> = false</td></tr>
 <tr class="memdesc:af64107c51c6c0f88217b817e96cc0891"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether this local valid particle's cell touches a patch boundary (has ghost targets). Always false for ghosts. <br /></td></tr>
@@ -108,7 +108,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>exposed</b> = false</
 struct ParticleManagement::detail::NNPooledParticle&lt; Packed &gt;</div><p>Pooled per-round record for one particle: the particle plus its cached boundary-exposure flag. </p>
 <p>particlesByID maps every local valid particle and every ghost to one of these. Folding the exposure flag in (it used to live in a separate id-&gt;bool map filled in the same gather loop) lets the gather do one hash insert per particle instead of two, and resolveTrivialTier() one lookup per query/candidate instead of two. exposed is meaningful only for local valid particles; ghosts always carry false (a ghost never initiates a query, and candidate-side exposure is gated on locality). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Packed</td><td>Caller-defined payload type (see <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>). </td></tr>
+    <tr><td class="paramname">Packed</td><td>Caller-defined payload type (see <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>). </td></tr>
   </table>
   </dd>
 </dl>

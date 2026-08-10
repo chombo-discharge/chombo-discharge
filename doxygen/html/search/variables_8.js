@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['id_0',['id',['../structParticleManagement_1_1detail_1_1KDMember.html#aada26eb8484d772df53b9b5eba4db477',1,'ParticleManagement::detail::KDMember']]],
-  ['isghost_1',['isGhost',['../structParticleManagement_1_1KDParticle.html#a890761b3a8b3dc7040e07f5b6435667e',1,'ParticleManagement::KDParticle']]]
+  ['isghost_0',['isGhost',['../structParticleManagement_1_1MergeParticle.html#a150f29f483a018aea7d3e05e7c94cec4',1,'ParticleManagement::MergeParticle']]]
 ];

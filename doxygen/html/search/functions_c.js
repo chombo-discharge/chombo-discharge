@@ -11,7 +11,7 @@ var searchData=
   ['newlayout_8',['newlayout',['../classCdrFactory.html#ab47671a46d67eb95ff3315a8e3abdc4d',1,'CdrFactory::newLayout()'],['../classRtFactory.html#a2b890776e4de471e35738400bc1af529',1,'RtFactory::newLayout()'],['../classItoFactory.html#a2e7bc11e6eb0e50f1fa6ab868ce62587',1,'ItoFactory::newLayout()']]],
   ['newsolver_9',['newSolver',['../classFieldSolverFactory.html#a44d84ea17a7f26c61e0492f299027916',1,'FieldSolverFactory']]],
   ['nncellbudget_10',['NNCellBudget',['../classParticleManagement_1_1NNCellBudget.html#a48c3d6c652865ff4d881bdb16045ca23',1,'ParticleManagement::NNCellBudget']]],
-  ['nnmergeanycellcrowded_11',['nnMergeAnyCellCrowded',['../namespaceParticleManagement_1_1detail.html#a808630b7e1c04f86271ec9bc7a05f5c0',1,'ParticleManagement::detail']]],
+  ['nnmergeanycellcrowded_11',['nnMergeAnyCellCrowded',['../namespaceParticleManagement_1_1detail.html#a6751820c6ffdb7076c350d67b04b4d39',1,'ParticleManagement::detail']]],
   ['nnmergechebyshevcelldistance_12',['nnMergeChebyshevCellDistance',['../namespaceParticleManagement_1_1detail.html#a1706a4fbee07113983168f8f2ac7bc1f',1,'ParticleManagement::detail']]],
   ['nnmergecrossleveltoofar_13',['nnMergeCrossLevelTooFar',['../namespaceParticleManagement_1_1detail.html#a5d12e7b8d1c9516266a727a6937daafc',1,'ParticleManagement::detail']]],
   ['nnmergedistsquared_14',['nnMergeDistSquared',['../namespaceParticleManagement_1_1detail.html#a6b4527b08debf6dd54d431a7a05b34c8',1,'ParticleManagement::detail']]],

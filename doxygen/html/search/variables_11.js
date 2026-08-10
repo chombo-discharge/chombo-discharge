@@ -18,5 +18,5 @@ var searchData=
   ['scratch_5fz_15',['scratch_z',['../structItoParticle.html#ada630493e16ac46fd67f4d3303e456e1',1,'ItoParticle']]],
   ['secondid_16',['secondID',['../structParticleManagement_1_1detail_1_1NNMergeResult.html#a38fcc65395bc31e4409a2938c72f4c52',1,'ParticleManagement::detail::NNMergeResult']]],
   ['solvers_17',['solvers',['../structEllipticSolverChain_1_1Settings.html#a2a73ad95fe0c257f99fbfddc91259e98',1,'EllipticSolverChain::Settings']]],
-  ['source_18',['source',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html#a1479a61adcdf69b87cba02a2042b7ed0',1,'ParticleManagement::detail::NNMergeProposal']]]
+  ['source_18',['source',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html#aaf9f2eb60459a95945a0935f70b53b70',1,'ParticleManagement::detail::NNMergeProposal']]]
 ];

@@ -323,36 +323,36 @@ This implies that the total mass on the coarse-grid cell is identical to the tot
 </ul>
 <p>These functions are available for cell-centered data, cut-cell data, and face-centered data.
 Multiple signatures for this functionality exist, see the code-block below.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Average multifluid data over a specified realm</span>
-<span class="cm">   * @param[in,out] a_data    Data to be coarsened.</span>
-<span class="cm">   * @param[in]    a_realm   Realm name</span>
-<span class="cm">   * @param[in]    a_average Averaging method</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">average</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Average multifluid data over a specified realm</span>
+<span class="cm"> * @param[in,out] a_data    Data to be coarsened.</span>
+<span class="cm"> * @param[in]    a_realm   Realm name</span>
+<span class="cm"> * @param[in]    a_average Averaging method</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">average</span><span class="p">(</span><span class="n">MFAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Average multifluid data over a specified realm</span>
-<span class="cm">   * @param[in,out] a_data    Data to be coarsened.</span>
-<span class="cm">   * @param[in]    a_realm   Realm name</span>
-<span class="cm">   * @param[in]    a_average Averaging method</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">average</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief Average multifluid data over a specified realm</span>
+<span class="cm"> * @param[in,out] a_data    Data to be coarsened.</span>
+<span class="cm"> * @param[in]    a_realm   Realm name</span>
+<span class="cm"> * @param[in]    a_average Averaging method</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">average</span><span class="p">(</span><span class="n">MFAMRFluxData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Average down on specific realm and phase.</span>
-<span class="cm">   * @param[in,out] a_data  Data to be coarsened.</span>
-<span class="cm">   * @param[in]    a_realm Realm name</span>
-<span class="cm">   * @param[in]    a_phase Phase (gas or solid)</span>
-<span class="cm">   * @param[in]    a_average Averaging method</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">average</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_data</span><span class="p">,</span>
-<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_realm</span><span class="p">,</span>
-<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">,</span>
-<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief Average down on specific realm and phase.</span>
+<span class="cm"> * @param[in,out] a_data  Data to be coarsened.</span>
+<span class="cm"> * @param[in]    a_realm Realm name</span>
+<span class="cm"> * @param[in]    a_phase Phase (gas or solid)</span>
+<span class="cm"> * @param[in]    a_average Averaging method</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">average</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_data</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">       </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Average</span><span class="o">&amp;</span><span class="w">           </span><span class="n">a_average</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> for further details.</p>
@@ -367,31 +367,31 @@ This process adheres to the following rules:</p>
 Currently, this slope is calculated with a minmod limiter, although support for superbee, piecewise constant, and van Leer limiters are also implemented.</p></li>
 </ol>
 <p>The signatures for updating the ghost cells are:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method.</span>
-<span class="cm">   * @param[in,out] a_data  Data to be interpolated.</span>
-<span class="cm">   * @param[in]    a_realm Realm name</span>
-<span class="cm">   * @param[in]    a_phase Phase (gas or solid)</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">interpGhost</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method.</span>
+<span class="cm"> * @param[in,out] a_data  Data to be interpolated.</span>
+<span class="cm"> * @param[in]    a_realm Realm name</span>
+<span class="cm"> * @param[in]    a_phase Phase (gas or solid)</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">interpGhost</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_data</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>As one alternative, one can update ghost cells on a single grid level:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level.</span>
-<span class="cm">   * @param[in,out] a_fineData  Fine grid data</span>
-<span class="cm">   * @param[in,out] a_coarData  Coarse grid data</span>
-<span class="cm">   * @param[in]    a_fineLevel The grid level corresponding to a_fineData</span>
-<span class="cm">   * @param[in]    a_realm     Realm name</span>
-<span class="cm">   * @param[in]    a_phase     Phase (gas or solid)</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">interpGhost</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w">       </span><span class="n">a_fineData</span><span class="p">,</span>
-<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coarData</span><span class="p">,</span>
-<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                   </span><span class="n">a_fineLevel</span><span class="p">,</span>
-<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
-<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w">    </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level.</span>
+<span class="cm"> * @param[in,out] a_fineData  Fine grid data</span>
+<span class="cm"> * @param[in,out] a_coarData  Coarse grid data</span>
+<span class="cm"> * @param[in]    a_fineLevel The grid level corresponding to a_fineData</span>
+<span class="cm"> * @param[in]    a_realm     Realm name</span>
+<span class="cm"> * @param[in]    a_phase     Phase (gas or solid)</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">interpGhost</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w">       </span><span class="n">a_fineData</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coarData</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                   </span><span class="n">a_fineLevel</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w">    </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Strictly speaking it is also possible to update ghost cells using the multigrid interpolator, but this will only fill a single layer of ghost cells around the halo zone (except near the cut-cells where additional cells are filled).</p>
@@ -405,26 +405,26 @@ If one needs data on a grid level where no data already exists, it is possible t
 <p>This type of interpolation is distinctly different from the ghost cell interpolation, as it affects data across the whole grid patch.</p>
 </div>
 <p>The interpolation function that fills fine-grid data from a coarse grid has the following signature:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief Interpolate data to new grids</span>
-<span class="cm">   * @details This is called when requiring data to be interpolated to new grids. Takes old data as argument</span>
-<span class="cm">   * and fills the new grid data with an interpolation of the old grid data.</span>
-<span class="cm">   * @param[out] a_newData        New grid data.</span>
-<span class="cm">   * @param[in]  a_oldData        Old grid data.</span>
-<span class="cm">   * @param[in]  a_phase          Phase on which we regrid.</span>
-<span class="cm">   * @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed).</span>
-<span class="cm">   * @param[in]  a_oldFinestLevel Previous finest level.</span>
-<span class="cm">   * @param[in]  a_newFinestLevel New finest level.</span>
-<span class="cm">   * @param[in]  a_type Interpolation type</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">void</span>
-<span class="w">  </span><span class="nf">interpToNewGrids</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_newData</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">             </span><span class="n">a_oldData</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w">         </span><span class="n">a_phase</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_oldFinestLevel</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_newFinestLevel</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">EBCoarseToFineInterp</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">a_type</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Interpolate data to new grids</span>
+<span class="cm"> * @details This is called when requiring data to be interpolated to new grids. Takes old data as argument</span>
+<span class="cm"> * and fills the new grid data with an interpolation of the old grid data.</span>
+<span class="cm"> * @param[out] a_newData        New grid data.</span>
+<span class="cm"> * @param[in]  a_oldData        Old grid data.</span>
+<span class="cm"> * @param[in]  a_phase          Phase on which we regrid.</span>
+<span class="cm"> * @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed).</span>
+<span class="cm"> * @param[in]  a_oldFinestLevel Previous finest level.</span>
+<span class="cm"> * @param[in]  a_newFinestLevel New finest level.</span>
+<span class="cm"> * @param[in]  a_type Interpolation type</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">interpToNewGrids</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_newData</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">             </span><span class="n">a_oldData</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w">         </span><span class="n">a_phase</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_oldFinestLevel</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_newFinestLevel</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">EBCoarseToFineInterp</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">a_type</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, the user must supply both the old data and the new data, as well as on which grid levels the interpolation will take place.

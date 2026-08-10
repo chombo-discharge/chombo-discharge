@@ -1,14 +1,12 @@
 var searchData=
 [
   ['p_0',['p',['../classPerlinSdf.html#a2461e1cbdb3f9e2765448043396b096f',1,'PerlinSdf']]],
-  ['particle_1',['particle',['../structParticleManagement_1_1detail_1_1NNPooledParticle.html#a5c791ee61fc49ce3cb6eafe012ca9768',1,'ParticleManagement::detail::NNPooledParticle']]],
-  ['payload_2',['payload',['../structParticleManagement_1_1KDParticle.html#aa698a4a300c1b56cbc8a7f1605675838',1,'ParticleManagement::KDParticle::payload'],['../structParticleManagement_1_1NNMergeParticle.html#a6f390ee4f5992f3abd5ffe26c09647a4',1,'ParticleManagement::NNMergeParticle::payload']]],
+  ['particle_1',['particle',['../structParticleManagement_1_1detail_1_1NNPooledParticle.html#a95738f647d7d536371bce6e8694ec881',1,'ParticleManagement::detail::NNPooledParticle']]],
+  ['payload_2',['payload',['../structParticleManagement_1_1MergeParticle.html#ab99cc6714027a0b5641b1ff0c9344b31',1,'ParticleManagement::MergeParticle']]],
   ['phia_3',['phiA',['../structItoKMCFieldParticle.html#a3e95befbc2f593270cabef6de00dc2ca',1,'ItoKMCFieldParticle']]],
   ['phib_4',['phiB',['../structItoKMCFieldParticle.html#a474f47d5854db30be42e5cda0e5c4a51',1,'ItoKMCFieldParticle']]],
   ['pi_5',['pi',['../namespaceUnits.html#a0ca097755c8ffeed400cf514d3ab8add',1,'Units']]],
-  ['position_6',['position',['../structParticleManagement_1_1KDParticle.html#ab138d18d82781c39ffe187d9b06d3759',1,'ParticleManagement::KDParticle::position'],['../structParticleManagement_1_1NNMergeParticle.html#a0dbde6c0b1a41a4ecc7866b976a8cbb7',1,'ParticleManagement::NNMergeParticle::position']]],
-  ['primal_7',['primal',['../classRealm.html#ae7b66527325a72d0b3aa2db67d34078e',1,'Realm::Primal'],['../classRealm.html#a1c30e25a30f74a8e27405dbd2261f4dd',1,'Realm::primal']]],
-  ['proposerboxidx_8',['proposerBoxIdx',['../structParticleManagement_1_1detail_1_1KDClaim.html#a0178c7d2915d005dec5a7e6629e8e789',1,'ParticleManagement::detail::KDClaim']]],
-  ['proposerid_9',['proposerID',['../structParticleManagement_1_1detail_1_1NNMergeVerdict.html#af18de36d4efc2c9947081c7352a052ba',1,'ParticleManagement::detail::NNMergeVerdict']]],
-  ['proposerrank_10',['proposerRank',['../structParticleManagement_1_1detail_1_1KDClaim.html#a20c54e37bf62f803601f28442e5fd56a',1,'ParticleManagement::detail::KDClaim']]]
+  ['position_6',['position',['../structParticleManagement_1_1MergeParticle.html#a4c21dcdf72c54c9bf5c369f0e44333be',1,'ParticleManagement::MergeParticle']]],
+  ['primal_7',['primal',['../classRealm.html#a1c30e25a30f74a8e27405dbd2261f4dd',1,'Realm::primal'],['../classRealm.html#ae7b66527325a72d0b3aa2db67d34078e',1,'Realm::Primal']]],
+  ['proposerid_8',['proposerID',['../structParticleManagement_1_1detail_1_1NNMergeVerdict.html#af18de36d4efc2c9947081c7352a052ba',1,'ParticleManagement::detail::NNMergeVerdict']]]
 ];

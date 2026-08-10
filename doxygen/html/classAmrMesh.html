@@ -261,6 +261,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>buildDomains</b> ()</
 <tr class="memitem:a3a74dfdd07adb1fde180fc46fd0d42be" id="r_a3a74dfdd07adb1fde180fc46fd0d42be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3a74dfdd07adb1fde180fc46fd0d42be">allocate</a> (EBAMRBool &amp;a_data, const std::string &amp;a_realm, const int a_nComp, const int a_ghost=-1) const</td></tr>
 <tr class="memdesc:a3a74dfdd07adb1fde180fc46fd0d42be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate Boolean data over a specific realm.  <br /></td></tr>
 <tr class="separator:a3a74dfdd07adb1fde180fc46fd0d42be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a476a89e445b193a3062b57b8f6046cb1" id="r_a476a89e445b193a3062b57b8f6046cb1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a476a89e445b193a3062b57b8f6046cb1">allocate</a> (EBAMRFAB &amp;a_data, const std::string &amp;a_realm, const int a_nComp, const int a_ghost=-1) const</td></tr>
+<tr class="memdesc:a476a89e445b193a3062b57b8f6046cb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate regular (non-EB) cell data over a specific realm.  <br /></td></tr>
+<tr class="separator:a476a89e445b193a3062b57b8f6046cb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a838bdb396888e963795dfe11e8ac4c09" id="r_a838bdb396888e963795dfe11e8ac4c09"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a838bdb396888e963795dfe11e8ac4c09">allocate</a> (MFAMRCellData &amp;a_data, const std::string &amp;a_realm, const int a_nComp, const int a_ghost=-1) const</td></tr>
 <tr class="memdesc:a838bdb396888e963795dfe11e8ac4c09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a data holder over a specific realm.  <br /></td></tr>
 <tr class="separator:a838bdb396888e963795dfe11e8ac4c09"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1450,7 +1453,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a3a74dfdd07adb1fde180fc46fd0d42be" name="a3a74dfdd07adb1fde180fc46fd0d42be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a74dfdd07adb1fde180fc46fd0d42be">&#9670;&#160;</a></span>allocate() <span class="overload">[1/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a74dfdd07adb1fde180fc46fd0d42be">&#9670;&#160;</a></span>allocate() <span class="overload">[1/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1502,7 +1505,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="aa8a19a5d0d082bf0a28dfcc0958227fc" name="aa8a19a5d0d082bf0a28dfcc0958227fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa8a19a5d0d082bf0a28dfcc0958227fc">&#9670;&#160;</a></span>allocate() <span class="overload">[2/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8a19a5d0d082bf0a28dfcc0958227fc">&#9670;&#160;</a></span>allocate() <span class="overload">[2/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1560,8 +1563,60 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="a476a89e445b193a3062b57b8f6046cb1" name="a476a89e445b193a3062b57b8f6046cb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a476a89e445b193a3062b57b8f6046cb1">&#9670;&#160;</a></span>allocate() <span class="overload">[3/11]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::allocate </td>
+          <td>(</td>
+          <td class="paramtype">EBAMRFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_nComp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghost</em> = <code>-1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Allocate regular (non-EB) cell data over a specific realm. </p>
+<p>Phase-free, unlike the EBAMRCellData overload: FArrayBox needs no EBISBox. Use this for plain per-cell scalars that do not need cut-cell representation. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Data holder to be allocated </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> of the name where the data will be allocated. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components in a_data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Number of ghost cells for a_data </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>If a_ghost &lt; 0, this routine will use the default number of ghost cells. </dd></dl>
+
+</div>
+</div>
 <a id="aa7974e702b0ff892baf67c708f1402b6" name="aa7974e702b0ff892baf67c708f1402b6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7974e702b0ff892baf67c708f1402b6">&#9670;&#160;</a></span>allocate() <span class="overload">[3/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7974e702b0ff892baf67c708f1402b6">&#9670;&#160;</a></span>allocate() <span class="overload">[4/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1620,7 +1675,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a9c6f20d848b073049877b439538bf113" name="a9c6f20d848b073049877b439538bf113"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9c6f20d848b073049877b439538bf113">&#9670;&#160;</a></span>allocate() <span class="overload">[4/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c6f20d848b073049877b439538bf113">&#9670;&#160;</a></span>allocate() <span class="overload">[5/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1679,7 +1734,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a006e7541830ab1cba7f89b27ef745b85" name="a006e7541830ab1cba7f89b27ef745b85"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a006e7541830ab1cba7f89b27ef745b85">&#9670;&#160;</a></span>allocate() <span class="overload">[5/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a006e7541830ab1cba7f89b27ef745b85">&#9670;&#160;</a></span>allocate() <span class="overload">[6/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1738,7 +1793,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a1a75298582cb09fbfc26b0291a01af0f" name="a1a75298582cb09fbfc26b0291a01af0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a75298582cb09fbfc26b0291a01af0f">&#9670;&#160;</a></span>allocate() <span class="overload">[6/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a75298582cb09fbfc26b0291a01af0f">&#9670;&#160;</a></span>allocate() <span class="overload">[7/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1804,7 +1859,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a838bdb396888e963795dfe11e8ac4c09" name="a838bdb396888e963795dfe11e8ac4c09"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a838bdb396888e963795dfe11e8ac4c09">&#9670;&#160;</a></span>allocate() <span class="overload">[7/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a838bdb396888e963795dfe11e8ac4c09">&#9670;&#160;</a></span>allocate() <span class="overload">[8/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1856,7 +1911,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a30606fccd082f1ba83686837519299a7" name="a30606fccd082f1ba83686837519299a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a30606fccd082f1ba83686837519299a7">&#9670;&#160;</a></span>allocate() <span class="overload">[8/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a30606fccd082f1ba83686837519299a7">&#9670;&#160;</a></span>allocate() <span class="overload">[9/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1908,7 +1963,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="aeb4539611f17f0c9e7a9a18870d1dc52" name="aeb4539611f17f0c9e7a9a18870d1dc52"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb4539611f17f0c9e7a9a18870d1dc52">&#9670;&#160;</a></span>allocate() <span class="overload">[9/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb4539611f17f0c9e7a9a18870d1dc52">&#9670;&#160;</a></span>allocate() <span class="overload">[10/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1960,7 +2015,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a1db67df63dc5a853e9d284c79065c54f" name="a1db67df63dc5a853e9d284c79065c54f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1db67df63dc5a853e9d284c79065c54f">&#9670;&#160;</a></span>allocate() <span class="overload">[10/10]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1db67df63dc5a853e9d284c79065c54f">&#9670;&#160;</a></span>allocate() <span class="overload">[11/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

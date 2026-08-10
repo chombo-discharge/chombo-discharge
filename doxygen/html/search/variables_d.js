@@ -3,6 +3,5 @@ var searchData=
   ['old_5fx_0',['old_x',['../structItoParticle.html#a728ee358789c4f296570b89d338fbd67',1,'ItoParticle']]],
   ['old_5fy_1',['old_y',['../structItoParticle.html#a66128e4d3a24fc2687aa1f757f07b68a',1,'ItoParticle']]],
   ['old_5fz_2',['old_z',['../structItoParticle.html#adc00d810218d1316868b25835f25a2e0',1,'ItoParticle']]],
-  ['owner_3',['owner',['../structParticleManagement_1_1detail_1_1KDMember.html#af4aa7824440cdb6062bef7fd25064eca',1,'ParticleManagement::detail::KDMember']]],
-  ['ownerrank_4',['ownerrank',['../structParticleManagement_1_1KDParticle.html#aa10c8ade4bd4942cab4577c85e8da480',1,'ParticleManagement::KDParticle::ownerRank'],['../structParticleManagement_1_1NNMergeParticle.html#aaa67a648dbb88dbdc06241f0b2a3cfd5',1,'ParticleManagement::NNMergeParticle::ownerRank']]]
+  ['ownerrank_3',['ownerRank',['../structParticleManagement_1_1MergeParticle.html#adc9c356744543d7a91c0694238993c25',1,'ParticleManagement::MergeParticle']]]
 ];

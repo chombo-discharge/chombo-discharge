@@ -5,7 +5,7 @@ var searchData=
   ['leaf_2',['Leaf',['../classParticleContainer.html#a87b7cf2ff4c56fb0ee98ebca42fdd839',1,'ParticleContainer']]],
   ['leastsquares_3',['leastsquares',['../classLeastSquares.html#ae06d49a257d3ab70c997b87c80640336',1,'LeastSquares::LeastSquares()'],['../classLeastSquares.html',1,'LeastSquares']]],
   ['lerp_4',['lerp',['../classPerlinSdf.html#a9b18780000df6c817726cadc76b0eabb',1,'PerlinSdf']]],
-  ['level_5',['level',['../structParticleManagement_1_1NNMergeParticle.html#a080a153df7a305cd0d04b334c36f974d',1,'ParticleManagement::NNMergeParticle::level'],['../structLevelTiles_1_1LevelAndBox.html#a886e9e5aa87bd1d906cc0043a752ad50',1,'LevelTiles::LevelAndBox::level']]],
+  ['level_5',['level',['../structParticleManagement_1_1MergeParticle.html#ac84e545539cce744a478f3db91819647',1,'ParticleManagement::MergeParticle::level'],['../structLevelTiles_1_1LevelAndBox.html#a886e9e5aa87bd1d906cc0043a752ad50',1,'LevelTiles::LevelAndBox::level']]],
   ['levelandbox_6',['LevelAndBox',['../structLevelTiles_1_1LevelAndBox.html',1,'LevelTiles']]],
   ['levelparticles_7',['LevelParticles',['../classParticleContainer.html#ac062ccbae3ee7ce005703a85ec15e1a5',1,'ParticleContainer']]],
   ['leveltiles_8',['leveltiles',['../classLevelTiles.html',1,'LevelTiles'],['../classLevelTiles.html#a39577ecde2d6103ce34ed26fd6841081',1,'LevelTiles::LevelTiles() noexcept'],['../classLevelTiles.html#aee832c2347533659386dbb4e4d514702',1,'LevelTiles::LevelTiles(const DisjointBoxLayout &amp;a_dbl, const int a_minBlockSize) noexcept']]],

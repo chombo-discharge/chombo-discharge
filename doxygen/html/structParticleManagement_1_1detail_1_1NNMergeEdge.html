@@ -119,7 +119,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>candidateIsLocal</b><
 struct ParticleManagement::detail::NNMergeEdge&lt; Packed &gt;</div><p>One candidate merge edge: a single particle's own nearest-neighbor query result. </p>
 <p>Produced once per over-threshold, unconsumed valid particle by findNearestNeighborCandidates() &ndash; exactly one edge per query particle, its single nearest neighbor among {this patch's own other valid particles} union {every ghost}. Distance is carried explicitly (never recomputed downstream) so trivial-tier resolution and the judge apply the same "closest-first, with a deterministic id tiebreak on exact ties" ordering. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1NNMergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to the nearest-neighbor merge.">NNMergeParticle</a>. </td></tr>
+    <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>. </td></tr>
   </table>
   </dd>
 </dl>

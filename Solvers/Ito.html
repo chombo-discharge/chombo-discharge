@@ -361,18 +361,18 @@ The solver can then automatically fill the boundary particles containers, see <a
 <section id="remapping-particles">
 <h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> has two functions for remapping particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">makeSuperparticlesKDSkinNn</span><span class="p">(</span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Remap the bulk particle container.</span>
+<span class="cm"> */</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">remap</span><span class="p">();</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * @brief Shared body of makeSuperparticlesKDCarve/makeSuperparticlesKDPatch.</span>
-<span class="cm"> * @details The two differ only in whether a ghost halo is filled and which merge entry point is</span>
-<span class="cm"> * called; everything else -- extracting the merge container, the gather/combine/scatter and</span>
-<span class="cm"> * position-validity callbacks, id allocation, and the final split-and-rebuild -- is identical, so</span>
-<span class="cm"> * it lives here rather than being duplicated. Not part of the public selection surface: callers</span>
-<span class="cm"> * choose an algorithm by calling one of the two methods above, never by passing a flag.</span>
-<span class="cm"> * @param[in] a_container           Which container to repartition.</span>
-<span class="cm"> * @param[in] a_particlesPerCell    Target particle count (only the first entry is used).</span>
+<span class="cm"> * @brief Remap all particles in the input container</span>
+<span class="cm"> * @param[in] a_container Particle container</span>
+<span class="cm"> */</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">remap</span><span class="p">(</span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The bottom function lets the user remap any <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;ItoParticle&gt;</span></code> that lives in the solver.
@@ -564,11 +564,11 @@ The flag <code class="docutils literal notranslate"><span class="pre">a_deletePa
 <p>The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.
 This routine is implemented as</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm"> * @brief Compute the largest possible time step such that the particles does not move more than a specified number of</span>
-<span class="cm"> * grid cells on the input grid level.</span>
-<span class="cm"> * @details This computes the time step differently whether or not diffusion and advection are active. The Ito</span>
-<span class="cm"> * particle model does not a fundamental time step limitation, so this function does its best at computing a time step</span>
-<span class="cm"> * such that the particles do not move more than the specified amount of grid cells. If only advection is active the</span>
+<span class="cm"> * @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle.</span>
+<span class="cm"> * @return Computed advective dt</span>
+<span class="cm"> */</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">computeAdvectiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which returns a CFL-like condition</p>
@@ -578,12 +578,12 @@ This routine is implemented as</p>
 <section id="diffusive-time-step">
 <h3>Diffusive time step<a class="headerlink" href="#diffusive-time-step" title="Permalink to this heading"></a></h3>
 <p>The signatures for the diffusion time step are similar to the ones for drift:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="nf">computeAdvectiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level.</span>
-<span class="cm"> * @param[in] a_lvl Grid level</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles</span>
+<span class="cm"> * @return Computed diffusive dt</span>
+<span class="cm"> */</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which returns a CFL-like condition</p>
@@ -594,17 +594,17 @@ This routine is implemented as</p>
 <section id="advective-diffusive-time-step">
 <h3>Advective-diffusive time step<a class="headerlink" href="#advective-diffusive-time-step" title="Permalink to this heading"></a></h3>
 <p>A combination of the advection and diffusion time step routines also exists as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">remapAll</span><span class="p">();</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief Draw a random N-dimensional Gaussian number from a normal distribution with zero with and unit standard</span>
-<span class="cm"> * deviation.</span>
-<span class="cm"> * @note The distribution is truncated at m_normalDistributionTruncation -- values above that threshold will be</span>
-<span class="cm"> * replaced by m_normalDistributionTruncation.</span>
-<span class="cm"> * @return Return value</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Compute a time step for the advance -- this calls the level function.</span>
+<span class="cm"> * @details This computes the time step differently whether or not diffusion and advection are active. The Ito</span>
+<span class="cm"> * particle model does not have a fundamental time step limitation, so these limits &quot;replicate&quot; the time step</span>
+<span class="cm"> * selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/sum(|V_i|)</span>
+<span class="cm"> * = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both</span>
+<span class="cm"> * advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD).</span>
+<span class="cm"> * @return Computed dt</span>
 <span class="cm"> */</span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
-<span class="nf">randomGaussian</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as</p>
@@ -662,15 +662,9 @@ In addition, the user must first supply a particle merging function:</p>
 </pre></div>
 </div>
 <p>In the code above, <code class="docutils literal notranslate"><span class="pre">ParticleManagement::ParticleMerger&lt;P&gt;</span></code> is an alias:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="o">*/</span>
-<span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMergeMethod</span>
-<span class="n">mergeMethodFromString</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_str</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief Concept for splitting/merging particles</span>
-<span class="cm"> * @param[in,out] a_particles Particles to be merged/split</span>
-<span class="cm"> * @param[in] a_cellInfo Cell info</span>
-<span class="cm"> * @param[in] a_numTargetParticles Number of target particles</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">void</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CellInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_cellInfo</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numTargetParticles</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 </pre></div>
 </div>
 <div class="admonition tip">
@@ -724,27 +718,27 @@ All options are run-time configurable.</span><a class="headerlink" href="#itoinp
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># ItoSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>                   <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                 <span class="c1">## Class verbosity</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>             <span class="o">=</span> <span class="n">equal_weight_kd</span>    <span class="c1">## Particle merging algorithm. One of &#39;reinitialize&#39;, &#39;equal_weight_kd&#39;, &#39;reinitialize_bvh&#39;, &#39;nn_sfc&#39;, &#39;nn_pair_tree&#39;, &#39;nn_pair_onecell&#39;, &#39;nn_pair_hash&#39;, &#39;kd_carve&#39;, &#39;kd_patch&#39;, &#39;kd_skin_nn&#39;, &#39;none&#39;, or &#39;external&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_iterate</span>             <span class="o">=</span> <span class="n">true</span>               <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local tier to convergence within each round</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_fallback</span>            <span class="o">=</span> <span class="mi">1</span>                  <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: fallback candidates per query</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_cell_dist</span>       <span class="o">=</span> <span class="mi">1</span>                  <span class="c1">## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_rounds</span>          <span class="o">=</span> <span class="mi">3</span>                  <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: max drain rounds per merge (stops early on convergence)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">kd_split_weight_leaf_dx</span>     <span class="o">=</span> <span class="mf">1.0</span>                <span class="c1">## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>                    <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>        <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>            <span class="o">=</span> <span class="n">bisection</span>          <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>                 <span class="o">=</span> <span class="mf">1.E-4</span>              <span class="c1">## Bisection step length for intersection tests</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>                  <span class="o">=</span> <span class="mf">5.0</span>                <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>                <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off redistribution.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>          <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>               <span class="o">=</span> <span class="n">particles</span>          <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>                 <span class="o">=</span> <span class="mi">32</span>                 <span class="c1">## Maximum number of computational particles to generate for restarts.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>          <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular deposition in cut cells or not</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>              <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular interpolation in cut cells or not</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>             <span class="o">=</span> <span class="n">direct</span>             <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>             <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Cloud-in-cell for plotting particles.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>                  <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Deposition type.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>               <span class="o">=</span> <span class="n">transition</span>         <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>                   <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c1">## Class verbosity</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>             <span class="o">=</span> <span class="n">kd_carve</span>       <span class="c1">## Particle merging algorithm. One of &#39;reinitialize&#39;, &#39;equal_weight_kd&#39;, &#39;reinitialize_bvh&#39;, &#39;nn_sfc&#39;, &#39;nn_pair_tree&#39;, &#39;nn_pair_onecell&#39;, &#39;nn_pair_hash&#39;, &#39;kd_carve&#39;, &#39;kd_patch&#39;, &#39;kd_skin_nn&#39;, &#39;none&#39;, or &#39;external&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_iterate</span>             <span class="o">=</span> <span class="n">true</span>           <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local tier to convergence within each round</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_fallback</span>            <span class="o">=</span> <span class="mi">1</span>              <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: fallback candidates per query</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_cell_dist</span>       <span class="o">=</span> <span class="mi">1</span>              <span class="c1">## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_rounds</span>          <span class="o">=</span> <span class="mi">3</span>              <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: max drain rounds per merge (stops early on convergence)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">kd_split_weight_leaf_dx</span>     <span class="o">=</span> <span class="mf">1.0</span>            <span class="c1">## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>                    <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>    <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>            <span class="o">=</span> <span class="n">bisection</span>      <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>                 <span class="o">=</span> <span class="mf">1.E-4</span>          <span class="c1">## Bisection step length for intersection tests</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>                  <span class="o">=</span> <span class="mf">5.0</span>            <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>                <span class="o">=</span> <span class="n">false</span>          <span class="c1">## Turn on/off redistribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>          <span class="o">=</span> <span class="n">false</span>          <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>               <span class="o">=</span> <span class="n">particles</span>      <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>                 <span class="o">=</span> <span class="mi">32</span>             <span class="c1">## Maximum number of computational particles to generate for restarts.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>          <span class="o">=</span> <span class="n">true</span>           <span class="c1">## Force irregular deposition in cut cells or not</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>              <span class="o">=</span> <span class="n">true</span>           <span class="c1">## Force irregular interpolation in cut cells or not</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>             <span class="o">=</span> <span class="n">direct</span>         <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>             <span class="o">=</span> <span class="n">cic</span>            <span class="c1">## Cloud-in-cell for plotting particles.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>                  <span class="o">=</span> <span class="n">cic</span>            <span class="c1">## Deposition type.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>               <span class="o">=</span> <span class="n">transition</span>     <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
 </pre></div>
 </div>
 </div>
