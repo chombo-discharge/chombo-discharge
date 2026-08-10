@@ -590,8 +590,7 @@ public:
   /**
    * @brief Allocate regular (non-EB) cell data over a specific realm
    * @details Phase-free, unlike the EBAMRCellData overload: FArrayBox needs no EBISBox. Use this for
-   * plain per-cell scalars that do not need cut-cell representation, e.g. per-cell scratch in the
-   * particle mergers.
+   * plain per-cell scalars that do not need cut-cell representation.
    * @param[out] a_data   Data holder to be allocated
    * @param[in]  a_realm  Realm of the name where the data will be allocated.
    * @param[in]  a_nComp  Number of components in a_data

@@ -423,9 +423,7 @@ drawSphereParticles(ParticleSoA<P, Traits>& a_particles,
  * unique id, the owning rank, plus an opaque caller-defined payload the merge never inspects and only
  * hands to the combine callback.
  *
- * Appended at the end of this header deliberately: the .rst literalincludes cite absolute line ranges
- * earlier in the file, and adding above them would silently shift the rendered excerpts.
- * @tparam Packed Caller-defined payload type (e.g. a single Real energy for ItoParticle).
+ * @tparam Packed Caller-defined payload type (e.g., a single Real energy for ItoParticle).
  */
 template <typename Packed>
 struct MergeParticle
