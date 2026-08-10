@@ -3910,8 +3910,7 @@ ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, cons
     return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
   };
 
-  auto scatter = [](ParticleSoA<ItoMergeParticle>&                   a_leaf,
-                    const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+  auto scatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::MergeParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
     p.energy = a_p.payload;
 
@@ -4115,8 +4114,7 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
     return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
   };
 
-  auto scatter = [](ParticleSoA<ItoMergeParticle>&                   a_leaf,
-                    const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+  auto scatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::MergeParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
     p.energy = a_p.payload;
 
@@ -4293,7 +4291,8 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
     return (a_firstWeight * a_firstEnergy + a_secondWeight * a_secondEnergy) / (a_firstWeight + a_secondWeight);
   };
 
-  auto kdScatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::KDParticle<Real>& a_p) -> void {
+  auto kdScatter = [](ParticleSoA<ItoMergeParticle>&                 a_leaf,
+                      const ParticleManagement::MergeParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
     p.energy = a_p.payload;
 
@@ -4302,8 +4301,8 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
     a_leaf.rankID(a_leaf.size() - 1)     = a_p.ownerRank;
   };
 
-  auto nnScatter = [](ParticleSoA<ItoMergeParticle>&                   a_leaf,
-                      const ParticleManagement::NNMergeParticle<Real>& a_p) -> void {
+  auto nnScatter = [](ParticleSoA<ItoMergeParticle>&                 a_leaf,
+                      const ParticleManagement::MergeParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
     p.energy = a_p.payload;
 
@@ -4550,7 +4549,7 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
     return weightedSum / totalWeight;
   };
 
-  auto scatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::KDParticle<Real>& a_p) -> void {
+  auto scatter = [](ParticleSoA<ItoMergeParticle>& a_leaf, const ParticleManagement::MergeParticle<Real>& a_p) -> void {
     ItoMergeParticle p;
     p.energy = a_p.payload;
 

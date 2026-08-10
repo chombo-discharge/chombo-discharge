@@ -416,6 +416,60 @@ drawSphereParticles(ParticleSoA<P, Traits>& a_particles,
                     const RealVect&         a_center,
                     const Real              a_radius) noexcept;
 
+/**
+ * @brief Minimal, payload-agnostic description of one particle as input to a distributed merge.
+ * @details Shared by the kd-tree and nearest-neighbor mergers, which previously kept one of these
+ * each, differing by a single field. Carries what any of them needs: position and weight, a globally
+ * unique id, the owning rank, plus an opaque caller-defined payload the merge never inspects and only
+ * hands to the combine callback.
+ *
+ * @tparam Packed Caller-defined payload type (e.g., a single Real energy for ItoParticle).
+ */
+template <typename Packed>
+struct MergeParticle
+{
+  /**
+   * @brief Particle position.
+   */
+  RealVect position;
+
+  /**
+   * @brief Particle weight. Not required to be an integer.
+   */
+  Real weight;
+
+  /**
+   * @brief Globally unique particle id, unique within one merge round across every rank.
+   */
+  ParticleID globalID;
+
+  /**
+   * @brief The rank owning this particle. Always read from the particle's own data, never inferred
+   * from MPI transport metadata.
+   */
+  RankID ownerRank;
+
+  /**
+   * @brief True iff this is a ghost copy in the patch currently holding it, i.e. not physically
+   * stored there. NOT the same question as ownerRank: a particle owned by this rank via one patch is
+   * still a ghost in a neighbouring patch this same rank owns. Used by the kd mergers; left false by
+   * the nearest-neighbor mergers, which track the distinction separately.
+   */
+  bool isGhost = false;
+
+  /**
+   * @brief The AMR level this particle lives on. Used by the nearest-neighbor mergers, whose cell
+   * keys are level-qualified; left at 0 by the kd mergers, which work in one patch's frame at a time.
+   */
+  int level = 0;
+
+  /**
+   * @brief Opaque, caller-defined payload. Never inspected by the merge logic -- only carried through
+   * to the combine callback.
+   */
+  Packed payload;
+};
+
 } // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>

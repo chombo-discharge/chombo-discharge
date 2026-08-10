@@ -17,17 +17,19 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <map>
 #include <utility>
 #include <vector>
 
 // Chombo includes
+#include <BaseFab.H>
+#include <Box.H>
 #include <CH_Timer.H>
 #include <MayDay.H>
 #include <SPMD.H>
 #include <DataIterator.H>
 
 // Our includes
+#include <CD_LevelTiles.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_KDParticleMerge.H>
 #include <CD_NamespaceHeader.H>
@@ -35,16 +37,6 @@
 namespace ParticleManagement {
 
 namespace detail {
-
-inline bool
-operator<(const KDBoxKey& a_lhs, const KDBoxKey& a_rhs) noexcept
-{
-  if (a_lhs.volume != a_rhs.volume) {
-    return a_lhs.volume < a_rhs.volume;
-  }
-
-  return a_lhs.anchor < a_rhs.anchor;
-}
 
 template <typename T>
 inline std::vector<T>
@@ -129,11 +121,11 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
  */
 template <typename Packed>
 inline void
-kdBBox(const std::vector<KDParticle<Packed>>& a_particles,
-       const std::size_t                      a_lo,
-       const std::size_t                      a_hi,
-       RealVect&                              a_boxLo,
-       RealVect&                              a_boxHi) noexcept
+kdBBox(const std::vector<MergeParticle<Packed>>& a_particles,
+       const std::size_t                         a_lo,
+       const std::size_t                         a_hi,
+       RealVect&                                 a_boxLo,
+       RealVect&                                 a_boxHi) noexcept
 {
   CH_assert(a_hi > a_lo);
   CH_assert(a_hi <= a_particles.size());
@@ -228,82 +220,45 @@ kdIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
 }
 
 /**
- * @brief Per-cell particle-count histogram over one patch's gathered particles.
- * @details Built once from every particle's own position, so it is unaffected by how
- * buildKDQuotaLeaves() later partitions the space -- a node-local count is NOT a safe substitute,
- * see that function's own docs for why. Stored sorted by cell index and looked up by binary search,
- * and callable directly, so it satisfies buildKDQuotaLeaves()'s CellTrueCount requirement as-is.
- * Shared by mergeKDCarve() and mergeKDPatch(): both need the same ground truth, and the invariant
- * that it is built from true positions rather than from the partition is easy to break if each
- * keeps its own copy.
+ * @brief Tally a per-cell particle-count histogram over one patch's gathered particles.
+ * @details Built from every particle's own position, so it is unaffected by how buildKDQuotaLeaves()
+ * later partitions the space -- a node-local count is NOT a safe substitute, see that function's own
+ * docs for why. Shared by mergeKDCarve()/mergeKDPatch()/mergeKDInterior(): all three need the same
+ * ground truth, and the invariant that it comes from true positions rather than from the partition is
+ * easy to break if each keeps its own copy.
+ *
+ * @a a_counts must include at least one ghost cell, since a gathered ghost sits up to one cell
+ * outside the patch's own box.
+ *
+ * The count is stored in @a a_counts' @c Real elements but is always a non-negative integer. A double
+ * represents every integer exactly up to 2^53, so consumers -- e.g. the crowding test in
+ * buildKDQuotaLeaves() -- may @c static_cast<int> it losslessly for any realistic per-cell count.
+ * @tparam Packed See MergeParticle.
+ * @param[in] a_particles Gathered particles for this patch.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dx This patch's own cell spacing.
+ * @param[out] a_counts Per-cell counts, zeroed here before tallying.
  */
-class KDCellHistogram
+template <typename Packed>
+inline void
+kdFillCellHistogram(const std::vector<MergeParticle<Packed>>& a_particles,
+                    const RealVect&                           a_probLo,
+                    const RealVect&                           a_dx,
+                    FArrayBox&                                a_counts) noexcept
 {
-public:
-  /**
-   * @brief Build the histogram from one patch's gathered particles.
-   * @param[in] a_particles Gathered particles for this patch.
-   * @param[in] a_probLo Physical position of the domain's low corner.
-   * @param[in] a_dx This patch's own cell spacing.
-   */
-  template <typename Packed>
-  KDCellHistogram(const std::vector<KDParticle<Packed>>& a_particles, const RealVect& a_probLo, const RealVect& a_dx)
-  {
-    m_counts.reserve(a_particles.size());
+  a_counts.setVal(0);
 
-    for (const KDParticle<Packed>& p : a_particles) {
-      m_counts.emplace_back(kdCellKeyOf(p.position, a_probLo, a_dx), 1);
-    }
+  for (const MergeParticle<Packed>& p : a_particles) {
+    const IntVect cell = kdCellKeyOf(p.position, a_probLo, a_dx);
 
-    std::sort(m_counts.begin(), m_counts.end(), [](const auto& a_lhs, const auto& a_rhs) {
-      return kdIntVectLess(a_lhs.first, a_rhs.first);
-    });
+    // Every gathered particle is resident in this patch or a ghost within one cell of it, so its
+    // cell lies inside a_counts' box. The previous map tolerated any key silently; a cell-indexed
+    // holder does not, which is the point -- the invariant is now checked instead of assumed.
+    CH_assert(a_counts.box().contains(cell));
 
-    std::size_t writeIdx = 0;
-
-    for (std::size_t readIdx = 0; readIdx < m_counts.size();) {
-      std::size_t runEnd = readIdx + 1;
-      int         total  = m_counts[readIdx].second;
-
-      while (runEnd < m_counts.size() && m_counts[runEnd].first == m_counts[readIdx].first) {
-        total += m_counts[runEnd].second;
-        runEnd++;
-      }
-
-      m_counts[writeIdx] = std::make_pair(m_counts[readIdx].first, total);
-
-      writeIdx++;
-
-      readIdx = runEnd;
-    }
-
-    m_counts.resize(writeIdx);
+    a_counts(cell, 0)++;
   }
-
-  /**
-   * @brief This cell's total particle count.
-   * @param[in] a_cell Cell index.
-   * @return The cell's particle count, or 0 for a cell holding none.
-   */
-  int
-  operator()(const IntVect& a_cell) const noexcept
-  {
-    const auto it = std::lower_bound(m_counts.begin(),
-                                     m_counts.end(),
-                                     a_cell,
-                                     [](const std::pair<IntVect, int>& a_entry, const IntVect& a_key) {
-                                       return kdIntVectLess(a_entry.first, a_key);
-                                     });
-
-    return (it != m_counts.end() && it->first == a_cell) ? it->second : 0;
-  }
-
-private:
-  /**
-   * @brief Cell index to particle count, sorted by cell index so lookups can binary-search.
-   */
-  std::vector<std::pair<IntVect, int>> m_counts;
-};
+}
 
 /**
  * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the sole
@@ -316,28 +271,26 @@ private:
  * @param[in,out] a_particles Particle buffer; reordered in [a_lo,a_hi).
  * @param[in] a_lo Start of the range (inclusive).
  * @param[in] a_hi End of the range (exclusive); a_hi - a_lo must be >= 2.
+ * @param[in] a_axis Split axis -- the node's longest box axis, precomputed once by the caller (which
+ * already needs the box for the span test) rather than re-derived here from a second bounding box.
  * @return The split index: [a_lo,mid) and [mid,a_hi) are the two children, each non-empty.
  */
 template <typename Packed>
 inline std::size_t
-kdSplitCountMedian(std::vector<KDParticle<Packed>>& a_particles,
-                   const std::size_t                a_lo,
-                   const std::size_t                a_hi) noexcept
+kdSplitCountMedian(std::vector<MergeParticle<Packed>>& a_particles,
+                   const std::size_t                   a_lo,
+                   const std::size_t                   a_hi,
+                   const int                           a_axis) noexcept
 {
   CH_assert(a_hi - a_lo >= 2);
-
-  RealVect boxLo, boxHi;
-  kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
-
-  const int axis = (boxHi - boxLo).maxDir(true);
 
   const std::size_t mid = a_lo + (a_hi - a_lo) / 2;
 
   std::nth_element(a_particles.begin() + a_lo,
                    a_particles.begin() + mid,
                    a_particles.begin() + a_hi,
-                   [axis](const KDParticle<Packed>& a_p1, const KDParticle<Packed>& a_p2) noexcept -> bool {
-                     return a_p1.position[axis] < a_p2.position[axis];
+                   [a_axis](const MergeParticle<Packed>& a_p1, const MergeParticle<Packed>& a_p2) noexcept -> bool {
+                     return a_p1.position[a_axis] < a_p2.position[a_axis];
                    });
 
   return mid;
@@ -363,25 +316,23 @@ kdSplitCountMedian(std::vector<KDParticle<Packed>>& a_particles,
  * @param[in,out] a_particles Particle buffer; reordered in [a_lo,a_hi).
  * @param[in] a_lo Start of the range (inclusive).
  * @param[in] a_hi End of the range (exclusive); a_hi - a_lo must be >= 2.
+ * @param[in] a_axis Split axis -- the node's longest box axis, precomputed once by the caller (which
+ * already needs the box for the span test) rather than re-derived here from a second bounding box.
  * @return The split index: [a_lo,mid) and [mid,a_hi) are the two children, each non-empty.
  */
 template <typename Packed>
 inline std::size_t
-kdSplitWeightMedian(std::vector<KDParticle<Packed>>& a_particles,
-                    const std::size_t                a_lo,
-                    const std::size_t                a_hi) noexcept
+kdSplitWeightMedian(std::vector<MergeParticle<Packed>>& a_particles,
+                    const std::size_t                   a_lo,
+                    const std::size_t                   a_hi,
+                    const int                           a_axis) noexcept
 {
   CH_assert(a_hi - a_lo >= 2);
 
-  RealVect boxLo, boxHi;
-  kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
-
-  const int axis = (boxHi - boxLo).maxDir(true);
-
   std::sort(a_particles.begin() + a_lo,
             a_particles.begin() + a_hi,
-            [axis](const KDParticle<Packed>& a_p1, const KDParticle<Packed>& a_p2) noexcept -> bool {
-              return a_p1.position[axis] < a_p2.position[axis];
+            [a_axis](const MergeParticle<Packed>& a_p1, const MergeParticle<Packed>& a_p2) noexcept -> bool {
+              return a_p1.position[a_axis] < a_p2.position[a_axis];
             });
 
   Real totalWeight = 0.0;
@@ -413,15 +364,16 @@ kdSplitWeightMedian(std::vector<KDParticle<Packed>>& a_particles,
   return clamped;
 }
 
-template <typename Packed, typename CellTrueCount>
+template <typename Packed>
 inline void
-buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
-                   const int                        a_ppc,
-                   const Real                       a_splitWeightLeafDx,
-                   const RealVect&                  a_dx,
-                   const RealVect&                  a_probLo,
-                   const CellTrueCount&             a_cellTrueCount,
-                   std::vector<KDLeaf>&             a_leaves) noexcept
+buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
+                   const int                           a_ppc,
+                   const Real                          a_splitWeightLeafDx,
+                   const RealVect&                     a_dx,
+                   const RealVect&                     a_probLo,
+                   FArrayBox&                          a_used,
+                   const FArrayBox&                    a_cellCounts,
+                   std::vector<KDLeaf>&                a_leaves) noexcept
 {
   CH_TIME("ParticleManagement::buildKDQuotaLeaves");
 
@@ -438,9 +390,14 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
   // target by a neighbour's merge.
   const auto firstUnmergeable = std::stable_partition(a_particles.begin(),
                                                       a_particles.end(),
-                                                      [&](const KDParticle<Packed>& a_p) {
-                                                        return a_cellTrueCount(
-                                                                 kdCellKeyOf(a_p.position, a_probLo, a_dx)) > a_ppc;
+                                                      [&](const MergeParticle<Packed>& a_p) {
+                                                        const IntVect cell = kdCellKeyOf(a_p.position, a_probLo, a_dx);
+
+                                                        // A cell outside the histogram box reads as 0
+                                                        // (empty) and is therefore never crowded.
+                                                        return a_cellCounts.box().contains(cell)
+                                                                 ? static_cast<int>(a_cellCounts(cell, 0)) > a_ppc
+                                                                 : false;
                                                       });
 
   const std::size_t numMergeable = static_cast<std::size_t>(firstUnmergeable - a_particles.begin());
@@ -467,7 +424,10 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
   // Splits are handed out heaviest-first: the quota is claimed first-come-first-served, so a
   // lighter ordering lets light leaves take a cell's slots before a heavy leaf is considered, and
   // the heavy one is then refused and retired whole as a single very heavy super-particle.
-  auto centroidCellOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> IntVect {
+  // Returns both the centroid's cell AND the range's total weight. The weight sum is a byproduct of
+  // the centroid accumulation, so returning it here removes the separate per-child rangeWeight() pass
+  // the heap loop used to make (same summation order, so the Real is bit-identical).
+  auto centroidCellOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> std::pair<IntVect, Real> {
     RealVect centroid = RealVect::Zero;
     Real     totalW   = 0.0;
 
@@ -483,7 +443,7 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
       centroid = a_particles[a_lo].position;
     }
 
-    return kdCellKeyOf(centroid, a_probLo, a_dx);
+    return {kdCellKeyOf(centroid, a_probLo, a_dx), totalW};
   };
 
   struct KDCand
@@ -505,43 +465,31 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     return a_lhs.weight < a_rhs.weight;
   };
 
-  auto rangeWeight = [&](const std::size_t a_lo, const std::size_t a_hi) -> Real {
-    Real w = 0.0;
+  // Live per-cell leaf count: how many leaves are currently centred in each cell. Caller-owned mesh
+  // data, zeroed here; its ghost cell must cover every cell a leaf centroid can fall in, since
+  // gathered ghosts sit up to one cell outside this patch.
+  FArrayBox& used = a_used;
+  used.setVal(0.0);
 
-    for (std::size_t idx = a_lo; idx < a_hi; idx++) {
-      w += a_particles[idx].weight;
-    }
-
-    return w;
-  };
-
-  // Whether [a_lo,a_hi) is still too wide to be merged at all. Both merges veto any
-  // final leaf whose largest per-axis extent exceeds one cell width and leaves every one of its
-  // members behind as an individual particle, so such a node does NOT cost its cell one particle --
-  // it costs its full member count.
-  auto maxAxisSpanOf = [&](const std::size_t a_lo, const std::size_t a_hi) -> Real {
-    RealVect boxLo, boxHi;
-    kdBBox(a_particles, a_lo, a_hi, boxLo, boxHi);
-
-    return kdMaxAxisSpan(boxLo, boxHi, a_dx);
-  };
-
-  // Whether [a_lo,a_hi) has shrunk to the scale at which the weight median takes over from the
-  // count median (see the split site below for why the crossover exists and where it sits).
-  const auto cellLess = [](const IntVect& a_lhs, const IntVect& a_rhs) noexcept -> bool {
-    return kdIntVectLess(a_lhs, a_rhs);
-  };
-
-  std::map<IntVect, int, decltype(cellLess)> used(cellLess);
-
+  // Reserved to numMergeable, a safe upper bound for both: leaves partition [0,numMergeable) with at
+  // least one member each, so #leaves <= numMergeable, and the split frontier can never exceed the
+  // leaf count. One allocation apiece instead of the push_back reallocation ladder, every patch.
   std::vector<KDCand> heap;
-  std::vector<KDCand> finalLeaves;
+  std::vector<KDLeaf> finalLeaves;
+
+  heap.reserve(numMergeable);
+  finalLeaves.reserve(numMergeable);
 
   {
-    const IntVect rootCell = centroidCellOf(0, numMergeable);
+    const auto [rootCell, rootWeight] = centroidCellOf(0, numMergeable);
 
-    used[rootCell]++;
-    heap.push_back(KDCand{rangeWeight(0, numMergeable), numMergeable, 0, numMergeable, rootCell});
+    // A centroid of positions gathered for this patch cannot fall outside the patch grown by the
+    // ghost width. Asserted rather than assumed: the map this replaced would have accepted any cell
+    // silently, which is exactly the class of bug a bounded holder is meant to surface.
+    CH_assert(used.box().contains(rootCell));
+
+    used(rootCell, 0)++;
+    heap.push_back(KDCand{rootWeight, numMergeable, 0, numMergeable, rootCell});
   }
 
   while (!heap.empty()) {
@@ -551,55 +499,65 @@ buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
     heap.pop_back();
 
     if (node.count < 2) {
-      finalLeaves.push_back(node);
+      RealVect boxLo, boxHi;
+      kdBBox(a_particles, node.lo, node.hi, boxLo, boxHi);
+
+      finalLeaves.push_back(KDLeaf{node.lo, node.hi, boxLo, boxHi});
 
       continue;
     }
 
-    // The split itself only reorders within [lo,hi), which is harmless even if the split is then
-    // refused -- the range stays one contiguous leaf either way.
+    // One bounding box per node, computed once here and reused three ways: the span test, the split
+    // axis (formerly re-derived from a second box inside each split helper), and -- if the split is
+    // refused below -- the emitted leaf (formerly re-derived a third time in the emission pass). A
+    // split only reorders within [lo,hi), so the box is unchanged by it either way.
+    RealVect nodeBoxLo, nodeBoxHi;
+    kdBBox(a_particles, node.lo, node.hi, nodeBoxLo, nodeBoxHi);
+
+    const Real nodeSpan  = kdMaxAxisSpan(nodeBoxLo, nodeBoxHi, a_dx);
+    const int  splitAxis = (nodeBoxHi - nodeBoxLo).maxDir(true);
+
     // While a node spans several cells a split apportions leaves BETWEEN cells, which is a question
     // of counts; once it is narrow the weight median is what drives the super-particles toward equal
     // weight. This is an extent test, not a "both corners in one cell" test, so a narrow node
     // straddling a face still qualifies.
-    const Real nodeSpan = maxAxisSpanOf(node.lo, node.hi);
+    const std::size_t mid = (nodeSpan <= a_splitWeightLeafDx)
+                              ? kdSplitWeightMedian(a_particles, node.lo, node.hi, splitAxis)
+                              : kdSplitCountMedian(a_particles, node.lo, node.hi, splitAxis);
 
-    const std::size_t mid = (nodeSpan <= a_splitWeightLeafDx) ? kdSplitWeightMedian(a_particles, node.lo, node.hi)
-                                                              : kdSplitCountMedian(a_particles, node.lo, node.hi);
+    const auto [cellLeft, weightLeft]   = centroidCellOf(node.lo, mid);
+    const auto [cellRight, weightRight] = centroidCellOf(mid, node.hi);
 
-    const IntVect cellLeft  = centroidCellOf(node.lo, mid);
-    const IntVect cellRight = centroidCellOf(mid, node.hi);
+    CH_assert(used.box().contains(cellLeft));
+    CH_assert(used.box().contains(cellRight));
 
-    used[node.cell]--;
-    used[cellLeft]++;
-    used[cellRight]++;
+    used(node.cell, 0)--;
+    used(cellLeft, 0)++;
+    used(cellRight, 0)++;
 
     // The quota constrains only leaves that can actually merge. A node wider than
     // s_kdMaxLeafExtent is vetoed by the caller and leaves every member behind
     // individually, so it costs its cell its full member count rather than one particle; splitting
     // it further lowers that cell's final population even though it raises the leaf count.
-    if (nodeSpan <= s_kdMaxLeafExtent && (used[cellLeft] > a_ppc || used[cellRight] > a_ppc)) {
-      used[cellLeft]--;
-      used[cellRight]--;
-      used[node.cell]++;
+    if (nodeSpan <= s_kdMaxLeafExtent && (used(cellLeft, 0) > a_ppc || used(cellRight, 0) > a_ppc)) {
+      used(cellLeft, 0)--;
+      used(cellRight, 0)--;
+      used(node.cell, 0)++;
 
-      finalLeaves.push_back(node);
+      finalLeaves.push_back(KDLeaf{node.lo, node.hi, nodeBoxLo, nodeBoxHi});
 
       continue;
     }
 
-    heap.push_back(KDCand{rangeWeight(node.lo, mid), mid - node.lo, node.lo, mid, cellLeft});
+    heap.push_back(KDCand{weightLeft, mid - node.lo, node.lo, mid, cellLeft});
     std::push_heap(heap.begin(), heap.end(), byWeight);
 
-    heap.push_back(KDCand{rangeWeight(mid, node.hi), node.hi - mid, mid, node.hi, cellRight});
+    heap.push_back(KDCand{weightRight, node.hi - mid, mid, node.hi, cellRight});
     std::push_heap(heap.begin(), heap.end(), byWeight);
   }
 
-  for (const KDCand& node : finalLeaves) {
-    RealVect boxLo, boxHi;
-    kdBBox(a_particles, node.lo, node.hi, boxLo, boxHi);
-
-    a_leaves.push_back(KDLeaf{node.lo, node.hi, boxLo, boxHi});
+  for (const KDLeaf& leaf : finalLeaves) {
+    a_leaves.push_back(leaf);
   }
 
   // The leaves must partition the input exactly: every particle in exactly one leaf, no overlap and
@@ -693,6 +651,54 @@ mergeKDCarve(AmrMesh&                      a_amr,
 {
   using namespace detail;
 
+  // Carve-protocol types. Local to this function because nothing else constructs or consumes them:
+  // they describe one pass of the claim/verdict/commit exchange and have no meaning outside it.
+
+  // Box ranking key. Tightest box wins a contested particle; the anchor id is the deterministic
+  // tiebreak, since AABB volume alone is not a strict total order.
+  struct KDBoxKey
+  {
+    Real       volume;
+    ParticleID anchor;
+
+    bool
+    operator<(const KDBoxKey& a_rhs) const noexcept
+    {
+      return (volume != a_rhs.volume) ? (volume < a_rhs.volume) : (anchor < a_rhs.anchor);
+    }
+  };
+
+  // One member of a boundary box: the particle and the rank that owns it.
+  struct KDMember
+  {
+    ParticleID id;
+    RankID     owner;
+  };
+
+  // Phase 1 wire type: a box's claim on one member, routed to that member's owner.
+  struct KDClaim
+  {
+    ParticleID memberID;
+    KDBoxKey   key;
+    RankID     proposerRank;
+    int        proposerBoxIdx; // which of the proposer's own boxes claimed it
+  };
+
+  // Phase 2 wire type: the owner's nominal argmin winner, answered per claiming box.
+  struct KDVerdict
+  {
+    ParticleID memberID;
+    int        claimantBoxIdx;
+    bool       won;
+  };
+
+  // Phase 3 wire type: the proposer's actual outcome. Only this authorizes a deletion.
+  struct KDCommit
+  {
+    ParticleID memberID;
+    bool       committed;
+  };
+
   CH_TIMERS("ParticleManagement::mergeKDCarve");
   CH_TIMER("ParticleManagement::mergeKDCarve::build_classify", t_build);
   CH_TIMER("ParticleManagement::mergeKDCarve::carve_exchange", t_carve);
@@ -709,6 +715,15 @@ mergeKDCarve(AmrMesh&                      a_amr,
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
   }
+
+  // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
+  // cell data, and this is what the rest of the code uses for cell data. One ghost cell, which is
+  // what the gathered ghosts and any just-outside leaf centroid need.
+  EBAMRFAB histogram;
+  EBAMRFAB leafQuota;
+
+  a_amr.allocate(histogram, realm, 1, 1);
+  a_amr.allocate(leafQuota, realm, 1, 1);
 
   const int myRank   = procID();
   const int numRanks = numProc();
@@ -733,8 +748,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // patchIdx: which patch's leaf produced it, used as the cheap first guess when placing it.
   struct MergedResult
   {
-    KDParticle<Packed> particle;
-    int                patchIdx;
+    MergeParticle<Packed> particle;
+    int                   patchIdx;
   };
 
   // One entry per (locally-owned, boundary-exposed particle) x (one of MY OWN boxes that lists it),
@@ -755,19 +770,24 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
   std::vector<PatchWork> patchWork;
 
-  // particlesByID:  every particle this rank gathered, locals and ghosts alike. One entry per
-  //                 (id, patch-occurrence) is appended during STEP 1, then deduplicated once STEP 1
-  //                 finishes by sorting and collapsing runs, preferring the non-ghost copy -- which
-  //                 is cheaper than a per-particle hash lookup while gathering. Point lookups after
-  //                 that go through findParticle() below, which binary-searches it.
+  // gatheredParticles: every particle this rank gathered, locals and ghosts alike, in gather order.
+  //                 Append-only and never reordered, so an index into it is a stable handle. Holds the
+  //                 full payloads particlesByID used to carry inline.
+  // particlesByID:  one (id, slot-into-gatheredParticles) entry per (id, patch-occurrence), appended
+  //                 during STEP 1, then deduplicated once STEP 1 finishes by sorting and collapsing
+  //                 runs, preferring the non-ghost copy. Sorting these light (id, slot) keys instead of
+  //                 whole particles is what keeps the dedup off the fat-struct memory path. Point
+  //                 lookups after that go through findParticle() below, which binary-searches it and
+  //                 dereferences the surviving slot.
   // myBoxes:        this rank's own boundary boxes, indexed by the boxIdx carried in claims.
   // consumedIDs:    ids whose particle has been merged away and must be deleted. Sorted once,
   //                 before STEP 7 consumes it by binary search.
   // mergedResults:  super-particles produced this pass, placed in STEP 8.
-  std::vector<std::pair<ParticleID, KDParticle<Packed>>> particlesByID;
-  std::vector<RuntimeBox>                                myBoxes;
-  std::vector<ParticleID>                                consumedIDs;
-  std::vector<MergedResult>                              mergedResults;
+  std::vector<MergeParticle<Packed>>              gatheredParticles;
+  std::vector<std::pair<ParticleID, std::size_t>> particlesByID;
+  std::vector<RuntimeBox>                         myBoxes;
+  std::vector<ParticleID>                         consumedIDs;
+  std::vector<MergedResult>                       mergedResults;
 
   // A particle can be listed by more than one of MY OWN boxes at once -- it is gathered once into
   // its own home patch's build (as a local member there) but can ALSO be gathered as a ghost into a
@@ -795,12 +815,21 @@ mergeKDCarve(AmrMesh&                      a_amr,
     }
   }
 
+  gatheredParticles.reserve(combinedCountUpperBound);
   particlesByID.reserve(combinedCountUpperBound);
   selfClaims.reserve(combinedCountUpperBound);
   consumedIDs.reserve(combinedCountUpperBound);
 
+  // Per-patch leaf/member scratch, declared once and reused across every patch below rather than
+  // reallocated inside the loop -- the same reuse pattern as the histogram/leafQuota holders above.
+  // buildKDQuotaLeaves() clear()s leaves on entry and members is cleared per leaf, so each reuse
+  // retains the heap capacity grown by earlier patches instead of starting from nothing.
+  std::vector<KDLeaf>   leaves;
+  std::vector<KDMember> members;
+
   // ==== STEP 1: gather + build + classify + commit interior, per patch ====
   CH_START(t_build);
+
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -821,11 +850,11 @@ mergeKDCarve(AmrMesh&                      a_amr,
                                                                                            : nullptr;
       const ParticleGhostMask* maskF2CDin  = (lvl > 0 && !maskF2C[lvl].isNull()) ? &(*maskF2C[lvl])[din] : nullptr;
 
-      std::vector<KDParticle<Packed>> combined;
+      std::vector<MergeParticle<Packed>> combined;
       combined.reserve(leaf.size());
 
       for (std::size_t i = 0; i < leaf.size(); i++) {
-        KDParticle<Packed> p;
+        MergeParticle<Packed> p;
 
         p.position  = leaf.position(i);
         p.weight    = leaf.weight(i);
@@ -837,9 +866,11 @@ mergeKDCarve(AmrMesh&                      a_amr,
         combined.push_back(p);
 
         // Append unconditionally -- deduplicated by id (preferring the non-ghost copy, per
-        // KDParticle::isGhost's own docs) in the one pass below once STEP 1 finishes gathering,
-        // rather than via a per-particle hash lookup here.
-        particlesByID.emplace_back(p.globalID, p);
+        // MergeParticle::isGhost's own docs) in the one pass below once STEP 1 finishes gathering,
+        // rather than via a per-particle hash lookup here. The full payload lives in gatheredParticles;
+        // particlesByID carries only (id, slot) so the dedup sort stays off the fat-struct path.
+        gatheredParticles.push_back(p);
+        particlesByID.emplace_back(p.globalID, gatheredParticles.size() - 1);
       }
 
       patchWork.push_back(PatchWork{lvl, din, dxByLevel[lvl], dbl[din]});
@@ -849,37 +880,32 @@ mergeKDCarve(AmrMesh&                      a_amr,
         continue;
       }
 
-      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
-      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
+      // Ground truth for how crowded each cell really is -- see kdFillCellHistogram(). Both this and
+      // the live quota are cell data, so they live in the mesh holders allocated once above rather
+      // than in per-patch scratch. Their ghost cell covers the gathered ghosts, which sit up to one
+      // cell outside this patch, and any leaf centroid that lands just outside it.
+      FArrayBox& cellCounts = (*histogram[lvl])[din];
+      FArrayBox& quota      = (*leafQuota[lvl])[din];
 
-      std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
 
-      // Per-patch exposure cache: leaves are about a cell in extent and not grid-aligned, so many leaves
-      // (and many members within one leaf) end up querying the SAME actual cell's exposure. A
-      // resident (non-ghost) member's cell always lies within this patch's OWN box (that's what
-      // "resident" means), so a dense array indexed by cell offset within the box is safe -- compute
-      // each distinct cell's exposure (up to 3 mask lookups) once, then reuse the cached bit for
-      // every subsequent member/leaf that touches the same cell.
-      const IntVect patchLo   = dbl[din].smallEnd();
-      const IntVect patchSize = dbl[din].size();
-      std::size_t   cacheSize = 1;
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        cacheSize *= static_cast<std::size_t>(patchSize[dir]);
-      }
-      // Tri-state per cell: -1 uncached, 0 not exposed, 1 exposed.
-      std::vector<signed char> exposureCache(cacheSize, -1);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
+
+      // Per-patch exposure cache. Leaves are about a cell in extent and not grid-aligned, so many
+      // leaves (and many members within one leaf) end up querying the SAME cell's exposure; compute
+      // it (up to 3 mask lookups) once per distinct cell and reuse the cached bit. Tri-state: -1
+      // uncached, 0 not exposed, 1 exposed.
+      //
+      // Held over the patch's OWN box, ungrown: only resident (non-ghost) members are ever queried,
+      // and resident is exactly what it means for a cell to lie in this box. That is why this one
+      // does not need the growth the histogram and the live quota do.
+      BaseFab<signed char> exposureCache(dbl[din], 1);
+      exposureCache.setVal(-1);
 
       auto isExposedCached = [&](const IntVect& a_iv) -> bool {
-        std::size_t cellIdx = 0;
-        std::size_t stride  = 1;
+        CH_assert(exposureCache.box().contains(a_iv));
 
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          cellIdx += static_cast<std::size_t>(a_iv[dir] - patchLo[dir]) * stride;
-          stride *= static_cast<std::size_t>(patchSize[dir]);
-        }
-
-        if (exposureCache[cellIdx] < 0) {
+        if (exposureCache(a_iv, 0) < 0) {
           bool isExposed = (maskSameDin != nullptr) && kdIsBoundaryExposed(a_iv, *maskSameDin);
 
           if (!isExposed && maskC2FDin != nullptr) {
@@ -889,14 +915,14 @@ mergeKDCarve(AmrMesh&                      a_amr,
             isExposed = kdIsBoundaryExposed(a_iv, *maskF2CDin);
           }
 
-          exposureCache[cellIdx] = isExposed ? 1 : 0;
+          exposureCache(a_iv, 0) = isExposed ? 1 : 0;
         }
 
-        return exposureCache[cellIdx] != 0;
+        return exposureCache(a_iv, 0) != 0;
       };
 
       for (const KDLeaf& bl : leaves) {
-        std::vector<KDMember> members;
+        members.clear();
         members.reserve(bl.hi - bl.lo);
 
         bool anyLocal = false;
@@ -911,7 +937,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
           // "Local" here means physically resident in THIS patch, not merely owned by this rank --
           // a particle owned by this rank via a DIFFERENT one of its own patches, appearing here
-          // only as a ghost, gives this leaf no standing (see KDParticle::isGhost's own docs).
+          // only as a ghost, gives this leaf no standing (see MergeParticle::isGhost's own docs).
           if (!combined[idx].isGhost) {
             anyLocal = true;
           }
@@ -1000,7 +1026,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
             weights.reserve(bl.hi - bl.lo);
 
             for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-              const KDParticle<Packed>& p = combined[idx];
+              const MergeParticle<Packed>& p = combined[idx];
 
               CH_assert(!p.isGhost);
 
@@ -1015,7 +1041,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
             kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
 
             if (a_isPositionValid(centroid)) {
-              KDParticle<Packed> merged;
+              MergeParticle<Packed> merged;
 
               merged.position  = centroid;
               merged.weight    = totalW;
@@ -1080,7 +1106,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
       std::size_t chosen = readIdx;
       for (std::size_t k = readIdx; k < runEnd; k++) {
-        if (!particlesByID[k].second.isGhost) {
+        if (!gatheredParticles[particlesByID[k].second].isGhost) {
           chosen = k;
 
           break;
@@ -1099,18 +1125,17 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
   // Binary-search lookup into the now-sorted, deduplicated particlesByID -- replaces the old
   // unordered_map's .at().
-  auto findParticle = [&particlesByID](const ParticleID a_id) -> const KDParticle<Packed>& {
-    const auto it = std::lower_bound(
-      particlesByID.begin(),
-      particlesByID.end(),
-      a_id,
-      [](const std::pair<ParticleID, KDParticle<Packed>>& a_entry, const ParticleID a_key) {
-        return a_entry.first < a_key;
-      });
+  auto findParticle = [&particlesByID, &gatheredParticles](const ParticleID a_id) -> const MergeParticle<Packed>& {
+    const auto it = std::lower_bound(particlesByID.begin(),
+                                     particlesByID.end(),
+                                     a_id,
+                                     [](const std::pair<ParticleID, std::size_t>& a_entry, const ParticleID a_key) {
+                                       return a_entry.first < a_key;
+                                     });
 
     CH_assert(it != particlesByID.end() && it->first == a_id);
 
-    return it->second;
+    return gatheredParticles[it->second];
   };
 
   // selfClaims was appended to during STEP 1 -- sort by id once so STEP 3 can process it as grouped
@@ -1257,6 +1282,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // One verdict PER INCOMING CLAIM, not per rank: two of the SAME rank's own boxes can both claim
   // this particle (from two different patches that rank owns), and each needs its own, correct
   // answer -- a rank-level "your rank won" cannot tell them apart. See KDClaim::proposerBoxIdx.
+
   std::vector<std::vector<KDVerdict>> verdictSendByRank(numRanks);
 
   for (std::size_t idx = 0; idx < incomingClaims.size();) {
@@ -1303,6 +1329,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
   // at the read site below avoids both a per-box hash-table allocation (unordered_set would add one
   // per box, of which there can be thousands) and, for large ppc, the O(box size^2) cost a linear
   // scan would have across all of a box's foreign-member lookups.
+
   std::vector<std::vector<ParticleID>> wonForeignByBox(myBoxes.size());
 
   for (const KDVerdict& v : incomingVerdicts) {
@@ -1357,7 +1384,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
       weights.reserve(totalSurvivors);
 
       auto accumulate = [&](const ParticleID a_id) {
-        const KDParticle<Packed>& p = findParticle(a_id);
+        const MergeParticle<Packed>& p = findParticle(a_id);
 
         payloads.push_back(p.payload);
         weights.push_back(p.weight);
@@ -1392,7 +1419,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
       if (a_isPositionValid(centroid)) {
         committed = true;
 
-        KDParticle<Packed> merged;
+        MergeParticle<Packed> merged;
 
         merged.position  = centroid;
         merged.weight    = totalW;
@@ -1471,9 +1498,9 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
   // ==== STEP 8: place merged results ====
   CH_START(t_place);
-  std::vector<std::vector<KDParticle<Packed>>> scatterByDestRank(numRanks);
+  std::vector<std::vector<MergeParticle<Packed>>> scatterByDestRank(numRanks);
 
-  auto insertHere = [&](const KDParticle<Packed>& a_p, const int a_level, const DataIndex& a_din) {
+  auto insertHere = [&](const MergeParticle<Packed>& a_p, const int a_level, const DataIndex& a_din) {
     ParticleSoA<P, Traits>& leaf = a_particles[a_level][a_din];
 
     a_scatter(leaf, a_p);
@@ -1515,16 +1542,16 @@ mergeKDCarve(AmrMesh&                      a_amr,
       insertHere(mr.particle, dst.level, din);
     }
     else {
-      KDParticle<Packed> corrected = mr.particle;
-      corrected.ownerRank          = dst.rank;
+      MergeParticle<Packed> corrected = mr.particle;
+      corrected.ownerRank             = dst.rank;
 
       scatterByDestRank[dst.rank].push_back(corrected);
     }
   }
 
-  const std::vector<KDParticle<Packed>> incomingScattered = kdExchangeByRank(scatterByDestRank);
+  const std::vector<MergeParticle<Packed>> incomingScattered = kdExchangeByRank(scatterByDestRank);
 
-  for (const KDParticle<Packed>& p : incomingScattered) {
+  for (const MergeParticle<Packed>& p : incomingScattered) {
     const auto dst = a_particles.findDestination(p.position);
 
     if (!dst.valid || dst.rank != myRank) {
@@ -1534,8 +1561,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
     const DataIndex din = a_amr.getLevelTiles(realm)[dst.level]->getMyGrids().at(dst.gridIndex);
 
-    KDParticle<Packed> corrected = p;
-    corrected.ownerRank          = myRank;
+    MergeParticle<Packed> corrected = p;
+    corrected.ownerRank             = myRank;
 
     insertHere(corrected, dst.level, din);
   }
@@ -1562,204 +1589,24 @@ mergeKDPatch(AmrMesh&                      a_amr,
              const Allocator&              a_allocateID,
              const PosValid&               a_isPositionValid)
 {
-  using namespace detail;
-
-  CH_TIMERS("ParticleManagement::mergeKDPatch");
-  CH_TIMER("ParticleManagement::mergeKDPatch::build", t_build);
-  CH_TIMER("ParticleManagement::mergeKDPatch::commit", t_commit);
-  CH_TIMER("ParticleManagement::mergeKDPatch::remove_place", t_place);
-
-  const std::string   realm       = a_particles.getRealm();
-  const int           finestLevel = a_amr.getFinestLevel();
-  const RealVect      probLo      = a_amr.getProbLo();
-  const Vector<Real>& dxScalar    = a_amr.getDx();
-
-  std::vector<RealVect> dxByLevel(finestLevel + 1);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
-  }
-
-  const int myRank = procID();
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
-
-      // Pack this patch's own particles. No ghosts are involved at all: nothing here is contested,
-      // so there is no owner to arbitrate with and no reason to look outside the patch. A ghost
-      // reaching this point would be merged here AND by its true owner, double-counting its weight,
-      // which is why the caller must not have filled any.
-      std::vector<KDParticle<Packed>> combined;
-      combined.reserve(leaf.size());
-
-      for (std::size_t i = 0; i < leaf.size(); i++) {
-        if (leaf.isGhost(i)) {
-          continue;
-        }
-
-        KDParticle<Packed> p;
-
-        p.position  = leaf.position(i);
-        p.weight    = leaf.weight(i);
-        p.globalID  = leaf.particleID(i);
-        p.ownerRank = leaf.rankID(i);
-        p.isGhost   = false;
-        p.payload   = a_gather(leaf, i);
-
-        combined.push_back(p);
-      }
-
-      if (combined.empty()) {
-        continue;
-      }
-
-      CH_START(t_build);
-
-      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
-      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
-
-      std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
-
-      CH_STOP(t_build);
-      CH_START(t_commit);
-
-      // Commit every leaf that can merge. Unlike the carve there is no classification step: nothing
-      // is exposed to arbitration, so the only questions are whether the leaf is compact enough and
-      // whether it has members enough to be worth collapsing.
-      std::vector<ParticleID>         consumedIDs;
-      std::vector<KDParticle<Packed>> mergedResults;
-
-      for (const KDLeaf& bl : leaves) {
-        if (bl.hi - bl.lo < 2) {
-          continue;
-        }
-
-        if (kdMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_kdMaxLeafExtent) {
-          continue;
-        }
-
-        std::vector<Packed> payloads;
-        std::vector<Real>   weights;
-        RealVect            centroid = RealVect::Zero;
-        Real                totalW   = 0.0;
-
-        payloads.reserve(bl.hi - bl.lo);
-        weights.reserve(bl.hi - bl.lo);
-
-        for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-          const KDParticle<Packed>& p = combined[idx];
-
-          // Ghosts were filtered out while gathering; merging one here would double-count its
-          // weight against its true owner, which is the contract this merge relies on.
-          CH_assert(!p.isGhost);
-
-          payloads.push_back(p.payload);
-          weights.push_back(p.weight);
-          centroid += p.weight * p.position;
-          totalW += p.weight;
-        }
-
-        centroid /= totalW;
-
-        kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
-
-        if (!a_isPositionValid(centroid)) {
-          continue;
-        }
-
-        KDParticle<Packed> merged;
-
-        merged.position  = centroid;
-        merged.weight    = totalW;
-        merged.globalID  = a_allocateID();
-        merged.ownerRank = myRank;
-        merged.isGhost   = false;
-        merged.payload   = a_combine(payloads.data(), weights.data(), payloads.size());
-
-        mergedResults.push_back(merged);
-
-        for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-          consumedIDs.push_back(combined[idx].globalID);
-        }
-      }
-
-      CH_STOP(t_commit);
-
-      if (mergedResults.empty()) {
-        continue;
-      }
-
-      CH_START(t_place);
-
-      // Remove the consumed originals, then insert the merged results. Both are confined to this
-      // patch, so no exchange is needed -- but a centroid can still land outside the patch's own
-      // box, so placement keeps the same cheap-test-then-general-search shape the carve uses.
-      std::sort(consumedIDs.begin(), consumedIDs.end());
-
-      // Removal below finds entries by binary search, which silently misses on an unsorted range.
-      CH_assert(std::is_sorted(consumedIDs.begin(), consumedIDs.end()));
-
-      {
-        std::size_t i = 0;
-
-        while (i < leaf.size()) {
-          if (!leaf.isGhost(i) && std::binary_search(consumedIDs.begin(), consumedIDs.end(), leaf.particleID(i))) {
-            leaf.remove(i);
-          }
-          else {
-            i++;
-          }
-        }
-      }
-
-      RealVect boxRealLo, boxRealHi;
-
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        boxRealLo[dir] = probLo[dir] + dbl[din].smallEnd(dir) * dxByLevel[lvl][dir];
-        boxRealHi[dir] = probLo[dir] + (dbl[din].bigEnd(dir) + 1) * dxByLevel[lvl][dir];
-      }
-
-      for (const KDParticle<Packed>& mr : mergedResults) {
-        bool inOwnBox = true;
-
-        for (int dir = 0; dir < SpaceDim && inOwnBox; dir++) {
-          if (mr.position[dir] < boxRealLo[dir] || mr.position[dir] >= boxRealHi[dir]) {
-            inOwnBox = false;
-          }
-        }
-
-        if (inOwnBox) {
-          a_scatter(leaf, mr);
-
-          continue;
-        }
-
-        // A weighted centroid of positions inside this patch lies inside it too, so this branch is
-        // unreachable in exact arithmetic and exists only for round-off at a patch face. It must
-        // still land on this rank: there is no exchange here to carry a particle anywhere else.
-        const auto dst = a_particles.findDestination(mr.position);
-
-        if (!dst.valid || dst.rank != myRank) {
-          MayDay::Error("ParticleManagement::mergeKDPatch -- merged particle left this rank's own patches");
-        }
-
-        const DataIndex dstDin = a_amr.getLevelTiles(realm)[dst.level]->getMyGrids().at(dst.gridIndex);
-
-        a_scatter(a_particles[dst.level][dstDin], mr);
-      }
-
-      CH_STOP(t_place);
-    }
-  }
+  // The patch-local merge is the ghost-free case of mergeKDInterior() writing back into its own
+  // container, so it delegates rather than repeating the body.
+  //
+  // mergeKDInterior() commits a leaf only when the leaf holds no ghost. The caller here must not
+  // have filled a ghost halo -- a ghost would be merged locally while its true owner merges it too --
+  // so every gathered particle is resident, every leaf is ghost-free, and that test admits them all.
+  // Passing a_particles as its own destination puts the super-particles back where the patch merge
+  // has always put them.
+  mergeKDInterior<P, Packed, Traits>(a_amr,
+                                     a_particles,
+                                     a_particles,
+                                     a_ppc,
+                                     a_splitWeightLeafDx,
+                                     a_gather,
+                                     a_combine,
+                                     a_scatter,
+                                     a_allocateID,
+                                     a_isPositionValid);
 }
 
 template <typename P,
@@ -1804,7 +1651,22 @@ mergeKDInterior(AmrMesh&                      a_amr,
     dxByLevel[lvl] = dxScalar[lvl] * RealVect::Unit;
   }
 
+  // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
+  // cell data, and this is what the rest of the code uses for cell data. One ghost cell, which is
+  // what the gathered ghosts and any just-outside leaf centroid need.
+  EBAMRFAB histogram;
+  EBAMRFAB leafQuota;
+
+  a_amr.allocate(histogram, realm, 1, 1);
+  a_amr.allocate(leafQuota, realm, 1, 1);
+
   const int myRank = procID();
+
+  // Per-patch leaf scratch, declared once and reused across every patch below rather than reallocated
+  // inside the loop -- the same reuse pattern as the histogram/leafQuota holders above.
+  // buildKDQuotaLeaves() clear()s it on entry, so each reuse retains the heap capacity grown by
+  // earlier patches instead of starting from nothing.
+  std::vector<KDLeaf> leaves;
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
@@ -1820,11 +1682,11 @@ mergeKDInterior(AmrMesh&                      a_amr,
       // Ghosts ARE gathered, unlike mergeKDPatch(). They are never merged here, but they must take
       // part in the partition: a ghost is what marks the leaf it lands in as contested, and the
       // per-cell quota has to see the cell's true occupancy to hand out the right number of slots.
-      std::vector<KDParticle<Packed>> combined;
+      std::vector<MergeParticle<Packed>> combined;
       combined.reserve(leaf.size());
 
       for (std::size_t i = 0; i < leaf.size(); i++) {
-        KDParticle<Packed> p;
+        MergeParticle<Packed> p;
 
         p.position  = leaf.position(i);
         p.weight    = leaf.weight(i);
@@ -1842,17 +1704,22 @@ mergeKDInterior(AmrMesh&                      a_amr,
 
       CH_START(t_build);
 
-      // Ground truth for how crowded each cell really is -- see KDCellHistogram.
-      const KDCellHistogram cellTrueCount(combined, probLo, dxByLevel[lvl]);
+      // Ground truth for how crowded each cell really is -- see kdFillCellHistogram(). Both this and
+      // the live quota are cell data, so they live in the mesh holders allocated once above rather
+      // than in per-patch scratch. Their ghost cell covers the gathered ghosts, which sit up to one
+      // cell outside this patch, and any leaf centroid that lands just outside it.
+      FArrayBox& cellCounts = (*histogram[lvl])[din];
+      FArrayBox& quota      = (*leafQuota[lvl])[din];
 
-      std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellTrueCount, leaves);
+      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
+
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
 
       CH_STOP(t_build);
       CH_START(t_commit);
 
-      std::vector<ParticleID>         consumedIDs;
-      std::vector<KDParticle<Packed>> mergedResults;
+      std::vector<ParticleID>            consumedIDs;
+      std::vector<MergeParticle<Packed>> mergedResults;
 
       for (const KDLeaf& bl : leaves) {
         if (bl.hi - bl.lo < 2) {
@@ -1890,7 +1757,7 @@ mergeKDInterior(AmrMesh&                      a_amr,
         weights.reserve(bl.hi - bl.lo);
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
-          const KDParticle<Packed>& p = combined[idx];
+          const MergeParticle<Packed>& p = combined[idx];
 
           // Guaranteed by the anyGhost test above; merging a ghost here would double-count its
           // weight against its true owner.
@@ -1910,7 +1777,7 @@ mergeKDInterior(AmrMesh&                      a_amr,
           continue;
         }
 
-        KDParticle<Packed> merged;
+        MergeParticle<Packed> merged;
 
         merged.position  = centroid;
         merged.weight    = totalW;
@@ -1961,7 +1828,7 @@ mergeKDInterior(AmrMesh&                      a_amr,
         boxRealHi[dir] = probLo[dir] + (dbl[din].bigEnd(dir) + 1) * dxByLevel[lvl][dir];
       }
 
-      for (const KDParticle<Packed>& mr : mergedResults) {
+      for (const MergeParticle<Packed>& mr : mergedResults) {
         bool inOwnBox = true;
 
         for (int dir = 0; dir < SpaceDim && inOwnBox; dir++) {

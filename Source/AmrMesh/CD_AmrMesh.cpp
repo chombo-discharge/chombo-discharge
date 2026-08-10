@@ -445,6 +445,34 @@ AmrMesh::allocate(EBAMRBool& a_data, const std::string& a_realm, const int a_nCo
 }
 
 void
+AmrMesh::allocate(EBAMRFAB& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost) const
+{
+  CH_TIME("AmrMesh::allocate(EBAMRFAB, string, int, int)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::allocate(EBAMRFAB, string, int, int)" << endl;
+  }
+
+  CH_assert(a_nComp > 0);
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::allocate(EBAMRFAB, string, int, int) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
+
+  a_data.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
+
+    a_data[lvl] = RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(dbl, a_nComp, ghost * IntVect::Unit));
+  }
+
+  a_data.setRealm(a_realm);
+}
+
+void
 AmrMesh::allocate(MFAMRCellData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost) const
 {
   CH_TIME("AmrMesh::allocate(MFAMRCellData, string, int, int)");

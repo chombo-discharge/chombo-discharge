@@ -19,73 +19,18 @@
 #include <vector>
 
 // Chombo includes
+#include <Box.H>
+#include <FArrayBox.H>
 #include <RealVect.H>
 
 // Our includes
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleManagement.H>
 #include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>
 
 namespace ParticleManagement {
-
-/**
- * @brief Minimal, payload-agnostic description of one particle as input to the kd-tree carve
- * merge.
- * @details Carries what the tree build/carve protocol needs -- position, weight, a globally
- * unique id, and the particle's current owning rank -- plus an opaque, caller-defined payload
- * (e.g. energy). The build/carve logic never inspects @c payload; it is unpacked only by the
- * caller-supplied combine callback when a leaf/box is finalized. No AMR-level field is carried
- * (unlike the nearest-neighbor merge's NNMergeParticle): the tree build only ever needs physical
- * position (level-independent) and this patch's own cell spacing, never a per-particle level.
- * @tparam Packed Caller-defined payload type (e.g. a single Real energy for ItoParticle).
- */
-template <typename Packed>
-struct KDParticle
-{
-  /**
-   * @brief Particle position.
-   */
-  RealVect position;
-
-  /**
-   * @brief Particle weight (used for the merged-particle centroid; not required to be an integer).
-   */
-  Real weight;
-
-  /**
-   * @brief Globally unique particle id -- also the source of a box's key anchor (see
-   * detail::KDBoxKey) and the deterministic tiebreak needed since AABB volume alone is not a
-   * strict total order.
-   */
-  ParticleID globalID;
-
-  /**
-   * @brief The rank that currently owns this particle. Always read from the particle's own data,
-   * never inferred from MPI transport metadata. NOT the same question as isGhost below -- a
-   * particle can be owned by this rank (via one of this rank's OTHER patches) while still being a
-   * ghost in the patch whose build currently holds it.
-   */
-  RankID ownerRank;
-
-  /**
-   * @brief True iff this particle is a ghost copy in the patch whose build currently holds it
-   * (i.e. not physically stored there). Build-internal bookkeeping, not part of the payload the
-   * caller-supplied callbacks see meaningfully -- always false on a freshly merged result. This is
-   * deliberately a per-particle field (not inferred from ownerRank) because ownership and physical
-   * residency are different questions: a particle owned by this rank via one patch can be a ghost
-   * in a NEIGHBORING patch this same rank also owns, and treating "owner == this rank" as "no
-   * further contest possible" there is exactly the bug this field exists to prevent -- see
-   * mergeKDCarve()'s own docs.
-   */
-  bool isGhost = false;
-
-  /**
-   * @brief Opaque, caller-defined payload. Never inspected by the build/carve logic -- only
-   * carried through to the caller-supplied combine callback.
-   */
-  Packed payload;
-};
 
 /**
  * @brief Illustrative signature of the N-ary combine callback: produce a merged particle's opaque
@@ -170,169 +115,32 @@ struct KDLeaf
  * Particles in cells at or below @a a_ppc are excluded from the partition and emitted as singleton
  * leaves. A singleton never merges (the merge threshold is two members), so an uncrowded cell cannot
  * be drained by a neighbour's merge.
- * @tparam Packed See KDParticle.
- * @tparam CellTrueCount Callable `(const IntVect&) -> int` giving that cell's total particle count,
- * or 0 for an empty cell. A cell is crowded iff this exceeds @a a_ppc.
+ * @tparam Packed See MergeParticle.
  * @param[in,out] a_particles Particles to partition; reordered in place.
  * @param[in] a_ppc Target particles per cell, enforced here as a per-cell ceiling on leaf count.
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the split plane
  * switches from the count median to the weight median. 0 disables the weight median.
  * @param[in] a_dx This patch's own cell spacing.
  * @param[in] a_probLo Physical position of the domain's low corner, for computing cell indices.
- * @param[in] a_cellTrueCount Per-cell particle-count lookup -- see @tparam CellTrueCount.
+ * @param[in,out] a_used Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover
+ * every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell.
+ * @param[in] a_cellCounts Per-cell TRUE particle-count histogram (see kdFillCellHistogram()). A cell
+ * is crowded, and its particles eligible to merge, iff its count exceeds @a a_ppc. A cell outside
+ * this box reads as 0 (empty): unlike @a a_used, whose box coverage is a hard precondition, this
+ * lookup guards rather than asserts, since a particle's own cell is always in-box but the guard
+ * costs nothing and documents the intent.
  * @param[out] a_leaves Every resulting leaf, in no particular order.
  */
-template <typename Packed, typename CellTrueCount>
+template <typename Packed>
 inline void
-buildKDQuotaLeaves(std::vector<KDParticle<Packed>>& a_particles,
-                   const int                        a_ppc,
-                   const Real                       a_splitWeightLeafDx,
-                   const RealVect&                  a_dx,
-                   const RealVect&                  a_probLo,
-                   const CellTrueCount&             a_cellTrueCount,
-                   std::vector<KDLeaf>&             a_leaves) noexcept;
-
-/**
- * @brief A boundary box's key: the total order the carve protocol's argmin resolves ownership
- * conflicts with.
- * @details Ascending lexicographic comparison on (volume, anchor): the tightest (smallest-volume)
- * box wins a contested particle; @c anchor (the lowest global particle id among the box's own
- * members) is the deterministic tiebreak volume alone cannot provide (every single-particle box
- * has zero volume, so volume alone is not a strict total order). Computed once by a box's
- * proposer and copied verbatim into every claim message, so comparing two keys for equality is
- * safe bit-for-bit -- no epsilon needed.
- */
-struct KDBoxKey
-{
-  /**
-   * @brief This box's AABB volume.
-   */
-  Real volume;
-
-  /**
-   * @brief Lowest global particle id among this box's own members.
-   */
-  ParticleID anchor;
-};
-
-/**
- * @brief Strict weak ordering for KDBoxKey -- see its own docs.
- * @param[in] a_lhs Left-hand key.
- * @param[in] a_rhs Right-hand key.
- * @return True iff @a a_lhs sorts strictly before @a a_rhs.
- */
-inline bool
-operator<(const KDBoxKey& a_lhs, const KDBoxKey& a_rhs) noexcept;
-
-/**
- * @brief One member of a boundary box, as listed by its proposer: a global id plus that
- * particle's current owning rank.
- * @details Eligibility to join a box's final (post-carve) membership is by this explicit listing
- * only, never by raw geometric AABB containment -- a box's AABB can enclose a particle its
- * proposer never actually listed.
- */
-struct KDMember
-{
-  /**
-   * @brief This member's global particle id.
-   */
-  ParticleID id;
-
-  /**
-   * @brief This member's current owning rank.
-   */
-  RankID owner;
-};
-
-/**
- * @brief One outgoing claim: "my box, with this key, lists you as a member" -- the wire record
- * for the carve protocol's Phase 1 (claims routed to owners).
- * @details Trivially copyable (required for the MPI_Alltoallv-based exchange, see
- * kdExchangeByRank()).
- */
-struct KDClaim
-{
-  /**
-   * @brief Global id of the claimed member (the recipient rank must own this particle).
-   */
-  ParticleID memberID;
-
-  /**
-   * @brief The claiming box's key.
-   */
-  KDBoxKey key;
-
-  /**
-   * @brief The claiming box's proposer rank -- where the verdict should be sent back to.
-   */
-  RankID proposerRank;
-
-  /**
-   * @brief The claiming box's own index into the proposer's local box list, echoed back verbatim
-   * in the reply. NOT redundant with proposerRank: two DIFFERENT boxes on the SAME rank (from two
-   * different patches that same rank owns) can both claim the same foreign particle at once, and
-   * the reply must let each of them individually learn whether IT specifically won -- a rank-level
-   * "your rank won" answer cannot distinguish which of that rank's own competing boxes it was. See
-   * mergeKDCarve()'s own docs for the double-count this caused before this field existed.
-   */
-  int proposerBoxIdx;
-};
-
-/**
- * @brief One reply to a single claim: "your specific box nominally won or lost this member" --
- * the wire record for the carve protocol's Phase 2 (verdicts routed back to proposers, foreign
- * members only).
- * @details Trivially copyable (see KDClaim). Answers exactly the claim identified by
- * (memberID, claimantBoxIdx) -- one KDVerdict per incoming KDClaim, not one per rank, so
- * that two of the SAME rank's own boxes claiming the same particle each get their own, individually
- * correct answer (see KDClaim::proposerBoxIdx). NOMINAL, not final: winning the argmin for one
- * member does not by itself guarantee the winning box will actually commit -- it can independently
- * lose OTHER members to OTHER, unrelated lower-keyed competitors and end up under the merge
- * threshold itself. An owner must NOT delete a member on the strength of this verdict alone -- it
- * must wait for the corresponding KDCommit in Phase 3. See mergeKDCarve()'s own docs
- * for a worked counterexample of the conservation bug that results from deleting here instead.
- */
-struct KDVerdict
-{
-  /**
-   * @brief Global id of the particle this verdict concerns.
-   */
-  ParticleID memberID;
-
-  /**
-   * @brief Echo of the claim's own KDClaim::proposerBoxIdx -- identifies which of the
-   * recipient's own boxes this verdict answers for.
-   */
-  int claimantBoxIdx;
-
-  /**
-   * @brief True iff THIS specific box (memberID, claimantBoxIdx) won the argmin for this particle.
-   */
-  bool won;
-};
-
-/**
- * @brief One commit/release instruction: "the box that nominally won you did/didn't actually
- * commit" -- the wire record for the carve protocol's Phase 3 (sent by a proposer to each foreign
- * member's owner, once the proposer's own box's final outcome is known).
- * @details Trivially copyable (see KDClaim). This, not KDVerdict, is what actually
- * authorizes an owner to delete a particle -- see KDVerdict's own docs for why a nominal
- * win/loss result by itself is insufficient.
- */
-struct KDCommit
-{
-  /**
-   * @brief Global id of the particle this instruction concerns.
-   */
-  ParticleID memberID;
-
-  /**
-   * @brief True iff the box that nominally won this member actually committed (the owner should
-   * delete its copy); false iff that box did not commit (>= 2 threshold or PosValid failed) and
-   * the owner should leave this particle untouched, exactly as if it had never been claimed.
-   */
-  bool committed;
-};
+buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
+                   const int                           a_ppc,
+                   const Real                          a_splitWeightLeafDx,
+                   const RealVect&                     a_dx,
+                   const RealVect&                     a_probLo,
+                   FArrayBox&                          a_used,
+                   const FArrayBox&                    a_cellCounts,
+                   std::vector<KDLeaf>&                a_leaves) noexcept;
 
 /**
  * @brief Generic Alltoallv-style exchange for a trivially-copyable record type: send a
@@ -343,7 +151,7 @@ struct KDCommit
  * not depend on (see this file's own @details). In a serial (non-MPI) build, or with a single
  * rank, returns this rank's own bucket unchanged.
  * @tparam T Trivially-copyable record type (KDClaim, KDVerdict, KDCommit, or
- * KDParticle<Packed> with Packed itself trivially copyable).
+ * MergeParticle<Packed> with Packed itself trivially copyable).
  * @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
  * @return Flat vector of every record received from every rank (including this rank's own bucket
  * addressed to itself).
@@ -369,11 +177,11 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  *
  * The round count is fixed, not a convergence loop; further reduction comes from calling again.
  * @tparam P SoA payload type.
- * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the group's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
@@ -424,11 +232,11 @@ mergeKDCarve(AmrMesh&                      a_amr,
  * communication, at the cost of no coordination across a patch boundary: a cell straddled by two
  * patches is reduced by each of them independently.
  * @tparam P SoA payload type.
- * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the grid layout.
@@ -485,11 +293,11 @@ mergeKDPatch(AmrMesh&                      a_amr,
  * The result is a split, not a finished merge -- @a a_particles is left holding exactly the
  * contested particles, for a caller that means to reduce them by some other means.
  * @tparam P SoA payload type.
- * @tparam Packed Opaque reconciliation payload type (see KDParticle).
+ * @tparam Packed Opaque reconciliation payload type (see MergeParticle).
  * @tparam Traits Column descriptor for P (defaults to ParticleTraits<P>).
  * @tparam Gather Callable `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @tparam Combine See KDPayloadCombine -- N-ary, not pairwise.
- * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const KDParticle<Packed>&) -> void`.
+ * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
  * @param[in,out] a_amr AMR mesh -- source of the grid layout.

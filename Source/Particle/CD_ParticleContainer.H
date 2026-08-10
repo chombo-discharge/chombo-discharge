@@ -886,7 +886,7 @@ public:
    * container's aliased grid metadata (probLo, dx, minBlockSize, level tiles). Public because the distributed
    * nearest-neighbor particle merge (ParticleManagement::mergeNearestNeighborsTree) locates each newly created
    * merged particle's owning patch/rank through the SAME tile-hash query remap() uses internally, rather than a
-   * linear scan over patches -- see NNParticleLocation / PositionLocator in CD_NearestNeighborParticleMerge.H.
+   * linear scan over patches -- see PositionLocator in CD_NearestNeighborParticleMerge.H.
    * @param[in] a_pos Particle position.
    * @return The resolved destination; valid==false if no tile on any level owns the cell.
    */
