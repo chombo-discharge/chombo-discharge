@@ -116,8 +116,6 @@ struct KDLeaf
  * leaves. A singleton never merges (the merge threshold is two members), so an uncrowded cell cannot
  * be drained by a neighbour's merge.
  * @tparam Packed See MergeParticle.
- * @tparam CellTrueCount Callable `(const IntVect&) -> int` giving that cell's total particle count,
- * or 0 for an empty cell. A cell is crowded iff this exceeds @a a_ppc.
  * @param[in,out] a_particles Particles to partition; reordered in place.
  * @param[in] a_ppc Target particles per cell, enforced here as a per-cell ceiling on leaf count.
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the split plane
@@ -126,10 +124,14 @@ struct KDLeaf
  * @param[in] a_probLo Physical position of the domain's low corner, for computing cell indices.
  * @param[in,out] a_used Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover
  * every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell.
- * @param[in] a_cellTrueCount Per-cell particle-count lookup -- see @tparam CellTrueCount.
+ * @param[in] a_cellCounts Per-cell TRUE particle-count histogram (see kdFillCellHistogram()). A cell
+ * is crowded, and its particles eligible to merge, iff its count exceeds @a a_ppc. A cell outside
+ * this box reads as 0 (empty): unlike @a a_used, whose box coverage is a hard precondition, this
+ * lookup guards rather than asserts, since a particle's own cell is always in-box but the guard
+ * costs nothing and documents the intent.
  * @param[out] a_leaves Every resulting leaf, in no particular order.
  */
-template <typename Packed, typename CellTrueCount>
+template <typename Packed>
 inline void
 buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
                    const int                           a_ppc,
@@ -137,7 +139,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
                    const RealVect&                     a_dx,
                    const RealVect&                     a_probLo,
                    FArrayBox&                          a_used,
-                   const CellTrueCount&                a_cellTrueCount,
+                   const FArrayBox&                    a_cellCounts,
                    std::vector<KDLeaf>&                a_leaves) noexcept;
 
 /**

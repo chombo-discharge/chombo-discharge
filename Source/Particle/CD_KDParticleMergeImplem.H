@@ -365,7 +365,7 @@ kdSplitWeightMedian(std::vector<MergeParticle<Packed>>& a_particles,
   return clamped;
 }
 
-template <typename Packed, typename CellTrueCount>
+template <typename Packed>
 inline void
 buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
                    const int                           a_ppc,
@@ -373,7 +373,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
                    const RealVect&                     a_dx,
                    const RealVect&                     a_probLo,
                    FArrayBox&                          a_used,
-                   const CellTrueCount&                a_cellTrueCount,
+                   const FArrayBox&                    a_cellCounts,
                    std::vector<KDLeaf>&                a_leaves) noexcept
 {
   CH_TIME("ParticleManagement::buildKDQuotaLeaves");
@@ -392,8 +392,13 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
   const auto firstUnmergeable = std::stable_partition(a_particles.begin(),
                                                       a_particles.end(),
                                                       [&](const MergeParticle<Packed>& a_p) {
-                                                        return a_cellTrueCount(
-                                                                 kdCellKeyOf(a_p.position, a_probLo, a_dx)) > a_ppc;
+                                                        const IntVect cell = kdCellKeyOf(a_p.position, a_probLo, a_dx);
+
+                                                        // A cell outside the histogram box reads as 0
+                                                        // (empty) and is therefore never crowded.
+                                                        return a_cellCounts.box().contains(cell)
+                                                                 ? static_cast<int>(a_cellCounts(cell, 0)) > a_ppc
+                                                                 : false;
                                                       });
 
   const std::size_t numMergeable = static_cast<std::size_t>(firstUnmergeable - a_particles.begin());
@@ -815,6 +820,13 @@ mergeKDCarve(AmrMesh&                      a_amr,
   selfClaims.reserve(combinedCountUpperBound);
   consumedIDs.reserve(combinedCountUpperBound);
 
+  // Per-patch leaf/member scratch, declared once and reused across every patch below rather than
+  // reallocated inside the loop -- the same reuse pattern as the histogram/leafQuota holders above.
+  // buildKDQuotaLeaves() clear()s leaves on entry and members is cleared per leaf, so each reuse
+  // retains the heap capacity grown by earlier patches instead of starting from nothing.
+  std::vector<KDLeaf>   leaves;
+  std::vector<KDMember> members;
+
   // ==== STEP 1: gather + build + classify + commit interior, per patch ====
   CH_START(t_build);
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
@@ -874,12 +886,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
       kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
 
-      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
-        return cellCounts.box().contains(a_cell) ? static_cast<int>(cellCounts(a_cell, 0)) : 0;
-      };
-
-      std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellTrueCount, leaves);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
 
       // Per-patch exposure cache. Leaves are about a cell in extent and not grid-aligned, so many
       // leaves (and many members within one leaf) end up querying the SAME cell's exposure; compute
@@ -912,7 +919,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
       };
 
       for (const KDLeaf& bl : leaves) {
-        std::vector<KDMember> members;
+        members.clear();
         members.reserve(bl.hi - bl.lo);
 
         bool anyLocal = false;
@@ -1651,6 +1658,12 @@ mergeKDInterior(AmrMesh&                      a_amr,
 
   const int myRank = procID();
 
+  // Per-patch leaf scratch, declared once and reused across every patch below rather than reallocated
+  // inside the loop -- the same reuse pattern as the histogram/leafQuota holders above.
+  // buildKDQuotaLeaves() clear()s it on entry, so each reuse retains the heap capacity grown by
+  // earlier patches instead of starting from nothing.
+  std::vector<KDLeaf> leaves;
+
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -1696,12 +1709,7 @@ mergeKDInterior(AmrMesh&                      a_amr,
 
       kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
 
-      auto cellTrueCount = [&cellCounts](const IntVect& a_cell) -> int {
-        return cellCounts.box().contains(a_cell) ? static_cast<int>(cellCounts(a_cell, 0)) : 0;
-      };
-
-      std::vector<KDLeaf> leaves;
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellTrueCount, leaves);
+      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
 
       CH_STOP(t_build);
       CH_START(t_commit);
