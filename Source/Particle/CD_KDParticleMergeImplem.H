@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -230,6 +229,10 @@ kdIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
  *
  * @a a_counts must include at least one ghost cell, since a gathered ghost sits up to one cell
  * outside the patch's own box.
+ *
+ * The count is stored in @a a_counts' @c Real elements but is always a non-negative integer. A double
+ * represents every integer exactly up to 2^53, so consumers -- e.g. the crowding test in
+ * buildKDQuotaLeaves() -- may @c static_cast<int> it losslessly for any realistic per-cell count.
  * @tparam Packed See MergeParticle.
  * @param[in] a_particles Gathered particles for this patch.
  * @param[in] a_probLo Physical position of the domain's low corner.
