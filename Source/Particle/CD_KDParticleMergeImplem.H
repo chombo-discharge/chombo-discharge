@@ -27,10 +27,8 @@
 #include <MayDay.H>
 #include <SPMD.H>
 #include <DataIterator.H>
-#include <parstream.H>
 
 // Our includes
-#include <CD_Timer.H>
 #include <CD_LevelTiles.H>
 #include <CD_ParticleGhostMask.H>
 #include <CD_KDParticleMerge.H>
