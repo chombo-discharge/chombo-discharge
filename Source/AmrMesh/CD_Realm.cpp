@@ -1102,6 +1102,8 @@ Realm::defineParticleGhostMasks() noexcept
   m_particleGhostMask.clear();
   m_particleGhostMaskFineToCoar.clear();
   m_particleGhostMaskCoarToFine.clear();
+  m_particleGhostExposure.clear();
+  m_particleGhostNeighborRanks.clear();
 
   // Particle ghost filling is intentionally NOT supported on periodic domains (a periodic ghost would
   // require wrapping particle copies across the domain). Abort rather than silently mis-fill if a width
@@ -1125,10 +1127,17 @@ Realm::defineParticleGhostMasks() noexcept
     AMRParticleGhostMask& same       = m_particleGhostMask[ghost];
     AMRParticleGhostMask& fineToCoar = m_particleGhostMaskFineToCoar[ghost];
     AMRParticleGhostMask& coarToFine = m_particleGhostMaskCoarToFine[ghost];
+    AMRMask&              exposure   = m_particleGhostExposure[ghost];
 
     same.resize(1 + m_finestLevel);
     fineToCoar.resize(1 + m_finestLevel);
     coarToFine.resize(1 + m_finestLevel);
+    exposure.resize(1 + m_finestLevel);
+
+    // Every rank this rank exchanges ghosts with at this width, in EITHER direction -- see
+    // m_particleGhostNeighborRanks' own docs for why folding in only MY OWN outgoing targets (below)
+    // is enough to also capture incoming ones, no communication required.
+    std::set<int>& neighborRanks = m_particleGhostNeighborRanks[ghost];
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl    = m_grids[lvl];
@@ -1167,6 +1176,92 @@ Realm::defineParticleGhostMasks() noexcept
                                                 m_refinementRatios[lvl],
                                                 ghost);
       }
+
+      // Derived quantities, folded in here rather than recomputed by consumers every timestep: both are
+      // pure functions of the three masks just built, so this is the only place their lifetime is defined.
+      exposure[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(dbl, 1, IntVect::Zero));
+
+      this->defineParticleGhostExposure(*exposure[lvl],
+                                        dbl,
+                                        *same[lvl],
+                                        *fineToCoar[lvl],
+                                        *coarToFine[lvl],
+                                        lvl > 0,
+                                        lvl < m_finestLevel);
+
+      // Fold this level's just-built masks' OWN (outgoing) target ranks into the running neighbor set.
+      // Ghost adjacency is symmetric (box growth intersection is a symmetric relation), so the ranks
+      // this rank ships TO at a given direction/width are exactly the ranks that ship back at the
+      // complementary direction (same-level ships back via the same mask; a coarse rank's C2F targets
+      // ship back via THEIR OWN F2C mask, and vice versa) -- the union across all three directions,
+      // over every level this rank owns boxes at, is therefore the full bidirectional neighbor set,
+      // with no MPI needed to discover it.
+      const DataIterator& dit  = dbl.dataIterator();
+      const int           nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        (*same[lvl])[din].collectTargetRanks(neighborRanks);
+
+        if (lvl > 0) {
+          (*fineToCoar[lvl])[din].collectTargetRanks(neighborRanks);
+        }
+        if (lvl < m_finestLevel) {
+          (*coarToFine[lvl])[din].collectTargetRanks(neighborRanks);
+        }
+      }
+    }
+  }
+}
+
+void
+Realm::defineParticleGhostExposure(LevelData<BaseFab<bool>>&            a_exposure,
+                                   const DisjointBoxLayout&             a_dbl,
+                                   const LayoutData<ParticleGhostMask>& a_same,
+                                   const LayoutData<ParticleGhostMask>& a_fineToCoar,
+                                   const LayoutData<ParticleGhostMask>& a_coarToFine,
+                                   const bool                           a_hasCoar,
+                                   const bool                           a_hasFine) noexcept
+{
+  CH_TIME("Realm::defineParticleGhostExposure");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineParticleGhostExposure" << endl;
+  }
+
+  // Box-local: each box reads only its own three CSR tables and writes only its own BaseFab, so this is
+  // thread-safe over boxes for the same reason the mask builds above are. a_hasCoar/a_hasFine gate the two
+  // masks that are allocated-but-undefined at the hierarchy's ends (see defineParticleGhostMasks()'s
+  // CONTRACT comments); querying those would trip ParticleGhostMask::numTargets()' own assertion.
+  const DataIterator& dit  = a_dbl.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+    const Box        box = a_dbl[din];
+
+    const ParticleGhostMask& same       = a_same[din];
+    const ParticleGhostMask& fineToCoar = a_fineToCoar[din];
+    const ParticleGhostMask& coarToFine = a_coarToFine[din];
+
+    BaseFab<bool>& exposure = a_exposure[din];
+
+    exposure.setVal(false);
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      bool isExposed = same.numTargets(iv) > 0;
+
+      if (!isExposed && a_hasCoar) {
+        isExposed = fineToCoar.numTargets(iv) > 0;
+      }
+      if (!isExposed && a_hasFine) {
+        isExposed = coarToFine.numTargets(iv) > 0;
+      }
+
+      exposure(iv, 0) = isExposed;
     }
   }
 }
@@ -1802,6 +1897,36 @@ Realm::getTrivialParticleGhostMask() const noexcept
   static const AMRParticleGhostMask trivial;
 
   return trivial;
+}
+
+const AMRMask&
+Realm::getParticleGhostExposure(const int a_width) const noexcept
+{
+  const auto it = m_particleGhostExposure.find(a_width);
+
+  if (it == m_particleGhostExposure.end()) {
+    const std::string msg = "Realm::getParticleGhostExposure -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
+}
+
+const std::set<int>&
+Realm::getParticleGhostNeighborRanks(const int a_width) const noexcept
+{
+  const auto it = m_particleGhostNeighborRanks.find(a_width);
+
+  if (it == m_particleGhostNeighborRanks.end()) {
+    const std::string msg = "Realm::getParticleGhostNeighborRanks -- width = " + std::to_string(a_width) +
+                            " was not registered (call registerParticleGhostMask before regridding)";
+
+    MayDay::Abort(msg.c_str());
+  }
+
+  return it->second;
 }
 
 LevelTiles::LevelAndBox

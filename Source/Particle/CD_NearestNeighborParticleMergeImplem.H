@@ -262,12 +262,6 @@ cellKeyOf(const RealVect& a_position, const RealVect& a_probLo, const RealVect& 
   return iv;
 }
 
-inline bool
-isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept
-{
-  return a_ghostMask.numTargets(a_cellIndex) > 0;
-}
-
 /**
  * @brief Exact per-cell crowding pre-filter shared by buildNNSpatialIndex()/buildNNCellSpatialIndex(): is any
  * cell in this patch's local+ghost particle set over its a_cellBudget?
@@ -1335,14 +1329,15 @@ gatherMergeParticles(AmrMesh&                                                  a
   a_particlesByID.clear();
   a_liveCellCount.clear();
 
+  // Which cells hold a particle that some other box can also see -- the trivial tier's eligibility test.
+  // Read from the realm, which derives it from the three ghost masks when they are built (see
+  // Realm::m_particleGhostExposure), rather than re-deriving it here per particle per timestep.
+  const AMRMask& exposure = a_amr.getParticleGhostExposure(a_realm, a_ghostWidth);
+
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     const RealVect& dx = a_dxByLevel[lvl];
 
     const DisjointBoxLayout& dbl = a_amr.getGrids(a_realm)[lvl];
-
-    const AMRParticleGhostMask& maskSame = a_amr.getParticleGhostMask(a_realm, a_ghostWidth);
-    const AMRParticleGhostMask& maskC2F  = a_amr.getParticleGhostMaskCoarToFine(a_realm, a_ghostWidth);
-    const AMRParticleGhostMask& maskF2C  = a_amr.getParticleGhostMaskFineToCoar(a_realm, a_ghostWidth);
 
     const DataIterator& dit  = dbl.dataIterator();
     const int           nbox = dit.size();
@@ -1360,10 +1355,7 @@ gatherMergeParticles(AmrMesh&                                                  a
 
       a_particlesByID.reserve(a_particlesByID.size() + leaf.size());
 
-      const ParticleGhostMask* maskSameDin = maskSame[lvl].isNull() ? nullptr : &(*maskSame[lvl])[din];
-      const ParticleGhostMask* maskC2FDin  = (lvl < a_finestLevel && !maskC2F[lvl].isNull()) ? &(*maskC2F[lvl])[din]
-                                                                                             : nullptr;
-      const ParticleGhostMask* maskF2CDin  = (lvl > 0 && !maskF2C[lvl].isNull()) ? &(*maskF2C[lvl])[din] : nullptr;
+      const BaseFab<bool>& exposureDin = (*exposure[lvl])[din];
 
       for (std::size_t i = 0; i < leaf.size(); i++) {
         const bool isGhost = leaf.isGhost(i);
@@ -1405,15 +1397,11 @@ gatherMergeParticles(AmrMesh&                                                  a
           a_particlesByID[p.globalID] = NNPooledParticle<Packed>{p, false};
         }
         else {
-          bool isExposed = (maskSameDin != nullptr) && isBoundaryExposed(cell, *maskSameDin);
+          // A non-ghost particle is resident in this patch, so its cell lies in this box -- which is
+          // exactly the region the exposure mask is defined over (it carries no ghost cells).
+          CH_assert(exposureDin.box().contains(cell));
 
-          if (!isExposed && maskC2FDin != nullptr) {
-            isExposed = isBoundaryExposed(cell, *maskC2FDin);
-          }
-
-          if (!isExposed && maskF2CDin != nullptr) {
-            isExposed = isBoundaryExposed(cell, *maskF2CDin);
-          }
+          const bool isExposed = exposureDin(cell, 0);
 
           localValid.push_back(p);
           a_particlesByID[p.globalID] = NNPooledParticle<Packed>{p, isExposed};
@@ -1613,19 +1601,14 @@ mergeNearestNeighborsRoundImpl(AmrMesh&                      a_amr,
 {
   CH_TIME("ParticleManagement::mergeNearestNeighborsRoundImpl");
 
-  const std::string   realm       = a_particles.getRealm();
-  const int           finestLevel = a_amr.getFinestLevel();
-  const RealVect      probLo      = a_amr.getProbLo();
-  const Vector<Real>& dxScalar    = a_amr.getDx();
+  const std::string realm       = a_particles.getRealm();
+  const int         finestLevel = a_amr.getFinestLevel();
+  const RealVect    probLo      = a_amr.getProbLo();
 
   // Per-level dx, indexed by level -- every cell-key computation below and downstream (in
   // resolveTrivialTier()/judgeProposals()) MUST use the dx of the PARTICLE'S OWN level (see
   // MergeParticle::level's docs), never a single dx shared across levels.
-  std::vector<RealVect> dxByLevel(finestLevel + 1);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    dxByLevel[lvl] = RealVect(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
-  }
+  const std::vector<RealVect>& dxByLevel = a_amr.getDxAsRealVect().constStdVector();
 
   CH_assert(a_ghostWidth >= 1);
   const int ghostWidth = a_ghostWidth;
@@ -1897,16 +1880,13 @@ mergeNearestNeighborsOneCell(AmrMesh&                      a_amr,
 
   using namespace detail;
 
-  const std::string   realm       = a_particles.getRealm();
-  const int           finestLevel = a_amr.getFinestLevel();
-  const RealVect      probLo      = a_amr.getProbLo();
-  const Vector<Real>& dxScalar    = a_amr.getDx();
+  const std::string realm       = a_particles.getRealm();
+  const int         finestLevel = a_amr.getFinestLevel();
+  const RealVect    probLo      = a_amr.getProbLo();
 
-  std::vector<RealVect> dxByLevel(finestLevel + 1);
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    dxByLevel[lvl] = RealVect(D_DECL(dxScalar[lvl], dxScalar[lvl], dxScalar[lvl]));
-  }
+  // Per-level dx, indexed by level -- see mergeNearestNeighborsRoundImpl()'s own note on why every cell
+  // key must use the dx of the particle's OWN level.
+  const std::vector<RealVect>& dxByLevel = a_amr.getDxAsRealVect().constStdVector();
 
   // Structurally fixed at 1 -- findNearestNeighborCandidatesOneCell() only ever visits the query's
   // own cell and its Moore neighbors, so a width-1 halo already contains every reachable candidate

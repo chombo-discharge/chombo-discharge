@@ -14,6 +14,7 @@
 #define CD_PARTICLEGHOSTMASK_H
 
 // Std includes
+#include <set>
 #include <vector>
 
 // Chombo includes
@@ -176,6 +177,16 @@ public:
    */
   inline bool
   hasTargetBoxes() const noexcept;
+
+  /**
+   * @brief Insert every rank appearing in this table's packed target list into a_ranks.
+   * @details One pass over the packed targets, ignoring which cell each belongs to -- the caller wants
+   * the set of ranks this box ships to, not the per-cell breakdown. Accumulates into the argument (does
+   * not clear it) so a caller can union several tables, e.g. every box of every level.
+   * @param[in,out] a_ranks Set that the target ranks are inserted into.
+   */
+  inline void
+  collectTargetRanks(std::set<int>& a_ranks) const noexcept;
 
 protected:
   /**

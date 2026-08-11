@@ -190,6 +190,11 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
  * switches from count-median to weight-median splitting -- forwarded verbatim to
  * buildKDQuotaLeaves(). 0 disables the weight median entirely.
+ * @param[in,out] a_cellHistogram Caller-owned per-cell scratch (1 component, >= 1 ghost cell, this
+ * container's realm) holding the cell occupancy. Contents on entry are irrelevant -- it is overwritten
+ * per patch. Owned by the caller so the allocation happens once per regrid rather than once per call.
+ * @param[in,out] a_leafQuota Caller-owned per-cell scratch, same shape and lifetime as
+ * @a a_cellHistogram, holding the live per-cell merge quota.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -209,6 +214,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
              ParticleContainer<P, Traits>& a_particles,
              const int                     a_ppc,
              const Real                    a_splitWeightLeafDx,
+             EBAMRFAB&                     a_cellHistogram,
+             EBAMRFAB&                     a_leafQuota,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -245,6 +252,8 @@ mergeKDCarve(AmrMesh&                      a_amr,
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
  * switches from count-median to weight-median splitting -- forwarded verbatim to
  * buildKDQuotaLeaves(). 0 disables the weight median entirely.
+ * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
+ * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -264,6 +273,8 @@ mergeKDPatch(AmrMesh&                      a_amr,
              ParticleContainer<P, Traits>& a_particles,
              const int                     a_ppc,
              const Real                    a_splitWeightLeafDx,
+             EBAMRFAB&                     a_cellHistogram,
+             EBAMRFAB&                     a_leafQuota,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -308,6 +319,8 @@ mergeKDPatch(AmrMesh&                      a_amr,
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
  * switches from count-median to weight-median splitting -- forwarded verbatim to
  * buildKDQuotaLeaves(). 0 disables the weight median entirely.
+ * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
+ * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -328,6 +341,8 @@ mergeKDInterior(AmrMesh&                      a_amr,
                 ParticleContainer<P, Traits>& a_interior,
                 const int                     a_ppc,
                 const Real                    a_splitWeightLeafDx,
+                EBAMRFAB&                     a_cellHistogram,
+                EBAMRFAB&                     a_leafQuota,
                 const Gather&                 a_gather,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,

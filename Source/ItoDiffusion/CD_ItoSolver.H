@@ -998,6 +998,26 @@ public:
                            const bool         a_enableBoundaryCarve);
 
   /**
+   * @brief Allocate the kd merges' per-cell scratch holders, unless they are already current.
+   * @details Called by the kd merge entry points rather than unconditionally from allocate()/regrid(),
+   * for two reasons: an ItoKMC run holds one solver per species, so unconditional holders multiply the
+   * memory by the species count for solvers that may never run a kd merge; and the merge method can be
+   * chosen per call (ItoKMCStepper's regrid merge), so m_mergeMethod does not predict whether a kd
+   * merge will happen. The holders are invalidated at every allocate()/regrid(), so this allocates at
+   * most once per regrid for a solver that does use them.
+   */
+  void
+  defineKDMergeScratch() noexcept;
+
+  /**
+   * @brief Release the kd merges' per-cell scratch holders and mark them stale.
+   * @details Called from allocate()/regrid(), i.e. whenever the grids the holders were sized to have
+   * been replaced. The next kd merge re-allocates them through defineKDMergeScratch().
+   */
+  void
+  invalidateKDMergeScratch() noexcept;
+
+  /**
    * @brief Remap the bulk particle container.
    */
   virtual void
@@ -1492,6 +1512,24 @@ protected:
    * @brief Diffusion-centerer field used for interpolating diffusion coefficients
    */
   EBAMRCellData m_diffusionFunction;
+
+  /**
+   * @brief Per-cell occupancy scratch for the kd merges (see ParticleManagement::mergeKDCarve).
+   * @details Owned here, not by the merge, so the allocation happens once per regrid rather than once
+   * per merge call. Undefined until the first kd merge; see defineKDMergeScratch().
+   */
+  EBAMRFAB m_kdMergeCellHistogram;
+
+  /**
+   * @brief Per-cell merge-quota scratch for the kd merges. Same lifetime as m_kdMergeCellHistogram.
+   */
+  EBAMRFAB m_kdMergeLeafQuota;
+
+  /**
+   * @brief Whether the kd merge scratch holders above match the current grids.
+   * @details Cleared at every allocate()/regrid(); defineKDMergeScratch() sets it when it allocates.
+   */
+  bool m_kdMergeScratchDefined = false;
 
   /**
    * @brief Scratch storage for holding the non-conservative deposition

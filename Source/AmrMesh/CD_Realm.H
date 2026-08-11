@@ -533,6 +533,27 @@ public:
   getTrivialParticleGhostMask() const noexcept;
 
   /**
+   * @brief Get the boundary-exposure mask for a registered particle ghost width.
+   * @details See m_particleGhostExposure' own docs for what "exposed" means and why the mask carries no
+   * ghost cells.
+   * @param[in] a_width Registered ghost width.
+   * @return The per-level exposure mask for a_width. Aborts if the width was not registered.
+   */
+  const AMRMask&
+  getParticleGhostExposure(const int a_width) const noexcept;
+
+  /**
+   * @brief Get the particle ghost neighbor-rank set for a registered width.
+   * @details Every rank this rank exchanges particle ghosts with, in either direction, at a_width -- see
+   * m_particleGhostNeighborRanks' own docs. Lets a consumer restrict a would-be all-to-all exchange to
+   * this set instead.
+   * @param[in] a_width Registered ghost width.
+   * @return The neighbor-rank set for a_width. Aborts if the width was not registered.
+   */
+  const std::set<int>&
+  getParticleGhostNeighborRanks(const int a_width) const noexcept;
+
+  /**
    * @brief Get the tiled space
    * @return Level tiles
    */
@@ -665,6 +686,33 @@ protected:
    * (<finest); per source (coarse) box maps a source cell to the finer-level boxes whose ghosted region covers it.
    */
   std::map<int, AMRParticleGhostMask> m_particleGhostMaskCoarToFine;
+
+  /**
+   * @brief Particle boundary-exposure masks, keyed by ghost width. Per width: indexed by level, true in
+   * every cell that has at least one outgoing ghost-shipment target in ANY direction -- i.e. the OR over
+   * the same-level, fine-to-coarse and coarse-to-fine masks of numTargets(cell) > 0.
+   * @details A cell is "exposed" when a particle sitting in it is visible to some other box, so a consumer
+   * that wants to act on such a particle unilaterally cannot: some other box may be acting on the same
+   * particle in the same round. The mergers ask this question per particle, every timestep, for data that
+   * changes only when the masks it is derived from do -- hence caching it here, beside those masks and
+   * rebuilt by the same function.
+   *
+   * Carries NO ghost cells, deliberately: only cells holding a RESIDENT particle are ever queried, and
+   * resident means the cell lies in the patch's own box. A ghost particle's cell lies outside the box and
+   * would in any case violate ParticleGhostMask::numTargets()' own precondition.
+   */
+  std::map<int, AMRMask> m_particleGhostExposure;
+
+  /**
+   * @brief Particle ghost neighbor ranks, keyed by ghost width. The union, over every box THIS rank owns
+   * at every level, of the target ranks appearing in that width's same-level/fine-to-coarse/coarse-to-fine
+   * masks -- i.e. every rank this rank exchanges particle ghosts with in EITHER direction, at that width.
+   * @details Built once per regrid alongside the masks themselves (see defineParticleGhostMasks()); no MPI
+   * is needed because it relies only on ghost adjacency being symmetric (if a box grown by the ghost width
+   * reaches a neighbor, the same growth relation reaches back), a property the ghost-fill masks already
+   * depend on. Lets consumers replace an all-to-all exchange with one restricted to actual neighbors.
+   */
+  std::map<int, std::set<int>> m_particleGhostNeighborRanks;
 
 #ifdef CH_USE_PETSC
   /**
@@ -878,6 +926,29 @@ protected:
                                     const ProblemDomain&            a_fineDomain,
                                     const int                       a_refRat,
                                     const int                       a_ghost) noexcept;
+
+  /**
+   * @brief Define the boundary-exposure mask on one level from that level's three particle ghost masks.
+   * @details Sets a cell true iff it has at least one outgoing ghost-shipment target in any direction; see
+   * m_particleGhostExposure' own docs for what the mask is for. a_hasCoar/a_hasFine say whether the
+   * fine-to-coarse/coarse-to-fine masks are actually defined on this level -- they are allocated but left
+   * undefined on level 0 and on the finest level respectively, and must not be queried there.
+   * @param[out] a_exposure   Per-box boolean mask over a_dbl to fill (no ghost cells).
+   * @param[in]  a_dbl        This level's grids.
+   * @param[in]  a_same       This level's same-level ghost mask.
+   * @param[in]  a_fineToCoar This level's fine-to-coarse ghost mask. Only read if a_hasCoar.
+   * @param[in]  a_coarToFine This level's coarse-to-fine ghost mask. Only read if a_hasFine.
+   * @param[in]  a_hasCoar    Whether a coarser level exists (i.e. a_fineToCoar is defined).
+   * @param[in]  a_hasFine    Whether a finer level exists (i.e. a_coarToFine is defined).
+   */
+  void
+  defineParticleGhostExposure(LevelData<BaseFab<bool>>&            a_exposure,
+                              const DisjointBoxLayout&             a_dbl,
+                              const LayoutData<ParticleGhostMask>& a_same,
+                              const LayoutData<ParticleGhostMask>& a_fineToCoar,
+                              const LayoutData<ParticleGhostMask>& a_coarToFine,
+                              const bool                           a_hasCoar,
+                              const bool                           a_hasFine) noexcept;
 
   /**
    * @brief Define the PETSc composite grid

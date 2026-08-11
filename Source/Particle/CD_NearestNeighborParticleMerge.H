@@ -40,7 +40,6 @@
 #include <CD_ParticleSoA.H>
 #include <CD_ParticleContainer.H>
 #include <CD_ParticleManagement.H>
-#include <CD_ParticleGhostMask.H>
 #include <CD_NamespaceHeader.H>
 
 class AmrMesh;
@@ -134,8 +133,8 @@ struct NNMergeEdge
   /**
    * @brief True iff the candidate is a locally-valid particle in the SAME patch as the query
    * (i.e. not a ghost). Note this is NOT sufficient on its own to decide trivial-tier
-   * eligibility -- see isBoundaryExposed(): a same-patch candidate can still require the
-   * propose/judge/verdict protocol if either participant is boundary-exposed.
+   * eligibility -- see Realm::m_particleGhostExposure: a same-patch candidate can still require
+   * the propose/judge/verdict protocol if either participant is boundary-exposed.
    */
   bool candidateIsLocal;
 
@@ -561,25 +560,6 @@ buildNNSpatialIndex(const std::vector<MergeParticle<Packed>>& a_localValid,
                     NNSpatialIndex<Packed, Cloud>&            a_index) noexcept;
 
 /**
- * @brief Whether a particle is boundary-exposed -- i.e. would be shipped as a ghost to at
- * least one neighboring patch.
- * @details The eligibility test for the trivial tier (see resolveTrivialTier()). A direct lookup
- * against the patch's own outgoing ghost mask -- whether this particle's cell has any registered
- * destination (@c ParticleGhostMask::numTargets()) -- not "same rank" and not "same ParticleSoA": a
- * particle can be exposed to a different patch owned by the same rank, and can be exposed while its
- * candidate sits in the same ParticleSoA.
- * @param[in] a_cellIndex Cell index (IntVect) of the particle, in this patch's own local frame -- i.e. whatever
- * a_ghostMask itself is keyed by (see ParticleGhostMask::define()/addTarget()).
- * @param[in] a_ghostMask This patch's own OUTGOING particle ghost mask, as returned by
- * AmrMesh::getParticleGhostMask() (or getParticleGhostMaskCoarToFine()/ getParticleGhostMaskFineToCoar() for
- * cross-level exposure -- a particle can be boundary-exposed toward a coarser or finer level too, not just the same
- * level; see mergeNearestNeighborsTree() for how the three mask kinds are combined into one boundary-exposed test).
- * @return True iff the particle's cell has at least one outgoing ghost-shipment target.
- */
-inline bool
-isBoundaryExposed(const IntVect& a_cellIndex, const ParticleGhostMask& a_ghostMask) noexcept;
-
-/**
  * @brief For every over-threshold, currently-alive valid particle in a patch, find its single
  * TRUE nearest neighbor among {this patch's own other valid particles} union {every ghost
  * shipped to this patch}.
@@ -788,7 +768,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<MergeParticle<Packed>>&  
  * coordination, and mark which remaining particles have committed to a non-trivial outgoing
  * proposal.
  * @details An edge is trivial-tier eligible iff NEITHER the query nor the candidate is
- * boundary-exposed (see isBoundaryExposed()) -- this check happens AFTER finding the true nearest
+ * boundary-exposed (see Realm::m_particleGhostExposure) -- this check happens AFTER finding the true nearest
  * neighbor, never as a restriction on the search itself.
  *
  * All eligible edges (across every patch this rank owns) are processed in ONE globally
@@ -834,7 +814,7 @@ findNearestNeighborCandidatesOneCell(const std::vector<MergeParticle<Packed>>&  
  * @param[in] a_particlesByID Full particle data for every currently-alive local valid particle and every ghost across
  * all of this rank's patches, keyed by id. Each value is an NNPooledParticle: the particle (position/weight/id/rank/
  * payload, needed to compute a merge's weighted-centroid position and call a_combine, since an edge only carries
- * ids/distance) plus its cached boundary-exposure flag (isBoundaryExposed(); false for ghosts).
+ * ids/distance) plus its cached boundary-exposure flag (Realm::m_particleGhostExposure; false for ghosts).
  * @param[in] a_combine Opaque-payload combine callback (see PayloadCombine).
  * @param[in,out] a_liveCellCount Live per-cell counts; decremented in place as trivial merges commit, so later edges
  * in the same pass see the up-to-date occupancy.

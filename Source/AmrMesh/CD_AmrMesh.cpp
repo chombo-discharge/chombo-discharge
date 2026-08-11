@@ -1030,6 +1030,7 @@ AmrMesh::buildDomains()
 
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
+  m_dxRealVect.resize(numLevels);
   m_grids.resize(numLevels);
 
   m_dx[0]      = (m_probHi[0] - m_probLo[0]) / m_numCells[0];
@@ -1040,6 +1041,10 @@ AmrMesh::buildDomains()
     m_domains[lvl] = m_domains[lvl - 1];
 
     m_domains[lvl].refine(m_refinementRatios[lvl - 1]);
+  }
+
+  for (int lvl = 0; lvl <= m_maxAmrDepth; lvl++) {
+    m_dxRealVect[lvl] = m_dx[lvl] * RealVect::Unit;
   }
 }
 
@@ -3222,6 +3227,17 @@ AmrMesh::getDx() const
   return m_dx;
 }
 
+const Vector<RealVect>&
+AmrMesh::getDxAsRealVect() const
+{
+  CH_TIME("AmrMesh::getDxAsRealVect()");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getDxAsRealVect()" << endl;
+  }
+
+  return m_dxRealVect;
+}
+
 const Vector<int>&
 AmrMesh::getRefinementRatios() const
 {
@@ -3528,6 +3544,39 @@ AmrMesh::getTrivialParticleGhostMask() const
   static const AMRParticleGhostMask trivial;
 
   return trivial;
+}
+
+const AMRMask&
+AmrMesh::getParticleGhostExposure(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostExposure(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostExposure(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostExposure(string, int) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostExposure(a_width);
+}
+
+const std::set<int>&
+AmrMesh::getParticleGhostNeighborRanks(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostNeighborRanks(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostNeighborRanks(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostNeighborRanks(string, int) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostNeighborRanks(a_width);
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&

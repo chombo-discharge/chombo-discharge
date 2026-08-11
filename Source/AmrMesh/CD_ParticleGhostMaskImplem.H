@@ -139,6 +139,14 @@ ParticleGhostMask::hasTargetBoxes() const noexcept
   return !m_flatBox.empty();
 }
 
+inline void
+ParticleGhostMask::collectTargetRanks(std::set<int>& a_ranks) const noexcept
+{
+  for (const LevelTiles::BoxIDs& target : m_flat) {
+    a_ranks.insert(static_cast<int>(target.second));
+  }
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif
