@@ -117,6 +117,7 @@
 #define CD_PARTICLESOA_H
 
 // Std includes
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -1590,18 +1591,41 @@ protected:
     a_o.m_colPtrs  = {};
   }
 
-  /** @brief Grow geometrically if the container is full (called before writing slot m_size). */
+  /**
+   * @brief Grow the arena to hold at least @a a_needed particles, geometrically.
+   * @details The growth policy for every append path, and deliberately NOT folded into reserve():
+   * reserve() sets the capacity EXACTLY, which deepCopy() depends on to reproduce a source
+   * container's arena layout byte for byte. An append that called reserve(m_size + n) directly would
+   * leave capacity == size on return, so the very next append would reallocate and recopy the whole
+   * arena again -- turning the documented extract->mutate->accumulate idiom (see extractCell()) into
+   * O(N^2) copying, since the accumulating container is grown one cell at a time.
+   * @param[in] a_needed Number of particles the arena must be able to hold.
+   */
+  void
+  growTo(const std::size_t a_needed)
+  {
+    if (a_needed <= m_capacity) {
+      return;
+    }
+
+    // Saturating geometric growth: 2 * m_capacity overflows std::size_t once m_capacity exceeds
+    // SIZE_MAX/2, and reserve()'s "a_capacity <= m_capacity" guard would then silently no-op.
+    const std::size_t doubled = (m_capacity == 0) ? 16
+                                                  : (m_capacity <= std::numeric_limits<std::size_t>::max() / 2
+                                                       ? 2 * m_capacity
+                                                       : std::numeric_limits<std::size_t>::max());
+
+    this->reserve(std::max(a_needed, doubled));
+  }
+
+  /**
+   * @brief Grow geometrically if the container is full (called before writing slot m_size).
+   */
   void
   growIfFull()
   {
     if (m_size == m_capacity) {
-      // Saturating geometric growth: 2 * m_capacity overflows std::size_t once m_capacity exceeds
-      // SIZE_MAX/2, and reserve()'s "a_capacity <= m_capacity" guard would then silently no-op.
-      const std::size_t newCap = (m_capacity == 0) ? 16
-                                                   : (m_capacity <= std::numeric_limits<std::size_t>::max() / 2
-                                                        ? 2 * m_capacity
-                                                        : std::numeric_limits<std::size_t>::max());
-      this->reserve(newCap);
+      this->growTo(m_size + 1);
     }
   }
 
