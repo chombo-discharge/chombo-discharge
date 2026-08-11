@@ -1594,11 +1594,18 @@ protected:
   /**
    * @brief Grow the arena to hold at least @a a_needed particles, geometrically.
    * @details The growth policy for every append path, and deliberately NOT folded into reserve():
-   * reserve() sets the capacity EXACTLY, which deepCopy() depends on to reproduce a source
-   * container's arena layout byte for byte. An append that called reserve(m_size + n) directly would
-   * leave capacity == size on return, so the very next append would reallocate and recopy the whole
-   * arena again -- turning the documented extract->mutate->accumulate idiom (see extractCell()) into
-   * O(N^2) copying, since the accumulating container is grown one cell at a time.
+   * reserve() sets the capacity EXACTLY, and exactly one caller needs that for correctness.
+   * deepCopy() sizes the destination to the SOURCE's capacity and then flat-memcpy()s byteSpan()
+   * across in one go, which is only valid while both arenas compute the same per-column offsets --
+   * and those offsets are derived from the capacity. Rounding the capacity up there would silently
+   * copy the columns to the wrong places. The remaining exact-sizing callers do not depend on the
+   * layout: resize() and deepCopyTo() simply want the capacity they asked for rather than a doubled
+   * one, deepCopyTo() copying column by column and so needing only capacity >= m_size.
+   *
+   * An append that called reserve(m_size + n) directly would leave capacity == size on return, so
+   * the very next append would reallocate and recopy the whole arena -- turning the
+   * extract->mutate->accumulate idiom extractCell() documents as canonical into O(N^2) copying,
+   * since the accumulating container is grown one cell at a time.
    * @param[in] a_needed Number of particles the arena must be able to hold.
    */
   void
