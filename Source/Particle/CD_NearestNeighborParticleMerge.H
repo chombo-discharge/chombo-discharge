@@ -1217,6 +1217,7 @@ finishMergeRound(ParticleContainer<P, Traits>&                             a_par
                  const PosValid&                                           a_isPositionValid,
                  const RealVect&                                           a_probLo,
                  const std::vector<RealVect>&                              a_dxByLevel,
+                 const std::vector<int>&                                   a_neighborRanks,
                  const std::vector<NNPatchWork>&                           a_patchWork,
                  const std::vector<NNMergeEdge<Packed>>&                   a_pooledEdges,
                  const std::unordered_set<ParticleID>&                     a_hasOutgoingCommitment,

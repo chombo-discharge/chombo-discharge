@@ -322,7 +322,7 @@ To fill the masked particles, ``ParticleContainer<P, Traits>`` has member functi
 The function signature for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 703-704
+   :lines: 708-709
    :language: c++
    :dedent: 2
 
@@ -338,7 +338,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be released through
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 733-737
+   :lines: 738-742
    :language: c++
    :dedent: 2
 
@@ -425,11 +425,12 @@ ______________
 With the three masks in hand, the ghost particles are filled with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 650-653
+   :lines: 654-658
    :language: c++
    :dedent: 2
 
 ``fillGhostParticles`` first clears any existing halo, then for every valid particle scatters a copy (same-rank directly, cross-rank via MPI) into each destination leaf listed by the masks, tagging it with the receiver-view ``GhostType`` and keeping the source's ``particleID``.
+The cross-rank scatter is point-to-point over the neighbour ranks rather than a full-communicator exchange, which is what the fourth argument is for: it must be the neighbour set built from these same masks, since a destination outside it would never be received.
 A typical call, having registered ``width`` during ``registerRealms``/setup, is
 
 .. code-block:: c++
@@ -439,13 +440,14 @@ A typical call, having registered ``width`` during ``registerRealms``/setup, is
    const AMRParticleGhostMask& same = amr->getParticleGhostMask(realm, width);
    const AMRParticleGhostMask& c2f  = amr->getParticleGhostMaskCoarToFine(realm, width);
    const AMRParticleGhostMask& f2c  = amr->getParticleGhostMaskFineToCoar(realm, width);
+   const std::vector<int>&     nbrs = amr->getParticleGhostNeighborRanks(realm, width);
 
-   particles.fillGhostParticles(same, c2f, f2c);   // pass getTrivialParticleGhostMask() to skip a direction
+   particles.fillGhostParticles(same, c2f, f2c, nbrs);   // pass getTrivialParticleGhostMask() to skip a direction
 
 The halo can be dropped at any time with
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 660-661
+   :lines: 665-666
    :language: c++
    :dedent: 2
 

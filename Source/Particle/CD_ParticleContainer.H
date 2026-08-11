@@ -646,11 +646,16 @@ public:
    * @param[in] a_maskSame       Same-level ghost mask (source cell -> same-level target boxes).
    * @param[in] a_maskCoarToFine Coarse-to-fine ghost mask (source cell -> next-finer target boxes).
    * @param[in] a_maskFineToCoar Fine-to-coarse ghost mask (source cell -> next-coarser target boxes).
+   * @param[in] a_neighborRanks  Every rank this rank exchanges ghosts with at the masks' width, as
+   * returned by AmrMesh::getParticleGhostNeighborRanks(realm, width). The cross-rank scatter is
+   * restricted to this set instead of going over the full communicator, so it MUST be the set built from
+   * these same masks -- a destination outside it would never be received (asserted in debug builds).
    */
   void
   fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
                      const AMRParticleGhostMask& a_maskCoarToFine,
-                     const AMRParticleGhostMask& a_maskFineToCoar);
+                     const AMRParticleGhostMask& a_maskFineToCoar,
+                     const std::vector<int>&     a_neighborRanks);
 
   /**
    * @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
@@ -952,7 +957,10 @@ protected:
                         const AMRParticleGhostMask& a_maskFineToCoar);
 
   /**
-   * @brief Assign a pool into the valid holders: local appends + MPI scatter.
+   * @brief Assign a pool into the valid holders: local appends + an all-to-all MPI scatter.
+   * @details For pools whose destinations are NOT bounded -- remap() (nothing limits how far a particle
+   * moves in a step, and a cold start over randomly sampled positions really is dense) and regrid() (the
+   * destination layout is new). Use distributeFromPoolNeighbors() where the destinations are bounded.
    * @param[in,out] a_pool              Per-rank pool (consumed). Same-rank bins are catenated into the
    *                                    destination leaf; cross-rank bins are linearized and Alltoallv'd.
    * @param[in] a_setOwnerToReceiver    If true, every cross-rank particle's rankID is set to the
@@ -961,6 +969,73 @@ protected:
    */
   void
   distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver);
+
+  /**
+   * @brief Assign a pool into the valid holders: local appends + a neighbor-restricted MPI scatter.
+   * @details Identical to distributeFromPool() except that the cross-rank scatter is point-to-point over
+   * a_neighborRanks rather than a full-communicator Alltoall/Alltoallv. Valid ONLY when every cross-rank
+   * destination in a_pool is known to lie in a_neighborRanks: a rank posts receives for its own neighbors
+   * only, so a destination outside the set would never collect the payload. That is a silent conservation
+   * violation, so it is asserted on the sending side in debug builds.
+   * @param[in,out] a_pool           Per-rank pool (consumed), as for distributeFromPool().
+   * @param[in] a_setOwnerToReceiver As for distributeFromPool().
+   * @param[in] a_neighborRanks      Ranks this rank may exchange with (see
+   *                                 AmrMesh::getParticleGhostNeighborRanks).
+   */
+  void
+  distributeFromPoolNeighbors(MoverPool&              a_pool,
+                              const bool              a_setOwnerToReceiver,
+                              const std::vector<int>& a_neighborRanks);
+
+  /**
+   * @brief Catenate a pool's same-rank bins straight into their destination leaves.
+   * @param[in,out] a_pool Per-rank pool; only the entry for this rank is read.
+   */
+  void
+  catenateLocalMovers(MoverPool& a_pool);
+
+#ifdef CH_MPI
+  /**
+   * @brief Linearize a pool's cross-rank bins into one byte buffer per destination rank.
+   * @details Each bin becomes a (level, grid index, count) header followed by the linearized particles.
+   * The entry for this rank is left empty -- catenateLocalMovers() handles those.
+   * @param[in,out] a_pool    Per-rank pool to pack.
+   * @param[out]    a_sendBuf Resized to the rank count and filled; entry r is the payload for rank r.
+   */
+  void
+  packMoversByRank(MoverPool& a_pool, std::vector<std::vector<char>>& a_sendBuf) const;
+
+  /**
+   * @brief Exchange packed byte buffers over the full communicator (MPI_Alltoall + MPI_Alltoallv).
+   * @param[in] a_sendBuf Per-destination-rank payloads, as built by packMoversByRank().
+   * @return Every byte received, in rank order.
+   */
+  std::vector<char>
+  exchangeAllToAll(const std::vector<std::vector<char>>& a_sendBuf) const;
+
+  /**
+   * @brief Exchange packed byte buffers point-to-point with a fixed neighbor set.
+   * @details Two Isend/Irecv rounds over a_neighborRanks -- byte counts, then payloads -- in place of the
+   * collectives exchangeAllToAll() uses. Non-neighbors are known to send nothing, so their counts are
+   * never asked for; that is the entire saving, and it is why the caller must guarantee the bound.
+   * @param[in] a_sendBuf       Per-destination-rank payloads, as built by packMoversByRank(). Entries
+   *                            outside a_neighborRanks must be empty (asserted in debug builds).
+   * @param[in] a_neighborRanks Ranks to exchange with.
+   * @return Every byte received, in neighbor order.
+   */
+  std::vector<char>
+  exchangeNeighbors(const std::vector<std::vector<char>>& a_sendBuf, const std::vector<int>& a_neighborRanks) const;
+
+  /**
+   * @brief Append received particles into their destination leaves.
+   * @details Walks the buffer's headers to group chunks by destination leaf, then appends group by group
+   * (one leaf per thread, so no two threads touch the same leaf).
+   * @param[in] a_recvFlat           Bytes received, as returned by either exchange routine.
+   * @param[in] a_setOwnerToReceiver If true, each appended particle's rankID becomes this rank.
+   */
+  void
+  unpackMovers(const std::vector<char>& a_recvFlat, const bool a_setOwnerToReceiver);
+#endif
 
   /**
    * @brief Per-level AMR grids.

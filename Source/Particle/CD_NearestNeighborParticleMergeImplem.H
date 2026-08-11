@@ -166,6 +166,167 @@ nnMergePointToCellDistSquared(const RealVect& a_point,
 }
 
 /**
+ * @brief Neighbor-restricted counterpart of nnMergeExchangeByRank().
+ * @details Two Isend/Irecv rounds -- record counts, then payloads -- over a_neighborRanks only, in place
+ * of the MPI_Alltoall/Alltoallv pair. A rank outside the set is known to send nothing, so its count is
+ * never asked for. Valid ONLY when every destination is bounded by that set; a destination outside it
+ * would never be received, which for these buckets means a silently dropped merge. Asserted on the
+ * sending side in debug builds. The result is concatenated in rank order, self bucket included at its
+ * own position, so it is indistinguishable from what nnMergeExchangeByRank() returns.
+ * @tparam T Trivially-copyable record type, as for nnMergeExchangeByRank().
+ * @param[in] a_sendByRank One bucket per destination rank (size == number of ranks).
+ * @param[in] a_neighborRanks Ranks this rank may exchange with.
+ * @return Flat vector of every record received, plus this rank's own bucket.
+ */
+template <typename T>
+inline std::vector<T>
+nnMergeExchangeByRankNeighbors(const std::vector<std::vector<T>>& a_sendByRank, const std::vector<int>& a_neighborRanks)
+{
+  const int numRanks = static_cast<int>(a_sendByRank.size());
+
+#ifdef CH_MPI
+  const int myRank = procID();
+
+  if (numRanks <= 1) {
+    return a_sendByRank.empty() ? std::vector<T>() : a_sendByRank[0];
+  }
+
+  // A destination outside the neighbor set would never be received: the receiving rank posts receives
+  // for ITS neighbors only. Assert on the sending side, where the destination is known -- for these
+  // buckets a dropped record is a dropped merge, i.e. lost weight, with nothing to signal it.
+#ifndef NDEBUG
+  for (int r = 0; r < numRanks; r++) {
+    if (r != myRank && !a_sendByRank[r].empty()) {
+      CH_assert(std::binary_search(a_neighborRanks.begin(), a_neighborRanks.end(), r));
+    }
+  }
+#endif
+
+  // Indices run over a_neighborRanks directly rather than over a filtered copy. It is sorted ascending,
+  // so every rank walks its neighbors in the same order, and it lists this rank too -- whose slot is
+  // skipped when posting and contributes its own bucket during the assembly below.
+  const int numNeighbors = static_cast<int>(a_neighborRanks.size());
+
+  std::vector<int> sendCounts(numNeighbors, 0);
+  std::vector<int> recvCounts(numNeighbors, 0);
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] != myRank) {
+      sendCounts[i] = static_cast<int>(a_sendByRank[a_neighborRanks[i]].size());
+    }
+  }
+
+  constexpr int countTag  = 1721;
+  constexpr int recordTag = 1722;
+
+  std::vector<MPI_Request> requests;
+  requests.reserve(2 * numNeighbors);
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] == myRank) {
+      continue;
+    }
+
+    requests.emplace_back();
+
+    MPI_Irecv(&recvCounts[i], 1, MPI_INT, a_neighborRanks[i], countTag, Chombo_MPI::comm, &requests.back());
+  }
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] == myRank) {
+      continue;
+    }
+
+    requests.emplace_back();
+
+    MPI_Isend(&sendCounts[i], 1, MPI_INT, a_neighborRanks[i], countTag, Chombo_MPI::comm, &requests.back());
+  }
+
+  MPI_Waitall(static_cast<int>(requests.size()), requests.data(), MPI_STATUSES_IGNORE);
+
+  std::vector<int> rdispl(numNeighbors, 0);
+
+  long rtot = 0;
+
+  for (int i = 0; i < numNeighbors; i++) {
+    rdispl[i] = static_cast<int>(rtot);
+    rtot += recvCounts[i];
+  }
+
+  std::vector<T> rflat(rtot);
+
+  requests.clear();
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (recvCounts[i] > 0) {
+      requests.emplace_back();
+
+      MPI_Irecv(rflat.data() + rdispl[i],
+                recvCounts[i] * static_cast<int>(sizeof(T)),
+                MPI_BYTE,
+                a_neighborRanks[i],
+                recordTag,
+                Chombo_MPI::comm,
+                &requests.back());
+    }
+  }
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (sendCounts[i] > 0) {
+      requests.emplace_back();
+
+      // const_cast because the pre-MPI-3 send prototypes take a non-const buffer; nothing writes to it.
+      MPI_Isend(const_cast<T*>(a_sendByRank[a_neighborRanks[i]].data()),
+                sendCounts[i] * static_cast<int>(sizeof(T)),
+                MPI_BYTE,
+                a_neighborRanks[i],
+                recordTag,
+                Chombo_MPI::comm,
+                &requests.back());
+    }
+  }
+
+  MPI_Waitall(static_cast<int>(requests.size()), requests.data(), MPI_STATUSES_IGNORE);
+
+  // Assemble in rank order, with this rank's self-addressed bucket spliced in at its own position.
+  // That is exactly the ordering MPI_Alltoallv produces, and it has to be: the argmin arbitration
+  // downstream tie-breaks on record order where two keys compare equal, so a different concatenation
+  // order would be a different (still self-consistent, but different) merge outcome.
+  std::vector<T> result;
+  result.reserve(static_cast<std::size_t>(rtot) + a_sendByRank[myRank].size());
+
+  int nextNeighbor = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    // a_neighborRanks lists THIS rank as well (a rank's own boxes ship to each other), so the cursor
+    // has to step past that entry too -- otherwise it stalls on it and every later neighbour's chunk is
+    // silently dropped. It is not guaranteed to be present, though, which is why the self bucket is
+    // spliced on the rank test rather than on the cursor.
+    const bool isNeighborSlot = (nextNeighbor < numNeighbors && a_neighborRanks[nextNeighbor] == r);
+
+    if (r == myRank) {
+      result.insert(result.end(), a_sendByRank[myRank].begin(), a_sendByRank[myRank].end());
+    }
+    else if (isNeighborSlot) {
+      result.insert(result.end(),
+                    rflat.begin() + rdispl[nextNeighbor],
+                    rflat.begin() + rdispl[nextNeighbor] + recvCounts[nextNeighbor]);
+    }
+
+    if (isNeighborSlot) {
+      nextNeighbor++;
+    }
+  }
+
+  return result;
+#else
+  (void)a_neighborRanks;
+
+  return a_sendByRank.empty() ? std::vector<T>() : a_sendByRank[0];
+#endif
+}
+
+/**
  * @brief Generic alltoallv-style exchange: send a per-destination-rank bucket of trivially-
  * copyable records, return the flat concatenation of everything received.
  * @details Packs one bucket per rank and exchanges via MPI_Alltoall (byte counts) + MPI_Alltoallv
@@ -1454,6 +1615,7 @@ finishMergeRound(ParticleContainer<P, Traits>&                             a_par
                  const PosValid&                                           a_isPositionValid,
                  const RealVect&                                           a_probLo,
                  const std::vector<RealVect>&                              a_dxByLevel,
+                 const std::vector<int>&                                   a_neighborRanks,
                  const std::vector<NNPatchWork>&                           a_patchWork,
                  const std::vector<NNMergeEdge<Packed>>&                   a_pooledEdges,
                  const std::unordered_set<ParticleID>&                     a_hasOutgoingCommitment,
@@ -1478,7 +1640,8 @@ finishMergeRound(ParticleContainer<P, Traits>&                             a_par
   std::vector<std::vector<NNMergeProposal<Packed>>> proposalsByDestRank;
   generateProposals(proposalsByDestRank, a_pooledEdges, a_hasOutgoingCommitment, a_particlesByID, numRanks);
 
-  const std::vector<NNMergeProposal<Packed>> incomingProposals = nnMergeExchangeByRank(proposalsByDestRank);
+  const std::vector<NNMergeProposal<Packed>> incomingProposals = nnMergeExchangeByRankNeighbors(proposalsByDestRank,
+                                                                                                a_neighborRanks);
 
   std::vector<NNMergeResult<Packed>>       judgeResults;
   std::vector<std::vector<NNMergeVerdict>> verdictsByDestRank(numRanks);
@@ -1507,7 +1670,8 @@ finishMergeRound(ParticleContainer<P, Traits>&                             a_par
     a_consumedIDs.insert(r.firstID);
   }
 
-  const std::vector<NNMergeVerdict> incomingVerdicts = nnMergeExchangeByRank(verdictsByDestRank);
+  const std::vector<NNMergeVerdict> incomingVerdicts = nnMergeExchangeByRankNeighbors(verdictsByDestRank,
+                                                                                      a_neighborRanks);
 
   applyVerdicts(a_consumedIDs, incomingVerdicts);
 
@@ -1523,6 +1687,9 @@ finishMergeRound(ParticleContainer<P, Traits>&                             a_par
 
   placeMergedParticles(localByPatch, scatterByDestRank, a_allResults, locate, myRank);
 
+  // Deliberately still all-to-all, unlike the two rounds above -- see the same note in mergeKDCarve().
+  // A merged particle's destination comes from a position lookup, not from the ghost masks, so the
+  // neighbor set does not bound it by construction.
   const std::vector<MergeParticle<Packed>> incomingScattered = nnMergeExchangeByRank(scatterByDestRank);
 
   // ---- Apply everything to the real ParticleSoA containers ----
@@ -1622,6 +1789,12 @@ mergeNearestNeighborsRoundImpl(ParticleContainer<P, Traits>& a_particles,
 
   CH_assert(a_ghostWidth >= 1);
   const int ghostWidth = a_ghostWidth;
+
+  // Every rank this rank can exchange ghosts with at this width. The proposal and verdict rounds are
+  // bounded by exactly this set -- a proposal is routed to the owner of a candidate, and a candidate is
+  // either resident here or arrived as a ghost from one of these ranks; verdicts answer the ranks the
+  // proposals came from. The scatter round is not bounded this way; see its own note.
+  const std::vector<int>& neighborRanks = a_amr.getParticleGhostNeighborRanks(realm, ghostWidth);
 
   // Ghost particles are assumed ALREADY FILLED by the caller (an a_ghostWidth-cell halo -- one cell
   // per unit of a_ghostWidth in every direction, which is what the crowding trigger and the candidate
@@ -1767,6 +1940,7 @@ mergeNearestNeighborsRoundImpl(ParticleContainer<P, Traits>& a_particles,
                                       a_isPositionValid,
                                       probLo,
                                       dxByLevel,
+                                      neighborRanks,
                                       patchWork,
                                       lastPooledEdges,
                                       hasOutgoingCommitment,
@@ -1908,6 +2082,9 @@ mergeNearestNeighborsOneCell(ParticleContainer<P, Traits>& a_particles,
   constexpr int            ghostWidth      = 1;
   const std::optional<int> maxCellDistance = 1;
 
+  // See mergeNearestNeighborsRoundImpl() for why the proposal and verdict rounds are bounded by this.
+  const std::vector<int>& neighborRanks = a_amr.getParticleGhostNeighborRanks(realm, ghostWidth);
+
   std::vector<NNPatchWork>                                 patchWork;
   std::vector<std::vector<MergeParticle<Packed>>>          patchLocalValid;
   std::vector<std::vector<MergeParticle<Packed>>>          patchGhosts;
@@ -2022,6 +2199,7 @@ mergeNearestNeighborsOneCell(ParticleContainer<P, Traits>& a_particles,
                                       a_isPositionValid,
                                       probLo,
                                       dxByLevel,
+                                      neighborRanks,
                                       patchWork,
                                       lastPooledEdges,
                                       hasOutgoingCommitment,

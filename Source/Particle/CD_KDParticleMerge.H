@@ -160,6 +160,24 @@ template <typename T>
 inline std::vector<T>
 kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
 
+/**
+ * @brief Neighbor-restricted counterpart of kdExchangeByRank().
+ * @details Two Isend/Irecv rounds -- record counts, then payloads -- over a_neighborRanks only, in place
+ * of the MPI_Alltoall/Alltoallv pair. A rank outside the set is known to send nothing, so its count is
+ * never asked for. Valid ONLY when every destination is bounded by that set; a destination outside it
+ * would never be received, which for these buckets means a silently dropped merge and lost weight.
+ * Asserted on the sending side in debug builds. The result is concatenated in rank order, this rank's
+ * own bucket included at its own position, so it is indistinguishable from what kdExchangeByRank()
+ * returns -- which matters, because the argmin arbitration downstream tie-breaks on record order.
+ * @tparam T Trivially-copyable record type, as for kdExchangeByRank().
+ * @param[in] a_sendByRank    One bucket per destination rank (size == number of ranks).
+ * @param[in] a_neighborRanks Ranks this rank may exchange with.
+ * @return Flat vector of every record received, plus this rank's own bucket.
+ */
+template <typename T>
+inline std::vector<T>
+kdExchangeByRankNeighbors(const std::vector<std::vector<T>>& a_sendByRank, const std::vector<int>& a_neighborRanks);
+
 } // namespace detail
 
 /**

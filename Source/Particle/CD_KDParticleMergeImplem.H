@@ -39,6 +39,154 @@ namespace detail {
 
 template <typename T>
 inline std::vector<T>
+kdExchangeByRankNeighbors(const std::vector<std::vector<T>>& a_sendByRank, const std::vector<int>& a_neighborRanks)
+{
+  const int numRanks = static_cast<int>(a_sendByRank.size());
+
+#ifdef CH_MPI
+  const int myRank = procID();
+
+  if (numRanks <= 1) {
+    return a_sendByRank.empty() ? std::vector<T>() : a_sendByRank[0];
+  }
+
+  // A destination outside the neighbor set would never be received: the receiving rank posts receives
+  // for ITS neighbors only. Assert on the sending side, where the destination is known -- for these
+  // buckets a dropped record is a dropped merge, i.e. lost weight, with nothing to signal it.
+#ifndef NDEBUG
+  for (int r = 0; r < numRanks; r++) {
+    if (r != myRank && !a_sendByRank[r].empty()) {
+      CH_assert(std::binary_search(a_neighborRanks.begin(), a_neighborRanks.end(), r));
+    }
+  }
+#endif
+
+  // Indices run over a_neighborRanks directly rather than over a filtered copy. It is sorted ascending,
+  // so every rank walks its neighbors in the same order, and it lists this rank too -- whose slot is
+  // skipped when posting and contributes its own bucket during the assembly below.
+  const int numNeighbors = static_cast<int>(a_neighborRanks.size());
+
+  std::vector<int> sendCounts(numNeighbors, 0);
+  std::vector<int> recvCounts(numNeighbors, 0);
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] != myRank) {
+      sendCounts[i] = static_cast<int>(a_sendByRank[a_neighborRanks[i]].size());
+    }
+  }
+
+  constexpr int countTag  = 1711;
+  constexpr int recordTag = 1712;
+
+  std::vector<MPI_Request> requests;
+  requests.reserve(2 * numNeighbors);
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] == myRank) {
+      continue;
+    }
+
+    requests.emplace_back();
+
+    MPI_Irecv(&recvCounts[i], 1, MPI_INT, a_neighborRanks[i], countTag, Chombo_MPI::comm, &requests.back());
+  }
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] == myRank) {
+      continue;
+    }
+
+    requests.emplace_back();
+
+    MPI_Isend(&sendCounts[i], 1, MPI_INT, a_neighborRanks[i], countTag, Chombo_MPI::comm, &requests.back());
+  }
+
+  MPI_Waitall(static_cast<int>(requests.size()), requests.data(), MPI_STATUSES_IGNORE);
+
+  std::vector<int> rdispl(numNeighbors, 0);
+
+  long rtot = 0;
+
+  for (int i = 0; i < numNeighbors; i++) {
+    rdispl[i] = static_cast<int>(rtot);
+    rtot += recvCounts[i];
+  }
+
+  std::vector<T> rflat(rtot);
+
+  requests.clear();
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (recvCounts[i] > 0) {
+      requests.emplace_back();
+
+      MPI_Irecv(rflat.data() + rdispl[i],
+                recvCounts[i] * static_cast<int>(sizeof(T)),
+                MPI_BYTE,
+                a_neighborRanks[i],
+                recordTag,
+                Chombo_MPI::comm,
+                &requests.back());
+    }
+  }
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (sendCounts[i] > 0) {
+      requests.emplace_back();
+
+      // const_cast because the pre-MPI-3 send prototypes take a non-const buffer; nothing writes to it.
+      MPI_Isend(const_cast<T*>(a_sendByRank[a_neighborRanks[i]].data()),
+                sendCounts[i] * static_cast<int>(sizeof(T)),
+                MPI_BYTE,
+                a_neighborRanks[i],
+                recordTag,
+                Chombo_MPI::comm,
+                &requests.back());
+    }
+  }
+
+  MPI_Waitall(static_cast<int>(requests.size()), requests.data(), MPI_STATUSES_IGNORE);
+
+  // Assemble in rank order, with this rank's self-addressed bucket spliced in at its own position.
+  // That is exactly the ordering MPI_Alltoallv produces, and it has to be: the argmin arbitration
+  // downstream tie-breaks on record order where two keys compare equal, so a different concatenation
+  // order would be a different (still self-consistent, but different) merge outcome.
+  std::vector<T> result;
+  result.reserve(static_cast<std::size_t>(rtot) + a_sendByRank[myRank].size());
+
+  int nextNeighbor = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    // a_neighborRanks lists THIS rank as well (a rank's own boxes ship to each other), so the cursor
+    // has to step past that entry too -- otherwise it stalls on it and every later neighbour's chunk is
+    // silently dropped. It is not guaranteed to be present, though, which is why the self bucket is
+    // spliced on the rank test rather than on the cursor.
+    const bool isNeighborSlot = (nextNeighbor < numNeighbors && a_neighborRanks[nextNeighbor] == r);
+
+    if (r == myRank) {
+      result.insert(result.end(), a_sendByRank[myRank].begin(), a_sendByRank[myRank].end());
+    }
+    else if (isNeighborSlot) {
+      result.insert(result.end(),
+                    rflat.begin() + rdispl[nextNeighbor],
+                    rflat.begin() + rdispl[nextNeighbor] + recvCounts[nextNeighbor]);
+    }
+
+    if (isNeighborSlot) {
+      nextNeighbor++;
+    }
+  }
+
+  return result;
+#else
+  (void)a_neighborRanks;
+
+  return a_sendByRank.empty() ? std::vector<T>() : a_sendByRank[0];
+#endif
+}
+
+template <typename T>
+inline std::vector<T>
 kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
 {
   const int numRanks = static_cast<int>(a_sendByRank.size());
@@ -840,6 +988,12 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
   // from the three ghost masks when they are built; see Realm::m_particleGhostExposure.
   const AMRMask& exposure = a_amr.getParticleGhostExposure(realm, 1);
 
+  // Every rank this rank can exchange width-1 ghosts with. The claim/verdict/commit rounds below are
+  // bounded by exactly this set: a claim is routed to the owner of a leaf member, and a member is either
+  // resident here or arrived as a width-1 ghost from one of these ranks; verdicts and commits answer the
+  // ranks those claims came from. The scatter round is NOT bounded this way -- see its own note.
+  const std::vector<int>& neighborRanks = a_amr.getParticleGhostNeighborRanks(realm, 1);
+
   // ==== STEP 1: gather + build + classify + commit interior, per patch ====
   CH_START(t_build);
 
@@ -1147,7 +1301,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
   // Sorted by memberID once received, so STEP 3's point lookups (claimsRange, below) and STEP 4's
   // full pass (grouped runs) don't need a hash map either.
-  std::vector<KDClaim> incomingClaims = kdExchangeByRank(claimSendByRank);
+  std::vector<KDClaim> incomingClaims = kdExchangeByRankNeighbors(claimSendByRank, neighborRanks);
   std::sort(incomingClaims.begin(), incomingClaims.end(), [](const KDClaim& a_lhs, const KDClaim& a_rhs) {
     return a_lhs.memberID < a_rhs.memberID;
   });
@@ -1305,7 +1459,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
     idx = idxEnd;
   }
 
-  const std::vector<KDVerdict> incomingVerdicts = kdExchangeByRank(verdictSendByRank);
+  const std::vector<KDVerdict> incomingVerdicts = kdExchangeByRankNeighbors(verdictSendByRank, neighborRanks);
 
   // wonForeignByBox[boxIdx] = every foreign member THAT SPECIFIC one of my own boxes was told it won.
   // Indexed directly by boxIdx (a dense range over myBoxes) rather than hashed -- each box's own
@@ -1444,7 +1598,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
   }
 
   // ==== STEP 6: Phase 3 -- commit/release, foreign members only ====
-  const std::vector<KDCommit> incomingCommits = kdExchangeByRank(commitSendByRank);
+  const std::vector<KDCommit> incomingCommits = kdExchangeByRankNeighbors(commitSendByRank, neighborRanks);
 
   for (const KDCommit& c : incomingCommits) {
     if (c.committed) {
@@ -1530,6 +1684,12 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
     }
   }
 
+  // Deliberately still all-to-all, unlike the three rounds above. A merged particle's destination comes
+  // from findDestination() on its centroid, not from the ghost masks, so the neighbor set does not bound
+  // it by construction -- only by the geometric argument that a leaf's centroid lies within the leaf,
+  // which is at most about a cell wide. That argument is very probably right, but a super-particle
+  // routed to a rank that is not listening is silently lost weight with nothing to signal it, and the
+  // saving here is one exchange out of four. Revisit with a measurement, not with an argument.
   const std::vector<MergeParticle<Packed>> incomingScattered = kdExchangeByRank(scatterByDestRank);
 
   for (const MergeParticle<Packed>& p : incomingScattered) {

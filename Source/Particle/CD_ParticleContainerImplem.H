@@ -241,14 +241,12 @@ ParticleContainer<P, Traits>::gatherMoversToPool()
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver)
+ParticleContainer<P, Traits>::catenateLocalMovers(MoverPool& a_pool)
 {
-  CH_TIME("ParticleContainer::distributeFromPool");
+  CH_TIME("ParticleContainer::catenateLocalMovers");
 
-  const int myRank   = procID();
-  const int numRanks = numProc();
+  const int myRank = procID();
 
-  // ---- same-rank movers: catenate each pooled leaf into its destination leaf ----
   // On the gather-all path the destination leaves are empty (remap clears them; regrid allocates them
   // fresh) so catenate() takes the O(1) arena-swap fast path. On the mask fast path the destinations
   // still hold their stayers, so catenate() appends (O(movers)); a mover never returns to its own
@@ -260,13 +258,24 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
 
     (*m_particles[lvl])[din].catenate(kv.second);
   }
+}
 
 #ifdef CH_MPI
-  // ---- cross-rank movers: one Alltoallv of linearized particles ----
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::packMoversByRank(MoverPool& a_pool, std::vector<std::vector<char>>& a_sendBuf) const
+{
+  CH_TIME("ParticleContainer::packMoversByRank");
+
+  const int myRank   = procID();
+  const int numRanks = numProc();
+
   constexpr std::size_t pp        = Leaf::bytesPerParticle();
   constexpr std::size_t headerLen = 2 * sizeof(std::uint32_t) + sizeof(std::uint64_t);
 
-  std::vector<std::vector<char>> sendBuf(numRanks);
+  a_sendBuf.clear();
+  a_sendBuf.resize(numRanks);
+
   // Each destination rank's buffer and pool map are disjoint, and linearizeParticle is a const read,
   // so packing different ranks in parallel is race-free.
 #ifdef _OPENMP
@@ -277,7 +286,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       continue;
     }
 
-    std::vector<char>& buf = sendBuf[r];
+    std::vector<char>& buf = a_sendBuf[r];
 
     for (auto& kv : a_pool[r]) {
       Leaf& src = kv.second;
@@ -306,14 +315,23 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       }
     }
   }
+}
+
+template <typename P, typename Traits>
+inline std::vector<char>
+ParticleContainer<P, Traits>::exchangeAllToAll(const std::vector<std::vector<char>>& a_sendBuf) const
+{
+  CH_TIME("ParticleContainer::exchangeAllToAll");
+
+  const int numRanks = numProc();
 
   // Exchange byte counts, then the byte buffers.
   std::vector<int> sendCounts(numRanks, 0);
   std::vector<int> recvCounts(numRanks, 0);
 
   for (int r = 0; r < numRanks; r++) {
-    CH_assert(sendBuf[r].size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
-    sendCounts[r] = static_cast<int>(sendBuf[r].size());
+    CH_assert(a_sendBuf[r].size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
+    sendCounts[r] = static_cast<int>(a_sendBuf[r].size());
   }
 
   MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
@@ -342,7 +360,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
 
   for (int r = 0; r < numRanks; r++) {
     if (sendCounts[r] > 0) {
-      std::memcpy(sflat.data() + sdispl[r], sendBuf[r].data(), static_cast<std::size_t>(sendCounts[r]));
+      std::memcpy(sflat.data() + sdispl[r], a_sendBuf[r].data(), static_cast<std::size_t>(sendCounts[r]));
     }
   }
 
@@ -355,6 +373,141 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
                 rdispl.data(),
                 MPI_BYTE,
                 Chombo_MPI::comm);
+
+  return rflat;
+}
+
+template <typename P, typename Traits>
+inline std::vector<char>
+ParticleContainer<P, Traits>::exchangeNeighbors(const std::vector<std::vector<char>>& a_sendBuf,
+                                                const std::vector<int>&               a_neighborRanks) const
+{
+  CH_TIME("ParticleContainer::exchangeNeighbors");
+
+  const int myRank   = procID();
+  const int numRanks = numProc();
+
+  // A destination outside the neighbor set is a silent particle loss waiting to happen: the receiving
+  // rank posts receives for ITS neighbors only, so it would never post one for us and the payload would
+  // simply never be collected. Assert on the sending side, where the offending destination is known --
+  // the neighbor sets are symmetric by construction, so if this holds everywhere then every send has a
+  // matching receive.
+#ifndef NDEBUG
+  for (int r = 0; r < numRanks; r++) {
+    if (r != myRank && !a_sendBuf[r].empty()) {
+      CH_assert(std::binary_search(a_neighborRanks.begin(), a_neighborRanks.end(), r));
+    }
+  }
+#endif
+
+  // Indices below run over a_neighborRanks directly rather than over a filtered copy of it. It is
+  // sorted ascending, so every rank walks its neighbors in the same order -- which is what makes the
+  // sends and receives line up. It also lists this rank, whose slot simply stays at zero count:
+  // catenateLocalMovers() has already dealt with the same-rank movers, so a_sendBuf[myRank] is empty.
+  const int numNeighbors = static_cast<int>(a_neighborRanks.size());
+
+  // 1. Byte counts, neighbor to neighbor. This replaces the counts MPI_Alltoall: a rank that is not a
+  //    neighbor cannot send us anything, so its count is known to be zero without asking.
+  std::vector<int> sendCounts(numNeighbors, 0);
+  std::vector<int> recvCounts(numNeighbors, 0);
+
+  for (int i = 0; i < numNeighbors; i++) {
+    CH_assert(a_sendBuf[a_neighborRanks[i]].size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
+
+    sendCounts[i] = static_cast<int>(a_sendBuf[a_neighborRanks[i]].size());
+  }
+
+  constexpr int countTag   = 1701;
+  constexpr int payloadTag = 1702;
+
+  std::vector<MPI_Request> requests;
+  requests.reserve(2 * numNeighbors);
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] == myRank) {
+      continue;
+    }
+
+    requests.emplace_back();
+
+    MPI_Irecv(&recvCounts[i], 1, MPI_INT, a_neighborRanks[i], countTag, Chombo_MPI::comm, &requests.back());
+  }
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (a_neighborRanks[i] == myRank) {
+      continue;
+    }
+
+    requests.emplace_back();
+
+    MPI_Isend(&sendCounts[i], 1, MPI_INT, a_neighborRanks[i], countTag, Chombo_MPI::comm, &requests.back());
+  }
+
+  MPI_Waitall(static_cast<int>(requests.size()), requests.data(), MPI_STATUSES_IGNORE);
+
+  // 2. Payloads, straight into their slice of the receive buffer -- no gather/scatter staging copy, which
+  //    is the other thing MPI_Alltoallv forced on us.
+  std::vector<int> rdispl(numNeighbors, 0);
+
+  std::int64_t rtot = 0;
+
+  for (int i = 0; i < numNeighbors; i++) {
+    rdispl[i] = static_cast<int>(rtot);
+    rtot += recvCounts[i];
+  }
+
+  CH_assert(rtot <= static_cast<std::int64_t>(std::numeric_limits<int>::max()));
+
+  std::vector<char> rflat(rtot);
+
+  requests.clear();
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (recvCounts[i] > 0) {
+      requests.emplace_back();
+
+      MPI_Irecv(rflat.data() + rdispl[i],
+                recvCounts[i],
+                MPI_BYTE,
+                a_neighborRanks[i],
+                payloadTag,
+                Chombo_MPI::comm,
+                &requests.back());
+    }
+  }
+
+  for (int i = 0; i < numNeighbors; i++) {
+    if (sendCounts[i] > 0) {
+      requests.emplace_back();
+
+      // const_cast because the pre-MPI-3 send prototypes take a non-const buffer; nothing writes to it.
+      MPI_Isend(const_cast<char*>(a_sendBuf[a_neighborRanks[i]].data()),
+                sendCounts[i],
+                MPI_BYTE,
+                a_neighborRanks[i],
+                payloadTag,
+                Chombo_MPI::comm,
+                &requests.back());
+    }
+  }
+
+  MPI_Waitall(static_cast<int>(requests.size()), requests.data(), MPI_STATUSES_IGNORE);
+
+  return rflat;
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::unpackMovers(const std::vector<char>& a_recvFlat, const bool a_setOwnerToReceiver)
+{
+  CH_TIME("ParticleContainer::unpackMovers");
+
+  const int myRank = procID();
+
+  constexpr std::size_t pp = Leaf::bytesPerParticle();
+
+  const std::size_t        rtot  = a_recvFlat.size();
+  const std::vector<char>& rflat = a_recvFlat;
 
   // ---- unpack: group received chunks by destination leaf, then append in parallel ----
   // Pass 1 (serial, header-only walk): record each chunk's payload pointer + count, grouped by its
@@ -435,6 +588,49 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       }
     }
   }
+}
+#endif
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver)
+{
+  CH_TIME("ParticleContainer::distributeFromPool");
+
+  this->catenateLocalMovers(a_pool);
+
+#ifdef CH_MPI
+  // Cross-rank movers over the full communicator. Used where the destination set is genuinely
+  // unbounded: remap() must route a particle to whichever rank now owns it -- nothing bounds how far a
+  // particle may move in one step, and a cold start over randomly sampled positions really is dense --
+  // and regrid() routes to a layout that did not exist a moment ago.
+  std::vector<std::vector<char>> sendBuf;
+
+  this->packMoversByRank(a_pool, sendBuf);
+  this->unpackMovers(this->exchangeAllToAll(sendBuf), a_setOwnerToReceiver);
+#endif
+}
+
+template <typename P, typename Traits>
+inline void
+ParticleContainer<P, Traits>::distributeFromPoolNeighbors(MoverPool&              a_pool,
+                                                          const bool              a_setOwnerToReceiver,
+                                                          const std::vector<int>& a_neighborRanks)
+{
+  CH_TIME("ParticleContainer::distributeFromPoolNeighbors");
+
+  this->catenateLocalMovers(a_pool);
+
+#ifdef CH_MPI
+  // Cross-rank movers restricted to the ranks this rank can exchange ghosts with. Only for pools whose
+  // destinations are bounded by construction -- see fillGhostParticles(), whose movers are produced by
+  // the ghost masks that a_neighborRanks is itself derived from.
+  std::vector<std::vector<char>> sendBuf;
+
+  this->packMoversByRank(a_pool, sendBuf);
+  this->unpackMovers(this->exchangeNeighbors(sendBuf, a_neighborRanks), a_setOwnerToReceiver);
+#else
+  (void)a_neighborRanks;
 #endif
 }
 
@@ -806,7 +1002,8 @@ template <typename P, typename Traits>
 inline void
 ParticleContainer<P, Traits>::fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
                                                  const AMRParticleGhostMask& a_maskCoarToFine,
-                                                 const AMRParticleGhostMask& a_maskFineToCoar)
+                                                 const AMRParticleGhostMask& a_maskFineToCoar,
+                                                 const std::vector<int>&     a_neighborRanks)
 {
   CH_TIME("ParticleContainer::fillGhostParticles");
 
@@ -818,7 +1015,9 @@ ParticleContainer<P, Traits>::fillGhostParticles(const AMRParticleGhostMask& a_m
   MoverPool pool = this->gatherGhostsFromMasks(a_maskSame, a_maskCoarToFine, a_maskFineToCoar);
 
   // a_setOwnerToReceiver == false: ghost copies keep their true owner's rankID (not the receiver's).
-  this->distributeFromPool(pool, false);
+  // The destinations come from the three masks, and a_neighborRanks is the union of exactly those masks'
+  // target ranks, so the point-to-point route is sound here in a way it is not for remap().
+  this->distributeFromPoolNeighbors(pool, false, a_neighborRanks);
 
   m_isOrganizedByCell = false; // ghosts appended to the leaves invalidate any cell sort
 }

@@ -4023,7 +4023,8 @@ ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, cons
     const int ghostWidth = maxCellDistance.value_or(1);
     merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, ghostWidth),
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, ghostWidth),
-                             m_amr->getParticleGhostMaskFineToCoar(m_realm, ghostWidth));
+                             m_amr->getParticleGhostMaskFineToCoar(m_realm, ghostWidth),
+                             m_amr->getParticleGhostNeighborRanks(m_realm, ghostWidth));
 
     // Merge particles -- this is the most expensive part of the merge algorithm. The only line in
     // this whole function that differs between the two backends.
@@ -4191,7 +4192,8 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
 
     merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1),
+                             m_amr->getParticleGhostNeighborRanks(m_realm, 1));
 
     // Merge particles -- this is the most expensive part of the merge algorithm.
     ParticleManagement::mergeNearestNeighborsOneCell<ItoMergeParticle, Real>(merge,
@@ -4372,7 +4374,8 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
   auto fillWidthOneGhosts = [&](ParticleContainer<ItoMergeParticle>& a_c) -> void {
     a_c.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
                            m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                           m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+                           m_amr->getParticleGhostMaskFineToCoar(m_realm, 1),
+                           m_amr->getParticleGhostNeighborRanks(m_realm, 1));
   };
 
   // 3. Interior tier -- one local pass, no communication beyond the ghost fill it reads.
@@ -4621,7 +4624,8 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
   if (a_enableBoundaryCarve) {
     merge.fillGhostParticles(m_amr->getParticleGhostMask(m_realm, 1),
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
-                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
+                             m_amr->getParticleGhostMaskFineToCoar(m_realm, 1),
+                             m_amr->getParticleGhostNeighborRanks(m_realm, 1));
 
     ParticleManagement::mergeKDCarve<ItoMergeParticle, Real>(merge,
                                                              m_kdMergeCellHistogram,
