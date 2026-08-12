@@ -1030,7 +1030,6 @@ AmrMesh::buildDomains()
 
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
-  m_dxRealVect.resize(numLevels);
   m_grids.resize(numLevels);
 
   m_dx[0]      = (m_probHi[0] - m_probLo[0]) / m_numCells[0];
@@ -1041,10 +1040,6 @@ AmrMesh::buildDomains()
     m_domains[lvl] = m_domains[lvl - 1];
 
     m_domains[lvl].refine(m_refinementRatios[lvl - 1]);
-  }
-
-  for (int lvl = 0; lvl <= m_maxAmrDepth; lvl++) {
-    m_dxRealVect[lvl] = m_dx[lvl] * RealVect::Unit;
   }
 }
 
@@ -3225,17 +3220,6 @@ AmrMesh::getDx() const
   }
 
   return m_dx;
-}
-
-const Vector<RealVect>&
-AmrMesh::getDxAsRealVect() const
-{
-  CH_TIME("AmrMesh::getDxAsRealVect()");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getDxAsRealVect()" << endl;
-  }
-
-  return m_dxRealVect;
 }
 
 const Vector<int>&

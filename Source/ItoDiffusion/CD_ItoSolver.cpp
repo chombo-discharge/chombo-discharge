@@ -1029,6 +1029,11 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
 
+  // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
+  // ghost cell -- the shape those functions document.
+  m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
+  m_amr->allocate(m_kdMergeLeafQuota, m_realm, 1, 1);
+
   // Only allocate memory for velocity if we actually have a mobile solver
   if (m_isMobile) {
     m_amr->allocate(m_mobilityFunction, m_realm, m_phase, ncomp); //
@@ -1053,8 +1058,6 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
 
     m_amr->remapToNewGrids(particles, a_lmin, a_newFinestLevel);
   }
-
-  this->invalidateKDMergeScratch();
 }
 
 void
@@ -1090,6 +1093,11 @@ ItoSolver::allocate()
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
 
+  // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
+  // ghost cell -- the shape those functions document.
+  m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
+  m_amr->allocate(m_kdMergeLeafQuota, m_realm, 1, 1);
+
   // Only allocate memory for velocity if we actually have a mobile solver
   if (m_isMobile) {
     m_amr->allocate(m_mobilityFunction, m_realm, m_phase, ncomp); //
@@ -1120,43 +1128,6 @@ ItoSolver::allocate()
   for (const auto& which : containers) {
     m_amr->allocate(m_particleContainers[which], m_realm);
   }
-
-  this->invalidateKDMergeScratch();
-}
-
-void
-ItoSolver::invalidateKDMergeScratch() noexcept
-{
-  CH_TIME("ItoSolver::invalidateKDMergeScratch");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::invalidateKDMergeScratch" << endl;
-  }
-
-  // Release the holders rather than merely marking them stale: they are sized to the grids that just
-  // went away, and a solver that never runs a kd merge again should not keep paying for them.
-  m_kdMergeCellHistogram.clear();
-  m_kdMergeLeafQuota.clear();
-
-  m_kdMergeScratchDefined = false;
-}
-
-void
-ItoSolver::defineKDMergeScratch() noexcept
-{
-  CH_TIME("ItoSolver::defineKDMergeScratch");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::defineKDMergeScratch" << endl;
-  }
-
-  if (m_kdMergeScratchDefined) {
-    return;
-  }
-
-  // One component, one ghost cell -- the shape the kd merges document for these holders.
-  m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
-  m_amr->allocate(m_kdMergeLeafQuota, m_realm, 1, 1);
-
-  m_kdMergeScratchDefined = true;
 }
 
 #ifdef CH_USE_HDF5
@@ -2205,6 +2176,8 @@ ItoSolver::preRegrid(const int a_lbase, const int /*a_oldFinestLevel*/)
   m_diffusionFunction.clear();
   m_depositionNC.clear();
   m_massDiff.clear();
+  m_kdMergeCellHistogram.clear();
+  m_kdMergeLeafQuota.clear();
 }
 
 ParticleContainer<ItoParticle>&
@@ -4273,10 +4246,6 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
     pout() << m_name + "::makeSuperparticlesKDSkinNn" << endl;
   }
 
-  // The interior tier below needs the per-cell scratch; allocate it if this is the first kd merge
-  // since the grids last changed.
-  this->defineKDMergeScratch();
-
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
   // with a whole-patch kd-tree merge whose boundary tier is the nearest-neighbor pair merge rather
   // than kd_carve's arbitration. The particles are split across TWO containers so the two tiers
@@ -4551,10 +4520,6 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
                                     const bool           a_enableBoundaryCarve)
 {
   CH_TIME("ItoSolver::makeSuperparticlesKDImpl");
-
-  // Both merges below need the per-cell scratch; allocate it if this is the first kd merge since the
-  // grids last changed.
-  this->defineKDMergeScratch();
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
   // using the whole-patch kd-tree merge (ParticleManagement::mergeKDCarve or mergeKDPatch).

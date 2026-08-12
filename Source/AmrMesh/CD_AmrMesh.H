@@ -1760,16 +1760,6 @@ public:
   getDx() const;
 
   /**
-   * @brief Get spatial resolutions in the per-direction form.
-   * @details The isotropic getDx() widened to RealVect, which is what the point-location and particle
-   * merge code wants. Held rather than rebuilt by each caller: it is a pure function of the domain, so it
-   * does not even change at a regrid.
-   * @return Grid spacings on all levels, as RealVect.
-   */
-  const Vector<RealVect>&
-  getDxAsRealVect() const;
-
-  /**
    * @brief Get refinement ratios
    * @return Refinement ratios between consecutive levels
    */
@@ -2383,13 +2373,6 @@ protected:
    * @brief Level resolutions
    */
   Vector<Real> m_dx;
-
-  /**
-   * @brief Level resolutions in the per-direction form, i.e. m_dx widened to RealVect.
-   * @details Filled beside m_dx in buildDomains() and never touched again -- the grid spacing follows from
-   * the domain, not from the grids, so it survives a regrid unchanged.
-   */
-  Vector<RealVect> m_dxRealVect;
 
   /**
    * @brief Define Realms

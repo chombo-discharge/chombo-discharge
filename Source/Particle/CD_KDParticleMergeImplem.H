@@ -716,10 +716,9 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
   CH_TIMER("ParticleManagement::mergeKDCarve::remove_consumed", t_remove);
   CH_TIMER("ParticleManagement::mergeKDCarve::place_results", t_place);
 
-  const std::string       realm       = a_particles.getRealm();
-  const int               finestLevel = a_amr.getFinestLevel();
-  const RealVect          probLo      = a_amr.getProbLo();
-  const Vector<RealVect>& dxByLevel   = a_amr.getDxAsRealVect();
+  const std::string realm       = a_particles.getRealm();
+  const int         finestLevel = a_amr.getFinestLevel();
+  const RealVect    probLo      = a_amr.getProbLo();
 
   // Per-cell scratch, as mesh data on this realm rather than per-patch buffers: both quantities are
   // cell data, and this is what the rest of the code uses for cell data. The caller owns the holders
@@ -847,6 +846,8 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
+    const RealVect dx = a_amr.getDx()[lvl] * RealVect::Unit;
+
     const int nbox = dit.size();
 
     for (int mybox = 0; mybox < nbox; mybox++) {
@@ -879,7 +880,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
         particlesByID.emplace_back(p.globalID, gatheredParticles.size() - 1);
       }
 
-      patchWork.push_back(PatchWork{lvl, din, dxByLevel[lvl], dbl[din]});
+      patchWork.push_back(PatchWork{lvl, din, dx, dbl[din]});
       const int patchIdx = static_cast<int>(patchWork.size()) - 1;
 
       if (combined.empty()) {
@@ -893,9 +894,9 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
       FArrayBox& cellCounts = (*histogram[lvl])[din];
       FArrayBox& quota      = (*leafQuota[lvl])[din];
 
-      kdFillCellHistogram(cellCounts, combined, probLo, dxByLevel[lvl]);
+      kdFillCellHistogram(cellCounts, combined, probLo, dx);
 
-      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellCounts);
+      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dx, probLo, cellCounts);
 
       for (const KDLeaf& bl : leaves) {
         members.clear();
@@ -934,7 +935,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
         // volume ratio alone cannot be trusted here (a long, thin leaf can have volume <=
         // one cell while still spanning several cells along one axis). leafVolume itself
         // is still needed below, unrelated to this check -- it's the box key's tie-break priority.
-        const bool unmergeable = kdMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_kdMaxLeafExtent;
+        const bool unmergeable = kdMaxAxisSpan(bl.boxLo, bl.boxHi, dx) > s_kdMaxLeafExtent;
 
         // Per-resident-member exposure -- needed either way (leaf-wide OR for the interior/
         // boundary decision below; per-particle for the unmergeable-leaf listen-only case). Ghosts
@@ -954,7 +955,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
             continue;
           }
 
-          const IntVect cell = kdCellKeyOf(combined[idx].position, probLo, dxByLevel[lvl]);
+          const IntVect cell = kdCellKeyOf(combined[idx].position, probLo, dx);
 
           CH_assert(exposureDin.box().contains(cell));
 
@@ -1617,10 +1618,9 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
   CH_TIMER("ParticleManagement::mergeKDInterior::commit", t_commit);
   CH_TIMER("ParticleManagement::mergeKDInterior::remove_place", t_place);
 
-  const std::string       realm       = a_particles.getRealm();
-  const int               finestLevel = a_amr.getFinestLevel();
-  const RealVect          probLo      = a_amr.getProbLo();
-  const Vector<RealVect>& dxByLevel   = a_amr.getDxAsRealVect();
+  const std::string realm       = a_particles.getRealm();
+  const int         finestLevel = a_amr.getFinestLevel();
+  const RealVect    probLo      = a_amr.getProbLo();
 
   // A leaf committed from patch (lvl,din) is written to the SAME patch of a_interior, which is only
   // meaningful when the two containers share a layout.
@@ -1646,6 +1646,8 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
+
+    const RealVect dx = a_amr.getDx()[lvl] * RealVect::Unit;
 
     const int nbox = dit.size();
 
@@ -1686,9 +1688,9 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
       FArrayBox& cellCounts = (*histogram[lvl])[din];
       FArrayBox& quota      = (*leafQuota[lvl])[din];
 
-      kdFillCellHistogram(cellCounts, combined, probLo, dxByLevel[lvl]);
+      kdFillCellHistogram(cellCounts, combined, probLo, dx);
 
-      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellCounts);
+      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dx, probLo, cellCounts);
 
       CH_STOP(t_build);
       CH_START(t_commit);
@@ -1702,7 +1704,7 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
         }
 
         // Cheap geometric test before the O(members) ghost scan below.
-        if (kdMaxAxisSpan(bl.boxLo, bl.boxHi, dxByLevel[lvl]) > s_kdMaxLeafExtent) {
+        if (kdMaxAxisSpan(bl.boxLo, bl.boxHi, dx) > s_kdMaxLeafExtent) {
           continue;
         }
 
@@ -1798,7 +1800,7 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
       RealVect boxRealLo, boxRealHi;
 
-      kdBoxRealBounds(boxRealLo, boxRealHi, dbl[din], dxByLevel[lvl], probLo);
+      kdBoxRealBounds(boxRealLo, boxRealHi, dbl[din], dx, probLo);
 
       for (const MergeParticle<Packed>& mr : mergedResults) {
         bool inOwnBox = true;

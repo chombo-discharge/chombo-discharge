@@ -1607,8 +1607,14 @@ mergeNearestNeighborsRoundImpl(ParticleContainer<P, Traits>& a_particles,
 
   // Per-level dx, indexed by level -- every cell-key computation below and downstream (in
   // resolveTrivialTier()/judgeProposals()) MUST use the dx of the PARTICLE'S OWN level (see
-  // MergeParticle::level's docs), never a single dx shared across levels.
-  const std::vector<RealVect>& dxByLevel = a_amr.getDxAsRealVect().constStdVector();
+  // MergeParticle::level's docs), never a single dx shared across levels. Built here rather than
+  // held by AmrMesh: unlike the kd merges, which only ever want the dx of the level they are looping
+  // over, this one is indexed by each PARTICLE's level, so it genuinely needs the whole vector.
+  std::vector<RealVect> dxByLevel(finestLevel + 1);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    dxByLevel[lvl] = a_amr.getDx()[lvl] * RealVect::Unit;
+  }
 
   CH_assert(a_ghostWidth >= 1);
   const int ghostWidth = a_ghostWidth;
@@ -1885,8 +1891,12 @@ mergeNearestNeighborsOneCell(ParticleContainer<P, Traits>& a_particles,
   const RealVect    probLo      = a_amr.getProbLo();
 
   // Per-level dx, indexed by level -- see mergeNearestNeighborsRoundImpl()'s own note on why every cell
-  // key must use the dx of the particle's OWN level.
-  const std::vector<RealVect>& dxByLevel = a_amr.getDxAsRealVect().constStdVector();
+  // key must use the dx of the particle's OWN level, and why it is built here.
+  std::vector<RealVect> dxByLevel(finestLevel + 1);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    dxByLevel[lvl] = a_amr.getDx()[lvl] * RealVect::Unit;
+  }
 
   // Structurally fixed at 1 -- findNearestNeighborCandidatesOneCell() only ever visits the query's
   // own cell and its Moore neighbors, so a width-1 halo already contains every reachable candidate
