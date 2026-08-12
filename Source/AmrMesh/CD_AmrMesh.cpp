@@ -3530,6 +3530,39 @@ AmrMesh::getTrivialParticleGhostMask() const
   return trivial;
 }
 
+const AMRMask&
+AmrMesh::getParticleGhostExposure(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostExposure(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostExposure(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostExposure(string, int) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostExposure(a_width);
+}
+
+const std::vector<int>&
+AmrMesh::getParticleGhostNeighborRanks(const std::string& a_realm, const int a_width) const
+{
+  CH_TIME("AmrMesh::getParticleGhostNeighborRanks(string, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getParticleGhostNeighborRanks(string, int)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getParticleGhostNeighborRanks(string, int) - could not find realm '" + a_realm +
+                            "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleGhostNeighborRanks(a_width);
+}
+
 const Vector<RefCountedPtr<EBLevelGrid>>&
 AmrMesh::getEBLevelGrid(const std::string& a_realm, const phase::which_phase a_phase) const
 {
