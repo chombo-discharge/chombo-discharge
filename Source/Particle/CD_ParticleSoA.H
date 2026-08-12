@@ -117,6 +117,7 @@
 #define CD_PARTICLESOA_H
 
 // Std includes
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -1590,18 +1591,48 @@ protected:
     a_o.m_colPtrs  = {};
   }
 
-  /** @brief Grow geometrically if the container is full (called before writing slot m_size). */
+  /**
+   * @brief Grow the arena to hold at least @a a_needed particles, geometrically.
+   * @details The growth policy for every append path, and deliberately NOT folded into reserve():
+   * reserve() sets the capacity EXACTLY, and exactly one caller needs that for correctness.
+   * deepCopy() sizes the destination to the SOURCE's capacity and then flat-memcpy()s byteSpan()
+   * across in one go, which is only valid while both arenas compute the same per-column offsets --
+   * and those offsets are derived from the capacity. Rounding the capacity up there would silently
+   * copy the columns to the wrong places. The remaining exact-sizing callers do not depend on the
+   * layout: resize() and deepCopyTo() simply want the capacity they asked for rather than a doubled
+   * one, deepCopyTo() copying column by column and so needing only capacity >= m_size.
+   *
+   * An append that called reserve(m_size + n) directly would leave capacity == size on return, so
+   * the very next append would reallocate and recopy the whole arena -- turning the
+   * extract->mutate->accumulate idiom extractCell() documents as canonical into O(N^2) copying,
+   * since the accumulating container is grown one cell at a time.
+   * @param[in] a_needed Number of particles the arena must be able to hold.
+   */
+  void
+  growTo(const std::size_t a_needed)
+  {
+    if (a_needed <= m_capacity) {
+      return;
+    }
+
+    // Saturating geometric growth: 2 * m_capacity overflows std::size_t once m_capacity exceeds
+    // SIZE_MAX/2, and reserve()'s "a_capacity <= m_capacity" guard would then silently no-op.
+    const std::size_t doubled = (m_capacity == 0) ? 16
+                                                  : (m_capacity <= std::numeric_limits<std::size_t>::max() / 2
+                                                       ? 2 * m_capacity
+                                                       : std::numeric_limits<std::size_t>::max());
+
+    this->reserve(std::max(a_needed, doubled));
+  }
+
+  /**
+   * @brief Grow geometrically if the container is full (called before writing slot m_size).
+   */
   void
   growIfFull()
   {
     if (m_size == m_capacity) {
-      // Saturating geometric growth: 2 * m_capacity overflows std::size_t once m_capacity exceeds
-      // SIZE_MAX/2, and reserve()'s "a_capacity <= m_capacity" guard would then silently no-op.
-      const std::size_t newCap = (m_capacity == 0) ? 16
-                                                   : (m_capacity <= std::numeric_limits<std::size_t>::max() / 2
-                                                        ? 2 * m_capacity
-                                                        : std::numeric_limits<std::size_t>::max());
-      this->reserve(newCap);
+      this->growTo(m_size + 1);
     }
   }
 

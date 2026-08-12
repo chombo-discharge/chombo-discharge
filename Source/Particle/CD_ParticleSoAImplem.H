@@ -120,7 +120,7 @@ ParticleSoA<P, Traits>::append(const ParticleSoA<P, Traits>& a_other)
     return;
   }
   const std::size_t oldSize = m_size;
-  this->reserve(oldSize + n); // may reallocate this (and a_other, when a_other == this); pointers refreshed below
+  this->growTo(oldSize + n); // may reallocate this (and a_other, when a_other == this); pointers refreshed below
   this->appendColumnsFrom(a_other, oldSize, std::make_index_sequence<s_numColumns>{});
   m_size   = oldSize + n;
   m_sorted = false;
@@ -133,7 +133,7 @@ ParticleSoA<P, Traits>::appendParticle(const ParticleSoA<P, Traits>& a_src, cons
   CH_assert(a_index < a_src.m_size);
 
   const std::size_t at = m_size;
-  this->reserve(m_size + 1); // may reallocate this (and a_src, when a_src == this); pointers refreshed below
+  this->growTo(m_size + 1); // may reallocate this (and a_src, when a_src == this); pointers refreshed below
   this->copyParticleColumns(a_src, a_index, at, std::make_index_sequence<s_numColumns>{});
   m_size   = at + 1;
   m_sorted = false;
