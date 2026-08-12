@@ -856,6 +856,9 @@ public:
     std::swap(m_sorted, a_other.m_sorted);
     std::swap(m_colPtrs, a_other.m_colPtrs);
     m_cellStart.swap(a_other.m_cellStart);
+    std::swap(m_sortBox, a_other.m_sortBox);
+    std::swap(m_sortDx, a_other.m_sortDx);
+    std::swap(m_sortProbLo, a_other.m_sortProbLo);
   }
 
   ///@}
@@ -1117,12 +1120,18 @@ public:
 
   /**
    * @brief Raw position component column dir (double*, for SIMD kernels).
+   * @details Handing out a writable position column invalidates the cell sort: the caller may move
+   * particles across cell boundaries, and the container cannot observe that. The sort flag is therefore
+   * cleared here rather than on the (unobservable) write, which is what lets sortByCell() trust the flag
+   * and skip a re-sort. Use the const overload for read-only kernels to keep the sort.
    * @param[in] a_dir Spatial direction in [0, SpaceDim).
    * @return Base pointer of the position component column for direction a_dir.
    */
   double*
   positionColumn(const int a_dir) noexcept
   {
+    m_sorted = false;
+
     return reinterpret_cast<double*>(m_colPtrs[a_dir]);
   }
 
@@ -1183,6 +1192,7 @@ public:
 
   /**
    * @brief Set the position of particle i.
+   * @details Invalidates the cell sort -- the new position may lie in a different cell.
    * @param[in] a_index    Particle index.
    * @param[in] a_position New position.
    */
@@ -1191,6 +1201,7 @@ public:
   {
     CH_assert(a_index < m_size);
 
+    // Writes through the non-const positionColumn(), which clears m_sorted.
     for (int dir = 0; dir < SpaceDim; dir++) {
       this->positionColumn(dir)[a_index] = a_position[dir];
     }
@@ -1432,6 +1443,15 @@ public:
    * @brief Counting-sort the columns into Fortran cell order and build CSR cell offsets.
    * @details After this, cell c owns the contiguous particle range [cellStart(c), cellStart(c+1)).
    * Particles must lie within a_box; out-of-range positions are clamped to the boundary cells.
+   *
+   * This is idempotent: a container already sorted against the same (box, dx, probLo) returns
+   * immediately, because the sort it would produce is the one it already has. Callers that establish
+   * the sort defensively therefore cost nothing when an earlier caller already did it, which is the
+   * common case -- the ItoKMC reaction path sorts the same leaves at three separate call sites. Any
+   * operation that can move a particle between cells (append, remove, resize, setPosition, or handing
+   * out a writable positionColumn()) clears the flag, so the early-out only fires when the CSR mapping
+   * is still the one this container computed. In debug builds the mapping is re-verified on every
+   * early-out; see checkCellSort().
    * @param[in] a_box    Patch box defining the cells.
    * @param[in] a_dx     Grid spacing per direction.
    * @param[in] a_probLo Physical coordinate of the lower domain corner.
@@ -1447,6 +1467,21 @@ public:
   isSorted() const noexcept
   {
     return m_sorted;
+  }
+
+  /**
+   * @brief Whether the container is cell-sorted against exactly this cell domain.
+   * @details isSorted() only says that some CSR mapping is valid; this says it is the mapping the
+   * caller is about to index with. sortByCell() early-outs on precisely this condition.
+   * @param[in] a_box    Patch box defining the cells.
+   * @param[in] a_dx     Grid spacing per direction.
+   * @param[in] a_probLo Physical coordinate of the lower domain corner.
+   * @return True iff the container is sorted against (a_box, a_dx, a_probLo).
+   */
+  bool
+  isSortedAgainst(const Box& a_box, const RealVect& a_dx, const RealVect& a_probLo) const noexcept
+  {
+    return m_sorted && m_sortBox == a_box && m_sortDx == a_dx && m_sortProbLo == a_probLo;
   }
 
   /**
@@ -1561,6 +1596,94 @@ protected:
   std::vector<std::size_t> m_cellStart;
 
   /**
+   * @brief Patch box the CSR mapping in m_cellStart was built against (meaningful only when m_sorted).
+   */
+  Box m_sortBox;
+
+  /**
+   * @brief Grid spacing the CSR mapping was built against (meaningful only when m_sorted).
+   */
+  RealVect m_sortDx = RealVect::Zero;
+
+  /**
+   * @brief Lower domain corner the CSR mapping was built against (meaningful only when m_sorted).
+   */
+  RealVect m_sortProbLo = RealVect::Zero;
+
+  /**
+   * @brief Compute the Fortran (x-fastest) cell index of particle i within the sort domain.
+   * @details Shared by sortByCell() and its debug-mode verifier so the two can never disagree about
+   * the mapping. Positions outside the box are clamped to the boundary cells.
+   * @param[in] a_index   Particle index.
+   * @param[in] a_box     Patch box defining the cells.
+   * @param[in] a_dx      Grid spacing per direction.
+   * @param[in] a_probLo  Physical coordinate of the lower domain corner.
+   * @return Linearized cell index in [0, a_box.numPts()).
+   */
+  std::size_t
+  cellKey(const std::size_t a_index, const Box& a_box, const RealVect& a_dx, const RealVect& a_probLo) const noexcept
+  {
+    const IntVect  loEnd   = a_box.smallEnd();
+    const IntVect  boxSize = a_box.size();
+    const RealVect x       = this->position(a_index);
+
+    std::size_t lin    = 0;
+    std::size_t stride = 1;
+    for (int d = 0; d < SpaceDim; d++) {
+      int c = static_cast<int>(std::floor((x[d] - a_probLo[d]) / a_dx[d])) - loEnd[d];
+      if (c < 0) {
+        c = 0;
+      }
+      if (c >= boxSize[d]) {
+        c = boxSize[d] - 1;
+      }
+      lin += static_cast<std::size_t>(c) * stride;
+      stride *= static_cast<std::size_t>(boxSize[d]);
+    }
+
+    return lin;
+  }
+
+  /**
+   * @brief Verify that the CSR mapping really does describe the current particle positions.
+   * @details The sort flag is only as good as the invalidation of every mutating path, so sortByCell()
+   * asserts on this whenever it takes its early-out: it recomputes each particle's cell key and checks
+   * that the particle sits in that cell's CSR range. O(N), and compiled out with the assertion in
+   * optimized builds. A failure here means some path moved particles without clearing m_sorted.
+   * @param[in] a_box    Patch box defining the cells.
+   * @param[in] a_dx     Grid spacing per direction.
+   * @param[in] a_probLo Physical coordinate of the lower domain corner.
+   * @return True iff the CSR mapping is consistent with the current positions.
+   */
+  bool
+  checkCellSort(const Box& a_box, const RealVect& a_dx, const RealVect& a_probLo) const noexcept
+  {
+    if (!m_sorted) {
+      return false;
+    }
+    if (m_cellStart.size() != static_cast<std::size_t>(a_box.numPts()) + 1) {
+      return false;
+    }
+    if (m_cellStart.back() != m_size) {
+      return false;
+    }
+
+    for (std::size_t c = 0; c < this->numCells(); c++) {
+      if (m_cellStart[c] > m_cellStart[c + 1]) {
+        return false;
+      }
+
+      for (std::size_t i = m_cellStart[c]; i < m_cellStart[c + 1]; i++) {
+        if (this->cellKey(i, a_box, a_dx, a_probLo) != c) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * @brief Round a_x up to the next multiple of s_align.
    * @param[in] a_x Value to round up.
    * @return a_x rounded up to a multiple of s_align.
@@ -1582,6 +1705,9 @@ protected:
     m_capacity     = a_o.m_capacity;
     m_size         = a_o.m_size;
     m_sorted       = a_o.m_sorted;
+    m_sortBox      = a_o.m_sortBox;
+    m_sortDx       = a_o.m_sortDx;
+    m_sortProbLo   = a_o.m_sortProbLo;
     m_colPtrs      = a_o.m_colPtrs;
     m_cellStart    = std::move(a_o.m_cellStart);
     a_o.m_buffer   = nullptr;
