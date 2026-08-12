@@ -3650,18 +3650,19 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
 
     ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    // SoA per-cell extract: cell-sort this leaf and split it into one ParticleSoA per grid cell.
-    std::vector<ParticleSoA<ItoParticle>> cellParticles;
-    binLeafToCells(cellParticles, particles[a_level][a_din], a_box, dx, probLo);
+    // Cell-sort the leaf and read each cell's particles straight out of its CSR range. This kernel only
+    // sums weights, so there is nothing to extract into per-cell scratch containers.
+    ParticleSoA<ItoParticle>& leaf = particles[a_level][a_din];
+    leaf.sortByCell(a_box, dx * RealVect::Unit, probLo);
 
     // Regular cells kernel.
     auto regularKernel = [&](const IntVect& iv) -> void {
       Real num = 0.0;
 
       if (a_ebisbox.isRegular(iv)) {
-        const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
-        for (std::size_t i = 0; i < cell.size(); i++) {
-          num += cell.weight(i);
+        const std::pair<std::size_t, std::size_t> range = leaf.cellRange(a_box.index(iv));
+        for (std::size_t i = range.first; i < range.second; i++) {
+          num += leaf.weight(i);
         }
       }
 
@@ -3676,11 +3677,11 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
 
       Real num = 0.0;
 
-      const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
-      for (std::size_t i = 0; i < cell.size(); i++) {
-        const RealVect pos = cell.position(i);
+      const std::pair<std::size_t, std::size_t> range = leaf.cellRange(a_box.index(iv));
+      for (std::size_t i = range.first; i < range.second; i++) {
+        const RealVect pos = leaf.position(i);
         if ((pos - physCentroid).dotProduct(normal) >= 0.0) {
-          num += cell.weight(i);
+          num += leaf.weight(i);
         }
       }
 
@@ -3880,9 +3881,10 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
 
     ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    // SoA per-cell extract: cell-sort this leaf and split it into one ParticleSoA per grid cell.
-    std::vector<ParticleSoA<ItoParticle>> cellParticles;
-    binLeafToCells(cellParticles, particles[a_level][a_din], a_box, dx, probLo);
+    // Cell-sort the leaf and read each cell's particles straight out of its CSR range. This kernel only
+    // accumulates weights and energies, so there is nothing to extract into per-cell scratch containers.
+    ParticleSoA<ItoParticle>& leaf = particles[a_level][a_din];
+    leaf.sortByCell(a_box, dx * RealVect::Unit, probLo);
 
     // Regular grid cells.
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3890,11 +3892,11 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
         Real totalWeight = 0.0;
         Real totalEnergy = 0.0;
 
-        const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
-        for (std::size_t i = 0; i < cell.size(); i++) {
-          const Real w = cell.weight(i);
+        const std::pair<std::size_t, std::size_t> range = leaf.cellRange(a_box.index(iv));
+        for (std::size_t i = range.first; i < range.second; i++) {
+          const Real w = leaf.weight(i);
           totalWeight += w;
-          totalEnergy += w * cell.template get<&ItoParticle::energy>(i);
+          totalEnergy += w * leaf.template get<&ItoParticle::energy>(i);
         }
 
         if (totalWeight > 0.0) {
@@ -3915,14 +3917,14 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
       Real totalWeight = 0.0;
       Real totalEnergy = 0.0;
 
-      const ParticleSoA<ItoParticle>& cell = cellParticles[a_box.index(iv)];
-      for (std::size_t i = 0; i < cell.size(); i++) {
-        const RealVect pos = cell.position(i);
+      const std::pair<std::size_t, std::size_t> range = leaf.cellRange(a_box.index(iv));
+      for (std::size_t i = range.first; i < range.second; i++) {
+        const RealVect pos = leaf.position(i);
 
         if ((pos - ebCentroid).dotProduct(normal) >= 0.0) {
-          const Real w = cell.weight(i);
+          const Real w = leaf.weight(i);
           totalWeight += w;
-          totalEnergy += w * cell.template get<&ItoParticle::energy>(i);
+          totalEnergy += w * leaf.template get<&ItoParticle::energy>(i);
         }
       }
 

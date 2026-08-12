@@ -18,7 +18,9 @@
 #include <unordered_set>
 
 // Chombo includes
-#include <CH_Timer.H>
+#include <CH_assert.H>
+#include <MayDay.H>
+#include <parstream.H>
 
 // Our includes
 #include <CD_Random.H>
@@ -29,31 +31,23 @@
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver() noexcept
 {
-  CH_TIME("KMCSolver::KMCSolver");
-
   this->setSolverParameters(0, 0, 100, std::numeric_limits<Real>::max(), 0.0, 1.E-6);
 }
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver(const ReactionList& a_reactions) noexcept
 {
-  CH_TIME("KMCSolver::KMCSolver");
-
   this->define(a_reactions);
 }
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::~KMCSolver() noexcept
-{
-  CH_TIME("KMCSolver::~KMCSolver");
-}
+{}
 
 template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::define(const ReactionList& a_reactions) noexcept
 {
-  CH_TIME("KMCSolver::define");
-
   m_reactions = a_reactions;
 
   // Default settings. These are equivalent to ALWAYS using tau-leaping.
@@ -69,8 +63,6 @@ KMCSolver<R, State, T>::setSolverParameters(const T    a_numCrit,
                                             const Real a_SSAlim,
                                             const Real a_exitTol) noexcept
 {
-  CH_TIME("KMCSolver::setSolverParameters");
-
   m_Ncrit   = a_numCrit;
   m_numSSA  = a_numSSA;
   m_maxIter = a_maxIter;
@@ -83,8 +75,6 @@ template <typename R, typename State, typename T>
 inline std::vector<std::vector<T>>
 KMCSolver<R, State, T>::getNu(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::getNu(State)");
-
   std::vector<std::vector<T>> ret(a_reactions.size());
 
   for (int j = 0; j < a_reactions.size(); j++) {
@@ -118,8 +108,6 @@ template <typename R, typename State, typename T>
 inline std::vector<Real>
 KMCSolver<R, State, T>::propensities(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSolver::propensities(State)");
-
   return this->propensities(a_state, m_reactions);
 }
 
@@ -127,8 +115,6 @@ template <typename R, typename State, typename T>
 inline std::vector<Real>
 KMCSolver<R, State, T>::propensities(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::propensities(State, ReactionList)");
-
   std::vector<Real> A(a_reactions.size());
 
   const size_t numReactions = a_reactions.size();
@@ -144,8 +130,6 @@ template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::totalPropensity(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSolver::totalPropensity(State)");
-
   return this->totalPropensity(a_state, m_reactions);
 }
 
@@ -153,8 +137,6 @@ template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::totalPropensity(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::totalPropensity(State, ReactionList)");
-
   Real A = 0.0;
 
   const size_t numReactions = a_reactions.size();
@@ -170,8 +152,6 @@ template <typename R, typename State, typename T>
 inline std::pair<typename KMCSolver<R, State, T>::ReactionList, typename KMCSolver<R, State, T>::ReactionList>
 KMCSolver<R, State, T>::partitionReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSolver::partitionReactions(State)");
-
   return this->partitionReactions(a_state, m_reactions);
 }
 
@@ -179,8 +159,6 @@ template <typename R, typename State, typename T>
 inline std::pair<typename KMCSolver<R, State, T>::ReactionList, typename KMCSolver<R, State, T>::ReactionList>
 KMCSolver<R, State, T>::partitionReactions(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::partitionReactions(State, ReactionList)");
-
   ReactionList criticalReactions;
   ReactionList nonCriticalReactions;
 
@@ -202,7 +180,9 @@ KMCSolver<R, State, T>::partitionReactions(const State& a_state, const ReactionL
     }
   }
 
-  return std::make_pair(criticalReactions, nonCriticalReactions);
+  // Move rather than copy: this runs once per substep per grid cell, and copying the two lists would
+  // duplicate both allocations and bump the refcount of every reaction twice more.
+  return std::make_pair(std::move(criticalReactions), std::move(nonCriticalReactions));
 }
 
 template <typename R, typename State, typename T>
@@ -218,8 +198,6 @@ inline Real
 KMCSolver<R, State, T>::getCriticalTimeStep(const State&        a_state,
                                             const ReactionList& a_criticalReactions) const noexcept
 {
-  CH_TIME("KMCSolver::getCriticalTimeStep");
-
   // TLDR: This computes the time until the firing of the next critical reaction.
 
   Real dt = std::numeric_limits<Real>::max();
@@ -238,8 +216,6 @@ template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::getCriticalTimeStep(const std::vector<Real>& a_propensities) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::getCriticalTimeStep(std::vector<Real>)");
-
   // To avoid division by zero later on.
   Real A = std::numeric_limits<Real>::min();
 
@@ -254,8 +230,6 @@ template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensity) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::getCriticalTimeStep(Real)");
-
   const Real u = std::numeric_limits<Real>::min() + Random::getUniformReal01();
 
   return log(1.0 / u) / a_totalPropensity;
@@ -265,8 +239,6 @@ template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSolver::getNonCriticalTimeStep(State");
-
   const auto& partitionedReactions = this->partitionReactions(a_state, m_reactions);
 
   return this->getNonCriticalTimeStep(a_state, partitionedReactions.second);
@@ -276,8 +248,6 @@ template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList");
-
   const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
   return this->getNonCriticalTimeStep(a_state, a_reactions, propensities);
@@ -289,8 +259,6 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
                                                const ReactionList&      a_nonCriticalReactions,
                                                const std::vector<Real>& a_nonCriticalPropensities) const noexcept
 {
-  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList, std::vector<Real>");
-
   CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
 
   constexpr Real one = 1.0;
@@ -371,8 +339,6 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
                                   const std::vector<Real>& a_propensities,
                                   const Real               a_epsilon) const noexcept
 {
-  CH_TIME("KMCSolver::computeDt(State, ReactionList, std::vector<Real>, Real");
-
   CH_assert(a_reactions.size() == a_propensities.size());
 
   constexpr Real one = 1.0;
@@ -439,8 +405,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepSSA(State& a_state) const noexcept
 {
-  CH_TIME("KMCSolver::stepSSA(State, Real)");
-
   this->stepSSA(a_state, m_reactions);
 }
 
@@ -448,8 +412,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepSSA(State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::stepSSA(State, ReactionList, Real)");
-
   if (a_reactions.size() > 0) {
 
     // Compute all propensities.
@@ -465,8 +427,6 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
                                 const ReactionList&      a_reactions,
                                 const std::vector<Real>& a_propensities) const noexcept
 {
-  CH_TIME("KMCSolver::stepSSA(State, ReactionList, std::vector<Real>)");
-
   CH_assert(a_reactions.size() == a_propensities.size());
 
   const size_t numReactions = a_reactions.size();
@@ -506,8 +466,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::advanceSSA(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceSSA(State, Real)");
-
   this->advanceSSA(a_state, m_reactions, a_dt);
 }
 
@@ -515,8 +473,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::advanceSSA(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceSSA(State, ReactionList, Real)");
-
   const size_t numReactions = a_reactions.size();
 
   if (numReactions > 0) {
@@ -545,8 +501,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepExplicitEuler(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepExplicitEuler(State, Real)");
-
   this->stepExplicitEuler(a_state, m_reactions, a_dt);
 }
 
@@ -556,8 +510,6 @@ KMCSolver<R, State, T>::stepExplicitEuler(State&              a_state,
                                           const ReactionList& a_reactions,
                                           const Real          a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepExplicitEuler(State, ReactionList, std::vector<Real>, Real)");
-
   CH_assert(a_dt > 0.0);
 
   if (a_reactions.size() > 0) {
@@ -578,8 +530,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepMidpoint(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepMidpoint(State&, const Real)");
-
   this->stepMidpoint(a_state, m_reactions, a_dt);
 }
 
@@ -587,10 +537,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIMERS("KMCSolver::stepMidpoint(State&, const ReactionList&, const Real)");
-  CH_TIMER("KMCSolver::stepTauMidPoint::first_loop", t1);
-  CH_TIMER("KMCSolver::stepTauMidPoint::second_loop", t2);
-
   const int numReactions = a_reactions.size();
 
   if (numReactions > 0) {
@@ -599,23 +545,19 @@ KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_react
 
     State Xdagger = a_state;
 
-    CH_START(t1);
     for (size_t i = 0; i < numReactions; i++) {
       // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
       //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
       a_reactions[i]->advanceState(Xdagger, (T)std::round(0.5 * propensities[i] * a_dt));
     }
-    CH_STOP(t1);
 
     propensities = this->propensities(Xdagger, a_reactions);
 
-    CH_START(t2);
     for (size_t i = 0; i < numReactions; i++) {
       const T curReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
 
       a_reactions[i]->advanceState(a_state, curReactions);
     }
-    CH_STOP(t2);
   }
 }
 
@@ -623,8 +565,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepPRC(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepPRC(State&, const Real)");
-
   this->stepPRC(a_state, m_reactions, a_dt);
 }
 
@@ -632,10 +572,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIMERS("KMCSolver::stepPRC(State&, const ReactionList&, const Real)");
-  CH_TIMER("KMCSolver::stepPRC::first_loop", t1);
-  CH_TIMER("KMCSolver::stepPRC::second_loop", t2);
-
   const int numReactions = a_reactions.size();
 
   if (numReactions > 0) {
@@ -644,7 +580,6 @@ KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions,
 
     const std::vector<Real> ak = aj;
 
-    CH_START(t1);
     for (int j = 0; j < numReactions; j++) {
       for (int k = 0; k < numReactions; k++) {
         State x = a_state;
@@ -656,15 +591,12 @@ KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions,
         aj[j] += 0.5 * a_dt * ak[k] * etajk;
       }
     }
-    CH_STOP(t1);
 
-    CH_START(t2);
     for (size_t i = 0; i < numReactions; i++) {
       const T nr = (T)Random::getPoisson<long long>(aj[i] * a_dt);
 
       a_reactions[i]->advanceState(a_state, nr);
     }
-    CH_STOP(t2);
   }
 }
 
@@ -672,8 +604,6 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepImplicitEuler(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepImplicitEuler(State, a_dt)");
-
   this->stepImplicitEuler(a_state, m_reactions, a_dt);
 }
 
@@ -683,8 +613,6 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
                                           const ReactionList& a_reactions,
                                           const Real          a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepImplicitEuler(State, ReactionList, a_dt)");
-
   // TLDR: The implicit Euler tau-leaping scheme is equivalent to the solution of
   //
   // F(X) = X - (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) - dt*sum_j nu_j a_j(X)
@@ -877,8 +805,6 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
                                    const Real&              a_dt,
                                    const KMCLeapPropagator& a_leapPropagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)");
-
   this->advanceTau(a_state, m_reactions, a_dt, a_leapPropagator);
 }
 
@@ -889,8 +815,6 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
                                    const Real&              a_dt,
                                    const KMCLeapPropagator& a_leapPropagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)");
-
   if (a_reactions.size() > 0) {
     Real curTime = 0.0;
     Real curDt   = a_dt;
@@ -956,8 +880,6 @@ KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
                                       const Real               a_dt,
                                       const KMCLeapPropagator& a_leapPropagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceHybrid(State, Real, KMCLeapPropagator)");
-
   this->advanceHybrid(a_state, m_reactions, a_dt, a_leapPropagator);
 }
 
@@ -968,8 +890,6 @@ KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
                                       const Real               a_dt,
                                       const KMCLeapPropagator& a_leapPropagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, KMCLeapPropagator)");
-
   switch (a_leapPropagator) {
   case KMCLeapPropagator::ExplicitEuler: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
@@ -1013,8 +933,6 @@ KMCSolver<R, State, T>::advanceHybrid(
   const Real                                                                           a_dt,
   const std::function<void(State&, const ReactionList& a_reactions, const Real a_dt)>& a_propagator) const noexcept
 {
-  CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, std::function)");
-
   constexpr T one = (T)1;
 
   // Simulated time within the advancement algorithm.

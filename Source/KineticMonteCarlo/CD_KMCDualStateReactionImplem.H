@@ -17,7 +17,7 @@
 #include <limits>
 
 // Chombo includes
-#include <CH_Timer.H>
+#include <CH_assert.H>
 
 // Our includes
 #include <CD_KMCDualStateReaction.H>
@@ -28,8 +28,6 @@ inline KMCDualStateReaction<State, T>::KMCDualStateReaction(const std::list<size
                                                             const std::list<size_t>& a_rhsReactives,
                                                             const std::list<size_t>& a_rhsNonReactives) noexcept
 {
-  CH_TIME("KMCDualStateReaction::KMCDualStateReaction");
-
   m_lhsReactives    = a_lhsReactives;
   m_rhsReactives    = a_rhsReactives;
   m_rhsNonReactives = a_rhsNonReactives;
@@ -41,16 +39,12 @@ inline KMCDualStateReaction<State, T>::KMCDualStateReaction(const std::list<size
 
 template <typename State, typename T>
 inline KMCDualStateReaction<State, T>::~KMCDualStateReaction()
-{
-  CH_TIME("KMCDualStateReaction::~KMCDualStateReaction");
-}
+{}
 
 template <typename State, typename T>
 inline void
 KMCDualStateReaction<State, T>::computeStateChanges() noexcept
 {
-  CH_TIME("KMCDualStateReaction::computeStateChanges");
-
   // Consumed species.
   for (const auto& r : m_lhsReactives) {
     if (m_reactiveStateChange.find(r) == m_reactiveStateChange.end()) {
@@ -133,8 +127,6 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) noexcept
 {
-  CH_TIME("KMCDualStateReaction::population");
-
   const auto& reactiveState = a_state.getReactiveState();
 
   CH_assert(reactiveState.size() > a_reactant);
@@ -146,7 +138,6 @@ template <typename State, typename T>
 inline Real
 KMCDualStateReaction<State, T>::propensity(const State& a_state) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::propensity");
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
@@ -168,8 +159,6 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::computeCriticalNumberOfReactions");
-
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
@@ -216,8 +205,6 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::getStateChange");
-
   T nuIJ = 0;
 
   if (m_reactiveStateChange.find(a_particleReactant) != m_reactiveStateChange.end()) {
@@ -231,8 +218,6 @@ template <typename State, typename T>
 inline void
 KMCDualStateReaction<State, T>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::advanceState");
-
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
@@ -256,8 +241,6 @@ template <typename State, typename T>
 inline void
 KMCDualStateReaction<State, T>::sanityCheck(const State& a_state) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::sanityCheck");
-
   const auto& reactiveState = a_state.getReactiveState();
   const auto& photonState   = a_state.getNonReactiveState();
 

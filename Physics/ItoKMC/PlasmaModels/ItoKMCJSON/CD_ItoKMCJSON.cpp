@@ -3412,7 +3412,6 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
 Real
 ItoKMCJSON::getNeutralDensity(const RealVect& a_pos) const noexcept
 {
-  CH_TIME("ItoKMCJSON::getNeutralDensity");
   if (m_verbose) {
     pout() << m_className + "::getNeutralDensity" << endl;
   }
@@ -3423,7 +3422,6 @@ ItoKMCJSON::getNeutralDensity(const RealVect& a_pos) const noexcept
 Real
 ItoKMCJSON::computeAlpha(const Real a_E, const RealVect& a_pos) const noexcept
 {
-  CH_TIME("ItoKMCJSON::computeAlpha");
   if (m_verbose) {
     pout() << m_className + "::computeAlpha" << endl;
   }
@@ -3434,7 +3432,6 @@ ItoKMCJSON::computeAlpha(const Real a_E, const RealVect& a_pos) const noexcept
 Real
 ItoKMCJSON::computeEta(const Real a_E, const RealVect& a_pos) const noexcept
 {
-  CH_TIME("ItoKMCJSON::computeEta");
   if (m_verbose) {
     pout() << m_className + "::computeEta" << endl;
   }
@@ -3445,7 +3442,6 @@ ItoKMCJSON::computeEta(const Real a_E, const RealVect& a_pos) const noexcept
 Vector<Real>
 ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect& a_pos, const RealVect& a_E) const noexcept
 {
-  CH_TIME("ItoKMCJSON::computeMobilities");
   if (m_verbose) {
     pout() << m_className + "::computeMobilities" << endl;
   }
@@ -3465,7 +3461,6 @@ ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/,
                                          const RealVect& a_pos,
                                          const RealVect& a_E) const noexcept
 {
-  CH_TIME("ItoKMCJSON::computeDiffusionCoefficients");
   if (m_verbose) {
     pout() << m_className + "::computeDiffusionCoefficients" << endl;
   }
@@ -3490,7 +3485,6 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
                                 const Real                                       a_dx,
                                 const Real /*a_kappa*/) const noexcept
 {
-  CH_TIME("ItoKMCJSON::updateReactionRates");
   if (m_verbose) {
     pout() << m_className + "::updateReactionRates" << endl;
   }
@@ -3547,7 +3541,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<ParticleSoA<ItoParticle>>& a_secondaryPar
                                 const bool                              a_isDielectric,
                                 const int /*a_matIndex*/) const noexcept
 {
-  CH_TIME("ItoKMCJSON::secondaryEmissionEB");
   if (m_verbose) {
     pout() << m_className + "::secondaryEmissionEB" << endl;
   }
@@ -3786,7 +3779,6 @@ ItoKMCJSON::getPlotVariables(const RealVect& a_E,
                              const Real /*a_kappa*/) const noexcept
 {
 
-  CH_TIME("ItoKMCJSON::getPlotVariables");
   if (m_verbose) {
     pout() << m_className + "::getPlotVariables" << endl;
   }
@@ -3827,7 +3819,6 @@ ItoKMCJSON::getPlotVariables(const RealVect& a_E,
 std::vector<size_t>
 ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<int>& a_distribution) const noexcept
 {
-  CH_TIME("ItoKMCJSON::multinomial");
   if (m_verbose) {
     pout() << m_className + "::multinomial" << endl;
   }

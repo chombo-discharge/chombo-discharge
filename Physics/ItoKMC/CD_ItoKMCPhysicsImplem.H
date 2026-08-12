@@ -348,8 +348,6 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
                           const Real              a_dx,
                           const Real              a_kappa) const
 {
-  CH_TIME("ItoKMCPhysics::advanceKMC");
-
   // Note: This is called PER GRID CELL, i.e. within OpenMP parallel regions. For this reason the KMC solver
   //       must be defined through defineKMC() (which must be later killed).
   CH_assert(m_isDefined);
@@ -523,10 +521,6 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
                                   const Real                         a_dx,
                                   const Real                         a_kappa) const noexcept
 {
-  CH_TIMERS("ItoKMCPhysics::reconcileParticles");
-  CH_TIMER("ItoKMCPhysics::reconcileParticles::compute_downstream", t1);
-  CH_TIMER("ItoKMCPhysics::reconcileParticles::particle_placement", t2);
-
   CH_assert(m_isDefined);
   CH_assert(a_particles.size() == a_newNumParticles.size());
   CH_assert(a_oldNumParticles.size() == a_newNumParticles.size());
@@ -580,7 +574,6 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
                                                   a_dx);
   }
 
-  CH_START(t2);
   for (int i = 0; i < a_particles.size(); i++) {
     const long long diff = static_cast<long long>(a_newNumParticles[i] - a_oldNumParticles[i]);
 
@@ -653,7 +646,6 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
       this->removeParticles(*a_particles[i], -diff);
     }
   }
-  CH_STOP(t2);
 }
 
 inline bool
@@ -666,8 +658,6 @@ ItoKMCPhysics::computeUpstreamPosition(RealVect&                       a_pos,
                                        const RealVect&                 a_cellPos,
                                        const Real&                     a_dx) const noexcept
 {
-  CH_TIME("ItoKMCPhysics::computeUpstreamPosition");
-
   CH_assert(a_dx > 0.0);
 
   a_pos = RealVect::Zero;
@@ -712,8 +702,6 @@ ItoKMCPhysics::computeUpstreamPosition(RealVect&                       a_pos,
 inline void
 ItoKMCPhysics::removeParticles(ParticleSoA<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const
 {
-  CH_TIME("ItoKMCPhysics::removeParticles");
-
   constexpr long long zero = 0LL;
 
   CH_assert(m_isDefined);
@@ -786,8 +774,6 @@ ItoKMCPhysics::reconcilePhotons(Vector<ParticleSoA<Photon>*>& a_newPhotons,
                                 const Real                    a_dx,
                                 const Real                    a_kappa) const noexcept
 {
-  CH_TIME("ItoKMCPhysics::reconcilePhotons");
-
   CH_assert(m_isDefined);
 
   for (int i = 0; i < a_newPhotons.size(); i++) {
@@ -818,8 +804,6 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<ParticleSoA<ItoParticle>*>&  a_it
                                         Vector<ParticleSoA<NoPayload>*>&    a_cdrParticles,
                                         const Vector<ParticleSoA<Photon>*>& a_absorbedPhotons) const noexcept
 {
-  CH_TIME("ItoKMCPhysics::reconcilePhotoionization");
-
   CH_assert(m_isDefined);
   CH_assert(a_itoParticles.size() == m_itoSpecies.size());
   CH_assert(a_cdrParticles.size() == m_cdrSpecies.size());
