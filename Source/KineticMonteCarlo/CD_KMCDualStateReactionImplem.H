@@ -114,6 +114,30 @@ KMCDualStateReaction<State, T>::computeStateChanges() noexcept
   for (const auto& rn : reactantNumbers) {
     m_propensityFactor *= 1.0 / factorial(rn.second);
   }
+
+  // Compact the reactant tally into the form propensity() consumes, so that the falling factorial
+  // can be formed straight off the incoming state rather than off a private copy of it.
+  m_lhsOrders.clear();
+  m_lhsOrders.reserve(reactantNumbers.size());
+
+  for (const auto& rn : reactantNumbers) {
+    m_lhsOrders.emplace_back(rn.first, rn.second);
+  }
+
+  // Dense mirror of m_reactiveStateChange for the per-cell lookups in KMCSolver. The map is keyed by
+  // species index, so the highest key fixes the length; species the reaction does not touch keep a
+  // zero state change.
+  m_reactiveStateChangeDense.clear();
+
+  if (!m_reactiveStateChange.empty()) {
+    const size_t highestSpecies = m_reactiveStateChange.rbegin()->first;
+
+    m_reactiveStateChangeDense.assign(highestSpecies + 1, (T)0);
+
+    for (const auto& s : m_reactiveStateChange) {
+      m_reactiveStateChangeDense[s.first] = s.second;
+    }
+  }
 }
 
 template <typename State, typename T>
@@ -144,12 +168,20 @@ KMCDualStateReaction<State, T>::propensity(const State& a_state) const noexcept
 
   Real A = m_rate * m_propensityFactor;
 
-  auto reactiveState = a_state.getReactiveState();
+  const auto& reactiveState = a_state.getReactiveState();
 
-  for (const auto& r : m_lhsReactives) {
-    A *= reactiveState[r];
+  // For a species entering the reaction k times the contribution is the falling factorial
+  // X * (X-1) * ... * (X-k+1) -- the same product the previous implementation formed by walking
+  // m_lhsReactives and decrementing a private copy of the state after each factor. Taking the order
+  // from m_lhsOrders gives the identical product without copying the state.
+  for (const auto& lhs : m_lhsOrders) {
+    T X = reactiveState[lhs.first];
 
-    reactiveState[r]--;
+    for (size_t k = 0; k < lhs.second; k++) {
+      A *= X;
+
+      X -= (T)1;
+    }
   }
 
   return A;
@@ -181,7 +213,7 @@ KMCDualStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCDualStateReaction<State, T>::getReactants() const noexcept
 {
   return m_lhsReactives;
@@ -205,10 +237,12 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
+  // Species beyond the dense vector are not part of this reaction, so their state change is zero --
+  // the same answer the map lookup gave for an absent key.
   T nuIJ = 0;
 
-  if (m_reactiveStateChange.find(a_particleReactant) != m_reactiveStateChange.end()) {
-    nuIJ = m_reactiveStateChange.at(a_particleReactant);
+  if (a_particleReactant < m_reactiveStateChangeDense.size()) {
+    nuIJ = m_reactiveStateChangeDense[a_particleReactant];
   }
 
   return nuIJ;

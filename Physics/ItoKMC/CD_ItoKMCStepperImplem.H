@@ -5045,6 +5045,17 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
+      // The kernel below is driven by the cut cells, so a patch without any has nothing to do. Its
+      // secondary containers were cleared and its CDR fluxes zeroed before this loop, which is
+      // exactly the state the patch would be left in anyway. Skipping matters because everything
+      // below is per species and would otherwise be paid on every patch in the domain, whether or
+      // not it is anywhere near the EB.
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[lvl])[din];
+
+      if (vofit.size() == 0) {
+        continue;
+      }
+
       const EBISBox&       ebisbox       = ebisl[din];
       const EBCellFAB&     electricField = (*a_electricField[lvl])[din];
       const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
@@ -5178,7 +5189,6 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       };
 
       // Run the kernel.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[lvl])[din];
       BoxLoops::loop(vofit, irregularKernel);
 
       // SoA write-back: rebuild the secondary Ito/photon leaves for this patch from the filled per-cell scratch.

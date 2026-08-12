@@ -479,6 +479,21 @@ protected:
   static thread_local KMCState m_kmcState;
 
   /**
+   * @brief Perturbed KMC state used by the time step tail of advanceKMC.
+   * @details The tail probes each reaction by firing it to its critical number and re-evaluating
+   * the time step on the result. It needs a state to perturb without disturbing m_kmcState, and
+   * reuses this one so that the probe does not allocate once per reaction per grid cell.
+   */
+  static thread_local KMCState m_kmcStateScratch;
+
+  /**
+   * @brief Propensity buffer used by the time step tail of advanceKMC.
+   * @details Reused across the tail's probes so the propensities are not returned by value, which
+   * allocated once per probe, i.e. once per reaction per grid cell.
+   */
+  static thread_local std::vector<Real> m_kmcPropensityScratch;
+
+  /**
    * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.
    * @details Set up via defineKMC() to ensure OpenMP thread safety; depopulated by killKMC().
    */

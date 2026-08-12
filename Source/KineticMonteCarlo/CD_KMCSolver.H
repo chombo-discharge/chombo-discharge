@@ -500,6 +500,50 @@ protected:
    * population of the state vector, with an indexing given by the State's linearIn/linearOut functions.
    */
   std::vector<std::vector<int>> m_nu;
+
+  /**
+   * @brief Scratch accumulator for the per-reactant expected state change, indexed by species.
+   * @details Used by computeDt and getNonCriticalTimeStep, which run once per grid cell (and, in
+   * the ItoKMC time step tail, once per reaction per grid cell). Holding the buffer on the solver
+   * keeps those calls free of heap traffic; previously they allocated a std::list node per reactant
+   * per reaction and then sorted it.
+   * @note Mutable because the calls that use it are logically const. This makes the solver's
+   * const member functions non-reentrant: a single KMCSolver must not be shared across threads.
+   * ItoKMCPhysics satisfies this by holding its solver as static thread_local (see defineKMC).
+   */
+  mutable std::vector<Real> m_muScratch;
+
+  /**
+   * @brief Scratch accumulator for the per-reactant propensity variance, indexed by species.
+   * @details Companion to m_muScratch, needed only by getNonCriticalTimeStep. Same reentrancy
+   * caveat.
+   */
+  mutable std::vector<Real> m_sigmaScratch;
+
+  /**
+   * @brief Scratch holding the distinct reactants of the reaction list currently being processed.
+   * @details Replaces the sorted, uniqued std::list the two time step routines used to rebuild on
+   * every call. Same reentrancy caveat.
+   */
+  mutable std::vector<size_t> m_reactantScratch;
+
+  /**
+   * @brief Membership stamps used to build m_reactantScratch without sorting, indexed by species.
+   * @details Entry i is set when species i has already been added to m_reactantScratch for the
+   * call in progress, and is cleared again before the call returns. Same reentrancy caveat.
+   */
+  mutable std::vector<char> m_seenScratch;
+
+  /**
+   * @brief Fill m_reactantScratch with the distinct reactants of the input reactions.
+   * @details Replaces concatenating the reactions' reactant lists and then sorting and uniquing
+   * them. The distinct set is the same; only the order differs, and both callers use it purely as a
+   * set to reduce over. The scratch buffers are sized from the largest reactant index seen, which
+   * keeps the routine independent of the State type's interface.
+   * @param[in] a_reactions Reactions whose reactants are collected.
+   */
+  inline void
+  gatherDistinctReactants(const ReactionList& a_reactions) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

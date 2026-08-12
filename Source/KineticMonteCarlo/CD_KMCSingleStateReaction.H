@@ -91,9 +91,12 @@ public:
 
   /**
    * @brief Get the reactants involved in the reaction.
+   * @details Returned by reference for the same reason as in KMCDualStateReaction: KMCSolver walks
+   * this list once per reaction per grid cell when assembling the reactant set for the time step
+   * calculation, and returning by value deep-copied the list on every walk.
    * @return m_reactants
    */
-  inline std::list<size_t>
+  inline const std::list<size_t>&
   getReactants() const noexcept;
 
   /**
