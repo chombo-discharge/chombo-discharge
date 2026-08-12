@@ -112,19 +112,19 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank)
 
 /**
  * @brief Axis-aligned bounding box of particles[a_lo, a_hi).
+ * @param[out] a_boxLo Low corner.
+ * @param[out] a_boxHi High corner.
  * @param[in] a_particles Particle buffer.
  * @param[in] a_lo Start of the range (inclusive).
  * @param[in] a_hi End of the range (exclusive).
- * @param[out] a_boxLo Low corner.
- * @param[out] a_boxHi High corner.
  */
 template <typename Packed>
 inline void
-kdBBox(const std::vector<MergeParticle<Packed>>& a_particles,
+kdBBox(RealVect&                                 a_boxLo,
+       RealVect&                                 a_boxHi,
+       const std::vector<MergeParticle<Packed>>& a_particles,
        const std::size_t                         a_lo,
-       const std::size_t                         a_hi,
-       RealVect&                                 a_boxLo,
-       RealVect&                                 a_boxHi) noexcept
+       const std::size_t                         a_hi) noexcept
 {
   CH_assert(a_hi > a_lo);
   CH_assert(a_hi <= a_particles.size());
@@ -233,17 +233,17 @@ kdIntVectLess(const IntVect& a_lhs, const IntVect& a_rhs) noexcept
  * represents every integer exactly up to 2^53, so consumers -- e.g. the crowding test in
  * buildKDQuotaLeaves() -- may @c static_cast<int> it losslessly for any realistic per-cell count.
  * @tparam Packed See MergeParticle.
+ * @param[out] a_counts Per-cell counts, zeroed here before tallying.
  * @param[in] a_particles Gathered particles for this patch.
  * @param[in] a_probLo Physical position of the domain's low corner.
  * @param[in] a_dx This patch's own cell spacing.
- * @param[out] a_counts Per-cell counts, zeroed here before tallying.
  */
 template <typename Packed>
 inline void
-kdFillCellHistogram(const std::vector<MergeParticle<Packed>>& a_particles,
+kdFillCellHistogram(FArrayBox&                                a_counts,
+                    const std::vector<MergeParticle<Packed>>& a_particles,
                     const RealVect&                           a_probLo,
-                    const RealVect&                           a_dx,
-                    FArrayBox&                                a_counts) noexcept
+                    const RealVect&                           a_dx) noexcept
 {
   a_counts.setVal(0);
 
@@ -366,13 +366,13 @@ kdSplitWeightMedian(std::vector<MergeParticle<Packed>>& a_particles,
 template <typename Packed>
 inline void
 buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
+                   FArrayBox&                          a_used,
+                   std::vector<KDLeaf>&                a_leaves,
                    const int                           a_ppc,
                    const Real                          a_splitWeightLeafDx,
                    const RealVect&                     a_dx,
                    const RealVect&                     a_probLo,
-                   FArrayBox&                          a_used,
-                   const FArrayBox&                    a_cellCounts,
-                   std::vector<KDLeaf>&                a_leaves) noexcept
+                   const FArrayBox&                    a_cellCounts) noexcept
 {
   CH_TIME("ParticleManagement::buildKDQuotaLeaves");
 
@@ -403,7 +403,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
 
   for (std::size_t idx = numMergeable; idx < a_particles.size(); idx++) {
     RealVect boxLo, boxHi;
-    kdBBox(a_particles, idx, idx + 1, boxLo, boxHi);
+    kdBBox(boxLo, boxHi, a_particles, idx, idx + 1);
 
     a_leaves.push_back(KDLeaf{idx, idx + 1, boxLo, boxHi});
   }
@@ -499,7 +499,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
 
     if (node.count < 2) {
       RealVect boxLo, boxHi;
-      kdBBox(a_particles, node.lo, node.hi, boxLo, boxHi);
+      kdBBox(boxLo, boxHi, a_particles, node.lo, node.hi);
 
       finalLeaves.push_back(KDLeaf{node.lo, node.hi, boxLo, boxHi});
 
@@ -511,7 +511,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
     // refused below -- the emitted leaf (formerly re-derived a third time in the emission pass). A
     // split only reorders within [lo,hi), so the box is unchanged by it either way.
     RealVect nodeBoxLo, nodeBoxHi;
-    kdBBox(a_particles, node.lo, node.hi, nodeBoxLo, nodeBoxHi);
+    kdBBox(nodeBoxLo, nodeBoxHi, a_particles, node.lo, node.hi);
 
     const Real nodeSpan  = kdMaxAxisSpan(nodeBoxLo, nodeBoxHi, a_dx);
     const int  splitAxis = (nodeBoxHi - nodeBoxLo).maxDir(true);
@@ -581,18 +581,18 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
  * @details Half-open on purpose -- the high corner is the OUTER face of the last cell, so testing
  * pos >= lo && pos < hi per direction partitions space between abutting boxes with no gap and no
  * double-cover, which is exactly the "is this particle still in its own patch" test both callers make.
+ * @param[out] a_boxLo  Low corner (inclusive).
+ * @param[out] a_boxHi  High corner (exclusive).
  * @param[in]  a_box    Box whose bounds are wanted.
  * @param[in]  a_dx     Grid spacing at the box's level.
  * @param[in]  a_probLo Lower-left corner of the physical domain.
- * @param[out] a_boxLo  Low corner (inclusive).
- * @param[out] a_boxHi  High corner (exclusive).
  */
 inline void
-kdBoxRealBounds(const Box&      a_box,
+kdBoxRealBounds(RealVect&       a_boxLo,
+                RealVect&       a_boxHi,
+                const Box&      a_box,
                 const RealVect& a_dx,
-                const RealVect& a_probLo,
-                RealVect&       a_boxLo,
-                RealVect&       a_boxHi) noexcept
+                const RealVect& a_probLo) noexcept
 {
   for (int dir = 0; dir < SpaceDim; dir++) {
     a_boxLo[dir] = a_probLo[dir] + a_box.smallEnd(dir) * a_dx[dir];
@@ -648,12 +648,12 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKDCarve(AmrMesh&                      a_amr,
-             ParticleContainer<P, Traits>& a_particles,
-             const int                     a_ppc,
-             const Real                    a_splitWeightLeafDx,
+mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
              EBAMRFAB&                     a_leafQuota,
+             const AmrMesh&                a_amr,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -893,9 +893,9 @@ mergeKDCarve(AmrMesh&                      a_amr,
       FArrayBox& cellCounts = (*histogram[lvl])[din];
       FArrayBox& quota      = (*leafQuota[lvl])[din];
 
-      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
+      kdFillCellHistogram(cellCounts, combined, probLo, dxByLevel[lvl]);
 
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
+      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellCounts);
 
       for (const KDLeaf& bl : leaves) {
         members.clear();
@@ -1489,7 +1489,7 @@ mergeKDCarve(AmrMesh&                      a_amr,
 
     RealVect boxRealLo, boxRealHi;
 
-    kdBoxRealBounds(pw.box, pw.dx, probLo, boxRealLo, boxRealHi);
+    kdBoxRealBounds(boxRealLo, boxRealHi, pw.box, pw.dx, probLo);
 
     bool inOwnBox = true;
 
@@ -1554,12 +1554,12 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKDPatch(AmrMesh&                      a_amr,
-             ParticleContainer<P, Traits>& a_particles,
-             const int                     a_ppc,
-             const Real                    a_splitWeightLeafDx,
+mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
              EBAMRFAB&                     a_leafQuota,
+             const AmrMesh&                a_amr,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -1574,13 +1574,13 @@ mergeKDPatch(AmrMesh&                      a_amr,
   // so every gathered particle is resident, every leaf is ghost-free, and that test admits them all.
   // Passing a_particles as its own destination puts the super-particles back where the patch merge
   // has always put them.
-  mergeKDInterior<P, Packed, Traits>(a_amr,
+  mergeKDInterior<P, Packed, Traits>(a_particles,
                                      a_particles,
-                                     a_particles,
-                                     a_ppc,
-                                     a_splitWeightLeafDx,
                                      a_cellHistogram,
                                      a_leafQuota,
+                                     a_amr,
+                                     a_ppc,
+                                     a_splitWeightLeafDx,
                                      a_gather,
                                      a_combine,
                                      a_scatter,
@@ -1597,13 +1597,13 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKDInterior(AmrMesh&                      a_amr,
-                ParticleContainer<P, Traits>& a_particles,
+mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 ParticleContainer<P, Traits>& a_interior,
-                const int                     a_ppc,
-                const Real                    a_splitWeightLeafDx,
                 EBAMRFAB&                     a_cellHistogram,
                 EBAMRFAB&                     a_leafQuota,
+                const AmrMesh&                a_amr,
+                const int                     a_ppc,
+                const Real                    a_splitWeightLeafDx,
                 const Gather&                 a_gather,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,
@@ -1686,9 +1686,9 @@ mergeKDInterior(AmrMesh&                      a_amr,
       FArrayBox& cellCounts = (*histogram[lvl])[din];
       FArrayBox& quota      = (*leafQuota[lvl])[din];
 
-      kdFillCellHistogram(combined, probLo, dxByLevel[lvl], cellCounts);
+      kdFillCellHistogram(cellCounts, combined, probLo, dxByLevel[lvl]);
 
-      buildKDQuotaLeaves(combined, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, quota, cellCounts, leaves);
+      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dxByLevel[lvl], probLo, cellCounts);
 
       CH_STOP(t_build);
       CH_START(t_commit);
@@ -1798,7 +1798,7 @@ mergeKDInterior(AmrMesh&                      a_amr,
 
       RealVect boxRealLo, boxRealHi;
 
-      kdBoxRealBounds(dbl[din], dxByLevel[lvl], probLo, boxRealLo, boxRealHi);
+      kdBoxRealBounds(boxRealLo, boxRealHi, dbl[din], dxByLevel[lvl], probLo);
 
       for (const MergeParticle<Packed>& mr : mergedResults) {
         bool inOwnBox = true;

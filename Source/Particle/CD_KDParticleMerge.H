@@ -117,30 +117,30 @@ struct KDLeaf
  * be drained by a neighbour's merge.
  * @tparam Packed See MergeParticle.
  * @param[in,out] a_particles Particles to partition; reordered in place.
+ * @param[in,out] a_used Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover
+ * every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell.
+ * @param[out] a_leaves Every resulting leaf, in no particular order.
  * @param[in] a_ppc Target particles per cell, enforced here as a per-cell ceiling on leaf count.
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the split plane
  * switches from the count median to the weight median. 0 disables the weight median.
  * @param[in] a_dx This patch's own cell spacing.
  * @param[in] a_probLo Physical position of the domain's low corner, for computing cell indices.
- * @param[in,out] a_used Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover
- * every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell.
  * @param[in] a_cellCounts Per-cell TRUE particle-count histogram (see kdFillCellHistogram()). A cell
  * is crowded, and its particles eligible to merge, iff its count exceeds @a a_ppc. A cell outside
  * this box reads as 0 (empty): unlike @a a_used, whose box coverage is a hard precondition, this
  * lookup guards rather than asserts, since a particle's own cell is always in-box but the guard
  * costs nothing and documents the intent.
- * @param[out] a_leaves Every resulting leaf, in no particular order.
  */
 template <typename Packed>
 inline void
 buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
+                   FArrayBox&                          a_used,
+                   std::vector<KDLeaf>&                a_leaves,
                    const int                           a_ppc,
                    const Real                          a_splitWeightLeafDx,
                    const RealVect&                     a_dx,
                    const RealVect&                     a_probLo,
-                   FArrayBox&                          a_used,
-                   const FArrayBox&                    a_cellCounts,
-                   std::vector<KDLeaf>&                a_leaves) noexcept;
+                   const FArrayBox&                    a_cellCounts) noexcept;
 
 /**
  * @brief Generic Alltoallv-style exchange for a trivially-copyable record type: send a
@@ -184,17 +184,17 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the group's members untouched.
- * @param[in,out] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
+ * @param[in] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
  * @param[in,out] a_particles The real particle container being merged.
- * @param[in] a_ppc Target particles per cell.
- * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
- * switches from count-median to weight-median splitting -- forwarded verbatim to
- * buildKDQuotaLeaves(). 0 disables the weight median entirely.
  * @param[in,out] a_cellHistogram Caller-owned per-cell scratch (1 component, >= 1 ghost cell, this
  * container's realm) holding the cell occupancy. Contents on entry are irrelevant -- it is overwritten
  * per patch. Owned by the caller so the allocation happens once per regrid rather than once per call.
  * @param[in,out] a_leafQuota Caller-owned per-cell scratch, same shape and lifetime as
  * @a a_cellHistogram, holding the live per-cell merge quota.
+ * @param[in] a_ppc Target particles per cell.
+ * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
+ * switches from count-median to weight-median splitting -- forwarded verbatim to
+ * buildKDQuotaLeaves(). 0 disables the weight median entirely.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -210,12 +210,12 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKDCarve(AmrMesh&                      a_amr,
-             ParticleContainer<P, Traits>& a_particles,
-             const int                     a_ppc,
-             const Real                    a_splitWeightLeafDx,
+mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
              EBAMRFAB&                     a_leafQuota,
+             const AmrMesh&                a_amr,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -246,14 +246,14 @@ mergeKDCarve(AmrMesh&                      a_amr,
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
- * @param[in,out] a_amr AMR mesh -- source of the grid layout.
  * @param[in,out] a_particles The real particle container being merged.
+ * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
+ * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
+ * @param[in] a_amr AMR mesh -- source of the grid layout.
  * @param[in] a_ppc Target particles per cell.
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
  * switches from count-median to weight-median splitting -- forwarded verbatim to
  * buildKDQuotaLeaves(). 0 disables the weight median entirely.
- * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
- * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -269,12 +269,12 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKDPatch(AmrMesh&                      a_amr,
-             ParticleContainer<P, Traits>& a_particles,
-             const int                     a_ppc,
-             const Real                    a_splitWeightLeafDx,
+mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
              EBAMRFAB&                     a_leafQuota,
+             const AmrMesh&                a_amr,
+             const int                     a_ppc,
+             const Real                    a_splitWeightLeafDx,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -311,16 +311,16 @@ mergeKDPatch(AmrMesh&                      a_amr,
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
- * @param[in,out] a_amr AMR mesh -- source of the grid layout.
  * @param[in,out] a_particles Particles to reduce. On return holds only what was not committed.
  * @param[in,out] a_interior Receives one super-particle per committed leaf. Must be allocated on the
  * same realm as @a a_particles, since a leaf is written to the patch it was built on.
+ * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
+ * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
+ * @param[in] a_amr AMR mesh -- source of the grid layout.
  * @param[in] a_ppc Target particles per cell.
  * @param[in] a_splitWeightLeafDx Leaf size, in cell widths, at or below which the tree build
  * switches from count-median to weight-median splitting -- forwarded verbatim to
  * buildKDQuotaLeaves(). 0 disables the weight median entirely.
- * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
- * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -336,13 +336,13 @@ template <typename P,
           typename Allocator,
           typename PosValid>
 inline void
-mergeKDInterior(AmrMesh&                      a_amr,
-                ParticleContainer<P, Traits>& a_particles,
+mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 ParticleContainer<P, Traits>& a_interior,
-                const int                     a_ppc,
-                const Real                    a_splitWeightLeafDx,
                 EBAMRFAB&                     a_cellHistogram,
                 EBAMRFAB&                     a_leafQuota,
+                const AmrMesh&                a_amr,
+                const int                     a_ppc,
+                const Real                    a_splitWeightLeafDx,
                 const Gather&                 a_gather,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,

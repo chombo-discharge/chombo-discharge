@@ -4055,8 +4055,8 @@ ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, cons
     // Merge particles -- this is the most expensive part of the merge algorithm. The only line in
     // this whole function that differs between the two backends.
     if constexpr (Backend == NnPairSearchBackend::Hash) {
-      ParticleManagement::mergeNearestNeighborsHash<ItoMergeParticle, Real>(*m_amr,
-                                                                            merge,
+      ParticleManagement::mergeNearestNeighborsHash<ItoMergeParticle, Real>(merge,
+                                                                            *m_amr,
                                                                             a_numParticlesPerCellThresh,
                                                                             gather,
                                                                             combine,
@@ -4069,8 +4069,8 @@ ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, cons
                                                                             isPositionValid);
     }
     else {
-      ParticleManagement::mergeNearestNeighborsTree<ItoMergeParticle, Real>(*m_amr,
-                                                                            merge,
+      ParticleManagement::mergeNearestNeighborsTree<ItoMergeParticle, Real>(merge,
+                                                                            *m_amr,
                                                                             a_numParticlesPerCellThresh,
                                                                             gather,
                                                                             combine,
@@ -4221,8 +4221,8 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
                              m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
 
     // Merge particles -- this is the most expensive part of the merge algorithm.
-    ParticleManagement::mergeNearestNeighborsOneCell<ItoMergeParticle, Real>(*m_amr,
-                                                                             merge,
+    ParticleManagement::mergeNearestNeighborsOneCell<ItoMergeParticle, Real>(merge,
+                                                                             *m_amr,
                                                                              a_numParticlesPerCellThresh,
                                                                              gather,
                                                                              combine,
@@ -4410,13 +4410,13 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
   renumber();
   fillWidthOneGhosts(merge);
 
-  ParticleManagement::mergeKDInterior<ItoMergeParticle, Real>(*m_amr,
-                                                              merge,
+  ParticleManagement::mergeKDInterior<ItoMergeParticle, Real>(merge,
                                                               interior,
-                                                              numParticlesPerCellThresh,
-                                                              m_kdSplitWeightLeafDx,
                                                               m_kdMergeCellHistogram,
                                                               m_kdMergeLeafQuota,
+                                                              *m_amr,
+                                                              numParticlesPerCellThresh,
+                                                              m_kdSplitWeightLeafDx,
                                                               gather,
                                                               kdCombine,
                                                               kdScatter,
@@ -4503,8 +4503,8 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
     renumber();
     fillWidthOneGhosts(merge);
 
-    ParticleManagement::mergeNearestNeighborsOneCell<ItoMergeParticle, Real>(*m_amr,
-                                                                             merge,
+    ParticleManagement::mergeNearestNeighborsOneCell<ItoMergeParticle, Real>(merge,
+                                                                             *m_amr,
                                                                              cellBudget,
                                                                              gather,
                                                                              nnCombine,
@@ -4656,12 +4656,12 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
                              m_amr->getParticleGhostMaskCoarToFine(m_realm, 1),
                              m_amr->getParticleGhostMaskFineToCoar(m_realm, 1));
 
-    ParticleManagement::mergeKDCarve<ItoMergeParticle, Real>(*m_amr,
-                                                             merge,
-                                                             a_numParticlesPerCellThresh,
-                                                             m_kdSplitWeightLeafDx,
+    ParticleManagement::mergeKDCarve<ItoMergeParticle, Real>(merge,
                                                              m_kdMergeCellHistogram,
                                                              m_kdMergeLeafQuota,
+                                                             *m_amr,
+                                                             a_numParticlesPerCellThresh,
+                                                             m_kdSplitWeightLeafDx,
                                                              gather,
                                                              combine,
                                                              scatter,
@@ -4669,12 +4669,12 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
                                                              isPositionValid);
   }
   else {
-    ParticleManagement::mergeKDPatch<ItoMergeParticle, Real>(*m_amr,
-                                                             merge,
-                                                             a_numParticlesPerCellThresh,
-                                                             m_kdSplitWeightLeafDx,
+    ParticleManagement::mergeKDPatch<ItoMergeParticle, Real>(merge,
                                                              m_kdMergeCellHistogram,
                                                              m_kdMergeLeafQuota,
+                                                             *m_amr,
+                                                             a_numParticlesPerCellThresh,
+                                                             m_kdSplitWeightLeafDx,
                                                              gather,
                                                              combine,
                                                              scatter,
