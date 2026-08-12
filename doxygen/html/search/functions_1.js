@@ -19,7 +19,7 @@ var searchData=
   ['buildgasgeometry_16',['buildGasGeometry',['../classComputationalGeometry.html#ab756f82ea473094f13ee0945694139fb',1,'ComputationalGeometry']]],
   ['buildgeometries_17',['buildGeometries',['../classComputationalGeometry.html#a01a9788004e72269e1b6a1421090bd0d',1,'ComputationalGeometry']]],
   ['buildgrids_18',['buildGrids',['../classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e',1,'AmrMesh']]],
-  ['buildkdquotaleaves_19',['buildKDQuotaLeaves',['../namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79',1,'ParticleManagement::detail']]],
+  ['buildkdquotaleaves_19',['buildKDQuotaLeaves',['../namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5',1,'ParticleManagement::detail']]],
   ['buildsolidgeometry_20',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
   ['bytespan_21',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
   ['bytespanimpl_22',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],

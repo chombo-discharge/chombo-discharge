@@ -479,7 +479,7 @@ Protected Types</h2></td></tr>
 <tr class="memitem:a3141048e034ed1e5f9b1539162d187fd" id="r_a3141048e034ed1e5f9b1539162d187fd"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">NnPairSearchBackend</a> { <a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da">Tree</a>
 , <a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6">Hash</a>
  }</td></tr>
-<tr class="memdesc:a3141048e034ed1e5f9b1539162d187fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which EBGeometry point-cloud index backs <a class="el" href="classItoSolver.html#a2b4967adf0999d044780feb466cc496c" title="Make superparticles with the distributed nearest-neighbour pair merge, regardless of merge_algorithm ...">makeSuperparticlesNnPairSearch()</a>'s per-patch spatial search &ndash; see <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash().  <a href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">More...</a><br /></td></tr>
+<tr class="memdesc:a3141048e034ed1e5f9b1539162d187fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which EBGeometry point-cloud index backs <a class="el" href="classItoSolver.html#a2b4967adf0999d044780feb466cc496c" title="Make superparticles with the distributed nearest-neighbour pair merge, regardless of merge_algorithm ...">makeSuperparticlesNnPairSearch()</a>'s per-patch spatial search &ndash; see <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash().  <a href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">More...</a><br /></td></tr>
 <tr class="separator:a3141048e034ed1e5f9b1539162d187fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
@@ -762,6 +762,13 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_velocityFu
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_diffusionFunction</b></td></tr>
 <tr class="memdesc:a1530feac364fec71833a2cc367538577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion-centerer field used for interpolating diffusion coefficients. <br /></td></tr>
 <tr class="separator:a1530feac364fec71833a2cc367538577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad34c0550688c09afe97a3c990f1db62d" id="r_ad34c0550688c09afe97a3c990f1db62d"><td class="memItemLeft" align="right" valign="top">EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad34c0550688c09afe97a3c990f1db62d">m_kdMergeCellHistogram</a></td></tr>
+<tr class="memdesc:ad34c0550688c09afe97a3c990f1db62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>).  <br /></td></tr>
+<tr class="separator:ad34c0550688c09afe97a3c990f1db62d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af71e85b23c94fdc63a714d2fbc029d65" id="r_af71e85b23c94fdc63a714d2fbc029d65"><td class="memItemLeft" align="right" valign="top"><a id="af71e85b23c94fdc63a714d2fbc029d65" name="af71e85b23c94fdc63a714d2fbc029d65"></a>
+EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><b>m_kdMergeLeafQuota</b></td></tr>
+<tr class="memdesc:af71e85b23c94fdc63a714d2fbc029d65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell merge-quota scratch for the kd merges. Same lifetime as m_kdMergeCellHistogram. <br /></td></tr>
+<tr class="separator:af71e85b23c94fdc63a714d2fbc029d65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49dc43db44eb8cb98f208c66162d5e7b" id="r_a49dc43db44eb8cb98f208c66162d5e7b"><td class="memItemLeft" align="right" valign="top"><a id="a49dc43db44eb8cb98f208c66162d5e7b" name="a49dc43db44eb8cb98f208c66162d5e7b"></a>
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_depositionNC</b></td></tr>
 <tr class="memdesc:a49dc43db44eb8cb98f208c66162d5e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for holding the non-conservative deposition. <br /></td></tr>
@@ -814,11 +821,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </table>
 </div><div class="memdoc">
 
-<p>Which EBGeometry point-cloud index backs <a class="el" href="classItoSolver.html#a2b4967adf0999d044780feb466cc496c" title="Make superparticles with the distributed nearest-neighbour pair merge, regardless of merge_algorithm ...">makeSuperparticlesNnPairSearch()</a>'s per-patch spatial search &ndash; see <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash(). </p>
+<p>Which EBGeometry point-cloud index backs <a class="el" href="classItoSolver.html#a2b4967adf0999d044780feb466cc496c" title="Make superparticles with the distributed nearest-neighbour pair merge, regardless of merge_algorithm ...">makeSuperparticlesNnPairSearch()</a>'s per-patch spatial search &ndash; see <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash(). </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da" name="a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da"></a>Tree&#160;</td><td class="fielddoc"><p>EBGeometry::PointCloudBVH &ndash; <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da" name="a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da"></a>Tree&#160;</td><td class="fielddoc"><p>EBGeometry::PointCloudBVH &ndash; <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6" name="a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6"></a>Hash&#160;</td><td class="fielddoc"><p>EBGeometry::PointCloudHashGrid &ndash; <a class="el" href="namespaceParticleManagement.html#ad560a278f6cf56416a7029a7cd42c809" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">ParticleManagement::mergeNearestNeighborsHash()</a>. </p>
+<tr><td class="fieldname"><a id="a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6" name="a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6"></a>Hash&#160;</td><td class="fielddoc"><p>EBGeometry::PointCloudHashGrid &ndash; <a class="el" href="namespaceParticleManagement.html#abda285ee8fc3e7d5dd0a96deadc98ea9" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">ParticleManagement::mergeNearestNeighborsHash()</a>. </p>
 </td></tr>
 </table>
 
@@ -3958,7 +3965,7 @@ template&lt;typename Gather &gt; </div>
 </div><div class="memdoc">
 
 <p>Make superparticles with the whole-patch kd-tree carve merge, regardless of merge_algorithm. </p>
-<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>). A single, non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/nn_pair_max_cell_dist equivalents, since there is no configurable search radius or convergence loop. Fills a width-1 particle ghost mask itself, which must be registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>). Does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>). A single, non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/nn_pair_max_cell_dist equivalents, since there is no configurable search radius or convergence loop. Fills a width-1 particle ghost mask itself, which must be registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>). Does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4047,7 +4054,7 @@ template&lt;typename Gather &gt; </div>
 </div><div class="memdoc">
 
 <p>Make superparticles with the patch-local kd-tree merge, regardless of merge_algorithm. </p>
-<p>Same tree build and per-cell quota as makeSuperparticlesKDCarve, without the boundary tier (see <a class="el" href="namespaceParticleManagement.html#a41307c92d88082530835eafc35a0c7e1" title="Run one patch-local kd-tree merge over every patch this rank owns.">ParticleManagement::mergeKDPatch</a>). Fills no ghosts and performs no communication; each patch reduces only the particles it owns, so a cell straddled by two patches is reduced by each independently. Does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Same tree build and per-cell quota as makeSuperparticlesKDCarve, without the boundary tier (see <a class="el" href="namespaceParticleManagement.html#a95c8a124b6573a90a94e8d2338f517a3" title="Run one patch-local kd-tree merge over every patch this rank owns.">ParticleManagement::mergeKDPatch</a>). Fills no ghosts and performs no communication; each patch reduces only the particles it owns, so a cell straddled by two patches is reduced by each independently. Does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4092,7 +4099,7 @@ template&lt;typename Gather &gt; </div>
 </div><div class="memdoc">
 
 <p>Make superparticles with the kd-tree merge and a nearest-neighbor skin, regardless of merge_algorithm. </p>
-<p>Same tree build and per-cell quota as makeSuperparticlesKDCarve, but the boundary tier is the nearest-neighbor pair merge instead of the carve arbitration. The particles are split across two containers: <a class="el" href="namespaceParticleManagement.html#a113306b375868bb5479b665faa6dbaa1" title="Run the uncontested tier of the kd merge, splitting the input into merged and leftover.">ParticleManagement::mergeKDInterior()</a> commits every leaf holding no ghost into one, and what is left &ndash; the contested skin &ndash; is drained from the other by <a class="el" href="namespaceParticleManagement.html#a05b2c4794b937b4218c170c91978211b" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">ParticleManagement::mergeNearestNeighborsOneCell()</a>, whose search radius is fixed at Chebyshev cell distance 1 and so matches the width-1 halo exactly. The skin tier drains each cell to what remains of its target after the interior results are counted against it, so the two tiers share one budget. Fills a width-1 particle ghost mask itself, which must be registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>). Tuned by nn_pair_iterate/nn_pair_fallback/nn_pair_max_rounds, shared with the nn_pair family; nn_pair_max_cell_dist does not apply. Does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Same tree build and per-cell quota as makeSuperparticlesKDCarve, but the boundary tier is the nearest-neighbor pair merge instead of the carve arbitration. The particles are split across two containers: <a class="el" href="namespaceParticleManagement.html#a5fc83198c8fc98e293150aca95fabdef" title="Run the uncontested tier of the kd merge, splitting the input into merged and leftover.">ParticleManagement::mergeKDInterior()</a> commits every leaf holding no ghost into one, and what is left &ndash; the contested skin &ndash; is drained from the other by <a class="el" href="namespaceParticleManagement.html#aaf418974eaf19a4608d54eda6a85dcab" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">ParticleManagement::mergeNearestNeighborsOneCell()</a>, whose search radius is fixed at Chebyshev cell distance 1 and so matches the width-1 halo exactly. The skin tier drains each cell to what remains of its target after the interior results are counted against it, so the two tiers share one budget. Fills a width-1 particle ghost mask itself, which must be registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>). Tuned by nn_pair_iterate/nn_pair_fallback/nn_pair_max_rounds, shared with the nn_pair family; nn_pair_max_cell_dist does not apply. Does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4137,7 +4144,7 @@ template&lt;typename Gather &gt; </div>
 </div><div class="memdoc">
 
 <p>Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudHashGrid search). </p>
-<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#ad560a278f6cf56416a7029a7cd42c809" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">ParticleManagement::mergeNearestNeighborsHash</a>) &ndash; identical algorithm and tunables to <a class="el" href="classItoSolver.html#a2b1606465351431360676747eca216b1" title="Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudBVH sear...">makeSuperparticlesNnPairTree()</a>, differing only in the per-patch spatial-index backend. Requires the particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#abda285ee8fc3e7d5dd0a96deadc98ea9" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">ParticleManagement::mergeNearestNeighborsHash</a>) &ndash; identical algorithm and tunables to <a class="el" href="classItoSolver.html#a2b1606465351431360676747eca216b1" title="Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudBVH sear...">makeSuperparticlesNnPairTree()</a>, differing only in the per-patch spatial-index backend. Requires the particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4182,7 +4189,7 @@ template&lt;typename Gather &gt; </div>
 </div><div class="memdoc">
 
 <p>Make superparticles with the distributed nearest-neighbour pair merge (per-cell PointCloudBVH search). </p>
-<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#a05b2c4794b937b4218c170c91978211b" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">ParticleManagement::mergeNearestNeighborsOneCell</a>). Merge distance is structurally fixed at Chebyshev cell distance 1 (own cell and Moore-adjacent neighbors only), so nn_pair_max_cell_dist is not honored by this method. Requires a width-1 particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#aaf418974eaf19a4608d54eda6a85dcab" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">ParticleManagement::mergeNearestNeighborsOneCell</a>). Merge distance is structurally fixed at Chebyshev cell distance 1 (own cell and Moore-adjacent neighbors only), so nn_pair_max_cell_dist is not honored by this method. Requires a width-1 particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4229,7 +4236,7 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 </div><div class="memdoc">
 
 <p>Make superparticles with the distributed nearest-neighbour pair merge, regardless of merge_algorithm &ndash; shared implementation behind <a class="el" href="classItoSolver.html#a2b1606465351431360676747eca216b1" title="Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudBVH sear...">makeSuperparticlesNnPairTree()</a>/makeSuperparticlesNnPairHash(). </p>
-<p>Identical in every respect between the two backends (extraction, callbacks, id allocation, drain loop, split/rebuild); only the <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash() call inside the drain loop differs, selected at compile time via <code>Backend</code>. See <a class="el" href="classItoSolver.html#a2b1606465351431360676747eca216b1" title="Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudBVH sear...">makeSuperparticlesNnPairTree()</a>'s own docs for the full behavioral contract, which applies unchanged to either backend. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Identical in every respect between the two backends (extraction, callbacks, id allocation, drain loop, split/rebuild); only the <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash() call inside the drain loop differs, selected at compile time via <code>Backend</code>. See <a class="el" href="classItoSolver.html#a2b1606465351431360676747eca216b1" title="Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudBVH sear...">makeSuperparticlesNnPairTree()</a>'s own docs for the full behavioral contract, which applies unchanged to either backend. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Backend</td><td>Which point-cloud index to search with (see NnPairSearchBackend). </td></tr>
   </table>
@@ -4280,7 +4287,7 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 </div><div class="memdoc">
 
 <p>Make superparticles with the distributed nearest-neighbour pair merge (whole-patch PointCloudBVH search). </p>
-<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree</a>). Requires the particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Whole-container, cross-patch/cross-rank AMR merge (see <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree</a>). Requires the particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and does NOT need cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -5892,6 +5899,31 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 
 </div>
 </div>
+<a id="ad34c0550688c09afe97a3c990f1db62d" name="ad34c0550688c09afe97a3c990f1db62d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad34c0550688c09afe97a3c990f1db62d">&#9670;&#160;</a></span>m_kdMergeCellHistogram</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRFAB ItoSolver::m_kdMergeCellHistogram</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>). </p>
+<p>Owned here, not by the merge, so the allocation happens once per regrid rather than once per merge call. Allocated and released with the other mesh fields, in <a class="el" href="classItoSolver.html#aa6f2c8ad146edca5e4d248349fda2afb" title="Allocate internal storage.">allocate()</a>/regrid() and <a class="el" href="classItoSolver.html#ad10688731e447c23076992858f989e9b" title="Perform pre-regrid operations.">preRegrid()</a> respectively. </p>
+
+</div>
+</div>
 <a id="a1f5137246c292dfdcf4c90e38b12fdbb" name="a1f5137246c292dfdcf4c90e38b12fdbb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1f5137246c292dfdcf4c90e38b12fdbb">&#9670;&#160;</a></span>m_kdSplitWeightLeafDx</h2>
 
@@ -5913,7 +5945,7 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 </div><div class="memdoc">
 
 <p>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting. </p>
-<p>Forwarded to the a_splitWeightLeafDx argument of <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve()</a> and mergeKDPatch() &ndash; see those functions' own docs. Larger values apply the weight median to bigger leaves, giving more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells; 0 disables it entirely. Governs the shared tree build, so it applies to both kd_carve and kd_patch. </p>
+<p>Forwarded to the a_splitWeightLeafDx argument of <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve()</a> and mergeKDPatch() &ndash; see those functions' own docs. Larger values apply the weight median to bigger leaves, giving more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells; 0 disables it entirely. Governs the shared tree build, so it applies to both kd_carve and kd_patch. </p>
 
 </div>
 </div>
@@ -5963,7 +5995,7 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 </div><div class="memdoc">
 
 <p>nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local trivial tier to convergence within each round. </p>
-<p>Forwarded to <a class="el" href="namespaceParticleManagement.html#a4b801094b73045efa79c76168473f7c1" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsOneCell()/ mergeNearestNeighborsHash(). Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash. </p>
+<p>Forwarded to <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsOneCell()/ mergeNearestNeighborsHash(). Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash. </p>
 
 </div>
 </div>

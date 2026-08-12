@@ -126,18 +126,18 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac37bed907d9f3b3d9ac8bc3ebab50a79" id="r_ac37bed907d9f3b3d9ac8bc3ebab50a79"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
-<tr class="memitem:ac37bed907d9f3b3d9ac8bc3ebab50a79"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79">buildKDQuotaLeaves</a> (std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const int a_ppc, const Real a_splitWeightLeafDx, const RealVect &amp;a_dx, const RealVect &amp;a_probLo, FArrayBox &amp;a_used, const FArrayBox &amp;a_cellCounts, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1KDLeaf.html">KDLeaf</a> &gt; &amp;a_leaves) noexcept</td></tr>
-<tr class="memdesc:ac37bed907d9f3b3d9ac8bc3ebab50a79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build one whole-patch kd tree: partition <em>a_particles</em> by position into leaves, each of which becomes exactly one super-particle, subject to a live per-cell leaf quota of <em>a_ppc</em>.  <br /></td></tr>
-<tr class="separator:ac37bed907d9f3b3d9ac8bc3ebab50a79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a686c9cc72c634822c6f36ef6c0a415a5" id="r_a686c9cc72c634822c6f36ef6c0a415a5"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:a686c9cc72c634822c6f36ef6c0a415a5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5">buildKDQuotaLeaves</a> (std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, FArrayBox &amp;a_used, std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1KDLeaf.html">KDLeaf</a> &gt; &amp;a_leaves, const int a_ppc, const Real a_splitWeightLeafDx, const RealVect &amp;a_dx, const RealVect &amp;a_probLo, const FArrayBox &amp;a_cellCounts) noexcept</td></tr>
+<tr class="memdesc:a686c9cc72c634822c6f36ef6c0a415a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build one whole-patch kd tree: partition <em>a_particles</em> by position into leaves, each of which becomes exactly one super-particle, subject to a live per-cell leaf quota of <em>a_ppc</em>.  <br /></td></tr>
+<tr class="separator:a686c9cc72c634822c6f36ef6c0a415a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a573710f1883ce3a0a5660c8ae0912315" id="r_a573710f1883ce3a0a5660c8ae0912315"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a573710f1883ce3a0a5660c8ae0912315"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a573710f1883ce3a0a5660c8ae0912315">kdExchangeByRank</a> (const std::vector&lt; std::vector&lt; T &gt; &gt; &amp;a_sendByRank)</td></tr>
 <tr class="memdesc:a573710f1883ce3a0a5660c8ae0912315"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic Alltoallv-style exchange for a trivially-copyable record type: send a per-destination-rank bucket, return the flat concatenation of everything received.  <br /></td></tr>
 <tr class="separator:a573710f1883ce3a0a5660c8ae0912315"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8613d96e5cc902439ee082739fd0339e" id="r_a8613d96e5cc902439ee082739fd0339e"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
-<tr class="memitem:a8613d96e5cc902439ee082739fd0339e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a8613d96e5cc902439ee082739fd0339e">kdBBox</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const std::size_t a_lo, const std::size_t a_hi, RealVect &amp;a_boxLo, RealVect &amp;a_boxHi) noexcept</td></tr>
-<tr class="memdesc:a8613d96e5cc902439ee082739fd0339e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis-aligned bounding box of particles[a_lo, a_hi).  <br /></td></tr>
-<tr class="separator:a8613d96e5cc902439ee082739fd0339e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f629894f24371ad15bca1c14724342f" id="r_a3f629894f24371ad15bca1c14724342f"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:a3f629894f24371ad15bca1c14724342f"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a3f629894f24371ad15bca1c14724342f">kdBBox</a> (RealVect &amp;a_boxLo, RealVect &amp;a_boxHi, const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const std::size_t a_lo, const std::size_t a_hi) noexcept</td></tr>
+<tr class="memdesc:a3f629894f24371ad15bca1c14724342f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis-aligned bounding box of particles[a_lo, a_hi).  <br /></td></tr>
+<tr class="separator:a3f629894f24371ad15bca1c14724342f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ea1e3ef175fb578ce0252ec1ce851c7" id="r_a1ea1e3ef175fb578ce0252ec1ce851c7"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a1ea1e3ef175fb578ce0252ec1ce851c7">kdMaxAxisSpan</a> (const RealVect &amp;a_boxLo, const RealVect &amp;a_boxHi, const RealVect &amp;a_dx) noexcept</td></tr>
 <tr class="memdesc:a1ea1e3ef175fb578ce0252ec1ce851c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest per-axis extent of [a_boxLo,a_boxHi], expressed as a fraction of that axis's own cell width.  <br /></td></tr>
 <tr class="separator:a1ea1e3ef175fb578ce0252ec1ce851c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,21 +147,21 @@ Functions</h2></td></tr>
 <tr class="memitem:a4fc76429d16c72ad6e981f6b4e702ff3" id="r_a4fc76429d16c72ad6e981f6b4e702ff3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a4fc76429d16c72ad6e981f6b4e702ff3">kdIntVectLess</a> (const IntVect &amp;a_lhs, const IntVect &amp;a_rhs) noexcept</td></tr>
 <tr class="memdesc:a4fc76429d16c72ad6e981f6b4e702ff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strict weak ordering over IntVect, lexicographic component-wise.  <br /></td></tr>
 <tr class="separator:a4fc76429d16c72ad6e981f6b4e702ff3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a559c7855d9e592ed1f803b1e08ad4f56" id="r_a559c7855d9e592ed1f803b1e08ad4f56"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
-<tr class="memitem:a559c7855d9e592ed1f803b1e08ad4f56"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a559c7855d9e592ed1f803b1e08ad4f56">kdFillCellHistogram</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, FArrayBox &amp;a_counts) noexcept</td></tr>
-<tr class="memdesc:a559c7855d9e592ed1f803b1e08ad4f56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tally a per-cell particle-count histogram over one patch's gathered particles.  <br /></td></tr>
-<tr class="separator:a559c7855d9e592ed1f803b1e08ad4f56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf34c46712c7541d073098cf1daafb7d" id="r_aaf34c46712c7541d073098cf1daafb7d"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
+<tr class="memitem:aaf34c46712c7541d073098cf1daafb7d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#aaf34c46712c7541d073098cf1daafb7d">kdFillCellHistogram</a> (FArrayBox &amp;a_counts, const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const RealVect &amp;a_probLo, const RealVect &amp;a_dx) noexcept</td></tr>
+<tr class="memdesc:aaf34c46712c7541d073098cf1daafb7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tally a per-cell particle-count histogram over one patch's gathered particles.  <br /></td></tr>
+<tr class="separator:aaf34c46712c7541d073098cf1daafb7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ea83a810a38dc7624d5f8ab3083ac9f" id="r_a4ea83a810a38dc7624d5f8ab3083ac9f"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
 <tr class="memitem:a4ea83a810a38dc7624d5f8ab3083ac9f"><td class="memTemplItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a4ea83a810a38dc7624d5f8ab3083ac9f">kdSplitCountMedian</a> (std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const std::size_t a_lo, const std::size_t a_hi, const int a_axis) noexcept</td></tr>
-<tr class="memdesc:a4ea83a810a38dc7624d5f8ab3083ac9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split particles[a_lo,a_hi) in place by the longest axis at the count-median &ndash; the sole split rule used by <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>.  <br /></td></tr>
+<tr class="memdesc:a4ea83a810a38dc7624d5f8ab3083ac9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split particles[a_lo,a_hi) in place by the longest axis at the count-median &ndash; the sole split rule used by <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>.  <br /></td></tr>
 <tr class="separator:a4ea83a810a38dc7624d5f8ab3083ac9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acea4e448665505456601713579eeaf5a" id="r_acea4e448665505456601713579eeaf5a"><td class="memTemplParams" colspan="2">template&lt;typename Packed &gt; </td></tr>
 <tr class="memitem:acea4e448665505456601713579eeaf5a"><td class="memTemplItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#acea4e448665505456601713579eeaf5a">kdSplitWeightMedian</a> (std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_particles, const std::size_t a_lo, const std::size_t a_hi, const int a_axis) noexcept</td></tr>
 <tr class="memdesc:acea4e448665505456601713579eeaf5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split particles[a_lo,a_hi) in place by the longest axis at the WEIGHT median &ndash; the plane with half this node's total particle weight on either side.  <br /></td></tr>
 <tr class="separator:acea4e448665505456601713579eeaf5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79e89248847ce11851f5511101044aa7" id="r_a79e89248847ce11851f5511101044aa7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a79e89248847ce11851f5511101044aa7">kdIsBoundaryExposed</a> (const IntVect &amp;a_cellIndex, const <a class="el" href="classParticleGhostMask.html">ParticleGhostMask</a> &amp;a_ghostMask) noexcept</td></tr>
-<tr class="memdesc:a79e89248847ce11851f5511101044aa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cell has any outgoing ghost-shipment target &ndash; a duplicate of the nearest- neighbor merge's isBoundaryExposed() (a one-line function, not worth an EBGeometry-pulling dependency to reuse).  <br /></td></tr>
-<tr class="separator:a79e89248847ce11851f5511101044aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f2efb70d9874cc34fd7463edd7a8033" id="r_a5f2efb70d9874cc34fd7463edd7a8033"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a5f2efb70d9874cc34fd7463edd7a8033">kdBoxRealBounds</a> (RealVect &amp;a_boxLo, RealVect &amp;a_boxHi, const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo) noexcept</td></tr>
+<tr class="memdesc:a5f2efb70d9874cc34fd7463edd7a8033"><td class="mdescLeft">&#160;</td><td class="mdescRight">Real-space bounds of a box: the half-open region [lo, hi) that its cells cover.  <br /></td></tr>
+<tr class="separator:a5f2efb70d9874cc34fd7463edd7a8033"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23e5272b408b32839e69e27e23b5bd2e" id="r_a23e5272b408b32839e69e27e23b5bd2e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a23e5272b408b32839e69e27e23b5bd2e">kdCheckCentroid</a> (const RealVect &amp;a_centroid, const Real a_totalWeight, const RealVect &amp;a_boxLo, const RealVect &amp;a_boxHi) noexcept</td></tr>
 <tr class="memdesc:a23e5272b408b32839e69e27e23b5bd2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Debug-only sanity check on a merged particle's position: a weighted centroid of positions that all lie within [a_boxLo,a_boxHi], using strictly positive weights, is mathematically guaranteed to itself lie within that same box.  <br /></td></tr>
 <tr class="separator:a23e5272b408b32839e69e27e23b5bd2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,9 +177,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a5d12e7b8d1c9516266a727a6937daafc" id="r_a5d12e7b8d1c9516266a727a6937daafc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a5d12e7b8d1c9516266a727a6937daafc">nnMergeCrossLevelTooFar</a> (const RealVect &amp;a_posA, const int a_levelA, const RealVect &amp;a_posB, const int a_levelB, const RealVect &amp;a_probLo, const std::vector&lt; RealVect &gt; &amp;a_dxByLevel, const int a_maxCellDistance) noexcept</td></tr>
 <tr class="memdesc:a5d12e7b8d1c9516266a727a6937daafc"><td class="mdescLeft">&#160;</td><td class="mdescRight">a_maxCellDistance check for two positions that may be on DIFFERENT AMR levels.  <br /></td></tr>
 <tr class="separator:a5d12e7b8d1c9516266a727a6937daafc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5df1365b60efb14c82511ac536e1dcb" id="r_ab5df1365b60efb14c82511ac536e1dcb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#ab5df1365b60efb14c82511ac536e1dcb">nnMergeWeightedCentroid</a> (const RealVect &amp;a_posA, const Real a_weightA, const RealVect &amp;a_posB, const Real a_weightB, RealVect &amp;a_mergedPos, Real &amp;a_mergedWeight) noexcept</td></tr>
-<tr class="memdesc:ab5df1365b60efb14c82511ac536e1dcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weighted-centroid merge of two positions/weights &ndash; shared by resolveTrivialTier() and judgeProposals() so the formula is written exactly once.  <br /></td></tr>
-<tr class="separator:ab5df1365b60efb14c82511ac536e1dcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41d0f3f93ba5e24ec7d0100f2ac6474b" id="r_a41d0f3f93ba5e24ec7d0100f2ac6474b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a41d0f3f93ba5e24ec7d0100f2ac6474b">nnMergeWeightedCentroid</a> (RealVect &amp;a_mergedPos, Real &amp;a_mergedWeight, const RealVect &amp;a_posA, const Real a_weightA, const RealVect &amp;a_posB, const Real a_weightB) noexcept</td></tr>
+<tr class="memdesc:a41d0f3f93ba5e24ec7d0100f2ac6474b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weighted-centroid merge of two positions/weights &ndash; shared by resolveTrivialTier() and judgeProposals() so the formula is written exactly once.  <br /></td></tr>
+<tr class="separator:a41d0f3f93ba5e24ec7d0100f2ac6474b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a" id="r_a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a">nnMergePointToCellDistSquared</a> (const RealVect &amp;a_point, const IntVect &amp;a_cell, const RealVect &amp;a_probLo, const RealVect &amp;a_dx) noexcept</td></tr>
 <tr class="memdesc:a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Squared distance from a physical point to a cell's axis-aligned bounding box (0 if the point is inside).  <br /></td></tr>
 <tr class="separator:a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -294,8 +294,8 @@ template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() co
 
 </div>
 </div>
-<a id="ac37bed907d9f3b3d9ac8bc3ebab50a79" name="ac37bed907d9f3b3d9ac8bc3ebab50a79"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac37bed907d9f3b3d9ac8bc3ebab50a79">&#9670;&#160;</a></span>buildKDQuotaLeaves()</h2>
+<a id="a686c9cc72c634822c6f36ef6c0a415a5" name="a686c9cc72c634822c6f36ef6c0a415a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a686c9cc72c634822c6f36ef6c0a415a5">&#9670;&#160;</a></span>buildKDQuotaLeaves()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -310,6 +310,18 @@ template&lt;typename Packed &gt; </div>
           <td>(</td>
           <td class="paramtype">std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FArrayBox &amp;&#160;</td>
+          <td class="paramname"><em>a_used</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1KDLeaf.html">KDLeaf</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_leaves</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -338,20 +350,8 @@ template&lt;typename Packed &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">FArrayBox &amp;&#160;</td>
-          <td class="paramname"><em>a_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const FArrayBox &amp;&#160;</td>
-          <td class="paramname"><em>a_cellCounts</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="structParticleManagement_1_1detail_1_1KDLeaf.html">KDLeaf</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_leaves</em>&#160;</td>
+          <td class="paramname"><em>a_cellCounts</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -370,7 +370,7 @@ template&lt;typename Packed &gt; </div>
 <p><em>a_particles</em> is reordered IN PLACE, so each returned leaf's [lo,hi) range is contiguous in the reordered buffer; no particle is ever copied or split synthetically.</p>
 <p>A leaf collapses to exactly ONE super-particle at its own weighted centroid, so the number of leaves whose centroid falls in a cell is that cell's post-merge population. That count is tracked live in a per-cell map while splitting, and a split that would push a cell past <em>a_ppc</em> is refused. Splitting takes the heaviest candidate leaf first and stops when nothing may legally be split.</p>
 <p>Splits are along the longest real-space axis and are deliberately UNSNAPPED to the grid, so a leaf may straddle a cell face and draw members from either side. The split plane is the count median while the node is wider than <em>a_splitWeightLeafDx</em> cell widths, and the weight median once it is narrower: above that scale a split apportions leaves between cells, which is a question of counts; below it the weight median drives the resulting super-particles toward equal weight.</p>
-<p>The quota constrains only leaves that can actually merge. <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and <a class="el" href="namespaceParticleManagement.html#a41307c92d88082530835eafc35a0c7e1" title="Run one patch-local kd-tree merge over every patch this rank owns.">mergeKDPatch()</a> veto any leaf wider than <code>s_kdMaxLeafExtent</code> and leaves its members behind individually, so such a leaf costs its cell its full member count rather than one particle; the quota therefore does not block splitting it further. As a result a cell can finish slightly above <em>a_ppc</em> when a leaf is both too wide to merge and in a cell already at quota, since both available choices overshoot.</p>
+<p>The quota constrains only leaves that can actually merge. <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and <a class="el" href="namespaceParticleManagement.html#a95c8a124b6573a90a94e8d2338f517a3" title="Run one patch-local kd-tree merge over every patch this rank owns.">mergeKDPatch()</a> veto any leaf wider than <code>s_kdMaxLeafExtent</code> and leaves its members behind individually, so such a leaf costs its cell its full member count rather than one particle; the quota therefore does not block splitting it further. As a result a cell can finish slightly above <em>a_ppc</em> when a leaf is both too wide to merge and in a cell already at quota, since both available choices overshoot.</p>
 <p>Particles in cells at or below <em>a_ppc</em> are excluded from the partition and emitted as singleton leaves. A singleton never merges (the merge threshold is two members), so an uncrowded cell cannot be drained by a neighbour's merge. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>. </td></tr>
@@ -380,13 +380,13 @@ template&lt;typename Packed &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to partition; reordered in place. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_used</td><td>Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_leaves</td><td>Every resulting leaf, in no particular order. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ppc</td><td>Target particles per cell, enforced here as a per-cell ceiling on leaf count. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_splitWeightLeafDx</td><td>Leaf size, in cell widths, at or below which the split plane switches from the count median to the weight median. 0 disables the weight median. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>This patch's own cell spacing. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner, for computing cell indices. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_used</td><td>Live per-cell leaf quota for this patch, zeroed on entry. Its box must cover every cell a leaf centroid can fall in, i.e. it needs at least one ghost cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCounts</td><td>Per-cell TRUE particle-count histogram (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a559c7855d9e592ed1f803b1e08ad4f56" title="Tally a per-cell particle-count histogram over one patch&#39;s gathered particles.">kdFillCellHistogram()</a>). A cell is crowded, and its particles eligible to merge, iff its count exceeds <em>a_ppc</em>. A cell outside this box reads as 0 (empty): unlike <em>a_used</em>, whose box coverage is a hard precondition, this lookup guards rather than asserts, since a particle's own cell is always in-box but the guard costs nothing and documents the intent. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_leaves</td><td>Every resulting leaf, in no particular order. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellCounts</td><td>Per-cell TRUE particle-count histogram (see <a class="el" href="namespaceParticleManagement_1_1detail.html#aaf34c46712c7541d073098cf1daafb7d" title="Tally a per-cell particle-count histogram over one patch&#39;s gathered particles.">kdFillCellHistogram()</a>). A cell is crowded, and its particles eligible to merge, iff its count exceeds <em>a_ppc</em>. A cell outside this box reads as 0 (empty): unlike <em>a_used</em>, whose box coverage is a hard precondition, this lookup guards rather than asserts, since a particle's own cell is always in-box but the guard costs nothing and documents the intent. </td></tr>
   </table>
   </dd>
 </dl>
@@ -447,8 +447,8 @@ template&lt;typename Packed &gt; </div>
 
 </div>
 </div>
-<a id="a8613d96e5cc902439ee082739fd0339e" name="a8613d96e5cc902439ee082739fd0339e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8613d96e5cc902439ee082739fd0339e">&#9670;&#160;</a></span>kdBBox()</h2>
+<a id="a3f629894f24371ad15bca1c14724342f" name="a3f629894f24371ad15bca1c14724342f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f629894f24371ad15bca1c14724342f">&#9670;&#160;</a></span>kdBBox()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -461,6 +461,18 @@ template&lt;typename Packed &gt; </div>
         <tr>
           <td class="memname">void ParticleManagement::detail::kdBBox </td>
           <td>(</td>
+          <td class="paramtype">RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_boxLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_boxHi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
@@ -474,19 +486,7 @@ template&lt;typename Packed &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::size_t&#160;</td>
-          <td class="paramname"><em>a_hi</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">RealVect &amp;&#160;</td>
-          <td class="paramname"><em>a_boxLo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">RealVect &amp;&#160;</td>
-          <td class="paramname"><em>a_boxHi</em>&#160;</td>
+          <td class="paramname"><em>a_hi</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -504,11 +504,77 @@ template&lt;typename Packed &gt; </div>
 <p>Axis-aligned bounding box of particles[a_lo, a_hi). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxLo</td><td>Low corner. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxHi</td><td>High corner. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle buffer. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Start of the range (inclusive). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>End of the range (exclusive). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxLo</td><td>Low corner. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxHi</td><td>High corner. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5f2efb70d9874cc34fd7463edd7a8033" name="a5f2efb70d9874cc34fd7463edd7a8033"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f2efb70d9874cc34fd7463edd7a8033">&#9670;&#160;</a></span>kdBoxRealBounds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::detail::kdBoxRealBounds </td>
+          <td>(</td>
+          <td class="paramtype">RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_boxLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_boxHi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Real-space bounds of a box: the half-open region [lo, hi) that its cells cover. </p>
+<p>Half-open on purpose &ndash; the high corner is the OUTER face of the last cell, so testing pos &gt;= lo &amp;&amp; pos &lt; hi per direction partitions space between abutting boxes with no gap and no double-cover, which is exactly the "is this particle still in its own patch" test both callers make. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxLo</td><td>Low corner (inclusive). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_boxHi</td><td>High corner (exclusive). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box whose bounds are wanted. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing at the box's level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the physical domain. </td></tr>
   </table>
   </dd>
 </dl>
@@ -671,8 +737,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a559c7855d9e592ed1f803b1e08ad4f56" name="a559c7855d9e592ed1f803b1e08ad4f56"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a559c7855d9e592ed1f803b1e08ad4f56">&#9670;&#160;</a></span>kdFillCellHistogram()</h2>
+<a id="aaf34c46712c7541d073098cf1daafb7d" name="aaf34c46712c7541d073098cf1daafb7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf34c46712c7541d073098cf1daafb7d">&#9670;&#160;</a></span>kdFillCellHistogram()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -685,6 +751,12 @@ template&lt;typename Packed &gt; </div>
         <tr>
           <td class="memname">void ParticleManagement::detail::kdFillCellHistogram </td>
           <td>(</td>
+          <td class="paramtype">FArrayBox &amp;&#160;</td>
+          <td class="paramname"><em>a_counts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
@@ -698,13 +770,7 @@ template&lt;typename Packed &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const RealVect &amp;&#160;</td>
-          <td class="paramname"><em>a_dx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">FArrayBox &amp;&#160;</td>
-          <td class="paramname"><em>a_counts</em>&#160;</td>
+          <td class="paramname"><em>a_dx</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -720,9 +786,9 @@ template&lt;typename Packed &gt; </div>
 </div><div class="memdoc">
 
 <p>Tally a per-cell particle-count histogram over one patch's gathered particles. </p>
-<p>Built from every particle's own position, so it is unaffected by how <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a> later partitions the space &ndash; a node-local count is NOT a safe substitute, see that function's own docs for why. Shared by <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>/mergeKDPatch()/mergeKDInterior(): all three need the same ground truth, and the invariant that it comes from true positions rather than from the partition is easy to break if each keeps its own copy.</p>
+<p>Built from every particle's own position, so it is unaffected by how <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a> later partitions the space &ndash; a node-local count is NOT a safe substitute, see that function's own docs for why. Shared by <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>/mergeKDPatch()/mergeKDInterior(): all three need the same ground truth, and the invariant that it comes from true positions rather than from the partition is easy to break if each keeps its own copy.</p>
 <p><em>a_counts</em> must include at least one ghost cell, since a gathered ghost sits up to one cell outside the patch's own box.</p>
-<p>The count is stored in <em>a_counts'</em> <code>Real</code> elements but is always a non-negative integer. A double represents every integer exactly up to 2^53, so consumers &ndash; e.g. the crowding test in <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a> &ndash; may <code>static_cast&lt;int&gt;</code> it losslessly for any realistic per-cell count. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>The count is stored in <em>a_counts'</em> <code>Real</code> elements but is always a non-negative integer. A double represents every integer exactly up to 2^53, so consumers &ndash; e.g. the crowding test in <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a> &ndash; may <code>static_cast&lt;int&gt;</code> it losslessly for any realistic per-cell count. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Packed</td><td>See <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>. </td></tr>
   </table>
@@ -730,10 +796,10 @@ template&lt;typename Packed &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_counts</td><td>Per-cell counts, zeroed here before tallying. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Gathered particles for this patch. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical position of the domain's low corner. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>This patch's own cell spacing. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_counts</td><td>Per-cell counts, zeroed here before tallying. </td></tr>
   </table>
   </dd>
 </dl>
@@ -775,7 +841,7 @@ template&lt;typename Packed &gt; </div>
 </div><div class="memdoc">
 
 <p>Strict weak ordering over IntVect, lexicographic component-wise. </p>
-<p>Used to sort/binary-search the per-patch, per-cell TRUE particle-count histogram (see <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>'s own docs) &ndash; IntVect has no built-in total order. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Used to sort/binary-search the per-patch, per-cell TRUE particle-count histogram (see <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>'s own docs) &ndash; IntVect has no built-in total order. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lhs</td><td>Left-hand cell index. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_rhs</td><td>Right-hand cell index. </td></tr>
@@ -783,52 +849,6 @@ template&lt;typename Packed &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True iff a_lhs sorts strictly before a_rhs. </dd></dl>
-
-</div>
-</div>
-<a id="a79e89248847ce11851f5511101044aa7" name="a79e89248847ce11851f5511101044aa7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79e89248847ce11851f5511101044aa7">&#9670;&#160;</a></span>kdIsBoundaryExposed()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ParticleManagement::detail::kdIsBoundaryExposed </td>
-          <td>(</td>
-          <td class="paramtype">const IntVect &amp;&#160;</td>
-          <td class="paramname"><em>a_cellIndex</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleGhostMask.html">ParticleGhostMask</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_ghostMask</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Whether a cell has any outgoing ghost-shipment target &ndash; a duplicate of the nearest- neighbor merge's isBoundaryExposed() (a one-line function, not worth an EBGeometry-pulling dependency to reuse). </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellIndex</td><td>Cell index in the mask's own frame. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostMask</td><td>Outgoing particle ghost mask. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True iff the cell has at least one outgoing ghost-shipment target. </dd></dl>
 
 </div>
 </div>
@@ -873,7 +893,7 @@ template&lt;typename Packed &gt; </div>
 </div><div class="memdoc">
 
 <p>Largest per-axis extent of [a_boxLo,a_boxHi], expressed as a fraction of that axis's own cell width. </p>
-<p>The correctness backstop <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>, <a class="el" href="namespaceParticleManagement.html#af681e1151a79c53180360eb01e53fbe0" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and <a class="el" href="namespaceParticleManagement.html#a41307c92d88082530835eafc35a0c7e1" title="Run one patch-local kd-tree merge over every patch this rank owns.">mergeKDPatch()</a> rely on to decide whether a leaf is compact enough to merge: unlike an aggregate VOLUME ratio (a product across axes), this cannot be fooled by an anisotropic (long-and-thin) bounding box &ndash; e.g. a box 5 cells long in one axis and 0.2 cells wide in another has volume ratio 1.0 (deceptively "one
+<p>The correctness backstop <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>, <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and <a class="el" href="namespaceParticleManagement.html#a95c8a124b6573a90a94e8d2338f517a3" title="Run one patch-local kd-tree merge over every patch this rank owns.">mergeKDPatch()</a> rely on to decide whether a leaf is compact enough to merge: unlike an aggregate VOLUME ratio (a product across axes), this cannot be fooled by an anisotropic (long-and-thin) bounding box &ndash; e.g. a box 5 cells long in one axis and 0.2 cells wide in another has volume ratio 1.0 (deceptively "one
 cell's worth") but a maxAxisSpan of 5.0 (correctly flagged as still spanning several cells). Particles hugging a curved EB surface, or funneled along a narrow L-shaped coarse-fine strip, produce exactly this kind of elongated cluster. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_boxLo</td><td>Low corner. </td></tr>
@@ -934,7 +954,7 @@ template&lt;typename Packed &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Split particles[a_lo,a_hi) in place by the longest axis at the count-median &ndash; the sole split rule used by <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>. </p>
+<p>Split particles[a_lo,a_hi) in place by the longest axis at the count-median &ndash; the sole split rule used by <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a>. </p>
 <p>The split point is the position-sorted median particle (via nth_element), balancing COUNT as evenly as possible &ndash; mirrors equal_weight_kd's own single-cell logic, but by count, never by weight, and with NO synthetic particle splitting (a particle is never divided across the two children). nth_element divides the range in half by count however the positions are distributed, so a tightly clustered node still splits evenly. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particle buffer; reordered in [a_lo,a_hi). </td></tr>
@@ -999,7 +1019,7 @@ template&lt;typename Packed &gt; </div>
 <p>Split particles[a_lo,a_hi) in place by the longest axis at the WEIGHT median &ndash; the plane with half this node's total particle weight on either side. </p>
 <p>Used instead of the count median so that the resulting leaves carry roughly equal total weight, and therefore so do the super-particles they collapse into. Uniform super-particle weight is what keeps statistical noise down, and is the defining property of the equal_weight_kd merge.</p>
 <p>Unlike equal_weight_kd this NEVER divides a particle synthetically, so exact equality is not attainable: once a single particle's weight exceeds a leaf's target weight, that particle alone sets a floor no partition can get under. The bound equal_weight_kd guarantees (max/min &lt;= 2) is bought precisely by that synthetic division and is therefore out of reach here by construction.</p>
-<p>A weight median can land very unevenly BY COUNT &ndash; one dominant particle carrying half the node's weight forces a 1-vs-(n-1) split. That is harmless here only because <a class="el" href="namespaceParticleManagement_1_1detail.html#ac37bed907d9f3b3d9ac8bc3ebab50a79" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a> enforces a hard per-cell leaf quota independently of how the split plane behaves: an uneven split can cost merge quality but cannot leave a cell above target. Under any of the earlier, quota-less formulations the same degeneracy was fatal. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>A weight median can land very unevenly BY COUNT &ndash; one dominant particle carrying half the node's weight forces a 1-vs-(n-1) split. That is harmless here only because <a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5" title="Build one whole-patch kd tree: partition a_particles by position into leaves, each of which becomes e...">buildKDQuotaLeaves()</a> enforces a hard per-cell leaf quota independently of how the split plane behaves: an uneven split can cost merge quality but cannot leave a cell above target. Under any of the earlier, quota-less formulations the same degeneracy was fatal. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particle buffer; reordered in [a_lo,a_hi). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Start of the range (inclusive). </td></tr>
@@ -1417,8 +1437,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ab5df1365b60efb14c82511ac536e1dcb" name="ab5df1365b60efb14c82511ac536e1dcb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5df1365b60efb14c82511ac536e1dcb">&#9670;&#160;</a></span>nnMergeWeightedCentroid()</h2>
+<a id="a41d0f3f93ba5e24ec7d0100f2ac6474b" name="a41d0f3f93ba5e24ec7d0100f2ac6474b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41d0f3f93ba5e24ec7d0100f2ac6474b">&#9670;&#160;</a></span>nnMergeWeightedCentroid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1429,6 +1449,18 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="memname">void ParticleManagement::detail::nnMergeWeightedCentroid </td>
           <td>(</td>
+          <td class="paramtype">RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_mergedPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_mergedWeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const RealVect &amp;&#160;</td>
           <td class="paramname"><em>a_posA</em>, </td>
         </tr>
@@ -1448,19 +1480,7 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_weightB</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">RealVect &amp;&#160;</td>
-          <td class="paramname"><em>a_mergedPos</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>a_mergedWeight</em>&#160;</td>
+          <td class="paramname"><em>a_weightB</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1478,12 +1498,12 @@ template&lt;typename T &gt; </div>
 <p>Weighted-centroid merge of two positions/weights &ndash; shared by resolveTrivialTier() and judgeProposals() so the formula is written exactly once. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_mergedPos</td><td>Weighted-centroid position. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_mergedWeight</td><td>Summed weight. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_posA</td><td>First particle's position. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weightA</td><td>First particle's weight. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_posB</td><td>Second particle's position. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weightB</td><td>Second particle's weight. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_mergedPos</td><td>Weighted-centroid position. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_mergedWeight</td><td>Summed weight. </td></tr>
   </table>
   </dd>
 </dl>

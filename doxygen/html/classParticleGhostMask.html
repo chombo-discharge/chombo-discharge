@@ -143,6 +143,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>finalize</b> () noexc
 <tr class="memitem:a8732dc5e8ed2e1db48a00c30d1bc7a9e" id="r_a8732dc5e8ed2e1db48a00c30d1bc7a9e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleGhostMask.html#a8732dc5e8ed2e1db48a00c30d1bc7a9e">hasTargetBoxes</a> () const noexcept</td></tr>
 <tr class="memdesc:a8732dc5e8ed2e1db48a00c30d1bc7a9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether this mask carries per-target acceptance boxes.  <br /></td></tr>
 <tr class="separator:a8732dc5e8ed2e1db48a00c30d1bc7a9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd81802a1aae11dad8adb1bfc18e3d31" id="r_abd81802a1aae11dad8adb1bfc18e3d31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleGhostMask.html#abd81802a1aae11dad8adb1bfc18e3d31">markTargetRanks</a> (std::vector&lt; bool &gt; &amp;a_isTarget) const noexcept</td></tr>
+<tr class="memdesc:abd81802a1aae11dad8adb1bfc18e3d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag every rank appearing in this table's packed target list.  <br /></td></tr>
+<tr class="separator:abd81802a1aae11dad8adb1bfc18e3d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -416,6 +419,40 @@ std::vector&lt; Box &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_iv</td><td>Source cell. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abd81802a1aae11dad8adb1bfc18e3d31" name="abd81802a1aae11dad8adb1bfc18e3d31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd81802a1aae11dad8adb1bfc18e3d31">&#9670;&#160;</a></span>markTargetRanks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleGhostMask::markTargetRanks </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; bool &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_isTarget</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Flag every rank appearing in this table's packed target list. </p>
+<p>One pass over the packed targets, ignoring which cell each belongs to &ndash; the caller wants the ranks this box ships to, not the per-cell breakdown. A flag array rather than a deduplicating container because there is one packed entry per (boundary cell x target) but only a handful of distinct ranks: this way each entry costs a single store, and the caller collapses the flags once. Accumulates into the argument (does not clear it), so a caller can union several tables &ndash; e.g. every box of every level. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_isTarget</td><td>Per-rank flags, indexed by rank and sized to the communicator. Entries are set to true; existing true entries are left alone. </td></tr>
   </table>
   </dd>
 </dl>

@@ -17,7 +17,7 @@ var searchData=
   ['nnmergedistsquared_14',['nnMergeDistSquared',['../namespaceParticleManagement_1_1detail.html#a6b4527b08debf6dd54d431a7a05b34c8',1,'ParticleManagement::detail']]],
   ['nnmergeexchangebyrank_15',['nnMergeExchangeByRank',['../namespaceParticleManagement_1_1detail.html#a9362f5cbbf7b28e732b0fe86f3868e29',1,'ParticleManagement::detail']]],
   ['nnmergepointtocelldistsquared_16',['nnMergePointToCellDistSquared',['../namespaceParticleManagement_1_1detail.html#a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a',1,'ParticleManagement::detail']]],
-  ['nnmergeweightedcentroid_17',['nnMergeWeightedCentroid',['../namespaceParticleManagement_1_1detail.html#ab5df1365b60efb14c82511ac536e1dcb',1,'ParticleManagement::detail']]],
+  ['nnmergeweightedcentroid_17',['nnMergeWeightedCentroid',['../namespaceParticleManagement_1_1detail.html#a41d0f3f93ba5e24ec7d0100f2ac6474b',1,'ParticleManagement::detail']]],
   ['nodiffusion_18',['noDiffusion',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad797a8460853ed15ca11e22e0dd816df',1,'Physics::ItoKMC::ItoKMCPhysics']]],
   ['noise_19',['noise',['../classPerlinSdf.html#ab9784562ccf64ca34891352e1197cb07',1,'PerlinSdf::noise(const double a_x, const double a_y, const double a_z) const'],['../classPerlinSdf.html#a2a68478eebeb7da707ffecec94a85553',1,'PerlinSdf::noise(const RealVect &amp;a_pos) const']]],
   ['noiseplane_20',['NoisePlane',['../classNoisePlane.html#aa8da41b0b883826047c9aefeee09b013',1,'NoisePlane']]],
