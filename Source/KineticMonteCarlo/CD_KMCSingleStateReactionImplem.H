@@ -13,9 +13,6 @@
 #ifndef CD_KMCSINGLESTATEREACTIONIMPLEM_H
 #define CD_KMCSINGLESTATEREACTIONIMPLEM_H
 
-// Chombo includes
-#include <CH_Timer.H>
-
 // Our includes
 #include <CD_KMCSingleStateReaction.H>
 #include <CD_NamespaceHeader.H>
@@ -25,23 +22,17 @@ inline KMCSingleStateReaction<State, T>::KMCSingleStateReaction(const std::list<
                                                                 const std::list<size_t>& a_products) noexcept
   : m_reactants(a_reactants), m_products(a_products)
 {
-  CH_TIME("KMCSingleStateReaction::KMCSingleStateReaction");
-
   this->computeStateChanges();
 }
 
 template <typename State, typename T>
 inline KMCSingleStateReaction<State, T>::~KMCSingleStateReaction()
-{
-  CH_TIME("KMCSingleStateReaction::~KMCSingleStateReaction");
-}
+{}
 
 template <typename State, typename T>
 inline void
 KMCSingleStateReaction<State, T>::computeStateChanges() noexcept
 {
-  CH_TIME("KMCSingleStateReaction::computeStateChanges");
-
   // Consumed particles.
   for (const auto& r : m_reactants) {
     if (m_stateChange.find(r) == m_stateChange.end()) {
@@ -111,8 +102,6 @@ template <typename State, typename T>
 inline Real
 KMCSingleStateReaction<State, T>::propensity(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::propensity");
-
   Real A = m_rate * m_propensityFactor;
 
   State tmp = a_state;
@@ -130,8 +119,6 @@ template <typename State, typename T>
 inline T
 KMCSingleStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::computeCriticalNumberOfReactions");
-
   T Lj = std::numeric_limits<T>::max();
 
   for (const auto& s : m_stateChange) {
@@ -158,8 +145,6 @@ template <typename State, typename T>
 inline T
 KMCSingleStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::getStateChange");
-
   T nuIJ = 0;
 
   if (m_stateChange.find(a_particleReactant) != m_stateChange.end()) {
@@ -173,8 +158,6 @@ template <typename State, typename T>
 inline void
 KMCSingleStateReaction<State, T>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::advanceState");
-
   for (const auto& s : m_stateChange) {
     a_state[s.first] += a_numReactions * s.second;
   }
