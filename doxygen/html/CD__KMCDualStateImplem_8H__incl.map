@@ -1,7 +1,7 @@
 <map id="Source/KineticMonteCarlo/CD_KMCDualStateImplem.H" name="Source/KineticMonteCarlo/CD_KMCDualStateImplem.H">
 <area shape="rect" id="Node000001" title="Implementation of CD_KMCDualState.H." alt="" coords="158,5,369,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="62,93,161,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,48,148,89,145,84,226,43"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="59,93,161,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,48,146,89,143,85,225,43"/>
 <area shape="rect" id="Node000003" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="185,93,341,119"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="258,46,258,79,252,79,253,45"/>
 <area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="287,167,472,192"/>

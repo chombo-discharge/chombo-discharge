@@ -234,6 +234,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept
 <tr class="memitem:aea097f7607229cde2f20cfc7dc199af0" id="r_aea097f7607229cde2f20cfc7dc199af0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#aea097f7607229cde2f20cfc7dc199af0">isSorted</a> () const noexcept</td></tr>
 <tr class="memdesc:aea097f7607229cde2f20cfc7dc199af0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the container is currently cell-sorted (false after append/remove).  <br /></td></tr>
 <tr class="separator:aea097f7607229cde2f20cfc7dc199af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad73d1ba574a39a9e955dd1582259c4f3" id="r_ad73d1ba574a39a9e955dd1582259c4f3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#ad73d1ba574a39a9e955dd1582259c4f3">isSortedAgainst</a> (const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo) const noexcept</td></tr>
+<tr class="memdesc:ad73d1ba574a39a9e955dd1582259c4f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the container is cell-sorted against exactly this cell domain.  <br /></td></tr>
+<tr class="separator:ad73d1ba574a39a9e955dd1582259c4f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c2e3fbb225f6b4206da89e395e75ca8" id="r_a3c2e3fbb225f6b4206da89e395e75ca8"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#a3c2e3fbb225f6b4206da89e395e75ca8">numCells</a> () const noexcept</td></tr>
 <tr class="memdesc:a3c2e3fbb225f6b4206da89e395e75ca8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of cells in the CSR sort (0 if not sorted).  <br /></td></tr>
 <tr class="separator:a3c2e3fbb225f6b4206da89e395e75ca8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,6 +255,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:aa970895f42dcce9f6b8eb88c7eee05e0" id="r_aa970895f42dcce9f6b8eb88c7eee05e0"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#aa970895f42dcce9f6b8eb88c7eee05e0">cellKey</a> (const std::size_t a_index, const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo) const noexcept</td></tr>
+<tr class="memdesc:aa970895f42dcce9f6b8eb88c7eee05e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Fortran (x-fastest) cell index of particle i within the sort domain.  <br /></td></tr>
+<tr class="separator:aa970895f42dcce9f6b8eb88c7eee05e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae95f87c525b1b01080d8f85474ee8fd4" id="r_ae95f87c525b1b01080d8f85474ee8fd4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#ae95f87c525b1b01080d8f85474ee8fd4">checkCellSort</a> (const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo) const noexcept</td></tr>
+<tr class="memdesc:ae95f87c525b1b01080d8f85474ee8fd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify that the CSR mapping really does describe the current particle positions.  <br /></td></tr>
+<tr class="separator:ae95f87c525b1b01080d8f85474ee8fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38f3a25831add95a7990cc48e56e29a4" id="r_a38f3a25831add95a7990cc48e56e29a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#a38f3a25831add95a7990cc48e56e29a4">steal</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a> &amp;a_o) noexcept</td></tr>
 <tr class="memdesc:a38f3a25831add95a7990cc48e56e29a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Steal another container's arena (move helper).  <br /></td></tr>
 <tr class="separator:a38f3a25831add95a7990cc48e56e29a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -373,6 +382,18 @@ std::array&lt; void *, <a class="el" href="classParticleSoA.html#a4e2d9e2762c678
 std::vector&lt; std::size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cellStart</b></td></tr>
 <tr class="memdesc:aa6408ce8df179bdb6ff89ff2f43c6632"><td class="mdescLeft">&#160;</td><td class="mdescRight">CSR cell offsets (size numCells+1 when sorted). <br /></td></tr>
 <tr class="separator:aa6408ce8df179bdb6ff89ff2f43c6632"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad26e2246437cb8b5974e986603b3d430" id="r_ad26e2246437cb8b5974e986603b3d430"><td class="memItemLeft" align="right" valign="top"><a id="ad26e2246437cb8b5974e986603b3d430" name="ad26e2246437cb8b5974e986603b3d430"></a>
+Box&#160;</td><td class="memItemRight" valign="bottom"><b>m_sortBox</b></td></tr>
+<tr class="memdesc:ad26e2246437cb8b5974e986603b3d430"><td class="mdescLeft">&#160;</td><td class="mdescRight">Patch box the CSR mapping in m_cellStart was built against (meaningful only when m_sorted). <br /></td></tr>
+<tr class="separator:ad26e2246437cb8b5974e986603b3d430"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa1381c8c620f35ee09cbf4c2fbdd1f8" id="r_aaa1381c8c620f35ee09cbf4c2fbdd1f8"><td class="memItemLeft" align="right" valign="top"><a id="aaa1381c8c620f35ee09cbf4c2fbdd1f8" name="aaa1381c8c620f35ee09cbf4c2fbdd1f8"></a>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_sortDx</b> = RealVect::Zero</td></tr>
+<tr class="memdesc:aaa1381c8c620f35ee09cbf4c2fbdd1f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grid spacing the CSR mapping was built against (meaningful only when m_sorted). <br /></td></tr>
+<tr class="separator:aaa1381c8c620f35ee09cbf4c2fbdd1f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac600c386692fba0f50ce99ce13ae2b1a" id="r_ac600c386692fba0f50ce99ce13ae2b1a"><td class="memItemLeft" align="right" valign="top"><a id="ac600c386692fba0f50ce99ce13ae2b1a" name="ac600c386692fba0f50ce99ce13ae2b1a"></a>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>m_sortProbLo</b> = RealVect::Zero</td></tr>
+<tr class="memdesc:ac600c386692fba0f50ce99ce13ae2b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower domain corner the CSR mapping was built against (meaningful only when m_sorted). <br /></td></tr>
+<tr class="separator:ac600c386692fba0f50ce99ce13ae2b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">Compile-time layout (indices and sizes)</h2></td></tr>
 <tr class="memitem:aa84965609a679daf9ec9a6e080556d09" id="r_aa84965609a679daf9ec9a6e080556d09"><td class="memItemLeft" align="right" valign="top"><a id="aa84965609a679daf9ec9a6e080556d09" name="aa84965609a679daf9ec9a6e080556d09"></a>
@@ -1004,6 +1025,68 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 
 </div>
 </div>
+<a id="aa970895f42dcce9f6b8eb88c7eee05e0" name="aa970895f42dcce9f6b8eb88c7eee05e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa970895f42dcce9f6b8eb88c7eee05e0">&#9670;&#160;</a></span>cellKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::cellKey </td>
+          <td>(</td>
+          <td class="paramtype">const std::size_t&#160;</td>
+          <td class="paramname"><em>a_index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the Fortran (x-fastest) cell index of particle i within the sort domain. </p>
+<p>Shared by <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a> and its debug-mode verifier so the two can never disagree about the mapping. Positions outside the box are clamped to the boundary cells. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_index</td><td>Particle index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Patch box defining the cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing per direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical coordinate of the lower domain corner. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Linearized cell index in [0, a_box.numPts()). </dd></dl>
+
+</div>
+</div>
 <a id="aa4d9552340bfbc75474c7bc85d219bab" name="aa4d9552340bfbc75474c7bc85d219bab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa4d9552340bfbc75474c7bc85d219bab">&#9670;&#160;</a></span>cellRange()</h2>
 
@@ -1075,6 +1158,61 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Index of the first particle owned by cell a_cell. </dd></dl>
+
+</div>
+</div>
+<a id="ae95f87c525b1b01080d8f85474ee8fd4" name="ae95f87c525b1b01080d8f85474ee8fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae95f87c525b1b01080d8f85474ee8fd4">&#9670;&#160;</a></span>checkCellSort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::checkCellSort </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Verify that the CSR mapping really does describe the current particle positions. </p>
+<p>The sort flag is only as good as the invalidation of every mutating path, so <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a> asserts on this whenever it takes its early-out: it recomputes each particle's cell key and checks that the particle sits in that cell's CSR range. O(N), and compiled out with the assertion in optimized builds. A failure here means some path moved particles without clearing m_sorted. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Patch box defining the cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing per direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical coordinate of the lower domain corner. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True iff the CSR mapping is consistent with the current positions. </dd></dl>
 
 </div>
 </div>
@@ -2379,6 +2517,61 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 
 </div>
 </div>
+<a id="ad73d1ba574a39a9e955dd1582259c4f3" name="ad73d1ba574a39a9e955dd1582259c4f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad73d1ba574a39a9e955dd1582259c4f3">&#9670;&#160;</a></span>isSortedAgainst()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::isSortedAgainst </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the container is cell-sorted against exactly this cell domain. </p>
+<p><a class="el" href="classParticleSoA.html#aea097f7607229cde2f20cfc7dc199af0" title="Whether the container is currently cell-sorted (false after append/remove).">isSorted()</a> only says that some CSR mapping is valid; this says it is the mapping the caller is about to index with. <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a> early-outs on precisely this condition. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Patch box defining the cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing per direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical coordinate of the lower domain corner. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True iff the container is sorted against (a_box, a_dx, a_probLo). </dd></dl>
+
+</div>
+</div>
 <a id="a75ee82b2c0530cd6d1fcacf28d805c7d" name="a75ee82b2c0530cd6d1fcacf28d805c7d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a75ee82b2c0530cd6d1fcacf28d805c7d">&#9670;&#160;</a></span>linearizeImpl()</h2>
 
@@ -2894,7 +3087,7 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 </div><div class="memdoc">
 
 <p>Raw position component column dir (double*, for SIMD kernels). </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Handing out a writable position column invalidates the cell sort: the caller may move particles across cell boundaries, and the container cannot observe that. The sort flag is therefore cleared here rather than on the (unobservable) write, which is what lets <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a> trust the flag and skip a re-sort. Use the const overload for read-only kernels to keep the sort. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Spatial direction in [0, SpaceDim). </td></tr>
   </table>
@@ -3441,7 +3634,7 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 </div><div class="memdoc">
 
 <p>Set the position of particle i. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Invalidates the cell sort &ndash; the new position may lie in a different cell. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_index</td><td>Particle index. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>New position. </td></tr>
@@ -3554,7 +3747,8 @@ template&lt;typename P , typename Traits &gt; </div>
 </div><div class="memdoc">
 
 <p>Counting-sort the columns into Fortran cell order and build CSR cell offsets. </p>
-<p>After this, cell c owns the contiguous particle range [cellStart(c), cellStart(c+1)). Particles must lie within a_box; out-of-range positions are clamped to the boundary cells. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>After this, cell c owns the contiguous particle range [cellStart(c), cellStart(c+1)). Particles must lie within a_box; out-of-range positions are clamped to the boundary cells.</p>
+<p>This is idempotent: a container already sorted against the same (box, dx, probLo) returns immediately, because the sort it would produce is the one it already has. Callers that establish the sort defensively therefore cost nothing when an earlier caller already did it, which is the common case &ndash; the ItoKMC reaction path sorts the same leaves at three separate call sites. Any operation that can move a particle between cells (append, remove, resize, setPosition, or handing out a writable <a class="el" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c" title="Raw position component column dir (double*, for SIMD kernels).">positionColumn()</a>) clears the flag, so the early-out only fires when the CSR mapping is still the one this container computed. In debug builds the mapping is re-verified on every early-out; see <a class="el" href="classParticleSoA.html#ae95f87c525b1b01080d8f85474ee8fd4" title="Verify that the CSR mapping really does describe the current particle positions.">checkCellSort()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Patch box defining the cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing per direction. </td></tr>

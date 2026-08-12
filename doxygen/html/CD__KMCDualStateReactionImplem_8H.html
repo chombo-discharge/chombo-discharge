@@ -87,7 +87,7 @@ $(function() {
 <p>Implementation of <a class="el" href="CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo.">CD_KMCDualStateReaction.H</a>.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;limits&gt;</code><br />
-<code>#include &lt;CH_Timer.H&gt;</code><br />
+<code>#include &lt;CH_assert.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__KMCDualStateReaction_8H_source.html">CD_KMCDualStateReaction.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
@@ -99,12 +99,12 @@ Include dependency graph for CD_KMCDualStateReactionImplem.H:</div>
 <area shape="rect" title="Implementation of CD_KMCDualStateReaction.H." alt="" coords="160,5,427,45"/>
 <area shape="rect" title=" " alt="" coords="5,93,64,119"/>
 <area shape="poly" title=" " alt="" coords="232,48,78,94,76,89,231,43"/>
-<area shape="rect" title=" " alt="" coords="71,313,169,339"/>
+<area shape="rect" title=" " alt="" coords="69,313,171,339"/>
 <area shape="poly" title=" " alt="" coords="273,47,251,69,230,95,197,150,169,207,131,301,126,299,164,205,192,147,226,92,247,66,270,44"/>
 <area shape="rect" href="CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="329,93,543,119"/>
 <area shape="poly" title=" " alt="" coords="321,43,397,85,395,89,318,48"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="230,313,415,339"/>
-<area shape="poly" title=" " alt="" coords="280,47,251,89,223,144,213,175,209,206,211,236,222,264,244,288,273,305,270,310,241,292,218,267,206,237,204,205,208,174,218,142,247,86,275,44"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="231,313,417,339"/>
+<area shape="poly" title=" " alt="" coords="280,47,251,89,223,144,213,175,209,206,211,236,222,264,244,288,273,306,270,310,241,293,218,267,206,237,203,205,208,174,218,142,246,86,275,44"/>
 <area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="755,313,933,339"/>
 <area shape="poly" title=" " alt="" coords="427,35,516,50,612,75,709,112,755,136,798,165,817,181,830,197,848,239,852,270,851,300,846,299,847,271,843,241,826,199,814,185,794,169,752,141,707,117,611,80,515,55,427,40"/>
 <area shape="poly" title=" " alt="" coords="420,95,346,54,349,49,423,91"/>
@@ -118,20 +118,20 @@ Include dependency graph for CD_KMCDualStateReactionImplem.H:</div>
 <area shape="poly" title=" " alt="" coords="470,116,595,160,593,165,468,121"/>
 <area shape="rect" href="CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="358,167,514,192"/>
 <area shape="poly" title=" " alt="" coords="439,119,439,153,433,153,433,119"/>
-<area shape="poly" title=" " alt="" coords="396,121,353,138,306,163,262,197,244,218,231,241,228,260,238,278,257,293,279,305,277,310,254,297,234,281,223,261,225,239,240,215,258,193,303,158,351,133,394,116"/>
+<area shape="poly" title=" " alt="" coords="396,121,353,138,306,163,262,197,244,218,231,241,228,260,239,278,257,293,280,305,278,310,254,297,235,281,223,262,225,239,240,215,258,193,303,158,351,133,394,116"/>
 <area shape="poly" title=" " alt="" coords="543,106,596,112,653,122,710,140,763,164,785,180,801,196,825,239,837,270,843,299,838,300,832,271,820,241,796,199,782,184,760,169,708,145,652,128,595,117,542,111"/>
 <area shape="poly" title=" " alt="" coords="411,194,312,237,310,232,409,190"/>
 <area shape="rect" title=" " alt="" coords="610,240,681,265"/>
 <area shape="poly" title=" " alt="" coords="470,189,599,233,597,238,469,195"/>
 <area shape="rect" title=" " alt="" coords="705,240,781,265"/>
 <area shape="poly" title=" " alt="" coords="486,189,692,237,691,242,485,195"/>
-<area shape="poly" title=" " alt="" coords="421,194,395,215,369,242,349,272,335,301,330,299,345,269,365,238,391,211,417,190"/>
+<area shape="poly" title=" " alt="" coords="421,194,395,215,369,242,350,272,336,301,331,299,345,269,365,238,391,211,417,190"/>
 <area shape="poly" title=" " alt="" coords="515,189,688,216,760,229,795,238,810,251,822,267,838,299,834,302,817,270,806,255,792,242,759,234,687,221,514,195"/>
 <area shape="rect" href="CD__KMCDualStateImplem_8H.html" title="Implementation of CD_KMCDualState.H." alt="" coords="379,240,586,265"/>
 <area shape="poly" title=" " alt="" coords="439,191,462,228,457,231,435,194"/>
-<area shape="poly" title=" " alt="" coords="425,268,183,315,182,310,424,263"/>
+<area shape="poly" title=" " alt="" coords="425,268,186,315,185,309,424,263"/>
 <area shape="poly" title=" " alt="" coords="480,241,457,204,461,201,484,238"/>
-<area shape="poly" title=" " alt="" coords="458,268,362,310,360,305,456,263"/>
+<area shape="poly" title=" " alt="" coords="458,268,363,310,361,305,456,263"/>
 <area shape="poly" title=" " alt="" coords="541,263,773,308,772,313,540,268"/>
 </map>
 </div>
