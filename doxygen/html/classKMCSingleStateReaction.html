@@ -117,9 +117,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~KMCSingleStateRea
 <tr class="memitem:aef688847250147a34612fbe578a79950" id="r_aef688847250147a34612fbe578a79950"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleStateReaction.html#aef688847250147a34612fbe578a79950">computeCriticalNumberOfReactions</a> (const State &amp;a_state) const noexcept</td></tr>
 <tr class="memdesc:aef688847250147a34612fbe578a79950"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the number of times the reaction can fire before exhausting one of the reactants.  <br /></td></tr>
 <tr class="separator:aef688847250147a34612fbe578a79950"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a015f847823b0403a76f056b0438e50ed" id="r_a015f847823b0403a76f056b0438e50ed"><td class="memItemLeft" align="right" valign="top">std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleStateReaction.html#a015f847823b0403a76f056b0438e50ed">getReactants</a> () const noexcept</td></tr>
-<tr class="memdesc:a015f847823b0403a76f056b0438e50ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactants involved in the reaction.  <br /></td></tr>
-<tr class="separator:a015f847823b0403a76f056b0438e50ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7a13641a97824a3f8968c000ee2867b" id="r_af7a13641a97824a3f8968c000ee2867b"><td class="memItemLeft" align="right" valign="top">const std::list&lt; size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleStateReaction.html#af7a13641a97824a3f8968c000ee2867b">getReactants</a> () const noexcept</td></tr>
+<tr class="memdesc:af7a13641a97824a3f8968c000ee2867b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactants involved in the reaction.  <br /></td></tr>
+<tr class="separator:af7a13641a97824a3f8968c000ee2867b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab272ab44927262e2345c0cf1fe02b671" id="r_ab272ab44927262e2345c0cf1fe02b671"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleStateReaction.html#ab272ab44927262e2345c0cf1fe02b671">getStateChange</a> (const size_t a_particleReactant) const noexcept</td></tr>
 <tr class="memdesc:ab272ab44927262e2345c0cf1fe02b671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the state change due to a change in the input reactant species.  <br /></td></tr>
 <tr class="separator:ab272ab44927262e2345c0cf1fe02b671"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -299,8 +299,8 @@ template&lt;typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a015f847823b0403a76f056b0438e50ed" name="a015f847823b0403a76f056b0438e50ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a015f847823b0403a76f056b0438e50ed">&#9670;&#160;</a></span>getReactants()</h2>
+<a id="af7a13641a97824a3f8968c000ee2867b" name="af7a13641a97824a3f8968c000ee2867b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7a13641a97824a3f8968c000ee2867b">&#9670;&#160;</a></span>getReactants()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -311,7 +311,7 @@ template&lt;typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::list&lt; size_t &gt; <a class="el" href="classKMCSingleStateReaction.html">KMCSingleStateReaction</a>&lt; State, T &gt;::getReactants </td>
+          <td class="memname">const std::list&lt; size_t &gt; &amp; <a class="el" href="classKMCSingleStateReaction.html">KMCSingleStateReaction</a>&lt; State, T &gt;::getReactants </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -325,7 +325,7 @@ template&lt;typename State , typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Get the reactants involved in the reaction. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_reactants </dd></dl>
+<p>Returned by reference for the same reason as in <a class="el" href="classKMCDualStateReaction.html" title="Reaction type for advancing a KMCDualState for Kinetic Monte Carlo.">KMCDualStateReaction</a>: <a class="el" href="classKMCSolver.html" title="Class for running Kinetic Monte-Carlo simulations.">KMCSolver</a> walks this list once per reaction per grid cell when assembling the reactant set for the time step calculation, and returning by value deep-copied the list on every walk. </p><dl class="section return"><dt>Returns</dt><dd>m_reactants </dd></dl>
 
 </div>
 </div>

@@ -117,9 +117,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~KMCDualStateReact
 <tr class="memitem:a8613aca198884ba9b4ca87f601df4066" id="r_a8613aca198884ba9b4ca87f601df4066"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCDualStateReaction.html#a8613aca198884ba9b4ca87f601df4066">computeCriticalNumberOfReactions</a> (const State &amp;a_state) const noexcept</td></tr>
 <tr class="memdesc:a8613aca198884ba9b4ca87f601df4066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the number of times the reaction can fire before exhausting one of the reactants.  <br /></td></tr>
 <tr class="separator:a8613aca198884ba9b4ca87f601df4066"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8fe781b2245715dccc1bdd0a0e722c1e" id="r_a8fe781b2245715dccc1bdd0a0e722c1e"><td class="memItemLeft" align="right" valign="top">std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCDualStateReaction.html#a8fe781b2245715dccc1bdd0a0e722c1e">getReactants</a> () const noexcept</td></tr>
-<tr class="memdesc:a8fe781b2245715dccc1bdd0a0e722c1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactants in the reaction.  <br /></td></tr>
-<tr class="separator:a8fe781b2245715dccc1bdd0a0e722c1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfc588c9b7642a5f4a67306a9f06b2dd" id="r_acfc588c9b7642a5f4a67306a9f06b2dd"><td class="memItemLeft" align="right" valign="top">const std::list&lt; size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCDualStateReaction.html#acfc588c9b7642a5f4a67306a9f06b2dd">getReactants</a> () const noexcept</td></tr>
+<tr class="memdesc:acfc588c9b7642a5f4a67306a9f06b2dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the reactants in the reaction.  <br /></td></tr>
+<tr class="separator:acfc588c9b7642a5f4a67306a9f06b2dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41caf894202930ca97da800f12601d79" id="r_a41caf894202930ca97da800f12601d79"><td class="memItemLeft" align="right" valign="top">std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCDualStateReaction.html#a41caf894202930ca97da800f12601d79">getReactiveProducts</a> () const noexcept</td></tr>
 <tr class="memdesc:a41caf894202930ca97da800f12601d79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the products from the reaction.  <br /></td></tr>
 <tr class="separator:a41caf894202930ca97da800f12601d79"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -174,6 +174,12 @@ std::list&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 std::map&lt; size_t, T &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_reactiveStateChange</b></td></tr>
 <tr class="memdesc:a3bf47d5fb2bf85f7fbec790f49614f22"><td class="mdescLeft">&#160;</td><td class="mdescRight">State change for reactants/products. <br /></td></tr>
 <tr class="separator:a3bf47d5fb2bf85f7fbec790f49614f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace641b54190e9eaf7fd3349bf4791397" id="r_ace641b54190e9eaf7fd3349bf4791397"><td class="memItemLeft" align="right" valign="top">std::vector&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCDualStateReaction.html#ace641b54190e9eaf7fd3349bf4791397">m_reactiveStateChangeDense</a></td></tr>
+<tr class="memdesc:ace641b54190e9eaf7fd3349bf4791397"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dense form of m_reactiveStateChange, indexed by reactive species.  <br /></td></tr>
+<tr class="separator:ace641b54190e9eaf7fd3349bf4791397"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdb51fc9d91da171f2cb341da01a1c06" id="r_acdb51fc9d91da171f2cb341da01a1c06"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; size_t, size_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCDualStateReaction.html#acdb51fc9d91da171f2cb341da01a1c06">m_lhsOrders</a></td></tr>
+<tr class="memdesc:acdb51fc9d91da171f2cb341da01a1c06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reactants of the left-hand side, compacted to (species, order) pairs.  <br /></td></tr>
+<tr class="separator:acdb51fc9d91da171f2cb341da01a1c06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b29fbbe59ab26fe7fff4cd75ca667be" id="r_a9b29fbbe59ab26fe7fff4cd75ca667be"><td class="memItemLeft" align="right" valign="top"><a id="a9b29fbbe59ab26fe7fff4cd75ca667be" name="a9b29fbbe59ab26fe7fff4cd75ca667be"></a>
 std::map&lt; size_t, T &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_nonReactiveStateChange</b></td></tr>
 <tr class="memdesc:a9b29fbbe59ab26fe7fff4cd75ca667be"><td class="mdescLeft">&#160;</td><td class="mdescRight">State change for non-reactive products. <br /></td></tr>
@@ -353,8 +359,8 @@ template&lt;typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="a8fe781b2245715dccc1bdd0a0e722c1e" name="a8fe781b2245715dccc1bdd0a0e722c1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8fe781b2245715dccc1bdd0a0e722c1e">&#9670;&#160;</a></span>getReactants()</h2>
+<a id="acfc588c9b7642a5f4a67306a9f06b2dd" name="acfc588c9b7642a5f4a67306a9f06b2dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfc588c9b7642a5f4a67306a9f06b2dd">&#9670;&#160;</a></span>getReactants()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -365,7 +371,7 @@ template&lt;typename State , typename T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::list&lt; size_t &gt; <a class="el" href="classKMCDualStateReaction.html">KMCDualStateReaction</a>&lt; State, T &gt;::getReactants </td>
+          <td class="memname">const std::list&lt; size_t &gt; &amp; <a class="el" href="classKMCDualStateReaction.html">KMCDualStateReaction</a>&lt; State, T &gt;::getReactants </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -379,7 +385,7 @@ template&lt;typename State , typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Get the reactants in the reaction. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_lhsReactives </dd></dl>
+<p>Returned by reference because <a class="el" href="classKMCSolver.html" title="Class for running Kinetic Monte-Carlo simulations.">KMCSolver</a> walks this list once per reaction per grid cell when it assembles the reactant set for the time step calculation; returning by value deep-copied the list, and with it one heap allocation per element, on every one of those walks. </p><dl class="section return"><dt>Returns</dt><dd>m_lhsReactives </dd></dl>
 
 </div>
 </div>
@@ -603,6 +609,33 @@ template&lt;typename State , typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="acdb51fc9d91da171f2cb341da01a1c06" name="acdb51fc9d91da171f2cb341da01a1c06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdb51fc9d91da171f2cb341da01a1c06">&#9670;&#160;</a></span>m_lhsOrders</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename State  = KMCDualState&lt;long long&gt;, typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::pair&lt;size_t, size_t&gt; &gt; <a class="el" href="classKMCDualStateReaction.html">KMCDualStateReaction</a>&lt; State, T &gt;::m_lhsOrders</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reactants of the left-hand side, compacted to (species, order) pairs. </p>
+<p>Built once in <a class="el" href="classKMCDualStateReaction.html#a1eb375a7ec578cbb181489f7aa7b6722" title="Compute state change vectors from the reactant/product lists.">computeStateChanges()</a> from the same reactant tally that fixes m_propensityFactor. <a class="el" href="classKMCDualStateReaction.html#a777b59532247ed40196ae1ff706cdec6" title="Compute the propensity function for this reaction type.">propensity()</a> uses it to form the falling factorial directly from the incoming state; without it the reaction has to copy the whole state vector on every call so that it can decrement its own copy while multiplying. </p>
+
+</div>
+</div>
 <a id="acfc872a4983a09d1be09da629c282e32" name="acfc872a4983a09d1be09da629c282e32"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acfc872a4983a09d1be09da629c282e32">&#9670;&#160;</a></span>m_propensityFactor</h2>
 
@@ -627,6 +660,33 @@ template&lt;typename State  = KMCDualState&lt;long long&gt;, typename T  = long 
 
 <p>Factor for the case where two or more particles of the same species react. </p>
 <p>For reactions X + X -&gt; null the propensity is k * X * (X-1)/2 because there are X * (X-1)/2 unique pairs of particles in the cell. </p>
+
+</div>
+</div>
+<a id="ace641b54190e9eaf7fd3349bf4791397" name="ace641b54190e9eaf7fd3349bf4791397"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace641b54190e9eaf7fd3349bf4791397">&#9670;&#160;</a></span>m_reactiveStateChangeDense</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename State  = KMCDualState&lt;long long&gt;, typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;T&gt; <a class="el" href="classKMCDualStateReaction.html">KMCDualStateReaction</a>&lt; State, T &gt;::m_reactiveStateChangeDense</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dense form of m_reactiveStateChange, indexed by reactive species. </p>
+<p>Built once in <a class="el" href="classKMCDualStateReaction.html#a1eb375a7ec578cbb181489f7aa7b6722" title="Compute state change vectors from the reactant/product lists.">computeStateChanges()</a> and holding the same values as m_reactiveStateChange, with zero for species the reaction does not touch. It exists because <a class="el" href="classKMCDualStateReaction.html#a0a30a1db0de7b0ed8d5fed350d922bb3" title="Get the state change due to a change in the input reactant.">getStateChange()</a> sits in the innermost loop of <a class="el" href="classKMCSolver.html#a213d882a0aec2acbcbec9bb9b5222526" title="Compute a time step using the leap condition on the mean value.">KMCSolver::computeDt</a> and <a class="el" href="classKMCSolver.html#aeca5a8c19de0c47f5e79a2cae2b7e861" title="Get the non-critical time step.">KMCSolver::getNonCriticalTimeStep</a>, which run once per reactant per reaction per grid cell. Serving those from the map cost two red-black-tree walks (find followed by at) per lookup. Species indices at or beyond the vector's length are not involved in the reaction and their state change is zero. </p>
 
 </div>
 </div>

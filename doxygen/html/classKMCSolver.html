@@ -79,6 +79,7 @@ $(function() {
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classKMCSolver-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">KMCSolver&lt; R, State, T &gt; Class Template Reference</div></div>
@@ -231,6 +232,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~KMCSolver</b> () 
 <tr class="memdesc:ab2839a89dc45b60bc32b5e9deeef21e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.  <br /></td></tr>
 <tr class="separator:ab2839a89dc45b60bc32b5e9deeef21e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a9aec435c7b5d6a24c2d6fc373b6b7fda" id="r_a9aec435c7b5d6a24c2d6fc373b6b7fda"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a9aec435c7b5d6a24c2d6fc373b6b7fda">gatherDistinctReactants</a> (const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;a_reactions) const noexcept</td></tr>
+<tr class="memdesc:a9aec435c7b5d6a24c2d6fc373b6b7fda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill m_reactantScratch with the distinct reactants of the input reactions.  <br /></td></tr>
+<tr class="separator:a9aec435c7b5d6a24c2d6fc373b6b7fda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a6c26f296c94e62e00aff21c5825eedc0" id="r_a6c26f296c94e62e00aff21c5825eedc0"><td class="memItemLeft" align="right" valign="top"><a id="a6c26f296c94e62e00aff21c5825eedc0" name="a6c26f296c94e62e00aff21c5825eedc0"></a>
@@ -263,6 +270,18 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_exitTol</b></td></t
 <tr class="memitem:a289d8b740404ac3f03b8f0a1bac5f1fb" id="r_a289d8b740404ac3f03b8f0a1bac5f1fb"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a289d8b740404ac3f03b8f0a1bac5f1fb">m_nu</a></td></tr>
 <tr class="memdesc:a289d8b740404ac3f03b8f0a1bac5f1fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of state changes for each reaction.  <br /></td></tr>
 <tr class="separator:a289d8b740404ac3f03b8f0a1bac5f1fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a728f4b627c7a72bb80f61dd52deb3727" id="r_a728f4b627c7a72bb80f61dd52deb3727"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a728f4b627c7a72bb80f61dd52deb3727">m_muScratch</a></td></tr>
+<tr class="memdesc:a728f4b627c7a72bb80f61dd52deb3727"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant expected state change, indexed by species.  <br /></td></tr>
+<tr class="separator:a728f4b627c7a72bb80f61dd52deb3727"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1488e34edac2a019e283428e9b8b2813" id="r_a1488e34edac2a019e283428e9b8b2813"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a1488e34edac2a019e283428e9b8b2813">m_sigmaScratch</a></td></tr>
+<tr class="memdesc:a1488e34edac2a019e283428e9b8b2813"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant propensity variance, indexed by species.  <br /></td></tr>
+<tr class="separator:a1488e34edac2a019e283428e9b8b2813"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eb262f77c7e064bda9b364371de57db" id="r_a0eb262f77c7e064bda9b364371de57db"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a0eb262f77c7e064bda9b364371de57db">m_reactantScratch</a></td></tr>
+<tr class="memdesc:a0eb262f77c7e064bda9b364371de57db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch holding the distinct reactants of the reaction list currently being processed.  <br /></td></tr>
+<tr class="separator:a0eb262f77c7e064bda9b364371de57db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc2f23653ebbfc98f38f40739d238c40" id="r_acc2f23653ebbfc98f38f40739d238c40"><td class="memItemLeft" align="right" valign="top">std::vector&lt; char &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#acc2f23653ebbfc98f38f40739d238c40">m_seenScratch</a></td></tr>
+<tr class="memdesc:acc2f23653ebbfc98f38f40739d238c40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Membership stamps used to build m_reactantScratch without sorting, indexed by species.  <br /></td></tr>
+<tr class="separator:acc2f23653ebbfc98f38f40739d238c40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename R, typename State, typename T = long long&gt;<br />
@@ -803,6 +822,42 @@ template&lt;typename R , typename State , typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>List of reactions. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9aec435c7b5d6a24c2d6fc373b6b7fda" name="a9aec435c7b5d6a24c2d6fc373b6b7fda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aec435c7b5d6a24c2d6fc373b6b7fda">&#9670;&#160;</a></span>gatherDistinctReactants()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::gatherDistinctReactants </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_reactions</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill m_reactantScratch with the distinct reactants of the input reactions. </p>
+<p>Replaces concatenating the reactions' reactant lists and then sorting and uniquing them. The distinct set is the same; only the order differs, and both callers use it purely as a set to reduce over. The scratch buffers are sized from the largest reactant index seen, which keeps the routine independent of the State type's interface. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>Reactions whose reactants are collected. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2079,6 +2134,33 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a728f4b627c7a72bb80f61dd52deb3727" name="a728f4b627c7a72bb80f61dd52deb3727"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a728f4b627c7a72bb80f61dd52deb3727">&#9670;&#160;</a></span>m_muScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Real&gt; <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::m_muScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch accumulator for the per-reactant expected state change, indexed by species. </p>
+<p>Used by computeDt and getNonCriticalTimeStep, which run once per grid cell (and, in the ItoKMC time step tail, once per reaction per grid cell). Holding the buffer on the solver keeps those calls free of heap traffic; previously they allocated a std::list node per reactant per reaction and then sorted it. </p><dl class="section note"><dt>Note</dt><dd>Mutable because the calls that use it are logically const. This makes the solver's const member functions non-reentrant: a single <a class="el" href="classKMCSolver.html" title="Class for running Kinetic Monte-Carlo simulations.">KMCSolver</a> must not be shared across threads. ItoKMCPhysics satisfies this by holding its solver as static thread_local (see defineKMC). </dd></dl>
+
+</div>
+</div>
 <a id="aa85db9327840c90f66ecfa6cd41ac585" name="aa85db9327840c90f66ecfa6cd41ac585"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa85db9327840c90f66ecfa6cd41ac585">&#9670;&#160;</a></span>m_Ncrit</h2>
 
@@ -2130,6 +2212,87 @@ template&lt;typename R , typename State , typename T  = long long&gt; </div>
 
 <p>List of state changes for each reaction. </p>
 <p>The outer vector corresponds to the reactive index. The inner vector describes the change in the population of the state vector, with an indexing given by the State's linearIn/linearOut functions. </p>
+
+</div>
+</div>
+<a id="a0eb262f77c7e064bda9b364371de57db" name="a0eb262f77c7e064bda9b364371de57db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0eb262f77c7e064bda9b364371de57db">&#9670;&#160;</a></span>m_reactantScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;size_t&gt; <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::m_reactantScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch holding the distinct reactants of the reaction list currently being processed. </p>
+<p>Replaces the sorted, uniqued std::list the two time step routines used to rebuild on every call. Same reentrancy caveat. </p>
+
+</div>
+</div>
+<a id="acc2f23653ebbfc98f38f40739d238c40" name="acc2f23653ebbfc98f38f40739d238c40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc2f23653ebbfc98f38f40739d238c40">&#9670;&#160;</a></span>m_seenScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;char&gt; <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::m_seenScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Membership stamps used to build m_reactantScratch without sorting, indexed by species. </p>
+<p>Entry i is set when species i has already been added to m_reactantScratch for the call in progress, and is cleared again before the call returns. Same reentrancy caveat. </p>
+
+</div>
+</div>
+<a id="a1488e34edac2a019e283428e9b8b2813" name="a1488e34edac2a019e283428e9b8b2813"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1488e34edac2a019e283428e9b8b2813">&#9670;&#160;</a></span>m_sigmaScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Real&gt; <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::m_sigmaScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch accumulator for the per-reactant propensity variance, indexed by species. </p>
+<p>Companion to m_muScratch, needed only by getNonCriticalTimeStep. Same reentrancy caveat. </p>
 
 </div>
 </div>

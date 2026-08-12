@@ -839,6 +839,21 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="n">m_kmcState</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Perturbed KMC state used by the time step tail of advanceKMC.</span>
+<span class="cm">   * @details The tail probes each reaction by firing it to its critical number and re-evaluating</span>
+<span class="cm">   * the time step on the result. It needs a state to perturb without disturbing m_kmcState, and</span>
+<span class="cm">   * reuses this one so that the probe does not allocate once per reaction per grid cell.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="n">m_kmcStateScratch</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Propensity buffer used by the time step tail of advanceKMC.</span>
+<span class="cm">   * @details Reused across the tail&#39;s probes so the propensities are not returned by value, which</span>
+<span class="cm">   * allocated once per probe, i.e. once per reaction per grid cell.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_kmcPropensityScratch</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.</span>
 <span class="cm">   * @details Set up via defineKMC() to ensure OpenMP thread safety; depopulated by killKMC().</span>
 <span class="cm">   */</span>
