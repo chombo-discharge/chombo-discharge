@@ -87,9 +87,12 @@ ParticleSoA<P, Traits>::deepCopy() const
   if (m_size > 0) {
     std::memcpy(dst.m_buffer, m_buffer, this->byteSpan()); // one contiguous copy of the live region
   }
-  dst.m_size      = m_size;
-  dst.m_sorted    = m_sorted;
-  dst.m_cellStart = m_cellStart;
+  dst.m_size       = m_size;
+  dst.m_sorted     = m_sorted;
+  dst.m_cellStart  = m_cellStart;
+  dst.m_sortBox    = m_sortBox;
+  dst.m_sortDx     = m_sortDx;
+  dst.m_sortProbLo = m_sortProbLo;
   return dst;
 }
 
@@ -106,9 +109,12 @@ ParticleSoA<P, Traits>::deepCopyTo(ParticleSoA<P, Traits>& a_dst) const
   if (m_size > 0) {
     this->copyLiveColumnsTo(a_dst, std::make_index_sequence<s_numColumns>{});
   }
-  a_dst.m_size      = m_size;
-  a_dst.m_sorted    = m_sorted;
-  a_dst.m_cellStart = m_cellStart;
+  a_dst.m_size       = m_size;
+  a_dst.m_sorted     = m_sorted;
+  a_dst.m_cellStart  = m_cellStart;
+  a_dst.m_sortBox    = m_sortBox;
+  a_dst.m_sortDx     = m_sortDx;
+  a_dst.m_sortProbLo = m_sortProbLo;
 }
 
 template <typename P, typename Traits>
@@ -237,9 +243,21 @@ ParticleSoA<P, Traits>::sortByCell(const Box& a_box, const RealVect& a_dx, const
 {
   // No CH_TIME here: this leaf container is the per-particle hot path; timing of bulk
   // operations like this one is done by the container/mesh drivers above.
-  const std::size_t nCells  = a_box.numPts();
-  const IntVect     loEnd   = a_box.smallEnd();
-  const IntVect     boxSize = a_box.size();
+
+  // Already sorted against exactly this cell domain -- the sort below would reproduce the CSR mapping
+  // the container already holds. Callers establish this precondition defensively at several call sites
+  // (see sortByCell's documentation), so this is the common path, not a rare one.
+  if (this->isSortedAgainst(a_box, a_dx, a_probLo)) {
+    CH_assert(this->checkCellSort(a_box, a_dx, a_probLo));
+
+    return;
+  }
+
+  const std::size_t nCells = a_box.numPts();
+
+  m_sortBox    = a_box;
+  m_sortDx     = a_dx;
+  m_sortProbLo = a_probLo;
 
   m_cellStart.assign(nCells + 1, 0);
   if (m_size == 0) {
@@ -250,20 +268,8 @@ ParticleSoA<P, Traits>::sortByCell(const Box& a_box, const RealVect& a_dx, const
   // Pass 1: compute each particle's Fortran cell key and tally per-cell counts.
   std::vector<std::size_t> key(m_size);
   for (std::size_t i = 0; i < m_size; i++) {
-    const RealVect x      = this->position(i);
-    std::size_t    lin    = 0;
-    std::size_t    stride = 1;
-    for (int d = 0; d < SpaceDim; d++) {
-      int c = static_cast<int>(std::floor((x[d] - a_probLo[d]) / a_dx[d])) - loEnd[d];
-      if (c < 0) {
-        c = 0;
-      }
-      if (c >= boxSize[d]) {
-        c = boxSize[d] - 1;
-      }
-      lin += static_cast<std::size_t>(c) * stride;
-      stride *= static_cast<std::size_t>(boxSize[d]);
-    }
+    const std::size_t lin = this->cellKey(i, a_box, a_dx, a_probLo);
+
     key[i] = lin;
     m_cellStart[lin + 1]++;
   }
