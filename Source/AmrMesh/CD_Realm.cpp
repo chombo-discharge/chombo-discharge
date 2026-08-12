@@ -1204,6 +1204,11 @@ Realm::defineParticleGhostMasks() noexcept
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
 
+      // Serial (no omp): every box marks flags in the SAME isNeighbor array, and different boxes
+      // routinely share a target rank, so threads would write the same element concurrently. Distinct
+      // elements would not help either -- std::vector<bool> packs bits, so neighbouring ranks share a
+      // word. Per-thread arrays would fix it, but this runs once per regrid and costs one store per
+      // packed target, so there is nothing here worth buying with that memory.
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 

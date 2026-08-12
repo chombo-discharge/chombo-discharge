@@ -4416,6 +4416,8 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
 
     const int nbox = dit.size();
 
+    // Serial (no omp): reservedIDs is a shared set that dedupes a particle seen from several patches,
+    // and cellBudget.reserveOne() accumulates into shared per-cell counts. Both would race.
     for (int mybox = 0; mybox < nbox; mybox++) {
       const ParticleSoA<ItoMergeParticle>& leaf = interior[lvl][dit[mybox]];
 

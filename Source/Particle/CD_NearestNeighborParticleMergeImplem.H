@@ -1342,6 +1342,10 @@ gatherMergeParticles(ParticleContainer<P, Traits>&                             a
     const DataIterator& dit  = dbl.dataIterator();
     const int           nbox = dit.size();
 
+    // Serial (no omp): every patch writes into the shared a_particlesByID map and pushes onto the
+    // shared a_patchWork/a_patchLocalValid/a_patchGhosts vectors. The map in particular is the whole
+    // point of this pass -- it deduplicates a particle seen as a ghost by several of this rank's own
+    // patches -- so the sharing cannot be split per thread without changing what it computes.
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 

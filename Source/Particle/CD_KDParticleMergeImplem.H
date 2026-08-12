@@ -818,6 +818,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
     const DataIterator&      dit  = dbl.dataIterator();
     const int                nbox = dit.size();
 
+#pragma omp parallel for schedule(runtime) reduction(+ : combinedCountUpperBound)
     for (int mybox = 0; mybox < nbox; mybox++) {
       combinedCountUpperBound += a_particles[lvl][dit[mybox]].size();
     }
@@ -850,6 +851,10 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
     const int nbox = dit.size();
 
+    // Serial (no omp): every patch appends to the same gatheredParticles/particlesByID/patchWork/
+    // selfClaims/consumedIDs buffers, reuses the shared leaves/members scratch declared above, and
+    // draws ids from the single a_allocateID() counter. Parallelising the box loop would race on all
+    // of them, and the id race would mint duplicates.
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
@@ -1651,6 +1656,8 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
     const int nbox = dit.size();
 
+    // Serial (no omp): the leaves scratch is shared across patches by design, consumedIDs is appended
+    // to from every patch, and a_allocateID() hands out ids from one counter.
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
