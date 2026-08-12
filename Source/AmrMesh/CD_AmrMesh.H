@@ -1878,6 +1878,30 @@ public:
   getTrivialParticleGhostMask() const;
 
   /**
+   * @brief Get the particle boundary-exposure mask on a realm for a registered width.
+   * @details True in every cell that has at least one outgoing ghost-shipment target in any direction, i.e.
+   * the OR of the three ghost masks above. Built at regrid, so a consumer can read the bit instead of
+   * re-deriving it per particle per timestep. Carries no ghost cells -- only cells holding a resident
+   * particle may be queried.
+   * @param[in] a_realm Realm name
+   * @param[in] a_width Registered ghost width.
+   * @return Per-level boolean mask over the valid grids.
+   */
+  const AMRMask&
+  getParticleGhostExposure(const std::string& a_realm, const int a_width) const;
+
+  /**
+   * @brief Get the particle ghost neighbor ranks on a realm for a registered width.
+   * @details Every rank this rank exchanges particle ghosts with, in either direction, at a_width. Lets a
+   * consumer restrict a would-be all-to-all exchange to this set instead.
+   * @param[in] a_realm Realm name
+   * @param[in] a_width Registered ghost width.
+   * @return The neighbor ranks, in ascending order.
+   */
+  const std::vector<int>&
+  getParticleGhostNeighborRanks(const std::string& a_realm, const int a_width) const;
+
+  /**
    * @brief Get the EBLevelGrid for a Realm and phase
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase (gas or solid)

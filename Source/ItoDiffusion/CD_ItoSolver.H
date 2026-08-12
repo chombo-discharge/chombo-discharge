@@ -1494,6 +1494,19 @@ protected:
   EBAMRCellData m_diffusionFunction;
 
   /**
+   * @brief Per-cell occupancy scratch for the kd merges (see ParticleManagement::mergeKDCarve).
+   * @details Owned here, not by the merge, so the allocation happens once per regrid rather than once
+   * per merge call. Allocated and released with the other mesh fields, in allocate()/regrid() and
+   * preRegrid() respectively.
+   */
+  EBAMRFAB m_kdMergeCellHistogram;
+
+  /**
+   * @brief Per-cell merge-quota scratch for the kd merges. Same lifetime as m_kdMergeCellHistogram.
+   */
+  EBAMRFAB m_kdMergeLeafQuota;
+
+  /**
    * @brief Scratch storage for holding the non-conservative deposition
    */
   mutable EBAMRIVData m_depositionNC;
