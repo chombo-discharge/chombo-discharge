@@ -255,6 +255,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a38f3a25831add95a7990cc48e56e29a4" id="r_a38f3a25831add95a7990cc48e56e29a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#a38f3a25831add95a7990cc48e56e29a4">steal</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a> &amp;a_o) noexcept</td></tr>
 <tr class="memdesc:a38f3a25831add95a7990cc48e56e29a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Steal another container's arena (move helper).  <br /></td></tr>
 <tr class="separator:a38f3a25831add95a7990cc48e56e29a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abada58a88f7b3eb43b6e65136f810cdd" id="r_abada58a88f7b3eb43b6e65136f810cdd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#abada58a88f7b3eb43b6e65136f810cdd">growTo</a> (const std::size_t a_needed)</td></tr>
+<tr class="memdesc:abada58a88f7b3eb43b6e65136f810cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grow the arena to hold at least <em>a_needed</em> particles, geometrically.  <br /></td></tr>
+<tr class="separator:abada58a88f7b3eb43b6e65136f810cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac49feac0efc534ea1efdba967963169b" id="r_ac49feac0efc534ea1efdba967963169b"><td class="memItemLeft" align="right" valign="top"><a id="ac49feac0efc534ea1efdba967963169b" name="ac49feac0efc534ea1efdba967963169b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>growIfFull</b> ()</td></tr>
 <tr class="memdesc:ac49feac0efc534ea1efdba967963169b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Grow geometrically if the container is full (called before writing slot m_size). <br /></td></tr>
@@ -2002,6 +2005,43 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to the ghost designation. </dd></dl>
+
+</div>
+</div>
+<a id="abada58a88f7b3eb43b6e65136f810cdd" name="abada58a88f7b3eb43b6e65136f810cdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abada58a88f7b3eb43b6e65136f810cdd">&#9670;&#160;</a></span>growTo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::growTo </td>
+          <td>(</td>
+          <td class="paramtype">const std::size_t&#160;</td>
+          <td class="paramname"><em>a_needed</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Grow the arena to hold at least <em>a_needed</em> particles, geometrically. </p>
+<p>The growth policy for every append path, and deliberately NOT folded into <a class="el" href="classParticleSoA.html#afed7ea6fe15e375cafecb6f4ce1e54b6" title="Ensure capacity for at least a_capacity particles (reallocates + moves on growth).">reserve()</a>: <a class="el" href="classParticleSoA.html#afed7ea6fe15e375cafecb6f4ce1e54b6" title="Ensure capacity for at least a_capacity particles (reallocates + moves on growth).">reserve()</a> sets the capacity EXACTLY, and exactly one caller needs that for correctness. <a class="el" href="classParticleSoA.html#a6969880df8fe9fd688e9c232e3220a12" title="Explicit deep copy: a new container with a private arena duplicating every particle.">deepCopy()</a> sizes the destination to the SOURCE's capacity and then flat-memcpy()s <a class="el" href="classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539" title="Byte span of the live data (for a compact container, one contiguous memcpy/MPI_Send).">byteSpan()</a> across in one go, which is only valid while both arenas compute the same per-column offsets &ndash; and those offsets are derived from the capacity. Rounding the capacity up there would silently copy the columns to the wrong places. The remaining exact-sizing callers do not depend on the layout: <a class="el" href="classParticleSoA.html#a8b5b63e9993722c6fc5e5a1b1a42cbcb" title="Set the particle count (grows capacity if needed; new slots are uninitialized).">resize()</a> and <a class="el" href="classParticleSoA.html#a3d2ebe49bb4fea6c95ba3fbe7c91b039" title="Deep copy into an existing destination, reusing its arena when possible.">deepCopyTo()</a> simply want the capacity they asked for rather than a doubled one, <a class="el" href="classParticleSoA.html#a3d2ebe49bb4fea6c95ba3fbe7c91b039" title="Deep copy into an existing destination, reusing its arena when possible.">deepCopyTo()</a> copying column by column and so needing only capacity &gt;= m_size.</p>
+<p>An append that called reserve(m_size + n) directly would leave capacity == size on return, so the very next append would reallocate and recopy the whole arena &ndash; turning the extract-&gt;mutate-&gt;accumulate idiom <a class="el" href="classParticleSoA.html#a735560a764f977529cdc3332b8b6296b" title="Extract cell c&#39;s particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.">extractCell()</a> documents as canonical into O(N^2) copying, since the accumulating container is grown one cell at a time. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_needed</td><td>Number of particles the arena must be able to hold. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
