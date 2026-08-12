@@ -3546,7 +3546,7 @@ AmrMesh::getParticleGhostExposure(const std::string& a_realm, const int a_width)
   return m_realms[a_realm]->getParticleGhostExposure(a_width);
 }
 
-const std::set<int>&
+const std::vector<int>&
 AmrMesh::getParticleGhostNeighborRanks(const std::string& a_realm, const int a_width) const
 {
   CH_TIME("AmrMesh::getParticleGhostNeighborRanks(string, int)");

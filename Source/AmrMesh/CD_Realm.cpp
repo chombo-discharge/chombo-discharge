@@ -1137,7 +1137,12 @@ Realm::defineParticleGhostMasks() noexcept
     // Every rank this rank exchanges ghosts with at this width, in EITHER direction -- see
     // m_particleGhostNeighborRanks' own docs for why folding in only MY OWN outgoing targets (below)
     // is enough to also capture incoming ones, no communication required.
-    std::set<int>& neighborRanks = m_particleGhostNeighborRanks[ghost];
+    //
+    // Accumulated as per-rank flags and collapsed once, after every level has contributed. The masks
+    // hold one packed entry per (boundary cell x target) but only a handful of distinct ranks, so a
+    // flag store per entry beats inserting each one into a deduplicating container.
+    std::vector<int>& neighborRanks = m_particleGhostNeighborRanks[ghost];
+    std::vector<bool> isNeighbor(numProc(), false);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl    = m_grids[lvl];
@@ -1202,14 +1207,23 @@ Realm::defineParticleGhostMasks() noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        (*same[lvl])[din].collectTargetRanks(neighborRanks);
+        (*same[lvl])[din].markTargetRanks(isNeighbor);
 
         if (lvl > 0) {
-          (*fineToCoar[lvl])[din].collectTargetRanks(neighborRanks);
+          (*fineToCoar[lvl])[din].markTargetRanks(isNeighbor);
         }
         if (lvl < m_finestLevel) {
-          (*coarToFine[lvl])[din].collectTargetRanks(neighborRanks);
+          (*coarToFine[lvl])[din].markTargetRanks(isNeighbor);
         }
+      }
+    }
+
+    // Collapse the flags. Scanning in rank order means the result is sorted by construction, which is
+    // what the point-to-point exchanges want: both sides must walk their shared neighbors in the same
+    // order for the sends and receives to line up.
+    for (int rank = 0; rank < numProc(); rank++) {
+      if (isNeighbor[rank]) {
+        neighborRanks.push_back(rank);
       }
     }
   }
@@ -1914,7 +1928,7 @@ Realm::getParticleGhostExposure(const int a_width) const noexcept
   return it->second;
 }
 
-const std::set<int>&
+const std::vector<int>&
 Realm::getParticleGhostNeighborRanks(const int a_width) const noexcept
 {
   const auto it = m_particleGhostNeighborRanks.find(a_width);

@@ -140,10 +140,12 @@ ParticleGhostMask::hasTargetBoxes() const noexcept
 }
 
 inline void
-ParticleGhostMask::collectTargetRanks(std::set<int>& a_ranks) const noexcept
+ParticleGhostMask::markTargetRanks(std::vector<bool>& a_isTarget) const noexcept
 {
   for (const LevelTiles::BoxIDs& target : m_flat) {
-    a_ranks.insert(static_cast<int>(target.second));
+    CH_assert(target.second < a_isTarget.size());
+
+    a_isTarget[target.second] = true;
   }
 }
 

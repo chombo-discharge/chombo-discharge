@@ -543,14 +543,14 @@ public:
   getParticleGhostExposure(const int a_width) const noexcept;
 
   /**
-   * @brief Get the particle ghost neighbor-rank set for a registered width.
+   * @brief Get the particle ghost neighbor ranks for a registered width.
    * @details Every rank this rank exchanges particle ghosts with, in either direction, at a_width -- see
    * m_particleGhostNeighborRanks' own docs. Lets a consumer restrict a would-be all-to-all exchange to
    * this set instead.
    * @param[in] a_width Registered ghost width.
-   * @return The neighbor-rank set for a_width. Aborts if the width was not registered.
+   * @return The neighbor ranks for a_width, in ascending order. Aborts if the width was not registered.
    */
-  const std::set<int>&
+  const std::vector<int>&
   getParticleGhostNeighborRanks(const int a_width) const noexcept;
 
   /**
@@ -711,8 +711,12 @@ protected:
    * is needed because it relies only on ghost adjacency being symmetric (if a box grown by the ghost width
    * reaches a neighbor, the same growth relation reaches back), a property the ghost-fill masks already
    * depend on. Lets consumers replace an all-to-all exchange with one restricted to actual neighbors.
+   *
+   * Held as a sorted vector rather than a set: it has a handful of entries (the neighbor COUNT saturates
+   * as the communicator grows, so it is not O(numProc)), every consumer wants to walk it in rank order,
+   * and a vector is what they would otherwise copy it into on every exchange.
    */
-  std::map<int, std::set<int>> m_particleGhostNeighborRanks;
+  std::map<int, std::vector<int>> m_particleGhostNeighborRanks;
 
 #ifdef CH_USE_PETSC
   /**

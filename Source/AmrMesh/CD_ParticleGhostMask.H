@@ -14,7 +14,6 @@
 #define CD_PARTICLEGHOSTMASK_H
 
 // Std includes
-#include <set>
 #include <vector>
 
 // Chombo includes
@@ -179,14 +178,18 @@ public:
   hasTargetBoxes() const noexcept;
 
   /**
-   * @brief Insert every rank appearing in this table's packed target list into a_ranks.
+   * @brief Flag every rank appearing in this table's packed target list.
    * @details One pass over the packed targets, ignoring which cell each belongs to -- the caller wants
-   * the set of ranks this box ships to, not the per-cell breakdown. Accumulates into the argument (does
-   * not clear it) so a caller can union several tables, e.g. every box of every level.
-   * @param[in,out] a_ranks Set that the target ranks are inserted into.
+   * the ranks this box ships to, not the per-cell breakdown. A flag array rather than a deduplicating
+   * container because there is one packed entry per (boundary cell x target) but only a handful of
+   * distinct ranks: this way each entry costs a single store, and the caller collapses the flags once.
+   * Accumulates into the argument (does not clear it), so a caller can union several tables -- e.g.
+   * every box of every level.
+   * @param[in,out] a_isTarget Per-rank flags, indexed by rank and sized to the communicator. Entries
+   * are set to true; existing true entries are left alone.
    */
   inline void
-  collectTargetRanks(std::set<int>& a_ranks) const noexcept;
+  markTargetRanks(std::vector<bool>& a_isTarget) const noexcept;
 
 protected:
   /**
