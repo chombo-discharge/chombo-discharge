@@ -122,6 +122,9 @@ ItoKMCPhysics::defineKMC() const noexcept
   m_kmcSolver.define(m_kmcReactionsThreadLocal);
   m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, m_eps, m_SSAlim, m_exitTol);
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+  m_kmcStateScratch.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+
+  m_kmcPropensityScratch.resize(m_kmcReactionsThreadLocal.size());
 
   m_hasKMCSolver = true;
 }
@@ -136,6 +139,9 @@ ItoKMCPhysics::killKMC() const noexcept
   m_kmcReactionsThreadLocal.resize(0);
   m_kmcSolver.define(m_kmcReactionsThreadLocal);
   m_kmcState.define(0, 0);
+  m_kmcStateScratch.define(0, 0);
+
+  m_kmcPropensityScratch.resize(0);
 
   m_hasKMCSolver = false;
 }
@@ -474,35 +480,38 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // time step. It exists because if there are no electrons but lots of ions, one may get a time step that is too large
   // because X/|sum mu| is zero for the electrons. Similarly, one may get a time step that is too small away from
   // ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron but lots of detachment.
-  auto getPropensitiesDt = [&](const KMCState& a_state) -> std::vector<Real> {
-    std::vector<Real> propensities = m_kmcSolver.propensities(a_state, m_kmcReactionsThreadLocal);
-
-    for (int i = 0; i < propensities.size(); i++) {
-      propensities[i] *= m_reactiveDtFactors[i];
+  // Fills the reusable propensity buffer rather than returning one, so that the probes below do not
+  // allocate once per reaction per grid cell.
+  auto fillPropensitiesDt = [&](const KMCState& a_state) -> void {
+    for (size_t i = 0; i < m_kmcReactionsThreadLocal.size(); i++) {
+      m_kmcPropensityScratch[i] = m_kmcReactionsThreadLocal[i]->propensity(a_state) * m_reactiveDtFactors[i];
     }
-
-    return propensities;
   };
 
   // Do a time step limitation on the complete state, using the user-specified reactions.
-  const auto propensitiesDt = getPropensitiesDt(m_kmcState);
-  const auto physicsDt      = m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, propensitiesDt, 1.0);
+  fillPropensitiesDt(m_kmcState);
 
-  a_physicsDt = std::min(a_physicsDt, physicsDt);
+  a_physicsDt = std::min(a_physicsDt,
+                         m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, m_kmcPropensityScratch, 1.0));
 
   // Go through reactions that are potentially detaching species and do the calculation again.
   for (const auto& reaction : m_kmcReactionsThreadLocal) {
-    auto       S = m_kmcState;
     const auto N = reaction->computeCriticalNumberOfReactions(m_kmcState);
 
-    // Trigger on both the reactions and the reactions with completely consumed reactants
+    // Trigger on both the reactions and the reactions with completely consumed reactants. The state
+    // is only copied inside the branch because that is the only place it is read -- copying it above
+    // the test meant paying for a copy per reaction per grid cell, including for the reactions that
+    // never enter here.
     if (N < std::numeric_limits<FPR>::max()) {
-      reaction->advanceState(S, N);
+      m_kmcStateScratch = m_kmcState;
 
-      const auto propensitiesDt = getPropensitiesDt(S);
-      const auto physicsDt      = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensitiesDt, 1.0);
+      reaction->advanceState(m_kmcStateScratch, N);
 
-      a_physicsDt = std::min(a_physicsDt, physicsDt);
+      fillPropensitiesDt(m_kmcStateScratch);
+
+      a_physicsDt = std::min(
+        a_physicsDt,
+        m_kmcSolver.computeDt(m_kmcStateScratch, m_kmcReactionsThreadLocal, m_kmcPropensityScratch, 1.0));
     }
   }
 }

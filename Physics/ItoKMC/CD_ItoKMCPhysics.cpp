@@ -23,6 +23,8 @@ thread_local bool                                            ItoKMCPhysics::m_ha
 thread_local KMCSolverType                                   ItoKMCPhysics::m_kmcSolver;
 thread_local KMCState                                        ItoKMCPhysics::m_kmcState;
 thread_local std::vector<std::shared_ptr<const KMCReaction>> ItoKMCPhysics::m_kmcReactionsThreadLocal;
+thread_local KMCState                                        ItoKMCPhysics::m_kmcStateScratch;
+thread_local std::vector<Real>                               ItoKMCPhysics::m_kmcPropensityScratch;
 
 Vector<std::string>
 ItoKMCPhysics::getPlotVariableNames() const noexcept

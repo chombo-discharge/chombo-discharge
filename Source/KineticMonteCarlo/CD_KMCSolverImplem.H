@@ -254,6 +254,46 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state, const React
 }
 
 template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::gatherDistinctReactants(const ReactionList& a_reactions) const noexcept
+{
+  // Size the scratch from the largest reactant index the reactions refer to. Species above that are
+  // not reactants of any of these reactions and can never be reduced over below.
+  size_t numSpecies = 0;
+
+  for (const auto& reaction : a_reactions) {
+    for (const size_t reactant : reaction->getReactants()) {
+      numSpecies = std::max(numSpecies, reactant + 1);
+    }
+  }
+
+  if (m_seenScratch.size() < numSpecies) {
+    m_seenScratch.resize(numSpecies, 0);
+    m_muScratch.resize(numSpecies, 0.0);
+    m_sigmaScratch.resize(numSpecies, 0.0);
+  }
+
+  // Collect the distinct reactants. The stamps make this a single pass with no sort: a reactant is
+  // appended the first time it is seen and skipped afterwards.
+  m_reactantScratch.clear();
+
+  for (const auto& reaction : a_reactions) {
+    for (const size_t reactant : reaction->getReactants()) {
+      if (!m_seenScratch[reactant]) {
+        m_seenScratch[reactant] = 1;
+
+        m_reactantScratch.push_back(reactant);
+      }
+    }
+  }
+
+  // Leave the stamps clear for the next call.
+  for (const size_t reactant : m_reactantScratch) {
+    m_seenScratch[reactant] = 0;
+  }
+}
+
+template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
                                                const ReactionList&      a_nonCriticalReactions,
@@ -269,22 +309,30 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 
   if (numReactions > 0) {
 
-    // 1. Gather a list of all reactants involved in the non-critical reactions.
-    auto allReactants = a_nonCriticalReactions[0]->getReactants();
-    for (size_t i = 1; i < numReactions; i++) {
-      const auto& curReactants = a_nonCriticalReactions[i]->getReactants();
+    // 1. Gather the distinct reactants involved in the non-critical reactions.
+    this->gatherDistinctReactants(a_nonCriticalReactions);
 
-      allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
+    for (const size_t reactant : m_reactantScratch) {
+      m_muScratch[reactant]    = 0.0;
+      m_sigmaScratch[reactant] = 0.0;
     }
 
-    // Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes
-    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the
-    // result: each reactant's contribution is independent and only feeds into a min-reduction.
-    allReactants.sort();
-    allReactants.unique();
+    // 2. Accumulate the expected change and variance per reactant. The loops are ordered reaction-
+    // major so that each reaction's state change is fetched once per reactant from its dense table
+    // rather than through a map lookup; the sums are the same as reactant-major.
+    for (size_t i = 0; i < numReactions; i++) {
+      const Real& p = a_nonCriticalPropensities[i];
 
-    // 2. Iterate through all reactants and compute deviations.
-    for (const auto& reactant : allReactants) {
+      for (const size_t reactant : m_reactantScratch) {
+        const auto muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
+
+        m_muScratch[reactant] += muIJ * p;
+        m_sigmaScratch[reactant] += muIJ * muIJ * p;
+      }
+    }
+
+    // 3. Reduce over the reactants.
+    for (const size_t reactant : m_reactantScratch) {
 
       // Xi is the population of the current reactant. It might seem weird that we are indexing this
       // through the reactions rather then through the state. Which it is, but the reason for that is
@@ -294,28 +342,18 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
       const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
 
       if (Xi > (T)0) {
-        Real mu     = 0.0;
-        Real sigma2 = 0.0;
 
         // Set gi to 1 for now. A more complex version would parse this through an input parameter
         // where the user has inspected the highest-order-reaction.
         constexpr Real gi = 1.0;
-
-        for (size_t i = 0; i < numReactions; i++) {
-          const Real& p    = a_nonCriticalPropensities[i];
-          const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
-
-          mu += muIJ * p;
-          sigma2 += muIJ * muIJ * p;
-        }
 
         Real dt1 = std::numeric_limits<Real>::max();
         Real dt2 = std::numeric_limits<Real>::max();
 
         const Real f = std::max(m_eps * Xi / gi, one);
 
-        mu     = std::abs(mu);
-        sigma2 = std::abs(sigma2);
+        const Real mu     = std::abs(m_muScratch[reactant]);
+        const Real sigma2 = std::abs(m_sigmaScratch[reactant]);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt1 = f / mu;
@@ -349,22 +387,28 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
 
   if (numReactions > 0) {
 
-    // 1. Gather a list of all reactants involved in the input reactions
-    auto allReactants = a_reactions[0]->getReactants();
-    for (size_t i = 1; i < numReactions; i++) {
-      const auto& curReactants = a_reactions[i]->getReactants();
+    // 1. Gather the distinct reactants involved in the input reactions.
+    this->gatherDistinctReactants(a_reactions);
 
-      allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
+    for (const size_t reactant : m_reactantScratch) {
+      m_muScratch[reactant] = 0.0;
     }
 
-    // Only do unique reactants. Sorting before the unique() collapses ALL duplicates (std::list::unique only removes
-    // consecutive equal elements), so each distinct reactant is processed exactly once. This does not change the
-    // result: each reactant's contribution is independent and only feeds into a min-reduction.
-    allReactants.sort();
-    allReactants.unique();
+    // 2. Accumulate the expected change per reactant. The loops are ordered reaction-major so that
+    // each reaction's state change is fetched once per reactant from its dense table rather than
+    // through a map lookup; the sums are the same as reactant-major.
+    for (size_t i = 0; i < numReactions; i++) {
+      const Real& p = a_propensities[i];
 
-    // 2. Iterate through all reactants and compute deviations.
-    for (const auto& reactant : allReactants) {
+      for (const size_t reactant : m_reactantScratch) {
+        const auto muIJ = a_reactions[i]->getStateChange(reactant);
+
+        m_muScratch[reactant] += muIJ * p;
+      }
+    }
+
+    // 3. Reduce over the reactants.
+    for (const size_t reactant : m_reactantScratch) {
 
       // Xi is the population of the current reactant. It might seem weird that we are indexing this
       // through the reactions rather then through the state. Which it is, but the reason for that is
@@ -374,22 +418,13 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
       const T Xi = R::population(reactant, a_state);
 
       if (Xi > (T)0) {
-        Real mu = 0.0;
 
         // Set gi to 1 for now. A more complex version would parse this through an input parameter
         // where the user has inspected the highest-order-reaction.
         constexpr Real gi = 1.0;
 
-        for (size_t i = 0; i < numReactions; i++) {
-          const Real& p    = a_propensities[i];
-          const auto& muIJ = a_reactions[i]->getStateChange(reactant);
-
-          mu += muIJ * p;
-        }
-
-        const Real f = std::max(a_epsilon * Xi / gi, one);
-
-        mu = std::abs(mu);
+        const Real f  = std::max(a_epsilon * Xi / gi, one);
+        const Real mu = std::abs(m_muScratch[reactant]);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt = std::min(dt, f / mu);

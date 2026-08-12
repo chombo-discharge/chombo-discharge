@@ -94,9 +94,12 @@ public:
 
   /**
    * @brief Get the reactants in the reaction.
+   * @details Returned by reference because KMCSolver walks this list once per reaction per grid
+   * cell when it assembles the reactant set for the time step calculation; returning by value
+   * deep-copied the list, and with it one heap allocation per element, on every one of those walks.
    * @return m_lhsReactives
    */
-  inline std::list<size_t>
+  inline const std::list<size_t>&
   getReactants() const noexcept;
 
   /**
@@ -161,6 +164,27 @@ protected:
    * @brief State change for reactants/products.
    */
   std::map<size_t, T> m_reactiveStateChange;
+
+  /**
+   * @brief Dense form of m_reactiveStateChange, indexed by reactive species.
+   * @details Built once in computeStateChanges() and holding the same values as
+   * m_reactiveStateChange, with zero for species the reaction does not touch. It exists because
+   * getStateChange() sits in the innermost loop of KMCSolver::computeDt and
+   * KMCSolver::getNonCriticalTimeStep, which run once per reactant per reaction per grid cell.
+   * Serving those from the map cost two red-black-tree walks (find followed by at) per lookup.
+   * Species indices at or beyond the vector's length are not involved in the reaction and their
+   * state change is zero.
+   */
+  std::vector<T> m_reactiveStateChangeDense;
+
+  /**
+   * @brief Reactants of the left-hand side, compacted to (species, order) pairs.
+   * @details Built once in computeStateChanges() from the same reactant tally that fixes
+   * m_propensityFactor. propensity() uses it to form the falling factorial directly from the
+   * incoming state; without it the reaction has to copy the whole state vector on every call so
+   * that it can decrement its own copy while multiplying.
+   */
+  std::vector<std::pair<size_t, size_t>> m_lhsOrders;
 
   /**
    * @brief State change for non-reactive products.

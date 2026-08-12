@@ -135,7 +135,7 @@ KMCSingleStateReaction<State, T>::computeCriticalNumberOfReactions(const State& 
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCSingleStateReaction<State, T>::getReactants() const noexcept
 {
   return m_reactants;
