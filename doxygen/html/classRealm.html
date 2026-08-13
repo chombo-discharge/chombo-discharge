@@ -267,9 +267,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memitem:a5eeefec553e2a39186eec5f983cf353e" id="r_a5eeefec553e2a39186eec5f983cf353e"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a5eeefec553e2a39186eec5f983cf353e">getParticleGhostExposure</a> (const int a_width) const noexcept</td></tr>
 <tr class="memdesc:a5eeefec553e2a39186eec5f983cf353e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the boundary-exposure mask for a registered particle ghost width.  <br /></td></tr>
 <tr class="separator:a5eeefec553e2a39186eec5f983cf353e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9af01e500302836d24fba54b2a5716f" id="r_aa9af01e500302836d24fba54b2a5716f"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa9af01e500302836d24fba54b2a5716f">getParticleGhostNeighborRanks</a> (const int a_width) const noexcept</td></tr>
-<tr class="memdesc:aa9af01e500302836d24fba54b2a5716f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle ghost neighbor ranks for a registered width.  <br /></td></tr>
-<tr class="separator:aa9af01e500302836d24fba54b2a5716f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd0b2627b0b3a2d7245d2eeb60f70207" id="r_acd0b2627b0b3a2d7245d2eeb60f70207"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#acd0b2627b0b3a2d7245d2eeb60f70207">getLevelTiles</a> () const noexcept</td></tr>
 <tr class="memdesc:acd0b2627b0b3a2d7245d2eeb60f70207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiled space.  <br /></td></tr>
 <tr class="separator:acd0b2627b0b3a2d7245d2eeb60f70207"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -433,9 +430,6 @@ std::map&lt; int, <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297
 <tr class="memitem:afa40dbffe1b4dfc754fc1670d22e29bc" id="r_afa40dbffe1b4dfc754fc1670d22e29bc"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#afa40dbffe1b4dfc754fc1670d22e29bc">m_particleGhostExposure</a></td></tr>
 <tr class="memdesc:afa40dbffe1b4dfc754fc1670d22e29bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle boundary-exposure masks, keyed by ghost width. Per width: indexed by level, true in every cell that has at least one outgoing ghost-shipment target in ANY direction &ndash; i.e. the OR over the same-level, fine-to-coarse and coarse-to-fine masks of numTargets(cell) &gt; 0.  <br /></td></tr>
 <tr class="separator:afa40dbffe1b4dfc754fc1670d22e29bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbd2aee31bf343b0d51dd97fec4a66fb" id="r_adbd2aee31bf343b0d51dd97fec4a66fb"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#adbd2aee31bf343b0d51dd97fec4a66fb">m_particleGhostNeighborRanks</a></td></tr>
-<tr class="memdesc:adbd2aee31bf343b0d51dd97fec4a66fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle ghost neighbor ranks, keyed by ghost width. The union, over every box THIS rank owns at every level, of the target ranks appearing in that width's same-level/fine-to-coarse/coarse-to-fine masks &ndash; i.e. every rank this rank exchanges particle ghosts with in EITHER direction, at that width.  <br /></td></tr>
-<tr class="separator:adbd2aee31bf343b0d51dd97fec4a66fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87e0c0bd3a397036248609c566e4cfcc" id="r_a87e0c0bd3a397036248609c566e4cfcc"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; <a class="el" href="classPhaseRealm.html">PhaseRealm</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a87e0c0bd3a397036248609c566e4cfcc">m_realms</a></td></tr>
 <tr class="memdesc:a87e0c0bd3a397036248609c566e4cfcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase realms.  <br /></td></tr>
 <tr class="separator:a87e0c0bd3a397036248609c566e4cfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2342,41 +2336,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
-<a id="aa9af01e500302836d24fba54b2a5716f" name="aa9af01e500302836d24fba54b2a5716f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9af01e500302836d24fba54b2a5716f">&#9670;&#160;</a></span>getParticleGhostNeighborRanks()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const std::vector&lt; int &gt; &amp; Realm::getParticleGhostNeighborRanks </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_width</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the particle ghost neighbor ranks for a registered width. </p>
-<p>Every rank this rank exchanges particle ghosts with, in either direction, at a_width &ndash; see m_particleGhostNeighborRanks' own docs. Lets a consumer restrict a would-be all-to-all exchange to this set instead. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_width</td><td>Registered ghost width. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The neighbor ranks for a_width, in ascending order. Aborts if the width was not registered. </dd></dl>
-
-</div>
-</div>
 <a id="ac8acf97fe9864537dd5dae4a14b96e4c" name="ac8acf97fe9864537dd5dae4a14b96e4c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac8acf97fe9864537dd5dae4a14b96e4c">&#9670;&#160;</a></span>getParticleMesh()</h2>
 
@@ -2989,32 +2948,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 <p>Particle boundary-exposure masks, keyed by ghost width. Per width: indexed by level, true in every cell that has at least one outgoing ghost-shipment target in ANY direction &ndash; i.e. the OR over the same-level, fine-to-coarse and coarse-to-fine masks of numTargets(cell) &gt; 0. </p>
 <p>A cell is "exposed" when a particle sitting in it is visible to some other box, so a consumer that wants to act on such a particle unilaterally cannot: some other box may be acting on the same particle in the same round. The mergers ask this question per particle, every timestep, for data that changes only when the masks it is derived from do &ndash; hence caching it here, beside those masks and rebuilt by the same function.</p>
 <p>Carries NO ghost cells, deliberately: only cells holding a RESIDENT particle are ever queried, and resident means the cell lies in the patch's own box. A ghost particle's cell lies outside the box and would in any case violate <a class="el" href="classParticleGhostMask.html#a402a9bac8b70b84602846882664a5d56" title="Get the number of scatter targets for a cell.">ParticleGhostMask::numTargets()</a>' own precondition. </p>
-
-</div>
-</div>
-<a id="adbd2aee31bf343b0d51dd97fec4a66fb" name="adbd2aee31bf343b0d51dd97fec4a66fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbd2aee31bf343b0d51dd97fec4a66fb">&#9670;&#160;</a></span>m_particleGhostNeighborRanks</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::map&lt;int, std::vector&lt;int&gt; &gt; Realm::m_particleGhostNeighborRanks</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Particle ghost neighbor ranks, keyed by ghost width. The union, over every box THIS rank owns at every level, of the target ranks appearing in that width's same-level/fine-to-coarse/coarse-to-fine masks &ndash; i.e. every rank this rank exchanges particle ghosts with in EITHER direction, at that width. </p>
-<p>Built once per regrid alongside the masks themselves (see <a class="el" href="classRealm.html#a83051d56bb141d76cf700a12c772711e" title="Define the same-level, fine-to-coarse, and coarse-to-fine particle ghost masks on every level.">defineParticleGhostMasks()</a>); no MPI is needed because it relies only on ghost adjacency being symmetric (if a box grown by the ghost width reaches a neighbor, the same growth relation reaches back), a property the ghost-fill masks already depend on. Lets consumers replace an all-to-all exchange with one restricted to actual neighbors.</p>
-<p>Held as a sorted vector rather than a set: it has a handful of entries (the neighbor COUNT saturates as the communicator grows, so it is not O(numProc)), every consumer wants to walk it in rank order, and a vector is what they would otherwise copy it into on every exchange. </p>
 
 </div>
 </div>

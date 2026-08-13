@@ -622,9 +622,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memitem:a74072f7f472716ad78085cc38ef8df77" id="r_a74072f7f472716ad78085cc38ef8df77"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a74072f7f472716ad78085cc38ef8df77">getParticleGhostExposure</a> (const std::string &amp;a_realm, const int a_width) const</td></tr>
 <tr class="memdesc:a74072f7f472716ad78085cc38ef8df77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle boundary-exposure mask on a realm for a registered width.  <br /></td></tr>
 <tr class="separator:a74072f7f472716ad78085cc38ef8df77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a321d1455b69c050a2ae68b079be3b6e6" id="r_a321d1455b69c050a2ae68b079be3b6e6"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a321d1455b69c050a2ae68b079be3b6e6">getParticleGhostNeighborRanks</a> (const std::string &amp;a_realm, const int a_width) const</td></tr>
-<tr class="memdesc:a321d1455b69c050a2ae68b079be3b6e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle ghost neighbor ranks on a realm for a registered width.  <br /></td></tr>
-<tr class="separator:a321d1455b69c050a2ae68b079be3b6e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8eb2cdf9111cd156647ae55c2dd3eb88" id="r_a8eb2cdf9111cd156647ae55c2dd3eb88"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8eb2cdf9111cd156647ae55c2dd3eb88">getEBLevelGrid</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a8eb2cdf9111cd156647ae55c2dd3eb88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the EBLevelGrid for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
 <tr class="separator:a8eb2cdf9111cd156647ae55c2dd3eb88"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5383,44 +5380,6 @@ template&lt;typename P , typename Traits &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Per-level, per-box CSR of source-cell -&gt; coarser-level target boxes (grid index, rank). </dd></dl>
-
-</div>
-</div>
-<a id="a321d1455b69c050a2ae68b079be3b6e6" name="a321d1455b69c050a2ae68b079be3b6e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a321d1455b69c050a2ae68b079be3b6e6">&#9670;&#160;</a></span>getParticleGhostNeighborRanks()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const std::vector&lt; int &gt; &amp; AmrMesh::getParticleGhostNeighborRanks </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_width</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the particle ghost neighbor ranks on a realm for a registered width. </p>
-<p>Every rank this rank exchanges particle ghosts with, in either direction, at a_width. Lets a consumer restrict a would-be all-to-all exchange to this set instead. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_width</td><td>Registered ghost width. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The neighbor ranks, in ascending order. </dd></dl>
 
 </div>
 </div>
