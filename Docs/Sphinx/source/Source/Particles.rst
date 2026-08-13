@@ -391,7 +391,7 @@ For each source cell a mask lists the destination boxes (grid index and receivin
 There is one mask per direction, and the collection type is
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_ParticleGhostMask.H
-   :lines: 224
+   :lines: 210
    :language: c++
 
 The masks live on the :ref:`Chap:Realm` and are rebuilt at every regrid.
