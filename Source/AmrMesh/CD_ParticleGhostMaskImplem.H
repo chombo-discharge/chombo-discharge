@@ -139,16 +139,6 @@ ParticleGhostMask::hasTargetBoxes() const noexcept
   return !m_flatBox.empty();
 }
 
-inline void
-ParticleGhostMask::markTargetRanks(std::vector<bool>& a_isTarget) const noexcept
-{
-  for (const LevelTiles::BoxIDs& target : m_flat) {
-    CH_assert(target.second < a_isTarget.size());
-
-    a_isTarget[target.second] = true;
-  }
-}
-
 #include <CD_NamespaceFooter.H>
 
 #endif

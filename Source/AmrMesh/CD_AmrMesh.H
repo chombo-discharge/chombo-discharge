@@ -1891,17 +1891,6 @@ public:
   getParticleGhostExposure(const std::string& a_realm, const int a_width) const;
 
   /**
-   * @brief Get the particle ghost neighbor ranks on a realm for a registered width.
-   * @details Every rank this rank exchanges particle ghosts with, in either direction, at a_width. Lets a
-   * consumer restrict a would-be all-to-all exchange to this set instead.
-   * @param[in] a_realm Realm name
-   * @param[in] a_width Registered ghost width.
-   * @return The neighbor ranks, in ascending order.
-   */
-  const std::vector<int>&
-  getParticleGhostNeighborRanks(const std::string& a_realm, const int a_width) const;
-
-  /**
    * @brief Get the EBLevelGrid for a Realm and phase
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase (gas or solid)

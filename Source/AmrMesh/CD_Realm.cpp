@@ -1103,7 +1103,6 @@ Realm::defineParticleGhostMasks() noexcept
   m_particleGhostMaskFineToCoar.clear();
   m_particleGhostMaskCoarToFine.clear();
   m_particleGhostExposure.clear();
-  m_particleGhostNeighborRanks.clear();
 
   // Particle ghost filling is intentionally NOT supported on periodic domains (a periodic ghost would
   // require wrapping particle copies across the domain). Abort rather than silently mis-fill if a width
@@ -1133,16 +1132,6 @@ Realm::defineParticleGhostMasks() noexcept
     fineToCoar.resize(1 + m_finestLevel);
     coarToFine.resize(1 + m_finestLevel);
     exposure.resize(1 + m_finestLevel);
-
-    // Every rank this rank exchanges ghosts with at this width, in EITHER direction -- see
-    // m_particleGhostNeighborRanks' own docs for why folding in only MY OWN outgoing targets (below)
-    // is enough to also capture incoming ones, no communication required.
-    //
-    // Accumulated as per-rank flags and collapsed once, after every level has contributed. The masks
-    // hold one packed entry per (boundary cell x target) but only a handful of distinct ranks, so a
-    // flag store per entry beats inserting each one into a deduplicating container.
-    std::vector<int>& neighborRanks = m_particleGhostNeighborRanks[ghost];
-    std::vector<bool> isNeighbor(numProc(), false);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl    = m_grids[lvl];
@@ -1193,43 +1182,6 @@ Realm::defineParticleGhostMasks() noexcept
                                         *coarToFine[lvl],
                                         lvl > 0,
                                         lvl < m_finestLevel);
-
-      // Fold this level's just-built masks' OWN (outgoing) target ranks into the running neighbor set.
-      // Ghost adjacency is symmetric (box growth intersection is a symmetric relation), so the ranks
-      // this rank ships TO at a given direction/width are exactly the ranks that ship back at the
-      // complementary direction (same-level ships back via the same mask; a coarse rank's C2F targets
-      // ship back via THEIR OWN F2C mask, and vice versa) -- the union across all three directions,
-      // over every level this rank owns boxes at, is therefore the full bidirectional neighbor set,
-      // with no MPI needed to discover it.
-      const DataIterator& dit  = dbl.dataIterator();
-      const int           nbox = dit.size();
-
-      // Serial (no omp): every box marks flags in the SAME isNeighbor array, and different boxes
-      // routinely share a target rank, so threads would write the same element concurrently. Distinct
-      // elements would not help either -- std::vector<bool> packs bits, so neighbouring ranks share a
-      // word. Per-thread arrays would fix it, but this runs once per regrid and costs one store per
-      // packed target, so there is nothing here worth buying with that memory.
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
-
-        (*same[lvl])[din].markTargetRanks(isNeighbor);
-
-        if (lvl > 0) {
-          (*fineToCoar[lvl])[din].markTargetRanks(isNeighbor);
-        }
-        if (lvl < m_finestLevel) {
-          (*coarToFine[lvl])[din].markTargetRanks(isNeighbor);
-        }
-      }
-    }
-
-    // Collapse the flags. Scanning in rank order means the result is sorted by construction, which is
-    // what the point-to-point exchanges want: both sides must walk their shared neighbors in the same
-    // order for the sends and receives to line up.
-    for (int rank = 0; rank < numProc(); rank++) {
-      if (isNeighbor[rank]) {
-        neighborRanks.push_back(rank);
-      }
     }
   }
 }
@@ -1925,21 +1877,6 @@ Realm::getParticleGhostExposure(const int a_width) const noexcept
 
   if (it == m_particleGhostExposure.end()) {
     const std::string msg = "Realm::getParticleGhostExposure -- width = " + std::to_string(a_width) +
-                            " was not registered (call registerParticleGhostMask before regridding)";
-
-    MayDay::Abort(msg.c_str());
-  }
-
-  return it->second;
-}
-
-const std::vector<int>&
-Realm::getParticleGhostNeighborRanks(const int a_width) const noexcept
-{
-  const auto it = m_particleGhostNeighborRanks.find(a_width);
-
-  if (it == m_particleGhostNeighborRanks.end()) {
-    const std::string msg = "Realm::getParticleGhostNeighborRanks -- width = " + std::to_string(a_width) +
                             " was not registered (call registerParticleGhostMask before regridding)";
 
     MayDay::Abort(msg.c_str());
