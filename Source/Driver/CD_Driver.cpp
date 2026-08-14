@@ -38,6 +38,7 @@
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleMemory.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_DischargeIO.H>
 #include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
@@ -2013,6 +2014,20 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     // Live Copiers. A Copier owns its motion plan, so a count that climbs regrid-over-regrid means
     // those plans -- and the layouts they refer to -- are being retained rather than rebuilt.
     pout() << "                                -- Live Copiers             : " << Copier::s_liveCopiers << endl;
+
+    // EBISLayout cache occupancy. The cache stores a copy of the DisjointBoxLayout as its map key, so
+    // every entry pins a complete layout -- boxes, neighbour lists and iterators. Entries are evicted
+    // only at refcount one and only on a miss, so a pinned count that climbs regrid-over-regrid means
+    // a holder is outliving its grids and taking a layout with it.
+    for (int i = 0; i < phase::numPhases; i++) {
+      const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(i);
+
+      if (!ebis.isNull() && ebis->isDefined()) {
+        const std::string prefix = "                                -- EBIS cache phase " + std::to_string(i);
+
+        ebis->reportLayoutCache(pout(), prefix.c_str());
+      }
+    }
     pout() << "                                -- Particle arenas          : " << bytesAsMB(particleBytes) << " (MB)"
            << endl;
     pout() << "                                -- Peak particle arenas     : " << bytesAsMB(particlePeak) << " (MB)"
