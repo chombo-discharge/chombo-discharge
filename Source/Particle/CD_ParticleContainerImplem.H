@@ -491,52 +491,6 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
 
 template <typename P, typename Traits>
 inline void
-ParticleContainer<P, Traits>::shrinkSlack(const Real a_trigger, const Real a_headroom)
-{
-  CH_TIME("ParticleContainer::shrinkSlack");
-
-  CH_assert(m_isDefined);
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    LevelParticles& level = *m_particles[lvl];
-
-    const DataIterator& dit  = level.dataIterator();
-    const int           nbox = dit.size();
-
-#ifdef _OPENMP
-#pragma omp parallel for schedule(runtime)
-#endif
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      level[dit[mybox]].shrinkSlack(a_trigger, a_headroom);
-    }
-  }
-}
-
-template <typename P, typename Traits>
-inline void
-ParticleContainer<P, Traits>::trimCapacity(const Real a_factor)
-{
-  CH_TIME("ParticleContainer::trimCapacity");
-
-  CH_assert(m_isDefined);
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    LevelParticles& level = *m_particles[lvl];
-
-    const DataIterator& dit  = level.dataIterator();
-    const int           nbox = dit.size();
-
-#ifdef _OPENMP
-#pragma omp parallel for schedule(runtime)
-#endif
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      level[dit[mybox]].trimCapacity(a_factor);
-    }
-  }
-}
-
-template <typename P, typename Traits>
-inline void
 ParticleContainer<P, Traits>::remap()
 {
   CH_TIME("ParticleContainer::remap");
@@ -563,11 +517,6 @@ ParticleContainer<P, Traits>::remap()
     this->distributeFromPool(pool, true); // remap: the receiving rank becomes the new owner
   }
 
-  // Return the slack left by leaves whose population has just dropped. Doing this on every remap
-  // keeps the containers compact between regrids, which matters because the regrid caches them: a
-  // bloated container is cached at its bloated size, and the copy is live alongside the rebuilt one.
-  this->shrinkSlack(s_shrinkTrigger, s_shrinkHeadroom);
-
   m_isOrganizedByCell = false;
 }
 
@@ -581,13 +530,6 @@ ParticleContainer<P, Traits>::preRegrid()
 
   // Ghost particles are transient, non-owned copies; drop them so they are never cached/regridded.
   this->clearGhostParticles();
-
-  // Share the current holders (RefCountedPtr) so regrid() can rebuild m_particles while the old
-  // particles stay alive in the cache. Remember the old layout for iterating the cache.
-  // Reclaim slack before handing the containers over to the cache. They are read once and drained
-  // during the regrid, so no headroom is wanted, and whatever they carry is held across the whole
-  // rebuild of the mesh, the operators and the time stepper that happens before the redistribution.
-  this->shrinkSlack(s_shrinkTrigger, s_cacheHeadroom);
 
   m_cacheParticles = m_particles;
   m_cacheGrids     = m_grids;
@@ -643,10 +585,6 @@ ParticleContainer<P, Traits>::regrid(const Vector<DisjointBoxLayout>&         a_
   // ---- redistribute the cached particles onto the new layout ----
   MoverPool pool = this->gatherToPool(m_cacheParticles, m_cacheGrids);
   this->distributeFromPool(pool, true); // regrid: the receiving rank becomes the new owner
-
-  // The leaves were filled from empty, so their capacities reflect the order particles arrived in.
-  // Normalize them to a known headroom so the footprint after a regrid is predictable.
-  this->trimCapacity(s_regridHeadroom);
 
   // ---- release the cache ----
   m_cacheParticles.resize(0);

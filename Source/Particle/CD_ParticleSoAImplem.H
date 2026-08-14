@@ -208,48 +208,6 @@ ParticleSoA<P, Traits>::shrinkToFit()
 
 template <typename P, typename Traits>
 inline void
-ParticleSoA<P, Traits>::shrinkSlack(const Real a_trigger, const Real a_headroom)
-{
-  CH_assert(a_headroom >= 1.0);
-
-  if (m_size == 0) {
-    this->shrinkToFit(); // nothing live: release the arena outright
-
-    return;
-  }
-
-  if (static_cast<Real>(m_capacity) <= a_trigger * static_cast<Real>(m_size)) {
-    return; // not enough slack to be worth a reallocation
-  }
-
-  const std::size_t target = std::max(m_size, static_cast<std::size_t>(a_headroom * static_cast<Real>(m_size)));
-
-  if (target < m_capacity) {
-    this->reallocate(target);
-  }
-}
-
-template <typename P, typename Traits>
-inline void
-ParticleSoA<P, Traits>::trimCapacity(const Real a_factor)
-{
-  CH_assert(a_factor >= 1.0);
-
-  if (m_size == 0) {
-    this->shrinkToFit(); // nothing live: release the arena outright
-
-    return;
-  }
-
-  const std::size_t target = std::max(m_size, static_cast<std::size_t>(a_factor * static_cast<Real>(m_size)));
-
-  if (target != m_capacity) {
-    this->reallocate(target);
-  }
-}
-
-template <typename P, typename Traits>
-inline void
 ParticleSoA<P, Traits>::append(const RealVect& a_position, const double a_weight, const P& a_payload)
 {
   this->growIfFull();

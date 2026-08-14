@@ -936,35 +936,6 @@ public:
   void
   shrinkToFit();
 
-  /**
-   * @brief Reclaim arena slack when the capacity greatly exceeds the live particle count.
-   * @details Geometric growth means a container that once absorbed a burst keeps that capacity until
-   * it is destroyed, so a rank that briefly received a large influx goes on holding the arena long
-   * after the particles have gone. This releases that slack, but only when there is enough of it to
-   * be worth a reallocation, and it leaves headroom so that a container which is about to refill does
-   * not immediately have to grow again -- shrinking to an exact fit would make the next append
-   * reallocate. Invalidates raw column pointers; particle order and cell-sort state are preserved.
-   * @param[in] a_trigger  Shrink only when capacity exceeds a_trigger times the live count. Values at
-   *                       or below one shrink on any slack at all, which will thrash.
-   * @param[in] a_headroom Capacity to leave, as a multiple of the live count. Must be at least one.
-   */
-  void
-  shrinkSlack(const Real a_trigger, const Real a_headroom);
-
-  /**
-   * @brief Set the arena capacity to a fixed multiple of the live particle count.
-   * @details Unlike reserve(), which only ever grows, this also shrinks: it normalizes a container to
-   * a known amount of headroom rather than leaving whatever geometric growth happened to produce. Use
-   * it after a bulk fill, where the capacity reached depends on the order the particles arrived in
-   * and can be anywhere between one and two times the final count. Frees the arena outright when the
-   * container is empty. Invalidates raw column pointers; particle order and cell-sort state are
-   * preserved.
-   * @param[in] a_factor Capacity to end up with, as a multiple of the live count. Must be at least
-   *                     one; below that the container could not hold its own particles.
-   */
-  void
-  trimCapacity(const Real a_factor);
-
   ///@}
 
   /**
