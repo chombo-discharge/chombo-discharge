@@ -700,12 +700,12 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   // from any change in the grid it is regridding onto. Note that forcing a regrid on every step can
   // destabilize a field solve that relies on its previous solution as an initial guess.
   static const bool forceRegrid = []() {
-    int force = 0;
+    bool force = false;
 
     ParmParse pp("Driver");
     pp.query("force_regrid", force);
 
-    return force > 0;
+    return force;
   }();
 
   if (!newCellTags && !m_needsNewGeometricTags && !forceRegrid) {
@@ -1983,12 +1983,12 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 #ifdef CH_USE_MEMORY_TRACKING
   {
     static const bool dumpSites = []() {
-      int dump = 0;
+      bool dump = false;
 
       ParmParse pp("Driver");
       pp.query("dump_sites", dump);
 
-      return dump > 0;
+      return dump;
     }();
 
     if (dumpSites) {
