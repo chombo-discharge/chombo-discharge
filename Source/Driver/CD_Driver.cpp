@@ -1884,26 +1884,21 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   // Write memory usage
 #ifdef CH_USE_MEMORY_TRACKING
-  const Real bytesPerMB = 1024. * 1024.;
-
   long long unfreedMem = 0LL;
   long long peakMem    = 0LL;
 
-  //  overallMemoryUsage(unfreedMem, peakMem);
+  overallMemoryUsage(unfreedMem, peakMem);
 
-  pout() << "                                -- Unfreed memory        : "
-         << std::ceil(static_cast<double>(unfreedMem) / bytesPerMB) << "(MB)" << endl;
-  pout() << "                                -- Peak memory usage     : "
-         << std::ceil(static_cast<double>(peakMem) / bytesPerMB) << "(MB)" << endl;
+  // In bytes rather than whole megabytes. The growth worth catching here is a ratchet of tens of
+  // kilobytes per regrid, which reads as a constant figure once rounded up to MB -- that rounding is
+  // what made this counter look flat while it was in fact moving.
+  pout() << "                                -- Unfreed memory        : " << unfreedMem << "(B)" << endl;
+  pout() << "                                -- Peak memory usage     : " << peakMem << "(B)" << endl;
 
 #ifdef CH_MPI
-  const long long maxUnfreedMem = ParallelOps::max(unfreedMem);
-  const long long maxPeakMem    = ParallelOps::max(peakMem);
-
-  pout() << "                                -- Max unfreed memory    : "
-         << std::ceil(static_cast<double>(maxUnfreedMem) / bytesPerMB) << "(MB)" << endl;
-  pout() << "                                -- Max peak memory usage : "
-         << std::ceil(static_cast<double>(maxPeakMem) / bytesPerMB) << "(MB)" << endl;
+  pout() << "                                -- Max unfreed memory    : " << ParallelOps::max(unfreedMem) << "(B)"
+         << endl;
+  pout() << "                                -- Max peak memory usage : " << ParallelOps::max(peakMem) << "(B)" << endl;
 #endif
 #endif
 }
