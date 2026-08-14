@@ -238,7 +238,7 @@ The reaction representation ``R`` *must* have the following member functions:
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H
    :language: c++
-   :lines: 75-113
+   :lines: 75-116
    :dedent: 2
 
 These template requirements exist so that users can define their states independent of their reactions.
