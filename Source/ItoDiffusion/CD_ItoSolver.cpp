@@ -22,7 +22,6 @@
 #include <EBCellFactory.H>
 
 // Our includes
-#include <CD_NonCommParticle.H>
 #include <CD_ItoSolver.H>
 #include <CD_Random.H>
 #include <CD_DataOps.H>
@@ -3488,16 +3487,16 @@ ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, con
 
   // Recursively partition particles into at most a_ppc equal-weight KD leaves, then reduce each leaf
   // to one particle at the weighted-centroid position. Requires particle weights >= 1 to split.
-  using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
+  using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
   // Pack ItoParticle fields into the lightweight intermediate type.
   const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
     [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
     PType p;
 
-    p.template real<0>() = a.weight(i);
-    p.template real<1>() = a.template get<&ItoParticle::energy>(i);
-    p.template vect<0>() = a.position(i);
+    p.weight   = a.weight(i);
+    p.payload  = a.template get<&ItoParticle::energy>(i);
+    p.position = a.position(i);
 
     return p;
   };
@@ -3505,8 +3504,8 @@ ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, con
   // Propagate energy to both daughters when the median particle is split across a KD boundary.
   const ParticleManagement::BinaryParticleReconcile<PType> reconcile =
     [](PType& p1, PType& p2, const PType& p0) -> void {
-    p1.template real<1>() = p0.template real<1>();
-    p2.template real<1>() = p0.template real<1>();
+    p1.payload = p0.payload;
+    p2.payload = p0.payload;
   };
 
   // Reduce each KD leaf to a single weighted-centroid particle.
@@ -3517,9 +3516,9 @@ ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, con
     RealVect x = RealVect::Zero;
 
     for (const PType* p = first; p != last; ++p) {
-      w += p->template real<0>();
-      x += p->template real<0>() * p->template vect<0>();
-      e += p->template real<0>() * p->template real<1>();
+      w += p->weight;
+      x += p->weight * p->position;
+      e += p->weight * p->payload;
     }
 
     x *= 1.0 / w;
@@ -3531,10 +3530,9 @@ ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, con
   };
 
   const ParticleManagement::ParticleMerger<ItoParticle>
-    merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::template real<0>, &PType::template vect<0>>(
-      gather,
-      reconcile,
-      scatterLeaf);
+    merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::weight, &PType::position>(gather,
+                                                                                                  reconcile,
+                                                                                                  scatterLeaf);
 
   this->applyCellMerger(a_container, a_particlesPerCell, merger);
 }
@@ -3598,16 +3596,16 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
   // Same KD partition as equal_weight_kd, but leaf positions are reinitialized: cut-cells use the
   // weighted centroid (to stay inside the EB), full cells draw a random point in the leaf bounding box.
   // Requires particle weights >= 1 to split.
-  using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
+  using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
   // Pack ItoParticle fields into the lightweight intermediate type.
   const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
     [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
     PType p;
 
-    p.template real<0>() = a.weight(i);
-    p.template real<1>() = a.template get<&ItoParticle::energy>(i);
-    p.template vect<0>() = a.position(i);
+    p.weight   = a.weight(i);
+    p.payload  = a.template get<&ItoParticle::energy>(i);
+    p.position = a.position(i);
 
     return p;
   };
@@ -3615,8 +3613,8 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
   // Propagate energy to both daughters when the median particle is split across a KD boundary.
   const ParticleManagement::BinaryParticleReconcile<PType> reconcile =
     [](PType& p1, PType& p2, const PType& p0) -> void {
-    p1.template real<1>() = p0.template real<1>();
-    p2.template real<1>() = p0.template real<1>();
+    p1.payload = p0.payload;
+    p2.payload = p0.payload;
   };
 
   // Cut-cells: weighted-centroid position to avoid placing particles outside the EB.
@@ -3630,9 +3628,9 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
       RealVect x = RealVect::Zero;
 
       for (const PType* p = first; p != last; ++p) {
-        w += p->template real<0>();
-        x += p->template real<0>() * p->template vect<0>();
-        e += p->template real<0>() * p->template real<1>();
+        w += p->weight;
+        x += p->weight * p->position;
+        e += p->weight * p->payload;
       }
 
       x *= 1.0 / w;
@@ -3647,10 +3645,10 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
       RealVect xMax = -std::numeric_limits<Real>::max() * RealVect::Unit;
 
       for (const PType* p = first; p != last; ++p) {
-        w += p->template real<0>();
-        e += p->template real<0>() * p->template real<1>();
+        w += p->weight;
+        e += p->weight * p->payload;
 
-        const RealVect x = p->template vect<0>();
+        const RealVect x = p->position;
 
         for (int dir = 0; dir < SpaceDim; dir++) {
           xMin[dir] = std::min(xMin[dir], x[dir]);
@@ -3673,10 +3671,9 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
   };
 
   const ParticleManagement::ParticleMerger<ItoParticle>
-    merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::template real<0>, &PType::template vect<0>>(
-      gather,
-      reconcile,
-      scatterLeaf);
+    merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::weight, &PType::position>(gather,
+                                                                                                  reconcile,
+                                                                                                  scatterLeaf);
 
   this->applyCellMerger(a_container, a_particlesPerCell, merger);
 }
@@ -3691,42 +3688,44 @@ ItoSolver::makeSuperparticlesNnSfc(const WhichContainer a_container, const Vecto
 
   // Sorts particles along a Hilbert curve, then merges adjacent pairs until the count reaches a_ppc.
   // Produces better spatial locality than the KD methods and does not require integer weights.
-  using PType = NonCommParticle<2, 1>; // real<0>=weight, real<1>=energy, vect<0>=position
+  using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
   // Pack ItoParticle fields into the lightweight intermediate type.
   const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
     [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
     PType p;
 
-    p.template real<0>() = a.weight(i);
-    p.template real<1>() = a.template get<&ItoParticle::energy>(i);
-    p.template vect<0>() = a.position(i);
+    p.weight   = a.weight(i);
+    p.payload  = a.template get<&ItoParticle::energy>(i);
+    p.position = a.position(i);
 
     return p;
   };
 
   // Weighted-average position and energy when two particles are merged into one.
   const std::function<void(PType&, const PType&)> combine = [](PType& a, const PType& b) -> void {
-    const Real wa  = a.template real<0>();
-    const Real wb  = b.template real<0>();
+    const Real wa  = a.weight;
+    const Real wb  = b.weight;
     const Real w   = wa + wb;
     const Real inv = (w > 0.0) ? 1.0 / w : 0.0;
 
-    a.template vect<0>() = (wa * a.template vect<0>() + wb * b.template vect<0>()) * inv;
-    a.template real<1>() = (wa * a.template real<1>() + wb * b.template real<1>()) * inv;
-    a.template real<0>() = w;
+    a.position = (wa * a.position + wb * b.position) * inv;
+    a.payload  = (wa * a.payload + wb * b.payload) * inv;
+    a.weight   = w;
   };
 
   // Unpack the merged intermediate back into an ItoParticle and append it to the SoA.
   const std::function<void(ParticleSoA<ItoParticle>&, const PType&)> scatter = [](ParticleSoA<ItoParticle>& a,
                                                                                   const PType&              p) -> void {
     ItoParticle payload;
-    payload.energy = static_cast<ParticleReal>(p.template real<1>());
-    a.append(p.template vect<0>(), p.template real<0>(), payload);
+    payload.energy = static_cast<ParticleReal>(p.payload);
+    a.append(p.position, p.weight, payload);
   };
 
-  const ParticleManagement::ParticleMerger<ItoParticle> merger = ParticleManagement::
-    makeSfcNearestNeighborMerger<PType, &PType::template real<0>, &PType::template vect<0>>(gather, combine, scatter);
+  const ParticleManagement::ParticleMerger<ItoParticle>
+    merger = ParticleManagement::makeSfcNearestNeighborMerger<PType, &PType::weight, &PType::position>(gather,
+                                                                                                       combine,
+                                                                                                       scatter);
 
   this->applyCellMerger(a_container, a_particlesPerCell, merger);
 }

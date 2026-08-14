@@ -761,7 +761,7 @@ What distinguishes the kd-based mergers from one another is the rule used to cho
 Per-cell kd-merges
 __________________
 
-The per-cell partitioner ``buildEqualWeightKDLeaves`` operates on a lightweight, communication-free particle type (``NonCommParticle``) carrying the position, weight, and any quantities to be preserved across a merge.
+The per-cell partitioner ``buildEqualWeightKDLeaves`` operates on a lightweight AoS particle type (``ParticleManagement::MergeParticle``) carrying the position and weight as data members, plus an opaque payload holding any quantities to be preserved across a merge.
 It recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible -- at each bisection the two halves differ by at most one physical particle.
 It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.
 
@@ -783,7 +783,7 @@ Equal-weight merging (``equal_weight_kd``)
 ``ParticleManagement::makeEqualWeightKDMerger`` wraps ``buildEqualWeightKDLeaves`` into a ``ParticleMerger`` functor.
 The caller provides three lambdas:
 
-* A *gather* function that packs one SoA slot into a ``NonCommParticle``.
+* A *gather* function that packs one SoA slot into a ``MergeParticle``.
 * A *reconcile* function (``BinaryParticleReconcile``) that propagates payload fields to both daughter particles when the median particle is split across a kd boundary.
 * A *scatter-leaf* function that receives the raw ``[first, last)`` pointer range of one leaf and appends exactly one merged particle to the SoA.
 
@@ -883,7 +883,7 @@ SFC pair merging (``nn_sfc``)
 
 The caller provides three lambdas:
 
-* A *gather* function that packs one SoA slot into a ``NonCommParticle``.
+* A *gather* function that packs one SoA slot into a ``MergeParticle``.
 * A *combine* function that merges two adjacent intermediates in place (typically a weighted average of position and energy).
 * A *scatter* function that unpacks one merged intermediate back into the SoA.
 

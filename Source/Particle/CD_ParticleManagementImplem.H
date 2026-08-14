@@ -82,7 +82,7 @@ mergeMethodFromString(const std::string& a_str) noexcept
 
 namespace detail {
 
-template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+template <class P, Real P::*weight, RealVect P::*position>
 inline void
 buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
                          const int                                   a_maxLeaves,
@@ -124,10 +124,10 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
   s_cur.reserve(numInput + maxLeaves);
   s_cur.insert(s_cur.end(), a_particles.begin(), a_particles.end());
 
-  // Total weight (read from the non-const working copy; the weight() member-pointer is non-const-qualified).
+  // Total weight, read from the working copy.
   Real W = 0.0;
-  for (P& p : s_cur) {
-    W += (p.*weight)();
+  for (const P& p : s_cur) {
+    W += p.*weight;
   }
 
   s_curNodes.clear();
@@ -164,7 +164,7 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
         RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
 
         for (P* p = beg; p != end; ++p) {
-          const RealVect& pos = ((*p).*position)();
+          const RealVect& pos = (*p).*position;
 
           for (int dir = 0; dir < SpaceDim; dir++) {
             loCorner[dir] = std::min(pos[dir], loCorner[dir]);
@@ -175,28 +175,28 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
         const int splitDir = (hiCorner - loCorner).maxDir(true);
 
         std::sort(beg, end, [splitDir](const P& p1, const P& p2) -> bool {
-          return ((p1).*position)()[splitDir] < ((p2).*position)()[splitDir];
+          return (p1.*position)[splitDir] < (p2.*position)[splitDir];
         });
 
         // B. Weight-balanced median particle.
         std::size_t id = 0;
         Real        wl = 0.0;
-        Real        wr = Wn - (beg[0].*weight)();
+        Real        wr = Wn - beg[0].*weight;
 
         for (std::size_t i = 1; i < n; i++) {
-          const Real& w = (beg[id].*weight)();
+          const Real& w = beg[id].*weight;
           if (wl + w < wr) {
             id = i;
             wl += w;
-            wr = Wn - wl - (beg[id].*weight)();
+            wr = Wn - wl - beg[id].*weight;
           }
           else {
             break;
           }
         }
 
-        P          med = beg[id]; // non-const: weight() is a non-const-qualified member function
-        const Real pw  = (med.*weight)();
+        const P    med = beg[id];
+        const Real pw  = med.*weight;
         const Real dw  = wr - wl;
 
         CH_assert(wl + wr + pw == Wn);
@@ -233,8 +233,8 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
             wl += dwl;
             wr += dwr;
 
-            (extraL.*weight)() = dwl;
-            (extraR.*weight)() = dwr;
+            extraL.*weight = dwl;
+            extraR.*weight = dwr;
 
             a_particleReconcile(extraL, extraR, med);
 
@@ -245,15 +245,15 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
             extraL = med;
             CH_assert(dwl >= 1.0);
             wl += dwl;
-            (extraL.*weight)() = dwl;
-            hasExtraL          = true;
+            extraL.*weight = dwl;
+            hasExtraL      = true;
           }
           else if (dwl == 0.0 && dwr > 0.0) {
             extraR = med;
             CH_assert(dwr >= 1.0);
             wr += dwr;
-            (extraR.*weight)() = dwr;
-            hasExtraR          = true;
+            extraR.*weight = dwr;
+            hasExtraR      = true;
           }
           else {
             MayDay::Abort("ParticleManagement::buildEqualWeightKDLeaves - logic bust");
@@ -315,7 +315,7 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
   }
 }
 
-template <class P, const RealVect& (P::*position)() const>
+template <class P, RealVect P::*position>
 inline void
 mergeAdjacentNearest(std::vector<P>&                          a_particles,
                      const std::size_t                        a_target,
@@ -329,8 +329,8 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
   }
 
   auto dist2 = [&a_particles](const std::size_t i, const std::size_t j) -> Real {
-    const RealVect& pi = (a_particles[i].*position)();
-    const RealVect& pj = (a_particles[j].*position)();
+    const RealVect& pi = a_particles[i].*position;
+    const RealVect& pj = a_particles[j].*position;
 
     Real s = 0.0;
 
@@ -436,11 +436,7 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
 
 } // namespace detail
 
-template <class Packed,
-          Real& (Packed::*packWeight)(),
-          const RealVect& (Packed::*packPosition)() const,
-          class P,
-          class Traits>
+template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition, class P, class Traits>
 inline ParticleMerger<P, Traits>
 makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
                              std::function<void(Packed&, const Packed&)>                       a_combine,
@@ -462,7 +458,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
 
     for (std::size_t i = 0; i < a_particles.size(); i++) {
       Packed p = a_gather(a_particles, i);
-      W += (p.*packWeight)();
+      W += p.*packWeight;
       particles.emplace_back(std::move(p));
     }
     CH_STOP(t1);
@@ -479,7 +475,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
       RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
 
       for (const Packed& p : particles) {
-        const RealVect& x = (p.*packPosition)();
+        const RealVect& x = p.*packPosition;
 
         for (int dir = 0; dir < SpaceDim; dir++) {
           loCorner[dir] = std::min(loCorner[dir], x[dir]);
@@ -499,7 +495,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
       keyed.reserve(particles.size());
 
       for (std::size_t i = 0; i < particles.size(); i++) {
-        const RealVect& x = (particles[i].*packPosition)();
+        const RealVect& x = particles[i].*packPosition;
 
         std::array<uint32_t, SpaceDim> coords;
 
@@ -533,22 +529,22 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
         std::size_t hi = 0;
 
         for (std::size_t i = 1; i < particles.size(); i++) {
-          if ((particles[i].*packWeight)() > (particles[hi].*packWeight)()) {
+          if (particles[i].*packWeight > particles[hi].*packWeight) {
             hi = i;
           }
         }
 
-        if ((particles[hi].*packWeight)() < 2.0) {
+        if (particles[hi].*packWeight < 2.0) {
           break;
         }
 
         // Use floor/ceil rather than *= 0.5 so that integer weights remain integers after
         // the split. weight * 0.5 on an odd integer (e.g. 3 -> 1.5) produces a fractional
         // weight that later breaks removePhysicalParticles, which assumes integer weights.
-        const Real hw   = std::floor((particles[hi].*packWeight)() * 0.5);
+        const Real hw   = std::floor(particles[hi].*packWeight * 0.5);
         Packed     half = particles[hi];
-        (particles[hi].*packWeight)() -= hw;
-        (half.*packWeight)() = hw;
+        particles[hi].*packWeight -= hw;
+        half.*packWeight = hw;
         particles.push_back(half);
       }
     }
@@ -563,11 +559,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
   };
 }
 
-template <class Packed,
-          Real& (Packed::*packWeight)(),
-          const RealVect& (Packed::*packPosition)() const,
-          class P,
-          class Traits>
+template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition, class P, class Traits>
 inline ParticleMerger<P, Traits>
 makeEqualWeightKDMerger(
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
@@ -590,7 +582,7 @@ makeEqualWeightKDMerger(
 
     for (std::size_t i = 0; i < a_particles.size(); i++) {
       Packed p = a_gather(a_particles, i);
-      W += (p.*packWeight)();
+      W += p.*packWeight;
       particles.emplace_back(std::move(p));
     }
     CH_STOP(t1);
