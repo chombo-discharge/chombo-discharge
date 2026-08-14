@@ -12,11 +12,13 @@
 
 // Std includes
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
 // Chombo includes
 #include <memtrack.H>
+#include <parstream.H>
 #include <memusage.H>
 #include <SPMD.H>
 #include <CH_Timer.H>
@@ -178,6 +180,123 @@ MemoryReport::getMaxMinResidentSetSize(Real& a_maxCurrent, Real& a_minCurrent, R
   a_minCurrent = ParallelOps::min(currentRSS);
   a_maxPeak    = ParallelOps::max(peakRSS);
   a_minPeak    = ParallelOps::min(peakRSS);
+}
+
+std::string
+MemoryReport::bytesAsMB(const long long a_bytes)
+{
+  constexpr double bytesPerMB = 1024.0 * 1024.0;
+
+  std::ostringstream os;
+
+  os << std::fixed << std::setprecision(3) << (static_cast<double>(a_bytes) / bytesPerMB);
+
+  return os.str();
+}
+
+std::string
+MemoryReport::bytesAsMB(const Real a_bytes)
+{
+  return MemoryReport::bytesAsMB(static_cast<long long>(a_bytes));
+}
+
+void
+MemoryReport::printMemoryTable([[maybe_unused]] std::ostream& a_out, [[maybe_unused]] const std::string& a_indent)
+{
+  CH_TIME("MemoryReport::printMemoryTable");
+
+#ifdef CH_USE_MEMORY_TRACKING
+  constexpr int labelWidth  = 24;
+  constexpr int columnWidth = 10;
+
+  const std::string none = "-";
+
+  auto rule = [&a_indent, &a_out]() -> void {
+    a_out << a_indent << std::string(labelWidth + 3 * columnWidth, '-') << endl;
+  };
+
+  auto row = [&a_indent, &a_out](const std::string& a_label,
+                                 const std::string& a_local,
+                                 const std::string& a_max,
+                                 const std::string& a_min) -> void {
+    a_out << a_indent << std::left << std::setw(labelWidth) << a_label << std::right << std::setw(columnWidth)
+          << a_local << std::setw(columnWidth) << a_max << std::setw(columnWidth) << a_min << endl;
+  };
+
+  rule();
+  row("Memory (MB)", "this rank", "rank max", "rank min");
+  rule();
+
+  Real currentRSS = 0.0;
+  Real peakRSS    = 0.0;
+
+  getResidentSetSize(currentRSS, peakRSS);
+
+  if (currentRSS > 0.0) {
+    Real maxCurrent = currentRSS;
+    Real minCurrent = currentRSS;
+    Real maxPeak    = peakRSS;
+    Real minPeak    = peakRSS;
+
+#ifdef CH_MPI
+    getMaxMinResidentSetSize(maxCurrent, minCurrent, maxPeak, minPeak);
+#endif
+
+    row("Resident set", bytesAsMB(currentRSS), bytesAsMB(maxCurrent), bytesAsMB(minCurrent));
+    row("  high-water", bytesAsMB(peakRSS), bytesAsMB(maxPeak), none);
+    rule();
+  }
+
+  long long meshBytes = 0LL;
+  long long meshPeak  = 0LL;
+
+  overallMemoryUsage(meshBytes, meshPeak);
+
+#ifdef CH_MPI
+  row("Mesh arenas",
+      bytesAsMB(meshBytes),
+      bytesAsMB(ParallelOps::max(meshBytes)),
+      bytesAsMB(ParallelOps::min(meshBytes)));
+  row("  high-water", bytesAsMB(meshPeak), bytesAsMB(ParallelOps::max(meshPeak)), none);
+#else
+  row("Mesh arenas", bytesAsMB(meshBytes), bytesAsMB(meshBytes), bytesAsMB(meshBytes));
+  row("  high-water", bytesAsMB(meshPeak), bytesAsMB(meshPeak), none);
+#endif
+  rule();
+
+  const long long arenaBytes  = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Container));
+  const long long arenaPeak   = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Container));
+  const long long bufferBytes = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Buffer));
+  const long long bufferPeak  = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Buffer));
+  const long long totalBytes  = static_cast<long long>(ParticleMemory::getAllocatedBytes());
+  const long long totalPeak   = static_cast<long long>(ParticleMemory::getPeakBytes());
+
+#ifdef CH_MPI
+  row("Particle arenas",
+      bytesAsMB(arenaBytes),
+      bytesAsMB(ParallelOps::max(arenaBytes)),
+      bytesAsMB(ParallelOps::min(arenaBytes)));
+  row("  high-water", bytesAsMB(arenaPeak), bytesAsMB(ParallelOps::max(arenaPeak)), none);
+  row("Particle buffers",
+      bytesAsMB(bufferBytes),
+      bytesAsMB(ParallelOps::max(bufferBytes)),
+      bytesAsMB(ParallelOps::min(bufferBytes)));
+  row("  high-water", bytesAsMB(bufferPeak), bytesAsMB(ParallelOps::max(bufferPeak)), none);
+  row("Particle total",
+      bytesAsMB(totalBytes),
+      bytesAsMB(ParallelOps::max(totalBytes)),
+      bytesAsMB(ParallelOps::min(totalBytes)));
+  row("  high-water", bytesAsMB(totalPeak), bytesAsMB(ParallelOps::max(totalPeak)), none);
+#else
+  row("Particle arenas", bytesAsMB(arenaBytes), bytesAsMB(arenaBytes), bytesAsMB(arenaBytes));
+  row("  high-water", bytesAsMB(arenaPeak), bytesAsMB(arenaPeak), none);
+  row("Particle buffers", bytesAsMB(bufferBytes), bytesAsMB(bufferBytes), bytesAsMB(bufferBytes));
+  row("  high-water", bytesAsMB(bufferPeak), bytesAsMB(bufferPeak), none);
+  row("Particle total", bytesAsMB(totalBytes), bytesAsMB(totalBytes), bytesAsMB(totalBytes));
+  row("  high-water", bytesAsMB(totalPeak), bytesAsMB(totalPeak), none);
+#endif
+  rule();
+#endif
 }
 
 #include <CD_NamespaceFooter.H>

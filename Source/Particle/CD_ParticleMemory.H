@@ -17,6 +17,9 @@
 #include <atomic>
 #include <cstddef>
 
+// Chombo includes
+#include <memtrack.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
@@ -42,6 +45,12 @@
  *
  * Peaks are tracked per kind and for the total. The total peak is not the sum of the per-kind peaks,
  * because the two need not peak at the same moment.
+ *
+ * This is a companion to Chombo's Arena accounting rather than an independent facility, so it is
+ * compiled in and out with it: with USE_MT=FALSE the whole namespace is inert, the counters do not
+ * exist, and the memory report prints nothing. The functions are still declared, so that the
+ * allocation sites in ParticleSoA and ParticleContainer read the same either way and cannot fall out
+ * of step with each other behind a preprocessor guard.
  */
 namespace ParticleMemory {
 
@@ -55,11 +64,15 @@ enum class Kind
   NumKinds  = 2  ///< Number of kinds.
 };
 
+#ifdef CH_USE_MEMORY_TRACKING
+
 /**
  * @brief Bytes currently held, per kind. Use the accessors rather than touching this directly.
  * @details Atomic because arenas are grown from inside OpenMP regions -- delinearizeAndAppend()
  * mutates one leaf per thread during a remap. Relaxed ordering suffices: these are diagnostic totals
- * with no happens-before relationship to the data they describe.
+ * with no happens-before relationship to the data they describe. CD_Initialize.H currently rejects a
+ * build with both OpenMP and memory tracking, so nothing can race these today; they are atomic so
+ * that lifting that restriction does not silently corrupt the counters.
  */
 inline std::atomic<std::size_t> s_bytes[static_cast<int>(Kind::NumKinds)]{};
 
@@ -81,6 +94,8 @@ inline std::atomic<std::size_t> s_totalBytes{0};
  */
 inline std::atomic<std::size_t> s_totalPeak{0};
 
+#endif
+
 /**
  * @brief Raise a high-water mark to a_value unless it is already at least that.
  * @details The loop reloads on contention, because a competing thread may have raised the mark in the
@@ -90,12 +105,14 @@ inline std::atomic<std::size_t> s_totalPeak{0};
  * @param[in]     a_value Candidate value.
  */
 inline void
-raisePeak(std::atomic<std::size_t>& a_mark, const std::size_t a_value) noexcept
+raisePeak([[maybe_unused]] std::atomic<std::size_t>& a_mark, [[maybe_unused]] const std::size_t a_value) noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   std::size_t seen = a_mark.load(std::memory_order_relaxed);
 
   while (a_value > seen && !a_mark.compare_exchange_weak(seen, a_value, std::memory_order_relaxed)) {
   }
+#endif
 }
 
 /**
@@ -104,12 +121,14 @@ raisePeak(std::atomic<std::size_t>& a_mark, const std::size_t a_value) noexcept
  * @param[in] a_bytes Size of the allocation, in bytes.
  */
 inline void
-addBytes(const Kind a_kind, const std::size_t a_bytes) noexcept
+addBytes([[maybe_unused]] const Kind a_kind, [[maybe_unused]] const std::size_t a_bytes) noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   const int k = static_cast<int>(a_kind);
 
   raisePeak(s_peak[k], s_bytes[k].fetch_add(a_bytes, std::memory_order_relaxed) + a_bytes);
   raisePeak(s_totalPeak, s_totalBytes.fetch_add(a_bytes, std::memory_order_relaxed) + a_bytes);
+#endif
 }
 
 /**
@@ -118,10 +137,12 @@ addBytes(const Kind a_kind, const std::size_t a_bytes) noexcept
  * @param[in] a_bytes Size of the release, in bytes. Must be what addBytes() was called with.
  */
 inline void
-removeBytes(const Kind a_kind, const std::size_t a_bytes) noexcept
+removeBytes([[maybe_unused]] const Kind a_kind, [[maybe_unused]] const std::size_t a_bytes) noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   s_bytes[static_cast<int>(a_kind)].fetch_sub(a_bytes, std::memory_order_relaxed);
   s_totalBytes.fetch_sub(a_bytes, std::memory_order_relaxed);
+#endif
 }
 
 /**
@@ -130,9 +151,13 @@ removeBytes(const Kind a_kind, const std::size_t a_bytes) noexcept
  * @return Bytes currently held.
  */
 inline std::size_t
-getBytes(const Kind a_kind) noexcept
+getBytes([[maybe_unused]] const Kind a_kind) noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   return s_bytes[static_cast<int>(a_kind)].load(std::memory_order_relaxed);
+#else
+  return 0;
+#endif
 }
 
 /**
@@ -141,9 +166,13 @@ getBytes(const Kind a_kind) noexcept
  * @return Peak bytes held by that kind.
  */
 inline std::size_t
-getPeak(const Kind a_kind) noexcept
+getPeak([[maybe_unused]] const Kind a_kind) noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   return s_peak[static_cast<int>(a_kind)].load(std::memory_order_relaxed);
+#else
+  return 0;
+#endif
 }
 
 /**
@@ -153,7 +182,11 @@ getPeak(const Kind a_kind) noexcept
 inline std::size_t
 getAllocatedBytes() noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   return s_totalBytes.load(std::memory_order_relaxed);
+#else
+  return 0;
+#endif
 }
 
 /**
@@ -163,7 +196,11 @@ getAllocatedBytes() noexcept
 inline std::size_t
 getPeakBytes() noexcept
 {
+#ifdef CH_USE_MEMORY_TRACKING
   return s_totalPeak.load(std::memory_order_relaxed);
+#else
+  return 0;
+#endif
 }
 } // namespace ParticleMemory
 
