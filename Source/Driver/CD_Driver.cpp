@@ -625,18 +625,26 @@ Driver::gridReport()
     }
   }
 
-  // Particle arenas, reported outside the memory-tracking guard because they are counted by us rather
-  // than by Chombo -- see the step report for why the two totals are disjoint.
+  // Particle memory, reported outside the memory-tracking guard because it is counted by us rather
+  // than by Chombo -- see the step report for why the two totals are disjoint. Split into the arenas a
+  // rank holds and the payload in flight through an exchange, because a peak dominated by one calls
+  // for a different remedy than a peak dominated by the other.
   {
-    const long long localParticleMemory = static_cast<long long>(ParticleMemory::getAllocatedBytes());
-    const long long localParticlePeak   = static_cast<long long>(ParticleMemory::getPeakBytes());
+    const long long arenaBytes = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Container));
+    const long long arenaPeak  = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Container));
+    const long long bufferPeak = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Buffer));
+    const long long totalPeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
 
-    pout() << "\tParticle arenas          = " << bytesAsMB(localParticleMemory) << " (MB)" << endl
-           << "\tPeak particle arenas     = " << bytesAsMB(localParticlePeak) << " (MB)" << endl;
+    pout() << "\tParticle arenas          = " << bytesAsMB(arenaBytes) << " (MB)" << endl
+           << "\tPeak particle arenas     = " << bytesAsMB(arenaPeak) << " (MB)" << endl
+           << "\tPeak particle buffers    = " << bytesAsMB(bufferPeak) << " (MB)" << endl
+           << "\tPeak particle total      = " << bytesAsMB(totalPeak) << " (MB)" << endl;
 #ifdef CH_MPI
-    pout() << "\tMin particle arenas      = " << bytesAsMB(ParallelOps::min(localParticleMemory)) << " (MB)" << endl
-           << "\tMax particle arenas      = " << bytesAsMB(ParallelOps::max(localParticleMemory)) << " (MB)" << endl
-           << "\tMax peak particle arenas = " << bytesAsMB(ParallelOps::max(localParticlePeak)) << " (MB)" << endl;
+    pout() << "\tMin particle arenas      = " << bytesAsMB(ParallelOps::min(arenaBytes)) << " (MB)" << endl
+           << "\tMax particle arenas      = " << bytesAsMB(ParallelOps::max(arenaBytes)) << " (MB)" << endl
+           << "\tMax peak part. arenas    = " << bytesAsMB(ParallelOps::max(arenaPeak)) << " (MB)" << endl
+           << "\tMax peak part. buffers   = " << bytesAsMB(ParallelOps::max(bufferPeak)) << " (MB)" << endl
+           << "\tMax peak particle total  = " << bytesAsMB(ParallelOps::max(totalPeak)) << " (MB)" << endl;
 #endif
   }
 
@@ -1972,19 +1980,33 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   {
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
+    const long long arenaBytes    = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Container));
+    const long long arenaPeak     = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Container));
+    const long long bufferBytes   = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Buffer));
+    const long long bufferPeak    = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Buffer));
 
-    pout() << "                                -- Particle arenas          : " << bytesAsMB(particleBytes) << " (MB)"
+    pout() << "                                -- Particle arenas          : " << bytesAsMB(arenaBytes) << " (MB)"
            << endl;
-    pout() << "                                -- Peak particle arenas     : " << bytesAsMB(particlePeak) << " (MB)"
+    pout() << "                                -- Peak particle arenas     : " << bytesAsMB(arenaPeak) << " (MB)"
+           << endl;
+    pout() << "                                -- Particle buffers         : " << bytesAsMB(bufferBytes) << " (MB)"
+           << endl;
+    pout() << "                                -- Peak particle buffers    : " << bytesAsMB(bufferPeak) << " (MB)"
+           << endl;
+    pout() << "                                -- Peak particle total      : " << bytesAsMB(particlePeak) << " (MB)"
            << endl;
 
 #ifdef CH_MPI
     pout() << "                                -- Max particle arenas      : "
-           << bytesAsMB(ParallelOps::max(particleBytes)) << " (MB)" << endl;
+           << bytesAsMB(ParallelOps::max(arenaBytes)) << " (MB)" << endl;
+    pout() << "                                -- Max peak particle arenas : " << bytesAsMB(ParallelOps::max(arenaPeak))
+           << " (MB)" << endl;
+    pout() << "                                -- Max peak particle buffers: "
+           << bytesAsMB(ParallelOps::max(bufferPeak)) << " (MB)" << endl;
+    pout() << "                                -- Max peak particle total  : "
+           << bytesAsMB(ParallelOps::max(particlePeak)) << " (MB)" << endl;
     pout() << "                                -- Min particle arenas      : "
            << bytesAsMB(ParallelOps::min(particleBytes)) << " (MB)" << endl;
-    pout() << "                                -- Max peak particle arenas : "
-           << bytesAsMB(ParallelOps::max(particlePeak)) << " (MB)" << endl;
 #endif
   }
 

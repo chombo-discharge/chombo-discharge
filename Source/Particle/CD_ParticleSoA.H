@@ -780,7 +780,7 @@ public:
    */
   ~ParticleSoA()
   {
-    ParticleMemory::removeBytes(m_bytes);
+    ParticleMemory::removeBytes(ParticleMemory::Kind::Container, m_bytes);
 
     std::free(m_buffer);
   }
@@ -815,7 +815,7 @@ public:
   operator=(ParticleSoA&& a_other) noexcept
   {
     if (this != &a_other) {
-      ParticleMemory::removeBytes(m_bytes);
+      ParticleMemory::removeBytes(ParticleMemory::Kind::Container, m_bytes);
 
       std::free(m_buffer);
       this->steal(a_other);

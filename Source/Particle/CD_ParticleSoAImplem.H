@@ -43,8 +43,8 @@ ParticleSoA<P, Traits>::reallocate(const std::size_t a_capacity)
     this->moveColumns(newBuf, off, std::make_index_sequence<s_numColumns>{});
   }
 
-  ParticleMemory::addBytes(bytes);
-  ParticleMemory::removeBytes(m_bytes);
+  ParticleMemory::addBytes(ParticleMemory::Kind::Container, bytes);
+  ParticleMemory::removeBytes(ParticleMemory::Kind::Container, m_bytes);
 
   std::free(m_buffer);
 
@@ -72,8 +72,8 @@ ParticleSoA<P, Traits>::permute(const std::vector<std::size_t>& a_dest)
 
   this->scatterColumns(newBuf, off, a_dest, std::make_index_sequence<s_numColumns>{});
 
-  ParticleMemory::addBytes(bytes);
-  ParticleMemory::removeBytes(m_bytes);
+  ParticleMemory::addBytes(ParticleMemory::Kind::Container, bytes);
+  ParticleMemory::removeBytes(ParticleMemory::Kind::Container, m_bytes);
 
   std::free(m_buffer);
 
@@ -191,7 +191,7 @@ ParticleSoA<P, Traits>::shrinkToFit()
   }
 
   if (m_size == 0) {
-    ParticleMemory::removeBytes(m_bytes);
+    ParticleMemory::removeBytes(ParticleMemory::Kind::Container, m_bytes);
 
     std::free(m_buffer);
 

@@ -336,7 +336,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   // in the step where an out-of-memory failure actually happens.
   const std::size_t flatBytes = static_cast<std::size_t>(stot) + static_cast<std::size_t>(rtot);
 
-  ParticleMemory::addBytes(flatBytes);
+  ParticleMemory::addBytes(ParticleMemory::Kind::Buffer, flatBytes);
 
   // Each destination's slice of sflat is disjoint and linearizeParticle is a const read, so packing
   // different destinations in parallel is race-free. A pooled leaf is spent once it has been
@@ -469,7 +469,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
     }
   }
 
-  ParticleMemory::removeBytes(flatBytes);
+  ParticleMemory::removeBytes(ParticleMemory::Kind::Buffer, flatBytes);
 #endif
 }
 
