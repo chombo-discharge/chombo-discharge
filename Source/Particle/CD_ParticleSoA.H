@@ -137,6 +137,7 @@
 #include <Box.H>
 
 // Our includes
+#include <CD_ParticleMemory.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -779,6 +780,8 @@ public:
    */
   ~ParticleSoA()
   {
+    ParticleMemory::removeBytes(m_bytes);
+
     std::free(m_buffer);
   }
 
@@ -812,6 +815,8 @@ public:
   operator=(ParticleSoA&& a_other) noexcept
   {
     if (this != &a_other) {
+      ParticleMemory::removeBytes(m_bytes);
+
       std::free(m_buffer);
       this->steal(a_other);
     }
@@ -1576,6 +1581,13 @@ protected:
   std::size_t m_capacity = 0;
 
   /**
+   * @brief Byte size of the arena at m_buffer (zero when m_buffer is null).
+   * @details Kept so a release can decrement ParticleMemory by exactly what the matching allocation
+   * added, without recomputing the column offsets.
+   */
+  std::size_t m_bytes = 0;
+
+  /**
    * @brief Live particle count.
    */
   std::size_t m_size = 0;
@@ -1703,6 +1715,7 @@ protected:
   {
     m_buffer       = a_o.m_buffer;
     m_capacity     = a_o.m_capacity;
+    m_bytes        = a_o.m_bytes;
     m_size         = a_o.m_size;
     m_sorted       = a_o.m_sorted;
     m_sortBox      = a_o.m_sortBox;
@@ -1712,6 +1725,7 @@ protected:
     m_cellStart    = std::move(a_o.m_cellStart);
     a_o.m_buffer   = nullptr;
     a_o.m_capacity = 0;
+    a_o.m_bytes    = 0;
     a_o.m_size     = 0;
     a_o.m_sorted   = false;
     a_o.m_colPtrs  = {};

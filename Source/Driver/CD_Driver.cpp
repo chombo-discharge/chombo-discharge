@@ -36,6 +36,7 @@
 #include <CD_MemoryReport.H>
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
+#include <CD_ParticleMemory.H>
 #include <CD_DischargeIO.H>
 #include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
@@ -1860,6 +1861,25 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
             remSec,
             remMs);
     pout() << metrics << endl;
+  }
+
+  // Memory held by particle arenas. Reported outside the memory-tracking guard because it is our own
+  // counter rather than Chombo's: ParticleSoA allocates with std::aligned_alloc, which never reaches
+  // Chombo's Arena, so this is the part of the footprint that the tracked figures below structurally
+  // cannot see. On a particle-heavy run it is the dominant term. Reported in bytes because the
+  // interesting changes are far smaller than a megabyte, and with the maximum and minimum over ranks
+  // because a maximum that runs away from the minimum means one rank is accumulating.
+  {
+    const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
+
+    pout() << "                                -- Particle arenas       : " << particleBytes << "(B)" << endl;
+
+#ifdef CH_MPI
+    pout() << "                                -- Max particle arenas   : " << ParallelOps::max(particleBytes) << "(B)"
+           << endl;
+    pout() << "                                -- Min particle arenas   : " << ParallelOps::min(particleBytes) << "(B)"
+           << endl;
+#endif
   }
 
   // Write memory usage
