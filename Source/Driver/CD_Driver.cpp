@@ -20,7 +20,6 @@
 #include <PolyGeom.H>
 #include <EBAlias.H>
 #include <LevelData.H>
-#include <Copier.H>
 #include <EBCellFAB.H>
 #include <EBAMRIO.H>
 #include <EBAMRDataOps.H>
@@ -38,7 +37,6 @@
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleMemory.H>
-#include <CD_MultiFluidIndexSpace.H>
 #include <CD_DischargeIO.H>
 #include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
@@ -697,20 +695,7 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   const bool newCellTags = this->tagCells(tags, m_tags); // Tag cells using the cell tagger
   timer.stopEvent("Tag cells");
 
-  // Force the regrid to proceed even when the cell tags are unchanged. A regrid onto an identical
-  // grid should be memory-neutral, so turning this on isolates what the regrid path itself retains
-  // from any change in the grid it is regridding onto. Note that forcing a regrid on every step can
-  // destabilize a field solve that relies on its previous solution as an initial guess.
-  static const bool forceRegrid = []() {
-    bool force = false;
-
-    ParmParse pp("Driver");
-    pp.query("force_regrid", force);
-
-    return force;
-  }();
-
-  if (!newCellTags && !m_needsNewGeometricTags && !forceRegrid) {
+  if (!newCellTags && !m_needsNewGeometricTags) {
     if (a_useInitialData) {
       m_timeStepper->initialData();
     }
@@ -1978,29 +1963,6 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     }
   }
 
-  // Per-allocation-site breakdown of the tracked memory, one dump per step. Diffing consecutive dumps
-  // attributes growth in the tracked total to the code that allocated it, which is how a ratchet gets
-  // localized -- the aggregate total only says that something grew, never what. Off by default,
-  // because each dump is a few hundred lines per rank.
-#ifdef CH_USE_MEMORY_TRACKING
-  {
-    static const bool dumpSites = []() {
-      bool dump = false;
-
-      ParmParse pp("Driver");
-      pp.query("dump_sites", dump);
-
-      return dump;
-    }();
-
-    if (dumpSites) {
-      pout() << "SITEDUMP step = " << m_timeStep << endl;
-      ReportUnfreedMemory(pout());
-      pout() << "SITEDUMP end" << endl;
-    }
-  }
-#endif
-
   // Memory held by particle arenas. Reported outside the memory-tracking guard because it is our own
   // counter rather than Chombo's: ParticleSoA allocates with std::aligned_alloc, which never reaches
   // Chombo's Arena, so this is the part of the footprint that the tracked figures below structurally
@@ -2011,23 +1973,6 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
 
-    // Live Copiers. A Copier owns its motion plan, so a count that climbs regrid-over-regrid means
-    // those plans -- and the layouts they refer to -- are being retained rather than rebuilt.
-    pout() << "                                -- Live Copiers             : " << Copier::s_liveCopiers << endl;
-
-    // EBISLayout cache occupancy. The cache stores a copy of the DisjointBoxLayout as its map key, so
-    // every entry pins a complete layout -- boxes, neighbour lists and iterators. Entries are evicted
-    // only at refcount one and only on a miss, so a pinned count that climbs regrid-over-regrid means
-    // a holder is outliving its grids and taking a layout with it.
-    for (int i = 0; i < phase::numPhases; i++) {
-      const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(i);
-
-      if (!ebis.isNull() && ebis->isDefined()) {
-        const std::string prefix = "                                -- EBIS cache phase " + std::to_string(i);
-
-        ebis->reportLayoutCache(pout(), prefix.c_str());
-      }
-    }
     pout() << "                                -- Particle arenas          : " << bytesAsMB(particleBytes) << " (MB)"
            << endl;
     pout() << "                                -- Peak particle arenas     : " << bytesAsMB(particlePeak) << " (MB)"

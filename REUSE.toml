@@ -29,7 +29,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 # ---------------------------------------------------------------------------
 
 [[annotations]]
-path = ["**/*.rst", "**/*.md", "**/*.tex", "**/*.bib", "**/*.pdf", "**/*.gif", "**/*.css", "**/*.patch", "Docs/.nojekyll"]
+path = ["**/*.rst", "**/*.md", "**/*.tex", "**/*.bib", "**/*.pdf", "**/*.gif", "**/*.css", "Docs/.nojekyll"]
 SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
