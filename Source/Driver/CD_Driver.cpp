@@ -599,12 +599,12 @@ Driver::gridReport()
     const long long localParticleMemory = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long localParticlePeak   = static_cast<long long>(ParticleMemory::getPeakBytes());
 
-    pout() << "\tParticle arenas       = " << bytesAsMB(localParticleMemory) << " (MB)" << endl
-           << "\tPeak particle arenas  = " << bytesAsMB(localParticlePeak) << " (MB)" << endl;
+    pout() << "\tParticle arenas          = " << bytesAsMB(localParticleMemory) << " (MB)" << endl
+           << "\tPeak particle arenas     = " << bytesAsMB(localParticlePeak) << " (MB)" << endl;
 #ifdef CH_MPI
-    pout() << "\tMin particle arenas   = " << bytesAsMB(ParallelOps::min(localParticleMemory)) << " (MB)" << endl
-           << "\tMax particle arenas   = " << bytesAsMB(ParallelOps::max(localParticleMemory)) << " (MB)" << endl
-           << "\tMax peak particle     = " << bytesAsMB(ParallelOps::max(localParticlePeak)) << " (MB)" << endl;
+    pout() << "\tMin particle arenas      = " << bytesAsMB(ParallelOps::min(localParticleMemory)) << " (MB)" << endl
+           << "\tMax particle arenas      = " << bytesAsMB(ParallelOps::max(localParticleMemory)) << " (MB)" << endl
+           << "\tMax peak particle arenas = " << bytesAsMB(ParallelOps::max(localParticlePeak)) << " (MB)" << endl;
 #endif
   }
 
@@ -615,8 +615,8 @@ Driver::gridReport()
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
 
-  pout() << "\tUnfreed mesh arenas   = " << bytesAsMB(localUnfreedMemory) << " (MB)" << endl
-         << "\tPeak mesh arenas      = " << bytesAsMB(localPeakMemory) << " (MB)" << endl;
+  pout() << "\tUnfreed mesh arenas      = " << bytesAsMB(localUnfreedMemory) << " (MB)" << endl
+         << "\tPeak mesh arenas         = " << bytesAsMB(localPeakMemory) << " (MB)" << endl;
 #ifdef CH_MPI
 
   // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
@@ -626,10 +626,10 @@ Driver::gridReport()
   const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
   const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
 
-  pout() << "\tMin unfreed mesh      = " << bytesAsMB(minUnfreedMemory) << " (MB)" << endl
-         << "\tMin peak mesh         = " << bytesAsMB(minPeakMemory) << " (MB)" << endl
-         << "\tMax unfreed mesh      = " << bytesAsMB(maxUnfreedMemory) << " (MB)" << endl
-         << "\tMax peak mesh         = " << bytesAsMB(maxPeakMemory) << " (MB)" << endl;
+  pout() << "\tMin unfreed mesh arenas  = " << bytesAsMB(minUnfreedMemory) << " (MB)" << endl
+         << "\tMin peak mesh arenas     = " << bytesAsMB(minPeakMemory) << " (MB)" << endl
+         << "\tMax unfreed mesh arenas  = " << bytesAsMB(maxUnfreedMemory) << " (MB)" << endl
+         << "\tMax peak mesh arenas     = " << bytesAsMB(maxPeakMemory) << " (MB)" << endl;
 #endif
 #endif
   pout() << "=======================================================================" << endl;
@@ -1821,7 +1821,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   // Write a string with total elapsed time
   sprintf(metrics,
-          "%31c -- Elapsed time          : %3.3ih %2.2im %2.2is %3.3ims",
+          "%31c -- Elapsed time             : %3.3ih %2.2im %2.2is %3.3ims",
           ' ',
           elapsedHrs,
           elapsedMin,
@@ -1837,7 +1837,13 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   const int  advMs   = floor((lastadv - 3600 * advHrs - 60 * advMin - advSec) * 1000);
 
   // Write a string with the previous iteration metrics
-  sprintf(metrics, "%31c -- Last time step        : %3.3ih %2.2im %2.2is %3.3ims", ' ', advHrs, advMin, advSec, advMs);
+  sprintf(metrics,
+          "%31c -- Last time step           : %3.3ih %2.2im %2.2is %3.3ims",
+          ' ',
+          advHrs,
+          advMin,
+          advSec,
+          advMs);
   pout() << metrics << endl;
 
   if (m_dt > 0.0 && lastadv > 0.0) {
@@ -1862,7 +1868,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const int  wt_Sec      = floor(wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min);
     const int  wt_Ms       = floor((wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
     sprintf(metrics,
-            "%31c -- Wall time per %-2s      : %3.3ih %2.2im %2.2is %3.3ims",
+            "%31c -- Wall time per %-2s         : %3.3ih %2.2im %2.2is %3.3ims",
             ' ',
             unitName,
             wt_Hrs,
@@ -1883,7 +1889,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const int  remMs     = floor((remaining - 3600 * remHrs - 60 * remMin - remSec) * 1000);
 
     sprintf(metrics,
-            "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims",
+            "%31c -- Estimated remaining      : %3.3ih %2.2im %2.2is %3.3ims",
             ' ',
             remHrs,
             remMin,
@@ -1902,18 +1908,18 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
 
-    pout() << "                                -- Particle arenas       : " << bytesAsMB(particleBytes) << " (MB)"
+    pout() << "                                -- Particle arenas          : " << bytesAsMB(particleBytes) << " (MB)"
            << endl;
-    pout() << "                                -- Peak particle arenas  : " << bytesAsMB(particlePeak) << " (MB)"
+    pout() << "                                -- Peak particle arenas     : " << bytesAsMB(particlePeak) << " (MB)"
            << endl;
 
 #ifdef CH_MPI
-    pout() << "                                -- Max particle arenas   : "
+    pout() << "                                -- Max particle arenas      : "
            << bytesAsMB(ParallelOps::max(particleBytes)) << " (MB)" << endl;
-    pout() << "                                -- Min particle arenas   : "
+    pout() << "                                -- Min particle arenas      : "
            << bytesAsMB(ParallelOps::min(particleBytes)) << " (MB)" << endl;
-    pout() << "                                -- Max peak particle     : " << bytesAsMB(ParallelOps::max(particlePeak))
-           << " (MB)" << endl;
+    pout() << "                                -- Max peak particle arenas : "
+           << bytesAsMB(ParallelOps::max(particlePeak)) << " (MB)" << endl;
 #endif
   }
 
@@ -1924,13 +1930,14 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   overallMemoryUsage(unfreedMem, peakMem);
 
-  pout() << "                                -- Unfreed mesh arenas   : " << bytesAsMB(unfreedMem) << " (MB)" << endl;
-  pout() << "                                -- Peak mesh arenas      : " << bytesAsMB(peakMem) << " (MB)" << endl;
+  pout() << "                                -- Unfreed mesh arenas      : " << bytesAsMB(unfreedMem) << " (MB)"
+         << endl;
+  pout() << "                                -- Peak mesh arenas         : " << bytesAsMB(peakMem) << " (MB)" << endl;
 
 #ifdef CH_MPI
-  pout() << "                                -- Max unfreed mesh      : " << bytesAsMB(ParallelOps::max(unfreedMem))
+  pout() << "                                -- Max unfreed mesh arenas  : " << bytesAsMB(ParallelOps::max(unfreedMem))
          << " (MB)" << endl;
-  pout() << "                                -- Max peak mesh         : " << bytesAsMB(ParallelOps::max(peakMem))
+  pout() << "                                -- Max peak mesh arenas     : " << bytesAsMB(ParallelOps::max(peakMem))
          << " (MB)" << endl;
 #endif
 #endif
