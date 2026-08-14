@@ -366,6 +366,9 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>m_buffer</b> = null
 std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>m_capacity</b> = 0</td></tr>
 <tr class="memdesc:a3a099d7c4f13e63c0b60eac32a92f7ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capacity in particles. <br /></td></tr>
 <tr class="separator:a3a099d7c4f13e63c0b60eac32a92f7ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91efeaf5a8c84a9bd8294177c480b0e0" id="r_a91efeaf5a8c84a9bd8294177c480b0e0"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#a91efeaf5a8c84a9bd8294177c480b0e0">m_bytes</a> = 0</td></tr>
+<tr class="memdesc:a91efeaf5a8c84a9bd8294177c480b0e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Byte size of the arena at m_buffer (zero when m_buffer is null).  <br /></td></tr>
+<tr class="separator:a91efeaf5a8c84a9bd8294177c480b0e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59f65f2ca8e68ee7a4f8aeda6cf99216" id="r_a59f65f2ca8e68ee7a4f8aeda6cf99216"><td class="memItemLeft" align="right" valign="top"><a id="a59f65f2ca8e68ee7a4f8aeda6cf99216" name="a59f65f2ca8e68ee7a4f8aeda6cf99216"></a>
 std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>m_size</b> = 0</td></tr>
 <tr class="memdesc:a59f65f2ca8e68ee7a4f8aeda6cf99216"><td class="mdescLeft">&#160;</td><td class="mdescRight">Live particle count. <br /></td></tr>
@@ -4016,6 +4019,34 @@ template&lt;std::size_t... J&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a91efeaf5a8c84a9bd8294177c480b0e0" name="a91efeaf5a8c84a9bd8294177c480b0e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91efeaf5a8c84a9bd8294177c480b0e0">&#9670;&#160;</a></span>m_bytes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::m_bytes = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Byte size of the arena at m_buffer (zero when m_buffer is null). </p>
+<p>Kept so a release can decrement <a class="el" href="namespaceParticleMemory.html" title="Running totals of the memory held by particle data on this rank.">ParticleMemory</a> by exactly what the matching allocation added, without recomputing the column offsets. It therefore describes the arena rather than the container, and must travel with m_buffer through every ownership transfer &ndash; <a class="el" href="classParticleSoA.html#aaef341591293e6aa1b2d14c75121efc3" title="Swap the entire state (arena, size, capacity, sort) with another container in O(1).">swap()</a> and <a class="el" href="classParticleSoA.html#a38f3a25831add95a7990cc48e56e29a4" title="Steal another container&#39;s arena (move helper).">steal()</a> both move it. A transfer that moves the arena but leaves this behind attributes the arena to a container that no longer holds it, and the accounting drifts from the first such transfer on. </p>
 
 </div>
 </div>

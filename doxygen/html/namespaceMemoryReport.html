@@ -97,10 +97,79 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxMinMemoryUsage<
 <tr class="memitem:a87197efa074669564af780421f9370fd" id="r_a87197efa074669564af780421f9370fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a87197efa074669564af780421f9370fd">getMemoryUsage</a> (Vector&lt; Real &gt; &amp;a_peak, Vector&lt; Real &gt; &amp;a_unfreed)</td></tr>
 <tr class="memdesc:a87197efa074669564af780421f9370fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get peak and unfreed memory usage per rank.  <br /></td></tr>
 <tr class="separator:a87197efa074669564af780421f9370fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e6942a1b60a8b5d1af478981ac2f577" id="r_a1e6942a1b60a8b5d1af478981ac2f577"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a1e6942a1b60a8b5d1af478981ac2f577">getResidentSetSize</a> (Real &amp;a_currentRSS, Real &amp;a_peakRSS)</td></tr>
+<tr class="memdesc:a1e6942a1b60a8b5d1af478981ac2f577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the calling process' current and peak resident set size.  <br /></td></tr>
+<tr class="separator:a1e6942a1b60a8b5d1af478981ac2f577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4dca1b63c8af5adf7c5a3d24507c1503" id="r_a4dca1b63c8af5adf7c5a3d24507c1503"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a4dca1b63c8af5adf7c5a3d24507c1503">getMaxMinResidentSetSize</a> (Real &amp;a_maxCurrent, Real &amp;a_minCurrent, Real &amp;a_maxPeak, Real &amp;a_minPeak)</td></tr>
+<tr class="memdesc:a4dca1b63c8af5adf7c5a3d24507c1503"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global maximum and minimum resident set size over all ranks.  <br /></td></tr>
+<tr class="separator:a4dca1b63c8af5adf7c5a3d24507c1503"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c01094cddb205837af8ecea08a46fdc" id="r_a7c01094cddb205837af8ecea08a46fdc"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc">bytesAsMB</a> (const long long a_bytes)</td></tr>
+<tr class="memdesc:a7c01094cddb205837af8ecea08a46fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Format a byte count as megabytes for a report line.  <br /></td></tr>
+<tr class="separator:a7c01094cddb205837af8ecea08a46fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3506c17223b7c61eb67ac42d60affb2" id="r_ab3506c17223b7c61eb67ac42d60affb2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#ab3506c17223b7c61eb67ac42d60affb2">bytesAsMB</a> (const Real a_bytes)</td></tr>
+<tr class="memdesc:ab3506c17223b7c61eb67ac42d60affb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Format a byte count as megabytes for a report line.  <br /></td></tr>
+<tr class="separator:ab3506c17223b7c61eb67ac42d60affb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8584be593ad237055716fc2dbb3c065" id="r_ac8584be593ad237055716fc2dbb3c065"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#ac8584be593ad237055716fc2dbb3c065">printMemoryTable</a> (std::ostream &amp;a_out, const std::string &amp;a_indent)</td></tr>
+<tr class="memdesc:ac8584be593ad237055716fc2dbb3c065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the full memory report as a table.  <br /></td></tr>
+<tr class="separator:ac8584be593ad237055716fc2dbb3c065"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace containing utility functions for reporting memory usage in various formats. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a id="a7c01094cddb205837af8ecea08a46fdc" name="a7c01094cddb205837af8ecea08a46fdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c01094cddb205837af8ecea08a46fdc">&#9670;&#160;</a></span>bytesAsMB() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string MemoryReport::bytesAsMB </td>
+          <td>(</td>
+          <td class="paramtype">const long long&#160;</td>
+          <td class="paramname"><em>a_bytes</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Format a byte count as megabytes for a report line. </p>
+<p>Fixed to three decimals, i.e. a resolution of about a kilobyte. Megabytes are what a reader wants for a figure in the gigabyte range, but rounding to whole megabytes destroys the signal these reports exist to carry: a ratchet of tens of kilobytes per step reads as an unchanging integer, and a counter that is quietly climbing looks flat. Formatted into its own stream so the caller's formatting flags are left alone. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bytes</td><td>Byte count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The value in MB, as a fixed-point string with three decimals. </dd></dl>
+
+</div>
+</div>
+<a id="ab3506c17223b7c61eb67ac42d60affb2" name="ab3506c17223b7c61eb67ac42d60affb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3506c17223b7c61eb67ac42d60affb2">&#9670;&#160;</a></span>bytesAsMB() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string MemoryReport::bytesAsMB </td>
+          <td>(</td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_bytes</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Format a byte count as megabytes for a report line. </p>
+<p>Overload for the byte counts this namespace reports as Real. See <a class="el" href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc" title="Format a byte count as megabytes for a report line.">bytesAsMB(long long)</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bytes</td><td>Byte count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The value in MB, as a fixed-point string with three decimals. </dd></dl>
+
+</div>
+</div>
 <a id="ae1b530c2e59377fd57c63e3e9ebff247" name="ae1b530c2e59377fd57c63e3e9ebff247"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae1b530c2e59377fd57c63e3e9ebff247">&#9670;&#160;</a></span>getMaxMinMemoryUsage()</h2>
 
@@ -152,6 +221,57 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxMinMemoryUsage<
 
 </div>
 </div>
+<a id="a4dca1b63c8af5adf7c5a3d24507c1503" name="a4dca1b63c8af5adf7c5a3d24507c1503"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4dca1b63c8af5adf7c5a3d24507c1503">&#9670;&#160;</a></span>getMaxMinResidentSetSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MemoryReport::getMaxMinResidentSetSize </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_maxCurrent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_minCurrent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_maxPeak</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_minPeak</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the global maximum and minimum resident set size over all ranks. </p>
+<p>See <a class="el" href="namespaceMemoryReport.html#a1e6942a1b60a8b5d1af478981ac2f577" title="Get the calling process&#39; current and peak resident set size.">getResidentSetSize()</a>. The maximum is what decides an out-of-memory failure, because the job dies when the worst rank exceeds its limit and not when the average does. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_maxCurrent</td><td>Maximum current RSS, in bytes (maximized over ranks). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_minCurrent</td><td>Minimum current RSS, in bytes (minimized over ranks). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_maxPeak</td><td>Maximum peak RSS, in bytes (maximized over ranks). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_minPeak</td><td>Minimum peak RSS, in bytes (minimized over ranks). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a87197efa074669564af780421f9370fd" name="a87197efa074669564af780421f9370fd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a87197efa074669564af780421f9370fd">&#9670;&#160;</a></span>getMemoryUsage()</h2>
 
@@ -183,6 +303,84 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxMinMemoryUsage<
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_peak</td><td>Peak memory usage </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_unfreed</td><td>Unfreed memory usage </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1e6942a1b60a8b5d1af478981ac2f577" name="a1e6942a1b60a8b5d1af478981ac2f577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e6942a1b60a8b5d1af478981ac2f577">&#9670;&#160;</a></span>getResidentSetSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MemoryReport::getResidentSetSize </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_currentRSS</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_peakRSS</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the calling process' current and peak resident set size. </p>
+<p>This is the memory the operating system has actually given the process, read from /proc/self/status (VmRSS and VmHWM). Unlike every other figure in this namespace it counts the whole process &ndash; mesh arenas, particle arenas, every std::vector buffer, MPI internals and the binary itself &ndash; so it is the quantity a job is killed for exceeding, and the only one that can tell real growth from a miscounting allocator. When a tracked figure climbs and this does not, the growth is in the counter rather than in the process.</p>
+<p>Both outputs are zero on platforms without /proc, so a zero reading means "unavailable" rather than "no memory in use". </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_currentRSS</td><td>Current resident set size (VmRSS), in bytes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_peakRSS</td><td>Peak resident set size (VmHWM), in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac8584be593ad237055716fc2dbb3c065" name="ac8584be593ad237055716fc2dbb3c065"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8584be593ad237055716fc2dbb3c065">&#9670;&#160;</a></span>printMemoryTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MemoryReport::printMemoryTable </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>a_out</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_indent</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Write the full memory report as a table. </p>
+<p>Three sources that do not overlap, gathered here so that they cannot drift apart: the resident set is the whole process, Chombo's counter sees only its own Arena (BaseFab-backed mesh data), and <a class="el" href="namespaceParticleMemory.html" title="Running totals of the memory held by particle data on this rank.">ParticleMemory</a> sees only particle storage. Neither counter can adjudicate itself &ndash; a tracked figure that climbs while the resident set does not is a bug in the counter rather than memory the process is holding &ndash; which is why all three are printed together.</p>
+<p>The table has two independent axes, and conflating them has cost real time. A "high-water" row is over <em>time</em> and never falls; the columns are over <em>ranks</em> at this instant. The figure a job is killed for exceeding is the high-water of the worst rank, i.e. the rightmost value of a high-water row. A dash marks a quantity that does not exist rather than one that is zero: there is no useful minimum over ranks of a high-water mark, because the ranks reach theirs at different moments.</p>
+<p>Prints nothing unless Chombo was compiled with memory tracking. The arena figures are the reason the table exists, and a table reporting two of its three sources would invite exactly the confusion between counter and process that the third column is there to prevent. The guard lives here rather than at the call sites, so callers need no preprocessor conditionals of their own.</p>
+<p>Collective: the rank columns are reductions, so every rank must call this. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_out</td><td>Stream to print to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_indent</td><td>Prefix written before every line, so the table can sit inside any report. </td></tr>
   </table>
   </dd>
 </dl>

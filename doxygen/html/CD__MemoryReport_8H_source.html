@@ -97,33 +97,58 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#ifndef CD_MEMORYREPORT_H</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#define CD_MEMORYREPORT_H</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// Chombo includes</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;REAL.H&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;Vector.H&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// Std includes</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;iosfwd&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// Our includes</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="foldopen" id="foldopen00026" data-start="{" data-end="}">
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="namespaceMemoryReport.html">   26</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceMemoryReport.html">MemoryReport</a> {</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// Chombo includes</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;REAL.H&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;Vector.H&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// Our includes</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;<a class="code" href="CD__ParticleMemory_8H.html">CD_ParticleMemory.H</a>&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><a class="code hl_function" href="namespaceMemoryReport.html#aaa2937c801c7eb6779f407f0a90fc338">getMaxMinMemoryUsage</a>();</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><a class="code hl_function" href="namespaceMemoryReport.html#aaa2937c801c7eb6779f407f0a90fc338">getMaxMinMemoryUsage</a>(Real&amp; a_maxPeak, Real&amp; a_minPeak, Real&amp; a_maxUnfreed, Real&amp; a_minUnfreed);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><a class="code hl_function" href="namespaceMemoryReport.html#a87197efa074669564af780421f9370fd">getMemoryUsage</a>(Vector&lt;Real&gt;&amp; a_peak, Vector&lt;Real&gt;&amp; a_unfreed);</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>} <span class="comment">// namespace MemoryReport</span></div>
+<div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="namespaceMemoryReport.html">   31</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceMemoryReport.html">MemoryReport</a> {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><a class="code hl_function" href="namespaceMemoryReport.html#aaa2937c801c7eb6779f407f0a90fc338">getMaxMinMemoryUsage</a>();</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><a class="code hl_function" href="namespaceMemoryReport.html#aaa2937c801c7eb6779f407f0a90fc338">getMaxMinMemoryUsage</a>(Real&amp; a_maxPeak, Real&amp; a_minPeak, Real&amp; a_maxUnfreed, Real&amp; a_minUnfreed);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><a class="code hl_function" href="namespaceMemoryReport.html#a87197efa074669564af780421f9370fd">getMemoryUsage</a>(Vector&lt;Real&gt;&amp; a_peak, Vector&lt;Real&gt;&amp; a_unfreed);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><a class="code hl_function" href="namespaceMemoryReport.html#a1e6942a1b60a8b5d1af478981ac2f577">getResidentSetSize</a>(Real&amp; a_currentRSS, Real&amp; a_peakRSS);</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><a class="code hl_function" href="namespaceMemoryReport.html#a4dca1b63c8af5adf7c5a3d24507c1503">getMaxMinResidentSetSize</a>(Real&amp; a_maxCurrent, Real&amp; a_minCurrent, Real&amp; a_maxPeak, Real&amp; a_minPeak);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>std::string</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><a class="code hl_function" href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc">bytesAsMB</a>(<span class="keyword">const</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> a_bytes);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>std::string</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><a class="code hl_function" href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc">bytesAsMB</a>(<span class="keyword">const</span> Real a_bytes);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><a class="code hl_function" href="namespaceMemoryReport.html#ac8584be593ad237055716fc2dbb3c065">printMemoryTable</a>(std::ostream&amp; a_out, <span class="keyword">const</span> std::string&amp; a_indent);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>} <span class="comment">// namespace MemoryReport</span></div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="anamespaceMemoryReport_html"><div class="ttname"><a href="namespaceMemoryReport.html">MemoryReport</a></div><div class="ttdoc">Namespace containing utility functions for reporting memory usage in various formats.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.H:26</div></div>
-<div class="ttc" id="anamespaceMemoryReport_html_a87197efa074669564af780421f9370fd"><div class="ttname"><a href="namespaceMemoryReport.html#a87197efa074669564af780421f9370fd">MemoryReport::getMemoryUsage</a></div><div class="ttdeci">void getMemoryUsage(Vector&lt; Real &gt; &amp;a_peak, Vector&lt; Real &gt; &amp;a_unfreed)</div><div class="ttdoc">Get peak and unfreed memory usage per rank.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:84</div></div>
-<div class="ttc" id="anamespaceMemoryReport_html_aaa2937c801c7eb6779f407f0a90fc338"><div class="ttname"><a href="namespaceMemoryReport.html#aaa2937c801c7eb6779f407f0a90fc338">MemoryReport::getMaxMinMemoryUsage</a></div><div class="ttdeci">void getMaxMinMemoryUsage()</div><div class="ttdoc">Print the global maximum and minimum memory usage. This includes peak memory and unfreed memory.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:24</div></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aCD__ParticleMemory_8H_html"><div class="ttname"><a href="CD__ParticleMemory_8H.html">CD_ParticleMemory.H</a></div><div class="ttdoc">Process-wide accounting of the memory held by particle data.</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html"><div class="ttname"><a href="namespaceMemoryReport.html">MemoryReport</a></div><div class="ttdoc">Namespace containing utility functions for reporting memory usage in various formats.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.H:31</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html_a1e6942a1b60a8b5d1af478981ac2f577"><div class="ttname"><a href="namespaceMemoryReport.html#a1e6942a1b60a8b5d1af478981ac2f577">MemoryReport::getResidentSetSize</a></div><div class="ttdeci">void getResidentSetSize(Real &amp;a_currentRSS, Real &amp;a_peakRSS)</div><div class="ttdoc">Get the calling process' current and peak resident set size.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:134</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html_a4dca1b63c8af5adf7c5a3d24507c1503"><div class="ttname"><a href="namespaceMemoryReport.html#a4dca1b63c8af5adf7c5a3d24507c1503">MemoryReport::getMaxMinResidentSetSize</a></div><div class="ttdeci">void getMaxMinResidentSetSize(Real &amp;a_maxCurrent, Real &amp;a_minCurrent, Real &amp;a_maxPeak, Real &amp;a_minPeak)</div><div class="ttdoc">Get the global maximum and minimum resident set size over all ranks.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:170</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html_a7c01094cddb205837af8ecea08a46fdc"><div class="ttname"><a href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc">MemoryReport::bytesAsMB</a></div><div class="ttdeci">std::string bytesAsMB(const long long a_bytes)</div><div class="ttdoc">Format a byte count as megabytes for a report line.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:186</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html_a87197efa074669564af780421f9370fd"><div class="ttname"><a href="namespaceMemoryReport.html#a87197efa074669564af780421f9370fd">MemoryReport::getMemoryUsage</a></div><div class="ttdeci">void getMemoryUsage(Vector&lt; Real &gt; &amp;a_peak, Vector&lt; Real &gt; &amp;a_unfreed)</div><div class="ttdoc">Get peak and unfreed memory usage per rank.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:92</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html_aaa2937c801c7eb6779f407f0a90fc338"><div class="ttname"><a href="namespaceMemoryReport.html#aaa2937c801c7eb6779f407f0a90fc338">MemoryReport::getMaxMinMemoryUsage</a></div><div class="ttdeci">void getMaxMinMemoryUsage()</div><div class="ttdoc">Print the global maximum and minimum memory usage. This includes peak memory and unfreed memory.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:32</div></div>
+<div class="ttc" id="anamespaceMemoryReport_html_ac8584be593ad237055716fc2dbb3c065"><div class="ttname"><a href="namespaceMemoryReport.html#ac8584be593ad237055716fc2dbb3c065">MemoryReport::printMemoryTable</a></div><div class="ttdeci">void printMemoryTable(std::ostream &amp;a_out, const std::string &amp;a_indent)</div><div class="ttdoc">Write the full memory report as a table.</div><div class="ttdef"><b>Definition</b> CD_MemoryReport.cpp:204</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

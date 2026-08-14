@@ -1,11 +1,25 @@
 <map id="Source/Utilities/CD_MemoryReport.H" name="Source/Utilities/CD_MemoryReport.H">
-<area shape="rect" id="Node000001" title="Headers for utility functions that report memory usage." alt="" coords="143,5,287,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,75,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,48,79,90,77,85,172,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="99,93,175,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,47,160,85,156,82,194,44"/>
-<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="199,93,385,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="235,44,273,82,269,85,231,47"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="409,93,588,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="283,43,445,87,443,92,282,48"/>
+<area shape="rect" id="Node000001" title="Headers for utility functions that report memory usage." alt="" coords="236,5,380,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,69,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,48,83,94,82,89,242,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="93,93,152,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="265,48,163,90,161,85,263,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="176,93,245,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="286,48,237,87,234,82,283,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="270,93,346,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="311,46,311,79,305,79,305,46"/>
+<area shape="rect" id="Node000006" href="$CD__ParticleMemory_8H.html" title="Process&#45;wide accounting of the memory held by particle data." alt="" coords="371,93,533,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="344,43,420,84,418,89,341,48"/>
+<area shape="rect" id="Node000010" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="478,167,663,192"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="381,26,423,33,467,45,510,64,547,91,558,105,565,121,572,152,567,154,560,123,553,108,543,95,507,68,465,50,422,38,380,32"/>
+<area shape="rect" id="Node000011" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="688,167,867,192"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="381,40,472,62,572,91,664,125,741,158,739,163,662,130,570,96,471,67,379,45"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="165,167,232,192"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="412,121,246,167,245,162,411,116"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="257,167,327,192"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="427,121,332,163,330,159,425,116"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="351,167,454,192"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="446,121,421,157,416,154,442,117"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="472,116,541,157,538,162,470,121"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="505,116,712,161,711,166,504,121"/>
 </map>

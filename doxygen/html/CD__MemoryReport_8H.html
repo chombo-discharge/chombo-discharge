@@ -89,8 +89,11 @@ $(function() {
 
 <p>Headers for utility functions that report memory usage.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;REAL.H&gt;</code><br />
+<div class="textblock"><code>#include &lt;iosfwd&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;REAL.H&gt;</code><br />
 <code>#include &lt;Vector.H&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__ParticleMemory_8H_source.html">CD_ParticleMemory.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -98,15 +101,29 @@ Include dependency graph for CD_MemoryReport.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__MemoryReport_8H__incl.png" border="0" usemap="#aSource_2Utilities_2CD__MemoryReport_8H" alt=""/></div>
 <map name="aSource_2Utilities_2CD__MemoryReport_8H" id="aSource_2Utilities_2CD__MemoryReport_8H">
-<area shape="rect" title="Headers for utility functions that report memory usage." alt="" coords="143,5,287,45"/>
-<area shape="rect" title=" " alt="" coords="5,93,75,119"/>
-<area shape="poly" title=" " alt="" coords="174,48,79,90,77,85,172,43"/>
-<area shape="rect" title=" " alt="" coords="99,93,175,119"/>
-<area shape="poly" title=" " alt="" coords="198,47,160,85,156,82,194,44"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="199,93,385,119"/>
-<area shape="poly" title=" " alt="" coords="235,44,273,82,269,85,231,47"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="409,93,588,119"/>
-<area shape="poly" title=" " alt="" coords="283,43,445,87,443,92,282,48"/>
+<area shape="rect" title="Headers for utility functions that report memory usage." alt="" coords="236,5,380,45"/>
+<area shape="rect" title=" " alt="" coords="5,93,69,119"/>
+<area shape="poly" title=" " alt="" coords="244,48,83,94,82,89,242,43"/>
+<area shape="rect" title=" " alt="" coords="93,93,152,119"/>
+<area shape="poly" title=" " alt="" coords="265,48,163,90,161,85,263,43"/>
+<area shape="rect" title=" " alt="" coords="176,93,245,119"/>
+<area shape="poly" title=" " alt="" coords="286,48,237,87,234,82,283,43"/>
+<area shape="rect" title=" " alt="" coords="270,93,346,119"/>
+<area shape="poly" title=" " alt="" coords="311,46,311,79,305,79,305,46"/>
+<area shape="rect" href="CD__ParticleMemory_8H.html" title="Process&#45;wide accounting of the memory held by particle data." alt="" coords="371,93,533,119"/>
+<area shape="poly" title=" " alt="" coords="344,43,420,84,418,89,341,48"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="478,167,663,192"/>
+<area shape="poly" title=" " alt="" coords="381,26,423,33,467,45,510,64,547,91,558,105,565,121,572,152,567,154,560,123,553,108,543,95,507,68,465,50,422,38,380,32"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="688,167,867,192"/>
+<area shape="poly" title=" " alt="" coords="381,40,472,62,572,91,664,125,741,158,739,163,662,130,570,96,471,67,379,45"/>
+<area shape="rect" title=" " alt="" coords="165,167,232,192"/>
+<area shape="poly" title=" " alt="" coords="412,121,246,167,245,162,411,116"/>
+<area shape="rect" title=" " alt="" coords="257,167,327,192"/>
+<area shape="poly" title=" " alt="" coords="427,121,332,163,330,159,425,116"/>
+<area shape="rect" title=" " alt="" coords="351,167,454,192"/>
+<area shape="poly" title=" " alt="" coords="446,121,421,157,416,154,442,117"/>
+<area shape="poly" title=" " alt="" coords="472,116,541,157,538,162,470,121"/>
+<area shape="poly" title=" " alt="" coords="505,116,712,161,711,166,504,121"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -150,6 +167,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>MemoryReport::getMaxM
 <tr class="memitem:a87197efa074669564af780421f9370fd" id="r_a87197efa074669564af780421f9370fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a87197efa074669564af780421f9370fd">MemoryReport::getMemoryUsage</a> (Vector&lt; Real &gt; &amp;a_peak, Vector&lt; Real &gt; &amp;a_unfreed)</td></tr>
 <tr class="memdesc:a87197efa074669564af780421f9370fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get peak and unfreed memory usage per rank.  <br /></td></tr>
 <tr class="separator:a87197efa074669564af780421f9370fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e6942a1b60a8b5d1af478981ac2f577" id="r_a1e6942a1b60a8b5d1af478981ac2f577"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a1e6942a1b60a8b5d1af478981ac2f577">MemoryReport::getResidentSetSize</a> (Real &amp;a_currentRSS, Real &amp;a_peakRSS)</td></tr>
+<tr class="memdesc:a1e6942a1b60a8b5d1af478981ac2f577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the calling process' current and peak resident set size.  <br /></td></tr>
+<tr class="separator:a1e6942a1b60a8b5d1af478981ac2f577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4dca1b63c8af5adf7c5a3d24507c1503" id="r_a4dca1b63c8af5adf7c5a3d24507c1503"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a4dca1b63c8af5adf7c5a3d24507c1503">MemoryReport::getMaxMinResidentSetSize</a> (Real &amp;a_maxCurrent, Real &amp;a_minCurrent, Real &amp;a_maxPeak, Real &amp;a_minPeak)</td></tr>
+<tr class="memdesc:a4dca1b63c8af5adf7c5a3d24507c1503"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global maximum and minimum resident set size over all ranks.  <br /></td></tr>
+<tr class="separator:a4dca1b63c8af5adf7c5a3d24507c1503"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c01094cddb205837af8ecea08a46fdc" id="r_a7c01094cddb205837af8ecea08a46fdc"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc">MemoryReport::bytesAsMB</a> (const long long a_bytes)</td></tr>
+<tr class="memdesc:a7c01094cddb205837af8ecea08a46fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Format a byte count as megabytes for a report line.  <br /></td></tr>
+<tr class="separator:a7c01094cddb205837af8ecea08a46fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3506c17223b7c61eb67ac42d60affb2" id="r_ab3506c17223b7c61eb67ac42d60affb2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#ab3506c17223b7c61eb67ac42d60affb2">MemoryReport::bytesAsMB</a> (const Real a_bytes)</td></tr>
+<tr class="memdesc:ab3506c17223b7c61eb67ac42d60affb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Format a byte count as megabytes for a report line.  <br /></td></tr>
+<tr class="separator:ab3506c17223b7c61eb67ac42d60affb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8584be593ad237055716fc2dbb3c065" id="r_ac8584be593ad237055716fc2dbb3c065"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceMemoryReport.html#ac8584be593ad237055716fc2dbb3c065">MemoryReport::printMemoryTable</a> (std::ostream &amp;a_out, const std::string &amp;a_indent)</td></tr>
+<tr class="memdesc:ac8584be593ad237055716fc2dbb3c065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the full memory report as a table.  <br /></td></tr>
+<tr class="separator:ac8584be593ad237055716fc2dbb3c065"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Headers for utility functions that report memory usage. </p>

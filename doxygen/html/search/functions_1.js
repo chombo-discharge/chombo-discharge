@@ -2,16 +2,16 @@ var searchData=
 [
   ['barrier_0',['barrier',['../namespaceParallelOps.html#aed6a3c22b5ec18db26ece6fecf1ebf54',1,'ParallelOps::barrier()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#af019b6bba203b000f080fdf6c859f131',1,'Physics::ItoKMC::ItoKMCGodunovStepper::barrier()']]],
   ['boundednoiseplane_1',['boundednoiseplane',['../classBoundedNoisePlane.html#a05f0a57ef5163aa74473288e29a73e29',1,'BoundedNoisePlane::BoundedNoisePlane(const std::string &amp;a_orientation, const RealVect &amp;a_point, const RealVect &amp;a_clampLo, const RealVect &amp;a_clampHi, const Real a_clampK, const Real a_noiseAmp, const RealVect &amp;a_noiseFreq, const Real a_persistence, const int a_octaves, const bool a_reseed=false)'],['../classBoundedNoisePlane.html#a1c5f68061d75bd672df5070b9b5cf662',1,'BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane &amp;a_inputIF)']]],
-  ['box_2',['box',['../classDomainFluxIFFAB.html#ae6a150ba1a55b21cc799e9495230ace0',1,'DomainFluxIFFAB::box()'],['../classParticleGhostMask.html#a154eabc6d391b95a598f020c13a44aaa',1,'ParticleGhostMask::box()']]],
+  ['box_2',['box',['../classParticleGhostMask.html#a154eabc6d391b95a598f020c13a44aaa',1,'ParticleGhostMask::box()'],['../classDomainFluxIFFAB.html#ae6a150ba1a55b21cc799e9495230ace0',1,'DomainFluxIFFAB::box()']]],
   ['boxsdf_3',['boxsdf',['../classBoxSdf.html#a00246df0e96b19cc7c917f1e9b6f4877',1,'BoxSdf::BoxSdf(const RealVect &amp;a_loCorner, const RealVect &amp;a_hiCorner, const bool &amp;a_fluidInside)'],['../classBoxSdf.html#ab1fa83184dd22fb61d4146704c62842f',1,'BoxSdf::BoxSdf(const BoxSdf &amp;a_inputIF)']]],
   ['brentrootfinder_4',['brentRootFinder',['../namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5',1,'PolyUtils']]],
   ['brentsolve_5',['brentSolve',['../namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912',1,'PolyUtils']]],
   ['brownianwalkerspecies_6',['BrownianWalkerSpecies',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html#a897d4bfb25160ac87ac149da20004e30',1,'Physics::BrownianWalker::BrownianWalkerSpecies']]],
   ['brownianwalkerstepper_7',['brownianwalkerstepper',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a465b2e67cd54ec4f7c82a71602244bcb',1,'Physics::BrownianWalker::BrownianWalkerStepper::BrownianWalkerStepper()'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a36367e4360ca3b4352537d8c0eadb4ff',1,'Physics::BrownianWalker::BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver)']]],
-  ['brownianwalkertagger_8',['brownianwalkertagger',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a9388d96da89ad770046b0aa1485c82dd',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger()=delete'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a2884fa2202e0f12efc7822ff89281abf',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver, RefCountedPtr&lt; AmrMesh &gt; &amp;a_amr)']]],
+  ['brownianwalkertagger_8',['brownianwalkertagger',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a2884fa2202e0f12efc7822ff89281abf',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr&lt; ItoSolver &gt; &amp;a_solver, RefCountedPtr&lt; AmrMesh &gt; &amp;a_amr)'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html#a9388d96da89ad770046b0aa1485c82dd',1,'Physics::BrownianWalker::BrownianWalkerTagger::BrownianWalkerTagger()=delete']]],
   ['buildaveragestencils_9',['buildAverageStencils',['../classMFHelmholtzJumpBC.html#a9ba91978ea71bee0702b50d007a73718',1,'MFHelmholtzJumpBC']]],
   ['buildcoarselevel_10',['buildCoarseLevel',['../classScanShop.html#a912623ff8876423afcdb1a6b9469ffe6',1,'ScanShop']]],
-  ['buildcopier_11',['buildcopier',['../classMFHelmholtzOp.html#af5b0772c63a865bfa7d073c179ae78b3',1,'MFHelmholtzOp::buildCopier()'],['../classEBHelmholtzOp.html#af13fb5c0506f1974be7a6fc2c4d22f43',1,'EBHelmholtzOp::buildCopier()']]],
+  ['buildcopier_11',['buildcopier',['../classEBHelmholtzOp.html#af13fb5c0506f1974be7a6fc2c4d22f43',1,'EBHelmholtzOp::buildCopier()'],['../classMFHelmholtzOp.html#af5b0772c63a865bfa7d073c179ae78b3',1,'MFHelmholtzOp::buildCopier()']]],
   ['buildcopiers_12',['buildCopiers',['../classAmrMesh.html#a7d384fb87bd71ccdc5ee53673685ce48',1,'AmrMesh']]],
   ['builddomains_13',['buildDomains',['../classAmrMesh.html#a429a94d3c17f51f138121c95b8bfe2bf',1,'AmrMesh']]],
   ['buildequalweightkdleaves_14',['buildEqualWeightKDLeaves',['../namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b',1,'ParticleManagement::detail']]],
@@ -21,7 +21,8 @@ var searchData=
   ['buildgrids_18',['buildGrids',['../classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e',1,'AmrMesh']]],
   ['buildkdquotaleaves_19',['buildKDQuotaLeaves',['../namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5',1,'ParticleManagement::detail']]],
   ['buildsolidgeometry_20',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
-  ['bytespan_21',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
-  ['bytespanimpl_22',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
-  ['bytesperparticle_23',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
+  ['bytesasmb_21',['bytesasmb',['../namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc',1,'MemoryReport::bytesAsMB(const long long a_bytes)'],['../namespaceMemoryReport.html#ab3506c17223b7c61eb67ac42d60affb2',1,'MemoryReport::bytesAsMB(const Real a_bytes)']]],
+  ['bytespan_22',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
+  ['bytespanimpl_23',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
+  ['bytesperparticle_24',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
 ];

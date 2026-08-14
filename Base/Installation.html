@@ -63,6 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#mpi">MPI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hdf5">HDF5</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#openmp">OpenMP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#particle-precision">Particle precision</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#petsc">PETSC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#compiler-flags">Compiler flags</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-on-clusters">Configuration on clusters</a></li>
@@ -376,8 +377,10 @@ Not compatible with OpenMP.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_HDF</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code> — enables HDF5 output.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code> — enables OpenMP threading.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_PETSC</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code> — links to PETSc.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">PRECISION</span> <span class="pre">=</span> <span class="pre">DOUBLE</span></code> — floating-point precision.
+<li><p><code class="docutils literal notranslate"><span class="pre">PRECISION</span> <span class="pre">=</span> <span class="pre">DOUBLE</span></code> — floating-point precision of the mesh data.
 Single precision is not supported.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PARTICLE_PRECISION</span> <span class="pre">=</span> <span class="pre">DOUBLE/FLOAT</span></code> — floating-point precision of the particle payload columns.
+Defaults to <code class="docutils literal notranslate"><span class="pre">DOUBLE</span></code>. See <a class="reference internal" href="#chap-particleprecision"><span class="std std-ref">Particle precision</span></a>.</p></li>
 </ul>
 </section>
 <section id="mpi">
@@ -426,6 +429,36 @@ production. Several threaded code paths – including some inside <code class="d
 only activated when it is compiled with <code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> – contain data races that can
 cause intermittent heap corruption and crashes at higher thread counts. For production runs,
 use pure MPI (<code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">FALSE</span></code>); OpenMP and OpenMP+MPI are intended for experimentation only.</p>
+</div>
+</section>
+<section id="particle-precision">
+<span id="chap-particleprecision"></span><h3>Particle precision<a class="headerlink" href="#particle-precision" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PARTICLE_PRECISION</span></code> sets the precision of the particle <em>payload</em> columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">PARTICLE_PRECISION</span> <span class="pre">=</span> <span class="pre">DOUBLE</span></code> — payload columns are <code class="docutils literal notranslate"><span class="pre">double</span></code>. This is the default.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PARTICLE_PRECISION</span> <span class="pre">=</span> <span class="pre">FLOAT</span></code> — payload columns are <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p></li>
+</ul>
+<p>Unlike <code class="docutils literal notranslate"><span class="pre">PRECISION</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> variable governing the mesh data, <code class="docutils literal notranslate"><span class="pre">PARTICLE_PRECISION</span></code>
+is specific to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and is read by <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Definitions.make</span></code>. The two
+are independent: single-precision particle payload against a double-precision grid is the intended
+use, halving the payload footprint and doubling the SIMD width on those columns.</p>
+<p>It reaches only the columns a particle type declares through <code class="docutils literal notranslate"><span class="pre">ParticleReal</span></code>. Position, weight, and
+the container-owned identity columns are unaffected and are always stored at their fixed widths, so
+particle <em>positions</em> remain double precision at either setting.</p>
+<p>Set it on the command line, or in <code class="docutils literal notranslate"><span class="pre">Lib/Local/Make.defs.local</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-s<span class="w"> </span>-j&lt;N&gt;<span class="w"> </span><span class="nv">DIM</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="nv">MPI</span><span class="o">=</span>TRUE<span class="w"> </span><span class="nv">PARTICLE_PRECISION</span><span class="o">=</span>FLOAT
+</pre></div>
+</div>
+<p>Any value other than <code class="docutils literal notranslate"><span class="pre">DOUBLE</span></code> or <code class="docutils literal notranslate"><span class="pre">FLOAT</span></code> is a hard error. Both precisions are folded into the
+build configuration string, in the order <code class="docutils literal notranslate"><span class="pre">&lt;PRECISION&gt;.&lt;PARTICLE_PRECISION&gt;</span></code>, so every object tree,
+library, and executable is named for the precision of both the mesh data and the particle payload
+(e.g. <code class="docutils literal notranslate"><span class="pre">main3d.&lt;...&gt;.DOUBLE.FLOAT.ex</span></code>). Switching precision therefore rebuilds cleanly and reuses
+the previous object tree when switching back.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Checkpoint files are not portable between the two settings. Particle records are written as raw
+bytes whose per-particle size depends on <code class="docutils literal notranslate"><span class="pre">sizeof(ParticleReal)</span></code>, so a checkpoint written by a
+<code class="docutils literal notranslate"><span class="pre">FLOAT</span></code> build cannot be restarted from by a <code class="docutils literal notranslate"><span class="pre">DOUBLE</span></code> build, or the other way round.</p>
 </div>
 </section>
 <section id="petsc">

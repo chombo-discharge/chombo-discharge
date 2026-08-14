@@ -6472,291 +6472,296 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l06052" name="l06052"></a><span class="lineno"> 6052</span>                                                  leaf.template get&lt;&amp;ItoParticle::old_y&gt;(i),</div>
 <div class="line"><a id="l06053" name="l06053"></a><span class="lineno"> 6053</span>                                                  leaf.template get&lt;&amp;ItoParticle::old_z&gt;(i)));</div>
 <div class="line"><a id="l06054" name="l06054"></a><span class="lineno"> 6054</span> </div>
-<div class="line"><a id="l06055" name="l06055"></a><span class="lineno"> 6055</span>            <a class="code hl_struct" href="structItoKMCFieldParticle.html">ItoKMCFieldParticle</a> payload;</div>
-<div class="line"><a id="l06056" name="l06056"></a><span class="lineno"> 6056</span>            D_DECL(payload.<a class="code hl_variable" href="structItoKMCFieldParticle.html#afc50437ed0c23a527b6ba6c8f996bb50">x0_x</a> = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a><span class="keyword">&gt;</span>(posA[0]),</div>
-<div class="line"><a id="l06057" name="l06057"></a><span class="lineno"> 6057</span>                   payload.<a class="code hl_variable" href="structItoKMCFieldParticle.html#a9501d08f2b5c584e8d537a2d8b4054fc">x0_y</a> = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a><span class="keyword">&gt;</span>(posA[1]),</div>
-<div class="line"><a id="l06058" name="l06058"></a><span class="lineno"> 6058</span>                   payload.<a class="code hl_variable" href="structItoKMCFieldParticle.html#a6dd5c53a86607a6928a38105fcab9ad8">x0_z</a> = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a><span class="keyword">&gt;</span>(posA[2]));</div>
-<div class="line"><a id="l06059" name="l06059"></a><span class="lineno"> 6059</span> </div>
-<div class="line"><a id="l06060" name="l06060"></a><span class="lineno"> 6060</span>            comp.<a class="code hl_function" href="classParticleSoA.html#a1209500183bdfbfff59b17c5939ef7ca">append</a>(leaf.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i), leaf.<a class="code hl_function" href="classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf">weight</a>(i), payload);</div>
-<div class="line"><a id="l06061" name="l06061"></a><span class="lineno"> 6061</span>          }</div>
-<div class="line"><a id="l06062" name="l06062"></a><span class="lineno"> 6062</span>        }</div>
-<div class="line"><a id="l06063" name="l06063"></a><span class="lineno"> 6063</span>      }</div>
-<div class="line"><a id="l06064" name="l06064"></a><span class="lineno"> 6064</span> </div>
-<div class="line"><a id="l06065" name="l06065"></a><span class="lineno"> 6065</span>      <span class="comment">// Interpolate the potential to the current particle position which gives us V(B) for the particles.</span></div>
-<div class="line"><a id="l06066" name="l06066"></a><span class="lineno"> 6066</span>      m_amr-&gt;interpolateParticles&lt;&amp;<a class="code hl_variable" href="structItoKMCFieldParticle.html#a474f47d5854db30be42e5cda0e5c4a51">ItoKMCFieldParticle::phiB</a>&gt;(computationParticles,</div>
-<div class="line"><a id="l06067" name="l06067"></a><span class="lineno"> 6067</span>                                                              m_particleRealm,</div>
-<div class="line"><a id="l06068" name="l06068"></a><span class="lineno"> 6068</span>                                                              m_plasmaPhase,</div>
-<div class="line"><a id="l06069" name="l06069"></a><span class="lineno"> 6069</span>                                                              m_particleScratch1,</div>
-<div class="line"><a id="l06070" name="l06070"></a><span class="lineno"> 6070</span>                                                              solver-&gt;getDeposition(),</div>
-<div class="line"><a id="l06071" name="l06071"></a><span class="lineno"> 6071</span>                                                              <span class="keyword">false</span>);</div>
-<div class="line"><a id="l06072" name="l06072"></a><span class="lineno"> 6072</span> </div>
-<div class="line"><a id="l06073" name="l06073"></a><span class="lineno"> 6073</span>      <span class="comment">// Move the particles back to their old positions (A) and interpolate the potential there. The container</span></div>
-<div class="line"><a id="l06074" name="l06074"></a><span class="lineno"> 6074</span>      <span class="comment">// position and the payload &quot;alt&quot; position are swapped so position now holds A and alt holds B.</span></div>
-<div class="line"><a id="l06075" name="l06075"></a><span class="lineno"> 6075</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a id="l06076" name="l06076"></a><span class="lineno"> 6076</span>        <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_particleRealm)[lvl];</div>
-<div class="line"><a id="l06077" name="l06077"></a><span class="lineno"> 6077</span>        <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
-<div class="line"><a id="l06078" name="l06078"></a><span class="lineno"> 6078</span> </div>
-<div class="line"><a id="l06079" name="l06079"></a><span class="lineno"> 6079</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
-<div class="line"><a id="l06080" name="l06080"></a><span class="lineno"> 6080</span> </div>
-<div class="line"><a id="l06081" name="l06081"></a><span class="lineno"> 6081</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
-<div class="line"><a id="l06082" name="l06082"></a><span class="lineno"> 6082</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
-<div class="line"><a id="l06083" name="l06083"></a><span class="lineno"> 6083</span>          <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
-<div class="line"><a id="l06084" name="l06084"></a><span class="lineno"> 6084</span> </div>
-<div class="line"><a id="l06085" name="l06085"></a><span class="lineno"> 6085</span>          <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;ItoKMCFieldParticle&gt;</a>&amp; comp = computationParticles[lvl][din];</div>
-<div class="line"><a id="l06086" name="l06086"></a><span class="lineno"> 6086</span> </div>
-<div class="line"><a id="l06087" name="l06087"></a><span class="lineno"> 6087</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span> pos[SpaceDim] = {</div>
-<div class="line"><a id="l06088" name="l06088"></a><span class="lineno"> 6088</span>            D_DECL(comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(0), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(1), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(2))};</div>
-<div class="line"><a id="l06089" name="l06089"></a><span class="lineno"> 6089</span>          <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>* <span class="keyword">const</span> alt[SpaceDim] = {D_DECL(comp.template column&lt;&amp;ItoKMCFieldParticle::x0_x&gt;(),</div>
-<div class="line"><a id="l06090" name="l06090"></a><span class="lineno"> 6090</span>                                                      comp.template column&lt;&amp;ItoKMCFieldParticle::x0_y&gt;(),</div>
-<div class="line"><a id="l06091" name="l06091"></a><span class="lineno"> 6091</span>                                                      comp.template column&lt;&amp;ItoKMCFieldParticle::x0_z&gt;())};</div>
-<div class="line"><a id="l06092" name="l06092"></a><span class="lineno"> 6092</span> </div>
-<div class="line"><a id="l06093" name="l06093"></a><span class="lineno"> 6093</span>          <a class="code hl_function" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">ParticleLoops::loop</a>(comp, [&amp;](<span class="keyword">const</span> std::size_t i) {</div>
-<div class="line"><a id="l06094" name="l06094"></a><span class="lineno"> 6094</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a id="l06095" name="l06095"></a><span class="lineno"> 6095</span>              <span class="keyword">const</span> <span class="keywordtype">double</span> posB = pos[dir][i];</div>
-<div class="line"><a id="l06096" name="l06096"></a><span class="lineno"> 6096</span>              pos[dir][i]       = alt[dir][i];</div>
-<div class="line"><a id="l06097" name="l06097"></a><span class="lineno"> 6097</span>              alt[dir][i]       = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a><span class="keyword">&gt;</span>(posB);</div>
-<div class="line"><a id="l06098" name="l06098"></a><span class="lineno"> 6098</span>            }</div>
-<div class="line"><a id="l06099" name="l06099"></a><span class="lineno"> 6099</span>          });</div>
-<div class="line"><a id="l06100" name="l06100"></a><span class="lineno"> 6100</span>        }</div>
-<div class="line"><a id="l06101" name="l06101"></a><span class="lineno"> 6101</span>      }</div>
-<div class="line"><a id="l06102" name="l06102"></a><span class="lineno"> 6102</span> </div>
-<div class="line"><a id="l06103" name="l06103"></a><span class="lineno"> 6103</span>      computationParticles.remap();</div>
-<div class="line"><a id="l06104" name="l06104"></a><span class="lineno"> 6104</span> </div>
-<div class="line"><a id="l06105" name="l06105"></a><span class="lineno"> 6105</span>      <span class="comment">// Interpolate the potential to the previous particle position which gives us V(A) for the particles.</span></div>
-<div class="line"><a id="l06106" name="l06106"></a><span class="lineno"> 6106</span>      m_amr-&gt;interpolateParticles&lt;&amp;<a class="code hl_variable" href="structItoKMCFieldParticle.html#a3e95befbc2f593270cabef6de00dc2ca">ItoKMCFieldParticle::phiA</a>&gt;(computationParticles,</div>
-<div class="line"><a id="l06107" name="l06107"></a><span class="lineno"> 6107</span>                                                              m_particleRealm,</div>
-<div class="line"><a id="l06108" name="l06108"></a><span class="lineno"> 6108</span>                                                              m_plasmaPhase,</div>
-<div class="line"><a id="l06109" name="l06109"></a><span class="lineno"> 6109</span>                                                              m_particleScratch1,</div>
-<div class="line"><a id="l06110" name="l06110"></a><span class="lineno"> 6110</span>                                                              solver-&gt;getDeposition(),</div>
-<div class="line"><a id="l06111" name="l06111"></a><span class="lineno"> 6111</span>                                                              <span class="keyword">false</span>);</div>
-<div class="line"><a id="l06112" name="l06112"></a><span class="lineno"> 6112</span> </div>
-<div class="line"><a id="l06113" name="l06113"></a><span class="lineno"> 6113</span>      <span class="comment">// Move the particles back to B again and multiply the weight by (V(B) - V(A)).</span></div>
-<div class="line"><a id="l06114" name="l06114"></a><span class="lineno"> 6114</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a id="l06115" name="l06115"></a><span class="lineno"> 6115</span>        <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_particleRealm)[lvl];</div>
-<div class="line"><a id="l06116" name="l06116"></a><span class="lineno"> 6116</span>        <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
-<div class="line"><a id="l06117" name="l06117"></a><span class="lineno"> 6117</span> </div>
-<div class="line"><a id="l06118" name="l06118"></a><span class="lineno"> 6118</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>();</div>
-<div class="line"><a id="l06119" name="l06119"></a><span class="lineno"> 6119</span> </div>
-<div class="line"><a id="l06120" name="l06120"></a><span class="lineno"> 6120</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
-<div class="line"><a id="l06121" name="l06121"></a><span class="lineno"> 6121</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
-<div class="line"><a id="l06122" name="l06122"></a><span class="lineno"> 6122</span>          <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a id="l06055" name="l06055"></a><span class="lineno"> 6055</span>            <span class="comment">// No cast to ParticleReal: x0 is a position and stays double, so casting would round the</span></div>
+<div class="line"><a id="l06056" name="l06056"></a><span class="lineno"> 6056</span>            <span class="comment">// old position through float whenever PARTICLE_PRECISION=FLOAT. This one compiles either</span></div>
+<div class="line"><a id="l06057" name="l06057"></a><span class="lineno"> 6057</span>            <span class="comment">// way, which is why it survived where the pointer bindings below did not.</span></div>
+<div class="line"><a id="l06058" name="l06058"></a><span class="lineno"> 6058</span>            <a class="code hl_struct" href="structItoKMCFieldParticle.html">ItoKMCFieldParticle</a> payload;</div>
+<div class="line"><a id="l06059" name="l06059"></a><span class="lineno"> 6059</span>            D_DECL(payload.<a class="code hl_variable" href="structItoKMCFieldParticle.html#afc50437ed0c23a527b6ba6c8f996bb50">x0_x</a> = posA[0], payload.<a class="code hl_variable" href="structItoKMCFieldParticle.html#a9501d08f2b5c584e8d537a2d8b4054fc">x0_y</a> = posA[1], payload.<a class="code hl_variable" href="structItoKMCFieldParticle.html#a6dd5c53a86607a6928a38105fcab9ad8">x0_z</a> = posA[2]);</div>
+<div class="line"><a id="l06060" name="l06060"></a><span class="lineno"> 6060</span> </div>
+<div class="line"><a id="l06061" name="l06061"></a><span class="lineno"> 6061</span>            comp.<a class="code hl_function" href="classParticleSoA.html#a1209500183bdfbfff59b17c5939ef7ca">append</a>(leaf.<a class="code hl_function" href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">position</a>(i), leaf.<a class="code hl_function" href="classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf">weight</a>(i), payload);</div>
+<div class="line"><a id="l06062" name="l06062"></a><span class="lineno"> 6062</span>          }</div>
+<div class="line"><a id="l06063" name="l06063"></a><span class="lineno"> 6063</span>        }</div>
+<div class="line"><a id="l06064" name="l06064"></a><span class="lineno"> 6064</span>      }</div>
+<div class="line"><a id="l06065" name="l06065"></a><span class="lineno"> 6065</span> </div>
+<div class="line"><a id="l06066" name="l06066"></a><span class="lineno"> 6066</span>      <span class="comment">// Interpolate the potential to the current particle position which gives us V(B) for the particles.</span></div>
+<div class="line"><a id="l06067" name="l06067"></a><span class="lineno"> 6067</span>      m_amr-&gt;interpolateParticles&lt;&amp;<a class="code hl_variable" href="structItoKMCFieldParticle.html#a474f47d5854db30be42e5cda0e5c4a51">ItoKMCFieldParticle::phiB</a>&gt;(computationParticles,</div>
+<div class="line"><a id="l06068" name="l06068"></a><span class="lineno"> 6068</span>                                                              m_particleRealm,</div>
+<div class="line"><a id="l06069" name="l06069"></a><span class="lineno"> 6069</span>                                                              m_plasmaPhase,</div>
+<div class="line"><a id="l06070" name="l06070"></a><span class="lineno"> 6070</span>                                                              m_particleScratch1,</div>
+<div class="line"><a id="l06071" name="l06071"></a><span class="lineno"> 6071</span>                                                              solver-&gt;getDeposition(),</div>
+<div class="line"><a id="l06072" name="l06072"></a><span class="lineno"> 6072</span>                                                              <span class="keyword">false</span>);</div>
+<div class="line"><a id="l06073" name="l06073"></a><span class="lineno"> 6073</span> </div>
+<div class="line"><a id="l06074" name="l06074"></a><span class="lineno"> 6074</span>      <span class="comment">// Move the particles back to their old positions (A) and interpolate the potential there. The container</span></div>
+<div class="line"><a id="l06075" name="l06075"></a><span class="lineno"> 6075</span>      <span class="comment">// position and the payload &quot;alt&quot; position are swapped so position now holds A and alt holds B.</span></div>
+<div class="line"><a id="l06076" name="l06076"></a><span class="lineno"> 6076</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a id="l06077" name="l06077"></a><span class="lineno"> 6077</span>        <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_particleRealm)[lvl];</div>
+<div class="line"><a id="l06078" name="l06078"></a><span class="lineno"> 6078</span>        <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a id="l06079" name="l06079"></a><span class="lineno"> 6079</span> </div>
+<div class="line"><a id="l06080" name="l06080"></a><span class="lineno"> 6080</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a id="l06081" name="l06081"></a><span class="lineno"> 6081</span> </div>
+<div class="line"><a id="l06082" name="l06082"></a><span class="lineno"> 6082</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a id="l06083" name="l06083"></a><span class="lineno"> 6083</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a id="l06084" name="l06084"></a><span class="lineno"> 6084</span>          <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a id="l06085" name="l06085"></a><span class="lineno"> 6085</span> </div>
+<div class="line"><a id="l06086" name="l06086"></a><span class="lineno"> 6086</span>          <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;ItoKMCFieldParticle&gt;</a>&amp; comp = computationParticles[lvl][din];</div>
+<div class="line"><a id="l06087" name="l06087"></a><span class="lineno"> 6087</span> </div>
+<div class="line"><a id="l06088" name="l06088"></a><span class="lineno"> 6088</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span> pos[SpaceDim] = {</div>
+<div class="line"><a id="l06089" name="l06089"></a><span class="lineno"> 6089</span>            D_DECL(comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(0), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(1), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(2))};</div>
+<div class="line"><a id="l06090" name="l06090"></a><span class="lineno"> 6090</span>          <span class="comment">// double rather than ParticleReal: x0 is a position, and positions are double at every</span></div>
+<div class="line"><a id="l06091" name="l06091"></a><span class="lineno"> 6091</span>          <span class="comment">// PARTICLE_PRECISION setting -- see ItoKMCFieldParticle. Typing these as ParticleReal</span></div>
+<div class="line"><a id="l06092" name="l06092"></a><span class="lineno"> 6092</span>          <span class="comment">// compiles only while the payload precision happens to be double.</span></div>
+<div class="line"><a id="l06093" name="l06093"></a><span class="lineno"> 6093</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span> alt[SpaceDim] = {D_DECL(comp.template column&lt;&amp;ItoKMCFieldParticle::x0_x&gt;(),</div>
+<div class="line"><a id="l06094" name="l06094"></a><span class="lineno"> 6094</span>                                                comp.template column&lt;&amp;ItoKMCFieldParticle::x0_y&gt;(),</div>
+<div class="line"><a id="l06095" name="l06095"></a><span class="lineno"> 6095</span>                                                comp.template column&lt;&amp;ItoKMCFieldParticle::x0_z&gt;())};</div>
+<div class="line"><a id="l06096" name="l06096"></a><span class="lineno"> 6096</span> </div>
+<div class="line"><a id="l06097" name="l06097"></a><span class="lineno"> 6097</span>          <a class="code hl_function" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">ParticleLoops::loop</a>(comp, [&amp;](<span class="keyword">const</span> std::size_t i) {</div>
+<div class="line"><a id="l06098" name="l06098"></a><span class="lineno"> 6098</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a id="l06099" name="l06099"></a><span class="lineno"> 6099</span>              <span class="keyword">const</span> <span class="keywordtype">double</span> posB = pos[dir][i];</div>
+<div class="line"><a id="l06100" name="l06100"></a><span class="lineno"> 6100</span>              pos[dir][i]       = alt[dir][i];</div>
+<div class="line"><a id="l06101" name="l06101"></a><span class="lineno"> 6101</span>              alt[dir][i]       = posB;</div>
+<div class="line"><a id="l06102" name="l06102"></a><span class="lineno"> 6102</span>            }</div>
+<div class="line"><a id="l06103" name="l06103"></a><span class="lineno"> 6103</span>          });</div>
+<div class="line"><a id="l06104" name="l06104"></a><span class="lineno"> 6104</span>        }</div>
+<div class="line"><a id="l06105" name="l06105"></a><span class="lineno"> 6105</span>      }</div>
+<div class="line"><a id="l06106" name="l06106"></a><span class="lineno"> 6106</span> </div>
+<div class="line"><a id="l06107" name="l06107"></a><span class="lineno"> 6107</span>      computationParticles.remap();</div>
+<div class="line"><a id="l06108" name="l06108"></a><span class="lineno"> 6108</span> </div>
+<div class="line"><a id="l06109" name="l06109"></a><span class="lineno"> 6109</span>      <span class="comment">// Interpolate the potential to the previous particle position which gives us V(A) for the particles.</span></div>
+<div class="line"><a id="l06110" name="l06110"></a><span class="lineno"> 6110</span>      m_amr-&gt;interpolateParticles&lt;&amp;<a class="code hl_variable" href="structItoKMCFieldParticle.html#a3e95befbc2f593270cabef6de00dc2ca">ItoKMCFieldParticle::phiA</a>&gt;(computationParticles,</div>
+<div class="line"><a id="l06111" name="l06111"></a><span class="lineno"> 6111</span>                                                              m_particleRealm,</div>
+<div class="line"><a id="l06112" name="l06112"></a><span class="lineno"> 6112</span>                                                              m_plasmaPhase,</div>
+<div class="line"><a id="l06113" name="l06113"></a><span class="lineno"> 6113</span>                                                              m_particleScratch1,</div>
+<div class="line"><a id="l06114" name="l06114"></a><span class="lineno"> 6114</span>                                                              solver-&gt;getDeposition(),</div>
+<div class="line"><a id="l06115" name="l06115"></a><span class="lineno"> 6115</span>                                                              <span class="keyword">false</span>);</div>
+<div class="line"><a id="l06116" name="l06116"></a><span class="lineno"> 6116</span> </div>
+<div class="line"><a id="l06117" name="l06117"></a><span class="lineno"> 6117</span>      <span class="comment">// Move the particles back to B again and multiply the weight by (V(B) - V(A)).</span></div>
+<div class="line"><a id="l06118" name="l06118"></a><span class="lineno"> 6118</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a id="l06119" name="l06119"></a><span class="lineno"> 6119</span>        <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_particleRealm)[lvl];</div>
+<div class="line"><a id="l06120" name="l06120"></a><span class="lineno"> 6120</span>        <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a id="l06121" name="l06121"></a><span class="lineno"> 6121</span> </div>
+<div class="line"><a id="l06122" name="l06122"></a><span class="lineno"> 6122</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.<a class="code hl_function" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">size</a>();</div>
 <div class="line"><a id="l06123" name="l06123"></a><span class="lineno"> 6123</span> </div>
-<div class="line"><a id="l06124" name="l06124"></a><span class="lineno"> 6124</span>          <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;ItoKMCFieldParticle&gt;</a>&amp; comp = computationParticles[lvl][din];</div>
-<div class="line"><a id="l06125" name="l06125"></a><span class="lineno"> 6125</span> </div>
-<div class="line"><a id="l06126" name="l06126"></a><span class="lineno"> 6126</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span> pos[SpaceDim] = {</div>
-<div class="line"><a id="l06127" name="l06127"></a><span class="lineno"> 6127</span>            D_DECL(comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(0), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(1), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(2))};</div>
-<div class="line"><a id="l06128" name="l06128"></a><span class="lineno"> 6128</span>          <span class="keyword">const</span> <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>* <span class="keyword">const</span> alt[SpaceDim] = {D_DECL(comp.template column&lt;&amp;ItoKMCFieldParticle::x0_x&gt;(),</div>
-<div class="line"><a id="l06129" name="l06129"></a><span class="lineno"> 6129</span>                                                            comp.template column&lt;&amp;ItoKMCFieldParticle::x0_y&gt;(),</div>
-<div class="line"><a id="l06130" name="l06130"></a><span class="lineno"> 6130</span>                                                            comp.template column&lt;&amp;ItoKMCFieldParticle::x0_z&gt;())};</div>
-<div class="line"><a id="l06131" name="l06131"></a><span class="lineno"> 6131</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span>             w             = comp.<a class="code hl_function" href="classParticleSoA.html#a1a500f16561d53697a27535c3aedab85">weightColumn</a>();</div>
-<div class="line"><a id="l06132" name="l06132"></a><span class="lineno"> 6132</span>          <span class="keyword">const</span> <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>* <span class="keyword">const</span> phiA          = comp.template column&lt;&amp;ItoKMCFieldParticle::phiA&gt;();</div>
-<div class="line"><a id="l06133" name="l06133"></a><span class="lineno"> 6133</span>          <span class="keyword">const</span> <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>* <span class="keyword">const</span> phiB          = comp.template column&lt;&amp;ItoKMCFieldParticle::phiB&gt;();</div>
-<div class="line"><a id="l06134" name="l06134"></a><span class="lineno"> 6134</span> </div>
-<div class="line"><a id="l06135" name="l06135"></a><span class="lineno"> 6135</span>          <a class="code hl_function" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">ParticleLoops::loop</a>(comp, [&amp;](<span class="keyword">const</span> std::size_t i) {</div>
-<div class="line"><a id="l06136" name="l06136"></a><span class="lineno"> 6136</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a id="l06137" name="l06137"></a><span class="lineno"> 6137</span>              pos[dir][i] = alt[dir][i];</div>
-<div class="line"><a id="l06138" name="l06138"></a><span class="lineno"> 6138</span>            }</div>
+<div class="line"><a id="l06124" name="l06124"></a><span class="lineno"> 6124</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a id="l06125" name="l06125"></a><span class="lineno"> 6125</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a id="l06126" name="l06126"></a><span class="lineno"> 6126</span>          <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a id="l06127" name="l06127"></a><span class="lineno"> 6127</span> </div>
+<div class="line"><a id="l06128" name="l06128"></a><span class="lineno"> 6128</span>          <a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;ItoKMCFieldParticle&gt;</a>&amp; comp = computationParticles[lvl][din];</div>
+<div class="line"><a id="l06129" name="l06129"></a><span class="lineno"> 6129</span> </div>
+<div class="line"><a id="l06130" name="l06130"></a><span class="lineno"> 6130</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span> pos[SpaceDim] = {</div>
+<div class="line"><a id="l06131" name="l06131"></a><span class="lineno"> 6131</span>            D_DECL(comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(0), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(1), comp.<a class="code hl_function" href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">positionColumn</a>(2))};</div>
+<div class="line"><a id="l06132" name="l06132"></a><span class="lineno"> 6132</span>          <span class="comment">// See the swap above: x0 is a position, hence double rather than ParticleReal.</span></div>
+<div class="line"><a id="l06133" name="l06133"></a><span class="lineno"> 6133</span>          <span class="keyword">const</span> <span class="keywordtype">double</span>* <span class="keyword">const</span>       alt[SpaceDim] = {D_DECL(comp.template column&lt;&amp;ItoKMCFieldParticle::x0_x&gt;(),</div>
+<div class="line"><a id="l06134" name="l06134"></a><span class="lineno"> 6134</span>                                                      comp.template column&lt;&amp;ItoKMCFieldParticle::x0_y&gt;(),</div>
+<div class="line"><a id="l06135" name="l06135"></a><span class="lineno"> 6135</span>                                                      comp.template column&lt;&amp;ItoKMCFieldParticle::x0_z&gt;())};</div>
+<div class="line"><a id="l06136" name="l06136"></a><span class="lineno"> 6136</span>          <span class="keywordtype">double</span>* <span class="keyword">const</span>             w             = comp.<a class="code hl_function" href="classParticleSoA.html#a1a500f16561d53697a27535c3aedab85">weightColumn</a>();</div>
+<div class="line"><a id="l06137" name="l06137"></a><span class="lineno"> 6137</span>          <span class="keyword">const</span> <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>* <span class="keyword">const</span> phiA          = comp.template column&lt;&amp;ItoKMCFieldParticle::phiA&gt;();</div>
+<div class="line"><a id="l06138" name="l06138"></a><span class="lineno"> 6138</span>          <span class="keyword">const</span> <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>* <span class="keyword">const</span> phiB          = comp.template column&lt;&amp;ItoKMCFieldParticle::phiB&gt;();</div>
 <div class="line"><a id="l06139" name="l06139"></a><span class="lineno"> 6139</span> </div>
-<div class="line"><a id="l06140" name="l06140"></a><span class="lineno"> 6140</span>            <span class="comment">// Effective weight = weight * (V(B) - V(A)).</span></div>
-<div class="line"><a id="l06141" name="l06141"></a><span class="lineno"> 6141</span>            w[i] *= (phiB[i] - phiA[i]);</div>
-<div class="line"><a id="l06142" name="l06142"></a><span class="lineno"> 6142</span>          });</div>
-<div class="line"><a id="l06143" name="l06143"></a><span class="lineno"> 6143</span>        }</div>
-<div class="line"><a id="l06144" name="l06144"></a><span class="lineno"> 6144</span>      }</div>
-<div class="line"><a id="l06145" name="l06145"></a><span class="lineno"> 6145</span> </div>
-<div class="line"><a id="l06146" name="l06146"></a><span class="lineno"> 6146</span>      computationParticles.remap();</div>
-<div class="line"><a id="l06147" name="l06147"></a><span class="lineno"> 6147</span> </div>
-<div class="line"><a id="l06148" name="l06148"></a><span class="lineno"> 6148</span>      <span class="comment">// Deposit the effective (energy-weighted) weight.</span></div>
-<div class="line"><a id="l06149" name="l06149"></a><span class="lineno"> 6149</span>      m_amr-&gt;depositWeight(m_particleScratch1,</div>
-<div class="line"><a id="l06150" name="l06150"></a><span class="lineno"> 6150</span>                           m_particleRealm,</div>
-<div class="line"><a id="l06151" name="l06151"></a><span class="lineno"> 6151</span>                           m_plasmaPhase,</div>
-<div class="line"><a id="l06152" name="l06152"></a><span class="lineno"> 6152</span>                           computationParticles,</div>
-<div class="line"><a id="l06153" name="l06153"></a><span class="lineno"> 6153</span>                           solver-&gt;getDeposition(),</div>
-<div class="line"><a id="l06154" name="l06154"></a><span class="lineno"> 6154</span>                           solver-&gt;getCoarseFineDeposition(),</div>
-<div class="line"><a id="l06155" name="l06155"></a><span class="lineno"> 6155</span>                           <span class="keyword">false</span>);</div>
-<div class="line"><a id="l06156" name="l06156"></a><span class="lineno"> 6156</span> </div>
-<div class="line"><a id="l06157" name="l06157"></a><span class="lineno"> 6157</span>      <span class="comment">// Copy data back onto the fluid realm.</span></div>
-<div class="line"><a id="l06158" name="l06158"></a><span class="lineno"> 6158</span>      m_amr-&gt;copyData(m_fluidScratch1, m_particleScratch1);</div>
-<div class="line"><a id="l06159" name="l06159"></a><span class="lineno"> 6159</span>      <a class="code hl_function" href="classDataOps.html#a0526ab53a5a7c72d202ac38e8ba3d1f0">DataOps::scale</a>(m_fluidScratch1, Z * <a class="code hl_variable" href="namespaceUnits.html#a6c222b26a27fc4985c5e26ec959f6460">Units::Qe</a> / a_dt);</div>
-<div class="line"><a id="l06160" name="l06160"></a><span class="lineno"> 6160</span>      <a class="code hl_function" href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">DataOps::plus</a>(m_EdotJ, m_fluidScratch1, 0, idx, 1);</div>
-<div class="line"><a id="l06161" name="l06161"></a><span class="lineno"> 6161</span>    }</div>
-<div class="line"><a id="l06162" name="l06162"></a><span class="lineno"> 6162</span> </div>
-<div class="line"><a id="l06163" name="l06163"></a><span class="lineno"> 6163</span>    computationParticles.<a class="code hl_function" href="classParticleContainer.html#a10dea58e175d3e0686716dc9d4972291">clearParticles</a>();</div>
-<div class="line"><a id="l06164" name="l06164"></a><span class="lineno"> 6164</span>  }</div>
-<div class="line"><a id="l06165" name="l06165"></a><span class="lineno"> 6165</span>}</div>
+<div class="line"><a id="l06140" name="l06140"></a><span class="lineno"> 6140</span>          <a class="code hl_function" href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">ParticleLoops::loop</a>(comp, [&amp;](<span class="keyword">const</span> std::size_t i) {</div>
+<div class="line"><a id="l06141" name="l06141"></a><span class="lineno"> 6141</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a id="l06142" name="l06142"></a><span class="lineno"> 6142</span>              pos[dir][i] = alt[dir][i];</div>
+<div class="line"><a id="l06143" name="l06143"></a><span class="lineno"> 6143</span>            }</div>
+<div class="line"><a id="l06144" name="l06144"></a><span class="lineno"> 6144</span> </div>
+<div class="line"><a id="l06145" name="l06145"></a><span class="lineno"> 6145</span>            <span class="comment">// Effective weight = weight * (V(B) - V(A)).</span></div>
+<div class="line"><a id="l06146" name="l06146"></a><span class="lineno"> 6146</span>            w[i] *= (phiB[i] - phiA[i]);</div>
+<div class="line"><a id="l06147" name="l06147"></a><span class="lineno"> 6147</span>          });</div>
+<div class="line"><a id="l06148" name="l06148"></a><span class="lineno"> 6148</span>        }</div>
+<div class="line"><a id="l06149" name="l06149"></a><span class="lineno"> 6149</span>      }</div>
+<div class="line"><a id="l06150" name="l06150"></a><span class="lineno"> 6150</span> </div>
+<div class="line"><a id="l06151" name="l06151"></a><span class="lineno"> 6151</span>      computationParticles.remap();</div>
+<div class="line"><a id="l06152" name="l06152"></a><span class="lineno"> 6152</span> </div>
+<div class="line"><a id="l06153" name="l06153"></a><span class="lineno"> 6153</span>      <span class="comment">// Deposit the effective (energy-weighted) weight.</span></div>
+<div class="line"><a id="l06154" name="l06154"></a><span class="lineno"> 6154</span>      m_amr-&gt;depositWeight(m_particleScratch1,</div>
+<div class="line"><a id="l06155" name="l06155"></a><span class="lineno"> 6155</span>                           m_particleRealm,</div>
+<div class="line"><a id="l06156" name="l06156"></a><span class="lineno"> 6156</span>                           m_plasmaPhase,</div>
+<div class="line"><a id="l06157" name="l06157"></a><span class="lineno"> 6157</span>                           computationParticles,</div>
+<div class="line"><a id="l06158" name="l06158"></a><span class="lineno"> 6158</span>                           solver-&gt;getDeposition(),</div>
+<div class="line"><a id="l06159" name="l06159"></a><span class="lineno"> 6159</span>                           solver-&gt;getCoarseFineDeposition(),</div>
+<div class="line"><a id="l06160" name="l06160"></a><span class="lineno"> 6160</span>                           <span class="keyword">false</span>);</div>
+<div class="line"><a id="l06161" name="l06161"></a><span class="lineno"> 6161</span> </div>
+<div class="line"><a id="l06162" name="l06162"></a><span class="lineno"> 6162</span>      <span class="comment">// Copy data back onto the fluid realm.</span></div>
+<div class="line"><a id="l06163" name="l06163"></a><span class="lineno"> 6163</span>      m_amr-&gt;copyData(m_fluidScratch1, m_particleScratch1);</div>
+<div class="line"><a id="l06164" name="l06164"></a><span class="lineno"> 6164</span>      <a class="code hl_function" href="classDataOps.html#a0526ab53a5a7c72d202ac38e8ba3d1f0">DataOps::scale</a>(m_fluidScratch1, Z * <a class="code hl_variable" href="namespaceUnits.html#a6c222b26a27fc4985c5e26ec959f6460">Units::Qe</a> / a_dt);</div>
+<div class="line"><a id="l06165" name="l06165"></a><span class="lineno"> 6165</span>      <a class="code hl_function" href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">DataOps::plus</a>(m_EdotJ, m_fluidScratch1, 0, idx, 1);</div>
+<div class="line"><a id="l06166" name="l06166"></a><span class="lineno"> 6166</span>    }</div>
+<div class="line"><a id="l06167" name="l06167"></a><span class="lineno"> 6167</span> </div>
+<div class="line"><a id="l06168" name="l06168"></a><span class="lineno"> 6168</span>    computationParticles.<a class="code hl_function" href="classParticleContainer.html#a10dea58e175d3e0686716dc9d4972291">clearParticles</a>();</div>
+<div class="line"><a id="l06169" name="l06169"></a><span class="lineno"> 6169</span>  }</div>
+<div class="line"><a id="l06170" name="l06170"></a><span class="lineno"> 6170</span>}</div>
 </div>
-<div class="line"><a id="l06166" name="l06166"></a><span class="lineno"> 6166</span> </div>
-<div class="line"><a id="l06167" name="l06167"></a><span class="lineno"> 6167</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> I, <span class="keyword">typename</span> C, <span class="keyword">typename</span> R, <span class="keyword">typename</span> F&gt;</div>
-<div class="line"><a id="l06168" name="l06168"></a><span class="lineno"> 6168</span><span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen06169" data-start="{" data-end="}">
-<div class="line"><a id="l06169" name="l06169"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0"> 6169</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0">ItoKMCStepper&lt;I, C, R, F&gt;::computePhysicsPlotVariables</a>(EBAMRCellData&amp; a_physicsPlotVars) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l06170" name="l06170"></a><span class="lineno"> 6170</span>{</div>
-<div class="line"><a id="l06171" name="l06171"></a><span class="lineno"> 6171</span>  CH_TIME(<span class="stringliteral">&quot;ItoKMCStepper::computePhysicsPlotVariables&quot;</span>);</div>
-<div class="line"><a id="l06172" name="l06172"></a><span class="lineno"> 6172</span>  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a id="l06173" name="l06173"></a><span class="lineno"> 6173</span>    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::computePhysicsPlotVariables&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a id="l06174" name="l06174"></a><span class="lineno"> 6174</span>  }</div>
-<div class="line"><a id="l06175" name="l06175"></a><span class="lineno"> 6175</span> </div>
-<div class="line"><a id="l06176" name="l06176"></a><span class="lineno"> 6176</span>  <span class="comment">// Number of output variables from CdrPlasmaPhysics</span></div>
-<div class="line"><a id="l06177" name="l06177"></a><span class="lineno"> 6177</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numVars          = m_physics-&gt;getNumberOfPlotVariables();</div>
-<div class="line"><a id="l06178" name="l06178"></a><span class="lineno"> 6178</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numItoSpecies    = m_physics-&gt;getNumItoSpecies();</div>
-<div class="line"><a id="l06179" name="l06179"></a><span class="lineno"> 6179</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numCdrSpecies    = m_physics-&gt;getNumCdrSpecies();</div>
-<div class="line"><a id="l06180" name="l06180"></a><span class="lineno"> 6180</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numPlasmaSpecies = m_physics-&gt;getNumPlasmaSpecies();</div>
-<div class="line"><a id="l06181" name="l06181"></a><span class="lineno"> 6181</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numPhotonSpecies = m_physics-&gt;getNumPhotonSpecies();</div>
-<div class="line"><a id="l06182" name="l06182"></a><span class="lineno"> 6182</span> </div>
-<div class="line"><a id="l06183" name="l06183"></a><span class="lineno"> 6183</span>  CH_assert(!(a_physicsPlotVars[0].isNull()));</div>
-<div class="line"><a id="l06184" name="l06184"></a><span class="lineno"> 6184</span>  CH_assert(a_physicsPlotVars[0]-&gt;nComp() == numVars);</div>
-<div class="line"><a id="l06185" name="l06185"></a><span class="lineno"> 6185</span>  CH_assert(a_physicsPlotVars.getRealm() == m_fluidRealm);</div>
-<div class="line"><a id="l06186" name="l06186"></a><span class="lineno"> 6186</span> </div>
-<div class="line"><a id="l06187" name="l06187"></a><span class="lineno"> 6187</span>  <span class="comment">// Update gradients</span></div>
-<div class="line"><a id="l06188" name="l06188"></a><span class="lineno"> 6188</span>  this-&gt;computeDensityGradients();</div>
-<div class="line"><a id="l06189" name="l06189"></a><span class="lineno"> 6189</span> </div>
-<div class="line"><a id="l06190" name="l06190"></a><span class="lineno"> 6190</span>  <span class="keyword">const</span> RealVect probLo = m_amr-&gt;getProbLo();</div>
+<div class="line"><a id="l06171" name="l06171"></a><span class="lineno"> 6171</span> </div>
+<div class="line"><a id="l06172" name="l06172"></a><span class="lineno"> 6172</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> I, <span class="keyword">typename</span> C, <span class="keyword">typename</span> R, <span class="keyword">typename</span> F&gt;</div>
+<div class="line"><a id="l06173" name="l06173"></a><span class="lineno"> 6173</span><span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen06174" data-start="{" data-end="}">
+<div class="line"><a id="l06174" name="l06174"></a><span class="lineno"><a class="line" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0"> 6174</a></span><a class="code hl_function" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0">ItoKMCStepper&lt;I, C, R, F&gt;::computePhysicsPlotVariables</a>(EBAMRCellData&amp; a_physicsPlotVars) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l06175" name="l06175"></a><span class="lineno"> 6175</span>{</div>
+<div class="line"><a id="l06176" name="l06176"></a><span class="lineno"> 6176</span>  CH_TIME(<span class="stringliteral">&quot;ItoKMCStepper::computePhysicsPlotVariables&quot;</span>);</div>
+<div class="line"><a id="l06177" name="l06177"></a><span class="lineno"> 6177</span>  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a id="l06178" name="l06178"></a><span class="lineno"> 6178</span>    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::computePhysicsPlotVariables&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a id="l06179" name="l06179"></a><span class="lineno"> 6179</span>  }</div>
+<div class="line"><a id="l06180" name="l06180"></a><span class="lineno"> 6180</span> </div>
+<div class="line"><a id="l06181" name="l06181"></a><span class="lineno"> 6181</span>  <span class="comment">// Number of output variables from CdrPlasmaPhysics</span></div>
+<div class="line"><a id="l06182" name="l06182"></a><span class="lineno"> 6182</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numVars          = m_physics-&gt;getNumberOfPlotVariables();</div>
+<div class="line"><a id="l06183" name="l06183"></a><span class="lineno"> 6183</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numItoSpecies    = m_physics-&gt;getNumItoSpecies();</div>
+<div class="line"><a id="l06184" name="l06184"></a><span class="lineno"> 6184</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numCdrSpecies    = m_physics-&gt;getNumCdrSpecies();</div>
+<div class="line"><a id="l06185" name="l06185"></a><span class="lineno"> 6185</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numPlasmaSpecies = m_physics-&gt;getNumPlasmaSpecies();</div>
+<div class="line"><a id="l06186" name="l06186"></a><span class="lineno"> 6186</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numPhotonSpecies = m_physics-&gt;getNumPhotonSpecies();</div>
+<div class="line"><a id="l06187" name="l06187"></a><span class="lineno"> 6187</span> </div>
+<div class="line"><a id="l06188" name="l06188"></a><span class="lineno"> 6188</span>  CH_assert(!(a_physicsPlotVars[0].isNull()));</div>
+<div class="line"><a id="l06189" name="l06189"></a><span class="lineno"> 6189</span>  CH_assert(a_physicsPlotVars[0]-&gt;nComp() == numVars);</div>
+<div class="line"><a id="l06190" name="l06190"></a><span class="lineno"> 6190</span>  CH_assert(a_physicsPlotVars.getRealm() == m_fluidRealm);</div>
 <div class="line"><a id="l06191" name="l06191"></a><span class="lineno"> 6191</span> </div>
-<div class="line"><a id="l06192" name="l06192"></a><span class="lineno"> 6192</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a id="l06193" name="l06193"></a><span class="lineno"> 6193</span>    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl   = m_amr-&gt;getGrids(m_fluidRealm)[lvl];</div>
-<div class="line"><a id="l06194" name="l06194"></a><span class="lineno"> 6194</span>    <span class="keyword">const</span> DataIterator&amp;      dit   = dbl.dataIterator();</div>
-<div class="line"><a id="l06195" name="l06195"></a><span class="lineno"> 6195</span>    <span class="keyword">const</span> EBISLayout&amp;        ebisl = m_amr-&gt;getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];</div>
-<div class="line"><a id="l06196" name="l06196"></a><span class="lineno"> 6196</span>    <span class="keyword">const</span> Real               dx    = m_amr-&gt;getDx()[lvl];</div>
-<div class="line"><a id="l06197" name="l06197"></a><span class="lineno"> 6197</span> </div>
-<div class="line"><a id="l06198" name="l06198"></a><span class="lineno"> 6198</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
-<div class="line"><a id="l06199" name="l06199"></a><span class="lineno"> 6199</span> </div>
-<div class="line"><a id="l06200" name="l06200"></a><span class="lineno"> 6200</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
-<div class="line"><a id="l06201" name="l06201"></a><span class="lineno"> 6201</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
-<div class="line"><a id="l06202" name="l06202"></a><span class="lineno"> 6202</span>      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
-<div class="line"><a id="l06203" name="l06203"></a><span class="lineno"> 6203</span> </div>
-<div class="line"><a id="l06204" name="l06204"></a><span class="lineno"> 6204</span>      <span class="keyword">const</span> Box&amp;     cellBox = dbl[din];</div>
-<div class="line"><a id="l06205" name="l06205"></a><span class="lineno"> 6205</span>      <span class="keyword">const</span> EBISBox&amp; ebisBox = ebisl[din];</div>
-<div class="line"><a id="l06206" name="l06206"></a><span class="lineno"> 6206</span> </div>
-<div class="line"><a id="l06207" name="l06207"></a><span class="lineno"> 6207</span>      <span class="comment">// Handle to electric field</span></div>
-<div class="line"><a id="l06208" name="l06208"></a><span class="lineno"> 6208</span>      <span class="keyword">const</span> EBCellFAB&amp; electricField    = (*m_electricFieldFluid[lvl])[din];</div>
-<div class="line"><a id="l06209" name="l06209"></a><span class="lineno"> 6209</span>      <span class="keyword">const</span> FArrayBox&amp; electricFieldReg = electricField.getFArrayBox();</div>
-<div class="line"><a id="l06210" name="l06210"></a><span class="lineno"> 6210</span> </div>
-<div class="line"><a id="l06211" name="l06211"></a><span class="lineno"> 6211</span>      <span class="comment">// Handle to densities and density gradients for CDR and Ito species.</span></div>
-<div class="line"><a id="l06212" name="l06212"></a><span class="lineno"> 6212</span>      Vector&lt;const EBCellFAB*&gt; densitiesIto(numItoSpecies);</div>
-<div class="line"><a id="l06213" name="l06213"></a><span class="lineno"> 6213</span>      Vector&lt;const EBCellFAB*&gt; densityGradientsIto(numItoSpecies);</div>
-<div class="line"><a id="l06214" name="l06214"></a><span class="lineno"> 6214</span>      Vector&lt;const FArrayBox*&gt; densitiesItoReg(numItoSpecies);</div>
-<div class="line"><a id="l06215" name="l06215"></a><span class="lineno"> 6215</span>      Vector&lt;const FArrayBox*&gt; densityGradientsItoReg(numItoSpecies);</div>
-<div class="line"><a id="l06216" name="l06216"></a><span class="lineno"> 6216</span> </div>
-<div class="line"><a id="l06217" name="l06217"></a><span class="lineno"> 6217</span>      Vector&lt;const EBCellFAB*&gt; densitiesCDR(numCdrSpecies);</div>
-<div class="line"><a id="l06218" name="l06218"></a><span class="lineno"> 6218</span>      Vector&lt;const EBCellFAB*&gt; densityGradientsCDR(numCdrSpecies);</div>
-<div class="line"><a id="l06219" name="l06219"></a><span class="lineno"> 6219</span>      Vector&lt;const FArrayBox*&gt; densitiesCDRReg(numCdrSpecies);</div>
-<div class="line"><a id="l06220" name="l06220"></a><span class="lineno"> 6220</span>      Vector&lt;const FArrayBox*&gt; densityGradientsCDRReg(numCdrSpecies);</div>
+<div class="line"><a id="l06192" name="l06192"></a><span class="lineno"> 6192</span>  <span class="comment">// Update gradients</span></div>
+<div class="line"><a id="l06193" name="l06193"></a><span class="lineno"> 6193</span>  this-&gt;computeDensityGradients();</div>
+<div class="line"><a id="l06194" name="l06194"></a><span class="lineno"> 6194</span> </div>
+<div class="line"><a id="l06195" name="l06195"></a><span class="lineno"> 6195</span>  <span class="keyword">const</span> RealVect probLo = m_amr-&gt;getProbLo();</div>
+<div class="line"><a id="l06196" name="l06196"></a><span class="lineno"> 6196</span> </div>
+<div class="line"><a id="l06197" name="l06197"></a><span class="lineno"> 6197</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a id="l06198" name="l06198"></a><span class="lineno"> 6198</span>    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl   = m_amr-&gt;getGrids(m_fluidRealm)[lvl];</div>
+<div class="line"><a id="l06199" name="l06199"></a><span class="lineno"> 6199</span>    <span class="keyword">const</span> DataIterator&amp;      dit   = dbl.dataIterator();</div>
+<div class="line"><a id="l06200" name="l06200"></a><span class="lineno"> 6200</span>    <span class="keyword">const</span> EBISLayout&amp;        ebisl = m_amr-&gt;getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];</div>
+<div class="line"><a id="l06201" name="l06201"></a><span class="lineno"> 6201</span>    <span class="keyword">const</span> Real               dx    = m_amr-&gt;getDx()[lvl];</div>
+<div class="line"><a id="l06202" name="l06202"></a><span class="lineno"> 6202</span> </div>
+<div class="line"><a id="l06203" name="l06203"></a><span class="lineno"> 6203</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a id="l06204" name="l06204"></a><span class="lineno"> 6204</span> </div>
+<div class="line"><a id="l06205" name="l06205"></a><span class="lineno"> 6205</span><span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a id="l06206" name="l06206"></a><span class="lineno"> 6206</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a id="l06207" name="l06207"></a><span class="lineno"> 6207</span>      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a id="l06208" name="l06208"></a><span class="lineno"> 6208</span> </div>
+<div class="line"><a id="l06209" name="l06209"></a><span class="lineno"> 6209</span>      <span class="keyword">const</span> Box&amp;     cellBox = dbl[din];</div>
+<div class="line"><a id="l06210" name="l06210"></a><span class="lineno"> 6210</span>      <span class="keyword">const</span> EBISBox&amp; ebisBox = ebisl[din];</div>
+<div class="line"><a id="l06211" name="l06211"></a><span class="lineno"> 6211</span> </div>
+<div class="line"><a id="l06212" name="l06212"></a><span class="lineno"> 6212</span>      <span class="comment">// Handle to electric field</span></div>
+<div class="line"><a id="l06213" name="l06213"></a><span class="lineno"> 6213</span>      <span class="keyword">const</span> EBCellFAB&amp; electricField    = (*m_electricFieldFluid[lvl])[din];</div>
+<div class="line"><a id="l06214" name="l06214"></a><span class="lineno"> 6214</span>      <span class="keyword">const</span> FArrayBox&amp; electricFieldReg = electricField.getFArrayBox();</div>
+<div class="line"><a id="l06215" name="l06215"></a><span class="lineno"> 6215</span> </div>
+<div class="line"><a id="l06216" name="l06216"></a><span class="lineno"> 6216</span>      <span class="comment">// Handle to densities and density gradients for CDR and Ito species.</span></div>
+<div class="line"><a id="l06217" name="l06217"></a><span class="lineno"> 6217</span>      Vector&lt;const EBCellFAB*&gt; densitiesIto(numItoSpecies);</div>
+<div class="line"><a id="l06218" name="l06218"></a><span class="lineno"> 6218</span>      Vector&lt;const EBCellFAB*&gt; densityGradientsIto(numItoSpecies);</div>
+<div class="line"><a id="l06219" name="l06219"></a><span class="lineno"> 6219</span>      Vector&lt;const FArrayBox*&gt; densitiesItoReg(numItoSpecies);</div>
+<div class="line"><a id="l06220" name="l06220"></a><span class="lineno"> 6220</span>      Vector&lt;const FArrayBox*&gt; densityGradientsItoReg(numItoSpecies);</div>
 <div class="line"><a id="l06221" name="l06221"></a><span class="lineno"> 6221</span> </div>
-<div class="line"><a id="l06222" name="l06222"></a><span class="lineno"> 6222</span>      <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = m_ito-&gt;iterator(); it.ok(); ++it) {</div>
-<div class="line"><a id="l06223" name="l06223"></a><span class="lineno"> 6223</span>        <span class="keyword">const</span> RefCountedPtr&lt;ItoSolver&gt;&amp; solver = it();</div>
-<div class="line"><a id="l06224" name="l06224"></a><span class="lineno"> 6224</span> </div>
-<div class="line"><a id="l06225" name="l06225"></a><span class="lineno"> 6225</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> i = it.index();</div>
+<div class="line"><a id="l06222" name="l06222"></a><span class="lineno"> 6222</span>      Vector&lt;const EBCellFAB*&gt; densitiesCDR(numCdrSpecies);</div>
+<div class="line"><a id="l06223" name="l06223"></a><span class="lineno"> 6223</span>      Vector&lt;const EBCellFAB*&gt; densityGradientsCDR(numCdrSpecies);</div>
+<div class="line"><a id="l06224" name="l06224"></a><span class="lineno"> 6224</span>      Vector&lt;const FArrayBox*&gt; densitiesCDRReg(numCdrSpecies);</div>
+<div class="line"><a id="l06225" name="l06225"></a><span class="lineno"> 6225</span>      Vector&lt;const FArrayBox*&gt; densityGradientsCDRReg(numCdrSpecies);</div>
 <div class="line"><a id="l06226" name="l06226"></a><span class="lineno"> 6226</span> </div>
-<div class="line"><a id="l06227" name="l06227"></a><span class="lineno"> 6227</span>        densitiesIto[i]           = &amp;(*(m_fluidPhiIto[i])[lvl])[din];</div>
-<div class="line"><a id="l06228" name="l06228"></a><span class="lineno"> 6228</span>        densitiesItoReg[i]        = &amp;(densitiesIto[i]-&gt;getFArrayBox());</div>
-<div class="line"><a id="l06229" name="l06229"></a><span class="lineno"> 6229</span>        densityGradientsIto[i]    = &amp;(*m_fluidGradPhiIto[i][lvl])[din];</div>
-<div class="line"><a id="l06230" name="l06230"></a><span class="lineno"> 6230</span>        densityGradientsItoReg[i] = &amp;(densityGradientsIto[i]-&gt;getFArrayBox());</div>
-<div class="line"><a id="l06231" name="l06231"></a><span class="lineno"> 6231</span>      }</div>
-<div class="line"><a id="l06232" name="l06232"></a><span class="lineno"> 6232</span> </div>
-<div class="line"><a id="l06233" name="l06233"></a><span class="lineno"> 6233</span>      <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = m_cdr-&gt;iterator(); it.ok(); ++it) {</div>
-<div class="line"><a id="l06234" name="l06234"></a><span class="lineno"> 6234</span>        <span class="keyword">const</span> RefCountedPtr&lt;CdrSolver&gt;&amp; solver = it();</div>
-<div class="line"><a id="l06235" name="l06235"></a><span class="lineno"> 6235</span>        <span class="keyword">const</span> EBAMRCellData&amp;            phi    = solver-&gt;getPhi();</div>
-<div class="line"><a id="l06236" name="l06236"></a><span class="lineno"> 6236</span> </div>
-<div class="line"><a id="l06237" name="l06237"></a><span class="lineno"> 6237</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> i = it.index();</div>
-<div class="line"><a id="l06238" name="l06238"></a><span class="lineno"> 6238</span> </div>
-<div class="line"><a id="l06239" name="l06239"></a><span class="lineno"> 6239</span>        densitiesCDR[i]           = &amp;(*phi[lvl])[din];</div>
-<div class="line"><a id="l06240" name="l06240"></a><span class="lineno"> 6240</span>        densitiesCDRReg[i]        = &amp;(densitiesCDR[i]-&gt;getFArrayBox());</div>
-<div class="line"><a id="l06241" name="l06241"></a><span class="lineno"> 6241</span>        densityGradientsCDR[i]    = &amp;(*m_fluidGradPhiCDR[i][lvl])[din];</div>
-<div class="line"><a id="l06242" name="l06242"></a><span class="lineno"> 6242</span>        densityGradientsCDRReg[i] = &amp;(densityGradientsCDR[i]-&gt;getFArrayBox());</div>
-<div class="line"><a id="l06243" name="l06243"></a><span class="lineno"> 6243</span>      }</div>
-<div class="line"><a id="l06244" name="l06244"></a><span class="lineno"> 6244</span> </div>
-<div class="line"><a id="l06245" name="l06245"></a><span class="lineno"> 6245</span>      <span class="comment">// Handle to valid grid cells.</span></div>
-<div class="line"><a id="l06246" name="l06246"></a><span class="lineno"> 6246</span>      <span class="keyword">const</span> BaseFab&lt;bool&gt;&amp; validCells = (*m_amr-&gt;getValidCells(m_fluidRealm)[lvl])[din];</div>
-<div class="line"><a id="l06247" name="l06247"></a><span class="lineno"> 6247</span> </div>
-<div class="line"><a id="l06248" name="l06248"></a><span class="lineno"> 6248</span>      <span class="comment">// Handle to output variables</span></div>
-<div class="line"><a id="l06249" name="l06249"></a><span class="lineno"> 6249</span>      EBCellFAB&amp; physicsPlotVars    = (*a_physicsPlotVars[lvl])[din];</div>
-<div class="line"><a id="l06250" name="l06250"></a><span class="lineno"> 6250</span>      FArrayBox&amp; physicsPlotVarsReg = physicsPlotVars.getFArrayBox();</div>
-<div class="line"><a id="l06251" name="l06251"></a><span class="lineno"> 6251</span> </div>
-<div class="line"><a id="l06252" name="l06252"></a><span class="lineno"> 6252</span>      <span class="comment">// Things that will be populated in the kernels.</span></div>
-<div class="line"><a id="l06253" name="l06253"></a><span class="lineno"> 6253</span>      Vector&lt;Real&gt;     densities(numPlasmaSpecies);</div>
-<div class="line"><a id="l06254" name="l06254"></a><span class="lineno"> 6254</span>      Vector&lt;RealVect&gt; densityGradients(numPlasmaSpecies);</div>
-<div class="line"><a id="l06255" name="l06255"></a><span class="lineno"> 6255</span> </div>
-<div class="line"><a id="l06256" name="l06256"></a><span class="lineno"> 6256</span>      <span class="comment">// Regular cells</span></div>
-<div class="line"><a id="l06257" name="l06257"></a><span class="lineno"> 6257</span>      <span class="keyword">auto</span> regularKernel = [&amp;](<span class="keyword">const</span> IntVect&amp; iv) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l06258" name="l06258"></a><span class="lineno"> 6258</span>        <span class="keywordflow">if</span> (ebisBox.isRegular(iv) &amp;&amp; validCells(iv, 0)) {</div>
-<div class="line"><a id="l06259" name="l06259"></a><span class="lineno"> 6259</span>          <span class="keyword">const</span> RealVect pos = probLo + dx * (RealVect(iv) + 0.5 * RealVect::Unit);</div>
-<div class="line"><a id="l06260" name="l06260"></a><span class="lineno"> 6260</span>          <span class="keyword">const</span> RealVect E   = RealVect(</div>
-<div class="line"><a id="l06261" name="l06261"></a><span class="lineno"> 6261</span>            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));</div>
-<div class="line"><a id="l06262" name="l06262"></a><span class="lineno"> 6262</span> </div>
-<div class="line"><a id="l06263" name="l06263"></a><span class="lineno"> 6263</span>          <span class="comment">// Populate gradients.</span></div>
-<div class="line"><a id="l06264" name="l06264"></a><span class="lineno"> 6264</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numItoSpecies; i++) {</div>
-<div class="line"><a id="l06265" name="l06265"></a><span class="lineno"> 6265</span>            densities[i]        = (*densitiesItoReg[i])(iv, 0);</div>
-<div class="line"><a id="l06266" name="l06266"></a><span class="lineno"> 6266</span>            densityGradients[i] = RealVect(D_DECL((*densityGradientsItoReg[i])(iv, 0),</div>
-<div class="line"><a id="l06267" name="l06267"></a><span class="lineno"> 6267</span>                                                  (*densityGradientsItoReg[i])(iv, 1),</div>
-<div class="line"><a id="l06268" name="l06268"></a><span class="lineno"> 6268</span>                                                  (*densityGradientsItoReg[i])(iv, 2)));</div>
-<div class="line"><a id="l06269" name="l06269"></a><span class="lineno"> 6269</span>          }</div>
-<div class="line"><a id="l06270" name="l06270"></a><span class="lineno"> 6270</span> </div>
-<div class="line"><a id="l06271" name="l06271"></a><span class="lineno"> 6271</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numCdrSpecies; i++) {</div>
-<div class="line"><a id="l06272" name="l06272"></a><span class="lineno"> 6272</span>            densities[numItoSpecies + i]        = (*densitiesCDRReg[i])(iv, 0);</div>
-<div class="line"><a id="l06273" name="l06273"></a><span class="lineno"> 6273</span>            densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDRReg[i])(iv, 0),</div>
-<div class="line"><a id="l06274" name="l06274"></a><span class="lineno"> 6274</span>                                                                  (*densityGradientsCDRReg[i])(iv, 1),</div>
-<div class="line"><a id="l06275" name="l06275"></a><span class="lineno"> 6275</span>                                                                  (*densityGradientsCDRReg[i])(iv, 2)));</div>
-<div class="line"><a id="l06276" name="l06276"></a><span class="lineno"> 6276</span>          }</div>
-<div class="line"><a id="l06277" name="l06277"></a><span class="lineno"> 6277</span> </div>
-<div class="line"><a id="l06278" name="l06278"></a><span class="lineno"> 6278</span>          <span class="comment">// Do the physics advance.</span></div>
-<div class="line"><a id="l06279" name="l06279"></a><span class="lineno"> 6279</span>          <span class="keyword">const</span> Vector&lt;Real&gt; plotVars = m_physics-&gt;getPlotVariables(E, pos, densities, densityGradients, dx, 1.0);</div>
-<div class="line"><a id="l06280" name="l06280"></a><span class="lineno"> 6280</span> </div>
-<div class="line"><a id="l06281" name="l06281"></a><span class="lineno"> 6281</span>          CH_assert(plotVars.size() == numVars);</div>
+<div class="line"><a id="l06227" name="l06227"></a><span class="lineno"> 6227</span>      <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = m_ito-&gt;iterator(); it.ok(); ++it) {</div>
+<div class="line"><a id="l06228" name="l06228"></a><span class="lineno"> 6228</span>        <span class="keyword">const</span> RefCountedPtr&lt;ItoSolver&gt;&amp; solver = it();</div>
+<div class="line"><a id="l06229" name="l06229"></a><span class="lineno"> 6229</span> </div>
+<div class="line"><a id="l06230" name="l06230"></a><span class="lineno"> 6230</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> i = it.index();</div>
+<div class="line"><a id="l06231" name="l06231"></a><span class="lineno"> 6231</span> </div>
+<div class="line"><a id="l06232" name="l06232"></a><span class="lineno"> 6232</span>        densitiesIto[i]           = &amp;(*(m_fluidPhiIto[i])[lvl])[din];</div>
+<div class="line"><a id="l06233" name="l06233"></a><span class="lineno"> 6233</span>        densitiesItoReg[i]        = &amp;(densitiesIto[i]-&gt;getFArrayBox());</div>
+<div class="line"><a id="l06234" name="l06234"></a><span class="lineno"> 6234</span>        densityGradientsIto[i]    = &amp;(*m_fluidGradPhiIto[i][lvl])[din];</div>
+<div class="line"><a id="l06235" name="l06235"></a><span class="lineno"> 6235</span>        densityGradientsItoReg[i] = &amp;(densityGradientsIto[i]-&gt;getFArrayBox());</div>
+<div class="line"><a id="l06236" name="l06236"></a><span class="lineno"> 6236</span>      }</div>
+<div class="line"><a id="l06237" name="l06237"></a><span class="lineno"> 6237</span> </div>
+<div class="line"><a id="l06238" name="l06238"></a><span class="lineno"> 6238</span>      <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = m_cdr-&gt;iterator(); it.ok(); ++it) {</div>
+<div class="line"><a id="l06239" name="l06239"></a><span class="lineno"> 6239</span>        <span class="keyword">const</span> RefCountedPtr&lt;CdrSolver&gt;&amp; solver = it();</div>
+<div class="line"><a id="l06240" name="l06240"></a><span class="lineno"> 6240</span>        <span class="keyword">const</span> EBAMRCellData&amp;            phi    = solver-&gt;getPhi();</div>
+<div class="line"><a id="l06241" name="l06241"></a><span class="lineno"> 6241</span> </div>
+<div class="line"><a id="l06242" name="l06242"></a><span class="lineno"> 6242</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> i = it.index();</div>
+<div class="line"><a id="l06243" name="l06243"></a><span class="lineno"> 6243</span> </div>
+<div class="line"><a id="l06244" name="l06244"></a><span class="lineno"> 6244</span>        densitiesCDR[i]           = &amp;(*phi[lvl])[din];</div>
+<div class="line"><a id="l06245" name="l06245"></a><span class="lineno"> 6245</span>        densitiesCDRReg[i]        = &amp;(densitiesCDR[i]-&gt;getFArrayBox());</div>
+<div class="line"><a id="l06246" name="l06246"></a><span class="lineno"> 6246</span>        densityGradientsCDR[i]    = &amp;(*m_fluidGradPhiCDR[i][lvl])[din];</div>
+<div class="line"><a id="l06247" name="l06247"></a><span class="lineno"> 6247</span>        densityGradientsCDRReg[i] = &amp;(densityGradientsCDR[i]-&gt;getFArrayBox());</div>
+<div class="line"><a id="l06248" name="l06248"></a><span class="lineno"> 6248</span>      }</div>
+<div class="line"><a id="l06249" name="l06249"></a><span class="lineno"> 6249</span> </div>
+<div class="line"><a id="l06250" name="l06250"></a><span class="lineno"> 6250</span>      <span class="comment">// Handle to valid grid cells.</span></div>
+<div class="line"><a id="l06251" name="l06251"></a><span class="lineno"> 6251</span>      <span class="keyword">const</span> BaseFab&lt;bool&gt;&amp; validCells = (*m_amr-&gt;getValidCells(m_fluidRealm)[lvl])[din];</div>
+<div class="line"><a id="l06252" name="l06252"></a><span class="lineno"> 6252</span> </div>
+<div class="line"><a id="l06253" name="l06253"></a><span class="lineno"> 6253</span>      <span class="comment">// Handle to output variables</span></div>
+<div class="line"><a id="l06254" name="l06254"></a><span class="lineno"> 6254</span>      EBCellFAB&amp; physicsPlotVars    = (*a_physicsPlotVars[lvl])[din];</div>
+<div class="line"><a id="l06255" name="l06255"></a><span class="lineno"> 6255</span>      FArrayBox&amp; physicsPlotVarsReg = physicsPlotVars.getFArrayBox();</div>
+<div class="line"><a id="l06256" name="l06256"></a><span class="lineno"> 6256</span> </div>
+<div class="line"><a id="l06257" name="l06257"></a><span class="lineno"> 6257</span>      <span class="comment">// Things that will be populated in the kernels.</span></div>
+<div class="line"><a id="l06258" name="l06258"></a><span class="lineno"> 6258</span>      Vector&lt;Real&gt;     densities(numPlasmaSpecies);</div>
+<div class="line"><a id="l06259" name="l06259"></a><span class="lineno"> 6259</span>      Vector&lt;RealVect&gt; densityGradients(numPlasmaSpecies);</div>
+<div class="line"><a id="l06260" name="l06260"></a><span class="lineno"> 6260</span> </div>
+<div class="line"><a id="l06261" name="l06261"></a><span class="lineno"> 6261</span>      <span class="comment">// Regular cells</span></div>
+<div class="line"><a id="l06262" name="l06262"></a><span class="lineno"> 6262</span>      <span class="keyword">auto</span> regularKernel = [&amp;](<span class="keyword">const</span> IntVect&amp; iv) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a id="l06263" name="l06263"></a><span class="lineno"> 6263</span>        <span class="keywordflow">if</span> (ebisBox.isRegular(iv) &amp;&amp; validCells(iv, 0)) {</div>
+<div class="line"><a id="l06264" name="l06264"></a><span class="lineno"> 6264</span>          <span class="keyword">const</span> RealVect pos = probLo + dx * (RealVect(iv) + 0.5 * RealVect::Unit);</div>
+<div class="line"><a id="l06265" name="l06265"></a><span class="lineno"> 6265</span>          <span class="keyword">const</span> RealVect E   = RealVect(</div>
+<div class="line"><a id="l06266" name="l06266"></a><span class="lineno"> 6266</span>            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));</div>
+<div class="line"><a id="l06267" name="l06267"></a><span class="lineno"> 6267</span> </div>
+<div class="line"><a id="l06268" name="l06268"></a><span class="lineno"> 6268</span>          <span class="comment">// Populate gradients.</span></div>
+<div class="line"><a id="l06269" name="l06269"></a><span class="lineno"> 6269</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numItoSpecies; i++) {</div>
+<div class="line"><a id="l06270" name="l06270"></a><span class="lineno"> 6270</span>            densities[i]        = (*densitiesItoReg[i])(iv, 0);</div>
+<div class="line"><a id="l06271" name="l06271"></a><span class="lineno"> 6271</span>            densityGradients[i] = RealVect(D_DECL((*densityGradientsItoReg[i])(iv, 0),</div>
+<div class="line"><a id="l06272" name="l06272"></a><span class="lineno"> 6272</span>                                                  (*densityGradientsItoReg[i])(iv, 1),</div>
+<div class="line"><a id="l06273" name="l06273"></a><span class="lineno"> 6273</span>                                                  (*densityGradientsItoReg[i])(iv, 2)));</div>
+<div class="line"><a id="l06274" name="l06274"></a><span class="lineno"> 6274</span>          }</div>
+<div class="line"><a id="l06275" name="l06275"></a><span class="lineno"> 6275</span> </div>
+<div class="line"><a id="l06276" name="l06276"></a><span class="lineno"> 6276</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numCdrSpecies; i++) {</div>
+<div class="line"><a id="l06277" name="l06277"></a><span class="lineno"> 6277</span>            densities[numItoSpecies + i]        = (*densitiesCDRReg[i])(iv, 0);</div>
+<div class="line"><a id="l06278" name="l06278"></a><span class="lineno"> 6278</span>            densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDRReg[i])(iv, 0),</div>
+<div class="line"><a id="l06279" name="l06279"></a><span class="lineno"> 6279</span>                                                                  (*densityGradientsCDRReg[i])(iv, 1),</div>
+<div class="line"><a id="l06280" name="l06280"></a><span class="lineno"> 6280</span>                                                                  (*densityGradientsCDRReg[i])(iv, 2)));</div>
+<div class="line"><a id="l06281" name="l06281"></a><span class="lineno"> 6281</span>          }</div>
 <div class="line"><a id="l06282" name="l06282"></a><span class="lineno"> 6282</span> </div>
-<div class="line"><a id="l06283" name="l06283"></a><span class="lineno"> 6283</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numVars; i++) {</div>
-<div class="line"><a id="l06284" name="l06284"></a><span class="lineno"> 6284</span>            physicsPlotVarsReg(iv, i) = plotVars[i];</div>
-<div class="line"><a id="l06285" name="l06285"></a><span class="lineno"> 6285</span>          }</div>
-<div class="line"><a id="l06286" name="l06286"></a><span class="lineno"> 6286</span>        }</div>
-<div class="line"><a id="l06287" name="l06287"></a><span class="lineno"> 6287</span>      };</div>
-<div class="line"><a id="l06288" name="l06288"></a><span class="lineno"> 6288</span> </div>
-<div class="line"><a id="l06289" name="l06289"></a><span class="lineno"> 6289</span>      <span class="comment">// Irregular cells</span></div>
-<div class="line"><a id="l06290" name="l06290"></a><span class="lineno"> 6290</span>      <span class="keyword">auto</span> irregularKernel = [&amp;](<span class="keyword">const</span> VolIndex&amp; vof) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l06291" name="l06291"></a><span class="lineno"> 6291</span>        <span class="keywordflow">if</span> (validCells(vof.gridIndex(), 0)) {</div>
-<div class="line"><a id="l06292" name="l06292"></a><span class="lineno"> 6292</span>          <span class="keyword">const</span> RealVect pos = probLo + dx * (RealVect(vof.gridIndex()) + 0.5 * RealVect::Unit);</div>
-<div class="line"><a id="l06293" name="l06293"></a><span class="lineno"> 6293</span>          <span class="keyword">const</span> RealVect E   = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));</div>
-<div class="line"><a id="l06294" name="l06294"></a><span class="lineno"> 6294</span> </div>
-<div class="line"><a id="l06295" name="l06295"></a><span class="lineno"> 6295</span>          <span class="comment">// Populate gradients.</span></div>
-<div class="line"><a id="l06296" name="l06296"></a><span class="lineno"> 6296</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numItoSpecies; i++) {</div>
-<div class="line"><a id="l06297" name="l06297"></a><span class="lineno"> 6297</span>            densities[i]        = (*densitiesIto[i])(vof, 0);</div>
-<div class="line"><a id="l06298" name="l06298"></a><span class="lineno"> 6298</span>            densityGradients[i] = RealVect(D_DECL((*densityGradientsIto[i])(vof, 0),</div>
-<div class="line"><a id="l06299" name="l06299"></a><span class="lineno"> 6299</span>                                                  (*densityGradientsIto[i])(vof, 1),</div>
-<div class="line"><a id="l06300" name="l06300"></a><span class="lineno"> 6300</span>                                                  (*densityGradientsIto[i])(vof, 2)));</div>
-<div class="line"><a id="l06301" name="l06301"></a><span class="lineno"> 6301</span>          }</div>
-<div class="line"><a id="l06302" name="l06302"></a><span class="lineno"> 6302</span> </div>
-<div class="line"><a id="l06303" name="l06303"></a><span class="lineno"> 6303</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numCdrSpecies; i++) {</div>
-<div class="line"><a id="l06304" name="l06304"></a><span class="lineno"> 6304</span>            densities[numItoSpecies + i]        = (*densitiesCDR[i])(vof, 0);</div>
-<div class="line"><a id="l06305" name="l06305"></a><span class="lineno"> 6305</span>            densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDR[i])(vof, 0),</div>
-<div class="line"><a id="l06306" name="l06306"></a><span class="lineno"> 6306</span>                                                                  (*densityGradientsCDR[i])(vof, 1),</div>
-<div class="line"><a id="l06307" name="l06307"></a><span class="lineno"> 6307</span>                                                                  (*densityGradientsCDR[i])(vof, 2)));</div>
-<div class="line"><a id="l06308" name="l06308"></a><span class="lineno"> 6308</span>          }</div>
-<div class="line"><a id="l06309" name="l06309"></a><span class="lineno"> 6309</span> </div>
-<div class="line"><a id="l06310" name="l06310"></a><span class="lineno"> 6310</span>          <span class="comment">// Do the physics advance.</span></div>
-<div class="line"><a id="l06311" name="l06311"></a><span class="lineno"> 6311</span>          <span class="keyword">const</span> Vector&lt;Real&gt; plotVars = m_physics-&gt;getPlotVariables(E, pos, densities, densityGradients, dx, 1.0);</div>
-<div class="line"><a id="l06312" name="l06312"></a><span class="lineno"> 6312</span> </div>
-<div class="line"><a id="l06313" name="l06313"></a><span class="lineno"> 6313</span>          CH_assert(plotVars.size() == numVars);</div>
+<div class="line"><a id="l06283" name="l06283"></a><span class="lineno"> 6283</span>          <span class="comment">// Do the physics advance.</span></div>
+<div class="line"><a id="l06284" name="l06284"></a><span class="lineno"> 6284</span>          <span class="keyword">const</span> Vector&lt;Real&gt; plotVars = m_physics-&gt;getPlotVariables(E, pos, densities, densityGradients, dx, 1.0);</div>
+<div class="line"><a id="l06285" name="l06285"></a><span class="lineno"> 6285</span> </div>
+<div class="line"><a id="l06286" name="l06286"></a><span class="lineno"> 6286</span>          CH_assert(plotVars.size() == numVars);</div>
+<div class="line"><a id="l06287" name="l06287"></a><span class="lineno"> 6287</span> </div>
+<div class="line"><a id="l06288" name="l06288"></a><span class="lineno"> 6288</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numVars; i++) {</div>
+<div class="line"><a id="l06289" name="l06289"></a><span class="lineno"> 6289</span>            physicsPlotVarsReg(iv, i) = plotVars[i];</div>
+<div class="line"><a id="l06290" name="l06290"></a><span class="lineno"> 6290</span>          }</div>
+<div class="line"><a id="l06291" name="l06291"></a><span class="lineno"> 6291</span>        }</div>
+<div class="line"><a id="l06292" name="l06292"></a><span class="lineno"> 6292</span>      };</div>
+<div class="line"><a id="l06293" name="l06293"></a><span class="lineno"> 6293</span> </div>
+<div class="line"><a id="l06294" name="l06294"></a><span class="lineno"> 6294</span>      <span class="comment">// Irregular cells</span></div>
+<div class="line"><a id="l06295" name="l06295"></a><span class="lineno"> 6295</span>      <span class="keyword">auto</span> irregularKernel = [&amp;](<span class="keyword">const</span> VolIndex&amp; vof) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a id="l06296" name="l06296"></a><span class="lineno"> 6296</span>        <span class="keywordflow">if</span> (validCells(vof.gridIndex(), 0)) {</div>
+<div class="line"><a id="l06297" name="l06297"></a><span class="lineno"> 6297</span>          <span class="keyword">const</span> RealVect pos = probLo + dx * (RealVect(vof.gridIndex()) + 0.5 * RealVect::Unit);</div>
+<div class="line"><a id="l06298" name="l06298"></a><span class="lineno"> 6298</span>          <span class="keyword">const</span> RealVect E   = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));</div>
+<div class="line"><a id="l06299" name="l06299"></a><span class="lineno"> 6299</span> </div>
+<div class="line"><a id="l06300" name="l06300"></a><span class="lineno"> 6300</span>          <span class="comment">// Populate gradients.</span></div>
+<div class="line"><a id="l06301" name="l06301"></a><span class="lineno"> 6301</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numItoSpecies; i++) {</div>
+<div class="line"><a id="l06302" name="l06302"></a><span class="lineno"> 6302</span>            densities[i]        = (*densitiesIto[i])(vof, 0);</div>
+<div class="line"><a id="l06303" name="l06303"></a><span class="lineno"> 6303</span>            densityGradients[i] = RealVect(D_DECL((*densityGradientsIto[i])(vof, 0),</div>
+<div class="line"><a id="l06304" name="l06304"></a><span class="lineno"> 6304</span>                                                  (*densityGradientsIto[i])(vof, 1),</div>
+<div class="line"><a id="l06305" name="l06305"></a><span class="lineno"> 6305</span>                                                  (*densityGradientsIto[i])(vof, 2)));</div>
+<div class="line"><a id="l06306" name="l06306"></a><span class="lineno"> 6306</span>          }</div>
+<div class="line"><a id="l06307" name="l06307"></a><span class="lineno"> 6307</span> </div>
+<div class="line"><a id="l06308" name="l06308"></a><span class="lineno"> 6308</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numCdrSpecies; i++) {</div>
+<div class="line"><a id="l06309" name="l06309"></a><span class="lineno"> 6309</span>            densities[numItoSpecies + i]        = (*densitiesCDR[i])(vof, 0);</div>
+<div class="line"><a id="l06310" name="l06310"></a><span class="lineno"> 6310</span>            densityGradients[numItoSpecies + i] = RealVect(D_DECL((*densityGradientsCDR[i])(vof, 0),</div>
+<div class="line"><a id="l06311" name="l06311"></a><span class="lineno"> 6311</span>                                                                  (*densityGradientsCDR[i])(vof, 1),</div>
+<div class="line"><a id="l06312" name="l06312"></a><span class="lineno"> 6312</span>                                                                  (*densityGradientsCDR[i])(vof, 2)));</div>
+<div class="line"><a id="l06313" name="l06313"></a><span class="lineno"> 6313</span>          }</div>
 <div class="line"><a id="l06314" name="l06314"></a><span class="lineno"> 6314</span> </div>
-<div class="line"><a id="l06315" name="l06315"></a><span class="lineno"> 6315</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numVars; i++) {</div>
-<div class="line"><a id="l06316" name="l06316"></a><span class="lineno"> 6316</span>            physicsPlotVars(vof, i) = plotVars[i];</div>
-<div class="line"><a id="l06317" name="l06317"></a><span class="lineno"> 6317</span>          }</div>
-<div class="line"><a id="l06318" name="l06318"></a><span class="lineno"> 6318</span>        }</div>
-<div class="line"><a id="l06319" name="l06319"></a><span class="lineno"> 6319</span>      };</div>
-<div class="line"><a id="l06320" name="l06320"></a><span class="lineno"> 6320</span> </div>
-<div class="line"><a id="l06321" name="l06321"></a><span class="lineno"> 6321</span>      <span class="comment">// Run the kernels.</span></div>
-<div class="line"><a id="l06322" name="l06322"></a><span class="lineno"> 6322</span>      VoFIterator&amp; vofit = (*m_amr-&gt;getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];</div>
-<div class="line"><a id="l06323" name="l06323"></a><span class="lineno"> 6323</span> </div>
-<div class="line"><a id="l06324" name="l06324"></a><span class="lineno"> 6324</span>      BoxLoops::loop&lt;D_DECL(1, 1, 1)&gt;(cellBox, regularKernel);</div>
-<div class="line"><a id="l06325" name="l06325"></a><span class="lineno"> 6325</span>      <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">BoxLoops::loop</a>(vofit, irregularKernel);</div>
-<div class="line"><a id="l06326" name="l06326"></a><span class="lineno"> 6326</span>    }</div>
-<div class="line"><a id="l06327" name="l06327"></a><span class="lineno"> 6327</span>  }</div>
+<div class="line"><a id="l06315" name="l06315"></a><span class="lineno"> 6315</span>          <span class="comment">// Do the physics advance.</span></div>
+<div class="line"><a id="l06316" name="l06316"></a><span class="lineno"> 6316</span>          <span class="keyword">const</span> Vector&lt;Real&gt; plotVars = m_physics-&gt;getPlotVariables(E, pos, densities, densityGradients, dx, 1.0);</div>
+<div class="line"><a id="l06317" name="l06317"></a><span class="lineno"> 6317</span> </div>
+<div class="line"><a id="l06318" name="l06318"></a><span class="lineno"> 6318</span>          CH_assert(plotVars.size() == numVars);</div>
+<div class="line"><a id="l06319" name="l06319"></a><span class="lineno"> 6319</span> </div>
+<div class="line"><a id="l06320" name="l06320"></a><span class="lineno"> 6320</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numVars; i++) {</div>
+<div class="line"><a id="l06321" name="l06321"></a><span class="lineno"> 6321</span>            physicsPlotVars(vof, i) = plotVars[i];</div>
+<div class="line"><a id="l06322" name="l06322"></a><span class="lineno"> 6322</span>          }</div>
+<div class="line"><a id="l06323" name="l06323"></a><span class="lineno"> 6323</span>        }</div>
+<div class="line"><a id="l06324" name="l06324"></a><span class="lineno"> 6324</span>      };</div>
+<div class="line"><a id="l06325" name="l06325"></a><span class="lineno"> 6325</span> </div>
+<div class="line"><a id="l06326" name="l06326"></a><span class="lineno"> 6326</span>      <span class="comment">// Run the kernels.</span></div>
+<div class="line"><a id="l06327" name="l06327"></a><span class="lineno"> 6327</span>      VoFIterator&amp; vofit = (*m_amr-&gt;getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];</div>
 <div class="line"><a id="l06328" name="l06328"></a><span class="lineno"> 6328</span> </div>
-<div class="line"><a id="l06329" name="l06329"></a><span class="lineno"> 6329</span>  m_amr-&gt;average(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase, Average::Arithmetic, Interval(0, numVars - 1));</div>
-<div class="line"><a id="l06330" name="l06330"></a><span class="lineno"> 6330</span>  m_amr-&gt;interpGhost(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase);</div>
-<div class="line"><a id="l06331" name="l06331"></a><span class="lineno"> 6331</span>}</div>
+<div class="line"><a id="l06329" name="l06329"></a><span class="lineno"> 6329</span>      BoxLoops::loop&lt;D_DECL(1, 1, 1)&gt;(cellBox, regularKernel);</div>
+<div class="line"><a id="l06330" name="l06330"></a><span class="lineno"> 6330</span>      <a class="code hl_function" href="namespaceBoxLoops.html#aa237179546062b6d0f1037ac83043922">BoxLoops::loop</a>(vofit, irregularKernel);</div>
+<div class="line"><a id="l06331" name="l06331"></a><span class="lineno"> 6331</span>    }</div>
+<div class="line"><a id="l06332" name="l06332"></a><span class="lineno"> 6332</span>  }</div>
+<div class="line"><a id="l06333" name="l06333"></a><span class="lineno"> 6333</span> </div>
+<div class="line"><a id="l06334" name="l06334"></a><span class="lineno"> 6334</span>  m_amr-&gt;average(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase, Average::Arithmetic, Interval(0, numVars - 1));</div>
+<div class="line"><a id="l06335" name="l06335"></a><span class="lineno"> 6335</span>  m_amr-&gt;interpGhost(a_physicsPlotVars, m_fluidRealm, m_plasmaPhase);</div>
+<div class="line"><a id="l06336" name="l06336"></a><span class="lineno"> 6336</span>}</div>
 </div>
 </div>
-<div class="line"><a id="l06332" name="l06332"></a><span class="lineno"> 6332</span> </div>
-<div class="line"><a id="l06333" name="l06333"></a><span class="lineno"> 6333</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l06334" name="l06334"></a><span class="lineno"> 6334</span> </div>
-<div class="line"><a id="l06335" name="l06335"></a><span class="lineno"> 6335</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l06337" name="l06337"></a><span class="lineno"> 6337</span> </div>
+<div class="line"><a id="l06338" name="l06338"></a><span class="lineno"> 6338</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l06339" name="l06339"></a><span class="lineno"> 6339</span> </div>
+<div class="line"><a id="l06340" name="l06340"></a><span class="lineno"> 6340</span><span class="preprocessor">#endif</span></div>
 </div>
 </div>
 </div>
@@ -6922,7 +6927,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aCD__ParallelOps_8H_html"><div class="ttname"><a href="CD__ParallelOps_8H.html">CD_ParallelOps.H</a></div><div class="ttdoc">Agglomeration of basic MPI reductions.</div></div>
 <div class="ttc" id="aCD__ParticleLoops_8H_html"><div class="ttname"><a href="CD__ParticleLoops_8H.html">CD_ParticleLoops.H</a></div><div class="ttdoc">Declaration of a namespace for SIMD-decorated loops over SoA particles.</div></div>
 <div class="ttc" id="aCD__ParticleOps_8H_html"><div class="ttname"><a href="CD__ParticleOps_8H.html">CD_ParticleOps.H</a></div><div class="ttdoc">Declaration of a static class containing some common useful particle routines that would otherwise be...</div></div>
-<div class="ttc" id="aCD__ParticleSoA_8H_html_af6a88235a5f32bc8c9cc19f7cef44502"><div class="ttname"><a href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a></div><div class="ttdeci">CD_PARTICLE_REAL ParticleReal</div><div class="ttdoc">Floating-point type a user may use for payload columns.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:155</div></div>
+<div class="ttc" id="aCD__ParticleSoA_8H_html_af6a88235a5f32bc8c9cc19f7cef44502"><div class="ttname"><a href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a></div><div class="ttdeci">CD_PARTICLE_REAL ParticleReal</div><div class="ttdoc">Floating-point type a user may use for payload columns.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:156</div></div>
 <div class="ttc" id="aCD__Timer_8H_html"><div class="ttname"><a href="CD__Timer_8H.html">CD_Timer.H</a></div><div class="ttdoc">Implementation of CD_Timer.H.</div></div>
 <div class="ttc" id="aCD__Units_8H_html"><div class="ttname"><a href="CD__Units_8H.html">CD_Units.H</a></div><div class="ttdoc">Declaration of various useful units.</div></div>
 <div class="ttc" id="aclassCdrFactory_html"><div class="ttname"><a href="classCdrFactory.html">CdrFactory</a></div><div class="ttdoc">Factory class for CdrLayout. T is (usually) CdrSolver and S is the implementation class (e....</div><div class="ttdef"><b>Definition</b> CD_CdrLayout.H:316</div></div>
@@ -6960,21 +6965,21 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassParticleOps_html_a35fe0d8e924c53fe42b564b43e899433"><div class="ttname"><a href="classParticleOps.html#a35fe0d8e924c53fe42b564b43e899433">ParticleOps::sum</a></div><div class="ttdeci">static Real sum(const ParticleContainer&lt; P, Traits &gt; &amp;a_particles) noexcept</div><div class="ttdoc">Global sum of the container-owned weight column (SoA overload).</div><div class="ttdef"><b>Definition</b> CD_ParticleOpsImplem.H:302</div></div>
 <div class="ttc" id="aclassParticleOps_html_abc1e26ca21cdbdb5a4eba895efb944c9"><div class="ttname"><a href="classParticleOps.html#abc1e26ca21cdbdb5a4eba895efb944c9">ParticleOps::getComputationalParticlesPerCell</a></div><div class="ttdeci">static void getComputationalParticlesPerCell(EBAMRCellData &amp;a_ppc, const ParticleContainer&lt; P, Traits &gt; &amp;a_src) noexcept</div><div class="ttdoc">Get the number of computational particles per cell (SoA overload).</div><div class="ttdef"><b>Definition</b> CD_ParticleOpsImplem.H:85</div></div>
 <div class="ttc" id="aclassParticleOps_html_af7825fb10b46638297c33922d83b6f3c"><div class="ttname"><a href="classParticleOps.html#af7825fb10b46638297c33922d83b6f3c">ParticleOps::getPhysicalParticlesPerCell</a></div><div class="ttdeci">static void getPhysicalParticlesPerCell(EBAMRCellData &amp;a_ppc, const ParticleContainer&lt; P, Traits &gt; &amp;a_src) noexcept</div><div class="ttdoc">Get the number of physical particles per cell (SoA overload).</div><div class="ttdef"><b>Definition</b> CD_ParticleOpsImplem.H:53</div></div>
-<div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:654</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a0dc3919e67e2d36e41a82012793ba8bb"><div class="ttname"><a href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb">ParticleSoA::sortByCell</a></div><div class="ttdeci">void sortByCell(const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo)</div><div class="ttdoc">Counting-sort the columns into Fortran cell order and build CSR cell offsets.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoAImplem.H:288</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a1209500183bdfbfff59b17c5939ef7ca"><div class="ttname"><a href="classParticleSoA.html#a1209500183bdfbfff59b17c5939ef7ca">ParticleSoA::append</a></div><div class="ttdeci">void append(const RealVect &amp;a_position, const double a_weight)</div><div class="ttdoc">Append one particle with a default-constructed payload.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:949</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a1a500f16561d53697a27535c3aedab85"><div class="ttname"><a href="classParticleSoA.html#a1a500f16561d53697a27535c3aedab85">ParticleSoA::weightColumn</a></div><div class="ttdeci">double * weightColumn() noexcept</div><div class="ttdoc">Raw weight column (double*).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1154</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1182</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a3bd7669006ab6c1ba9c286be324177bf"><div class="ttname"><a href="classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf">ParticleSoA::weight</a></div><div class="ttdeci">double &amp; weight(const std::size_t a_index) noexcept</div><div class="ttdoc">Weight of particle i.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1216</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:876</div></div>
-<div class="ttc" id="aclassParticleSoA_html_a60b90121ad8e4b9376099031bab4717c"><div class="ttname"><a href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">ParticleSoA::positionColumn</a></div><div class="ttdeci">double * positionColumn(const int a_dir) noexcept</div><div class="ttdoc">Raw position component column dir (double*, for SIMD kernels).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1131</div></div>
-<div class="ttc" id="aclassParticleSoA_html_aa4d9552340bfbc75474c7bc85d219bab"><div class="ttname"><a href="classParticleSoA.html#aa4d9552340bfbc75474c7bc85d219bab">ParticleSoA::cellRange</a></div><div class="ttdeci">std::pair&lt; std::size_t, std::size_t &gt; cellRange(const std::size_t a_cell) const noexcept</div><div class="ttdoc">Half-open particle index range [begin, end) owned by cell c (valid after sortByCell).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1533</div></div>
-<div class="ttc" id="aclassParticleSoA_html_afed7ea6fe15e375cafecb6f4ce1e54b6"><div class="ttname"><a href="classParticleSoA.html#afed7ea6fe15e375cafecb6f4ce1e54b6">ParticleSoA::reserve</a></div><div class="ttdeci">void reserve(const std::size_t a_capacity)</div><div class="ttdoc">Ensure capacity for at least a_capacity particles (reallocates + moves on growth).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoAImplem.H:76</div></div>
+<div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:655</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a0dc3919e67e2d36e41a82012793ba8bb"><div class="ttname"><a href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb">ParticleSoA::sortByCell</a></div><div class="ttdeci">void sortByCell(const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo)</div><div class="ttdoc">Counting-sort the columns into Fortran cell order and build CSR cell offsets.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoAImplem.H:303</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a1209500183bdfbfff59b17c5939ef7ca"><div class="ttname"><a href="classParticleSoA.html#a1209500183bdfbfff59b17c5939ef7ca">ParticleSoA::append</a></div><div class="ttdeci">void append(const RealVect &amp;a_position, const double a_weight)</div><div class="ttdoc">Append one particle with a default-constructed payload.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:955</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a1a500f16561d53697a27535c3aedab85"><div class="ttname"><a href="classParticleSoA.html#a1a500f16561d53697a27535c3aedab85">ParticleSoA::weightColumn</a></div><div class="ttdeci">double * weightColumn() noexcept</div><div class="ttdoc">Raw weight column (double*).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1160</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a3a8d5e1e4128aab802b386b611d4f082"><div class="ttname"><a href="classParticleSoA.html#a3a8d5e1e4128aab802b386b611d4f082">ParticleSoA::position</a></div><div class="ttdeci">RealVect position(const std::size_t a_index) const noexcept</div><div class="ttdoc">Position of particle i as a RealVect (by value, assembled from the scalar columns).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1188</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a3bd7669006ab6c1ba9c286be324177bf"><div class="ttname"><a href="classParticleSoA.html#a3bd7669006ab6c1ba9c286be324177bf">ParticleSoA::weight</a></div><div class="ttdeci">double &amp; weight(const std::size_t a_index) noexcept</div><div class="ttdoc">Weight of particle i.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1222</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a4a1ed9474a75b6142f7fccebaf059d13"><div class="ttname"><a href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13">ParticleSoA::size</a></div><div class="ttdeci">std::size_t size() const noexcept</div><div class="ttdoc">Number of particles currently stored.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:882</div></div>
+<div class="ttc" id="aclassParticleSoA_html_a60b90121ad8e4b9376099031bab4717c"><div class="ttname"><a href="classParticleSoA.html#a60b90121ad8e4b9376099031bab4717c">ParticleSoA::positionColumn</a></div><div class="ttdeci">double * positionColumn(const int a_dir) noexcept</div><div class="ttdoc">Raw position component column dir (double*, for SIMD kernels).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1137</div></div>
+<div class="ttc" id="aclassParticleSoA_html_aa4d9552340bfbc75474c7bc85d219bab"><div class="ttname"><a href="classParticleSoA.html#aa4d9552340bfbc75474c7bc85d219bab">ParticleSoA::cellRange</a></div><div class="ttdeci">std::pair&lt; std::size_t, std::size_t &gt; cellRange(const std::size_t a_cell) const noexcept</div><div class="ttdoc">Half-open particle index range [begin, end) owned by cell c (valid after sortByCell).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:1539</div></div>
+<div class="ttc" id="aclassParticleSoA_html_afed7ea6fe15e375cafecb6f4ce1e54b6"><div class="ttname"><a href="classParticleSoA.html#afed7ea6fe15e375cafecb6f4ce1e54b6">ParticleSoA::reserve</a></div><div class="ttdeci">void reserve(const std::size_t a_capacity)</div><div class="ttdoc">Ensure capacity for at least a_capacity particles (reallocates + moves on growth).</div><div class="ttdef"><b>Definition</b> CD_ParticleSoAImplem.H:88</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a></div><div class="ttdoc">Abstract TimeStepper for the Ito-KMC-Poisson system of equations.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepper.H:66</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a027b77bc7a683203c5e1656273b21d3e"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a027b77bc7a683203c5e1656273b21d3e">Physics::ItoKMC::ItoKMCStepper::transferCoveredParticles</a></div><div class="ttdeci">virtual void transferCoveredParticles(const SpeciesSubset a_speciesSubset, const EBRepresentation a_representation, const Real a_tolerance) noexcept</div><div class="ttdoc">Transfer covered particles (i.e., particles inside the EB) from the ItoSolver bulk container to EB co...</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:2531</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a067136fb7d58075fdbfa27e748e5cf1a"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a067136fb7d58075fdbfa27e748e5cf1a">Physics::ItoKMC::ItoKMCStepper::setupCdr</a></div><div class="ttdeci">virtual void setupCdr() noexcept</div><div class="ttdoc">Set up the CDR solvers.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:505</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a0b4128cea425a39371aef47a5cfcb0a3"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0b4128cea425a39371aef47a5cfcb0a3">Physics::ItoKMC::ItoKMCStepper::getParticleStatistics</a></div><div class="ttdeci">virtual void getParticleStatistics(Real &amp;a_avgParticles, Real &amp;a_sigma, Real &amp;a_minParticles, Real &amp;a_maxParticles, int &amp;a_minRank, int &amp;a_maxRank)</div><div class="ttdoc">Compute some particle statistics.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:1453</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a0d4712bdecdfd8aa5c7fc05d618fefa0"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0">Physics::ItoKMC::ItoKMCStepper::computePhysicsPlotVariables</a></div><div class="ttdeci">virtual void computePhysicsPlotVariables(EBAMRCellData &amp;a_physicsPlotVars) noexcept</div><div class="ttdoc">Compute physics plot variables.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:6169</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a0d4712bdecdfd8aa5c7fc05d618fefa0"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0d4712bdecdfd8aa5c7fc05d618fefa0">Physics::ItoKMC::ItoKMCStepper::computePhysicsPlotVariables</a></div><div class="ttdeci">virtual void computePhysicsPlotVariables(EBAMRCellData &amp;a_physicsPlotVars) noexcept</div><div class="ttdoc">Compute physics plot variables.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:6174</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a0f2ff3044d33797d8b9f7149cc4b08fd"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0f2ff3044d33797d8b9f7149cc4b08fd">Physics::ItoKMC::ItoKMCStepper::computePhysicsDt</a></div><div class="ttdeci">virtual void computePhysicsDt() noexcept</div><div class="ttdoc">Compute a physics-based maximum time step.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:5376</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a0f914b3b50986a48ee3ed64e7469b88a"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0f914b3b50986a48ee3ed64e7469b88a">Physics::ItoKMC::ItoKMCStepper::computeReactiveMeanEnergiesPerCell</a></div><div class="ttdeci">virtual void computeReactiveMeanEnergiesPerCell(EBAMRCellData &amp;a_meanEnergies) noexcept</div><div class="ttdoc">Compute the mean particle energy in all grid cells.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:3808</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCStepper_html_a19005db080ea1a88b09918e3269e5284"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a19005db080ea1a88b09918e3269e5284">Physics::ItoKMC::ItoKMCStepper::parseRuntimeOptions</a></div><div class="ttdeci">virtual void parseRuntimeOptions() noexcept override</div><div class="ttdoc">Parse runtime configurable options.</div><div class="ttdef"><b>Definition</b> CD_ItoKMCStepperImplem.H:161</div></div>

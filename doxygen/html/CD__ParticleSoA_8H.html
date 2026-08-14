@@ -108,6 +108,7 @@ $(function() {
 <code>#include &lt;RealVect.H&gt;</code><br />
 <code>#include &lt;IntVect.H&gt;</code><br />
 <code>#include &lt;Box.H&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__ParticleMemory_8H_source.html">CD_ParticleMemory.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParticleSoAImplem_8H_source.html">CD_ParticleSoAImplem.H</a>&gt;</code><br />
@@ -116,51 +117,60 @@ Include dependency graph for CD_ParticleSoA.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__ParticleSoA_8H__incl.png" border="0" usemap="#aSource_2Particle_2CD__ParticleSoA_8H" alt=""/></div>
 <map name="aSource_2Particle_2CD__ParticleSoA_8H" id="aSource_2Particle_2CD__ParticleSoA_8H">
-<area shape="rect" title="Declaration of ParticleSoA, an arena&#45;backed Struct&#45;of&#45;Arrays particle container." alt="" coords="727,5,868,45"/>
-<area shape="rect" title=" " alt="" coords="5,93,91,119"/>
-<area shape="poly" title=" " alt="" coords="727,34,457,55,284,73,105,96,104,91,283,67,457,49,726,28"/>
-<area shape="rect" title=" " alt="" coords="115,93,171,119"/>
-<area shape="poly" title=" " alt="" coords="726,33,489,53,339,71,185,96,184,91,338,66,489,47,726,28"/>
-<area shape="rect" title=" " alt="" coords="195,93,266,119"/>
-<area shape="poly" title=" " alt="" coords="727,36,530,58,280,96,279,91,529,53,726,31"/>
-<area shape="rect" title=" " alt="" coords="291,93,357,119"/>
-<area shape="poly" title=" " alt="" coords="727,39,564,62,371,96,371,96,370,91,370,91,563,57,726,33"/>
-<area shape="rect" title=" " alt="" coords="382,93,447,119"/>
-<area shape="poly" title=" " alt="" coords="727,43,467,96,461,97,460,92,466,91,726,38"/>
-<area shape="rect" title=" " alt="" coords="336,167,403,192"/>
-<area shape="poly" title=" " alt="" coords="727,43,636,65,538,96,464,129,402,162,399,157,462,124,536,91,635,60,726,38"/>
-<area shape="rect" title=" " alt="" coords="835,93,893,119"/>
-<area shape="poly" title=" " alt="" coords="815,44,847,81,843,84,811,47"/>
-<area shape="rect" title=" " alt="" coords="918,93,973,119"/>
-<area shape="poly" title=" " alt="" coords="834,43,913,84,910,89,832,48"/>
-<area shape="rect" title=" " alt="" coords="997,93,1089,119"/>
-<area shape="poly" title=" " alt="" coords="857,43,995,87,993,92,855,48"/>
-<area shape="rect" title=" " alt="" coords="1113,93,1173,119"/>
-<area shape="poly" title=" " alt="" coords="869,39,1100,90,1099,96,868,44"/>
-<area shape="rect" title=" " alt="" coords="1197,93,1259,119"/>
-<area shape="poly" title=" " alt="" coords="869,34,1010,57,1184,90,1183,96,1010,62,868,40"/>
-<area shape="rect" title=" " alt="" coords="1284,93,1361,119"/>
-<area shape="poly" title=" " alt="" coords="869,32,1047,55,1270,90,1269,96,1046,61,868,37"/>
-<area shape="rect" title=" " alt="" coords="1385,93,1479,119"/>
-<area shape="poly" title=" " alt="" coords="868,30,1089,53,1372,91,1371,96,1088,59,868,36"/>
-<area shape="rect" title=" " alt="" coords="1503,93,1585,119"/>
-<area shape="poly" title=" " alt="" coords="868,28,1137,49,1311,67,1490,91,1490,96,1311,72,1137,54,868,33"/>
-<area shape="rect" title=" " alt="" coords="1609,93,1671,119"/>
-<area shape="poly" title=" " alt="" coords="869,26,1002,31,1181,42,1386,62,1596,91,1595,96,1385,67,1180,48,1002,36,868,31"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="427,167,613,192"/>
-<area shape="poly" title=" " alt="" coords="727,34,686,42,644,53,602,71,564,95,542,123,529,154,524,152,538,121,561,91,599,66,642,48,685,36,726,29"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="837,167,1016,192"/>
-<area shape="poly" title=" " alt="" coords="801,45,808,81,815,100,825,117,851,141,882,159,879,164,848,146,821,120,810,102,802,82,796,46"/>
-<area shape="rect" href="CD__ParticleSoAImplem_8H.html" title="Implementation of CD_ParticleSoA.H." alt="" coords="574,93,759,119"/>
-<area shape="poly" title=" " alt="" coords="760,48,692,88,689,83,757,43"/>
-<area shape="poly" title=" " alt="" coords="691,91,761,51,763,55,694,96"/>
-<area shape="poly" title=" " alt="" coords="619,121,417,169,416,169,415,164,415,164,618,116"/>
-<area shape="poly" title=" " alt="" coords="644,121,557,163,555,158,642,116"/>
-<area shape="poly" title=" " alt="" coords="709,116,872,160,871,166,708,121"/>
-<area shape="rect" title=" " alt="" coords="750,167,813,192"/>
-<area shape="poly" title=" " alt="" coords="686,116,752,157,750,162,684,121"/>
-<area shape="rect" title=" " alt="" coords="637,167,725,192"/>
-<area shape="poly" title=" " alt="" coords="672,118,679,153,674,154,666,120"/>
+<area shape="rect" title="Declaration of ParticleSoA, an arena&#45;backed Struct&#45;of&#45;Arrays particle container." alt="" coords="841,5,982,45"/>
+<area shape="rect" title=" " alt="" coords="43,93,129,119"/>
+<area shape="poly" title=" " alt="" coords="841,33,541,53,344,71,143,96,142,91,344,66,540,47,840,27"/>
+<area shape="rect" title=" " alt="" coords="153,93,209,119"/>
+<area shape="poly" title=" " alt="" coords="841,33,571,53,400,71,228,96,223,97,222,92,227,91,399,66,570,48,840,28"/>
+<area shape="rect" title=" " alt="" coords="5,167,76,192"/>
+<area shape="poly" title=" " alt="" coords="841,29,729,31,587,40,428,61,349,76,272,96,247,107,222,121,153,147,90,167,88,162,151,142,220,116,244,103,270,91,348,71,428,56,586,35,729,26,841,23"/>
+<area shape="rect" title=" " alt="" coords="833,93,899,119"/>
+<area shape="poly" title=" " alt="" coords="903,47,882,83,877,80,898,44"/>
+<area shape="rect" title=" " alt="" coords="924,93,989,119"/>
+<area shape="poly" title=" " alt="" coords="925,44,945,80,941,83,920,47"/>
+<area shape="rect" title=" " alt="" coords="931,167,998,192"/>
+<area shape="poly" title=" " alt="" coords="871,48,848,62,828,80,818,98,819,107,823,117,837,129,861,141,919,162,917,167,858,146,834,134,819,120,813,109,813,97,824,76,844,58,868,43"/>
+<area shape="rect" title=" " alt="" coords="1014,93,1073,119"/>
+<area shape="poly" title=" " alt="" coords="944,43,1013,84,1010,88,942,48"/>
+<area shape="rect" title=" " alt="" coords="1097,93,1152,119"/>
+<area shape="poly" title=" " alt="" coords="963,43,1085,87,1083,92,962,48"/>
+<area shape="rect" title=" " alt="" coords="1176,93,1268,119"/>
+<area shape="poly" title=" " alt="" coords="983,42,1164,87,1163,92,982,47"/>
+<area shape="rect" title=" " alt="" coords="1292,93,1352,119"/>
+<area shape="poly" title=" " alt="" coords="983,35,1117,58,1279,90,1278,96,1116,63,982,40"/>
+<area shape="rect" title=" " alt="" coords="1376,93,1439,119"/>
+<area shape="poly" title=" " alt="" coords="982,32,1152,54,1363,91,1362,96,1151,60,982,37"/>
+<area shape="rect" title=" " alt="" coords="1463,93,1541,119"/>
+<area shape="poly" title=" " alt="" coords="983,31,1188,53,1450,91,1449,96,1188,58,982,36"/>
+<area shape="rect" title=" " alt="" coords="1565,93,1658,119"/>
+<area shape="poly" title=" " alt="" coords="983,29,1230,52,1552,91,1551,96,1229,57,982,35"/>
+<area shape="rect" title=" " alt="" coords="1683,93,1764,119"/>
+<area shape="poly" title=" " alt="" coords="982,27,1278,47,1471,66,1669,91,1669,96,1470,71,1277,53,982,33"/>
+<area shape="rect" title=" " alt="" coords="1789,93,1850,119"/>
+<area shape="poly" title=" " alt="" coords="983,25,1126,30,1321,40,1545,60,1775,91,1775,96,1545,65,1321,46,1126,35,982,30"/>
+<area shape="rect" href="CD__ParticleMemory_8H.html" title="Process&#45;wide accounting of the memory held by particle data." alt="" coords="283,93,446,119"/>
+<area shape="poly" title=" " alt="" coords="841,39,458,94,457,89,840,34"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="319,167,504,192"/>
+<area shape="poly" title=" " alt="" coords="841,35,703,54,625,72,550,96,488,127,438,161,435,156,485,122,548,91,624,66,702,49,840,29"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="529,167,707,192"/>
+<area shape="poly" title=" " alt="" coords="841,32,763,39,679,50,606,69,579,81,562,95,556,110,561,126,574,142,591,156,587,160,570,145,557,128,551,110,557,92,576,76,604,64,678,45,762,33,840,27"/>
+<area shape="rect" href="CD__ParticleSoAImplem_8H.html" title="Implementation of CD_ParticleSoA.H." alt="" coords="572,93,757,119"/>
+<area shape="poly" title=" " alt="" coords="845,48,708,91,706,86,844,43"/>
+<area shape="poly" title=" " alt="" coords="311,121,90,169,89,164,310,116"/>
+<area shape="rect" title=" " alt="" coords="101,167,167,192"/>
+<area shape="poly" title=" " alt="" coords="328,121,182,166,180,161,327,116"/>
+<area shape="rect" title=" " alt="" coords="192,167,295,192"/>
+<area shape="poly" title=" " alt="" coords="347,121,276,162,273,157,344,116"/>
+<area shape="poly" title=" " alt="" coords="375,118,398,154,394,157,370,120"/>
+<area shape="poly" title=" " alt="" coords="406,116,564,160,563,165,405,121"/>
+<area shape="poly" title=" " alt="" coords="707,91,846,47,848,52,708,96"/>
+<area shape="poly" title=" " alt="" coords="715,116,919,164,917,169,714,121"/>
+<area shape="poly" title=" " alt="" coords="625,121,466,165,465,160,623,116"/>
+<area shape="poly" title=" " alt="" coords="659,120,635,157,631,154,655,118"/>
+<area shape="rect" title=" " alt="" coords="844,167,907,192"/>
+<area shape="poly" title=" " alt="" coords="699,116,832,161,830,166,698,121"/>
+<area shape="rect" title=" " alt="" coords="731,167,819,192"/>
+<area shape="poly" title=" " alt="" coords="684,116,747,157,744,161,681,121"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -489,7 +499,7 @@ Functions</h2></td></tr>
 <div class="line">  <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a> mobility = 0.0;</div>
 <div class="line">  <a class="code hl_typedef" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a> energy   = 0.0;</div>
 <div class="line">};</div>
-<div class="ttc" id="aCD__ParticleSoA_8H_html_af6a88235a5f32bc8c9cc19f7cef44502"><div class="ttname"><a href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a></div><div class="ttdeci">CD_PARTICLE_REAL ParticleReal</div><div class="ttdoc">Floating-point type a user may use for payload columns.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:155</div></div>
+<div class="ttc" id="aCD__ParticleSoA_8H_html_af6a88235a5f32bc8c9cc19f7cef44502"><div class="ttname"><a href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a></div><div class="ttdeci">CD_PARTICLE_REAL ParticleReal</div><div class="ttdoc">Floating-point type a user may use for payload columns.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:156</div></div>
 </div><!-- fragment --><p>Step 2 &ndash; specialize ParticleTraits&lt;MyPayload&gt; with the <code>columns</code> tuple (one pointer-to-member per payload column; the single source of truth for the layout):</p>
 <div class="fragment"><div class="line"><span class="keyword">template</span> &lt;&gt;</div>
 <div class="line"><span class="keyword">struct </span><a class="code hl_struct" href="structParticleTraits.html">ParticleTraits</a>&lt;MyPayload&gt;</div>
@@ -500,7 +510,7 @@ Functions</h2></td></tr>
 <div class="line">                                                  &amp;MyPayload::mobility,</div>
 <div class="line">                                                  &amp;MyPayload::energy);</div>
 <div class="line">};</div>
-<div class="ttc" id="astructParticleTraits_html"><div class="ttname"><a href="structParticleTraits.html">ParticleTraits</a></div><div class="ttdoc">Traits class that a user specializes to describe the PAYLOAD columns of a particle type....</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:191</div></div>
+<div class="ttc" id="astructParticleTraits_html"><div class="ttname"><a href="structParticleTraits.html">ParticleTraits</a></div><div class="ttdoc">Traits class that a user specializes to describe the PAYLOAD columns of a particle type....</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:192</div></div>
 </div><!-- fragment --><p>Step 3 (optional) &ndash; restrict which PAYLOAD columns go to HDF5 by declaring an <code>h5Columns</code> tuple of member pointers. Position and weight are ALWAYS checkpointed; id/rank NEVER are. If <code>h5Columns</code> is omitted, every payload column is checkpointed.</p>
 <div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span> h5Columns = std::make_tuple(&amp;MyPayload::energy);</div>
 </div><!-- fragment --><p>That is all &ndash; <code>ParticleSoA&lt;MyPayload&gt;</code> now works. Payload fields are selected by member pointer, e.g. <code>soa.column&lt;&amp;MyPayload::energy&gt;()</code>; the column index is DERIVED from the pointer at compile time, so reordering <code>columns</code> keeps name-based access correct.</p>

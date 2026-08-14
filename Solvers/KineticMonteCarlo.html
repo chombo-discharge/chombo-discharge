@@ -408,6 +408,9 @@ The functionality is used when using the hybrid advancement algorithm, see <a cl
 <span class="cm"> * @brief Advance the incoming state with the number of reactions.</span>
 <span class="cm"> * @param[in,out] a_state        State vector.</span>
 <span class="cm"> * @param[in]    a_numReactions Number of reactions.</span>
+<span class="cm"> */</span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">advanceState</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>These template requirements exist so that users can define their states independent of their reactions.
