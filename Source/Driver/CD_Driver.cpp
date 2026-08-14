@@ -69,6 +69,118 @@ bytesAsMB(const Real a_bytes)
   return bytesAsMB(static_cast<long long>(a_bytes));
 }
 
+/**
+ * @brief Write the memory report as a table.
+ * @details Three sources that do not overlap: the resident set is the whole process, Chombo's counter
+ * sees only its own Arena (BaseFab-backed mesh data), and ours sees only particle storage. Neither
+ * counter can adjudicate itself -- a tracked figure that climbs while the resident set does not is a
+ * bug in the counter rather than memory the process is holding -- which is why all three are printed
+ * together.
+ *
+ * The table has two independent axes, and conflating them has cost real time. A "high-water" row is
+ * over *time* and never falls; the columns are over *ranks* at this instant. The figure a job is
+ * killed for exceeding is the high-water of the worst rank, i.e. the rightmost value of a high-water
+ * row. A dash marks a quantity that does not exist rather than one that is zero: there is no useful
+ * minimum over ranks of a high-water mark, because the ranks reach theirs at different moments.
+ * @param[in] a_indent Prefix written before every line, so the table can sit inside either report.
+ */
+static void
+writeMemoryTable(const std::string& a_indent)
+{
+  constexpr int labelWidth  = 24;
+  constexpr int columnWidth = 10;
+
+  const std::string none = "-";
+
+  auto rule = [&a_indent]() -> void {
+    pout() << a_indent << std::string(labelWidth + 3 * columnWidth, '-') << endl;
+  };
+
+  auto row = [&a_indent](const std::string& a_label,
+                         const std::string& a_local,
+                         const std::string& a_max,
+                         const std::string& a_min) -> void {
+    pout() << a_indent << std::left << std::setw(labelWidth) << a_label << std::right << std::setw(columnWidth)
+           << a_local << std::setw(columnWidth) << a_max << std::setw(columnWidth) << a_min << endl;
+  };
+
+  rule();
+  row("Memory (MB)", "this rank", "rank max", "rank min");
+  rule();
+
+  Real currentRSS = 0.0;
+  Real peakRSS    = 0.0;
+
+  MemoryReport::getResidentSetSize(currentRSS, peakRSS);
+
+  if (currentRSS > 0.0) {
+    Real maxCurrent = currentRSS;
+    Real minCurrent = currentRSS;
+    Real maxPeak    = peakRSS;
+    Real minPeak    = peakRSS;
+
+#ifdef CH_MPI
+    MemoryReport::getMaxMinResidentSetSize(maxCurrent, minCurrent, maxPeak, minPeak);
+#endif
+
+    row("Resident set", bytesAsMB(currentRSS), bytesAsMB(maxCurrent), bytesAsMB(minCurrent));
+    row("  high-water", bytesAsMB(peakRSS), bytesAsMB(maxPeak), none);
+    rule();
+  }
+
+#ifdef CH_USE_MEMORY_TRACKING
+  long long meshBytes = 0LL;
+  long long meshPeak  = 0LL;
+
+  overallMemoryUsage(meshBytes, meshPeak);
+
+#ifdef CH_MPI
+  row("Mesh arenas",
+      bytesAsMB(meshBytes),
+      bytesAsMB(ParallelOps::max(meshBytes)),
+      bytesAsMB(ParallelOps::min(meshBytes)));
+  row("  high-water", bytesAsMB(meshPeak), bytesAsMB(ParallelOps::max(meshPeak)), none);
+#else
+  row("Mesh arenas", bytesAsMB(meshBytes), bytesAsMB(meshBytes), bytesAsMB(meshBytes));
+  row("  high-water", bytesAsMB(meshPeak), bytesAsMB(meshPeak), none);
+#endif
+  rule();
+#endif
+
+  const long long arenaBytes  = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Container));
+  const long long arenaPeak   = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Container));
+  const long long bufferBytes = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Buffer));
+  const long long bufferPeak  = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Buffer));
+  const long long totalBytes  = static_cast<long long>(ParticleMemory::getAllocatedBytes());
+  const long long totalPeak   = static_cast<long long>(ParticleMemory::getPeakBytes());
+
+#ifdef CH_MPI
+  row("Particle arenas",
+      bytesAsMB(arenaBytes),
+      bytesAsMB(ParallelOps::max(arenaBytes)),
+      bytesAsMB(ParallelOps::min(arenaBytes)));
+  row("  high-water", bytesAsMB(arenaPeak), bytesAsMB(ParallelOps::max(arenaPeak)), none);
+  row("Particle buffers",
+      bytesAsMB(bufferBytes),
+      bytesAsMB(ParallelOps::max(bufferBytes)),
+      bytesAsMB(ParallelOps::min(bufferBytes)));
+  row("  high-water", bytesAsMB(bufferPeak), bytesAsMB(ParallelOps::max(bufferPeak)), none);
+  row("Particle total",
+      bytesAsMB(totalBytes),
+      bytesAsMB(ParallelOps::max(totalBytes)),
+      bytesAsMB(ParallelOps::min(totalBytes)));
+  row("  high-water", bytesAsMB(totalPeak), bytesAsMB(ParallelOps::max(totalPeak)), none);
+#else
+  row("Particle arenas", bytesAsMB(arenaBytes), bytesAsMB(arenaBytes), bytesAsMB(arenaBytes));
+  row("  high-water", bytesAsMB(arenaPeak), bytesAsMB(arenaPeak), none);
+  row("Particle buffers", bytesAsMB(bufferBytes), bytesAsMB(bufferBytes), bytesAsMB(bufferBytes));
+  row("  high-water", bytesAsMB(bufferPeak), bytesAsMB(bufferPeak), none);
+  row("Particle total", bytesAsMB(totalBytes), bytesAsMB(totalBytes), bytesAsMB(totalBytes));
+  row("  high-water", bytesAsMB(totalPeak), bytesAsMB(totalPeak), none);
+#endif
+  rule();
+}
+
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
@@ -599,79 +711,8 @@ Driver::gridReport()
            << "\t...Proc. # of cells (lvl)... = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
-  // Resident set size -- the whole process. See the step report for why this is the figure that
-  // distinguishes real growth from a miscounting allocator.
-  {
-    Real currentRSS = 0.0;
-    Real peakRSS    = 0.0;
+  writeMemoryTable("\t");
 
-    MemoryReport::getResidentSetSize(currentRSS, peakRSS);
-
-    if (currentRSS > 0.0) {
-      pout() << "\tResident set size        = " << bytesAsMB(currentRSS) << " (MB)" << endl
-             << "\tPeak resident set size   = " << bytesAsMB(peakRSS) << " (MB)" << endl;
-#ifdef CH_MPI
-      Real maxCurrent = 0.0;
-      Real minCurrent = 0.0;
-      Real maxPeak    = 0.0;
-      Real minPeak    = 0.0;
-
-      MemoryReport::getMaxMinResidentSetSize(maxCurrent, minCurrent, maxPeak, minPeak);
-
-      pout() << "\tMin resident set size    = " << bytesAsMB(minCurrent) << " (MB)" << endl
-             << "\tMax resident set size    = " << bytesAsMB(maxCurrent) << " (MB)" << endl
-             << "\tMax peak resident size   = " << bytesAsMB(maxPeak) << " (MB)" << endl;
-#endif
-    }
-  }
-
-  // Particle memory, reported outside the memory-tracking guard because it is counted by us rather
-  // than by Chombo -- see the step report for why the two totals are disjoint. Split into the arenas a
-  // rank holds and the payload in flight through an exchange, because a peak dominated by one calls
-  // for a different remedy than a peak dominated by the other.
-  {
-    const long long arenaBytes = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Container));
-    const long long arenaPeak  = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Container));
-    const long long bufferPeak = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Buffer));
-    const long long totalPeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
-
-    pout() << "\tParticle arenas          = " << bytesAsMB(arenaBytes) << " (MB)" << endl
-           << "\tPeak particle arenas     = " << bytesAsMB(arenaPeak) << " (MB)" << endl
-           << "\tPeak particle buffers    = " << bytesAsMB(bufferPeak) << " (MB)" << endl
-           << "\tPeak particle total      = " << bytesAsMB(totalPeak) << " (MB)" << endl;
-#ifdef CH_MPI
-    pout() << "\tMin particle arenas      = " << bytesAsMB(ParallelOps::min(arenaBytes)) << " (MB)" << endl
-           << "\tMax particle arenas      = " << bytesAsMB(ParallelOps::max(arenaBytes)) << " (MB)" << endl
-           << "\tMax peak part. arenas    = " << bytesAsMB(ParallelOps::max(arenaPeak)) << " (MB)" << endl
-           << "\tMax peak part. buffers   = " << bytesAsMB(ParallelOps::max(bufferPeak)) << " (MB)" << endl
-           << "\tMax peak particle total  = " << bytesAsMB(ParallelOps::max(totalPeak)) << " (MB)" << endl;
-#endif
-  }
-
-  // Write a memory report if Chombo was to compiled to use memory tracking.
-#ifdef CH_USE_MEMORY_TRACKING
-  long long localUnfreedMemory = 0LL;
-  long long localPeakMemory    = 0LL;
-
-  overallMemoryUsage(localUnfreedMemory, localPeakMemory);
-
-  pout() << "\tUnfreed mesh arenas      = " << bytesAsMB(localUnfreedMemory) << " (MB)" << endl
-         << "\tPeak mesh arenas         = " << bytesAsMB(localPeakMemory) << " (MB)" << endl;
-#ifdef CH_MPI
-
-  // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
-  // smallest/largest memory consumptions.
-  const long long minUnfreedMemory = ParallelOps::min(localUnfreedMemory);
-  const long long minPeakMemory    = ParallelOps::min(localPeakMemory);
-  const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
-  const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
-
-  pout() << "\tMin unfreed mesh arenas  = " << bytesAsMB(minUnfreedMemory) << " (MB)" << endl
-         << "\tMin peak mesh arenas     = " << bytesAsMB(minPeakMemory) << " (MB)" << endl
-         << "\tMax unfreed mesh arenas  = " << bytesAsMB(maxUnfreedMemory) << " (MB)" << endl
-         << "\tMax peak mesh arenas     = " << bytesAsMB(maxPeakMemory) << " (MB)" << endl;
-#endif
-#endif
   pout() << "=======================================================================" << endl;
 
   pout() << endl;
@@ -1938,96 +1979,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     pout() << metrics << endl;
   }
 
-  // Resident set size. This is the whole process -- mesh arenas, particle arenas, every buffer that
-  // neither counter sees, and the binary itself -- so it is both the figure a job is killed for
-  // exceeding and the only way to tell real growth from a miscounting allocator: a tracked figure
-  // that climbs while this one does not is a bug in the counter, not memory the process is holding.
-  {
-    Real currentRSS = 0.0;
-    Real peakRSS    = 0.0;
-
-    MemoryReport::getResidentSetSize(currentRSS, peakRSS);
-
-    if (currentRSS > 0.0) {
-      Real maxCurrent = 0.0;
-      Real minCurrent = 0.0;
-      Real maxPeak    = 0.0;
-      Real minPeak    = 0.0;
-
-      MemoryReport::getMaxMinResidentSetSize(maxCurrent, minCurrent, maxPeak, minPeak);
-
-      pout() << "                                -- Resident set size        : " << bytesAsMB(currentRSS) << " (MB)"
-             << endl;
-      pout() << "                                -- Peak resident set size   : " << bytesAsMB(peakRSS) << " (MB)"
-             << endl;
-#ifdef CH_MPI
-      pout() << "                                -- Max resident set size    : " << bytesAsMB(maxCurrent) << " (MB)"
-             << endl;
-      pout() << "                                -- Min resident set size    : " << bytesAsMB(minCurrent) << " (MB)"
-             << endl;
-      pout() << "                                -- Max peak resident size   : " << bytesAsMB(maxPeak) << " (MB)"
-             << endl;
-#endif
-    }
-  }
-
-  // Memory held by particle arenas. Reported outside the memory-tracking guard because it is our own
-  // counter rather than Chombo's: ParticleSoA allocates with std::aligned_alloc, which never reaches
-  // Chombo's Arena, so this is the part of the footprint that the tracked figures below structurally
-  // cannot see. On a particle-heavy run it is the dominant term. Reported with the
-  // maximum and minimum over ranks, because a maximum that runs away from the minimum means a single
-  // rank is accumulating rather than the whole run.
-  {
-    const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
-    const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
-    const long long arenaBytes    = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Container));
-    const long long arenaPeak     = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Container));
-    const long long bufferBytes   = static_cast<long long>(ParticleMemory::getBytes(ParticleMemory::Kind::Buffer));
-    const long long bufferPeak    = static_cast<long long>(ParticleMemory::getPeak(ParticleMemory::Kind::Buffer));
-
-    pout() << "                                -- Particle arenas          : " << bytesAsMB(arenaBytes) << " (MB)"
-           << endl;
-    pout() << "                                -- Peak particle arenas     : " << bytesAsMB(arenaPeak) << " (MB)"
-           << endl;
-    pout() << "                                -- Particle buffers         : " << bytesAsMB(bufferBytes) << " (MB)"
-           << endl;
-    pout() << "                                -- Peak particle buffers    : " << bytesAsMB(bufferPeak) << " (MB)"
-           << endl;
-    pout() << "                                -- Peak particle total      : " << bytesAsMB(particlePeak) << " (MB)"
-           << endl;
-
-#ifdef CH_MPI
-    pout() << "                                -- Max particle arenas      : "
-           << bytesAsMB(ParallelOps::max(arenaBytes)) << " (MB)" << endl;
-    pout() << "                                -- Max peak particle arenas : " << bytesAsMB(ParallelOps::max(arenaPeak))
-           << " (MB)" << endl;
-    pout() << "                                -- Max peak particle buffers: "
-           << bytesAsMB(ParallelOps::max(bufferPeak)) << " (MB)" << endl;
-    pout() << "                                -- Max peak particle total  : "
-           << bytesAsMB(ParallelOps::max(particlePeak)) << " (MB)" << endl;
-    pout() << "                                -- Min particle arenas      : "
-           << bytesAsMB(ParallelOps::min(particleBytes)) << " (MB)" << endl;
-#endif
-  }
-
-  // Write memory usage
-#ifdef CH_USE_MEMORY_TRACKING
-  long long unfreedMem = 0LL;
-  long long peakMem    = 0LL;
-
-  overallMemoryUsage(unfreedMem, peakMem);
-
-  pout() << "                                -- Unfreed mesh arenas      : " << bytesAsMB(unfreedMem) << " (MB)"
-         << endl;
-  pout() << "                                -- Peak mesh arenas         : " << bytesAsMB(peakMem) << " (MB)" << endl;
-
-#ifdef CH_MPI
-  pout() << "                                -- Max unfreed mesh arenas  : " << bytesAsMB(ParallelOps::max(unfreedMem))
-         << " (MB)" << endl;
-  pout() << "                                -- Max peak mesh arenas     : " << bytesAsMB(ParallelOps::max(peakMem))
-         << " (MB)" << endl;
-#endif
-#endif
+  writeMemoryTable("                                -- ");
 }
 
 int
