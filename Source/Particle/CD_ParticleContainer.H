@@ -588,6 +588,29 @@ public:
   remap();
 
   /**
+   * @brief Reclaim arena slack across every leaf this rank owns.
+   * @details Applied after a remap or a regrid, where the particle population on a leaf can fall
+   * sharply -- particles leave for another rank, or the grids are rebuilt underneath them -- while
+   * the arena that held them does not shrink on its own. Left unchecked, a rank that once absorbed a
+   * burst goes on holding that capacity, so its footprint reflects the worst influx it has ever seen
+   * rather than what it currently owns.
+   * @param[in] a_trigger  Shrink a leaf only when its capacity exceeds a_trigger times its live count.
+   * @param[in] a_headroom Capacity to leave behind, as a multiple of the live count.
+   */
+  void
+  shrinkSlack(const Real a_trigger, const Real a_headroom);
+
+  /**
+   * @brief Set every leaf's arena capacity to a fixed multiple of its live particle count.
+   * @details Applied after a regrid, where the leaves have just been filled from empty and their
+   * capacities reflect the order particles arrived in rather than anything meaningful. Unlike
+   * shrinkSlack() this also grows, so it normalizes rather than only reclaiming.
+   * @param[in] a_factor Capacity to leave, as a multiple of the live count.
+   */
+  void
+  trimCapacity(const Real a_factor);
+
+  /**
    * @brief Cache the current valid particles ahead of a regrid.
    * @details Snapshots the current per-level holders (and their layout) so that regrid() can
    * rebuild over a new layout and redistribute the cached particles. Call exactly once before
@@ -911,6 +934,41 @@ protected:
   using MoverPool = std::vector<std::map<PoolKey, Leaf>>;
 
   /**
+   * @brief Slack ratio above which a leaf's arena is shrunk after a remap or regrid.
+   * @details Two is the natural threshold because the arena doubles when it grows: a leaf that has
+   * just grown once sits at up to twice its size and is left alone, while one holding more than that
+   * is carrying slack from an influx that has since gone. Lowering this towards one makes containers
+   * thrash between shrinking and regrowing.
+   */
+  static constexpr Real s_shrinkTrigger = 2.0;
+
+  /**
+   * @brief Capacity left behind when a leaf is shrunk, as a multiple of its live count.
+   * @details Above one so that a container which refills slightly does not immediately reallocate;
+   * an exact fit would make the very next append grow the arena again.
+   */
+  static constexpr Real s_shrinkHeadroom = 1.25;
+
+  /**
+   * @brief Headroom left on the cached leaves at pre-regrid, as a multiple of their live count.
+   * @details Exactly one, i.e. no headroom at all. The cache is read once and drained during the
+   * regrid, so nothing will ever be appended to it; any slack it carries is held for the whole span
+   * between pre-regrid and the redistribution, during which the mesh, the operators and the time
+   * stepper are all rebuilt and allocating.
+   */
+  static constexpr Real s_cacheHeadroom = 1.0;
+
+  /**
+   * @brief Capacity the leaves are left with after a regrid, as a multiple of their live count.
+   * @details The leaves are filled from empty during the redistribution, so they end up wherever
+   * doubling happened to leave them -- anywhere between one and two times their final count,
+   * depending on the order particles arrived in. Normalizing to a known factor makes the footprint
+   * after a regrid predictable, and two is the natural choice because it is what a container that has
+   * just grown would hold anyway.
+   */
+  static constexpr Real s_regridHeadroom = 2.0;
+
+  /**
    * @brief Gather every particle of a source holder into a per-rank, per-destination-patch pool.
    * @details Reads each particle, resolves its owning (level, grid index, rank) on the CURRENT tile
    * maps, and copies it into the pool (ids preserved, rankID set to the new owner). Off-domain
@@ -920,7 +978,7 @@ protected:
    * @return The per-rank mover pool.
    */
   MoverPool
-  gatherToPool(const AMRParticlesSoA<P, Traits>& a_source, const Vector<DisjointBoxLayout>& a_sourceGrids);
+  gatherToPool(AMRParticlesSoA<P, Traits>& a_source, const Vector<DisjointBoxLayout>& a_sourceGrids);
 
   /**
    * @brief Mask fast path for remap(): pool ONLY the movers, leaving stayers in place.
