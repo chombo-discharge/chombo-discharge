@@ -6052,10 +6052,11 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
                                                   leaf.template get<&ItoParticle::old_y>(i),
                                                   leaf.template get<&ItoParticle::old_z>(i)));
 
+            // No cast to ParticleReal: x0 is a position and stays double, so casting would round the
+            // old position through float whenever PARTICLE_PRECISION=FLOAT. This one compiles either
+            // way, which is why it survived where the pointer bindings below did not.
             ItoKMCFieldParticle payload;
-            D_DECL(payload.x0_x = static_cast<ParticleReal>(posA[0]),
-                   payload.x0_y = static_cast<ParticleReal>(posA[1]),
-                   payload.x0_z = static_cast<ParticleReal>(posA[2]));
+            D_DECL(payload.x0_x = posA[0], payload.x0_y = posA[1], payload.x0_z = posA[2]);
 
             comp.append(leaf.position(i), leaf.weight(i), payload);
           }
@@ -6086,15 +6087,18 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
           double* const pos[SpaceDim] = {
             D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
-          ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
-                                                      comp.template column<&ItoKMCFieldParticle::x0_y>(),
-                                                      comp.template column<&ItoKMCFieldParticle::x0_z>())};
+          // double rather than ParticleReal: x0 is a position, and positions are double at every
+          // PARTICLE_PRECISION setting -- see ItoKMCFieldParticle. Typing these as ParticleReal
+          // compiles only while the payload precision happens to be double.
+          double* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
+                                                comp.template column<&ItoKMCFieldParticle::x0_y>(),
+                                                comp.template column<&ItoKMCFieldParticle::x0_z>())};
 
           ParticleLoops::loop(comp, [&](const std::size_t i) {
             for (int dir = 0; dir < SpaceDim; dir++) {
               const double posB = pos[dir][i];
               pos[dir][i]       = alt[dir][i];
-              alt[dir][i]       = static_cast<ParticleReal>(posB);
+              alt[dir][i]       = posB;
             }
           });
         }
@@ -6125,9 +6129,10 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
 
           double* const pos[SpaceDim] = {
             D_DECL(comp.positionColumn(0), comp.positionColumn(1), comp.positionColumn(2))};
-          const ParticleReal* const alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
-                                                            comp.template column<&ItoKMCFieldParticle::x0_y>(),
-                                                            comp.template column<&ItoKMCFieldParticle::x0_z>())};
+          // See the swap above: x0 is a position, hence double rather than ParticleReal.
+          const double* const       alt[SpaceDim] = {D_DECL(comp.template column<&ItoKMCFieldParticle::x0_x>(),
+                                                      comp.template column<&ItoKMCFieldParticle::x0_y>(),
+                                                      comp.template column<&ItoKMCFieldParticle::x0_z>())};
           double* const             w             = comp.weightColumn();
           const ParticleReal* const phiA          = comp.template column<&ItoKMCFieldParticle::phiA>();
           const ParticleReal* const phiB          = comp.template column<&ItoKMCFieldParticle::phiB>();

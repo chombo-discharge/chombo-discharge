@@ -547,7 +547,7 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
       double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       const ParticleReal* const vel[SpaceDim] = {
         D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
-      ParticleReal* const xk[SpaceDim] = {
+      double* const xk[SpaceDim] = {
         D_DECL(leaf.template column<&P::xk_x>(), leaf.template column<&P::xk_y>(), leaf.template column<&P::xk_z>())};
       ParticleReal* const k1[SpaceDim] = {
         D_DECL(leaf.template column<&P::k1_x>(), leaf.template column<&P::k1_y>(), leaf.template column<&P::k1_z>())};
@@ -583,7 +583,7 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
       double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
       const ParticleReal* const vel[SpaceDim] = {
         D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
-      const ParticleReal* const xk[SpaceDim] = {
+      const double* const xk[SpaceDim] = {
         D_DECL(leaf.template column<&P::xk_x>(), leaf.template column<&P::xk_y>(), leaf.template column<&P::xk_z>())};
       const ParticleReal* const k1[SpaceDim] = {
         D_DECL(leaf.template column<&P::k1_x>(), leaf.template column<&P::k1_y>(), leaf.template column<&P::k1_z>())};
@@ -636,7 +636,7 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
         double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
         const ParticleReal* const vel[SpaceDim] = {
           D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
-        ParticleReal* const xk[SpaceDim] = {
+        double* const xk[SpaceDim] = {
           D_DECL(leaf.template column<&P::xk_x>(), leaf.template column<&P::xk_y>(), leaf.template column<&P::xk_z>())};
         ParticleReal* const k1[SpaceDim] = {
           D_DECL(leaf.template column<&P::k1_x>(), leaf.template column<&P::k1_y>(), leaf.template column<&P::k1_z>())};
@@ -673,7 +673,7 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
         double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
         const ParticleReal* const vel[SpaceDim] = {
           D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
-        const ParticleReal* const xk[SpaceDim] = {
+        const double* const xk[SpaceDim] = {
           D_DECL(leaf.template column<&P::xk_x>(), leaf.template column<&P::xk_y>(), leaf.template column<&P::xk_z>())};
         ParticleReal* const k2[SpaceDim] = {
           D_DECL(leaf.template column<&P::k2_x>(), leaf.template column<&P::k2_y>(), leaf.template column<&P::k2_z>())};
@@ -709,7 +709,7 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
         double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
         const ParticleReal* const vel[SpaceDim] = {
           D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
-        const ParticleReal* const xk[SpaceDim] = {
+        const double* const xk[SpaceDim] = {
           D_DECL(leaf.template column<&P::xk_x>(), leaf.template column<&P::xk_y>(), leaf.template column<&P::xk_z>())};
         ParticleReal* const k3[SpaceDim] = {
           D_DECL(leaf.template column<&P::k3_x>(), leaf.template column<&P::k3_y>(), leaf.template column<&P::k3_z>())};
@@ -745,7 +745,7 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
         double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
         const ParticleReal* const vel[SpaceDim] = {
           D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
-        const ParticleReal* const xk[SpaceDim] = {
+        const double* const xk[SpaceDim] = {
           D_DECL(leaf.template column<&P::xk_x>(), leaf.template column<&P::xk_y>(), leaf.template column<&P::xk_z>())};
         const ParticleReal* const k1[SpaceDim] = {
           D_DECL(leaf.template column<&P::k1_x>(), leaf.template column<&P::k1_y>(), leaf.template column<&P::k1_z>())};
