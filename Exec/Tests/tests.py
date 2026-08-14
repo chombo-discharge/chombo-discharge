@@ -31,6 +31,7 @@ parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, defa
 parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default=None,  required=False)
 parser.add_argument('-debug',      help="Build with debug symbols (DEBUG=TRUE/FALSE)", type=str, default=None, required=False)
 parser.add_argument('-opt',        help="Optimisation level (OPT=HIGH/FALSE)",         type=str, default=None, required=False)
+parser.add_argument('-particle_precision', help="Particle payload precision (PARTICLE_PRECISION=DOUBLE/FLOAT)", type=str, default=None, required=False)
 parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=None,       required=False)
 parser.add_argument('-cores',      help="Number of cores to use", type=int, default=2,        required=False)
 parser.add_argument('-exec_mpi',   help="MPI run command.",       type=str, default="mpirun", required=False)
@@ -128,7 +129,7 @@ def pre_check(silent):
 # --------------------------------------------------
 # Function that compiles a test
 # --------------------------------------------------
-def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, debug, opt, clean, main):
+def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, debug, opt, particle_precision, clean, main):
     """ Set up and run a compilation of the target test. """
 
     makeCommand = "make "
@@ -151,6 +152,8 @@ def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, debug, opt, cle
         makeCommand += "DEBUG=" + str(debug).upper() + " "
     if opt is not None:
         makeCommand += "OPT=" + str(opt).upper() + " "
+    if particle_precision is not None:
+        makeCommand += "PARTICLE_PRECISION=" + str(particle_precision).upper() + " "
     if omp is not None and str(omp).upper() == "TRUE":
         makeCommand += "USE_MT=FALSE "
 
@@ -290,6 +293,7 @@ for test in config.sections():
                                         petsc=args.petsc,
                                         debug=args.debug,
                                         opt=args.opt,
+                                        particle_precision=args.particle_precision,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if compile_code != 0:
