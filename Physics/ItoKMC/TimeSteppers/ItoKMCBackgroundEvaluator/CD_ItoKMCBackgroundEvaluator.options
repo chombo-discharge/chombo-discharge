@@ -15,9 +15,7 @@ ItoKMCBackgroundEvaluator.load_balance_particles                   = false      
 ItoKMCBackgroundEvaluator.load_indices                             = -1                 ## Which particle containers to use for load balancing (-1 => all)
 ItoKMCBackgroundEvaluator.load_per_cell                            = 1.0                ## Default load per grid cell.
 ItoKMCBackgroundEvaluator.box_sorting                              = morton             ## Box sorting when load balancing
-ItoKMCBackgroundEvaluator.particles_per_cell                       = 32                 ## Max computational particles per cell
 ItoKMCBackgroundEvaluator.merge_interval                           = 1                  ## Time steps between superparticle merging
-ItoKMCBackgroundEvaluator.regrid_superparticles                    = solver             ## Regrid merge: none/solver/equal_weight_kd/reinitialize/reinitialize_bvh/nn_sfc/nn_pair_tree/nn_pair_onecell/nn_pair_hash/external
 ItoKMCBackgroundEvaluator.physics_dt_factor                        = 1.0                ## Physics-based time step factor
 ItoKMCBackgroundEvaluator.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
 ItoKMCBackgroundEvaluator.max_particle_advection_cfl               = 1.0                ## Advective time step CFL restriction

@@ -37,7 +37,6 @@ BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
   pp.get("mobility", m_mobility);
   pp.get("omega", m_omega);
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
   pp.get("which_balance", str);
@@ -77,7 +76,6 @@ BrownianWalkerStepper::parseRuntimeOptions()
   ParmParse pp("BrownianWalker");
 
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
 
@@ -549,11 +547,10 @@ BrownianWalkerStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
     pout() << "BrownianWalkerStepper::regrid" << endl;
   }
 
-  // Solver regrids.
+  // Solver regrids. The super-particle merge happens inside that call now (see
+  // ItoSolver.regrid_superparticles), on the reduced particles and before they are rebuilt as
+  // ItoParticles -- merging again here would just re-merge an already-merged population.
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  // Make superparticles
-  this->makeSuperParticles();
 }
 
 void
@@ -585,7 +582,7 @@ BrownianWalkerStepper::makeSuperParticles()
     pout() << "BrownianWalkerStepper::makeSuperParticles" << endl;
   }
 
-  if (m_ppc > 0) {
+  if (m_solver->getParticlesPerCell()[0] > 0) {
     // A merge redistributes weight but must never create or destroy it. When requested, compute the
     // total particle weight on the container before and after the merge -- independent of the merge
     // scheme and of how the container is organized -- and abort if it drifts by more than round-off.
@@ -593,7 +590,7 @@ BrownianWalkerStepper::makeSuperParticles()
     // patch-organized.)
     const Real weightBefore = m_verifyConservation ? this->computeTotalWeight() : 0.0;
 
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
 
     if (m_verifyConservation) {
       const Real weightAfter = this->computeTotalWeight();
@@ -747,11 +744,16 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
       // later run with superparticle merging/splitting.
       Real sum = 0.0;
 
-      // We will have at most m_ppc particles per grid cell. This kernel does that.
+      // We will have at most this many particles per grid cell after the merge. This kernel does that.
+      // The target is the solver's (ItoSolver.particles_per_cell), read with the same per-level clamp
+      // the merge itself uses -- this loop is already per level, so a per-level target is honoured.
+      const Vector<int>& ppcPerLevel = m_solver->getParticlesPerCell();
+      const int          ppc         = (lvl < ppcPerLevel.size()) ? ppcPerLevel[lvl] : ppcPerLevel.back();
+
       auto kernel = [&](const IntVect& iv) -> void {
         if (!ebisBox.isCovered(iv)) {
           const Real numPhysParticles = std::abs(ppcFAB(iv, comp) * dV);
-          const Real numCompParticles = std::min(numPhysParticles, Real(m_ppc));
+          const Real numCompParticles = std::min(numPhysParticles, Real(ppc));
 
           sum += numCompParticles;
         }

@@ -3,6 +3,8 @@
 # ====================================================================================================
 ItoSolver.verbosity                   = -1             ## Class verbosity
 ItoSolver.merge_algorithm             = kd_carve       ## Particle merging algorithm. One of 'reinitialize', 'equal_weight_kd', 'reinitialize_bvh', 'nn_sfc', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'kd_carve', 'kd_patch', 'kd_skin_nn', 'none', or 'external'
+ItoSolver.particles_per_cell          = 32             ## Target computational particles per cell (one value, or one per level)
+ItoSolver.regrid_superparticles       = solver         ## Merge run during regrids: 'solver' (use merge_algorithm), 'none', or any merge_algorithm selector
 ItoSolver.nn_pair_iterate             = true           ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local tier to convergence within each round
 ItoSolver.nn_pair_fallback            = 1              ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: fallback candidates per query
 ItoSolver.nn_pair_max_cell_dist       = 1              ## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)
@@ -15,7 +17,7 @@ ItoSolver.normal_max                  = 5.0            ## Maximum value (absolut
 ItoSolver.redistribute                = false          ## Turn on/off redistribution.
 ItoSolver.blend_conservation          = false          ## Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing               = particles      ## 'particles' or 'numbers'
-ItoSolver.ppc_restart                 = 32             ## Maximum number of computational particles to generate for restarts.
+ItoSolver.ppc_restart                 = 32             ## Particles per cell redrawn when restarting from a 'checkpointing = numbers' checkpoint
 ItoSolver.irr_ngp_deposition          = true           ## Force irregular deposition in cut cells or not
 ItoSolver.irr_ngp_interp              = true           ## Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp             = direct         ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)

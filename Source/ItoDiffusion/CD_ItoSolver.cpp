@@ -411,6 +411,21 @@ ItoSolver::parseParticleMerger()
 
   pp.get("merge_algorithm", str);
 
+  // Target particle count per cell, and the regrid-time merge method. Both live here rather than on a
+  // time stepper: the solver is where merging happens, so it is what owns the target to merge to and
+  // whether to merge at a regrid. A stepper still owns the per-step cadence (merge_interval), which is
+  // a property of the advance, not of the solver.
+  m_particlesPerCell.resize(pp.countval("particles_per_cell"));
+  pp.getarr("particles_per_cell", m_particlesPerCell, 0, m_particlesPerCell.size());
+
+  // regrid_superparticles selects the merge method run inside ItoSolver::regrid(): one of the
+  // merge_algorithm selectors (incl. 'none' to turn the merge off), or 'solver' to use merge_algorithm.
+  std::string regridMerge;
+  pp.get("regrid_superparticles", regridMerge);
+  m_regridMergeMethod = (regridMerge == "solver") ? std::optional<ParticleManagement::ParticleMergeMethod>(std::nullopt)
+                                                  : std::optional<ParticleManagement::ParticleMergeMethod>(
+                                                      ParticleManagement::mergeMethodFromString(regridMerge));
+
   // The per-cell merger for each cell-based method is built locally in the corresponding
   // mergeXxx() (see mergeLite()); parseParticleMerger only records the method.
   // 'external' leaves the merger to the user (setParticleCellMerger); 'none' does nothing.
@@ -447,6 +462,46 @@ ItoSolver::parseParticleMerger()
   if (m_kdSplitWeightLeafDx < 0.0) {
     MayDay::Abort("ItoSolver::parseParticleMerger - 'kd_split_weight_leaf_dx' must be >= 0");
   }
+
+  if (m_particlesPerCell.size() < 1) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'particles_per_cell' must have at least one entry");
+  }
+  for (int lvl = 0; lvl < m_particlesPerCell.size(); lvl++) {
+    if (m_particlesPerCell[lvl] <= 0) {
+      MayDay::Abort("ItoSolver::parseParticleMerger - 'particles_per_cell' must be > 0");
+    }
+  }
+
+  // A non-uniform particles_per_cell is only meaningful to the cell-based methods; the whole-container
+  // methods use one crowding threshold for the whole hierarchy and read entry 0, so a per-level vector
+  // combined with one of them would be silently truncated. Fail loudly instead, for the same reason the
+  // validations above do: a bad value here produces a degenerate merge rather than an error.
+  // (initialData() needs no such guard -- generateParticlesFromDensity() takes the vector and resolves
+  // it per level.)
+  const bool uniformPPC = std::adjacent_find(m_particlesPerCell.stdVector().begin(),
+                                             m_particlesPerCell.stdVector().end(),
+                                             std::not_equal_to<int>()) == m_particlesPerCell.stdVector().end();
+
+  if (!uniformPPC) {
+    auto isCellBased = [](const ParticleManagement::ParticleMergeMethod a_method) -> bool {
+      return a_method == ParticleManagement::ParticleMergeMethod::EqualWeightKD ||
+             a_method == ParticleManagement::ParticleMergeMethod::Reinitialize ||
+             a_method == ParticleManagement::ParticleMergeMethod::ReinitializeBVH ||
+             a_method == ParticleManagement::ParticleMergeMethod::NnSfc ||
+             a_method == ParticleManagement::ParticleMergeMethod::External;
+    };
+
+    if (!isCellBased(m_mergeMethod)) {
+      MayDay::Abort("ItoSolver::parseParticleMerger - a per-level 'particles_per_cell' needs a cell-based "
+                    "'merge_algorithm' (equal_weight_kd/reinitialize/reinitialize_bvh/nn_sfc/external); the "
+                    "whole-container methods use one threshold for the whole hierarchy and would use entry 0 only");
+    }
+    if (m_regridMergeMethod.has_value() && !isCellBased(m_regridMergeMethod.value()) &&
+        m_regridMergeMethod.value() != ParticleManagement::ParticleMergeMethod::None) {
+      MayDay::Abort("ItoSolver::parseParticleMerger - a per-level 'particles_per_cell' needs a cell-based "
+                    "'regrid_superparticles' (or 'none'); the whole-container methods would use entry 0 only");
+    }
+  }
 }
 
 EBIntersection
@@ -458,6 +513,14 @@ ItoSolver::getIntersectionAlgorithm() const noexcept
   }
 
   return m_intersectionAlg;
+}
+
+const Vector<int>&
+ItoSolver::getParticlesPerCell() const noexcept
+{
+  CH_TIME("ItoSolver::getParticlesPerCell");
+
+  return m_particlesPerCell;
 }
 
 unsigned long long
@@ -625,7 +688,12 @@ ItoSolver::initialData()
     return initialDensityFunc(x, m_time);
   };
 
-  this->generateParticlesFromDensity(bulkParticles, initialDensity, m_restartPPC);
+  // Seed at the merge target, not at ppc_restart. This is a cold start, not a restart: ppc_restart
+  // exists for redrawing particles from a 'checkpointing = numbers' checkpoint (see
+  // readCheckpointLevelFluid()), and using it here meant seeding at one count and having the first
+  // merge immediately take the population down to another. A cold start and the first merge now agree
+  // on the target by construction.
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, m_particlesPerCell);
 
   constexpr Real tolerance = 0.0;
 
@@ -639,14 +707,31 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
                                         const std::function<Real(const RealVect x)>& a_densityFunc,
                                         const int a_maxParticlesPerCell) const noexcept
 {
-  CH_TIME("ItoSolver::generateParticlesFromDensity");
+  CH_TIME("ItoSolver::generateParticlesFromDensity(int)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::generateParticlesFromDensity" << endl;
+    pout() << m_name + "::generateParticlesFromDensity(int)" << endl;
+  }
+
+  this->generateParticlesFromDensity(a_particles, a_densityFunc, Vector<int>(1, a_maxParticlesPerCell));
+}
+
+void
+ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
+                                        const std::function<Real(const RealVect x)>& a_densityFunc,
+                                        const Vector<int>& a_maxParticlesPerCell) const noexcept
+{
+  CH_TIME("ItoSolver::generateParticlesFromDensity(Vector<int>)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::generateParticlesFromDensity(Vector<int>)" << endl;
+  }
+
+  if (a_maxParticlesPerCell.size() < 1) {
+    MayDay::Error("ItoSolver::generateParticlesFromDensity - empty particles-per-cell vector");
   }
 
   // Lambda which stochastically determines the number of particles in a cell. This is the mean number of particles,
   // plus a stochastic evaluation of whether or not to include the "fractional" particle.
-  auto sampleParticles = [&](const Real a_volume, const Real a_density) -> std::vector<long long> {
+  auto sampleParticles = [&](const Real a_volume, const Real a_density, const int a_ppc) -> std::vector<long long> {
     const Real meanNumParticles   = a_volume * a_density;
     const Real remainingParticles = meanNumParticles - std::floor(meanNumParticles);
 
@@ -655,11 +740,14 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
       numParticles += 1LL;
     }
 
-    return ParticleManagement::partitionParticleWeights(numParticles, static_cast<long long>(a_maxParticlesPerCell));
+    return ParticleManagement::partitionParticleWeights(numParticles, static_cast<long long>(a_ppc));
   };
 
   // Grid loop.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Same clamp applyCellMerger() uses: entry lvl when the vector is long enough, else the last one.
+    const int ppc = (lvl < a_maxParticlesPerCell.size()) ? a_maxParticlesPerCell[lvl] : a_maxParticlesPerCell.back();
+
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
@@ -682,7 +770,7 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
           const RealVect cellPos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
           const Real     phi     = a_densityFunc(cellPos);
 
-          const std::vector<long long> particleWeights = sampleParticles(vol, phi);
+          const std::vector<long long> particleWeights = sampleParticles(vol, phi, ppc);
 
           const RealVect lo = probLo + (RealVect(iv)) * dx;
           const RealVect hi = probLo + (RealVect(iv) + RealVect::Unit) * dx;
@@ -712,7 +800,7 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
           DataOps::computeMinValidBox(lo, hi, normal, bndryCentroid);
 
           // Partition particle weights.
-          const std::vector<long long> particleWeights = sampleParticles(kappa * vol, phi);
+          const std::vector<long long> particleWeights = sampleParticles(kappa * vol, phi, ppc);
 
           // Sample the particles.
           for (const auto& w : particleWeights) {
@@ -3259,6 +3347,17 @@ ItoSolver::organizeParticlesByPatch(const WhichContainer a_container)
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
   particles.organizeParticlesByPatch();
+}
+
+void
+ItoSolver::makeSuperparticles(const WhichContainer a_container)
+{
+  CH_TIME("ItoSolver::makeSuperparticles(WhichContainer)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::makeSuperparticles(WhichContainer)" << endl;
+  }
+
+  this->makeSuperparticles(a_container, m_particlesPerCell);
 }
 
 void

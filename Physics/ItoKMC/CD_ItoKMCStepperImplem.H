@@ -100,7 +100,6 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_timeStep                         = 0;
   m_loadPerCell                      = 1.0;
   m_redistributeCDR                  = true;
-  m_regridMergeMethod                = std::nullopt; // "solver" -- overwritten by parseSuperParticles()
   m_fluidRealm                       = Realm::Primal;
   m_particleRealm                    = Realm::Primal;
   m_minParticleAdvectionCFL          = 0.0;
@@ -273,26 +272,10 @@ ItoKMCStepper<I, C, R, F>::parseSuperParticles() noexcept
 
   ParmParse pp(m_name.c_str());
 
-  m_particlesPerCell.resize(pp.countval("particles_per_cell"));
-
+  // Cadence only. What to merge to, and whether to merge at a regrid, are properties of the solver and
+  // live there (ItoSolver.particles_per_cell / ItoSolver.regrid_superparticles). This is a property of
+  // the advance, which the solver has no notion of, so it stays here.
   pp.get("merge_interval", m_mergeInterval);
-
-  // regrid_superparticles selects the merge method run on regrids: one of the ItoSolver.merge_algorithm
-  // selectors (incl. 'none' to turn it off), or 'solver' to defer to whatever each ItoSolver has
-  // configured.
-  std::string regridMerge;
-  pp.get("regrid_superparticles", regridMerge);
-  m_regridMergeMethod = (regridMerge == "solver") ? std::optional<ParticleManagement::ParticleMergeMethod>(std::nullopt)
-                                                  : std::optional<ParticleManagement::ParticleMergeMethod>(
-                                                      ParticleManagement::mergeMethodFromString(regridMerge));
-
-  pp.getarr("particles_per_cell", m_particlesPerCell, 0, m_particlesPerCell.size());
-
-  for (int lvl = 0; lvl < m_particlesPerCell.size(); lvl++) {
-    if (m_particlesPerCell[lvl] <= 0) {
-      MayDay::Error("ItoKMCStepper::parseSuperParticles -- must have 'particles_per_cell' > 0");
-    }
-  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -745,7 +728,7 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
 
   // Make superparticles (makeSuperparticles() cell-sorts internally as needed and returns the containers
   // patch-organized).
-  m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
+  m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
 
   // Solve Poisson equation and compute the E-field
   m_fieldSolver->setPermittivities();
@@ -1677,6 +1660,11 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
 
   // If we are load balancing then we need to store the number of particles per cell on the old grids. This
   // will be used to estimate computational loads on the new grids.
+  //
+  // ORDERING: this must stay ahead of m_ito->preRegrid() below. That call extracts the bulk particles
+  // into the solver's reduced regrid holder and leaves the ItoParticle container empty, so reading
+  // getParticles(Bulk) afterwards would deposit nothing and every load would come back zero -- which
+  // produces a perfectly valid, perfectly unbalanced layout rather than an error.
   if (m_loadBalanceParticles) {
     Vector<RefCountedPtr<ItoSolver>> lbSolvers = this->getLoadBalanceSolvers();
 
@@ -1776,21 +1764,9 @@ ItoKMCStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  // Regrid super-particle merge. m_regridMergeMethod: nullopt => "solver", each solver uses its own
-  // configured merge_algorithm; a value => that specific method (ParticleMergeMethod::None => off).
-  // makeSuperparticles() cell-sorts internally as needed and returns the containers patch-organized.
-  const bool useSolverMethod = !m_regridMergeMethod.has_value();
-  const bool mergeIsOff      = m_regridMergeMethod.has_value() &&
-                          m_regridMergeMethod.value() == ParticleManagement::ParticleMergeMethod::None;
-
-  if (!mergeIsOff) {
-    if (useSolverMethod) {
-      m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-    }
-    else {
-      m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell, m_regridMergeMethod.value());
-    }
-  }
+  // The regrid super-particle merge now runs inside ItoSolver::regrid(), on the reduced particles and
+  // before they are rebuilt as ItoParticles -- which is the whole point: the de-refinement pile-up is
+  // merged away while it is still 53 B per particle. See ItoSolver.regrid_superparticles.
 
   // Redeposit particles and update the electric field on the new mesh.
   m_ito->depositParticles();

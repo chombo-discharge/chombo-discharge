@@ -13,6 +13,9 @@
 #ifndef CD_ITOSOLVER_H
 #define CD_ITOSOLVER_H
 
+// Std includes
+#include <optional>
+
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
@@ -145,6 +148,22 @@ public:
    */
   virtual void
   initialData();
+
+  /**
+   * @brief Fill a particle container randomly with particles such that we obtain the target uniform
+   * density, with a per-level cap on the computational particle count.
+   * @details The per-level form of the overload below. Used by initialData(), which seeds at
+   * ItoSolver.particles_per_cell -- a per-level vector -- so that a cold start and the first merge agree
+   * on the target by construction instead of seeding high and immediately merging back down.
+   * @param[in,out] a_particles         Particle container to fill. Particles already in the container will be kept.
+   * @param[in]     a_densityFunc       Density function.
+   * @param[in]     a_maxParticlesPerCell Maximum computational particles generated per cell, per level;
+   *                                    the last entry applies to any finer level.
+   */
+  virtual void
+  generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
+                               const std::function<Real(const RealVect x)>& a_densityFunc,
+                               const Vector<int>&                           a_maxParticlesPerCell) const noexcept;
 
   /**
    * @brief Fill a particle container randomly with particles such that we obtain the target uniform density.
@@ -810,6 +829,15 @@ public:
   organizeParticlesByPatch(WhichContainer a_container);
 
   /**
+   * @brief Make superparticles for a full container, merging to the solver's configured target.
+   * @details The usual entry point: the target is ItoSolver.particles_per_cell and the method is
+   * ItoSolver.merge_algorithm, so a caller that has no opinion about either does not have to carry one.
+   * @param[in] a_container Which container to repartition into new superparticles.
+   */
+  virtual void
+  makeSuperparticles(WhichContainer a_container);
+
+  /**
    * @brief Make superparticles for a full container -- this is the AMR version that users will usually call.
    * @param[in] a_container        Which container to repartition into new superparticles
    * @param[in] a_particlesPerCell Target number of particles per cell
@@ -840,6 +868,17 @@ public:
   makeSuperparticles(WhichContainer                                a_container,
                      const Vector<int>&                            a_particlesPerCell,
                      const ParticleManagement::ParticleMergeMethod a_method);
+
+  /**
+   * @brief Get the configured target number of computational particles per cell, per AMR level.
+   * @details ItoSolver.particles_per_cell. Exposed because a load estimator has to assume the same
+   * target the merge will actually reduce to -- BrownianWalkerStepper's mesh balancer clamps its
+   * per-cell physical count with it. Index it with the same clamp the merge uses: entry @c lvl if the
+   * vector is long enough, otherwise the last entry.
+   * @return The per-level target particle count.
+   */
+  virtual const Vector<int>&
+  getParticlesPerCell() const noexcept;
 
   /**
    * @brief Remap the bulk particle container.
@@ -1102,6 +1141,33 @@ protected:
    * merge_algorithm).
    */
   ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
+
+  /**
+   * @brief Target number of computational particles per cell, per AMR level.
+   * @details Set by parseParticleMerger() from ItoSolver.particles_per_cell. The solver owns this
+   * because the solver is where merging happens -- it is the target every merge reduces to, the count
+   * initialData() seeds the bulk container at, and (through getParticlesPerCell()) the number a
+   * particle-count load estimate has to assume. A time stepper still owns *when* to merge during a run
+   * (ItoKMCStepper.merge_interval); it no longer owns *what to merge to*.
+   *
+   * Per-level, for compatibility with the ItoKMCStepper key it replaces. Only the cell-based methods
+   * honour it per level; the whole-container methods use one crowding threshold for the whole
+   * hierarchy and read entry 0, so parseParticleMerger() aborts on a non-uniform vector rather than
+   * silently truncating it.
+   */
+  Vector<int> m_particlesPerCell;
+
+  /**
+   * @brief Which merge method to run inside ItoSolver::regrid(), or nullopt for "whatever
+   * merge_algorithm says".
+   * @details Set by parseParticleMerger() from ItoSolver.regrid_superparticles. A separate knob from
+   * merge_algorithm because the two are genuinely independent: the regrid merge runs once per regrid
+   * on a population that has just been redistributed, and a run may reasonably want a cheaper (or no)
+   * method there than it uses per step. ParticleMergeMethod::None turns the regrid merge off; the
+   * extract/rebuild round-trip still happens, since preRegrid() has already reduced the particles by
+   * then.
+   */
+  std::optional<ParticleManagement::ParticleMergeMethod> m_regridMergeMethod;
 
   /**
    * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local trivial tier to convergence within each
