@@ -881,6 +881,18 @@ public:
   getParticlesPerCell() const noexcept;
 
   /**
+   * @brief Get the reduced holder the bulk particles ride across a regrid in.
+   * @details Only meaningful between preRegrid() and regrid(); the bulk ItoParticle container is empty
+   * over that window, and this is where its particles actually are. Exposed for load balancers that
+   * need to count or trial-regrid the population between those two calls -- see
+   * BrownianWalkerStepper::loadBalanceBoxesParticles(). Reading getParticles(Bulk) there instead
+   * yields zero loads and a valid but unbalanced layout, with nothing to indicate anything went wrong.
+   * @return The reduced-particle regrid holder.
+   */
+  virtual ParticleContainer<ItoMergeParticle>&
+  getRegridParticles() noexcept;
+
+  /**
    * @brief Remap the bulk particle container.
    */
   virtual void
@@ -1430,6 +1442,25 @@ protected:
    * @brief Various particle containers with identifiers.
    */
   std::map<WhichContainer, ParticleContainer<ItoParticle>> m_particleContainers;
+
+  /**
+   * @brief The bulk particles, in reduced form, between preRegrid() and regrid().
+   * @details At a de-refining regrid 2^D fine cells collapse into one coarse cell, so between the
+   * redistribution and the merge each rank transiently holds up to 2^D times the target particles per
+   * cell. This container is what that spike is held in: preRegrid() extracts the bulk container into
+   * it, the redistribution and load balancing happen on it, and regrid() merges it and only then
+   * rebuilds ItoParticles. 53 B per particle in 3-D instead of 149 B, and the merge runs before the
+   * population is ever materialised at the larger size.
+   *
+   * Bulk only. The EB/Domain/Source/Covered/Scratch containers keep the plain
+   * ParticleContainer::preRegrid() path -- they are small, none of them is merged, and Scratch is
+   * never populated.
+   *
+   * Live only across a regrid: regrid() releases it before returning. It is a member rather than a
+   * local because preRegrid() and regrid() are separate calls with the load-balancing phase between
+   * them, and because BrownianWalkerStepper's particle load balancer has to count it.
+   */
+  ParticleContainer<ItoMergeParticle> m_regridParticles;
 
   /**
    * @brief Algorithm for EB intersection

@@ -523,6 +523,14 @@ ItoSolver::getParticlesPerCell() const noexcept
   return m_particlesPerCell;
 }
 
+ParticleContainer<ItoMergeParticle>&
+ItoSolver::getRegridParticles() noexcept
+{
+  CH_TIME("ItoSolver::getRegridParticles");
+
+  return m_regridParticles;
+}
+
 unsigned long long
 ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_localOnly) const
 {
@@ -1114,11 +1122,50 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
     m_amr->allocatePointer(m_diffusionFunction, m_realm);
   }
 
-  // Regrid particle containers.
+  // Regrid particle containers. The bulk one is empty -- preRegrid() moved its particles into
+  // m_regridParticles -- but it still has to make the trip, since ParticleContainer::regrid() is what
+  // rebuilds its holders over the new layout.
   for (auto& container : m_particleContainers) {
     ParticleContainer<ItoParticle>& particles = container.second;
 
     m_amr->remapToNewGrids(particles, a_lmin, a_newFinestLevel);
+  }
+
+  // Redistribute the reduced particles onto the new grids, merge them there, and only then rebuild
+  // ItoParticles. This ordering is the point of the exercise: the de-refinement pile-up exists between
+  // the redistribution and the merge, and here it is held at 53 B per particle rather than 149 B, and
+  // merged away before anything is materialised at the larger size.
+  //
+  // Safe to run the AMR-collective merges from here: Driver::regrid() calls AmrMesh::regridOperators()
+  // before the time stepper's regrid, so the particle ghost masks exist and m_amr->getFinestLevel() is
+  // already the new finest level. The kd merges' mesh scratch (m_kdMergeCellHistogram/m_kdMergeLeafQuota)
+  // was allocated above.
+  {
+    CH_TIME("ItoSolver::regrid::mergeRegridParticles");
+
+    m_amr->remapToNewGrids(m_regridParticles, a_lmin, a_newFinestLevel);
+
+    // nullopt => use the solver's own merge_algorithm.
+    const ParticleManagement::ParticleMergeMethod method = m_regridMergeMethod.value_or(m_mergeMethod);
+
+    this->mergeLite(m_regridParticles, m_particlesPerCell, method);
+    this->rebuildFromMergeContainer(WhichContainer::Bulk, m_regridParticles);
+
+    // Backstop for any leaf the rebuild skipped. rebuildFromMergeContainer() releases each leaf as it
+    // consumes it, but this container is a member and would otherwise hold its arenas until the next
+    // regrid -- unlike the function-local merge containers, which die at scope exit.
+    m_regridParticles.clearParticles();
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        m_regridParticles[lvl][dit[mybox]].shrinkToFit();
+      }
+    }
   }
 }
 
@@ -2225,6 +2272,20 @@ ItoSolver::preRegrid(const int a_lbase, const int /*a_oldFinestLevel*/)
   }
 
   CH_assert(a_lbase >= 0);
+
+  // The bulk particles cross the regrid in reduced form. At a de-refining regrid 2^D fine cells
+  // collapse into one coarse cell, so between the redistribution and the merge each rank transiently
+  // holds up to 2^D times the target particles per cell -- the largest single term in the particle
+  // footprint. Extract now, so that everything from here to the merge in regrid() moves 53 B particles
+  // instead of 149 B ones, and so that the merge can run before the pile-up is ever rebuilt at the
+  // larger size. extractIntoMergeContainer() clears the ItoParticle arenas patch by patch as it goes.
+  this->extractIntoMergeContainer(WhichContainer::Bulk, m_regridParticles);
+
+  // BOTH containers make the round trip. The bulk ItoParticle container is empty now, but
+  // ParticleContainer::regrid() is the only thing that re-defines m_particles/m_grownGrids/
+  // m_bufferParticles over the new layout and resets m_finestLevel. Skip its preRegrid() and the
+  // rebuild in regrid() would index new-layout DataIndexes into old-layout LevelData.
+  m_regridParticles.preRegrid();
 
   for (auto& container : m_particleContainers) {
     ParticleContainer<ItoParticle>& particles = container.second;

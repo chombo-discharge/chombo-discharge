@@ -67,7 +67,7 @@ Driver.refine_dielectrics           = -1                  ## Refine dielectric s
 ItoSolver.verbosity                   = -1                 ## Class verbosity
 ItoSolver.merge_algorithm             = equal_weight_kd    ## Particle merging algorithm (see documentation)
 ItoSolver.particles_per_cell          = 32                 ## Target computational particles per cell (one value, or one per level)
-ItoSolver.regrid_superparticles       = none               ## Merge run during regrids: 'solver', 'none', or any merge_algorithm selector
+ItoSolver.regrid_superparticles       = solver             ## Merge run during regrids: 'solver', 'none', or any merge_algorithm selector
 ItoSolver.nn_pair_iterate             = true               ## nn_pair: iterate the local tier to convergence within each round
 ItoSolver.nn_pair_fallback            = 1                  ## nn_pair: fallback candidates per query (k-NN graph built with k = 1 + this)
 ItoSolver.nn_pair_max_cell_dist       = 1                  ## nn_pair: max merge distance in cells (Chebyshev);

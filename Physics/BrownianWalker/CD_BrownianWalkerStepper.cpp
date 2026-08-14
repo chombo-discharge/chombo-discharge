@@ -381,6 +381,9 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   // clang-format on
   m_amr->allocate(m_regridPPC, m_realm, m_phase, 1);
 
+  // ORDERING: this deposit must stay ahead of m_solver->preRegrid() below. That call moves the bulk
+  // particles into the solver's reduced regrid holder and leaves the ItoParticle container empty, so
+  // depositing afterwards would deposit nothing and loadBalanceBoxesMesh() would balance on zeros.
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
   m_solver->depositWeight(m_regridPPC,
                           m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
@@ -801,7 +804,12 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   //       than the other one when the number of particles is large.
   // clang-format on
 
-  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  // The bulk ItoParticle container is EMPTY at this point -- Driver::regrid() calls loadBalanceBoxes()
+  // between the solver's preRegrid() and regrid(), and preRegrid() moved the particles into the
+  // solver's reduced regrid holder. Count that instead. Reading getParticles(Bulk) here would produce
+  // an all-zero load vector, which LoadBalancing happily turns into a valid, completely unbalanced
+  // layout with nothing to indicate that anything went wrong.
+  ParticleContainer<ItoMergeParticle>& particles = m_solver->getRegridParticles();
 
   // Regrid the particles onto the new mesh (SoA regrid rebuilds over the new layout from the preRegrid cache).
   // a_grids are the proxy grids (m_amr->getProxyGrids()) on which the Realm built its tile->box maps
@@ -883,6 +891,10 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int 
 
   loads.resize(boxArray.size(), 0L);
 
+  // ORDERING: safe only because every caller runs outside the preRegrid()->regrid() window, where the
+  // bulk container is empty. Driver reaches this through writeLoads() when writing a checkpoint, a plot
+  // file, or the pre-regrid file -- and the pre-regrid file is written before Driver::regrid() is
+  // entered at all, hence before preRegrid(). Anything that moves it inside that window reads zeros.
   const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   const int nbox = dit.size();
