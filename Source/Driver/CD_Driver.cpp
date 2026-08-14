@@ -20,6 +20,7 @@
 #include <PolyGeom.H>
 #include <EBAlias.H>
 #include <LevelData.H>
+#include <Copier.H>
 #include <EBCellFAB.H>
 #include <EBAMRIO.H>
 #include <EBAMRDataOps.H>
@@ -2009,6 +2010,9 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
 
+    // Live Copiers. A Copier owns its motion plan, so a count that climbs regrid-over-regrid means
+    // those plans -- and the layouts they refer to -- are being retained rather than rebuilt.
+    pout() << "                                -- Live Copiers             : " << Copier::s_liveCopiers << endl;
     pout() << "                                -- Particle arenas          : " << bytesAsMB(particleBytes) << " (MB)"
            << endl;
     pout() << "                                -- Peak particle arenas     : " << bytesAsMB(particlePeak) << " (MB)"

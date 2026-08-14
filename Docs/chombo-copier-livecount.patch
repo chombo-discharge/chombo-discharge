@@ -1,0 +1,81 @@
+diff --git a/lib/src/BoxTools/Copier.H b/lib/src/BoxTools/Copier.H
+index b200ce5..f4f51ac 100644
+--- a/lib/src/BoxTools/Copier.H
++++ b/lib/src/BoxTools/Copier.H
+@@ -155,7 +155,16 @@ public:
+ 
+   ///null constructor, copy constructor and operator= can be compiler defined.
+   Copier():m_isDefined(false)
+-  {}
++  {
++    s_liveCopiers++;
++  }
++
++  /**
++     DIAGNOSTIC. Copiers constructed minus Copiers destroyed. A Copier owns its motion plan --
++     MotionItems plus the per-rank index vectors -- so a live count that climbs from one regrid to
++     the next means those plans are being retained, and the layouts they refer to with them.
++  */
++  static long long s_liveCopiers;
+ 
+   Copier(const Copier& a_rhs);
+ 
+diff --git a/lib/src/BoxTools/Copier.cpp b/lib/src/BoxTools/Copier.cpp
+index beeb528..2247818 100644
+--- a/lib/src/BoxTools/Copier.cpp
++++ b/lib/src/BoxTools/Copier.cpp
+@@ -44,11 +44,14 @@ void CopierBuffer::clear()
+   m_ncomps = 0;
+ }
+ 
++long long Copier::s_liveCopiers = 0;
++
+ Copier::Copier(const DisjointBoxLayout& a_level,
+                const BoxLayout& a_dest,
+                bool a_exchange,
+                IntVect a_shift)
+ {
++  s_liveCopiers++;
+   const ProblemDomain& domain = a_level.physDomain();
+   define(a_level, a_dest, domain, IntVect::Zero, a_exchange, a_shift);
+ }
+@@ -59,6 +62,7 @@ Copier::Copier(const DisjointBoxLayout& a_level,
+                bool a_exchange,
+                IntVect a_shift)
+ {
++  s_liveCopiers++;
+   define(a_level, a_dest, a_domain, IntVect::Zero, a_exchange, a_shift);
+ }
+ 
+@@ -68,6 +72,7 @@ Copier::Copier(const DisjointBoxLayout& a_level,
+                bool a_exchange,
+                IntVect a_shift)
+ {
++  s_liveCopiers++;
+   const ProblemDomain domain = a_level.physDomain();
+   define(a_level, a_dest, domain, a_destGhost, a_exchange, a_shift);
+ }
+@@ -79,6 +84,7 @@ Copier::Copier(const DisjointBoxLayout& a_level,
+                bool a_exchange,
+                IntVect a_shift)
+ {
++  s_liveCopiers++;
+   define(a_level, a_dest, a_domain, a_destGhost, a_exchange, a_shift);
+ }
+ 
+@@ -106,6 +112,7 @@ void Copier::clear()
+ 
+ Copier::Copier(const Copier& a_rhs)
+ {
++  s_liveCopiers++;
+   *this = a_rhs;
+ }
+ 
+@@ -1260,6 +1267,7 @@ ostream& operator<< (ostream& os, const Copier& copier)
+ Copier::~Copier()
+ {
+   CH_TIME("~Copier");
++  s_liveCopiers--;
+   clear();
+ }
+ 
