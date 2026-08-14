@@ -695,7 +695,20 @@ Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData)
   const bool newCellTags = this->tagCells(tags, m_tags); // Tag cells using the cell tagger
   timer.stopEvent("Tag cells");
 
-  if (!newCellTags && !m_needsNewGeometricTags) {
+  // Force the regrid to proceed even when the cell tags are unchanged. A regrid onto an identical
+  // grid should be memory-neutral, so turning this on isolates what the regrid path itself retains
+  // from any change in the grid it is regridding onto. Note that forcing a regrid on every step can
+  // destabilize a field solve that relies on its previous solution as an initial guess.
+  static const bool forceRegrid = []() {
+    int force = 0;
+
+    ParmParse pp("Driver");
+    pp.query("force_regrid", force);
+
+    return force > 0;
+  }();
+
+  if (!newCellTags && !m_needsNewGeometricTags && !forceRegrid) {
     if (a_useInitialData) {
       m_timeStepper->initialData();
     }
@@ -1962,6 +1975,29 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 #endif
     }
   }
+
+  // Per-allocation-site breakdown of the tracked memory, one dump per step. Diffing consecutive dumps
+  // attributes growth in the tracked total to the code that allocated it, which is how a ratchet gets
+  // localized -- the aggregate total only says that something grew, never what. Off by default,
+  // because each dump is a few hundred lines per rank.
+#ifdef CH_USE_MEMORY_TRACKING
+  {
+    static const bool dumpSites = []() {
+      int dump = 0;
+
+      ParmParse pp("Driver");
+      pp.query("dump_sites", dump);
+
+      return dump > 0;
+    }();
+
+    if (dumpSites) {
+      pout() << "SITEDUMP step = " << m_timeStep << endl;
+      ReportUnfreedMemory(pout());
+      pout() << "SITEDUMP end" << endl;
+    }
+  }
+#endif
 
   // Memory held by particle arenas. Reported outside the memory-tracking guard because it is our own
   // counter rather than Chombo's: ParticleSoA allocates with std::aligned_alloc, which never reaches
