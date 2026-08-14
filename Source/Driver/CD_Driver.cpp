@@ -1871,13 +1871,17 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   // because a maximum that runs away from the minimum means one rank is accumulating.
   {
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
+    const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
 
     pout() << "                                -- Particle arenas       : " << particleBytes << "(B)" << endl;
+    pout() << "                                -- Peak particle arenas  : " << particlePeak << "(B)" << endl;
 
 #ifdef CH_MPI
     pout() << "                                -- Max particle arenas   : " << ParallelOps::max(particleBytes) << "(B)"
            << endl;
     pout() << "                                -- Min particle arenas   : " << ParallelOps::min(particleBytes) << "(B)"
+           << endl;
+    pout() << "                                -- Max peak particle arn : " << ParallelOps::max(particlePeak) << "(B)"
            << endl;
 #endif
   }

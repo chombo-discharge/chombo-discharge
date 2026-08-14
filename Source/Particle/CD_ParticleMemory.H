@@ -48,13 +48,30 @@ namespace ParticleMemory {
 inline std::atomic<std::size_t> s_allocatedBytes{0};
 
 /**
+ * @brief High-water mark of s_allocatedBytes. Use the accessors rather than touching this directly.
+ * @details The peak is the number that decides an out-of-memory failure, and it is not visible in the
+ * running total: the largest particle footprint of a time step occurs midway through a remap, when
+ * the mover pool and the flat exchange buffer are both live, and by the end of the step both are gone
+ * again. Sampling the total from the step report therefore misses it entirely.
+ */
+inline std::atomic<std::size_t> s_peakBytes{0};
+
+/**
  * @brief Record an arena allocation.
  * @param[in] a_bytes Size of the newly allocated arena, in bytes.
  */
 inline void
 addBytes(const std::size_t a_bytes) noexcept
 {
-  s_allocatedBytes.fetch_add(a_bytes, std::memory_order_relaxed);
+  const std::size_t total = s_allocatedBytes.fetch_add(a_bytes, std::memory_order_relaxed) + a_bytes;
+
+  // Raise the high-water mark if this allocation set a new one. The loop reloads on contention
+  // because a competing thread may have raised it in the meantime; it exits as soon as the mark is at
+  // least this total, so a thread that loses the race to a larger value simply stops.
+  std::size_t peak = s_peakBytes.load(std::memory_order_relaxed);
+
+  while (total > peak && !s_peakBytes.compare_exchange_weak(peak, total, std::memory_order_relaxed)) {
+  }
 }
 
 /**
@@ -75,6 +92,18 @@ inline std::size_t
 getAllocatedBytes() noexcept
 {
   return s_allocatedBytes.load(std::memory_order_relaxed);
+}
+
+/**
+ * @brief Get the high-water mark of the bytes held by particle arenas on this rank.
+ * @details See s_peakBytes: this is the figure that decides an out-of-memory failure, and it is
+ * strictly larger than what getAllocatedBytes() reports from the step report.
+ * @return Peak allocated arena bytes since the run started.
+ */
+inline std::size_t
+getPeakBytes() noexcept
+{
+  return s_peakBytes.load(std::memory_order_relaxed);
 }
 } // namespace ParticleMemory
 
