@@ -226,8 +226,10 @@ The main variables that the user needs to set are
 * ``USE_HDF = TRUE/FALSE`` — enables HDF5 output.
 * ``OPENMPCC = TRUE/FALSE`` — enables OpenMP threading.
 * ``USE_PETSC = TRUE/FALSE`` — links to PETSc.
-* ``PRECISION = DOUBLE`` — floating-point precision.
+* ``PRECISION = DOUBLE`` — floating-point precision of the mesh data.
   Single precision is not supported.
+* ``PARTICLE_PRECISION = DOUBLE/FLOAT`` — floating-point precision of the particle payload columns.
+  Defaults to ``DOUBLE``. See :ref:`Chap:ParticlePrecision`.
 
 
 MPI
@@ -280,6 +282,43 @@ When compiled with OpenMP, all loops over grid patches use:
    only activated when it is compiled with ``OPENMPCC = TRUE`` -- contain data races that can
    cause intermittent heap corruption and crashes at higher thread counts. For production runs,
    use pure MPI (``OPENMPCC = FALSE``); OpenMP and OpenMP+MPI are intended for experimentation only.
+
+.. _Chap:ParticlePrecision:
+
+Particle precision
+__________________
+
+``PARTICLE_PRECISION`` sets the precision of the particle *payload* columns:
+
+* ``PARTICLE_PRECISION = DOUBLE`` — payload columns are ``double``. This is the default.
+* ``PARTICLE_PRECISION = FLOAT`` — payload columns are ``float``.
+
+Unlike ``PRECISION``, which is a ``Chombo`` variable governing the mesh data, ``PARTICLE_PRECISION``
+is specific to ``chombo-discharge`` and is read by ``$DISCHARGE_HOME/Lib/Definitions.make``. The two
+are independent: single-precision particle payload against a double-precision grid is the intended
+use, halving the payload footprint and doubling the SIMD width on those columns.
+
+It reaches only the columns a particle type declares through ``ParticleReal``. Position, weight, and
+the container-owned identity columns are unaffected and are always stored at their fixed widths, so
+particle *positions* remain double precision at either setting.
+
+Set it on the command line, or in ``Lib/Local/Make.defs.local``:
+
+.. code-block:: bash
+
+   make -s -j<N> DIM=3 MPI=TRUE PARTICLE_PRECISION=FLOAT
+
+Any value other than ``DOUBLE`` or ``FLOAT`` is a hard error. Both precisions are folded into the
+build configuration string, in the order ``<PRECISION>.<PARTICLE_PRECISION>``, so every object tree,
+library, and executable is named for the precision of both the mesh data and the particle payload
+(e.g. ``main3d.<...>.DOUBLE.FLOAT.ex``). Switching precision therefore rebuilds cleanly and reuses
+the previous object tree when switching back.
+
+.. warning::
+
+   Checkpoint files are not portable between the two settings. Particle records are written as raw
+   bytes whose per-particle size depends on ``sizeof(ParticleReal)``, so a checkpoint written by a
+   ``FLOAT`` build cannot be restarted from by a ``DOUBLE`` build, or the other way round.
 
 PETSC
 _____
