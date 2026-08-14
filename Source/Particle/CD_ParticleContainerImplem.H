@@ -27,12 +27,14 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <MayDay.H>
 #include <CH_assert.H>
 #include <BoxIterator.H>
 #include <parstream.H>
 
 // Our includes
 #include <CD_ParticleContainer.H>
+#include <CD_ParticleMemory.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P, typename Traits>
@@ -44,8 +46,8 @@ ParticleContainer<P, Traits>::findDestination(const RealVect& a_pos) const
 
 template <typename P, typename Traits>
 inline typename ParticleContainer<P, Traits>::MoverPool
-ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_source,
-                                           const Vector<DisjointBoxLayout>&  a_sourceGrids)
+ParticleContainer<P, Traits>::gatherToPool(AMRParticlesSoA<P, Traits>&      a_source,
+                                           const Vector<DisjointBoxLayout>& a_sourceGrids)
 {
   CH_TIME("ParticleContainer::gatherToPool");
 
@@ -83,9 +85,9 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
   unsigned long long numOutcast = 0;
 
   for (int lvl = 0; lvl < a_source.size(); lvl++) {
-    const LevelParticles& level = *a_source[lvl];
-    const DataIterator&   dit   = a_sourceGrids[lvl].dataIterator();
-    const int             nbox  = dit.size();
+    LevelParticles&     level = *a_source[lvl];
+    const DataIterator& dit   = a_sourceGrids[lvl].dataIterator();
+    const int           nbox  = dit.size();
 
 #ifdef _OPENMP
 #pragma omp parallel reduction(+ : numOutcast)
@@ -94,7 +96,17 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
 
 #pragma omp for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        numOutcast += binLeaf(threadPool, level[dit[mybox]]);
+        Leaf& leaf = level[dit[mybox]];
+
+        numOutcast += binLeaf(threadPool, leaf);
+
+        // The pool now holds this leaf's particles, and the source is discarded by every caller, so
+        // release the arena here rather than at the end. Otherwise the source and the pool are both
+        // fully live until the caller returns, which doubles the particle footprint at exactly the
+        // point in a regrid where it is already highest. Each thread owns its own boxes, so this is
+        // race-free.
+        leaf.clear();
+        leaf.shrinkToFit();
       }
 
       // Merge the thread-local pool into the shared pool. First writer to a (rank,key) slot gets the
@@ -110,7 +122,13 @@ ParticleContainer<P, Traits>::gatherToPool(const AMRParticlesSoA<P, Traits>& a_s
     }
 #else
     for (int mybox = 0; mybox < nbox; mybox++) {
-      numOutcast += binLeaf(pool, level[dit[mybox]]);
+      Leaf& leaf = level[dit[mybox]];
+
+      numOutcast += binLeaf(pool, leaf);
+
+      // See the OpenMP branch: drain as we go so the source and the pool are never both fully live.
+      leaf.clear();
+      leaf.shrinkToFit();
     }
 #endif
   }
@@ -266,9 +284,81 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
   constexpr std::size_t pp        = Leaf::bytesPerParticle();
   constexpr std::size_t headerLen = 2 * sizeof(std::uint32_t) + sizeof(std::uint64_t);
 
-  std::vector<std::vector<char>> sendBuf(numRanks);
-  // Each destination rank's buffer and pool map are disjoint, and linearizeParticle is a const read,
-  // so packing different ranks in parallel is race-free.
+  // Size the send side before packing anything. A destination's byte count is arithmetic over the
+  // pool -- a header plus the payload for each pooled leaf -- so computing it up front costs nothing,
+  // and knowing it lets every particle be linearized straight into the flat buffer that MPI reads.
+  // Packing into per-destination buffers first and copying those into the flat one afterwards would
+  // hold a second full copy of every outbound particle for the duration of the copy.
+  std::vector<int>          sendCounts(numRanks, 0);
+  std::vector<int>          recvCounts(numRanks, 0);
+  std::vector<std::int64_t> sendBytes(numRanks, 0);
+
+  std::int64_t stot = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    if (r == myRank) {
+      continue;
+    }
+
+    std::int64_t bytes = 0;
+
+    for (const auto& kv : a_pool[r]) {
+      bytes += static_cast<std::int64_t>(headerLen + kv.second.size() * pp);
+    }
+
+    sendBytes[r] = bytes;
+    stot += bytes;
+  }
+
+  // MPI counts and displacements are int, so the byte totals have to fit in one. This is a real limit
+  // at scale rather than a formality -- a rank holding 2 GB of outbound particles reaches it -- and it
+  // has to be enforced in every build. CH_assert compiles out under OPT, which is precisely where the
+  // scale is, so a guard that used it would let the displacements overflow and corrupt the exchange
+  // silently instead of stopping it.
+  if (stot > static_cast<std::int64_t>(std::numeric_limits<int>::max())) {
+    MayDay::Abort("ParticleContainer::distributeFromPool - outbound particle bytes exceed MPI's int limit");
+  }
+
+  for (int r = 0; r < numRanks; r++) {
+    sendCounts[r] = static_cast<int>(sendBytes[r]);
+  }
+
+  MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
+
+  std::vector<int> sdispl(numRanks, 0);
+  std::vector<int> rdispl(numRanks, 0);
+
+  std::int64_t sacc = 0;
+  std::int64_t rtot = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    sdispl[r] = static_cast<int>(sacc);
+    sacc += sendCounts[r];
+
+    rdispl[r] = static_cast<int>(rtot);
+    rtot += recvCounts[r];
+  }
+
+  if (rtot > static_cast<std::int64_t>(std::numeric_limits<int>::max())) {
+    MayDay::Abort("ParticleContainer::distributeFromPool - inbound particle bytes exceed MPI's int limit");
+  }
+
+  std::vector<char> sflat(stot);
+  std::vector<char> rflat(rtot);
+
+  // The flat buffers are particle payload in flight, so account for them alongside the arenas. They
+  // are part of the peak this rank has to fit, and on a particle-heavy step they are comparable in
+  // size to the arenas themselves -- leaving them out would report a peak that understates the point
+  // in the step where an out-of-memory failure actually happens.
+  const std::size_t flatBytes = static_cast<std::size_t>(stot) + static_cast<std::size_t>(rtot);
+
+  ParticleMemory::addBytes(ParticleMemory::Kind::Buffer, flatBytes);
+
+  // Each destination's slice of sflat is disjoint and linearizeParticle is a const read, so packing
+  // different destinations in parallel is race-free. A pooled leaf is spent once it has been
+  // linearized, so release it there and then: holding it until the pool goes out of scope would keep
+  // a second copy of every outbound particle alive across the exchange itself, which is the point in
+  // the step where the footprint peaks.
 #ifdef _OPENMP
 #pragma omp parallel for schedule(runtime)
 #endif
@@ -277,7 +367,7 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       continue;
     }
 
-    std::vector<char>& buf = sendBuf[r];
+    char* p = sflat.data() + sdispl[r];
 
     for (auto& kv : a_pool[r]) {
       Leaf& src = kv.second;
@@ -285,11 +375,6 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       const std::uint32_t lvl   = static_cast<std::uint32_t>(kv.first.first);
       const std::uint32_t gidx  = static_cast<std::uint32_t>(kv.first.second);
       const std::uint64_t count = static_cast<std::uint64_t>(src.size());
-      const std::size_t   off   = buf.size();
-
-      buf.resize(off + headerLen + count * pp);
-
-      char* p = buf.data() + off;
 
       std::memcpy(p, &lvl, sizeof(std::uint32_t));
       p += sizeof(std::uint32_t);
@@ -300,49 +385,13 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       std::memcpy(p, &count, sizeof(std::uint64_t));
       p += sizeof(std::uint64_t);
 
-      for (std::size_t i = 0; i < src.size(); i++) {
+      for (std::size_t i = 0; i < count; i++) {
         src.linearizeParticle(p, i);
         p += pp;
       }
-    }
-  }
 
-  // Exchange byte counts, then the byte buffers.
-  std::vector<int> sendCounts(numRanks, 0);
-  std::vector<int> recvCounts(numRanks, 0);
-
-  for (int r = 0; r < numRanks; r++) {
-    CH_assert(sendBuf[r].size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
-    sendCounts[r] = static_cast<int>(sendBuf[r].size());
-  }
-
-  MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
-
-  std::vector<int> sdispl(numRanks, 0);
-  std::vector<int> rdispl(numRanks, 0);
-
-  std::int64_t stot = 0;
-  std::int64_t rtot = 0;
-
-  for (int r = 0; r < numRanks; r++) {
-    sdispl[r] = static_cast<int>(stot);
-    stot += sendCounts[r];
-
-    rdispl[r] = static_cast<int>(rtot);
-    rtot += recvCounts[r];
-  }
-
-  // The accumulators are int64 so the cross-rank sum cannot overflow; MPI displacement arrays are
-  // int, so assert the totals fit before allocating the flat buffers and calling MPI_Alltoallv.
-  CH_assert(stot <= static_cast<std::int64_t>(std::numeric_limits<int>::max()));
-  CH_assert(rtot <= static_cast<std::int64_t>(std::numeric_limits<int>::max()));
-
-  std::vector<char> sflat(stot);
-  std::vector<char> rflat(rtot);
-
-  for (int r = 0; r < numRanks; r++) {
-    if (sendCounts[r] > 0) {
-      std::memcpy(sflat.data() + sdispl[r], sendBuf[r].data(), static_cast<std::size_t>(sendCounts[r]));
+      src.clear();
+      src.shrinkToFit();
     }
   }
 
@@ -435,6 +484,8 @@ ParticleContainer<P, Traits>::distributeFromPool(MoverPool& a_pool, const bool a
       }
     }
   }
+
+  ParticleMemory::removeBytes(ParticleMemory::Kind::Buffer, flatBytes);
 #endif
 }
 
@@ -480,8 +531,6 @@ ParticleContainer<P, Traits>::preRegrid()
   // Ghost particles are transient, non-owned copies; drop them so they are never cached/regridded.
   this->clearGhostParticles();
 
-  // Share the current holders (RefCountedPtr) so regrid() can rebuild m_particles while the old
-  // particles stay alive in the cache. Remember the old layout for iterating the cache.
   m_cacheParticles = m_particles;
   m_cacheGrids     = m_grids;
 }

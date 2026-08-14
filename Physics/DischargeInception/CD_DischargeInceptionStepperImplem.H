@@ -2189,7 +2189,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       // Back up the initial position into the rewind column (weight was set to zero on append).
       const double* const pos[SpaceDim] = {
         D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
-      ParticleReal* const x0[SpaceDim] = {
+      double* const x0[SpaceDim] = {
         D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
       ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
@@ -2310,7 +2310,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
       // zero from the default-payload append).
       const double* const pos[SpaceDim] = {
         D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
-      ParticleReal* const x0[SpaceDim] = {
+      double* const x0[SpaceDim] = {
         D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
       ParticleLoops::loop(leaf, [&](const std::size_t i) {
         for (int dir = 0; dir < SpaceDim; dir++) {
@@ -3766,7 +3766,7 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
       ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
       double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
-      const ParticleReal* const x0[SpaceDim] = {
+      const double* const x0[SpaceDim] = {
         D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
 
       ParticleLoops::loop(leaf, [&](const std::size_t i) {

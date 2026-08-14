@@ -150,6 +150,15 @@ jobs:
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
         omp: ["TRUE", "FALSE"]
+        pp: ["DOUBLE"]
+        # Single-precision particle payload is compile-checked only, on one representative
+        # configuration per dimension rather than across the full matrix: the failures it catches are
+        # type mismatches in headers, which are dimension-dependent (D_DECL) but not MPI- or
+        # HDF5-dependent. The tests are not executed, because a FLOAT payload does not reproduce the
+        # benchmark files bit for bit.
+        include:
+          - {ver: 13, dim: 2, mpi: "TRUE", hdf: "TRUE", omp: "FALSE", pp: "FLOAT"}
+          - {ver: 13, dim: 3, mpi: "TRUE", hdf: "TRUE", omp: "FALSE", pp: "FLOAT"}
 
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -189,12 +198,12 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
-          key: gcc-chombo-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-chombo-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Build Chombo
         if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
-          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo; }
+          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} chombo; }
           # The recursive Chombo build can intermittently leave a truncated archive member on resource-
           # constrained runners. On failure, clear the partial libraries/objects and rebuild serially.
           build ${{ env.CORES }} || {
@@ -209,40 +218,40 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Lib/lib*.a
-          key: gcc-discharge-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-discharge-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Build chombo-discharge/source
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-source
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-source
 
       - name: Build chombo-discharge/geometries
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-geometries
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-physics
 
       - name: Restore test executables cache
         id: cache-tests
         uses: actions/cache@v5
         with:
           path: Exec/Tests/**/*.ex
-          key: gcc-test-execs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-test-execs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Compile tests
         if: steps.cache-tests.outputs.cache-hit != 'true'
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         run: |
-          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
+          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }} -particle_precision=${{ matrix.pp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: always()
+        if: always() && matrix.pp == 'DOUBLE'
         env:
           OMP_STACKSIZE: "64M"
         run: |
@@ -262,6 +271,11 @@ jobs:
         mpi: ["TRUE", "FALSE"]
         hdf: ["FALSE"]
         omp: ["TRUE", "FALSE"]
+        pp: ["DOUBLE"]
+        # See the GNU job: FLOAT is compile-checked only, one configuration per dimension.
+        include:
+          - {dim: 2, mpi: "TRUE", hdf: "FALSE", omp: "FALSE", pp: "FLOAT"}
+          - {dim: 3, mpi: "TRUE", hdf: "FALSE", omp: "FALSE", pp: "FLOAT"}
 
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -320,13 +334,13 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
-          key: oneapi-chombo-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+          key: oneapi-chombo-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
 
       - name: Build Chombo
         if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
-          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo; }
+          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} chombo; }
           # The recursive Chombo build can intermittently leave a truncated archive member on resource-
           # constrained runners. On failure, clear the partial libraries/objects and rebuild serially.
           build ${{ env.CORES }} || {
@@ -341,44 +355,44 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Lib/lib*.a
-          key: oneapi-discharge-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+          key: oneapi-discharge-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
 
       - name: Build chombo-discharge/source
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-source
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-source
 
       - name: Build chombo-discharge/geometries
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-geometries
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-physics
 
       - name: Restore test executables cache
         id: cache-tests
         uses: actions/cache@v5
         with:
           path: Exec/Tests/**/*.ex
-          key: oneapi-test-execs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+          key: oneapi-test-execs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
 
       - name: Compile tests
         if: steps.cache-tests.outputs.cache-hit != 'true'
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         run: |
           source /opt/intel/oneapi/setvars.sh
-          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
+          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }} -particle_precision=${{ matrix.pp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: always()
+        if: always() && matrix.pp == 'DOUBLE'
         env:
           OMP_STACKSIZE: "64M"
         run: |

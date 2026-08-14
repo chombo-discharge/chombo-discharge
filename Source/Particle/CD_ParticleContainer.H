@@ -920,7 +920,7 @@ protected:
    * @return The per-rank mover pool.
    */
   MoverPool
-  gatherToPool(const AMRParticlesSoA<P, Traits>& a_source, const Vector<DisjointBoxLayout>& a_sourceGrids);
+  gatherToPool(AMRParticlesSoA<P, Traits>& a_source, const Vector<DisjointBoxLayout>& a_sourceGrids);
 
   /**
    * @brief Mask fast path for remap(): pool ONLY the movers, leaving stayers in place.

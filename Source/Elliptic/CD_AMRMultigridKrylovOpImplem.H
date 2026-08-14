@@ -24,10 +24,10 @@
 template <class T>
 AMRMultigridKrylovOp<T>::~AMRMultigridKrylovOp()
 {
-  if (m_precondInit) {
-    this->clear(m_precondTmp);
-    this->clear(m_precondDcor);
-  }
+  // Unconditionally: clear() null-checks, and guarding on m_precondInit would skip scratch left by a
+  // define() that ran after the last solve.
+  this->clear(m_precondTmp);
+  this->clear(m_precondDcor);
 }
 
 template <class T>
@@ -41,11 +41,20 @@ AMRMultigridKrylovOp<T>::define(AMRMultiGrid<LevelData<T>>*                     
 {
   CH_TIME("AMRMultigridKrylovOp::define");
 
-  m_mg           = a_mg;
-  m_amrOps       = a_mg->getAMROperators();
-  m_lbase        = a_lbase;
-  m_lmax         = a_lmax;
-  m_numVCycles   = std::max(1, a_numVCycles);
+  m_mg         = a_mg;
+  m_amrOps     = a_mg->getAMROperators();
+  m_lbase      = a_lbase;
+  m_lmax       = a_lmax;
+  m_numVCycles = std::max(1, a_numVCycles);
+  // Release the preconditioner scratch before dropping the initialized flag. create() sizes its target
+  // with resize(n, nullptr), which is a no-op once the vector is already that long, so the null fill
+  // never reaches entries that survive from a previous define -- the loop then overwrites live
+  // pointers and the LevelDatas behind them are lost. Each carries an exchange Copier and its field
+  // data, so a redefine per regrid leaks 2 * (lmax + 1 - lbase) of them. clear() null-checks, so this
+  // is safe on the first define too.
+  this->clear(m_precondTmp);
+  this->clear(m_precondDcor);
+
   m_precondInit  = false;
   m_volumeCached = false; // Geometry changed; the cached per-level volumes are stale.
 

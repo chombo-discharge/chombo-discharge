@@ -570,38 +570,8 @@ Driver::gridReport()
            << "\t...Proc. # of cells (lvl)... = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
-  // Write a memory report if Chombo was to compiled to use memory tracking.
-#ifdef CH_USE_MEMORY_TRACKING
-  constexpr Real BytesPerMB = 1024.0 * 1024.0;
+  MemoryReport::printMemoryTable(pout(), "\t");
 
-  long long localUnfreedMemory = 0LL;
-  long long localPeakMemory    = 0LL;
-
-  overallMemoryUsage(localUnfreedMemory, localPeakMemory);
-
-  pout() << "\tUnfreed memory        = " << std::ceil(static_cast<double>(localUnfreedMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tPeak memory usage     = " << std::ceil(static_cast<double>(localPeakMemory) / BytesPerMB) << " (MB)"
-         << endl;
-#ifdef CH_MPI
-
-  // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
-  // smallest/largest memory consumptions.
-  const long long minUnfreedMemory = ParallelOps::min(localUnfreedMemory);
-  const long long minPeakMemory    = ParallelOps::min(localPeakMemory);
-  const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
-  const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
-
-  pout() << "\tMin unfreed memory    = " << std::ceil(static_cast<double>(minUnfreedMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tMin peak memory       = " << std::ceil(static_cast<double>(minPeakMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tMax unfreed memory    = " << std::ceil(static_cast<double>(maxUnfreedMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tMax peak memory       = " << std::ceil(static_cast<double>(maxPeakMemory) / BytesPerMB) << " (MB)"
-         << endl;
-#endif
-#endif
   pout() << "=======================================================================" << endl;
 
   pout() << endl;
@@ -1791,7 +1761,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   // Write a string with total elapsed time
   sprintf(metrics,
-          "%31c -- Elapsed time          : %3.3ih %2.2im %2.2is %3.3ims",
+          "%31c -- Elapsed time             : %3.3ih %2.2im %2.2is %3.3ims",
           ' ',
           elapsedHrs,
           elapsedMin,
@@ -1807,7 +1777,13 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   const int  advMs   = floor((lastadv - 3600 * advHrs - 60 * advMin - advSec) * 1000);
 
   // Write a string with the previous iteration metrics
-  sprintf(metrics, "%31c -- Last time step        : %3.3ih %2.2im %2.2is %3.3ims", ' ', advHrs, advMin, advSec, advMs);
+  sprintf(metrics,
+          "%31c -- Last time step           : %3.3ih %2.2im %2.2is %3.3ims",
+          ' ',
+          advHrs,
+          advMin,
+          advSec,
+          advMs);
   pout() << metrics << endl;
 
   if (m_dt > 0.0 && lastadv > 0.0) {
@@ -1832,7 +1808,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const int  wt_Sec      = floor(wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min);
     const int  wt_Ms       = floor((wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
     sprintf(metrics,
-            "%31c -- Wall time per %-2s      : %3.3ih %2.2im %2.2is %3.3ims",
+            "%31c -- Wall time per %-2s         : %3.3ih %2.2im %2.2is %3.3ims",
             ' ',
             unitName,
             wt_Hrs,
@@ -1853,7 +1829,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const int  remMs     = floor((remaining - 3600 * remHrs - 60 * remMin - remSec) * 1000);
 
     sprintf(metrics,
-            "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims",
+            "%31c -- Estimated remaining      : %3.3ih %2.2im %2.2is %3.3ims",
             ' ',
             remHrs,
             remMin,
@@ -1862,30 +1838,7 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     pout() << metrics << endl;
   }
 
-  // Write memory usage
-#ifdef CH_USE_MEMORY_TRACKING
-  const Real bytesPerMB = 1024. * 1024.;
-
-  long long unfreedMem = 0LL;
-  long long peakMem    = 0LL;
-
-  //  overallMemoryUsage(unfreedMem, peakMem);
-
-  pout() << "                                -- Unfreed memory        : "
-         << std::ceil(static_cast<double>(unfreedMem) / bytesPerMB) << "(MB)" << endl;
-  pout() << "                                -- Peak memory usage     : "
-         << std::ceil(static_cast<double>(peakMem) / bytesPerMB) << "(MB)" << endl;
-
-#ifdef CH_MPI
-  const long long maxUnfreedMem = ParallelOps::max(unfreedMem);
-  const long long maxPeakMem    = ParallelOps::max(peakMem);
-
-  pout() << "                                -- Max unfreed memory    : "
-         << std::ceil(static_cast<double>(maxUnfreedMem) / bytesPerMB) << "(MB)" << endl;
-  pout() << "                                -- Max peak memory usage : "
-         << std::ceil(static_cast<double>(maxPeakMem) / bytesPerMB) << "(MB)" << endl;
-#endif
-#endif
+  MemoryReport::printMemoryTable(pout(), "                                -- ");
 }
 
 int

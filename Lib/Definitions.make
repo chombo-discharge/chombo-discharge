@@ -62,7 +62,9 @@ XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/EBGeometry
 # this file is included before Make.defs.local, and it is appended only to our own XTRACPPFLAGS --
 # so no modification of Chombo's makefile system is required.
 PARTICLE_PRECISION ?= DOUBLE
-XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),float,double)
+XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),float,$(if $(filter \
+DOUBLE,$(PARTICLE_PRECISION)),double,$(error PARTICLE_PRECISION must be DOUBLE or FLOAT, got \
+'$(PARTICLE_PRECISION)')))
 
 # Fold BOTH floating-point precisions into Chombo's configuration string, in the order
 # <Chombo PRECISION>.<payload PARTICLE_PRECISION>, so every build artifact (o/<config>/,

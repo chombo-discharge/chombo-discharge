@@ -43,7 +43,13 @@ The following options are available for running the various tests:
 * ``-dim <number>`` Run only the specified 2D or 3D tests.  
 * ``-mpi <true/false>`` Use MPI or not.
 * ``-hdf <true/false>`` Use HDF5 or not.  
+* ``-openmp <true/false>`` Use OpenMP or not.
+* ``-petsc <true/false>`` Compile with PETSc.
+* ``-debug <true/false>`` Build with debug symbols and assertions.
+* ``-opt <high/true/false>`` Optimization level.
+* ``-particle_precision <double/float>`` Particle payload precision, see :ref:`Chap:ParticlePrecision`.
 * ``-cores <number>`` Run with specified number of cores.
+* ``-exec_mpi <string>`` MPI run command (default ``mpirun``).
 * ``-suites <string>`` Run a specific application test suite.
 * ``-tests <string>`` Run a specific test.
 
