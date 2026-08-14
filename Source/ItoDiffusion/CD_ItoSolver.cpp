@@ -36,32 +36,6 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-/**
- * @brief Minimal particle payload for the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges -- only the energy
- * has to survive.
- * @details extractIntoMergeContainer() reduces particles by weight and position, carrying a
- * single reconciliation scalar (energy). ItoParticle's other columns (mobility, diffusion, velocity,
- * ...) are recomputed from the field immediately after merging, so they need not ride the repeated,
- * cross-rank ghost exchange. Merging on this much smaller particle -- then rebuilding ItoParticles --
- * keeps the per-round ghost fill and container churn proportional to what the merge actually needs.
- */
-struct ItoMergeParticle
-{
-  ParticleReal energy = 0.0; ///< Average particle energy -- the only payload the merge carries.
-};
-
-/**
- * @brief ParticleTraits for ItoMergeParticle: a single energy payload column.
- */
-template <>
-struct ParticleTraits<ItoMergeParticle>
-{
-  /**
-   * @brief The one payload column.
-   */
-  static constexpr auto columns = std::make_tuple(&ItoMergeParticle::energy);
-};
-
 constexpr int ItoSolver::m_comp;
 constexpr int ItoSolver::m_nComp;
 
@@ -80,7 +54,7 @@ ItoSolver::ItoSolver()
   CH_TIME("ItoSolver::ItoSolver");
 
   // Default is to not merge particles
-  m_particleCellMerger = [](ParticleSoA<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+  m_particleCellMerger = [](ParticleSoA<ItoMergeParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
 
   };
 }
@@ -115,7 +89,8 @@ ItoSolver::setRealm(const std::string& a_realm)
 }
 
 void
-ItoSolver::setParticleCellMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleCellMerger) noexcept
+ItoSolver::setParticleCellMerger(
+  const ParticleManagement::ParticleMerger<ItoMergeParticle>& a_particleCellMerger) noexcept
 {
   CH_TIME("ItoSolver::setParticleCellMerger");
 
@@ -437,7 +412,7 @@ ItoSolver::parseParticleMerger()
   pp.get("merge_algorithm", str);
 
   // The per-cell merger for each cell-based method is built locally in the corresponding
-  // makeSuperparticlesXxx() (see makeSuperparticles()); parseParticleMerger only records the method.
+  // mergeXxx() (see mergeLite()); parseParticleMerger only records the method.
   // 'external' leaves the merger to the user (setParticleCellMerger); 'none' does nothing.
   m_mergeMethod = ParticleManagement::mergeMethodFromString(str);
 
@@ -554,7 +529,7 @@ ItoSolver::registerOperators() const
     }
 
     // nn_pair_tree/nn_pair_hash both read a particle ghost halo as merge candidates (see
-    // makeSuperparticlesNnPairSearch() / ParticleManagement::mergeNearestNeighborsTree()/
+    // mergeNnPairSearch() / ParticleManagement::mergeNearestNeighborsTree()/
     // mergeNearestNeighborsHash()). Its width is the merge distance nn_pair_max_cell_dist (>= 1), or
     // 1 when that is unbounded or neither merger is used. Register it here, alongside the other
     // operators; the same width must be filled and passed to the round -- shared by both backends
@@ -563,7 +538,7 @@ ItoSolver::registerOperators() const
     m_amr->registerParticleGhostMask(m_realm, nnPairSearchGhostWidth);
 
     // nn_pair_onecell's merge distance is structurally fixed at 1 (see
-    // makeSuperparticlesNnPairOneCell() / ParticleManagement::mergeNearestNeighborsOneCell()), so it
+    // the nn_pair_onecell merge / ParticleManagement::mergeNearestNeighborsOneCell()), so it
     // always needs a width-1 mask regardless of nn_pair_max_cell_dist; register it too (a no-op if
     // nnPairSearchGhostWidth is already 1).
     m_amr->registerParticleGhostMask(m_realm, 1);
@@ -3323,80 +3298,144 @@ ItoSolver::makeSuperparticles(const WhichContainer                          a_co
     MayDay::Error("ItoSolver::makeSuperparticles(WhichContainer, Vector<int>) - empty particles-per-cell vector");
   }
 
-  // Route to the requested method. Each method below is also a public entry point the user can call
-  // directly.
+  // 'none' short-circuits before the extract. Every other method runs on ItoMergeParticle, so the
+  // pipeline is always extract -> mergeLite -> rebuild; running that round-trip for a no-op merge would
+  // pay a full population copy each way and zero the ItoParticle payload for nothing. The regrid path is
+  // the one place the round-trip DOES run under 'none' (ItoSolver::regrid), and there it is unavoidable
+  // -- preRegrid already did the extract, so the rebuild has to happen regardless.
+  if (a_method == ParticleManagement::ParticleMergeMethod::None) {
+    return;
+  }
+
+  ParticleContainer<ItoMergeParticle> merge;
+
+  this->extractIntoMergeContainer(a_container, merge);
+  this->mergeLite(merge, a_particlesPerCell, a_method);
+  this->rebuildFromMergeContainer(a_container, merge);
+}
+
+void
+ItoSolver::mergeLite(ParticleContainer<ItoMergeParticle>&          a_particles,
+                     const Vector<int>&                            a_particlesPerCell,
+                     const ParticleManagement::ParticleMergeMethod a_method)
+{
+  CH_TIME("ItoSolver::mergeLite");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::mergeLite" << endl;
+  }
+
+  // TLDR: this is the ONE place that knows which methods split and which do not, so no caller has to.
+  //       The cell-based methods reduce a cell to at most its target and never refill an under-full one,
+  //       so splitting after them would inflate the population; the whole-container methods only drain
+  //       over-full cells and rely on the split to bring under-full ones back up. 'none' does neither.
+  //       Getting this wrong is silent -- the population simply grows at every regrid.
   switch (a_method) {
   case ParticleManagement::ParticleMergeMethod::None: {
-    break;
+    // Deliberately nothing: not even a split. See the regrid path in ItoSolver::regrid().
+    return;
   }
-  case ParticleManagement::ParticleMergeMethod::EqualWeightKD: {
-    this->makeSuperparticlesEqualWeightKD(a_container, a_particlesPerCell);
 
-    break;
+    // ---- cell-based: per-level target honoured, never splits ----
+  case ParticleManagement::ParticleMergeMethod::EqualWeightKD: {
+    this->mergeEqualWeightKD(a_particles, a_particlesPerCell);
+
+    return;
   }
   case ParticleManagement::ParticleMergeMethod::Reinitialize: {
-    this->makeSuperparticlesReinitialize(a_container, a_particlesPerCell);
+    this->mergeReinitialize(a_particles, a_particlesPerCell);
 
-    break;
+    return;
   }
   case ParticleManagement::ParticleMergeMethod::ReinitializeBVH: {
-    this->makeSuperparticlesReinitializeBVH(a_container, a_particlesPerCell);
+    this->mergeReinitializeBVH(a_particles, a_particlesPerCell);
 
-    break;
+    return;
   }
   case ParticleManagement::ParticleMergeMethod::NnSfc: {
-    this->makeSuperparticlesNnSfc(a_container, a_particlesPerCell);
+    this->mergeNnSfc(a_particles, a_particlesPerCell);
 
-    break;
+    return;
   }
+  case ParticleManagement::ParticleMergeMethod::External: {
+    // The user supplies the per-cell merger through setParticleCellMerger().
+    this->applyCellMerger(a_particles, a_particlesPerCell, m_particleCellMerger);
+
+    return;
+  }
+
+    // ---- whole-container: one crowding threshold over the hierarchy, splits afterwards ----
   case ParticleManagement::ParticleMergeMethod::NnPairTree: {
-    this->makeSuperparticlesNnPairTree(a_container, a_particlesPerCell);
-
-    break;
-  }
-  case ParticleManagement::ParticleMergeMethod::NnPairOneCell: {
-    this->makeSuperparticlesNnPairOneCell(a_container, a_particlesPerCell);
+    this->mergeNnPairSearch<NnPairSearchBackend::Tree>(a_particles, a_particlesPerCell);
 
     break;
   }
   case ParticleManagement::ParticleMergeMethod::NnPairHash: {
-    this->makeSuperparticlesNnPairHash(a_container, a_particlesPerCell);
+    this->mergeNnPairSearch<NnPairSearchBackend::Hash>(a_particles, a_particlesPerCell);
+
+    break;
+  }
+  case ParticleManagement::ParticleMergeMethod::NnPairOneCell: {
+    this->mergeNnPairOneCell(a_particles, a_particlesPerCell);
 
     break;
   }
   case ParticleManagement::ParticleMergeMethod::KdCarve: {
-    this->makeSuperparticlesKDCarve(a_container, a_particlesPerCell);
+    this->mergeKDImpl(a_particles, a_particlesPerCell, true);
 
     break;
   }
   case ParticleManagement::ParticleMergeMethod::KdPatch: {
-    this->makeSuperparticlesKDPatch(a_container, a_particlesPerCell);
+    this->mergeKDImpl(a_particles, a_particlesPerCell, false);
 
     break;
   }
   case ParticleManagement::ParticleMergeMethod::KdSkinNn: {
-    this->makeSuperparticlesKDSkinNn(a_container, a_particlesPerCell);
-
-    break;
-  }
-  case ParticleManagement::ParticleMergeMethod::External: {
-    // The user supplies the per-cell merger through setParticleCellMerger().
-    this->applyCellMerger(a_container, a_particlesPerCell, m_particleCellMerger);
+    this->mergeKDSkinNn(a_particles, a_particlesPerCell);
 
     break;
   }
   default: {
-    MayDay::Abort("ItoSolver::makeSuperparticles -- unsupported method requested");
+    MayDay::Abort("ItoSolver::mergeLite -- unsupported method requested");
 
-    break;
+    return;
   }
+  }
+
+  // Only the whole-container methods reach here. They mint their own rank-local ids from a counter that
+  // restarts every drain round (see the allocateID() lambdas below), so what is sitting in the id column
+  // now is merge scratch, not particle identity -- and it is indistinguishable from a real id downstream,
+  // where it would reach H5Part output. Put the column back to "no id", which is what an append()-built
+  // particle carries and what a merged particle has always effectively had.
+  this->invalidateParticleIDs(a_particles);
+
+  this->splitFromMergeContainer(a_particles, a_particlesPerCell[0]);
+}
+
+void
+ItoSolver::invalidateParticleIDs(ParticleContainer<ItoMergeParticle>& a_particles) const
+{
+  CH_TIME("ItoSolver::invalidateParticleIDs");
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      ParticleSoA<ItoMergeParticle>& leaf = a_particles[lvl][dit[mybox]];
+
+      for (std::size_t i = 0; i < leaf.size(); i++) {
+        leaf.particleID(i) = ParticleSoA<ItoMergeParticle>::s_invalidID;
+      }
+    }
   }
 }
 
 void
-ItoSolver::applyCellMerger(const WhichContainer                                   a_container,
-                           const Vector<int>&                                     a_particlesPerCell,
-                           const ParticleManagement::ParticleMerger<ItoParticle>& a_merger)
+ItoSolver::applyCellMerger(ParticleContainer<ItoMergeParticle>&                        a_particles,
+                           const Vector<int>&                                          a_particlesPerCell,
+                           const ParticleManagement::ParticleMerger<ItoMergeParticle>& a_merger)
 {
   CH_TIME("ItoSolver::applyCellMerger");
   if (m_verbosity > 5) {
@@ -3405,10 +3444,12 @@ ItoSolver::applyCellMerger(const WhichContainer                                 
 
   // TLDR (SoA): cell-sort so each leaf's cells own a contiguous CSR range [cellStart(c), cellStart(c+1)).
   //       For each non-empty cell we extract its particles into an SoA scratch, run a_merger on it, and
-  //       collect the result; then we rebuild the leaf and return the container to a by-patch view. The
-  //       merge discards velocity/mobility/diffusion (only weight/position/energy survive), which is fine
-  //       because those are recomputed (interpolated) after the merge.
-  ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
+  //       collect the result; then we rebuild the leaf and return the container to a by-patch view.
+  //
+  // Operates on the reduced particle: everything a cell-based merge needs -- position, weight, energy --
+  // is already there, and the ItoParticle columns it would otherwise discard (velocity, mobility,
+  // diffusion) were never carried in the first place.
+  ParticleContainer<ItoMergeParticle>& particles = a_particles;
 
   // A cell-based merge needs the leaves cell-sorted for the CSR ranges. Own that here rather than pushing
   // it onto every caller -- the AMR-collective nn_pair_tree/nn_pair_onecell/nn_pair_hash merges do not use
@@ -3428,17 +3469,17 @@ ItoSolver::applyCellMerger(const WhichContainer                                 
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      ParticleSoA<ItoParticle>& leaf    = particles[lvl][din];
-      const EBISBox&            ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[lvl][din];
-      const Box                 cellBox = dbl[din];
+      ParticleSoA<ItoMergeParticle>& leaf    = particles[lvl][din];
+      const EBISBox&                 ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[lvl][din];
+      const Box                      cellBox = dbl[din];
 
       CH_assert(leaf.isSorted()); // organizeParticlesByCell() above sorted every leaf
       CH_assert(leaf.numCells() == static_cast<std::size_t>(cellBox.numPts()));
 
       // Accumulate the merged particles of every cell here, then swap them into the leaf. The per-cell
       // scratch is a small SoA container reused across cells (extract -> merge in place -> accumulate).
-      ParticleSoA<ItoParticle> merged;
-      ParticleSoA<ItoParticle> scratch;
+      ParticleSoA<ItoMergeParticle> merged;
+      ParticleSoA<ItoMergeParticle> scratch;
 
       // BoxIterator visits cells in Fortran (x-fastest) order, matching sortByCell's CSR cell index.
       std::size_t cellIndex = 0;
@@ -3478,24 +3519,24 @@ ItoSolver::applyCellMerger(const WhichContainer                                 
 }
 
 void
-ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeEqualWeightKD(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesEqualWeightKD");
+  CH_TIME("ItoSolver::mergeEqualWeightKD");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesEqualWeightKD" << endl;
+    pout() << m_name + "::mergeEqualWeightKD" << endl;
   }
 
   // Recursively partition particles into at most a_ppc equal-weight KD leaves, then reduce each leaf
   // to one particle at the weighted-centroid position. Requires particle weights >= 1 to split.
   using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
-  // Pack ItoParticle fields into the lightweight intermediate type.
-  const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
-    [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
+  // Pack the reduced particle's columns into the per-cell AoS intermediate.
+  const std::function<PType(const ParticleSoA<ItoMergeParticle>&, std::size_t)> gather =
+    [](const ParticleSoA<ItoMergeParticle>& a, const std::size_t i) -> PType {
     PType p;
 
     p.weight   = a.weight(i);
-    p.payload  = a.template get<&ItoParticle::energy>(i);
+    p.payload  = a.template get<&ItoMergeParticle::energy>(i);
     p.position = a.position(i);
 
     return p;
@@ -3509,8 +3550,8 @@ ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, con
   };
 
   // Reduce each KD leaf to a single weighted-centroid particle.
-  const std::function<void(ParticleSoA<ItoParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
-    [](ParticleSoA<ItoParticle>& a, const PType* first, const PType* last, const CellInfo&) -> void {
+  const std::function<void(ParticleSoA<ItoMergeParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
+    [](ParticleSoA<ItoMergeParticle>& a, const PType* first, const PType* last, const CellInfo&) -> void {
     Real     w = 0.0;
     Real     e = 0.0;
     RealVect x = RealVect::Zero;
@@ -3524,25 +3565,25 @@ ItoSolver::makeSuperparticlesEqualWeightKD(const WhichContainer a_container, con
     x *= 1.0 / w;
     e *= 1.0 / w;
 
-    ItoParticle payload;
+    ItoMergeParticle payload;
     payload.energy = static_cast<ParticleReal>(e);
     a.append(x, w, payload);
   };
 
-  const ParticleManagement::ParticleMerger<ItoParticle>
+  const ParticleManagement::ParticleMerger<ItoMergeParticle>
     merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::weight, &PType::position>(gather,
                                                                                                   reconcile,
                                                                                                   scatterLeaf);
 
-  this->applyCellMerger(a_container, a_particlesPerCell, merger);
+  this->applyCellMerger(a_particles, a_particlesPerCell, merger);
 }
 
 void
-ItoSolver::makeSuperparticlesReinitialize(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeReinitialize(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesReinitialize");
+  CH_TIME("ItoSolver::mergeReinitialize");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesReinitialize" << endl;
+    pout() << m_name + "::mergeReinitialize" << endl;
   }
 
   // Sums the total number of physical particles in the cell, then redistributes them into at most a_ppc
@@ -3550,8 +3591,8 @@ ItoSolver::makeSuperparticlesReinitialize(const WhichContainer a_container, cons
   // All output particles carry the same weight-averaged energy. Requires integer-valued weights.
 
   // Sum physical particle count and compute weight-averaged energy across the cell.
-  const std::function<std::pair<long long, Real>(const ParticleSoA<ItoParticle>&)> aggregate =
-    [](const ParticleSoA<ItoParticle>& a) -> std::pair<long long, Real> {
+  const std::function<std::pair<long long, Real>(const ParticleSoA<ItoMergeParticle>&)> aggregate =
+    [](const ParticleSoA<ItoMergeParticle>& a) -> std::pair<long long, Real> {
     long long numPhysical = 0LL;
     Real      E           = 0.0;
 
@@ -3559,7 +3600,7 @@ ItoSolver::makeSuperparticlesReinitialize(const WhichContainer a_container, cons
       const Real w = a.weight(i);
 
       numPhysical = numPhysical + (long long)w;
-      E           = E + w * a.template get<&ItoParticle::energy>(i);
+      E           = E + w * a.template get<&ItoMergeParticle::energy>(i);
     }
 
     const Real avgE = (numPhysical > 0) ? E / static_cast<double>(numPhysical) : 0.0;
@@ -3568,29 +3609,29 @@ ItoSolver::makeSuperparticlesReinitialize(const WhichContainer a_container, cons
   };
 
   // Emit one new particle with the given weight and average energy at the drawn position.
-  const std::function<void(ParticleSoA<ItoParticle>&, const RealVect&, long long, const Real&)> emit =
-    [](ParticleSoA<ItoParticle>& a, const RealVect& x, const long long wt, const Real& avgE) -> void {
-    ItoParticle payload;
+  const std::function<void(ParticleSoA<ItoMergeParticle>&, const RealVect&, long long, const Real&)> emit =
+    [](ParticleSoA<ItoMergeParticle>& a, const RealVect& x, const long long wt, const Real& avgE) -> void {
+    ItoMergeParticle payload;
 
     payload.energy = static_cast<ParticleReal>(avgE);
 
     a.append(x, static_cast<double>(wt), payload);
   };
 
-  const ParticleManagement::ParticleMerger<ItoParticle>
-    merger = ParticleManagement::makeReinitializeMerger<Real, ItoParticle>(aggregate, emit, [this]() noexcept {
+  const ParticleManagement::ParticleMerger<ItoMergeParticle>
+    merger = ParticleManagement::makeReinitializeMerger<Real, ItoMergeParticle>(aggregate, emit, [this]() noexcept {
       return m_amr->getProbLo();
     });
 
-  this->applyCellMerger(a_container, a_particlesPerCell, merger);
+  this->applyCellMerger(a_particles, a_particlesPerCell, merger);
 }
 
 void
-ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeReinitializeBVH(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesReinitializeBVH");
+  CH_TIME("ItoSolver::mergeReinitializeBVH");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesReinitializeBVH" << endl;
+    pout() << m_name + "::mergeReinitializeBVH" << endl;
   }
 
   // Same KD partition as equal_weight_kd, but leaf positions are reinitialized: cut-cells use the
@@ -3598,13 +3639,13 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
   // Requires particle weights >= 1 to split.
   using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
-  // Pack ItoParticle fields into the lightweight intermediate type.
-  const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
-    [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
+  // Pack the reduced particle's columns into the per-cell AoS intermediate.
+  const std::function<PType(const ParticleSoA<ItoMergeParticle>&, std::size_t)> gather =
+    [](const ParticleSoA<ItoMergeParticle>& a, const std::size_t i) -> PType {
     PType p;
 
     p.weight   = a.weight(i);
-    p.payload  = a.template get<&ItoParticle::energy>(i);
+    p.payload  = a.template get<&ItoMergeParticle::energy>(i);
     p.position = a.position(i);
 
     return p;
@@ -3619,8 +3660,8 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
 
   // Cut-cells: weighted-centroid position to avoid placing particles outside the EB.
   // Full cells: random point in the leaf bounding box to reinitialize spatial distribution.
-  const std::function<void(ParticleSoA<ItoParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
-    [](ParticleSoA<ItoParticle>& a, const PType* first, const PType* last, const CellInfo& cellInfo) -> void {
+  const std::function<void(ParticleSoA<ItoMergeParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
+    [](ParticleSoA<ItoMergeParticle>& a, const PType* first, const PType* last, const CellInfo& cellInfo) -> void {
     Real w = 0.0;
     Real e = 0.0;
 
@@ -3636,7 +3677,7 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
       x *= 1.0 / w;
       e *= 1.0 / w;
 
-      ItoParticle payload;
+      ItoMergeParticle payload;
       payload.energy = static_cast<ParticleReal>(e);
       a.append(x, w, payload);
     }
@@ -3664,39 +3705,39 @@ ItoSolver::makeSuperparticlesReinitializeBVH(const WhichContainer a_container, c
 
       e *= 1.0 / w;
 
-      ItoParticle payload;
+      ItoMergeParticle payload;
       payload.energy = static_cast<ParticleReal>(e);
       a.append(x, w, payload);
     }
   };
 
-  const ParticleManagement::ParticleMerger<ItoParticle>
+  const ParticleManagement::ParticleMerger<ItoMergeParticle>
     merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::weight, &PType::position>(gather,
                                                                                                   reconcile,
                                                                                                   scatterLeaf);
 
-  this->applyCellMerger(a_container, a_particlesPerCell, merger);
+  this->applyCellMerger(a_particles, a_particlesPerCell, merger);
 }
 
 void
-ItoSolver::makeSuperparticlesNnSfc(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeNnSfc(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesNnSfc");
+  CH_TIME("ItoSolver::mergeNnSfc");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesNnSfc" << endl;
+    pout() << m_name + "::mergeNnSfc" << endl;
   }
 
   // Sorts particles along a Hilbert curve, then merges adjacent pairs until the count reaches a_ppc.
   // Produces better spatial locality than the KD methods and does not require integer weights.
   using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
-  // Pack ItoParticle fields into the lightweight intermediate type.
-  const std::function<PType(const ParticleSoA<ItoParticle>&, std::size_t)> gather =
-    [](const ParticleSoA<ItoParticle>& a, const std::size_t i) -> PType {
+  // Pack the reduced particle's columns into the per-cell AoS intermediate.
+  const std::function<PType(const ParticleSoA<ItoMergeParticle>&, std::size_t)> gather =
+    [](const ParticleSoA<ItoMergeParticle>& a, const std::size_t i) -> PType {
     PType p;
 
     p.weight   = a.weight(i);
-    p.payload  = a.template get<&ItoParticle::energy>(i);
+    p.payload  = a.template get<&ItoMergeParticle::energy>(i);
     p.position = a.position(i);
 
     return p;
@@ -3714,20 +3755,20 @@ ItoSolver::makeSuperparticlesNnSfc(const WhichContainer a_container, const Vecto
     a.weight   = w;
   };
 
-  // Unpack the merged intermediate back into an ItoParticle and append it to the SoA.
-  const std::function<void(ParticleSoA<ItoParticle>&, const PType&)> scatter = [](ParticleSoA<ItoParticle>& a,
-                                                                                  const PType&              p) -> void {
-    ItoParticle payload;
+  // Unpack the merged intermediate back into the reduced particle and append it to the SoA.
+  const std::function<void(ParticleSoA<ItoMergeParticle>&, const PType&)> scatter = [](ParticleSoA<ItoMergeParticle>& a,
+                                                                                       const PType& p) -> void {
+    ItoMergeParticle payload;
     payload.energy = static_cast<ParticleReal>(p.payload);
     a.append(p.position, p.weight, payload);
   };
 
-  const ParticleManagement::ParticleMerger<ItoParticle>
+  const ParticleManagement::ParticleMerger<ItoMergeParticle>
     merger = ParticleManagement::makeSfcNearestNeighborMerger<PType, &PType::weight, &PType::position>(gather,
                                                                                                        combine,
                                                                                                        scatter);
 
-  this->applyCellMerger(a_container, a_particlesPerCell, merger);
+  this->applyCellMerger(a_particles, a_particlesPerCell, merger);
 }
 
 void
@@ -3746,6 +3787,13 @@ ItoSolver::extractIntoMergeContainer(const WhichContainer a_container, ParticleC
   // the full ItoParticle.
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
+  // Ghosts first. The loop below copies every slot with no isGhost() test and append() marks the result
+  // valid, so a ghost copy would silently become an owned particle and double-count its weight. Nothing
+  // ghost-fills the bulk container today, but this function is called from preRegrid() -- before the
+  // ParticleContainer::preRegrid() that used to guarantee the invariant -- so enforce it here rather
+  // than depend on a distant caller. preRegrid() and remap() clear defensively for the same reason.
+  particles.clearGhostParticles();
+
   m_amr->allocate(a_merge, m_realm);
 
   // Extract into the SAME patch (positions unchanged => ownership unchanged => no remap needed).
@@ -3756,31 +3804,50 @@ ItoSolver::extractIntoMergeContainer(const WhichContainer a_container, ParticleC
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex&                din     = dit[mybox];
-      const ParticleSoA<ItoParticle>& itoLeaf = particles[lvl][din];
+      const DataIndex&          din     = dit[mybox];
+      ParticleSoA<ItoParticle>& itoLeaf = particles[lvl][din];
 
       ParticleSoA<ItoMergeParticle>& mergeLeaf = a_merge[lvl][din];
+
+      // Exact, not geometric: growTo() doubles from 16, so a leaf built by repeated append() carries up
+      // to 2x overshoot, while the final count is known here and reserve() sets the capacity exactly.
+      mergeLeaf.reserve(itoLeaf.size());
 
       for (std::size_t i = 0; i < itoLeaf.size(); i++) {
         ItoMergeParticle p;
         p.energy = itoLeaf.template get<&ItoParticle::energy>(i);
 
         mergeLeaf.append(itoLeaf.position(i), itoLeaf.weight(i), p);
+
+        // append() sets id/rank to s_invalidID/-1. Carry the id: it is preserved by every transport path
+        // in ParticleContainer and is written to H5Part output, so losing it here would rename every
+        // particle that merely passes through. rankID is left alone -- nothing in-tree reads it on an
+        // ItoParticle, and it is already -1 after any merge.
+        mergeLeaf.particleID(mergeLeaf.size() - 1) = itoLeaf.particleID(i);
       }
+
+      // Release this patch's ItoParticle arena as soon as its reduced copy exists, rather than clearing
+      // the whole container at the end. clearParticles() deliberately keeps each leaf's capacity, so the
+      // 149 B arenas would otherwise stay resident alongside the 53 B copies for the whole extract --
+      // and, on the regrid path, through the entire load-balancing phase. Overlap becomes one patch
+      // instead of one level. ParticleContainer::gatherToPool() drains its source the same way.
+      // Safe under the omp loop: each thread owns its own din, and no kernel here holds a raw column<>()
+      // pointer, which shrinkToFit() would invalidate.
+      itoLeaf.clear();
+      itoLeaf.shrinkToFit();
     }
   }
 
+  // The per-leaf clears above already emptied every patch; this resets the container-level bookkeeping.
   particles.clearParticles();
 }
 
 void
-ItoSolver::splitAndRebuildFromMergeContainer(const WhichContainer                 a_container,
-                                             ParticleContainer<ItoMergeParticle>& a_merge,
-                                             const int                            a_numParticlesPerCellThresh)
+ItoSolver::splitFromMergeContainer(ParticleContainer<ItoMergeParticle>& a_merge, const int a_numParticlesPerCellThresh)
 {
-  CH_TIME("ItoSolver::splitAndRebuildFromMergeContainer");
+  CH_TIME("ItoSolver::splitFromMergeContainer");
   if (m_verbosity > 5) {
-    pout() << m_name + "::splitAndRebuildFromMergeContainer" << endl;
+    pout() << m_name + "::splitFromMergeContainer" << endl;
   }
 
   // The merge phase only drains over-full cells. A cell BELOW the target is brought up to it by
@@ -3848,9 +3915,22 @@ ItoSolver::splitAndRebuildFromMergeContainer(const WhichContainer               
       leaf.swap(split);
     }
   }
+}
 
-  // Rebuild ItoParticles from the merged/split small particles, into the same patch (no remap).
+void
+ItoSolver::rebuildFromMergeContainer(const WhichContainer a_container, ParticleContainer<ItoMergeParticle>& a_merge)
+{
+  CH_TIME("ItoSolver::rebuildFromMergeContainer");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::rebuildFromMergeContainer" << endl;
+  }
+
+  // Rebuild ItoParticles from the reduced particles, into the same patch (no remap).
   // velocity/mobility/diffusion/... default to zero and are recomputed from the field before use.
+  // particleID is carried across explicitly -- append() would set it to s_invalidID, and for the
+  // methods that do not renumber (and for 'none' on the regrid path) the incoming id is the particle's
+  // real identity, which reaches H5Part output. mergeLite() has already invalidated the ids of any
+  // method that mints its own, so this copy is unconditional and always right.
   ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -3860,17 +3940,26 @@ ItoSolver::splitAndRebuildFromMergeContainer(const WhichContainer               
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex&                     din       = dit[mybox];
-      const ParticleSoA<ItoMergeParticle>& mergeLeaf = a_merge[lvl][din];
+      const DataIndex&               din       = dit[mybox];
+      ParticleSoA<ItoMergeParticle>& mergeLeaf = a_merge[lvl][din];
 
       ParticleSoA<ItoParticle>& itoLeaf = particles[lvl][din];
+
+      itoLeaf.reserve(itoLeaf.size() + mergeLeaf.size());
 
       for (std::size_t i = 0; i < mergeLeaf.size(); i++) {
         ItoParticle p;
         p.energy = mergeLeaf.template get<&ItoMergeParticle::energy>(i);
 
         itoLeaf.append(mergeLeaf.position(i), mergeLeaf.weight(i), p);
+
+        itoLeaf.particleID(itoLeaf.size() - 1) = mergeLeaf.particleID(i);
       }
+
+      // Hand the reduced leaf's arena back now rather than at end of scope: the ItoParticle copy of
+      // this patch already exists, so from here the two would coexist for the rest of the level loop.
+      mergeLeaf.clear();
+      mergeLeaf.shrinkToFit();
     }
   }
 
@@ -3880,11 +3969,11 @@ ItoSolver::splitAndRebuildFromMergeContainer(const WhichContainer               
 
 template <ItoSolver::NnPairSearchBackend Backend>
 void
-ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesNnPairSearch");
+  CH_TIME("ItoSolver::mergeNnPairSearch");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesNnPairSearch" << endl;
+    pout() << m_name + "::mergeNnPairSearch" << endl;
   }
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells) using
@@ -3904,10 +3993,6 @@ ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, cons
   // threshold over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is
   // uniform wherever nn_pair_tree/nn_pair_hash is used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
-
-  // 1. Extract.
-  ParticleContainer<ItoMergeParticle> merge;
-  this->extractIntoMergeContainer(a_container, merge);
 
   // 2. Merge callbacks (on the small particle), plus the EB position check and id allocator below.
   auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
@@ -4063,44 +4148,19 @@ ItoSolver::makeSuperparticlesNnPairSearch(const WhichContainer a_container, cons
       break;
     }
   }
-
-  // 4-5. Split under-full cells and rebuild the ItoParticles.
-  this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);
 }
 
 void
-ItoSolver::makeSuperparticlesNnPairTree(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeNnPairOneCell(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesNnPairTree");
+  CH_TIME("ItoSolver::mergeNnPairOneCell");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesNnPairTree" << endl;
-  }
-
-  this->makeSuperparticlesNnPairSearch<NnPairSearchBackend::Tree>(a_container, a_particlesPerCell);
-}
-
-void
-ItoSolver::makeSuperparticlesNnPairHash(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
-{
-  CH_TIME("ItoSolver::makeSuperparticlesNnPairHash");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesNnPairHash" << endl;
-  }
-
-  this->makeSuperparticlesNnPairSearch<NnPairSearchBackend::Hash>(a_container, a_particlesPerCell);
-}
-
-void
-ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
-{
-  CH_TIME("ItoSolver::makeSuperparticlesNnPairOneCell");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesNnPairOneCell" << endl;
+    pout() << m_name + "::mergeNnPairOneCell" << endl;
   }
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells) using
   // the distributed nearest-neighbor pair merge (per-cell PointCloudBVH search, Chebyshev cell distance
-  // structurally fixed at 1); see makeSuperparticlesNnPairTree() for the shared five-step outline --
+  // structurally fixed at 1); see the nn_pair_tree merge for the shared five-step outline --
   // this differs only in step 3 (no maxCellDistance, a fixed width-1 ghost halo, and
   // mergeNearestNeighborsOneCell() instead of mergeNearestNeighborsTree()).
 
@@ -4109,11 +4169,7 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
   // uniform wherever nn_pair_onecell is used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
 
-  // 1. Extract.
-  ParticleContainer<ItoMergeParticle> merge;
-  this->extractIntoMergeContainer(a_container, merge);
-
-  // 2. Merge callbacks -- identical reconciliation rule to makeSuperparticlesNnPairTree().
+  // 2. Merge callbacks -- identical reconciliation rule to the nn_pair_tree merge.
   auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
     return a_leaf.template get<&ItoMergeParticle::energy>(a_idx);
   };
@@ -4144,7 +4200,7 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // See makeSuperparticlesNnPairTree() for the id-allocator rationale.
+  // See the nn_pair_tree merge for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
 
@@ -4156,7 +4212,7 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
     return nextID++;
   };
 
-  // 3. Merge phase -- same drain-loop structure as makeSuperparticlesNnPairTree(), but the ghost width
+  // 3. Merge phase -- same drain-loop structure as the nn_pair_tree merge, but the ghost width
   // is fixed at 1 (see mergeNearestNeighborsOneCell()'s own docs on why nn_pair_max_cell_dist does not
   // apply here) and mergeNearestNeighborsOneCell() replaces mergeNearestNeighborsTree().
   unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
@@ -4210,39 +4266,14 @@ ItoSolver::makeSuperparticlesNnPairOneCell(const WhichContainer a_container, con
       break;
     }
   }
-
-  // 4-5. Split under-full cells and rebuild the ItoParticles.
-  this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);
 }
 
 void
-ItoSolver::makeSuperparticlesKDCarve(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
+ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesKDCarve");
+  CH_TIME("ItoSolver::mergeKDSkinNn");
   if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesKDCarve" << endl;
-  }
-
-  this->makeSuperparticlesKDImpl(a_container, a_particlesPerCell, true);
-}
-
-void
-ItoSolver::makeSuperparticlesKDPatch(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
-{
-  CH_TIME("ItoSolver::makeSuperparticlesKDPatch");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesKDPatch" << endl;
-  }
-
-  this->makeSuperparticlesKDImpl(a_container, a_particlesPerCell, false);
-}
-
-void
-ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Vector<int>& a_particlesPerCell)
-{
-  CH_TIME("ItoSolver::makeSuperparticlesKDSkinNn");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::makeSuperparticlesKDSkinNn" << endl;
+    pout() << m_name + "::mergeKDSkinNn" << endl;
   }
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
@@ -4268,9 +4299,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
   // threshold over the whole AMR hierarchy. Use the coarsest level's value.
   const int numParticlesPerCellThresh = a_particlesPerCell[0];
 
-  // 1. Extract. `merge` becomes the skin container once the interior tier has taken its share.
-  ParticleContainer<ItoMergeParticle> merge;
-  this->extractIntoMergeContainer(a_container, merge);
+  // 1. `merge` becomes the skin container once the interior tier has taken its share.
 
   ParticleContainer<ItoMergeParticle> interior;
   m_amr->allocate(interior, m_realm);
@@ -4332,7 +4361,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // See makeSuperparticlesNnPairTree() for the id-allocator rationale.
+  // See the nn_pair_tree merge for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
 
@@ -4460,7 +4489,7 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
 
   interior.clearGhostParticles();
 
-  // 5. Skin tier -- same drain loop as makeSuperparticlesNnPairOneCell(), against the budget above.
+  // 5. Skin tier -- same drain loop as the nn_pair_onecell merge, against the budget above.
   unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
 
   for (int round = 0; round < m_nnPairMaxRounds; round++) {
@@ -4511,20 +4540,18 @@ ItoSolver::makeSuperparticlesKDSkinNn(const WhichContainer a_container, const Ve
       merge[lvl][din].append(interior[lvl][din]);
     }
   }
-
-  this->splitAndRebuildFromMergeContainer(a_container, merge, numParticlesPerCellThresh);
 }
 
 void
-ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
-                                    const Vector<int>&   a_particlesPerCell,
-                                    const bool           a_enableBoundaryCarve)
+ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
+                       const Vector<int>&                   a_particlesPerCell,
+                       const bool                           a_enableBoundaryCarve)
 {
-  CH_TIME("ItoSolver::makeSuperparticlesKDImpl");
+  CH_TIME("ItoSolver::mergeKDImpl");
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
   // using the whole-patch kd-tree merge (ParticleManagement::mergeKDCarve or mergeKDPatch).
-  // Unlike makeSuperparticlesNnPairTree/Hash/OneCell, there is no drain-loop round here -- both
+  // Unlike the nn_pair merges, there is no drain-loop round here -- both
   // are a single, fixed, non-iterative pass -- in four steps:
   //
   //   1. extractIntoMergeContainer(): copy the ItoParticles into a minimal ItoMergeParticle
@@ -4542,10 +4569,6 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
   // over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is uniform
   // wherever kd_carve/kd_patch are used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
-
-  // 1. Extract.
-  ParticleContainer<ItoMergeParticle> merge;
-  this->extractIntoMergeContainer(a_container, merge);
 
   // 2. Merge callbacks -- identical reconciliation rule to the nn_pair variants, just N-ary.
   auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
@@ -4583,7 +4606,7 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // See makeSuperparticlesNnPairTree() for the id-allocator rationale.
+  // See the nn_pair_tree merge for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
 
@@ -4647,9 +4670,6 @@ ItoSolver::makeSuperparticlesKDImpl(const WhichContainer a_container,
                                                              allocateID,
                                                              isPositionValid);
   }
-
-  // 4. Split under-full cells and rebuild the ItoParticles.
-  this->splitAndRebuildFromMergeContainer(a_container, merge, a_numParticlesPerCellThresh);
 }
 
 void
