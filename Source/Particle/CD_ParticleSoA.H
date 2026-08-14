@@ -856,6 +856,7 @@ public:
   swap(ParticleSoA& a_other) noexcept
   {
     std::swap(m_buffer, a_other.m_buffer);
+    std::swap(m_bytes, a_other.m_bytes);
     std::swap(m_capacity, a_other.m_capacity);
     std::swap(m_size, a_other.m_size);
     std::swap(m_sorted, a_other.m_sorted);
@@ -1583,7 +1584,10 @@ protected:
   /**
    * @brief Byte size of the arena at m_buffer (zero when m_buffer is null).
    * @details Kept so a release can decrement ParticleMemory by exactly what the matching allocation
-   * added, without recomputing the column offsets.
+   * added, without recomputing the column offsets. It therefore describes the arena rather than the
+   * container, and must travel with m_buffer through every ownership transfer -- swap() and steal()
+   * both move it. A transfer that moves the arena but leaves this behind attributes the arena to a
+   * container that no longer holds it, and the accounting drifts from the first such transfer on.
    */
   std::size_t m_bytes = 0;
 
