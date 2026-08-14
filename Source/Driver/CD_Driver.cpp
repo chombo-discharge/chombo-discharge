@@ -63,6 +63,12 @@ bytesAsMB(const long long a_bytes)
   return os.str();
 }
 
+static std::string
+bytesAsMB(const Real a_bytes)
+{
+  return bytesAsMB(static_cast<long long>(a_bytes));
+}
+
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
@@ -591,6 +597,32 @@ Driver::gridReport()
            << "\t...Proc. # of boxes......... = " << DischargeIO::numberFmt(localBoxes) << endl
            << "\t...Proc. # of boxes (lvl)... = " << DischargeIO::numberFmt(localLevelBoxes) << endl
            << "\t...Proc. # of cells (lvl)... = " << DischargeIO::numberFmt(localLevelCells) << endl;
+  }
+
+  // Resident set size -- the whole process. See the step report for why this is the figure that
+  // distinguishes real growth from a miscounting allocator.
+  {
+    Real currentRSS = 0.0;
+    Real peakRSS    = 0.0;
+
+    MemoryReport::getResidentSetSize(currentRSS, peakRSS);
+
+    if (currentRSS > 0.0) {
+      pout() << "\tResident set size        = " << bytesAsMB(currentRSS) << " (MB)" << endl
+             << "\tPeak resident set size   = " << bytesAsMB(peakRSS) << " (MB)" << endl;
+#ifdef CH_MPI
+      Real maxCurrent = 0.0;
+      Real minCurrent = 0.0;
+      Real maxPeak    = 0.0;
+      Real minPeak    = 0.0;
+
+      MemoryReport::getMaxMinResidentSetSize(maxCurrent, minCurrent, maxPeak, minPeak);
+
+      pout() << "\tMin resident set size    = " << bytesAsMB(minCurrent) << " (MB)" << endl
+             << "\tMax resident set size    = " << bytesAsMB(maxCurrent) << " (MB)" << endl
+             << "\tMax peak resident size   = " << bytesAsMB(maxPeak) << " (MB)" << endl;
+#endif
+    }
   }
 
   // Particle arenas, reported outside the memory-tracking guard because they are counted by us rather
@@ -1898,12 +1930,45 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     pout() << metrics << endl;
   }
 
+  // Resident set size. This is the whole process -- mesh arenas, particle arenas, every buffer that
+  // neither counter sees, and the binary itself -- so it is both the figure a job is killed for
+  // exceeding and the only way to tell real growth from a miscounting allocator: a tracked figure
+  // that climbs while this one does not is a bug in the counter, not memory the process is holding.
+  {
+    Real currentRSS = 0.0;
+    Real peakRSS    = 0.0;
+
+    MemoryReport::getResidentSetSize(currentRSS, peakRSS);
+
+    if (currentRSS > 0.0) {
+      Real maxCurrent = 0.0;
+      Real minCurrent = 0.0;
+      Real maxPeak    = 0.0;
+      Real minPeak    = 0.0;
+
+      MemoryReport::getMaxMinResidentSetSize(maxCurrent, minCurrent, maxPeak, minPeak);
+
+      pout() << "                                -- Resident set size        : " << bytesAsMB(currentRSS) << " (MB)"
+             << endl;
+      pout() << "                                -- Peak resident set size   : " << bytesAsMB(peakRSS) << " (MB)"
+             << endl;
+#ifdef CH_MPI
+      pout() << "                                -- Max resident set size    : " << bytesAsMB(maxCurrent) << " (MB)"
+             << endl;
+      pout() << "                                -- Min resident set size    : " << bytesAsMB(minCurrent) << " (MB)"
+             << endl;
+      pout() << "                                -- Max peak resident size   : " << bytesAsMB(maxPeak) << " (MB)"
+             << endl;
+#endif
+    }
+  }
+
   // Memory held by particle arenas. Reported outside the memory-tracking guard because it is our own
   // counter rather than Chombo's: ParticleSoA allocates with std::aligned_alloc, which never reaches
   // Chombo's Arena, so this is the part of the footprint that the tracked figures below structurally
-  // cannot see. On a particle-heavy run it is the dominant term. Reported in bytes because the
-  // interesting changes are far smaller than a megabyte, and with the maximum and minimum over ranks
-  // because a maximum that runs away from the minimum means one rank is accumulating.
+  // cannot see. On a particle-heavy run it is the dominant term. Reported with the
+  // maximum and minimum over ranks, because a maximum that runs away from the minimum means a single
+  // rank is accumulating rather than the whole run.
   {
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());

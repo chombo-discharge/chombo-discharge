@@ -10,6 +10,11 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <fstream>
+#include <sstream>
+#include <string>
+
 // Chombo includes
 #include <memtrack.H>
 #include <memusage.H>
@@ -18,6 +23,7 @@
 
 // Our includes
 #include <CD_MemoryReport.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 void
@@ -120,6 +126,58 @@ MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
   a_peak[0]    = peakMem / BytesPerMB;
   a_unfreed[0] = unfreedMem / BytesPerMB;
 #endif
+}
+
+void
+MemoryReport::getResidentSetSize(Real& a_currentRSS, Real& a_peakRSS)
+{
+  CH_TIME("MemoryReport::getResidentSetSize");
+
+  a_currentRSS = 0.0;
+  a_peakRSS    = 0.0;
+
+  // /proc/self/status reports these as 'VmRSS:<whitespace><number> kB'. Absent on non-Linux
+  // platforms, in which case both outputs are left at zero.
+  std::ifstream status("/proc/self/status");
+
+  if (status.is_open()) {
+    std::string line;
+
+    while (std::getline(status, line)) {
+      const bool isCurrent = line.compare(0, 6, "VmRSS:") == 0;
+      const bool isPeak    = line.compare(0, 6, "VmHWM:") == 0;
+
+      if (isCurrent || isPeak) {
+        std::istringstream parser(line.substr(6));
+
+        double kiloBytes = 0.0;
+        parser >> kiloBytes;
+
+        if (isCurrent) {
+          a_currentRSS = 1024.0 * kiloBytes;
+        }
+        else {
+          a_peakRSS = 1024.0 * kiloBytes;
+        }
+      }
+    }
+  }
+}
+
+void
+MemoryReport::getMaxMinResidentSetSize(Real& a_maxCurrent, Real& a_minCurrent, Real& a_maxPeak, Real& a_minPeak)
+{
+  CH_TIME("MemoryReport::getMaxMinResidentSetSize");
+
+  Real currentRSS = 0.0;
+  Real peakRSS    = 0.0;
+
+  MemoryReport::getResidentSetSize(currentRSS, peakRSS);
+
+  a_maxCurrent = ParallelOps::max(currentRSS);
+  a_minCurrent = ParallelOps::min(currentRSS);
+  a_maxPeak    = ParallelOps::max(peakRSS);
+  a_minPeak    = ParallelOps::min(peakRSS);
 }
 
 #include <CD_NamespaceFooter.H>
