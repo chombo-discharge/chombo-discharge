@@ -41,6 +41,28 @@
 #include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
 
+/**
+ * @brief Format a byte count as megabytes for a report line.
+ * @details Fixed to three decimals, i.e. resolution of about a kilobyte. Megabytes are what a reader
+ * wants for a figure in the gigabyte range, but rounding to whole megabytes destroys the signal these
+ * reports exist to carry: a ratchet of tens of kilobytes per step reads as an unchanging integer, and
+ * a counter that is quietly climbing looks flat. Formatted into its own stream so the caller's
+ * formatting flags are left alone.
+ * @param[in] a_bytes Byte count.
+ * @return The value in MB, as a fixed-point string with three decimals.
+ */
+static std::string
+bytesAsMB(const long long a_bytes)
+{
+  constexpr double bytesPerMB = 1024.0 * 1024.0;
+
+  std::ostringstream os;
+
+  os << std::fixed << std::setprecision(3) << (static_cast<double>(a_bytes) / bytesPerMB);
+
+  return os.str();
+}
+
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
@@ -571,19 +593,30 @@ Driver::gridReport()
            << "\t...Proc. # of cells (lvl)... = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
+  // Particle arenas, reported outside the memory-tracking guard because they are counted by us rather
+  // than by Chombo -- see the step report for why the two totals are disjoint.
+  {
+    const long long localParticleMemory = static_cast<long long>(ParticleMemory::getAllocatedBytes());
+    const long long localParticlePeak   = static_cast<long long>(ParticleMemory::getPeakBytes());
+
+    pout() << "\tParticle arenas       = " << bytesAsMB(localParticleMemory) << " (MB)" << endl
+           << "\tPeak particle arenas  = " << bytesAsMB(localParticlePeak) << " (MB)" << endl;
+#ifdef CH_MPI
+    pout() << "\tMin particle arenas   = " << bytesAsMB(ParallelOps::min(localParticleMemory)) << " (MB)" << endl
+           << "\tMax particle arenas   = " << bytesAsMB(ParallelOps::max(localParticleMemory)) << " (MB)" << endl
+           << "\tMax peak particle     = " << bytesAsMB(ParallelOps::max(localParticlePeak)) << " (MB)" << endl;
+#endif
+  }
+
   // Write a memory report if Chombo was to compiled to use memory tracking.
 #ifdef CH_USE_MEMORY_TRACKING
-  constexpr Real BytesPerMB = 1024.0 * 1024.0;
-
   long long localUnfreedMemory = 0LL;
   long long localPeakMemory    = 0LL;
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
 
-  pout() << "\tUnfreed memory        = " << std::ceil(static_cast<double>(localUnfreedMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tPeak memory usage     = " << std::ceil(static_cast<double>(localPeakMemory) / BytesPerMB) << " (MB)"
-         << endl;
+  pout() << "\tUnfreed mesh arenas   = " << bytesAsMB(localUnfreedMemory) << " (MB)" << endl
+         << "\tPeak mesh arenas      = " << bytesAsMB(localPeakMemory) << " (MB)" << endl;
 #ifdef CH_MPI
 
   // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
@@ -593,14 +626,10 @@ Driver::gridReport()
   const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
   const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
 
-  pout() << "\tMin unfreed memory    = " << std::ceil(static_cast<double>(minUnfreedMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tMin peak memory       = " << std::ceil(static_cast<double>(minPeakMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tMax unfreed memory    = " << std::ceil(static_cast<double>(maxUnfreedMemory) / BytesPerMB) << " (MB)"
-         << endl
-         << "\tMax peak memory       = " << std::ceil(static_cast<double>(maxPeakMemory) / BytesPerMB) << " (MB)"
-         << endl;
+  pout() << "\tMin unfreed mesh      = " << bytesAsMB(minUnfreedMemory) << " (MB)" << endl
+         << "\tMin peak mesh         = " << bytesAsMB(minPeakMemory) << " (MB)" << endl
+         << "\tMax unfreed mesh      = " << bytesAsMB(maxUnfreedMemory) << " (MB)" << endl
+         << "\tMax peak mesh         = " << bytesAsMB(maxPeakMemory) << " (MB)" << endl;
 #endif
 #endif
   pout() << "=======================================================================" << endl;
@@ -1873,16 +1902,18 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
     const long long particleBytes = static_cast<long long>(ParticleMemory::getAllocatedBytes());
     const long long particlePeak  = static_cast<long long>(ParticleMemory::getPeakBytes());
 
-    pout() << "                                -- Particle arenas       : " << particleBytes << "(B)" << endl;
-    pout() << "                                -- Peak particle arenas  : " << particlePeak << "(B)" << endl;
+    pout() << "                                -- Particle arenas       : " << bytesAsMB(particleBytes) << " (MB)"
+           << endl;
+    pout() << "                                -- Peak particle arenas  : " << bytesAsMB(particlePeak) << " (MB)"
+           << endl;
 
 #ifdef CH_MPI
-    pout() << "                                -- Max particle arenas   : " << ParallelOps::max(particleBytes) << "(B)"
-           << endl;
-    pout() << "                                -- Min particle arenas   : " << ParallelOps::min(particleBytes) << "(B)"
-           << endl;
-    pout() << "                                -- Max peak particle arn : " << ParallelOps::max(particlePeak) << "(B)"
-           << endl;
+    pout() << "                                -- Max particle arenas   : "
+           << bytesAsMB(ParallelOps::max(particleBytes)) << " (MB)" << endl;
+    pout() << "                                -- Min particle arenas   : "
+           << bytesAsMB(ParallelOps::min(particleBytes)) << " (MB)" << endl;
+    pout() << "                                -- Max peak particle     : " << bytesAsMB(ParallelOps::max(particlePeak))
+           << " (MB)" << endl;
 #endif
   }
 
@@ -1893,16 +1924,14 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   overallMemoryUsage(unfreedMem, peakMem);
 
-  // In bytes rather than whole megabytes. The growth worth catching here is a ratchet of tens of
-  // kilobytes per regrid, which reads as a constant figure once rounded up to MB -- that rounding is
-  // what made this counter look flat while it was in fact moving.
-  pout() << "                                -- Unfreed memory        : " << unfreedMem << "(B)" << endl;
-  pout() << "                                -- Peak memory usage     : " << peakMem << "(B)" << endl;
+  pout() << "                                -- Unfreed mesh arenas   : " << bytesAsMB(unfreedMem) << " (MB)" << endl;
+  pout() << "                                -- Peak mesh arenas      : " << bytesAsMB(peakMem) << " (MB)" << endl;
 
 #ifdef CH_MPI
-  pout() << "                                -- Max unfreed memory    : " << ParallelOps::max(unfreedMem) << "(B)"
-         << endl;
-  pout() << "                                -- Max peak memory usage : " << ParallelOps::max(peakMem) << "(B)" << endl;
+  pout() << "                                -- Max unfreed mesh      : " << bytesAsMB(ParallelOps::max(unfreedMem))
+         << " (MB)" << endl;
+  pout() << "                                -- Max peak mesh         : " << bytesAsMB(ParallelOps::max(peakMem))
+         << " (MB)" << endl;
 #endif
 #endif
 }
