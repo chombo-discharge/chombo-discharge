@@ -1953,9 +1953,13 @@ ItoKMCStepper<I, C, R, F>::computeSpaceChargeDensity(MFAMRCellData&             
     pout() << m_name + "::computeSpaceChargeDensity(rho, densities)" << endl;
   }
 
+  // Guard the realm spot-checks: either layout may legitimately be empty. A chemistry that puts every
+  // plasma species on the Ito solver leaves a_cdrDensities empty, and indexing [0] to check its realm
+  // then aborts on the assert rather than on anything real. The loops below iterate the solver
+  // layouts, so an empty one is already a no-op there.
   CH_assert(a_rho.getRealm() == m_fluidRealm);
-  CH_assert(a_itoDensities[0]->getRealm() == m_particleRealm);
-  CH_assert(a_cdrDensities[0]->getRealm() == m_fluidRealm);
+  CH_assert(a_itoDensities.size() == 0 || a_itoDensities[0]->getRealm() == m_particleRealm);
+  CH_assert(a_cdrDensities.size() == 0 || a_cdrDensities[0]->getRealm() == m_fluidRealm);
 
   // TLDR: a_itoDensities could be defined over the particle realm, so we use m_fluidScratch1 as a temporary storage.
 
