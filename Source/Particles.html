@@ -1026,7 +1026,7 @@ What distinguishes the kd-based mergers from one another is the rule used to cho
 </section>
 <section id="per-cell-kd-merges">
 <h3>Per-cell kd-merges<a class="headerlink" href="#per-cell-kd-merges" title="Permalink to this heading">ÔÉÅ</a></h3>
-<p>The per-cell partitioner <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> operates on a lightweight, communication-free particle type (<code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>) carrying the position, weight, and any quantities to be preserved across a merge.
+<p>The per-cell partitioner <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> operates on a lightweight AoS particle type (<code class="docutils literal notranslate"><span class="pre">ParticleManagement::MergeParticle</span></code>) carrying the position and weight as data members, plus an opaque payload holding any quantities to be preserved across a merge.
 It recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible ‚Äì at each bisection the two halves differ by at most one physical particle.
 It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.</p>
 <div class="admonition note">
@@ -1044,7 +1044,7 @@ In this case any other members in the particle type are copied over into the new
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeEqualWeightKDMerger</span></code> wraps <code class="docutils literal notranslate"><span class="pre">buildEqualWeightKDLeaves</span></code> into a <code class="docutils literal notranslate"><span class="pre">ParticleMerger</span></code> functor.
 The caller provides three lambdas:</p>
 <ul class="simple">
-<li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>.</p></li>
+<li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">MergeParticle</span></code>.</p></li>
 <li><p>A <em>reconcile</em> function (<code class="docutils literal notranslate"><span class="pre">BinaryParticleReconcile</span></code>) that propagates payload fields to both daughter particles when the median particle is split across a kd boundary.</p></li>
 <li><p>A <em>scatter-leaf</em> function that receives the raw <code class="docutils literal notranslate"><span class="pre">[first,</span> <span class="pre">last)</span></code> pointer range of one leaf and appends exactly one merged particle to the SoA.</p></li>
 </ul>
@@ -1129,8 +1129,8 @@ The mask must therefore be registered <em>before</em> the grids are (re)built ‚Ä
 <h4>SFC pair merging (<code class="docutils literal notranslate"><span class="pre">nn_sfc</span></code>)<a class="headerlink" href="#sfc-pair-merging-nn-sfc" title="Permalink to this heading">ÔÉÅ</a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleManagement::makeSfcNearestNeighborMerger</span></code> sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most <code class="docutils literal notranslate"><span class="pre">ppc</span></code>.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Packed</span><span class="p">,</span>
-<span class="w">          </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">)(),</span>
-<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Packed</span><span class="o">::*</span><span class="n">packPosition</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="p">,</span>
+<span class="w">          </span><span class="n">Real</span><span class="w"> </span><span class="n">Packed</span><span class="o">::*</span><span class="n">packWeight</span><span class="p">,</span>
+<span class="w">          </span><span class="n">RealVect</span><span class="w"> </span><span class="n">Packed</span><span class="o">::*</span><span class="n">packPosition</span><span class="p">,</span>
 <span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span>
 <span class="w">          </span><span class="k">class</span><span class="w"> </span><span class="nc">Traits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ParticleTraits</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&gt;</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">ParticleMerger</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;</span>
@@ -1141,7 +1141,7 @@ The mask must therefore be registered <em>before</em> the grids are (re)built ‚Ä
 </div>
 <p>The caller provides three lambdas:</p>
 <ul class="simple">
-<li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">NonCommParticle</span></code>.</p></li>
+<li><p>A <em>gather</em> function that packs one SoA slot into a <code class="docutils literal notranslate"><span class="pre">MergeParticle</span></code>.</p></li>
 <li><p>A <em>combine</em> function that merges two adjacent intermediates in place (typically a weighted average of position and energy).</p></li>
 <li><p>A <em>scatter</em> function that unpacks one merged intermediate back into the SoA.</p></li>
 </ul>

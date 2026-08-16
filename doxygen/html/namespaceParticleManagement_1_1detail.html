@@ -191,11 +191,11 @@ Functions</h2></td></tr>
 <tr class="memitem:a6751820c6ffdb7076c350d67b04b4d39"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6751820c6ffdb7076c350d67b04b4d39">nnMergeAnyCellCrowded</a> (const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_localValid, const std::vector&lt; <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &gt; &amp;a_ghosts, const RealVect &amp;a_probLo, const RealVect &amp;a_dx, const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;a_cellBudget) noexcept</td></tr>
 <tr class="memdesc:a6751820c6ffdb7076c350d67b04b4d39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exact per-cell crowding pre-filter shared by buildNNSpatialIndex()/buildNNCellSpatialIndex(): is any cell in this patch's local+ghost particle set over its a_cellBudget?  <br /></td></tr>
 <tr class="separator:a6751820c6ffdb7076c350d67b04b4d39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fc7b40dd364f95d53d3cba126eb614b" id="r_a6fc7b40dd364f95d53d3cba126eb614b"><td class="memTemplParams" colspan="2">template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </td></tr>
+<tr class="memitem:a6fc7b40dd364f95d53d3cba126eb614b" id="r_a6fc7b40dd364f95d53d3cba126eb614b"><td class="memTemplParams" colspan="2">template&lt;class P , Real P::* weight, RealVect P::* position&gt; </td></tr>
 <tr class="memitem:a6fc7b40dd364f95d53d3cba126eb614b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b">buildEqualWeightKDLeaves</a> (const std::vector&lt; P &gt; &amp;a_particles, const int a_maxLeaves, const <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; P &gt; &amp;a_particleReconcile, std::vector&lt; std::pair&lt; const P *, const P * &gt; &gt; &amp;a_leaves) noexcept</td></tr>
 <tr class="memdesc:a6fc7b40dd364f95d53d3cba126eb614b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.  <br /></td></tr>
 <tr class="separator:a6fc7b40dd364f95d53d3cba126eb614b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bbb6d2c11766c23bb63548c63ba356b" id="r_a5bbb6d2c11766c23bb63548c63ba356b"><td class="memTemplParams" colspan="2">template&lt;class P , const RealVect &amp;(P::*)() const position&gt; </td></tr>
+<tr class="memitem:a5bbb6d2c11766c23bb63548c63ba356b" id="r_a5bbb6d2c11766c23bb63548c63ba356b"><td class="memTemplParams" colspan="2">template&lt;class P , RealVect P::* position&gt; </td></tr>
 <tr class="memitem:a5bbb6d2c11766c23bb63548c63ba356b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement_1_1detail.html#a5bbb6d2c11766c23bb63548c63ba356b">mergeAdjacentNearest</a> (std::vector&lt; P &gt; &amp;a_particles, const std::size_t a_target, const std::function&lt; void(P &amp;, const P &amp;)&gt; &amp;a_combine) noexcept</td></tr>
 <tr class="memdesc:a5bbb6d2c11766c23bb63548c63ba356b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merge an already spatially-ordered particle list down to a target count by repeatedly combining the nearest adjacent pair.  <br /></td></tr>
 <tr class="separator:a5bbb6d2c11766c23bb63548c63ba356b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,7 +234,7 @@ Functions</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() const position&gt; </div>
+template&lt;class P , Real P::* weight, RealVect P::* position&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -279,8 +279,8 @@ template&lt;class P , Real &amp;(P::*)() weight, const RealVect &amp;(P::*)() co
 <p>Build an equal-weight KD partition of a list of particles and return the leaf particle ranges. </p>
 <p>Partitions the input particles into at most <code>a_maxLeaves</code> spatial groups ("leaves") whose total weights are as equal as possible (they differ by at most one physical particle between sibling nodes). At each split the particles are partitioned along the longest bounding-box axis at the weight-median; the median particle may itself be split so the two halves balance, in which case <code>a_particleReconcile</code> fixes up the daughters' non-weight members. This is the partitioning primitive behind super-particle merging: the caller reduces each returned leaf range to a single merged particle.</p>
 <p>Implementation note: the tree is built in a flat, reusable per-thread scratch arena (two ping-ponged contiguous particle buffers + a flat range list), so there is no per-node heap allocation, no pointer chasing, and the scratch is reused across calls on the same thread.</p>
-<p>Template parameters: P -&gt; Particle type exposing the weight()/position() member functions below P::*weight -&gt; Member function returning a mutable reference to the particle weight P::*position -&gt; Member function returning a const reference to the particle position.</p>
-<p>P must be an AoS-style particle type with weight()/position() member functions (e.g. <a class="el" href="classNonCommParticle.html" title="A generic non-communicated particle class.">NonCommParticle</a>). <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> payload types (<a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>, ...) have no such methods; pack their columns into such an intermediary AoS structure first.</p>
+<p>Template parameters: P -&gt; Particle type exposing the weight/position data members below P::*weight -&gt; Pointer to the <code>Real</code> data member holding the particle weight P::*position -&gt; Pointer to the <code>RealVect</code> data member holding the particle position.</p>
+<p>P must be an AoS-style particle type carrying weight and position as data members &ndash; <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a> is the one this library provides, and the one every in-tree caller uses. <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> payload types (<a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>, ...) store those two in the container rather than the payload, so pack the columns into such an intermediary AoS structure first.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Input particles (copied into internal scratch; not modified). </td></tr>
@@ -1038,7 +1038,7 @@ template&lt;typename Packed &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class P , const RealVect &amp;(P::*)() const position&gt; </div>
+template&lt;class P , RealVect P::* position&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -1075,7 +1075,7 @@ template&lt;class P , const RealVect &amp;(P::*)() const position&gt; </div>
 </div><div class="memdoc">
 
 <p>Merge an already spatially-ordered particle list down to a target count by repeatedly combining the nearest adjacent pair. </p>
-<p>The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair (by <code>position()</code>) is combined repeatedly until <code>a_target</code> particles remain. Combining the second particle into the first is delegated to <code>a_combine</code> (the caller decides the payload semantics, e.g. a weight-weighted centroid and energy). This does NOT split, so it cannot increase the count &ndash; it is a no-op when the list already has <code>a_target</code> or fewer particles (the caller handles the split direction). Operates in place on per-thread scratch (allocation-free after warmup); on return <code>a_particles</code> holds the surviving merged particles. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair (by <code>position</code>) is combined repeatedly until <code>a_target</code> particles remain. Combining the second particle into the first is delegated to <code>a_combine</code> (the caller decides the payload semantics, e.g. a weight-weighted centroid and energy). This does NOT split, so it cannot increase the count &ndash; it is a no-op when the list already has <code>a_target</code> or fewer particles (the caller handles the split direction). Operates in place on per-thread scratch (allocation-free after warmup); on return <code>a_particles</code> holds the surviving merged particles. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Spatially-ordered particle list; overwritten with the merged result. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_target</td><td>Desired number of particles. </td></tr>

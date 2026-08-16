@@ -256,7 +256,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setVelocity</b> ()</t
 <tr class="memdesc:a6fd4186c9795fc0afece3cf3d849c559"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the mesh diffusion function on the solver.  <br /></td></tr>
 <tr class="separator:a6fd4186c9795fc0afece3cf3d849c559"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ca4b5d910f842b23cad9ebe90fe088d" id="r_a5ca4b5d910f842b23cad9ebe90fe088d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d">makeSuperParticles</a> ()</td></tr>
-<tr class="memdesc:a5ca4b5d910f842b23cad9ebe90fe088d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort particles by cell, merge to m_ppc per cell, then re-sort by patch.  <br /></td></tr>
+<tr class="memdesc:a5ca4b5d910f842b23cad9ebe90fe088d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merge to ItoSolver.particles_per_cell, checking weight conservation if asked.  <br /></td></tr>
 <tr class="separator:a5ca4b5d910f842b23cad9ebe90fe088d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae90567b471e6bacf91a289240948fc32" id="r_ae90567b471e6bacf91a289240948fc32"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ae90567b471e6bacf91a289240948fc32">computeTotalWeight</a> ()</td></tr>
 <tr class="memdesc:ae90567b471e6bacf91a289240948fc32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the global total weight of the bulk particles.  <br /></td></tr>
@@ -310,10 +310,6 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_mobility</b></td></
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_omega</b></td></tr>
 <tr class="memdesc:a93131e04dc8f59c7c109876f0b18df4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Angular velocity of the solid-body rotation advection field. <br /></td></tr>
 <tr class="separator:a93131e04dc8f59c7c109876f0b18df4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a819431715e0f36978cf6f96ad085015d" id="r_a819431715e0f36978cf6f96ad085015d"><td class="memItemLeft" align="right" valign="top"><a id="a819431715e0f36978cf6f96ad085015d" name="a819431715e0f36978cf6f96ad085015d"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ppc</b></td></tr>
-<tr class="memdesc:a819431715e0f36978cf6f96ad085015d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target number of computational particles per cell after superparticle merging. <br /></td></tr>
-<tr class="separator:a819431715e0f36978cf6f96ad085015d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a375ca67c03c4edf60258eef810b901e0" id="r_a375ca67c03c4edf60258eef810b901e0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a375ca67c03c4edf60258eef810b901e0">m_verifyConservation</a></td></tr>
 <tr class="memdesc:a375ca67c03c4edf60258eef810b901e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, verify that the superparticle merge conserves the total particle weight.  <br /></td></tr>
 <tr class="separator:a375ca67c03c4edf60258eef810b901e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -962,7 +958,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </table>
 </div><div class="memdoc">
 
-<p>Sort particles by cell, merge to m_ppc per cell, then re-sort by patch. </p>
+<p>Merge to ItoSolver.particles_per_cell, checking weight conservation if asked. </p>
 <p>If m_verifyConservation is set, the total particle weight is checked for conservation across the merge and the run is aborted if it is violated. </p>
 
 </div>
@@ -1495,7 +1491,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </div><div class="memdoc">
 
 <p>If true, verify that the superparticle merge conserves the total particle weight. </p>
-<p>When set, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d" title="Sort particles by cell, merge to m_ppc per cell, then re-sort by patch.">makeSuperParticles()</a> sums the global (MPI-reduced) particle weight before and after the merge and calls MayDay::Abort if the two differ by more than a small relative tolerance. Off by default &ndash; it costs two global reductions per merge, so it is intended for regression testing rather than production runs. </p>
+<p>When set, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5ca4b5d910f842b23cad9ebe90fe088d" title="Merge to ItoSolver.particles_per_cell, checking weight conservation if asked.">makeSuperParticles()</a> sums the global (MPI-reduced) particle weight before and after the merge and calls MayDay::Abort if the two differ by more than a small relative tolerance. Off by default &ndash; it costs two global reductions per merge, so it is intended for regression testing rather than production runs. </p>
 
 </div>
 </div>

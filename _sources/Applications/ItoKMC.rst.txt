@@ -69,7 +69,7 @@ These limits are given by the following input variables:
 
 .. literalinclude:: ../../../../Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepper.options
    :language: text
-   :lines: 21-33
+   :lines: 19-31
 
 Particle placement
 ------------------

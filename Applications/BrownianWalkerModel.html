@@ -195,7 +195,7 @@ The time step is then limited by a particle-like CFL time step condition on the 
 <section id="superparticle-handling">
 <h2>Superparticle handling<a class="headerlink" href="#superparticle-handling" title="Permalink to this heading"></a></h2>
 <p>Superparticle handling in this module occurs via <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>, so the user needs to specify the superparticle algorithm through the <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a> configuration options.
-However, the <em>number</em> of superparticles is adjusted through <code class="docutils literal notranslate"><span class="pre">BrownianWalkerStepper</span></code>, and is set through <code class="docutils literal notranslate"><span class="pre">BrownianWalker.ppc</span></code>.
+However, the <em>number</em> of superparticles is set on the solver, through <code class="docutils literal notranslate"><span class="pre">ItoSolver.particles_per_cell</span></code>.
 Setting this value to anything less than 1 will turn off super-particle handling.</p>
 </section>
 <section id="solver-configuration">
@@ -215,7 +215,6 @@ BrownianWalker.blob_center             = 0 0       ## Blob center
 BrownianWalker.seed                    = 0         ## RNG seed
 BrownianWalker.num_particles           = 100       ## Number of initial particles
 BrownianWalker.cfl                     = 1.0       ## CFL-like number.
-BrownianWalker.ppc                     = -1        ## Particles per cell. &lt;= 0 turns off superparticles
 BrownianWalker.load_balance            = true      ## Turn on/off particle load balancing
 BrownianWalker.which_balance           = mesh      ## Switch for load balancing method. Either &#39;mesh&#39; or &#39;particle&#39;.
 BrownianWalker.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight

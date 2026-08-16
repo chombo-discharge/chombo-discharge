@@ -59,7 +59,7 @@ var searchData=
   ['ellipticsolverchain_56',['EllipticSolverChain',['../namespaceEllipticSolverChain.html',1,'']]],
   ['empty_57',['empty',['../classParticleSoA.html#aafc64413c84e36e24a7a555078cd2130',1,'ParticleSoA']]],
   ['encodesuper_58',['encodeSuper',['../classTiledMeshRefine.html#a546ff4726d6d1bf24f73bc9b3531f8cb',1,'TiledMeshRefine']]],
-  ['energy_59',['energy',['../structItoMergeParticle.html#ad16887c8fef3321a571033689d7351d6',1,'ItoMergeParticle::energy'],['../structItoParticle.html#a10c881c72e0d17a27af7ad2de28392f6',1,'ItoParticle::energy']]],
+  ['energy_59',['energy',['../structItoParticle.html#a10c881c72e0d17a27af7ad2de28392f6',1,'ItoParticle::energy'],['../structItoMergeParticle.html#ad16887c8fef3321a571033689d7351d6',1,'ItoMergeParticle::energy']]],
   ['eps_60',['eps',['../structEllipticSolverChain_1_1Settings.html#a071e834d0338da79a1237ff89429996b',1,'EllipticSolverChain::Settings']]],
   ['eps0_61',['eps0',['../namespaceUnits.html#a1b05588f11c74e3846a8e62e5b29e94d',1,'Units']]],
   ['eqmember_62',['eqmember',['../CD__ParticleSoA_8H.html#a27d89d3f232c03bda24064a0ecd8408f',1,'detail::eqMember(A, B) noexcept'],['../CD__ParticleSoA_8H.html#ab1830d7fb174ff212462691f53653991',1,'detail::eqMember(A a_lhs, A a_rhs) noexcept']]],

@@ -83,21 +83,25 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Minimal particle payload for the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges &ndash; only the energy has to survive.  
+<p>Reduced Ito particle: everything an <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> carries that is not recomputed from the mesh.  
  <a href="structItoMergeParticle.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="CD__ItoMergeParticle_8H_source.html">CD_ItoMergeParticle.H</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ad16887c8fef3321a571033689d7351d6" id="r_ad16887c8fef3321a571033689d7351d6"><td class="memItemLeft" align="right" valign="top"><a id="ad16887c8fef3321a571033689d7351d6" name="ad16887c8fef3321a571033689d7351d6"></a>
 <a class="el" href="CD__ParticleSoA_8H.html#af6a88235a5f32bc8c9cc19f7cef44502">ParticleReal</a>&#160;</td><td class="memItemRight" valign="bottom"><b>energy</b> = 0.0</td></tr>
-<tr class="memdesc:ad16887c8fef3321a571033689d7351d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average particle energy &ndash; the only payload the merge carries. <br /></td></tr>
+<tr class="memdesc:ad16887c8fef3321a571033689d7351d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average particle energy &ndash; the only payload this particle carries. <br /></td></tr>
 <tr class="separator:ad16887c8fef3321a571033689d7351d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Minimal particle payload for the nn_pair_tree/nn_pair_onecell/nn_pair_hash merges &ndash; only the energy has to survive. </p>
-<p>extractIntoMergeContainer() reduces particles by weight and position, carrying a single reconciliation scalar (energy). <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>'s other columns (mobility, diffusion, velocity, ...) are recomputed from the field immediately after merging, so they need not ride the repeated, cross-rank ghost exchange. Merging on this much smaller particle &ndash; then rebuilding ItoParticles &ndash; keeps the per-round ghost fill and container churn proportional to what the merge actually needs. </p>
+<div class="textblock"><p>Reduced Ito particle: everything an <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> carries that is not recomputed from the mesh. </p>
+<p>This is <em>the</em> Ito particle representation for merging, and the holder the bulk particles ride across a regrid in. Position, weight and the particleID/rankID metadata are container-owned columns, so the payload is a single scalar &ndash; the average energy &ndash; and the whole particle is 53 B in 3-D against <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>'s 149 B.</p>
+<p>Nothing else in <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> needs to survive either operation. Its mobility, diffusion and velocity columns are interpolated from the mesh (interpolateMobilities()/interpolateDiffusion()/ interpolateVelocities()); its scratch columns are scratch; and old_x/y/z is rewritten wholesale at the top of every time step (ItoKMCGodunovStepper::setOldPositions()) and read back inside the same advance, so no regrid can land between the write and the read. The energy is the one genuine state candidate &ndash; it is read on a live path, <a class="el" href="classItoSolver.html#a06df3eb32ebb71b1858298b2b0d7dd0b" title="Interpolate mobilities.">ItoSolver::interpolateMobilities()</a> feeding ItoSpecies::mobility(Real) &ndash; so it is carried, and dropping the rest is lossless.</p>
+<dl class="section warning"><dt>Warning</dt><dd>The old_x/y/z argument above expires the day anything writes those columns outside ItoKMCGodunovStepper::advance(); ItoKMCStepper::computeEdotJSource() reads them and would be such a caller if it were ever wired up (it has no callers anywhere in the tree today). </dd></dl>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
-<li>Source/ItoDiffusion/<a class="el" href="CD__ItoSolver_8cpp.html">CD_ItoSolver.cpp</a></li>
+<li>Source/ItoDiffusion/<a class="el" href="CD__ItoMergeParticle_8H_source.html">CD_ItoMergeParticle.H</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

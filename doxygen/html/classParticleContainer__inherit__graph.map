@@ -1,7 +1,9 @@
 <map id="ParticleContainer&lt; P, Traits &gt;" name="ParticleContainer&lt; P, Traits &gt;">
-<area shape="rect" id="Node000001" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="96,5,240,45"/>
-<area shape="rect" id="Node000002" href="$classParticleContainer.html" title=" " alt="" coords="5,108,149,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,57,96,110,92,106,140,54"/>
-<area shape="rect" id="Node000003" href="$classParticleContainer.html" title=" " alt="" coords="173,115,344,141"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,53,217,68,253,114,249,117,213,71,198,57"/>
+<area shape="rect" id="Node000001" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="5,69,149,109"/>
+<area shape="rect" id="Node000002" href="$classParticleContainer.html" title=" " alt="" coords="351,5,497,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,69,173,67,350,35,351,40,174,72,163,74"/>
+<area shape="rect" id="Node000003" href="$classParticleContainer.html" title=" " alt="" coords="352,69,496,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,87,352,87,352,92,163,92"/>
+<area shape="rect" id="Node000004" href="$classParticleContainer.html" title=" " alt="" coords="339,134,509,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="163,105,174,107,339,133,338,138,173,112,162,110"/>
 </map>

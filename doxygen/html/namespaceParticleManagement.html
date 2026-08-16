@@ -184,11 +184,11 @@ Functions</h2></td></tr>
 <tr class="memitem:ace7541e61134b0af1e86e6e0e2a260b9" id="r_ace7541e61134b0af1e86e6e0e2a260b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleMergeMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ace7541e61134b0af1e86e6e0e2a260b9">mergeMethodFromString</a> (const std::string &amp;a_str) noexcept</td></tr>
 <tr class="memdesc:ace7541e61134b0af1e86e6e0e2a260b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map a merge-algorithm selector string to a ParticleMergeMethod.  <br /></td></tr>
 <tr class="separator:ace7541e61134b0af1e86e6e0e2a260b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0" id="r_a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplParams" colspan="2">template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &amp;(Packed::*)() const packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0" id="r_a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplParams" colspan="2">template&lt;class Packed , Real Packed::* packWeight, RealVect Packed::* packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </td></tr>
 <tr class="memitem:a6ed160136e38c95de7c4ddd1831606f0"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; P, Traits &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a6ed160136e38c95de7c4ddd1831606f0">makeSfcNearestNeighborMerger</a> (std::function&lt; Packed(const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;, std::size_t)&gt; a_gather, std::function&lt; void(Packed &amp;, const Packed &amp;)&gt; a_combine, std::function&lt; void(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;, const Packed &amp;)&gt; a_scatter) noexcept</td></tr>
 <tr class="memdesc:a6ed160136e38c95de7c4ddd1831606f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
 <tr class="separator:a6ed160136e38c95de7c4ddd1831606f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad67e840020de9b17223682bf08f13637" id="r_ad67e840020de9b17223682bf08f13637"><td class="memTemplParams" colspan="2">template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &amp;(Packed::*)() const packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </td></tr>
+<tr class="memitem:ad67e840020de9b17223682bf08f13637" id="r_ad67e840020de9b17223682bf08f13637"><td class="memTemplParams" colspan="2">template&lt;class Packed , Real Packed::* packWeight, RealVect Packed::* packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </td></tr>
 <tr class="memitem:ad67e840020de9b17223682bf08f13637"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleMerger</a>&lt; P, Traits &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ad67e840020de9b17223682bf08f13637">makeEqualWeightKDMerger</a> (std::function&lt; Packed(const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;, std::size_t)&gt; a_gather, <a class="el" href="namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f">BinaryParticleReconcile</a>&lt; Packed &gt; a_reconcile, std::function&lt; void(<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;, const Packed *, const Packed *, const <a class="el" href="classCellInfo.html">CellInfo</a> &amp;)&gt; a_scatterLeaf) noexcept</td></tr>
 <tr class="memdesc:ad67e840020de9b17223682bf08f13637"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.  <br /></td></tr>
 <tr class="separator:ad67e840020de9b17223682bf08f13637"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -775,7 +775,7 @@ template&lt;typename P , typename Traits , typename T , typename &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &amp;(Packed::*)() const packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;class Packed , Real Packed::* packWeight, RealVect Packed::* packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -823,9 +823,9 @@ template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &a
 <p>Thread-local scratch vectors are reused across cells — no per-cell heap allocation after warmup.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Packed</td><td>Lightweight AoS intermediate type (e.g. NonCommParticle&lt;M,N&gt;). Must be copyable. </td></tr>
-    <tr><td class="paramname">packWeight</td><td>Member-function pointer <code>Real&amp; (Packed::*)()</code> giving mutable access to the weight. Forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b" title="Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.">detail::buildEqualWeightKDLeaves</a> for median splitting. </td></tr>
-    <tr><td class="paramname">packPosition</td><td>Member-function pointer <code>const RealVect&amp; (Packed::*)() const</code> giving the position. Forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b" title="Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.">detail::buildEqualWeightKDLeaves</a> for bounding-box splitting. </td></tr>
+    <tr><td class="paramname">Packed</td><td>Lightweight AoS intermediate type (e.g. MergeParticle&lt;Packed&gt;). Must be copyable. </td></tr>
+    <tr><td class="paramname">packWeight</td><td>Member-data pointer <code>Real Packed::*</code> naming the weight. Forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b" title="Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.">detail::buildEqualWeightKDLeaves</a> for median splitting. </td></tr>
+    <tr><td class="paramname">packPosition</td><td>Member-data pointer <code>RealVect Packed::*</code> naming the position. Forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b" title="Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.">detail::buildEqualWeightKDLeaves</a> for bounding-box splitting. </td></tr>
     <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor for <code>P</code> (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
   </table>
@@ -839,7 +839,7 @@ template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &a
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in e.g. <a class="el" href="classItoSolver.html#a7c80c3e30864bfc1d12f0b7e9173cec4" title="User-supplied per-cell merger for merge_algorithm = external (set via setParticleCellMerger())....">ItoSolver::m_particleCellMerger</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in e.g. <a class="el" href="classItoSolver.html#ac02a2f6305247faccb86187a701d7d1a" title="User-supplied per-cell merger for merge_algorithm = external (set via setParticleCellMerger())....">ItoSolver::m_particleCellMerger</a>. </dd></dl>
 
 </div>
 </div>
@@ -910,7 +910,7 @@ template&lt;class Context , class P , class Traits  = ParticleTraits&lt;P&gt;&gt
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in e.g. <a class="el" href="classItoSolver.html#a7c80c3e30864bfc1d12f0b7e9173cec4" title="User-supplied per-cell merger for merge_algorithm = external (set via setParticleCellMerger())....">ItoSolver::m_particleCellMerger</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in e.g. <a class="el" href="classItoSolver.html#ac02a2f6305247faccb86187a701d7d1a" title="User-supplied per-cell merger for merge_algorithm = external (set via setParticleCellMerger())....">ItoSolver::m_particleCellMerger</a>. </dd></dl>
 
 </div>
 </div>
@@ -920,7 +920,7 @@ template&lt;class Context , class P , class Traits  = ParticleTraits&lt;P&gt;&gt
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &amp;(Packed::*)() const packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+template&lt;class Packed , Real Packed::* packWeight, RealVect Packed::* packPosition, class P , class Traits  = ParticleTraits&lt;P&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -971,9 +971,9 @@ template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &a
 <p>Implementation note: thread-local scratch vectors are reused across cells so there is no per-cell heap allocation after the first call on a given thread.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Packed</td><td>Lightweight AoS intermediate type (e.g. NonCommParticle&lt;M,N&gt;). Must be copyable. </td></tr>
-    <tr><td class="paramname">packWeight</td><td>Member-function pointer <code>Real&amp; (Packed::*)()</code> giving mutable access to the weight. Used only for the split path. </td></tr>
-    <tr><td class="paramname">packPosition</td><td>Member-function pointer <code>const RealVect&amp; (Packed::*)() const</code> giving the position. Used for Hilbert-key computation and forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a5bbb6d2c11766c23bb63548c63ba356b" title="Merge an already spatially-ordered particle list down to a target count by repeatedly combining the n...">detail::mergeAdjacentNearest</a>. </td></tr>
+    <tr><td class="paramname">Packed</td><td>Lightweight AoS intermediate type (e.g. MergeParticle&lt;Packed&gt;). Must be copyable. </td></tr>
+    <tr><td class="paramname">packWeight</td><td>Member-data pointer <code>Real Packed::*</code> naming the weight. Used only for the split path. </td></tr>
+    <tr><td class="paramname">packPosition</td><td>Member-data pointer <code>RealVect Packed::*</code> naming the position. Used for Hilbert-key computation and forwarded to <a class="el" href="namespaceParticleManagement_1_1detail.html#a5bbb6d2c11766c23bb63548c63ba356b" title="Merge an already spatially-ordered particle list down to a target count by repeatedly combining the n...">detail::mergeAdjacentNearest</a>. </td></tr>
     <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
     <tr><td class="paramname">Traits</td><td>Column descriptor for <code>P</code> (defaults to <a class="el" href="structParticleTraits.html" title="Traits class that a user specializes to describe the PAYLOAD columns of a particle type....">ParticleTraits</a></td></tr>
   </table>
@@ -987,7 +987,7 @@ template&lt;class Packed , Real &amp;(Packed::*)() packWeight, const RealVect &a
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in e.g. <a class="el" href="classItoSolver.html#a7c80c3e30864bfc1d12f0b7e9173cec4" title="User-supplied per-cell merger for merge_algorithm = external (set via setParticleCellMerger())....">ItoSolver::m_particleCellMerger</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A ParticleMerger&lt;P, Traits&gt; ready to be stored in e.g. <a class="el" href="classItoSolver.html#ac02a2f6305247faccb86187a701d7d1a" title="User-supplied per-cell merger for merge_algorithm = external (set via setParticleCellMerger())....">ItoSolver::m_particleCellMerger</a>. </dd></dl>
 
 </div>
 </div>

@@ -549,7 +549,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRedistri
 <tr class="memdesc:a52ccbfb26c477f45dccee82e01c67a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse CDR mass redistribution when assigning reactive products. <br /></td></tr>
 <tr class="separator:a52ccbfb26c477f45dccee82e01c67a68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48af9427bef887295ae18eb23aaee3fd" id="r_a48af9427bef887295ae18eb23aaee3fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a48af9427bef887295ae18eb23aaee3fd">parseSuperParticles</a> () noexcept</td></tr>
-<tr class="memdesc:a48af9427bef887295ae18eb23aaee3fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the desired number of particles per cell.  <br /></td></tr>
+<tr class="memdesc:a48af9427bef887295ae18eb23aaee3fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the super-particle merge cadence.  <br /></td></tr>
 <tr class="separator:a48af9427bef887295ae18eb23aaee3fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7824f74638a163e2ee8a27a9217fafac" id="r_a7824f74638a163e2ee8a27a9217fafac"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7824f74638a163e2ee8a27a9217fafac">parseDualGrid</a> () noexcept</td></tr>
 <tr class="memdesc:a7824f74638a163e2ee8a27a9217fafac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse dual or single realm calculations.  <br /></td></tr>
@@ -654,9 +654,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_dualGrid</b></td></
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></tr>
 <tr class="memdesc:a1ca218ff1d6f707572816653fa225078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile kernels or not. <br /></td></tr>
 <tr class="separator:a1ca218ff1d6f707572816653fa225078"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4e9a561348aae7416e1c12838207d85" id="r_aa4e9a561348aae7416e1c12838207d85"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aa4e9a561348aae7416e1c12838207d85">m_regridMergeMethod</a></td></tr>
-<tr class="memdesc:aa4e9a561348aae7416e1c12838207d85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Super-particle merge method used on regrids.  <br /></td></tr>
-<tr class="separator:aa4e9a561348aae7416e1c12838207d85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0015cd4cc2ea3f82b54c90085b84a1e" id="r_af0015cd4cc2ea3f82b54c90085b84a1e"><td class="memItemLeft" align="right" valign="top"><a id="af0015cd4cc2ea3f82b54c90085b84a1e" name="af0015cd4cc2ea3f82b54c90085b84a1e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_loadBalanceParticles</b></td></tr>
 <tr class="memdesc:af0015cd4cc2ea3f82b54c90085b84a1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance particle realm or not. <br /></td></tr>
@@ -677,10 +674,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotCurrentDensity<
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotParticlesPerPatch</b></td></tr>
 <tr class="memdesc:aa52b65319ec3653b04b9c0373ae78b24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot number of particles per patch or not. <br /></td></tr>
 <tr class="separator:aa52b65319ec3653b04b9c0373ae78b24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a555b9b38aef39bb8c14dd50eeff96c3a" id="r_a555b9b38aef39bb8c14dd50eeff96c3a"><td class="memItemLeft" align="right" valign="top"><a id="a555b9b38aef39bb8c14dd50eeff96c3a" name="a555b9b38aef39bb8c14dd50eeff96c3a"></a>
-Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_particlesPerCell</b></td></tr>
-<tr class="memdesc:a555b9b38aef39bb8c14dd50eeff96c3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target number of particles per cell when squishing <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>'s into superparticles. <br /></td></tr>
-<tr class="separator:a555b9b38aef39bb8c14dd50eeff96c3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a766c1a0a4738c47e34752b7dc284819d" id="r_a766c1a0a4738c47e34752b7dc284819d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a766c1a0a4738c47e34752b7dc284819d">m_mergeInterval</a></td></tr>
 <tr class="memdesc:a766c1a0a4738c47e34752b7dc284819d"><td class="mdescLeft">&#160;</td><td class="mdescRight">How often to merge superparticles.  <br /></td></tr>
 <tr class="separator:a766c1a0a4738c47e34752b7dc284819d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4149,8 +4142,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Parse the desired number of particles per cell. </p>
-<p>Sets m_particlesPerCell from input script. </p>
+<p>Parse the super-particle merge cadence. </p>
+<p>Sets m_mergeInterval from the input script. The merge <em>target</em> and the regrid-time merge method belong to the solver (ItoSolver.particles_per_cell / ItoSolver.regrid_superparticles); only the per-step cadence is the stepper's, because only the stepper has an advance to pace. </p>
 
 </div>
 </div>
@@ -6623,33 +6616,6 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 <p>Phase where we solve for the plasma. </p>
 <dl class="section note"><dt>Note</dt><dd>This is hardcoded to <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108bad0a7c1eb8fd916c8b7ec85be0fd23b38" title="Gas phase.">phase::gas</a> </dd></dl>
-
-</div>
-</div>
-<a id="aa4e9a561348aae7416e1c12838207d85" name="aa4e9a561348aae7416e1c12838207d85"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa4e9a561348aae7416e1c12838207d85">&#9670;&#160;</a></span>m_regridMergeMethod</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::optional&lt;<a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a>&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_regridMergeMethod</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Super-particle merge method used on regrids. </p>
-<p>Set from ItoKMCGodunovStepper.regrid_superparticles, mirroring the ItoSolver.merge_algorithm selectors plus a 'solver' value. std::nullopt means "solver" &ndash; defer to whatever each <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> has configured; a value means run that specific method (ParticleMergeMethod::None turns the regrid merge off). Lets the regrid-time merge use a different (e.g. cheaper) method than the per-step merge. </p>
 
 </div>
 </div>

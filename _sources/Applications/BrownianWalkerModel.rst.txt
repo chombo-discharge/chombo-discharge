@@ -60,7 +60,7 @@ Superparticle handling
 ----------------------
 
 Superparticle handling in this module occurs via :ref:`Chap:ItoSolver`, so the user needs to specify the superparticle algorithm through the :ref:`Chap:ItoSolver` configuration options.
-However, the *number* of superparticles is adjusted through ``BrownianWalkerStepper``, and is set through ``BrownianWalker.ppc``.
+However, the *number* of superparticles is set on the solver, through ``ItoSolver.particles_per_cell``.
 Setting this value to anything less than 1 will turn off super-particle handling.
 
 .. _Chap:BrownianWalkerConfiguration:

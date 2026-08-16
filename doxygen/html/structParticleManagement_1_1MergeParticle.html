@@ -95,19 +95,18 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a4c21dcdf72c54c9bf5c369f0e44333be" id="r_a4c21dcdf72c54c9bf5c369f0e44333be"><td class="memItemLeft" align="right" valign="top"><a id="a4c21dcdf72c54c9bf5c369f0e44333be" name="a4c21dcdf72c54c9bf5c369f0e44333be"></a>
-RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>position</b></td></tr>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><b>position</b> = RealVect::Zero</td></tr>
 <tr class="memdesc:a4c21dcdf72c54c9bf5c369f0e44333be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle position. <br /></td></tr>
 <tr class="separator:a4c21dcdf72c54c9bf5c369f0e44333be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba2d61858cf34d33529f61a5f0248e3d" id="r_aba2d61858cf34d33529f61a5f0248e3d"><td class="memItemLeft" align="right" valign="top"><a id="aba2d61858cf34d33529f61a5f0248e3d" name="aba2d61858cf34d33529f61a5f0248e3d"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><b>weight</b></td></tr>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>weight</b> = 0.0</td></tr>
 <tr class="memdesc:aba2d61858cf34d33529f61a5f0248e3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle weight. Not required to be an integer. <br /></td></tr>
 <tr class="separator:aba2d61858cf34d33529f61a5f0248e3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accc829ccbbc389184c5131a35c9e90de" id="r_accc829ccbbc389184c5131a35c9e90de"><td class="memItemLeft" align="right" valign="top"><a id="accc829ccbbc389184c5131a35c9e90de" name="accc829ccbbc389184c5131a35c9e90de"></a>
-<a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>&#160;</td><td class="memItemRight" valign="bottom"><b>globalID</b></td></tr>
-<tr class="memdesc:accc829ccbbc389184c5131a35c9e90de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Globally unique particle id, unique within one merge round across every rank. <br /></td></tr>
+<tr class="memitem:accc829ccbbc389184c5131a35c9e90de" id="r_accc829ccbbc389184c5131a35c9e90de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structParticleManagement_1_1MergeParticle.html#accc829ccbbc389184c5131a35c9e90de">globalID</a> = -1</td></tr>
+<tr class="memdesc:accc829ccbbc389184c5131a35c9e90de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Globally unique particle id, unique within one merge round across every rank.  <br /></td></tr>
 <tr class="separator:accc829ccbbc389184c5131a35c9e90de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc9c356744543d7a91c0694238993c25" id="r_adc9c356744543d7a91c0694238993c25"><td class="memItemLeft" align="right" valign="top"><a id="adc9c356744543d7a91c0694238993c25" name="adc9c356744543d7a91c0694238993c25"></a>
-<a class="el" href="CD__ParticleSoA_8H.html#aaf5265ab33d0f725606c3795f981e7b6">RankID</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ownerRank</b></td></tr>
+<a class="el" href="CD__ParticleSoA_8H.html#aaf5265ab33d0f725606c3795f981e7b6">RankID</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ownerRank</b> = -1</td></tr>
 <tr class="memdesc:adc9c356744543d7a91c0694238993c25"><td class="mdescLeft">&#160;</td><td class="mdescRight">The rank owning this particle. Always read from the particle's own data, never inferred from MPI transport metadata. <br /></td></tr>
 <tr class="separator:adc9c356744543d7a91c0694238993c25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a150f29f483a018aea7d3e05e7c94cec4" id="r_a150f29f483a018aea7d3e05e7c94cec4"><td class="memItemLeft" align="right" valign="top"><a id="a150f29f483a018aea7d3e05e7c94cec4" name="a150f29f483a018aea7d3e05e7c94cec4"></a>
@@ -133,7 +132,27 @@ struct ParticleManagement::MergeParticle&lt; Packed &gt;</div><p>Minimal, payloa
   </table>
   </dd>
 </dl>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="accc829ccbbc389184c5131a35c9e90de" name="accc829ccbbc389184c5131a35c9e90de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accc829ccbbc389184c5131a35c9e90de">&#9670;&#160;</a></span>globalID</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Packed &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CD__ParticleSoA_8H.html#afec4fd5f60cd0dd55574084c6276a49e">ParticleID</a> <a class="el" href="structParticleManagement_1_1MergeParticle.html">ParticleManagement::MergeParticle</a>&lt; Packed &gt;::globalID = -1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Globally unique particle id, unique within one merge round across every rank. </p>
+<p>Defaults to -1, matching <a class="el" href="classParticleSoA.html#aaeea9c9d0dcec5322e4c45be2370a378" title="Sentinel for an unassigned/invalid global particle id.">ParticleSoA::s_invalidID</a> (not spelled as that constant, which is a member of a <a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a> instantiation this payload-agnostic struct has no business naming). The default matters because the cell-based mergers have no id fields to fill: without it the KD leaf builder would copy indeterminate values between daughters. </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>Source/Particle/<a class="el" href="CD__ParticleManagement_8H_source.html">CD_ParticleManagement.H</a></li>
 </ul>
 </div><!-- contents -->
