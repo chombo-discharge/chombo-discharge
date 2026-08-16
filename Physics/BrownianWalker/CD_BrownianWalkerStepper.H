@@ -311,11 +311,6 @@ protected:
   Real m_omega;
 
   /**
-   * @brief Target number of computational particles per cell after superparticle merging.
-   */
-  int m_ppc;
-
-  /**
    * @brief If true, verify that the superparticle merge conserves the total particle weight.
    * @details When set, makeSuperParticles() sums the global (MPI-reduced) particle weight before
    * and after the merge and calls MayDay::Abort if the two differ by more than a small relative
@@ -349,7 +344,7 @@ protected:
   setDiffusion();
 
   /**
-   * @brief Sort particles by cell, merge to m_ppc per cell, then re-sort by patch.
+   * @brief Merge to ItoSolver.particles_per_cell, checking weight conservation if asked.
    * @details If m_verifyConservation is set, the total particle weight is checked for
    * conservation across the merge and the run is aborted if it is violated.
    */

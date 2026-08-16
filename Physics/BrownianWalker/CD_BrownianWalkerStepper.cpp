@@ -37,7 +37,6 @@ BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
   pp.get("mobility", m_mobility);
   pp.get("omega", m_omega);
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
   pp.get("which_balance", str);
@@ -77,7 +76,6 @@ BrownianWalkerStepper::parseRuntimeOptions()
   ParmParse pp("BrownianWalker");
 
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
 
@@ -383,6 +381,9 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   // clang-format on
   m_amr->allocate(m_regridPPC, m_realm, m_phase, 1);
 
+  // ORDERING: this deposit must stay ahead of m_solver->preRegrid() below. That call moves the bulk
+  // particles into the solver's reduced regrid holder and leaves the ItoParticle container empty, so
+  // depositing afterwards would deposit nothing and loadBalanceBoxesMesh() would balance on zeros.
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
   m_solver->depositWeight(m_regridPPC,
                           m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
@@ -549,11 +550,10 @@ BrownianWalkerStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
     pout() << "BrownianWalkerStepper::regrid" << endl;
   }
 
-  // Solver regrids.
+  // Solver regrids. The super-particle merge happens inside that call now (see
+  // ItoSolver.regrid_superparticles), on the reduced particles and before they are rebuilt as
+  // ItoParticles -- merging again here would just re-merge an already-merged population.
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  // Make superparticles
-  this->makeSuperParticles();
 }
 
 void
@@ -585,7 +585,7 @@ BrownianWalkerStepper::makeSuperParticles()
     pout() << "BrownianWalkerStepper::makeSuperParticles" << endl;
   }
 
-  if (m_ppc > 0) {
+  if (m_solver->getParticlesPerCell()[0] > 0) {
     // A merge redistributes weight but must never create or destroy it. When requested, compute the
     // total particle weight on the container before and after the merge -- independent of the merge
     // scheme and of how the container is organized -- and abort if it drifts by more than round-off.
@@ -593,7 +593,7 @@ BrownianWalkerStepper::makeSuperParticles()
     // patch-organized.)
     const Real weightBefore = m_verifyConservation ? this->computeTotalWeight() : 0.0;
 
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
 
     if (m_verifyConservation) {
       const Real weightAfter = this->computeTotalWeight();
@@ -747,11 +747,16 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
       // later run with superparticle merging/splitting.
       Real sum = 0.0;
 
-      // We will have at most m_ppc particles per grid cell. This kernel does that.
+      // We will have at most this many particles per grid cell after the merge. This kernel does that.
+      // The target is the solver's (ItoSolver.particles_per_cell), read with the same per-level clamp
+      // the merge itself uses -- this loop is already per level, so a per-level target is honoured.
+      const Vector<int>& ppcPerLevel = m_solver->getParticlesPerCell();
+      const int          ppc         = (lvl < ppcPerLevel.size()) ? ppcPerLevel[lvl] : ppcPerLevel.back();
+
       auto kernel = [&](const IntVect& iv) -> void {
         if (!ebisBox.isCovered(iv)) {
           const Real numPhysParticles = std::abs(ppcFAB(iv, comp) * dV);
-          const Real numCompParticles = std::min(numPhysParticles, Real(m_ppc));
+          const Real numCompParticles = std::min(numPhysParticles, Real(ppc));
 
           sum += numCompParticles;
         }
@@ -799,7 +804,12 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   //       than the other one when the number of particles is large.
   // clang-format on
 
-  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  // The bulk ItoParticle container is EMPTY at this point -- Driver::regrid() calls loadBalanceBoxes()
+  // between the solver's preRegrid() and regrid(), and preRegrid() moved the particles into the
+  // solver's reduced regrid holder. Count that instead. Reading getParticles(Bulk) here would produce
+  // an all-zero load vector, which LoadBalancing happily turns into a valid, completely unbalanced
+  // layout with nothing to indicate that anything went wrong.
+  ParticleContainer<ItoMergeParticle>& particles = m_solver->getRegridParticles();
 
   // Regrid the particles onto the new mesh (SoA regrid rebuilds over the new layout from the preRegrid cache).
   // a_grids are the proxy grids (m_amr->getProxyGrids()) on which the Realm built its tile->box maps
@@ -881,6 +891,10 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int 
 
   loads.resize(boxArray.size(), 0L);
 
+  // ORDERING: safe only because every caller runs outside the preRegrid()->regrid() window, where the
+  // bulk container is empty. Driver reaches this through writeLoads() when writing a checkpoint, a plot
+  // file, or the pre-regrid file -- and the pre-regrid file is written before Driver::regrid() is
+  // entered at all, hence before preRegrid(). Anything that moves it inside that window reads zeros.
   const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   const int nbox = dit.size();

@@ -208,6 +208,15 @@ ItoLayout<T>::organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichCo
 
 template <class T>
 void
+ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer)
+{
+  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
+    iter()->makeSuperparticles(a_whichContainer);
+  }
+}
+
+template <class T>
+void
 ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const int a_ppc)
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {

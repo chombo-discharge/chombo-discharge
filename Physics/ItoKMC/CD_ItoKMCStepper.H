@@ -468,16 +468,6 @@ protected:
   bool m_profile;
 
   /**
-   * @brief Super-particle merge method used on regrids.
-   * @details Set from ItoKMCGodunovStepper.regrid_superparticles, mirroring the
-   * ItoSolver.merge_algorithm selectors plus a 'solver' value. std::nullopt means "solver" -- defer
-   * to whatever each ItoSolver has configured; a value means run that specific method
-   * (ParticleMergeMethod::None turns the regrid merge off). Lets the regrid-time merge use a different
-   * (e.g. cheaper) method than the per-step merge.
-   */
-  std::optional<ParticleManagement::ParticleMergeMethod> m_regridMergeMethod;
-
-  /**
    * @brief Load balance particle realm or not
    */
   bool m_loadBalanceParticles;
@@ -501,11 +491,6 @@ protected:
    * @brief Plot number of particles per patch or not
    */
   bool m_plotParticlesPerPatch;
-
-  /**
-   * @brief Target number of particles per cell when squishing ItoParticle's into superparticles
-   */
-  Vector<int> m_particlesPerCell;
 
   /**
    * @brief How often to merge superparticles
@@ -1787,8 +1772,10 @@ protected:
   parseRedistributeCDR() noexcept;
 
   /**
-   * @brief Parse the desired number of particles per cell.
-   * @details Sets m_particlesPerCell from input script.
+   * @brief Parse the super-particle merge cadence.
+   * @details Sets m_mergeInterval from the input script. The merge *target* and the regrid-time merge
+   * method belong to the solver (ItoSolver.particles_per_cell / ItoSolver.regrid_superparticles); only
+   * the per-step cadence is the stepper's, because only the stepper has an advance to pace.
    */
   virtual void
   parseSuperParticles() noexcept;

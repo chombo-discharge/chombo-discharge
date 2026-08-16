@@ -115,13 +115,14 @@ namespace detail {
  * chasing, and the scratch is reused across calls on the same thread.
  *
  * Template parameters:
- *    P            -> Particle type exposing the weight()/position() member functions below
- *    P::*weight   -> Member function returning a mutable reference to the particle weight
- *    P::*position -> Member function returning a const reference to the particle position.
+ *    P            -> Particle type exposing the weight/position data members below
+ *    P::*weight   -> Pointer to the @c Real data member holding the particle weight
+ *    P::*position -> Pointer to the @c RealVect data member holding the particle position.
  *
- * P must be an AoS-style particle type with weight()/position() member functions (e.g. NonCommParticle).
- * ParticleSoA payload types (ItoParticle, ...) have no such methods; pack their columns into such an
- * intermediary AoS structure first.
+ * P must be an AoS-style particle type carrying weight and position as data members -- MergeParticle is
+ * the one this library provides, and the one every in-tree caller uses. ParticleSoA payload types
+ * (ItoParticle, ...) store those two in the container rather than the payload, so pack the columns into
+ * such an intermediary AoS structure first.
  *
  * @param[in]  a_particles         Input particles (copied into internal scratch; not modified).
  * @param[in]  a_maxLeaves         Maximum number of leaf nodes (the per-cell target particle count).
@@ -130,7 +131,7 @@ namespace detail {
  * @warning The returned ranges alias an internal thread-local buffer that is overwritten on the next call to
  *          this function on the same thread. Consume them (reduce each leaf) before calling again.
  */
-template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+template <class P, Real P::*weight, RealVect P::*position>
 inline void
 buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
                          const int                                   a_maxLeaves,
@@ -142,7 +143,7 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
  * the nearest adjacent pair.
  * @details The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling
  * curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair
- * (by @c position()) is combined repeatedly until @c a_target particles remain. Combining the second
+ * (by @c position) is combined repeatedly until @c a_target particles remain. Combining the second
  * particle into the first is delegated to @c a_combine (the caller decides the payload semantics, e.g. a
  * weight-weighted centroid and energy). This does NOT split, so it cannot increase the count -- it is a
  * no-op when the list already has @c a_target or fewer particles (the caller handles the split direction).
@@ -152,7 +153,7 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
  * @param[in]     a_target    Desired number of particles.
  * @param[in]     a_combine   Callback that combines the second particle into the first.
  */
-template <class P, const RealVect& (P::*position)() const>
+template <class P, RealVect P::*position>
 inline void
 mergeAdjacentNearest(std::vector<P>&                          a_particles,
                      const std::size_t                        a_target,
@@ -183,11 +184,10 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
  * Implementation note: thread-local scratch vectors are reused across cells so there is no per-cell heap
  * allocation after the first call on a given thread.
  *
- * @tparam Packed      Lightweight AoS intermediate type (e.g. NonCommParticle<M,N>). Must be copyable.
- * @tparam packWeight  Member-function pointer `Real& (Packed::*)()` giving mutable access to the weight.
- *                     Used only for the split path.
- * @tparam packPosition Member-function pointer `const RealVect& (Packed::*)() const` giving the position.
- *                     Used for Hilbert-key computation and forwarded to detail::mergeAdjacentNearest.
+ * @tparam Packed      Lightweight AoS intermediate type (e.g. MergeParticle<Packed>). Must be copyable.
+ * @tparam packWeight  Member-data pointer `Real Packed::*` naming the weight. Used only for the split path.
+ * @tparam packPosition Member-data pointer `RealVect Packed::*` naming the position. Used for Hilbert-key
+ *                     computation and forwarded to detail::mergeAdjacentNearest.
  * @tparam P           SoA payload type.
  * @tparam Traits      Column descriptor for @c P (defaults to ParticleTraits<P>).
  * @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
@@ -196,8 +196,8 @@ mergeAdjacentNearest(std::vector<P>&                          a_particles,
  * @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
  */
 template <class Packed,
-          Real& (Packed::*packWeight)(),
-          const RealVect& (Packed::*packPosition)() const,
+          Real Packed::*packWeight,
+          RealVect Packed::*packPosition,
           class P,
           class Traits = ParticleTraits<P>>
 inline ParticleMerger<P, Traits>
@@ -225,11 +225,11 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  *
  * Thread-local scratch vectors are reused across cells — no per-cell heap allocation after warmup.
  *
- * @tparam Packed       Lightweight AoS intermediate type (e.g. NonCommParticle<M,N>). Must be copyable.
- * @tparam packWeight   Member-function pointer `Real& (Packed::*)()` giving mutable access to the weight.
- *                      Forwarded to detail::buildEqualWeightKDLeaves for median splitting.
- * @tparam packPosition Member-function pointer `const RealVect& (Packed::*)() const` giving the position.
- *                      Forwarded to detail::buildEqualWeightKDLeaves for bounding-box splitting.
+ * @tparam Packed       Lightweight AoS intermediate type (e.g. MergeParticle<Packed>). Must be copyable.
+ * @tparam packWeight   Member-data pointer `Real Packed::*` naming the weight. Forwarded to
+ *                      detail::buildEqualWeightKDLeaves for median splitting.
+ * @tparam packPosition Member-data pointer `RealVect Packed::*` naming the position. Forwarded to
+ *                      detail::buildEqualWeightKDLeaves for bounding-box splitting.
  * @tparam P            SoA payload type.
  * @tparam Traits       Column descriptor for @c P (defaults to ParticleTraits<P>).
  * @param[in] a_gather      Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
@@ -240,8 +240,8 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  * @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
  */
 template <class Packed,
-          Real& (Packed::*packWeight)(),
-          const RealVect& (Packed::*packPosition)() const,
+          Real Packed::*packWeight,
+          RealVect Packed::*packPosition,
           class P,
           class Traits = ParticleTraits<P>>
 inline ParticleMerger<P, Traits>
@@ -431,23 +431,27 @@ struct MergeParticle
   /**
    * @brief Particle position.
    */
-  RealVect position;
+  RealVect position = RealVect::Zero;
 
   /**
    * @brief Particle weight. Not required to be an integer.
    */
-  Real weight;
+  Real weight = 0.0;
 
   /**
    * @brief Globally unique particle id, unique within one merge round across every rank.
+   * @details Defaults to -1, matching ParticleSoA::s_invalidID (not spelled as that constant, which is
+   * a member of a ParticleSoA instantiation this payload-agnostic struct has no business naming). The
+   * default matters because the cell-based mergers have no id fields to fill: without it the KD leaf
+   * builder would copy indeterminate values between daughters.
    */
-  ParticleID globalID;
+  ParticleID globalID = -1;
 
   /**
    * @brief The rank owning this particle. Always read from the particle's own data, never inferred
    * from MPI transport metadata.
    */
-  RankID ownerRank;
+  RankID ownerRank = -1;
 
   /**
    * @brief True iff this is a ghost copy in the patch currently holding it, i.e. not physically

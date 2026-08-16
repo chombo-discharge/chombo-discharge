@@ -545,7 +545,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->barrier();
   m_timer.startEvent("Make superparticles");
   if (this->m_mergeInterval > 0 && (this->m_timeStep + 1) % this->m_mergeInterval == 0) {
-    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, this->m_particlesPerCell);
+    (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
   }
   m_timer.stopEvent("Make superparticles");
 
@@ -758,26 +758,18 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   }
   m_timer.stopEvent("Solve Poisson");
 
-  // Regrid super-particle merge. m_regridMergeMethod: nullopt => "solver", each solver uses its own
-  // configured merge_algorithm; a value => that specific method (ParticleMergeMethod::None => off).
-  // makeSuperparticles() cell-sorts internally as needed and returns the containers patch-organized.
-  const bool useSolverMethod = !this->m_regridMergeMethod.has_value();
-  const bool mergeIsOff      = this->m_regridMergeMethod.has_value() &&
-                          this->m_regridMergeMethod.value() == ParticleManagement::ParticleMergeMethod::None;
-
-  if (!mergeIsOff) {
-    m_timer.startEvent("Make superparticles");
-    if (useSolverMethod) {
-      (this->m_ito)->makeSuperparticles(ItoSolver::WhichContainer::Bulk, (this->m_particlesPerCell));
-    }
-    else {
-      (this->m_ito)
-        ->makeSuperparticles(ItoSolver::WhichContainer::Bulk,
-                             (this->m_particlesPerCell),
-                             this->m_regridMergeMethod.value());
-    }
-    m_timer.stopEvent("Make superparticles");
-  }
+  // The regrid super-particle merge now runs inside ItoSolver::regrid() -- above, in the "Regrid Ito
+  // solvers" event -- so that the de-refinement pile-up is merged while it is still held as the reduced
+  // 53 B particle rather than the full 149 B ItoParticle. Two consequences worth knowing:
+  //
+  //   - This timer loses its "Make superparticles" line for the regrid. The advance() one stays, since
+  //     merge_interval stays. Profile ItoSolver directly if the regrid merge needs attributing again;
+  //     it keeps its own CH_TIME.
+  //   - The merge now happens BEFORE the semi-implicit Poisson solve above rather than after it, which
+  //     is what the base ItoKMCStepper::regrid() already did. Only observable at m_timeStep == 0, where
+  //     computeSpaceChargeDensity() deposits the bulk particles; every later step solves from
+  //     m_rhoDaggerParticles, and the conductivity comes from m_conductivityParticles. A merge
+  //     conserves total weight, so the deposited density is preserved to the merge's spatial accuracy.
 
   // Now let Ihe ito solver deposit its actual particles... In the above it deposit m_rhoDaggerParticles.
   m_timer.startEvent("Deposit particles");

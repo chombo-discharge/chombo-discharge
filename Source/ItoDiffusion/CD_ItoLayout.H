@@ -227,6 +227,16 @@ public:
   organizeParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer);
 
   /**
+   * @brief Rearrange the input container particles into new superparticles for all solvers, each
+   * merging to its own configured target.
+   * @details The usual entry point: each solver uses its own ItoSolver.particles_per_cell and
+   * merge_algorithm, so a caller with no opinion about either need not carry one.
+   * @param[in] a_whichContainer Which ItoSolver container to repartition.
+   */
+  virtual void
+  makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer);
+
+  /**
    * @brief Rearrange the input container particle into new superparticles -- this is done for all solvers.
    * @param[in] a_whichContainer Which ItoSolver container to sort by cell.
    * @param[in] a_ppc            Target particle-per-cell (ppc)
