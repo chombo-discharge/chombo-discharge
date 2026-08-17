@@ -1,4 +1,12 @@
-"""Band width for the ACTUAL chombo-discharge kernels (overlap-integral CIC and TSC)."""
+"""Band width for the chombo-discharge kernels, measured on their SUPPORT.
+
+Everything here is decided by `w > 1e-14`, i.e. by the cloud support, which CIC and TSC share
+with the single formula below. The formula itself is TSC's triangular-cloud overlap; the real
+CIC kernel is a top-hat (CD_EBParticleMesh.H:732). That does not affect any number printed
+here, because none of them is mass-weighted -- but do not copy this weight into a harness that
+sums mass. reach_cells.py did, and reported a CIC retention figure for a kernel that does not
+exist.
+"""
 import numpy as np
 from mirror_test import CASES, DX, N_VALID, PAD, kappa_field, sample_random
 SHAPE=(N_VALID+2*PAD,)*3; LO=-PAD; SIDE=N_VALID*DX
@@ -31,7 +39,7 @@ def fires(pos, kappa, L):
                 out |= (w>1e-14)&ins&(kap>0)
     return out
 
-print("### Measured band, with the deposition kernels the code actually uses")
+print("### Measured band, on the SUPPORT of the code's CIC and TSC clouds")
 print("### CIC: cloud width L=1 (reach dx).  TSC: L=2 (reach 1.5 dx).")
 print(f"\n    {'case':<18} {'sum|n|':>7} {'3 s_max':>8} {'CIC max d':>10} "
       f"{'4 s_max':>8} {'TSC max d':>10} {'plan band':>10}  TSC verdict")
