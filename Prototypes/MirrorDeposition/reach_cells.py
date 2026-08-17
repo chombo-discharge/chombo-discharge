@@ -32,8 +32,15 @@ KERNELS = (("CIC", 1.0), ("TSC", 2.0))
 def cloud_weights(pos, kappa, L):
     """Overlap weight of a width-L*dx cloud at pos against every nearby cell.
 
+    The two kernels are NOT the same cloud shape, and mass-weighted results depend on it:
+    CIC is a TOP-HAT cloud, weight = min(b,L/2) - max(a,-L/2)      (CD_EBParticleMesh.H:732)
+    TSC is a TRIANGULAR cloud, the (be-al) - (be|be|-al|al|)/L form (CD_EBParticleMesh.H:794)
+    Only the support is shared. Revisions 3-4 of the plan used the TSC form for both and
+    reported CIC retention of 95.5% at Chebyshev 1 where the true figure is 91.6%.
+
     Returns (useful, ) where useful[p] is the summed weight landing in kappa>0 cells.
     """
+    cic = L == 1.0
     base = np.floor(pos / DX).astype(np.int64)
     rad = int(np.ceil(L / 2.0)) + 1
     useful = np.zeros(pos.shape[0])
@@ -50,7 +57,8 @@ def cloud_weights(pos, kappa, L):
                     al = np.maximum(a, -0.5 * L)
                     be = np.minimum(b, 0.5 * L)
                     ok = al < be
-                    w *= np.where(ok, (be - al) - (be * np.abs(be) - al * np.abs(al)) / L, 0.0)
+                    ww = (be - al) if cic else ((be - al) - (be * np.abs(be) - al * np.abs(al)) / L)
+                    w *= np.where(ok, ww, 0.0)
 
                 sh = iv - LO
                 ins = np.all((sh >= 0) & (sh < np.array(SHAPE)), axis=-1)
