@@ -229,12 +229,16 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeO
 <tr class="memitem:ad0d8205db3b7e2543eaad980e861e0fb"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad0d8205db3b7e2543eaad980e861e0fb">depositGatheredNGP</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, int a_level, Gather a_gather) const noexcept</td></tr>
 <tr class="memdesc:ad0d8205db3b7e2543eaad980e861e0fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an NGP deposit of a gathered per-particle quantity on a specific grid level. Used for IO.  <br /></td></tr>
 <tr class="separator:ad0d8205db3b7e2543eaad980e861e0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57ba7c882960920a9c000a21ed97352c" id="r_a57ba7c882960920a9c000a21ed97352c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a57ba7c882960920a9c000a21ed97352c">depositWeight</a> (EBAMRCellData &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
-<tr class="memdesc:a57ba7c882960920a9c000a21ed97352c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the SoA weight column on the mesh (full pipeline: kappa-conservative + redistribution).  <br /></td></tr>
-<tr class="separator:a57ba7c882960920a9c000a21ed97352c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51452386dfce33723fe33d6ff2841d11" id="r_a51452386dfce33723fe33d6ff2841d11"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a51452386dfce33723fe33d6ff2841d11">coarsenAndFillGhosts</a> (EBAMRCellData &amp;a_phi) const</td></tr>
+<tr class="memdesc:a51452386dfce33723fe33d6ff2841d11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the input data and interpolate its ghost cells.  <br /></td></tr>
+<tr class="separator:a51452386dfce33723fe33d6ff2841d11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66829749b8ec2e57ac7f83c9363af294" id="r_a66829749b8ec2e57ac7f83c9363af294"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:a66829749b8ec2e57ac7f83c9363af294"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a66829749b8ec2e57ac7f83c9363af294">depositWeight</a> (EBAMRCellData &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a66829749b8ec2e57ac7f83c9363af294"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the SoA weight column on the mesh (kappa-conservative + redistribution).  <br /></td></tr>
+<tr class="separator:a66829749b8ec2e57ac7f83c9363af294"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a91bbe9100a3967307b48d32932b76cd4" id="r_a91bbe9100a3967307b48d32932b76cd4"><td class="memTemplParams" colspan="2">template&lt;typename Gather &gt; </td></tr>
 <tr class="memitem:a91bbe9100a3967307b48d32932b76cd4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a91bbe9100a3967307b48d32932b76cd4">depositGathered</a> (EBAMRCellData &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, Gather a_gather) const</td></tr>
-<tr class="memdesc:a91bbe9100a3967307b48d32932b76cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).  <br /></td></tr>
+<tr class="memdesc:a91bbe9100a3967307b48d32932b76cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a gathered per-particle quantity on the mesh (kappa-conservative + redistribution).  <br /></td></tr>
 <tr class="separator:a91bbe9100a3967307b48d32932b76cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7373fbaa206ac2717ff3e6d600f4b036" id="r_a7373fbaa206ac2717ff3e6d600f4b036"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a7373fbaa206ac2717ff3e6d600f4b036">removeCoveredParticles</a> (<a class="el" href="CD__EBRepresentation_8H.html#ac839237a887a079963372760880f908f">EBRepresentation</a> a_representation, Real a_tol)</td></tr>
 <tr class="memdesc:a7373fbaa206ac2717ff3e6d600f4b036"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles that are inside the EB.  <br /></td></tr>
@@ -565,9 +569,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCheckpointing</b
 <tr class="memitem:a9ac5b0d86ab115c8b37f96a161de9fce" id="r_a9ac5b0d86ab115c8b37f96a161de9fce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a9ac5b0d86ab115c8b37f96a161de9fce">drawNewParticles</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_particlesPerCell, int a_level, int a_newPPC)</td></tr>
 <tr class="memdesc:a9ac5b0d86ab115c8b37f96a161de9fce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart particles from a specified number of particles in the grid cell.  <br /></td></tr>
 <tr class="separator:a9ac5b0d86ab115c8b37f96a161de9fce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aada0ec2880c2344c94a1c6ccc21ed453" id="r_aada0ec2880c2344c94a1c6ccc21ed453"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aada0ec2880c2344c94a1c6ccc21ed453">finalizeDeposit</a> (EBAMRCellData &amp;a_phi) const</td></tr>
-<tr class="memdesc:aada0ec2880c2344c94a1c6ccc21ed453"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the redistribution + average-down + ghost-interpolation tail shared by all deposits.  <br /></td></tr>
-<tr class="separator:aada0ec2880c2344c94a1c6ccc21ed453"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad599086b015754fd8dc25f94ba0b686d" id="r_ad599086b015754fd8dc25f94ba0b686d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad599086b015754fd8dc25f94ba0b686d">redistributeAMR</a> (EBAMRCellData &amp;a_phi) const</td></tr>
 <tr class="memdesc:ad599086b015754fd8dc25f94ba0b686d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute mass in an AMR context.  <br /></td></tr>
 <tr class="separator:ad599086b015754fd8dc25f94ba0b686d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1080,6 +1081,32 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Container </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a51452386dfce33723fe33d6ff2841d11" name="a51452386dfce33723fe33d6ff2841d11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51452386dfce33723fe33d6ff2841d11">&#9670;&#160;</a></span>coarsenAndFillGhosts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::coarsenAndFillGhosts </td>
+          <td>(</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Coarsen the input data and interpolate its ghost cells. </p>
+<p>This is the AMR synchronization that a deposit does <em>not</em> do for itself. Whether it is wanted depends on what the caller does next: a deposit that is the final state of a field needs it, whereas a deposit that is one term in a sum does not &ndash; there, only the assembled sum needs synchronizing, and doing it per term produces values that are immediately overwritten. Deposits therefore leave it to the caller. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell-centered mesh data (one component). </td></tr>
   </table>
   </dd>
 </dl>
@@ -2094,7 +2121,7 @@ template&lt;typename Gather &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution). </p>
+<p>Deposit a gathered per-particle quantity on the mesh (kappa-conservative + redistribution). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data &ndash; must have exactly one component. </td></tr>
@@ -2111,6 +2138,7 @@ template&lt;typename Gather &gt; </div>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>This leaves coarse levels un-averaged and ghost cells stale. Call <a class="el" href="classItoSolver.html#a51452386dfce33723fe33d6ff2841d11" title="Coarsen the input data and interpolate its ghost cells.">coarsenAndFillGhosts()</a> afterwards unless the result is a term in a sum that the caller synchronizes itself. </dd></dl>
 
 </div>
 </div>
@@ -2341,11 +2369,13 @@ template&lt;typename Gather &gt; </div>
 
 </div>
 </div>
-<a id="a57ba7c882960920a9c000a21ed97352c" name="a57ba7c882960920a9c000a21ed97352c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57ba7c882960920a9c000a21ed97352c">&#9670;&#160;</a></span>depositWeight()</h2>
+<a id="a66829749b8ec2e57ac7f83c9363af294" name="a66829749b8ec2e57ac7f83c9363af294"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66829749b8ec2e57ac7f83c9363af294">&#9670;&#160;</a></span>depositWeight()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void ItoSolver::depositWeight </td>
@@ -2356,7 +2386,7 @@ template&lt;typename Gather &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
@@ -2379,13 +2409,21 @@ template&lt;typename Gather &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Deposit the SoA weight column on the mesh (full pipeline: kappa-conservative + redistribution). </p>
+<p>Deposit the SoA weight column on the mesh (kappa-conservative + redistribution). </p>
+<p>The container payload is a template parameter so that auxiliary point-particle containers &ndash; e.g. the rho-dagger and conductivity particles carried by the semi-implicit time steppers &ndash; deposit through exactly the same pipeline as the solver's own particles. This includes the cut-cell deposition flag and the redistribution, both of which must be identical if the deposited densities are to be in the same normalization. </p><dl class="section note"><dt>Note</dt><dd>This leaves coarse levels un-averaged and ghost cells stale. Call <a class="el" href="classItoSolver.html#a51452386dfce33723fe33d6ff2841d11" title="Coarsen the input data and interpolate its ghost cells.">coarsenAndFillGhosts()</a> afterwards unless the result is a term in a sum that the caller synchronizes itself. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data &ndash; must have exactly one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>SoA particles to be deposited. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>Payload type of the container. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2535,40 +2573,6 @@ template&lt;typename Gather &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to extract from. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_merge</td><td>The resulting minimal-payload container, allocated on m_realm. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aada0ec2880c2344c94a1c6ccc21ed453" name="aada0ec2880c2344c94a1c6ccc21ed453"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aada0ec2880c2344c94a1c6ccc21ed453">&#9670;&#160;</a></span>finalizeDeposit()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::finalizeDeposit </td>
-          <td>(</td>
-          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
-          <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Apply the redistribution + average-down + ghost-interpolation tail shared by all deposits. </p>
-<p>The SoA deposit pipeline first deposits onto the mesh (kappa-conservative), then calls this to redistribute mass (if enabled), average down, and interpolate ghost cells. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell-centered mesh data (one component). </td></tr>
   </table>
   </dd>
 </dl>

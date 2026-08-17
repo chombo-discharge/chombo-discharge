@@ -90,6 +90,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#particle-containers">Particle containers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#remapping-particles">Remapping particles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#particle-deposition">Particle deposition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#amr-synchronization-after-a-deposit">AMR synchronization after a deposit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#deposition-of-other-quantities">Deposition of other quantities</a></li>
 </ul>
 </li>
@@ -383,13 +384,15 @@ Here, <code class="docutils literal notranslate"><span class="pre">a_container</
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> contains several member functions for depositing various particle properties onto the mesh.
 The most general version is given below:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
-<span class="cm"> * @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).</span>
+<span class="cm"> * @brief Deposit a gathered per-particle quantity on the mesh (kappa-conservative + redistribution).</span>
 <span class="cm"> * @param[out] a_phi                  Mesh data -- must have exactly one component.</span>
 <span class="cm"> * @param[in]  a_particles            SoA particles to be deposited.</span>
 <span class="cm"> * @param[in]  a_deposition           Deposition method.</span>
 <span class="cm"> * @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.</span>
 <span class="cm"> * @param[in]  a_gather               Per-particle value gatherer (leaf, index) -&gt; Real.</span>
 <span class="cm"> * @tparam     Gather                 Callable (const ParticleSoA&lt;ItoParticle&gt;&amp;, std::size_t) -&gt; Real.</span>
+<span class="cm"> * @note This leaves coarse levels un-averaged and ghost cells stale. Call coarsenAndFillGhosts() afterwards unless</span>
+<span class="cm"> * the result is a term in a sum that the caller synchronizes itself.</span>
 <span class="cm"> */</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Gather</span><span class="o">&gt;</span>
 <span class="kt">void</span>
@@ -430,6 +433,27 @@ This data can then be fetched with</p>
 </pre></div>
 </div>
 <p>For the full list of available deposition functions, see the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> C++ API <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html</a>.</p>
+<section id="amr-synchronization-after-a-deposit">
+<h3>AMR synchronization after a deposit<a class="headerlink" href="#amr-synchronization-after-a-deposit" title="Permalink to this heading"></a></h3>
+<p>The deposition functions put the particles on the mesh and, if redistribution is enabled, redistribute the cut-cell mass.
+They do <em>not</em> average the result down onto the coarser levels, and they do not fill its ghost cells.
+Whether that is wanted depends on what happens next, which only the caller knows: a deposit that is the final state of a field needs it, whereas a deposit that is merely one term of a larger sum does not, because only the assembled sum needs synchronizing.
+Callers that need it should therefore call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Coarsen the input data and interpolate its ghost cells.</span>
+<span class="cm"> * @details This is the AMR synchronization that a deposit does *not* do for itself. Whether it is wanted depends on</span>
+<span class="cm"> * what the caller does next: a deposit that is the final state of a field needs it, whereas a deposit that is one</span>
+<span class="cm"> * term in a sum does not -- there, only the assembled sum needs synchronizing, and doing it per term produces values</span>
+<span class="cm"> * that are immediately overwritten. Deposits therefore leave it to the caller.</span>
+<span class="cm"> * @param[in,out] a_phi Cell-centered mesh data (one component).</span>
+<span class="cm"> */</span>
+<span class="kt">void</span>
+<span class="nf">coarsenAndFillGhosts</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>after depositing.
+Note that <code class="docutils literal notranslate"><span class="pre">ItoSolver::depositParticles</span></code> already does this internally, so <code class="docutils literal notranslate"><span class="pre">m_phi</span></code> (i.e. the data returned by <code class="docutils literal notranslate"><span class="pre">getPhi()</span></code>) is always synchronized.</p>
+</section>
 <section id="deposition-of-other-quantities">
 <h3>Deposition of other quantities<a class="headerlink" href="#deposition-of-other-quantities" title="Permalink to this heading"></a></h3>
 <p>One can also deposit the following quantities on the mesh:</p>
