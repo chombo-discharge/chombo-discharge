@@ -351,26 +351,48 @@ public:
                      Gather                                a_gather) const noexcept;
 
   /**
-   * @brief Deposit the SoA weight column on the mesh (full pipeline: kappa-conservative + redistribution).
+   * @brief Coarsen the input data and interpolate its ghost cells.
+   * @details This is the AMR synchronization that a deposit does *not* do for itself. Whether it is wanted depends on
+   * what the caller does next: a deposit that is the final state of a field needs it, whereas a deposit that is one
+   * term in a sum does not -- there, only the assembled sum needs synchronizing, and doing it per term produces values
+   * that are immediately overwritten. Deposits therefore leave it to the caller.
+   * @param[in,out] a_phi Cell-centered mesh data (one component).
+   */
+  void
+  coarsenAndFillGhosts(EBAMRCellData& a_phi) const;
+
+  /**
+   * @brief Deposit the SoA weight column on the mesh (kappa-conservative + redistribution).
+   * @details The container payload is a template parameter so that auxiliary point-particle containers -- e.g. the
+   * rho-dagger and conductivity particles carried by the semi-implicit time steppers -- deposit through exactly the
+   * same pipeline as the solver's own particles. This includes the cut-cell deposition flag and the redistribution,
+   * both of which must be identical if the deposited densities are to be in the same normalization.
+   * @note This leaves coarse levels un-averaged and ghost cells stale. Call coarsenAndFillGhosts() afterwards unless
+   * the result is a term in a sum that the caller synchronizes itself.
    * @param[out] a_phi                  Mesh data -- must have exactly one component.
    * @param[in]  a_particles            SoA particles to be deposited.
    * @param[in]  a_deposition           Deposition method.
    * @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
+   * @tparam     P                      Payload type of the container.
+   * @tparam     Traits                 Column descriptor for the payload.
    */
+  template <typename P, typename Traits>
   void
-  depositWeight(EBAMRCellData&                        a_phi,
-                const ParticleContainer<ItoParticle>& a_particles,
-                DepositionType                        a_deposition,
-                CoarseFineDeposition                  a_coarseFineDeposition) const;
+  depositWeight(EBAMRCellData&                      a_phi,
+                const ParticleContainer<P, Traits>& a_particles,
+                DepositionType                      a_deposition,
+                CoarseFineDeposition                a_coarseFineDeposition) const;
 
   /**
-   * @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).
+   * @brief Deposit a gathered per-particle quantity on the mesh (kappa-conservative + redistribution).
    * @param[out] a_phi                  Mesh data -- must have exactly one component.
    * @param[in]  a_particles            SoA particles to be deposited.
    * @param[in]  a_deposition           Deposition method.
    * @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
    * @param[in]  a_gather               Per-particle value gatherer (leaf, index) -> Real.
    * @tparam     Gather                 Callable (const ParticleSoA<ItoParticle>&, std::size_t) -> Real.
+   * @note This leaves coarse levels un-averaged and ghost cells stale. Call coarsenAndFillGhosts() afterwards unless
+   * the result is a term in a sum that the caller synchronizes itself.
    */
   template <typename Gather>
   void
@@ -1799,15 +1821,6 @@ protected:
    */
   void
   drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, int a_level, int a_newPPC);
-
-  /**
-   * @brief Apply the redistribution + average-down + ghost-interpolation tail shared by all deposits.
-   * @details The SoA deposit pipeline first deposits onto the mesh (kappa-conservative), then calls this to
-   * redistribute mass (if enabled), average down, and interpolate ghost cells.
-   * @param[in,out] a_phi Cell-centered mesh data (one component).
-   */
-  void
-  finalizeDeposit(EBAMRCellData& a_phi) const;
 
   /**
    * @brief Redistribute mass in an AMR context.
