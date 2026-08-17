@@ -708,6 +708,8 @@ ItoSolver::initialData()
   // Add particles, remove the ones that are inside the EB, and then deposit
   this->removeCoveredParticles(bulkParticles, EBRepresentation::ImplicitFunction, tolerance);
   this->depositWeight(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
+
+  this->coarsenAndFillGhosts(m_phi);
 }
 
 void
@@ -1862,6 +1864,8 @@ ItoSolver::depositConductivity(EBAMRCellData&                  a_phi,
                           [](const ParticleSoA<ItoParticle>& a_leaf, const std::size_t a_i) -> Real {
                             return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::mobility>(a_i);
                           });
+
+    this->coarsenAndFillGhosts(a_phi);
   }
   else {
     DataOps::setValue(a_phi, 0.0);
@@ -1900,6 +1904,8 @@ ItoSolver::depositDiffusivity(EBAMRCellData&                  a_phi,
                         [](const ParticleSoA<ItoParticle>& a_leaf, const std::size_t a_i) -> Real {
                           return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::diffusion>(a_i);
                         });
+
+  this->coarsenAndFillGhosts(a_phi);
 }
 
 void
@@ -1934,6 +1940,8 @@ ItoSolver::depositEnergyDensity(EBAMRCellData&                  a_phi,
                         [](const ParticleSoA<ItoParticle>& a_leaf, const std::size_t a_i) -> Real {
                           return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::energy>(a_i);
                         });
+
+  this->coarsenAndFillGhosts(a_phi);
 }
 
 void
@@ -1959,7 +1967,11 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoPar
                           return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::mobility>(a_i);
                         });
 
+  this->coarsenAndFillGhosts(a_phi);
+
   this->depositWeight(weight, a_particles, m_deposition, m_coarseFineDeposition);
+
+  this->coarsenAndFillGhosts(weight);
 
   // Make averageMobility = weight*mu/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1990,7 +2002,11 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoPa
                           return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::diffusion>(a_i);
                         });
 
+  this->coarsenAndFillGhosts(a_phi);
+
   this->depositWeight(weight, a_particles, m_deposition, m_coarseFineDeposition);
+
+  this->coarsenAndFillGhosts(weight);
 
   // Make average diffusion coefficient = weight*D/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
@@ -2022,7 +2038,11 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParti
                           return a_leaf.weight(a_i) * a_leaf.template get<&ItoParticle::energy>(a_i);
                         });
 
+  this->coarsenAndFillGhosts(a_phi);
+
   this->depositWeight(weight, a_particles, m_deposition, m_coarseFineDeposition);
+
+  this->coarsenAndFillGhosts(weight);
 
   // Make average energy = weight*energy/weight. If there is no weight then set the value to zero.
   constexpr Real zero = 0.0;
@@ -2050,6 +2070,8 @@ ItoSolver::depositParticles(const WhichContainer a_container)
   }
 
   this->depositWeight(m_phi, m_particleContainers.at(a_container), m_deposition, m_coarseFineDeposition);
+
+  this->coarsenAndFillGhosts(m_phi);
 }
 
 void
@@ -2096,15 +2118,12 @@ ItoSolver::depositWeightNGP(LevelData<EBCellFAB>&                 a_output,
 }
 
 void
-ItoSolver::finalizeDeposit(EBAMRCellData& a_phi) const
+ItoSolver::coarsenAndFillGhosts(EBAMRCellData& a_phi) const
 {
-  CH_TIME("ItoSolver::finalizeDeposit");
+  CH_TIME("ItoSolver::coarsenAndFillGhosts");
   if (m_verbosity > 5) {
-    pout() << m_name + "::finalizeDeposit" << endl;
+    pout() << m_name + "::coarsenAndFillGhosts" << endl;
   }
-
-  // Redistribution magic (if enabled), then average down and interpolate ghost cells.
-  this->redistributeAMR(a_phi);
 
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);

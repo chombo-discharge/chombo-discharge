@@ -390,6 +390,8 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
                           DepositionType::NGP,
                           CoarseFineDeposition::Interp);
 
+  m_solver->coarsenAndFillGhosts(m_regridPPC);
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];
     const Real dV = std::pow(dx, SpaceDim);

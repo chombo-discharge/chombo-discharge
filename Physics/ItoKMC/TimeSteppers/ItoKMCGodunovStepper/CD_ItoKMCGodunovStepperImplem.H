@@ -33,8 +33,11 @@ namespace {
 // Deposit an SoA point-particle container's weight onto a_phi through the Ito solver's own deposition routine, so
 // that the point particles land on the mesh in the same normalization as the solver's own particles. Going through
 // the solver -- rather than calling AmrMesh::depositWeight directly -- is what picks up the solver's cut-cell
-// deposition flag and its redistribution/average-down/ghost-interpolation tail, and what guarantees the realm and
-// phase are the solver's own.
+// deposition flag and its redistribution, and what guarantees the realm and phase are the solver's own.
+//
+// No coarsenAndFillGhosts() here: every caller sums these deposits into rho or the cell conductivity and then
+// coarsens and fills ghost cells on that sum, so doing it per species would only produce values that are
+// immediately overwritten.
 inline void
 depositPointParticlesLikeSolver(const RefCountedPtr<ItoSolver>&     a_solver,
                                 EBAMRCellData&                      a_phi,

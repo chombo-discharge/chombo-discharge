@@ -65,8 +65,9 @@ ItoSolver::depositWeight(EBAMRCellData&                      a_phi,
   CH_assert(a_particles.getRealm() == m_realm);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  // Deposit the weight column onto the mesh (resets a_phi internally), then run the shared
-  // redistribution + average-down + ghost-interpolation tail.
+  // Deposit the weight column onto the mesh (resets a_phi internally), then redistribute. Redistribution belongs
+  // here because it decides what the valid-cell values are; coarsening and ghost filling are the caller's, see
+  // coarsenAndFillGhosts().
   m_amr->depositWeight(a_phi,
                        m_realm,
                        m_phase,
@@ -75,7 +76,7 @@ ItoSolver::depositWeight(EBAMRCellData&                      a_phi,
                        a_coarseFineDeposition,
                        m_forceIrregDepositionNGP);
 
-  this->finalizeDeposit(a_phi);
+  this->redistributeAMR(a_phi);
 }
 
 template <typename Gather>
@@ -142,8 +143,8 @@ ItoSolver::depositGathered(EBAMRCellData&                        a_phi,
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isOrganizedByCell());
 
-  // Deposit the gathered quantity onto the mesh (resets a_phi internally), then run the shared
-  // redistribution + average-down + ghost-interpolation tail.
+  // Deposit the gathered quantity onto the mesh (resets a_phi internally), then redistribute. Coarsening and ghost
+  // filling are the caller's, see coarsenAndFillGhosts().
   m_amr->depositGathered(a_phi,
                          m_realm,
                          m_phase,
@@ -153,7 +154,7 @@ ItoSolver::depositGathered(EBAMRCellData&                        a_phi,
                          m_forceIrregDepositionNGP,
                          a_gather);
 
-  this->finalizeDeposit(a_phi);
+  this->redistributeAMR(a_phi);
 }
 
 #include <CD_NamespaceFooter.H>
