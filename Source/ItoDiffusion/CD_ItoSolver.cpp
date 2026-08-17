@@ -2053,33 +2053,6 @@ ItoSolver::depositParticles(const WhichContainer a_container)
 }
 
 void
-ItoSolver::depositWeight(EBAMRCellData&                        a_phi,
-                         const ParticleContainer<ItoParticle>& a_particles,
-                         const DepositionType                  a_deposition,
-                         const CoarseFineDeposition            a_coarseFineDeposition) const
-{
-  CH_TIME("ItoSolver::depositWeight");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositWeight" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isOrganizedByCell());
-
-  // Deposit the weight column onto the mesh (resets a_phi internally), then run the shared
-  // redistribution + average-down + ghost-interpolation tail.
-  m_amr->depositWeight(a_phi,
-                       m_realm,
-                       m_phase,
-                       a_particles,
-                       a_deposition,
-                       a_coarseFineDeposition,
-                       m_forceIrregDepositionNGP);
-
-  this->finalizeDeposit(a_phi);
-}
-
-void
 ItoSolver::depositWeightNGP(LevelData<EBCellFAB>&                 a_output,
                             const ParticleContainer<ItoParticle>& a_particles,
                             const int                             a_level) const noexcept

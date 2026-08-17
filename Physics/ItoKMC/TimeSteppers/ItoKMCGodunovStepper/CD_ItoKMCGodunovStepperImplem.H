@@ -30,22 +30,17 @@
 using namespace Physics::ItoKMC;
 
 namespace {
-// Deposit an SoA particle container's weight onto a_phi using an Ito solver's configured deposition scheme.
+// Deposit an SoA point-particle container's weight onto a_phi through the Ito solver's own deposition routine, so
+// that the point particles land on the mesh in the same normalization as the solver's own particles. Going through
+// the solver -- rather than calling AmrMesh::depositWeight directly -- is what picks up the solver's cut-cell
+// deposition flag and its redistribution/average-down/ghost-interpolation tail, and what guarantees the realm and
+// phase are the solver's own.
 inline void
-depositPointParticlesLikeSolver(const RefCountedPtr<AmrMesh>&   a_amr,
-                                const std::string&              a_realm,
-                                const phase::which_phase        a_phase,
-                                const RefCountedPtr<ItoSolver>& a_solver,
-                                EBAMRCellData&                  a_phi,
-                                ParticleContainer<NoPayload>&   a_particles) noexcept
+depositPointParticlesLikeSolver(const RefCountedPtr<ItoSolver>&     a_solver,
+                                EBAMRCellData&                      a_phi,
+                                const ParticleContainer<NoPayload>& a_particles) noexcept
 {
-  a_amr->depositWeight(a_phi,
-                       a_realm,
-                       a_phase,
-                       a_particles,
-                       a_solver->getDeposition(),
-                       a_solver->getCoarseFineDeposition(),
-                       false);
+  a_solver->depositWeight(a_phi, a_particles, a_solver->getDeposition(), a_solver->getCoarseFineDeposition());
 }
 
 } // namespace
@@ -959,127 +954,72 @@ ItoKMCGodunovStepper<I, C, R, F>::depositPointParticles(
 
     switch (a_subset) {
     case SpeciesSubset::All: {
-      depositPointParticlesLikeSolver(this->m_amr,
-                                      this->m_particleRealm,
-                                      this->m_plasmaPhase,
-                                      solver,
-                                      solver->getPhi(),
-                                      *a_particles[idx]);
+      depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
 
       break;
     }
     case SpeciesSubset::AllMobile: {
       if (mobile) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllDiffusive: {
       if (diffusive) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllMobileOrDiffusive: {
       if (mobile || diffusive) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::AllMobileAndDiffusive: {
       if (mobile && diffusive) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::Charged: {
       if (charged) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedDiffusive: {
       if (charged && diffusive) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileAndDiffusive: {
       if (charged && (mobile && diffusive)) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
-        depositPointParticlesLikeSolver(this->m_amr,
-                                        this->m_particleRealm,
-                                        this->m_plasmaPhase,
-                                        solver,
-                                        solver->getPhi(),
-                                        *a_particles[idx]);
+        depositPointParticlesLikeSolver(solver, solver->getPhi(), *a_particles[idx]);
       }
 
       break;
@@ -1237,12 +1177,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     if (Z != 0 && solver->isMobile()) {
       // Deposit on the particle realm.
       DataOps::setValue(this->m_particleScratch1, 0.0);
-      depositPointParticlesLikeSolver(this->m_amr,
-                                      this->m_particleRealm,
-                                      this->m_plasmaPhase,
-                                      solver,
-                                      this->m_particleScratch1,
-                                      *a_particles[idx]);
+      depositPointParticlesLikeSolver(solver, this->m_particleScratch1, *a_particles[idx]);
 
       // Copy to fluid realm and add to total conductivity.
       (this->m_amr)->copyData(this->m_fluidScratch1, this->m_particleScratch1);

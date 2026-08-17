@@ -352,16 +352,24 @@ public:
 
   /**
    * @brief Deposit the SoA weight column on the mesh (full pipeline: kappa-conservative + redistribution).
+   * @details The container payload is a template parameter so that auxiliary point-particle containers -- e.g. the
+   * rho-dagger and conductivity particles carried by the semi-implicit time steppers -- deposit through exactly the
+   * same pipeline as the solver's own particles. This includes the cut-cell deposition flag and the
+   * redistribution/average-down/ghost-interpolation tail, both of which must be identical if the deposited densities
+   * are to be in the same normalization.
    * @param[out] a_phi                  Mesh data -- must have exactly one component.
    * @param[in]  a_particles            SoA particles to be deposited.
    * @param[in]  a_deposition           Deposition method.
    * @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
+   * @tparam     P                      Payload type of the container.
+   * @tparam     Traits                 Column descriptor for the payload.
    */
+  template <typename P, typename Traits>
   void
-  depositWeight(EBAMRCellData&                        a_phi,
-                const ParticleContainer<ItoParticle>& a_particles,
-                DepositionType                        a_deposition,
-                CoarseFineDeposition                  a_coarseFineDeposition) const;
+  depositWeight(EBAMRCellData&                      a_phi,
+                const ParticleContainer<P, Traits>& a_particles,
+                DepositionType                      a_deposition,
+                CoarseFineDeposition                a_coarseFineDeposition) const;
 
   /**
    * @brief Deposit a gathered per-particle quantity on the mesh (full pipeline: kappa-conservative + redistribution).
