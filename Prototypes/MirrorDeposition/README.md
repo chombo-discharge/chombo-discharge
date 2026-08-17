@@ -9,8 +9,11 @@ the design decisions can be reproduced and challenged while the work is in revie
 
 The first three were written for revision 1 of the plan. The `_ext` / `curvature`
 files were written for revision 2, after an adversarial review refuted three of
-revision 1's quantitative conclusions; each exists because the original harness
-could not answer the question that decided a design choice.
+revision 1's quantitative conclusions. The six `mirror_*` files at the bottom were
+written for **revision 3**, after a second adversarial review refuted four more and
+after the decision to take the curvature from the discrete normal rather than from
+the level set. Each exists because the previous harness could not answer the
+question that decided a design choice.
 
 | Script | Geometry | What it establishes |
 |---|---|---|
@@ -20,6 +23,12 @@ could not answer the question that decided a design choice.
 | `mirror_curvature.py` | sphere, cylinder, **torus** | the exact Jacobian needs no Hessian: two curvature invariants suffice, and they agree with `\|det grad R\|` and with the closed form |
 | `mirror_sphere_ext.py` | sphere, both signs, R = 4..40 | reflection source **crossed with** Jacobian; the mass check is an identity; kappa sub-sampling is not the explanation |
 | `mirror_planar_ext.py` | planar EB | the reflect-criterion table; the band width, measured rather than asserted; margin sensitivity; the broken `lattice` mode |
+| `mirror_source.py` | sphere, R = 4..16, both signs | the reflection-source **ladder**: nearest-cut plane / nearest-cut quadratic patch / own-foot plane / per-particle IF. The quadratic patch is what revision 3 ships |
+| `mirror_discrete_curvature.py` | sphere, both signs | curvature from the **discrete area-fraction normal** fitted over the cut-cell neighbourhood, and how much normal error that fit absorbs |
+| `mirror_levelset_curvature.py` | sphere, several implicit functions | why the level-set route was dropped: the FD step is unspecified and both extremes fail on geometries this tree ships |
+| `mirror_band_kernels.py` | planar EB | the band measured with the **real** overlap-integral CIC and TSC kernels. `3*s_max` is CIC-only |
+| `mirror_zeroing.py` | planar EB | an images-only build (the zeroing-deposit bug) does **not** read `phi = n` on a plane |
+| `mirror_cavity.py` | concave spheres R = 8..3 | the Jacobian blow-up in tight cavities is a NaN risk, not an accuracy risk |
 
 All are Cartesian: uniform cubic cells, tensor-product CIC, 16^3 valid cells with
 2 ghost cells. Only the shape of the embedded boundary varies. Volume fractions
@@ -40,9 +49,21 @@ python3 mirror_planar_ext.py criteria    # reflect-criterion table
 python3 mirror_planar_ext.py band        # measured band width
 python3 mirror_planar_ext.py margin      # scoring-margin sensitivity
 python3 mirror_planar_ext.py lattice     # why `lattice` mode must not be used
+
+python3 mirror_source.py                        # the reflection-source ladder
+python3 mirror_discrete_curvature.py fit        # curvature from the discrete normal
+python3 mirror_discrete_curvature.py noise      # how much normal error the fit absorbs
+python3 mirror_levelset_curvature.py endtoend   # why the level-set route was dropped
+python3 mirror_levelset_curvature.py fidelity   # invariants vs |det grad R| of the same IF
+python3 mirror_band_kernels.py                  # CIC and TSC bands, real kernels
+python3 mirror_zeroing.py                       # the zeroing-deposit failure, on a plane
+python3 mirror_cavity.py                        # tight-cavity Jacobian blow-up
 ```
 
 Do **not** use `python3 mirror_test.py lattice`. See harness bug 3.
+
+The revision-3 scripts import machinery from the revision-1/2 ones (`mirror_test`,
+`mirror_sphere`, `mirror_sphere_ext`), so run them from this directory.
 
 ## Headline numbers
 
@@ -68,6 +89,40 @@ Do **not** use `python3 mirror_test.py lattice`. See harness bug 3.
   curved-geometry values are not a kappa quadrature artifact.
 * Cylinder: the product form lands inside 0.003. `(r'/r)^(D-1)` over-corrects a
   cylinder by -0.24 to +0.21 and a torus by -44%.
+
+Added in revision 3:
+
+* **Curvature from the discrete normal works, and does not degrade at small
+  kappa.** A least-squares fit of the shape operator over the cut-cell
+  neighbourhood gives median `|dJ/J|` of 1.2 / 1.4 / 2.7% at convex R = 8 / 6 /
+  4 dx on a 3^3 stencil and 0.5 / 0.7 / 1.4% on 5^3, against a linearized-form
+  reference of 48 / 63 / 77%. The `kappa <= 0.05` bin is as good as the
+  `kappa > 0.75` bin; the widest spread is at *high* kappa. It absorbs **10
+  degrees** of per-cell normal error at 5.0% on a 5^3 stencil -- the fit is what
+  buys that, since a two-point difference over 2 dx would turn 10 degrees into a
+  52% curvature error.
+* **The quadratic surface patch removes the implicit function entirely.** Stored
+  per band cell as the nearest cut cell's `(centroid, normal, shape operator)`,
+  it lands at 1.2 / 2.1 / 1.8 / 2.3 / 2.9% for convex R = 16 / 12 / 8 / 6 / 4 dx
+  and 1.3 / 1.9% concave -- matching the per-particle IF and beating the
+  own-foot plane on concave, where the plane is weakest.
+* **The nearest-cut-cell PLANE's 7-18% is a property of the borrowing, not of
+  storing a plane.** Same cell, own foot point: 0.4 / 1.4 / 3.1% convex at
+  R = 8 / 6 / 4 dx.
+* **The band `3*s_max` is CIC-only.** With the TSC kernel the correct band is
+  `2*dx*sum|n_i| = 4*s_max`; `3*s_max` is short by up to 0.844 dx, and short even
+  for an axis-aligned normal.
+* **`sum(kappa phi dV)/sum(m)` is nearly blind to the error the mirror exists to
+  fix.** Convex R = 4 dx with the cell plane and the linearized Jacobian reads
+  0.99974 while the `kappa <= 0.05` density is -46.5% wrong. It is kappa-weighted,
+  so it is least sensitive exactly where the mirror matters.
+* **An images-only build is loud, not silent.** On a plane it reads -100% in
+  every regular cell, so the planar acceptance test catches a zeroing-deposit
+  bug. Only the `kappa <= 0.05` bin is nearly blind (-1.8 to -7.7%).
+* **The tight-cavity Jacobian blow-up is a NaN risk, not an accuracy risk.** Down
+  to R = 3 dx, where `J` reaches 179, the worst binned deviation stays under 2.2%
+  and the cell-to-cell spread does not grow -- the high-`J` images land where
+  every stencil cell is covered and are dropped.
 
 ## Four harness bugs found while doing this
 
@@ -146,6 +201,25 @@ The normals here are analytic. A real `ebisbox.normal(vof)` is reconstructed fro
 discrete area fractions and degrades as kappa -> 0, which is exactly where the
 mirror matters. These harnesses isolate the geometric approximation; the
 discrete-normal reconstruction error can only be measured in the code.
+
+**Superseded in revision 3.** The paragraph above, and the one below, were written
+when the curvature came from the level set. It no longer does:
+`mirror_discrete_curvature.py` measures the estimator that ships, and it is
+discrete by construction. `mirror_levelset_curvature.py` is kept because it is the
+evidence for *why* the level-set route was dropped -- not because anything depends
+on it any more. Two things in it are still worth knowing if the decision is ever
+revisited: an `EBGeometryIF<float>` (`Tessellation`) differenced at `h = 1e-4`
+gives a 231% deposition error, and a non-SDF implicit function costs 26% end to
+end because `IF/|grad IF|` misplaces the foot point.
+
+What revision 3 does *not* measure: the cut-cell normals in
+`mirror_discrete_curvature.py` are reconstructed from **exact** sub-sampled face
+area fractions. A real `GeometryShop`/`ScanShop` computes moments to finite order
+and has its own pathologies. The noise sweep prices the estimator's tolerance
+(10 degrees of per-cell error costs 5.0% on a 5^3 stencil); it does not measure
+what the real geometry generator actually delivers. And a sphere has constant
+curvature, so nothing here can see the cost of *extending* the invariants from
+cut cells to band cells -- a torus or a rod cap can, and should.
 
 **`mirror_curvature.py` is entirely continuum.** Its implicit functions are
 analytic and its finite differences use steps of 1e-4 to 1e-6. `K` is a second
