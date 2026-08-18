@@ -1,5 +1,14 @@
 # Review of PLAN.md revision 5 — findings
 
+> **Status, after review 6: all three findings and all five nits are confirmed and are fixed in
+> PLAN.md revision 6.** Findings 1 and 2 were fixed by a change of design rather than of wording —
+> the band is now derived from the exchanged irregular mask rather than from `EBISBox`, and the
+> shape operator is stored frame-free, so there is no frame to keep consistent. Finding 3's
+> *cause* was right and its *predicted correction* was wrong in the interesting direction:
+> re-running `mirror_cavity.py` under the plan's real criterion gives `Jmax` 28.9 (CIC) / 483.8
+> (TSC) at `R = 3*dx` and never singular, because the criterion is self-limiting in a cavity.
+> See `Review6Findings.md`. This file is kept as review 5's record; do not treat it as open work.
+
 **Reviewed** `Prototypes/MirrorDeposition/PLAN.md` at revision 5 · **Branch** `mirror_deposition`
 · **Code citations re-resolved against** `dab94cbd` · **All harnesses re-run from this directory.**
 

@@ -28,7 +28,8 @@ question that decided a design choice.
 | `mirror_levelset_curvature.py` | sphere, several implicit functions | why the level-set route was dropped: the FD step is unspecified and both extremes fail on geometries this tree ships |
 | `mirror_band_kernels.py` | planar EB | the band measured with the **real** overlap-integral CIC and TSC kernels. `3*s_max` is CIC-only |
 | `mirror_zeroing.py` | planar EB | an images-only build (the zeroing-deposit bug) does **not** read `phi = n` on a plane |
-| `mirror_cavity.py` | concave spheres R = 8..3 | the Jacobian blow-up in tight cavities is a NaN risk, not an accuracy risk |
+| `mirror_cavity.py` | concave spheres R = 8..3 | the Jacobian blow-up in tight cavities is a NaN risk, not an accuracy risk. **Rewritten in revision 6** to use PLAN.md 1.2's criterion instead of the retired `3*s_max` distance band |
+| `mirror_frame.py` | cylinder R = 6 dx | **new in revision 6.** The tangent frame is part of the stored format; a mismatch moves the image by up to 2.24 dx while `J` and the mass check stay exactly right. The frame-FREE world-frame shape operator reproduces the framed form to 1.8e-15 |
 
 All are Cartesian: uniform cubic cells, tensor-product CIC, 16^3 valid cells with
 2 ghost cells. Only the shape of the embedded boundary varies. Volume fractions
@@ -57,7 +58,8 @@ python3 mirror_levelset_curvature.py endtoend   # why the level-set route was dr
 python3 mirror_levelset_curvature.py fidelity   # invariants vs |det grad R| of the same IF
 python3 mirror_band_kernels.py                  # CIC and TSC bands, real kernels
 python3 mirror_zeroing.py                       # the zeroing-deposit failure, on a plane
-python3 mirror_cavity.py                        # tight-cavity Jacobian blow-up
+python3 mirror_cavity.py                        # tight-cavity Jacobian blow-up (rewritten r6)
+python3 mirror_frame.py                         # the tangent frame, and the frame-free form (r6)
 ```
 
 Do **not** use `python3 mirror_test.py lattice`. See harness bug 3.
@@ -73,7 +75,11 @@ The revision-3 scripts import machinery from the revision-1/2 ones (`mirror_test
   the individual cases, and revision 1 of the plan quoted it as though it did.
 * The reflect band is `(3/2)*dx*sum|n_i| = 3*s_max`, and that bound is tight to
   within 1%. The narrower `dx*(1 + sum|n_i|/2)` is short by up to 0.71 dx on
-  tilted normals and agrees only for axis-aligned ones.
+  tilted normals and agrees only for axis-aligned ones. **Superseded**: PLAN.md 9
+  retired the band-as-a-distance in revision 3; stated in cells it is "grow by 2",
+  with no dependence on the normal or the kernel. Two harnesses were still
+  selecting on the distance form afterwards (`mirror_band_kernels.py`'s verdict
+  column, `mirror_cavity.py`'s `sel`) -- see harness bug 5.
 * Sphere, **exact** reflection, no Jacobian: +4% at R = 40 dx, +16% at 16,
   +40% at 8, +117% at 4. With the exact Jacobian every radius and both curvature
   signs land inside ~1.5%. No improvement to the reflection source removes this,
@@ -92,12 +98,13 @@ The revision-3 scripts import machinery from the revision-1/2 ones (`mirror_test
 
 Added in revision 3:
 
-* **Curvature from the discrete normal works, and does not degrade at small
-  kappa.** A least-squares fit of the shape operator over the cut-cell
+* **Curvature from the discrete normal works.** (The "and does not degrade at
+  small kappa" this bullet used to claim was refuted by review 3 -- it tabulated
+  the 3^3 fit while the plan ships 5^3, and it confused spread with bias. See
+  PLAN.md 3.3.) A least-squares fit of the shape operator over the cut-cell
   neighbourhood gives median `|dJ/J|` of 1.2 / 1.4 / 2.7% at convex R = 8 / 6 /
   4 dx on a 3^3 stencil and 0.5 / 0.7 / 1.4% on 5^3, against a linearized-form
-  reference of 48 / 63 / 77%. The `kappa <= 0.05` bin is as good as the
-  `kappa > 0.75` bin; the widest spread is at *high* kappa. It absorbs **10
+  reference of 48 / 63 / 77%. It absorbs **10
   degrees** of per-cell normal error at 5.0% on a 5^3 stencil -- the fit is what
   buys that, since a two-point difference over 2 dx would turn 10 degrees into a
   52% curvature error.
@@ -119,12 +126,33 @@ Added in revision 3:
 * **An images-only build is loud, not silent.** On a plane it reads -100% in
   every regular cell, so the planar acceptance test catches a zeroing-deposit
   bug. Only the `kappa <= 0.05` bin is nearly blind (-1.8 to -7.7%).
-* **The tight-cavity Jacobian blow-up is a NaN risk, not an accuracy risk.** Down
-  to R = 3 dx, where `J` reaches 179, the worst binned deviation stays under 2.2%
-  and the cell-to-cell spread does not grow -- the high-`J` images land where
-  every stencil cell is covered and are dropped.
+* **The tight-cavity Jacobian blow-up is a NaN risk, not an accuracy risk.** The
+  worst binned deviation stays under 2.2% down to R = 3 dx and the cell-to-cell
+  spread does not grow. **Revision 6 corrected the amplification**: the "J reaches
+  179" figure was measured with the retired `3*s_max` distance band. Under the
+  plan's real criterion the reach in a cavity is only 2.06-2.33 dx (CIC) or
+  2.74-3.19 dx (TSC), because a deep particle's image lands where no stencil cell
+  has kappa > 0 and is dropped -- which is the mechanism the plan states, and was
+  not the mechanism this harness used. `J` reaches 28.9 (CIC) / 483.8 (TSC) at
+  R = 3 dx, and is never singular.
 
-## Four harness bugs found while doing this
+Added in revision 6:
+
+* **The two halves of the scheme are each measured; their composition is not.**
+  `mirror_source.quad_reflect` takes a scalar `kap_princ`, i.e. an ISOTROPIC shape
+  operator, which is frame-invariant. The anisotropic 2x2 `S` that
+  `mirror_discrete_curvature.py` fits is never fed into a reflection by anything
+  here. `mirror_frame.py` closes that on a cylinder and finds that a tangent-frame
+  mismatch moves the image by a median of 0.40 dx and up to 2.24 dx at R = 6 dx,
+  while `tr S` and `det S` -- and therefore `J` and the mass check -- do not move
+  at all.
+* **A world-frame shape operator removes the frame entirely.** Storing
+  `S_c = P S P^T` as a symmetric 3x3 reproduces the framed reflection to 1.8e-15,
+  makes `2H = tr S_c` and `K = 0.5[(tr S_c)^2 - tr(S_c^2)]` in both dimensions,
+  and makes the 2-D `K = 0` override unnecessary. **`det S_c` is identically zero**
+  -- it is rank <= 2 -- so the old `K = det S` is a silent trap in the new format.
+
+## Five harness bugs found while doing this
 
 All produced confident, plausible, wrong numbers, and none was caught by reading
 the code -- each was caught by a control or by the output contradicting its own
@@ -153,6 +181,15 @@ prose. Anyone re-running or extending these should assume more of the same.
    -25.5% at sub=2, +20.9% at 4, -0.9% at 8 and 16. Run
    `mirror_planar_ext.py lattice` to see it. The zero standard error makes this
    the most convincing of the four and the least true. Not fixed -- use `random`.
+
+5. **`mirror_cavity.py` selected on a band the plan had retired.** Its `sel`
+   used `d <= 1.5*dx*sum|n_i|`, the `3*s_max` distance band, two revisions after
+   PLAN.md stopped stating the band as a distance. The kernel was right; the
+   selection rule was not. Every number it produced -- reflect fractions, `Jmax`,
+   the analytic header table -- was therefore measured on a sample the scheme does
+   not produce. Fixed in revision 6 by applying the real criterion (the image's
+   cloud must overlap a `kappa > 0` cell). When re-running anything here, check the
+   **selection** as well as the kernel.
 
 4. **Two bugs in `mirror_curvature.py` while writing it.** The exponent-trap
    check compared the image and the particle against their shared foot point, so

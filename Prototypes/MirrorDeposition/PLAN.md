@@ -1,7 +1,7 @@
 # Mirrored cut-cell deposition — implementation plan
 
 **Issue** chombo-discharge#29 (parts 1 and 3) · **Branch** `mirror_deposition` · **Depends on** PR #700
-· **Revision** 5, after four adversarial reviews.
+· **Revision** 6, after five adversarial reviews.
 
 Particle deposition divides by `dx^D` and never by `kappa`, so a cut cell holds `kappa*n` where the
 CDR solvers hold `n`. Space charge and the semi-implicit conductivity are assembled from both, so a
@@ -21,7 +21,7 @@ Read this section first.
 
 **The document you are reviewing is this file.**
 
-**What four prior reviews have already caught.** Each was a confident, plausible, wrong claim that
+**What five prior reviews have already caught.** Each was a confident, plausible, wrong claim that
 survived a reading of the plan and died to a measurement or to the code. Assume more remain.
 
 | Review | What it refuted |
@@ -30,6 +30,9 @@ survived a reading of the plan and died to a measurement or to the code. Assume 
 | 2 | The reflection source attribution; `sum(kappa phi dV)/sum(m)` as a primary metric; one table that did not reproduce at all |
 | 3 | The band as a distance; "does not degrade at small kappa"; `bndryCentroid` units; "positivity by construction" |
 | 4 | The whole post-deposit redistribution step, which the plan never mentioned; `eb_ghost` as the governing ghost count; the CIC retention column, measured with the wrong kernel; the `kappa < 0.25` threshold as kernel-independent; the level-preserving remap, which was both unnecessary and harmful; "`EBAMRParticleMesh` needs a realm" |
+| 5 | Nothing quantitative — every table reproduced exactly. It refuted the *scope* of three claims: the tangent frame as an unstated accident rather than a specification; the cavity table, computed with a band §9 had already retired; and "extend to every band cell from the nearest cut cell" as a total statement |
+| 6 | The tangent frame as a stored quantity at all; §7's cavity numbers, wrong in **both** directions; the 93-occurrence conversion count, 36 of which are the interpolation parameter the plan puts out of scope; "`parseOptions` structurally cannot see" `mirror` + NGP; the reflect fractions read as a cost estimate; and a mesh field the pseudocode uses that §5 never declares |
+| 6, second pass | Three of revision 6's own conclusions, all from the same mistake — taking responsibility for what the deposit hands to its consumer. The covered-cell reset (withdrawn: images belong in the solid and the field is only read at `kappa > 0`); the coarse-fine correction loss (accepted: `addInvalidCoarseToFine` conserves it, the residual is bandwidth); and the audit of `phi` readers as a blocker (it is a contract to state, and the consumers' work). Revision 6 also claimed a demoted image is overwritten by `conservativeAverage`, and named `AmrMesh.buffer_size` as a knob that only the `br` grid generator reads |
 
 **How to review this.** In descending order of yield:
 
@@ -55,6 +58,14 @@ survived a reading of the plan and died to a measurement or to the code. Assume 
 5. **Do not re-derive widths along the normal.** §1 states every width in cells. Two earlier reviews
    produced wrong ghost counts (4–5, then 3) by computing a reach in `dx` along the normal and
    re-projecting onto index axes. Work in index space.
+6. **Price the containers, and check that every field the pseudocode uses is declared.** Revision 6
+   found that §4.2's scratch `EBAMRCellData` appeared in no member list anywhere in §5, and that the
+   surface data as a whole-domain cell field costs ~426 MB per level per phase at the shipped
+   defaults — 3.2× the four masks the realm already carries. Count the fields, multiply by
+   `coarsest_domain` and the ghost overhead, and cross-check §4.2 and §5.3 against §5.1 line by line.
+7. **Check that a harness's *selection* is the plan's criterion, not just that its kernel is.**
+   Review 5 caught `mirror_cavity.py` selecting reflecting particles with a band §9 had retired;
+   revision 6 re-ran it under the real criterion and every number in §7's cavity row moved.
 
 **Known-open items, listed so you do not spend the review rediscovering them:** §7.
 
@@ -95,6 +106,9 @@ and its fractional position `f = x/dx - c` in `[0,1)`:
 | CIC, `L = 1` | `[c+f-1/2, c+f+1/2]` | `{c-1, c}` if `f < 1/2`; `{c, c+1}` if `f >= 1/2` | 2³ = 8 | **1** |
 | TSC, `L = 2` | `[c+f-1, c+f+1]` | `{c-1, c, c+1}` (just `{c-1, c}` at `f = 0`) | 3³ = 27 | **1** |
 
+(Both are also what `EBParticleMesh::cloudBox` (`:677-688`) returns: it anchors the iterated box on
+the cloud's lower and upper edge cells, so the loop visits exactly the reached cells and no others.)
+
 **Both kernels reach exactly Chebyshev distance 1 from the particle's own cell.** They differ in
 *how many* of the three cells per direction they touch — two versus three — not in how far. CIC
 takes its own cell plus the single neighbour the particle leans toward, so its offsets are `{-1,0}`
@@ -114,6 +128,13 @@ kernels. That is a safe over-scan radius for the loop, **not** the reach.
 
 The exact criterion falls out of the deposit loop for free and costs nothing, because the overlap
 weight is already zero at the support boundary. The mask is only an early-out.
+
+> **Check the early-out under `DEBUG`.** Chebyshev 2 is *derived* only for axis-aligned normals
+> (O6) and *measured* over ten tilted planar cases plus two sphere signs. That is good evidence and
+> it is not a proof, and the failure — a reflection silently not taken — leaves no trace. Under
+> `DEBUG`, evaluate the exact criterion on a band grown to Chebyshev 3 and count how many particles
+> in the outer ring would have reflected. The count must be zero; if it is not, the mask is short
+> and the number says by how much. It costs nothing under `OPT=HIGH`.
 
 Measured against the real overlap-integral kernels — top-hat for CIC, triangular for TSC — share of
 mirrored mass retained, counting only the part of each image's cloud landing in a `kappa > 0` cell
@@ -196,7 +217,10 @@ but not in *cells*. With the EB near the top face of cell `c`, walking up leaves
 
 The second column of that table is the reason images are remapped rather than deposited by the
 source's own patch: a design in which each patch deposits its own images needs `4 + 1 = 5` ghost
-cells for CIC and `5 + 1 = 6` for TSC. See §4.2.
+cells for CIC and `5 + 1 = 6` for TSC. It is also not merely a memory argument —
+`depositParticleCIC` opens with `CH_assert(m_region.contains(particleIV))`
+(`CD_EBParticleMesh.H:713`), so a patch cannot deposit a particle whose *cell* lies outside its
+region at all, whatever the ghost width. See §4.2.
 
 > **Open:** the `kappa` thresholds are derived for axis-aligned normals, where `kappa` and `t` are
 > the same parameter. For a tilted normal they decouple. The Chebyshev-2 *result* is measured for
@@ -235,19 +259,49 @@ Neither is a safe default. `CD_AmrMesh.cpp:2788` is `pp.get("eb_ghost", ...)` va
 `CD_AmrMesh.options` ships 2 for both; shipped inputs split 39×`eb_ghost=2` / 100×`=4` and
 71×`num_ghost=2` / 68×`=3`. **Require both `>= 2` at runtime when `mirror` is selected.**
 
+Note what that split says: every shipped input already satisfies both requirements — the minimum in
+each column is 2. The runtime check is a guard against a future input file, not a migration, and it
+costs nothing today. It is also the only one of the two that a user can get wrong silently, since
+`num_ghost = 1` would produce a wrong extension rather than an out-of-bounds access.
+
 ---
 
 ## 2. The reflection point
 
 ### 2.1 Stored state
 
-Three quantities per band cell, taken from the nearest cut cell, computed once at regrid:
+Three quantities per band cell, taken from the nearest cut cell, plus a validity flag; all
+computed once at regrid:
 
 ```
-x_c    boundary centroid, as a PHYSICAL position    3 Reals
-n_c    normal(vof)                                  3 Reals
-S_c    fitted shape operator                        3 Reals (2x2 symmetric, tangent frame)
+x_c    boundary centroid, as a PHYSICAL position    3 Reals  (2 in 2-D)
+n_c    normal(vof), pointing INTO the fluid         3 Reals  (2 in 2-D)
+S_c    fitted shape operator, in the WORLD frame    6 Reals  (3 in 2-D; symmetric, S_c n_c = 0)
+ok     may this cell reflect at all                 1 flag   (see 5.4)
 ```
+
+> **`S_c` is stored frame-free, and this is not a presentation choice.** Revision 5 stored it as the
+> 3 independent entries of a 2×2 symmetric matrix "in the tangent frame", with §3.3 fitting it in
+> "any orthonormal basis perpendicular to `n_i`" and §2.2 reflecting in "`t1, t2` spanning the plane
+> perpendicular to `n_c`". Those have to be the *same* basis, and nothing said so. The failure mode
+> is the worst available: `2H` and `K` are frame-invariant, so a mismatch leaves `J` correct, leaves
+> §6.1's mass check correct, and moves only the reflection point.
+>
+> `mirror_frame.py`, cylinder `R = 6*dx` (principal curvatures `1/R` and `0` — every other harness
+> here uses an *isotropic* `S`, which is frame-invariant and therefore cannot see this):
+>
+> | | median | p95 | max |
+> |---|---|---|---|
+> | image displacement, mismatched frame | **0.397 dx** | 1.36 dx | **2.24 dx** |
+> | change in `tr S` under the same rotation | 2.8e-17 | 5.6e-17 | 8.3e-17 |
+> | change in `det S` under the same rotation | 7.3e-20 | 1.4e-18 | 3.5e-18 |
+>
+> Storing `S_c = P S P^T` with `P = [t1 t2]` — the same operator expressed as a symmetric 3×3 in
+> world coordinates — removes the question. The tangent frame becomes local to the fit (§3.3) and is
+> discarded there; nothing downstream ever constructs one. Verified exact, not approximate: the
+> frame-free reflection reproduces the framed one to 1.8e-15 in the image position over 4000 draws.
+> It costs 6 Reals against 3, removes a branchy frame construction from the per-particle path, and
+> it is what makes §3.1's 2-D special case disappear.
 
 > **`bndryCentroid` is cell-relative — use the existing helper.** `EBISBox::bndryCentroid(vof)`
 > returns coordinates in `[-0.5, 0.5]` *relative to the cell*, not a position. The tree already has
@@ -257,8 +311,10 @@ S_c    fitted shape operator                        3 Reals (2x2 symmetric, tang
 > x_c = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
 > ```
 >
-> `Location::position` is `CD_LocationImplem.H:37-41` and returns
-> `(gridIndex + 0.5 + bndryCentroid) * dx`; `CD_AmrMeshImplem.H:584` already calls it this way.
+> `Location::position` is `CD_LocationImplem.H:37-51` and returns
+> `(gridIndex + 0.5 + bndryCentroid) * dx`; `CD_AmrMeshImplem.H:584` already calls it this way. The
+> range must include `:49`, `ret *= a_dx` — that line is the whole point of the citation, and
+> revision 5 cited `:37-41`, which stops at the `Location::Cell::Boundary` switch case.
 > (`CD_EBHelmholtzEBBCImplem.H:32` open-codes the same thing; do not add a third copy.)
 >
 > Revision 3 wrote the curvature fit as `dx_j = bndryCentroid(j) - x_i`, differencing two
@@ -272,15 +328,19 @@ centroid) appears nowhere in it.
 
 ### 2.2 Per particle
 
-With `t1, t2` spanning the plane perpendicular to `n_c`, and `w = p - x_c`:
+With `w = p - x_c`:
 
 ```
-xi     = (t1.w, t2.w)          eta = n_c.w
+eta    = n_c . w
 
-d      = eta + (1/2) xi^T S xi                     one-step distance to the quadratic patch
-nhat   = normalize( n_c + (S xi)_1 t1 + (S xi)_2 t2 )   its normal at the foot point
+d      = eta + (1/2) w . (S_c w)                   one-step distance to the quadratic patch
+nhat   = normalize( n_c + S_c w )                  its normal at the foot point
 R(p)   = p - 2 d nhat
 ```
+
+`S_c n_c = 0` by construction, so the normal component of `w` contributes nothing to either
+expression and no tangential projection is needed: `w . (S_c w) = xi^T S xi` and `S_c w = P S xi`
+identically. **There is no tangent frame at reflect time.**
 
 One dependent load per particle and about twenty flops. **No implicit-function evaluation
 anywhere**, at regrid or per particle.
@@ -288,7 +348,9 @@ anywhere**, at regrid or per particle.
 Review 4 checked the signs independently against both curvature signs, with `S` in the fit's own
 convention (`S = +dn̂`, §3.3): a convex sphere of radius `R` with fluid outside gives `S = +I/R` and
 patch height `h(xi) = -|xi|²/2R`, a concave cavity gives `S = -I/R` and `h(xi) = +|xi|²/2R`, and
-`d = eta - h` reproduces the expression above in both. `nhat = n_c + S xi` likewise.
+`d = eta - h` reproduces the expression above in both. `nhat = n_c + S xi` likewise. Lifting `S` to
+the world frame is an identity, not a re-derivation, so those checks carry over unchanged
+(`mirror_frame.py`, rows 1–2).
 
 `d` is the **first iterate** of the signed distance, not the signed distance: `xi` is the tangential
 projection of the particle, not of the foot point. The neglected term is `O(c^2 d^2 xi)`, and at
@@ -334,18 +396,29 @@ end to end.
 ### 3.1 Form
 
 ```
-J   = (1 - 2H*d + K*d^2) / (1 + 2H*d + K*d^2)        2H = tr S,  K = det S
+J   = (1 - 2H*d + K*d^2) / (1 + 2H*d + K*d^2)
     = prod(1 - c_i d) / prod(1 + c_i d)              over principal curvatures c_i
 
-2-D:  S is 1x1, set K = 0 explicitly, J = (1 - c d)/(1 + c d)
+with, from the stored world-frame S_c:
+
+2H  = tr S_c
+K   = (1/2) [ (tr S_c)^2 - tr(S_c^2) ]
 ```
 
-`J` is exactly 1 on a plane, where `S = 0`. Sphere check: `J = (R-d)^2/(R+d)^2`, the ratio of shell
+`J` is exactly 1 on a plane, where `S_c = 0`. Sphere check: `J = (R-d)^2/(R+d)^2`, the ratio of shell
 areas, as it must be.
 
-The 2-D line is an instruction, not a restatement: `det` of a 1×1 `S` is `c`, not 0, so
-`K = det S` must be overridden rather than evaluated. The product form has one factor in 2-D and two
-in 3-D.
+> **`K` is NOT `det S_c`.** `S_c` is a symmetric 3×3 of rank at most 2 — it annihilates `n_c` — so
+> `det S_c` is identically zero and `K = det S_c` silently degrades the exact Jacobian to the
+> linearized one, whose error §3.3 measures at 48–77%. The second-invariant formula above is the
+> only correct reading, and it is the same expression in both dimensions.
+>
+> This is what the frame-free format buys beyond §2.1's determinism. Revision 5 carried a 2-D
+> special case — "`S` is 1×1, set `K = 0` explicitly, because `det` of a 1×1 `S` is `c`, not 0" —
+> that is now unnecessary: in 2-D `S_c = c * t t^T`, so `tr S_c = c`, `tr(S_c^2) = c^2` and the
+> formula returns `K = 0` on its own. One expression, both dimensions, no override to forget.
+> Verified over 2000 random normals and curvature pairs (`mirror_frame.py`): both invariants agree
+> with the 2×2 `tr`/`det` to 2e-16, and `|S_c n_c| < 2e-17`.
 
 **Symbols.** `kappa` is the volume fraction everywhere in this document; principal curvatures are
 `c_1, c_2`. Revision 3 used `kappa` for both.
@@ -353,6 +426,11 @@ in 3-D.
 Without the Jacobian the mirror carries a curvature error of +117% at `R = 4*dx`, +40% at 8, +15.3%
 at 16 and +4.2% even at 40 — with *exact* reflection, so no improvement to the surface model removes
 the need for it. Reflection is measure-preserving only about a plane.
+
+Those four figures are the **worst `kappa` bin**, not the sliver bin: the worst bin is the sliver at
+`R = 4, 8, 16` but the `0.15–0.30` bin at `R = 40` (+0.0424 against the sliver's +0.0219). Every
+other table in this file bins by `kappa` and quotes the sliver, so the selection rule is stated here
+rather than left to be rediscovered.
 
 ### 3.2 Positivity is conditional, not structural
 
@@ -366,6 +444,25 @@ The **denominator** vanishes at `d = -1/c_i` on concave surfaces. These are the 
 same threshold — a needle tip on a coarse level — and `abs()` hides both. **Guard both**: clamp
 `|1 -/+ 2H*d + K*d^2|` away from zero on numerator and denominator, and signal out-of-range rather
 than dividing or emitting a negative weight.
+
+**Size the guard from a measurement, not from a round number.** The guard must not trip on images
+the scheme legitimately produces. Under the criterion of §1.2 — not the retired distance band —
+a concave cavity of `R = 3*dx` produces `J` up to **28.9 under CIC and 483.8 under TSC**
+(`mirror_cavity.py`, revision 6), corresponding to a denominator of `(1 - d/R)^2 = 4.1e-3` at the
+TSC reach. A guard that fires below `J ~ 10^3`, or on a denominator above `~10^-3`, discards real
+images in a geometry this tree ships. Guard on `J` itself with a counter, so the diagnostic says how
+many images were refused and at what `J`, and let the numerator sign test be separate — a negative
+weight and a near-singular denominator want different messages even though they share a threshold.
+
+**A refused image is deposited with `J = 1`, not dropped.** It is the same fallback the fit uses for
+a crease and for a rank-deficient neighbourhood (§3.3), and it is the conservative choice in both
+senses: the image still carries its mass, so the even extension is still present and the cut cell
+still reads a density rather than `kappa*n`; and the error it carries is bounded by §3.1's
+no-Jacobian column — +117% at `R = 4*dx` in the worst case — rather than being unbounded, which is
+what a `J` of several hundred applied to the wrong particle would be. Dropping the image instead
+would reintroduce exactly the deficit the mirror exists to remove, in precisely the cells where it is
+largest. Count the fallbacks; a run in which they are not rare is a run whose geometry is
+under-resolved, and that is a tagging problem, not a deposition problem.
 
 (The separate claim that the volume fraction `kappa` never appears in a denominator is **correct**
 and is the real advantage over hybrid-plus-redistribution.)
@@ -384,13 +481,27 @@ for cut cell i, with normal n_i and boundary centroid position x_i:
     v_j    = (t1.dn_j, t2.dn_j)      dn_j = normal(j) - n_i
 
     S      = argmin sum_j | v_j - S u_j |^2        2x2 least squares, then symmetrized
-    2H     = tr S        K = det S
+
+then store  S_c = P S P^T,  P = [t1 t2]   (3x2), and DISCARD t1, t2
 ```
 
+The invariants come from `S_c` by §3.1's formulas, not from this 2×2 — do not carry `2H = tr S`,
+`K = det S` forward past this point, because `det` is what changes meaning between the two forms.
+
 This makes `S` the differential of the normal, `S = +dn̂`, which is the convention §2.2 and §3.1 are
-written in. No principal directions, no eigen-decomposition, no Hessian. **Use a 5³ neighbourhood**
-and require at least **four** usable cut neighbours (this is what the harness enforces; revision 3
-said three). Skip multi-valued neighbours — a multi-valued cell contributes two normals to the fit.
+written in. No principal directions, no eigen-decomposition, no Hessian. **The tangent frame is
+local to this fit and is discarded here** — `S_c` is what is stored, and §2.2 never reconstructs a
+frame (§2.1). **Use a 5³ neighbourhood** and require at least **four** usable cut neighbours (this is
+what the harness enforces; revision 3 said three). Skip multi-valued neighbours — a multi-valued cell
+contributes two normals to the fit.
+
+> **Four neighbours is a count, not a rank test.** Four cut neighbours can be nearly collinear in the
+> tangent plane — a ridge, a thin fin, a cylinder whose cut cells run along the axis — and then
+> `U^T U` is near-singular in one direction and the least squares returns an arbitrary curvature
+> there. The count is necessary and not sufficient. **Test the conditioning of the 2×2 `U^T U`** and
+> fall back to `J = 1` with the same counter as the crease fallback when it fails. This is separate
+> from the residual test below: the residual detects a surface that is not smooth, the conditioning
+> test detects a *sample* that cannot determine `S` even where the surface is smooth.
 
 `mirror_discrete_curvature.py fit`, 5³ throughout:
 
@@ -461,38 +572,110 @@ Those values are what makes the ensemble integral close, because a cut cell's va
 over the whole cell while its particles occupy only the fluid fraction. Dividing by a
 position-dependent `V` reintroduces exactly the bias the mirror removes.
 
-**Mass that lands in covered cells is discarded, but not by the kernel.** The estimator is only ever
-read at `kappa_j > 0`, so dropping the part of an image's cloud that falls in covered cells is
-correct. The deposition kernels do **not** drop it: `depositParticleCIC` and `depositParticleTSC`
-write `rho(iv, ...)` for every cell in `cloudBox` with no EB test (`CD_EBParticleMesh.H:725-737,
+**Mass that lands in covered cells is ignored, not removed.** The estimator is only ever read at
+`kappa_j > 0`, so the part of an image's cloud that falls in covered cells is irrelevant by
+construction — and every image is inside the solid, so a large share of it falls there. The
+deposition kernels do not drop it: `depositParticleCIC` and `depositParticleTSC` write
+`rho(iv, ...)` for every cell in `cloudBox` with no EB test (`CD_EBParticleMesh.H:725-737,
 779-798`). That is pre-existing behaviour — today's fluid-side clouds already spill into covered
-cells — but the mirror puts a far larger share of mass there, and anything that reads regular data
-uniformly across covered cells (plot output, `arithmeticAverage` in `EBCoarseAve`,
-`DataOps::filterSmooth`) would see it. Hence step 5 below.
+cells — and the mirror raises the magnitude. **The deposit does not clean it up** (§4.2); the
+question of which downstream readers treat a covered cell as data is O2.
 
-### 4.2 Five steps
+### 4.2 The pass, step by step
 
 ```
-1. build     for each VALID particle inside the band, append an image at R(x_p) into a
-             persistent ParticleContainer<NoPayload>, carrying weight g_p*J_p
+0. clear     m_mirrorImages.clearParticles()      -- the container is persistent, not fresh
 
-2. remap     images.remap() -- the ordinary remap, no special level rule
+1. build     for each VALID particle inside the band, append an image at R(x_p) into
+             m_mirrorImages (ParticleContainer<NoPayload>), carrying weight g_p*J_p
+
+2. remap     m_mirrorImages.remap() -- the ordinary remap, no special level rule
 
 3. deposit   the image container through the ORDINARY EBAMRParticleMesh::depositWeight,
-             with the ordinary kernel and coarse-fine strategy, into a scratch EBAMRCellData
+             with the ordinary kernel and coarse-fine strategy, into m_mirrorScratch
 
-4. add       DataOps::incr the scratch field into the real one
-
-5. clean     DataOps::setCoveredValue(real, getCoveredCells(realm, phase), 0.0)
+4. add       DataOps::incr(real, m_mirrorScratch, 1.0)
 ```
 
-Step 4 is not optional: every AMR deposit path opens with `DataOps::setValue(a_meshData, 0.0)`
-(`CD_EBAMRParticleMesh.H:641, 844, 943, 1217`), so step 3 needs a scratch field.
+**There is no covered-cell cleanup step, and that is deliberate.** Revisions 5 and 6 had one. See
+below for why it came out.
 
-Step 5 must run **after** the exchange and `addFineGhostsToCoarse` inside step 3 have folded ghost
-mass back to its owner, and **before** redistribution and `coarsenAndFillGhosts`. `DataOps::setCoveredValue`
-(`CD_DataOps.H:1200`) with `AmrMesh::getCoveredCells(realm, phase)` is the existing pair; a covered
-cell is covered in every patch that sees it, so nothing real is destroyed.
+**Two containers and two mesh fields — and the second mesh field is forced by more than the reset.**
+The obvious reading is that `m_mirrorScratch` exists only because every AMR deposit path opens with
+`DataOps::setValue(a_meshData, 0.0)` (`CD_EBAMRParticleMesh.H:641, 844, 943, 1217`), so a second
+`depositWeight` into `a_phi` would erase the first. That is true, and it is the weaker of the two
+reasons. The stronger one is that **the level exchange accumulates over ghost cells and never clears
+them.**
+
+`DataOps::setValue` zeros the whole `EBCellFAB`, ghosts included (`EBCellFAB::setVal`), so a deposit
+starts from a clean ghost region. The level exchange is a *reversed* copier with an add op —
+`m_levelCopiers[lvl].define(dbl, dbl, domain, m_ghost*IntVect::Unit, true)` then `.reverse()`
+(`:591-592`), used at `:662` — so the ghost region is the exchange's **source** and the owner's
+valid region its destination. The ghost cells keep what was deposited into them; nothing writes them
+back to zero.
+
+So a hypothetical "deposit again without resetting" would fold the *first* pass's ghost content into
+the valid region a second time. **Double counting, silently, proportional to the ghost-region share
+of each patch.** A scratch field is therefore not an ergonomic convenience that a `bool a_reset`
+parameter could remove — the reset and the exchange are one mechanism, and separating them is a bug.
+Say this where the scratch is allocated; it is the kind of thing that reads like dead weight to
+someone optimising later.
+
+The particle side needs its own container for a plainer reason: the source container arrives as
+`const ParticleContainer<P, Traits>&` (`:251-255`) and the images are new particles. Two evaluated
+alternatives, both rejected:
+
+- **Merge images into a copy of the source container and deposit once.** Saves the second pass over
+  the coarse-fine machinery and the whole-domain `incr`, but costs a copy of *every* source particle
+  on *every* deposit to gain a saving proportional to the *images*, which are a thin band. It also
+  forces the combined container to carry the source's payload type, so every image would carry an
+  `ItoParticle`'s columns to hold one weight.
+- **Deposit images into `a_phi` first, sources second.** Same double-fold problem in the other
+  direction, plus it makes the mirror pass reorder the ordinary deposit.
+
+`m_mirrorScratch` carries one component, because `depositWeight` asserts
+`a_meshData[0]->nComp() == 1` (`:639`).
+
+> **What `DataOps::incr` does when the ghosts differ.** `EBCellFAB::plus(src, scale)` adds over
+> `a_src.getRegion() & getRegion()` (Chombo `EBCellFAB.cpp:591`) and asserts only that the component
+> counts match. So a scratch allocated with a different ghost width than the caller's `a_phi` does
+> **not** assert and does **not** lose anything in the valid region — both regions contain the same
+> `dbl[din]` — it simply skips the outer ghost ring. That is correct here, because after step 3 only
+> the valid region of the scratch is meaningful anyway: the deposit's `exchange(..., EBAddOp())`
+> (`CD_EBAMRParticleMesh.H:662`) folds ghost mass *into* its owner and never refreshes the ghosts.
+> Document this where the scratch is allocated, so nobody later "repairs" a mismatch that is not a
+> bug.
+
+> **Why there is no covered-cell reset, and why that is not a loose end.** Revisions 5 and 6 ended
+> the pass with `DataOps::setCoveredValue(real, getCoveredCells(realm, phase), 0.0)`. It is gone,
+> for the same reason `coarsenAndFillGhosts` is not called here either (`03cf59690`): **the deposit's
+> contract is that the field is correct where it is read, and it is read at `kappa > 0`.**
+> Covered-cell content, ghost-cell content and cross-level synchronization are all the consumer's,
+> and the consumer is the only party that knows whether it needs them.
+>
+> Every image is inside the solid by construction — that is what reflection means — so images
+> landing in covered cells is the expected outcome, not a defect to be cleaned up. §4.1's estimator
+> is defined only at `kappa > 0`, so nothing the mirror claims depends on what a covered cell holds.
+>
+> Four facts make deferring it safe rather than merely convenient:
+>
+> 1. **The dominant coarsening path is `kappa`-weighted.** `ItoSolver::coarsenAndFillGhosts`
+>    (`CD_ItoSolver.cpp:2121`) is `conservativeAverage` + `interpGhost`, and a conservative average
+>    weights by `kappa`, so a covered fine cell contributes exactly zero to the coarse cut cell
+>    however large its value.
+> 2. **Plot output already resets covered cells itself**, at `CD_ItoSolver.cpp:1813`, immediately
+>    before copying to the output realm.
+> 3. **The elliptic solvers never see them.** A covered cell has no `VolIndex`, so it is not in any
+>    stencil the field solve assembles.
+> 4. **Nothing zeroes covered cells after a particle deposit today either.** All nineteen
+>    `setCoveredValue` call sites are plot paths or the CDR solvers' own state
+>    (`CD_CdrSolver.cpp:1261`, `CD_ItoKMCStepperImplem.H:4890`), never `ItoSolver`'s deposited
+>    `m_phi`. A reset here would have been a new responsibility, not the restoration of an old one.
+>
+> What is genuinely left is the *consumer-side* question — which readers treat a covered cell as
+> data — and the mirror raises the magnitude of what they would see. That is **O2**, where it
+> belongs, and O2 already names `DataOps::filterSmooth` and the `arithmeticAverage` sites. Do not
+> re-add a reset here to paper over an O2 item.
 
 **Step 1 needs no kernel.** Building an image is position → cell → stored `(x_c, n_c, S_c)` → `R(x_p)`.
 It is an `AmrMesh` private helper, not an `EBParticleMesh` concern.
@@ -537,8 +720,12 @@ and it needs no change to `ParticleContainer` at all.
 
 Under `Halo` — the one strategy that deposits at `widthScale != 1`, at exactly one line
 (`CD_EBAMRParticleMesh.H:897`) — a promoted image is deposited at `widthScale = 1` while its source
-gets `refRat`, a bandwidth mismatch across the interface. `Halo` is not the target strategy;
-**document this in `depositHaloCore`'s Doxygen rather than engineering around it.** The same
+gets `refRat`, a bandwidth mismatch across the interface. `Halo` is not the target strategy, and that
+is now measured rather than asserted: **all 60 shipped `deposition_cf` settings are `transition`**,
+and the only two hardcoded `CoarseFineDeposition::Halo` call sites
+(`CD_ItoKMCStepperImplem.H:4046`, `CD_ItoKMCGodunovStepperImplem.H:1343`) are exactly the two that
+map to `Native` and `NGP` under §5.5 and therefore never run a mirror pass at all.
+**Document this in `depositHaloCore`'s Doxygen rather than engineering around it.** The same
 disposition applies to the band-mask width on that path (former O5): `widthScale` is 1.0 at every
 other patch deposit in the class (`:658, :866, :966, :967, :1235, :1276`), so the reflect decision
 taken at build time matches the deposit everywhere except `Halo`.
@@ -551,8 +738,13 @@ refined-coarse grid at `widthScale = refRat` (`CD_EBAMRParticleMesh.H:880`); it 
 counting only because `conservativeAverage` later overwrites the coarse cells under the fine grid.
 `HaloNGP` (`:949`) and `Transition` (`:1220`) move instead of copying.
 
-So images must be built from the **valid** holder only, before any deposit. Build them from a mask
-holder as well and `Halo`'s copy generates a second image — issue #29's double-counting trap 1 in a
+So images must be built from the **valid** holder only. The constraint is *which holder*, not
+*when*: all three coarse-fine cores restore the valid holder before returning — `depositHaloCore`
+copies then clears (`CD_EBAMRParticleMesh.H:849, 912`), `depositHaloNGPCore` and
+`depositTransitionCore` transfer out and transfer back (`:988`, `:1292`) — so building images after
+the real deposit, as §5.3's sequence does, is safe. Revision 5 said "before any deposit", which
+contradicts §5.3 and would send the next implementer to reorder correct code. Build them from a mask
+holder and `Halo`'s copy generates a second image — issue #29's double-counting trap 1 in a
 new guise. The image container then goes through the identical coarse-fine pass with its own mask
 copy, so it must be a container **defined on the realm's grids and reused rather than reallocated
 per deposit**. (Revision 4 said it must be "on the same realm with the halo masks available"; the
@@ -575,20 +767,58 @@ The split is: **regrid-lifetime state and per-call scratch on `PhaseRealm`; orch
   level with `EBCellFactory(ebisl)`, fill on valid cells, then `exchange()` (`:657-660`)
 - called from `PhaseRealm::regridBase(a_lmin)` (`:189`), after `defineEBLevelGrid` (`:163`)
 
-Four members are added, and the file's own convention decides which are `mutable`. `PhaseRealm`
-declares every operator and per-call scratch `mutable` (seventeen of them, `:605-695`, including
-`m_particleMesh` at `:675`, `m_redistributionOp` at `:665` and `m_nonConservativeDivergence` at
-`:695`) while regrid-built data such as `m_irregularCells` is not:
+Five members are added, and the file's own convention decides which are `mutable`. `PhaseRealm`
+declares every operator and per-call scratch `mutable` (**eighteen** of them, `:605-695` — revision 5
+said seventeen; the members are at `:605, 610, 615, 622, 630, 635, 640, 645, 650, 655, 660, 665, 670,
+675, 680, 685, 690, 695`, including `m_particleMesh` at `:675`, `m_redistributionOp` at `:665` and
+`m_nonConservativeDivergence` at `:695`) while regrid-built data such as `m_irregularCells` (`:600`)
+is not:
 
 ```cpp
-EBAMRCellData                        m_surfaceData;    // (x_c, n_c, S_c), 9 comps or three fields
+// Regrid-lifetime, so not mutable -- the m_irregularCells convention.
+EBAMRCellData                        m_surfaceData;    // 13 comps: ok, x_c, n_c, S_c
+
+// Per-call scratch, so mutable, following the file's own convention.
+mutable EBAMRCellData                m_mirrorScratch;  // 1 comp, 4.2 step 3
 mutable ParticleContainer<NoPayload> m_mirrorImages;
-mutable EBAMRIVData                  m_massDiff;       // moved off the solvers, see 5.4
+mutable EBAMRIVData                  m_massDiff;       // off the solvers, see 5.4
 mutable EBAMRIVData                  m_depositionNC;
 ```
 
-`m_surfaceData` is built in `defineMasks` alongside the existing masks — **with the ordering caveat
-in §5.4**, which `defineMasks` does not have to worry about because a mask is purely local per cell.
+**`m_mirrorScratch` is the field §4.2 step 3 deposits into.** Revision 5's member list omitted it
+entirely while §4.2 and §5.3 both used it. It is per-call scratch, so `mutable`, and one component.
+
+> **`EBAMRCellData`, chosen for the lookup, with the memory cost accepted.** The reflect decision
+> and the `(x_c, n_c, S_c)` read are on the per-particle hot path: one `FArrayBox` read at a known
+> `IntVect`, no indirection. A `BaseIVFAB` over the band would be far smaller but is indexed through
+> a per-patch offset map, and the whole point of §2.2 is that reflection is *one dependent load and
+> about twenty flops*. **This was decided; do not re-propose the sparse container.** What a future
+> reviewer may legitimately reopen is the *number of components*, not the container.
+>
+> The cost is real and is accepted with eyes open. At the shipped defaults —
+> `AmrMesh.coarsest_domain 128 128 128`, `max_block_size 16`, `num_ghost 2`, so a 1.91× ghost
+> overhead on 16³ boxes — one component costs 33 MB per level. Thirteen components cost **~430 MB
+> per level, per phase, per realm**; a two-phase dielectric problem on two realms pays four times
+> that. For comparison the four masks the realm already carries (`m_regularCells`, `m_coveredCells`,
+> `m_notCoveredCells`, `m_irregularCells`) cost 131 MB per level between them. **Report it in the
+> memory report** alongside the existing masks, so the number is visible rather than inferred.
+>
+> Note that 12 payload components is the floor for *any* correct format, not a cost of the
+> frame-free one. Revision 5's "9 Reals" was only 9 because it left the tangent frame unspecified;
+> the honest alternative — a 2×2 `S` plus an explicitly stored `t1` — is 3 + 3 + 3 + 3 = 12 as well.
+> The frame-free format buys §2.1's determinism for nothing.
+
+`m_surfaceData` is built **with the ordering caveat in §5.4**. Component 0 is the `ok` flag of §2.1,
+zeroed at allocation, so an unwritten cell is a no-reflect cell by default rather than by accident.
+
+> **Build it in `regridOperators`, not in `defineMasks`.** `defineMasks` sits in `regridBase`
+> for a stated reason — *"so the cell masks are available to load-balancing routines, which run
+> after regridBase but before regridOperators"* (`CD_PhaseRealm.cpp:182-183`) — and is
+> unconditional. Nothing in load balancing wants a curvature fit, and an unconditional build makes
+> every realm pay the 5³ fit and the 430 MB whether or not it deposits particles. Put the build beside
+> `defineParticleMesh` (`CD_PhaseRealm.cpp:327`, from `regridOperators` at `:203`) and gate it on
+> `queryOperator` like every other operator in that routine.
+
 `m_massDiff` and `m_depositionNC` need no new plumbing: `PhaseRealm` already owns the operators that
 consume them (`m_redistributionOp`, `m_nonConservativeDivergence`) behind the `s_eb_redist` and
 `s_noncons_div` registrations (`:56-57`).
@@ -600,7 +830,14 @@ are phase-independent, and `Realm` owns the `PhaseRealm`s, so this is one hop of
 `AmrMesh::allocate(ParticleContainer<P,Traits>&, realm)` (`CD_AmrMeshImplem.H:238-261`) shows exactly
 which getters to forward.
 
-Gate all four on an operator registered through `PhaseRealm::registerOperator` (`:353`) so realms
+**Its lifecycle is three lines, and all three are load-bearing.** It is `define`d at regrid, beside
+the surface data, because `remap()` reads `levelTiles` and `validCells` which the regrid rebuilds.
+It is `clearParticles()`d at the *start* of every mirror pass (§4.2 step 0), not the end, so that an
+aborted pass cannot leak images into the next deposit. And `ParticleSoA::append(pos, weight)` leaves
+the metadata columns at `s_invalidID`/`-1` (`CD_ParticleSoA.H:949-958`), which is fine: nothing in
+`remap()` reads them, and images need no identity. Do not call `resetParticleIDs` on them.
+
+Gate all five on an operator registered through `PhaseRealm::registerOperator` (`:353`) so realms
 that never deposit particles do not pay for it, in the same way `s_particle_mesh` is gated
 (`CD_PhaseRealm.H:60`).
 
@@ -638,12 +875,12 @@ machinery. Neither is `const` (`CD_AmrMesh.H:991-997`). The full sequence lives 
 ```
 AmrMesh::depositWeight(...)
   ├ particleMesh.depositWeight(real, sources, ...)          // unchanged
-  ├ if mode == Mirror:
-  │   ├ build images into PhaseRealm's m_mirrorImages from m_surfaceData
+  ├ if mode == Mirror && this (realm, phase) has cut cells:
+  │   ├ m_mirrorImages.clearParticles()
+  │   ├ build images into m_mirrorImages from m_surfaceData, VALID holder only
   │   ├ m_mirrorImages.remap()
-  │   ├ particleMesh.depositWeight(scratch, m_mirrorImages, ...)
-  │   ├ DataOps::incr(real, scratch, 1.0)
-  │   └ DataOps::setCoveredValue(real, getCoveredCells(realm, phase), 0.0)
+  │   ├ particleMesh.depositWeight(m_mirrorScratch, m_mirrorImages, ...)
+  │   └ DataOps::incr(real, m_mirrorScratch, 1.0)
   └ if mode == Redistribute | RedistributeBlended:
       └ nonConservativeDivergence + hybrid + redistribute, using m_depositionNC / m_massDiff
 ```
@@ -659,6 +896,33 @@ AmrMesh::depositWeight(...)
    cell from the nearest cut cell — or equivalently extend by two 1-cell propagation sweeps with an
    exchange between them.
 4. Require `eb_ghost >= 2` **and** `num_ghost >= 2` at runtime.
+
+> **"Nearest" means Euclidean, over the radius-2 neighbourhood, with a stated tie-break.** §2.4's
+> error ladder — the 1.2–2.9% that justifies the quadratic patch over everything else — was measured
+> with `near = argmin(|x_band - x_cut|^2)` over **all** cut cells (`mirror_source.py:48-53`). Two
+> 1-cell propagation sweeps do not compute that: they compute a Chebyshev-nearest assignment with an
+> arbitrary tie-break, and the two differ exactly where more than one piece of surface is within two
+> cells — the O3 geometry. An explicit search over the 5³ neighbourhood costs 125 distance
+> comparisons per band cell once per regrid and is faithful to the evidence. Fix the tie-break
+> (lowest `IntVect` in lexicographic order) so the result does not depend on iteration order.
+
+> **A band cell whose nearest cut cell is not one this level owns must not reflect.** `EBISBox` is
+> valid `eb_ghost` cells out *whether or not any box on that level owns those cells* — that is what
+> `new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_numEbGhostsCells, &(*m_ebis))`
+> (`CD_PhaseRealm.cpp:411`) buys — while `exchange()` fills ghosts only from *valid* regions of the
+> same level. So on a level whose grid edge passes within two cells of the EB, a valid band cell can
+> see a cut cell through `EBISBox` that no box on that level ever fits an `S` for, and no exchange
+> can deliver one. Revision 5 wrote step 3 as a total statement and it is not.
+>
+> The cheap fix is to derive the band from data that was actually delivered rather than from
+> geometry that merely exists. The existing masks already work this way: `defineMasks` raises
+> `m_irregularCells` on `ebisbox.getIrregIVS(dbl[din])` — the **valid** box — and then exchanges
+> (`CD_PhaseRealm.cpp:646, 660`), so a cut cell nobody owns never raises the mask. Build the band by
+> growing the *exchanged* irregular mask, set the `ok` flag of §2.1 only on band cells that found a
+> delivered cut cell, and **count the band cells that did not**. A nonzero count is not a warning to
+> be tuned away — it means the grids do not cover the EB band, which is the same defect as O9 seen
+> from the other end, and both are repaired by tagging the band rather than only the cut cells —
+> see the note under O9, which corrects an earlier claim that `AmrMesh.buffer_size` was the knob.
 
 > Revision 3 extended first and exchanged once afterwards. In that order a band cell at a patch edge
 > whose nearest cut cell lies one patch over is assigned a too-far cut cell, and the exchange cannot
@@ -706,34 +970,98 @@ is discarded, so it is dead work, not a different scheme.
 | `Redistribute` | `dc` | `(1-kappa)*dc` | `redistribute=true, blend=false` (**23 files**) | *not expressible* |
 | `RedistributeBlended` | `dc + (1-kappa)*dnc` | `(1-kappa)(dc - kappa*dnc)` | both true (0 shipped) | `blend=true` (0 shipped) |
 
-Two consequences to decide, not to discover:
+**The migration is mechanical and behaviour-preserving, because `mirror` is not the default.** The
+enum lands as a *signature* change: every shipped input is rewritten to the value that reproduces
+exactly what it does today, and nothing selects `Mirror` until someone opts in deliberately. That
+removes the whole class of "which of these 30 files did we mean to change" risk from this work.
 
-- **McPhoto gains a mode** it cannot currently express. That is a behaviour addition.
-- **`mirror` collides with the dominant shipped configuration.** `CD_ItoSolver.options` ships
-  `false/false`, but 23 of the 30 shipped inputs that set `redistribute` set it `true`. Every one of
-  those files needs a per-case decision, not a mechanical substitution.
+The cross-product of the two flags in shipped inputs is what makes that possible, and it is not
+obvious until measured — the enum collapses two independent booleans into one selector, so it can
+only be behaviour-preserving if no shipped file uses a combination the enum cannot express:
+
+| `irr_ngp_deposition` | `redistribute` | `blend_conservation` | files | becomes |
+|---|---|---|---|---|
+| `false` | `true` | `false` | 22 | `redistribute` |
+| `false` | `false` | `false` | 5 | `native` |
+| `true` | `false` | `false` | 2 | `ngp` |
+| `true` | `true` | — | **0** | *not expressible — and not used* |
+
+(29 files set `irr_ngp_deposition`; a 30th sets `redistribute = true` alone and inherits `false` for
+the other from `CD_ItoSolver.options`, so it maps to `redistribute` too.) Every shipped
+configuration maps one-to-one. McPhoto's 14 `blend_conservation = false` files map to `native`,
+which is behaviour-preserving because with `blend = false` its `depositHybrid` is the identity
+`divH = dc + (1-kappa)*0` and the resulting `deltaM` is discarded — dead work, not a different
+scheme.
+
+Two consequences to record in the PR description, not to discover later:
+
+- **The enum makes `NGP` + `redistribute` unrepresentable.** It is representable today and no
+  shipped input uses it. Dropping it is deliberate: the combination is semantically odd (put the
+  whole cloud in the cut cell, then redistribute a `(1-kappa)` share of it out again).
+- **McPhoto gains a mode** it cannot currently express. That is a behaviour addition, available but
+  unselected.
 
 **Do not sweep in the fluid solvers.** `CdrGodunov.blend_conservation` (7 files) and
 `CdrCTU.blend_conservation` (34 files) are the *fluid* hybrid divergence and have nothing to do with
 particle deposition, despite the identical option name.
 
 **One check the enum does not subsume.** `IrregularDeposition::NGP` and `DepositionType::NGP` are
-different things. `Mirror` with an NGP base kernel must still be rejected where the kernel is
-chosen — `AmrMesh::depositWeight` or `EBParticleMesh::depositCore`'s switch — because
-`CD_ItoKMCStepperImplem.H:4041` passes `DepositionType::NGP` as a literal at the call site, so
-`parseOptions` structurally cannot see it.
+different things, and `Mirror` with an NGP base kernel is meaningless: NGP puts the whole cloud in
+the particle's own cell, so an image in the same cell doubles it.
+
+Revision 5 placed this check at `AmrMesh::depositWeight` or in `EBParticleMesh::depositCore`'s
+switch, on the grounds that `CD_ItoKMCStepperImplem.H:4041` passes `DepositionType::NGP` as a literal
+"so `parseOptions` structurally cannot see it". That reads the call site wrong. `:4041` passes
+`DepositionType::NGP` **and** `a_forceIrregNGP = false` (`:4047`), which maps to
+`IrregularDeposition::Native` — it can never be `Mirror`. The other hardcoded site,
+`CD_ItoKMCGodunovStepperImplem.H:1338`, passes `true` (`:1344`), which maps to `NGP`. Both are
+behaviour-preserving under a mechanical conversion and neither can produce the collision.
+
+The combination that *can* arise is a solver configured with `deposition = ngp` and
+`irregular_deposition = mirror`, and **both of those are options of the same solver**, parsed
+thirty lines apart in `ItoSolver::parseDeposition` (`CD_ItoSolver.cpp:263` and `:320`). Put the check
+there, where it can name both offending keys in the error message, and keep a cheap defensive
+`CH_assert` at `AmrMesh::depositWeight` for the literal call sites.
 
 **The rename.** `irr_ngp_deposition` → `irregular_deposition` across 29 `.options`/`.inputs`
 occurrences in 29 files, plus `Ito.rst` and the `pp.get` at `CD_ItoSolver.cpp:320`. It is a
-value-domain change, not only a key rename: `true/false` becomes one of five strings. Because the
-tree uses `pp.get` and never `query`, a stale input file hard-errors on the missing key — that is the
-failure mode we want, so do not add a fallback. Leave `irr_ngp_interp` alone; interpolation keeps its
+value-domain change, not only a key rename: `true/false` becomes one of five strings, mapped by the
+table above. Because the tree uses `pp.get` and never `query`, a stale input file hard-errors on the
+missing key — that is the failure mode we want, so do not add a fallback.
+
+**No shipped input is left selecting `mirror`.** The default in `CD_ItoSolver.options` becomes the
+value that reproduces today's shipped default (`false/false` → `native`), and `mirror` is opted into
+by hand. Whether it later becomes a default is a separate decision, taken after the acceptance
+evidence of §6.1 exists on real geometry — not in this work. Leave `irr_ngp_interp` alone; interpolation keeps its
 own two-valued type, and `mirror` is meaningless when gathering.
 
-**93 C++ occurrences across 8 files** to convert: 85 `a_forceIrregNGP` + 4 `forceIrregNGP` +
-4 `m_forceIrregDepositionNGP`, in `CD_EBParticleMesh.H` (49), `CD_EBAMRParticleMesh.H` (18),
-`CD_AmrMesh.H` (10), `CD_AmrMeshImplem.H` (10), `CD_ItoSolver.cpp`, `CD_ItoSolver.H`,
-`CD_ItoSolverImplem.H`, `CD_CdrSolver.cpp` (2). The 7 `m_forceIrregInterpolationNGP` are not in scope.
+**93 C++ occurrences across 8 files** carry the name — `CD_EBParticleMesh.H` (49),
+`CD_EBAMRParticleMesh.H` (18), `CD_AmrMesh.H` (10), `CD_AmrMeshImplem.H` (10), `CD_ItoSolver.cpp`,
+`CD_ItoSolver.H`, `CD_ItoSolverImplem.H` (4 between them), `CD_CdrSolver.cpp` (2) — but **93 is not
+the conversion count, and a mechanical conversion of all 93 crosses the scope boundary this section
+draws two paragraphs above.**
+
+`EBParticleMesh` and `EBAMRParticleMesh` use the *same parameter name* `a_forceIrregNGP` on the
+interpolation path, which "Leave `irr_ngp_interp` alone" explicitly excludes. Splitting them:
+
+| File | total | interpolation side | deposition side |
+|---|---|---|---|
+| `CD_EBParticleMesh.H` | 49 | **22** | 27 |
+| `CD_EBAMRParticleMesh.H` | 18 | **6** | 12 |
+| `CD_AmrMesh.H` | 10 | **4** | 6 |
+| `CD_AmrMeshImplem.H` | 10 | **4** | 6 |
+| solvers | 6 | 0 | 6 |
+| | **93** | **36** | **57** |
+
+The 7 `m_forceIrregInterpolationNGP` members are a separate, already-excluded set.
+
+**Stop the enum at `AmrMesh`/`EBAMRParticleMesh`; leave `EBParticleMesh` a bool.** The per-particle
+kernel answers exactly one question — NGP in a cut cell, yes or no — and `Mirror`, `Redistribute`
+and `RedistributeBlended` all map to *no* there, since the mirror is a separate pass (§4.2) and
+redistribution happens after the deposit. Threading a five-valued enum into `depositParticleCIC`
+buys nothing and forces a decision at every leaf. Converting only the deposition side of
+`CD_AmrMesh.H`/`CD_AmrMeshImplem.H`/`CD_EBAMRParticleMesh.H` plus the solvers is **30 sites**, and
+the leaf keeps a single-purpose contract.
 
 ---
 
@@ -741,10 +1069,11 @@ own two-valued type, and `mirror` is meaningless when gathering.
 
 ### PR A — mechanism, one consumer
 
-Band mask, the per-band-cell patch data at regrid, the image container, the mirror utility, and the
-covered-cell reset. Wire exactly one consumer — `ItoSolver::depositParticles` — as the proof.
+Band mask, the per-band-cell surface data at regrid, the image container and the mirror utility.
+Wire exactly one consumer — `ItoSolver::depositParticles` — as the proof.
 
-**PR A must also deal with redistribution**, because it is one line below the deposit it wires.
+**PR A must also deal with redistribution**, because it is one line below the deposit it wires — but
+only to the extent of refusing the combination, since nothing selects `mirror` by default.
 `ItoSolver::depositWeight` is `AmrMesh::depositWeight` followed by `this->redistributeAMR(a_phi)`
 (`CD_ItoSolverImplem.H:71, :79`), and `depositGathered` does the same (`:148, :157`).
 `redistributeAMR` (`CD_ItoSolver.cpp:2133`) opens with
@@ -752,15 +1081,18 @@ covered-cell reset. Wire exactly one consumer — `ItoSolver::depositParticles` 
 > *"When we entered this routine we had `a_phi = m_i/dV` but we actually want to have
 > `phi = m_i/(kappa*dV)`"*
 
-which is exactly the assumption the mirror removes, and `depositHybrid` (`:2193`) computes
+which is exactly the assumption the mirror removes, and `depositHybrid` (`:2194`) computes
 `deltaM = (1-kappa)*(dc - kappa*dnc)` under the comment *"Remember, `dc` already scaled by kappa"*
-(`:2225-2233`). With the mirror, `dc` is already a density, so `deltaM` is inflated by `1/kappa`
+(`:2231-2234`). With the mirror, `dc` is already a density, so `deltaM` is inflated by `1/kappa`
 — 20× at `kappa = 0.05` — and smooshed into the neighbouring cells. The minimum for PR A is a hard
 error when `mirror` is selected with `redistribute` or `blend_conservation`; the enum of §5.5 makes
 that unrepresentable instead, which is why PR B should not lag far behind.
 
 **Done when** the acceptance test (§6.1) passes through the wired path, the `kappa <= 0.05` bin is
-reported, and every other regression is bit-for-bit unchanged.
+reported, and every other regression is bit-for-bit unchanged. The last clause is cheap to satisfy
+and is the point of the whole migration strategy: nothing selects `mirror`, so *every* existing
+regression must be bit-for-bit identical, and any that is not is a bug in the conversion rather than
+an expected consequence of the feature.
 
 ### PR B — wire it centrally
 
@@ -775,9 +1107,13 @@ and delete PR A's bespoke call and the duplicated redistribution code in the sol
 
 The eighth is the awkward one: the `hasDielectrics` branch of `computeSemiImplicitRho`
 (`CD_ItoKMCGodunovStepperImplem.H:1270`), depositing onto `phase::solid` with a hardcoded
-`forceIrregNGP = true` (`:1338`). Under PR B it inherits the enum, so `mirror` would reflect across
-the same embedded boundary with the fluid side swapped — pushing particles deliberately *inside* the
-dielectric back out into the gas. **Decide explicitly whether `phase::solid` deposits mirror.**
+`forceIrregNGP = true` (`:1344`). The mechanical conversion of that literal is
+`IrregularDeposition::NGP`, which preserves today's behaviour exactly, so **PR B does not have to
+decide anything here — it has to resist deciding.** The hazard is only if someone later routes the
+solver's setting into that call: `phase::solid`'s `ebisbox.normal()` points into the *solid*, so a
+mirror there reflects across the same embedded boundary with the fluid side swapped, pushing
+particles deliberately placed *inside* the dielectric back out into the gas. Convert the literal to
+`NGP`, and say in a comment why it is a literal.
 
 **Why B is not optional.** If the mirror pass stays the consumer's responsibility,
 `irregular_deposition = mirror` becomes a setting that some deposits honour and others silently
@@ -792,10 +1128,16 @@ registering `s_particle_mesh` on those realms and using the persistent per-patch
 
 Three cases, mandatory, same PR. **Primary metric is the density binned by `kappa`.**
 
-- **A curved case** — on a plane `J = 1` identically, so a planar-only test green-lights an
-  implementation with no Jacobian and a 117% error at `R = 4*dx`. A torus is the cheapest surface
-  that also exercises unequal principal curvatures and non-constant curvature, and it exercises the
-  cut-cell-to-band-cell extension that a sphere cannot.
+- **A curved case, and it must be the torus, not a sphere** — on a plane `J = 1` identically, so a
+  planar-only test green-lights an implementation with no Jacobian and a 117% error at `R = 4*dx`.
+  A sphere is barely better: it is umbilic (`c_1 = c_2`), so `S_c` is isotropic and *frame-invariant*,
+  and it has constant curvature, so borrowing `(x_c, n_c, S_c)` from a neighbouring cut cell costs
+  nothing. A sphere therefore cannot distinguish a correct anisotropic `S_c` from a wrong one, which
+  is exactly the gap §2.1 closes and exactly the gap every harness in this directory shares. A torus
+  has unequal principal curvatures **and** non-constant curvature, and it exercises the
+  cut-cell-to-band-cell extension. **Assert in the test that the sliver bin actually contains cells
+  with `c_1 != c_2`** — otherwise a torus resolved too coarsely degenerates to the sphere case
+  without saying so.
 - **A concave case** — convex-only hides the errors that no longer cancel, and the sliver bias is
   worst there.
 - **A case with no EB at all**, bit-for-bit identical to `native`.
@@ -832,13 +1174,24 @@ Revision 2 argued the opposite.
 
 | # | Item | Status |
 |---|---|---|
-| O1 | The mirror activates issue #29 part 4 | Today the reaction step's charge error cancels because both sides are `kappa`-weighted; with the mirror the Ito side becomes a true density and `drho = -Qe*dn*(1-kappa)` appears. Fix belongs in `ItoKMCStepper::reconcileCdrDensities`, not here. The acceptance test cannot see it, the obvious repair reintroduces a `kappa` denominator, and `floor(kappa*phi*vol)` already zeroes reactions in slivers. **Needs a reacting cut-cell test and a decision.** |
-| O2 | `phi` changes meaning — and this list is not closed | Redistribution is handled (§5.5 makes it unrepresentable alongside `mirror`), but it was missed by three reviews, so assume peers remain. Known: `DataOps::filterSmooth` (`CD_DataOps.cpp:679`) pulls cut cells toward zero and would actively undo the mirror — reject `rho_filter`/`cond_filter` with `mirror`, or fix it. `arithmeticAverage` sites coarsen a density without `kappa` weighting. Tagging and plot output change at the wall. **Audit every reader of `phi` in a cut cell.** |
+| O1 | The mirror activates issue #29 part 4 | **Downstream, not this PR.** Today the reaction step's charge error cancels because both sides are `kappa`-weighted; with the mirror the Ito side becomes a true density and `drho = -Qe*dn*(1-kappa)` appears. The fix belongs in `ItoKMCStepper::reconcileCdrDensities` and will arrive with the coupling-algorithm rework, in consumer code. It is listed here so the connection is on record, not because this PR owes it anything: `mirror` is opt-in and nothing selects it (§5.5), so nothing regresses in the meantime. |
+| O2 | `phi` changes meaning — and the consumers own that | **Consumer responsibility, documented not fixed here.** This PR builds images, scales them by `J`, and deposits them through the ordinary machinery. Where the field goes afterwards — ghost filling, coarsening, filtering, tagging, plotting — belongs to whoever asked for the deposit, which is the same division `03cf59690` drew for synchronization and §4.2 draws for covered cells. What this PR owes is a clear statement of the new contract: **under `mirror`, a cut cell holds `n`, not `kappa*n`.** Put it in the `IrregularDeposition::Mirror` enumerator's Doxygen and in `Ito.rst`. Known consumers that will need attention when they opt in, listed as a courtesy rather than as work items: `DataOps::filterSmooth` (`CD_DataOps.cpp:679`) pulls cut cells toward zero and would undo the mirror; the `arithmeticAverage` sites coarsen a density with no `kappa` weighting (`conservativeAverage`, the path `ItoSolver` actually uses, is fine); tagging and plot output change at the wall. |
 | O3 | More than one surface, and creases | The reflection is through *a* surface. At a triple point, a re-entrant corner, or `Aerosol`'s sphere unions the even extension is not a single reflection. Fit residual is the detector, `J = 1` the fallback. **Decide whether that is enough.** |
 | O6 | Tilted-normal band threshold | The `kappa < 0.25` (CIC) / `< 0.5` (TSC) thresholds are derived for axis-aligned normals only (§1.2). Chebyshev-2 is measured for tilted normals; the thresholds are not derived. |
 | O7 | Images outside the problem domain | `remap()` drops off-domain particles with a counter. Near a domain corner where the solid extends past the boundary the image leaves and its contribution vanishes. Decide whether that wants a reflect-at-domain-boundary rule. |
 | O8 | Thin solids and narrow gaps | If the solid is thinner than the reflection reach, the image lands in fluid on the far side. No criterion fixes this; start with an assert on minimum resolved solid thickness. |
-| O9 | Fine grids must cover the band | When a fine patch edge cuts through the mirror band, images from fine cut cells land outside the fine grids, are demoted by `remap()`, deposit at coarse width, and are then overwritten by `conservativeAverage`. Those fine cut cells lose their correction. This is a *grid* requirement, not a remap rule: the refined region must cover the EB plus ~3 cells. `AmrMesh.buffer_size` ships 2. **Decide whether to require more, or to accept and document.** |
+| O9 | The correction degrades at an EB × coarse-fine boundary | **Accepted, and documented.** Where a fine grid edge passes near the EB, two things happen: an image from a fine cut cell can land outside the fine grids and be demoted by `remap()`, and a valid fine band cell can find no cut cell with a fitted `S` (§5.4). Neither loses mass. A demoted image deposits on the coarse level and `addInvalidCoarseToFine` routes coarse-under-fine cloud mass back up to the fine level *inside the deposit* (`CD_EBCoarseFineParticleMesh.H`, item 3 of the class doc), before any averaging — so `conservativeAverage` never sees it as something to overwrite. What is left is a **bandwidth** difference: the correction arrives through a coarse-width cloud rather than a fine-width one. That is precisely the trade §4.2 already accepts, and documents, for a promoted image, and it is the ordinary price of AMR: the answer near a refinement boundary is not the answer you would get without one. §5.4's `ok` counter stays as a **diagnostic**, not an abort — it says how much of the band was affected. |
+| O10 | Multi-valued cells, on the band side | **Closed by an invariant.** Multiply-cut cells are always refined away in this project's workflows, so a particle's cell is single-valued and the reflect path never has to choose between two VoFs — which it could not do, since a position alone does not determine a VoF. The invariant is a *workflow* invariant: nothing in the library enforces it (`AmrMesh::getMultiCutVofIterator` exists precisely because the CDR solvers handle these cells defensively). **So assert it: `CH_assert(!ebisbox.isMultiValued(particleIV))` on the reflect path**, where it costs nothing under `OPT=HIGH` and fires the day a geometry violates the invariant. §5.4's "skip multi-valued neighbours" in the fit stays as belt-and-braces. |
+| O11 | Deposits that never reach the funnel | `ItoSolver::depositWeightNGP` and `depositGatheredNGP` (`CD_ItoSolverImplem.H:84`) build an `EBParticleMesh` per patch themselves (`:115`) and never call `AmrMesh::depositWeight`, so no mirror pass can apply to them. They are plot paths (`CD_ItoSolver.cpp:1705-1755`) and deliberately NGP, so this is correct — but it means the plotted particle density in a cut cell will not match the `phi` the field solver sees, by exactly the factor the mirror introduces. That is a diagnostic people will read as a bug. **Name it in the plot variable's documentation.** |
+
+> **Two corrections revision 6 owes O9.** First, it wrote that a demoted image is *"overwritten by
+> `conservativeAverage`"*. It is not: `addInvalidCoarseToFine` interpolates coarse-grid deposition
+> clouds onto the fine level from inside the deposit, which is exactly the case it exists for. The
+> defect is bandwidth, not lost mass. Second, it named `AmrMesh.buffer_size` as the knob to raise.
+> That parameter is read into `m_bufferSizeBR` (`CD_AmrMesh.cpp:2704`) and reaches only the
+> `BRMeshRefine` constructor in the `BergerRigoutsous` branch (`:1216-1221`); the `Tiled` branch
+> (`:1228`) takes no buffer at all, and shipped inputs split **70 `br` / 69 `tiled`**. Neither
+> correction changes the disposition, which is to accept it.
 
 **Retired since revision 4:**
 
@@ -854,13 +1207,45 @@ Revision 2 argued the opposite.
 - **What the real geometry generator delivers.** The first number appears in phase 3.
 - **Extending the invariants off the cut cells.** A sphere has constant curvature, so no table here
   can see the cost of borrowing `(x_c, n_c, S_c)` from the nearest cut cell. A torus can.
-- **Cost.** One extra `EBAMRCellData`, one extra `ParticleContainer`, a whole-domain increment and a
-  covered-cell reset per deposit, an extra `remap()`, and the per-regrid fit. Reflect fraction:
-  planar per-case reaches 43.4%, convex spheres 17.5–30.1%, and **concave runs 62.7% at R = 8, 71.3%
-  at 6, 91.2% at 4 and 98.0% at 3**. A vessel wall is not exotic.
-- **Tight cavities are a NaN risk, not an accuracy risk.** Down to R = 3`*dx`, where `J` reaches 179,
-  the worst binned deviation stays under 2.2% — the high-`J` images land where every stencil cell is
-  covered and are dropped.
+- **Cost, and the reflect fraction is not the way to estimate it.** One extra `EBAMRCellData`
+  (`m_mirrorScratch`), one extra `ParticleContainer`, a whole-domain increment per deposit, an extra
+  `remap()`, and the per-regrid fit.
+
+  Revision 5 quoted reflect fractions of 62.7–98.0% and concluded "a vessel wall is not exotic".
+  **Those are properties of the harnesses' 16³ box, not of a simulation.** Every harness here puts a
+  16³ domain tightly around its geometry, so the band is a large share of the fluid volume by
+  construction — for a concave sphere of `R = 8*dx` with a reach of ~2.3, the shell is
+  `1 - (5.7/8)^3 = 64%` of the volume, and the harness duly reports 42–58%. In a real run the band
+  is two cells of a domain hundreds of cells across, and the reflect fraction goes with
+  surface-to-volume. Under the criterion of §1.2 the corrected figures are, concave:
+
+  | `R/dx` | CIC reflect | CIC max `d` | TSC reflect | TSC max `d` |
+  |---|---|---|---|---|
+  | 8 | 42.1% | 2.29 | 57.9% | 3.15 |
+  | 6 | 47.8% | 2.33 | 64.9% | 3.19 |
+  | 4 | 65.0% | 2.13 | 82.8% | 2.96 |
+  | 3 | 73.9% | 2.06 | 90.5% | 2.74 |
+
+  The cost that does **not** shrink with the band is the fixed per-deposit work: `remap()` is a
+  collective, and the increment is whole-domain. Those are O(cells) and
+  O(particles) regardless of how thin the band is, and they are paid on every deposit of every
+  species. **Early-out the whole mirror pass on a level with no cut cells**, and measure the
+  remaining fixed cost before assuming it is small — `remap()` has been the dominant cost in this
+  tree before.
+
+  The `EBAMRCellData` of §5.1 adds ~430 MB per level per phase per realm on top of that; report it
+  in the memory report rather than letting it appear as unexplained growth.
+- **Tight cavities are a NaN risk, not an accuracy risk** — and the numbers are kernel-dependent.
+  Revision 5 read *"down to R = 3`*dx`, where `J` reaches 179"*, measured with the retired distance
+  band of §9 and therefore on a sample the scheme does not produce. Under the criterion of §1.2
+  (`mirror_cavity.py`, revision 6) the criterion itself caps the reach — the image of a deep particle
+  in a small cavity lands far inside the solid where its cloud touches no `kappa > 0` cell — so `J`
+  reaches **28.9 at `R = 3*dx` under CIC and 483.8 under TSC**, never singular. The worst binned
+  deviation is unchanged at 2.16%, at `R = 3.5`.
+
+  So the stated mechanism is now also the harness's mechanism, which it was not before: revision 5's
+  run dropped those images by a distance test long before the covered-cell test could. The
+  conclusion survives; §3.2's guard has to be sized for `J ~ 500`, not for `J ~ 179`.
 - **The absorbing-wall boundary condition.** Reflection imposes `dn/dnhat = 0`, right for a uniform
   plasma and for reflecting or dielectric surfaces, wrong at an absorbing electrode. Out of scope.
 
@@ -876,6 +1261,7 @@ The CIC column of the band table did not, for the reason in §1.2, and is correc
 ```
 python3 reach_cells.py                          # band in cells; Chebyshev-N retention
 python3 img_reach.py                            # where the IMAGE's cell sits          (new in r5)
+python3 mirror_frame.py                         # the tangent frame, and the frame-free form (new in r6)
 python3 band_weight.py                          # mirrored mass vs distance
 python3 mirror_source.py                        # the reflection-source ladder
 python3 mirror_discrete_curvature.py fit        # curvature from the discrete normal
@@ -883,10 +1269,19 @@ python3 mirror_discrete_curvature.py noise      # how much normal error the fit 
 python3 mirror_levelset_curvature.py endtoend   # why the level-set route was dropped
 python3 mirror_band_kernels.py                  # CIC and TSC bands, real kernels
 python3 mirror_zeroing.py                       # the zeroing-deposit failure, on a plane
-python3 mirror_cavity.py                        # tight-cavity Jacobian blow-up
+python3 mirror_cavity.py                        # tight-cavity Jacobian blow-up (rewritten in r6)
 python3 mirror_sphere_ext.py radii              # the curved cross (revision 2)
 python3 mirror_planar_ext.py band | criteria | margin
 ```
+
+**Harness bug 6, fixed in r6.** `mirror_cavity.py` selected reflecting particles with
+`d <= 1.5*dx*sum|n_i|`, the `3*s_max` distance band §9 retired two revisions earlier, and reported
+the analytic amplification at `d = 1.5*sqrt(3)`. It now applies §1.2's criterion — the image's cloud
+must overlap a `kappa > 0` cell — and reports the max `d` that criterion actually admits, for both
+kernels. Every number in §7's cavity bullet changed. The class of error is review 5's Finding 3 and
+it is one level up from harness bug 5: not *"the harness used the wrong kernel"* but *"the harness
+used the right kernel with a selection rule the plan had already discarded"*. When re-running
+anything here, check the **selection** as well as the kernel.
 
 **Harness bug 5, fixed in r5.** `reach_cells.py` used the TSC triangular-cloud weight for both
 kernels, so its CIC mass-retention column described a kernel the code does not have. Fixed by
@@ -923,3 +1318,11 @@ is a sampling artifact and is the most convincing wrong number in the set.
 | "Covered cells are never written" | 4 | The kernels write every cell in `cloudBox` with no EB test (`CD_EBParticleMesh.H:725, 779`) |
 | `EBAMRParticleMesh` cannot hold the image container because it "needs a realm" | 4 | `ParticleContainer::m_realm` is a label read only by `getRealm()`; the real gaps are `minBlockSize`/`levelTiles`/`validCells`, and the container belongs on `PhaseRealm` for other reasons |
 | The mirror is a self-contained change to the deposit | 1–4 | `ItoSolver::depositWeight` calls `redistributeAMR` one line later (`CD_ItoSolverImplem.H:79`), on the explicit assumption that `dc = kappa*phi` |
+| `S_c` stored as a 2×2 "in the tangent frame" | 5 | The fit's frame and the reflection's frame have to be the same one and nothing said so; a mismatch moves the image by up to 2.24`*dx` while `J` and the §6.1 mass check stay exactly right (`mirror_frame.py`) |
+| `K = det S` | 5 | True of the 2×2; **identically zero** for the world-frame `S_c`, which is rank ≤ 2. Use `K = ½[(tr S_c)² − tr(S_c²)]`, which also removes the 2-D special case |
+| "Extend `(x_c, n_c, S_c)` to every band cell from the nearest cut cell" | 5 | Total as written. `EBISBox` sees cut cells outside the level's grids that no box on that level can fit an `S` for, and `exchange()` cannot deliver one |
+| Cavity `J` reaches 179 at `R = 3*dx`; reflect fractions 62.7–98.0% | 5 | Measured with the `3*s_max` distance band this table retired in revision 3. Under §1.2's criterion: `J` = 28.9 (CIC) / 483.8 (TSC), reflect 42.1–90.5% |
+| Build images "before any deposit" | 5 | All three coarse-fine cores restore the valid holder before returning (`:912, :988, :1292`); the constraint is *which holder*, not *when*, and as written it contradicts §5.3 |
+| 93 occurrences to convert | 5 | 36 of the 93 are the **interpolation** parameter that §5.5 puts out of scope; the deposition side is 57, and only ~30 need the enum at all |
+| `parseOptions` structurally cannot see `mirror` + NGP | 5 | The cited literal call site passes `a_forceIrregNGP = false`, i.e. `Native`, and can never collide. The collision is `deposition = ngp` with `irregular_deposition = mirror`, and both are options of the same solver |
+| The scratch field of §4.2 step 3 | 5 | Used by §4.2 and §5.3, declared nowhere. It is `m_mirrorScratch` in §5.1 now |
