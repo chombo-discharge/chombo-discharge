@@ -2291,6 +2291,8 @@ Example programs that use the Îto-KMC module are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic` for a basic streamer discharge in atmospheric air.
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD` for a streamer discharge over a dielectric.
+* :file:`$DISCHARGE_HOME/Exec/Examples/Comparison/AirBasic` for the same streamer discharge run with both the Îto-KMC
+  and the ``CdrPlasma`` model, using the same geometry, transport data, chemistry, and initial particles.
 
 Setting up a new problem
 ========================

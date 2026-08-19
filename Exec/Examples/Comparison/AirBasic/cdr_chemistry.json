@@ -1,0 +1,251 @@
+// Chemistry for the CdrPlasma model. This file is the CdrPlasmaJSON transcription of ito_chemistry.json --
+// the gas, the transport data, the reaction set, and the initial particles are the same in both files.
+//
+// Note that CdrPlasmaJSON specifies the pressure in atmospheres while ItoKMCJSON specifies it in Pascal,
+// so 1 here is the same gas as 101325 in ito_chemistry.json.
+{
+    "gas" :
+    {
+	"law" : "ideal",
+	"temperature" : 300,
+	"pressure" : 1,
+	"plot" : true,
+	"neutral species" :
+	[
+	    {
+		"name" : "O2",
+		"molar fraction" : 0.2
+	    },
+	    {
+		"name" : "N2",
+		"molar fraction" : 0.8
+	    }
+	]
+    },
+    "plasma species" :
+    [
+	{
+	    "name" : "e",
+	    "Z" : -1,
+	    "mobile" : true,
+	    "diffusive" : true,
+	    "mobility" : {
+		"lookup" : "table E/N",
+		"file" : "bolsig_air.dat",
+		"header" : "E/N (Td)\tMobility *N (1/m/V/s)",
+		"E/N" : 0,
+		"mu*N" : 1,
+		"min E/N" : 1,
+		"max E/N" : 2E6,
+		"points" : 1000,
+		"spacing" : "exponential"
+	    },
+	    "diffusion" : {
+		"lookup" : "table E/N",
+		"file" : "bolsig_air.dat",
+		"header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
+		"E/N" : 0,
+		"D*N" : 1,
+		"min E/N" : 10,
+		"max E/N" : 2E6,
+		"points" : 1000,
+		"spacing" : "exponential"
+	    },
+	    "temperature" : {
+		"lookup" : "table E/N",
+		"file" : "bolsig_air.dat",
+		"header" : "E/N (Td)\tMean energy (eV)",
+		"E/N" : 0,
+		"eV" : 1,
+		"min E/N" : 10,
+		"max E/N" : 2E6,
+		"points" : 1000,
+		"spacing" : "exponential"
+	    },
+	    // Initial seed. The particles are drawn by ParticleManagement and deposited on the mesh, which is
+	    // the same seed that the Ito solver is given in ito_chemistry.json.
+	    "initial particles" : {
+		"gaussian" : {
+		    "center" : [ 0, -1E-3, 0 ],
+		    "radius" : 200E-6,
+		    "number" : 100000,
+		    "weight" : 10000
+		}
+	    }
+	},
+	{
+	    "name" : "O2+",
+	    "Z" : 1,
+	    "mobile" : false,
+	    "diffusive" : false,
+	    "mobility" : {
+		"lookup" : "constant",
+		"value" : 2E-4
+	    },
+	    "initial particles" : {
+		"gaussian" : {
+		    "center" : [ 0, -1E-3, 0 ],
+		    "radius" : 200E-6,
+		    "number" : 100000,
+		    "weight" : 10000
+		}
+	    }
+	},
+	{
+	    "name" : "O2-",
+	    "Z" : -1,
+	    "mobile" : false,
+	    "diffusive" : false,
+	    "mobility" : {
+		"lookup" : "constant",
+		"value" : 2E-4
+	    }
+	},
+	{
+	    "name" : "N2+",
+	    "Z" : 1,
+	    "mobile" : false,
+	    "diffusive" : false,
+	    "mobility" : {
+		"lookup" : "constant",
+		"value" : 2E-4
+	    }
+	}
+    ],
+    "photon species" :
+    [
+	{
+	    "name" : "Y",
+	    "kappa" : "stochastic A",
+	    "neutral" : "O2",
+	    "f1" : 2.925E15,
+	    "f2" : 3.059E15,
+	    "chi min" : 2.625E-2,
+	    "chi max" : 1.5
+	}
+    ],
+    "sigma" : {
+	"initial density" : 0.0
+    },
+    // ItoKMCJSON computes alpha and eta from the reaction list ("type": "auto"). CdrPlasmaJSON has no such
+    // option, so the tabulated BOLSIG+ coefficients are used instead. These only enter the cell tagger.
+    "alpha" : {
+	"lookup" : "table E/N",
+	"file" : "bolsig_air.dat",
+	"header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)",
+	"E/N" : 0,
+	"alpha/N" : 1,
+	"min E/N" : 1,
+	"max E/N" : 2E6,
+	"points" : 1000,
+	"spacing" : "exponential",
+	"plot" : true
+    },
+    "eta" : {
+	"lookup" : "table E/N",
+	"file" : "bolsig_air.dat",
+	"header" : "E/N (Td)\tTownsend attach. coef. eta/N (m2)",
+	"E/N" : 0,
+	"eta/N" : 1,
+	"min E/N" : 1,
+	"max E/N" : 2E6,
+	"points" : 1000,
+	"spacing" : "exponential",
+	"plot" : true
+    },
+    // Reaction set. No 'soloviev' entries appear below, i.e. the gradient (density-gradient) correction to the
+    // LFA reaction rates is turned off so that the rates are the same functions of E as in the Ito-KMC model.
+    "plasma reactions" :
+    [
+	{
+	    "description" : "N2 ionization",
+	    "reaction" : "e + N2 -> e + e + N2+",
+	    "lookup" : "table E/N",
+	    "file" : "bolsig_air.dat",
+	    "header" : "C25   N2    Ionization    15.60 eV",
+	    "E/N" : 0,
+	    "rate" : 1,
+	    "min E/N" : 1.0,
+	    "max E/N" : 1000.0,
+	    "points" : 1000,
+	    "spacing" : "exponential",
+	    "scale" : 1.0,
+	    "plot" : true
+	},
+	{
+	    "description" : "O2 ionization",
+	    "reaction" : "e + O2 -> e + e + O2+",
+	    "lookup" : "table E/N",
+	    "file" : "bolsig_air.dat",
+	    "header" : "C42   O2    Ionization    12.06 eV",
+	    "E/N" : 0,
+	    "rate" : 1,
+	    "min E/N" : 1.0,
+	    "max E/N" : 1000.0,
+	    "points" : 1000,
+	    "spacing" : "exponential",
+	    "scale" : 1.0,
+	    "plot" : true
+	},
+	{
+	    "description" : "O2 dissociative attachment",
+	    "reaction" : "e + O2 -> O2-",
+	    "lookup" : "table E/N",
+	    "file" : "bolsig_air.dat",
+	    "header" : "C27   O2    Attachment",
+	    "E/N" : 0,
+	    "rate" : 1,
+	    "min E/N" : 1.0,
+	    "max E/N" : 1000.0,
+	    "points" : 1000,
+	    "spacing" : "exponential",
+	    "scale" : 1.0,
+	    "plot" : true
+	},
+	{
+	    "description" : "O2 three-body attachment",
+	    "reaction" : "e + O2 + O2 -> O2- + O2",
+	    "lookup" : "table E/N",
+	    "file" : "bolsig_air.dat",
+	    "header" : "C26   O2    Attachment",
+	    "E/N" : 0,
+	    "rate" : 1,
+	    "min E/N" : 1.0,
+	    "max E/N" : 1000.0,
+	    "points" : 1000,
+	    "spacing" : "exponential",
+	    "scale" : 1.0E-6,
+	    "plot" : true
+	},
+	{
+	    "description" : "Photon generation",
+	    "reaction" : "e + N2 -> e + N2 + Y",
+	    "lookup" : "table E/N",
+	    "file" : "bolsig_air.dat",
+	    "header" : "C25   N2    Ionization    15.60 eV",
+	    "E/N" : 0,
+	    "rate" : 1,
+	    "min E/N" : 1.0,
+	    "max E/N" : 1000.0,
+	    "points" : 1000,
+	    "spacing" : "exponential",
+	    "quenching pressure" : 4000.0,
+	    "scale" : 0.06,
+	    "plot" : true
+	}
+    ],
+    "photo reactions" :
+    [
+	{
+	    "reaction" : "Y -> e + O2+"
+	}
+    ],
+    // Electrons that reach the needle are extrapolated out of the domain, which is what happens to Ito particles
+    // that strike the electrode. There is no secondary emission in either model.
+    "electrode reactions" :
+    [
+	{
+	    "reaction" : "e -> extrap"
+	}
+    ]
+}
