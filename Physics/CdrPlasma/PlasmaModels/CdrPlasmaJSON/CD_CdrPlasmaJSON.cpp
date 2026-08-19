@@ -6078,7 +6078,7 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cd
   }
 
   for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = rteSources[i] * a_dt;
+    a_photonProduction[i] += rteSources[i] * a_dt;
   }
 }
 
@@ -6123,7 +6123,7 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrD
   }
 
   for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = a_dt * (c1 * rteK1[i] + c2 * rteK2[i]);
+    a_photonProduction[i] += a_dt * (c1 * rteK1[i] + c2 * rteK2[i]);
   }
 }
 
@@ -6190,7 +6190,7 @@ CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrD
   }
 
   for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = a_dt * (rteK1[i] + 2.0 * rteK2[i] + 2.0 * rteK3[i] + rteK4[i]) / 6.0;
+    a_photonProduction[i] += a_dt * (rteK1[i] + 2.0 * rteK2[i] + 2.0 * rteK3[i] + rteK4[i]) / 6.0;
   }
 }
 

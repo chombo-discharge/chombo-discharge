@@ -423,9 +423,10 @@ protected:
    */
   enum class ParticlePlacement
   {
-    Random,    ///< Place particles at a uniformly random position within the cell.
-    Centroid,  ///< Place particles at the cell centroid.
-    Downstream ///< Place particles in the downstream region relative to the primary particle drift.
+    Random,     ///< Place particles at a uniformly random position within the cell.
+    Centroid,   ///< Place particles at the cell centroid.
+    Downstream, ///< Place particles in the downstream region relative to the primary particle drift.
+    Parent      ///< Place particles on an existing particle, drawn with probability proportional to its weight.
   };
 
   /**

@@ -1,4 +1,4 @@
-## Exec/Examples/Comparison/AirBasic
+## Exec/Examples/ItoKMC/ComparisonCdrPlasma
 
 This example runs the *same* 2D streamer discharge problem with two different plasma models:
 

@@ -838,6 +838,9 @@ ItoKMCJSON::initializeParticlePlacement()
       else if (method == "random") {
         m_particlePlacement = ParticlePlacement::Random;
       }
+      else if (method == "parent") {
+        m_particlePlacement = ParticlePlacement::Parent;
+      }
       else if (method == "downstream") {
         m_particlePlacement = ParticlePlacement::Downstream;
         m_downstreamSpecies = -1;

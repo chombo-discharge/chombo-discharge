@@ -53,7 +53,7 @@
 	    "Z" : -1,
 	    "solver" : "ito",
 	    "mobile" : true,
-	    "diffusive" : true,
+	    "diffusive" : false,
 	    "mobility" : {
 		"type" : "table vs E/N",
 		"file" : "bolsig_air.dat",
@@ -67,16 +67,14 @@
 		"E/N scale" : 1.0,
 		"mu*N scale" : 1.0
 	    },
+	    // Constant electron diffusion coefficient, frozen at the tabulated value for E/N = 150 Td at 300 K
+	    // and 1 atm: D = (D*N)/N = 3.359333E24 / 2.446313E25 = 0.1373223 m^2/s. The tabulated D(E/N) is
+	    // deliberately not used here -- with grad(D) = 0 the Ito SDE dX = v*dt + sqrt(2*D*dt)*N(0,1) and the
+	    // fluid operator div(D*grad(n)) describe the same diffusion, so the two models can be compared
+	    // without the grad(D) term that otherwise separates them. Same value in cdr_chemistry.json.
 	    "diffusion" : {
-		"type" : "table vs E/N",
-		"file" : "bolsig_air.dat",
-		"header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
-		"E/N column" : 0,
-		"D*N column" : 1,
-		"min E/N" : 10,
-		"max E/N" : 2E6,
-		"spacing" : "exponential",
-		"points" : 1000
+		"type" : "constant",
+		"value" : 0.1373223
 	    },
 	    "temperature" : {
 		"type" : "table vs E/N",
@@ -96,7 +94,7 @@
 	    [
 		{
 		    "gaussian distribution" : {
-			"center" : [ 0, -1E-3, 0 ],
+			"center" : [ 0, -0E-3, 0 ],
 			"radius" : 200E-6,
 			"num particles" : 100000,
 			"weight" : 10000
@@ -122,7 +120,7 @@
 	    [
 		{
 		    "gaussian distribution" : {
-			"center" : [ 0, -1E-3, 0 ],
+			"center" : [ 0, -0E-3, 0 ],
 			"radius" : 200E-6,
 			"num particles" : 100000,
 			"weight" : 10000

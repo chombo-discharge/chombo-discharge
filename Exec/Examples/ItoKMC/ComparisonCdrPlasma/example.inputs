@@ -2,6 +2,7 @@
 # Comparison class options
 # ====================================================================================================
 Comparison.model         = ito_kmc    ## Which model to run. Either 'cdr_plasma' or 'ito_kmc'
+#Comparison.model         = cdr_plasma    # Which model to run. Either 'cdr_plasma' or 'ito_kmc'
 Comparison.potential     = 35E3       ## Voltage applied to the rod/needle electrode
 
 # ====================================================================================================
@@ -17,7 +18,7 @@ AmrMesh.lo_corner            = -4E-2 -4E-2 -4E-2    ## Low corner of problem dom
 AmrMesh.hi_corner            = 4E-2  4E-2  4E-2     ## High corner of problem domain
 AmrMesh.verbosity            = -1                   ## Controls verbosity.
 AmrMesh.coarsest_domain      = 64 64 64             ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 7                    ## Maximum amr depth
+AmrMesh.max_amr_depth        = 8                    ## Maximum amr depth
 AmrMesh.max_sim_depth        = -1                   ## Maximum simulation depth
 AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
@@ -59,7 +60,7 @@ Driver.geometry_only                = false               ## Special option that
 Driver.write_memory                 = false               ## Write MPI memory report
 Driver.write_loads                  = false               ## Write (accumulated) computational loads
 Driver.output_directory             = ./                  ## Output directory
-Driver.output_names                 = simulation          ## Simulation output names
+Driver.output_names                 = cdr                 ## Simulation output names
 Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
@@ -124,14 +125,14 @@ FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflu
 # ====================================================================================================
 # Only used by the Ito-KMC model.
 ItoSolver.verbosity                   = -1                ## Class verbosity
-ItoSolver.merge_algorithm             = kd_patch          ## Particle merging algorithm (see documentation)
+ItoSolver.merge_algorithm             = nn_sfc            ## Particle merging algorithm (see documentation)
 ItoSolver.particles_per_cell          = 16                ## Target computational particles per cell (one value, or one per level)
 ItoSolver.regrid_superparticles       = solver            ## Merge run during regrids: 'solver', 'none', or any merge_algorithm selector
 ItoSolver.nn_pair_iterate             = true              ## nn_pair: iterate the local tier to convergence within each round
-ItoSolver.nn_pair_fallback            = 1                 ## nn_pair: fallback candidates per query (k-NN graph built with k = 1 + this)
+ItoSolver.nn_pair_fallback            = 3                 ## nn_pair: fallback candidates per query (k-NN graph built with k = 1 + this)
 ItoSolver.nn_pair_max_cell_dist       = 1                 ## nn_pair: max merge distance in cells (Chebyshev);
-ItoSolver.nn_pair_max_rounds          = 3                 ## nn_pair: max drain rounds per merge (stops early on convergence)
-ItoSolver.kd_split_weight_leaf_dx     = 1.0               ## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)
+ItoSolver.nn_pair_max_rounds          = 10                ## nn_pair: max drain rounds per merge (stops early on convergence)
+ItoSolver.kd_split_weight_leaf_dx     = 0.0               ## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)
 ItoSolver.plt_vars                    = phi mu vel dco    ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg            = bisection         ## Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step                 = 1.E-3             ## Bisection step length for intersection tests
@@ -190,7 +191,7 @@ CdrCTU.gmg_smoother              = red_black    ## Relaxation type. 'jacobi', 'm
 # ====================================================================================================
 McPhoto.verbosity                = -1               ## Solver verbosity
 McPhoto.instantaneous            = true             ## Instantaneous transport or not
-McPhoto.max_photons_per_cell     = 1                ## Maximum no. generated in a cell (< = 0 yields physical photons)
+McPhoto.max_photons_per_cell     = 128              ## Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.num_sampling_packets     = 1                ## Number of sub-sampling packets for max_photons_per_cell
 McPhoto.blend_conservation       = false            ## Switch for blending with the nonconservative divergence
 McPhoto.transparent_eb           = false            ## Turn on/off transparent boundaries. Only for instantaneous=true
@@ -272,7 +273,7 @@ ItoKMCGodunovStepper.load_indices                             = -1              
 ItoKMCGodunovStepper.load_per_cell                            = 1.0                ## Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                              = morton             ## Box sorting when load balancing
 ItoKMCGodunovStepper.merge_interval                           = 1                  ## Time steps between superparticle merging
-ItoKMCGodunovStepper.physics_dt_factor                        = 2.0                ## Physics-based time step factor
+ItoKMCGodunovStepper.physics_dt_factor                        = 0.5                ## Physics-based time step factor
 ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.1                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl               = 10.0               ## Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
@@ -285,7 +286,7 @@ ItoKMCGodunovStepper.min_dt                                   = 1.E-12          
 ItoKMCGodunovStepper.max_dt                                   = 100.E-12           ## Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                            = 1.2                ## Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                            = 1.2                ## Maximum permissible time step reduction (dt/factor)
-ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
+ItoKMCGodunovStepper.extend_conductivity                      = false              ## Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.cond_filter_num                          = 0                  ## Number of filterings for conductivity
 ItoKMCGodunovStepper.cond_filter_max_stride                   = 1                  ## Maximum stride for filter
 ItoKMCGodunovStepper.cond_filter_alpha                        = 0.5                ## Filtering factor (0.5 is a bilinear filter)
@@ -304,10 +305,10 @@ ItoKMCJSON.chemistry_file     = ito_chemistry.json    ## Chemistry file
 
 # Kinetic Monte Carlo solver settings.
 ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons       = 32                 ## Maximum number of computational photons to produce in reaction step
+ItoKMCJSON.max_new_photons       = 128                ## Maximum number of computational photons to produce in reaction step
 ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
 ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps              = 0.5                ## Maximum relative change in propensity function
+ItoKMCJSON.prop_eps              = 0.1                ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSA_lim               = 5.0                ## When to enter SSA instead of tau-leaping
 ItoKMCJSON.max_iter              = 50                 ## Maximum number of iterations for implicit algorithms
@@ -326,7 +327,7 @@ ItoKMCStreamerTagger.buffer            = 4              ## Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
-ItoKMCStreamerTagger.refine_alpha          = 0.8      ## Set alpha refinement. Lower  => More mesh
+ItoKMCStreamerTagger.refine_alpha          = 0.4      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
 
@@ -337,7 +338,7 @@ CdrPlasmaGodunovStepper.verbosity             = -1               ## Class verbos
 CdrPlasmaGodunovStepper.solver_verbosity      = -1               ## Individual solver verbosities
 CdrPlasmaGodunovStepper.min_dt                = 1.E-12           ## Minimum permitted time step
 CdrPlasmaGodunovStepper.max_dt                = 100.E-12         ## Maximum permitted time step
-CdrPlasmaGodunovStepper.cfl                   = 0.8              ## CFL number
+CdrPlasmaGodunovStepper.cfl                   = 0.9              ## CFL number
 CdrPlasmaGodunovStepper.use_regrid_slopes     = true             ## Use slopes when regridding (or not)
 CdrPlasmaGodunovStepper.filter_rho            = 0                ## Number of filterings of space charge
 CdrPlasmaGodunovStepper.filter_compensate     = false            ## Use compensation step after filter or not
@@ -363,7 +364,7 @@ CdrPlasmaJSON.chemistry_file       = cdr_chemistry.json    ## Chemistry file con
 CdrPlasmaJSON.discrete_photons     = true                  ## Use discrete photons or not. Must be true when using McPhoto.
 CdrPlasmaJSON.skip_reactions       = false                 ## If true, turn off all reactions
 CdrPlasmaJSON.integrator           = explicit_midpoint     ## Reaction network integrator
-CdrPlasmaJSON.chemistry_dt         = 1.E99                 ## Maximum allowed chemistry time step.
+CdrPlasmaJSON.chemistry_dt         = 1.E-12                ## Maximum allowed chemistry time step.
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options
@@ -382,6 +383,8 @@ CdrPlasmaStreamerTagger.ref_box1_lvl      = 0              ## Refine to this lev
 
 CdrPlasmaStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
-CdrPlasmaStreamerTagger.refine_alpha          = 0.8      ## Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.refine_alpha          = 0.4      ## Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
+
+ItoKMCGodunovStepper.plot_particles     = true

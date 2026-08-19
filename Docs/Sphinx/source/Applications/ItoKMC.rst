@@ -1987,10 +1987,16 @@ Particle placement
 ------------------
 
 Specification of secondary particle placement is done through the JSON file by specifying the ``particle placement`` field.
-Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
-The method is specified through the ``method`` specifier, which must either be ``centroid``, ``random``, or ``downstream``.
+Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, inherited from one of the particles that are already in the cell, or placed randomly in the downstream region of some user-defined species.
+The method is specified through the ``method`` specifier, which must either be ``centroid``, ``random``, ``parent``, or ``downstream``.
 If specifying ``downstream``, one must also include a species specifier (which must correspond to one of the plasma species).
-The following three specifiers are all valid:
+
+The ``parent`` method draws one of the particles that were already in the cell, with probability proportional to its weight, and puts the new particle on top of it.
+This is the placement that introduces no sub-grid transport of its own: unlike ``random`` it does not scatter the new weight across the cell, and unlike ``centroid`` it does not pull the new weight towards the cell centre.
+Both of those act as numerical transport terms whose magnitude is set by the grid resolution rather than by the physics.
+If the cell holds no particles of the species in question -- which happens for photoionization products -- ``parent`` falls back to ``random``.
+
+The following four specifiers are all valid:
 
 .. code-block:: json
 		
@@ -2002,6 +2008,11 @@ The following three specifiers are all valid:
     "particle placement":
     {
        "method": "random"
+    }
+
+    "particle placement":
+    {
+       "method": "parent"
     }
 
     "particle placement":
@@ -2291,8 +2302,8 @@ Example programs that use the Îto-KMC module are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic` for a basic streamer discharge in atmospheric air.
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD` for a streamer discharge over a dielectric.
-* :file:`$DISCHARGE_HOME/Exec/Examples/Comparison/AirBasic` for the same streamer discharge run with both the Îto-KMC
-  and the ``CdrPlasma`` model, using the same geometry, transport data, chemistry, and initial particles.
+* :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/ComparisonCdrPlasma` for the same streamer discharge run with both the
+  Îto-KMC and the ``CdrPlasma`` model, using the same geometry, transport data, chemistry, and initial particles.
 
 Setting up a new problem
 ========================
