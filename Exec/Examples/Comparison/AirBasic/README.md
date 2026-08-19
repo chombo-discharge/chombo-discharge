@@ -78,4 +78,4 @@ To run the other model without editing the input script:
 # Output
 
 Output is given to HDF5 files in the plt folder. `Driver` writes one plot file every 1 ns and the simulation stops at
-15 ns, so both models produce plot files at the same 16 output times.
+5 ns, so both models produce plot files at the same six output times.
