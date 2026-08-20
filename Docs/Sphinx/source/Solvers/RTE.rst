@@ -104,7 +104,7 @@ To advance the solution, one will call the member function
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
    :language: c++
-   :lines: 81-91
+   :lines: 82-92
 
 Internally, this version will perform one of the following:
 
@@ -164,7 +164,7 @@ To specify that function, ``EddingtonSP1`` has a member function
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
    :language: c++
-   :lines: 117-128
+   :lines: 118-129
 
 Here, the ``a_function`` argument is simply an alias:
 
