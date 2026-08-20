@@ -146,6 +146,13 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
 
   this->m_amr->allocate(m_semiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_semiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
+
+  // AmrMesh::allocate does not initialize, and both of these are consumed by regrid() before advance() has
+  // necessarily run -- Driver.initial_regrids regrids the very first grids. Zero them so that a regrid
+  // preceding the first advance carries zeros rather than uninitialized memory. On every later regrid these
+  // values are overwritten by interpToNewGrids immediately after this routine returns.
+  DataOps::setValue(m_semiImplicitRhoCDR, 0.0);
+  DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
 }
 
 template <typename I, typename C, typename R, typename F>
