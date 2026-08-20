@@ -107,6 +107,10 @@ With tau-leaping the state is advanced over a time :math:`\Delta t` as
 where :math:`\mathcal{P}` is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.
 
+The interval :math:`\Delta t` handed to the solver is substepped, and each substep is limited such that the propensities change by no more than a relative factor :math:`\epsilon`.
+This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see :ref:`Chap:KMCHybridAdvance`.
+Substeps that yield an invalid state are rejected and retried with a halved time step, so :math:`\epsilon` is what controls the accuracy of the leap while step rejection only guards validity.
+
 Tau-leaping variants
 ____________________
 
@@ -323,7 +327,7 @@ The most general one that uses the hybrid advance is
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 420-430
+   :lines: 423-433
    :dedent: 2
 
 When using the hybrid algorithm, the user should set the hybrid solver parameters through the function

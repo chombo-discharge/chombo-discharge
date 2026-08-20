@@ -233,6 +233,9 @@ The state is then advanced as</p>
 \[\vec{X}\left(t+\Delta t\right) =  \vec{X}\left(t\right) + \sum_{r\in\vec{R}} \vec{\nu}_r\mathcal{P}\left(a_r\left[\vec{X}\left(t\right)\right]\Delta t\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.</p>
+<p>The interval <span class="math notranslate nohighlight">\(\Delta t\)</span> handed to the solver is substepped, and each substep is limited such that the propensities change by no more than a relative factor <span class="math notranslate nohighlight">\(\epsilon\)</span>.
+This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a>.
+Substeps that yield an invalid state are rejected and retried with a halved time step, so <span class="math notranslate nohighlight">\(\epsilon\)</span> is what controls the accuracy of the leap while step rejection only guards validity.</p>
 <section id="tau-leaping-variants">
 <h3>Tau-leaping variants<a class="headerlink" href="#tau-leaping-variants" title="Permalink to this heading"></a></h3>
 <p>The following forms of tau-leaping are also supported:</p>

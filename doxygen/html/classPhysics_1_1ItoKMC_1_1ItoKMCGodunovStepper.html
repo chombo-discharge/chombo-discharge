@@ -326,12 +326,15 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setOldPositio
 <tr class="memitem:a4b303770c3425aa04109baa0ee05cfe4" id="r_a4b303770c3425aa04109baa0ee05cfe4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a4b303770c3425aa04109baa0ee05cfe4">clearPointParticles</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;a_particles, const <a class="el" href="CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967">SpeciesSubset</a> a_subset) noexcept</td></tr>
 <tr class="memdesc:a4b303770c3425aa04109baa0ee05cfe4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the input particle data holders.  <br /></td></tr>
 <tr class="separator:a4b303770c3425aa04109baa0ee05cfe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb8261d18728b2b2a952ccd2c92fb5b5" id="r_acb8261d18728b2b2a952ccd2c92fb5b5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#acb8261d18728b2b2a952ccd2c92fb5b5">computeConductivities</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;a_particles) noexcept</td></tr>
-<tr class="memdesc:acb8261d18728b2b2a952ccd2c92fb5b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute all conductivities (cell, face, and EB) from the input point particles.  <br /></td></tr>
-<tr class="separator:acb8261d18728b2b2a952ccd2c92fb5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c2ecdc6b78d9f59e9c8bc12a10d964d" id="r_a7c2ecdc6b78d9f59e9c8bc12a10d964d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a7c2ecdc6b78d9f59e9c8bc12a10d964d">computeCellConductivity</a> (EBAMRCellData &amp;a_conductivityCell, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;a_particles) noexcept</td></tr>
-<tr class="memdesc:a7c2ecdc6b78d9f59e9c8bc12a10d964d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered conductivity.  <br /></td></tr>
-<tr class="separator:a7c2ecdc6b78d9f59e9c8bc12a10d964d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7b526f6cb78910f754273876cbabeb3" id="r_af7b526f6cb78910f754273876cbabeb3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#af7b526f6cb78910f754273876cbabeb3">computeCdrConductivity</a> () noexcept</td></tr>
+<tr class="memdesc:af7b526f6cb78910f754273876cbabeb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the CDR contribution to the semi-implicit conductivity, i.e. sum(|Z| * phi * mu).  <br /></td></tr>
+<tr class="separator:af7b526f6cb78910f754273876cbabeb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32f11822c77479ac5019b82cc5232cf7" id="r_a32f11822c77479ac5019b82cc5232cf7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a32f11822c77479ac5019b82cc5232cf7">computeConductivities</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;a_particles, const bool a_useStoredCdrConductivity) noexcept</td></tr>
+<tr class="memdesc:a32f11822c77479ac5019b82cc5232cf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute all conductivities (cell, face, and EB) from the input point particles.  <br /></td></tr>
+<tr class="separator:a32f11822c77479ac5019b82cc5232cf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a176c80a69a9c76391577ee66355498" id="r_a7a176c80a69a9c76391577ee66355498"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a7a176c80a69a9c76391577ee66355498">computeCellConductivity</a> (EBAMRCellData &amp;a_conductivityCell, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;a_particles, const bool a_useStoredCdrConductivity) noexcept</td></tr>
+<tr class="memdesc:a7a176c80a69a9c76391577ee66355498"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered conductivity.  <br /></td></tr>
+<tr class="separator:a7a176c80a69a9c76391577ee66355498"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a747dc5dfffc0518f718c05d12b7dc1c8" id="r_a747dc5dfffc0518f718c05d12b7dc1c8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a747dc5dfffc0518f718c05d12b7dc1c8">computeFaceConductivity</a> () noexcept</td></tr>
 <tr class="memdesc:a747dc5dfffc0518f718c05d12b7dc1c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered conductivity.  <br /></td></tr>
 <tr class="separator:a747dc5dfffc0518f718c05d12b7dc1c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1340,8 +1343,38 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
-<a id="a7c2ecdc6b78d9f59e9c8bc12a10d964d" name="a7c2ecdc6b78d9f59e9c8bc12a10d964d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7c2ecdc6b78d9f59e9c8bc12a10d964d">&#9670;&#160;</a></span>computeCellConductivity()</h2>
+<a id="af7b526f6cb78910f754273876cbabeb3" name="af7b526f6cb78910f754273876cbabeb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7b526f6cb78910f754273876cbabeb3">&#9670;&#160;</a></span>computeCdrConductivity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCGodunovStepper::computeCdrConductivity </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the CDR contribution to the semi-implicit conductivity, i.e. sum(|Z| * phi * mu). </p>
+<p>The result is stored on m_semiImplicitConductivityCDR, which is carried across regrids. It is not scaled by <a class="el" href="namespaceUnits.html#a6c222b26a27fc4985c5e26ec959f6460" title="Elementary charge.">Units::Qe</a> &ndash; that scaling is applied once to the total conductivity in computeCellConductivity &ndash; nor by dt/eps0, which setupSemiImplicitPoisson applies. </p><dl class="section note"><dt>Note</dt><dd>Reads m_cdrMobilities, so it may only be called when those hold the mobilities for the current grids. That is not the case inside <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a03385c154c9a31ec9d051c20de0e98e2" title="Regrid methods – puts all data on the new mesh.">regrid()</a>, where <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e" title="Allocate &quot;internal&quot; storage.">allocateInternals()</a> has just reallocated them. </dd></dl>
+
+</div>
+</div>
+<a id="a7a176c80a69a9c76391577ee66355498" name="a7a176c80a69a9c76391577ee66355498"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a176c80a69a9c76391577ee66355498">&#9670;&#160;</a></span>computeCellConductivity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1361,7 +1394,13 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_useStoredCdrConductivity</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1381,6 +1420,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_conductivityCell</td><td>Cell-centered conductivity </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to deposit. Particle weights must hold the mobility*weight </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_useStoredCdrConductivity</td><td>If true, take the CDR contribution from m_semiImplicitConductivityCDR as it stands; if false, recompute it first through computeCdrConductivity. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1388,8 +1428,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
-<a id="acb8261d18728b2b2a952ccd2c92fb5b5" name="acb8261d18728b2b2a952ccd2c92fb5b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb8261d18728b2b2a952ccd2c92fb5b5">&#9670;&#160;</a></span>computeConductivities()</h2>
+<a id="a32f11822c77479ac5019b82cc5232cf7" name="a32f11822c77479ac5019b82cc5232cf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32f11822c77479ac5019b82cc5232cf7">&#9670;&#160;</a></span>computeConductivities()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1403,8 +1443,18 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td class="memname">void ItoKMCGodunovStepper::computeConductivities </td>
           <td>(</td>
           <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em></td><td>)</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_useStoredCdrConductivity</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -1418,6 +1468,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to deposit. Particle weights must hold the mobility*weight </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_useStoredCdrConductivity</td><td>If true, take the CDR contribution from m_semiImplicitConductivityCDR as it stands; if false, recompute it first through computeCdrConductivity. </td></tr>
   </table>
   </dd>
 </dl>

@@ -783,9 +783,10 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePlacement</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">Random</span><span class="p">,</span><span class="w">    </span><span class="c1">///&lt; Place particles at a uniformly random position within the cell.</span>
-<span class="w">    </span><span class="n">Centroid</span><span class="p">,</span><span class="w">  </span><span class="c1">///&lt; Place particles at the cell centroid.</span>
-<span class="w">    </span><span class="n">Downstream</span><span class="w"> </span><span class="c1">///&lt; Place particles in the downstream region relative to the primary particle drift.</span>
+<span class="w">    </span><span class="n">Random</span><span class="p">,</span><span class="w">     </span><span class="c1">///&lt; Place particles at a uniformly random position within the cell.</span>
+<span class="w">    </span><span class="n">Centroid</span><span class="p">,</span><span class="w">   </span><span class="c1">///&lt; Place particles at the cell centroid.</span>
+<span class="w">    </span><span class="n">Downstream</span><span class="p">,</span><span class="w"> </span><span class="c1">///&lt; Place particles in the downstream region relative to the primary particle drift.</span>
+<span class="w">    </span><span class="n">Parent</span><span class="w">      </span><span class="c1">///&lt; Place particles on an existing particle, drawn with probability proportional to its weight.</span>
 <span class="w">  </span><span class="p">};</span>
 
 <span class="w">  </span><span class="cm">/**</span>
@@ -2615,10 +2616,14 @@ To enable a time step calculation, specify the <code class="docutils literal not
 <section id="id13">
 <h3>Particle placement<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
 <p>Specification of secondary particle placement is done through the JSON file by specifying the <code class="docutils literal notranslate"><span class="pre">particle</span> <span class="pre">placement</span></code> field.
-Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
-The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
-If specifying <code class="docutils literal notranslate"><span class="pre">downstream</span></code>, one must also include a species specifier (which must correspond to one of the plasma species).
-The following three specifiers are all valid:</p>
+Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, inherited from one of the particles that are already in the cell, or placed randomly in the downstream region of some user-defined species.
+The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, <code class="docutils literal notranslate"><span class="pre">parent</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
+If specifying <code class="docutils literal notranslate"><span class="pre">downstream</span></code>, one must also include a species specifier (which must correspond to one of the plasma species).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">parent</span></code> method draws one of the particles that were already in the cell, with probability proportional to its weight, and puts the new particle on top of it.
+This is the placement that introduces no sub-grid transport of its own: unlike <code class="docutils literal notranslate"><span class="pre">random</span></code> it does not scatter the new weight across the cell, and unlike <code class="docutils literal notranslate"><span class="pre">centroid</span></code> it does not pull the new weight towards the cell centre.
+Both of those act as numerical transport terms whose magnitude is set by the grid resolution rather than by the physics.
+If the cell holds no particles of the species in question – which happens for photoionization products – <code class="docutils literal notranslate"><span class="pre">parent</span></code> falls back to <code class="docutils literal notranslate"><span class="pre">random</span></code>.</p>
+<p>The following four specifiers are all valid:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
 <span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;centroid&quot;</span>
@@ -2627,6 +2632,11 @@ The following three specifiers are all valid:</p>
 <span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
 <span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span>
+<span class="p">}</span>
+
+<span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;parent&quot;</span>
 <span class="p">}</span>
 
 <span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
@@ -2879,6 +2889,8 @@ It is essential that the user checks that the model converges when these feature
 <ul class="simple">
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic</span></code> for a basic streamer discharge in atmospheric air.</p></li>
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD</span></code> for a streamer discharge over a dielectric.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/ComparisonCdrPlasma</span></code> for the same streamer discharge run with both the
+Îto-KMC and the <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code> model, using the same geometry, transport data, chemistry, and initial particles.</p></li>
 </ul>
 </section>
 <section id="setting-up-a-new-problem">

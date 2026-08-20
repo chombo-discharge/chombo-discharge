@@ -662,7 +662,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Advance using a specified tau-leaping algorithm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>The interval a_dt is substepped, each substep being bounded by the tau-leaping condition tau = eps * X_i / |sum_j nu_ij * a_j| so that the accuracy of the leap is controlled by m_eps. Substeps that produce an invalid state are rejected and retried with half the time step. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>Reactions to advance. </td></tr>

@@ -1138,6 +1138,35 @@ Mandatory fields are</p>
 </pre></div>
 </div>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gaussian</span></code> For drawing initial particles from a Gaussian distribution.
+Mandatory fields are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">center</span></code> for specifying the center of the distribution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">radius</span></code> for specifying the standard deviation of the distribution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">number</span></code> for the number of computational particles.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weight</span></code> for the initial particle weight.</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+<span class="w">  </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w">  </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;mobile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;diffusive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;initial particles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;gaussian&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;center&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;radius&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">copy</span></code> For using an already initialized particle distribution.
 The only mandatory fields is <code class="docutils literal notranslate"><span class="pre">copy</span></code>, e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>

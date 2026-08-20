@@ -1007,260 +1007,265 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>{</div>
 <div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>  <span class="keywordflow">if</span> (a_reactions.size() &gt; 0) {</div>
 <div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>    Real curTime = 0.0;</div>
-<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>    Real curDt   = a_dt;</div>
-<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span> </div>
-<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>    <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span> </div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>      <span class="comment">// Try big time step first.</span></div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>      curDt = a_dt - curTime;</div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span> </div>
-<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>      <span class="keywordtype">bool</span> valid = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span> </div>
-<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>      <span class="comment">// Substepping so we end up with a valid state.</span></div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>      <span class="keywordflow">while</span> (!valid) {</div>
+<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span> </div>
+<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>    <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
+<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span> </div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>      <span class="comment">// Bound the substep by the tau-leaping condition tau = eps * X_i / |sum_j nu_ij * a_j|, as advanceHybrid</span></div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>      <span class="comment">// does for its non-critical reactions. The propensities are recomputed each substep because the state</span></div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>      <span class="comment">// changes.</span></div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>      <span class="keyword">const</span> std::vector&lt;Real&gt; propensities = this-&gt;propensities(a_state, a_reactions);</div>
+<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span> </div>
+<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>      <span class="keyword">const</span> Real dtLeap = this-&gt;getNonCriticalTimeStep(a_state, a_reactions, propensities);</div>
+<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span> </div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>      Real curDt = std::min(a_dt - curTime, dtLeap);</div>
 <div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span> </div>
-<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>        State state = a_state;</div>
+<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>      <span class="keywordtype">bool</span> valid = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span> </div>
-<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>        <span class="comment">// Do a tau-leaping step.</span></div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>        <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>          this-&gt;stepExplicitEuler(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>      <span class="comment">// Substepping so we end up with a valid state.</span></div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>      <span class="keywordflow">while</span> (!valid) {</div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span> </div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>        State state = a_state;</div>
 <div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span> </div>
-<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>        }</div>
-<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>          this-&gt;stepMidpoint(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>        <span class="comment">// Do a tau-leaping step.</span></div>
+<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>        <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
+<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>          this-&gt;stepExplicitEuler(state, a_reactions, curDt);</div>
 <div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span> </div>
 <div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>          <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>        }</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>          this-&gt;stepPRC(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>          this-&gt;stepMidpoint(state, a_reactions, curDt);</div>
 <div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span> </div>
 <div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>          <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>        }</div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>          this-&gt;stepImplicitEuler(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>          this-&gt;stepPRC(state, a_reactions, curDt);</div>
 <div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span> </div>
 <div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>          <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>        }</div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>        <span class="keywordflow">default</span>: {</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>        }</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>        }</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span> </div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>        <span class="comment">// If this was a valid step, accept it. Else reduce dt.</span></div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>        valid = state.isValidState();</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span> </div>
-<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>        <span class="keywordflow">if</span> (valid) {</div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>          a_state = state;</div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span> </div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>          curTime += curDt;</div>
-<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>        }</div>
-<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>          curDt *= 0.5;</div>
-<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>        }</div>
-<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>      }</div>
-<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>    }</div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>  }</div>
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>}</div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>          this-&gt;stepImplicitEuler(state, a_reactions, curDt);</div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span> </div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>        }</div>
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>        <span class="keywordflow">default</span>: {</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>        }</div>
+<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>        }</div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span> </div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>        <span class="comment">// If this was a valid step, accept it. Else reduce dt.</span></div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>        valid = state.isValidState();</div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span> </div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>        <span class="keywordflow">if</span> (valid) {</div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>          a_state = state;</div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span> </div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>          curTime += curDt;</div>
+<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        }</div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>          curDt *= 0.5;</div>
+<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>        }</div>
+<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>      }</div>
+<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>    }</div>
+<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>  }</div>
+<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>}</div>
 </div>
-<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span> </div>
-<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00914" data-start="{" data-end="}">
-<div class="line"><a id="l00914" name="l00914"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">  914</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
-<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
-<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>{</div>
-<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>  this-&gt;advanceHybrid(a_state, m_reactions, a_dt, a_leapPropagator);</div>
-<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>}</div>
+<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span> </div>
+<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00919" data-start="{" data-end="}">
+<div class="line"><a id="l00919" name="l00919"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">  919</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
+<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
+<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>{</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>  this-&gt;advanceHybrid(a_state, m_reactions, a_dt, a_leapPropagator);</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>}</div>
 </div>
-<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span> </div>
-<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00923" data-start="{" data-end="}">
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno"><a class="line" href="classKMCSolver.html#a92a89de4bef3c3071c4145c5839ebca9">  923</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>                                      <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;      a_reactions,</div>
-<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
-<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>{</div>
-<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>  <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
-<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>      this-&gt;stepExplicitEuler(s, r, dt);</div>
-<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>    });</div>
-<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span> </div>
-<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>  }</div>
-<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
-<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span>      this-&gt;stepMidpoint(s, r, dt);</div>
-<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>    });</div>
-<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span> </div>
-<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>  }</div>
-<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
-<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>      this-&gt;stepPRC(s, r, dt);</div>
-<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>    });</div>
-<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span> </div>
-<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>  }</div>
-<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
-<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
-<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span>      this-&gt;stepImplicitEuler(s, r, dt);</div>
-<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>    });</div>
-<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span> </div>
-<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>  }</div>
-<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>  <span class="keywordflow">default</span>: {</div>
-<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>    MayDay::Error(<span class="stringliteral">&quot;KMCSolver::advanceHybrid - unknown leap propagator requested&quot;</span>);</div>
-<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>  }</div>
-<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>  }</div>
-<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>}</div>
+<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span> </div>
+<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00928" data-start="{" data-end="}">
+<div class="line"><a id="l00928" name="l00928"></a><span class="lineno"><a class="line" href="classKMCSolver.html#a92a89de4bef3c3071c4145c5839ebca9">  928</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(State&amp;                   a_state,</div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>                                      <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;      a_reactions,</div>
+<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>                                      <span class="keyword">const</span> Real               a_dt,</div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>                                      <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a>&amp; a_leapPropagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>{</div>
+<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>  <span class="keywordflow">switch</span> (a_leapPropagator) {</div>
+<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a96fdcdf2e719153ba8daa0a24976e73e">KMCLeapPropagator::ExplicitEuler</a>: {</div>
+<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>      this-&gt;stepExplicitEuler(s, r, dt);</div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>    });</div>
+<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span> </div>
+<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>  }</div>
+<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a7f56c02b34d312867e3f63c9f21fe5c8">KMCLeapPropagator::Midpoint</a>: {</div>
+<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>      this-&gt;stepMidpoint(s, r, dt);</div>
+<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>    });</div>
+<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span> </div>
+<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>  }</div>
+<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2">KMCLeapPropagator::PRC</a>: {</div>
+<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>      this-&gt;stepPRC(s, r, dt);</div>
+<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>    });</div>
+<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span> </div>
+<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span>  }</div>
+<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>  <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a>: {</div>
+<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>    this-&gt;advanceHybrid(a_state, a_reactions, a_dt, [<span class="keyword">this</span>](State&amp; s, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; r, <span class="keyword">const</span> Real dt) {</div>
+<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>      this-&gt;stepImplicitEuler(s, r, dt);</div>
+<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>    });</div>
+<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span> </div>
+<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>  }</div>
+<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span>    MayDay::Error(<span class="stringliteral">&quot;KMCSolver::advanceHybrid - unknown leap propagator requested&quot;</span>);</div>
+<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span>  }</div>
+<div class="line"><a id="l00965" name="l00965"></a><span class="lineno">  965</span>  }</div>
+<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span>}</div>
 </div>
-<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span> </div>
-<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00965" data-start="{" data-end="}">
-<div class="line"><a id="l00965" name="l00965"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab2839a89dc45b60bc32b5e9deeef21e3">  965</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(</div>
-<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span>  State&amp;                                                                               a_state,</div>
-<div class="line"><a id="l00967" name="l00967"></a><span class="lineno">  967</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;                                                                  a_reactions,</div>
-<div class="line"><a id="l00968" name="l00968"></a><span class="lineno">  968</span>  <span class="keyword">const</span> Real                                                                           a_dt,</div>
-<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span>  <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(State&amp;, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; a_reactions, <span class="keyword">const</span> Real a_dt)&gt;&amp; a_propagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span>{</div>
-<div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span>  <span class="keyword">constexpr</span> T one = (T)1;</div>
-<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span> </div>
-<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>  <span class="comment">// Simulated time within the advancement algorithm.</span></div>
-<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>  Real curTime = 0.0;</div>
-<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span> </div>
-<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>  <span class="comment">// Outer loop is for reactive substepping over a_dt.</span></div>
-<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span>  <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
-<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span> </div>
-<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>    <span class="comment">// Partition reactions into critical and non-critical reactions and compute the critical and non-critical time</span></div>
-<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>    <span class="comment">// steps.</span></div>
-<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>    <span class="keyword">const</span> std::pair&lt;ReactionList, ReactionList&gt; partitionedReactions = this-&gt;partitionReactions(a_state, a_reactions);</div>
-<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span> </div>
-<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; criticalReactions    = partitionedReactions.first;</div>
-<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; nonCriticalReactions = partitionedReactions.second;</div>
-<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span> </div>
-<div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesCrit    = this-&gt;propensities(a_state, criticalReactions);</div>
-<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesNonCrit = this-&gt;propensities(a_state, nonCriticalReactions);</div>
-<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span> </div>
-<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>    Real dtCrit    = this-&gt;getCriticalTimeStep(propensitiesCrit);</div>
-<div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span>    Real dtNonCrit = this-&gt;getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);</div>
-<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span> </div>
-<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>    <span class="comment">// Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state,</span></div>
-<div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span>    <span class="comment">// e.g. a state with a negative number of particles.</span></div>
-<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>    <span class="keywordtype">bool</span> validStep = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span> </div>
-<div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span>    <span class="keywordflow">while</span> (!validStep) {</div>
-<div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span> </div>
-<div class="line"><a id="l00998" name="l00998"></a><span class="lineno">  998</span>      <span class="comment">// Do a backup of the advancement state to operate on. This is necessary because the tau-leaping</span></div>
-<div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span>      <span class="comment">// algorithms advance the state but we may need to reject those steps if we end up with a thermodynamically</span></div>
-<div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span>      <span class="comment">// invalid state.</span></div>
-<div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>      State state = a_state;</div>
+<div class="line"><a id="l00967" name="l00967"></a><span class="lineno">  967</span> </div>
+<div class="line"><a id="l00968" name="l00968"></a><span class="lineno">  968</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span> State, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00970" data-start="{" data-end="}">
+<div class="line"><a id="l00970" name="l00970"></a><span class="lineno"><a class="line" href="classKMCSolver.html#ab2839a89dc45b60bc32b5e9deeef21e3">  970</a></span><a class="code hl_function" href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver&lt;R, State, T&gt;::advanceHybrid</a>(</div>
+<div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span>  State&amp;                                                                               a_state,</div>
+<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp;                                                                  a_reactions,</div>
+<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>  <span class="keyword">const</span> Real                                                                           a_dt,</div>
+<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>  <span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(State&amp;, <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; a_reactions, <span class="keyword">const</span> Real a_dt)&gt;&amp; a_propagator) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>{</div>
+<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>  <span class="keyword">constexpr</span> T one = (T)1;</div>
+<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span> </div>
+<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span>  <span class="comment">// Simulated time within the advancement algorithm.</span></div>
+<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>  Real curTime = 0.0;</div>
+<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span> </div>
+<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>  <span class="comment">// Outer loop is for reactive substepping over a_dt.</span></div>
+<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>  <span class="keywordflow">while</span> (curTime &lt; a_dt) {</div>
+<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span> </div>
+<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span>    <span class="comment">// Partition reactions into critical and non-critical reactions and compute the critical and non-critical time</span></div>
+<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span>    <span class="comment">// steps.</span></div>
+<div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span>    <span class="keyword">const</span> std::pair&lt;ReactionList, ReactionList&gt; partitionedReactions = this-&gt;partitionReactions(a_state, a_reactions);</div>
+<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span> </div>
+<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; criticalReactions    = partitionedReactions.first;</div>
+<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a>&amp; nonCriticalReactions = partitionedReactions.second;</div>
+<div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span> </div>
+<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesCrit    = this-&gt;propensities(a_state, criticalReactions);</div>
+<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>    <span class="keyword">const</span> std::vector&lt;Real&gt; propensitiesNonCrit = this-&gt;propensities(a_state, nonCriticalReactions);</div>
+<div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span> </div>
+<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>    Real dtCrit    = this-&gt;getCriticalTimeStep(propensitiesCrit);</div>
+<div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span>    Real dtNonCrit = this-&gt;getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);</div>
+<div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span> </div>
+<div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span>    <span class="comment">// Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state,</span></div>
+<div class="line"><a id="l00998" name="l00998"></a><span class="lineno">  998</span>    <span class="comment">// e.g. a state with a negative number of particles.</span></div>
+<div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span>    <span class="keywordtype">bool</span> validStep = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span> </div>
+<div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>    <span class="keywordflow">while</span> (!validStep) {</div>
 <div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span> </div>
-<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span>      <span class="comment">// Compute the time step to be used.</span></div>
-<div class="line"><a id="l01004" name="l01004"></a><span class="lineno"> 1004</span>      <span class="keyword">const</span> Real curDt = std::min(a_dt - curTime, std::min(dtCrit, dtNonCrit));</div>
-<div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span> </div>
-<div class="line"><a id="l01006" name="l01006"></a><span class="lineno"> 1006</span>      <span class="comment">// Are we only doing non-critical reactions?</span></div>
-<div class="line"><a id="l01007" name="l01007"></a><span class="lineno"> 1007</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> nonCriticalOnly = (dtNonCrit &lt; dtCrit) || (criticalReactions.size() == 0) ||</div>
-<div class="line"><a id="l01008" name="l01008"></a><span class="lineno"> 1008</span>                                   (dtCrit &gt; (a_dt - curTime));</div>
-<div class="line"><a id="l01009" name="l01009"></a><span class="lineno"> 1009</span> </div>
-<div class="line"><a id="l01010" name="l01010"></a><span class="lineno"> 1010</span>      <span class="comment">// Decide whether tau-leaping is efficient enough, or whether we should fall back to an exact SSA advancement</span></div>
-<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>      <span class="comment">// over the WHOLE reaction set. This decision is made independently of whether a critical reaction is pending --</span></div>
-<div class="line"><a id="l01012" name="l01012"></a><span class="lineno"> 1012</span>      <span class="comment">// in low-activity regimes exact SSA is both cheaper and more accurate than tau-leaping, so it must be available</span></div>
-<div class="line"><a id="l01013" name="l01013"></a><span class="lineno"> 1013</span>      <span class="comment">// in the critical branch as well. SSA is only used when the user has permitted at least one SSA step</span></div>
-<div class="line"><a id="l01014" name="l01014"></a><span class="lineno"> 1014</span>      <span class="comment">// (m_numSSA &gt; 0); otherwise we always tau-leap, which also avoids a no-progress infinite loop when m_numSSA == 0.</span></div>
-<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>      <span class="keyword">const</span> Real A      = this-&gt;totalPropensity(state, a_reactions);</div>
-<div class="line"><a id="l01016" name="l01016"></a><span class="lineno"> 1016</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> useSSA = (m_numSSA &gt;= one) &amp;&amp; (A * curDt &lt; m_SSAlim);</div>
-<div class="line"><a id="l01017" name="l01017"></a><span class="lineno"> 1017</span> </div>
-<div class="line"><a id="l01018" name="l01018"></a><span class="lineno"> 1018</span>      <span class="keywordflow">if</span> (useSSA) {</div>
-<div class="line"><a id="l01019" name="l01019"></a><span class="lineno"> 1019</span>        <span class="comment">// TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.</span></div>
-<div class="line"><a id="l01020" name="l01020"></a><span class="lineno"> 1020</span> </div>
-<div class="line"><a id="l01021" name="l01021"></a><span class="lineno"> 1021</span>        <span class="comment">// Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA &gt;= curDt or</span></div>
-<div class="line"><a id="l01022" name="l01022"></a><span class="lineno"> 1022</span>        <span class="comment">// we&#39;ve exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).</span></div>
-<div class="line"><a id="l01023" name="l01023"></a><span class="lineno"> 1023</span>        Real dtSSA  = 0.0;</div>
-<div class="line"><a id="l01024" name="l01024"></a><span class="lineno"> 1024</span>        T    numSSA = 0;</div>
+<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span>      <span class="comment">// Do a backup of the advancement state to operate on. This is necessary because the tau-leaping</span></div>
+<div class="line"><a id="l01004" name="l01004"></a><span class="lineno"> 1004</span>      <span class="comment">// algorithms advance the state but we may need to reject those steps if we end up with a thermodynamically</span></div>
+<div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span>      <span class="comment">// invalid state.</span></div>
+<div class="line"><a id="l01006" name="l01006"></a><span class="lineno"> 1006</span>      State state = a_state;</div>
+<div class="line"><a id="l01007" name="l01007"></a><span class="lineno"> 1007</span> </div>
+<div class="line"><a id="l01008" name="l01008"></a><span class="lineno"> 1008</span>      <span class="comment">// Compute the time step to be used.</span></div>
+<div class="line"><a id="l01009" name="l01009"></a><span class="lineno"> 1009</span>      <span class="keyword">const</span> Real curDt = std::min(a_dt - curTime, std::min(dtCrit, dtNonCrit));</div>
+<div class="line"><a id="l01010" name="l01010"></a><span class="lineno"> 1010</span> </div>
+<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>      <span class="comment">// Are we only doing non-critical reactions?</span></div>
+<div class="line"><a id="l01012" name="l01012"></a><span class="lineno"> 1012</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> nonCriticalOnly = (dtNonCrit &lt; dtCrit) || (criticalReactions.size() == 0) ||</div>
+<div class="line"><a id="l01013" name="l01013"></a><span class="lineno"> 1013</span>                                   (dtCrit &gt; (a_dt - curTime));</div>
+<div class="line"><a id="l01014" name="l01014"></a><span class="lineno"> 1014</span> </div>
+<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>      <span class="comment">// Decide whether tau-leaping is efficient enough, or whether we should fall back to an exact SSA advancement</span></div>
+<div class="line"><a id="l01016" name="l01016"></a><span class="lineno"> 1016</span>      <span class="comment">// over the WHOLE reaction set. This decision is made independently of whether a critical reaction is pending --</span></div>
+<div class="line"><a id="l01017" name="l01017"></a><span class="lineno"> 1017</span>      <span class="comment">// in low-activity regimes exact SSA is both cheaper and more accurate than tau-leaping, so it must be available</span></div>
+<div class="line"><a id="l01018" name="l01018"></a><span class="lineno"> 1018</span>      <span class="comment">// in the critical branch as well. SSA is only used when the user has permitted at least one SSA step</span></div>
+<div class="line"><a id="l01019" name="l01019"></a><span class="lineno"> 1019</span>      <span class="comment">// (m_numSSA &gt; 0); otherwise we always tau-leap, which also avoids a no-progress infinite loop when m_numSSA == 0.</span></div>
+<div class="line"><a id="l01020" name="l01020"></a><span class="lineno"> 1020</span>      <span class="keyword">const</span> Real A      = this-&gt;totalPropensity(state, a_reactions);</div>
+<div class="line"><a id="l01021" name="l01021"></a><span class="lineno"> 1021</span>      <span class="keyword">const</span> <span class="keywordtype">bool</span> useSSA = (m_numSSA &gt;= one) &amp;&amp; (A * curDt &lt; m_SSAlim);</div>
+<div class="line"><a id="l01022" name="l01022"></a><span class="lineno"> 1022</span> </div>
+<div class="line"><a id="l01023" name="l01023"></a><span class="lineno"> 1023</span>      <span class="keywordflow">if</span> (useSSA) {</div>
+<div class="line"><a id="l01024" name="l01024"></a><span class="lineno"> 1024</span>        <span class="comment">// TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.</span></div>
 <div class="line"><a id="l01025" name="l01025"></a><span class="lineno"> 1025</span> </div>
-<div class="line"><a id="l01026" name="l01026"></a><span class="lineno"> 1026</span>        <span class="keywordflow">while</span> (dtSSA &lt; curDt &amp;&amp; numSSA &lt; m_numSSA) {</div>
-<div class="line"><a id="l01027" name="l01027"></a><span class="lineno"> 1027</span> </div>
-<div class="line"><a id="l01028" name="l01028"></a><span class="lineno"> 1028</span>          <span class="comment">// Recompute propensities for the full reaction set and advance everything using the SSA.</span></div>
-<div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span>          <span class="keyword">const</span> std::vector&lt;Real&gt; propensities = this-&gt;propensities(a_state, a_reactions);</div>
+<div class="line"><a id="l01026" name="l01026"></a><span class="lineno"> 1026</span>        <span class="comment">// Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA &gt;= curDt or</span></div>
+<div class="line"><a id="l01027" name="l01027"></a><span class="lineno"> 1027</span>        <span class="comment">// we&#39;ve exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).</span></div>
+<div class="line"><a id="l01028" name="l01028"></a><span class="lineno"> 1028</span>        Real dtSSA  = 0.0;</div>
+<div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span>        T    numSSA = 0;</div>
 <div class="line"><a id="l01030" name="l01030"></a><span class="lineno"> 1030</span> </div>
-<div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span>          Real Asum = 0.0;</div>
-<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>          <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; propensities.size(); i++) {</div>
-<div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span>            Asum += propensities[i];</div>
-<div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>          }</div>
+<div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span>        <span class="keywordflow">while</span> (dtSSA &lt; curDt &amp;&amp; numSSA &lt; m_numSSA) {</div>
+<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span> </div>
+<div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span>          <span class="comment">// Recompute propensities for the full reaction set and advance everything using the SSA.</span></div>
+<div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>          <span class="keyword">const</span> std::vector&lt;Real&gt; propensities = this-&gt;propensities(a_state, a_reactions);</div>
 <div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span> </div>
-<div class="line"><a id="l01036" name="l01036"></a><span class="lineno"> 1036</span>          <span class="comment">// Compute the time to the next reaction.</span></div>
-<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span>          <span class="keyword">const</span> Real dtReact = this-&gt;getCriticalTimeStep(Asum);</div>
-<div class="line"><a id="l01038" name="l01038"></a><span class="lineno"> 1038</span> </div>
-<div class="line"><a id="l01039" name="l01039"></a><span class="lineno"> 1039</span>          <span class="keywordflow">if</span> (dtSSA + dtReact &lt; curDt) {</div>
-<div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span>            this-&gt;stepSSA(a_state, a_reactions, propensities);</div>
-<div class="line"><a id="l01041" name="l01041"></a><span class="lineno"> 1041</span> </div>
-<div class="line"><a id="l01042" name="l01042"></a><span class="lineno"> 1042</span>            dtSSA += dtReact;</div>
-<div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span>            numSSA += one;</div>
-<div class="line"><a id="l01044" name="l01044"></a><span class="lineno"> 1044</span>          }</div>
-<div class="line"><a id="l01045" name="l01045"></a><span class="lineno"> 1045</span>          <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01036" name="l01036"></a><span class="lineno"> 1036</span>          Real Asum = 0.0;</div>
+<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span>          <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; propensities.size(); i++) {</div>
+<div class="line"><a id="l01038" name="l01038"></a><span class="lineno"> 1038</span>            Asum += propensities[i];</div>
+<div class="line"><a id="l01039" name="l01039"></a><span class="lineno"> 1039</span>          }</div>
+<div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span> </div>
+<div class="line"><a id="l01041" name="l01041"></a><span class="lineno"> 1041</span>          <span class="comment">// Compute the time to the next reaction.</span></div>
+<div class="line"><a id="l01042" name="l01042"></a><span class="lineno"> 1042</span>          <span class="keyword">const</span> Real dtReact = this-&gt;getCriticalTimeStep(Asum);</div>
+<div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span> </div>
+<div class="line"><a id="l01044" name="l01044"></a><span class="lineno"> 1044</span>          <span class="keywordflow">if</span> (dtSSA + dtReact &lt; curDt) {</div>
+<div class="line"><a id="l01045" name="l01045"></a><span class="lineno"> 1045</span>            this-&gt;stepSSA(a_state, a_reactions, propensities);</div>
 <div class="line"><a id="l01046" name="l01046"></a><span class="lineno"> 1046</span> </div>
-<div class="line"><a id="l01047" name="l01047"></a><span class="lineno"> 1047</span>            <span class="comment">// Next reaction occurred outside the substep -- break out of the loop.</span></div>
-<div class="line"><a id="l01048" name="l01048"></a><span class="lineno"> 1048</span>            dtSSA = curDt;</div>
+<div class="line"><a id="l01047" name="l01047"></a><span class="lineno"> 1047</span>            dtSSA += dtReact;</div>
+<div class="line"><a id="l01048" name="l01048"></a><span class="lineno"> 1048</span>            numSSA += one;</div>
 <div class="line"><a id="l01049" name="l01049"></a><span class="lineno"> 1049</span>          }</div>
-<div class="line"><a id="l01050" name="l01050"></a><span class="lineno"> 1050</span>        }</div>
+<div class="line"><a id="l01050" name="l01050"></a><span class="lineno"> 1050</span>          <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l01051" name="l01051"></a><span class="lineno"> 1051</span> </div>
-<div class="line"><a id="l01052" name="l01052"></a><span class="lineno"> 1052</span>        validStep = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l01053" name="l01053"></a><span class="lineno"> 1053</span>        curTime += dtSSA;</div>
-<div class="line"><a id="l01054" name="l01054"></a><span class="lineno"> 1054</span>      }</div>
-<div class="line"><a id="l01055" name="l01055"></a><span class="lineno"> 1055</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (nonCriticalOnly) {</div>
-<div class="line"><a id="l01056" name="l01056"></a><span class="lineno"> 1056</span>        <span class="comment">// Do the tau-leaping over the non-critical reactions only.</span></div>
-<div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
-<div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span> </div>
-<div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
-<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>        validStep = state.isValidState();</div>
-<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span> </div>
-<div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span>        <span class="keywordflow">if</span> (validStep) {</div>
-<div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span>          a_state = state;</div>
-<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span> </div>
-<div class="line"><a id="l01065" name="l01065"></a><span class="lineno"> 1065</span>          curTime += curDt;</div>
-<div class="line"><a id="l01066" name="l01066"></a><span class="lineno"> 1066</span>        }</div>
-<div class="line"><a id="l01067" name="l01067"></a><span class="lineno"> 1067</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01068" name="l01068"></a><span class="lineno"> 1068</span>          dtNonCrit *= 0.5;</div>
-<div class="line"><a id="l01069" name="l01069"></a><span class="lineno"> 1069</span>        }</div>
-<div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span>      }</div>
-<div class="line"><a id="l01071" name="l01071"></a><span class="lineno"> 1071</span>      <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01072" name="l01072"></a><span class="lineno"> 1072</span>        <span class="comment">// TLDR: Here, one critical reaction fires. We tau-leap the non-critical reactions over curDt and fire exactly</span></div>
-<div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>        <span class="comment">//       one critical reaction using the SSA. The non-critical tau-leap is performed FIRST, while the state is</span></div>
-<div class="line"><a id="l01074" name="l01074"></a><span class="lineno"> 1074</span>        <span class="comment">//       still at the start of the step, so that its propensities are evaluated at the start-of-step state. The</span></div>
-<div class="line"><a id="l01075" name="l01075"></a><span class="lineno"> 1075</span>        <span class="comment">//       single critical firing is then applied as a fixed stoichiometric increment -- its reaction was already</span></div>
-<div class="line"><a id="l01076" name="l01076"></a><span class="lineno"> 1076</span>        <span class="comment">//       selected from the start-of-step propensities (propensitiesCrit), so applying it last is exact. This</span></div>
-<div class="line"><a id="l01077" name="l01077"></a><span class="lineno"> 1077</span>        <span class="comment">//       keeps both contributions consistent with the start-of-step state, as required by the</span></div>
-<div class="line"><a id="l01078" name="l01078"></a><span class="lineno"> 1078</span>        <span class="comment">//       Cao-Gillespie-Petzold scheme.</span></div>
-<div class="line"><a id="l01079" name="l01079"></a><span class="lineno"> 1079</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
-<div class="line"><a id="l01080" name="l01080"></a><span class="lineno"> 1080</span> </div>
-<div class="line"><a id="l01081" name="l01081"></a><span class="lineno"> 1081</span>        this-&gt;stepSSA(state, criticalReactions, propensitiesCrit);</div>
-<div class="line"><a id="l01082" name="l01082"></a><span class="lineno"> 1082</span> </div>
-<div class="line"><a id="l01083" name="l01083"></a><span class="lineno"> 1083</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
-<div class="line"><a id="l01084" name="l01084"></a><span class="lineno"> 1084</span>        validStep = state.isValidState();</div>
+<div class="line"><a id="l01052" name="l01052"></a><span class="lineno"> 1052</span>            <span class="comment">// Next reaction occurred outside the substep -- break out of the loop.</span></div>
+<div class="line"><a id="l01053" name="l01053"></a><span class="lineno"> 1053</span>            dtSSA = curDt;</div>
+<div class="line"><a id="l01054" name="l01054"></a><span class="lineno"> 1054</span>          }</div>
+<div class="line"><a id="l01055" name="l01055"></a><span class="lineno"> 1055</span>        }</div>
+<div class="line"><a id="l01056" name="l01056"></a><span class="lineno"> 1056</span> </div>
+<div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span>        validStep = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span>        curTime += dtSSA;</div>
+<div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>      }</div>
+<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (nonCriticalOnly) {</div>
+<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>        <span class="comment">// Do the tau-leaping over the non-critical reactions only.</span></div>
+<div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
+<div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span> </div>
+<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
+<div class="line"><a id="l01065" name="l01065"></a><span class="lineno"> 1065</span>        validStep = state.isValidState();</div>
+<div class="line"><a id="l01066" name="l01066"></a><span class="lineno"> 1066</span> </div>
+<div class="line"><a id="l01067" name="l01067"></a><span class="lineno"> 1067</span>        <span class="keywordflow">if</span> (validStep) {</div>
+<div class="line"><a id="l01068" name="l01068"></a><span class="lineno"> 1068</span>          a_state = state;</div>
+<div class="line"><a id="l01069" name="l01069"></a><span class="lineno"> 1069</span> </div>
+<div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span>          curTime += curDt;</div>
+<div class="line"><a id="l01071" name="l01071"></a><span class="lineno"> 1071</span>        }</div>
+<div class="line"><a id="l01072" name="l01072"></a><span class="lineno"> 1072</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>          dtNonCrit *= 0.5;</div>
+<div class="line"><a id="l01074" name="l01074"></a><span class="lineno"> 1074</span>        }</div>
+<div class="line"><a id="l01075" name="l01075"></a><span class="lineno"> 1075</span>      }</div>
+<div class="line"><a id="l01076" name="l01076"></a><span class="lineno"> 1076</span>      <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01077" name="l01077"></a><span class="lineno"> 1077</span>        <span class="comment">// TLDR: Here, one critical reaction fires. We tau-leap the non-critical reactions over curDt and fire exactly</span></div>
+<div class="line"><a id="l01078" name="l01078"></a><span class="lineno"> 1078</span>        <span class="comment">//       one critical reaction using the SSA. The non-critical tau-leap is performed FIRST, while the state is</span></div>
+<div class="line"><a id="l01079" name="l01079"></a><span class="lineno"> 1079</span>        <span class="comment">//       still at the start of the step, so that its propensities are evaluated at the start-of-step state. The</span></div>
+<div class="line"><a id="l01080" name="l01080"></a><span class="lineno"> 1080</span>        <span class="comment">//       single critical firing is then applied as a fixed stoichiometric increment -- its reaction was already</span></div>
+<div class="line"><a id="l01081" name="l01081"></a><span class="lineno"> 1081</span>        <span class="comment">//       selected from the start-of-step propensities (propensitiesCrit), so applying it last is exact. This</span></div>
+<div class="line"><a id="l01082" name="l01082"></a><span class="lineno"> 1082</span>        <span class="comment">//       keeps both contributions consistent with the start-of-step state, as required by the</span></div>
+<div class="line"><a id="l01083" name="l01083"></a><span class="lineno"> 1083</span>        <span class="comment">//       Cao-Gillespie-Petzold scheme.</span></div>
+<div class="line"><a id="l01084" name="l01084"></a><span class="lineno"> 1084</span>        a_propagator(state, nonCriticalReactions, curDt);</div>
 <div class="line"><a id="l01085" name="l01085"></a><span class="lineno"> 1085</span> </div>
-<div class="line"><a id="l01086" name="l01086"></a><span class="lineno"> 1086</span>        <span class="keywordflow">if</span> (validStep) {</div>
-<div class="line"><a id="l01087" name="l01087"></a><span class="lineno"> 1087</span>          a_state = state;</div>
-<div class="line"><a id="l01088" name="l01088"></a><span class="lineno"> 1088</span> </div>
-<div class="line"><a id="l01089" name="l01089"></a><span class="lineno"> 1089</span>          curTime += curDt;</div>
-<div class="line"><a id="l01090" name="l01090"></a><span class="lineno"> 1090</span>        }</div>
-<div class="line"><a id="l01091" name="l01091"></a><span class="lineno"> 1091</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01092" name="l01092"></a><span class="lineno"> 1092</span>          dtNonCrit *= 0.5;</div>
-<div class="line"><a id="l01093" name="l01093"></a><span class="lineno"> 1093</span>        }</div>
-<div class="line"><a id="l01094" name="l01094"></a><span class="lineno"> 1094</span>      }</div>
-<div class="line"><a id="l01095" name="l01095"></a><span class="lineno"> 1095</span>    }</div>
-<div class="line"><a id="l01096" name="l01096"></a><span class="lineno"> 1096</span>  }</div>
-<div class="line"><a id="l01097" name="l01097"></a><span class="lineno"> 1097</span>}</div>
+<div class="line"><a id="l01086" name="l01086"></a><span class="lineno"> 1086</span>        this-&gt;stepSSA(state, criticalReactions, propensitiesCrit);</div>
+<div class="line"><a id="l01087" name="l01087"></a><span class="lineno"> 1087</span> </div>
+<div class="line"><a id="l01088" name="l01088"></a><span class="lineno"> 1088</span>        <span class="comment">// Check if we need to reject the state and rather try again with a smaller non-critical time step.</span></div>
+<div class="line"><a id="l01089" name="l01089"></a><span class="lineno"> 1089</span>        validStep = state.isValidState();</div>
+<div class="line"><a id="l01090" name="l01090"></a><span class="lineno"> 1090</span> </div>
+<div class="line"><a id="l01091" name="l01091"></a><span class="lineno"> 1091</span>        <span class="keywordflow">if</span> (validStep) {</div>
+<div class="line"><a id="l01092" name="l01092"></a><span class="lineno"> 1092</span>          a_state = state;</div>
+<div class="line"><a id="l01093" name="l01093"></a><span class="lineno"> 1093</span> </div>
+<div class="line"><a id="l01094" name="l01094"></a><span class="lineno"> 1094</span>          curTime += curDt;</div>
+<div class="line"><a id="l01095" name="l01095"></a><span class="lineno"> 1095</span>        }</div>
+<div class="line"><a id="l01096" name="l01096"></a><span class="lineno"> 1096</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01097" name="l01097"></a><span class="lineno"> 1097</span>          dtNonCrit *= 0.5;</div>
+<div class="line"><a id="l01098" name="l01098"></a><span class="lineno"> 1098</span>        }</div>
+<div class="line"><a id="l01099" name="l01099"></a><span class="lineno"> 1099</span>      }</div>
+<div class="line"><a id="l01100" name="l01100"></a><span class="lineno"> 1100</span>    }</div>
+<div class="line"><a id="l01101" name="l01101"></a><span class="lineno"> 1101</span>  }</div>
+<div class="line"><a id="l01102" name="l01102"></a><span class="lineno"> 1102</span>}</div>
 </div>
-<div class="line"><a id="l01098" name="l01098"></a><span class="lineno"> 1098</span> </div>
-<div class="line"><a id="l01099" name="l01099"></a><span class="lineno"> 1099</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l01100" name="l01100"></a><span class="lineno"> 1100</span> </div>
-<div class="line"><a id="l01101" name="l01101"></a><span class="lineno"> 1101</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l01103" name="l01103"></a><span class="lineno"> 1103</span> </div>
+<div class="line"><a id="l01104" name="l01104"></a><span class="lineno"> 1104</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l01105" name="l01105"></a><span class="lineno"> 1105</span> </div>
+<div class="line"><a id="l01106" name="l01106"></a><span class="lineno"> 1106</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__KMCSolver_8H_html"><div class="ttname"><a href="CD__KMCSolver_8H.html">CD_KMCSolver.H</a></div><div class="ttdoc">Class for running Kinetic Monte Carlo functionality.</div></div>
 <div class="ttc" id="aCD__KMCSolver_8H_html_a44a86cfb3c9eee456028c00d618ea9d4"><div class="ttname"><a href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4">KMCLeapPropagator</a></div><div class="ttdeci">KMCLeapPropagator</div><div class="ttdoc">Supported propagators for hybrid tau leaping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolver.H:35</div></div>
 <div class="ttc" id="aCD__KMCSolver_8H_html_a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5"><div class="ttname"><a href="CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4a1b41e1bf0ba9f22aff9ae08cba5197c5">KMCLeapPropagator::ImplicitEuler</a></div><div class="ttdeci">@ ImplicitEuler</div><div class="ttdoc">Implicit Euler tau leaping.</div></div>
@@ -1280,7 +1285,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassKMCSolver_html_a8d944fbded7f556f9325b5fba58b068c"><div class="ttname"><a href="classKMCSolver.html#a8d944fbded7f556f9325b5fba58b068c">KMCSolver::advanceSSA</a></div><div class="ttdeci">void advanceSSA(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Advance with the SSA over the input time. This can end up using substepping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:502</div></div>
 <div class="ttc" id="aclassKMCSolver_html_a9aec435c7b5d6a24c2d6fc373b6b7fda"><div class="ttname"><a href="classKMCSolver.html#a9aec435c7b5d6a24c2d6fc373b6b7fda">KMCSolver::gatherDistinctReactants</a></div><div class="ttdeci">void gatherDistinctReactants(const ReactionList &amp;a_reactions) const noexcept</div><div class="ttdoc">Fill m_reactantScratch with the distinct reactants of the input reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:258</div></div>
 <div class="ttc" id="aclassKMCSolver_html_aaca91100d8b18efdd3379af9eca9f8ec"><div class="ttname"><a href="classKMCSolver.html#aaca91100d8b18efdd3379af9eca9f8ec">KMCSolver::stepImplicitEuler</a></div><div class="ttdeci">void stepImplicitEuler(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one implicit Euler tau-leaping step using ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:640</div></div>
-<div class="ttc" id="aclassKMCSolver_html_ab284d9236aa9557ef582b638eaa1dd0d"><div class="ttname"><a href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver::advanceHybrid</a></div><div class="ttdeci">void advanceHybrid(State &amp;a_state, Real a_dt, const KMCLeapPropagator &amp;a_leapPropagator=KMCLeapPropagator::ExplicitEuler) const noexcept</div><div class="ttdoc">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:914</div></div>
+<div class="ttc" id="aclassKMCSolver_html_ab284d9236aa9557ef582b638eaa1dd0d"><div class="ttname"><a href="classKMCSolver.html#ab284d9236aa9557ef582b638eaa1dd0d">KMCSolver::advanceHybrid</a></div><div class="ttdeci">void advanceHybrid(State &amp;a_state, Real a_dt, const KMCLeapPropagator &amp;a_leapPropagator=KMCLeapPropagator::ExplicitEuler) const noexcept</div><div class="ttdoc">Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:919</div></div>
 <div class="ttc" id="aclassKMCSolver_html_ab28a827ad32fd5c7d8fcf69c2f3d3c0e"><div class="ttname"><a href="classKMCSolver.html#ab28a827ad32fd5c7d8fcf69c2f3d3c0e">KMCSolver::stepPRC</a></div><div class="ttdeci">void stepPRC(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one leaping step using the PRC method for ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:601</div></div>
 <div class="ttc" id="aclassKMCSolver_html_abb2afb35cead37e46f583a1bb1bdef59"><div class="ttname"><a href="classKMCSolver.html#abb2afb35cead37e46f583a1bb1bdef59">KMCSolver::stepMidpoint</a></div><div class="ttdeci">void stepMidpoint(State &amp;a_state, Real a_dt) const noexcept</div><div class="ttdoc">Perform one leaping step using the midpoint method for ALL reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:566</div></div>
 <div class="ttc" id="aclassKMCSolver_html_acfad658ae71fc1214f16b22c7ab6cbac"><div class="ttname"><a href="classKMCSolver.html#acfad658ae71fc1214f16b22c7ab6cbac">KMCSolver::partitionReactions</a></div><div class="ttdeci">std::pair&lt; ReactionList, ReactionList &gt; partitionReactions(const State &amp;a_state) const noexcept</div><div class="ttdoc">Partition reactions into critical and non-critical reactions.</div><div class="ttdef"><b>Definition</b> CD_KMCSolverImplem.H:153</div></div>

@@ -2725,7 +2725,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numRtSpecies</b></td
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrDensities</td><td>On input, contains n(t). On output it contains n(t+dt). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_photonProduction</td><td>On input, should be equal to zero. On output it will contain the number of photons produced during the time step. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photonProduction</td><td>Number of photons produced during the time step. The contribution is added to whatever the array already holds, so the caller must zero it before the call. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrGradients</td><td>CDR gradients at time a_time </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates </td></tr>
@@ -2819,7 +2819,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numRtSpecies</b></td
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrDensities</td><td>On input, contains n(t). On output it contains n(t+dt). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_photonProduction</td><td>On input, should be equal to zero. On output it will contain the number of photons produced during the time step. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photonProduction</td><td>Number of photons produced during the time step. The contribution is added to whatever the array already holds, so the caller must zero it before the call. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrGradients</td><td>CDR gradients at time a_time </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates </td></tr>
@@ -2919,7 +2919,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numRtSpecies</b></td
 <p>This includes the tableu through the a_tableuAlpha parameter. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrDensities</td><td>On input, contains n(t). On output it contains n(t+dt). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_photonProduction</td><td>On input, should be equal to zero. On output it will contain the number of photons produced during the time step. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photonProduction</td><td>Number of photons produced during the time step. The contribution is added to whatever the array already holds, so the caller must zero it before the call. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrGradients</td><td>CDR gradients at time a_time </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates </td></tr>
@@ -3014,7 +3014,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numRtSpecies</b></td
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrDensities</td><td>On input, contains n(t). On output it contains n(t+dt). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_photonProduction</td><td>On input, should be equal to zero. On output it will contain the number of photons produced during the time step. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photonProduction</td><td>Number of photons produced during the time step. The contribution is added to whatever the array already holds, so the caller must zero it before the call. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrGradients</td><td>CDR gradients at time a_time </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates </td></tr>
@@ -3108,7 +3108,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numRtSpecies</b></td
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrDensities</td><td>On input, contains n(t). On output it contains n(t+dt). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_photonProduction</td><td>On input, should be equal to zero. On output it will contain the number of photons produced during the time step. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photonProduction</td><td>Number of photons produced during the time step. The contribution is added to whatever the array already holds, so the caller must zero it before the call. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrGradients</td><td>CDR gradients at time a_time </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical coordinates </td></tr>

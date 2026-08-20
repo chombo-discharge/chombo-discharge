@@ -813,6 +813,35 @@ The current implementation supports
      ]
    }
 
+* ``gaussian`` For drawing initial particles from a Gaussian distribution.
+  Mandatory fields are
+
+  * ``center`` for specifying the center of the distribution.
+  * ``radius`` for specifying the standard deviation of the distribution.
+  * ``number`` for the number of computational particles.
+  * ``weight`` for the initial particle weight.
+
+  .. code-block:: json
+
+   {"plasma species":
+     [
+       {
+         "name": "e",
+         "Z":  -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "initial particles": {
+	   "gaussian": {
+	     "center": [0,0,0],
+	     "radius": 1.0,
+	     "number": 100,
+	     "weight": 1.0
+	   }
+	 }
+       }
+     ]
+   }
+
 * ``copy`` For using an already initialized particle distribution.
   The only mandatory fields is ``copy``, e.g.
 
