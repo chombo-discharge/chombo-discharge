@@ -35,7 +35,7 @@
 	}
     },
     "particle placement" : {
-	"method" : "random",
+	"method" : "parent",
 	"species" : "e"
     },
     // Townsend coefficients. ItoKMCJSON can compute these from the reaction list ("type" : "auto"), but the
