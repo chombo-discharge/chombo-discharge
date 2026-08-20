@@ -42,3 +42,4 @@ ItoKMCBackgroundEvaluator.max_field_exit_crit                      = 1.E99      
 ItoKMCBackgroundEvaluator.rel_field_exit_crit                      = 1.E99              ## Exit if relative field change (any cell) exceeds this (fraction)
 ItoKMCBackgroundEvaluator.optical_solver                           = 2PN2               ## Name of optical CDR solver to track
 ItoKMCBackgroundEvaluator.max_initial_time_step                    = 0.0                ## Max initial time step (0 = normal operation)
+ItoKMCBackgroundEvaluator.reactive_E_centering                     = 0.5                ## Time-centering of E in the reactive step. 0.5 = midpoint, 1 = end of step

@@ -152,6 +152,10 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
   // interpToNewGrids.
   DataOps::setValue(m_semiImplicitRhoCDR, 0.0);
   DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
+
+  // Holds the field the chemistry is evaluated at. This one needs no initialization -- advance() overwrites
+  // it from m_electricFieldFluid before anything reads it, and nothing else consumes it.
+  this->m_amr->allocate(m_reactiveElectricField, this->m_fluidRealm, this->m_plasmaPhase, SpaceDim);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -183,6 +187,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseOptions() noexcept
   this->parseFiltering();
   this->parseCheckpointParticles();
   this->parseSecondaryEmissionSpecification();
+  this->parseReactiveFieldCentering();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -200,6 +205,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   this->parseFiltering();
   this->parseCheckpointParticles();
   this->parseSecondaryEmissionSpecification();
+  this->parseReactiveFieldCentering();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -309,6 +315,26 @@ ItoKMCGodunovStepper<I, C, R, F>::parseSecondaryEmissionSpecification() noexcept
 }
 
 template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::parseReactiveFieldCentering() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::parseReactiveFieldCentering");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseReactiveFieldCentering" << endl;
+  }
+
+  ParmParse pp(this->m_name.c_str());
+
+  pp.get("reactive_E_centering", m_reactiveFieldCentering);
+
+  // Anything outside [0,1] extrapolates past the two fields that were actually solved for, which has no
+  // physical justification.
+  if (m_reactiveFieldCentering < 0.0 || m_reactiveFieldCentering > 1.0) {
+    MayDay::Abort("ItoKMCGodunovStepper::parseReactiveFieldCentering -- 'reactive_E_centering' must lie in [0,1]");
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
 Real
 ItoKMCGodunovStepper<I, C, R, F>::computeDt()
 {
@@ -359,6 +385,12 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     solver->depositPhotons(phi, photons, DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
+
+  // Store E^k -- the field the step starts from. The chemistry is later evaluated at an interpolant between
+  // this field and the one that comes out of the semi-implicit transport step.
+  m_timer.startEvent("Store E^k");
+  DataOps::copy(m_reactiveElectricField, this->m_electricFieldFluid);
+  m_timer.stopEvent("Store E^k");
 
   // ====== BEGIN TRANSPORT STEP ======
   // Semi-implicitly advance the particles and the field.
@@ -527,10 +559,18 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by cell");
 
-  // Run the Kinetic Monte Carlo reaction kernels.
+  // Run the Kinetic Monte Carlo reaction kernels. These are evaluated at (1-theta)*E^k + theta*E^(k+1) rather
+  // than at the end-of-step field: in the semi-implicit formulation E^(k+1) is the already-screened field, so
+  // evaluating the whole reactive substep there biases the rate coefficients low wherever the plasma screens
+  // the field. m_reactiveElectricField holds E^k, and m_electricFieldFluid holds E^(k+1) at this point.
+  //
+  // NOTE: This centering applies to the reactions only. The drift update must keep using E^(k+1) with the
+  //       lagged mobility mu^k because that is the pairing the semi-implicit Poisson operator was built for.
   this->barrier();
   m_timer.startEvent("Reaction network");
-  this->advanceReactionNetwork(a_dt);
+  DataOps::scale(m_reactiveElectricField, 1.0 - m_reactiveFieldCentering);
+  DataOps::incr(m_reactiveElectricField, this->m_electricFieldFluid, m_reactiveFieldCentering);
+  this->advanceReactionNetwork(m_reactiveElectricField, a_dt);
   m_timer.stopEvent("Reaction network");
 
   // Merge super-particles down to the target after the chemistry advance created/removed particles.
