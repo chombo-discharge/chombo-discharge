@@ -720,7 +720,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   // modified coefficients if we are reusing data from the last time step.
   m_timer.startEvent("Setup field solver");
   (this->m_fieldSolver)->setupSolver();
-  this->computeConductivities(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles, true);
   this->setupSemiImplicitPoisson(this->m_prevDt);
   m_timer.stopEvent("Setup field solver");
 
@@ -1135,15 +1135,46 @@ ItoKMCGodunovStepper<I, C, R, F>::clearPointParticles(
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoKMCGodunovStepper<I, C, R, F>::computeCdrConductivity() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::computeCdrConductivity");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeCdrConductivity" << endl;
+  }
+
+  DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
+
+  for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int index = solverIt.index();
+    const int Z     = species->getChargeNumber();
+
+    if (Z != 0 && solver->isMobile()) {
+      const EBAMRCellData& phi = solver->getPhi();
+      const EBAMRCellData& mu  = this->m_cdrMobilities[index];
+
+      DataOps::copy(this->m_fluidScratch1, phi);
+      DataOps::multiply(this->m_fluidScratch1, mu);
+
+      DataOps::incr(m_semiImplicitConductivityCDR, this->m_fluidScratch1, 1.0 * std::abs(Z));
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
-  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const bool                                                 a_useStoredCdrConductivity) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::computeConductivities");
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::computeConductivities" << endl;
   }
 
-  this->computeCellConductivity((this->m_conductivityCell), a_particles);
+  this->computeCellConductivity((this->m_conductivityCell), a_particles, a_useStoredCdrConductivity);
   this->computeFaceConductivity();
 }
 
@@ -1151,7 +1182,8 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   EBAMRCellData&                                             a_conductivityCell,
-  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const bool                                                 a_useStoredCdrConductivity) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::computeCellConductivity(EBAMRCellData, ParticleContainer)");
   if (this->m_verbosity > 5) {
@@ -1179,25 +1211,15 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     }
   }
 
-  // Contribution from CDR solvers.
-  DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
-  for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
-    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
-
-    const int index = solverIt.index();
-    const int Z     = species->getChargeNumber();
-
-    if (Z != 0 && solver->isMobile()) {
-      const EBAMRCellData& phi = solver->getPhi();
-      const EBAMRCellData& mu  = this->m_cdrMobilities[index];
-
-      DataOps::copy(this->m_fluidScratch1, phi);
-      DataOps::multiply(this->m_fluidScratch1, mu);
-
-      DataOps::incr(a_conductivityCell, this->m_fluidScratch1, 1.0 * std::abs(Z));
-    }
+  // Contribution from the CDR solvers. This always comes from m_semiImplicitConductivityCDR; the flag only
+  // decides whether that buffer is refreshed from the solver states first. Inside regrid() it must not be,
+  // because the mobilities it is built from have just been reallocated -- the buffer is carried across the
+  // regrid instead, exactly as m_semiImplicitRhoCDR is.
+  if (!a_useStoredCdrConductivity) {
+    this->computeCdrConductivity();
   }
+
+  DataOps::incr(a_conductivityCell, m_semiImplicitConductivityCDR, 1.0);
 
   // Conductivity is mobility * weight * Q
   DataOps::scale(a_conductivityCell, Units::Qe);
@@ -1568,7 +1590,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->barrier();
   m_timer.startEvent("Compute conductivities");
   this->copyConductivityParticles(m_conductivityParticles);
-  this->computeConductivities(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles, false);
   m_timer.stopEvent("Compute conductivities");
 
   // Set up the semi-implicit Poisson solver with the computed conductivities.
