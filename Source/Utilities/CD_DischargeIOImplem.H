@@ -58,8 +58,8 @@ struct HasH5PartColumns<Traits, VoidT<decltype(Traits::h5PartColumns)>> : std::t
  * @details Gathers the value for every valid particle across all AMR levels (in the same per-level,
  * per-box, per-particle order as the id/position datasets) and writes it as an H5T_NATIVE_DOUBLE dataset.
  * @param[in] a_grp        Open H5Part step group.
- * @param[in] a_fileSpace  File dataspace (global particle count, hyperslab pre-selected).
- * @param[in] a_memSpace   Memory dataspace (local particle count, hyperslab pre-selected).
+ * @param[in] a_fileSpace  File dataspace (global particle count, hyperslab preselected).
+ * @param[in] a_memSpace   Memory dataspace (local particle count, hyperslab preselected).
  * @param[in] a_particles  SoA particle container.
  * @param[in] a_name       Dataset name.
  * @param[in] a_gather     Callable (const ParticleSoA<P,Traits>&, std::size_t) -> double.
