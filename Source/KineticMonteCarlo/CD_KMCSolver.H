@@ -405,6 +405,9 @@ public:
 
   /**
    * @brief Advance using a specified tau-leaping algorithm.
+   * @details The interval a_dt is substepped, each substep being bounded by the tau-leaping condition
+   * tau = eps * X_i / |sum_j nu_ij * a_j| so that the accuracy of the leap is controlled by m_eps. Substeps that
+   * produce an invalid state are rejected and retried with half the time step.
    * @param[in,out] a_state          State vector to advance.
    * @param[in]    a_reactions      Reactions to advance.
    * @param[in]    a_dt             Time increment.
