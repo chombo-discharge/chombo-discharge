@@ -147,10 +147,9 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
   this->m_amr->allocate(m_semiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_semiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
 
-  // AmrMesh::allocate does not initialize, and both of these are consumed by regrid() before advance() has
-  // necessarily run -- Driver.initial_regrids regrids the very first grids. Zero them so that a regrid
-  // preceding the first advance carries zeros rather than uninitialized memory. On every later regrid these
-  // values are overwritten by interpToNewGrids immediately after this routine returns.
+  // AmrMesh::allocate does not initialize. Both fields are consumed by regrid(), which may run before an
+  // advance has filled them, so give them a defined value here. Later regrids overwrite them through
+  // interpToNewGrids.
   DataOps::setValue(m_semiImplicitRhoCDR, 0.0);
   DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
 }
@@ -1218,10 +1217,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     }
   }
 
-  // Contribution from the CDR solvers. This always comes from m_semiImplicitConductivityCDR; the flag only
-  // decides whether that buffer is refreshed from the solver states first. Inside regrid() it must not be,
-  // because the mobilities it is built from have just been reallocated -- the buffer is carried across the
-  // regrid instead, exactly as m_semiImplicitRhoCDR is.
+  // Contribution from the CDR solvers, always taken from m_semiImplicitConductivityCDR. The flag decides only
+  // whether that buffer is refreshed from the solver states first, which it must not be inside regrid(), where
+  // the mobilities it is built from are not valid for the current grids.
   if (!a_useStoredCdrConductivity) {
     this->computeCdrConductivity();
   }
@@ -1249,12 +1247,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
 
   (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 
-  // The conductivity is a sum of non-negative contributions, but it does not reach this point untransformed:
-  // the CDR part is interpolated across regrids, the optional filter smooths it, and interpToCentroids uses
-  // stencils that can carry negative weights. Any undershoot would enter setupSemiImplicitPoisson as
-  // eps + sigma*dt/eps0 < eps, which is unphysical and goes straight into the multigrid operator, so floor
-  // it here -- after the last transform rather than before, so the bound holds where the data is consumed.
-  // CdrPlasmaGodunovStepper floors its own conductivity for the same reason.
+  // The sum itself is non-negative, but the CDR part is interpolated across regrids, filterSmooth may smooth
+  // it, and interpToCentroids uses stencils with negative weights. Floor after the last of those so that the
+  // bound holds where the data is consumed -- a negative conductivity enters the field solve as
+  // eps + sigma*dt/eps0 < eps.
   DataOps::floor(a_conductivityCell, 0.0, (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 }
 

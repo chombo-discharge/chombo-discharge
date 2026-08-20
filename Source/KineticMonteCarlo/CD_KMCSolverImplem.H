@@ -855,10 +855,9 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
 
     while (curTime < a_dt) {
 
-      // Bound the substep by the tau-leaping condition tau = eps * X_i / |sum_j nu_ij * a_j|, exactly as
-      // advanceHybrid does for its non-critical reactions. Without this bound the entire interval is leaped in
-      // one step unless the state comes out invalid, and m_eps has no influence on the accuracy of the
-      // propagators below. The propensities are recomputed every substep because the state changes.
+      // Bound the substep by the tau-leaping condition tau = eps * X_i / |sum_j nu_ij * a_j|, as advanceHybrid
+      // does for its non-critical reactions. The propensities are recomputed each substep because the state
+      // changes.
       const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
       const Real dtLeap = this->getNonCriticalTimeStep(a_state, a_reactions, propensities);

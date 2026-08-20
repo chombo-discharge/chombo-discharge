@@ -355,11 +355,10 @@ protected:
   /**
    * @brief Compute the CDR contribution to the semi-implicit conductivity, i.e. sum(|Z| * phi * mu).
    * @details The result is stored on m_semiImplicitConductivityCDR, which is carried across regrids. It is
-   * deliberately not scaled by Units::Qe -- that scaling is applied once to the total conductivity in
-   * computeCellConductivity -- and neither is it scaled by dt/eps0, which setupSemiImplicitPoisson applies.
+   * not scaled by Units::Qe -- that scaling is applied once to the total conductivity in
+   * computeCellConductivity -- nor by dt/eps0, which setupSemiImplicitPoisson applies.
    * @note Reads m_cdrMobilities, so it may only be called when those hold the mobilities for the current
-   * grids. That is not the case inside regrid(), where allocateInternals() has just reallocated them --
-   * which is precisely why the result is stored and carried rather than recomputed there.
+   * grids. That is not the case inside regrid(), where allocateInternals() has just reallocated them.
    */
   virtual void
   computeCdrConductivity() noexcept;
