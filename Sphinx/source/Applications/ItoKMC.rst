@@ -87,6 +87,36 @@ Both these methods (``centroid`` and ``random``) are, however, sources of numeri
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See :ref:`Chap:ItoKMCJSON` for instructions on how to assign the particle placement method.
 
+Reactive field centering
+------------------------
+
+The transport step is semi-implicit, so the electric field it ends on, :math:`\mathbf{E}^{k+1}`, is the field
+*after* the plasma has screened it.
+Evaluating the whole reactive substep at that field therefore biases the rate coefficients low wherever screening
+occurs, and because the Townsend coefficient is strongly field-dependent a modest field error turns into a much
+larger error in the ionization rate.
+The chemistry is therefore evaluated at
+
+.. math::
+
+   \mathbf{E} = \left(1-\theta\right)\mathbf{E}^k + \theta\mathbf{E}^{k+1},
+
+where :math:`\mathbf{E}^k` is the field at the start of the step and :math:`\theta` is set by
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.reactive_E_centering = 0.5  # Time-centering of E in the reactive step
+
+The default :math:`\theta = 0.5` is the time-centered field, which removes the leading-order bias.
+Setting :math:`\theta = 1` recovers the end-of-step field and :math:`\theta = 0` the field the step started from.
+Values outside :math:`\left[0,1\right]` extrapolate past fields that were never solved for, and are rejected at
+run time.
+
+.. note::
+
+   This centering applies to the reactions only.
+   The drift update keeps using :math:`\mathbf{E}^{k+1}` together with the lagged mobility, because that is the
+   pairing assumed by the semi-implicit Poisson operator.
 
 
 

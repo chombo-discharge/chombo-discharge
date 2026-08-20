@@ -399,7 +399,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1839-1840
+   :lines: 1838-1839
    :language: c++
    :dedent: 2
 
@@ -720,7 +720,7 @@ Often, merging or splitting of particles is required.
   These are ``equal_weight_kd``, ``reinitialize``, ``reinitialize_bvh``, and ``nn_sfc``.
 * **Whole-hierarchy mergers** operate collectively across the entire AMR hierarchy rather than one cell at a time.
   None is a per-cell factory, and all are distributed and MPI-safe.
-  These are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, and ``kd_patch``.
+  These are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, ``kd_patch``, and ``kd_skin_nn``.
 
 The recommended pattern for the per-cell family is to cell-sort the leaf, extract a cell's particles into a small scratch ``ParticleSoA``, merge/split them, and rebuild the leaf.
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
@@ -855,13 +855,13 @@ Nearest-neighbour algorithms merge each particle with a spatially close partner 
 
 The three ``nn_pair_*`` variants are distributed, MPI-safe merges that operate collectively across the whole AMR hierarchy.
 All three share the same propose/judge/verdict protocol and differ only in how merge candidates are found.
-Each call performs one *round*:
+Each *round* proceeds as follows:
 
 #. Ghost particles are refilled (fresh, exactly once per round) so that a particle's nearest neighbour may be one owned by another patch or rank.
 #. Every particle's nearest neighbour is located, and pairs lying entirely within one patch are merged immediately (the *trivial tier*).
 #. Pairs that straddle a patch or rank boundary are resolved through a single cross-patch propose/judge/verdict exchange, so both owners agree on exactly one merge and no particle is merged twice.
 
-Because a round merges *pairs*, a cell far above the target count is not necessarily drained in a single call; the merge is invoked once per time step and relies on repeated rounds -- and, in a running simulation, on particle motion between them -- for further convergence.
+Because a round merges *pairs*, one round only roughly halves an over-full cell's surplus above the target, so a call repeats the round until no round merges anything -- or until ``nn_pair_max_rounds`` rounds have run, whichever comes first. A cell far above the target is therefore not necessarily drained by a single call, and in a running simulation the merge relies on being invoked once per time step -- and on particle motion between invocations -- for further convergence.
 Merged particles need globally unique ids that cannot collide across ranks or rounds, so the caller supplies an id allocator (a rank-namespaced counter suffices).
 
 .. important::
@@ -870,7 +870,7 @@ Merged particles need globally unique ids that cannot collide across ranks or ro
    The mask must therefore be registered *before* the grids are (re)built -- registering it late leaves it empty and the neighbour search will not see cross-patch particles.
    ``ItoSolver`` handles this automatically when ``merge_algorithm`` selects any of the three, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to any of the three.
 
-In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).
+In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), ``nn_pair_max_rounds`` (cap the number of rounds a single call may run, so the cost stays bounded rather than running to full convergence), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).
 
 SFC pair merging (``nn_sfc``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

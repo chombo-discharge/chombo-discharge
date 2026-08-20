@@ -279,7 +279,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 298-305
+   :lines: 334-341
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
 In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.

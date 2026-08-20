@@ -285,6 +285,7 @@ To advance the solution, one will call the member function</p>
 <span class="cm">   * @return Time step used</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_zeroPhi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Internally, this version will perform one of the following:</p>
@@ -340,8 +341,9 @@ To specify that function, <code class="docutils literal notranslate"><span class
 <span class="cm">   * in the input script.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">  </span><span class="n">setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_dir</span><span class="p">,</span>
+<span class="w">  </span><span class="nf">setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_dir</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w">                    </span><span class="n">a_side</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">EddingtonSP1DomainBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_function</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">a_function</span></code> argument is simply an alias:</p>

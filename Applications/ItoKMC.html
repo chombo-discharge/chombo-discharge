@@ -102,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reactive-field-centering">Reactive field centering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
@@ -316,6 +317,31 @@ Randomly distributing the new particles has the advantage that it generates seco
 Both these methods (<code class="docutils literal notranslate"><span class="pre">centroid</span></code> and <code class="docutils literal notranslate"><span class="pre">random</span></code>) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a> for instructions on how to assign the particle placement method.</p>
+</section>
+<section id="reactive-field-centering">
+<h3>Reactive field centering<a class="headerlink" href="#reactive-field-centering" title="Permalink to this heading"></a></h3>
+<p>The transport step is semi-implicit, so the electric field it ends on, <span class="math notranslate nohighlight">\(\mathbf{E}^{k+1}\)</span>, is the field
+<em>after</em> the plasma has screened it.
+Evaluating the whole reactive substep at that field therefore biases the rate coefficients low wherever screening
+occurs, and because the Townsend coefficient is strongly field-dependent a modest field error turns into a much
+larger error in the ionization rate.
+The chemistry is therefore evaluated at</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{E} = \left(1-\theta\right)\mathbf{E}^k + \theta\mathbf{E}^{k+1},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{E}^k\)</span> is the field at the start of the step and <span class="math notranslate nohighlight">\(\theta\)</span> is set by</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.reactive_E_centering = 0.5  # Time-centering of E in the reactive step
+</pre></div>
+</div>
+<p>The default <span class="math notranslate nohighlight">\(\theta = 0.5\)</span> is the time-centered field, which removes the leading-order bias.
+Setting <span class="math notranslate nohighlight">\(\theta = 1\)</span> recovers the end-of-step field and <span class="math notranslate nohighlight">\(\theta = 0\)</span> the field the step started from.
+Values outside <span class="math notranslate nohighlight">\(\left[0,1\right]\)</span> extrapolate past fields that were never solved for, and are rejected at
+run time.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This centering applies to the reactions only.
+The drift update keeps using <span class="math notranslate nohighlight">\(\mathbf{E}^{k+1}\)</span> together with the lagged mobility, because that is the
+pairing assumed by the semi-implicit Poisson operator.</p>
+</div>
 </section>
 <section id="spatial-filtering">
 <h3>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h3>
