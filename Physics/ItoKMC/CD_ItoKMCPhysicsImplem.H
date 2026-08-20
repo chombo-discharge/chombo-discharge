@@ -607,6 +607,18 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
           diff,
           static_cast<long long>(m_maxNewParticles));
 
+        // Total weight of the particles that were already in the cell. Only the leading numParticles entries are
+        // eligible parents -- the appends below grow the container, and a freshly created particle must not become
+        // a parent for its siblings. Computed once here rather than per new particle.
+        Real parentWeightSum = 0.0;
+
+        if (m_particlePlacement == ParticlePlacement::Parent) {
+
+          for (long long j = 0; j < numParticles; j++) {
+            parentWeightSum += a_particles[i]->weight(static_cast<std::size_t>(j));
+          }
+        }
+
         for (const auto& w : particleWeights) {
           RealVect x = RealVect::Zero;
 
@@ -619,6 +631,39 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
           }
           case ParticlePlacement::Random: {
             x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+            break;
+          }
+          case ParticlePlacement::Parent: {
+            // Ionization happens at the electrons, so put the new particle on top of one of the particles that were
+            // already there, drawn with probability proportional to the parent weight. This is the placement that
+            // introduces no sub-grid transport of its own: it neither scatters the new weight across the cell (which
+            // acts as a numerical diffusion) nor pulls it towards the cell centre (which acts as a drag on the front).
+            // The inherited position is by construction on the fluid side of the EB, so no cut-cell test is needed.
+            //
+            // Falls back to a random position when there is nothing to inherit from, e.g. photoionization products
+            // landing in a cell that holds no particles of this species yet.
+            if (numParticles > 0LL && parentWeightSum > 0.0) {
+              const Real r = Random::getUniformReal01() * parentWeightSum;
+
+              Real      runningSum = 0.0;
+              long long parent     = numParticles - 1;
+
+              for (long long j = 0; j < numParticles; j++) {
+                runningSum += a_particles[i]->weight(static_cast<std::size_t>(j));
+
+                if (runningSum >= r) {
+                  parent = j;
+
+                  break;
+                }
+              }
+
+              x = a_particles[i]->position(static_cast<std::size_t>(parent));
+            }
+            else {
+              x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+            }
 
             break;
           }

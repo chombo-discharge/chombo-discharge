@@ -353,23 +353,40 @@ protected:
                       const SpeciesSubset                                        a_subset) noexcept;
 
   /**
+   * @brief Compute the CDR contribution to the semi-implicit conductivity, i.e. sum(|Z| * phi * mu).
+   * @details The result is stored on m_semiImplicitConductivityCDR, which is carried across regrids. It is
+   * not scaled by Units::Qe -- that scaling is applied once to the total conductivity in
+   * computeCellConductivity -- nor by dt/eps0, which setupSemiImplicitPoisson applies.
+   * @note Reads m_cdrMobilities, so it may only be called when those hold the mobilities for the current
+   * grids. That is not the case inside regrid(), where allocateInternals() has just reallocated them.
+   */
+  virtual void
+  computeCdrConductivity() noexcept;
+
+  /**
    * @brief Compute all conductivities (cell, face, and EB) from the input point particles
    * @param[in] a_particles Particles to deposit. Particle weights must hold the mobility*weight
+   * @param[in] a_useStoredCdrConductivity If true, take the CDR contribution from
+   * m_semiImplicitConductivityCDR as it stands; if false, recompute it first through computeCdrConductivity.
    * @note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace.
    * @note Also adds in the conductive contribution from the CDR solvers.
    */
   virtual void
-  computeConductivities(const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept;
+  computeConductivities(const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+                        const bool                                                 a_useStoredCdrConductivity) noexcept;
 
   /**
    * @brief Compute the cell-centered conductivity
    * @param[out] a_conductivityCell Cell-centered conductivity
    * @param[in]  a_particles        Particles to deposit. Particle weights must hold the mobility*weight
+   * @param[in]  a_useStoredCdrConductivity If true, take the CDR contribution from
+   * m_semiImplicitConductivityCDR as it stands; if false, recompute it first through computeCdrConductivity.
    * @note Also adds in the conductive contribution from the CDR solvers.
    */
   virtual void
   computeCellConductivity(EBAMRCellData&                                             a_conductivityCell,
-                          const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept;
+                          const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+                          const bool a_useStoredCdrConductivity) noexcept;
 
   /**
    * @brief Compute the cell-centered conductivity

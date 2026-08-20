@@ -588,8 +588,9 @@ McPhoto::regrid(const int a_lmin, const int /*a_oldFinestLevel*/, const int a_ne
   m_amr->remapToNewGrids(m_domainPhotons, a_lmin, a_newFinestLevel);
   m_amr->remapToNewGrids(m_sourcePhotons, a_lmin, a_newFinestLevel);
 
-  // Deposit
-  this->depositPhotons();
+  // m_phi holds the density of the photons absorbed during the previous advance, i.e. the population in
+  // m_bulkPhotons. m_photons holds the photons that are still in flight.
+  this->depositPhotons(m_phi, m_bulkPhotons, m_deposition);
 }
 
 void

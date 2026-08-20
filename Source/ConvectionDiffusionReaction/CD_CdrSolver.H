@@ -165,8 +165,11 @@ public:
    * @brief Compute div(J) explicitly, where J = nV - D*grad(n)
    * @param[out] a_divJ             Divergence term, i.e. finite volume approximation to
    * @param[in]  a_phi              Cell-centered state
-   * @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only
-   * affects the advective term.
+   * @param[in]  a_extrapDt         Time step to extrapolate the face states over. Pass the full time step of
+   * the update: the face reconstruction is phi + 0.5*(1 - v*a_extrapDt/dx)*slope, so the argument enters as
+   * twice the time actually extrapolated over, and the full step is what centres the flux at the half step.
+   * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.
+   * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.
    * @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve
    * redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)
@@ -186,8 +189,11 @@ public:
    * @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(v*phi), including
    * redistribution magic.
    * @param[in]  a_phi              Cell-centered state
-   * @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only
-   * affects the advective term.
+   * @param[in]  a_extrapDt         Time step to extrapolate the face states over. Pass the full time step of
+   * the update: the face reconstruction is phi + 0.5*(1 - v*a_extrapDt/dx)*slope, so the argument enters as
+   * twice the time actually extrapolated over, and the full step is what centres the flux at the half step.
+   * Pass 0.0 to disable time-centring, which is what callers running their own multi-stage integration want.
+   * Only affects the advective term; for CdrCTU it also scales the transverse (CTU) correction.
    * @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.
    * @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
    * @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)

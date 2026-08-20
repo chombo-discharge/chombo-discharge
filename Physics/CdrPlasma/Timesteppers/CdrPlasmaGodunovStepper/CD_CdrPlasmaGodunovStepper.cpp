@@ -19,7 +19,6 @@
 // Our includes
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaGodunovStorage.H>
-#include <CD_DischargeIO.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
@@ -473,23 +472,9 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
 
     const bool converged = this->solveSemiImplicitPoisson();
 
-    // Debug if we don't converge.
     if (!converged) {
       pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid."
              << endl;
-
-#if 1 // For now, add a debug file.
-#ifdef CH_USE_HDF5
-      pout() << "CdrPlasmaGodunovStepper::regrid - I'm adding a debug file in 'semi_implicit_debug.hdf5'" << endl;
-      EBAMRCellData data;
-      m_amr->allocate(data, m_realm, m_phase, 2);
-
-      m_amr->copyData(data, m_conductivityFactorCell, Interval(0, 0), Interval(0, 0));
-      m_amr->copyData(data, m_semiImplicitRho, Interval(1, 1), Interval(0, 0));
-
-      DischargeIO::writeEBHDF5(data, "semi_implicit_debug.hdf5");
-#endif
-#endif
     }
 
     // Now compute drift velocities and diffusion -- using the electric field from last time step on the new mesh.
@@ -1362,7 +1347,7 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
   this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0);
   m_timer->stopEvent("Setup Poisson");
 
-  // Compute the modified right-hand side. We store this as rho^k - dt*e * sum(Z * div(D*grad(phi))).
+  // Compute the modified right-hand side. We store this as rho^k + dt*e * sum(Z * div(D*grad(phi))).
   m_timer->startEvent("Compute rho");
   DataOps::setValue(m_semiImplicitRho, 0.0);
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1378,15 +1363,13 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
 
       // If the solver is diffusive we must compute the diffusion term as well, and then increment by it.
       if (solver->isDiffusive()) {
-#if 0
-	RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
-												 
-	EBAMRCellData& divDgradPhi = storage->getScratch();
+        RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
-	solver->computeDivD(divDgradPhi, phi, false, false, false);
+        EBAMRCellData& divDgradPhi = storage->getScratch();
 
-	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
-#endif
+        solver->computeDivD(divDgradPhi, phi, false, false, false);
+
+        DataOps::incr(m_semiImplicitRho, divDgradPhi, Z * a_dt * Units::Qe);
       }
     }
   }

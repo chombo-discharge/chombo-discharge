@@ -852,12 +852,17 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
 {
   if (a_reactions.size() > 0) {
     Real curTime = 0.0;
-    Real curDt   = a_dt;
 
     while (curTime < a_dt) {
 
-      // Try big time step first.
-      curDt = a_dt - curTime;
+      // Bound the substep by the tau-leaping condition tau = eps * X_i / |sum_j nu_ij * a_j|, as advanceHybrid
+      // does for its non-critical reactions. The propensities are recomputed each substep because the state
+      // changes.
+      const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
+
+      const Real dtLeap = this->getNonCriticalTimeStep(a_state, a_reactions, propensities);
+
+      Real curDt = std::min(a_dt - curTime, dtLeap);
 
       bool valid = false;
 

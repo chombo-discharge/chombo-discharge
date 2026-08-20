@@ -146,6 +146,12 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
 
   this->m_amr->allocate(m_semiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_semiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
+
+  // AmrMesh::allocate does not initialize. Both fields are consumed by regrid(), which may run before an
+  // advance has filled them, so give them a defined value here. Later regrids overwrite them through
+  // interpToNewGrids.
+  DataOps::setValue(m_semiImplicitRhoCDR, 0.0);
+  DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -331,13 +337,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
-  auto debugCharge = [this](const std::string a_message) -> void {
-    const Real Qtot = this->computeTotalCharge();
-    if (procID() == 0) {
-      std::cout << a_message << " = " << Qtot << "\n";
-    }
-  };
-
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
   // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
   // to restart a simulation and regrid without all the prerequisites being in place. This flag is set to true
@@ -345,8 +344,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_canRegridOnRestart = true;
 
   m_timer = Timer("ItoKMCGodunovStepper::advance");
-
-  //  debugCharge("advance");
 
   // Previous time step is needed when regridding.
   this->m_prevDt = a_dt;
@@ -715,7 +712,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                EBCoarseToFineInterp::Type::ConservativePWC);
+                                EBCoarseToFineInterp::Type::ConservativeMinMod);
 
   this->m_amr->interpToNewGrids(m_semiImplicitConductivityCDR,
                                 m_scratchSemiImplicitConductivityCDR,
@@ -723,13 +720,13 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                EBCoarseToFineInterp::Type::ConservativePWC);
+                                EBCoarseToFineInterp::Type::ConservativeMinMod);
 
   // Set up the field solver with standard coefficients or with
   // modified coefficients if we are reusing data from the last time step.
   m_timer.startEvent("Setup field solver");
   (this->m_fieldSolver)->setupSolver();
-  this->computeConductivities(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles, true);
   this->setupSemiImplicitPoisson(this->m_prevDt);
   m_timer.stopEvent("Setup field solver");
 
@@ -1144,15 +1141,46 @@ ItoKMCGodunovStepper<I, C, R, F>::clearPointParticles(
 
 template <typename I, typename C, typename R, typename F>
 void
+ItoKMCGodunovStepper<I, C, R, F>::computeCdrConductivity() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::computeCdrConductivity");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeCdrConductivity" << endl;
+  }
+
+  DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
+
+  for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+
+    const int index = solverIt.index();
+    const int Z     = species->getChargeNumber();
+
+    if (Z != 0 && solver->isMobile()) {
+      const EBAMRCellData& phi = solver->getPhi();
+      const EBAMRCellData& mu  = this->m_cdrMobilities[index];
+
+      DataOps::copy(this->m_fluidScratch1, phi);
+      DataOps::multiply(this->m_fluidScratch1, mu);
+
+      DataOps::incr(m_semiImplicitConductivityCDR, this->m_fluidScratch1, 1.0 * std::abs(Z));
+    }
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
 ItoKMCGodunovStepper<I, C, R, F>::computeConductivities(
-  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const bool                                                 a_useStoredCdrConductivity) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::computeConductivities");
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::computeConductivities" << endl;
   }
 
-  this->computeCellConductivity((this->m_conductivityCell), a_particles);
+  this->computeCellConductivity((this->m_conductivityCell), a_particles, a_useStoredCdrConductivity);
   this->computeFaceConductivity();
 }
 
@@ -1160,7 +1188,8 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   EBAMRCellData&                                             a_conductivityCell,
-  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles) noexcept
+  const Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_particles,
+  const bool                                                 a_useStoredCdrConductivity) noexcept
 {
   CH_TIME("ItoKMCGodunovStepper::computeCellConductivity(EBAMRCellData, ParticleContainer)");
   if (this->m_verbosity > 5) {
@@ -1188,25 +1217,14 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     }
   }
 
-  // Contribution from CDR solvers.
-  DataOps::setValue(m_semiImplicitConductivityCDR, 0.0);
-  for (auto solverIt = (this->m_cdr)->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
-    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
-
-    const int index = solverIt.index();
-    const int Z     = species->getChargeNumber();
-
-    if (Z != 0 && solver->isMobile()) {
-      const EBAMRCellData& phi = solver->getPhi();
-      const EBAMRCellData& mu  = this->m_cdrMobilities[index];
-
-      DataOps::copy(this->m_fluidScratch1, phi);
-      DataOps::multiply(this->m_fluidScratch1, mu);
-
-      DataOps::incr(a_conductivityCell, this->m_fluidScratch1, 1.0 * std::abs(Z));
-    }
+  // Contribution from the CDR solvers, always taken from m_semiImplicitConductivityCDR. The flag decides only
+  // whether that buffer is refreshed from the solver states first, which it must not be inside regrid(), where
+  // the mobilities it is built from are not valid for the current grids.
+  if (!a_useStoredCdrConductivity) {
+    this->computeCdrConductivity();
   }
+
+  DataOps::incr(a_conductivityCell, m_semiImplicitConductivityCDR, 1.0);
 
   // Conductivity is mobility * weight * Q
   DataOps::scale(a_conductivityCell, Units::Qe);
@@ -1228,6 +1246,12 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   }
 
   (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+
+  // The sum itself is non-negative, but the CDR part is interpolated across regrids, filterSmooth may smooth
+  // it, and interpToCentroids uses stencils with negative weights. Floor after the last of those so that the
+  // bound holds where the data is consumed -- a negative conductivity enters the field solve as
+  // eps + sigma*dt/eps0 < eps.
+  DataOps::floor(a_conductivityCell, 0.0, (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1577,7 +1601,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->barrier();
   m_timer.startEvent("Compute conductivities");
   this->copyConductivityParticles(m_conductivityParticles);
-  this->computeConductivities(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles, false);
   m_timer.stopEvent("Compute conductivities");
 
   // Set up the semi-implicit Poisson solver with the computed conductivities.
@@ -1816,7 +1840,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
 
       // Compute the FV approximation to the advective term and do the Euler advance. If the underlying
       // CDR solver is a CTU solver, we also add in the transverse terms.
-      solver->computeDivF(this->m_fluidScratch1, phi, 0.5 * a_dt, false, true, true);
+      solver->computeDivF(this->m_fluidScratch1, phi, a_dt, false, true, true);
 
       DataOps::incr(phi, this->m_fluidScratch1, -a_dt);
     }

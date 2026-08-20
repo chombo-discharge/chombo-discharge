@@ -1166,6 +1166,44 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
         initParticles.catenate(sphereParticles);
       }
     }
+
+    // Gaussian-distributed particles.
+    if (initData.contains("gaussian")) {
+      const json& gaussianArray = initData["gaussian"];
+
+      if (!(gaussianArray.contains("center"))) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'gaussian' in initial particles but 'center' was not specified");
+      }
+      if (!(gaussianArray.contains("radius"))) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'gaussian' in initial particles but 'radius' was not specified");
+      }
+      if (!(gaussianArray.contains("number"))) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'gaussian' in initial particles but 'number' was not specified");
+      }
+      if (!(gaussianArray.contains("weight"))) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'gaussian' in initial particles but 'weight' was not specified");
+      }
+
+      const RealVect center = RealVect(D_DECL(gaussianArray["center"][0].get<Real>(),
+                                              gaussianArray["center"][1].get<Real>(),
+                                              gaussianArray["center"][2].get<Real>()));
+
+      const long long numCompPart = gaussianArray["number"].get<long long>();
+      const Real      weight      = gaussianArray["weight"].get<Real>();
+      const Real      radius      = gaussianArray["radius"].get<Real>();
+
+      // Draw the particles and add them to initParticles
+      if (numCompPart > 0) {
+        ParticleSoA<NoPayload> gaussianParticles;
+        ParticleManagement::drawGaussianParticles(gaussianParticles, numCompPart, center, radius);
+
+        for (std::size_t i = 0; i < gaussianParticles.size(); i++) {
+          gaussianParticles.weight(i) = weight;
+        }
+
+        initParticles.catenate(gaussianParticles);
+      }
+    }
   }
 
   return initParticles;
@@ -6040,7 +6078,7 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&           a_cd
   }
 
   for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = rteSources[i] * a_dt;
+    a_photonProduction[i] += rteSources[i] * a_dt;
   }
 }
 
@@ -6085,7 +6123,7 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrD
   }
 
   for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = a_dt * (c1 * rteK1[i] + c2 * rteK2[i]);
+    a_photonProduction[i] += a_dt * (c1 * rteK1[i] + c2 * rteK2[i]);
   }
 }
 
@@ -6152,7 +6190,7 @@ CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrD
   }
 
   for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = a_dt * (rteK1[i] + 2.0 * rteK2[i] + 2.0 * rteK3[i] + rteK4[i]) / 6.0;
+    a_photonProduction[i] += a_dt * (rteK1[i] + 2.0 * rteK2[i] + 2.0 * rteK3[i] + rteK4[i]) / 6.0;
   }
 }
 

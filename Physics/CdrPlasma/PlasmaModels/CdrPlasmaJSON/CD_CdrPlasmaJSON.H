@@ -1454,8 +1454,8 @@ protected:
   /**
    * @brief Routine for integrating the reactive-only problem using various algorithms.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
-   * @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons
-   * produced during the time step.
+   * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
    * @param[in]    a_pos              Physical coordinates
@@ -1501,8 +1501,8 @@ protected:
   /**
    * @brief Routine for integrating the reactive-only problem using the explicit Euler rule.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
-   * @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons
-   * produced during the time step.
+   * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
    * @param[in]    a_pos              Physical coordinates
@@ -1525,8 +1525,8 @@ protected:
   /**
    * @brief Routine for integrating the reactive-only problem using the implicit Euler rule.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
-   * @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons
-   * produced during the time step.
+   * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
    * @param[in]    a_pos              Physical coordinates
@@ -1550,8 +1550,8 @@ protected:
    * @brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method.
    * @details This includes the tableu through the a_tableuAlpha parameter.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
-   * @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons
-   * produced during the time step.
+   * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
    * @param[in]    a_pos              Physical coordinates
@@ -1576,8 +1576,8 @@ protected:
   /**
    * @brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method.
    * @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
-   * @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons
-   * produced during the time step.
+   * @param[in,out] a_photonProduction Number of photons produced during the time step. The contribution is added to
+   * whatever the array already holds, so the caller must zero it before the call.
    * @param[in]    a_cdrGradients     CDR gradients at time a_time
    * @param[in]    a_E                Electric field
    * @param[in]    a_pos              Physical coordinates
