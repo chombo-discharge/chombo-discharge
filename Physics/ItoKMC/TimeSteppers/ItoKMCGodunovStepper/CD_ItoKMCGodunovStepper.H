@@ -231,6 +231,15 @@ protected:
   Real m_maxFieldAbort;
 
   /**
+   * @brief Time-centering of the electric field that the chemistry is evaluated at.
+   * @details The reactive substep is evaluated at (1-theta)*E^k + theta*E^(k+1), where theta is this
+   * parameter and E^k/E^(k+1) are the fields from the start and end of the transport step. theta = 0.5
+   * removes the leading-order bias from the semi-implicit screening of the field, theta = 1 evaluates at
+   * the end-of-step field, and theta = 0 at the field the step started from. Restricted to [0,1].
+   */
+  Real m_reactiveFieldCentering;
+
+  /**
    * @brief Storage for simplified particles that gave us sigma^k
    * @note Needed for regrids
    */
@@ -279,6 +288,13 @@ protected:
   Vector<EBAMRCellData> m_cdrDivD;
 
   /**
+   * @brief Storage for the electric field that the chemistry is evaluated at.
+   * @details This holds E^k from the top of advance() until the transport step is done, and is then turned
+   * into the interpolant (1-theta)*E^k + theta*E^(k+1) that is handed to advanceReactionNetwork.
+   */
+  EBAMRCellData m_reactiveElectricField;
+
+  /**
    * @brief Allocate "internal" storage.
    */
   virtual void
@@ -307,6 +323,13 @@ protected:
    */
   virtual void
   parseSecondaryEmissionSpecification() noexcept;
+
+  /**
+   * @brief Parse the time-centering of the electric field used for the reactive substep.
+   * @note Aborts if the requested centering falls outside [0,1].
+   */
+  virtual void
+  parseReactiveFieldCentering() noexcept;
 
   /**
    * @brief Set the starting positions for the ItoSolver particles
