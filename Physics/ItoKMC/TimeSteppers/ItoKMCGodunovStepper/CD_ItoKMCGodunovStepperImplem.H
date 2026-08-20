@@ -1248,6 +1248,14 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   }
 
   (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+
+  // The conductivity is a sum of non-negative contributions, but it does not reach this point untransformed:
+  // the CDR part is interpolated across regrids, the optional filter smooths it, and interpToCentroids uses
+  // stencils that can carry negative weights. Any undershoot would enter setupSemiImplicitPoisson as
+  // eps + sigma*dt/eps0 < eps, which is unphysical and goes straight into the multigrid operator, so floor
+  // it here -- after the last transform rather than before, so the bound holds where the data is consumed.
+  // CdrPlasmaGodunovStepper floors its own conductivity for the same reason.
+  DataOps::floor(a_conductivityCell, 0.0, (this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
 }
 
 template <typename I, typename C, typename R, typename F>
