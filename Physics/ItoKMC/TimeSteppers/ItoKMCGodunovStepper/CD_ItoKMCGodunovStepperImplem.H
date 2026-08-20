@@ -331,13 +331,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     pout() << this->m_name + "::advance" << endl;
   }
 
-  auto debugCharge = [this](const std::string a_message) -> void {
-    const Real Qtot = this->computeTotalCharge();
-    if (procID() == 0) {
-      std::cout << a_message << " = " << Qtot << "\n";
-    }
-  };
-
   // Special flag for telling the class that we have the necessary things in place for doing a regrid. This is
   // an if-but-maybe situation where the user chose not to checkpoint the particles we need for regrids, yet tries
   // to restart a simulation and regrid without all the prerequisites being in place. This flag is set to true
@@ -345,8 +338,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_canRegridOnRestart = true;
 
   m_timer = Timer("ItoKMCGodunovStepper::advance");
-
-  //  debugCharge("advance");
 
   // Previous time step is needed when regridding.
   this->m_prevDt = a_dt;
@@ -715,7 +706,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                EBCoarseToFineInterp::Type::ConservativePWC);
+                                EBCoarseToFineInterp::Type::ConservativeMinMod);
 
   this->m_amr->interpToNewGrids(m_semiImplicitConductivityCDR,
                                 m_scratchSemiImplicitConductivityCDR,
@@ -723,7 +714,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
                                 a_lmin,
                                 a_oldFinestLevel,
                                 a_newFinestLevel,
-                                EBCoarseToFineInterp::Type::ConservativePWC);
+                                EBCoarseToFineInterp::Type::ConservativeMinMod);
 
   // Set up the field solver with standard coefficients or with
   // modified coefficients if we are reusing data from the last time step.
@@ -1816,7 +1807,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
 
       // Compute the FV approximation to the advective term and do the Euler advance. If the underlying
       // CDR solver is a CTU solver, we also add in the transverse terms.
-      solver->computeDivF(this->m_fluidScratch1, phi, 0.5 * a_dt, false, true, true);
+      solver->computeDivF(this->m_fluidScratch1, phi, a_dt, false, true, true);
 
       DataOps::incr(phi, this->m_fluidScratch1, -a_dt);
     }

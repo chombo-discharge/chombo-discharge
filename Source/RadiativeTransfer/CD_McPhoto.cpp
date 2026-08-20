@@ -588,8 +588,12 @@ McPhoto::regrid(const int a_lmin, const int /*a_oldFinestLevel*/, const int a_ne
   m_amr->remapToNewGrids(m_domainPhotons, a_lmin, a_newFinestLevel);
   m_amr->remapToNewGrids(m_sourcePhotons, a_lmin, a_newFinestLevel);
 
-  // Deposit
-  this->depositPhotons();
+  // Re-deposit the absorbed photons. m_phi holds the density of the photons that were ABSORBED during the
+  // previous advance -- both the instantaneous and the transient branch of advance() deposit m_bulkPhotons
+  // into it. m_photons holds the photons that are still in flight, and for an instantaneous solver that
+  // container is always empty here because advancePhotonsInstantaneous drains it. Depositing it would reset
+  // m_phi to zero, which silently removes the photoionization source for the step following every regrid.
+  this->depositPhotons(m_phi, m_bulkPhotons, m_deposition);
 }
 
 void
