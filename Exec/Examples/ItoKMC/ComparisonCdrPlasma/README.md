@@ -39,6 +39,10 @@ Everything else in the input script is shared. The `ItoSolver` options are only 
 * **Reactions.** Both models use N2 and O2 ionization, dissociative and three-body attachment to O2-, photon generation
   from N2 with efficiency 0.06 and a quenching pressure of 4000 Pa, and photoionization of O2. There is no secondary
   emission in either model.
+* **Townsend coefficients.** Both chemistry files read alpha/N and eta/N directly from the tabulated BOLSIG+
+  coefficients in `bolsig_air.dat`. `ItoKMCJSON` could instead derive them from the reaction list (`"type" : "auto"`),
+  which `CdrPlasmaJSON` cannot do, so the tabulated form is used in both. These coefficients only enter the cell
+  tagger, not the transport or the reactions.
 * **No gradient correction.** The `soloviev` field is absent from every reaction in `cdr_chemistry.json`, i.e. the
   density-gradient correction to the LFA rates is off, so the rates are the same functions of E in both models.
 * **Initial particles.** Both models are seeded with 10^5 computational particles of weight 10^4 (10^9 physical
@@ -49,9 +53,6 @@ Everything else in the input script is shared. The `ItoSolver` options are only 
 
 # What necessarily differs
 
-* `ItoKMCJSON` derives the Townsend coefficients from the reaction list (`"type": "auto"`), which `CdrPlasmaJSON` cannot
-  do, so `cdr_chemistry.json` uses the tabulated BOLSIG+ alpha/N and eta/N instead. These coefficients only enter the
-  cell tagger, not the transport or the reactions.
 * The time integrators are different classes (`CdrPlasmaGodunovStepper` and `ItoKMCGodunovStepper`) and therefore have
   their own option sections. Both are set to a semi-implicit field coupling with a maximum time step of 100 ps.
 

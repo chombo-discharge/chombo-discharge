@@ -125,8 +125,8 @@
     "sigma" : {
 	"initial density" : 0.0
     },
-    // ItoKMCJSON computes alpha and eta from the reaction list ("type": "auto"). CdrPlasmaJSON has no such
-    // option, so the tabulated BOLSIG+ coefficients are used instead. These only enter the cell tagger.
+    // Townsend coefficients, read from the tabulated BOLSIG+ coefficients. ito_chemistry.json reads the same
+    // tables, so alpha and eta are the same functions of E/N in both models. These only enter the cell tagger.
     "alpha" : {
 	"lookup" : "table E/N",
 	"file" : "bolsig_air.dat",

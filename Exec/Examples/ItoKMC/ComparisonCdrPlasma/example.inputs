@@ -60,7 +60,7 @@ Driver.geometry_only                = false               ## Special option that
 Driver.write_memory                 = false               ## Write MPI memory report
 Driver.write_loads                  = false               ## Write (accumulated) computational loads
 Driver.output_directory             = ./                  ## Output directory
-Driver.output_names                 = cdr                 ## Simulation output names
+Driver.output_names                 = simulation          ## Simulation output names
 Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
@@ -125,7 +125,7 @@ FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflu
 # ====================================================================================================
 # Only used by the Ito-KMC model.
 ItoSolver.verbosity                   = -1                ## Class verbosity
-ItoSolver.merge_algorithm             = nn_sfc            ## Particle merging algorithm (see documentation)
+ItoSolver.merge_algorithm             = kd_patch          ## Particle merging algorithm (see documentation)
 ItoSolver.particles_per_cell          = 16                ## Target computational particles per cell (one value, or one per level)
 ItoSolver.regrid_superparticles       = solver            ## Merge run during regrids: 'solver', 'none', or any merge_algorithm selector
 ItoSolver.nn_pair_iterate             = true              ## nn_pair: iterate the local tier to convergence within each round

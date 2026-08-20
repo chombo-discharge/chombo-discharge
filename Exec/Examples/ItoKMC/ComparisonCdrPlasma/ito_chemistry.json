@@ -38,20 +38,39 @@
 	"method" : "random",
 	"species" : "e"
     },
+    // Townsend coefficients. ItoKMCJSON can compute these from the reaction list ("type" : "auto"), but the
+    // tabulated BOLSIG+ coefficients are read directly instead so that they are the same functions of E/N as in
+    // cdr_chemistry.json. These only enter the cell tagger.
     "alpha" : {
-	"type" : "auto",
-	"species" : "e"
+	"type" : "table vs E/N",
+	"file" : "bolsig_air.dat",
+	"header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)",
+	"E/N column" : 0,
+	"alpha/N column" : 1,
+	"min E/N" : 1,
+	"max E/N" : 2E6,
+	"num points" : 1000,
+	"spacing" : "exponential",
+	"plot" : true
     },
     "eta" : {
-	"type" : "auto",
-	"species" : "e"
+	"type" : "table vs E/N",
+	"file" : "bolsig_air.dat",
+	"header" : "E/N (Td)\tTownsend attach. coef. eta/N (m2)",
+	"E/N column" : 0,
+	"eta/N column" : 1,
+	"min E/N" : 1,
+	"max E/N" : 2E6,
+	"num points" : 1000,
+	"spacing" : "exponential",
+	"plot" : true
     },
     "plasma species" :
     [
 	{
             "id" : "e",
 	    "Z" : -1,
-	    "solver" : "ito",
+	    "solver" : "cdr",
 	    "mobile" : true,
 	    "diffusive" : false,
 	    "mobility" : {
@@ -105,7 +124,7 @@
 	{
             "id" : "O2+",
 	    "Z" : 1,
-	    "solver" : "ito",
+	    "solver" : "cdr",
 	    "mobile" : false,
 	    "diffusive" : false,
 	    "mobility" : {
@@ -131,7 +150,7 @@
 	{
             "id" : "O2-",
 	    "Z" : -1,
-	    "solver" : "ito",
+	    "solver" : "cdr",
 	    "mobile" : false,
 	    "diffusive" : false,
 	    "mobility" : {
@@ -146,7 +165,7 @@
 	{
 	    "id" : "N2+",
 	    "Z" : 1,
-	    "solver" : "ito",
+	    "solver" : "cdr",
 	    "mobile" : false,
 	    "diffusive" : false,
 	    "mobility" : {
