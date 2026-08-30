@@ -161,53 +161,78 @@ EBGhostCellInterpolator::defineBuffers() noexcept
   CH_TIME("EBGhostCellInterpolator::defineBuffers");
 
   m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_ghostCF * IntVect::Unit);
+
+  // One component to begin with -- interpolate() grows the buffer if it is asked for more variables.
+  m_coarsenedFineData.define(m_eblgCoFi.getDBL(), 1, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
 }
 
 void
 EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
                                      const LevelData<EBCellFAB>& a_phiCoar,
                                      const Interval              a_variables,
-                                     const Type                  a_interpType) const noexcept
+                                     const Type                  a_interpType,
+                                     const bool                  a_doExchange) const noexcept
 {
   CH_TIMERS("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>");
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::buffer_define", t1);
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::copy_exchange", t2);
-  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::regular_cells", t3);
-  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::irregular_cells", t4);
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::interp_cells", t3);
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::exchange", t4);
 
+  CH_assert(m_isDefined);
   CH_assert(a_phiFine.nComp() > a_variables.end());
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_phiFine.nComp() == a_phiCoar.nComp());
 
-  LevelData<EBCellFAB> phiCoFi(m_eblgCoFi.getDBL(), 1, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
+  const int numVars = a_variables.size();
 
-  for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
-    const Interval srcInterv = Interval(icomp, icomp);
-    const Interval dstInterv = Interval(0, 0);
+  // Grow the buffer if this call interpolates more variables than it was sized for. In steady state this does
+  // not trigger, so the buffer is allocated once per regrid.
+  CH_START(t1);
+  if (m_coarsenedFineData.nComp() < numVars) {
+    m_coarsenedFineData.define(m_eblgCoFi.getDBL(),
+                               numVars,
+                               m_ghostCF * IntVect::Unit,
+                               EBCellFactory(m_eblgCoFi.getEBISL()));
+  }
+  CH_STOP(t1);
 
-    a_phiCoar.copyTo(srcInterv, phiCoFi, dstInterv, m_copier);
+  // Fetch all the coarse-grid variables in one round trip rather than one per variable.
+  CH_START(t2);
+  a_phiCoar.copyTo(a_variables, m_coarsenedFineData, Interval(0, numVars - 1), m_copier);
+  CH_STOP(t2);
 
-    // Fill invalid regions.
-    const DataIterator dit = m_eblgFine.getDBL().dataIterator();
+  // Fill invalid regions.
+  const DataIterator dit = m_eblgFine.getDBL().dataIterator();
 
-    const int nbox = dit.size();
+  const int nbox = dit.size();
+
+  CH_START(t3);
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-      EBCellFAB&       phiFine = a_phiFine[din];
-      const EBCellFAB& phiCoar = phiCoFi[din];
+    EBCellFAB&       phiFine = a_phiFine[din];
+    const EBCellFAB& phiCoar = m_coarsenedFineData[din];
 
-      FArrayBox&       phiFineReg = phiFine.getFArrayBox();
-      const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
+    FArrayBox&       phiFineReg = phiFine.getFArrayBox();
+    const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
 
-      this->interpolateRegular(phiFineReg, phiCoarReg, din, icomp, 0, a_interpType);
-      this->interpolateIrregular(phiFine, phiCoar, din, icomp, 0, a_interpType);
+    for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
+      const int coarComp = icomp - a_variables.begin();
+
+      this->interpolateRegular(phiFineReg, phiCoarReg, din, icomp, coarComp, a_interpType);
+      this->interpolateIrregular(phiFine, phiCoar, din, icomp, coarComp, a_interpType);
     }
   }
+  CH_STOP(t3);
 
   // Fill valid regions.
-  a_phiFine.exchange(a_variables);
+  if (a_doExchange) {
+    CH_START(t4);
+    a_phiFine.exchange(a_variables);
+    CH_STOP(t4);
+  }
 }
 
 void

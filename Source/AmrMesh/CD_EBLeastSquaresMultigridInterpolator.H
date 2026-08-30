@@ -209,6 +209,15 @@ protected:
   Copier m_copier;
 
   /**
+   * @brief Buffer holding the coarse-grid data on the coarsened fine grids.
+   * @details This is filled by a single copyTo from the coarse level, for all the interpolated variables at
+   * once. It is sized in defineBuffers, i.e. once per regrid, and is grown if a call asks for more variables
+   * than it currently holds. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the
+   * entire coarsened-fine layout on every call.
+   */
+  mutable LevelData<EBCellFAB> m_coarsenedFineData;
+
+  /**
    * @brief Iterator over ghost cells
    */
   mutable LayoutData<VoFIterator> m_ghostIterFine;

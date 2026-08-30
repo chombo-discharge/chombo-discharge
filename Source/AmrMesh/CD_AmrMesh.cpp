@@ -1957,6 +1957,38 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
 }
 
 void
+AmrMesh::aliasMultifluidCellData(const std::string& a_realm, MFAMRCellData& a_data) const
+{
+  CH_TIME("AmrMesh::aliasMultifluidCellData(string, MFAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::aliasMultifluidCellData(string, MFAMRCellData)" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+
+  m_mfAliasGas.resize(1 + m_finestLevel);
+  m_mfAliasSolid.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    // The views hold no data of their own, so an existing shell can simply be re-aliased.
+    if (m_mfAliasGas[lvl].isNull()) {
+      m_mfAliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+    }
+    if (m_mfAliasSolid[lvl].isNull()) {
+      m_mfAliasSolid[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+    }
+
+    if (!ebisGas.isNull()) {
+      MultifluidAlias::aliasMF(*m_mfAliasGas[lvl], phase::gas, *a_data[lvl]);
+    }
+    if (!ebisSol.isNull()) {
+      MultifluidAlias::aliasMF(*m_mfAliasSolid[lvl], phase::solid, *a_data[lvl]);
+    }
+  }
+}
+
+void
 AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string& a_realm) const
 {
   CH_TIME("AmrMesh::interpGhost(MFAMRCellData, string)");
@@ -1969,30 +2001,17 @@ AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string& a_realm) const
     MayDay::Abort(str.c_str());
   }
 
-  // Do aliasing
-  EBAMRCellData aliasGas(1 + m_finestLevel);
-  EBAMRCellData aliasSol(1 + m_finestLevel);
-
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-    aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
-    }
-  }
+  // Do aliasing
+  this->aliasMultifluidCellData(a_realm, a_data);
 
   if (!ebisGas.isNull()) {
-    this->interpGhost(aliasGas, a_realm, phase::gas);
+    this->interpGhost(m_mfAliasGas, a_realm, phase::gas);
   }
   if (!ebisSol.isNull()) {
-    this->interpGhost(aliasSol, a_realm, phase::solid);
+    this->interpGhost(m_mfAliasSolid, a_realm, phase::solid);
   }
 }
 
@@ -2009,30 +2028,17 @@ AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string& a_realm) const
     MayDay::Abort(str.c_str());
   }
 
-  // Do aliasing
-  EBAMRCellData aliasGas(1 + m_finestLevel);
-  EBAMRCellData aliasSol(1 + m_finestLevel);
-
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-    aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
-    }
-  }
+  // Do aliasing
+  this->aliasMultifluidCellData(a_realm, a_data);
 
   if (!ebisGas.isNull()) {
-    this->interpGhostPwl(aliasGas, a_realm, phase::gas);
+    this->interpGhostPwl(m_mfAliasGas, a_realm, phase::gas);
   }
   if (!ebisSol.isNull()) {
-    this->interpGhostPwl(aliasSol, a_realm, phase::solid);
+    this->interpGhostPwl(m_mfAliasSolid, a_realm, phase::solid);
   }
 }
 
@@ -2055,7 +2061,10 @@ AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string& a_realm, const
 
     EBGhostCellInterpolator& interpolator = *m_realms[a_realm]->getGhostCellInterpolator(a_phase)[lvl];
 
-    interpolator.interpolate(*a_data[lvl], *a_data[lvl - 1], interv, EBGhostCellInterpolator::Type::MinMod);
+    // The exchange below covers every level, so the interpolator does not need to exchange this one.
+    constexpr bool doExchange = false;
+
+    interpolator.interpolate(*a_data[lvl], *a_data[lvl - 1], interv, EBGhostCellInterpolator::Type::MinMod, doExchange);
   }
 
   a_data.exchange();
@@ -2074,30 +2083,17 @@ AmrMesh::interpGhostMG(MFAMRCellData& a_data, const std::string& a_realm) const
     MayDay::Abort(str.c_str());
   }
 
-  // Do aliasing
-  EBAMRCellData aliasGas(1 + m_finestLevel);
-  EBAMRCellData aliasSol(1 + m_finestLevel);
-
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-    aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
-    }
-  }
+  // Do aliasing
+  this->aliasMultifluidCellData(a_realm, a_data);
 
   if (!ebisGas.isNull()) {
-    this->interpGhostMG(aliasGas, a_realm, phase::gas);
+    this->interpGhostMG(m_mfAliasGas, a_realm, phase::gas);
   }
   if (!ebisSol.isNull()) {
-    this->interpGhostMG(aliasSol, a_realm, phase::solid);
+    this->interpGhostMG(m_mfAliasSolid, a_realm, phase::solid);
   }
 }
 

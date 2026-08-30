@@ -95,16 +95,21 @@ public:
 
   /**
    * @brief Do inhomogeneous interpolation
-   * @param[in,out] a_phiFine   Fine phi
-   * @param[in]    a_phiCoar   Coarse phi
-   * @param[in]    a_variables Variables to interpolate
-   * @param[in] a_interpType Interp type
+   * @details The interpolation fills the fine-grid ghost cells that lie across the coarse-fine interface. The
+   * remaining ghost cells, i.e. the ones that are covered by a neighbouring patch on the fine level, are filled
+   * by the exchange at the end. Callers that follow up with an exchange of their own can turn it off here.
+   * @param[in,out] a_phiFine    Fine phi
+   * @param[in]     a_phiCoar    Coarse phi
+   * @param[in]     a_variables  Variables to interpolate
+   * @param[in]     a_interpType Interp type
+   * @param[in]     a_doExchange Exchange the fine-grid ghost cells that are not filled by the interpolation.
    */
   virtual void
   interpolate(LevelData<EBCellFAB>&       a_phiFine,
               const LevelData<EBCellFAB>& a_phiCoar,
               const Interval              a_variables,
-              const Type                  a_interpType) const noexcept;
+              const Type                  a_interpType,
+              const bool                  a_doExchange = true) const noexcept;
 
 protected:
   /**
@@ -152,6 +157,15 @@ protected:
    * @brief Copier for making copying from m_eblgCoar to m_grownCoarData go faster
    */
   Copier m_copier;
+
+  /**
+   * @brief Buffer holding the coarse-grid data on the coarsened fine grids.
+   * @details This is filled by a single copyTo from the coarse level, for all the interpolated variables at
+   * once. It is sized in defineBuffers, i.e. once per regrid, and is grown if a call asks for more variables
+   * than it currently holds. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the
+   * entire coarsened-fine layout on every call.
+   */
+  mutable LevelData<EBCellFAB> m_coarsenedFineData;
 
   /**
    * @brief List of coarse-grid cells that appear through coarsening a fine-grid ghost cell
