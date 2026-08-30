@@ -2155,20 +2155,6 @@ protected:
   mutable std::map<std::string, RefCountedPtr<Realm>> m_realms;
 
   /**
-   * @brief Reusable single-phase alias of the gas-phase part of multifluid cell data.
-   * @details The MFAMRCellData routines operate by aliasing the multifluid data into single-phase views and
-   * calling the single-phase routine. The views are shells only -- they never own the data -- so they are held
-   * here and re-aliased in aliasMultifluidCellData rather than reallocated on every call.
-   */
-  mutable EBAMRCellData m_mfAliasGas;
-
-  /**
-   * @brief Reusable single-phase alias of the solid-phase part of multifluid cell data.
-   * @details See m_mfAliasGas.
-   */
-  mutable EBAMRCellData m_mfAliasSolid;
-
-  /**
    * @brief Implicit functions
    */
   std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
@@ -2396,21 +2382,6 @@ protected:
    */
   void
   buildCopiers();
-
-  /**
-   * @brief Alias multifluid cell data into the reusable single-phase views m_mfAliasGas and m_mfAliasSolid.
-   * @details This is the shell-reusing counterpart of allocatePointer followed by alias: it keeps the level
-   * shells alive between calls and only re-aliases them, then defers the aliasing itself to alias(). Only the
-   * phases that exist on the input realm are aliased; the view for a phase without an EB index space is left
-   * alone, and callers must not use it. The views are write handles rather than copies:
-   * MfCellAliasFactory hands out the EBCellFAB inside each MFCellFAB of a_data, so everything a caller writes
-   * through m_mfAliasGas or m_mfAliasSolid lands in a_data. This routine only reads a_data, but a_data is
-   * modified through the views it returns, which is why it is taken by non-const reference.
-   * @param[in]     a_realm Realm name. Must exist.
-   * @param[in,out] a_data  Multifluid data to alias. Written to through the resulting views, not by this call.
-   */
-  void
-  aliasMultifluidCellData(const std::string& a_realm, MFAMRCellData& a_data) const;
 
   /**
    * @brief Parse the low/high corners of the computational domain.
