@@ -2399,8 +2399,10 @@ protected:
 
   /**
    * @brief Alias multifluid cell data into the reusable single-phase views m_mfAliasGas and m_mfAliasSolid.
-   * @details Only the phases that exist on the input realm are aliased; the view for a phase without an EB index
-   * space is left alone, and callers must not use it. The views are write handles rather than copies:
+   * @details This is the shell-reusing counterpart of allocatePointer followed by alias: it keeps the level
+   * shells alive between calls and only re-aliases them, then defers the aliasing itself to alias(). Only the
+   * phases that exist on the input realm are aliased; the view for a phase without an EB index space is left
+   * alone, and callers must not use it. The views are write handles rather than copies:
    * MfCellAliasFactory hands out the EBCellFAB inside each MFCellFAB of a_data, so everything a caller writes
    * through m_mfAliasGas or m_mfAliasSolid lands in a_data. This routine only reads a_data, but a_data is
    * modified through the views it returns, which is why it is taken by non-const reference.

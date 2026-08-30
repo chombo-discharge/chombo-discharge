@@ -1967,24 +1967,25 @@ AmrMesh::aliasMultifluidCellData(const std::string& a_realm, MFAMRCellData& a_da
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
+  // Deliberately not allocatePointer, which news a shell for every level on every call. The views hold no data
+  // of their own, so a shell that already exists only needs re-aliasing.
   m_mfAliasGas.resize(1 + m_finestLevel);
   m_mfAliasSolid.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    // The views hold no data of their own, so an existing shell can simply be re-aliased.
     if (m_mfAliasGas[lvl].isNull()) {
       m_mfAliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     }
     if (m_mfAliasSolid[lvl].isNull()) {
       m_mfAliasSolid[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     }
+  }
 
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*m_mfAliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*m_mfAliasSolid[lvl], phase::solid, *a_data[lvl]);
-    }
+  if (!ebisGas.isNull()) {
+    this->alias(m_mfAliasGas, phase::gas, a_data);
+  }
+  if (!ebisSol.isNull()) {
+    this->alias(m_mfAliasSolid, phase::solid, a_data);
   }
 }
 
