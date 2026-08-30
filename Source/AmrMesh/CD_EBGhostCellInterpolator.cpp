@@ -162,8 +162,12 @@ EBGhostCellInterpolator::defineBuffers() noexcept
 
   m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_ghostCF * IntVect::Unit);
 
-  // One component to begin with -- interpolate() grows the buffer if it is asked for more variables.
-  m_coarsenedFineData.define(m_eblgCoFi.getDBL(), 1, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
+  // SpaceDim components covers every caller on the hot path; interpolate() falls back to a local buffer for
+  // the rare wider call.
+  m_coarsenedFineData.define(m_eblgCoFi.getDBL(),
+                             SpaceDim,
+                             m_ghostCF * IntVect::Unit,
+                             EBCellFactory(m_eblgCoFi.getEBISL()));
 }
 
 void
@@ -186,20 +190,24 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
 
   const int numVars = a_variables.size();
 
-  // Grow the buffer if this call interpolates more variables than it was sized for. In steady state this does
-  // not trigger, so the buffer is allocated once per regrid.
+  // The member buffer holds SpaceDim components, which covers every caller on the hot path. A call that asks
+  // for more -- physics plot variables, whose count comes from the user's model -- takes a local buffer, so
+  // the resident footprint stays bounded while every call still fetches its variables in one round trip.
+  const bool wideCall = numVars > m_coarsenedFineData.nComp();
+
+  LevelData<EBCellFAB> wideBuffer;
+
   CH_START(t1);
-  if (m_coarsenedFineData.nComp() < numVars) {
-    m_coarsenedFineData.define(m_eblgCoFi.getDBL(),
-                               numVars,
-                               m_ghostCF * IntVect::Unit,
-                               EBCellFactory(m_eblgCoFi.getEBISL()));
+  if (wideCall) {
+    wideBuffer.define(m_eblgCoFi.getDBL(), numVars, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
   }
   CH_STOP(t1);
 
+  LevelData<EBCellFAB>& phiCoFi = wideCall ? wideBuffer : m_coarsenedFineData;
+
   // Fetch all the coarse-grid variables in one round trip rather than one per variable.
   CH_START(t2);
-  a_phiCoar.copyTo(a_variables, m_coarsenedFineData, Interval(0, numVars - 1), m_copier);
+  a_phiCoar.copyTo(a_variables, phiCoFi, Interval(0, numVars - 1), m_copier);
   CH_STOP(t2);
 
   // Fill invalid regions.
@@ -213,7 +221,7 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
     const DataIndex& din = dit[mybox];
 
     EBCellFAB&       phiFine = a_phiFine[din];
-    const EBCellFAB& phiCoar = m_coarsenedFineData[din];
+    const EBCellFAB& phiCoar = phiCoFi[din];
 
     FArrayBox&       phiFineReg = phiFine.getFArrayBox();
     const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();

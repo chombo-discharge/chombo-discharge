@@ -211,9 +211,11 @@ protected:
   /**
    * @brief Buffer holding the coarse-grid data on the coarsened fine grids.
    * @details This is filled by a single copyTo from the coarse level, for all the interpolated variables at
-   * once. It is sized in defineBuffers, i.e. once per regrid, and is grown if a call asks for more variables
-   * than it currently holds. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the
-   * entire coarsened-fine layout on every call.
+   * once. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the entire coarsened-fine
+   * layout on every call. It is sized in defineBuffers, i.e. once per regrid, and holds SpaceDim components:
+   * that covers the scalar and vector fields which make up every call on the hot path. The rare wider call --
+   * physics plot variables, whose count is set by the user's model -- uses a local buffer instead, so the
+   * resident footprint stays bounded regardless of how many plot variables a model declares.
    */
   mutable LevelData<EBCellFAB> m_coarsenedFineData;
 

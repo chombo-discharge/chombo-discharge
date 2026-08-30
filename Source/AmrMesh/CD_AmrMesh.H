@@ -2400,9 +2400,12 @@ protected:
   /**
    * @brief Alias multifluid cell data into the reusable single-phase views m_mfAliasGas and m_mfAliasSolid.
    * @details Only the phases that exist on the input realm are aliased; the view for a phase without an EB index
-   * space is left alone, and callers must not use it.
+   * space is left alone, and callers must not use it. The views are write handles rather than copies:
+   * MfCellAliasFactory hands out the EBCellFAB inside each MFCellFAB of a_data, so everything a caller writes
+   * through m_mfAliasGas or m_mfAliasSolid lands in a_data. This routine only reads a_data, but a_data is
+   * modified through the views it returns, which is why it is taken by non-const reference.
    * @param[in]     a_realm Realm name. Must exist.
-   * @param[in,out] a_data  Multifluid data to alias.
+   * @param[in,out] a_data  Multifluid data to alias. Written to through the resulting views, not by this call.
    */
   void
   aliasMultifluidCellData(const std::string& a_realm, MFAMRCellData& a_data) const;

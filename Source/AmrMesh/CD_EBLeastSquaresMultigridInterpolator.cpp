@@ -208,23 +208,30 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
   const int numVars = a_variables.size();
 
-  // Grow the buffer if this call interpolates more variables than it was sized for. In steady state this does
-  // not trigger, so the buffer is allocated once per regrid.
-  if (m_coarsenedFineData.nComp() < numVars) {
-    m_coarsenedFineData.define(m_eblgCoFi.getDBL(), numVars, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
+  // The member buffer holds SpaceDim components, which covers every caller on the hot path. A call that asks
+  // for more takes a local buffer, so the resident footprint stays bounded while every call still fetches its
+  // variables in one round trip.
+  const bool wideCall = numVars > m_coarsenedFineData.nComp();
+
+  LevelData<EBCellFAB> wideBuffer;
+
+  if (wideCall) {
+    wideBuffer.define(m_eblgCoFi.getDBL(), numVars, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
   }
+
+  LevelData<EBCellFAB>& phiCoFi = wideCall ? wideBuffer : m_coarsenedFineData;
 
   // Fetch all the coarse-grid variables in one round trip rather than one per variable. The buffer holds the data on
   // the coarse grid cells around each fine-grid patch, i.e. it is a LOCAL view of the coarse grid around each
   // fine-level patch, so we can apply the stencils directly.
-  a_phiCoar.copyTo(a_variables, m_coarsenedFineData, Interval(0, numVars - 1), m_copier);
+  a_phiCoar.copyTo(a_variables, phiCoFi, Interval(0, numVars - 1), m_copier);
 
   // Interpolate all variables near the EB.
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
     const int coarComp = icomp - a_variables.begin();
 
     // Do regular interpolation as if the EB is not there.
-    this->regularCoarseFineInterp(a_phiFine, m_coarsenedFineData, icomp, coarComp);
+    this->regularCoarseFineInterp(a_phiFine, phiCoFi, icomp, coarComp);
 
     // Go through each grid patch and the to-be-interpolated ghost cells across the refinement boundary. We simply
     // apply the stencils here.
@@ -234,7 +241,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
       EBCellFAB&       dstFine = a_phiFine[din];
       const EBCellFAB& srcFine = a_phiFine[din];
-      const EBCellFAB& srcCoar = m_coarsenedFineData[din];
+      const EBCellFAB& srcCoar = phiCoFi[din];
 
       // Apply the coarse and fine stencils
       constexpr int numComp = 1;
@@ -416,8 +423,9 @@ EBLeastSquaresMultigridInterpolator::defineBuffers() noexcept
 
   m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_ghostVectorCoFi);
 
-  // One component to begin with -- coarseFineInterp() grows the buffer if it is asked for more variables.
-  m_coarsenedFineData.define(m_eblgCoFi.getDBL(), 1, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
+  // SpaceDim components covers every caller on the hot path; coarseFineInterp() falls back to a local buffer
+  // for the rare wider call.
+  m_coarsenedFineData.define(m_eblgCoFi.getDBL(), SpaceDim, m_ghostVectorCoFi, EBCellFactory(m_eblgCoFi.getEBISL()));
 }
 
 void
