@@ -2,6 +2,19 @@
 
 Branch: `claude/706-grad-d-drift` (worktree `.claude/worktrees/issue-706`, base `main` @ 813be50d)
 
+## 0. Decisions taken (2026-08-31)
+
+The design questions that were open in the first draft have been answered:
+
+| # | Question | Decision |
+|---|---|---|
+| A | Mesh storage for the gradient | **Per-solver persistent** `ItoSolver::m_diffusionGradient` |
+| B | Reuse `ItoParticle::scratch_x/y/z` | **Yes, reuse** -- conditional on the safety audit in §4.1, which passes |
+| C | Where the option lives | **`ItoSolver.options`**, enabled by default |
+| D | `max\|grad D\|` in the time step | **Not in the calculation.** Documented in the doxygen blocks of the `computeDt`/`computeAdvectiveDt`/`computeDiffusiveDt` declarations in `CD_ItoSolver.H` |
+| E | Varying-`D` verification test | **Follow-up PR.** Land the fix first |
+| F | Enabled by default | **Yes**, with the results change called out in the PR description |
+
 ## 1. Problem restatement
 
 `ItoSolver`/`ItoKMC` integrate the Ito-interpretation Euler-Maruyama update
@@ -78,16 +91,49 @@ and `m_forceIrregInterpolationNGP`.
 
 ## 4. Storage — no new types, existing containers only
 
-* **Per-particle**: reuse the existing `ItoParticle::scratch_x/y/z` columns (`CD_ItoParticle.H:49-53`). Their only
-  current consumer is the Godunov hop (`CD_ItoKMCGodunovStepperImplem.H:1748` write, `:1842` read); the
-  `m_extendConductivityEB` flag uses the *scalar* `scratch`, a different column. No new payload columns, so no
-  extra `SpaceDim*sizeof(ParticleReal)` per particle in a 10^8-particle run, and nothing new to checkpoint.
-  The gradient is interpolated into `scratch_x/y/z` and then overwritten in the same particle loop by
-  `hop + dt*gradD`, so the lifetime is a handful of instructions and never spans a remap, merge or regrid.
-* **On the mesh**: one `SpaceDim` cell-data holder. See open question **A** — per-solver persistent vs one shared
-  scratch.
+* **Per-particle**: reuse the existing `ItoParticle::scratch_x/y/z` columns (`CD_ItoParticle.H:49-53`). No new
+  payload columns, so no extra `SpaceDim*sizeof(ParticleReal)` per particle in a 10^8-particle run, and nothing
+  new to checkpoint (`ParticleTraits<ItoParticle>::h5Columns` lists only `vx/vy/vz`). Safety audited in §4.1.
+* **On the mesh**: `ItoSolver::m_diffusionGradient`, a `SpaceDim`-component `EBAMRCellData` on `m_realm`,
+  allocated in `ItoSolver::allocate` only when `m_isDiffusive && m_diffusionGradientDrift` and
+  `allocatePointer`-ed otherwise -- the same allocate/allocatePointer pattern `m_velocityFunction` already uses
+  (`CD_ItoSolver.cpp`, `allocate()`). Self-contained, plottable, and works for BrownianWalker with no extra
+  plumbing. Costs `SpaceDim` components per diffusive species.
 
 Neither is a new type or a new container kind; both are `EBAMRCellData`/existing payload columns.
+
+### 4.1 Safety audit for the scratch-column reuse
+
+The reuse is safe because **the proposed lifetime is strictly shorter than the one already in the tree.** Today
+`scratch_x/y/z` holds the hop from `diffuseParticlesEulerMaruyama` (`CD_ItoKMCGodunovStepperImplem.H:1748`) all
+the way to `stepEulerMaruyamaParticles` (`:1842`) -- across the point-particle remap, the conductivity deposit,
+the semi-implicit Poisson setup and solve, and the velocity re-interpolation. The `grad(D)` value lives from the
+`interpolateDiffusionGradient(lvl, din)` call to a few lines later in the same patch loop, and is overwritten by
+`hop + dt*grad(D)` in the same iteration that reads it.
+
+What was checked:
+
+* **Sole consumers.** `scratch_x/y/z` is referenced in exactly three places in `Source/` and `Physics/`: the
+  declaration and `ParticleTraits::columns` in `CD_ItoParticle.H`, and the hop write/read at
+  `CD_ItoKMCGodunovStepperImplem.H:1748` and `:1842`.
+* **Not the same column as the EB flag.** `m_extendConductivityEB` (`:424`, `:428`, `:469`, `:500`) uses the
+  *scalar* `ItoParticle::scratch`, a different member.
+* **Not checkpointed.** `h5Columns` is `D_DECL(&ItoParticle::vx, ...)` only, so nothing here reaches HDF5.
+* **Nothing mutates the bulk particles in between.** In `advanceEulerMaruyama` the only particle operations
+  between the write and the read are `remapPointParticles` (operates on `m_rhoDaggerParticles`, a separate
+  `NoPayload` container), `copyConductivityParticles` (verified read-only on the `ItoParticle` container -- it
+  reads `position`, `weight` and `mobility` and appends to `NoPayload` containers), and `interpolateVelocities`
+  (writes `vx/vy/vz`). No merge, no regrid, no remap of the bulk container.
+* **OpenMP.** `interpolateDiffusionGradient(lvl, din)` is per-patch and is called from inside the existing
+  `#pragma omp parallel for` over boxes, exactly as `interpolateVelocities(lvl, dit)` already is. The AMR-wide
+  `computeDiffusionGradient()` runs once per solver, outside that loop.
+
+**One genuinely new exposure, to be documented rather than avoided.** `diffuseParticlesEulerMaruyama` passes
+`p = leaf.gather(i)` to the user's `ItoKMCPhysics::DiffusionFunction`. After this change `p.scratch_{x,y,z}` holds
+`grad(D)` at the particle position instead of the previous step's stale hop. That is a user-visible change to the
+callback payload, and an improvement -- the value becomes defined and useful (a custom diffusion model can now
+read `grad(D)`) instead of being leftover state. Document it in the doxygen for the `DiffusionFunction` alias and
+in `ItoKMC.rst`.
 
 ## 5. Staged implementation
 
@@ -102,13 +148,17 @@ which is also how we show the new code path is neutral.
 
 ### Stage 1 — `ItoSolver`: mesh gradient + interpolation
 
-* New option in `CD_ItoSolver.options`, default on:
-  `ItoSolver.diffusion_gradient_drift = true   ## Add grad(D) to the drift so the SDE transports D*grad(n)`
-* `computeDiffusionGradient()` — `m_amr->computeGradient(...)` on `m_diffusionFunction`, then
-  `conservativeAverage` + `interpGhostPwl` on the result. No-op when `!m_isDiffusive` or the flag is off.
+* New option in `CD_ItoSolver.options`, **default true** (decisions C and F):
+  `ItoSolver.diffusion_gradient_drift   = true   ## Add grad(D) to the drift so the SDE transports D*grad(n)`
+  Parsed with `pp.get`, never `pp.query` — inputs in this codebase are mandatory.
+* `m_diffusionGradient` (`SpaceDim`, `m_realm`, `m_phase`), allocated in `allocate()` only when
+  `m_isDiffusive && m_diffusionGradientDrift`, `allocatePointer`-ed otherwise.
+* `computeDiffusionGradient()` — `m_amr->computeGradient(m_diffusionGradient, m_diffusionFunction, m_realm,
+  m_phase)`, then `conservativeAverage` + `interpGhostPwl` on the result. No-op when `!m_isDiffusive` or the flag
+  is off.
 * `interpolateDiffusionGradient()` and `interpolateDiffusionGradient(int a_lvl, const DataIndex& a_dit)` —
-  interpolate onto `scratch_x/y/z`, mirroring `interpolateVelocities` exactly (including the irregular-cell NGP
-  override). Zero the columns when disabled, so callers can add unconditionally.
+  interpolate onto `scratch_x/y/z`, mirroring `interpolateVelocities` exactly (`m_deposition` and
+  `m_forceIrregInterpolationNGP`). Zero the columns when disabled, so callers may add unconditionally.
 * `isDiffusionGradientDrift()` query.
 * `registerOperator(s_eb_gradient, m_realm, m_phase)` in `registerOperators`.
 * Optional: a `grad_dco` entry in `ItoSolver.plt_vars` for debugging. Cheap and worth it while validating.
@@ -140,37 +190,56 @@ local-`RealVect`-first ordering must be explicit in the code, not incidental.
 `pos += dt*gradD` in the Euler step. With Stage 0 in place and a constant `m_diffCo` this is exactly zero, so
 `Exec/Tests/BrownianWalker/DriftDiffusion` and the merge tests must be bit-comparable before/after.
 
-### Stage 4 — time step
+### Stage 4 — time step (documentation only)
 
-`ItoSolver::computeAdvectiveDt` bounds `dt` from the particle velocity columns, which will not contain `grad(D)`.
-For realistic streamer parameters the omission is not the binding constraint: with `D ~ 0.1 m^2/s` varying over
-`~10 um`, `|grad D| ~ 1e4 m/s`, and at `dt = 1 ps` the correction displacement is
-`dt*|gradD| / sqrt(2*D*dt) ~ 2e-2` — two percent of the hop the diffusive `dt` rule already bounds. Plan:
-document this in the doxygen for the new functions and in `Ito.rst`; optionally add a cheap
-`DataOps::getMaxMin` bound on `|grad D|` folded into the Ito advective `dt` in `ItoKMCStepper`. See open
-question **D**.
+`ItoSolver::computeAdvectiveDt` bounds `dt` from the particle velocity columns, which do not contain `grad(D)`.
+**Decision D: the bound is deliberately not changed.** For realistic streamer parameters the omission is not the
+binding constraint: with `D ~ 0.1 m^2/s` varying over `~10 um`, `|grad D| ~ 1e4 m/s`, and at `dt = 1 ps` the
+correction displacement is `dt*|gradD| / sqrt(2*D*dt) ~ 2e-2` — two percent of the hop the diffusive `dt` rule
+already bounds.
+
+Instead, say so in the doxygen `@details` of the declarations in `CD_ItoSolver.H`:
+
+* `computeDt()` / `computeDt(int)` / `computeDt(int, const DataIndex&)` (`:964`, `:978`, `:993`)
+* `computeAdvectiveDt()` and its two overloads (`:1057`, `:1065`, `:1074`)
+* `computeDiffusiveDt()` and its two overloads (`:1081`, `:1089`, `:1098`)
+
+Each should note that the estimate is built from the particle velocity and diffusion columns only, and that the
+`grad(D)` drift contributes an additional displacement not accounted for here — with the magnitude argument above,
+so a future reader can see it was a judgement call rather than an oversight.
+
+Note that editing these blocks shifts lines and therefore touches the `Ito.rst` ranges `954-964`, `1052-1057` and
+`1076-1081` (see Stage 6).
 
 ### Stage 5 — verification
 
-This is the part the issue specifically calls out as missing ("invisible in any test with a constant diffusion
-coefficient"). The decisive test:
+**Decision E: the varying-`D` test is a follow-up PR.** This PR lands the fix and verifies it with what already
+exists; the test lands next.
+
+In this PR:
+
+* **Neutrality where it must be neutral.** Every existing BrownianWalker test (`Exec/Tests/BrownianWalker/*`) uses
+  a constant `m_diffCo`, so after Stage 0 the gradient is identically zero and results must be unchanged. Compare
+  with `plt_vars = part` (integer particle counts) rather than byte-identical HDF5, and clean-build both sides.
+* **`Exec/Examples/ItoKMC/ComparisonCdrPlasma`** — rerun both models with the tabulated `D(E/N)` and check that
+  the head positions move together. This is the direct evidence that the sign is right: the issue predicts the
+  uncorrected particle swarm *lags* the fluid solution by `~1-3%` at the head, so the correction must advance it.
+  Update the "will not agree exactly" paragraph in `README.md:43-47`, which currently tells the reader to freeze
+  `D` and points at #706.
+* All existing `Exec/Tests/ItoKMC/*` regression inputs run to completion with no NaN/assert.
+
+Deferred to the follow-up (record as a new issue when this PR opens, so it is not lost):
 
 > **Uniform density, spatially varying D, zero drift.** The fluid equation `dn/dt = div(D grad n)` has `n = const`
 > as an exact steady state for *any* `D(x)`. The uncorrected Ito scheme does not: particles pile up where `D` is
-> small. With the correction, uniformity is preserved to statistical noise.
+> small. With the correction, uniformity is preserved to statistical noise. Home: a new
+> `Exec/Tests/BrownianWalker/VariableDiffusion`. Needs a spatially varying `D` mode in BrownianWalker — a linear
+> ramp or Gaussian blob through `DataOps::setValue(..., lambda, probLo, dx, ...)` in `setDiffusion`, with the
+> particle coefficients taken from `solver->interpolateDiffusion()` rather than `setParticleDiffusion(m_diffCo)`.
+> Measure the RMS deviation of the deposited density from its initial uniform value: it should sit at the sqrt(N)
+> noise floor with the correction and grow linearly in `t` without it.
 
-Home: a new `Exec/Tests/BrownianWalker/VariableDiffusion` (or `Exec/Convergence/BrownianWalker`). Needs
-BrownianWalker to support a spatially varying `D` — a linear ramp or a Gaussian blob set through
-`DataOps::setValue(..., lambda, probLo, dx, ...)` in `setDiffusion`, with the particle coefficients taken from
-`solver->interpolateDiffusion()` instead of `setParticleDiffusion(m_diffCo)`. Measure the RMS deviation of the
-deposited density from its initial uniform value; it should stay at the sqrt(N) noise floor with the correction
-and grow linearly in `t` without it. See open question **E** on whether to build this now.
-
-Secondary checks:
-* `Exec/Examples/ItoKMC/ComparisonCdrPlasma` — rerun both models with the tabulated `D(E/N)` and confirm the head
-  positions converge. Update the "will not agree exactly" paragraph in its `README.md:43-47`, which currently
-  tells the reader to freeze `D` and points at #706.
-* All existing `Exec/Tests/ItoKMC/*` regression inputs run to completion with no NaN/assert.
+Note that Stage 0 is exactly the groundwork that test needs, so the follow-up is small.
 
 ### Stage 6 — documentation
 
@@ -228,31 +297,9 @@ diffusive rule already dominates.
 
 ## 8. Open questions
 
-**A. Mesh storage for the gradient.** Two options, both existing containers:
-   * *Per-solver persistent* `ItoSolver::m_diffusionGradient` (`SpaceDim`, allocated only when diffusive and the
-     flag is on). Same shape as the existing `m_velocityFunction`. Self-contained, plottable, works for
-     BrownianWalker without extra plumbing. Costs `SpaceDim` components per diffusive species — for a 10-species
-     3-D ItoKMC run, ~30 extra doubles/cell.
-   * *One shared scratch*, reused species-by-species. `ItoKMCStepper::m_particleScratchD` (`CD_ItoKMCStepper.H:787`)
-     already exists and is exactly the right shape; BrownianWalker would need its own. O(1) memory.
-   **Recommendation: per-solver persistent**, for the self-containment and plottability, unless the memory matters
-   to you — the ItoKMC species count is the deciding factor and you know it better than I do.
+None outstanding — all six were answered; see §0. Two judgement calls are deliberately deferred until a run
+produces evidence, and neither blocks the implementation:
 
-**B. Confirm the scratch-column reuse.** §4 reuses `ItoParticle::scratch_x/y/z` rather than adding
-   `gradD_x/y/z` payload columns. This keeps the per-particle footprint unchanged but means two consumers share
-   one scratch group within a single function body. Dedicated columns would be self-documenting at the cost of
-   `SpaceDim` reals per particle everywhere. **Recommendation: reuse scratch.**
-
-**C. Where the option lives.** `ItoSolver.options` (per-solver, next to `mobility_interp`, and automatically
-   available to BrownianWalker) vs. an `ItoKMCGodunovStepper` option. **Recommendation: `ItoSolver.options`.**
-
-**D. Time-step bound.** Document only, or also fold a mesh `max|grad D|` into the Ito advective `dt`?
-   **Recommendation: document now, add the bound only if a run shows it matters.**
-
-**E. Verification test scope.** Build the varying-`D` BrownianWalker test in this PR (it needs a spatially varying
-   `D` mode in BrownianWalker, which is real but contained work), or land the fix first and add the test
-   separately? **Recommendation: build it in this PR** — the issue's own argument is that the defect survived
-   because no test varies `D`, and without it we have no evidence the sign and magnitude are right.
-
-**F. Default on.** You said enabled by default. Confirming that you accept that every existing ItoKMC result with
-   a tabulated `D(E/N)` shifts, and that this goes in the PR description.
+* Whether `|grad D|` near the EB needs a limiter on `|dt*grad(D)|` (§6). Watch the first `ComparisonCdrPlasma`
+  run; do not add the knob pre-emptively.
+* Whether the `dt` bound of Stage 4 ever binds in practice.
