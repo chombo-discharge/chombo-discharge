@@ -850,6 +850,17 @@ public:
   interpolateDiffusionGradient();
 
   /**
+   * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.
+   * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns. Requires a
+   * preceding call to computeDiffusionGradient(). Public because the time steppers call it per patch, from
+   * inside their own OpenMP loops over boxes.
+   * @param[in] a_lvl Grid level
+   * @param[in] a_dit Grid index
+   */
+  virtual void
+  interpolateDiffusionGradient(int a_lvl, const DataIndex& a_dit);
+
+  /**
    * @brief Check if the grad(D) drift correction is enabled.
    * @return Returns m_diffusionGradientDrift.
    */
@@ -1954,16 +1965,6 @@ protected:
    */
   virtual void
   interpolateDiffusion(int a_lvl, const DataIndex& a_dit);
-
-  /**
-   * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.
-   * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns. Requires a
-   * preceding call to computeDiffusionGradient().
-   * @param[in] a_lvl Grid level
-   * @param[in] a_dit Grid index
-   */
-  virtual void
-  interpolateDiffusionGradient(int a_lvl, const DataIndex& a_dit);
 
   /**
    * @brief Update mobilities parametrically from the particle energy.

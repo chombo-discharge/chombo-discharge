@@ -467,13 +467,23 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
   // TLDR: This function advances the particles using an Euler-Maruyama kernel. The steps are simply:
   //
-  //          1. Compute Xnew = Xold + V*dt + sqrt(2*D*dt)*N0 where N0 is a random number
+  //          1. Compute Xnew = Xold + (V + grad(D))*dt + sqrt(2*D*dt)*N0 where N0 is a random number
   //          2. Remap the particles, assigning them to new grid boxes.
   //          3. Remove particles that struck the EB.
   //          4. Make super-particles.
   //          5. Update the particle velocities and diffusion coefficients.
   //          6. Deposit particles on mesh.
   //
+
+  // The grad(D) drift correction, which makes the walkers transport v*n - D*grad(n) rather than the
+  // v*n - grad(D*n) a plain Ito update gives. m_diffCo is uniform here, so the gradient is identically zero
+  // and this changes nothing -- it is wired up so the code path is exercised and so that a spatially varying
+  // diffusion coefficient would be handled correctly. See #706.
+  const bool gradientDrift = m_solver->isDiffusive() && m_solver->isDiffusionGradientDrift();
+
+  if (gradientDrift) {
+    m_solver->computeDiffusionGradient();
+  }
 
   // 1. Euler-Maruayma kernel on each patch.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -508,6 +518,24 @@ BrownianWalkerStepper::advance(const Real a_dt)
           for (int dir = 0; dir < SpaceDim; dir++) {
             oldPos[dir][i] = pos[dir][i];
             pos[dir][i] += static_cast<Real>(v[dir][i]) * a_dt;
+          }
+        });
+      }
+
+      // grad(D) drift. This is a drift term like the one above, but it applies to any diffusive solver,
+      // mobile or not. interpolateDiffusionGradient puts (grad D)(X_p) on the scratch vector columns.
+      if (gradientDrift) {
+        m_solver->interpolateDiffusionGradient(lvl, din);
+
+        const ParticleReal* gradD[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::scratch_x>(),
+                                                      leaf.column<&ItoParticle::scratch_y>(),
+                                                      leaf.column<&ItoParticle::scratch_z>())};
+
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            pos[dir][i] += static_cast<Real>(gradD[dir][i]) * a_dt;
           }
         });
       }
