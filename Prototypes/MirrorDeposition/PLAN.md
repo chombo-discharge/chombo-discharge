@@ -3,6 +3,9 @@
 **Issue** chombo-discharge#29 (parts 1 and 3) · **Branch** `mirror_deposition` · **Depends on** PR #700
 · **Revision** 6, after five adversarial reviews.
 
+> **Current branch state: see [`STATUS.md`](STATUS.md).** This file is the design; it does not track
+> what has been implemented.
+
 > **Rebased onto `main` at `f44e5968` on 2026-08-31.** #700 is now *in* `main` (as `92448b90`), so this
 > branch no longer carries its own copy of it. The design below is unchanged — no mechanism it depends
 > on was touched — but a handful of line citations and shipped-input counts moved, and they have been

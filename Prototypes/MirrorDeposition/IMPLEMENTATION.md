@@ -3,6 +3,9 @@
 **Design** `PLAN.md` revision 6 · **Issue** chombo-discharge#29 (parts 1 and 3) · **Branch**
 `mirror_deposition` · **Depends on** PR #700 (**merged**, `92448b90`)
 
+> **For the current state of the branch — what is done, what is broken, and what to do next — read
+> [`STATUS.md`](STATUS.md) first.** This file is the plan, not the progress log.
+
 `PLAN.md` is the design and stays the authority on *why*. This file is the work order: what changes,
 in what order, in which file, and what proves each step. Where it deviates from `PLAN.md` it says so
 explicitly in §0.3 — those are the only deviations, and each is a correction rather than a

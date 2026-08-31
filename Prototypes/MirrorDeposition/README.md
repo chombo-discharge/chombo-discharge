@@ -1,5 +1,7 @@
 # DELETE BEFORE MERGING TO MAIN
 
+> **Branch status — start at [`STATUS.md`](STATUS.md).** This file catalogues the Python harnesses only.
+
 These are throwaway Python prototypes used to design mirrored cut-cell deposition
 for issue #29. They are not part of the build, are not run by CI, and must be
 removed before this branch merges. They are committed only so the numbers behind
