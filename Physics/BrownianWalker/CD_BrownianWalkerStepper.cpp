@@ -503,6 +503,13 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
       const std::size_t n = leaf.size();
 
+      // grad(D) at the particle positions, onto the scratch vector columns. This MUST happen before any of the
+      // kernels below move a particle: the interpolation stencil reads the patch that owns X^k, and the particles
+      // are not remapped until after the whole Euler-Maruyama kernel has run.
+      if (gradientDrift) {
+        m_solver->interpolateDiffusionGradient(lvl, din);
+      }
+
       // Euler step.
       if (m_solver->isMobile()) {
         double* oldPos[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::old_x>(),
@@ -523,10 +530,8 @@ BrownianWalkerStepper::advance(const Real a_dt)
       }
 
       // grad(D) drift. This is a drift term like the one above, but it applies to any diffusive solver,
-      // mobile or not. interpolateDiffusionGradient puts (grad D)(X_p) on the scratch vector columns.
+      // mobile or not. The scratch vector columns hold (grad D)(X^k) from the interpolation above.
       if (gradientDrift) {
-        m_solver->interpolateDiffusionGradient(lvl, din);
-
         const ParticleReal* gradD[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::scratch_x>(),
                                                       leaf.column<&ItoParticle::scratch_y>(),
                                                       leaf.column<&ItoParticle::scratch_z>())};
