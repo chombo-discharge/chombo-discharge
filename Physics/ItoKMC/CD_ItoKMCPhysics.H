@@ -61,6 +61,11 @@ using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
 /**
  * @brief Basic function for diffusing a particle
+ * @details Returns the stochastic diffusion hop only. The grad(D) drift correction that makes the particles
+ * transport the same diffusive flux as the CDR solvers is a separate, deterministic term, added to the
+ * displacement by the time stepper -- see ItoKMCGodunovStepper::diffuseParticlesEulerMaruyama. When the stepper
+ * calls this function the particle's scratch vector columns (p.scratch_x etc.) hold grad(D) at the particle
+ * position, which a diffusion model may read but must not assume it can write.
  */
 using DiffusionFunction = std::function<RealVect(const ItoParticle& p, const Real& a_dt)>;
 
@@ -705,6 +710,9 @@ protected:
 
   /**
    * @brief Isotropic diffusion function for a particle
+   * @details This is the stochastic hop alone; it carries no drift. In particular it does not contain the
+   * grad(D) correction that makes the Ito update transport v*n - D*grad(n) rather than v*n - grad(D*n) -- that
+   * term is deterministic and is added to the particle displacement by the time stepper.
    * @param[in] a_particle Particle to diffuse
    * @param[in] a_dt Time step
    * @return Returns sqrt(2 * D * a_dt) * N(0,1), where N(0,1) is a normal distribution

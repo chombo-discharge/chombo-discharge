@@ -118,6 +118,42 @@ run time.
    The drift update keeps using :math:`\mathbf{E}^{k+1}` together with the lagged mobility, because that is the
    pairing assumed by the semi-implicit Poisson operator.
 
+The :math:`\nabla D` drift correction
+-------------------------------------
+
+The particles are advanced with the drift :math:`\mathbf{V} + \nabla D` rather than :math:`\mathbf{V}` alone, so
+that they transport the same diffusive flux as the CDR solvers -- see :ref:`Chap:ItoDiffusionGradient` for why the
+term is there and how to turn it off.
+
+Where the term is applied matters for the semi-implicit coupling.
+The transport step splits the particle update as
+
+.. math::
+
+   \mathbf{X}^{k+1} = \mathbf{X}^k + \underbrace{\sqrt{2D^k\Delta t}\mathbf{W} + \Delta t\nabla D^k}_{\textrm{explicit}}
+   + \underbrace{\Delta t\mu^k\mathbf{E}^{k+1}\left(\mathbf{X}^k\right)}_{\textrm{implicit}},
+
+and the semi-implicit Poisson equation
+
+.. math::
+
+   \nabla\cdot\left[\left(\epsilon + \Delta t\sigma^k\right)\nabla\Phi^{k+1}\right] = -\rho^\dagger
+
+is exact only because :math:`\rho^\dagger` is deposited from particles displaced by everything *except* the
+:math:`\Delta t\mu\mathbf{E}^{k+1}` term, and because that remaining term is linear in :math:`\mathbf{E}^{k+1}`.
+:math:`\nabla D^k` is lagged and independent of the field, so it belongs in the explicit half, next to the
+stochastic hop, where :math:`\rho^\dagger` accounts for it exactly.
+Nothing about the Poisson operator, the conductivity, or the final update changes.
+This is the same treatment the CDR half of the step already gives the explicit
+:math:`\Delta t\nabla\cdot\left(D\nabla n^k\right)`.
+
+.. warning::
+
+   Enabling this correction changes results for any simulation whose diffusion coefficient varies in space,
+   which includes every model using a tabulated :math:`D\left(E/N\right)`.
+   The uncorrected particle swarm lags the fluid solution by of order :math:`\left|\nabla D\right|/\left|\mathbf{V}\right|`,
+   which is a few percent at a streamer head in atmospheric air.
+
 
 
 Spatial filtering
