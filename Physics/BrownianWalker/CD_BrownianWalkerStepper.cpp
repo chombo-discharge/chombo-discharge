@@ -140,9 +140,11 @@ BrownianWalkerStepper::setDiffusion()
 
   CH_assert(m_solver->isDiffusive());
 
-  // Set something crazy for the diffusion field. This should not matter because we set the particle diffusion
-  // coefficients directly.
-  m_solver->setDiffusionFunction(std::numeric_limits<Real>::max());
+  // The mesh diffusion field must hold the same coefficient the particles carry. The particle coefficients are
+  // still assigned directly (setParticleDiffusion), so this field is not what moves the walkers -- but it is the
+  // field that is plotted as 'dco', and it is the field a grad(D) drift correction would have to differentiate.
+  // EBCellFAB::setVal covers ghost cells and the value is uniform, so no coarsening or ghost fill is needed here.
+  m_solver->setDiffusionFunction(m_diffCo);
 }
 
 void
