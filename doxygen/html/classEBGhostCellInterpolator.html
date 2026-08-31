@@ -192,6 +192,9 @@ LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, Box &gt; &gt
 Copier&#160;</td><td class="memItemRight" valign="bottom"><b>m_copier</b></td></tr>
 <tr class="memdesc:a7d566e872edc76b2ca138bfe010be5fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for making copying from m_eblgCoar to m_grownCoarData go faster. <br /></td></tr>
 <tr class="separator:a7d566e872edc76b2ca138bfe010be5fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad096de455faaf3df064cad784f963400" id="r_ad096de455faaf3df064cad784f963400"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#ad096de455faaf3df064cad784f963400">m_coarsenedFineData</a></td></tr>
+<tr class="memdesc:ad096de455faaf3df064cad784f963400"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer holding the coarse-grid data on the coarsened fine grids.  <br /></td></tr>
+<tr class="separator:ad096de455faaf3df064cad784f963400"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b3de4442c0d757353fb8dc6c3854040" id="r_a9b3de4442c0d757353fb8dc6c3854040"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; BaseIVFAB&lt; VolIndex &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBGhostCellInterpolator.html#a9b3de4442c0d757353fb8dc6c3854040">m_coarsenedFineGhosts</a></td></tr>
 <tr class="memdesc:a9b3de4442c0d757353fb8dc6c3854040"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of coarse-grid cells that appear through coarsening a fine-grid ghost cell.  <br /></td></tr>
 <tr class="separator:a9b3de4442c0d757353fb8dc6c3854040"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -406,6 +409,7 @@ LayoutData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" v
 </div><div class="memdoc">
 
 <p>Do inhomogeneous interpolation. </p>
+<p>This fills the fine-grid ghost cells that lie across the coarse-fine interface, interpolating them from the coarse grid. The coarse data is fetched into an internal buffer on the coarsened fine grids, so a_phiCoar's own ghost cells are not read and need not be valid. </p><dl class="section note"><dt>Note</dt><dd>This routine does not exchange, and on return a_phiFine's ghost cells are not consistent. Two separate things are left to the caller. First, the ghost cells that are covered by a neighbouring patch on the fine level are not part of the coarse-fine region and are never filled here. Second, some of those cells are actively overwritten with interpolated values, because the interpolated region is stored as the bounding box of the coarse-fine ghost cells rather than as the cell set itself, and that box spans neighbour-owned cells whenever the set is not rectangular. The caller must therefore exchange a_phiFine before anything reads its ghost cells. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phiFine</td><td>Fine phi </td></tr>
@@ -703,6 +707,31 @@ LayoutData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" v
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad096de455faaf3df064cad784f963400" name="ad096de455faaf3df064cad784f963400"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad096de455faaf3df064cad784f963400">&#9670;&#160;</a></span>m_coarsenedFineData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LevelData&lt;EBCellFAB&gt; EBGhostCellInterpolator::m_coarsenedFineData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Buffer holding the coarse-grid data on the coarsened fine grids. </p>
+<p>This is filled by a single copyTo from the coarse level, for all the interpolated variables at once. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the entire coarsened-fine layout on every call. It is sized in defineBuffers, i.e. once per regrid, and holds SpaceDim components: that covers the scalar and vector fields which make up every call on the hot path. The rare wider call &ndash; physics plot variables, whose count is set by the user's model &ndash; uses a local buffer instead, so the resident footprint stays bounded regardless of how many plot variables a model declares. </p>
+
+</div>
+</div>
 <a id="a9b3de4442c0d757353fb8dc6c3854040" name="a9b3de4442c0d757353fb8dc6c3854040"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b3de4442c0d757353fb8dc6c3854040">&#9670;&#160;</a></span>m_coarsenedFineGhosts</h2>
 

@@ -283,6 +283,9 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><b>m_eblgCoFi</b>
 Copier&#160;</td><td class="memItemRight" valign="bottom"><b>m_copier</b></td></tr>
 <tr class="memdesc:a1bebdcad6cb9c28ef9fba57c9afd0504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copier for making copying into m_grownCoarData go faster. <br /></td></tr>
 <tr class="separator:a1bebdcad6cb9c28ef9fba57c9afd0504"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4b6df642513144b18e3e2fbfe50de97" id="r_ac4b6df642513144b18e3e2fbfe50de97"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBLeastSquaresMultigridInterpolator.html#ac4b6df642513144b18e3e2fbfe50de97">m_coarsenedFineData</a></td></tr>
+<tr class="memdesc:ac4b6df642513144b18e3e2fbfe50de97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer holding the coarse-grid data on the coarsened fine grids.  <br /></td></tr>
+<tr class="separator:ac4b6df642513144b18e3e2fbfe50de97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e4cea73a10abeb03c8b5b95aa95d912" id="r_a9e4cea73a10abeb03c8b5b95aa95d912"><td class="memItemLeft" align="right" valign="top"><a id="a9e4cea73a10abeb03c8b5b95aa95d912" name="a9e4cea73a10abeb03c8b5b95aa95d912"></a>
 LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_ghostIterFine</b></td></tr>
 <tr class="memdesc:a9e4cea73a10abeb03c8b5b95aa95d912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator over ghost cells. <br /></td></tr>
@@ -1105,6 +1108,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 <p>Regular coarse-fine interface boxes. </p>
 <dl class="section note"><dt>Note</dt><dd>This is a map to the "regular" ghost cells that will be interpolated using a standard multigrid interpolation stencil (away from the EB). </dd></dl>
+
+</div>
+</div>
+<a id="ac4b6df642513144b18e3e2fbfe50de97" name="ac4b6df642513144b18e3e2fbfe50de97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4b6df642513144b18e3e2fbfe50de97">&#9670;&#160;</a></span>m_coarsenedFineData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LevelData&lt;EBCellFAB&gt; EBLeastSquaresMultigridInterpolator::m_coarsenedFineData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Buffer holding the coarse-grid data on the coarsened fine grids. </p>
+<p>This is filled by a single copyTo from the coarse level, for all the interpolated variables at once. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the entire coarsened-fine layout on every call. It is sized in defineBuffers, i.e. once per regrid, and holds SpaceDim components: that covers the scalar and vector fields which make up every call on the hot path. The rare wider call &ndash; physics plot variables, whose count is set by the user's model &ndash; uses a local buffer instead, so the resident footprint stays bounded regardless of how many plot variables a model declares. </p>
 
 </div>
 </div>
