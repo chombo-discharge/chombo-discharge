@@ -4078,7 +4078,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
                          *m_cdrPhotoiProducts[i],
                          DepositionType::NGP,
                          CoarseFineDeposition::Halo,
-                         false);
+                         IrregularDeposition::Native);
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
@@ -6175,7 +6175,7 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
                            computationParticles,
                            solver->getDeposition(),
                            solver->getCoarseFineDeposition(),
-                           false);
+                           IrregularDeposition::Native);
 
       // Copy data back onto the fluid realm.
       m_amr->copyData(m_fluidScratch1, m_particleScratch1);

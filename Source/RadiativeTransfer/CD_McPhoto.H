@@ -21,6 +21,7 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Photon.H>
+#include <CD_IrregularDeposition.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -506,9 +507,10 @@ protected:
   bool m_instantaneous;
 
   /**
-   * @brief Flag for blending the deposition clouds with the nonconservative divergence
+   * @brief How the cut cells are treated when depositing.
+   * @details Replaces the former blend_conservation flag; see CD_IrregularDeposition.H.
    */
-  bool m_blendConservation;
+  IrregularDeposition m_irregularDeposition;
 
   /**
    * @brief If true, the NUMBER of of Photons will be deposited in each cell
@@ -668,7 +670,7 @@ protected:
   /**
    * @brief Shared hybrid-divergence tail for the deposition routines.
    * @details On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the
-   * non-conservative divergence, redistributes the mass difference (when m_blendConservation is set),
+   * non-conservative divergence, redistributes the mass difference (when a redistributing selector is set),
    * and finishes with an average-down and ghost-cell interpolation.
    * @param[in,out] a_phi Mesh density. On input the conservative deposition; on output the hybrid result.
    */

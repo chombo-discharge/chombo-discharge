@@ -198,7 +198,7 @@ These functions are available for cell-centered data, cut-cell data, and face-ce
 Multiple signatures for this functionality exist, see the code-block below.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 712-720,745-753,782-794
+   :lines: 713-721,746-754,783-795
    :dedent: 2
    :language: c++
 	    
@@ -219,14 +219,14 @@ This process adheres to the following rules:
 The signatures for updating the ghost cells are:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1259-1267
+   :lines: 1260-1268
    :dedent: 2
    :language: c++
 
 As one alternative, one can update ghost cells on a single grid level:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1268-1282
+   :lines: 1269-1283
    :dedent: 2
    :language: c++
 
@@ -248,7 +248,7 @@ If one needs data on a grid level where no data already exists, it is possible t
 The interpolation function that fills fine-grid data from a coarse grid has the following signature:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1348-1368
+   :lines: 1349-1369
    :dedent: 2
    :language: c++
 
@@ -303,7 +303,7 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 To compute gradients of a scalar, one can simply call ``AmrMesh::computeGradient(...)`` functions:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 445-458
+   :lines: 446-459
    :language: c++
    :dedent: 2
 
@@ -323,7 +323,7 @@ This version requires that the source and destination data holders are defined o
 A more general version is supplied by :ref:`Chap:AmrMesh`, and has the following structure:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 100-118
+   :lines: 101-119
    :language: c++
    :dedent: 2
 

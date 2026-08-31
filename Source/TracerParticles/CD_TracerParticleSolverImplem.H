@@ -371,7 +371,13 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const noexcept
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  m_amr->depositWeight(a_phi, m_realm, m_phase, m_particles, m_deposition, m_coarseFineDeposition, false);
+  m_amr->depositWeight(a_phi,
+                       m_realm,
+                       m_phase,
+                       m_particles,
+                       m_deposition,
+                       m_coarseFineDeposition,
+                       IrregularDeposition::Native);
 
   if (m_volumeScale) {
     DataOps::volumeScale(a_phi, m_amr->getDx());

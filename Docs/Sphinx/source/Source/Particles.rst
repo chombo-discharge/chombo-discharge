@@ -238,7 +238,7 @@ Allocating particles
 :ref:`Chap:AmrMesh` has a simple function for allocating a ``ParticleContainer<P, Traits>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 213-223
+   :lines: 214-224
    :dedent: 2
    :language: c++
 
@@ -399,7 +399,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1838-1839
+   :lines: 1839-1840
    :language: c++
    :dedent: 2
 
@@ -526,7 +526,7 @@ Conversely, if the particle is close to the EB a small step will be used.
 The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and the ray-casting variant is called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1221-1230
+   :lines: 1222-1231
    :language: c++
    :dedent: 2
 
@@ -560,18 +560,18 @@ ___________________
 To deposit the particle weight on the mesh, the user can call ``AmrMesh::depositWeight``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 990-998
+   :lines: 991-999
    :language: c++
    :dedent: 2
 
-The input arguments are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, the SoA particle container (``a_particles``), the deposition method, the coarse-fine handling, and a flag that enforces nearest grid-point deposition in cut-cells.
-The last flag is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.
+The input arguments are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, the SoA particle container (``a_particles``), the deposition method, the coarse-fine handling, and the cut-cell strategy.
+The last argument is discussed in :ref:`Chap:IrregularDeposition`.
 
 To deposit a *derived* per-particle quantity (e.g. weight times a payload column), use ``AmrMesh::depositGathered`` with a gatherer callback, or ``AmrMesh::depositParticles<Members...>`` to deposit one or more payload columns directly.
 Surface (EB) deposition of the weight column onto an ``EBAMRIVData`` is available through an overload of ``AmrMesh::depositParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 971-976
+   :lines: 972-977
    :language: c++
    :dedent: 2
 
@@ -649,6 +649,27 @@ The following coarse-fine deposition methods are currently supported:
    Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
    The ``CoarseFineDeposition::Transition`` method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.
 
+.. _Chap:IrregularDeposition:
+
+Cut-cell deposition
+^^^^^^^^^^^^^^^^^^^
+
+Deposition divides by :math:`\Delta x^{\mathrm{D}}` and never by the volume fraction :math:`\kappa`, so a cut cell holds :math:`\kappa n` where the fluid solvers hold :math:`n`.
+The input argument ``a_irregularDeposition`` selects what, if anything, is done about that, through the enum ``IrregularDeposition``:
+
+* ``IrregularDeposition::Native`` -- deposit as-is, with no cut-cell treatment. :math:`\phi` is then an extended state that runs into the embedded boundary.
+* ``IrregularDeposition::NGP`` -- put the particle's entire cloud in its own cell when that cell is cut, so that mass is never deposited into covered grid cells.
+  This is motivated by applications that require hard mass conservation.
+* ``IrregularDeposition::Mirror`` -- even extension of the density about the embedded boundary, obtained by depositing each particle's cloud *and* the cloud of its image reflected across the boundary.
+  Under this option **a cut cell holds** :math:`n`, **not** :math:`\kappa n`, which is a change of meaning that consumers of :math:`\phi` must opt into knowingly.
+  Incompatible with ``DepositionType::NGP``.
+* ``IrregularDeposition::Redistribute`` -- hybrid divergence, with the cut-cell mass excess :math:`(1-\kappa)` redistributed to the neighbouring cells.
+* ``IrregularDeposition::RedistributeBlended`` -- as above, but the conservative divergence is first blended with the non-conservative one.
+
+These are mutually exclusive answers to a single question, which is why they are one selector rather than a set of independent flags.
+Combining ``Mirror`` with redistribution, for instance, would apply a :math:`1/\kappa` correction to a field that no longer needs one.
+
+Note that cut-cell *interpolation* is a separate and independent question, and remains a boolean.
 
 Particle interpolation
 ______________________
@@ -656,7 +677,7 @@ ______________________
 To interpolate mesh data onto a payload column, the user can call ``AmrMesh::interpolateParticles``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1086-1093
+   :lines: 1087-1094
    :language: c++
    :dedent: 2
 

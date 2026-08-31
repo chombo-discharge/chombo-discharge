@@ -374,7 +374,7 @@ AmrMesh::depositWeight(EBAMRCellData&                      a_meshData,
                        const ParticleContainer<P, Traits>& a_particles,
                        const DepositionType                a_depositionType,
                        const CoarseFineDeposition          a_coarseFineDeposition,
-                       const bool                          a_forceIrregNGP)
+                       const IrregularDeposition           a_irregularDeposition)
 {
   CH_TIME("AmrMesh::depositWeight(ParticleContainer)");
   if (m_verbosity > 5) {
@@ -383,7 +383,7 @@ AmrMesh::depositWeight(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
-  particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
+  particleMesh.depositWeight(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_irregularDeposition);
 }
 
 template <typename P, typename Traits, typename CellGather>
@@ -394,7 +394,7 @@ AmrMesh::depositGathered(EBAMRCellData&                      a_meshData,
                          const ParticleContainer<P, Traits>& a_particles,
                          const DepositionType                a_depositionType,
                          const CoarseFineDeposition          a_coarseFineDeposition,
-                         const bool                          a_forceIrregNGP,
+                         const IrregularDeposition           a_irregularDeposition,
                          CellGather                          a_cellGather)
 {
   CH_TIME("AmrMesh::depositGathered(ParticleContainer)");
@@ -404,8 +404,12 @@ AmrMesh::depositGathered(EBAMRCellData&                      a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
-  particleMesh
-    .depositGathered(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP, a_cellGather);
+  particleMesh.depositGathered(a_meshData,
+                               a_particles,
+                               a_depositionType,
+                               a_coarseFineDeposition,
+                               a_irregularDeposition,
+                               a_cellGather);
 }
 
 template <auto... Members, typename P, typename Traits>
@@ -416,7 +420,7 @@ AmrMesh::depositParticles(EBAMRCellData&                      a_meshData,
                           const ParticleContainer<P, Traits>& a_particles,
                           const DepositionType                a_depositionType,
                           const CoarseFineDeposition          a_coarseFineDeposition,
-                          const bool                          a_forceIrregNGP)
+                          const IrregularDeposition           a_irregularDeposition)
 {
   CH_TIME("AmrMesh::depositParticles(ParticleContainer)");
   if (m_verbosity > 5) {
@@ -429,7 +433,7 @@ AmrMesh::depositParticles(EBAMRCellData&                      a_meshData,
                                             a_particles,
                                             a_depositionType,
                                             a_coarseFineDeposition,
-                                            a_forceIrregNGP);
+                                            a_irregularDeposition);
 }
 
 template <typename P, typename Traits>

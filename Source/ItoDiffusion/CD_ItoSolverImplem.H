@@ -68,13 +68,8 @@ ItoSolver::depositWeight(EBAMRCellData&                      a_phi,
   // Deposit the weight column onto the mesh (resets a_phi internally), then redistribute. Redistribution belongs
   // here because it decides what the valid-cell values are; coarsening and ghost filling are the caller's, see
   // coarsenAndFillGhosts().
-  m_amr->depositWeight(a_phi,
-                       m_realm,
-                       m_phase,
-                       a_particles,
-                       a_deposition,
-                       a_coarseFineDeposition,
-                       m_forceIrregDepositionNGP);
+  m_amr
+    ->depositWeight(a_phi, m_realm, m_phase, a_particles, a_deposition, a_coarseFineDeposition, m_irregularDeposition);
 
   this->redistributeAMR(a_phi);
 }
@@ -151,7 +146,7 @@ ItoSolver::depositGathered(EBAMRCellData&                        a_phi,
                          a_particles,
                          a_deposition,
                          a_coarseFineDeposition,
-                         m_forceIrregDepositionNGP,
+                         m_irregularDeposition,
                          a_gather);
 
   this->redistributeAMR(a_phi);

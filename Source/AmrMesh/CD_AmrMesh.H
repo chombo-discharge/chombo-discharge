@@ -32,6 +32,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
 #include <CD_ParticleGhostMask.H>
+#include <CD_IrregularDeposition.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
@@ -982,7 +983,7 @@ public:
    * @param[in]  a_particles            SoA particle container.
    * @param[in]  a_depositionType       Deposition kernel (e.g. CIC).
    * @param[in]  a_coarseFineDeposition Coarse-fine handling.
-   * @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+   * @param[in]  a_irregularDeposition        Cut-cell deposition strategy.
    * @tparam P      Payload type of the container.
    * @tparam Traits Column descriptor for the payload.
    */
@@ -994,7 +995,7 @@ public:
                 const ParticleContainer<P, Traits>& a_particles,
                 const DepositionType                a_depositionType,
                 const CoarseFineDeposition          a_coarseFineDeposition,
-                const bool                          a_forceIrregNGP);
+                const IrregularDeposition           a_irregularDeposition);
 
   /**
    * @brief Deposit a custom per-particle scalar (a_cellGather) of an SoA container on the mesh.
@@ -1006,7 +1007,7 @@ public:
    * @param[in]  a_particles            SoA particle container.
    * @param[in]  a_depositionType       Deposition kernel (e.g. CIC).
    * @param[in]  a_coarseFineDeposition Coarse-fine handling.
-   * @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+   * @param[in]  a_irregularDeposition        Cut-cell deposition strategy.
    * @param[in]  a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
    * @tparam P          Payload type of the container.
    * @tparam Traits     Column descriptor for the payload.
@@ -1020,7 +1021,7 @@ public:
                   const ParticleContainer<P, Traits>& a_particles,
                   const DepositionType                a_depositionType,
                   const CoarseFineDeposition          a_coarseFineDeposition,
-                  const bool                          a_forceIrregNGP,
+                  const IrregularDeposition           a_irregularDeposition,
                   CellGather                          a_cellGather);
 
   /**
@@ -1033,7 +1034,7 @@ public:
    * @param[in]  a_particles            SoA particle container.
    * @param[in]  a_depositionType       Deposition kernel.
    * @param[in]  a_coarseFineDeposition Coarse-fine handling.
-   * @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+   * @param[in]  a_irregularDeposition        Cut-cell deposition strategy.
    * @tparam Members Pack of payload data-member pointers selecting the column(s).
    * @tparam P       Payload type (deduced).
    * @tparam Traits  Column descriptor (deduced).
@@ -1046,7 +1047,7 @@ public:
                    const ParticleContainer<P, Traits>& a_particles,
                    const DepositionType                a_depositionType,
                    const CoarseFineDeposition          a_coarseFineDeposition,
-                   const bool                          a_forceIrregNGP);
+                   const IrregularDeposition           a_irregularDeposition);
 
   /**
    * @brief Interpolate a mesh scalar field onto the SoA container's weight column.

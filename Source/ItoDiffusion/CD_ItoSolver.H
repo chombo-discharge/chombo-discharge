@@ -27,6 +27,7 @@
 #include <CD_EBIntersection.H>
 #include <CD_CellInfo.H>
 #include <CD_ParticleManagement.H>
+#include <CD_IrregularDeposition.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -1384,9 +1385,11 @@ protected:
   Real m_dt;
 
   /**
-   * @brief NGP deposition in cut cells or not
+   * @brief How the cut cells are treated when depositing.
+   * @details One selector replaces the former irr_ngp_deposition/redistribute/blend_conservation triple; see
+   * CD_IrregularDeposition.H for why these must not be independent flags.
    */
-  bool m_forceIrregDepositionNGP;
+  IrregularDeposition m_irregularDeposition;
 
   /**
    * @brief NGP interpolation in cut cells or not
@@ -1397,16 +1400,6 @@ protected:
    * @brief Force usage of NGP when depositing "halo" particles.
    */
   bool m_forceHaloNGP;
-
-  /**
-   * @brief Use mass redistribution or not.
-   */
-  bool m_useRedistribution;
-
-  /**
-   * @brief Flag for blending the deposition clouds with the "non-conservative" divergence.
-   */
-  bool m_blendConservation;
 
   /**
    * @brief If true, solver is diffusive.
@@ -1836,18 +1829,6 @@ protected:
    */
   void
   parseDiffusionGradient();
-
-  /**
-   * @brief Parse whether or not to use redistribution.
-   */
-  void
-  parseRedistribution();
-
-  /**
-   * @brief Parse whether or not to compute a "non-conservative" divergence when redistributing mass.
-   */
-  void
-  parseDivergenceComputation();
 
   /**
    * @brief Parse checkpointing method

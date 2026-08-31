@@ -190,7 +190,7 @@ The particles are available from the solver through the function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 691-697
+   :lines: 692-698
    :dedent: 2
 
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
@@ -203,7 +203,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 956-967
+   :lines: 957-968
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -217,7 +217,7 @@ The most general version is given below:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 386-403
+   :lines: 387-404
    :dedent: 2
 
 This version permits the user to deposit an arbitrary per-particle quantity from a particle container ``a_particles`` onto some pre-allocated mesh storage ``a_phi``.
@@ -232,7 +232,7 @@ A simpler version that deposits the bulk particles as a density on the mesh is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 317-325
+   :lines: 318-326
    :dedent: 2
 
 The particles are deposited into the class member ``m_phi``, which stores the particle density on the mesh. 
@@ -240,7 +240,7 @@ This data can then be fetched with
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 714-719
+   :lines: 715-720
    :dedent: 2
    
 For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
@@ -255,7 +255,7 @@ Callers that need it should therefore call
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 353-362
+   :lines: 354-363
    :dedent: 2
 
 after depositing.
@@ -276,7 +276,7 @@ Functionality for the above deposited quantities exist as the following function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 219-231,243-255
+   :lines: 220-232,244-256
    :dedent: 2
 
 .. _Chap:ItoInterpolation:
@@ -304,7 +304,7 @@ Complete interpolation of the particle velocity consists of calling two function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 809-814,791-797
+   :lines: 810-815,792-798
    :dedent: 2
 
 Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
@@ -343,7 +343,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 824-829
+   :lines: 825-830
    :dedent: 2
 
 Particle intersections
@@ -356,7 +356,7 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 482-489
+   :lines: 483-490
    :dedent: 2
 
 Here, ``EBIntersection`` is just an enum for putting logic into how the intersection is computed.
@@ -385,7 +385,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1100-1112
+   :lines: 1101-1113
    :dedent: 2
 
 which returns a CFL-like condition
@@ -401,7 +401,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1133-1145
+   :lines: 1134-1146
    :dedent: 2
 
 which returns a CFL-like condition
@@ -419,7 +419,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 993-1010
+   :lines: 994-1011
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -438,7 +438,7 @@ The entry point for splitting and merging is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 901-907
+   :lines: 902-908
    :dedent: 2
 
 Calling this function will merge/split the particles.
@@ -469,7 +469,7 @@ In addition, the user must first supply a particle merging function:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 93-103
+   :lines: 94-104
    :dedent: 2
 
 In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
@@ -583,10 +583,26 @@ Deposition and coarse-fine deposition (see :ref:`Chap:ParticleMesh`) are control
 * ``ItoSolver.deposition_cf`` for the coarse-fine deposition strategy.
   Valid options are ``interp``, ``halo``, or ``halo_ngp``.
 
-To modify the deposition scheme in cut-cells, one can enforce NGP interpolation and deposition through
+How the cut cells are treated when depositing is selected with a single flag,
 
-* ``ItoSolver.irr_ngp_deposition`` for enforcing NGP deposition. Valid options are ``true`` or ``false``.
-* ``ItoSolver.irr_ngp_interp`` for enforcing NGP interpolation. Valid options are ``true`` or ``false``.  
+* ``ItoSolver.irregular_deposition``, with valid options
+
+  * ``native`` -- deposit as-is, with no cut-cell treatment. A cut cell then holds :math:`\kappa n`.
+  * ``ngp`` -- put the particle's entire cloud in its own cell when that cell is cut.
+  * ``mirror`` -- even extension of the density about the embedded boundary. **Under this option a cut
+    cell holds** :math:`n`, **not** :math:`\kappa n`, unlike every other option here; consumers of
+    :math:`\phi` must opt into that change of meaning knowingly. Incompatible with
+    ``ItoSolver.deposition = ngp``.
+  * ``redistribute`` -- hybrid divergence, with the cut-cell mass excess redistributed to the neighbours.
+  * ``redistribute_blended`` -- as ``redistribute``, but blended with the non-conservative divergence.
+
+These are mutually exclusive answers to one question, which is why they are one selector rather than
+independent flags: ``mirror`` combined with redistribution would apply a :math:`1/\kappa` correction to
+a field that no longer needs one.
+
+Cut-cell *interpolation* is separate and remains a boolean:
+
+* ``ItoSolver.irr_ngp_interp`` for enforcing NGP interpolation. Valid options are ``true`` or ``false``.
 
 Checkpoint-restart
 __________________
