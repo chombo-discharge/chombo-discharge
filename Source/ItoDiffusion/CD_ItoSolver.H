@@ -998,6 +998,13 @@ public:
    * = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both
    * advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD).
    * @return Computed dt
+   * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These
+   * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is
+   * interpolated at the point of use and added to the displacement by the time stepper. The omission is
+   * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer
+   * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the
+   * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model
+   * that made grad(D) comparable to the drift velocity would make these estimates optimistic.
    */
   virtual Real
   computeDt() const;
@@ -1012,6 +1019,7 @@ public:
    * computed as dt = 1/(1/dtA + 1/dtD).
    * @param[in] a_lvl Grid level
    * @return Computed dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDt(int a_lvl) const;
@@ -1027,6 +1035,7 @@ public:
    * @param[in] a_lvl Grid level
    * @param[in] a_dit Grid index
    * @return Computed dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDt(int a_lvl, const DataIndex& a_dit) const;
@@ -1091,6 +1100,13 @@ public:
   /**
    * @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle.
    * @return Computed advective dt
+   * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These
+   * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is
+   * interpolated at the point of use and added to the displacement by the time stepper. The omission is
+   * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer
+   * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the
+   * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model
+   * that made grad(D) comparable to the drift velocity would make these estimates optimistic.
    */
   virtual Real
   computeAdvectiveDt() const;
@@ -1099,6 +1115,7 @@ public:
    * @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level.
    * @param[in] a_lvl Grid level
    * @return Computed advective dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeAdvectiveDt(int a_lvl) const;
@@ -1108,6 +1125,7 @@ public:
    * @param[in] a_lvl Grid level
    * @param[in] a_dit Grid index
    * @return Computed advective dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeAdvectiveDt(int a_lvl, const DataIndex& a_dit) const;
@@ -1115,6 +1133,13 @@ public:
   /**
    * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles
    * @return Computed diffusive dt
+   * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These
+   * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is
+   * interpolated at the point of use and added to the displacement by the time stepper. The omission is
+   * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer
+   * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the
+   * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model
+   * that made grad(D) comparable to the drift velocity would make these estimates optimistic.
    */
   virtual Real
   computeDiffusiveDt() const;
@@ -1123,6 +1148,7 @@ public:
    * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level
    * @param[in] a_lvl Grid level
    * @return Computed diffusive dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDiffusiveDt(int a_lvl) const;
@@ -1132,6 +1158,7 @@ public:
    * @param[in] a_lvl Grid level
    * @param[in] a_dit Grid index
    * @return Computed diffusive dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDiffusiveDt(int a_lvl, const DataIndex& a_dit) const;

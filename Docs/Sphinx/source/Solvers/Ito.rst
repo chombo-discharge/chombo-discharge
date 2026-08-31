@@ -337,7 +337,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1091-1096
+   :lines: 1100-1112
    :dedent: 2
 
 which returns a CFL-like condition
@@ -353,7 +353,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1115-1120
+   :lines: 1133-1145
    :dedent: 2
 
 which returns a CFL-like condition
@@ -371,7 +371,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 993-1003
+   :lines: 993-1010
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
