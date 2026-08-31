@@ -1943,7 +1943,6 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
   }
 
   if (a_fineLevel > 0) {
-
     const int      nComps = a_fineData.nComp();
     const Interval interv = Interval(0, nComps - 1);
 
@@ -1951,9 +1950,10 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
 
     interpolator.interpolate(a_fineData, a_coarData, interv, EBGhostCellInterpolator::Type::MinMod);
   }
-  else {
-    a_fineData.exchange();
-  }
+
+  // Unconditional: on the coarsest level this is the only thing that fills the ghost cells, and on the finer
+  // ones the interpolator leaves them inconsistent -- see EBGhostCellInterpolator::interpolate.
+  a_fineData.exchange();
 }
 
 void
@@ -2043,12 +2043,11 @@ AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string& a_realm, const
 
     EBGhostCellInterpolator& interpolator = *m_realms[a_realm]->getGhostCellInterpolator(a_phase)[lvl];
 
-    // The exchange below covers every level, so the interpolator does not need to exchange this one.
-    constexpr bool doExchange = false;
-
-    interpolator.interpolate(*a_data[lvl], *a_data[lvl - 1], interv, EBGhostCellInterpolator::Type::MinMod, doExchange);
+    interpolator.interpolate(*a_data[lvl], *a_data[lvl - 1], interv, EBGhostCellInterpolator::Type::MinMod);
   }
 
+  // The interpolator leaves the ghost cells inconsistent -- see EBGhostCellInterpolator::interpolate. This is
+  // where they are made whole again, for every level at once.
   a_data.exchange();
 }
 

@@ -174,14 +174,12 @@ void
 EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
                                      const LevelData<EBCellFAB>& a_phiCoar,
                                      const Interval              a_variables,
-                                     const Type                  a_interpType,
-                                     const bool                  a_doExchange) const noexcept
+                                     const Type                  a_interpType) const noexcept
 {
   CH_TIMERS("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>");
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::buffer_define", t1);
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::copy_exchange", t2);
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::interp_cells", t3);
-  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::exchange", t4);
 
   CH_assert(m_isDefined);
   CH_assert(a_phiFine.nComp() > a_variables.end());
@@ -234,13 +232,6 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
     }
   }
   CH_STOP(t3);
-
-  // Fill valid regions.
-  if (a_doExchange) {
-    CH_START(t4);
-    a_phiFine.exchange(a_variables);
-    CH_STOP(t4);
-  }
 }
 
 void

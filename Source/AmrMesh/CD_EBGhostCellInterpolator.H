@@ -95,21 +95,26 @@ public:
 
   /**
    * @brief Do inhomogeneous interpolation
-   * @details The interpolation fills the fine-grid ghost cells that lie across the coarse-fine interface. The
-   * remaining ghost cells, i.e. the ones that are covered by a neighbouring patch on the fine level, are filled
-   * by the exchange at the end. Callers that follow up with an exchange of their own can turn it off here.
+   * @details This fills the fine-grid ghost cells that lie across the coarse-fine interface, interpolating them
+   * from the coarse grid. The coarse data is fetched into an internal buffer on the coarsened fine grids, so
+   * a_phiCoar's own ghost cells are not read and need not be valid.
+   * @note This routine does not exchange, and on return a_phiFine's ghost cells are not consistent. Two
+   * separate things are left to the caller. First, the ghost cells that are covered by a neighbouring patch on
+   * the fine level are not part of the coarse-fine region and are never filled here. Second, some of those
+   * cells are actively overwritten with interpolated values, because the interpolated region is stored as the
+   * bounding box of the coarse-fine ghost cells rather than as the cell set itself, and that box spans
+   * neighbour-owned cells whenever the set is not rectangular. The caller must therefore exchange a_phiFine
+   * before anything reads its ghost cells.
    * @param[in,out] a_phiFine    Fine phi
    * @param[in]     a_phiCoar    Coarse phi
    * @param[in]     a_variables  Variables to interpolate
    * @param[in]     a_interpType Interp type
-   * @param[in]     a_doExchange Exchange the fine-grid ghost cells that are not filled by the interpolation.
    */
   virtual void
   interpolate(LevelData<EBCellFAB>&       a_phiFine,
               const LevelData<EBCellFAB>& a_phiCoar,
               const Interval              a_variables,
-              const Type                  a_interpType,
-              const bool                  a_doExchange = true) const noexcept;
+              const Type                  a_interpType) const noexcept;
 
 protected:
   /**
