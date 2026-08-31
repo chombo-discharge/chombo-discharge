@@ -1893,7 +1893,7 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaCDR(const Real a_dt) noexcept
     DataOps::floor(phi, 0.0, this->m_amr->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase));
   }
 
-  this->coarsenCDRSolvers();
+  this->coarsenCDRSolvers(true);
 }
 
 #ifdef CH_USE_HDF5

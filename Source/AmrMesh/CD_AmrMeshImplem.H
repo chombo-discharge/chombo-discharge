@@ -122,14 +122,17 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
       CH_assert(a_src.ghostVect() == m_numGhostCells * IntVect::Unit);
     }
 
-    Copier copier;
+    // Point at the cached Copier rather than copy-assigning it: Copier::operator= pool-allocates a fresh
+    // MotionItem for every entry in all three motion plans, which on this (very hot, generic) path is a
+    // per-level allocation loop paid on every cross-realm copy. copyTo() only ever reads it.
+    const Copier* copier = nullptr;
 
     if (a_fromRegion == CopyStrategy::Valid) {
       if (a_toRegion == CopyStrategy::Valid) {
-        copier = m_validToValidRealmCopiers.at(id)[a_level];
+        copier = &m_validToValidRealmCopiers.at(id)[a_level];
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
-        copier = m_validToValidGhostRealmCopiers.at(id)[a_level];
+        copier = &m_validToValidGhostRealmCopiers.at(id)[a_level];
       }
       else {
         MayDay::Abort("AmrMesh::copyData - logic bust 1");
@@ -137,10 +140,10 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
     }
     else if (a_fromRegion == CopyStrategy::ValidGhost) {
       if (a_toRegion == CopyStrategy::Valid) {
-        copier = m_validGhostToValidRealmCopiers.at(id)[a_level];
+        copier = &m_validGhostToValidRealmCopiers.at(id)[a_level];
       }
       else if (a_toRegion == CopyStrategy::ValidGhost) {
-        copier = m_validGhostToValidGhostRealmCopiers.at(id)[a_level];
+        copier = &m_validGhostToValidGhostRealmCopiers.at(id)[a_level];
       }
       else {
         MayDay::Abort("AmrMesh::copyData - logic bust 2");
@@ -150,7 +153,7 @@ AmrMesh::copyData(LevelData<T>&       a_dst,
       MayDay::Abort("AmrMesh::copyData - logic bust 3");
     }
 
-    a_src.copyTo(a_srcComps, a_dst, a_dstComps, copier);
+    a_src.copyTo(a_srcComps, a_dst, a_dstComps, *copier);
   }
   else {
     a_src.localCopyTo(a_srcComps, a_dst, a_dstComps);

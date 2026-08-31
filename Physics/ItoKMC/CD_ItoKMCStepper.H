@@ -1601,9 +1601,16 @@ protected:
 
   /**
    * @brief Coarsen data for CDR solvers
+   * @details Always averages the densities and source terms down the hierarchy -- the coarse valid cells
+   * are read before anything re-averages them. The ghost-cell interpolation is optional because it has no
+   * reader on the reaction-advance path: the next consumers of the density ghost cells are
+   * CdrSolver::computeDivF/computeDivD, both of which interpolate the ghost cells themselves, and the
+   * source-term ghost cells are never read at all (getSource()'s consumers -- plotting and
+   * ItoKMCBackgroundEvaluator -- are valid-cell only, and the plot path fills its own ghost cells).
+   * @param[in] a_interpGhosts Whether to interpolate the ghost cells after averaging.
    */
   virtual void
-  coarsenCDRSolvers() noexcept;
+  coarsenCDRSolvers(const bool a_interpGhosts) noexcept;
 
   /**
    * @brief Resolve particle injection at EBs.
