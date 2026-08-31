@@ -1,14 +1,18 @@
 # Mirrored cut-cell deposition — implementation plan
 
 **Design** `PLAN.md` revision 6 · **Issue** chombo-discharge#29 (parts 1 and 3) · **Branch**
-`mirror_deposition` · **Depends on** PR #700
+`mirror_deposition` · **Depends on** PR #700 (**merged**, `92448b90`)
 
 `PLAN.md` is the design and stays the authority on *why*. This file is the work order: what changes,
 in what order, in which file, and what proves each step. Where it deviates from `PLAN.md` it says so
 explicitly in §0.3 — those are the only deviations, and each is a correction rather than a
 re-litigation.
 
-All code citations below were re-resolved against the working tree on 2026-08-19 and hold.
+All code citations below were re-resolved against the working tree on **2026-08-31**, after the branch
+was rebased onto `main` at `f44e5968` (PR #711). The rebase dropped this branch's unsquashed copy of
+PR #700 — `main` already carries it as `92448b90` — so the branch's own content is now exactly
+`Prototypes/MirrorDeposition/` and nothing else. What #704, #709 and #711 changed under the plan is
+recorded in §0.4; nothing in the design moved, but several line numbers and counts did.
 
 ---
 
@@ -70,7 +74,7 @@ Three, all verified against the tree.
    files carrying `true` are `Source/ItoDiffusion/CD_ItoSolver.options` and
    `Exec/Examples/ItoKMC/WireWire/example.inputs`. Setting the default to `native` would silently
    change every input that does not override it. **Default becomes `ngp`.** The cross-tabulation
-   otherwise reproduces §5.5 exactly: 5 native / 22 redistribute / 2 ngp.
+   otherwise reproduces §5.5's shape: 6 native / 22 redistribute / 2 ngp (§0.4).
 
 2. **The exact criterion of §1.2 is not evaluated at runtime, and must not be.** §1.2 says the
    criterion *"falls out of the deposit loop for free"*. Taken literally as a build-time test it is
@@ -88,6 +92,68 @@ Three, all verified against the tree.
    suite runs the torus case at radius 2 and radius 3 and asserts the `kappa`-binned densities agree
    to round-off. That measures the thing the counter is a proxy for, needs no geometry outside the
    grown region, and costs nothing in production. See §5.4.
+
+### 0.4 What the rebase onto `f44e5968` changed
+
+Three PRs landed on `main` between revision 6 and the rebase: #704 (CdrPlasma/ItoKMC comparison),
+#709 (chemistry interpolant) and #711 (ghost-cell interpolation round trips). **None of them touches
+a mechanism this plan depends on.** `CD_EBParticleMesh.H`, `CD_EBAMRParticleMesh.H`, `CD_PhaseRealm.*`,
+`CD_ItoSolver.*`, `CD_ParticleContainer.H`, `CD_ParticleSoA.H`, `CD_Realm.*`, `CD_LocationImplem.H` and
+`CD_DataOps.cpp` are byte-identical, so §2, §3 and §4's designs stand unaltered. #711's edits to
+`CD_AmrMesh.cpp` are confined to `interpGhost*` (`:1943-2074`), which the mirror pass never calls —
+§4.2 does no ghost filling by design.
+
+What did move:
+
+| | was | is | why |
+|---|---|---|---|
+| `AmrMesh::parseEbGhostCells` | `CD_AmrMesh.cpp:2788` | `:2772` | #711 removed 16 net lines above it |
+| `AmrMesh::parseNumGhostCells` | `:2805` | `:2789` | same |
+| `buffer_size` parse | `:2704` | `:2688` | same |
+| `BRMeshRefine` ctor | `:1216-1221` | `:1217-1221` | — |
+| `TiledMeshRefine` ctor | `:1228` | `:1229` | — |
+| the `phase::solid` literal `true` | `CD_ItoKMCGodunovStepperImplem.H:1338/1344` | `:1401/1408` | #709 added ~64 lines above it |
+| `McPhoto` hybrid/redistribute block | `CD_McPhoto.cpp:1277,1287,1318,1325,1339,1365,1381,1459` | `:1278,1288,1319,1326,1340,1366,1382,1460` | #704 added one line |
+| the direct `CdrSolver` deposit | `CD_CdrSolver.cpp:1316-1319` | `:1315-1318` | **not drift** — this one was off by one in revision 6 |
+
+`CD_ItoKMCStepperImplem.H:4041` and `:6134`, and `CD_AmrMesh.cpp:1153-1165` (`regridOperators`), are
+unchanged.
+
+**The counts moved because #704 shipped a new ItoKMC example** (`Exec/Examples/ItoKMC/ComparisonCdrPlasma/example.inputs`),
+which sets the full ItoSolver and McPhoto blocks. Re-tabulated over the rebased tree:
+
+| | revision 6 | now |
+|---|---|---|
+| files setting `irr_ngp_deposition` | 29 | **30** |
+| `false/false` -> `native` | 5 | **6** |
+| `false/true` -> `redistribute` | 22 | 22 |
+| `true/false` -> `ngp` | 2 | 2 |
+| files setting `McPhoto.blend_conservation` | 14 | **15** (14 inputs + `CD_McPhoto.options`) |
+| `deposition_cf` settings, all `transition` | 60 | **62** |
+| `eb_ghost = 2` / `= 4` | 39 / 100 | **40** / 100 |
+| `num_ghost = 2` / `= 3` | 71 / 68 | **72** / 68 |
+| `grid_algorithm` `br` / `tiled` | 70 / 69 | 70 / **70** |
+
+Every conclusion drawn from these survives: still **zero** files combine `irr_ngp_deposition = true`
+with `redistribute = true`, so the enum migration is still a pure signature change; every
+`deposition_cf` is still `transition`; the minimum shipped `eb_ghost` and `num_ghost` are both still
+2. The `forceIrregNGP` attribution table of §5.5/F6 (49/18/10/10 by file, 36 interpolation vs 57
+deposition) reproduces exactly — none of those four files was touched.
+
+**One requirement revision 6 missed, and it is not new.** `AmrMesh::sanityCheck` has been enforcing
+`num_ghost < min_block_size` in *optimized* builds since before this branch
+(`CD_AmrMesh.cpp:2966`, previously `:2982`) — the particle ghost-target build relies on a box's ghost
+region reaching only abutting neighbours. Combined with §2.3 this makes the band radius bounded on
+both sides:
+
+```
+mirror_band_radius <= num_ghost < min_block_size
+```
+
+At the shipped `min_block_size = 16` that is no constraint at all, and §5.4's convergence test at
+`num_ghost = 3` is safely inside it. It is worth stating because the obvious response to a nonzero
+`bandNoCutCell` counter is "raise the band radius", and that route has a hard ceiling which is *not*
+the ghost count.
 
 ---
 
@@ -153,14 +219,14 @@ keeps its boolean. Counted per file: `CD_EBParticleMesh.H` 22, `CD_EBAMRParticle
 
 - `CD_ItoKMCStepperImplem.H:4041` passes `a_forceIrregNGP = false` -> `IrregularDeposition::Native`.
 - `CD_ItoKMCStepperImplem.H:6134` — convert to whatever its literal maps to.
-- `CD_ItoKMCGodunovStepperImplem.H:1338` passes `true` -> `IrregularDeposition::NGP`. This is the
+- `CD_ItoKMCGodunovStepperImplem.H:1401` passes `true` (the literal is at `:1408`) -> `IrregularDeposition::NGP`. This is the
   `hasDielectrics` branch of `computeSemiImplicitRho`, depositing onto `phase::solid`. **Convert the
   literal and add the comment saying why it is a literal**: `phase::solid`'s `ebisbox.normal()`
   points into the *solid*, so routing a solver's setting here would mirror across the same EB with
   the fluid side swapped and push particles deliberately placed inside the dielectric back into the
   gas. `PLAN.md` §6 PR B: *"it has to resist deciding."*
 
-`CD_CdrSolver.cpp:1316-1319` is a `constexpr bool forceIrregNGP = true` on a direct per-patch
+`CD_CdrSolver.cpp:1315-1318` is a `constexpr bool forceIrregNGP = true` on a direct per-patch
 `EBParticleMesh::depositWeight`. It never passes through the funnel and is left alone.
 
 ### 1.4 Solver parsing
@@ -191,13 +257,13 @@ if (m_deposition == DepositionType::NGP && m_irregularDeposition == IrregularDep
   Stage 3.
 
 `McPhoto::parseOptions` (`CD_McPhoto.cpp:236`): `blend_conservation` -> `irregular_deposition`.
-`m_blendConservation` gated `depositHybridDivergence`'s redistribution at `:1339` while the hybrid
-itself ran unconditionally at `:1288/:1321` — with `blend = false` that hybrid is the identity
-`divH = dc + (1-kappa)*0` and its `deltaM` is discarded, so all 14 shipped files map to `native` and
+`m_blendConservation` gated `depositHybridDivergence`'s redistribution at `:1340` while the hybrid
+itself ran unconditionally at `:1289/:1322` — with `blend = false` that hybrid is the identity
+`divH = dc + (1-kappa)*0` and its `deltaM` is discarded, so all 15 shipped files map to `native` and
 the dead work disappears. Record in the PR description that McPhoto *gains* `Redistribute`, a mode it
 could not previously express, available but unselected.
 
-### 1.5 Input migration — 29 + 14 files
+### 1.5 Input migration — 30 + 15 files
 
 | `irr_ngp_deposition` | `redistribute` | files | becomes |
 |---|---|---|---|
@@ -206,13 +272,13 @@ could not previously express, available but unselected.
 | `true` | `false` | 2 | `irregular_deposition = ngp` |
 
 Verified by cross-tabulation over the tree; `blend_conservation` is `false` in all 29. The 22 are the
-`Exec/Tests/BrownianWalker/*` pairs; the 5 are `Exec/Tests/ItoKMC/JSON/*` and three
+`Exec/Tests/BrownianWalker/*` pairs; the 6 are `Exec/Tests/ItoKMC/JSON/*` and four
 `Exec/Examples/ItoKMC/*`; the 2 are `CD_ItoSolver.options` and
 `Exec/Examples/ItoKMC/WireWire/example.inputs`.
 
 Also: delete the now-dead `ItoSolver.redistribute` / `ItoSolver.blend_conservation` lines from every
 input that sets them; rewrite `McPhoto.blend_conservation` -> `McPhoto.irregular_deposition = native`
-in `CD_McPhoto.options` and the 14 inputs; update `Docs/Sphinx/source/**/Ito.rst`.
+in `CD_McPhoto.options` and the 14 inputs that set it; update `Docs/Sphinx/source/**/Ito.rst`.
 
 **Do not sweep in the fluid solvers.** `CdrGodunov.blend_conservation` (7 files) and
 `CdrCTU.blend_conservation` (34 files) are the fluid hybrid divergence, unrelated despite the name.
@@ -298,9 +364,15 @@ m_numEbGhostsCells >= 2                   // EBISBox valid over the 5^3 fit sten
 m_numGhostCells    >= m_mirrorBandRadius  // default 2; exchange must deliver cut-cell data
 ```
 
-`CD_AmrMesh.cpp:2788/2805` validate both only as `>= 0`, and `CD_AmrMesh.options` ships 2 for each.
+`CD_AmrMesh.cpp:2772/2789` validate both only as `>= 0`, and `CD_AmrMesh.options` ships 2 for each.
 Every shipped input already satisfies both — the check guards a future input file, not a migration.
 **Keep the two separate; do not derive one from the other.**
+
+The band radius also has an *upper* bound that is not obvious and is not new:
+`AmrMesh::sanityCheck` aborts on `num_ghost >= min_block_size` in optimized builds too
+(`CD_AmrMesh.cpp:2966`), so `mirror_band_radius <= num_ghost < min_block_size`. Harmless at the
+shipped `min_block_size = 16`; state it anyway, because raising the band radius is the obvious
+response to a nonzero `bandNoCutCell` and it does not scale indefinitely. See §0.4.
 
 Move to a 7³ fit later and `eb_ghost` becomes 3 while `num_ghost` and the band stay 2.
 
@@ -614,7 +686,7 @@ Stage 1's enum already makes that unrepresentable: `Mirror`, `Redistribute` and
 - **`Mirror`'s enumerator Doxygen** carries the O2 contract (written in Stage 1, re-read here).
 - **`depositHaloCore`'s Doxygen** records the `widthScale` mismatch (former O5): under `Halo` a
   promoted image deposits at `widthScale = 1` while its source gets `refRat`. `widthScale` is 1.0 at
-  every other patch deposit in the class (`:658, 866, 966, 967, 1235, 1276`), all 60 shipped
+  every other patch deposit in the class (`:658, 866, 966, 967, 1235, 1276`), all 62 shipped
   `deposition_cf` settings are `transition`, and the two hardcoded `Halo` sites are exactly the two
   that map to `Native`/`NGP` and never run a mirror pass. **Document it; do not engineer around it.**
 - **`ItoSolver`'s plot-variable documentation** records O11: `depositWeightNGP`/`depositGatheredNGP`
@@ -640,13 +712,13 @@ function cannot know whether its caller intends a mirror pass afterwards.
    pass, under `case Redistribute` / `case RedistributeBlended`.
 3. Delete `ItoSolver::redistributeAMR`/`depositNonConservative`/`depositHybrid`
    (`CD_ItoSolver.cpp:2133, 2178, 2194`) and `McPhoto::depositHybridDivergence`/
-   `depositNonConservative`/`depositHybrid` (`CD_McPhoto.cpp:1325, 1365, 1381`) — near-verbatim
+   `depositNonConservative`/`depositHybrid` (`CD_McPhoto.cpp:1326, 1366, 1382`) — near-verbatim
    copies of each other.
-4. **8 direct callers in 5 files** to re-point: `CD_McPhoto.cpp` x2 (`:1287, :1318`),
+4. **8 direct callers in 5 files** to re-point: `CD_McPhoto.cpp` x2 (`:1288, :1319`),
    `CD_TracerParticleSolverImplem.H:374`, `CD_ItoKMCStepperImplem.H` x2 (`:4041, :6134`),
-   `CD_ItoSolverImplem.H` x2 (`:71, :148`), `CD_ItoKMCGodunovStepperImplem.H:1338`.
-5. Retire the nine ad-hoc `EBParticleMesh` constructions — `McPhoto.cpp:1277, 1459`,
-   `CdrSolver.cpp:1317`, `ItoSolver.cpp:2108, 2528, 2651, 2686, 2804`, `ItoSolverImplem.H:115` — by
+   `CD_ItoSolverImplem.H` x2 (`:71, :148`), `CD_ItoKMCGodunovStepperImplem.H:1401`.
+5. Retire the nine ad-hoc `EBParticleMesh` constructions — `McPhoto.cpp:1278, 1460`,
+   `CdrSolver.cpp:1316`, `ItoSolver.cpp:2108, 2528, 2651, 2686, 2804`, `ItoSolverImplem.H:115` — by
    registering `s_particle_mesh` on those realms and using the persistent per-patch leaves. **Keep
    O11's two plot paths NGP**; retiring the construction does not change their kernel.
 

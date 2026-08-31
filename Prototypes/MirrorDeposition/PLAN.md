@@ -3,6 +3,13 @@
 **Issue** chombo-discharge#29 (parts 1 and 3) · **Branch** `mirror_deposition` · **Depends on** PR #700
 · **Revision** 6, after five adversarial reviews.
 
+> **Rebased onto `main` at `f44e5968` on 2026-08-31.** #700 is now *in* `main` (as `92448b90`), so this
+> branch no longer carries its own copy of it. The design below is unchanged — no mechanism it depends
+> on was touched — but a handful of line citations and shipped-input counts moved, and they have been
+> re-resolved in place. `IMPLEMENTATION.md` §0.4 tabulates exactly what moved and why, and records one
+> pre-existing constraint the plan had missed (`num_ghost < min_block_size`, enforced in optimized
+> builds). Read §0.4 before re-checking any number here.
+
 Particle deposition divides by `dx^D` and never by `kappa`, so a cut cell holds `kappa*n` where the
 CDR solvers hold `n`. Space charge and the semi-implicit conductivity are assembled from both, so a
 quasi-neutral plasma against a wall produces a full-strength spurious charge layer. This plan
@@ -254,10 +261,12 @@ into ghosts, then extend. Extend first and exchange once afterwards and a patch 
 cells 2 cells outside its valid region, each of which needs its own radius-2 neighbourhood, reaching
 4 cells out.
 
-Neither is a safe default. `CD_AmrMesh.cpp:2788` is `pp.get("eb_ghost", ...)` validated only as
-`>= 0` (`:2790`), and `:2805` is `pp.get("num_ghost", ...)` validated only as `>= 0` (`:2808`).
-`CD_AmrMesh.options` ships 2 for both; shipped inputs split 39×`eb_ghost=2` / 100×`=4` and
-71×`num_ghost=2` / 68×`=3`. **Require both `>= 2` at runtime when `mirror` is selected.**
+Neither is a safe default. `CD_AmrMesh.cpp:2772` is `pp.get("eb_ghost", ...)` validated only as
+`>= 0` (`:2774`), and `:2789` is `pp.get("num_ghost", ...)` validated only as `>= 0` (`:2792`).
+`CD_AmrMesh.options` ships 2 for both; shipped inputs split 40×`eb_ghost=2` / 100×`=4` and
+72×`num_ghost=2` / 68×`=3`. Note also the *upper* bound already enforced in optimized builds:
+`AmrMesh::sanityCheck` requires `num_ghost < min_block_size` (`:2966`), so the band radius is
+bounded on both sides — see `IMPLEMENTATION.md` §0.4. **Require both `>= 2` at runtime when `mirror` is selected.**
 
 Note what that split says: every shipped input already satisfies both requirements — the minimum in
 each column is 2. The runtime check is a guard against a future input file, not a migration, and it
@@ -721,9 +730,9 @@ and it needs no change to `ParticleContainer` at all.
 Under `Halo` — the one strategy that deposits at `widthScale != 1`, at exactly one line
 (`CD_EBAMRParticleMesh.H:897`) — a promoted image is deposited at `widthScale = 1` while its source
 gets `refRat`, a bandwidth mismatch across the interface. `Halo` is not the target strategy, and that
-is now measured rather than asserted: **all 60 shipped `deposition_cf` settings are `transition`**,
+is now measured rather than asserted: **all 62 shipped `deposition_cf` settings are `transition`**,
 and the only two hardcoded `CoarseFineDeposition::Halo` call sites
-(`CD_ItoKMCStepperImplem.H:4046`, `CD_ItoKMCGodunovStepperImplem.H:1343`) are exactly the two that
+(`CD_ItoKMCStepperImplem.H:4046`, `CD_ItoKMCGodunovStepperImplem.H:1407`) are exactly the two that
 map to `Native` and `NGP` under §5.5 and therefore never run a mirror pass at all.
 **Document this in `depositHaloCore`'s Doxygen rather than engineering around it.** The same
 disposition applies to the band-mask width on that path (former O5): `widthScale` is 1.0 at every
@@ -1099,11 +1108,11 @@ an expected consequence of the feature.
 Introduce `IrregularDeposition`, move `m_massDiff`/`m_depositionNC` onto `PhaseRealm`, move the
 hybrid-and-redistribute step into `AmrMesh::depositWeight`/`depositGathered` beside the mirror pass,
 and delete PR A's bespoke call and the duplicated redistribution code in the solvers
-(`CD_ItoSolver.cpp:2133/2178/2193` and `CD_McPhoto.cpp:1325/1365/1381` are near-verbatim copies).
+(`CD_ItoSolver.cpp:2133/2178/2193` and `CD_McPhoto.cpp:1326/1366/1382` are near-verbatim copies).
 
-**8 direct callers in 5 files**: `CD_McPhoto.cpp` ×2 (`:1287, :1318`),
+**8 direct callers in 5 files**: `CD_McPhoto.cpp` ×2 (`:1288, :1319`),
 `CD_TracerParticleSolverImplem.H:374`, `CD_ItoKMCStepperImplem.H` ×2 (`:4041, :6134`),
-`CD_ItoSolverImplem.H` ×2 (`:71, :148`), `CD_ItoKMCGodunovStepperImplem.H:1338`.
+`CD_ItoSolverImplem.H` ×2 (`:71, :148`), `CD_ItoKMCGodunovStepperImplem.H:1401`.
 
 The eighth is the awkward one: the `hasDielectrics` branch of `computeSemiImplicitRho`
 (`CD_ItoKMCGodunovStepperImplem.H:1270`), depositing onto `phase::solid` with a hardcoded
@@ -1188,9 +1197,9 @@ Revision 2 argued the opposite.
 > `conservativeAverage`"*. It is not: `addInvalidCoarseToFine` interpolates coarse-grid deposition
 > clouds onto the fine level from inside the deposit, which is exactly the case it exists for. The
 > defect is bandwidth, not lost mass. Second, it named `AmrMesh.buffer_size` as the knob to raise.
-> That parameter is read into `m_bufferSizeBR` (`CD_AmrMesh.cpp:2704`) and reaches only the
-> `BRMeshRefine` constructor in the `BergerRigoutsous` branch (`:1216-1221`); the `Tiled` branch
-> (`:1228`) takes no buffer at all, and shipped inputs split **70 `br` / 69 `tiled`**. Neither
+> That parameter is read into `m_bufferSizeBR` (`CD_AmrMesh.cpp:2688`) and reaches only the
+> `BRMeshRefine` constructor in the `BergerRigoutsous` branch (`:1217-1221`); the `Tiled` branch
+> (`:1229`) takes no buffer at all, and shipped inputs split **70 `br` / 70 `tiled`**. Neither
 > correction changes the disposition, which is to accept it.
 
 **Retired since revision 4:**
