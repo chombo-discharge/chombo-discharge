@@ -158,6 +158,8 @@ regrids. That is the neutrality evidence Stage 3 needs.
 
 ### Stage 1 — `ItoSolver`: mesh gradient + interpolation
 
+**Status: done** (`8621e3f9`).
+
 * New option in `CD_ItoSolver.options`, **default true** (decisions C and F):
   `ItoSolver.diffusion_gradient_drift   = true   ## Add grad(D) to the drift so the SDE transports D*grad(n)`
   Parsed with `pp.get`, never `pp.query` — inputs in this codebase are mandatory.
@@ -174,6 +176,8 @@ regrids. That is the neutrality evidence Stage 3 needs.
 * Optional: a `grad_dco` entry in `ItoSolver.plt_vars` for debugging. Cheap and worth it while validating.
 
 ### Stage 2 — `ItoKMCGodunovStepper`
+
+**Status: done** (`0504a505`).
 
 In `diffuseParticlesEulerMaruyama` (`CD_ItoKMCGodunovStepperImplem.H:1701`):
 
@@ -195,12 +199,16 @@ local-`RealVect`-first ordering must be explicit in the code, not incidental.
 
 ### Stage 3 — `BrownianWalker`
 
+**Status: done** (`48a984d0`). Also moved `interpolateDiffusionGradient(int, const DataIndex&)` from protected to public -- both steppers call it per patch.
+
 `BrownianWalkerStepper::advance` (`:457`) currently applies the drift only under `isMobile()`. Add, under
 `isDiffusive()`, a `computeDiffusionGradient()` + `interpolateDiffusionGradient()` before the patch loop and
 `pos += dt*gradD` in the Euler step. With Stage 0 in place and a constant `m_diffCo` this is exactly zero, so
 `Exec/Tests/BrownianWalker/DriftDiffusion` and the merge tests must be bit-comparable before/after.
 
 ### Stage 4 — time step (documentation only)
+
+**Status: done** (`a78230a2`). All nine `computeDt`/`computeAdvectiveDt`/`computeDiffusiveDt` overloads carry the note.
 
 `ItoSolver::computeAdvectiveDt` bounds `dt` from the particle velocity columns, which do not contain `grad(D)`.
 **Decision D: the bound is deliberately not changed.** For realistic streamer parameters the omission is not the
@@ -222,6 +230,8 @@ Note that editing these blocks shifts lines and therefore touches the `Ito.rst` 
 `1076-1081` (see Stage 6).
 
 ### Stage 5 — verification
+
+**Status: blocked on a build.** Syntax-checked only -- see below.
 
 **Decision E: the varying-`D` test is a follow-up PR.** This PR lands the fix and verifies it with what already
 exists; the test lands next.
@@ -251,7 +261,24 @@ Deferred to the follow-up (record as a new issue when this PR opens, so it is no
 
 Note that Stage 0 is exactly the groundwork that test needs, so the follow-up is small.
 
+**What has actually been verified so far.** The code compiles but has not been run:
+
+* `Source/ItoDiffusion/CD_ItoSolver.cpp` and `Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp` both pass
+  `mpic++ -fsyntax-only` with the real build's flags.
+* `ItoKMCGodunovStepper<>` was explicitly instantiated in a throwaway TU, which forces every member to compile,
+  and passes. A deliberately introduced typo in the Stage 2 call site makes that check fail, so it does reach the
+  changed code.
+* Sphinx builds clean under `-W --keep-going`, and all fifteen `Ito.rst` `literalinclude` ranges were relocated by
+  exact block match and re-verified after clang-format.
+* All pre-commit hooks pass on every commit.
+
+Nothing has been linked or run. A concurrent build in the main checkout has held the shared Chombo tree for the
+whole session, and this worktree's `Submodules/` are symlinks into it, so `make dependencies` would race with it
+-- that is exactly how the Stage 1 build attempt died. The runs in this stage are still outstanding.
+
 ### Stage 6 — documentation
+
+**Status: done** (`fb133064`). Sphinx builds clean under `-W --keep-going`.
 
 * `Docs/Sphinx/source/Solvers/Ito.rst` — equation `ito_diffusion` (line 9) currently states the plain Ito SDE.
   State the drift as `V + grad(D)`, explain the Fokker-Planck equivalence to the CDR flux, and document the new
