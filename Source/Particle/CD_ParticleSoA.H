@@ -905,13 +905,20 @@ public:
   }
 
   /**
-   * @brief Drop all particles (keeps the arena; invalidates the cell sort).
+   * @brief Drop all particles (keeps the arena; invalidates the cell sort unless there was nothing to drop).
+   * @details An already-empty container's CSR mapping is all-zero regardless of the cells it was built
+   * against, so dropping nothing cannot invalidate it. Keeping the flag in that case is what lets a
+   * repeatedly-cleared container (e.g. the ItoKMC photoionization products, cleared and re-sorted every
+   * time step) take sortByCell()'s early-out instead of paying an O(cells) offset rebuild per step.
    */
   void
   clear() noexcept
   {
-    m_size   = 0;
-    m_sorted = false;
+    if (m_size > 0) {
+      m_sorted = false;
+    }
+
+    m_size = 0;
   }
 
   /**
@@ -1566,6 +1573,53 @@ public:
     for (std::size_t i = range.first; i < range.second; i++) {
       a_out.appendParticle(*this, i);
     }
+  }
+
+  /**
+   * @brief The raw CSR start offsets (valid after sortByCell(); a_box.numPts()+1 entries).
+   * @details Exposed so that a caller which is about to reproduce this container's particle order in
+   * another container can hand the mapping straight to adoptCellSort() instead of re-deriving it with a
+   * counting sort. Use the cellStart()/cellRange() accessors for ordinary per-cell indexing.
+   * @return The CSR start offsets.
+   */
+  const std::vector<std::size_t>&
+  cellOffsets() const noexcept
+  {
+    CH_assert(m_sorted);
+
+    return m_cellStart;
+  }
+
+  /**
+   * @brief Declare the container cell-sorted against (a_box, a_dx, a_probLo) with a caller-supplied CSR.
+   * @details For callers that lay the particles out in Fortran cell order themselves and therefore
+   * already know the mapping -- concatenating per-cell scratch containers back into a leaf, or copying a
+   * sorted leaf particle-for-particle into a container with a different payload. sortByCell() would
+   * rediscover exactly this mapping at the cost of a key pass, a prefix sum and a full column permute;
+   * adopting it costs a move. The caller owns the precondition that every particle really does lie in the
+   * cell its offsets claim -- it is checked by the same debug-mode verifier that guards sortByCell()'s
+   * early-out, and is compiled out in optimized builds.
+   * @param[in] a_box       Patch box defining the cells.
+   * @param[in] a_dx        Grid spacing per direction.
+   * @param[in] a_probLo    Physical coordinate of the lower domain corner.
+   * @param[in] a_cellStart CSR start offsets: a_box.numPts()+1 non-decreasing entries, ending at size().
+   */
+  void
+  adoptCellSort(const Box&               a_box,
+                const RealVect&          a_dx,
+                const RealVect&          a_probLo,
+                std::vector<std::size_t> a_cellStart) noexcept
+  {
+    CH_assert(a_cellStart.size() == static_cast<std::size_t>(a_box.numPts()) + 1);
+    CH_assert(a_cellStart.back() == m_size);
+
+    m_cellStart  = std::move(a_cellStart);
+    m_sortBox    = a_box;
+    m_sortDx     = a_dx;
+    m_sortProbLo = a_probLo;
+    m_sorted     = true;
+
+    CH_assert(this->checkCellSort(a_box, a_dx, a_probLo));
   }
 
   ///@}

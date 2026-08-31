@@ -14,6 +14,7 @@
 #include <chrono>
 #include <array>
 #include <unordered_set>
+#include <vector>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -3948,6 +3949,12 @@ ItoSolver::extractIntoMergeContainer(const WhichContainer a_container, ParticleC
 
   m_amr->allocate(a_merge, m_realm);
 
+  // Cell-sort metadata of the source container, so a leaf that is already cell-sorted can hand its CSR
+  // mapping straight to its reduced copy (see below). These are the same values organizeParticlesByCell()
+  // sorts against, so an adopted mapping is indistinguishable from a re-derived one.
+  const Vector<RealVect> particleDx     = particles.getDx();
+  const RealVect         particleProbLo = particles.getProbLo();
+
   // Extract into the SAME patch (positions unchanged => ownership unchanged => no remap needed).
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
@@ -3960,6 +3967,17 @@ ItoSolver::extractIntoMergeContainer(const WhichContainer a_container, ParticleC
       ParticleSoA<ItoParticle>& itoLeaf = particles[lvl][din];
 
       ParticleSoA<ItoMergeParticle>& mergeLeaf = a_merge[lvl][din];
+
+      // The copy below preserves the particle order exactly, so a cell-sorted source hands its CSR
+      // mapping to the reduced copy rather than making the cell-based merges re-derive it with a full
+      // counting sort (applyCellMerger() cell-sorts a_merge before it can index the per-cell ranges).
+      // Snapshot the offsets before the loop -- itoLeaf is cleared at the end of this iteration.
+      const bool               adoptSort = itoLeaf.isSortedAgainst(dbl[din], particleDx[lvl], particleProbLo);
+      std::vector<std::size_t> cellStart;
+
+      if (adoptSort) {
+        cellStart = itoLeaf.cellOffsets();
+      }
 
       // Exact, not geometric: growTo() doubles from 16, so a leaf built by repeated append() carries up
       // to 2x overshoot, while the final count is known here and reserve() sets the capacity exactly.
@@ -3976,6 +3994,10 @@ ItoSolver::extractIntoMergeContainer(const WhichContainer a_container, ParticleC
         // particle that merely passes through. rankID is left alone -- nothing in-tree reads it on an
         // ItoParticle, and it is already -1 after any merge.
         mergeLeaf.particleID(mergeLeaf.size() - 1) = itoLeaf.particleID(i);
+      }
+
+      if (adoptSort && mergeLeaf.size() == itoLeaf.size()) {
+        mergeLeaf.adoptCellSort(dbl[din], particleDx[lvl], particleProbLo, std::move(cellStart));
       }
 
       // Release this patch's ItoParticle arena as soon as its reduced copy exists, rather than clearing
