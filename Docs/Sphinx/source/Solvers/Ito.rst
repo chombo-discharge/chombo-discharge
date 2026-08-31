@@ -157,7 +157,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 917-928
+   :lines: 945-956
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -337,7 +337,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1052-1057
+   :lines: 1080-1085
    :dedent: 2
 
 which returns a CFL-like condition
@@ -353,7 +353,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1076-1081
+   :lines: 1104-1109
    :dedent: 2
 
 which returns a CFL-like condition
@@ -371,7 +371,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 954-964
+   :lines: 982-992
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -390,7 +390,7 @@ The entry point for splitting and merging is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 862-868
+   :lines: 890-896
    :dedent: 2
 
 Calling this function will merge/split the particles.
@@ -509,7 +509,7 @@ Several input options are available for configuring the run-time configuration o
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.options
    :name: ItoInputOptions
    :caption: Input options for the ``ItoSolver`` class.
-	     All options are run-time configurable.
+	     Most are run-time configurable; ``seed`` and ``diffusion_grad_drift`` are read once at setup.
 	     
 
 Plot file variables
