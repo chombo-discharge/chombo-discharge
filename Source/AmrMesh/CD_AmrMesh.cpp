@@ -1943,7 +1943,6 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
   }
 
   if (a_fineLevel > 0) {
-
     const int      nComps = a_fineData.nComp();
     const Interval interv = Interval(0, nComps - 1);
 
@@ -1951,9 +1950,10 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
 
     interpolator.interpolate(a_fineData, a_coarData, interv, EBGhostCellInterpolator::Type::MinMod);
   }
-  else {
-    a_fineData.exchange();
-  }
+
+  // Unconditional: on the coarsest level this is the only thing that fills the ghost cells, and on the finer
+  // ones the interpolator leaves them inconsistent -- see EBGhostCellInterpolator::interpolate.
+  a_fineData.exchange();
 }
 
 void
@@ -1969,29 +1969,23 @@ AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string& a_realm) const
     MayDay::Abort(str.c_str());
   }
 
-  // Do aliasing
-  EBAMRCellData aliasGas(1 + m_finestLevel);
-  EBAMRCellData aliasSol(1 + m_finestLevel);
-
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-    aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
-    }
-  }
-
+  // Alias into single-phase views and interpolate those. A phase without an EB index space is skipped, so
+  // unlike a plain alias() over both phases we never ask an MFCellFAB for a phase it does not carry.
   if (!ebisGas.isNull()) {
+    EBAMRCellData aliasGas;
+
+    this->allocatePointer(aliasGas, a_realm);
+    this->alias(aliasGas, phase::gas, a_data);
     this->interpGhost(aliasGas, a_realm, phase::gas);
   }
   if (!ebisSol.isNull()) {
+    EBAMRCellData aliasSol;
+
+    this->allocatePointer(aliasSol, a_realm);
+    this->alias(aliasSol, phase::solid, a_data);
     this->interpGhost(aliasSol, a_realm, phase::solid);
   }
 }
@@ -2009,29 +2003,23 @@ AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string& a_realm) const
     MayDay::Abort(str.c_str());
   }
 
-  // Do aliasing
-  EBAMRCellData aliasGas(1 + m_finestLevel);
-  EBAMRCellData aliasSol(1 + m_finestLevel);
-
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-    aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
-    }
-  }
-
+  // Alias into single-phase views and interpolate those. A phase without an EB index space is skipped, so
+  // unlike a plain alias() over both phases we never ask an MFCellFAB for a phase it does not carry.
   if (!ebisGas.isNull()) {
+    EBAMRCellData aliasGas;
+
+    this->allocatePointer(aliasGas, a_realm);
+    this->alias(aliasGas, phase::gas, a_data);
     this->interpGhostPwl(aliasGas, a_realm, phase::gas);
   }
   if (!ebisSol.isNull()) {
+    EBAMRCellData aliasSol;
+
+    this->allocatePointer(aliasSol, a_realm);
+    this->alias(aliasSol, phase::solid, a_data);
     this->interpGhostPwl(aliasSol, a_realm, phase::solid);
   }
 }
@@ -2058,6 +2046,8 @@ AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string& a_realm, const
     interpolator.interpolate(*a_data[lvl], *a_data[lvl - 1], interv, EBGhostCellInterpolator::Type::MinMod);
   }
 
+  // The interpolator leaves the ghost cells inconsistent -- see EBGhostCellInterpolator::interpolate. This is
+  // where they are made whole again, for every level at once.
   a_data.exchange();
 }
 
@@ -2074,29 +2064,23 @@ AmrMesh::interpGhostMG(MFAMRCellData& a_data, const std::string& a_realm) const
     MayDay::Abort(str.c_str());
   }
 
-  // Do aliasing
-  EBAMRCellData aliasGas(1 + m_finestLevel);
-  EBAMRCellData aliasSol(1 + m_finestLevel);
-
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-    aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
-
-    if (!ebisGas.isNull()) {
-      MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    }
-    if (!ebisSol.isNull()) {
-      MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
-    }
-  }
-
+  // Alias into single-phase views and interpolate those. A phase without an EB index space is skipped, so
+  // unlike a plain alias() over both phases we never ask an MFCellFAB for a phase it does not carry.
   if (!ebisGas.isNull()) {
+    EBAMRCellData aliasGas;
+
+    this->allocatePointer(aliasGas, a_realm);
+    this->alias(aliasGas, phase::gas, a_data);
     this->interpGhostMG(aliasGas, a_realm, phase::gas);
   }
   if (!ebisSol.isNull()) {
+    EBAMRCellData aliasSol;
+
+    this->allocatePointer(aliasSol, a_realm);
+    this->alias(aliasSol, phase::solid, a_data);
     this->interpGhostMG(aliasSol, a_realm, phase::solid);
   }
 }

@@ -95,10 +95,20 @@ public:
 
   /**
    * @brief Do inhomogeneous interpolation
-   * @param[in,out] a_phiFine   Fine phi
-   * @param[in]    a_phiCoar   Coarse phi
-   * @param[in]    a_variables Variables to interpolate
-   * @param[in] a_interpType Interp type
+   * @details This fills the fine-grid ghost cells that lie across the coarse-fine interface, interpolating them
+   * from the coarse grid. The coarse data is fetched into an internal buffer on the coarsened fine grids, so
+   * a_phiCoar's own ghost cells are not read and need not be valid.
+   * @note This routine does not exchange, and on return a_phiFine's ghost cells are not consistent. Two
+   * separate things are left to the caller. First, the ghost cells that are covered by a neighbouring patch on
+   * the fine level are not part of the coarse-fine region and are never filled here. Second, some of those
+   * cells are actively overwritten with interpolated values, because the interpolated region is stored as the
+   * bounding box of the coarse-fine ghost cells rather than as the cell set itself, and that box spans
+   * neighbour-owned cells whenever the set is not rectangular. The caller must therefore exchange a_phiFine
+   * before anything reads its ghost cells.
+   * @param[in,out] a_phiFine    Fine phi
+   * @param[in]     a_phiCoar    Coarse phi
+   * @param[in]     a_variables  Variables to interpolate
+   * @param[in]     a_interpType Interp type
    */
   virtual void
   interpolate(LevelData<EBCellFAB>&       a_phiFine,
@@ -152,6 +162,17 @@ protected:
    * @brief Copier for making copying from m_eblgCoar to m_grownCoarData go faster
    */
   Copier m_copier;
+
+  /**
+   * @brief Buffer holding the coarse-grid data on the coarsened fine grids.
+   * @details This is filled by a single copyTo from the coarse level, for all the interpolated variables at
+   * once. Keeping it as a member avoids rebuilding an EBCellFactory and reallocating the entire coarsened-fine
+   * layout on every call. It is sized in defineBuffers, i.e. once per regrid, and holds SpaceDim components:
+   * that covers the scalar and vector fields which make up every call on the hot path. The rare wider call --
+   * physics plot variables, whose count is set by the user's model -- uses a local buffer instead, so the
+   * resident footprint stays bounded regardless of how many plot variables a model declares.
+   */
+  mutable LevelData<EBCellFAB> m_coarsenedFineData;
 
   /**
    * @brief List of coarse-grid cells that appear through coarsening a fine-grid ghost cell
