@@ -10,10 +10,11 @@ ItoSolver.nn_pair_fallback            = 1              ## nn_pair_tree/nn_pair_o
 ItoSolver.nn_pair_max_cell_dist       = 1              ## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)
 ItoSolver.nn_pair_max_rounds          = 3              ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: max drain rounds per merge (stops early on convergence)
 ItoSolver.kd_split_weight_leaf_dx     = 1.0            ## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)
-ItoSolver.plt_vars                    = phi vel dco    ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
+ItoSolver.plt_vars                    = phi vel dco    ## 'phi', 'vel', 'dco', 'grad_dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg            = bisection      ## Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step                 = 1.E-4          ## Bisection step length for intersection tests
 ItoSolver.normal_max                  = 5.0            ## Maximum value (absolute) that can be drawn from the exponential distribution.
+ItoSolver.diffusion_grad_drift        = true           ## Add grad(D) to the drift so the particles transport D*grad(n), as CdrSolver does
 ItoSolver.redistribute                = false          ## Turn on/off redistribution.
 ItoSolver.blend_conservation          = false          ## Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing               = particles      ## 'particles' or 'numbers'

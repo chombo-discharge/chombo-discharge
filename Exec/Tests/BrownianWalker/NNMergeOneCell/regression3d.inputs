@@ -79,6 +79,7 @@ ItoSolver.bisect_step                 = 1.E-4              ## Bisection step len
 ItoSolver.seed                        = 0                  ## Seed for RNG
 ItoSolver.max_diffusion_hop           = 2.0                ## Maximum diffusion hop length (in units of dx)
 ItoSolver.normal_max                  = 5.0                ## Maximum value (absolute) that can be drawn from the exponential distribution.
+ItoSolver.diffusion_grad_drift        = true               ## Add grad(D) to the drift so the particles transport D*grad(n), as CdrSolver does
 ItoSolver.redistribute                = true               ## Turn on/off redistribution.
 ItoSolver.blend_conservation          = false              ## Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing               = particles          ## 'particles' or 'numbers'

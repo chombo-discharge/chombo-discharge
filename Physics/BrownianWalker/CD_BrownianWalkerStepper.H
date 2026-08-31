@@ -338,7 +338,9 @@ protected:
 
   /**
    * @brief Set the mesh diffusion function on the solver.
-   * @details Sets a sentinel large value since actual per-particle diffusion is assigned directly.
+   * @details Sets the spatially uniform coefficient m_diffCo. The per-particle diffusion coefficients are assigned
+   * directly through ItoSolver::setParticleDiffusion, so this field does not move the walkers, but it is the field
+   * that is plotted as 'dco' and the field a grad(D) drift correction would differentiate.
    */
   void
   setDiffusion();

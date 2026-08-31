@@ -829,6 +829,45 @@ public:
   interpolateDiffusion();
 
   /**
+   * @brief Compute the cell-centered gradient of the mesh diffusion field.
+   * @details Fills m_diffusionGradient with grad(Df), where Df is the mesh diffusion field, and then coarsens the
+   * result and updates its ghost cells. The caller must have brought m_diffusionFunction's own ghost cells up to
+   * date first -- the gradient stencil reaches into them and across refinement boundaries. Does nothing when the
+   * solver is not diffusive or when ItoSolver.diffusion_grad_drift is false, in which case m_diffusionGradient
+   * is not allocated.
+   */
+  virtual void
+  computeDiffusionGradient();
+
+  /**
+   * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage.
+   * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns, from which the
+   * caller adds dt*(grad D) to the particle displacement. The scratch columns are set to zero when the solver is
+   * not diffusive or the drift correction is disabled, so callers may add the term unconditionally. Requires a
+   * preceding call to computeDiffusionGradient().
+   */
+  virtual void
+  interpolateDiffusionGradient();
+
+  /**
+   * @brief Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.
+   * @details This computes (grad D)(X_p) and writes it to the ItoParticle scratch vector columns. Requires a
+   * preceding call to computeDiffusionGradient(). Public because the time steppers call it per patch, from
+   * inside their own OpenMP loops over boxes.
+   * @param[in] a_lvl Grid level
+   * @param[in] a_dit Grid index
+   */
+  virtual void
+  interpolateDiffusionGradient(int a_lvl, const DataIndex& a_dit);
+
+  /**
+   * @brief Check if the grad(D) drift correction is enabled.
+   * @return Returns m_diffusionGradientDrift.
+   */
+  virtual bool
+  isDiffusionGradientDrift() const noexcept;
+
+  /**
    * @brief Update mobilities parametrically from the particle energy.
    * @details This calls the diffusion function implemented by ItoSpecies. The particle diffusion is set D =
    * f(p.energy()) where f is the diffusion function in ItoSpecies
@@ -959,6 +998,13 @@ public:
    * = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both
    * advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD).
    * @return Computed dt
+   * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These
+   * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is
+   * interpolated at the point of use and added to the displacement by the time stepper. The omission is
+   * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer
+   * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the
+   * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model
+   * that made grad(D) comparable to the drift velocity would make these estimates optimistic.
    */
   virtual Real
   computeDt() const;
@@ -973,6 +1019,7 @@ public:
    * computed as dt = 1/(1/dtA + 1/dtD).
    * @param[in] a_lvl Grid level
    * @return Computed dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDt(int a_lvl) const;
@@ -988,6 +1035,7 @@ public:
    * @param[in] a_lvl Grid level
    * @param[in] a_dit Grid index
    * @return Computed dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDt(int a_lvl, const DataIndex& a_dit) const;
@@ -1052,6 +1100,13 @@ public:
   /**
    * @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle.
    * @return Computed advective dt
+   * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These
+   * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is
+   * interpolated at the point of use and added to the displacement by the time stepper. The omission is
+   * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer
+   * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the
+   * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model
+   * that made grad(D) comparable to the drift velocity would make these estimates optimistic.
    */
   virtual Real
   computeAdvectiveDt() const;
@@ -1060,6 +1115,7 @@ public:
    * @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level.
    * @param[in] a_lvl Grid level
    * @return Computed advective dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeAdvectiveDt(int a_lvl) const;
@@ -1069,6 +1125,7 @@ public:
    * @param[in] a_lvl Grid level
    * @param[in] a_dit Grid index
    * @return Computed advective dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeAdvectiveDt(int a_lvl, const DataIndex& a_dit) const;
@@ -1076,6 +1133,13 @@ public:
   /**
    * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles
    * @return Computed diffusive dt
+   * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These
+   * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is
+   * interpolated at the point of use and added to the displacement by the time stepper. The omission is
+   * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer
+   * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the
+   * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model
+   * that made grad(D) comparable to the drift velocity would make these estimates optimistic.
    */
   virtual Real
   computeDiffusiveDt() const;
@@ -1084,6 +1148,7 @@ public:
    * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level
    * @param[in] a_lvl Grid level
    * @return Computed diffusive dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDiffusiveDt(int a_lvl) const;
@@ -1093,6 +1158,7 @@ public:
    * @param[in] a_lvl Grid level
    * @param[in] a_dit Grid index
    * @return Computed diffusive dt
+   * @note Does not account for the grad(D) drift correction -- see computeDt().
    */
   virtual Real
   computeDiffusiveDt(int a_lvl, const DataIndex& a_dit) const;
@@ -1353,6 +1419,14 @@ protected:
   bool m_isMobile;
 
   /**
+   * @brief If true, grad(D) is added to the particle drift.
+   * @details Set from ItoSolver.diffusion_grad_drift. An Ito-interpretation Euler-Maruyama update with a drift
+   * of v alone transports the flux v*n - grad(D*n); adding grad(D) to the drift makes it transport v*n - D*grad(n)
+   * instead, which is the flux CdrSolver integrates. The two coincide only where D is constant in space.
+   */
+  bool m_diffusionGradientDrift;
+
+  /**
    * @brief Flag for outputting m_phi to plot files.
    */
   bool m_plotPhi;
@@ -1366,6 +1440,11 @@ protected:
    * @brief Flag for outputting m_diffusionFunction to plot files.
    */
   bool m_plotDiffCo;
+
+  /**
+   * @brief Flag for outputting m_diffusionGradient to plot files.
+   */
+  bool m_plotDiffusionGradient;
 
   /**
    * @brief Flag for depositing and plotting the bulk particles on the mesh.
@@ -1436,6 +1515,14 @@ protected:
    * @brief Diffusion-centerer field used for interpolating diffusion coefficients
    */
   EBAMRCellData m_diffusionFunction;
+
+  /**
+   * @brief Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction.
+   * @details Allocated only when the solver is diffusive and m_diffusionGradientDrift is true; otherwise this is a
+   * bare pointer holder. Recomputed from m_diffusionFunction by computeDiffusionGradient(), so it carries no state
+   * across a regrid and is never checkpointed.
+   */
+  EBAMRCellData m_diffusionGradient;
 
   /**
    * @brief Per-cell occupancy scratch for the kd merges (see ParticleManagement::mergeKDCarve).
@@ -1743,6 +1830,12 @@ protected:
    */
   void
   parseDiffusionHop();
+
+  /**
+   * @brief Parse whether or not to add the grad(D) drift correction.
+   */
+  void
+  parseDiffusionGradient();
 
   /**
    * @brief Parse whether or not to use redistribution.

@@ -140,9 +140,11 @@ BrownianWalkerStepper::setDiffusion()
 
   CH_assert(m_solver->isDiffusive());
 
-  // Set something crazy for the diffusion field. This should not matter because we set the particle diffusion
-  // coefficients directly.
-  m_solver->setDiffusionFunction(std::numeric_limits<Real>::max());
+  // The mesh diffusion field must hold the same coefficient the particles carry. The particle coefficients are
+  // still assigned directly (setParticleDiffusion), so this field is not what moves the walkers -- but it is the
+  // field that is plotted as 'dco', and it is the field a grad(D) drift correction would have to differentiate.
+  // EBCellFAB::setVal covers ghost cells and the value is uniform, so no coarsening or ghost fill is needed here.
+  m_solver->setDiffusionFunction(m_diffCo);
 }
 
 void
@@ -465,13 +467,23 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
   // TLDR: This function advances the particles using an Euler-Maruyama kernel. The steps are simply:
   //
-  //          1. Compute Xnew = Xold + V*dt + sqrt(2*D*dt)*N0 where N0 is a random number
+  //          1. Compute Xnew = Xold + (V + grad(D))*dt + sqrt(2*D*dt)*N0 where N0 is a random number
   //          2. Remap the particles, assigning them to new grid boxes.
   //          3. Remove particles that struck the EB.
   //          4. Make super-particles.
   //          5. Update the particle velocities and diffusion coefficients.
   //          6. Deposit particles on mesh.
   //
+
+  // The grad(D) drift correction, which makes the walkers transport v*n - D*grad(n) rather than the
+  // v*n - grad(D*n) a plain Ito update gives. m_diffCo is uniform here, so the gradient is identically zero
+  // and this changes nothing -- it is wired up so the code path is exercised and so that a spatially varying
+  // diffusion coefficient would be handled correctly.
+  const bool gradientDrift = m_solver->isDiffusive() && m_solver->isDiffusionGradientDrift();
+
+  if (gradientDrift) {
+    m_solver->computeDiffusionGradient();
+  }
 
   // 1. Euler-Maruayma kernel on each patch.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -491,6 +503,13 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
       const std::size_t n = leaf.size();
 
+      // grad(D) at the particle positions, onto the scratch vector columns. This MUST happen before any of the
+      // kernels below move a particle: the interpolation stencil reads the patch that owns X^k, and the particles
+      // are not remapped until after the whole Euler-Maruyama kernel has run.
+      if (gradientDrift) {
+        m_solver->interpolateDiffusionGradient(lvl, din);
+      }
+
       // Euler step.
       if (m_solver->isMobile()) {
         double* oldPos[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::old_x>(),
@@ -506,6 +525,22 @@ BrownianWalkerStepper::advance(const Real a_dt)
           for (int dir = 0; dir < SpaceDim; dir++) {
             oldPos[dir][i] = pos[dir][i];
             pos[dir][i] += static_cast<Real>(v[dir][i]) * a_dt;
+          }
+        });
+      }
+
+      // grad(D) drift. This is a drift term like the one above, but it applies to any diffusive solver,
+      // mobile or not. The scratch vector columns hold (grad D)(X^k) from the interpolation above.
+      if (gradientDrift) {
+        const ParticleReal* gradD[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::scratch_x>(),
+                                                      leaf.column<&ItoParticle::scratch_y>(),
+                                                      leaf.column<&ItoParticle::scratch_z>())};
+
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            pos[dir][i] += static_cast<Real>(gradD[dir][i]) * a_dt;
           }
         });
       }

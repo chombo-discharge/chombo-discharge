@@ -467,11 +467,15 @@ protected:
   advanceEulerMaruyama(const Real a_dt) noexcept;
 
   /**
-   * @brief Perform the diffusive Ito advance in the Euler-Maruyama step.
-   * @details This computes the diffusion hop onto run-time enabled storage on the ItoParticles. We also store the
-   *         @param[in,out] a_rhoDaggerParticles Description
-   *         @param[in] a_dt Description
-   * "rho dagger" particles which correspond to the position of the charged particles after the diffusionhop.
+   * @brief Perform the explicit half of the Ito advance in the Euler-Maruyama step.
+   * @details This computes each particle's explicit displacement -- the stochastic diffusion hop plus the lagged
+   * a_dt*grad(D) drift correction -- and stores it on the ItoParticle scratch vector columns. It also fills the
+   * "rho dagger" particles, which sit at the charged particles' positions displaced by that same amount. The
+   * grad(D) term belongs here rather than in the particle velocities because it is independent of E^(k+1): the
+   * rho dagger deposit accounts for it exactly, leaving the implicit half proportional to E^(k+1) as the
+   * semi-implicit Poisson operator requires.
+   * @param[in,out] a_rhoDaggerParticles Point particles at the displaced positions, used for the space charge.
+   * @param[in]     a_dt                 Time step.
    */
   virtual void
   diffuseParticlesEulerMaruyama(Vector<RefCountedPtr<ParticleContainer<NoPayload>>>& a_rhoDaggerParticles,
@@ -491,8 +495,10 @@ protected:
   /**
    * @brief Step the particles according to the regular Euler-Maruyama scheme.
    * @param[in] a_dt Time step.
-   * @details This sets X^(k+1) = X^k + a_dt * V + sqrt(2*D*a_dt) * W
-   * @note The hop MUST have been stored on the particle run-time storage
+   * @details This sets X^(k+1) = X^k + a_dt*V + dX, where V = mu^k * E^(k+1) is the implicit half of the update
+   * and dX is the explicit displacement computed by diffuseParticlesEulerMaruyama, i.e. the diffusion hop plus
+   * the a_dt*grad(D) drift correction.
+   * @note The explicit displacement MUST have been stored on the particle run-time storage
    */
   virtual void
   stepEulerMaruyamaParticles(const Real a_dt) noexcept;
