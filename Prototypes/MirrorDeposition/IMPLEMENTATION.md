@@ -296,6 +296,45 @@ That is the failure mode we want — **no fallback, no deprecation shim.**
 4. **Run the full regression set and diff plot files bit-for-bit against the pre-branch build.** Any
    difference is a conversion bug.
 
+### 1.7 Stage 1 as built — five notes for stages 2–4
+
+Stage 1 landed as `38b0101a`. It followed §1.1–§1.6 as written; these are the points where reality
+added something the work order did not have, and each of them bears on a later stage.
+
+1. **"Bit-for-bit" has to mean *dataset*-for-dataset.** Chombo plot files are **not byte-reproducible
+   run to run** — a baseline compared against *itself* differs in all 201 files of
+   `BrownianWalker/DriftDiffusion`. `diff` on the HDF5 is therefore a broken test that will report a
+   conversion bug in every stage. Use `h5diff -c -d 0`, which compares dataset values; under it the
+   same baseline-against-itself pair is 201/201 identical. **Stages 2 and 4 must use the same tool**,
+   and §6 item 4 should be read that way.
+2. **The `ngp` mapping is not covered by any shipped regression.** Every `BrownianWalker` test selects
+   `redistribute` and `ItoKMC/JSON` selects `native`, so `ngp` survives only as the
+   `CD_ItoSolver.options` default and the `WireWire` *example*. It was verified by forcing that
+   setting on both sides of the conversion (201/201 identical), with a control confirming the run is
+   actually sensitive to the setting — `ngp` and `redistribute` differ in all 201 files. Any stage
+   that touches the NGP cut-cell path needs that forced run; the test suite will not do it for you.
+3. **§1.4's "the dead work disappears" does not apply to McPhoto, and the hybrid call was kept.**
+   With `blend = false` the hybrid is indeed the identity and its `deltaM` is discarded — but
+   `McPhoto::depositHybridDivergence` *also* performs the unconditional `conservativeAverage` and
+   `interpGhost` at its foot (`CD_McPhoto.cpp:1369-1370`). Skipping the call under `Native` would
+   have dropped those and would not have been behaviour-preserving. The gates inside it were
+   converted instead. **Stage 4 deletes the function, and must re-home that average-down and ghost
+   interpolation rather than delete it with the rest.**
+4. **The `literalinclude` repair is real work, not a formality.** Adding one `#include` to
+   `CD_AmrMesh.H`, `CD_ItoSolver.H` and `CD_McPhoto.H` shifted **30** `:lines:` ranges. They were
+   repaired from an exact per-file diff (`difflib` opcodes mapping baseline line -> current line),
+   never by matching excerpt text — the procedure `CLAUDE.md` §4 prescribes. All 150 directives were
+   then re-rendered from both trees and compared at word level: 149 unchanged, and the single
+   changed one is `depositWeight`'s own signature. Stage 2 adds members to `PhaseRealm.H` and Stage 4
+   deletes whole functions from three solvers, so both will shift more.
+5. **A full 3-D or `DEBUG` build needs a Chombo built in that configuration**, which this machine does
+   not have (only `2d…OPTHIGH.MPI`). Stage 1 was checked in 3-D and with assertions enabled by
+   `-fsyntax-only` on the changed translation units, which catches a dimension- or assert-dependent
+   error in the *conversion* but is not a link or a run. **Stage 2's curvature fit and Stage 3's
+   reflect path are genuinely dimension-dependent and cannot be signed off this way** — they need a
+   real 3-D build, and the `|S_c n_c|` and multi-valued-cell asserts need `OPT=TRUE`, not `OPT=HIGH`,
+   which compiles `CH_assert` out.
+
 ---
 
 ## 2. Stage 2 — surface data at regrid
