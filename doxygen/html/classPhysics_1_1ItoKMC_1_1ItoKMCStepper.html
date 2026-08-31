@@ -484,10 +484,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memitem:a80725850b9ff7f3de4798fa4bc4f4fe1" id="r_a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a80725850b9ff7f3de4798fa4bc4f4fe1">reconcileCdrDensities</a> (const EBCellFAB &amp;a_newParticlesPerCell, const EBCellFAB &amp;a_oldParticlesPerCell, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
 <tr class="separator:a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad94c68661aaebd5d7c81eb40e1b26517" id="r_ad94c68661aaebd5d7c81eb40e1b26517"><td class="memItemLeft" align="right" valign="top"><a id="ad94c68661aaebd5d7c81eb40e1b26517" name="ad94c68661aaebd5d7c81eb40e1b26517"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>coarsenCDRSolvers</b> () noexcept</td></tr>
-<tr class="memdesc:ad94c68661aaebd5d7c81eb40e1b26517"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers. <br /></td></tr>
-<tr class="separator:ad94c68661aaebd5d7c81eb40e1b26517"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c5fb4a621700bef48880b7867838bfb" id="r_a9c5fb4a621700bef48880b7867838bfb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9c5fb4a621700bef48880b7867838bfb">coarsenCDRSolvers</a> (const bool a_interpGhosts) noexcept</td></tr>
+<tr class="memdesc:a9c5fb4a621700bef48880b7867838bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers.  <br /></td></tr>
+<tr class="separator:a9c5fb4a621700bef48880b7867838bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f165cf7747a84abe650c67ca1852ecf" id="r_a5f165cf7747a84abe650c67ca1852ecf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a5f165cf7747a84abe650c67ca1852ecf">fillSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a5f165cf7747a84abe650c67ca1852ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
 <tr class="separator:a5f165cf7747a84abe650c67ca1852ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1335,6 +1334,42 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 <p>Allocate "internal" storage. </p>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e">Physics::ItoKMC::ItoKMCGodunovStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverGMG &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a9c5fb4a621700bef48880b7867838bfb" name="a9c5fb4a621700bef48880b7867838bfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c5fb4a621700bef48880b7867838bfb">&#9670;&#160;</a></span>coarsenCDRSolvers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::coarsenCDRSolvers </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_interpGhosts</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Coarsen data for CDR solvers. </p>
+<p>Always averages the densities and source terms down the hierarchy &ndash; the coarse valid cells are read before anything re-averages them. The ghost-cell interpolation is optional because it has no reader on the reaction-advance path: the next consumers of the density ghost cells are <a class="el" href="classCdrSolver.html#a06082d89e6896cafdfa12e4ac5b20c38" title="Compute div(v*phi) explicitly.">CdrSolver::computeDivF</a>/computeDivD, both of which interpolate the ghost cells themselves, and the source-term ghost cells are never read at all (getSource()'s consumers &ndash; plotting and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundEvaluator.html" title="Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time ...">ItoKMCBackgroundEvaluator</a> &ndash; are valid-cell only, and the plot path fills its own ghost cells). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhosts</td><td>Whether to interpolate the ghost cells after averaging. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

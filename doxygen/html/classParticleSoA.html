@@ -145,9 +145,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aafc64413c84e36e24a7a555078cd2130" id="r_aafc64413c84e36e24a7a555078cd2130"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#aafc64413c84e36e24a7a555078cd2130">empty</a> () const noexcept</td></tr>
 <tr class="memdesc:aafc64413c84e36e24a7a555078cd2130"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the container holds no particles.  <br /></td></tr>
 <tr class="separator:aafc64413c84e36e24a7a555078cd2130"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae47ad676e08353800929ea4ccfc35acc" id="r_ae47ad676e08353800929ea4ccfc35acc"><td class="memItemLeft" align="right" valign="top"><a id="ae47ad676e08353800929ea4ccfc35acc" name="ae47ad676e08353800929ea4ccfc35acc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept</td></tr>
-<tr class="memdesc:ae47ad676e08353800929ea4ccfc35acc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all particles (keeps the arena; invalidates the cell sort). <br /></td></tr>
+<tr class="memitem:ae47ad676e08353800929ea4ccfc35acc" id="r_ae47ad676e08353800929ea4ccfc35acc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#ae47ad676e08353800929ea4ccfc35acc">clear</a> () noexcept</td></tr>
+<tr class="memdesc:ae47ad676e08353800929ea4ccfc35acc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop all particles (keeps the arena; invalidates the cell sort unless there was nothing to drop).  <br /></td></tr>
 <tr class="separator:ae47ad676e08353800929ea4ccfc35acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afed7ea6fe15e375cafecb6f4ce1e54b6" id="r_afed7ea6fe15e375cafecb6f4ce1e54b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#afed7ea6fe15e375cafecb6f4ce1e54b6">reserve</a> (const std::size_t a_capacity)</td></tr>
 <tr class="memdesc:afed7ea6fe15e375cafecb6f4ce1e54b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure capacity for at least a_capacity particles (reallocates + moves on growth).  <br /></td></tr>
@@ -252,6 +251,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> () noexcept
 <tr class="memitem:a735560a764f977529cdc3332b8b6296b" id="r_a735560a764f977529cdc3332b8b6296b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#a735560a764f977529cdc3332b8b6296b">extractCell</a> (const std::size_t a_cell, <a class="el" href="classParticleSoA.html">ParticleSoA</a> &amp;a_out) const</td></tr>
 <tr class="memdesc:a735560a764f977529cdc3332b8b6296b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract cell c's particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.  <br /></td></tr>
 <tr class="separator:a735560a764f977529cdc3332b8b6296b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29240b74e9cccda9ac3a6c6d434b3e74" id="r_a29240b74e9cccda9ac3a6c6d434b3e74"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; std::size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#a29240b74e9cccda9ac3a6c6d434b3e74">cellOffsets</a> () const noexcept</td></tr>
+<tr class="memdesc:a29240b74e9cccda9ac3a6c6d434b3e74"><td class="mdescLeft">&#160;</td><td class="mdescRight">The raw CSR start offsets (valid after <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a>; a_box.numPts()+1 entries).  <br /></td></tr>
+<tr class="separator:a29240b74e9cccda9ac3a6c6d434b3e74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa3812337fe442fe4a8c0654c2563704" id="r_aaa3812337fe442fe4a8c0654c2563704"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleSoA.html#aaa3812337fe442fe4a8c0654c2563704">adoptCellSort</a> (const Box &amp;a_box, const RealVect &amp;a_dx, const RealVect &amp;a_probLo, std::vector&lt; std::size_t &gt; a_cellStart) noexcept</td></tr>
+<tr class="memdesc:aaa3812337fe442fe4a8c0654c2563704"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare the container cell-sorted against (a_box, a_dx, a_probLo) with a caller-supplied CSR.  <br /></td></tr>
+<tr class="separator:aaa3812337fe442fe4a8c0654c2563704"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -530,7 +535,7 @@ class ParticleSoA&lt; P, Traits &gt;</div><p>Arena-backed Struct-of-Arrays parti
 <p>append(pos, weight, payload) adds a particle (grows geometrically); remove(i) deletes particle i by swap-and-pop (O(1), does NOT preserve order). The canonical remove loop does not advance i on a removal: </p><div class="fragment"><div class="line"><span class="keywordflow">for</span> (std::size_t i = 0; i &lt; soa.size(); ) {</div>
 <div class="line">  <span class="keywordflow">if</span> (predicate(i)) soa.remove(i); <span class="keywordflow">else</span> ++i;</div>
 <div class="line">}</div>
-</div><!-- fragment --><p> append/remove/reserve invalidate raw pointers from <a class="el" href="classParticleSoA.html#ace10104984fd1b33fc7a608b7cc1fb84" title="Whole payload column selected by member pointer (raw pointer, vectorizable).">column()</a>/positionColumn(). Capacity never shrinks (<a class="el" href="classParticleSoA.html#ae47ad676e08353800929ea4ccfc35acc" title="Drop all particles (keeps the arena; invalidates the cell sort).">clear()</a> keeps it); the container is meant to be reused across steps.</p>
+</div><!-- fragment --><p> append/remove/reserve invalidate raw pointers from <a class="el" href="classParticleSoA.html#ace10104984fd1b33fc7a608b7cc1fb84" title="Whole payload column selected by member pointer (raw pointer, vectorizable).">column()</a>/positionColumn(). Capacity never shrinks (<a class="el" href="classParticleSoA.html#ae47ad676e08353800929ea4ccfc35acc" title="Drop all particles (keeps the arena; invalidates the cell sort unless there was nothing to drop).">clear()</a> keeps it); the container is meant to be reused across steps.</p>
 <h3>Cell sorting</h3>
 <p>sortByCell(box,dx,probLo) counting-sorts the columns into Fortran cell order and builds a CSR offsets array, so cell c owns the contiguous range [cellStart(c), cellStart(c+1)). Append/remove invalidate the sort (<a class="el" href="classParticleSoA.html#aea097f7607229cde2f20cfc7dc199af0" title="Whether the container is currently cell-sorted (false after append/remove).">isSorted()</a>).</p>
 <h3>Communication &amp; I/O</h3>
@@ -581,6 +586,67 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="aaa3812337fe442fe4a8c0654c2563704" name="aaa3812337fe442fe4a8c0654c2563704"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa3812337fe442fe4a8c0654c2563704">&#9670;&#160;</a></span>adoptCellSort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::adoptCellSort </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::size_t &gt;&#160;</td>
+          <td class="paramname"><em>a_cellStart</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Declare the container cell-sorted against (a_box, a_dx, a_probLo) with a caller-supplied CSR. </p>
+<p>For callers that lay the particles out in Fortran cell order themselves and therefore already know the mapping &ndash; concatenating per-cell scratch containers back into a leaf, or copying a sorted leaf particle-for-particle into a container with a different payload. <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a> would rediscover exactly this mapping at the cost of a key pass, a prefix sum and a full column permute; adopting it costs a move. The caller owns the precondition that every particle really does lie in the cell its offsets claim &ndash; it is checked by the same debug-mode verifier that guards <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a>'s early-out, and is compiled out in optimized builds. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Patch box defining the cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing per direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Physical coordinate of the lower domain corner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellStart</td><td>CSR start offsets: a_box.numPts()+1 non-decreasing entries, ending at <a class="el" href="classParticleSoA.html#a4a1ed9474a75b6142f7fccebaf059d13" title="Number of particles currently stored.">size()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a9870f188d679e4781d59ca34a18f59ec" name="a9870f188d679e4781d59ca34a18f59ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9870f188d679e4781d59ca34a18f59ec">&#9670;&#160;</a></span>alignUp()</h2>
 
@@ -1090,6 +1156,36 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
 
 </div>
 </div>
+<a id="a29240b74e9cccda9ac3a6c6d434b3e74" name="a29240b74e9cccda9ac3a6c6d434b3e74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29240b74e9cccda9ac3a6c6d434b3e74">&#9670;&#160;</a></span>cellOffsets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::size_t &gt; &amp; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::cellOffsets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The raw CSR start offsets (valid after <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a>; a_box.numPts()+1 entries). </p>
+<p>Exposed so that a caller which is about to reproduce this container's particle order in another container can hand the mapping straight to <a class="el" href="classParticleSoA.html#aaa3812337fe442fe4a8c0654c2563704" title="Declare the container cell-sorted against (a_box, a_dx, a_probLo) with a caller-supplied CSR.">adoptCellSort()</a> instead of re-deriving it with a counting sort. Use the <a class="el" href="classParticleSoA.html#af8d2fef94930d96d3b1f5be1c048f41c" title="CSR start offset of cell c (valid after sortByCell; requires c &lt;= numCells()).">cellStart()</a>/cellRange() accessors for ordinary per-cell indexing. </p><dl class="section return"><dt>Returns</dt><dd>The CSR start offsets. </dd></dl>
+
+</div>
+</div>
 <a id="aa4d9552340bfbc75474c7bc85d219bab" name="aa4d9552340bfbc75474c7bc85d219bab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa4d9552340bfbc75474c7bc85d219bab">&#9670;&#160;</a></span>cellRange()</h2>
 
@@ -1216,6 +1312,36 @@ template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True iff the CSR mapping is consistent with the current positions. </dd></dl>
+
+</div>
+</div>
+<a id="ae47ad676e08353800929ea4ccfc35acc" name="ae47ad676e08353800929ea4ccfc35acc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae47ad676e08353800929ea4ccfc35acc">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P  = NoPayload, typename Traits  = ParticleTraits&lt;P&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt;::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Drop all particles (keeps the arena; invalidates the cell sort unless there was nothing to drop). </p>
+<p>An already-empty container's CSR mapping is all-zero regardless of the cells it was built against, so dropping nothing cannot invalidate it. Keeping the flag in that case is what lets a repeatedly-cleared container (e.g. the ItoKMC photoionization products, cleared and re-sorted every time step) take <a class="el" href="classParticleSoA.html#a0dc3919e67e2d36e41a82012793ba8bb" title="Counting-sort the columns into Fortran cell order and build CSR cell offsets.">sortByCell()</a>'s early-out instead of paying an O(cells) offset rebuild per step. </p>
 
 </div>
 </div>
@@ -3673,7 +3799,7 @@ template&lt;typename P , typename Traits &gt; </div>
 </div><div class="memdoc">
 
 <p>Reclaim unused capacity by reallocating the arena down to the current size. </p>
-<p>A no-op when already compact (capacity == size). The arena does not shrink on its own (<a class="el" href="classParticleSoA.html#ae47ad676e08353800929ea4ccfc35acc" title="Drop all particles (keeps the arena; invalidates the cell sort).">clear()</a>/remove() keep the capacity for reuse); call this to return memory after a transient spike. Invalidates raw column pointers. The particle order and cell-sort state are preserved. </p>
+<p>A no-op when already compact (capacity == size). The arena does not shrink on its own (<a class="el" href="classParticleSoA.html#ae47ad676e08353800929ea4ccfc35acc" title="Drop all particles (keeps the arena; invalidates the cell sort unless there was nothing to drop).">clear()</a>/remove() keep the capacity for reuse); call this to return memory after a transient spike. Invalidates raw column pointers. The particle order and cell-sort state are preserved. </p>
 
 </div>
 </div>

@@ -369,6 +369,18 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeO
 <tr class="memitem:a64b5e34d86ab0286807678c7f753f57e" id="r_a64b5e34d86ab0286807678c7f753f57e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a64b5e34d86ab0286807678c7f753f57e">interpolateDiffusion</a> ()</td></tr>
 <tr class="memdesc:a64b5e34d86ab0286807678c7f753f57e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the diffusion field to the particle positions.  <br /></td></tr>
 <tr class="separator:a64b5e34d86ab0286807678c7f753f57e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a539b80e8ccb1bbfab4aa6ce0114dbf78" id="r_a539b80e8ccb1bbfab4aa6ce0114dbf78"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a539b80e8ccb1bbfab4aa6ce0114dbf78">computeDiffusionGradient</a> ()</td></tr>
+<tr class="memdesc:a539b80e8ccb1bbfab4aa6ce0114dbf78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered gradient of the mesh diffusion field.  <br /></td></tr>
+<tr class="separator:a539b80e8ccb1bbfab4aa6ce0114dbf78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48b8d183b19d1a4e71d17ea03577d183" id="r_a48b8d183b19d1a4e71d17ea03577d183"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a48b8d183b19d1a4e71d17ea03577d183">interpolateDiffusionGradient</a> ()</td></tr>
+<tr class="memdesc:a48b8d183b19d1a4e71d17ea03577d183"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the mesh diffusion gradient onto the particles' scratch vector storage.  <br /></td></tr>
+<tr class="separator:a48b8d183b19d1a4e71d17ea03577d183"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7208794ff36b207c8cae3c04c21301f8" id="r_a7208794ff36b207c8cae3c04c21301f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a7208794ff36b207c8cae3c04c21301f8">interpolateDiffusionGradient</a> (int a_lvl, const DataIndex &amp;a_dit)</td></tr>
+<tr class="memdesc:a7208794ff36b207c8cae3c04c21301f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch.  <br /></td></tr>
+<tr class="separator:a7208794ff36b207c8cae3c04c21301f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b18662c972acf95033b5b66b43e0f3c" id="r_a7b18662c972acf95033b5b66b43e0f3c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a7b18662c972acf95033b5b66b43e0f3c">isDiffusionGradientDrift</a> () const noexcept</td></tr>
+<tr class="memdesc:a7b18662c972acf95033b5b66b43e0f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the grad(D) drift correction is enabled.  <br /></td></tr>
+<tr class="separator:a7b18662c972acf95033b5b66b43e0f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d8246f963aa976e49c808a9d963b464" id="r_a4d8246f963aa976e49c808a9d963b464"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a4d8246f963aa976e49c808a9d963b464">updateDiffusion</a> ()</td></tr>
 <tr class="memdesc:a4d8246f963aa976e49c808a9d963b464"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update mobilities parametrically from the particle energy.  <br /></td></tr>
 <tr class="separator:a4d8246f963aa976e49c808a9d963b464"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -554,6 +566,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parsePlotVariables</b
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDiffusionHop</b> ()</td></tr>
 <tr class="memdesc:a077daa0e8d08f13bc81a9a7f19d079df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse diffusion hop. <br /></td></tr>
 <tr class="separator:a077daa0e8d08f13bc81a9a7f19d079df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1de0d962de81bb473f090fa0062c4e85" id="r_a1de0d962de81bb473f090fa0062c4e85"><td class="memItemLeft" align="right" valign="top"><a id="a1de0d962de81bb473f090fa0062c4e85" name="a1de0d962de81bb473f090fa0062c4e85"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDiffusionGradient</b> ()</td></tr>
+<tr class="memdesc:a1de0d962de81bb473f090fa0062c4e85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not to add the grad(D) drift correction. <br /></td></tr>
+<tr class="separator:a1de0d962de81bb473f090fa0062c4e85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40ac1cf61d9ad50ba0f959088e4e083b" id="r_a40ac1cf61d9ad50ba0f959088e4e083b"><td class="memItemLeft" align="right" valign="top"><a id="a40ac1cf61d9ad50ba0f959088e4e083b" name="a40ac1cf61d9ad50ba0f959088e4e083b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRedistribution</b> ()</td></tr>
 <tr class="memdesc:a40ac1cf61d9ad50ba0f959088e4e083b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not to use redistribution. <br /></td></tr>
@@ -723,6 +739,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDiffusive</b></td
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isMobile</b></td></tr>
 <tr class="memdesc:acc5525eae4b28bdd085b242d67ac5a1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, solver is mobile, i.e. advection is turned on. <br /></td></tr>
 <tr class="separator:acc5525eae4b28bdd085b242d67ac5a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93ccebe88021c61bd261093653fe9b12" id="r_a93ccebe88021c61bd261093653fe9b12"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a93ccebe88021c61bd261093653fe9b12">m_diffusionGradientDrift</a></td></tr>
+<tr class="memdesc:a93ccebe88021c61bd261093653fe9b12"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, grad(D) is added to the particle drift.  <br /></td></tr>
+<tr class="separator:a93ccebe88021c61bd261093653fe9b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a102e31eab3cdf58100b390afbd6bac5a" id="r_a102e31eab3cdf58100b390afbd6bac5a"><td class="memItemLeft" align="right" valign="top"><a id="a102e31eab3cdf58100b390afbd6bac5a" name="a102e31eab3cdf58100b390afbd6bac5a"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotPhi</b></td></tr>
 <tr class="memdesc:a102e31eab3cdf58100b390afbd6bac5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for outputting m_phi to plot files. <br /></td></tr>
@@ -735,6 +754,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotVelocity</b></t
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotDiffCo</b></td></tr>
 <tr class="memdesc:abe9e7bdf7a18548a2f13572e8e2811c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for outputting m_diffusionFunction to plot files. <br /></td></tr>
 <tr class="separator:abe9e7bdf7a18548a2f13572e8e2811c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac783357f8054014eda45a09584364d52" id="r_ac783357f8054014eda45a09584364d52"><td class="memItemLeft" align="right" valign="top"><a id="ac783357f8054014eda45a09584364d52" name="ac783357f8054014eda45a09584364d52"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotDiffusionGradient</b></td></tr>
+<tr class="memdesc:ac783357f8054014eda45a09584364d52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for outputting m_diffusionGradient to plot files. <br /></td></tr>
+<tr class="separator:ac783357f8054014eda45a09584364d52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d9a240d402d0800d2420563b308e3f3" id="r_a4d9a240d402d0800d2420563b308e3f3"><td class="memItemLeft" align="right" valign="top"><a id="a4d9a240d402d0800d2420563b308e3f3" name="a4d9a240d402d0800d2420563b308e3f3"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotParticles</b></td></tr>
 <tr class="memdesc:a4d9a240d402d0800d2420563b308e3f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for depositing and plotting the bulk particles on the mesh. <br /></td></tr>
@@ -791,6 +814,9 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_velocityFu
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_diffusionFunction</b></td></tr>
 <tr class="memdesc:a1530feac364fec71833a2cc367538577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion-centerer field used for interpolating diffusion coefficients. <br /></td></tr>
 <tr class="separator:a1530feac364fec71833a2cc367538577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c9cedeae5f1456da3b2f301042d0971" id="r_a6c9cedeae5f1456da3b2f301042d0971"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a6c9cedeae5f1456da3b2f301042d0971">m_diffusionGradient</a></td></tr>
+<tr class="memdesc:a6c9cedeae5f1456da3b2f301042d0971"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction.  <br /></td></tr>
+<tr class="separator:a6c9cedeae5f1456da3b2f301042d0971"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad34c0550688c09afe97a3c990f1db62d" id="r_ad34c0550688c09afe97a3c990f1db62d"><td class="memItemLeft" align="right" valign="top">EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad34c0550688c09afe97a3c990f1db62d">m_kdMergeCellHistogram</a></td></tr>
 <tr class="memdesc:ad34c0550688c09afe97a3c990f1db62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>).  <br /></td></tr>
 <tr class="separator:ad34c0550688c09afe97a3c990f1db62d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1138,6 +1164,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. </p>
 <dl class="section return"><dt>Returns</dt><dd>Computed advective dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither &ndash; it is interpolated at the point of use and added to the displacement by the time stepper. The omission is deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model that made grad(D) comparable to the drift velocity would make these estimates optimistic. </dd></dl>
 
 </div>
 </div>
@@ -1173,6 +1200,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed advective dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does not account for the grad(D) drift correction &ndash; see <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5" title="Compute a time step for the advance – this calls the level function.">computeDt()</a>. </dd></dl>
 
 </div>
 </div>
@@ -1219,6 +1247,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed advective dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does not account for the grad(D) drift correction &ndash; see <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5" title="Compute a time step for the advance – this calls the level function.">computeDt()</a>. </dd></dl>
 
 </div>
 </div>
@@ -1357,6 +1386,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
+<a id="a539b80e8ccb1bbfab4aa6ce0114dbf78" name="a539b80e8ccb1bbfab4aa6ce0114dbf78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a539b80e8ccb1bbfab4aa6ce0114dbf78">&#9670;&#160;</a></span>computeDiffusionGradient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::computeDiffusionGradient </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the cell-centered gradient of the mesh diffusion field. </p>
+<p>Fills m_diffusionGradient with grad(Df), where Df is the mesh diffusion field, and then coarsens the result and updates its ghost cells. The caller must have brought m_diffusionFunction's own ghost cells up to date first &ndash; the gradient stencil reaches into them and across refinement boundaries. Does nothing when the solver is not diffusive or when ItoSolver.diffusion_grad_drift is false, in which case m_diffusionGradient is not allocated. </p>
+
+</div>
+</div>
 <a id="a4b93acc51df2b5bf6f6d69309027c646" name="a4b93acc51df2b5bf6f6d69309027c646"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4b93acc51df2b5bf6f6d69309027c646">&#9670;&#160;</a></span>computeDiffusiveDt() <span class="overload">[1/3]</span></h2>
 
@@ -1382,6 +1439,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles. </p>
 <dl class="section return"><dt>Returns</dt><dd>Computed diffusive dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither &ndash; it is interpolated at the point of use and added to the displacement by the time stepper. The omission is deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model that made grad(D) comparable to the drift velocity would make these estimates optimistic. </dd></dl>
 
 </div>
 </div>
@@ -1417,6 +1475,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed diffusive dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does not account for the grad(D) drift correction &ndash; see <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5" title="Compute a time step for the advance – this calls the level function.">computeDt()</a>. </dd></dl>
 
 </div>
 </div>
@@ -1463,6 +1522,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed diffusive dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does not account for the grad(D) drift correction &ndash; see <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5" title="Compute a time step for the advance – this calls the level function.">computeDt()</a>. </dd></dl>
 
 </div>
 </div>
@@ -1491,6 +1551,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Compute a time step for the advance &ndash; this calls the level function. </p>
 <p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p><dl class="section return"><dt>Returns</dt><dd>Computed dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither &ndash; it is interpolated at the point of use and added to the displacement by the time stepper. The omission is deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model that made grad(D) comparable to the drift velocity would make these estimates optimistic. </dd></dl>
 
 </div>
 </div>
@@ -1526,6 +1587,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does not account for the grad(D) drift correction &ndash; see <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5" title="Compute a time step for the advance – this calls the level function.">computeDt()</a>. </dd></dl>
 
 </div>
 </div>
@@ -1572,6 +1634,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Computed dt </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Does not account for the grad(D) drift correction &ndash; see <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5" title="Compute a time step for the advance – this calls the level function.">computeDt()</a>. </dd></dl>
 
 </div>
 </div>
@@ -3380,6 +3443,79 @@ template&lt;typename P , typename Traits &gt; </div>
 
 </div>
 </div>
+<a id="a48b8d183b19d1a4e71d17ea03577d183" name="a48b8d183b19d1a4e71d17ea03577d183"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48b8d183b19d1a4e71d17ea03577d183">&#9670;&#160;</a></span>interpolateDiffusionGradient() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::interpolateDiffusionGradient </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interpolate the mesh diffusion gradient onto the particles' scratch vector storage. </p>
+<p>This computes (grad D)(X_p) and writes it to the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns, from which the caller adds dt*(grad D) to the particle displacement. The scratch columns are set to zero when the solver is not diffusive or the drift correction is disabled, so callers may add the term unconditionally. Requires a preceding call to <a class="el" href="classItoSolver.html#a539b80e8ccb1bbfab4aa6ce0114dbf78" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>. </p>
+
+</div>
+</div>
+<a id="a7208794ff36b207c8cae3c04c21301f8" name="a7208794ff36b207c8cae3c04c21301f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7208794ff36b207c8cae3c04c21301f8">&#9670;&#160;</a></span>interpolateDiffusionGradient() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::interpolateDiffusionGradient </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>a_lvl</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_dit</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interpolate the mesh diffusion gradient onto the particles' scratch vector storage, on one patch. </p>
+<p>This computes (grad D)(X_p) and writes it to the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns. Requires a preceding call to <a class="el" href="classItoSolver.html#a539b80e8ccb1bbfab4aa6ce0114dbf78" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>. Public because the time steppers call it per patch, from inside their own OpenMP loops over boxes. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a06df3eb32ebb71b1858298b2b0d7dd0b" name="a06df3eb32ebb71b1858298b2b0d7dd0b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a06df3eb32ebb71b1858298b2b0d7dd0b">&#9670;&#160;</a></span>interpolateMobilities() <span class="overload">[1/2]</span></h2>
 
@@ -3861,6 +3997,34 @@ template&lt;typename P , typename Traits &gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a7b18662c972acf95033b5b66b43e0f3c" name="a7b18662c972acf95033b5b66b43e0f3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b18662c972acf95033b5b66b43e0f3c">&#9670;&#160;</a></span>isDiffusionGradientDrift()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoSolver::isDiffusionGradientDrift </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the grad(D) drift correction is enabled. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_diffusionGradientDrift. </dd></dl>
 
 </div>
 </div>
@@ -6030,6 +6194,56 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 
 <p>Class name. </p>
 <p><a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> for parent class &ndash; derived classes might be named something else. </p>
+
+</div>
+</div>
+<a id="a6c9cedeae5f1456da3b2f301042d0971" name="a6c9cedeae5f1456da3b2f301042d0971"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c9cedeae5f1456da3b2f301042d0971">&#9670;&#160;</a></span>m_diffusionGradient</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData ItoSolver::m_diffusionGradient</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction. </p>
+<p>Allocated only when the solver is diffusive and m_diffusionGradientDrift is true; otherwise this is a bare pointer holder. Recomputed from m_diffusionFunction by <a class="el" href="classItoSolver.html#a539b80e8ccb1bbfab4aa6ce0114dbf78" title="Compute the cell-centered gradient of the mesh diffusion field.">computeDiffusionGradient()</a>, so it carries no state across a regrid and is never checkpointed. </p>
+
+</div>
+</div>
+<a id="a93ccebe88021c61bd261093653fe9b12" name="a93ccebe88021c61bd261093653fe9b12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93ccebe88021c61bd261093653fe9b12">&#9670;&#160;</a></span>m_diffusionGradientDrift</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoSolver::m_diffusionGradientDrift</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If true, grad(D) is added to the particle drift. </p>
+<p>Set from ItoSolver.diffusion_grad_drift. An Ito-interpretation Euler-Maruyama update with a drift of v alone transports the flux v*n - grad(D*n); adding grad(D) to the drift makes it transport v*n - D*grad(n) instead, which is the flux <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> integrates. The two coincide only where D is constant in space. </p>
 
 </div>
 </div>

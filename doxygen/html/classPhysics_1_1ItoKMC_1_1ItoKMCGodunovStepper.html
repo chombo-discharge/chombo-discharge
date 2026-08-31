@@ -361,7 +361,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>computeSemiIm
 <tr class="memdesc:ac25558a7ebeac507bd8982dc504020d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance the particles using the Euler-Maruyama scheme.  <br /></td></tr>
 <tr class="separator:ac25558a7ebeac507bd8982dc504020d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f10fcf9743d2f006926f984cf65ad73" id="r_a5f10fcf9743d2f006926f984cf65ad73"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a5f10fcf9743d2f006926f984cf65ad73">diffuseParticlesEulerMaruyama</a> (Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt; &amp;a_rhoDaggerParticles, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a5f10fcf9743d2f006926f984cf65ad73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform the diffusive Ito advance in the Euler-Maruyama step.  <br /></td></tr>
+<tr class="memdesc:a5f10fcf9743d2f006926f984cf65ad73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform the explicit half of the Ito advance in the Euler-Maruyama step.  <br /></td></tr>
 <tr class="separator:a5f10fcf9743d2f006926f984cf65ad73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04ea4a8497227ead6396e95939a0fc80" id="r_a04ea4a8497227ead6396e95939a0fc80"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a04ea4a8497227ead6396e95939a0fc80">computeDiffusionTermCDR</a> (EBAMRCellData &amp;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a44ab83906043bbf5ab6621ad00c28eff">m_semiImplicitRhoCDR</a>, const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a04ea4a8497227ead6396e95939a0fc80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusion term for the CDR equations as well as the resulting CDR-contributions to the space charge density.  <br /></td></tr>
@@ -582,10 +582,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memitem:a80725850b9ff7f3de4798fa4bc4f4fe1 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a80725850b9ff7f3de4798fa4bc4f4fe1">reconcileCdrDensities</a> (const EBCellFAB &amp;a_newParticlesPerCell, const EBCellFAB &amp;a_oldParticlesPerCell, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a80725850b9ff7f3de4798fa4bc4f4fe1 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
 <tr class="separator:a80725850b9ff7f3de4798fa4bc4f4fe1 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad94c68661aaebd5d7c81eb40e1b26517 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_ad94c68661aaebd5d7c81eb40e1b26517"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>coarsenCDRSolvers</b> () noexcept</td></tr>
-<tr class="memdesc:ad94c68661aaebd5d7c81eb40e1b26517 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers. <br /></td></tr>
-<tr class="separator:ad94c68661aaebd5d7c81eb40e1b26517 inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c5fb4a621700bef48880b7867838bfb inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a9c5fb4a621700bef48880b7867838bfb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9c5fb4a621700bef48880b7867838bfb">coarsenCDRSolvers</a> (const bool a_interpGhosts) noexcept</td></tr>
+<tr class="memdesc:a9c5fb4a621700bef48880b7867838bfb inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers.  <br /></td></tr>
+<tr class="separator:a9c5fb4a621700bef48880b7867838bfb inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f165cf7747a84abe650c67ca1852ecf inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a5f165cf7747a84abe650c67ca1852ecf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a5f165cf7747a84abe650c67ca1852ecf">fillSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a5f165cf7747a84abe650c67ca1852ecf inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
 <tr class="separator:a5f165cf7747a84abe650c67ca1852ecf inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1718,11 +1717,11 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Perform the diffusive Ito advance in the Euler-Maruyama step. </p>
-<p>This computes the diffusion hop onto run-time enabled storage on the ItoParticles. We also store the </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Perform the explicit half of the Ito advance in the Euler-Maruyama step. </p>
+<p>This computes each particle's explicit displacement &ndash; the stochastic diffusion hop plus the lagged a_dt*grad(D) drift correction &ndash; and stores it on the <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> scratch vector columns. It also fills the "rho dagger" particles, which sit at the charged particles' positions displaced by that same amount. The grad(D) term belongs here rather than in the particle velocities because it is independent of E^(k+1): the rho dagger deposit accounts for it exactly, leaving the implicit half proportional to E^(k+1) as the semi-implicit Poisson operator requires. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_rhoDaggerParticles</td><td>Description </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Description "rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_rhoDaggerParticles</td><td>Point particles at the displaced positions, used for the space charge. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2228,7 +2227,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This sets X^(k+1) = X^k + a_dt * V + sqrt(2*D*a_dt) * W </p><dl class="section note"><dt>Note</dt><dd>The hop MUST have been stored on the particle run-time storage </dd></dl>
+<p>This sets X^(k+1) = X^k + a_dt*V + dX, where V = mu^k * E^(k+1) is the implicit half of the update and dX is the explicit displacement computed by diffuseParticlesEulerMaruyama, i.e. the diffusion hop plus the a_dt*grad(D) drift correction. </p><dl class="section note"><dt>Note</dt><dd>The explicit displacement MUST have been stored on the particle run-time storage </dd></dl>
 
 </div>
 </div>

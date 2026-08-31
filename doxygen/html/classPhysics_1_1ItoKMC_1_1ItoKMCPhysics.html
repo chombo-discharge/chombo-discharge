@@ -1463,7 +1463,7 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 </div><div class="memdoc">
 
 <p>Isotropic diffusion function for a particle. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>This is the stochastic hop alone; it carries no drift. In particular it does not contain the grad(D) correction that makes the Ito update transport v*n - D*grad(n) rather than v*n - grad(D*n) &ndash; that term is deterministic and is added to the particle displacement by the time stepper. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particle</td><td>Particle to diffuse </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>

@@ -81,6 +81,7 @@
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Îto diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-nabla-d-drift-correction">The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift correction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#itoparticle">ItoParticle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#itosolver">ItoSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#itospecies">ItoSpecies</a><ul>
@@ -188,13 +189,47 @@
 <span id="chap-itodiffusion"></span><h1>Îto diffusion<a class="headerlink" href="#ito-diffusion" title="Permalink to this heading"></a></h1>
 <p>The Îto diffusion model advances computational particles as drifting Brownian walkers</p>
 <div class="math notranslate nohighlight" id="equation-ito-diffusion">
-<span class="eqno">(9)<a class="headerlink" href="#equation-ito-diffusion" title="Permalink to this equation"></a></span>\[\Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}\]</div>
+<span class="eqno">(9)<a class="headerlink" href="#equation-ito-diffusion" title="Permalink to this equation"></a></span>\[\Delta\mathbf{X} = \left(\mathbf{V} + \nabla D\right)\Delta t + \sqrt{2D\Delta t}\mathbf{W}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the spatial position of a particle, <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> the particle drift velocity, and <span class="math notranslate nohighlight">\(D\)</span> is the diffusion coefficient <em>in the continuum limit</em>.
 The vector term <span class="math notranslate nohighlight">\(\mathbf{W}\)</span> indicates a random number sampled from a Gaussian distribution with mean value of 0 and standard deviation of 1.</p>
+<section id="the-nabla-d-drift-correction">
+<span id="chap-itodiffusiongradient"></span><h2>The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift correction<a class="headerlink" href="#the-nabla-d-drift-correction" title="Permalink to this heading"></a></h2>
+<p><a class="reference internal" href="#equation-ito-diffusion">Eq. 9</a> is an Îto-interpretation update, and the <span class="math notranslate nohighlight">\(\nabla D\)</span> term in its drift is what makes it
+transport the same diffusive flux as the fluid solvers.
+Without that term the update is <span class="math notranslate nohighlight">\(\Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}\)</span>,
+whose Fokker-Planck equation is</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial n}{\partial t} = -\nabla\cdot\left(\mathbf{V}n\right) + \nabla^2\left(Dn\right),\]</div>
+<p>i.e. it transports the flux <span class="math notranslate nohighlight">\(\mathbf{V}n - n\nabla D - D\nabla n\)</span>.
+<a class="reference internal" href="CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a> integrates</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial n}{\partial t} = -\nabla\cdot\left(\mathbf{V}n\right) + \nabla\cdot\left(D\nabla n\right),\]</div>
+<p>i.e. the flux <span class="math notranslate nohighlight">\(\mathbf{V}n - D\nabla n\)</span>.
+The two differ by <span class="math notranslate nohighlight">\(\nabla\cdot\left(n\nabla D\right)\)</span> and coincide exactly where <span class="math notranslate nohighlight">\(D\)</span> is constant in
+space, which is why the discrepancy is invisible in any test with a constant diffusion coefficient.
+Adding <span class="math notranslate nohighlight">\(\nabla D\)</span> to the drift, as <a class="reference internal" href="#equation-ito-diffusion">Eq. 9</a> does, recovers the fluid form; equivalently, it
+integrates the stochastic equation in the Hänggi-Klimontovich (anti-Îto) interpretation.</p>
+<p>The correction is on by default and can be turned off with</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoSolver.diffusion_grad_drift = true
+</pre></div>
+</div>
+<p>in which case the solver reverts to the plain Îto update and transports <span class="math notranslate nohighlight">\(\mathbf{V}n - \nabla\left(Dn\right)\)</span>.
+<code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> computes <span class="math notranslate nohighlight">\(\nabla D\)</span> from the mesh diffusion coefficient and interpolates it to the particle
+positions; it is the time stepper that adds <span class="math notranslate nohighlight">\(\Delta t\nabla D\)</span> to the particle displacement.
+Setting <code class="docutils literal notranslate"><span class="pre">ItoSolver.plt_vars</span></code> to include <code class="docutils literal notranslate"><span class="pre">grad_dco</span></code> writes <span class="math notranslate nohighlight">\(\nabla D\)</span> to the plot files.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The correction is defined for a scalar, isotropic <span class="math notranslate nohighlight">\(D\)</span>.
+It is also only meaningful when <span class="math notranslate nohighlight">\(D\)</span> is a mesh field: a solver that assigns particle diffusion
+coefficients parametrically from the particle energy has no mesh field whose gradient means anything.
+Finally, the time step estimates in <a class="reference internal" href="#chap-itotimestep"><span class="std std-ref">Computing time steps</span></a> do not account for this term – see the
+<code class="docutils literal notranslate"><span class="pre">computeDt</span></code> documentation for why.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The code for Îto diffusion is given in <code class="file docutils literal notranslate"><span class="pre">/Source/ItoDiffusion</span></code>.</p>
 </div>
+</section>
 <section id="itoparticle">
 <span id="chap-itoparticle"></span><h2>ItoParticle<a class="headerlink" href="#itoparticle" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> is used as the underlying particle type for running the Ito drift-diffusion solvers.
@@ -577,7 +612,7 @@ The flag <code class="docutils literal notranslate"><span class="pre">a_deletePa
 <p>After calling <code class="docutils literal notranslate"><span class="pre">intersectParticles</span></code>, the particles that crossed the EB or domain walls are available through the <code class="docutils literal notranslate"><span class="pre">getParticles</span></code> routine, see <a class="reference internal" href="#chap-itosolver"><span class="std std-ref">ItoSolver</span></a> and can then be parsed separately by user code.</p>
 </section>
 <section id="computing-time-steps">
-<h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this heading"></a></h2>
+<span id="chap-itotimestep"></span><h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this heading"></a></h2>
 <p>While <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> has no fundamental requirement on the time steps that can be used, several functions are available for computing various types of drift and diffusion related time steps.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -590,6 +625,13 @@ This routine is implemented as</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle.</span>
 <span class="cm"> * @return Computed advective dt</span>
+<span class="cm"> * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These</span>
+<span class="cm"> * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is</span>
+<span class="cm"> * interpolated at the point of use and added to the displacement by the time stepper. The omission is</span>
+<span class="cm"> * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer</span>
+<span class="cm"> * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the</span>
+<span class="cm"> * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model</span>
+<span class="cm"> * that made grad(D) comparable to the drift velocity would make these estimates optimistic.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">computeAdvectiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
@@ -605,6 +647,13 @@ This routine is implemented as</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles</span>
 <span class="cm"> * @return Computed diffusive dt</span>
+<span class="cm"> * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These</span>
+<span class="cm"> * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is</span>
+<span class="cm"> * interpolated at the point of use and added to the displacement by the time stepper. The omission is</span>
+<span class="cm"> * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer</span>
+<span class="cm"> * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the</span>
+<span class="cm"> * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model</span>
+<span class="cm"> * that made grad(D) comparable to the drift velocity would make these estimates optimistic.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
@@ -626,6 +675,13 @@ This routine is implemented as</p>
 <span class="cm"> * = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both</span>
 <span class="cm"> * advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD).</span>
 <span class="cm"> * @return Computed dt</span>
+<span class="cm"> * @note The grad(D) drift correction (ItoSolver.diffusion_grad_drift) is not accounted for here. These</span>
+<span class="cm"> * estimates are built from the particle velocity and diffusion columns, and grad(D) lives on neither -- it is</span>
+<span class="cm"> * interpolated at the point of use and added to the displacement by the time stepper. The omission is</span>
+<span class="cm"> * deliberate rather than an oversight: the correction displaces a particle by dt*grad(D), which for a streamer</span>
+<span class="cm"> * in atmospheric air (D ~ 0.1 m^2/s varying over ~10 um, so |grad D| ~ 1e4 m/s) is about two percent of the</span>
+<span class="cm"> * diffusion hop sqrt(2*D*dt) at dt = 1 ps, and the hop is what the diffusive limit already bounds. A model</span>
+<span class="cm"> * that made grad(D) comparable to the drift velocity would make these estimates optimistic.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
 <span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
@@ -741,7 +797,7 @@ The implementation uses the random number generators in <a class="reference inte
 <p>Several input options are available for configuring the run-time configuration of <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>, which are listed in <a class="reference internal" href="#itoinputoptions"><span class="std std-numref">Listing 27</span></a>.</p>
 <div class="literal-block-wrapper docutils container" id="itoinputoptions">
 <div class="code-block-caption"><span class="caption-number">Listing 27 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> class.
-All options are run-time configurable.</span><a class="headerlink" href="#itoinputoptions" title="Permalink to this code"></a></div>
+Most are run-time configurable; <code class="docutils literal notranslate"><span class="pre">seed</span></code> and <code class="docutils literal notranslate"><span class="pre">diffusion_grad_drift</span></code> are read once at setup.</span><a class="headerlink" href="#itoinputoptions" title="Permalink to this code"></a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># ItoSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
@@ -754,10 +810,11 @@ All options are run-time configurable.</span><a class="headerlink" href="#itoinp
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_cell_dist</span>       <span class="o">=</span> <span class="mi">1</span>              <span class="c1">## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">nn_pair_max_rounds</span>          <span class="o">=</span> <span class="mi">3</span>              <span class="c1">## nn_pair_tree/nn_pair_onecell/nn_pair_hash: max drain rounds per merge (stops early on convergence)</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">kd_split_weight_leaf_dx</span>     <span class="o">=</span> <span class="mf">1.0</span>            <span class="c1">## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>                    <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>    <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>                    <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>    <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;grad_dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>            <span class="o">=</span> <span class="n">bisection</span>      <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>                 <span class="o">=</span> <span class="mf">1.E-4</span>          <span class="c1">## Bisection step length for intersection tests</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>                  <span class="o">=</span> <span class="mf">5.0</span>            <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">diffusion_grad_drift</span>        <span class="o">=</span> <span class="n">true</span>           <span class="c1">## Add grad(D) to the drift so the particles transport D*grad(n), as CdrSolver does</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>                <span class="o">=</span> <span class="n">false</span>          <span class="c1">## Turn on/off redistribution.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>          <span class="o">=</span> <span class="n">false</span>          <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>               <span class="o">=</span> <span class="n">particles</span>      <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>

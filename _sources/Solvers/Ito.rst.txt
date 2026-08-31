@@ -8,10 +8,56 @@ The Îto diffusion model advances computational particles as drifting Brownian w
 .. math::
    :label: ito_diffusion
 	   
-   \Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}
+   \Delta\mathbf{X} = \left(\mathbf{V} + \nabla D\right)\Delta t + \sqrt{2D\Delta t}\mathbf{W}
 
 where :math:`\mathbf{X}` is the spatial position of a particle, :math:`\mathbf{V}` the particle drift velocity, and :math:`D` is the diffusion coefficient *in the continuum limit*.
 The vector term :math:`\mathbf{W}` indicates a random number sampled from a Gaussian distribution with mean value of 0 and standard deviation of 1.
+
+.. _Chap:ItoDiffusionGradient:
+
+The :math:`\nabla D` drift correction
+-------------------------------------
+
+:eq:`ito_diffusion` is an Îto-interpretation update, and the :math:`\nabla D` term in its drift is what makes it
+transport the same diffusive flux as the fluid solvers.
+Without that term the update is :math:`\Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}`,
+whose Fokker-Planck equation is
+
+.. math::
+
+   \frac{\partial n}{\partial t} = -\nabla\cdot\left(\mathbf{V}n\right) + \nabla^2\left(Dn\right),
+
+i.e. it transports the flux :math:`\mathbf{V}n - n\nabla D - D\nabla n`.
+:ref:`Chap:CdrSolver` integrates
+
+.. math::
+
+   \frac{\partial n}{\partial t} = -\nabla\cdot\left(\mathbf{V}n\right) + \nabla\cdot\left(D\nabla n\right),
+
+i.e. the flux :math:`\mathbf{V}n - D\nabla n`.
+The two differ by :math:`\nabla\cdot\left(n\nabla D\right)` and coincide exactly where :math:`D` is constant in
+space, which is why the discrepancy is invisible in any test with a constant diffusion coefficient.
+Adding :math:`\nabla D` to the drift, as :eq:`ito_diffusion` does, recovers the fluid form; equivalently, it
+integrates the stochastic equation in the Hänggi-Klimontovich (anti-Îto) interpretation.
+
+The correction is on by default and can be turned off with
+
+.. code-block:: text
+
+   ItoSolver.diffusion_grad_drift = true
+
+in which case the solver reverts to the plain Îto update and transports :math:`\mathbf{V}n - \nabla\left(Dn\right)`.
+``ItoSolver`` computes :math:`\nabla D` from the mesh diffusion coefficient and interpolates it to the particle
+positions; it is the time stepper that adds :math:`\Delta t\nabla D` to the particle displacement.
+Setting ``ItoSolver.plt_vars`` to include ``grad_dco`` writes :math:`\nabla D` to the plot files.
+
+.. note::
+
+   The correction is defined for a scalar, isotropic :math:`D`.
+   It is also only meaningful when :math:`D` is a mesh field: a solver that assigns particle diffusion
+   coefficients parametrically from the particle energy has no mesh field whose gradient means anything.
+   Finally, the time step estimates in :ref:`Chap:ItoTimeStep` do not account for this term -- see the
+   ``computeDt`` documentation for why.
 
 .. tip::
    
@@ -157,7 +203,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 917-928
+   :lines: 956-967
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -320,6 +366,8 @@ The flag ``a_deleteParticles`` specifies if the original particles should be del
 
 After calling ``intersectParticles``, the particles that crossed the EB or domain walls are available through the ``getParticles`` routine, see :ref:`Chap:ItoSolver` and can then be parsed separately by user code. 
 
+.. _Chap:ItoTimeStep:
+
 Computing time steps
 --------------------
 
@@ -337,7 +385,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1052-1057
+   :lines: 1100-1112
    :dedent: 2
 
 which returns a CFL-like condition
@@ -353,7 +401,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1076-1081
+   :lines: 1133-1145
    :dedent: 2
 
 which returns a CFL-like condition
@@ -371,7 +419,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 954-964
+   :lines: 993-1010
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -390,7 +438,7 @@ The entry point for splitting and merging is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 862-868
+   :lines: 901-907
    :dedent: 2
 
 Calling this function will merge/split the particles.
@@ -509,7 +557,7 @@ Several input options are available for configuring the run-time configuration o
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.options
    :name: ItoInputOptions
    :caption: Input options for the ``ItoSolver`` class.
-	     All options are run-time configurable.
+	     Most are run-time configurable; ``seed`` and ``diffusion_grad_drift`` are read once at setup.
 	     
 
 Plot file variables

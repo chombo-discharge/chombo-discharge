@@ -385,9 +385,8 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>Physics::ItoKMC::KMC
 using&#160;</td><td class="memItemRight" valign="bottom"><b>Physics::ItoKMC::KMCSolverType</b> = <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a>, <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa1768b8abe941660e8a9a9">KMCState</a>, <a class="el" href="CD__ItoKMCPhysics_8H.html#a9d925e020399fbcb9b67cc8a8c751694">FPR</a> &gt;</td></tr>
 <tr class="memdesc:a3125af9aa2e74060b4fd0751a02c4a46"><td class="mdescLeft">&#160;</td><td class="mdescRight">KMC solver type used in the Kinetic Monte Carlo advancement. <br /></td></tr>
 <tr class="separator:a3125af9aa2e74060b4fd0751a02c4a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af239bef953a1c981907a54033285c3d8" id="r_af239bef953a1c981907a54033285c3d8"><td class="memItemLeft" align="right" valign="top"><a id="af239bef953a1c981907a54033285c3d8" name="af239bef953a1c981907a54033285c3d8"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>Physics::ItoKMC::DiffusionFunction</b> = std::function&lt; RealVect(const <a class="el" href="structItoParticle.html">ItoParticle</a> &amp;p, const Real &amp;a_dt)&gt;</td></tr>
-<tr class="memdesc:af239bef953a1c981907a54033285c3d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Basic function for diffusing a particle. <br /></td></tr>
+<tr class="memitem:af239bef953a1c981907a54033285c3d8" id="r_af239bef953a1c981907a54033285c3d8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__ItoKMCPhysics_8H.html#af239bef953a1c981907a54033285c3d8">Physics::ItoKMC::DiffusionFunction</a> = std::function&lt; RealVect(const <a class="el" href="structItoParticle.html">ItoParticle</a> &amp;p, const Real &amp;a_dt)&gt;</td></tr>
+<tr class="memdesc:af239bef953a1c981907a54033285c3d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Basic function for diffusing a particle.  <br /></td></tr>
 <tr class="separator:af239bef953a1c981907a54033285c3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
@@ -401,7 +400,25 @@ Enumerations</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Declaration of the <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">Physics::ItoKMC::ItoKMCPhysics</a> abstract base class. </p>
 <dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
-</div><h2 class="groupheader">Enumeration Type Documentation</h2>
+</div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="af239bef953a1c981907a54033285c3d8" name="af239bef953a1c981907a54033285c3d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af239bef953a1c981907a54033285c3d8">&#9670;&#160;</a></span>DiffusionFunction</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="CD__ItoKMCPhysics_8H.html#af239bef953a1c981907a54033285c3d8">Physics::ItoKMC::DiffusionFunction</a> = typedef std::function&lt;RealVect(const <a class="el" href="structItoParticle.html">ItoParticle</a>&amp; p, const Real&amp; a_dt)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Basic function for diffusing a particle. </p>
+<p>Returns the stochastic diffusion hop only. The grad(D) drift correction that makes the particles transport the same diffusive flux as the CDR solvers is a separate, deterministic term, added to the displacement by the time stepper &ndash; see <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a5f10fcf9743d2f006926f984cf65ad73" title="Perform the explicit half of the Ito advance in the Euler-Maruyama step.">ItoKMCGodunovStepper::diffuseParticlesEulerMaruyama</a>. When the stepper calls this function the particle's scratch vector columns (p.scratch_x etc.) hold grad(D) at the particle position, which a diffusion model may read but must not assume it can write. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="ac739724a1bd29688091b459d5b183731" name="ac739724a1bd29688091b459d5b183731"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac739724a1bd29688091b459d5b183731">&#9670;&#160;</a></span>SpeciesType</h2>
 

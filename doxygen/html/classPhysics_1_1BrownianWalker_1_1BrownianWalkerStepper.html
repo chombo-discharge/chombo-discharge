@@ -1321,7 +1321,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </div><div class="memdoc">
 
 <p>Set the mesh diffusion function on the solver. </p>
-<p>Sets a sentinel large value since actual per-particle diffusion is assigned directly. </p>
+<p>Sets the spatially uniform coefficient m_diffCo. The per-particle diffusion coefficients are assigned directly through <a class="el" href="classItoSolver.html#a91cf8bc00557256cd5500eedb47ee557" title="Sets diffusion coefficient for all particles.">ItoSolver::setParticleDiffusion</a>, so this field does not move the walkers, but it is the field that is plotted as 'dco' and the field a grad(D) drift correction would differentiate. </p>
 
 </div>
 </div>

@@ -103,6 +103,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reactive-field-centering">Reactive field centering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-nabla-d-drift-correction">The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift correction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
@@ -343,6 +344,34 @@ The drift update keeps using <span class="math notranslate nohighlight">\(\mathb
 pairing assumed by the semi-implicit Poisson operator.</p>
 </div>
 </section>
+<section id="the-nabla-d-drift-correction">
+<h3>The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift correction<a class="headerlink" href="#the-nabla-d-drift-correction" title="Permalink to this heading"></a></h3>
+<p>The particles are advanced with the drift <span class="math notranslate nohighlight">\(\mathbf{V} + \nabla D\)</span> rather than <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> alone, so
+that they transport the same diffusive flux as the CDR solvers – see <a class="reference internal" href="../Solvers/Ito.html#chap-itodiffusiongradient"><span class="std std-ref">The \nabla D drift correction</span></a> for why the
+term is there and how to turn it off.</p>
+<p>Where the term is applied matters for the semi-implicit coupling.
+The transport step splits the particle update as</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{X}^{k+1} = \mathbf{X}^k + \underbrace{\sqrt{2D^k\Delta t}\mathbf{W} + \Delta t\nabla D^k}_{\textrm{explicit}}
++ \underbrace{\Delta t\mu^k\mathbf{E}^{k+1}\left(\mathbf{X}^k\right)}_{\textrm{implicit}},\]</div>
+<p>and the semi-implicit Poisson equation</p>
+<div class="math notranslate nohighlight">
+\[\nabla\cdot\left[\left(\epsilon + \Delta t\sigma^k\right)\nabla\Phi^{k+1}\right] = -\rho^\dagger\]</div>
+<p>is exact only because <span class="math notranslate nohighlight">\(\rho^\dagger\)</span> is deposited from particles displaced by everything <em>except</em> the
+<span class="math notranslate nohighlight">\(\Delta t\mu\mathbf{E}^{k+1}\)</span> term, and because that remaining term is linear in <span class="math notranslate nohighlight">\(\mathbf{E}^{k+1}\)</span>.
+<span class="math notranslate nohighlight">\(\nabla D^k\)</span> is lagged and independent of the field, so it belongs in the explicit half, next to the
+stochastic hop, where <span class="math notranslate nohighlight">\(\rho^\dagger\)</span> accounts for it exactly.
+Nothing about the Poisson operator, the conductivity, or the final update changes.
+This is the same treatment the CDR half of the step already gives the explicit
+<span class="math notranslate nohighlight">\(\Delta t\nabla\cdot\left(D\nabla n^k\right)\)</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Enabling this correction changes results for any simulation whose diffusion coefficient varies in space,
+which includes every model using a tabulated <span class="math notranslate nohighlight">\(D\left(E/N\right)\)</span>.
+The uncorrected particle swarm lags the fluid solution by of order <span class="math notranslate nohighlight">\(\left|\nabla D\right|/\left|\mathbf{V}\right|\)</span>,
+which is a few percent at a streamer head in atmospheric air.</p>
+</div>
+</section>
 <section id="spatial-filtering">
 <h3>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h3>
 <p>It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
@@ -447,6 +476,11 @@ The difference between <code class="docutils literal notranslate"><span class="p
 
 <span class="cm">/**</span>
 <span class="cm"> * @brief Basic function for diffusing a particle</span>
+<span class="cm"> * @details Returns the stochastic diffusion hop only. The grad(D) drift correction that makes the particles</span>
+<span class="cm"> * transport the same diffusive flux as the CDR solvers is a separate, deterministic term, added to the</span>
+<span class="cm"> * displacement by the time stepper -- see ItoKMCGodunovStepper::diffuseParticlesEulerMaruyama. When the stepper</span>
+<span class="cm"> * calls this function the particle&#39;s scratch vector columns (p.scratch_x etc.) hold grad(D) at the particle</span>
+<span class="cm"> * position, which a diffusion model may read but must not assume it can write.</span>
 <span class="cm"> */</span>
 <span class="k">using</span><span class="w"> </span><span class="n">DiffusionFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
 
@@ -1091,6 +1125,9 @@ The difference between <code class="docutils literal notranslate"><span class="p
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Isotropic diffusion function for a particle</span>
+<span class="cm">   * @details This is the stochastic hop alone; it carries no drift. In particular it does not contain the</span>
+<span class="cm">   * grad(D) correction that makes the Ito update transport v*n - D*grad(n) rather than v*n - grad(D*n) -- that</span>
+<span class="cm">   * term is deterministic and is added to the particle displacement by the time stepper.</span>
 <span class="cm">   * @param[in] a_particle Particle to diffuse</span>
 <span class="cm">   * @param[in] a_dt Time step</span>
 <span class="cm">   * @return Returns sqrt(2 * D * a_dt) * N(0,1), where N(0,1) is a normal distribution</span>
