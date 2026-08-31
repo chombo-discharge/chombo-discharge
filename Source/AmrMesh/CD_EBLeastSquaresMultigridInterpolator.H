@@ -136,12 +136,6 @@ public:
 
   /**
    * @brief Do inhomogeneous interpolation
-   * @details This fills the fine-grid ghost cells across the coarse-fine interface, interpolating them from the
-   * coarse grid. The coarse data is fetched into an internal buffer on the coarsened fine grids, so a_phiCoar's
-   * own ghost cells are not read and need not be valid.
-   * @note This routine does not exchange, and on return a_phiFine's ghost cells are not consistent: the ones
-   * covered by a neighbouring patch on the fine level are not part of the coarse-fine region and are never
-   * filled here. The caller must exchange a_phiFine before anything reads its ghost cells.
    * @param[in,out] a_phiFine   Fine phi
    * @param[in]    a_phiCoar   Coarse phi
    * @param[in]    a_variables Variables to interpolate
