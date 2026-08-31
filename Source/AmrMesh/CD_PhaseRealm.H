@@ -58,6 +58,7 @@ static const std::string s_noncons_div         = "eb_non_cons_div";     // For c
 static const std::string s_eb_multigrid        = "eb_multigrid";        // For multigrid interpolation
 static const std::string s_levelset            = "levelset";            // For putting level-set on mesh
 static const std::string s_particle_mesh       = "particle_mesh";       // For doing particle-mesh operations.
+static const std::string s_mirror_deposition   = "mirror_deposition";   // For mirrored cut-cell deposition.
 
 /**
  * @brief Class that holds important things for doing AMR over a specific phase and processor distribution.
@@ -123,6 +124,9 @@ public:
    * @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
    * @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
    * @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
+   * @param[in] a_mirrorBandRadius Mirror deposition: band half-width in cells. Must not exceed a_numGhost.
+   * @param[in] a_mirrorCondTol    Mirror deposition: smallest permitted eigenvalue ratio in the curvature fit.
+   * @param[in] a_mirrorCreaseTol  Mirror deposition: largest permitted fit residual before falling back to J = 1.
    * @param[in] a_centroidStencil  Stencil type for interpolation from cell centers to cell centroids
    * @param[in] a_ebStencil        Stencil type for interpolation from cell centers to eb centroids
    * @param[in] a_baseif           Implicit/signed distance function
@@ -142,6 +146,9 @@ public:
          const int                             a_mgInterpOrder,
          const int                             a_mgInterpRadius,
          const int                             a_mgInterpWeight,
+         const int                             a_mirrorBandRadius,
+         const Real                            a_mirrorCondTol,
+         const Real                            a_mirrorCreaseTol,
          const CellCentroidInterpolation::Type a_centroidStencil,
          const EBCentroidInterpolation::Type   a_ebStencil,
          const RefCountedPtr<BaseIF>&          a_baseif,
@@ -441,6 +448,23 @@ public:
   const EBAMRCellData&
   getIrregularCells() const;
 
+  /**
+   * @brief Get the per-band-cell surface data used by mirrored deposition.
+   * @details Empty unless the s_mirror_deposition operator was registered. Component layout is in
+   * CD_MirrorDeposition.H.
+   * @return m_mirrorSurfaceData
+   */
+  const EBAMRCellData&
+  getMirrorSurfaceData() const;
+
+  /**
+   * @brief Get, per level, whether that level has any cut cell anywhere in the domain.
+   * @details All-reduced, so the answer is the same on every rank. Nonzero means the level has cut cells.
+   * @return m_mirrorHasCutCells
+   */
+  const Vector<int>&
+  getMirrorHasCutCells() const;
+
 protected:
   /**
    * @brief True if things on this phase can be defined. False otherwise. Only used internally.
@@ -598,6 +622,39 @@ protected:
    * @brief Cell mask with value 1 in irregular (cut) cells and 0 elsewhere.
    */
   EBAMRCellData m_irregularCells;
+
+  /**
+   * @brief Per-band-cell local surface patch used by mirrored deposition: (status, x_c, n_c, S_c).
+   * @details Eight components in 2-D, thirteen in 3-D; the layout is defined by CD_MirrorDeposition.H. Regrid
+   * lifetime, so not mutable -- the m_irregularCells convention. Only built when the s_mirror_deposition operator is
+   * registered, because it is not cheap: at the shipped defaults it costs roughly 430 MB per level, per phase, per
+   * realm, against 131 MB for the four cell masks together.
+   */
+  EBAMRCellData m_mirrorSurfaceData;
+
+  /**
+   * @brief Per level, whether the level has any cut cell ANYWHERE in the domain.
+   * @details All-reduced across ranks, and that is load-bearing rather than tidy: the mirror pass early-outs on this,
+   * and the pass contains a collective remap, so a per-rank answer would deadlock the ranks that disagree.
+   * @details Held as int rather than bool because Chombo's Vector<T>::operator[] returns T&, which the
+   * std::vector<bool> proxy specialization cannot provide -- Vector<bool> does not compile.
+   */
+  Vector<int> m_mirrorHasCutCells;
+
+  /**
+   * @brief Mirror deposition: band half-width in cells.
+   */
+  int m_mirrorBandRadius;
+
+  /**
+   * @brief Mirror deposition: smallest permitted eigenvalue ratio of U^T U in the shape-operator fit.
+   */
+  Real m_mirrorConditionTolerance;
+
+  /**
+   * @brief Mirror deposition: largest permitted dimensionless residual of the shape-operator fit.
+   */
+  Real m_mirrorCreaseTolerance;
 
   /**
    * @brief Cut-cell iterator (all irregular cells)
@@ -788,6 +845,16 @@ protected:
    */
   void
   defineParticleMesh();
+
+  /**
+   * @brief Build the per-band-cell surface data used by mirrored cut-cell deposition.
+   * @details Runs three passes over each level: seed the cut cells from EBISBox, fit the shape operator over the
+   * 5^D neighbourhood, then extend the result outwards to the band. An exchange separates each pass from the next,
+   * and the ORDER MATTERS -- see the implementation.
+   * @param[in] a_lmin Coarsest level that changed.
+   */
+  void
+  defineMirrorSurfaceData(const int a_lmin);
 
   /**
    * @brief Define gradient stencils

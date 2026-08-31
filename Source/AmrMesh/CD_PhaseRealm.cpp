@@ -10,9 +10,14 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <cmath>
+#include <limits>
+
 // Chombo includes
 #include <EBArith.H>
 #include <ParmParse.H>
+#include <BoxIterator.H>
 #include <BaseIVFactory.H>
 #include <EBCellFactory.H>
 #include <EBFluxFactory.H>
@@ -24,6 +29,10 @@
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
 #include <CD_MemoryReport.H>
 #include <CD_BoxLoops.H>
+#include <CD_DataOps.H>
+#include <CD_Location.H>
+#include <CD_ParallelOps.H>
+#include <CD_MirrorDeposition.H>
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false)
@@ -57,6 +66,9 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
                    const int                             a_mgInterpOrder,
                    const int                             a_mgInterpRadius,
                    const int                             a_mgInterpWeight,
+                   const int                             a_mirrorBandRadius,
+                   const Real                            a_mirrorCondTol,
+                   const Real                            a_mirrorCreaseTol,
                    const CellCentroidInterpolation::Type a_centroidStencil,
                    const EBCentroidInterpolation::Type   a_ebStencil,
                    const RefCountedPtr<BaseIF>&          a_baseif,
@@ -74,6 +86,9 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
   m_numGhostCells                 = a_numGhost;
   m_numLsfGhostCells              = a_lsfGhost;
   m_redistributionRadius          = a_redistRad;
+  m_mirrorBandRadius              = a_mirrorBandRadius;
+  m_mirrorConditionTolerance      = a_mirrorCondTol;
+  m_mirrorCreaseTolerance         = a_mirrorCreaseTol;
   m_multigridInterpolationOrder   = a_mgInterpOrder;
   m_multigridInterpolationRadius  = a_mgInterpRadius;
   m_multigridInterpolationWeight  = a_mgInterpWeight;
@@ -332,6 +347,18 @@ PhaseRealm::regridOperators(const int a_lmin)
     }
 
     if (m_profile) {
+      pout() << "before/after mirror surface data define" << endl;
+      MemoryReport::getMaxMinMemoryUsage();
+    }
+    timer.startEvent("Mirror surface data");
+    this->defineMirrorSurfaceData(a_lmin);
+    timer.stopEvent("Mirror surface data");
+    if (m_profile) {
+      MemoryReport::getMaxMinMemoryUsage();
+      pout() << endl;
+    }
+
+    if (m_profile) {
       pout() << "before/after levelset define" << endl;
       MemoryReport::getMaxMinMemoryUsage();
     }
@@ -361,7 +388,7 @@ PhaseRealm::registerOperator(const std::string& a_operator)
   if (!(a_operator == s_eb_coar_ave || a_operator == s_eb_fill_patch || a_operator == s_eb_fine_interp ||
         a_operator == s_eb_flux_reg || a_operator == s_eb_redist || a_operator == s_noncons_div ||
         a_operator == s_eb_gradient || a_operator == s_particle_mesh || a_operator == s_eb_irreg_interp ||
-        a_operator == s_eb_multigrid || a_operator == s_levelset)) {
+        a_operator == s_eb_multigrid || a_operator == s_levelset || a_operator == s_mirror_deposition)) {
 
     const std::string str = "PhaseRealm::registerOperator - unknown operator '" + a_operator + "' requested";
     MayDay::Error(str.c_str());
@@ -888,6 +915,516 @@ PhaseRealm::defineParticleMesh()
 }
 
 void
+PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
+{
+  CH_TIME("PhaseRealm::defineMirrorSurfaceData");
+  if (m_verbose) {
+    pout() << "PhaseRealm::defineMirrorSurfaceData" << endl;
+  }
+
+  const bool doThisOperator = this->queryOperator(s_mirror_deposition);
+
+  m_mirrorSurfaceData.resize(1 + m_finestLevel);
+  m_mirrorHasCutCells.resize(1 + m_finestLevel, 0);
+
+  if (!doThisOperator) {
+    return;
+  }
+
+  // Two independent requirements, and they must stay independent: eb_ghost sizes the region over which EBISBox
+  // geometric data is valid, while num_ghost sizes the DATA and is therefore what the exchanges below can deliver.
+  // Deriving one from the other has been a recurring mistake; do not.
+  if (m_numEbGhostsCells < 2) {
+    MayDay::Error("PhaseRealm::defineMirrorSurfaceData - mirrored deposition needs 'AmrMesh.eb_ghost' >= 2 so that "
+                  "EBISBox is valid over the 5^D curvature-fit stencil");
+  }
+  if (m_numGhostCells < m_mirrorBandRadius) {
+    MayDay::Error("PhaseRealm::defineMirrorSurfaceData - mirrored deposition needs 'AmrMesh.num_ghost' >= "
+                  "'AmrMesh.mirror_band_radius' so that the exchange delivers the cut-cell data the band reads");
+  }
+
+  constexpr int fitStencilRadius = 2;
+
+  // Counters, reduced at the end. fitOk/fallback are about the CURVATURE; bandNoCutCell is about the GRIDS, which is
+  // why they are counted apart -- a run that trips the first has under-resolved geometry, a run that trips the second
+  // has a level whose grids do not cover the embedded-boundary band.
+  long long fitOk               = 0;
+  long long fitTooFewNeighbours = 0;
+  long long fitIllConditioned   = 0;
+  long long fitCrease           = 0;
+  long long bandNoCutCell       = 0;
+
+  for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = m_grids[lvl];
+    const EBISLayout&        ebisl = m_ebisl[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
+    const Real               dx    = m_dx[lvl];
+
+    m_mirrorSurfaceData[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(
+      new LevelData<EBCellFAB>(dbl, MirrorDeposition::numComp, m_numGhostCells * IntVect::Unit, EBCellFactory(ebisl)));
+
+    // Zero first, so that a cell nothing writes carries Status::None by default rather than by accident.
+    DataOps::setValue(*m_mirrorSurfaceData[lvl], 0.0);
+
+    const int nbox = dit.size();
+
+    // ---------------------------------------------------------------------------------------------------------
+    // Pass A -- seed the cut cells of the VALID box with their centroid and normal.
+    // ---------------------------------------------------------------------------------------------------------
+    long long numCutCells = 0;
+
+#pragma omp parallel for schedule(runtime) reduction(+ : numCutCells)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&     surf    = (*m_mirrorSurfaceData[lvl])[din];
+      BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
+      const EBISBox& ebisbox = surf.getEBISBox();
+
+      // Use the realm's own cut-cell iterator rather than re-deriving the irregular set: it is built in regridBase
+      // from the same EBISBox and is the iteration every other operator here uses, so the two cannot drift apart.
+      VoFIterator& vofit = (*m_vofIter[lvl])[din];
+
+      for (vofit.reset(); vofit.ok(); ++vofit) {
+        const VolIndex& vof = vofit();
+        const IntVect&  iv  = vof.gridIndex();
+
+        // Multiply-cut cells are refined away by this project's workflows, but nothing in the library enforces that,
+        // so skip them rather than pick one of the two VoFs arbitrarily -- a position alone cannot select a VoF.
+        if (ebisbox.numVoFs(iv) != 1) {
+          continue;
+        }
+
+        // Location::position multiplies by dx (see its 'ret *= a_dx'), so this is a physical position. Do NOT
+        // difference raw bndryCentroid values from different cells: that drops the inter-cell offset and inflates the
+        // fitted curvature by about an order of magnitude.
+        const RealVect xc = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+        const RealVect nc = ebisbox.normal(vof);
+
+        // Provisional: a valid plane, upgraded to a fitted patch by pass B if the fit succeeds.
+        surfReg(iv, MirrorDeposition::compStatus) = static_cast<Real>(MirrorDeposition::Status::Planar);
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          surfReg(iv, MirrorDeposition::compCentroid + dir) = xc[dir];
+          surfReg(iv, MirrorDeposition::compNormal + dir)   = nc[dir];
+        }
+
+        numCutCells++;
+      }
+    }
+
+    m_mirrorSurfaceData[lvl]->exchange();
+
+    // ---------------------------------------------------------------------------------------------------------
+    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell.
+    // ---------------------------------------------------------------------------------------------------------
+#pragma omp parallel for schedule(runtime) reduction(+ : fitOk, fitTooFewNeighbours, fitIllConditioned, fitCrease)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&     surf    = (*m_mirrorSurfaceData[lvl])[din];
+      BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
+      const EBISBox& ebisbox = surf.getEBISBox();
+
+      const Box validBox = dbl[din];
+
+      // Clip to the EBISBox region as well as to the data FAB. A LevelData ghost box is not clipped to the problem
+      // domain, but EBISBox only holds data over its own region, so a box on the domain edge would otherwise ask
+      // EBISBox about cells it has nothing for.
+      const Box readBox = grow(validBox, fitStencilRadius) & surfReg.box() & ebisbox.getRegion();
+
+      for (BoxIterator bit(validBox); bit.ok(); ++bit) {
+        const IntVect& iv = bit();
+
+        if (surfReg(iv, MirrorDeposition::compStatus) < 0.5) {
+          continue;
+        }
+
+        RealVect xi;
+        RealVect ni;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          xi[dir] = surfReg(iv, MirrorDeposition::compCentroid + dir);
+          ni[dir] = surfReg(iv, MirrorDeposition::compNormal + dir);
+        }
+
+        // Orthonormal tangent basis. Cross the normal with the axis it is least aligned with, so the cross product is
+        // never near-degenerate. This basis is LOCAL TO THE FIT and is discarded at the end of it -- the shape
+        // operator is stored in world coordinates precisely so that no later reader has to agree with this choice.
+        RealVect tangents[MirrorDeposition::numTangents];
+        {
+          int minDir = 0;
+          for (int dir = 1; dir < SpaceDim; dir++) {
+            if (std::abs(ni[dir]) < std::abs(ni[minDir])) {
+              minDir = dir;
+            }
+          }
+
+          RealVect axis = RealVect::Zero;
+          axis[minDir]  = 1.0;
+
+#if CH_SPACEDIM == 2
+          tangents[0] = RealVect(-ni[1], ni[0]);
+#else
+          RealVect t1 = RealVect(ni[1] * axis[2] - ni[2] * axis[1],
+                                 ni[2] * axis[0] - ni[0] * axis[2],
+                                 ni[0] * axis[1] - ni[1] * axis[0]);
+          RealVect t2 = RealVect::Zero;
+
+          const Real t1len = t1.vectorLength();
+          if (t1len > 0.0) {
+            t1 /= t1len;
+            t2 = RealVect(ni[1] * t1[2] - ni[2] * t1[1], ni[2] * t1[0] - ni[0] * t1[2], ni[0] * t1[1] - ni[1] * t1[0]);
+
+            const Real t2len = t2.vectorLength();
+            if (t2len > 0.0) {
+              t2 /= t2len;
+            }
+          }
+
+          tangents[0] = t1;
+          tangents[1] = t2;
+#endif
+        }
+
+        // Least-squares fit of the shape operator: minimize sum_j |v_j - S u_j|^2 over the tangential displacement
+        // u_j and tangential normal-difference v_j of the neighbouring cut cells.
+        constexpr int T = MirrorDeposition::numTangents;
+
+        Real A[T][T] = {};
+        Real B[T][T] = {};
+        Real uNormSq = 0.0;
+
+        int numUsable = 0;
+
+        // Neighbour data is read FROM THE FIELD, never from EBISBox. That is what enforces the delivered-not-merely-
+        // existing rule: a cut cell that no box on this level owns was never seeded and never exchanged, so it reads
+        // back as Status::None here even though EBISBox can see it. Reading EBISBox instead would fit a patch to
+        // geometry this level has no data for.
+        Box window(iv - fitStencilRadius * IntVect::Unit, iv + fitStencilRadius * IntVect::Unit);
+        window &= readBox;
+
+        for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
+          const IntVect& jv = nbrIt();
+
+          if (jv == iv) {
+            continue;
+          }
+          if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
+            continue;
+          }
+          if (ebisbox.numVoFs(jv) != 1) {
+            continue;
+          }
+
+          RealVect xj;
+          RealVect nj;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
+            nj[dir] = surfReg(jv, MirrorDeposition::compNormal + dir);
+          }
+
+          const RealVect dxj = xj - xi;
+          const RealVect dnj = nj - ni;
+
+          Real u[T];
+          Real v[T];
+
+          for (int a = 0; a < T; a++) {
+            u[a] = tangents[a].dotProduct(dxj);
+            v[a] = tangents[a].dotProduct(dnj);
+          }
+
+          for (int a = 0; a < T; a++) {
+            uNormSq += u[a] * u[a];
+
+            for (int b = 0; b < T; b++) {
+              A[a][b] += u[a] * u[b];
+              B[a][b] += u[a] * v[b];
+            }
+          }
+
+          numUsable++;
+        }
+
+        bool accepted = false;
+        Real S[T][T]  = {};
+
+        if (numUsable < 4) {
+          fitTooFewNeighbours++;
+        }
+        else {
+          // Condition test on A, normalized by the natural scale (numUsable * dx^2) so the threshold is a pure
+          // number in both dimensions. A count of usable neighbours is necessary but NOT sufficient: four cut cells
+          // can be nearly collinear in the tangent plane -- a ridge, a fin, a cylinder whose cut cells run along its
+          // axis -- and then A is near-singular while the count looks healthy.
+          const Real scale = 1.0 / (numUsable * dx * dx);
+
+#if CH_SPACEDIM == 2
+          const Real lambdaMin = A[0][0] * scale;
+#else
+          const Real tr   = (A[0][0] + A[1][1]) * scale;
+          const Real det  = (A[0][0] * A[1][1] - A[0][1] * A[1][0]) * scale * scale;
+          const Real disc = std::max(0.0, 0.25 * tr * tr - det);
+
+          const Real lambdaMin = 0.5 * tr - std::sqrt(disc);
+#endif
+
+          if (!(lambdaMin > m_mirrorConditionTolerance)) {
+            fitIllConditioned++;
+          }
+          else {
+            // Solve S^T = A^{-1} B in closed form. A 2x2 symmetric inverse and a 2x2 eigenproblem are about fifteen
+            // allocation-free lines; LaPackUtils::computeSVD would give the conditioning number directly but
+            // allocates std::vectors per call, inside what is an OpenMP loop over every cut cell.
+#if CH_SPACEDIM == 2
+            S[0][0] = B[0][0] / A[0][0];
+#else
+            const Real detA = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+
+            const Real inv00 = A[1][1] / detA;
+            const Real inv01 = -A[0][1] / detA;
+            const Real inv11 = A[0][0] / detA;
+
+            // S^T = A^{-1} B, then transpose into S.
+            const Real st00 = inv00 * B[0][0] + inv01 * B[1][0];
+            const Real st01 = inv00 * B[0][1] + inv01 * B[1][1];
+            const Real st10 = inv01 * B[0][0] + inv11 * B[1][0];
+            const Real st11 = inv01 * B[0][1] + inv11 * B[1][1];
+
+            S[0][0] = st00;
+            S[0][1] = st10;
+            S[1][0] = st01;
+            S[1][1] = st11;
+#endif
+
+            // Symmetrize. The shape operator is symmetric for a smooth surface; the fitted one is not exactly, and
+            // the antisymmetric part is fit noise.
+            for (int a = 0; a < T; a++) {
+              for (int b = a + 1; b < T; b++) {
+                const Real avg = 0.5 * (S[a][b] + S[b][a]);
+
+                S[a][b] = avg;
+                S[b][a] = avg;
+              }
+            }
+
+            // Crease detector. The residual is made dimensionless by dx, so the threshold does not move with
+            // refinement. A sphere union, a facet edge or a dielectric corner is not a quadratic patch, and this is
+            // what says so.
+            Real residualSq = 0.0;
+
+            for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
+              const IntVect& jv = nbrIt();
+
+              if (jv == iv) {
+                continue;
+              }
+              if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
+                continue;
+              }
+              if (ebisbox.numVoFs(jv) != 1) {
+                continue;
+              }
+
+              RealVect xj;
+              RealVect nj;
+
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
+                nj[dir] = surfReg(jv, MirrorDeposition::compNormal + dir);
+              }
+
+              const RealVect dxj = xj - xi;
+              const RealVect dnj = nj - ni;
+
+              for (int a = 0; a < T; a++) {
+                Real pred = 0.0;
+
+                for (int b = 0; b < T; b++) {
+                  pred += S[a][b] * tangents[b].dotProduct(dxj);
+                }
+
+                const Real r = tangents[a].dotProduct(dnj) - pred;
+
+                residualSq += r * r;
+              }
+            }
+
+            const Real residual = (uNormSq > 0.0) ? dx * std::sqrt(residualSq / uNormSq) : 0.0;
+
+            if (residual > m_mirrorCreaseTolerance) {
+              fitCrease++;
+            }
+            else {
+              accepted = true;
+            }
+          }
+        }
+
+        if (accepted) {
+          Real shape[MirrorDeposition::numShapeComp];
+
+          MirrorDeposition::liftShapeOperator(tangents, S, shape);
+
+          for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
+            surfReg(iv, MirrorDeposition::compShape + c) = shape[c];
+          }
+
+          surfReg(iv, MirrorDeposition::compStatus) = static_cast<Real>(MirrorDeposition::Status::Fitted);
+
+          // S_c annihilates the normal by construction; if it does not, the lift or the tangent basis is wrong, and
+          // the failure is otherwise silent because tr(S_c) and the Jacobian stay plausible.
+          CH_assert(MirrorDeposition::applyShapeOperator(shape, ni).vectorLength() < 1.E-12);
+
+          fitOk++;
+        }
+        else {
+          // Status stays Planar and the shape components stay zero, which gives J = 1 exactly. A refused fit still
+          // reflects -- against a plane -- because dropping it removes the correction in the very cells that need it.
+          for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
+            surfReg(iv, MirrorDeposition::compShape + c) = 0.0;
+          }
+        }
+      }
+    }
+
+    m_mirrorSurfaceData[lvl]->exchange();
+
+    // ---------------------------------------------------------------------------------------------------------
+    // Pass C -- extend the patch outwards to the band.
+    //
+    // The ORDER of this pass relative to the exchange above is load-bearing. Extend first and exchange afterwards,
+    // and a band cell at a patch edge whose nearest cut cell lies one patch over gets assigned a too-far cut cell --
+    // and the exchange cannot repair it, because both patches computed from the same incomplete data and agree on
+    // the wrong answer. This is the one place where the valid-then-exchange pattern of defineMasks does not carry
+    // over.
+    // ---------------------------------------------------------------------------------------------------------
+#pragma omp parallel for schedule(runtime) reduction(+ : bandNoCutCell)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&     surf    = (*m_mirrorSurfaceData[lvl])[din];
+      BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
+      const EBISBox& ebisbox = surf.getEBISBox();
+
+      const Box validBox = dbl[din];
+      const Box readBox  = grow(validBox, m_mirrorBandRadius) & surfReg.box() & ebisbox.getRegion();
+
+      // Pass C reads the seeded/fitted values and writes new ones into the same holder, so it needs its own copy of
+      // the band cells' results -- otherwise a band cell written early in the iteration becomes a candidate source
+      // for one written later, and the patch propagates outwards instead of being assigned.
+      BaseFab<Real> extReg(validBox, MirrorDeposition::numComp);
+      extReg.setVal(0.0);
+
+      for (BoxIterator bit(validBox); bit.ok(); ++bit) {
+        const IntVect& iv = bit();
+
+        // Cut cells keep what pass B gave them.
+        if (surfReg(iv, MirrorDeposition::compStatus) >= 0.5) {
+          for (int c = 0; c < MirrorDeposition::numComp; c++) {
+            extReg(iv, c) = surfReg(iv, c);
+          }
+
+          continue;
+        }
+
+        if (ebisbox.isCovered(iv)) {
+          continue;
+        }
+
+        // Euclidean-nearest over the neighbourhood, NOT a Chebyshev sweep. The error ladder that justifies the
+        // quadratic patch over a plane was measured with argmin |x_band - x_cut|^2 over all cut cells; sweeps compute
+        // a Chebyshev-nearest assignment with an arbitrary tie-break, and the two differ exactly where more than one
+        // piece of surface is within the band -- which is the geometry the patch exists to get right.
+        const RealVect cellCentre = m_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+
+        Box window(iv - m_mirrorBandRadius * IntVect::Unit, iv + m_mirrorBandRadius * IntVect::Unit);
+        window &= readBox;
+
+        Real    bestDistSq = std::numeric_limits<Real>::max();
+        IntVect bestIv     = IntVect::Zero;
+        bool    found      = false;
+
+        for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
+          const IntVect& jv = nbrIt();
+
+          if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
+            continue;
+          }
+
+          RealVect xj;
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
+          }
+
+          const RealVect delta  = xj - cellCentre;
+          const Real     distSq = delta.dotProduct(delta);
+
+          // Fixed lexicographic tie-break, so the assignment does not depend on iteration order or on the box
+          // decomposition.
+          bool better = distSq < bestDistSq;
+          if (!better && found && distSq <= bestDistSq) {
+            for (int dir = SpaceDim - 1; dir >= 0; dir--) {
+              if (jv[dir] != bestIv[dir]) {
+                better = jv[dir] < bestIv[dir];
+
+                break;
+              }
+            }
+          }
+
+          if (better) {
+            bestDistSq = distSq;
+            bestIv     = jv;
+            found      = true;
+          }
+        }
+
+        if (found) {
+          for (int c = 0; c < MirrorDeposition::numComp; c++) {
+            extReg(iv, c) = surfReg(bestIv, c);
+          }
+        }
+        else {
+          // Reachable where a level's grids do not cover the embedded-boundary band. A diagnostic, not an abort:
+          // particles here simply do not reflect.
+          bandNoCutCell++;
+        }
+      }
+
+      // Commit.
+      for (BoxIterator bit(validBox); bit.ok(); ++bit) {
+        const IntVect& iv = bit();
+
+        for (int c = 0; c < MirrorDeposition::numComp; c++) {
+          surfReg(iv, c) = extReg(iv, c);
+        }
+      }
+    }
+
+    // No exchange after pass C. Surface data is read only at a particle's OWN cell, and particles live in the valid
+    // region of the patch that owns them.
+
+    // All-reduced, and that is required rather than tidy -- see the member's documentation.
+    m_mirrorHasCutCells[lvl] = (ParallelOps::sum(numCutCells) > 0) ? 1 : 0;
+  }
+
+  if (m_verbose) {
+    fitOk               = ParallelOps::sum(fitOk);
+    fitTooFewNeighbours = ParallelOps::sum(fitTooFewNeighbours);
+    fitIllConditioned   = ParallelOps::sum(fitIllConditioned);
+    fitCrease           = ParallelOps::sum(fitCrease);
+    bandNoCutCell       = ParallelOps::sum(bandNoCutCell);
+
+    pout() << "PhaseRealm::defineMirrorSurfaceData - curvature fit: " << fitOk << " ok, " << fitTooFewNeighbours
+           << " too few neighbours, " << fitIllConditioned << " ill-conditioned, " << fitCrease << " crease; "
+           << bandNoCutCell << " band cells found no cut cell" << endl;
+  }
+}
+
+void
 PhaseRealm::defineGradSten(const int /*a_lmin*/)
 {
   CH_TIME("PhaseRealm::defineGradSten");
@@ -1226,6 +1763,18 @@ const EBAMRCellData&
 PhaseRealm::getIrregularCells() const
 {
   return m_irregularCells;
+}
+
+const EBAMRCellData&
+PhaseRealm::getMirrorSurfaceData() const
+{
+  return m_mirrorSurfaceData;
+}
+
+const Vector<int>&
+PhaseRealm::getMirrorHasCutCells() const
+{
+  return m_mirrorHasCutCells;
 }
 
 #include <CD_NamespaceFooter.H>

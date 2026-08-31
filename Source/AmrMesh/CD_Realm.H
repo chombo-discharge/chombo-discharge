@@ -100,6 +100,9 @@ public:
    * @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
    * @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
    * @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
+   * @param[in] a_mirrorBandRadius Mirror deposition: band half-width in cells. Must not exceed a_numGhost.
+   * @param[in] a_mirrorCondTol    Mirror deposition: smallest permitted eigenvalue ratio in the curvature fit.
+   * @param[in] a_mirrorCreaseTol  Mirror deposition: largest permitted fit residual before falling back to J = 1.
    * @param[in] a_centroidInterpType  Stencil type for interpolation from cell centers to cell centroids
    * @param[in] a_ebInterpType     Stencil type for interpolation from cell centers to eb centroids
    * @param[in] a_baseif           Implicit/signed distance function
@@ -120,6 +123,9 @@ public:
          const int                                                  a_mgInterpOrder,
          const int                                                  a_mgInterpRadius,
          const int                                                  a_mgInterpWeight,
+         const int                                                  a_mirrorBandRadius,
+         const Real                                                 a_mirrorCondTol,
+         const Real                                                 a_mirrorCreaseTol,
          const CellCentroidInterpolation::Type                      a_centroidInterpType,
          const EBCentroidInterpolation::Type                        a_ebInterpType,
          const std::map<phase::which_phase, RefCountedPtr<BaseIF>>& a_baseif,
@@ -472,6 +478,22 @@ public:
    */
   const EBAMRCellData&
   getIrregularCells(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the per-band-cell surface data used by mirrored deposition, for a phase.
+   * @param[in] a_phase Phase (gas or solid)
+   * @return Mirror surface data
+   */
+  const EBAMRCellData&
+  getMirrorSurfaceData(const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get, per level, whether that level has any cut cell anywhere in the domain, for a phase.
+   * @param[in] a_phase Phase (gas or solid)
+   * @return Per-level cut-cell presence, all-reduced
+   */
+  const Vector<int>&
+  getMirrorHasCutCells(const phase::which_phase a_phase) const;
 
   /**
    * @brief Get AMR mask
