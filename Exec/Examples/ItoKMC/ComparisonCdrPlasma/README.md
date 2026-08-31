@@ -41,10 +41,7 @@ the two files say `1` and `101325` for the same gas.
 
 The two models will not agree exactly. The Ito-KMC results carry statistical noise and depend on the target
 particles-per-cell and the superparticle merging algorithm; the two time steppers also select their time steps by
-different rules, so the runs take a different number of steps to reach the same time. The particle and fluid solvers
-additionally transport slightly different diffusive fluxes where the diffusion coefficient varies in space, which can
-be removed from the comparison by setting a constant `D` in both chemistry files -- see
-[#706](https://github.com/chombo-discharge/chombo-discharge/issues/706).
+different rules, so the runs take a different number of steps to reach the same time.
 
 # Compilation
 
