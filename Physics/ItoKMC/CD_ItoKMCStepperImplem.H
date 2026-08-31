@@ -61,24 +61,35 @@ binLeafToCells(std::vector<ParticleSoA<P, Traits>>& a_cells,
 }
 
 // Rebuild a_leaf from the per-cell scratch vector (concatenate all cells, then swap into the leaf).
+// The cells are written back in Fortran cell order, so the rebuilt leaf is cell-sorted by construction
+// and adopts the CSR mapping rather than letting the next sortByCell() rediscover it.
 template <typename P, typename Traits>
 inline void
-rebuildLeafFromCells(ParticleSoA<P, Traits>& a_leaf, const std::vector<ParticleSoA<P, Traits>>& a_cells) noexcept
+rebuildLeafFromCells(ParticleSoA<P, Traits>&                    a_leaf,
+                     const std::vector<ParticleSoA<P, Traits>>& a_cells,
+                     const Box&                                 a_box,
+                     const Real                                 a_dx,
+                     const RealVect&                            a_probLo) noexcept
 {
-  ParticleSoA<P, Traits> rebuilt;
+  CH_assert(a_cells.size() == static_cast<std::size_t>(a_box.numPts()));
 
-  // Pre-reserve the known total so the append loop allocates once instead of growing
-  // geometrically (O(log N) reallocations) on every reaction-kernel step.
-  std::size_t total = 0;
-  for (const ParticleSoA<P, Traits>& cell : a_cells) {
-    total += cell.size();
+  // Prefix-sum the per-cell counts into the CSR start offsets. This also gives the known total, so the
+  // append loop below allocates once instead of growing geometrically (O(log N) reallocations) on every
+  // reaction-kernel step.
+  std::vector<std::size_t> cellStart(a_cells.size() + 1, 0);
+  for (std::size_t c = 0; c < a_cells.size(); c++) {
+    cellStart[c + 1] = cellStart[c] + a_cells[c].size();
   }
-  rebuilt.reserve(total);
+
+  ParticleSoA<P, Traits> rebuilt;
+  rebuilt.reserve(cellStart.back());
 
   for (const ParticleSoA<P, Traits>& cell : a_cells) {
     rebuilt.append(cell);
   }
+
   a_leaf.swap(rebuilt);
+  a_leaf.adoptCellSort(a_box, a_dx * RealVect::Unit, a_probLo, std::move(cellStart));
 }
 
 } // namespace
@@ -4035,7 +4046,30 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // the photoionization products are created in reconcileParticles and  deposited them on the particle realm, but
   // the resulting products need to end up on in the correct data component in m_fluidCdrPPC.
   CH_START(t5);
+
+  // Species whose product container is empty on EVERY rank deposit identically zero, so the whole block
+  // below -- a halo deposition (which alone is ~3L-1 synchronizing stages), a cross-realm copy, and two
+  // hierarchy-wide passes -- adds nothing to m_fluidCdrPPC. Many plasma models route photoionization to
+  // Ito species rather than CDR species, in which case that is every species on every time step.
+  //
+  // The test must be global because the work being skipped is collective: every rank has to reach the
+  // same verdict for every species. One Allreduce over the whole vector answers it for all of them, and
+  // the local counts it reduces are free (the containers track their own size). Skipping leaves stale
+  // data in m_particleScratch1/m_fluidScratch1, which is harmless -- both are fully overwritten by their
+  // next user.
+  Vector<long long int> numPhotoiProducts(m_cdrPhotoiProducts.size(), 0LL);
+
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
+    numPhotoiProducts[i] = static_cast<long long int>(m_cdrPhotoiProducts[i]->getNumberOfValidParticlesLocal());
+  }
+
+  ParallelOps::sum(numPhotoiProducts);
+
+  for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
+    if (numPhotoiProducts[i] == 0LL) {
+      continue;
+    }
+
     m_cdrPhotoiProducts[i]->organizeParticlesByPatch();
 
     m_amr->depositWeight(m_particleScratch1,
@@ -4640,7 +4674,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     ParticleContainer<ItoParticle>& solverParticles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    rebuildLeafFromCells(solverParticles[a_level][a_din], itoCells[idx]);
+    rebuildLeafFromCells(solverParticles[a_level][a_din], itoCells[idx], a_box, a_dx, probLo);
   }
 
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
@@ -4648,14 +4682,14 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     ParticleContainer<Photon>& solverSourcePhotons = solverIt()->getSourcePhotons();
 
-    rebuildLeafFromCells(solverSourcePhotons[a_level][a_din], sourcePhotonCells[idx]);
+    rebuildLeafFromCells(solverSourcePhotons[a_level][a_din], sourcePhotonCells[idx], a_box, a_dx, probLo);
   }
 
   // Rebuild the CDR photoionization-product leaves from the mutated per-cell scratch.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    rebuildLeafFromCells((*m_cdrPhotoiProducts[idx])[a_level][a_din], cdrCells[idx]);
+    rebuildLeafFromCells((*m_cdrPhotoiProducts[idx])[a_level][a_din], cdrCells[idx], a_box, a_dx, probLo);
   }
 }
 
@@ -4787,7 +4821,9 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
       }
     }
 
-    this->coarsenCDRSolvers();
+    // No ghost interpolation: nothing reads the density or source-term ghost cells between here and the
+    // next transport step, which fills them itself. See coarsenCDRSolvers().
+    this->coarsenCDRSolvers(false);
   }
 }
 
@@ -4868,7 +4904,7 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::coarsenCDRSolvers() noexcept
+ItoKMCStepper<I, C, R, F>::coarsenCDRSolvers(const bool a_interpGhosts) noexcept
 {
   CH_TIME("ItoKMCStepper::coarsenCDRSolvers");
   if (m_verbosity > 5) {
@@ -4884,8 +4920,10 @@ ItoKMCStepper<I, C, R, F>::coarsenCDRSolvers() noexcept
     this->m_amr->conservativeAverage(phi, phi.getRealm(), this->m_plasmaPhase);
     this->m_amr->conservativeAverage(src, src.getRealm(), this->m_plasmaPhase);
 
-    this->m_amr->interpGhostPwl(phi, phi.getRealm(), this->m_plasmaPhase);
-    this->m_amr->interpGhostPwl(src, src.getRealm(), this->m_plasmaPhase);
+    if (a_interpGhosts) {
+      this->m_amr->interpGhostPwl(phi, phi.getRealm(), this->m_plasmaPhase);
+      this->m_amr->interpGhostPwl(src, src.getRealm(), this->m_plasmaPhase);
+    }
 
     DataOps::setCoveredValue(phi, this->m_amr->getCoveredCells(phi.getRealm(), this->m_plasmaPhase), 0.0);
     DataOps::setCoveredValue(src, this->m_amr->getCoveredCells(src.getRealm(), this->m_plasmaPhase), 0.0);
@@ -5175,11 +5213,11 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(
       // Primaries are read-only (the physics interface takes them by const reference), so they are not written.
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
         const int idx = it.index();
-        rebuildLeafFromCells((*a_secondaryParticles[idx])[lvl][din], secondaryItoCells[idx]);
+        rebuildLeafFromCells((*a_secondaryParticles[idx])[lvl][din], secondaryItoCells[idx], box, dx, probLo);
       }
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
         const int idx = it.index();
-        rebuildLeafFromCells((*a_secondaryPhotons[idx])[lvl][din], secondaryPhotonCells[idx]);
+        rebuildLeafFromCells((*a_secondaryPhotons[idx])[lvl][din], secondaryPhotonCells[idx], box, dx, probLo);
       }
     }
   }
