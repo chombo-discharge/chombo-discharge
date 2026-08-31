@@ -19,12 +19,12 @@ if sys.version_info < MIN_PYTHON:
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--compile',   help="Compile executables.",           action='store_true')
-parser.add_argument('--silent',    help="Turn off unnecessary output.",   action='store_true')
-parser.add_argument('--clean',     help="Do a clean compile.",            action='store_true')
-parser.add_argument('--benchmark', help="Generate benchmark files only.", action='store_true')
-parser.add_argument('--no_exec',   help="Do not run executables.",        action='store_true')
-parser.add_argument('--compare',   help="Turn off HDF5 comparisons",      action='store_true')
+parser.add_argument('--compile',   help="Compile executables.",                          action='store_true')
+parser.add_argument('--silent',    help="Turn off unnecessary output.",                  action='store_true')
+parser.add_argument('--clean',     help="Do a clean compile.",                           action='store_true')
+parser.add_argument('--benchmark', help="Generate benchmark files only.",                action='store_true')
+parser.add_argument('--no_exec',   help="Do not run executables.",                       action='store_true')
+parser.add_argument('--compare',   help="Compare output against benchmarks (h5diff).",   action='store_true')
 parser.add_argument('-mpi',        help="Use MPI or not",         type=str, default=None,  required=False)
 parser.add_argument('-petsc',      help="Compile with PETSC",     type=str, default=None,  required=False)
 parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default=None,  required=False)
