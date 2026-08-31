@@ -41,13 +41,9 @@ the two files say `1` and `101325` for the same gas.
 
 The two models will not agree exactly. The Ito-KMC results carry statistical noise and depend on the target
 particles-per-cell and the superparticle merging algorithm; the two time steppers also select their time steps by
-different rules, so the runs take a different number of steps to reach the same time.
-
-Both models do now transport the same diffusive flux. The particle update carries a `grad(D)` drift correction
-(`ItoSolver.diffusion_grad_drift`, on by default) without which an Ito-interpretation update transports
-`v*n - grad(D*n)` rather than the `v*n - D*grad(n)` the CDR solvers integrate -- a difference that vanishes only
-where `D` is constant, and that made the particle swarm lag the fluid solution by a few percent at the head with
-the tabulated `D(E/N)` used here. See
+different rules, so the runs take a different number of steps to reach the same time. The particle and fluid solvers
+additionally transport slightly different diffusive fluxes where the diffusion coefficient varies in space, which can
+be removed from the comparison by setting a constant `D` in both chemistry files -- see
 [#706](https://github.com/chombo-discharge/chombo-discharge/issues/706).
 
 # Compilation
