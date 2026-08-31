@@ -1724,7 +1724,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
     // The grad(D) drift correction. An Ito-interpretation Euler-Maruyama update with a drift of v alone
     // transports the flux v*n - grad(D*n); the drift has to be v + grad(D) for the particles to transport
-    // v*n - D*grad(n), which is what CdrSolver integrates. See #706.
+    // v*n - D*grad(n), which is what CdrSolver integrates.
     //
     // The correction belongs here, with the hop, and not in the particle velocities: it is lagged and
     // independent of E^(k+1), so it goes into the explicit half of the semi-implicit split, where the
