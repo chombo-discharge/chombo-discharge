@@ -478,7 +478,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
   // The grad(D) drift correction, which makes the walkers transport v*n - D*grad(n) rather than the
   // v*n - grad(D*n) a plain Ito update gives. m_diffCo is uniform here, so the gradient is identically zero
   // and this changes nothing -- it is wired up so the code path is exercised and so that a spatially varying
-  // diffusion coefficient would be handled correctly. See #706.
+  // diffusion coefficient would be handled correctly.
   const bool gradientDrift = m_solver->isDiffusive() && m_solver->isDiffusionGradientDrift();
 
   if (gradientDrift) {
