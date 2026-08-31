@@ -150,6 +150,21 @@ to run: a baseline compared against *itself* differs in all 201 `DriftDiffusion`
 is therefore a broken test that reports a conversion bug in every stage. Use `h5diff -c -d 0`, under
 which that same self-comparison is 201/201 identical.
 
+**How to get a baseline to compare against.** The comparison needs a *second* worktree checked out at
+`origin/main`, not a stash: the baseline has to run its own pre-migration inputs (which still say
+`irr_ngp_deposition` / `redistribute`), and those only exist alongside the matching code. Recipe:
+
+```
+git worktree add .claude/worktrees/mirror-baseline origin/main --detach
+# symlink its Submodules the same way (see below), then build and run the same test in both trees
+# and compare with:  h5diff -c -d 0 <base>/plt/<file> <new>/plt/<file>
+```
+
+Sanity-check the comparison before trusting it: run the baseline **twice** and diff it against itself.
+That must come out 201/201 identical at the dataset level; if it does not, the harness is wrong, not
+the code. And check the comparison is *sensitive* — an `ngp` run and a `redistribute` run of
+`DriftDiffusion` must differ in all 201 files, or a passing comparison means nothing.
+
 **The `ngp` mapping is covered by no shipped regression.** Every `BrownianWalker` test selects
 `redistribute` and `ItoKMC/JSON` selects `native`, so `ngp` survives only as the `CD_ItoSolver.options`
 default and the `WireWire` *example*. Force it explicitly on both sides of any change that touches the
