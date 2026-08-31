@@ -139,12 +139,22 @@ in `ItoKMC.rst`.
 
 ### Stage 0 — make the mesh diffusion field honest in BrownianWalker (prerequisite)
 
+**Status: done** (`cbc70522`). It turned out to be a live defect, not just a latent trap — see below.
+
 `BrownianWalkerStepper::setDiffusion` (`CD_BrownianWalkerStepper.cpp:134`) writes
 `std::numeric_limits<Real>::max()` into `m_solver->getDiffusionFunction()` and sets the particle coefficients
 directly from the scalar `m_diffCo`. Any generic `grad(D)` machinery reading that field would produce garbage.
-Replace with `setDiffusionFunction(m_diffCo)` plus `conservativeAverage` + `interpGhostPwl`. With a constant
-`m_diffCo` the gradient is then identically zero and Stage 3 is a no-op for every existing BrownianWalker test —
-which is also how we show the new code path is neutral.
+Replaced with `setDiffusionFunction(m_diffCo)`. No `conservativeAverage`/`interpGhostPwl` is needed after all:
+`DataOps::setValue` bottoms out in `EBCellFAB::setVal`, which covers ghost cells, and the value is uniform.
+
+This was **not** merely latent. The regression inputs ask for `ItoSolver.plt_vars = phi vel dco`, so every plot
+file the BrownianWalker tests write carried `DBL_MAX` in the `diffusion_coefficient` component.
+
+Verified on `Exec/Tests/BrownianWalker/DriftDiffusion` (`regression2d`, serial, `OPT=HIGH`), comparing every value
+of every plot file before and after: of 16 932 240 values across 201 plot files and both levels, 1 240 572 change,
+and every single one goes from `1.7976931348623157e+308` to `0.01` — the configured `BrownianWalker.diffco`. No
+other value moves anywhere, so the particle trajectories are bit-identical across the 200 steps and the 40
+regrids. That is the neutrality evidence Stage 3 needs.
 
 ### Stage 1 — `ItoSolver`: mesh gradient + interpolation
 
