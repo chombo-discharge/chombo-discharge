@@ -1623,8 +1623,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   // Store X^k positions.
   this->setOldPositions();
 
-  // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles. We need
-  // to remap the particles species that made a diffusion hop.
+  // Compute the explicit displacement -- the diffusion hop plus the lagged dt*grad(D) drift. This copies onto
+  // m_rhoDaggerParticles and stores the displacement on the full particles. We need to remap the particle
+  // species that moved.
   this->barrier();
   m_timer.startEvent("Diffuse particles");
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
@@ -1650,8 +1651,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   this->setupSemiImplicitPoisson(a_dt);
   m_timer.stopEvent("Setup Poisson");
 
-  // Compute space charge density arising from the new particle positions X^k + sqrt(2*D*dt)*W. Only need to
-  // do the diffusive and charged species.
+  // Compute space charge density arising from the displaced particle positions X^k + sqrt(2*D*dt)*W + dt*grad(D).
+  // Only need to do the diffusive and charged species.
   this->barrier();
   m_timer.startEvent("Deposit point particles");
   this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::Charged);
@@ -1721,6 +1722,21 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
     const auto& diffusionFunction = (this->m_physics)->getItoDiffusionFunctions()[idx];
 
+    // The grad(D) drift correction. An Ito-interpretation Euler-Maruyama update with a drift of v alone
+    // transports the flux v*n - grad(D*n); the drift has to be v + grad(D) for the particles to transport
+    // v*n - D*grad(n), which is what CdrSolver integrates. See #706.
+    //
+    // The correction belongs here, with the hop, and not in the particle velocities: it is lagged and
+    // independent of E^(k+1), so it goes into the explicit half of the semi-implicit split, where the
+    // rho^dagger deposit accounts for it exactly. Putting it in the velocities would add a term that is not
+    // proportional to E^(k+1) to the implicit half, which is the half the semi-implicit Poisson operator was
+    // built for. This mirrors what computeDiffusionTermCDR does with the explicit dt*div(D*grad(phi^k)).
+    const bool gradientDrift = diffusive && solver->isDiffusionGradientDrift();
+
+    if (gradientDrift) {
+      solver->computeDiffusionGradient();
+    }
+
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -1736,21 +1752,35 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
         ParticleSoA<ItoParticle>& leaf           = particles[din];
         ParticleSoA<NoPayload>&   pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din];
 
+        // Puts (grad D)(X_p) on the scratch vector columns. Those columns are also where the total explicit
+        // displacement ends up, so each particle's gradient is read into a local below before being
+        // overwritten, within the same loop iteration.
+        if (gradientDrift) {
+          solver->interpolateDiffusionGradient(lvl, din);
+        }
+
         for (std::size_t i = 0; i < leaf.size(); i++) {
           const Real     weight = leaf.weight(i);
           const RealVect pos    = leaf.position(i);
 
           // Compute a particle hop and store it on the run-time storage. The DiffusionFunction reads payload
-          // columns (diffusion/velocity), so materialize the payload via gather().
+          // columns (diffusion/velocity/scratch), so materialize the payload via gather(). Note that the
+          // scratch vector columns hold grad(D) at this point, which a custom diffusion model may use.
           const ItoParticle p   = leaf.gather(i);
           const RealVect    hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
 
-          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(hop[0]),
-                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(hop[1]),
-                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(hop[2]));
+          const RealVect gradD = gradientDrift ? RealVect(D_DECL(p.scratch_x, p.scratch_y, p.scratch_z))
+                                               : RealVect::Zero;
+
+          // The total explicit displacement: the stochastic hop plus the lagged grad(D) drift.
+          const RealVect disp = hop + a_dt * gradD;
+
+          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(disp[0]),
+                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(disp[1]),
+                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(disp[2]));
 
           if (Z != 0) {
-            pointParticles.append(pos + hop, weight);
+            pointParticles.append(pos + disp, weight);
           }
         }
       }
@@ -1839,14 +1869,14 @@ ItoKMCGodunovStepper<I, C, R, F>::stepEulerMaruyamaParticles(const Real a_dt) no
           ParticleReal* const vel[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::vx>(),
                                                       leaf.template column<&ItoParticle::vy>(),
                                                       leaf.template column<&ItoParticle::vz>())};
-          ParticleReal* const hop[SpaceDim]    = {D_DECL(leaf.template column<&ItoParticle::scratch_x>(),
-                                                      leaf.template column<&ItoParticle::scratch_y>(),
-                                                      leaf.template column<&ItoParticle::scratch_z>())};
+          ParticleReal* const disp[SpaceDim]   = {D_DECL(leaf.template column<&ItoParticle::scratch_x>(),
+                                                       leaf.template column<&ItoParticle::scratch_y>(),
+                                                       leaf.template column<&ItoParticle::scratch_z>())};
 
           ParticleLoops::loop(leaf, [&](const std::size_t i) {
-            // Add in the diffusion hop and advective contribution.
+            // Add in the advective contribution and the explicit displacement (hop + dt*grad(D)).
             for (int dir = 0; dir < SpaceDim; dir++) {
-              pos[dir][i] = oldPos[dir][i] + f * vel[dir][i] + g * hop[dir][i];
+              pos[dir][i] = oldPos[dir][i] + f * vel[dir][i] + g * disp[dir][i];
             }
           });
         }
