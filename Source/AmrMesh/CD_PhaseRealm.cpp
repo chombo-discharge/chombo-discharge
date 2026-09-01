@@ -945,21 +945,37 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 
   constexpr int fitStencilRadius = 2;
 
-  // PROTOTYPE -- TEMPORARY.  Take the cut-cell normal from the gradient of the implicit function instead of from
-  // EBISBox::normal, to test whether a coarse, strongly curved surface fails because its DISCRETE normals are poor.
-  // m_baseif is the analytic geometry and is set unconditionally in define(), so this needs no plumbing. Flip and
-  // rebuild to compare. Delete this, and the angle diagnostic below, once the question is answered.
-  constexpr bool useLevelSetNormal    = true;
-  constexpr bool useProjectedCentroid = true;
-  const Real     lsfStep              = 1.E-2;
+  // Take the cut-cell centroid and normal from the implicit function rather than from EBISBox, which is a large
+  // accuracy win because the fit is S ~ dn/dx and so amplifies any position error by 1/dx. Measured mean
+  // |d(2H)|/|2H| against the analytic surface:
+  //
+  //                            2-D sphere R=4dx    3-D sphere    3-D torus
+  //   EBISBox normal+centroid       6.97E-3          1.12E-3       3.549E-2
+  //   implicit function             9.97E-7          9.53E-8       3.564E-2
+  //
+  // The torus is moved by neither, and its 3.5% is a THIRD mechanism -- most likely that a torus is not umbilic, so
+  // the shape operator genuinely varies across the 5^D stencil and a fit assuming it constant carries model error.
+  // Do not read the two sphere columns as evidence about that case.
+  //
+  // m_baseif is set unconditionally in define(), independent of the s_levelset operator, so this needs no plumbing.
+  // The single switch below is the escape hatch: turn it off to fall back to EBISBox everywhere. It is deliberately
+  // one switch rather than one per quantity -- two independent toggles is four states to reason about, and the
+  // reported diagnostic below would then have to be read very carefully to know which was in play.
+  constexpr bool useImplicitFunctionGeometry = true;
 
-  // Largest projection, in cells, that will be believed. The measured shifts are 0.015-0.027 dx mean and 0.045 dx
-  // worst over the sphere and torus cases, so this is roughly a factor of ten of headroom -- it is not a tuning knob
-  // for accuracy, it is a tripwire. Composite geometries are built from min/max of several implicit functions and
-  // are therefore NOT differentiable at a seam; a one-sided gradient there can throw the Newton step onto the wrong
-  // facet, which would move the centroid by order a cell rather than a fortieth of one. Refuse those and keep
-  // Chombo's centroid, which is at least on the right piece of surface.
-  const Real maxCentroidShift_ = 0.5;
+  // Finite-difference step for the gradient, in cells. Two-sided failure: too small cancels, too large truncates.
+  // 1E-2 sits well inside both for double precision on an analytic implicit function. Note this truncation is why
+  // the implicit-function normal is slightly WORSE than EBISBox's in 2-D, where Chombo's normals are already exact
+  // to ~1E-5 degrees; in 3-D they carry up to 1.6 degrees of error and the implicit function wins decisively.
+  const Real gradientStep = 1.E-2;
+
+  // Largest projection, in cells, that will be believed. Not a tuning knob for accuracy -- a tripwire. Composite
+  // geometries are min/max of several implicit functions and are therefore NOT differentiable at a seam; a one-sided
+  // gradient there can throw the Newton step onto the wrong facet, moving the centroid by order a cell rather than a
+  // fortieth of one. Refuse those and keep Chombo's centroid, which is at least on the right piece of surface. The
+  // measured shifts are 0.015-0.027 dx mean and 0.045 dx worst, so this carries about a factor of ten of headroom
+  // and should fire only on a seam, never on ordinary discretization.
+  const Real centroidShiftLimit = 0.5;
 
   // Counters, reduced at the end. fitOk/fallback are about the CURVATURE; bandNoCutCell is about the GRIDS, which is
   // why they are counted apart -- a run that trips the first has under-resolved geometry, a run that trips the second
@@ -970,7 +986,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
   long long fitCrease           = 0;
   long long bandNoCutCell       = 0;
 
-  // PROTOTYPE -- TEMPORARY. How far the implicit function's normal is from EBISBox's, in degrees.
+  // How far the implicit function's geometry is from EBISBox's. Reported so a silent change of source, or a
+  // geometry with no implicit function at all, cannot go unnoticed.
   Real      sumNormalAngle     = 0.0;
   Real      maxNormalAngle     = 0.0;
   long long numNormalCmp       = 0;
@@ -1029,9 +1046,9 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
         const RealVect ebNc = ebisbox.normal(vof);
         RealVect       nc   = ebNc;
 
-        // PROTOTYPE -- TEMPORARY, see useLevelSetNormal / useProjectedCentroid above.
+        // Implicit-function geometry, see useImplicitFunctionGeometry above.
         if (!m_baseif.isNull()) {
-          const Real h = lsfStep * dx;
+          const Real h = gradientStep * dx;
 
           const auto gradientAt = [&](const RealVect& a_x) -> RealVect {
             RealVect g = RealVect::Zero;
@@ -1063,10 +1080,10 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
             sumCentroidShift += shift;
             maxCentroidShift = std::max(maxCentroidShift, shift);
 
-            if (shift > maxCentroidShift_) {
+            if (shift > centroidShiftLimit) {
               numCentroidRefused++;
             }
-            else if (useProjectedCentroid) {
+            else if (useImplicitFunctionGeometry) {
               xc      = xProj;
               grad    = gradientAt(xc);
               gradLen = grad.vectorLength();
@@ -1095,7 +1112,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
               numNormalFlipped++;
             }
 
-            if (useLevelSetNormal) {
+            if (useImplicitFunctionGeometry) {
               nc = lsfNc;
             }
           }
@@ -1518,7 +1535,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     fitCrease           = ParallelOps::sum(fitCrease);
     bandNoCutCell       = ParallelOps::sum(bandNoCutCell);
 
-    // PROTOTYPE -- TEMPORARY. The reductions run unconditionally: they are collectives, and "this rank saw a cut
+    // The reductions run unconditionally: they are collectives, and "this rank saw a cut
     // cell" is NOT a collective condition -- gating them on it deadlocks the moment one rank's patch has no cut
     // cells. Only the printing is conditional, on the reduced count.
     const Real      sumAll      = ParallelOps::sum(sumNormalAngle);
@@ -1529,14 +1546,22 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     const Real      maxShiftAll = ParallelOps::max(maxCentroidShift);
     const long long refusedAll  = ParallelOps::sum(numCentroidRefused);
 
-    if (cmpAll > 0) {
+    // An absent implicit function is a silent fallback to EBISBox geometry, and silence is exactly what makes it a
+    // trap -- the surface data is then built from the less accurate source with nothing in the log to say so.
+    if (cmpAll == 0) {
+      pout() << "PhaseRealm::defineMirrorSurfaceData - no implicit function on this realm; using EBISBox centroid "
+                "and normal, which are the less accurate source (see defineMirrorSurfaceData)"
+             << endl;
+    }
+    else {
       pout() << "PhaseRealm::defineMirrorSurfaceData - LSF vs EBISBox normal over " << cmpAll << " cut cells: mean "
              << sumAll / cmpAll << " deg, max " << maxAll << " deg, " << flipAll << " inverted; using the "
-             << (useLevelSetNormal ? "LSF" : "EBISBox") << " normal" << endl;
+             << (useImplicitFunctionGeometry ? "implicit-function" : "EBISBox") << " normal" << endl;
 
       pout() << "PhaseRealm::defineMirrorSurfaceData - centroid off the true surface by mean " << sumShiftAll / cmpAll
-             << " dx, max " << maxShiftAll << " dx; using the " << (useProjectedCentroid ? "projected" : "EBISBox")
-             << " centroid, " << refusedAll << " refused as beyond " << maxCentroidShift_ << " dx" << endl;
+             << " dx, max " << maxShiftAll << " dx; using the "
+             << (useImplicitFunctionGeometry ? "projected" : "EBISBox") << " centroid, " << refusedAll
+             << " refused as beyond " << centroidShiftLimit << " dx" << endl;
     }
 
     pout() << "PhaseRealm::defineMirrorSurfaceData - curvature fit: " << fitOk << " ok, " << fitTooFewNeighbours
