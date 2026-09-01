@@ -25,6 +25,7 @@
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
 #include <CD_MirrorDeposition.H>
+#include <CD_ParallelOps.H>
 #include <CD_ParticleOps.H>
 #include <CD_Random.H>
 #include <CD_EBParticleMesh.H>
@@ -206,6 +207,21 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
   // deposit.
   m_mirrorImages.clearParticles();
 
+  // Diagnostics. Counted unconditionally because it is a handful of increments, but reduced and printed only when
+  // asked for: the reduction is a collective and this pass runs on every deposit of every species, so doing it
+  // always would put a global synchronization in the hot path. m_verbosity is parsed from the same input on every
+  // rank, so gating a collective on it is safe.
+  //
+  // These matter more than they look. A refused image still deposits, with J = 1, which is the FLAT mirror -- and a
+  // flat mirror on a curved surface is biased, not neutral. So a run whose images are nearly all refused has quietly
+  // degraded to a worse model rather than failed, and without these counters it looks identical to a healthy one.
+  long long numImages       = 0;
+  long long numNoData       = 0;
+  long long numInside       = 0;
+  long long numSmallDenom   = 0;
+  long long numLargeJac     = 0;
+  long long numNonPositiveJ = 0;
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -230,6 +246,8 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
 
         // Outside the band the surface data was never written, and a particle there has nothing to reflect across.
         if (surfReg(iv, MirrorDeposition::compStatus) < 0.5) {
+          numNoData++;
+
           continue;
         }
 
@@ -249,10 +267,35 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
         // cells where the correction is largest.
         MirrorDeposition::reflect(pos, surfaceComponents, maxJacobian, minDenom, image, jacobian, d, refusal);
 
+        switch (refusal) {
+        case MirrorDeposition::Refusal::SmallDenominator: {
+          numSmallDenom++;
+
+          break;
+        }
+        case MirrorDeposition::Refusal::LargeJacobian: {
+          numLargeJac++;
+
+          break;
+        }
+        case MirrorDeposition::Refusal::NonPositiveJacobian: {
+          numNonPositiveJ++;
+
+          break;
+        }
+        case MirrorDeposition::Refusal::None: {
+          break;
+        }
+        }
+
         // A particle at or inside the surface has no image to add: the even extension is defined on the fluid side.
         if (d <= 0.0) {
+          numInside++;
+
           continue;
         }
+
+        numImages++;
 
         images.append(image, a_strength(leaf, i) * jacobian);
       }
@@ -276,6 +319,19 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
   // the density is only defined where kappa > 0. The deposit's contract is that the field is correct where it is
   // read.
   DataOps::incr(a_phi, m_mirrorScratch, 1.0);
+
+  if (m_verbosity > 5) {
+    numImages       = ParallelOps::sum(numImages);
+    numNoData       = ParallelOps::sum(numNoData);
+    numInside       = ParallelOps::sum(numInside);
+    numSmallDenom   = ParallelOps::sum(numSmallDenom);
+    numLargeJac     = ParallelOps::sum(numLargeJac);
+    numNonPositiveJ = ParallelOps::sum(numNonPositiveJ);
+
+    pout() << m_name + "::mirrorPass - " << numImages << " images; skipped " << numNoData << " outside the band, "
+           << numInside << " at d <= 0; refused (J = 1, the FLAT mirror) " << numSmallDenom << " small denominator, "
+           << numLargeJac << " large Jacobian, " << numNonPositiveJ << " non-positive Jacobian" << endl;
+  }
 }
 
 #include <CD_NamespaceFooter.H>
