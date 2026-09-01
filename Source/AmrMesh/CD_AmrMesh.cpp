@@ -3730,6 +3730,18 @@ AmrMesh::getMirrorHasCutCells(const std::string& a_realm, const phase::which_pha
   return m_realms[a_realm]->getMirrorHasCutCells(a_phase);
 }
 
+Real
+AmrMesh::getMirrorMaxJacobian() const
+{
+  return m_mirrorMaxJacobian;
+}
+
+Real
+AmrMesh::getMirrorMinDenominator() const
+{
+  return m_mirrorMinDenominator;
+}
+
 EBAMRParticleMesh&
 AmrMesh::getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const
 {

@@ -190,7 +190,7 @@ The particles are available from the solver through the function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 692-698
+   :lines: 721-727
    :dedent: 2
 
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
@@ -203,7 +203,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 957-968
+   :lines: 986-997
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -240,7 +240,7 @@ This data can then be fetched with
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 715-720
+   :lines: 744-749
    :dedent: 2
    
 For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
@@ -304,7 +304,7 @@ Complete interpolation of the particle velocity consists of calling two function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 810-815,792-798
+   :lines: 839-844,821-827
    :dedent: 2
 
 Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
@@ -343,7 +343,7 @@ The function signature is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 825-830
+   :lines: 854-859
    :dedent: 2
 
 Particle intersections
@@ -356,7 +356,7 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 483-490
+   :lines: 512-519
    :dedent: 2
 
 Here, ``EBIntersection`` is just an enum for putting logic into how the intersection is computed.
@@ -385,7 +385,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1101-1113
+   :lines: 1130-1142
    :dedent: 2
 
 which returns a CFL-like condition
@@ -401,7 +401,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1134-1146
+   :lines: 1163-1175
    :dedent: 2
 
 which returns a CFL-like condition
@@ -419,7 +419,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 994-1011
+   :lines: 1023-1040
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -438,7 +438,7 @@ The entry point for splitting and merging is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 902-908
+   :lines: 931-937
    :dedent: 2
 
 Calling this function will merge/split the particles.
@@ -599,6 +599,13 @@ How the cut cells are treated when depositing is selected with a single flag,
 These are mutually exclusive answers to one question, which is why they are one selector rather than
 independent flags: ``mirror`` combined with redistribution would apply a :math:`1/\kappa` correction to
 a field that no longer needs one.
+
+.. note::
+
+   ``mirror`` is **experimental**. It is verified to add mass only where it should and never to remove
+   any, but its acceptance suite is not finished, and the change of meaning above -- a cut cell holding
+   :math:`n` rather than :math:`\kappa n` -- has not been audited against every consumer of
+   :math:`\phi`. Use it for deliberate experiments, not production runs.
 
 Cut-cell *interpolation* is separate and remains a boolean:
 

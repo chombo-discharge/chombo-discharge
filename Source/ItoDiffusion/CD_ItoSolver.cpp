@@ -349,11 +349,6 @@ ItoSolver::parseDeposition()
                    "image in the same cell doubles it.")
                     .c_str());
   }
-
-  // Removed in stage 3, when the mirror pass lands.
-  if (m_irregularDeposition == IrregularDeposition::Mirror) {
-    MayDay::Error("ItoSolver::parseDeposition - 'irregular_deposition = mirror' is not implemented yet");
-  }
 }
 
 void
@@ -611,6 +606,11 @@ ItoSolver::registerOperators() const
     if (m_irregularDeposition == IrregularDeposition::Redistribute ||
         m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
+    }
+
+    // Without this the realm never builds the surface data and the mirror pass would read an empty field.
+    if (m_irregularDeposition == IrregularDeposition::Mirror) {
+      m_amr->registerOperator(s_mirror_deposition, m_realm, m_phase);
     }
 
     // nn_pair_tree/nn_pair_hash both read a particle ghost halo as merge candidates (see
@@ -1115,6 +1115,15 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
 
+  // For mirrored cut-cell deposition. Both are rebuilt from scratch by every pass, so unlike the solver's particle
+  // containers they are simply reallocated here rather than remapped -- there is no state in them to carry across a
+  // regrid. The image container must be redefined at every regrid regardless, because remap() reads the level tiles
+  // and valid cells that the regrid rebuilds.
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    m_amr->allocate(m_mirrorScratch, m_realm, m_phase, ncomp);
+    m_amr->allocate(m_mirrorImages, m_realm);
+  }
+
   // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
   // ghost cell -- the shape those functions document.
   m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
@@ -1226,6 +1235,15 @@ ItoSolver::allocate()
   // For "redistributed" particle deposition
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
+
+  // For mirrored cut-cell deposition. Both are rebuilt from scratch by every pass, so unlike the solver's particle
+  // containers they are simply reallocated here rather than remapped -- there is no state in them to carry across a
+  // regrid. The image container must be redefined at every regrid regardless, because remap() reads the level tiles
+  // and valid cells that the regrid rebuilds.
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    m_amr->allocate(m_mirrorScratch, m_realm, m_phase, ncomp);
+    m_amr->allocate(m_mirrorImages, m_realm);
+  }
 
   // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
   // ghost cell -- the shape those functions document.

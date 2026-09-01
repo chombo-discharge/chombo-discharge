@@ -2066,6 +2066,20 @@ public:
   getMirrorHasCutCells(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get the largest Jacobian magnitude the mirror pass will trust.
+   * @return AmrMesh.mirror_max_jacobian
+   */
+  Real
+  getMirrorMaxJacobian() const;
+
+  /**
+   * @brief Get the smallest Jacobian denominator the mirror pass will trust.
+   * @return AmrMesh.mirror_min_denom
+   */
+  Real
+  getMirrorMinDenominator() const;
+
+  /**
    * @brief Get EBAMRParticleMesh operator
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase (gas or solid)

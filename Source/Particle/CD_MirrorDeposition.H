@@ -225,11 +225,16 @@ jacobian(const Real a_twoH, const Real a_K, const Real a_d, Real& a_denominator)
  * @param[in]  a_minDenominator Refuse denominators below this magnitude.
  * @param[out] a_image          The reflected position.
  * @param[out] a_jacobian       The Jacobian, or one if refused.
+ * @param[out] a_signedDistance The first iterate d of the signed distance to the patch. See the note below.
  * @param[out] a_refusal        Which guard fired, or Refusal::None.
  * @return True if the Jacobian was accepted, false if a guard fired.
  * @note a_surfaceData must be a CONTIGUOUS array of numComp Reals, so a caller holding an EBCellFAB has to gather
  * the components rather than pass a pointer into it. A BaseFab stores the component index last -- all cells of
  * component 0, then all cells of component 1 -- so &fab(iv, 0) walks into the NEXT CELL, not the next component.
+ * @note a_signedDistance is reported rather than acted on here, because it is the CALLER's admission test: a
+ * particle at d <= 0 sits on or inside the solid and must not be reflected at all (PLAN.md section 1.2). Returning
+ * it keeps that arithmetic in one place -- a caller that recomputed d from the components would be duplicating the
+ * patch evaluation, and the two copies would have to agree exactly forever.
  */
 inline bool
 reflect(const RealVect& a_pos,
@@ -238,6 +243,7 @@ reflect(const RealVect& a_pos,
         const Real      a_minDenominator,
         RealVect&       a_image,
         Real&           a_jacobian,
+        Real&           a_signedDistance,
         Refusal&        a_refusal) noexcept;
 
 } // namespace MirrorDeposition

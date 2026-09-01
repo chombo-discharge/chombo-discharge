@@ -127,6 +127,7 @@ reflect(const RealVect& a_pos,
         const Real      a_minDenominator,
         RealVect&       a_image,
         Real&           a_jacobian,
+        Real&           a_signedDistance,
         Refusal&        a_refusal) noexcept
 {
   RealVect centroid;
@@ -157,7 +158,8 @@ reflect(const RealVect& a_pos,
     nhat = normal;
   }
 
-  a_image = a_pos - 2.0 * d * nhat;
+  a_image          = a_pos - 2.0 * d * nhat;
+  a_signedDistance = d;
 
   Real       denominator = 0.0;
   const Real J           = jacobian(meanCurvatureTimesTwo(shape), gaussianCurvature(shape), d, denominator);
