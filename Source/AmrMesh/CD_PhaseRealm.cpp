@@ -945,6 +945,13 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 
   constexpr int fitStencilRadius = 2;
 
+  // PROTOTYPE -- TEMPORARY.  Take the cut-cell normal from the gradient of the implicit function instead of from
+  // EBISBox::normal, to test whether a coarse, strongly curved surface fails because its DISCRETE normals are poor.
+  // m_baseif is the analytic geometry and is set unconditionally in define(), so this needs no plumbing. Flip and
+  // rebuild to compare. Delete this, and the angle diagnostic below, once the question is answered.
+  constexpr bool useLevelSetNormal = true;
+  const Real     lsfStep           = 1.E-2;
+
   // Counters, reduced at the end. fitOk/fallback are about the CURVATURE; bandNoCutCell is about the GRIDS, which is
   // why they are counted apart -- a run that trips the first has under-resolved geometry, a run that trips the second
   // has a level whose grids do not cover the embedded-boundary band.
@@ -953,6 +960,12 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
   long long fitIllConditioned   = 0;
   long long fitCrease           = 0;
   long long bandNoCutCell       = 0;
+
+  // PROTOTYPE -- TEMPORARY. How far the implicit function's normal is from EBISBox's, in degrees.
+  Real      sumNormalAngle   = 0.0;
+  Real      maxNormalAngle   = 0.0;
+  long long numNormalCmp     = 0;
+  long long numNormalFlipped = 0;
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_grids[lvl];
@@ -973,7 +986,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     // ---------------------------------------------------------------------------------------------------------
     long long numCutCells = 0;
 
-#pragma omp parallel for schedule(runtime) reduction(+ : numCutCells)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCutCells, sumNormalAngle, numNormalCmp, numNormalFlipped) \
+  reduction(max : maxNormalAngle)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
@@ -998,8 +1012,54 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
         // Location::position multiplies by dx (see its 'ret *= a_dx'), so this is a physical position. Do NOT
         // difference raw bndryCentroid values from different cells: that drops the inter-cell offset and inflates the
         // fitted curvature by about an order of magnitude.
-        const RealVect xc = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
-        const RealVect nc = ebisbox.normal(vof);
+        const RealVect xc   = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
+        const RealVect ebNc = ebisbox.normal(vof);
+        RealVect       nc   = ebNc;
+
+        // PROTOTYPE -- TEMPORARY, see useLevelSetNormal above.
+        if (!m_baseif.isNull()) {
+          const Real h = lsfStep * dx;
+
+          RealVect grad = RealVect::Zero;
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            RealVect lo = xc;
+            RealVect hi = xc;
+
+            lo[dir] -= h;
+            hi[dir] += h;
+
+            grad[dir] = (m_baseif->value(hi) - m_baseif->value(lo)) / (2.0 * h);
+          }
+
+          const Real gradLen = grad.vectorLength();
+
+          if (gradLen > 0.0) {
+            RealVect lsfNc = grad / gradLen;
+
+            // Sign the level-set normal to the EB normal's half-space rather than assuming a convention, then report
+            // the angle BEFORE that alignment so a genuinely inverted normal shows up as ~180 degrees rather than
+            // being silently folded to ~0.
+            const Real cosRaw = std::max(-1.0, std::min(1.0, lsfNc.dotProduct(ebNc)));
+
+            // Report the angle AFTER folding out the sign convention, so a perfect match reads 0 rather than 180 and
+            // the residual disagreement is legible. The flip count below says whether a convention difference exists
+            // at all, so nothing is hidden by folding.
+            const Real angle = std::acos(std::min(1.0, std::abs(cosRaw))) * 180.0 / M_PI;
+
+            sumNormalAngle += angle;
+            maxNormalAngle = std::max(maxNormalAngle, angle);
+            numNormalCmp++;
+
+            if (cosRaw < 0.0) {
+              lsfNc = -lsfNc;
+              numNormalFlipped++;
+            }
+
+            if (useLevelSetNormal) {
+              nc = lsfNc;
+            }
+          }
+        }
 
         // Provisional: a valid plane, upgraded to a fitted patch by pass B if the fit succeeds.
         surfReg(iv, MirrorDeposition::compStatus) = static_cast<Real>(MirrorDeposition::Status::Planar);
@@ -1417,6 +1477,20 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     fitIllConditioned   = ParallelOps::sum(fitIllConditioned);
     fitCrease           = ParallelOps::sum(fitCrease);
     bandNoCutCell       = ParallelOps::sum(bandNoCutCell);
+
+    // PROTOTYPE -- TEMPORARY. The reductions run unconditionally: they are collectives, and "this rank saw a cut
+    // cell" is NOT a collective condition -- gating them on it deadlocks the moment one rank's patch has no cut
+    // cells. Only the printing is conditional, on the reduced count.
+    const Real      sumAll  = ParallelOps::sum(sumNormalAngle);
+    const Real      maxAll  = ParallelOps::max(maxNormalAngle);
+    const long long cmpAll  = ParallelOps::sum(numNormalCmp);
+    const long long flipAll = ParallelOps::sum(numNormalFlipped);
+
+    if (cmpAll > 0) {
+      pout() << "PhaseRealm::defineMirrorSurfaceData - LSF vs EBISBox normal over " << cmpAll << " cut cells: mean "
+             << sumAll / cmpAll << " deg, max " << maxAll << " deg, " << flipAll << " inverted; using the "
+             << (useLevelSetNormal ? "LSF" : "EBISBox") << " normal" << endl;
+    }
 
     pout() << "PhaseRealm::defineMirrorSurfaceData - curvature fit: " << fitOk << " ok, " << fitTooFewNeighbours
            << " too few neighbours, " << fitIllConditioned << " ill-conditioned, " << fitCrease << " crease; "
