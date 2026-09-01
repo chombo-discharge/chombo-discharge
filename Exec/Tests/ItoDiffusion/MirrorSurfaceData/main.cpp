@@ -173,7 +173,11 @@ MirrorSurfaceDataStepper::checkSurfaceData() const noexcept
       const BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
       const EBISBox&       ebisbox = surf.getEBISBox();
 
-      for (IVSIterator ivsIt(ebisbox.getIrregIVS(dbl[it()])); ivsIt.ok(); ++ivsIt) {
+      // The set must be a named local. IVSIterator stores raw pointers into the set's tree nodes, so binding it to
+      // the temporary that getIrregIVS returns leaves the iterator walking freed memory from its very first ok().
+      const IntVectSet irregIVS = ebisbox.getIrregIVS(dbl[it()]);
+
+      for (IVSIterator ivsIt(irregIVS); ivsIt.ok(); ++ivsIt) {
         const IntVect& iv = ivsIt();
 
         if (ebisbox.numVoFs(iv) != 1) {
@@ -295,6 +299,15 @@ MirrorSurfaceDataStepper::checkSurfaceData() const noexcept
 
   pout() << "  cut cells: " << numFitted << " fitted, " << numPlanar << " planar fallback, " << numNone << " no data; "
          << numAniso << " anisotropic" << endl;
+
+  // A cut cell with no surface data is a defect, not a note: pass A gives every cut cell in the valid box at least
+  // Status::Planar, and pass C preserves anything already seeded, so the count can only be zero. Reporting it without
+  // failing on it is how a decomposition-dependent hole stays invisible.
+  if (numNone > 0) {
+    pout() << "  FAIL " << numNone << " cut cells carry no surface data" << endl;
+
+    g_numFailures++;
+  }
 
   if (numAll == 0) {
     pout() << "  FAIL no cut cells were scored at all" << endl;
