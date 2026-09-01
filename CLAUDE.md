@@ -166,13 +166,51 @@ Output goes to `pout.<rank>` files and HDF5 plot/checkpoint files in `plt/`, `ch
 
 ### Regression tests
 
-Each test directory contains `regression2d.inputs` and/or `regression3d.inputs`. These are
-the canonical reference inputs. Running with these inputs and checking that the simulation
-completes without assertion failures or NaNs is the baseline regression check.
+Each test directory contains `regression2d.inputs` and/or `regression3d.inputs`. These are the
+canonical reference inputs. Running with these inputs and checking that the simulation completes
+without assertion failures or NaNs is the baseline regression check.
 
-There is no automated regression-comparison framework in the repository yet; correctness is
-verified by visual inspection of the output or by comparison against reference solutions in
-the Sphinx documentation.
+`Exec/Tests/tests.py` automates this across the whole suite, including an exact HDF5 comparison
+(`h5diff`, no tolerance) against benchmark files. The suites are described by the `*.ini` files
+alongside it, one section per test.
+
+Benchmark files are **not** checked in — `.gitignore` excludes `*.hdf5`. They are generated with
+`--benchmark`, which writes `<benchmark>.step*.<dim>d.hdf5` into the test's `plt/` directory. So the
+workflow for a change that should not alter results is: generate benchmarks from the *pre*-change
+tree, apply the change, then compare.
+
+```bash
+# from Exec/Tests, on the pre-change tree
+python3 tests.py --compile --benchmark --silent -mpi true -hdf true -opt HIGH -debug false -dim 2 -cores 12
+
+# apply the change, rebuild, then
+python3 tests.py --compile --compare   --silent -mpi true -hdf true -opt HIGH -debug false -dim 2 -cores 12
+```
+
+Run `-dim 2` and `-dim 3` separately; `-dim` selects tests by the `dim` key in the `.ini`, and the
+two dimensions have different test sets.
+
+Pitfalls that are easy to miss and make a run look green when it is not:
+
+- **Comparison only happens if you pass `--compare`.** Without it the suite builds and runs every
+  test and diffs nothing.
+- **`-cores` sets both `make -j` and `mpirun -np`.** The rank count feeds the domain decomposition,
+  so the benchmark run and the comparison run must use the same value or everything differs for
+  unrelated reasons.
+- **A test that fails to compile is silently not compared**, and is reported the same way as a test
+  that had nothing to compare. Transient compile failures do occur. Audit coverage from the benchmark
+  files on disk rather than from the log, and retry failures individually.
+- **`--silent` sends compile stdout and stderr to `/dev/null`**, so a compile failure yields one line
+  and no diagnostic. Drop it when retrying a failure.
+- **A handful of tests emit no HDF5 output at all** and can never contribute to a comparison
+  (`Utilities/LookupTable` declares `output = invalid`). They still serve as crash checks.
+- **After any Chombo submodule change, `make pristine` before rebuilding.** An incremental build
+  leaves objects compiled against the old headers, and if the change touched a class layout the
+  resulting mismatch produces crashes that look like logic bugs.
+
+Correctness beyond bit-for-bit comparison — for changes that are *meant* to alter results — is still
+verified by inspecting the output or comparing against reference solutions in the Sphinx
+documentation.
 
 ### CI tests
 

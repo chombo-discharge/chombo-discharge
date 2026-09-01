@@ -440,9 +440,15 @@ for test in config.sections():
                                         else:
                                             compare_code = subprocess.call(compare_command, shell=True)
 
-                                            if compare_code != 0:
-                                                print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
-                                            else:
-                                                print("\t Benchmark test succeeded for files " + regFile +  " and " + str(benFile))
+                                        # The result must be acted on whether or not --silent was passed. It used to be
+                                        # examined only in the else branch above, so under --silent a mismatch produced
+                                        # no output at all -- and ret_code was never set either way, so the suite exited
+                                        # 0 on a failed comparison. A regression harness that cannot fail is worse than
+                                        # no harness, because it is trusted.
+                                        if compare_code != 0:
+                                            ret_code = 1
+                                            print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                                        elif not args.silent:
+                                            print("\t Benchmark test succeeded for files " + regFile +  " and " + str(benFile))
 
 exit(ret_code)

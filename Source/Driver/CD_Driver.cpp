@@ -24,6 +24,7 @@
 #include <EBAMRIO.H>
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
+#include <SPMD.H>
 
 // Our includes
 #include <CD_Driver.H>
@@ -964,6 +965,12 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
     pout() << "==================================" << endl;
 
     MemoryReport::getMaxMinMemoryUsage();
+
+    // Chombo tracks the largest message it actually posted, but nothing ever printed it. Report it
+    // alongside the memory usage: it is the only way to tell whether a run comes anywhere near
+    // CH_MAX_MPI_MESSAGE_SIZE, above which a single peer's message is split across several MPI
+    // requests. A max send or receive size equal to the limit means that splitting has occurred.
+    reportMPIStats();
   }
 }
 
