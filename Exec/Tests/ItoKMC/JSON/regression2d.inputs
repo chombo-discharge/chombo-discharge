@@ -136,7 +136,7 @@ ItoSolver.normal_max                  = 5.0               ## Maximum value (abso
 ItoSolver.diffusion_grad_drift        = true              ## Add grad(D) to the drift so the particles transport D*grad(n), as CdrSolver does
 ItoSolver.checkpointing               = particles         ## 'particles' or 'numbers'
 ItoSolver.ppc_restart                 = 32                ## Maximum number of computational particles to generate for restarts.
-ItoSolver.irregular_deposition        = native            ## Cut-cell deposition: 'native', 'ngp', 'mirror', 'redistribute', 'redistribute_blended'
+ItoSolver.deposition_irreg            = native            ## Cut-cell deposition: 'native', 'ngp', 'mirror', 'redistribute', 'redistribute_blended'
 ItoSolver.irr_ngp_interp              = true              ## Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp             = direct            ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition             = cic               ## Cloud-in-cell for plotting particles.
@@ -187,7 +187,7 @@ McPhoto.verbosity                = -1               ## Solver verbosity
 McPhoto.instantaneous            = true             ## Instantaneous transport or not
 McPhoto.max_photons_per_cell     = 1                ## Maximum no. generated in a cell (< = 0 yields physical photons)
 McPhoto.num_sampling_packets     = 1                ## Number of sub-sampling packets for max_photons_per_cell
-McPhoto.irregular_deposition     = native           ## Cut-cell deposition: 'native', 'ngp', 'redistribute', 'redistribute_blended'
+McPhoto.deposition_irreg         = native           ## Cut-cell deposition: 'native', 'ngp', 'redistribute', 'redistribute_blended'
 McPhoto.transparent_eb           = false            ## Turn on/off transparent boundaries. Only for instantaneous=true
 McPhoto.random_kappa             = true             ## Randomize absorption length (taken from Photon implementation)
 McPhoto.plt_vars                 = phi src_phot     ## Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'

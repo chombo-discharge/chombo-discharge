@@ -334,7 +334,7 @@ ItoSolver::parseDeposition()
     MayDay::Abort("ItoSolver::parseDeposition - unknown interpolation method for mobility");
   }
 
-  pp.get("irregular_deposition", str);
+  pp.get("deposition_irreg", str);
   m_irregularDeposition = irregularDepositionFromString(str);
 
   pp.get("irr_ngp_interp", m_forceIrregInterpolationNGP);
@@ -345,7 +345,7 @@ ItoSolver::parseDeposition()
   if (m_deposition == DepositionType::NGP && m_irregularDeposition == IrregularDeposition::Mirror) {
     MayDay::Error(("ItoSolver::parseDeposition - '" + m_className + ".deposition = ngp' is incompatible with '" +
                    m_className +
-                   ".irregular_deposition = mirror'; NGP puts the whole cloud in the particle's own cell, so an "
+                   ".deposition_irreg = mirror'; NGP puts the whole cloud in the particle's own cell, so an "
                    "image in the same cell doubles it.")
                     .c_str());
   }

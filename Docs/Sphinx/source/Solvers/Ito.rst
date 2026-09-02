@@ -585,7 +585,7 @@ Deposition and coarse-fine deposition (see :ref:`Chap:ParticleMesh`) are control
 
 How the cut cells are treated when depositing is selected with a single flag,
 
-* ``ItoSolver.irregular_deposition``, with valid options
+* ``ItoSolver.deposition_irreg``, with valid options
 
   * ``native`` -- deposit as-is, with no cut-cell treatment. A cut cell then holds :math:`\kappa n`.
   * ``ngp`` -- put the particle's entire cloud in its own cell when that cell is cut.

@@ -234,11 +234,11 @@ McPhoto::parseDivergenceComputation()
   ParmParse pp(m_className.c_str());
 
   std::string irrStr;
-  pp.get("irregular_deposition", irrStr);
+  pp.get("deposition_irreg", irrStr);
   m_irregularDeposition = irregularDepositionFromString(irrStr);
 
   if (m_irregularDeposition == IrregularDeposition::Mirror) {
-    MayDay::Error("McPhoto::parseOptions - 'irregular_deposition = mirror' is not supported by McPhoto");
+    MayDay::Error("McPhoto::parseOptions - 'deposition_irreg = mirror' is not supported by McPhoto");
   }
 }
 
