@@ -707,6 +707,23 @@ protected:
   tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags);
 
   /**
+   * @brief Coarsen the refinement tags so that every level below a tag is tagged as well.
+   * @details TiledMeshRefine builds the level l+1 grids from the tags on level l and then injects proper nesting
+   * from level l+1 back down into level l. A region can therefore hold levels 0 through l+1 from a single tag on
+   * level l, with no tags whatsoever on the levels in between. When that one tag is later coarsened away there is
+   * nothing left to hold the column up, and the region collapses by several levels at once -- undershooting the
+   * cell tagger's maximum coarsening level, which can only stop tags from being removed and cannot create the
+   * coarse tags that the column needs.
+   * @details This restores the invariant a_cellTags[l] >= coarsen(a_cellTags[l+1]). Each level's tags are
+   * coarsened in place onto the coarsened grids, which needs no communication, and are then copied onto the
+   * coarser level's grids and added to its tags. The sweep runs from the finest level down, so a level is
+   * coarsened only after it has itself received everything from above, and a tag reaches level 0 in one pass.
+   * @param[in,out] a_cellTags Tags to coarsen.
+   */
+  void
+  coarsenTags(EBAMRTags& a_cellTags) const noexcept;
+
+  /**
    * @brief Get number of plot variables
    * @return Returns the number of internal plot variables that Driver will write to file.
    */
