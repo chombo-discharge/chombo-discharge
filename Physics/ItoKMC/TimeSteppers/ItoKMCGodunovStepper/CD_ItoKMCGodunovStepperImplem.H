@@ -60,6 +60,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
+  m_diffusiveDeposit               = DiffusiveDeposit::Inside;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
   this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
@@ -188,6 +189,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseOptions() noexcept
   this->parseFiltering();
   this->parseCheckpointParticles();
   this->parseSecondaryEmissionSpecification();
+  this->parseDiffusiveDeposit();
   this->parseReactiveFieldCentering();
 }
 
@@ -206,6 +208,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   this->parseFiltering();
   this->parseCheckpointParticles();
   this->parseSecondaryEmissionSpecification();
+  this->parseDiffusiveDeposit();
   this->parseReactiveFieldCentering();
 }
 
@@ -310,6 +313,118 @@ ItoKMCGodunovStepper<I, C, R, F>::parseSecondaryEmissionSpecification() noexcept
 
     err = "ItoKMCGodunovStepper::parseSecondaryEmissionSpecification - expected 'before_reactions' or 'after_reactions'";
     err += "but got" + str;
+
+    MayDay::Abort(err.c_str());
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+RealVect
+ItoKMCGodunovStepper<I, C, R, F>::reflectDiffusionHop(const RealVect& a_pos,
+                                                      const RealVect& a_disp,
+                                                      const Real      a_fOld,
+                                                      const Real      a_dx) const noexcept
+{
+  constexpr int numBisections = 20;
+  constexpr int numAttempts   = 2;
+
+  const RefCountedPtr<BaseIF>& baseif = (this->m_amr)->getBaseImplicitFunction(this->m_plasmaPhase);
+
+  const Real fluidSign = (a_fOld > 0.0) ? 1.0 : -1.0;
+  const Real h         = 1.E-2 * a_dx;
+
+  const auto inFluid = [&](const RealVect& a_x) -> bool {
+    return fluidSign * baseif->value(a_x) > 0.0;
+  };
+
+  RealVect start = a_pos;
+  RealVect end   = a_pos + a_disp;
+
+  for (int attempt = 0; attempt < numAttempts; attempt++) {
+
+    // Bisect for the crossing point. start is in the fluid and end is not, so the bracket is valid by construction.
+    RealVect lo = start;
+    RealVect hi = end;
+
+    for (int k = 0; k < numBisections; k++) {
+      const RealVect mid = 0.5 * (lo + hi);
+
+      if (inFluid(mid)) {
+        lo = mid;
+      }
+      else {
+        hi = mid;
+      }
+    }
+
+    const RealVect cross = 0.5 * (lo + hi);
+
+    // Surface normal from the gradient of the implicit function.
+    RealVect grad = RealVect::Zero;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      RealVect a = cross;
+      RealVect b = cross;
+
+      a[dir] -= h;
+      b[dir] += h;
+
+      grad[dir] = (baseif->value(b) - baseif->value(a)) / (2.0 * h);
+    }
+
+    const Real gradLen = grad.vectorLength();
+
+    if (gradLen <= 0.0) {
+      return RealVect::Zero;
+    }
+
+    const RealVect n = grad / gradLen;
+
+    // Mirror the overshoot about the surface.
+    const RealVect overshoot = end - cross;
+
+    end = cross + overshoot - 2.0 * overshoot.dotProduct(n) * n;
+
+    if (inFluid(end)) {
+      return end - a_pos;
+    }
+
+    // Reflected back into the solid, which happens at a concave corner or in a thin feature. Try once more from the
+    // crossing point, then give up.
+    start = cross;
+  }
+
+  return RealVect::Zero;
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::parseDiffusiveDeposit() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::parseDiffusiveDeposit");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseDiffusiveDeposit" << endl;
+  }
+
+  ParmParse pp(this->m_name.c_str());
+
+  std::string str;
+
+  pp.get("diffusive_deposit", str);
+
+  if (str == "inside") {
+    m_diffusiveDeposit = DiffusiveDeposit::Inside;
+  }
+  else if (str == "cancel") {
+    m_diffusiveDeposit = DiffusiveDeposit::Cancel;
+  }
+  else if (str == "reflect") {
+    m_diffusiveDeposit = DiffusiveDeposit::Reflect;
+  }
+  else {
+    const std::string err = "ItoKMCGodunovStepper::parseDiffusiveDeposit - expected 'inside', 'cancel' or 'reflect' "
+                            "but got '" +
+                            str + "'";
 
     MayDay::Abort(err.c_str());
   }
@@ -848,7 +963,7 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime) reduction(+ : numCancelledHops, numTotalHops)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCancelledHops, numTotalHops, numReflectFailed)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
@@ -1715,9 +1830,10 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
   this->clearPointParticles(a_rhoDaggerParticles, SpeciesSubset::All);
 
-  // PROTOTYPE -- TEMPORARY. Count explicit displacements that would land on or behind the embedded boundary.
+  // Diffusion hops that would have crossed the boundary, and were cancelled or reflected instead.
   long long numCancelledHops = 0;
   long long numTotalHops     = 0;
+  long long numReflectFailed = 0;
 
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
@@ -1750,10 +1866,8 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
-      // PROTOTYPE -- TEMPORARY, for the displacement rejection below.
+      // For the boundary test on the diffusion hop below.
       const RefCountedPtr<BaseIF>& baseif = (this->m_amr)->getBaseImplicitFunction(this->m_plasmaPhase);
-      const ProblemDomain&         domain = (this->m_amr)->getDomains()[lvl];
-      const RealVect               probLo = (this->m_amr)->getProbLo();
       const Real                   dx     = (this->m_amr)->getDx()[lvl];
 
       auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
@@ -1790,49 +1904,32 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           // The total explicit displacement: the stochastic hop plus the lagged grad(D) drift.
           RealVect disp = hop + a_dt * gradD;
 
-          // PROTOTYPE -- TEMPORARY. Refuse a displacement that crosses the embedded boundary or leaves the domain.
-          //
-          // The random walk here has NO reflecting boundary, and that makes a zero-mean hop systematic: a particle
-          // in the fluid can hop into the solid, but a particle in the solid can never hop back out, because there
-          // are none there. Symmetric steps, asymmetric geometry -- so the near-wall fluid drains every step. There
-          // is also no length limiter; normal_max truncates the GAUSSIAN at 5 sigma, not the hop at some number of
-          // cells, so excursions of several cells are routine and can cross the boundary outright.
-          //
-          // Cancelling is the diagnostic, not the fix. It leaves the particle where it was rather than where a
-          // reflected walk would put it, which piles density up slightly at the pre-hop position. The correct form
-          // is reflection -- a particle that would land at depth d inside comes back to depth d outside -- which is
-          // the particle-level statement of the same even extension the mirror applies at deposition. Cancel first
-          // to confirm the channel, then reflect.
-          //
-          // This sits ABOVE the scratch write on purpose, so it applies to the REAL particle and not only to the
-          // rho^dagger copy. Applying it to rho^dagger alone changes nothing, which is how we know the channel is
-          // the real hop: rho^dagger is rebuilt from scratch every step and cannot accumulate anything.
-          {
-            const RealVect newPos = pos + disp;
-
-            bool reject = false;
-
-            // Sign CHANGE, not sign, so this needs no assumption about which side the implicit function calls
-            // positive -- the old position is known to be in the fluid because the particle is there now.
-            if (!baseif.isNull()) {
-              const Real fOld = baseif->value(pos);
-              const Real fNew = baseif->value(newPos);
-
-              if (fOld * fNew < 0.0) {
-                reject = true;
-              }
-            }
-
-            if (!domain.contains(ParticleOps::getParticleCellIndex(newPos, probLo, dx))) {
-              reject = true;
-            }
+          // The stochastic hop has zero mean and should carry no net transport, but the geometry makes it one-way:
+          // a particle in the fluid can hop into the solid, and there are none inside to hop back. What to do about
+          // that is ItoKMCGodunovStepper.diffusive_deposit. Drift is untouched here -- a particle carried into the
+          // boundary by v*dt still intersects and is absorbed later in the advance, which is real transport.
+          if (m_diffusiveDeposit != DiffusiveDeposit::Inside && !baseif.isNull()) {
+            const Real fOld = baseif->value(pos);
 
             numTotalHops++;
 
-            if (reject) {
-              disp = RealVect::Zero;
-
+            // A sign CHANGE rather than a sign, so this assumes nothing about which side the implicit function
+            // calls positive. pos is known to be in the fluid because the particle is there now.
+            if (fOld * baseif->value(pos + disp) < 0.0) {
               numCancelledHops++;
+
+              if (m_diffusiveDeposit == DiffusiveDeposit::Cancel) {
+                disp = RealVect::Zero;
+              }
+              else {
+                disp = this->reflectDiffusionHop(pos, disp, fOld, dx);
+
+                // Zero is unambiguous here: a hop that crossed cannot reflect to exactly no displacement, so this is
+                // the routine reporting that it could not place the particle back in the fluid.
+                if (disp == RealVect::Zero) {
+                  numReflectFailed++;
+                }
+              }
             }
           }
 
@@ -1848,14 +1945,22 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
     }
   }
 
-  // PROTOTYPE -- TEMPORARY. Reduced unconditionally: these are collectives and the condition below is not one.
+  // Reduced unconditionally: these are collectives and the condition below is not one.
   numCancelledHops = ParallelOps::sum(numCancelledHops);
   numTotalHops     = ParallelOps::sum(numTotalHops);
+  numReflectFailed = ParallelOps::sum(numReflectFailed);
 
   if (this->m_verbosity > 5 && numTotalHops > 0) {
-    pout() << this->m_name + "::diffuseParticlesEulerMaruyama - cancelled " << numCancelledHops << " of "
-           << numTotalHops << " explicit particle displacements (" << (100.0 * numCancelledHops) / numTotalHops
-           << "%) that would have crossed into the EB or left the domain" << endl;
+    pout() << this->m_name + "::diffuseParticlesEulerMaruyama - "
+           << ((m_diffusiveDeposit == DiffusiveDeposit::Cancel) ? "cancelled " : "reflected ") << numCancelledHops
+           << " of " << numTotalHops << " diffusion hops (" << (100.0 * numCancelledHops) / numTotalHops
+           << "%) that would have crossed the EB";
+
+    if (m_diffusiveDeposit == DiffusiveDeposit::Reflect) {
+      pout() << "; " << numReflectFailed << " could not be reflected into the fluid and were cancelled";
+    }
+
+    pout() << endl;
   }
 }
 

@@ -160,9 +160,29 @@ protected:
   };
 
   /**
+   * @brief What to do with a diffusion hop that would land inside the embedded boundary.
+   * @details The stochastic hop has zero mean, so it should produce no net transport -- but the geometry makes it
+   * one-way: a particle in the fluid can hop into the solid, and there are none inside to hop back out. The near-wall
+   * region therefore drains at a rate set by sqrt(2*D*dt)/dx rather than by any physics. This selects what happens
+   * instead. Drift is unaffected in every case: a particle carried into the boundary by v*dt still intersects and is
+   * absorbed, which is real transport at a rate the field sets.
+   */
+  enum class DiffusiveDeposit
+  {
+    Inside,  ///< Leave the hop alone. The particle lands inside the solid and deposits from there.
+    Cancel,  ///< Zero the hop. Conserves charge, but biases density towards the pre-hop position.
+    Reflect, ///< Reflect the hop about the boundary, which is the no-flux condition for a random walk.
+  };
+
+  /**
    * @brief If true, then the particles are checkpointed so we can regrid on checkpoint-restart.
    */
   bool m_writeCheckpointParticles;
+
+  /**
+   * @brief What to do with a diffusion hop that would cross the embedded boundary. See DiffusiveDeposit.
+   */
+  DiffusiveDeposit m_diffusiveDeposit;
 
   /**
    * @brief If true, then the HDF5 checkpoint file contained particles that we can read.
@@ -323,6 +343,31 @@ protected:
    */
   virtual void
   parseSecondaryEmissionSpecification() noexcept;
+
+  /**
+   * @brief Parse what happens to a diffusion hop that would cross the embedded boundary.
+   */
+  virtual void
+  parseDiffusiveDeposit() noexcept;
+
+  /**
+   * @brief Reflect a diffusion hop that crosses the embedded boundary back into the fluid.
+   * @details Bisects along the segment for the crossing point, takes the surface normal from the gradient of the
+   * implicit function there, and mirrors the remainder of the displacement about it.
+   * @details Reflection can fail to place the particle in the fluid -- at a concave corner, or in a feature thinner
+   * than the hop, the mirrored point is inside the solid again. A second reflection is attempted, and if that also
+   * fails the hop is cancelled, which is always safe because the pre-hop position is known to be in the fluid.
+   * @note A hop that passes clean THROUGH thin geometry and ends in fluid on the far side is not detected: the
+   * caller's test compares the endpoints only, and both are outside the solid. Catching that needs a swept-path
+   * intersection rather than a sign change.
+   * @param[in] a_pos  Pre-hop position, in the fluid.
+   * @param[in] a_disp Displacement that crosses the boundary.
+   * @param[in] a_fOld Implicit function at a_pos, so the fluid's sign is known without re-evaluating.
+   * @param[in] a_dx   Grid resolution, used to size the gradient stencil.
+   * @return The reflected displacement, or zero if reflection could not place the particle in the fluid.
+   */
+  virtual RealVect
+  reflectDiffusionHop(const RealVect& a_pos, const RealVect& a_disp, const Real a_fOld, const Real a_dx) const noexcept;
 
   /**
    * @brief Parse the time-centering of the electric field used for the reactive substep.
