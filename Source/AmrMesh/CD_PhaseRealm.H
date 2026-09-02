@@ -487,6 +487,19 @@ protected:
   bool m_verbose;
 
   /**
+   * @brief Whether mirrored deposition fits a shape operator, or settles for a plane mirror.
+   * @details Optional, read from PhaseRealm.mirror_curvature_correction and defaulting to true. With it false the
+   * curvature fit is skipped entirely and the shape operator stays zero, which degrades mirrored deposition to a
+   * plane mirror -- reflect() needs no special case for that, since a zero shape operator already collapses the
+   * patch normal to n_c and the Jacobian to one.
+   * @details It exists to answer whether the correction earns its cost on a given geometry, and the answer is not
+   * obviously yes or no. On a rod dielectric it moved individual cut cells by up to a factor of three, always
+   * upwards when disabled, because a convex surface has J < 1 and a plane mirror does not down-weight the image.
+   * On a gently curved surface the effect is small. Measure before deciding.
+   */
+  bool m_mirrorCurvatureCorrection;
+
+  /**
    * @brief Finest grid level
    */
   int m_finestLevel;

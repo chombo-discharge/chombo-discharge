@@ -35,7 +35,7 @@
 #include <CD_MirrorDeposition.H>
 #include <CD_NamespaceHeader.H>
 
-PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false)
+PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false), m_mirrorCurvatureCorrection(true)
 {
   CH_TIME("PhaseRealm::PhaseRealm");
 
@@ -44,10 +44,12 @@ PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false
   this->registerOperator(s_eb_gradient);
   this->registerOperator(s_eb_irreg_interp);
 
-  // Adding this for debugging purposes.
+  // Adding this for debugging purposes. These are read with query rather than get -- they are optional debug knobs
+  // with working defaults, not physics parameters, so an input that says nothing about them is not an error.
   ParmParse pp("PhaseRealm");
   pp.query("profile", m_profile);
   pp.query("verbosity", m_verbose);
+  pp.query("mirror_curvature_correction", m_mirrorCurvatureCorrection);
 }
 
 PhaseRealm::~PhaseRealm() = default;
@@ -991,7 +993,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
   // to ~1E-5 degrees; in 3-D they carry up to 1.6 degrees of error and the implicit function wins decisively.
   const Real gradientStep = 1.E-2;
 
-  // Curvature correction on or off.  With it OFF, pass B is skipped entirely: the shape operator stays zero, every
+  // Curvature correction on or off, from PhaseRealm.mirror_curvature_correction. With it OFF, pass B is skipped
+  // entirely: the shape operator stays zero, every
   // cut cell keeps the Status::Planar that pass A gave it, and the whole scheme degrades to a PLANE mirror with no
   // special-casing anywhere downstream -- MirrorDeposition::reflect already does the right thing for S = 0, since
   // Sw vanishes, nhat collapses to n_c, and the Jacobian becomes (1 - 0 + 0)/(1 + 0 + 0) = 1.
@@ -1004,7 +1007,6 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
   //
   // What it costs is the least-squares fit over the 5^D neighbourhood of every cut cell, once per regrid: a
   // symmetric solve plus a residual pass per cell, with the conditioning and crease guards on top.
-  constexpr bool useCurvatureCorrection = true;
 
   // Largest projection, in cells, that will be believed. Not a tuning knob for accuracy -- a tripwire. Composite
   // geometries are min/max of several implicit functions and are therefore NOT differentiable at a seam; a one-sided
@@ -1173,10 +1175,11 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     m_mirrorSurfaceData[lvl]->exchange();
 
     // ---------------------------------------------------------------------------------------------------------
-    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell. Skipped entirely when the
-    // curvature correction is off, which leaves S = 0 and Status::Planar and gives a plane mirror.
+    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell. Skipped entirely when
+    // PhaseRealm.mirror_curvature_correction is false, which leaves S = 0 and Status::Planar and gives a plane
+    // mirror.
     // ---------------------------------------------------------------------------------------------------------
-    if (useCurvatureCorrection) {
+    if (m_mirrorCurvatureCorrection) {
 
 #pragma omp parallel for schedule(runtime) reduction(+ : fitOk, fitTooFewNeighbours, fitIllConditioned, fitCrease)
       for (int mybox = 0; mybox < nbox; mybox++) {
@@ -1630,9 +1633,9 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
              << " refused as beyond " << centroidShiftLimit << " dx" << endl;
     }
 
-    if (!useCurvatureCorrection) {
+    if (!m_mirrorCurvatureCorrection) {
       pout() << "PhaseRealm::defineMirrorSurfaceData - curvature correction DISABLED; the shape operator is zero and "
-                "the scheme is a plane mirror (see useCurvatureCorrection)"
+                "the scheme is a plane mirror (PhaseRealm.mirror_curvature_correction)"
              << endl;
     }
 
