@@ -991,6 +991,21 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
   // to ~1E-5 degrees; in 3-D they carry up to 1.6 degrees of error and the implicit function wins decisively.
   const Real gradientStep = 1.E-2;
 
+  // Curvature correction on or off.  With it OFF, pass B is skipped entirely: the shape operator stays zero, every
+  // cut cell keeps the Status::Planar that pass A gave it, and the whole scheme degrades to a PLANE mirror with no
+  // special-casing anywhere downstream -- MirrorDeposition::reflect already does the right thing for S = 0, since
+  // Sw vanishes, nhat collapses to n_c, and the Jacobian becomes (1 - 0 + 0)/(1 + 0 + 0) = 1.
+  //
+  // The point of the switch is to find out whether the correction earns its cost in a production run. What it buys,
+  // measured against analytic surfaces: the fitted curvature is accurate to a fraction of a percent on a resolved
+  // sphere, and the exact Jacobian matters most where the surface is tightly curved relative to dx -- a concave
+  // cavity at R = 3*dx runs at J = 28.9 under CIC and J = 483.8 under TSC, so on that geometry a plane mirror
+  // under-weights the image by two to three orders of magnitude. On a gently curved surface it is a small effect.
+  //
+  // What it costs is the least-squares fit over the 5^D neighbourhood of every cut cell, once per regrid: a
+  // symmetric solve plus a residual pass per cell, with the conditioning and crease guards on top.
+  constexpr bool useCurvatureCorrection = true;
+
   // Largest projection, in cells, that will be believed. Not a tuning knob for accuracy -- a tripwire. Composite
   // geometries are min/max of several implicit functions and are therefore NOT differentiable at a seam; a one-sided
   // gradient there can throw the Newton step onto the wrong facet, moving the centroid by order a cell rather than a
@@ -1158,288 +1173,296 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     m_mirrorSurfaceData[lvl]->exchange();
 
     // ---------------------------------------------------------------------------------------------------------
-    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell.
+    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell. Skipped entirely when the
+    // curvature correction is off, which leaves S = 0 and Status::Planar and gives a plane mirror.
     // ---------------------------------------------------------------------------------------------------------
+    if (useCurvatureCorrection) {
+
 #pragma omp parallel for schedule(runtime) reduction(+ : fitOk, fitTooFewNeighbours, fitIllConditioned, fitCrease)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-      EBCellFAB&     surf    = (*m_mirrorSurfaceData[lvl])[din];
-      BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
-      const EBISBox& ebisbox = surf.getEBISBox();
+        EBCellFAB&     surf    = (*m_mirrorSurfaceData[lvl])[din];
+        BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
+        const EBISBox& ebisbox = surf.getEBISBox();
 
-      const Box validBox = dbl[din];
+        const Box validBox = dbl[din];
 
-      // Clip to the EBISBox region as well as to the data FAB. A LevelData ghost box is not clipped to the problem
-      // domain, but EBISBox only holds data over its own region, so a box on the domain edge would otherwise ask
-      // EBISBox about cells it has nothing for.
-      const Box readBox = grow(validBox, fitStencilRadius) & surfReg.box() & ebisbox.getRegion();
+        // Clip to the EBISBox region as well as to the data FAB. A LevelData ghost box is not clipped to the problem
+        // domain, but EBISBox only holds data over its own region, so a box on the domain edge would otherwise ask
+        // EBISBox about cells it has nothing for.
+        const Box readBox = grow(validBox, fitStencilRadius) & surfReg.box() & ebisbox.getRegion();
 
-      for (BoxIterator bit(validBox); bit.ok(); ++bit) {
-        const IntVect& iv = bit();
+        for (BoxIterator bit(validBox); bit.ok(); ++bit) {
+          const IntVect& iv = bit();
 
-        if (surfReg(iv, MirrorDeposition::compStatus) < 0.5) {
-          continue;
-        }
-
-        RealVect xi;
-        RealVect ni;
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          xi[dir] = surfReg(iv, MirrorDeposition::compCentroid + dir);
-          ni[dir] = surfReg(iv, MirrorDeposition::compNormal + dir);
-        }
-
-        // Orthonormal tangent basis. Cross the normal with the axis it is least aligned with, so the cross product is
-        // never near-degenerate. This basis is LOCAL TO THE FIT and is discarded at the end of it -- the shape
-        // operator is stored in world coordinates precisely so that no later reader has to agree with this choice.
-        RealVect tangents[MirrorDeposition::numTangents];
-        {
-          int minDir = 0;
-
-          for (int dir = 1; dir < SpaceDim; dir++) {
-            if (std::abs(ni[dir]) < std::abs(ni[minDir])) {
-              minDir = dir;
-            }
-          }
-
-          RealVect axis = RealVect::Zero;
-          axis[minDir]  = 1.0;
-
-#if CH_SPACEDIM == 2
-          tangents[0] = RealVect(-ni[1], ni[0]);
-#else
-          RealVect t1 = RealVect(ni[1] * axis[2] - ni[2] * axis[1],
-                                 ni[2] * axis[0] - ni[0] * axis[2],
-                                 ni[0] * axis[1] - ni[1] * axis[0]);
-          RealVect t2 = RealVect::Zero;
-
-          const Real t1len = t1.vectorLength();
-
-          if (t1len > 0.0) {
-            t1 /= t1len;
-            t2 = RealVect(ni[1] * t1[2] - ni[2] * t1[1], ni[2] * t1[0] - ni[0] * t1[2], ni[0] * t1[1] - ni[1] * t1[0]);
-
-            const Real t2len = t2.vectorLength();
-
-            if (t2len > 0.0) {
-              t2 /= t2len;
-            }
-          }
-
-          tangents[0] = t1;
-          tangents[1] = t2;
-#endif
-        }
-
-        // Least-squares fit of the shape operator: minimize sum_j |v_j - S u_j|^2 over the tangential displacement
-        // u_j and tangential normal-difference v_j of the neighbouring cut cells.
-        constexpr int T = MirrorDeposition::numTangents;
-
-        Real A[T][T] = {};
-        Real B[T][T] = {};
-        Real uNormSq = 0.0;
-
-        int numUsable = 0;
-
-        // Neighbour data is read FROM THE FIELD, never from EBISBox. That is what enforces the delivered-not-merely-
-        // existing rule: a cut cell that no box on this level owns was never seeded and never exchanged, so it reads
-        // back as Status::None here even though EBISBox can see it. Reading EBISBox instead would fit a patch to
-        // geometry this level has no data for.
-        Box window(iv - fitStencilRadius * IntVect::Unit, iv + fitStencilRadius * IntVect::Unit);
-        window &= readBox;
-
-        for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
-          const IntVect& jv = nbrIt();
-
-          if (jv == iv) {
+          if (surfReg(iv, MirrorDeposition::compStatus) < 0.5) {
             continue;
           }
 
-          if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
-            continue;
-          }
-
-          if (ebisbox.numVoFs(jv) != 1) {
-            continue;
-          }
-
-          RealVect xj;
-          RealVect nj;
+          RealVect xi;
+          RealVect ni;
 
           for (int dir = 0; dir < SpaceDim; dir++) {
-            xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
-            nj[dir] = surfReg(jv, MirrorDeposition::compNormal + dir);
+            xi[dir] = surfReg(iv, MirrorDeposition::compCentroid + dir);
+            ni[dir] = surfReg(iv, MirrorDeposition::compNormal + dir);
           }
 
-          const RealVect dxj = xj - xi;
-          const RealVect dnj = nj - ni;
+          // Orthonormal tangent basis. Cross the normal with the axis it is least aligned with, so the cross product is
+          // never near-degenerate. This basis is LOCAL TO THE FIT and is discarded at the end of it -- the shape
+          // operator is stored in world coordinates precisely so that no later reader has to agree with this choice.
+          RealVect tangents[MirrorDeposition::numTangents];
+          {
+            int minDir = 0;
 
-          Real u[T];
-          Real v[T];
-
-          for (int a = 0; a < T; a++) {
-            u[a] = tangents[a].dotProduct(dxj);
-            v[a] = tangents[a].dotProduct(dnj);
-          }
-
-          for (int a = 0; a < T; a++) {
-            uNormSq += u[a] * u[a];
-
-            for (int b = 0; b < T; b++) {
-              A[a][b] += u[a] * u[b];
-              B[a][b] += u[a] * v[b];
+            for (int dir = 1; dir < SpaceDim; dir++) {
+              if (std::abs(ni[dir]) < std::abs(ni[minDir])) {
+                minDir = dir;
+              }
             }
-          }
 
-          numUsable++;
-        }
-
-        bool accepted = false;
-        Real S[T][T]  = {};
-
-        if (numUsable < 4) {
-          fitTooFewNeighbours++;
-        }
-        else {
-          // Condition test on A, normalized by the natural scale (numUsable * dx^2) so the threshold is a pure
-          // number in both dimensions. A count of usable neighbours is necessary but NOT sufficient: four cut cells
-          // can be nearly collinear in the tangent plane -- a ridge, a fin, a cylinder whose cut cells run along its
-          // axis -- and then A is near-singular while the count looks healthy.
-          const Real scale = 1.0 / (numUsable * dx * dx);
+            RealVect axis = RealVect::Zero;
+            axis[minDir]  = 1.0;
 
 #if CH_SPACEDIM == 2
-          const Real lambdaMin = A[0][0] * scale;
+            tangents[0] = RealVect(-ni[1], ni[0]);
 #else
-          const Real tr   = (A[0][0] + A[1][1]) * scale;
-          const Real det  = (A[0][0] * A[1][1] - A[0][1] * A[1][0]) * scale * scale;
-          const Real disc = std::max(0.0, 0.25 * tr * tr - det);
+            RealVect t1 = RealVect(ni[1] * axis[2] - ni[2] * axis[1],
+                                   ni[2] * axis[0] - ni[0] * axis[2],
+                                   ni[0] * axis[1] - ni[1] * axis[0]);
+            RealVect t2 = RealVect::Zero;
 
-          const Real lambdaMin = 0.5 * tr - std::sqrt(disc);
+            const Real t1len = t1.vectorLength();
+
+            if (t1len > 0.0) {
+              t1 /= t1len;
+              t2 = RealVect(ni[1] * t1[2] - ni[2] * t1[1],
+                            ni[2] * t1[0] - ni[0] * t1[2],
+                            ni[0] * t1[1] - ni[1] * t1[0]);
+
+              const Real t2len = t2.vectorLength();
+
+              if (t2len > 0.0) {
+                t2 /= t2len;
+              }
+            }
+
+            tangents[0] = t1;
+            tangents[1] = t2;
 #endif
+          }
 
-          if (!(lambdaMin > m_mirrorConditionTolerance)) {
-            fitIllConditioned++;
+          // Least-squares fit of the shape operator: minimize sum_j |v_j - S u_j|^2 over the tangential displacement
+          // u_j and tangential normal-difference v_j of the neighbouring cut cells.
+          constexpr int T = MirrorDeposition::numTangents;
+
+          Real A[T][T] = {};
+          Real B[T][T] = {};
+          Real uNormSq = 0.0;
+
+          int numUsable = 0;
+
+          // Neighbour data is read FROM THE FIELD, never from EBISBox. That is what enforces the delivered-not-merely-
+          // existing rule: a cut cell that no box on this level owns was never seeded and never exchanged, so it reads
+          // back as Status::None here even though EBISBox can see it. Reading EBISBox instead would fit a patch to
+          // geometry this level has no data for.
+          Box window(iv - fitStencilRadius * IntVect::Unit, iv + fitStencilRadius * IntVect::Unit);
+          window &= readBox;
+
+          for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
+            const IntVect& jv = nbrIt();
+
+            if (jv == iv) {
+              continue;
+            }
+
+            if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
+              continue;
+            }
+
+            if (ebisbox.numVoFs(jv) != 1) {
+              continue;
+            }
+
+            RealVect xj;
+            RealVect nj;
+
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
+              nj[dir] = surfReg(jv, MirrorDeposition::compNormal + dir);
+            }
+
+            const RealVect dxj = xj - xi;
+            const RealVect dnj = nj - ni;
+
+            Real u[T];
+            Real v[T];
+
+            for (int a = 0; a < T; a++) {
+              u[a] = tangents[a].dotProduct(dxj);
+              v[a] = tangents[a].dotProduct(dnj);
+            }
+
+            for (int a = 0; a < T; a++) {
+              uNormSq += u[a] * u[a];
+
+              for (int b = 0; b < T; b++) {
+                A[a][b] += u[a] * u[b];
+                B[a][b] += u[a] * v[b];
+              }
+            }
+
+            numUsable++;
+          }
+
+          bool accepted = false;
+          Real S[T][T]  = {};
+
+          if (numUsable < 4) {
+            fitTooFewNeighbours++;
           }
           else {
-            // Solve S^T = A^{-1} B in closed form. A 2x2 symmetric inverse and a 2x2 eigenproblem are about fifteen
-            // allocation-free lines; LaPackUtils::computeSVD would give the conditioning number directly but
-            // allocates std::vectors per call, inside what is an OpenMP loop over every cut cell.
+            // Condition test on A, normalized by the natural scale (numUsable * dx^2) so the threshold is a pure
+            // number in both dimensions. A count of usable neighbours is necessary but NOT sufficient: four cut cells
+            // can be nearly collinear in the tangent plane -- a ridge, a fin, a cylinder whose cut cells run along its
+            // axis -- and then A is near-singular while the count looks healthy.
+            const Real scale = 1.0 / (numUsable * dx * dx);
+
 #if CH_SPACEDIM == 2
-            S[0][0] = B[0][0] / A[0][0];
+            const Real lambdaMin = A[0][0] * scale;
 #else
-            const Real detA = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+            const Real tr   = (A[0][0] + A[1][1]) * scale;
+            const Real det  = (A[0][0] * A[1][1] - A[0][1] * A[1][0]) * scale * scale;
+            const Real disc = std::max(0.0, 0.25 * tr * tr - det);
 
-            const Real inv00 = A[1][1] / detA;
-            const Real inv01 = -A[0][1] / detA;
-            const Real inv11 = A[0][0] / detA;
-
-            // S^T = A^{-1} B, then transpose into S.
-            const Real st00 = inv00 * B[0][0] + inv01 * B[1][0];
-            const Real st01 = inv00 * B[0][1] + inv01 * B[1][1];
-            const Real st10 = inv01 * B[0][0] + inv11 * B[1][0];
-            const Real st11 = inv01 * B[0][1] + inv11 * B[1][1];
-
-            S[0][0] = st00;
-            S[0][1] = st10;
-            S[1][0] = st01;
-            S[1][1] = st11;
+            const Real lambdaMin = 0.5 * tr - std::sqrt(disc);
 #endif
 
-            // Symmetrize. The shape operator is symmetric for a smooth surface; the fitted one is not exactly, and
-            // the antisymmetric part is fit noise.
-            for (int a = 0; a < T; a++) {
-              for (int b = a + 1; b < T; b++) {
-                const Real avg = 0.5 * (S[a][b] + S[b][a]);
-
-                S[a][b] = avg;
-                S[b][a] = avg;
-              }
-            }
-
-            // Crease detector. The residual is made dimensionless by dx, so the threshold does not move with
-            // refinement. A sphere union, a facet edge or a dielectric corner is not a quadratic patch, and this is
-            // what says so.
-            Real residualSq = 0.0;
-
-            for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
-              const IntVect& jv = nbrIt();
-
-              if (jv == iv) {
-                continue;
-              }
-
-              if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
-                continue;
-              }
-
-              if (ebisbox.numVoFs(jv) != 1) {
-                continue;
-              }
-
-              RealVect xj;
-              RealVect nj;
-
-              for (int dir = 0; dir < SpaceDim; dir++) {
-                xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
-                nj[dir] = surfReg(jv, MirrorDeposition::compNormal + dir);
-              }
-
-              const RealVect dxj = xj - xi;
-              const RealVect dnj = nj - ni;
-
-              for (int a = 0; a < T; a++) {
-                Real pred = 0.0;
-
-                for (int b = 0; b < T; b++) {
-                  pred += S[a][b] * tangents[b].dotProduct(dxj);
-                }
-
-                const Real r = tangents[a].dotProduct(dnj) - pred;
-
-                residualSq += r * r;
-              }
-            }
-
-            const Real residual = (uNormSq > 0.0) ? dx * std::sqrt(residualSq / uNormSq) : 0.0;
-
-            if (residual > m_mirrorCreaseTolerance) {
-              fitCrease++;
+            if (!(lambdaMin > m_mirrorConditionTolerance)) {
+              fitIllConditioned++;
             }
             else {
-              accepted = true;
+              // Solve S^T = A^{-1} B in closed form. A 2x2 symmetric inverse and a 2x2 eigenproblem are about fifteen
+              // allocation-free lines; LaPackUtils::computeSVD would give the conditioning number directly but
+              // allocates std::vectors per call, inside what is an OpenMP loop over every cut cell.
+#if CH_SPACEDIM == 2
+              S[0][0] = B[0][0] / A[0][0];
+#else
+              const Real detA = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+
+              const Real inv00 = A[1][1] / detA;
+              const Real inv01 = -A[0][1] / detA;
+              const Real inv11 = A[0][0] / detA;
+
+              // S^T = A^{-1} B, then transpose into S.
+              const Real st00 = inv00 * B[0][0] + inv01 * B[1][0];
+              const Real st01 = inv00 * B[0][1] + inv01 * B[1][1];
+              const Real st10 = inv01 * B[0][0] + inv11 * B[1][0];
+              const Real st11 = inv01 * B[0][1] + inv11 * B[1][1];
+
+              S[0][0] = st00;
+              S[0][1] = st10;
+              S[1][0] = st01;
+              S[1][1] = st11;
+#endif
+
+              // Symmetrize. The shape operator is symmetric for a smooth surface; the fitted one is not exactly, and
+              // the antisymmetric part is fit noise.
+              for (int a = 0; a < T; a++) {
+                for (int b = a + 1; b < T; b++) {
+                  const Real avg = 0.5 * (S[a][b] + S[b][a]);
+
+                  S[a][b] = avg;
+                  S[b][a] = avg;
+                }
+              }
+
+              // Crease detector. The residual is made dimensionless by dx, so the threshold does not move with
+              // refinement. A sphere union, a facet edge or a dielectric corner is not a quadratic patch, and this is
+              // what says so.
+              Real residualSq = 0.0;
+
+              for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
+                const IntVect& jv = nbrIt();
+
+                if (jv == iv) {
+                  continue;
+                }
+
+                if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
+                  continue;
+                }
+
+                if (ebisbox.numVoFs(jv) != 1) {
+                  continue;
+                }
+
+                RealVect xj;
+                RealVect nj;
+
+                for (int dir = 0; dir < SpaceDim; dir++) {
+                  xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
+                  nj[dir] = surfReg(jv, MirrorDeposition::compNormal + dir);
+                }
+
+                const RealVect dxj = xj - xi;
+                const RealVect dnj = nj - ni;
+
+                for (int a = 0; a < T; a++) {
+                  Real pred = 0.0;
+
+                  for (int b = 0; b < T; b++) {
+                    pred += S[a][b] * tangents[b].dotProduct(dxj);
+                  }
+
+                  const Real r = tangents[a].dotProduct(dnj) - pred;
+
+                  residualSq += r * r;
+                }
+              }
+
+              const Real residual = (uNormSq > 0.0) ? dx * std::sqrt(residualSq / uNormSq) : 0.0;
+
+              if (residual > m_mirrorCreaseTolerance) {
+                fitCrease++;
+              }
+              else {
+                accepted = true;
+              }
             }
           }
-        }
 
-        if (accepted) {
-          Real shape[MirrorDeposition::numShapeComp];
+          if (accepted) {
+            Real shape[MirrorDeposition::numShapeComp];
 
-          MirrorDeposition::liftShapeOperator(tangents, S, shape);
+            MirrorDeposition::liftShapeOperator(tangents, S, shape);
 
-          for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
-            surfReg(iv, MirrorDeposition::compShape + c) = shape[c];
+            for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
+              surfReg(iv, MirrorDeposition::compShape + c) = shape[c];
+            }
+
+            surfReg(iv, MirrorDeposition::compStatus) = static_cast<Real>(MirrorDeposition::Status::Fitted);
+
+            // S_c annihilates the normal by construction; if it does not, the lift or the tangent basis is wrong, and
+            // the failure is otherwise silent because tr(S_c) and the Jacobian stay plausible.
+            CH_assert(MirrorDeposition::applyShapeOperator(shape, ni).vectorLength() < 1.E-12);
+
+            fitOk++;
           }
-
-          surfReg(iv, MirrorDeposition::compStatus) = static_cast<Real>(MirrorDeposition::Status::Fitted);
-
-          // S_c annihilates the normal by construction; if it does not, the lift or the tangent basis is wrong, and
-          // the failure is otherwise silent because tr(S_c) and the Jacobian stay plausible.
-          CH_assert(MirrorDeposition::applyShapeOperator(shape, ni).vectorLength() < 1.E-12);
-
-          fitOk++;
-        }
-        else {
-          // Status stays Planar and the shape components stay zero, which gives J = 1 exactly. A refused fit still
-          // reflects -- against a plane -- because dropping it removes the correction in the very cells that need it.
-          for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
-            surfReg(iv, MirrorDeposition::compShape + c) = 0.0;
+          else {
+            // Status stays Planar and the shape components stay zero, which gives J = 1 exactly. A refused fit still
+            // reflects -- against a plane -- because dropping it removes the correction in the very cells that need it.
+            for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
+              surfReg(iv, MirrorDeposition::compShape + c) = 0.0;
+            }
           }
         }
       }
-    }
 
-    m_mirrorSurfaceData[lvl]->exchange();
+      // Publishes the fitted shape operator to the ghosts that pass C reads. Inside the guard because with no fit
+      // there is nothing new to publish -- pass A's exchange already delivered the centroids and normals.
+      m_mirrorSurfaceData[lvl]->exchange();
+    }
 
     // ---------------------------------------------------------------------------------------------------------
     // Pass C -- extend the patch outwards to the band.
@@ -1605,6 +1628,12 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
              << " dx, max " << maxShiftAll << " dx; using the "
              << (useImplicitFunctionGeometry ? "projected" : "EBISBox") << " centroid, " << refusedAll
              << " refused as beyond " << centroidShiftLimit << " dx" << endl;
+    }
+
+    if (!useCurvatureCorrection) {
+      pout() << "PhaseRealm::defineMirrorSurfaceData - curvature correction DISABLED; the shape operator is zero and "
+                "the scheme is a plane mirror (see useCurvatureCorrection)"
+             << endl;
     }
 
     pout() << "PhaseRealm::defineMirrorSurfaceData - curvature fit: " << fitOk << " ok, " << fitTooFewNeighbours
