@@ -350,9 +350,11 @@ PhaseRealm::regridOperators(const int a_lmin)
       pout() << "before/after mirror surface data define" << endl;
       MemoryReport::getMaxMinMemoryUsage();
     }
+
     timer.startEvent("Mirror surface data");
     this->defineMirrorSurfaceData(a_lmin);
     timer.stopEvent("Mirror surface data");
+
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
       pout() << endl;
@@ -918,6 +920,7 @@ void
 PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 {
   CH_TIME("PhaseRealm::defineMirrorSurfaceData");
+
   if (m_verbose) {
     pout() << "PhaseRealm::defineMirrorSurfaceData" << endl;
   }
@@ -938,6 +941,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     MayDay::Error("PhaseRealm::defineMirrorSurfaceData - mirrored deposition needs 'AmrMesh.eb_ghost' >= 2 so that "
                   "EBISBox is valid over the 5^D curvature-fit stencil");
   }
+
   if (m_numGhostCells < m_mirrorBandRadius) {
     MayDay::Error("PhaseRealm::defineMirrorSurfaceData - mirrored deposition needs 'AmrMesh.num_ghost' >= "
                   "'AmrMesh.mirror_band_radius' so that the exchange delivers the cut-cell data the band reads");
@@ -1036,6 +1040,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 #pragma omp parallel for schedule(runtime)                                                                         \
   reduction(+ : numCutCells, sumNormalAngle, numNormalCmp, numNormalFlipped, sumCentroidShift, numCentroidRefused) \
   reduction(max : maxNormalAngle, maxCentroidShift)
+
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
@@ -1191,6 +1196,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
         RealVect tangents[MirrorDeposition::numTangents];
         {
           int minDir = 0;
+
           for (int dir = 1; dir < SpaceDim; dir++) {
             if (std::abs(ni[dir]) < std::abs(ni[minDir])) {
               minDir = dir;
@@ -1209,11 +1215,13 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           RealVect t2 = RealVect::Zero;
 
           const Real t1len = t1.vectorLength();
+
           if (t1len > 0.0) {
             t1 /= t1len;
             t2 = RealVect(ni[1] * t1[2] - ni[2] * t1[1], ni[2] * t1[0] - ni[0] * t1[2], ni[0] * t1[1] - ni[1] * t1[0]);
 
             const Real t2len = t2.vectorLength();
+
             if (t2len > 0.0) {
               t2 /= t2len;
             }
@@ -1247,9 +1255,11 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           if (jv == iv) {
             continue;
           }
+
           if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
             continue;
           }
+
           if (ebisbox.numVoFs(jv) != 1) {
             continue;
           }
@@ -1358,9 +1368,11 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
               if (jv == iv) {
                 continue;
               }
+
               if (surfReg(jv, MirrorDeposition::compStatus) < 0.5) {
                 continue;
               }
+
               if (ebisbox.numVoFs(jv) != 1) {
                 continue;
               }
@@ -1492,6 +1504,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           }
 
           RealVect xj;
+
           for (int dir = 0; dir < SpaceDim; dir++) {
             xj[dir] = surfReg(jv, MirrorDeposition::compCentroid + dir);
           }
@@ -1502,6 +1515,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           // Fixed lexicographic tie-break, so the assignment does not depend on iteration order or on the box
           // decomposition.
           bool better = distSq < bestDistSq;
+
           if (!better && found && distSq <= bestDistSq) {
             for (int dir = SpaceDim - 1; dir >= 0; dir--) {
               if (jv[dir] != bestIv[dir]) {
