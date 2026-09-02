@@ -11,5 +11,6 @@ var searchData=
   ['speciesiteration_8',['speciesiteration',['../classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50',1,'CdrIterator::SpeciesIteration'],['../classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3',1,'ItoIterator::SpeciesIteration']]],
   ['speciessubset_9',['SpeciesSubset',['../CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967',1,'Physics::ItoKMC']]],
   ['speciestype_10',['SpeciesType',['../CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731',1,'Physics::ItoKMC']]],
-  ['surface_11',['Surface',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html#a9225cc2e7ef96d7260fa2b7a2d8f772d',1,'Physics::ItoKMC::ItoKMCSurfaceReactionSet']]]
+  ['status_11',['Status',['../namespaceMirrorDeposition.html#a19afd0b8665028a01fc3d68850721200',1,'MirrorDeposition']]],
+  ['surface_12',['Surface',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html#a9225cc2e7ef96d7260fa2b7a2d8f772d',1,'Physics::ItoKMC::ItoKMCSurfaceReactionSet']]]
 ];

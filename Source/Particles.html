@@ -111,6 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#particle-deposition">Particle deposition</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#base-deposition">Base deposition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#coarse-fine-deposition">Coarse-fine deposition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cut-cell-deposition">Cut-cell deposition</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-interpolation">Particle interpolation</a></li>
@@ -820,11 +821,11 @@ There are two main operations involved:</p>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">Traits</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">                </span><span class="n">a_depositionType</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">          </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span>
-<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                          </span><span class="n">a_forceIrregNGP</span><span class="p">);</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">IrregularDeposition</span><span class="w">           </span><span class="n">a_irregularDeposition</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>The input arguments are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, the SoA particle container (<code class="docutils literal notranslate"><span class="pre">a_particles</span></code>), the deposition method, the coarse-fine handling, and a flag that enforces nearest grid-point deposition in cut-cells.
-The last flag is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.</p>
+<p>The input arguments are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, the SoA particle container (<code class="docutils literal notranslate"><span class="pre">a_particles</span></code>), the deposition method, the coarse-fine handling, and the cut-cell strategy.
+The last argument is discussed in <a class="reference internal" href="#chap-irregulardeposition"><span class="std std-ref">Cut-cell deposition</span></a>.</p>
 <p>To deposit a <em>derived</em> per-particle quantity (e.g. weight times a payload column), use <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositGathered</span></code> with a gatherer callback, or <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles&lt;Members...&gt;</span></code> to deposit one or more payload columns directly.
 Surface (EB) deposition of the weight column onto an <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code> is available through an overload of <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles</span></code>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
@@ -895,6 +896,24 @@ This method operates by extracting the coarse-grid particles that live around th
 <p>Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
 The <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Transition</span></code> method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.</p>
 </div>
+</section>
+<section id="cut-cell-deposition">
+<span id="chap-irregulardeposition"></span><h4>Cut-cell deposition<a class="headerlink" href="#cut-cell-deposition" title="Permalink to this heading"></a></h4>
+<p>Deposition divides by <span class="math notranslate nohighlight">\(\Delta x^{\mathrm{D}}\)</span> and never by the volume fraction <span class="math notranslate nohighlight">\(\kappa\)</span>, so a cut cell holds <span class="math notranslate nohighlight">\(\kappa n\)</span> where the fluid solvers hold <span class="math notranslate nohighlight">\(n\)</span>.
+The input argument <code class="docutils literal notranslate"><span class="pre">a_irregularDeposition</span></code> selects what, if anything, is done about that, through the enum <code class="docutils literal notranslate"><span class="pre">IrregularDeposition</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IrregularDeposition::Native</span></code> – deposit as-is, with no cut-cell treatment. <span class="math notranslate nohighlight">\(\phi\)</span> is then an extended state that runs into the embedded boundary.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IrregularDeposition::NGP</span></code> – put the particle’s entire cloud in its own cell when that cell is cut, so that mass is never deposited into covered grid cells.
+This is motivated by applications that require hard mass conservation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IrregularDeposition::Mirror</span></code> – even extension of the density about the embedded boundary, obtained by depositing each particle’s cloud <em>and</em> the cloud of its image reflected across the boundary.
+Under this option <strong>a cut cell holds</strong> <span class="math notranslate nohighlight">\(n\)</span>, <strong>not</strong> <span class="math notranslate nohighlight">\(\kappa n\)</span>, which is a change of meaning that consumers of <span class="math notranslate nohighlight">\(\phi\)</span> must opt into knowingly.
+Incompatible with <code class="docutils literal notranslate"><span class="pre">DepositionType::NGP</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IrregularDeposition::Redistribute</span></code> – hybrid divergence, with the cut-cell mass excess <span class="math notranslate nohighlight">\((1-\kappa)\)</span> redistributed to the neighbouring cells.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IrregularDeposition::RedistributeBlended</span></code> – as above, but the conservative divergence is first blended with the non-conservative one.</p></li>
+</ul>
+<p>These are mutually exclusive answers to a single question, which is why they are one selector rather than a set of independent flags.
+Combining <code class="docutils literal notranslate"><span class="pre">Mirror</span></code> with redistribution, for instance, would apply a <span class="math notranslate nohighlight">\(1/\kappa\)</span> correction to a field that no longer needs one.</p>
+<p>Note that cut-cell <em>interpolation</em> is a separate and independent question, and remains a boolean.</p>
 </section>
 </section>
 <section id="particle-interpolation">

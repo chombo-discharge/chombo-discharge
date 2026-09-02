@@ -815,15 +815,13 @@ Most are run-time configurable; <code class="docutils literal notranslate"><span
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>                 <span class="o">=</span> <span class="mf">1.E-4</span>          <span class="c1">## Bisection step length for intersection tests</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>                  <span class="o">=</span> <span class="mf">5.0</span>            <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">diffusion_grad_drift</span>        <span class="o">=</span> <span class="n">true</span>           <span class="c1">## Add grad(D) to the drift so the particles transport D*grad(n), as CdrSolver does</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>                <span class="o">=</span> <span class="n">false</span>          <span class="c1">## Turn on/off redistribution.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>          <span class="o">=</span> <span class="n">false</span>          <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>               <span class="o">=</span> <span class="n">particles</span>      <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>                 <span class="o">=</span> <span class="mi">32</span>             <span class="c1">## Particles per cell redrawn when restarting from a &#39;checkpointing = numbers&#39; checkpoint</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>          <span class="o">=</span> <span class="n">true</span>           <span class="c1">## Force irregular deposition in cut cells or not</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>              <span class="o">=</span> <span class="n">true</span>           <span class="c1">## Force irregular interpolation in cut cells or not</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>             <span class="o">=</span> <span class="n">direct</span>         <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>             <span class="o">=</span> <span class="n">cic</span>            <span class="c1">## Cloud-in-cell for plotting particles.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>                  <span class="o">=</span> <span class="n">cic</span>            <span class="c1">## Deposition type.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_irreg</span>            <span class="o">=</span> <span class="n">mirror</span>         <span class="c1">## Cut-cell deposition: &#39;native&#39;, &#39;ngp&#39;, &#39;mirror&#39;, &#39;redistribute&#39;, &#39;redistribute_blended&#39;</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>               <span class="o">=</span> <span class="n">transition</span>     <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
 </pre></div>
 </div>
@@ -849,9 +847,33 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">n
 <li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.deposition_cf</span></code> for the coarse-fine deposition strategy.
 Valid options are <code class="docutils literal notranslate"><span class="pre">interp</span></code>, <code class="docutils literal notranslate"><span class="pre">halo</span></code>, or <code class="docutils literal notranslate"><span class="pre">halo_ngp</span></code>.</p></li>
 </ul>
-<p>To modify the deposition scheme in cut-cells, one can enforce NGP interpolation and deposition through</p>
+<p>How the cut cells are treated when depositing is selected with a single flag,</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.irr_ngp_deposition</span></code> for enforcing NGP deposition. Valid options are <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.deposition_irreg</span></code>, with valid options</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">native</span></code> – deposit as-is, with no cut-cell treatment. A cut cell then holds <span class="math notranslate nohighlight">\(\kappa n\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngp</span></code> – put the particle’s entire cloud in its own cell when that cell is cut.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mirror</span></code> – even extension of the density about the embedded boundary. <strong>Under this option a cut
+cell holds</strong> <span class="math notranslate nohighlight">\(n\)</span>, <strong>not</strong> <span class="math notranslate nohighlight">\(\kappa n\)</span>, unlike every other option here; consumers of
+<span class="math notranslate nohighlight">\(\phi\)</span> must opt into that change of meaning knowingly. Incompatible with
+<code class="docutils literal notranslate"><span class="pre">ItoSolver.deposition</span> <span class="pre">=</span> <span class="pre">ngp</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redistribute</span></code> – hybrid divergence, with the cut-cell mass excess redistributed to the neighbours.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redistribute_blended</span></code> – as <code class="docutils literal notranslate"><span class="pre">redistribute</span></code>, but blended with the non-conservative divergence.</p></li>
+</ul>
+</li>
+</ul>
+<p>These are mutually exclusive answers to one question, which is why they are one selector rather than
+independent flags: <code class="docutils literal notranslate"><span class="pre">mirror</span></code> combined with redistribution would apply a <span class="math notranslate nohighlight">\(1/\kappa\)</span> correction to
+a field that no longer needs one.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">mirror</span></code> is <strong>experimental</strong>. It is verified to add mass only where it should and never to remove
+any, but its acceptance suite is not finished, and the change of meaning above – a cut cell holding
+<span class="math notranslate nohighlight">\(n\)</span> rather than <span class="math notranslate nohighlight">\(\kappa n\)</span> – has not been audited against every consumer of
+<span class="math notranslate nohighlight">\(\phi\)</span>. Use it for deliberate experiments, not production runs.</p>
+</div>
+<p>Cut-cell <em>interpolation</em> is separate and remains a boolean:</p>
+<ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ItoSolver.irr_ngp_interp</span></code> for enforcing NGP interpolation. Valid options are <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
 </ul>
 </section>

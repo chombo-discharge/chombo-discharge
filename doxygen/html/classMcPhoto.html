@@ -468,10 +468,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_transparentEB</b></
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_instantaneous</b></td></tr>
 <tr class="memdesc:a6cf70cf85ebb75002fad55455ef77957"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instantaneous transport or not. <br /></td></tr>
 <tr class="separator:a6cf70cf85ebb75002fad55455ef77957"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28361f2c171b12fa007be264e3d2c157" id="r_a28361f2c171b12fa007be264e3d2c157"><td class="memItemLeft" align="right" valign="top"><a id="a28361f2c171b12fa007be264e3d2c157" name="a28361f2c171b12fa007be264e3d2c157"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_blendConservation</b></td></tr>
-<tr class="memdesc:a28361f2c171b12fa007be264e3d2c157"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for blending the deposition clouds with the nonconservative divergence. <br /></td></tr>
-<tr class="separator:a28361f2c171b12fa007be264e3d2c157"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59f63d5c9aadadab5f27ad0edd0d3ccc" id="r_a59f63d5c9aadadab5f27ad0edd0d3ccc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a59f63d5c9aadadab5f27ad0edd0d3ccc">m_irregularDeposition</a></td></tr>
+<tr class="memdesc:a59f63d5c9aadadab5f27ad0edd0d3ccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the cut cells are treated when depositing.  <br /></td></tr>
+<tr class="separator:a59f63d5c9aadadab5f27ad0edd0d3ccc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55de2135296806b3b697d3152893fe0c" id="r_a55de2135296806b3b697d3152893fe0c"><td class="memItemLeft" align="right" valign="top"><a id="a55de2135296806b3b697d3152893fe0c" name="a55de2135296806b3b697d3152893fe0c"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_depositNumber</b></td></tr>
 <tr class="memdesc:a55de2135296806b3b697d3152893fe0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, the NUMBER of of Photons will be deposited in each cell. <br /></td></tr>
@@ -1486,7 +1485,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div><div class="memdoc">
 
 <p>Shared hybrid-divergence tail for the deposition routines. </p>
-<p>On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the non-conservative divergence, redistributes the mass difference (when m_blendConservation is set), and finishes with an average-down and ghost-cell interpolation. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>On input a_phi holds the conservative (kappa-weighted) deposition. This blends in the non-conservative divergence, redistributes the mass difference (when a redistributing selector is set), and finishes with an average-down and ghost-cell interpolation. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Mesh density. On input the conservative deposition; on output the hybrid result. </td></tr>
   </table>
@@ -2661,6 +2660,32 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dl class="section note"><dt>Note</dt><dd>Currently calls an error because it is not implemented. </dd></dl>
 
 <p>Implements <a class="el" href="classRtSolver.html#a85f3b8b1a5790d30efd2e2317b171ac0">RtSolver</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a59f63d5c9aadadab5f27ad0edd0d3ccc" name="a59f63d5c9aadadab5f27ad0edd0d3ccc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59f63d5c9aadadab5f27ad0edd0d3ccc">&#9670;&#160;</a></span>m_irregularDeposition</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> McPhoto::m_irregularDeposition</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How the cut cells are treated when depositing. </p>
+<p>Replaces the former blend_conservation flag; see <a class="el" href="CD__IrregularDeposition_8H.html" title="Declaration of cut-cell deposition strategies.">CD_IrregularDeposition.H</a>. </p>
 
 </div>
 </div>

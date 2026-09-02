@@ -97,11 +97,14 @@ Collaboration diagram for ItoSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classItoSolver__coll__graph.png" border="0" usemap="#aItoSolver_coll__map" alt="Collaboration graph"/></div>
 <map name="aItoSolver_coll__map" id="aItoSolver_coll__map">
-<area shape="rect" title="Base class for Ito diffusion particle models." alt="" coords="39,211,119,236"/>
-<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="5,108,152,148"/>
-<area shape="poly" title=" " alt="" coords="81,162,81,210,76,210,76,162"/>
-<area shape="rect" href="classParticleContainer.html" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="7,5,151,45"/>
-<area shape="poly" title=" " alt="" coords="81,59,81,108,76,108,76,59"/>
+<area shape="rect" title="Base class for Ito diffusion particle models." alt="" coords="121,211,201,236"/>
+<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="5,108,149,148"/>
+<area shape="poly" title=" " alt="" coords="86,160,99,185,114,198,131,208,129,213,111,202,95,188,82,163"/>
+<area shape="rect" href="classParticleContainer.html" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="89,5,233,45"/>
+<area shape="poly" title=" " alt="" coords="121,56,106,71,94,90,86,109,81,107,90,87,102,68,118,52"/>
+<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="173,108,320,148"/>
+<area shape="poly" title=" " alt="" coords="196,53,210,68,238,106,233,109,206,71,192,57"/>
+<area shape="poly" title=" " alt="" coords="233,162,213,189,183,213,179,208,209,185,228,158"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -240,6 +243,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeO
 <tr class="memitem:a91bbe9100a3967307b48d32932b76cd4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a91bbe9100a3967307b48d32932b76cd4">depositGathered</a> (EBAMRCellData &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, Gather a_gather) const</td></tr>
 <tr class="memdesc:a91bbe9100a3967307b48d32932b76cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a gathered per-particle quantity on the mesh (kappa-conservative + redistribution).  <br /></td></tr>
 <tr class="separator:a91bbe9100a3967307b48d32932b76cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fc409ca117efce969d2f7c3ffa1fa03" id="r_a3fc409ca117efce969d2f7c3ffa1fa03"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits , typename Strength &gt; </td></tr>
+<tr class="memitem:a3fc409ca117efce969d2f7c3ffa1fa03"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a3fc409ca117efce969d2f7c3ffa1fa03">mirrorPass</a> (EBAMRCellData &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const Strength a_strength) const</td></tr>
+<tr class="memdesc:a3fc409ca117efce969d2f7c3ffa1fa03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the mirrored contribution of the band particles to an already-deposited field.  <br /></td></tr>
+<tr class="separator:a3fc409ca117efce969d2f7c3ffa1fa03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7373fbaa206ac2717ff3e6d600f4b036" id="r_a7373fbaa206ac2717ff3e6d600f4b036"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a7373fbaa206ac2717ff3e6d600f4b036">removeCoveredParticles</a> (<a class="el" href="CD__EBRepresentation_8H.html#ac839237a887a079963372760880f908f">EBRepresentation</a> a_representation, Real a_tol)</td></tr>
 <tr class="memdesc:a7373fbaa206ac2717ff3e6d600f4b036"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles that are inside the EB.  <br /></td></tr>
 <tr class="separator:a7373fbaa206ac2717ff3e6d600f4b036"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -570,14 +577,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDiffusionHop</b>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDiffusionGradient</b> ()</td></tr>
 <tr class="memdesc:a1de0d962de81bb473f090fa0062c4e85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not to add the grad(D) drift correction. <br /></td></tr>
 <tr class="separator:a1de0d962de81bb473f090fa0062c4e85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40ac1cf61d9ad50ba0f959088e4e083b" id="r_a40ac1cf61d9ad50ba0f959088e4e083b"><td class="memItemLeft" align="right" valign="top"><a id="a40ac1cf61d9ad50ba0f959088e4e083b" name="a40ac1cf61d9ad50ba0f959088e4e083b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRedistribution</b> ()</td></tr>
-<tr class="memdesc:a40ac1cf61d9ad50ba0f959088e4e083b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not to use redistribution. <br /></td></tr>
-<tr class="separator:a40ac1cf61d9ad50ba0f959088e4e083b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac4be69b978f264e422bcdf75498a81e" id="r_aac4be69b978f264e422bcdf75498a81e"><td class="memItemLeft" align="right" valign="top"><a id="aac4be69b978f264e422bcdf75498a81e" name="aac4be69b978f264e422bcdf75498a81e"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parseDivergenceComputation</b> ()</td></tr>
-<tr class="memdesc:aac4be69b978f264e422bcdf75498a81e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not to compute a "non-conservative" divergence when redistributing mass. <br /></td></tr>
-<tr class="separator:aac4be69b978f264e422bcdf75498a81e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74657cea12e9660c0e25db1b4982d647" id="r_a74657cea12e9660c0e25db1b4982d647"><td class="memItemLeft" align="right" valign="top"><a id="a74657cea12e9660c0e25db1b4982d647" name="a74657cea12e9660c0e25db1b4982d647"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCheckpointing</b> ()</td></tr>
 <tr class="memdesc:a74657cea12e9660c0e25db1b4982d647"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse checkpointing method. <br /></td></tr>
@@ -711,10 +710,9 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_time</b></td></tr>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_dt</b></td></tr>
 <tr class="memdesc:a6747e8e5e18f1617c4fb773def7e5fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time step. <br /></td></tr>
 <tr class="separator:a6747e8e5e18f1617c4fb773def7e5fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5381483b3eb70b58fda7a36a20774738" id="r_a5381483b3eb70b58fda7a36a20774738"><td class="memItemLeft" align="right" valign="top"><a id="a5381483b3eb70b58fda7a36a20774738" name="a5381483b3eb70b58fda7a36a20774738"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_forceIrregDepositionNGP</b></td></tr>
-<tr class="memdesc:a5381483b3eb70b58fda7a36a20774738"><td class="mdescLeft">&#160;</td><td class="mdescRight">NGP deposition in cut cells or not. <br /></td></tr>
-<tr class="separator:a5381483b3eb70b58fda7a36a20774738"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a770af13ebe335c1636b2107633d75efe" id="r_a770af13ebe335c1636b2107633d75efe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a770af13ebe335c1636b2107633d75efe">m_irregularDeposition</a></td></tr>
+<tr class="memdesc:a770af13ebe335c1636b2107633d75efe"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the cut cells are treated when depositing.  <br /></td></tr>
+<tr class="separator:a770af13ebe335c1636b2107633d75efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a44eff78633d5756c928ecfa7ade33e9b" id="r_a44eff78633d5756c928ecfa7ade33e9b"><td class="memItemLeft" align="right" valign="top"><a id="a44eff78633d5756c928ecfa7ade33e9b" name="a44eff78633d5756c928ecfa7ade33e9b"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_forceIrregInterpolationNGP</b></td></tr>
 <tr class="memdesc:a44eff78633d5756c928ecfa7ade33e9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">NGP interpolation in cut cells or not. <br /></td></tr>
@@ -723,14 +721,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_forceIrregInterpola
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_forceHaloNGP</b></td></tr>
 <tr class="memdesc:a3577bd63b657bd0e01a8fc16f36d66dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force usage of NGP when depositing "halo" particles. <br /></td></tr>
 <tr class="separator:a3577bd63b657bd0e01a8fc16f36d66dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82c612b96f248ab1d4952f5640270158" id="r_a82c612b96f248ab1d4952f5640270158"><td class="memItemLeft" align="right" valign="top"><a id="a82c612b96f248ab1d4952f5640270158" name="a82c612b96f248ab1d4952f5640270158"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_useRedistribution</b></td></tr>
-<tr class="memdesc:a82c612b96f248ab1d4952f5640270158"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use mass redistribution or not. <br /></td></tr>
-<tr class="separator:a82c612b96f248ab1d4952f5640270158"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ee84b0a66255e6e5c8b798db2f32e0e" id="r_a9ee84b0a66255e6e5c8b798db2f32e0e"><td class="memItemLeft" align="right" valign="top"><a id="a9ee84b0a66255e6e5c8b798db2f32e0e" name="a9ee84b0a66255e6e5c8b798db2f32e0e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_blendConservation</b></td></tr>
-<tr class="memdesc:a9ee84b0a66255e6e5c8b798db2f32e0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for blending the deposition clouds with the "non-conservative" divergence. <br /></td></tr>
-<tr class="separator:a9ee84b0a66255e6e5c8b798db2f32e0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75440c5ecf1b1bf55e76bc13e28e80c5" id="r_a75440c5ecf1b1bf55e76bc13e28e80c5"><td class="memItemLeft" align="right" valign="top"><a id="a75440c5ecf1b1bf55e76bc13e28e80c5" name="a75440c5ecf1b1bf55e76bc13e28e80c5"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDiffusive</b></td></tr>
 <tr class="memdesc:a75440c5ecf1b1bf55e76bc13e28e80c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, solver is diffusive. <br /></td></tr>
@@ -832,6 +822,12 @@ EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_depositionNC
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_massDiff</b></td></tr>
 <tr class="memdesc:ab92737393f3b0d1776c7116f65379fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for holding the mass difference when using hybrid deposition. <br /></td></tr>
 <tr class="separator:ab92737393f3b0d1776c7116f65379fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05c4353d3fcb69f3cb1b1e942fc23ebd" id="r_a05c4353d3fcb69f3cb1b1e942fc23ebd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a05c4353d3fcb69f3cb1b1e942fc23ebd">m_mirrorImages</a></td></tr>
+<tr class="memdesc:a05c4353d3fcb69f3cb1b1e942fc23ebd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflected images of the band particles, for <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50a2403def5083f02105e7802b3b315681e" title="Even extension of the density about the embedded boundary: deposit each particle&#39;s cloud and the clou...">IrregularDeposition::Mirror</a>.  <br /></td></tr>
+<tr class="separator:a05c4353d3fcb69f3cb1b1e942fc23ebd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17cf04e959a97412cd1f7500e097efa0" id="r_a17cf04e959a97412cd1f7500e097efa0"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a17cf04e959a97412cd1f7500e097efa0">m_mirrorScratch</a></td></tr>
+<tr class="memdesc:a17cf04e959a97412cd1f7500e097efa0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mesh scratch the mirror images deposit into, before being added to the real field.  <br /></td></tr>
+<tr class="separator:a17cf04e959a97412cd1f7500e097efa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87a391ecb6dd2afbe949ecba8190b1aa" id="r_a87a391ecb6dd2afbe949ecba8190b1aa"><td class="memItemLeft" align="right" valign="top"><a id="a87a391ecb6dd2afbe949ecba8190b1aa" name="a87a391ecb6dd2afbe949ecba8190b1aa"></a>
 std::map&lt; <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a>, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleContainers</b></td></tr>
 <tr class="memdesc:a87a391ecb6dd2afbe949ecba8190b1aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Various particle containers with identifiers. <br /></td></tr>
@@ -4691,6 +4687,75 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 
 </div>
 </div>
+<a id="a3fc409ca117efce969d2f7c3ffa1fa03" name="a3fc409ca117efce969d2f7c3ffa1fa03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fc409ca117efce969d2f7c3ffa1fa03">&#9670;&#160;</a></span>mirrorPass()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename Traits , typename Strength &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoSolver::mirrorPass </td>
+          <td>(</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Strength&#160;</td>
+          <td class="paramname"><em>a_strength</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add the mirrored contribution of the band particles to an already-deposited field. </p>
+<p>Deposition divides by dx^D and never by kappa, so a cut cell holds kappa*n where the fluid solvers hold n. This pass removes that by additionally depositing the cloud of each band particle's image, reflected across the embedded boundary &ndash; a kernel density estimate of the even extension of the density. Under this option, and only this one, a cut cell therefore holds n rather than kappa*n.</p>
+<p>Runs after the real deposit and adds to it. Images are built from the VALID holder only: the halo coarse-fine cores copy particles into a mask holder, so building from that would produce a second image for the same particle &ndash; the double count that issue #29 fell into. All three cores restore the valid holder before returning, so running afterwards is safe; the constraint is which holder, not when. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Field to add the mirrored contribution to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles whose images are deposited. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition kernel, the same one the real deposit used. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine strategy, likewise. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_strength</td><td>Per-particle strength: leaf.weight(i) from the depositWeight funnel, the caller's gatherer from the depositGathered one. Both funnels must call this, or the mapping silently applies to only some of the solver's fields. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">P</td><td>Payload type of the container. </td></tr>
+    <tr><td class="paramname">Traits</td><td>Column descriptor for the payload. </td></tr>
+    <tr><td class="paramname">Strength</td><td>Callable (const ParticleSoA&lt;P, Traits&gt;&amp;, std::size_t) -&gt; Real. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="af23a30e574f34c0381af3b9d3753cdad" name="af23a30e574f34c0381af3b9d3753cdad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af23a30e574f34c0381af3b9d3753cdad">&#9670;&#160;</a></span>operator=()</h2>
 
@@ -6247,6 +6312,31 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 
 </div>
 </div>
+<a id="a770af13ebe335c1636b2107633d75efe" name="a770af13ebe335c1636b2107633d75efe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a770af13ebe335c1636b2107633d75efe">&#9670;&#160;</a></span>m_irregularDeposition</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> ItoSolver::m_irregularDeposition</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How the cut cells are treated when depositing. </p>
+<p>One selector replaces the former irr_ngp_deposition/redistribute/blend_conservation triple; see <a class="el" href="CD__IrregularDeposition_8H.html" title="Declaration of cut-cell deposition strategies.">CD_IrregularDeposition.H</a> for why these must not be independent flags. </p>
+
+</div>
+</div>
 <a id="ad34c0550688c09afe97a3c990f1db62d" name="ad34c0550688c09afe97a3c990f1db62d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad34c0550688c09afe97a3c990f1db62d">&#9670;&#160;</a></span>m_kdMergeCellHistogram</h2>
 
@@ -6319,6 +6409,57 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 
 <p>The configured merge method (which specific algorithm). </p>
 <p>Set by <a class="el" href="classItoSolver.html#a4c33ca03f4f05b4b9c69eaae228ca794" title="Parse the super-particle merger.">parseParticleMerger()</a> from ItoSolver.merge_algorithm. <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> dispatches on this to run the right algorithm. Defaults to EqualWeightKD (the default merge_algorithm). </p>
+
+</div>
+</div>
+<a id="a05c4353d3fcb69f3cb1b1e942fc23ebd" name="a05c4353d3fcb69f3cb1b1e942fc23ebd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05c4353d3fcb69f3cb1b1e942fc23ebd">&#9670;&#160;</a></span>m_mirrorImages</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt;<a class="el" href="structNoPayload.html">NoPayload</a>&gt; ItoSolver::m_mirrorImages</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reflected images of the band particles, for <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50a2403def5083f02105e7802b3b315681e" title="Even extension of the density about the embedded boundary: deposit each particle&#39;s cloud and the clou...">IrregularDeposition::Mirror</a>. </p>
+<p>Rebuilt from scratch by every mirror pass and cleared at its START rather than its end, so that a pass that aborts partway cannot leak images into the next deposit. Holds no identity: ParticleSoA::append(pos,
+weight) leaves the metadata columns invalid, nothing in <a class="el" href="classItoSolver.html#a802e12734bd28664a925cf946f485350" title="Remap the bulk particle container.">remap()</a> reads them, and an image is not a particle anyone can refer to. </p><dl class="section note"><dt>Note</dt><dd>Allocated per solver here rather than shared on the realm. Sharing one container across every solver on a (realm, phase) would need it to live on <a class="el" href="classPhaseRealm.html" title="Class that holds important things for doing AMR over a specific phase and processor distribution.">PhaseRealm</a>, which in turn needs the realm name, minimum block size, level tiles and valid cells that <a class="el" href="classParticleContainer.html#a76b35ee8a07d588f7070ccd6f658ad47" title="Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.">ParticleContainer::define</a> takes and <a class="el" href="classPhaseRealm.html" title="Class that holds important things for doing AMR over a specific phase and processor distribution.">PhaseRealm</a> does not hold &ndash; plus an in-flight assertion, because a shared mutable scratch is only safe while solvers deposit serially. Owning one per solver needs none of that, at the cost of one container per species. </dd></dl>
+
+</div>
+</div>
+<a id="a17cf04e959a97412cd1f7500e097efa0" name="a17cf04e959a97412cd1f7500e097efa0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17cf04e959a97412cd1f7500e097efa0">&#9670;&#160;</a></span>m_mirrorScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData ItoSolver::m_mirrorScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mesh scratch the mirror images deposit into, before being added to the real field. </p>
+<p>One component, because <a class="el" href="classEBAMRParticleMesh.html#ab93c8ab527b294ba16e35f647f84138a" title="Deposit the container-owned weight onto the AMR mesh.">EBAMRParticleMesh::depositWeight</a> asserts on that. </p><dl class="section note"><dt>Note</dt><dd>The images CANNOT be deposited straight into the solver's field, and the reason is not just that every AMR deposit opens by zeroing its target. The level exchange is a reversed copier with an add op &ndash; the ghost region is the source and the owner's valid region the destination &ndash; and nothing writes those ghosts back to zero afterwards. A second deposit into the same field would fold the first pass's ghost content into the valid region again, silently double counting in proportion to each patch's ghost share. </dd></dl>
 
 </div>
 </div>

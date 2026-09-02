@@ -113,9 +113,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~Realm</b> ()</td></tr>
 <tr class="memdesc:af3274ecbfed41f903f8cfecd1233d56e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:af3274ecbfed41f903f8cfecd1233d56e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2e6505525e8df6a4c710b13943e6103" id="r_ae2e6505525e8df6a4c710b13943e6103"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ae2e6505525e8df6a4c710b13943e6103">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_minBlockSize, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidInterpType, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebInterpType, const std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; BaseIF &gt; &gt; &amp;a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
-<tr class="memdesc:ae2e6505525e8df6a4c710b13943e6103"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
-<tr class="separator:ae2e6505525e8df6a4c710b13943e6103"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16557c5152157a590d313cbaae66706f" id="r_a16557c5152157a590d313cbaae66706f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a16557c5152157a590d313cbaae66706f">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_minBlockSize, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const int a_mirrorBandRadius, const Real a_mirrorCondTol, const Real a_mirrorCreaseTol, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidInterpType, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebInterpType, const std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; BaseIF &gt; &gt; &amp;a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
+<tr class="memdesc:a16557c5152157a590d313cbaae66706f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
+<tr class="separator:a16557c5152157a590d313cbaae66706f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3caaf4a8867b472534db7698306b671" id="r_ad3caaf4a8867b472534db7698306b671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad3caaf4a8867b472534db7698306b671">setGrids</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_finestLevel)</td></tr>
 <tr class="memdesc:ad3caaf4a8867b472534db7698306b671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grid method.  <br /></td></tr>
 <tr class="separator:ad3caaf4a8867b472534db7698306b671"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -243,6 +243,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memitem:aa96a1c6bb2d0678937509c01a4f59f10" id="r_aa96a1c6bb2d0678937509c01a4f59f10"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa96a1c6bb2d0678937509c01a4f59f10">getIrregularCells</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:aa96a1c6bb2d0678937509c01a4f59f10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the irregular-cell mask (value 1 in irregular cells, 0 elsewhere) for a phase.  <br /></td></tr>
 <tr class="separator:aa96a1c6bb2d0678937509c01a4f59f10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21d810ea9d03a2df2a99f49de4c7260e" id="r_a21d810ea9d03a2df2a99f49de4c7260e"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a21d810ea9d03a2df2a99f49de4c7260e">getMirrorSurfaceData</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a21d810ea9d03a2df2a99f49de4c7260e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the per-band-cell surface data used by mirrored deposition, for a phase.  <br /></td></tr>
+<tr class="separator:a21d810ea9d03a2df2a99f49de4c7260e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6048e431f4bb74af830cee1261a3c01e" id="r_a6048e431f4bb74af830cee1261a3c01e"><td class="memItemLeft" align="right" valign="top">const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a6048e431f4bb74af830cee1261a3c01e">getMirrorHasCutCells</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a6048e431f4bb74af830cee1261a3c01e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get, per level, whether that level has any cut cell anywhere in the domain, for a phase.  <br /></td></tr>
+<tr class="separator:a6048e431f4bb74af830cee1261a3c01e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade514f7e8251c8f5646b4c796c57e62f" id="r_ade514f7e8251c8f5646b4c796c57e62f"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ade514f7e8251c8f5646b4c796c57e62f">getMask</a> (const std::string &amp;a_mask, const int a_buffer) const</td></tr>
 <tr class="memdesc:ade514f7e8251c8f5646b4c796c57e62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get AMR mask.  <br /></td></tr>
 <tr class="separator:ade514f7e8251c8f5646b4c796c57e62f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -514,8 +520,8 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae2e6505525e8df6a4c710b13943e6103" name="ae2e6505525e8df6a4c710b13943e6103"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae2e6505525e8df6a4c710b13943e6103">&#9670;&#160;</a></span>define()</h2>
+<a id="a16557c5152157a590d313cbaae66706f" name="a16557c5152157a590d313cbaae66706f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16557c5152157a590d313cbaae66706f">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -607,6 +613,24 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_mirrorBandRadius</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_mirrorCondTol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_mirrorCreaseTol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a>&#160;</td>
           <td class="paramname"><em>a_centroidInterpType</em>, </td>
         </tr>
@@ -653,6 +677,9 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpOrder</td><td>Multigrid ghost cell interpolation order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpRadius</td><td>Multigrid ghost cell interpolation radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpWeight</td><td>Multigrid ghost cell interpolation weight (for least squares) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mirrorBandRadius</td><td>Mirror deposition: band half-width in cells. Must not exceed a_numGhost. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mirrorCondTol</td><td>Mirror deposition: smallest permitted eigenvalue ratio in the curvature fit. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mirrorCreaseTol</td><td>Mirror deposition: largest permitted fit residual before falling back to J = 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_centroidInterpType</td><td>Stencil type for interpolation from cell centers to cell centroids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebInterpType</td><td>Stencil type for interpolation from cell centers to eb centroids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_baseif</td><td>Implicit/signed distance function </td></tr>
@@ -2058,6 +2085,60 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 <p>Get the refined grids. </p>
 <p>The returned vector contains the refined grids. Entry on level lvl=1 contains the refinement of level lvl=0 and so on. The bottom level is undefined because there was no coarser grid from which we can refine. </p><dl class="section return"><dt>Returns</dt><dd>M f level grid fi co </dd></dl>
+
+</div>
+</div>
+<a id="a6048e431f4bb74af830cee1261a3c01e" name="a6048e431f4bb74af830cee1261a3c01e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6048e431f4bb74af830cee1261a3c01e">&#9670;&#160;</a></span>getMirrorHasCutCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; int &gt; &amp; Realm::getMirrorHasCutCells </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get, per level, whether that level has any cut cell anywhere in the domain, for a phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Per-level cut-cell presence, all-reduced </dd></dl>
+
+</div>
+</div>
+<a id="a21d810ea9d03a2df2a99f49de4c7260e" name="a21d810ea9d03a2df2a99f49de4c7260e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21d810ea9d03a2df2a99f49de4c7260e">&#9670;&#160;</a></span>getMirrorSurfaceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const EBAMRCellData &amp; Realm::getMirrorSurfaceData </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the per-band-cell surface data used by mirrored deposition, for a phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Mirror surface data </dd></dl>
 
 </div>
 </div>

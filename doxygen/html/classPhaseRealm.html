@@ -124,9 +124,9 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PhaseRealm</b> ()</td></tr>
 <tr class="memdesc:a0682df0831e89770258af919e44b1357"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a0682df0831e89770258af919e44b1357"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad10c5e28779f9cd85c47fb4fbf9f4b17" id="r_ad10c5e28779f9cd85c47fb4fbf9f4b17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ad10c5e28779f9cd85c47fb4fbf9f4b17">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidStencil, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebStencil, const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseif, const RefCountedPtr&lt; EBIndexSpace &gt; &amp;a_ebis)</td></tr>
-<tr class="memdesc:ad10c5e28779f9cd85c47fb4fbf9f4b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
-<tr class="separator:ad10c5e28779f9cd85c47fb4fbf9f4b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4bc2e1b60291f68134c39a31c7cb20b" id="r_af4bc2e1b60291f68134c39a31c7cb20b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#af4bc2e1b60291f68134c39a31c7cb20b">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect &amp;a_probLo, const int a_finestLevel, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const int a_mirrorBandRadius, const Real a_mirrorCondTol, const Real a_mirrorCreaseTol, const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a> a_centroidStencil, const <a class="el" href="classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6">EBCentroidInterpolation::Type</a> a_ebStencil, const RefCountedPtr&lt; BaseIF &gt; &amp;a_baseif, const RefCountedPtr&lt; EBIndexSpace &gt; &amp;a_ebis)</td></tr>
+<tr class="memdesc:af4bc2e1b60291f68134c39a31c7cb20b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <br /></td></tr>
+<tr class="separator:af4bc2e1b60291f68134c39a31c7cb20b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66cd59dfd4b8b5b19137d02be25d4f1a" id="r_a66cd59dfd4b8b5b19137d02be25d4f1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a66cd59dfd4b8b5b19137d02be25d4f1a">setGrids</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_finestLevel)</td></tr>
 <tr class="memdesc:a66cd59dfd4b8b5b19137d02be25d4f1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grid method.  <br /></td></tr>
 <tr class="separator:a66cd59dfd4b8b5b19137d02be25d4f1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -245,6 +245,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memitem:a4546a8d1464604f5be6f244cbf2b7364" id="r_a4546a8d1464604f5be6f244cbf2b7364"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a4546a8d1464604f5be6f244cbf2b7364">getIrregularCells</a> () const</td></tr>
 <tr class="memdesc:a4546a8d1464604f5be6f244cbf2b7364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the irregular-cell mask (value 1 in irregular/cut cells, 0 elsewhere).  <br /></td></tr>
 <tr class="separator:a4546a8d1464604f5be6f244cbf2b7364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f90b7554e7f0dacb24b32bf48d86777" id="r_a1f90b7554e7f0dacb24b32bf48d86777"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a1f90b7554e7f0dacb24b32bf48d86777">getMirrorSurfaceData</a> () const</td></tr>
+<tr class="memdesc:a1f90b7554e7f0dacb24b32bf48d86777"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the per-band-cell surface data used by mirrored deposition.  <br /></td></tr>
+<tr class="separator:a1f90b7554e7f0dacb24b32bf48d86777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad43d926b82b84ef340477dba513f4950" id="r_ad43d926b82b84ef340477dba513f4950"><td class="memItemLeft" align="right" valign="top">const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ad43d926b82b84ef340477dba513f4950">getMirrorHasCutCells</a> () const</td></tr>
+<tr class="memdesc:ad43d926b82b84ef340477dba513f4950"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get, per level, whether that level has any cut cell anywhere in the domain.  <br /></td></tr>
+<tr class="separator:ad43d926b82b84ef340477dba513f4950"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -288,6 +294,9 @@ Protected Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>defineParticleMesh</b> ()</td></tr>
 <tr class="memdesc:abb6d427370c610405b44499ad80a9db9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define particle mesh operator. <br /></td></tr>
 <tr class="separator:abb6d427370c610405b44499ad80a9db9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88ab9a067563c7c6586f3dff5e3d7a54" id="r_a88ab9a067563c7c6586f3dff5e3d7a54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a88ab9a067563c7c6586f3dff5e3d7a54">defineMirrorSurfaceData</a> (const int a_lmin)</td></tr>
+<tr class="memdesc:a88ab9a067563c7c6586f3dff5e3d7a54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the per-band-cell surface data used by mirrored cut-cell deposition.  <br /></td></tr>
+<tr class="separator:a88ab9a067563c7c6586f3dff5e3d7a54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9facdbdb95642b48e3b57a93d4775c26" id="r_a9facdbdb95642b48e3b57a93d4775c26"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a9facdbdb95642b48e3b57a93d4775c26">defineGradSten</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a9facdbdb95642b48e3b57a93d4775c26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define gradient stencils.  <br /></td></tr>
 <tr class="separator:a9facdbdb95642b48e3b57a93d4775c26"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -323,6 +332,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></t
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbose</b></td></tr>
 <tr class="memdesc:a789b712cd353e2ede8078bdd499ba818"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbose or not. <br /></td></tr>
 <tr class="separator:a789b712cd353e2ede8078bdd499ba818"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f7ab28bc189a4d1a5c3db94e877cf53" id="r_a7f7ab28bc189a4d1a5c3db94e877cf53"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a7f7ab28bc189a4d1a5c3db94e877cf53">m_mirrorCurvatureCorrection</a></td></tr>
+<tr class="memdesc:a7f7ab28bc189a4d1a5c3db94e877cf53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether mirrored deposition fits a shape operator, or settles for a plane mirror.  <br /></td></tr>
+<tr class="separator:a7f7ab28bc189a4d1a5c3db94e877cf53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09e325703a9af72453d211c9c2e28372" id="r_a09e325703a9af72453d211c9c2e28372"><td class="memItemLeft" align="right" valign="top"><a id="a09e325703a9af72453d211c9c2e28372" name="a09e325703a9af72453d211c9c2e28372"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_finestLevel</b></td></tr>
 <tr class="memdesc:a09e325703a9af72453d211c9c2e28372"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest grid level. <br /></td></tr>
@@ -429,6 +441,24 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_notCovered
 EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_irregularCells</b></td></tr>
 <tr class="memdesc:aad6ad2398bd71b005a4374808663dd16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell mask with value 1 in irregular (cut) cells and 0 elsewhere. <br /></td></tr>
 <tr class="separator:aad6ad2398bd71b005a4374808663dd16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd9657059c8b7978ae1001c41e16b7b7" id="r_acd9657059c8b7978ae1001c41e16b7b7"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#acd9657059c8b7978ae1001c41e16b7b7">m_mirrorSurfaceData</a></td></tr>
+<tr class="memdesc:acd9657059c8b7978ae1001c41e16b7b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-band-cell local surface patch used by mirrored deposition: (status, x_c, n_c, S_c).  <br /></td></tr>
+<tr class="separator:acd9657059c8b7978ae1001c41e16b7b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae65965428ad441a18d40cdcedad18c5d" id="r_ae65965428ad441a18d40cdcedad18c5d"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ae65965428ad441a18d40cdcedad18c5d">m_mirrorHasCutCells</a></td></tr>
+<tr class="memdesc:ae65965428ad441a18d40cdcedad18c5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per level, whether the level has any cut cell ANYWHERE in the domain.  <br /></td></tr>
+<tr class="separator:ae65965428ad441a18d40cdcedad18c5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7824a0a22bbafca50fe9e3f304423cd6" id="r_a7824a0a22bbafca50fe9e3f304423cd6"><td class="memItemLeft" align="right" valign="top"><a id="a7824a0a22bbafca50fe9e3f304423cd6" name="a7824a0a22bbafca50fe9e3f304423cd6"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_mirrorBandRadius</b></td></tr>
+<tr class="memdesc:a7824a0a22bbafca50fe9e3f304423cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: band half-width in cells. <br /></td></tr>
+<tr class="separator:a7824a0a22bbafca50fe9e3f304423cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d10827cdab8a749eec9490cf646c6a4" id="r_a8d10827cdab8a749eec9490cf646c6a4"><td class="memItemLeft" align="right" valign="top"><a id="a8d10827cdab8a749eec9490cf646c6a4" name="a8d10827cdab8a749eec9490cf646c6a4"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_mirrorConditionTolerance</b></td></tr>
+<tr class="memdesc:a8d10827cdab8a749eec9490cf646c6a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: smallest permitted eigenvalue ratio of U^T U in the shape-operator fit. <br /></td></tr>
+<tr class="separator:a8d10827cdab8a749eec9490cf646c6a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61096e0b915bdcfe2d0c0ddefa953af6" id="r_a61096e0b915bdcfe2d0c0ddefa953af6"><td class="memItemLeft" align="right" valign="top"><a id="a61096e0b915bdcfe2d0c0ddefa953af6" name="a61096e0b915bdcfe2d0c0ddefa953af6"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_mirrorCreaseTolerance</b></td></tr>
+<tr class="memdesc:a61096e0b915bdcfe2d0c0ddefa953af6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: largest permitted dimensionless residual of the shape-operator fit. <br /></td></tr>
+<tr class="separator:a61096e0b915bdcfe2d0c0ddefa953af6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7af73476212af40233d9456abaec2053" id="r_a7af73476212af40233d9456abaec2053"><td class="memItemLeft" align="right" valign="top"><a id="a7af73476212af40233d9456abaec2053" name="a7af73476212af40233d9456abaec2053"></a>
 Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_vofIter</b></td></tr>
 <tr class="memdesc:a7af73476212af40233d9456abaec2053"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cell iterator (all irregular cells) <br /></td></tr>
@@ -575,8 +605,8 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad10c5e28779f9cd85c47fb4fbf9f4b17" name="ad10c5e28779f9cd85c47fb4fbf9f4b17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad10c5e28779f9cd85c47fb4fbf9f4b17">&#9670;&#160;</a></span>define()</h2>
+<a id="af4bc2e1b60291f68134c39a31c7cb20b" name="af4bc2e1b60291f68134c39a31c7cb20b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4bc2e1b60291f68134c39a31c7cb20b">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -662,6 +692,24 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_mirrorBandRadius</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_mirrorCondTol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_mirrorCreaseTol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const <a class="el" href="classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351">CellCentroidInterpolation::Type</a>&#160;</td>
           <td class="paramname"><em>a_centroidStencil</em>, </td>
         </tr>
@@ -707,6 +755,9 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpOrder</td><td>Multigrid ghost cell interpolation order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpRadius</td><td>Multigrid ghost cell interpolation radius </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mgInterpWeight</td><td>Multigrid ghost cell interpolation weight (for least squares) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mirrorBandRadius</td><td>Mirror deposition: band half-width in cells. Must not exceed a_numGhost. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mirrorCondTol</td><td>Mirror deposition: smallest permitted eigenvalue ratio in the curvature fit. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mirrorCreaseTol</td><td>Mirror deposition: largest permitted fit residual before falling back to J = 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_centroidStencil</td><td>Stencil type for interpolation from cell centers to cell centroids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebStencil</td><td>Stencil type for interpolation from cell centers to eb centroids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_baseif</td><td>Implicit/signed distance function </td></tr>
@@ -1185,6 +1236,43 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Number of ghost cells </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a88ab9a067563c7c6586f3dff5e3d7a54" name="a88ab9a067563c7c6586f3dff5e3d7a54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88ab9a067563c7c6586f3dff5e3d7a54">&#9670;&#160;</a></span>defineMirrorSurfaceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::defineMirrorSurfaceData </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the per-band-cell surface data used by mirrored cut-cell deposition. </p>
+<p>Runs three passes over each level: seed the cut cells with a boundary centroid and normal, fit the shape operator over the 5^D neighbourhood, then extend the result outwards to the band by Euclidean-nearest assignment. An exchange separates each pass from the next, and the ORDER MATTERS &ndash; passes B and C read their neighbours from the FIELD rather than from EBISBox, which is what makes a cut cell no box on this level owns read back as Status::None instead of silently contributing stale geometry. See the implementation.</p>
+<p>The seed geometry comes from EBISBox by default. It can instead be taken from the implicit function &ndash; normal from the gradient, centroid by one Newton step onto phi = 0 &ndash; which is roughly four orders of magnitude more accurate on a sphere but costs O(2*SpaceDim) evaluations of BaseIF::value per cut cell per regrid. The switch is the compile-time constant useImplicitFunctionGeometry at the top of the implementation, which also carries the measured accuracy table and the reasoning. Whichever source is used is reported at m_verbose, including the case where the implicit function was wanted but the realm has none.</p>
+<p>Does nothing unless the s_mirror_deposition operator is registered on this realm and phase, so realms that never mirror pay neither the memory nor the passes. </p><dl class="section note"><dt>Note</dt><dd>Requires AmrMesh.eb_ghost &gt;= 2, so that EBISBox is valid over the 5^D curvature-fit stencil, and AmrMesh.num_ghost &gt;= AmrMesh.mirror_band_radius, so that the exchange can deliver the cut-cell data the band reads. These are independent requirements on independent quantities &ndash; eb_ghost sizes the region over which geometric data is valid, num_ghost sizes the DATA &ndash; and deriving one from the other has been a recurring mistake. Both are checked at define time and abort by name. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1778,6 +1866,46 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="ad43d926b82b84ef340477dba513f4950" name="ad43d926b82b84ef340477dba513f4950"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad43d926b82b84ef340477dba513f4950">&#9670;&#160;</a></span>getMirrorHasCutCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; int &gt; &amp; PhaseRealm::getMirrorHasCutCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get, per level, whether that level has any cut cell anywhere in the domain. </p>
+<p>All-reduced, so the answer is the same on every rank. Nonzero means the level has cut cells. </p><dl class="section return"><dt>Returns</dt><dd>m_mirrorHasCutCells </dd></dl>
+
+</div>
+</div>
+<a id="a1f90b7554e7f0dacb24b32bf48d86777" name="a1f90b7554e7f0dacb24b32bf48d86777"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f90b7554e7f0dacb24b32bf48d86777">&#9670;&#160;</a></span>getMirrorSurfaceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const EBAMRCellData &amp; PhaseRealm::getMirrorSurfaceData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the per-band-cell surface data used by mirrored deposition. </p>
+<p>Empty unless the s_mirror_deposition operator was registered. Component layout is in <a class="el" href="CD__MirrorDeposition_8H.html" title="Namespace containing the geometry used by mirrored cut-cell deposition.">CD_MirrorDeposition.H</a>. </p><dl class="section return"><dt>Returns</dt><dd>m_mirrorSurfaceData </dd></dl>
+
+</div>
+</div>
 <a id="a3b6f388395b8c6f30d201589611352e4" name="a3b6f388395b8c6f30d201589611352e4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3b6f388395b8c6f30d201589611352e4">&#9670;&#160;</a></span>getMultiCutFaceIterator()</h2>
 
@@ -2310,6 +2438,83 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 <p>Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer. </p>
 <p>For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1 in the two directions tangential to dir; the dir extent stays at the valid-box boundary. Domain boundary faces are excluded (FaceStop::SurroundingNoBoundary). </p>
+
+</div>
+</div>
+<a id="a7f7ab28bc189a4d1a5c3db94e877cf53" name="a7f7ab28bc189a4d1a5c3db94e877cf53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f7ab28bc189a4d1a5c3db94e877cf53">&#9670;&#160;</a></span>m_mirrorCurvatureCorrection</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PhaseRealm::m_mirrorCurvatureCorrection</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether mirrored deposition fits a shape operator, or settles for a plane mirror. </p>
+<p>Optional, read from PhaseRealm.mirror_curvature_correction and defaulting to true. With it false the curvature fit is skipped entirely and the shape operator stays zero, which degrades mirrored deposition to a plane mirror &ndash; reflect() needs no special case for that, since a zero shape operator already collapses the patch normal to n_c and the Jacobian to one.</p>
+<p>It exists to answer whether the correction earns its cost on a given geometry, and the answer is not obviously yes or no. On a rod dielectric it moved individual cut cells by up to a factor of three, always upwards when disabled, because a convex surface has J &lt; 1 and a plane mirror does not down-weight the image. On a gently curved surface the effect is small. Measure before deciding. </p>
+
+</div>
+</div>
+<a id="ae65965428ad441a18d40cdcedad18c5d" name="ae65965428ad441a18d40cdcedad18c5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae65965428ad441a18d40cdcedad18c5d">&#9670;&#160;</a></span>m_mirrorHasCutCells</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;int&gt; PhaseRealm::m_mirrorHasCutCells</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per level, whether the level has any cut cell ANYWHERE in the domain. </p>
+<p>All-reduced across ranks, and that is load-bearing rather than tidy: the mirror pass early-outs on this, and the pass contains a collective remap, so a per-rank answer would deadlock the ranks that disagree.</p>
+<p>Held as int rather than bool because Chombo's Vector&lt;T&gt;::operator[] returns T&amp;, which the std::vector&lt;bool&gt; proxy specialization cannot provide &ndash; Vector&lt;bool&gt; does not compile. </p>
+
+</div>
+</div>
+<a id="acd9657059c8b7978ae1001c41e16b7b7" name="acd9657059c8b7978ae1001c41e16b7b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd9657059c8b7978ae1001c41e16b7b7">&#9670;&#160;</a></span>m_mirrorSurfaceData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData PhaseRealm::m_mirrorSurfaceData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-band-cell local surface patch used by mirrored deposition: (status, x_c, n_c, S_c). </p>
+<p>Eight components in 2-D, thirteen in 3-D; the layout is defined by <a class="el" href="CD__MirrorDeposition_8H.html" title="Namespace containing the geometry used by mirrored cut-cell deposition.">CD_MirrorDeposition.H</a>. Regrid lifetime, so not mutable &ndash; the m_irregularCells convention. Only built when the s_mirror_deposition operator is registered, because it is not cheap: at the shipped defaults it costs roughly 430 MB per level, per phase, per realm, against 131 MB for the four cell masks together. </p>
 
 </div>
 </div>

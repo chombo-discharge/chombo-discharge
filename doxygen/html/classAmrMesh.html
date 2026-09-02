@@ -373,18 +373,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>buildDomains</b> ()</
 <tr class="memitem:abcbf30fd1a7255ede402c6b29128ea47"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#abcbf30fd1a7255ede402c6b29128ea47">depositParticles</a> (EBAMRIVData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles) const noexcept</td></tr>
 <tr class="memdesc:abcbf30fd1a7255ede402c6b29128ea47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the weight column of an SoA particle container onto the surface (EB).  <br /></td></tr>
 <tr class="separator:abcbf30fd1a7255ede402c6b29128ea47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a61cdd12fe97e4928cb8919a3fb96bc51" id="r_a61cdd12fe97e4928cb8919a3fb96bc51"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
-<tr class="memitem:a61cdd12fe97e4928cb8919a3fb96bc51"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a61cdd12fe97e4928cb8919a3fb96bc51">depositWeight</a> (EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP)</td></tr>
-<tr class="memdesc:a61cdd12fe97e4928cb8919a3fb96bc51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the SoA container's weight column on the mesh (all coarse-fine strategies).  <br /></td></tr>
-<tr class="separator:a61cdd12fe97e4928cb8919a3fb96bc51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5045f84d9c7179ff7668a03796e13d8c" id="r_a5045f84d9c7179ff7668a03796e13d8c"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits , typename CellGather &gt; </td></tr>
-<tr class="memitem:a5045f84d9c7179ff7668a03796e13d8c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a5045f84d9c7179ff7668a03796e13d8c">depositGathered</a> (EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP, CellGather a_cellGather)</td></tr>
-<tr class="memdesc:a5045f84d9c7179ff7668a03796e13d8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar (a_cellGather) of an SoA container on the mesh.  <br /></td></tr>
-<tr class="separator:a5045f84d9c7179ff7668a03796e13d8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52551130711d6770da9a8ced8ce6dc45" id="r_a52551130711d6770da9a8ced8ce6dc45"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P , typename Traits &gt; </td></tr>
-<tr class="memitem:a52551130711d6770da9a8ced8ce6dc45"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a52551130711d6770da9a8ced8ce6dc45">depositParticles</a> (EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP)</td></tr>
-<tr class="memdesc:a52551130711d6770da9a8ced8ce6dc45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit one or more SoA payload columns on the mesh (all coarse-fine strategies).  <br /></td></tr>
-<tr class="separator:a52551130711d6770da9a8ced8ce6dc45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2102597eae334fa833838a405a3422f9" id="r_a2102597eae334fa833838a405a3422f9"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:a2102597eae334fa833838a405a3422f9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2102597eae334fa833838a405a3422f9">depositWeight</a> (EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition)</td></tr>
+<tr class="memdesc:a2102597eae334fa833838a405a3422f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the SoA container's weight column on the mesh (all coarse-fine strategies).  <br /></td></tr>
+<tr class="separator:a2102597eae334fa833838a405a3422f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b9de528bea10215c10c958f9bc9670b" id="r_a0b9de528bea10215c10c958f9bc9670b"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits , typename CellGather &gt; </td></tr>
+<tr class="memitem:a0b9de528bea10215c10c958f9bc9670b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a0b9de528bea10215c10c958f9bc9670b">depositGathered</a> (EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition, CellGather a_cellGather)</td></tr>
+<tr class="memdesc:a0b9de528bea10215c10c958f9bc9670b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit a custom per-particle scalar (a_cellGather) of an SoA container on the mesh.  <br /></td></tr>
+<tr class="separator:a0b9de528bea10215c10c958f9bc9670b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adeba437d0e6cb337d4474b3e79aed3b8" id="r_adeba437d0e6cb337d4474b3e79aed3b8"><td class="memTemplParams" colspan="2">template&lt;auto... Members, typename P , typename Traits &gt; </td></tr>
+<tr class="memitem:adeba437d0e6cb337d4474b3e79aed3b8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#adeba437d0e6cb337d4474b3e79aed3b8">depositParticles</a> (EBAMRCellData &amp;a_meshData, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a> a_irregularDeposition)</td></tr>
+<tr class="memdesc:adeba437d0e6cb337d4474b3e79aed3b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit one or more SoA payload columns on the mesh (all coarse-fine strategies).  <br /></td></tr>
+<tr class="separator:adeba437d0e6cb337d4474b3e79aed3b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3142452b439cc3ffaa4205e8c6754108" id="r_a3142452b439cc3ffaa4205e8c6754108"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Traits &gt; </td></tr>
 <tr class="memitem:a3142452b439cc3ffaa4205e8c6754108"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3142452b439cc3ffaa4205e8c6754108">interpolateWeight</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> &amp;a_phase, const EBAMRCellData &amp;a_meshScalarField, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_interpType, const bool a_forceIrregNGP) const</td></tr>
 <tr class="memdesc:a3142452b439cc3ffaa4205e8c6754108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate a mesh scalar field onto the SoA container's weight column.  <br /></td></tr>
@@ -667,6 +667,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memitem:a55e36dca645e3b8a49f39a6f9a1f2147" id="r_a55e36dca645e3b8a49f39a6f9a1f2147"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a55e36dca645e3b8a49f39a6f9a1f2147">getIrregularCells</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a55e36dca645e3b8a49f39a6f9a1f2147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the irregular-cell mask (value 1 in irregular cells, 0 elsewhere) for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
 <tr class="separator:a55e36dca645e3b8a49f39a6f9a1f2147"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a20810ea81c0847e1c928cf0b39f577" id="r_a4a20810ea81c0847e1c928cf0b39f577"><td class="memItemLeft" align="right" valign="top">const EBAMRCellData &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4a20810ea81c0847e1c928cf0b39f577">getMirrorSurfaceData</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a4a20810ea81c0847e1c928cf0b39f577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the per-band-cell surface data used by mirrored deposition, for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <br /></td></tr>
+<tr class="separator:a4a20810ea81c0847e1c928cf0b39f577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a676b6994b2da605b23530ce46a62fe03" id="r_a676b6994b2da605b23530ce46a62fe03"><td class="memItemLeft" align="right" valign="top">const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a676b6994b2da605b23530ce46a62fe03">getMirrorHasCutCells</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a676b6994b2da605b23530ce46a62fe03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get, per level, whether that level has any cut cell anywhere in the domain.  <br /></td></tr>
+<tr class="separator:a676b6994b2da605b23530ce46a62fe03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a506b4f07d584e0315ac8bae04617f4c0" id="r_a506b4f07d584e0315ac8bae04617f4c0"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a506b4f07d584e0315ac8bae04617f4c0">getMirrorMaxJacobian</a> () const</td></tr>
+<tr class="memdesc:a506b4f07d584e0315ac8bae04617f4c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the largest Jacobian magnitude the mirror pass will trust.  <br /></td></tr>
+<tr class="separator:a506b4f07d584e0315ac8bae04617f4c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa555142eda652df805fb4c4a89cdbb6" id="r_aaa555142eda652df805fb4c4a89cdbb6"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aaa555142eda652df805fb4c4a89cdbb6">getMirrorMinDenominator</a> () const</td></tr>
+<tr class="memdesc:aaa555142eda652df805fb4c4a89cdbb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the smallest Jacobian denominator the mirror pass will trust.  <br /></td></tr>
+<tr class="separator:aaa555142eda652df805fb4c4a89cdbb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa9ca7a8c5f78bb42ac403bb14acff60" id="r_aaa9ca7a8c5f78bb42ac403bb14acff60"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aaa9ca7a8c5f78bb42ac403bb14acff60">getParticleMesh</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:aaa9ca7a8c5f78bb42ac403bb14acff60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="classEBAMRParticleMesh.html" title="AMR driver that deposits/interpolates ParticleContainer particles across the hierarchy.">EBAMRParticleMesh</a> operator.  <br /></td></tr>
 <tr class="separator:aaa9ca7a8c5f78bb42ac403bb14acff60"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -781,6 +793,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMultigridInterpo
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRedistributionRadius</b> ()</td></tr>
 <tr class="memdesc:a9e931207fee7ef2897c99de6d8c5e819"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the default redistribution radius. <br /></td></tr>
 <tr class="separator:a9e931207fee7ef2897c99de6d8c5e819"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af488a755c0931cb2967d9d6d33674a5d" id="r_af488a755c0931cb2967d9d6d33674a5d"><td class="memItemLeft" align="right" valign="top"><a id="af488a755c0931cb2967d9d6d33674a5d" name="af488a755c0931cb2967d9d6d33674a5d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMirrorDeposition</b> ()</td></tr>
+<tr class="memdesc:af488a755c0931cb2967d9d6d33674a5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the mirror-deposition band radius and fit/guard tolerances. <br /></td></tr>
+<tr class="separator:af488a755c0931cb2967d9d6d33674a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e0333e81e94f9b4a66fd7d26beb8bf1" id="r_a1e0333e81e94f9b4a66fd7d26beb8bf1"><td class="memItemLeft" align="right" valign="top"><a id="a1e0333e81e94f9b4a66fd7d26beb8bf1" name="a1e0333e81e94f9b4a66fd7d26beb8bf1"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCellCentroidInterpolation</b> ()</td></tr>
 <tr class="memdesc:a1e0333e81e94f9b4a66fd7d26beb8bf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse centroid interpolation stencils. <br /></td></tr>
@@ -929,6 +945,21 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_multigridInterpWeigh
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistributionRadius</b></td></tr>
 <tr class="memdesc:aff4be2723b347e649654ab7cb8f84b6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribution radius. <br /></td></tr>
 <tr class="separator:aff4be2723b347e649654ab7cb8f84b6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3304207da2d870898124450354565510" id="r_a3304207da2d870898124450354565510"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a3304207da2d870898124450354565510">m_mirrorBandRadius</a></td></tr>
+<tr class="memdesc:a3304207da2d870898124450354565510"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: half-width, in cells, of the band around the embedded boundary that reflects.  <br /></td></tr>
+<tr class="separator:a3304207da2d870898124450354565510"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77d5e536082f0e0b427c7756a474d295" id="r_a77d5e536082f0e0b427c7756a474d295"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a77d5e536082f0e0b427c7756a474d295">m_mirrorConditionTolerance</a></td></tr>
+<tr class="memdesc:a77d5e536082f0e0b427c7756a474d295"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: smallest permitted eigenvalue ratio of U^T U in the shape-operator fit.  <br /></td></tr>
+<tr class="separator:a77d5e536082f0e0b427c7756a474d295"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42aa99be91167f2eca7943c9d16cf520" id="r_a42aa99be91167f2eca7943c9d16cf520"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a42aa99be91167f2eca7943c9d16cf520">m_mirrorCreaseTolerance</a></td></tr>
+<tr class="memdesc:a42aa99be91167f2eca7943c9d16cf520"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: largest permitted dimensionless residual of the shape-operator fit.  <br /></td></tr>
+<tr class="separator:a42aa99be91167f2eca7943c9d16cf520"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8be1054e964f5131a66da4a478871e03" id="r_a8be1054e964f5131a66da4a478871e03"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8be1054e964f5131a66da4a478871e03">m_mirrorMaxJacobian</a></td></tr>
+<tr class="memdesc:a8be1054e964f5131a66da4a478871e03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: largest Jacobian magnitude that will be trusted.  <br /></td></tr>
+<tr class="separator:a8be1054e964f5131a66da4a478871e03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2f4542e22e8b1e040ccfac9bd673040" id="r_ae2f4542e22e8b1e040ccfac9bd673040"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae2f4542e22e8b1e040ccfac9bd673040">m_mirrorMinDenominator</a></td></tr>
+<tr class="memdesc:ae2f4542e22e8b1e040ccfac9bd673040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror deposition: smallest Jacobian denominator that will be trusted.  <br /></td></tr>
+<tr class="separator:ae2f4542e22e8b1e040ccfac9bd673040"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2fb5e315cfc9e853def28d39c4259f1" id="r_ae2fb5e315cfc9e853def28d39c4259f1"><td class="memItemLeft" align="right" valign="top"><a id="ae2fb5e315cfc9e853def28d39c4259f1" name="ae2fb5e315cfc9e853def28d39c4259f1"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_hasGrids</b></td></tr>
 <tr class="memdesc:ae2fb5e315cfc9e853def28d39c4259f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Has grids or not. <br /></td></tr>
@@ -3756,8 +3787,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a5045f84d9c7179ff7668a03796e13d8c" name="a5045f84d9c7179ff7668a03796e13d8c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5045f84d9c7179ff7668a03796e13d8c">&#9670;&#160;</a></span>depositGathered()</h2>
+<a id="a0b9de528bea10215c10c958f9bc9670b" name="a0b9de528bea10215c10c958f9bc9670b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b9de528bea10215c10c958f9bc9670b">&#9670;&#160;</a></span>depositGathered()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3803,8 +3834,8 @@ template&lt;typename P , typename Traits , typename CellGather &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_forceIrregNGP</em>, </td>
+          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_irregularDeposition</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -3829,7 +3860,7 @@ template&lt;typename P , typename Traits , typename CellGather &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>SoA particle container. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (e.g. CIC). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP deposition in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_irregularDeposition</td><td>Cut-cell deposition strategy. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellGather</td><td>Per-particle value gatherer (leaf, index) -&gt; Real. </td></tr>
   </table>
   </dd>
@@ -3845,8 +3876,8 @@ template&lt;typename P , typename Traits , typename CellGather &gt; </div>
 
 </div>
 </div>
-<a id="a52551130711d6770da9a8ced8ce6dc45" name="a52551130711d6770da9a8ced8ce6dc45"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a52551130711d6770da9a8ced8ce6dc45">&#9670;&#160;</a></span>depositParticles() <span class="overload">[1/2]</span></h2>
+<a id="adeba437d0e6cb337d4474b3e79aed3b8" name="adeba437d0e6cb337d4474b3e79aed3b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adeba437d0e6cb337d4474b3e79aed3b8">&#9670;&#160;</a></span>depositParticles() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3892,8 +3923,8 @@ template&lt;auto... Members, typename P , typename Traits &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_forceIrregNGP</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_irregularDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3912,7 +3943,7 @@ template&lt;auto... Members, typename P , typename Traits &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>SoA particle container. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP deposition in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_irregularDeposition</td><td>Cut-cell deposition strategy. </td></tr>
   </table>
   </dd>
 </dl>
@@ -3995,8 +4026,8 @@ template&lt;typename P , typename Traits &gt; </div>
 
 </div>
 </div>
-<a id="a61cdd12fe97e4928cb8919a3fb96bc51" name="a61cdd12fe97e4928cb8919a3fb96bc51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61cdd12fe97e4928cb8919a3fb96bc51">&#9670;&#160;</a></span>depositWeight()</h2>
+<a id="a2102597eae334fa833838a405a3422f9" name="a2102597eae334fa833838a405a3422f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2102597eae334fa833838a405a3422f9">&#9670;&#160;</a></span>depositWeight()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4042,8 +4073,8 @@ template&lt;typename P , typename Traits &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_forceIrregNGP</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50">IrregularDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_irregularDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -4062,7 +4093,7 @@ template&lt;typename P , typename Traits &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>SoA particle container. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_depositionType</td><td>Deposition kernel (e.g. CIC). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine handling. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_forceIrregNGP</td><td>Force NGP deposition in cut cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_irregularDeposition</td><td>Cut-cell deposition strategy. </td></tr>
   </table>
   </dd>
 </dl>
@@ -5036,6 +5067,122 @@ template&lt;typename P , typename Traits &gt; </div>
 
 <p>Get the minimum block size (i.e. the smallest possible box / tile size). </p>
 <dl class="section return"><dt>Returns</dt><dd>Minimum block size </dd></dl>
+
+</div>
+</div>
+<a id="a676b6994b2da605b23530ce46a62fe03" name="a676b6994b2da605b23530ce46a62fe03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a676b6994b2da605b23530ce46a62fe03">&#9670;&#160;</a></span>getMirrorHasCutCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; int &gt; &amp; AmrMesh::getMirrorHasCutCells </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get, per level, whether that level has any cut cell anywhere in the domain. </p>
+<p>All-reduced, so every rank sees the same answer &ndash; which the mirror pass requires, because it early-outs on this and contains a collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Per-level cut-cell presence </dd></dl>
+
+</div>
+</div>
+<a id="a506b4f07d584e0315ac8bae04617f4c0" name="a506b4f07d584e0315ac8bae04617f4c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a506b4f07d584e0315ac8bae04617f4c0">&#9670;&#160;</a></span>getMirrorMaxJacobian()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real AmrMesh::getMirrorMaxJacobian </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the largest Jacobian magnitude the mirror pass will trust. </p>
+<dl class="section return"><dt>Returns</dt><dd>AmrMesh.mirror_max_jacobian </dd></dl>
+
+</div>
+</div>
+<a id="aaa555142eda652df805fb4c4a89cdbb6" name="aaa555142eda652df805fb4c4a89cdbb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa555142eda652df805fb4c4a89cdbb6">&#9670;&#160;</a></span>getMirrorMinDenominator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real AmrMesh::getMirrorMinDenominator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the smallest Jacobian denominator the mirror pass will trust. </p>
+<dl class="section return"><dt>Returns</dt><dd>AmrMesh.mirror_min_denom </dd></dl>
+
+</div>
+</div>
+<a id="a4a20810ea81c0847e1c928cf0b39f577" name="a4a20810ea81c0847e1c928cf0b39f577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a20810ea81c0847e1c928cf0b39f577">&#9670;&#160;</a></span>getMirrorSurfaceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const EBAMRCellData &amp; AmrMesh::getMirrorSurfaceData </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the per-band-cell surface data used by mirrored deposition, for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. </p>
+<p>Empty unless the s_mirror_deposition operator was registered on that realm and phase. The component layout is in <a class="el" href="CD__MirrorDeposition_8H.html" title="Namespace containing the geometry used by mirrored cut-cell deposition.">CD_MirrorDeposition.H</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Mirror surface data </dd></dl>
 
 </div>
 </div>
@@ -9036,6 +9183,131 @@ template&lt;typename P , typename Traits &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a3304207da2d870898124450354565510" name="a3304207da2d870898124450354565510"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3304207da2d870898124450354565510">&#9670;&#160;</a></span>m_mirrorBandRadius</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int AmrMesh::m_mirrorBandRadius</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mirror deposition: half-width, in cells, of the band around the embedded boundary that reflects. </p>
+<p>Bounded on both sides: it must not exceed num_ghost (the exchange has to deliver the cut-cell data it reads), and <a class="el" href="classAmrMesh.html#a673a01e951aa1b355b60416c3ea3f55f" title="Do a sanity check to make sure everything is set up correctly.">AmrMesh::sanityCheck</a> separately requires num_ghost &lt; min_block_size. </p>
+
+</div>
+</div>
+<a id="a77d5e536082f0e0b427c7756a474d295" name="a77d5e536082f0e0b427c7756a474d295"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77d5e536082f0e0b427c7756a474d295">&#9670;&#160;</a></span>m_mirrorConditionTolerance</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real AmrMesh::m_mirrorConditionTolerance</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mirror deposition: smallest permitted eigenvalue ratio of U^T U in the shape-operator fit. </p>
+<p>Rejects a neighbourhood whose usable cut cells are nearly collinear in the tangent plane &ndash; a ridge, a fin, or a cylinder whose cut cells run along its axis. The neighbour count alone is necessary but not sufficient. </p>
+
+</div>
+</div>
+<a id="a42aa99be91167f2eca7943c9d16cf520" name="a42aa99be91167f2eca7943c9d16cf520"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42aa99be91167f2eca7943c9d16cf520">&#9670;&#160;</a></span>m_mirrorCreaseTolerance</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real AmrMesh::m_mirrorCreaseTolerance</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mirror deposition: largest permitted dimensionless residual of the shape-operator fit. </p>
+<p>A crease detector. A sphere union, a facet edge or a dielectric corner is not a quadratic patch, and the residual is what says so. </p>
+
+</div>
+</div>
+<a id="a8be1054e964f5131a66da4a478871e03" name="a8be1054e964f5131a66da4a478871e03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8be1054e964f5131a66da4a478871e03">&#9670;&#160;</a></span>m_mirrorMaxJacobian</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real AmrMesh::m_mirrorMaxJacobian</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mirror deposition: largest Jacobian magnitude that will be trusted. </p>
+<p>Sized from a measurement rather than a round number: a concave cavity of radius 3*dx legitimately produces J = 28.9 under CIC and J = 483.8 under TSC, so a cap below ~10^3 would discard real images in a geometry this tree ships. </p>
+
+</div>
+</div>
+<a id="ae2f4542e22e8b1e040ccfac9bd673040" name="ae2f4542e22e8b1e040ccfac9bd673040"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2f4542e22e8b1e040ccfac9bd673040">&#9670;&#160;</a></span>m_mirrorMinDenominator</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real AmrMesh::m_mirrorMinDenominator</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mirror deposition: smallest Jacobian denominator that will be trusted. </p>
+<p>The same measurement from the other side; the TSC cavity above runs at a denominator of 4.1E-3, so a floor above ~1E-3 would discard real images. </p>
+
+</div>
+</div>
 <a id="a0e2169012fe5dc50728c7e9053483362" name="a0e2169012fe5dc50728c7e9053483362"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0e2169012fe5dc50728c7e9053483362">&#9670;&#160;</a></span>m_oldToNewCellCopiers</h2>
 

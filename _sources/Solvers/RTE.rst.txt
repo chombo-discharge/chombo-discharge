@@ -246,7 +246,7 @@ Various functions are in place for obtaining these particles:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
    :language: c++
-   :lines: 402-435
+   :lines: 403-436
    :dedent: 2
 
 Photon particle
@@ -274,7 +274,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 430-435
+      :lines: 431-436
       :dedent: 2
 
    The source photons can then be filled and added to the other photons.
@@ -283,7 +283,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 402-407
+      :lines: 403-408
       :dedent: 2
 
    Photons can then be added directly.
