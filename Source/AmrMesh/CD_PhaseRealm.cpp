@@ -957,11 +957,29 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
   // the shape operator genuinely varies across the 5^D stencil and a fit assuming it constant carries model error.
   // Do not read the two sphere columns as evidence about that case.
   //
-  // m_baseif is set unconditionally in define(), independent of the s_levelset operator, so this needs no plumbing.
-  // The single switch below is the escape hatch: turn it off to fall back to EBISBox everywhere. It is deliberately
-  // one switch rather than one per quantity -- two independent toggles is four states to reason about, and the
-  // reported diagnostic below would then have to be read very carefully to know which was in play.
-  constexpr bool useImplicitFunctionGeometry = true;
+  // OFF by default, and the trade is deliberate. Taking the geometry from the implicit function costs roughly
+  // 2*SpaceDim + 1 evaluations of BaseIF::value per cut cell, doubled when the centroid moves and the gradient is
+  // re-evaluated at the projected point -- about thirteen in 3-D, at every regrid. That is nothing for an analytic
+  // sphere and potentially a great deal for a tessellated geometry, where each call is a BVH traversal. EBISBox
+  // already holds the same information discretely and hands it over for free.
+  //
+  // What it costs in accuracy, measured against the analytic surface as mean |d(2H)|/|2H|:
+  //
+  //                                2-D sphere R=4dx    3-D sphere    3-D torus
+  //   EBISBox (this default)            6.97E-3          1.12E-3       3.549E-2
+  //   implicit function                 9.97E-7          9.53E-8       3.564E-2
+  //
+  // The whole difference is the CENTROID, not the normal: EBISBox::normal already comes from the implicit function
+  // and agrees with it to ~1E-5 degrees in 2-D, whereas the boundary centroid comes from Chombo's moment
+  // reconstruction and sits 0.015-0.027 dx off the true surface. The fit is S ~ dn/dx, so that position error is
+  // amplified by 1/dx. In 3-D the normals carry error too, up to 1.6 degrees on a torus, and both matter.
+  //
+  // Turn it on for a geometry whose implicit function is cheap and whose curvature has to be right. The torus is
+  // moved by neither, so do not reach for this to fix that case.
+  //
+  // One switch rather than one per quantity: two independent toggles is four states to reason about, and the
+  // diagnostic below would then have to be read very carefully to know which was in play.
+  constexpr bool useImplicitFunctionGeometry = false;
 
   // Finite-difference step for the gradient, in cells. Two-sided failure: too small cancels, too large truncates.
   // 1E-2 sits well inside both for double precision on an analytic implicit function. Note this truncation is why
@@ -1046,8 +1064,10 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
         const RealVect ebNc = ebisbox.normal(vof);
         RealVect       nc   = ebNc;
 
-        // Implicit-function geometry, see useImplicitFunctionGeometry above.
-        if (!m_baseif.isNull()) {
+        // Implicit-function geometry, see useImplicitFunctionGeometry above. Gated on the switch as well as on the
+        // implicit function existing, because the comparison below evaluates BaseIF::value whether or not the result
+        // is used -- leaving it running when the switch is off would pay the whole cost for a diagnostic.
+        if (useImplicitFunctionGeometry && !m_baseif.isNull()) {
           const Real h = gradientStep * dx;
 
           const auto gradientAt = [&](const RealVect& a_x) -> RealVect {
@@ -1546,12 +1566,21 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     const Real      maxShiftAll = ParallelOps::max(maxCentroidShift);
     const long long refusedAll  = ParallelOps::sum(numCentroidRefused);
 
-    // An absent implicit function is a silent fallback to EBISBox geometry, and silence is exactly what makes it a
-    // trap -- the surface data is then built from the less accurate source with nothing in the log to say so.
+    // Say which source built the surface data, and distinguish the two ways it can be EBISBox. Chosen and
+    // unavailable are very different situations -- one is a deliberate trade, the other is a geometry that cannot
+    // offer the alternative -- and both are otherwise silent.
     if (cmpAll == 0) {
-      pout() << "PhaseRealm::defineMirrorSurfaceData - no implicit function on this realm; using EBISBox centroid "
-                "and normal, which are the less accurate source (see defineMirrorSurfaceData)"
-             << endl;
+      if (!useImplicitFunctionGeometry) {
+        pout() << "PhaseRealm::defineMirrorSurfaceData - using EBISBox centroid and normal by configuration; the "
+                  "implicit function is the more accurate source but costs evaluations per cut cell (see "
+                  "useImplicitFunctionGeometry)"
+               << endl;
+      }
+      else {
+        pout() << "PhaseRealm::defineMirrorSurfaceData - no implicit function on this realm; using EBISBox centroid "
+                  "and normal, which are the less accurate source (see defineMirrorSurfaceData)"
+               << endl;
+      }
     }
     else {
       pout() << "PhaseRealm::defineMirrorSurfaceData - LSF vs EBISBox normal over " << cmpAll << " cut cells: mean "

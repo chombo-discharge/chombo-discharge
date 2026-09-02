@@ -848,9 +848,24 @@ protected:
 
   /**
    * @brief Build the per-band-cell surface data used by mirrored cut-cell deposition.
-   * @details Runs three passes over each level: seed the cut cells from EBISBox, fit the shape operator over the
-   * 5^D neighbourhood, then extend the result outwards to the band. An exchange separates each pass from the next,
-   * and the ORDER MATTERS -- see the implementation.
+   * @details Runs three passes over each level: seed the cut cells with a boundary centroid and normal, fit the
+   * shape operator over the 5^D neighbourhood, then extend the result outwards to the band by Euclidean-nearest
+   * assignment. An exchange separates each pass from the next, and the ORDER MATTERS -- passes B and C read their
+   * neighbours from the FIELD rather than from EBISBox, which is what makes a cut cell no box on this level owns
+   * read back as Status::None instead of silently contributing stale geometry. See the implementation.
+   * @details The seed geometry comes from EBISBox by default. It can instead be taken from the implicit function --
+   * normal from the gradient, centroid by one Newton step onto phi = 0 -- which is roughly four orders of magnitude
+   * more accurate on a sphere but costs O(2*SpaceDim) evaluations of BaseIF::value per cut cell per regrid. The
+   * switch is the compile-time constant useImplicitFunctionGeometry at the top of the implementation, which also
+   * carries the measured accuracy table and the reasoning. Whichever source is used is reported at m_verbose,
+   * including the case where the implicit function was wanted but the realm has none.
+   * @details Does nothing unless the s_mirror_deposition operator is registered on this realm and phase, so realms
+   * that never mirror pay neither the memory nor the passes.
+   * @note Requires AmrMesh.eb_ghost >= 2, so that EBISBox is valid over the 5^D curvature-fit stencil, and
+   * AmrMesh.num_ghost >= AmrMesh.mirror_band_radius, so that the exchange can deliver the cut-cell data the band
+   * reads. These are independent requirements on independent quantities -- eb_ghost sizes the region over which
+   * geometric data is valid, num_ghost sizes the DATA -- and deriving one from the other has been a recurring
+   * mistake. Both are checked at define time and abort by name.
    * @param[in] a_lmin Coarsest level that changed.
    */
   void
