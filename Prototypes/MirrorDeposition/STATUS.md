@@ -5,19 +5,23 @@ order). This file is neither: it is the running state of the branch, so a sessio
 cold knows what is done, what is broken, and what to do next without re-deriving any of it.
 
 **PR** chombo-discharge#703 (draft) · **Branch** `mirror_deposition`, fork `rmrsk`, based on `main` at
-`cd3a7d29` · **Issue** chombo-discharge#29 parts 1 and 3 · **Last updated** 2026-09-01
+`cd3a7d29` · **Issue** chombo-discharge#29 parts 1 and 3 · **Last updated** 2026-09-02
 
 ---
 
 ## 1. One-paragraph summary
 
-Stages 1 and 2 of `IMPLEMENTATION.md` are written. Stage 1 (the `IrregularDeposition` selector and the
-input migration) is **complete and fully verified** — every shipped regression is bit-for-bit unchanged
-on all four mappings. Stage 2 (the per-band-cell surface data and the shape-operator fit at regrid) is
-**written, building in 2-D and 3-D, and verified in both** at every rank count tried. The 3-D segfault
-that this file previously carried as the open defect is **root-caused and fixed** — it was a
-use-after-free in the test's own checker, not a defect in the library (§4). Stages 3 and 4 have not
-been started.
+Stages 1, 2 and a **working prototype of stage 3** are in. Stage 1 (the `IrregularDeposition`
+selector and the input migration) is **complete and fully verified** — every shipped regression is
+bit-for-bit unchanged on all four mappings. Stage 2 (the per-band-cell surface data and the
+shape-operator fit at regrid) is **written, building in 2-D and 3-D, and verified in both** at every
+rank count tried, and its accuracy improved by four to six orders of magnitude once the cut-cell
+geometry was taken from the implicit function rather than from `EBISBox` (§3). Stage 3 exists as a
+**runnable prototype**: `irregular_deposition = mirror` actually deposits, through both `ItoSolver`
+funnels (§3). Stage 4 has not been started.
+
+The 3-D segfault this file once carried as the open defect is **root-caused and fixed** — a
+use-after-free in the test's own checker, not a defect in the library (§4).
 
 Nothing selects the mirror yet, so the branch is inert with respect to every existing simulation.
 
@@ -36,7 +40,13 @@ older notes (`876d9aee`, `38b0101a`, `0fce9309`, …) no longer resolve.
 
 | commit | what |
 |---|---|
-| *(this file's own commit)* | §4 rewritten: the 3-D defect root-caused and closed |
+| *(this file's own commit)* | §3 and §5 brought up to date; house-cleaning |
+| `71363b2e` | Implicit-function geometry kept, prototype footguns defused |
+| `daa4c22a` | Centroid projection. Titled `TEMPORARY -- DELETE`, but `71363b2e` **kept** it |
+| `caaeecde` | Normal test. Titled `TEMPORARY -- DELETE`; refuted, and the finding is in §3 |
+| `5c83c2db` | Mirror refusal counters |
+| `b7fb04a4` | **Stage 3 prototype** — `mirror` actually deposits |
+| `4fa7f726` | §4 rewritten: the 3-D defect root-caused and closed |
 | `6ecf9064` | **The §4 fix** — the test was iterating a freed `IntVectSet` |
 | `c1638b84` | How to obtain a comparison baseline (§6) |
 | `2833da6b` | First version of this file |
@@ -63,6 +73,17 @@ rebased header, then verified word-for-word against what main rendered. Also re-
 narrower comment column than the branch's reflowed one, so eight input files need realigning.
 
 And do not `git add -A` mid-rebase: it commits the `Submodules/*` symlinks from §6 as typechanges.
+
+**Two commit titles lie, deliberately left alone.** `caaeecde` and `daa4c22a` say
+`TEMPORARY -- DELETE`, but `71363b2e` promoted their content to kept code. They are published;
+retitling means a force-push for a cosmetic fix. The table above is the correction.
+
+**A separate defect was split out of this branch into chombo-discharge#718.** The Ito diffusion hop has
+no reflecting boundary at the EB, so particles leak one-way into the solid and drain the near-wall
+region, producing a spurious positive cut-cell space charge. It reproduces on `main` under every
+deposition scheme and has nothing to do with mirrored deposition — but it is worth knowing about here,
+because it is a *second* cut-cell artefact and the mirror removing the first one is what made it
+visible. Do not let #703 grow to include it.
 
 ---
 
@@ -139,6 +160,59 @@ Existing regressions still run after Stage 2, because nothing registers the oper
 the deposition path. A **full** bit-for-bit comparison against `main` has *not* been redone since the
 rebase — main's #713 changes Ito results by design, so it needs a fresh baseline (§6).
 
+### Cut-cell geometry from the implicit function, not `EBISBox` (2026-09-02)
+
+The fit takes exactly two inputs: the neighbours' boundary centroids and their normals. Both now come
+from the implicit function (`AmrMesh::getBaseImplicitFunction`), and it is worth four to six orders of
+magnitude. Mean `|d(2H)|/|2H|` against the analytic surface:
+
+| source | 2-D sphere R=4dx | 3-D sphere | 3-D torus |
+|---|---|---|---|
+| `EBISBox` normal + centroid | 6.97E-3 | 1.12E-3 | 3.549E-2 |
+| implicit function | 9.97E-7 | 9.53E-8 | 3.564E-2 |
+
+`EBISBox::normal` already comes from the implicit function, so the **normals were never the problem** —
+they agree to ~1E-5 degrees in 2-D. The **centroid** was: it comes from Chombo's moment reconstruction
+and sits 0.015–0.027 dx off the true surface, which the fit amplifies by 1/dx because `S ~ dn/dx`. One
+Newton step removes it. In 3-D the normals *do* carry error (up to 1.6 deg on the torus) and both fixes
+are needed.
+
+**The torus is moved by neither**, and its 3.5% is a third mechanism — see §5 item 3. Do not read the
+sphere columns as saying anything about it.
+
+Guarded by a 0.5 dx shift limit, which is a tripwire and not a tuning knob: composite geometries are
+min/max of several implicit functions and are **not** differentiable at a seam, where a one-sided
+gradient could throw the Newton step onto the wrong facet. It refuses 0 cells on every case measured.
+
+### Stage 3 — the mirror pass (prototype, runnable)
+
+`irregular_deposition = mirror` deposits. `ItoSolver::mirrorPass` is `PLAN.md` §4.2: clear the image
+container, walk the valid holder, reflect, append the image at `weight * J`, remap, deposit into
+scratch with `Native`, add.
+
+**Called from BOTH funnels**, and that is not optional. `depositWeight` produces the plotted `phi`;
+`depositGathered` produces the six average/conductivity fields. Hooking only one fails *silently* —
+the run completes and the output is bit-for-bit identical to `native`, because the mapping never
+reaches the field being looked at. That cost a build-and-run cycle.
+
+Verified on `BrownianWalker/DriftDiffusion` 2-D against the same case as `native`:
+
+- differs in all 201 plot files, so the mapping reaches the field
+- at step 0, before the grids diverge, only **76 of 67392** level-0 elements differ — confined to a
+  thin band, not global
+- **all 210 differing elements rose, none fell** — the sign check that matters, since the mirror only
+  ever adds the image cloud. 43 were exactly zero before, which is the deliberate absence of a
+  covered-cell reset
+- runs at 1, 2, 3 and 4 ranks, so the collective early-out holds
+- `native` is bit-for-bit unchanged, 201/201, so the prototype is inert unless selected
+
+Refusal counters report at `ItoSolver.verbosity > 5`: images built, particles skipped (outside the
+band, or at `d <= 0`), and refusals split by the three guards. A refused image still deposits with
+`J = 1`, which is the **flat** mirror and is *biased*, not neutral — so a run whose images are nearly
+all refused has degraded to a worse model rather than failed, and without the counters it looks
+identical to a healthy one. DriftDiffusion reports **zero refusals of any kind**; read a coarse-curved
+case against that.
+
 ---
 
 ## 4. THE 3-D SEGFAULT — root-caused and FIXED (2026-09-01)
@@ -211,17 +285,39 @@ sanitizer at that point rather than more `fprintf`.
 
 ## 5. What is next, in order
 
-1. **Finish the Stage 2 acceptance suite** (`IMPLEMENTATION.md` §2.7). What §4 left done: the
+1. **The quantitative test that has never been run.** Everything measured so far is either the
+   *curvature* (exact to ~1E-8) or *directional* — the mirror adds mass, only near the boundary, never
+   subtracts. **Nothing yet measures the thing the feature claims**: that a cut cell holds `n` rather
+   than `kappa*n`. Fill a known analytic density around a known surface, deposit, read `phi` in the cut
+   cells binned by `kappa`: `native` should give `kappa*n0`, `mirror` should give `n0`. A mirror that
+   put images at the wrong depth would pass every test in this file. Do this before building anything
+   on top.
+2. **Audit the consumers of `phi`.** Under `mirror` a cut cell holds `n`, not `kappa*n`.
+   `DataOps::filterSmooth` (`CD_DataOps.cpp:679`) is the named one; there may be others. Until this is
+   swept the option is safe for looking at cut-cell behaviour and unsafe in a coupled run, which is
+   what the experimental note in `Ito.rst` says.
+3. **The 3-D torus sits at 3.5%** against a 5% bound, and is moved by neither the projected centroid
+   nor the implicit-function normal (§3). Leading hypothesis: a torus is not umbilic, so the shape
+   operator genuinely varies across the 5^D stencil and a fit assuming it constant carries model
+   error. The experiment is a `fitStencilRadius` sweep on the torus with the geometry fixes held on.
+   The sphere cases structurally cannot show this.
+4. **Cost.** `mirrorPass` measured at 19% of `depositParticles` and ~1.4% of the timed total on a small
+   2-D case — but that is 128^2, one species, two ranks. The `remap()` inside the pass is a collective
+   and scales with rank and particle count, not with the band. `IMPLEMENTATION.md` §3.4 says measure
+   it; on a real case run with `CH_TIMER=1` and read `time.table.0`.
+5. **Finish the Stage 2 acceptance suite** (`IMPLEMENTATION.md` §2.7). What §4 left done: the
    extension/tie-break determinism check passes across *rank counts* — 1-through-8-rank runs agree to
    every printed digit in both dimensions. What remains: the same check across **different box sizes**
    (`max_block_size`), which is the harder half and the one that would catch a decomposition-dependent
    tie-break; the **cylinder** case (the anisotropy check a sphere cannot provide and a torus provides
    only incidentally); and the **sign-convention** assertion.
-2. **Re-establish the bit-for-bit baseline.** It has not been redone since the rebase, and main's #713
+6. **Re-establish the bit-for-bit baseline.** It has not been redone since the rebase, and main's #713
    changes Ito results by design, so the old benchmark files are useless. Recipe in §6.
-3. **Stage 3** — the mirror pass itself: image container, scratch field, build/remap/deposit/add,
-   guards, `ItoSolver` wired, plus the §5.2 acceptance suite.
-4. **Stage 4** — `PLAN.md`'s PR B: redistribution moved centrally, duplicated solver code deleted.
+7. **Promote the stage 3 prototype.** It deliberately skips `IMPLEMENTATION.md` §3.2: the image
+   container and mesh scratch are `ItoSolver` members rather than shared on `PhaseRealm`, and there is
+   no in-flight assertion. Sharing needs the §3.2 plumbing hop; owning one per solver costs one
+   container per species. Plus the §5.2 acceptance suite.
+8. **Stage 4** — `PLAN.md`'s PR B: redistribution moved centrally, duplicated solver code deleted.
 
 Note for stage 4, from `IMPLEMENTATION.md` §1.7: `McPhoto::depositHybridDivergence` also carries an
 unconditional `conservativeAverage` and `interpGhost` (`CD_McPhoto.cpp:1369-1370`). Deleting the
@@ -293,6 +389,12 @@ Feed it the `+0x...` offsets from the OpenMPI backtrace. See §4 for what assumi
 instrumenting and reach for the assertion build or a sanitizer. See §4.
 
 **Do not name a loop variable `wit`.** `codespell` reads it as a misspelling of "with".
+
+**`format-input-files` DELETES trailing content, it does not only realign.** Keys appended below the
+last `# ===` banner section are removed outright — including, in one case here, the
+`ItoSolver.irregular_deposition = mirror` line that was doing the work, since ParmParse takes the last
+value. Put new keys inside a banner section, and check the diff after the hook runs rather than
+assuming it only touched whitespace. The hook is not in CI, so nothing downstream catches it.
 
 ---
 
