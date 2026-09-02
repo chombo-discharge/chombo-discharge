@@ -927,6 +927,21 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     pout() << "PhaseRealm::defineMirrorSurfaceData" << endl;
   }
 
+  // Builds the surface data that mirrored deposition reflects particles across. Every cut cell, and every cell within
+  // mirror_band_radius of one, gets a status, a boundary centroid x_c, a normal n_c and a shape operator S_c stored
+  // in world coordinates. Three passes per level, with an exchange between them:
+  //
+  //   Pass A -- seed each cut cell of the valid box with its centroid and normal, marked Planar.
+  //   Pass B -- fit S_c by least squares over the 5^D neighbourhood, upgrading the cell to Fitted. Skipped when
+  //             PhaseRealm.mirror_curvature_correction is false, which leaves S_c zero and a plane mirror.
+  //   Pass C -- extend the record outwards to the band, taking it from the Euclidean-nearest cut cell.
+  //
+  // Two things are load-bearing and easy to undo by accident. The pass order relative to the exchanges: pass C must
+  // extend before the data is exchanged, or a band cell at a patch edge is assigned a cut cell that is not its
+  // nearest and no later exchange can repair it. And passes B and C read their neighbours from the FIELD rather than
+  // from EBISBox, so a cut cell this level does not own reads back as Status::None instead of contributing geometry
+  // the level has no data for.
+
   const bool doThisOperator = this->queryOperator(s_mirror_deposition);
 
   m_mirrorSurfaceData.resize(1 + m_finestLevel);
@@ -936,9 +951,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     return;
   }
 
-  // Two independent requirements, and they must stay independent: eb_ghost sizes the region over which EBISBox
-  // geometric data is valid, while num_ghost sizes the DATA and is therefore what the exchanges below can deliver.
-  // Deriving one from the other has been a recurring mistake; do not.
+  // Independent requirements: eb_ghost sizes the region EBISBox is valid over, num_ghost sizes the data the
+  // exchanges can deliver. Do not derive one from the other.
   if (m_numEbGhostsCells < 2) {
     MayDay::Error("PhaseRealm::defineMirrorSurfaceData - mirrored deposition needs 'AmrMesh.eb_ghost' >= 2 so that "
                   "EBISBox is valid over the 5^D curvature-fit stencil");
@@ -951,82 +965,27 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 
   constexpr int fitStencilRadius = 2;
 
-  // Take the cut-cell centroid and normal from the implicit function rather than from EBISBox, which is a large
-  // accuracy win because the fit is S ~ dn/dx and so amplifies any position error by 1/dx. Measured mean
-  // |d(2H)|/|2H| against the analytic surface:
-  //
-  //                            2-D sphere R=4dx    3-D sphere    3-D torus
-  //   EBISBox normal+centroid       6.97E-3          1.12E-3       3.549E-2
-  //   implicit function             9.97E-7          9.53E-8       3.564E-2
-  //
-  // The torus is moved by neither, and its 3.5% is a THIRD mechanism -- most likely that a torus is not umbilic, so
-  // the shape operator genuinely varies across the 5^D stencil and a fit assuming it constant carries model error.
-  // Do not read the two sphere columns as evidence about that case.
-  //
-  // OFF by default, and the trade is deliberate. Taking the geometry from the implicit function costs roughly
-  // 2*SpaceDim + 1 evaluations of BaseIF::value per cut cell, doubled when the centroid moves and the gradient is
-  // re-evaluated at the projected point -- about thirteen in 3-D, at every regrid. That is nothing for an analytic
-  // sphere and potentially a great deal for a tessellated geometry, where each call is a BVH traversal. EBISBox
-  // already holds the same information discretely and hands it over for free.
-  //
-  // What it costs in accuracy, measured against the analytic surface as mean |d(2H)|/|2H|:
-  //
-  //                                2-D sphere R=4dx    3-D sphere    3-D torus
-  //   EBISBox (this default)            6.97E-3          1.12E-3       3.549E-2
-  //   implicit function                 9.97E-7          9.53E-8       3.564E-2
-  //
-  // The whole difference is the CENTROID, not the normal: EBISBox::normal already comes from the implicit function
-  // and agrees with it to ~1E-5 degrees in 2-D, whereas the boundary centroid comes from Chombo's moment
-  // reconstruction and sits 0.015-0.027 dx off the true surface. The fit is S ~ dn/dx, so that position error is
-  // amplified by 1/dx. In 3-D the normals carry error too, up to 1.6 degrees on a torus, and both matter.
-  //
-  // Turn it on for a geometry whose implicit function is cheap and whose curvature has to be right. The torus is
-  // moved by neither, so do not reach for this to fix that case.
-  //
-  // One switch rather than one per quantity: two independent toggles is four states to reason about, and the
-  // diagnostic below would then have to be read very carefully to know which was in play.
+  // Cut-cell geometry source. EBISBox by default: the implicit function is far more accurate -- almost all of it
+  // from the centroid rather than the normal -- but costs O(2*SpaceDim) BaseIF::value calls per cut cell per regrid,
+  // which is expensive for a tessellated geometry. See the declaration for the measured trade.
   constexpr bool useImplicitFunctionGeometry = false;
 
-  // Finite-difference step for the gradient, in cells. Two-sided failure: too small cancels, too large truncates.
-  // 1E-2 sits well inside both for double precision on an analytic implicit function. Note this truncation is why
-  // the implicit-function normal is slightly WORSE than EBISBox's in 2-D, where Chombo's normals are already exact
-  // to ~1E-5 degrees; in 3-D they carry up to 1.6 degrees of error and the implicit function wins decisively.
+  // Finite-difference step for the gradient, in cells. Large enough not to cancel, small enough not to truncate.
   const Real gradientStep = 1.E-2;
 
-  // Curvature correction on or off, from PhaseRealm.mirror_curvature_correction. With it OFF, pass B is skipped
-  // entirely: the shape operator stays zero, every
-  // cut cell keeps the Status::Planar that pass A gave it, and the whole scheme degrades to a PLANE mirror with no
-  // special-casing anywhere downstream -- MirrorDeposition::reflect already does the right thing for S = 0, since
-  // Sw vanishes, nhat collapses to n_c, and the Jacobian becomes (1 - 0 + 0)/(1 + 0 + 0) = 1.
-  //
-  // The point of the switch is to find out whether the correction earns its cost in a production run. What it buys,
-  // measured against analytic surfaces: the fitted curvature is accurate to a fraction of a percent on a resolved
-  // sphere, and the exact Jacobian matters most where the surface is tightly curved relative to dx -- a concave
-  // cavity at R = 3*dx runs at J = 28.9 under CIC and J = 483.8 under TSC, so on that geometry a plane mirror
-  // under-weights the image by two to three orders of magnitude. On a gently curved surface it is a small effect.
-  //
-  // What it costs is the least-squares fit over the 5^D neighbourhood of every cut cell, once per regrid: a
-  // symmetric solve plus a residual pass per cell, with the conditioning and crease guards on top.
-
-  // Largest projection, in cells, that will be believed. Not a tuning knob for accuracy -- a tripwire. Composite
-  // geometries are min/max of several implicit functions and are therefore NOT differentiable at a seam; a one-sided
-  // gradient there can throw the Newton step onto the wrong facet, moving the centroid by order a cell rather than a
-  // fortieth of one. Refuse those and keep Chombo's centroid, which is at least on the right piece of surface. The
-  // measured shifts are 0.015-0.027 dx mean and 0.045 dx worst, so this carries about a factor of ten of headroom
-  // and should fire only on a seam, never on ordinary discretization.
+  // A tripwire, not a tuning knob. Composite geometries are not differentiable at a seam, where a one-sided gradient
+  // can throw the Newton step onto the wrong facet. Ordinary shifts are ~0.02 dx, so this only fires on a seam.
   const Real centroidShiftLimit = 0.5;
 
-  // Counters, reduced at the end. fitOk/fallback are about the CURVATURE; bandNoCutCell is about the GRIDS, which is
-  // why they are counted apart -- a run that trips the first has under-resolved geometry, a run that trips the second
-  // has a level whose grids do not cover the embedded-boundary band.
+  // Counted apart because they mean different things: the fit counters say the geometry is under-resolved,
+  // bandNoCutCell says a level's grids do not cover the band.
   long long fitOk               = 0;
   long long fitTooFewNeighbours = 0;
   long long fitIllConditioned   = 0;
   long long fitCrease           = 0;
   long long bandNoCutCell       = 0;
 
-  // How far the implicit function's geometry is from EBISBox's. Reported so a silent change of source, or a
-  // geometry with no implicit function at all, cannot go unnoticed.
+  // How far the implicit function's geometry is from EBISBox's, so a silent change of source cannot go unnoticed.
   Real      sumNormalAngle     = 0.0;
   Real      maxNormalAngle     = 0.0;
   long long numNormalCmp       = 0;
@@ -1065,30 +1024,26 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
       BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
       const EBISBox& ebisbox = surf.getEBISBox();
 
-      // Use the realm's own cut-cell iterator rather than re-deriving the irregular set: it is built in regridBase
-      // from the same EBISBox and is the iteration every other operator here uses, so the two cannot drift apart.
+      // The realm's own cut-cell iterator, so this cannot drift from what every other operator iterates.
       VoFIterator& vofit = (*m_vofIter[lvl])[din];
 
       for (vofit.reset(); vofit.ok(); ++vofit) {
         const VolIndex& vof = vofit();
         const IntVect&  iv  = vof.gridIndex();
 
-        // Multiply-cut cells are refined away by this project's workflows, but nothing in the library enforces that,
-        // so skip them rather than pick one of the two VoFs arbitrarily -- a position alone cannot select a VoF.
+        // A position alone cannot select one of two VoFs, so skip multi-cut cells.
         if (ebisbox.numVoFs(iv) != 1) {
           continue;
         }
 
-        // Location::position multiplies by dx (see its 'ret *= a_dx'), so this is a physical position. Do NOT
-        // difference raw bndryCentroid values from different cells: that drops the inter-cell offset and inflates the
-        // fitted curvature by about an order of magnitude.
+        // Physical position. Do NOT difference raw bndryCentroid values between cells -- that drops the inter-cell
+        // offset and inflates the fitted curvature by an order of magnitude.
         RealVect       xc   = m_probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
         const RealVect ebNc = ebisbox.normal(vof);
         RealVect       nc   = ebNc;
 
-        // Implicit-function geometry, see useImplicitFunctionGeometry above. Gated on the switch as well as on the
-        // implicit function existing, because the comparison below evaluates BaseIF::value whether or not the result
-        // is used -- leaving it running when the switch is off would pay the whole cost for a diagnostic.
+        // Gated on the switch as well as on the implicit function existing: the comparison below evaluates
+        // BaseIF::value whether or not the result is used.
         if (useImplicitFunctionGeometry && !m_baseif.isNull()) {
           const Real h = gradientStep * dx;
 
@@ -1111,10 +1066,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           RealVect grad    = gradientAt(xc);
           Real     gradLen = grad.vectorLength();
 
-          // One Newton step onto phi = 0. EBISBox::normal comes from the implicit function and was measured to be
-          // exact, but the boundary CENTROID comes from Chombo's moment reconstruction, which is genuinely discrete.
-          // Since the fit is S ~ dn/dx, a centroid error eps enters the curvature as eps/dx -- so this is the other
-          // of the fit's only two inputs, and the one still untested.
+          // One Newton step onto phi = 0.
           if (gradLen > 0.0) {
             const RealVect xProj = xc - (m_baseif->value(xc) / (gradLen * gradLen)) * grad;
             const Real     shift = (xProj - xc).vectorLength() / dx;
@@ -1135,14 +1087,11 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           if (gradLen > 0.0) {
             RealVect lsfNc = grad / gradLen;
 
-            // Sign the level-set normal to the EB normal's half-space rather than assuming a convention, then report
-            // the angle BEFORE that alignment so a genuinely inverted normal shows up as ~180 degrees rather than
-            // being silently folded to ~0.
+            // Sign to the EB normal's half-space rather than assuming a convention.
             const Real cosRaw = std::max(-1.0, std::min(1.0, lsfNc.dotProduct(ebNc)));
 
-            // Report the angle AFTER folding out the sign convention, so a perfect match reads 0 rather than 180 and
-            // the residual disagreement is legible. The flip count below says whether a convention difference exists
-            // at all, so nothing is hidden by folding.
+            // Angle with the sign convention folded out, so a perfect match reads 0. The flip count below says
+            // whether a convention difference exists at all.
             const Real angle = std::acos(std::min(1.0, std::abs(cosRaw))) * 180.0 / M_PI;
 
             sumNormalAngle += angle;
@@ -1175,9 +1124,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
     m_mirrorSurfaceData[lvl]->exchange();
 
     // ---------------------------------------------------------------------------------------------------------
-    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell. Skipped entirely when
-    // PhaseRealm.mirror_curvature_correction is false, which leaves S = 0 and Status::Planar and gives a plane
-    // mirror.
+    // Pass B -- fit the shape operator over the 5^D neighbourhood of each cut cell.
     // ---------------------------------------------------------------------------------------------------------
     if (m_mirrorCurvatureCorrection) {
 
@@ -1191,9 +1138,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 
         const Box validBox = dbl[din];
 
-        // Clip to the EBISBox region as well as to the data FAB. A LevelData ghost box is not clipped to the problem
-        // domain, but EBISBox only holds data over its own region, so a box on the domain edge would otherwise ask
-        // EBISBox about cells it has nothing for.
+        // Clipped to the EBISBox region as well as the FAB: a LevelData ghost box is not clipped to the domain.
         const Box readBox = grow(validBox, fitStencilRadius) & surfReg.box() & ebisbox.getRegion();
 
         for (BoxIterator bit(validBox); bit.ok(); ++bit) {
@@ -1211,9 +1156,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
             ni[dir] = surfReg(iv, MirrorDeposition::compNormal + dir);
           }
 
-          // Orthonormal tangent basis. Cross the normal with the axis it is least aligned with, so the cross product is
-          // never near-degenerate. This basis is LOCAL TO THE FIT and is discarded at the end of it -- the shape
-          // operator is stored in world coordinates precisely so that no later reader has to agree with this choice.
+          // Orthonormal tangent basis, crossing the normal with the axis it is least aligned with so the cross
+          // product is never near-degenerate. Local to the fit, and discarded at the end of it.
           RealVect tangents[MirrorDeposition::numTangents];
           {
             int minDir = 0;
@@ -1255,8 +1199,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 #endif
           }
 
-          // Least-squares fit of the shape operator: minimize sum_j |v_j - S u_j|^2 over the tangential displacement
-          // u_j and tangential normal-difference v_j of the neighbouring cut cells.
+          // Least-squares fit: minimize sum_j |v_j - S u_j|^2 over the neighbours' tangential displacement u_j and
+          // tangential normal-difference v_j.
           constexpr int T = MirrorDeposition::numTangents;
 
           Real A[T][T] = {};
@@ -1265,10 +1209,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 
           int numUsable = 0;
 
-          // Neighbour data is read FROM THE FIELD, never from EBISBox. That is what enforces the delivered-not-merely-
-          // existing rule: a cut cell that no box on this level owns was never seeded and never exchanged, so it reads
-          // back as Status::None here even though EBISBox can see it. Reading EBISBox instead would fit a patch to
-          // geometry this level has no data for.
+          // Read from the FIELD, never from EBISBox: a cut cell no box on this level owns reads back as
+          // Status::None here even though EBISBox can see it.
           Box window(iv - fitStencilRadius * IntVect::Unit, iv + fitStencilRadius * IntVect::Unit);
           window &= readBox;
 
@@ -1325,10 +1267,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
             fitTooFewNeighbours++;
           }
           else {
-            // Condition test on A, normalized by the natural scale (numUsable * dx^2) so the threshold is a pure
-            // number in both dimensions. A count of usable neighbours is necessary but NOT sufficient: four cut cells
-            // can be nearly collinear in the tangent plane -- a ridge, a fin, a cylinder whose cut cells run along its
-            // axis -- and then A is near-singular while the count looks healthy.
+            // Condition test on A, normalized so the threshold is dimensionless. A healthy neighbour count is not
+            // sufficient -- collinear cut cells, as on a ridge or a fin, leave A near-singular.
             const Real scale = 1.0 / (numUsable * dx * dx);
 
 #if CH_SPACEDIM == 2
@@ -1345,9 +1285,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
               fitIllConditioned++;
             }
             else {
-              // Solve S^T = A^{-1} B in closed form. A 2x2 symmetric inverse and a 2x2 eigenproblem are about fifteen
-              // allocation-free lines; LaPackUtils::computeSVD would give the conditioning number directly but
-              // allocates std::vectors per call, inside what is an OpenMP loop over every cut cell.
+              // Solved in closed form rather than by SVD, which would allocate per call inside this loop.
 #if CH_SPACEDIM == 2
               S[0][0] = B[0][0] / A[0][0];
 #else
@@ -1369,8 +1307,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
               S[1][1] = st11;
 #endif
 
-              // Symmetrize. The shape operator is symmetric for a smooth surface; the fitted one is not exactly, and
-              // the antisymmetric part is fit noise.
+              // Symmetrize; the antisymmetric part of the fitted operator is noise.
               for (int a = 0; a < T; a++) {
                 for (int b = a + 1; b < T; b++) {
                   const Real avg = 0.5 * (S[a][b] + S[b][a]);
@@ -1380,9 +1317,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
                 }
               }
 
-              // Crease detector. The residual is made dimensionless by dx, so the threshold does not move with
-              // refinement. A sphere union, a facet edge or a dielectric corner is not a quadratic patch, and this is
-              // what says so.
+              // Crease detector: a facet edge or a corner is not a quadratic patch. Residual made dimensionless by
+              // dx so the threshold does not move with refinement.
               Real residualSq = 0.0;
 
               for (BoxIterator nbrIt(window); nbrIt.ok(); ++nbrIt) {
@@ -1446,15 +1382,14 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
 
             surfReg(iv, MirrorDeposition::compStatus) = static_cast<Real>(MirrorDeposition::Status::Fitted);
 
-            // S_c annihilates the normal by construction; if it does not, the lift or the tangent basis is wrong, and
-            // the failure is otherwise silent because tr(S_c) and the Jacobian stay plausible.
+            // S_c annihilates the normal by construction. A wrong lift or tangent basis breaks this and nothing
+            // else -- tr(S_c) and the Jacobian stay plausible.
             CH_assert(MirrorDeposition::applyShapeOperator(shape, ni).vectorLength() < 1.E-12);
 
             fitOk++;
           }
           else {
-            // Status stays Planar and the shape components stay zero, which gives J = 1 exactly. A refused fit still
-            // reflects -- against a plane -- because dropping it removes the correction in the very cells that need it.
+            // Status stays Planar and S_c stays zero, giving J = 1. A refused fit still reflects, against a plane.
             for (int c = 0; c < MirrorDeposition::numShapeComp; c++) {
               surfReg(iv, MirrorDeposition::compShape + c) = 0.0;
             }
@@ -1462,19 +1397,12 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
         }
       }
 
-      // Publishes the fitted shape operator to the ghosts that pass C reads. Inside the guard because with no fit
-      // there is nothing new to publish -- pass A's exchange already delivered the centroids and normals.
+      // Publish the fit to the ghosts pass C reads. Inside the guard: with no fit there is nothing new to publish.
       m_mirrorSurfaceData[lvl]->exchange();
     }
 
     // ---------------------------------------------------------------------------------------------------------
-    // Pass C -- extend the patch outwards to the band.
-    //
-    // The ORDER of this pass relative to the exchange above is load-bearing. Extend first and exchange afterwards,
-    // and a band cell at a patch edge whose nearest cut cell lies one patch over gets assigned a too-far cut cell --
-    // and the exchange cannot repair it, because both patches computed from the same incomplete data and agree on
-    // the wrong answer. This is the one place where the valid-then-exchange pattern of defineMasks does not carry
-    // over.
+    // Pass C -- extend the patch outwards to the band. Runs AFTER the exchange above; see the summary.
     // ---------------------------------------------------------------------------------------------------------
 #pragma omp parallel for schedule(runtime) reduction(+ : bandNoCutCell)
     for (int mybox = 0; mybox < nbox; mybox++) {
@@ -1487,9 +1415,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
       const Box validBox = dbl[din];
       const Box readBox  = grow(validBox, m_mirrorBandRadius) & surfReg.box() & ebisbox.getRegion();
 
-      // Pass C reads the seeded/fitted values and writes new ones into the same holder, so it needs its own copy of
-      // the band cells' results -- otherwise a band cell written early in the iteration becomes a candidate source
-      // for one written later, and the patch propagates outwards instead of being assigned.
+      // Own copy of the results, or a band cell written early becomes a source for one written later and the patch
+      // propagates outwards instead of being assigned.
       BaseFab<Real> extReg(validBox, MirrorDeposition::numComp);
       extReg.setVal(0.0);
 
@@ -1509,10 +1436,8 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           continue;
         }
 
-        // Euclidean-nearest over the neighbourhood, NOT a Chebyshev sweep. The error ladder that justifies the
-        // quadratic patch over a plane was measured with argmin |x_band - x_cut|^2 over all cut cells; sweeps compute
-        // a Chebyshev-nearest assignment with an arbitrary tie-break, and the two differ exactly where more than one
-        // piece of surface is within the band -- which is the geometry the patch exists to get right.
+        // Euclidean-nearest, not a Chebyshev sweep. The two differ exactly where more than one piece of surface is
+        // within the band, which is the geometry the patch exists to get right.
         const RealVect cellCentre = m_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
 
         Box window(iv - m_mirrorBandRadius * IntVect::Unit, iv + m_mirrorBandRadius * IntVect::Unit);
@@ -1538,8 +1463,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           const RealVect delta  = xj - cellCentre;
           const Real     distSq = delta.dotProduct(delta);
 
-          // Fixed lexicographic tie-break, so the assignment does not depend on iteration order or on the box
-          // decomposition.
+          // Fixed tie-break, so the assignment does not depend on iteration order or box decomposition.
           bool better = distSq < bestDistSq;
 
           if (!better && found && distSq <= bestDistSq) {
@@ -1565,8 +1489,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
           }
         }
         else {
-          // Reachable where a level's grids do not cover the embedded-boundary band. A diagnostic, not an abort:
-          // particles here simply do not reflect.
+          // Reachable where a level's grids do not cover the band. Particles there simply do not reflect.
           bandNoCutCell++;
         }
       }
@@ -1581,8 +1504,7 @@ PhaseRealm::defineMirrorSurfaceData(const int a_lmin)
       }
     }
 
-    // No exchange after pass C. Surface data is read only at a particle's OWN cell, and particles live in the valid
-    // region of the patch that owns them.
+    // No exchange after pass C: surface data is read only at a particle's own cell.
 
     // All-reduced, and that is required rather than tidy -- see the member's documentation.
     m_mirrorHasCutCells[lvl] = (ParallelOps::sum(numCutCells) > 0) ? 1 : 0;
