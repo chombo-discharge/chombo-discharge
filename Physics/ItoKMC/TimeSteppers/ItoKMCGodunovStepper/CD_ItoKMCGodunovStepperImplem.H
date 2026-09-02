@@ -22,6 +22,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
 #include <CD_ParticleLoops.H>
+#include <CD_ParticleOps.H>
 #include <CD_Units.H>
 #include <CD_Photon.H>
 #include <CD_DischargeIO.H>
@@ -847,7 +848,7 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCancelledHops, numTotalHops)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
@@ -1714,6 +1715,10 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
   this->clearPointParticles(a_rhoDaggerParticles, SpeciesSubset::All);
 
+  // PROTOTYPE -- TEMPORARY. Count explicit displacements that would land on or behind the embedded boundary.
+  long long numCancelledHops = 0;
+  long long numTotalHops     = 0;
+
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
@@ -1744,6 +1749,12 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
+
+      // PROTOTYPE -- TEMPORARY, for the displacement rejection below.
+      const RefCountedPtr<BaseIF>& baseif = (this->m_amr)->getBaseImplicitFunction(this->m_plasmaPhase);
+      const ProblemDomain&         domain = (this->m_amr)->getDomains()[lvl];
+      const RealVect               probLo = (this->m_amr)->getProbLo();
+      const Real                   dx     = (this->m_amr)->getDx()[lvl];
 
       auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
@@ -1777,7 +1788,53 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
                                                : RealVect::Zero;
 
           // The total explicit displacement: the stochastic hop plus the lagged grad(D) drift.
-          const RealVect disp = hop + a_dt * gradD;
+          RealVect disp = hop + a_dt * gradD;
+
+          // PROTOTYPE -- TEMPORARY. Refuse a displacement that crosses the embedded boundary or leaves the domain.
+          //
+          // The random walk here has NO reflecting boundary, and that makes a zero-mean hop systematic: a particle
+          // in the fluid can hop into the solid, but a particle in the solid can never hop back out, because there
+          // are none there. Symmetric steps, asymmetric geometry -- so the near-wall fluid drains every step. There
+          // is also no length limiter; normal_max truncates the GAUSSIAN at 5 sigma, not the hop at some number of
+          // cells, so excursions of several cells are routine and can cross the boundary outright.
+          //
+          // Cancelling is the diagnostic, not the fix. It leaves the particle where it was rather than where a
+          // reflected walk would put it, which piles density up slightly at the pre-hop position. The correct form
+          // is reflection -- a particle that would land at depth d inside comes back to depth d outside -- which is
+          // the particle-level statement of the same even extension the mirror applies at deposition. Cancel first
+          // to confirm the channel, then reflect.
+          //
+          // This sits ABOVE the scratch write on purpose, so it applies to the REAL particle and not only to the
+          // rho^dagger copy. Applying it to rho^dagger alone changes nothing, which is how we know the channel is
+          // the real hop: rho^dagger is rebuilt from scratch every step and cannot accumulate anything.
+          {
+            const RealVect newPos = pos + disp;
+
+            bool reject = false;
+
+            // Sign CHANGE, not sign, so this needs no assumption about which side the implicit function calls
+            // positive -- the old position is known to be in the fluid because the particle is there now.
+            if (!baseif.isNull()) {
+              const Real fOld = baseif->value(pos);
+              const Real fNew = baseif->value(newPos);
+
+              if (fOld * fNew < 0.0) {
+                reject = true;
+              }
+            }
+
+            if (!domain.contains(ParticleOps::getParticleCellIndex(newPos, probLo, dx))) {
+              reject = true;
+            }
+
+            numTotalHops++;
+
+            if (reject) {
+              disp = RealVect::Zero;
+
+              numCancelledHops++;
+            }
+          }
 
           D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(disp[0]),
                  leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(disp[1]),
@@ -1789,6 +1846,16 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
         }
       }
     }
+  }
+
+  // PROTOTYPE -- TEMPORARY. Reduced unconditionally: these are collectives and the condition below is not one.
+  numCancelledHops = ParallelOps::sum(numCancelledHops);
+  numTotalHops     = ParallelOps::sum(numTotalHops);
+
+  if (this->m_verbosity > 5 && numTotalHops > 0) {
+    pout() << this->m_name + "::diffuseParticlesEulerMaruyama - cancelled " << numCancelledHops << " of "
+           << numTotalHops << " explicit particle displacements (" << (100.0 * numCancelledHops) / numTotalHops
+           << "%) that would have crossed into the EB or left the domain" << endl;
   }
 }
 
