@@ -1575,10 +1575,11 @@ protected:
    * that aborts partway cannot leak images into the next deposit. Holds no identity: ParticleSoA::append(pos,
    * weight) leaves the metadata columns invalid, nothing in remap() reads them, and an image is not a particle
    * anyone can refer to.
-   * @note Allocated per solver here rather than shared on the realm. That is a deliberate simplification of
-   * IMPLEMENTATION.md section 3.1, which puts it on PhaseRealm so every solver on a (realm, phase) shares one
-   * container. Sharing needs the section 3.2 plumbing hop and an in-flight assertion to stay safe; owning one per
-   * solver needs neither, at the cost of one container per species.
+   * @note Allocated per solver here rather than shared on the realm. Sharing one container across every solver on a
+   * (realm, phase) would need it to live on PhaseRealm, which in turn needs the realm name, minimum block size,
+   * level tiles and valid cells that ParticleContainer::define takes and PhaseRealm does not hold -- plus an
+   * in-flight assertion, because a shared mutable scratch is only safe while solvers deposit serially. Owning one
+   * per solver needs none of that, at the cost of one container per species.
    */
   mutable ParticleContainer<NoPayload> m_mirrorImages;
 

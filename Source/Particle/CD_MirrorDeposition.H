@@ -27,12 +27,13 @@
  * solvers hold n. The mirror removes that by depositing each particle's cloud AND the cloud of its image reflected
  * across the boundary. This namespace holds the per-particle arithmetic for that reflection -- the local quadratic
  * surface patch, the image position, and the Jacobian that reweights it -- with no mesh and no I/O, so that it can be
- * unit tested directly against the prototype harnesses in Prototypes/MirrorDeposition.
+ * unit tested directly.
  * @details The surface patch is stored per band cell as (status, x_c, n_c, S_c), where S_c is the shape operator
  * lifted into WORLD coordinates. Storing it frame-free is deliberate: a 2x2 shape operator "in the tangent frame"
  * only means something together with the frame it was fitted in, and a mismatch between the fitting frame and the
  * using frame moves the image by up to 2.24 dx while leaving tr S, det S, the Jacobian and any mass check exactly
- * right -- an error invisible to every check the scheme has. See Prototypes/MirrorDeposition/mirror_frame.py.
+ * right -- an error invisible to every check the scheme has. Exec/Tests/ItoDiffusion/MirrorSurfaceData asserts
+ * |S_c n_c| = 0, which is the invariant a mismatched frame breaks and nothing else does.
  */
 namespace MirrorDeposition {
 
@@ -232,7 +233,7 @@ jacobian(const Real a_twoH, const Real a_K, const Real a_d, Real& a_denominator)
  * the components rather than pass a pointer into it. A BaseFab stores the component index last -- all cells of
  * component 0, then all cells of component 1 -- so &fab(iv, 0) walks into the NEXT CELL, not the next component.
  * @note a_signedDistance is reported rather than acted on here, because it is the CALLER's admission test: a
- * particle at d <= 0 sits on or inside the solid and must not be reflected at all (PLAN.md section 1.2). Returning
+ * particle at d <= 0 sits on or inside the solid and must not be reflected at all. Returning
  * it keeps that arithmetic in one place -- a caller that recomputed d from the components would be duplicating the
  * patch evaluation, and the two copies would have to agree exactly forever.
  */
