@@ -428,9 +428,9 @@ public:
   void
   mirrorPass(EBAMRCellData&                      a_phi,
              const ParticleContainer<P, Traits>& a_particles,
-             DepositionType                      a_deposition,
-             CoarseFineDeposition                a_coarseFineDeposition,
-             Strength                            a_strength) const;
+             const DepositionType                a_deposition,
+             const CoarseFineDeposition          a_coarseFineDeposition,
+             const Strength                      a_strength) const;
 
   /**
    * @brief Remove particles that are inside the EB.

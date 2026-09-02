@@ -177,7 +177,7 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
                       const ParticleContainer<P, Traits>& a_particles,
                       const DepositionType                a_deposition,
                       const CoarseFineDeposition          a_coarseFineDeposition,
-                      Strength                            a_strength) const
+                      const Strength                      a_strength) const
 {
   CH_TIME("ItoSolver::mirrorPass");
   if (m_verbosity > 5) {
