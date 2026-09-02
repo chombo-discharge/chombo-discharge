@@ -229,6 +229,10 @@ ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
 
     const int nbox = dit.size();
 
+    // Safe to thread over patches: each iteration reads its own surface FAB and particle leaf and appends only to
+    // m_mirrorImages[lvl][din], which is that patch's own container. The counters are reduced rather than shared.
+#pragma omp parallel for schedule(runtime) \
+  reduction(+ : numImages, numNoData, numInside, numSmallDenom, numLargeJac, numNonPositiveJ)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
