@@ -970,6 +970,7 @@ AmrMesh::parseOptions()
   this->parseBrBufferSize();
   this->parseBrFillRatio();
   this->parseRedistributionRadius();
+  this->parseMirrorDeposition();
   ;
   this->parseNumGhostCells();
   this->parseEbGhostCells();
@@ -2841,6 +2842,36 @@ AmrMesh::parseRedistributionRadius()
 }
 
 void
+AmrMesh::parseMirrorDeposition()
+{
+  CH_TIME("AmrMesh::parseMirrorDeposition()");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::parseMirrorDeposition()" << endl;
+  }
+
+  ParmParse pp("AmrMesh");
+
+  pp.get("mirror_band_radius", m_mirrorBandRadius);
+  pp.get("mirror_cond_tol", m_mirrorConditionTolerance);
+  pp.get("mirror_crease_tol", m_mirrorCreaseTolerance);
+  pp.get("mirror_max_jacobian", m_mirrorMaxJacobian);
+  pp.get("mirror_min_denom", m_mirrorMinDenominator);
+
+  if (m_mirrorBandRadius < 1) {
+    MayDay::Error("AmrMesh::parseMirrorDeposition -- 'mirror_band_radius' must be at least 1");
+  }
+  if (m_mirrorConditionTolerance <= 0.0 || m_mirrorCreaseTolerance <= 0.0) {
+    MayDay::Error("AmrMesh::parseMirrorDeposition -- 'mirror_cond_tol' and 'mirror_crease_tol' must be positive");
+  }
+  if (m_mirrorMaxJacobian <= 1.0) {
+    MayDay::Error("AmrMesh::parseMirrorDeposition -- 'mirror_max_jacobian' must exceed one");
+  }
+  if (m_mirrorMinDenominator <= 0.0) {
+    MayDay::Error("AmrMesh::parseMirrorDeposition -- 'mirror_min_denom' must be positive");
+  }
+}
+
+void
 AmrMesh::parseCellCentroidInterpolation()
 {
   CH_TIME("AmrMesh::parseCellCentroidInterpolation()");
@@ -3665,6 +3696,52 @@ AmrMesh::getIrregularCells(const std::string& a_realm, const phase::which_phase 
   return m_realms[a_realm]->getIrregularCells(a_phase);
 }
 
+const EBAMRCellData&
+AmrMesh::getMirrorSurfaceData(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMirrorSurfaceData(string, phase::which_phase)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::getMirrorSurfaceData(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMirrorSurfaceData(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMirrorSurfaceData(a_phase);
+}
+
+const Vector<int>&
+AmrMesh::getMirrorHasCutCells(const std::string& a_realm, const phase::which_phase a_phase) const
+{
+  CH_TIME("AmrMesh::getMirrorHasCutCells(string, phase::which_phase)");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::getMirrorHasCutCells(string, phase::which_phase)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getMirrorHasCutCells(string, phase::which_phase) - could not find realm '" +
+                            a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getMirrorHasCutCells(a_phase);
+}
+
+Real
+AmrMesh::getMirrorMaxJacobian() const
+{
+  return m_mirrorMaxJacobian;
+}
+
+Real
+AmrMesh::getMirrorMinDenominator() const
+{
+  return m_mirrorMinDenominator;
+}
+
 EBAMRParticleMesh&
 AmrMesh::getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const
 {
@@ -3938,6 +4015,9 @@ AmrMesh::defineRealms()
                      m_multigridInterpOrder,
                      m_multigridInterpRadius,
                      m_multigridInterpWeight,
+                     m_mirrorBandRadius,
+                     m_mirrorConditionTolerance,
+                     m_mirrorCreaseTolerance,
                      m_cellCentroidInterpolationType,
                      m_ebCentroidInterpolationType,
                      m_baseif,
@@ -3994,6 +4074,9 @@ AmrMesh::regridRealm(const std::string&         a_realm,
                             m_multigridInterpOrder,
                             m_multigridInterpRadius,
                             m_multigridInterpWeight,
+                            m_mirrorBandRadius,
+                            m_mirrorConditionTolerance,
+                            m_mirrorCreaseTolerance,
                             m_cellCentroidInterpolationType,
                             m_ebCentroidInterpolationType,
                             m_baseif,

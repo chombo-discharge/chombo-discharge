@@ -1398,6 +1398,10 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
         DataOps::setValue(particleScratch, 0.0);
         DataOps::setValue(fluidScratch, 0.0);
 
+        // The cut-cell strategy is a literal here, and must stay one: this deposits onto phase::solid, whose
+        // ebisbox.normal() points into the SOLID. Routing a solver's own setting here would mirror across the
+        // same embedded boundary with the fluid side swapped, pushing particles that were deliberately placed
+        // inside the dielectric back out into the gas. NGP reproduces the historical behaviour exactly.
         (this->m_amr)
           ->depositWeight(particleScratch,
                           this->m_particleRealm,
@@ -1405,7 +1409,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
                           *m_rhoDaggerParticles[solverIt.index()],
                           DepositionType::CIC,
                           CoarseFineDeposition::Halo,
-                          true);
+                          IrregularDeposition::NGP);
 
         (this->m_amr)->copyData(fluidScratch, particleScratch);
 

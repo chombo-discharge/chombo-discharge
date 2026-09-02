@@ -233,7 +233,13 @@ McPhoto::parseDivergenceComputation()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("blend_conservation", m_blendConservation);
+  std::string irrStr;
+  pp.get("deposition_irreg", irrStr);
+  m_irregularDeposition = irregularDepositionFromString(irrStr);
+
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    MayDay::Error("McPhoto::parseOptions - 'deposition_irreg = mirror' is not supported by McPhoto");
+  }
 }
 
 void
@@ -1285,7 +1291,8 @@ McPhoto::dirtySamplePhotons(ParticleContainer<NoPayload>& a_photons,
     }
   }
   else {
-    m_amr->depositWeight(a_phi, m_realm, m_phase, a_photons, m_deposition, m_coarseFineDeposition, false);
+    m_amr
+      ->depositWeight(a_phi, m_realm, m_phase, a_photons, m_deposition, m_coarseFineDeposition, m_irregularDeposition);
     this->depositHybridDivergence(a_phi);
   }
 
@@ -1316,7 +1323,7 @@ McPhoto::depositPhotons(EBAMRCellData&             a_phi,
   CH_assert(a_phi[0]->nComp() == 1);
 
   // a_phi contains only weights, i.e. not divided by kappa.
-  m_amr->depositWeight(a_phi, m_realm, m_phase, a_photons, a_deposition, m_coarseFineDeposition, false);
+  m_amr->depositWeight(a_phi, m_realm, m_phase, a_photons, a_deposition, m_coarseFineDeposition, m_irregularDeposition);
 
   // Blend with the non-conservative divergence, redistribute, average down, and interpolate ghosts.
   this->depositHybridDivergence(a_phi);
@@ -1337,7 +1344,8 @@ McPhoto::depositHybridDivergence(EBAMRCellData& a_phi) const noexcept
   this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
 
   // Redistribute
-  if (m_blendConservation) {
+  if (m_irregularDeposition == IrregularDeposition::Redistribute ||
+      m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
     Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real     scale     = 1.0;
@@ -1370,7 +1378,7 @@ McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData
     pout() << m_name + "::depositNonConservative" << endl;
   }
 
-  if (m_blendConservation) {
+  if (m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
     m_amr->nonConservativeDivergence(a_depositionNC, a_depositionKappaC, m_realm, m_phase);
   }
   else {
@@ -1415,7 +1423,7 @@ McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
         const Real dnc   = divNC(vof, m_comp);
 
         // Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
-        // from other cells. This is why there is a flag m_blendConservation which always
+        // from other cells. This is why there is a RedistributeBlended selector which always
         // gives positive definite results.
         divH(vof, m_comp)   = dc + (1 - kappa) * dnc;           // On output, contains hybrid divergence
         deltaM(vof, m_comp) = (1 - kappa) * (dc - kappa * dnc); // Remember, dc already scaled by kappa.

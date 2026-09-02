@@ -24,6 +24,9 @@
 // Our includes
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
+#include <CD_MirrorDeposition.H>
+#include <CD_ParallelOps.H>
+#include <CD_ParticleOps.H>
 #include <CD_Random.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_NamespaceHeader.H>
@@ -68,13 +71,18 @@ ItoSolver::depositWeight(EBAMRCellData&                      a_phi,
   // Deposit the weight column onto the mesh (resets a_phi internally), then redistribute. Redistribution belongs
   // here because it decides what the valid-cell values are; coarsening and ghost filling are the caller's, see
   // coarsenAndFillGhosts().
-  m_amr->depositWeight(a_phi,
-                       m_realm,
-                       m_phase,
-                       a_particles,
-                       a_deposition,
-                       a_coarseFineDeposition,
-                       m_forceIrregDepositionNGP);
+  m_amr
+    ->depositWeight(a_phi, m_realm, m_phase, a_particles, a_deposition, a_coarseFineDeposition, m_irregularDeposition);
+
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    this->mirrorPass(a_phi,
+                     a_particles,
+                     a_deposition,
+                     a_coarseFineDeposition,
+                     [](const ParticleSoA<P, Traits>& a_leaf, const std::size_t a_index) -> Real {
+                       return a_leaf.weight(a_index);
+                     });
+  }
 
   this->redistributeAMR(a_phi);
 }
@@ -151,10 +159,183 @@ ItoSolver::depositGathered(EBAMRCellData&                        a_phi,
                          a_particles,
                          a_deposition,
                          a_coarseFineDeposition,
-                         m_forceIrregDepositionNGP,
+                         m_irregularDeposition,
                          a_gather);
 
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    this->mirrorPass(a_phi, a_particles, a_deposition, a_coarseFineDeposition, a_gather);
+  }
+
+  // A no-op unless the selector is one of the two redistributing ones, which Mirror is not -- the enum is what makes
+  // that combination unrepresentable rather than merely discouraged.
   this->redistributeAMR(a_phi);
+}
+
+template <typename P, typename Traits, typename Strength>
+void
+ItoSolver::mirrorPass(EBAMRCellData&                      a_phi,
+                      const ParticleContainer<P, Traits>& a_particles,
+                      const DepositionType                a_deposition,
+                      const CoarseFineDeposition          a_coarseFineDeposition,
+                      const Strength                      a_strength) const
+{
+  CH_TIME("ItoSolver::mirrorPass");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::mirrorPass" << endl;
+  }
+
+  const Vector<int>& hasCutCells = m_amr->getMirrorHasCutCells(m_realm, m_phase);
+
+  // The early-out has to be a GLOBAL decision, not a per-rank one: remap() below is collective, so a rank that
+  // skipped it while another entered it deadlocks rather than misbehaves. getMirrorHasCutCells is all-reduced at
+  // regrid precisely so this test is safe to make independently on every rank.
+  bool anyCutCells = false;
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    anyCutCells = anyCutCells || (hasCutCells[lvl] != 0);
+  }
+
+  if (!anyCutCells) {
+    return;
+  }
+
+  const EBAMRCellData& surfaceData = m_amr->getMirrorSurfaceData(m_realm, m_phase);
+  const RealVect       probLo      = m_amr->getProbLo();
+  const Real           maxJacobian = m_amr->getMirrorMaxJacobian();
+  const Real           minDenom    = m_amr->getMirrorMinDenominator();
+
+  // Cleared at the START of the pass, so that a pass which aborts partway cannot leak its images into the next
+  // deposit.
+  m_mirrorImages.clearParticles();
+
+  // Diagnostics. Counted unconditionally because it is a handful of increments, but reduced and printed only when
+  // asked for: the reduction is a collective and this pass runs on every deposit of every species, so doing it
+  // always would put a global synchronization in the hot path. m_verbosity is parsed from the same input on every
+  // rank, so gating a collective on it is safe.
+  //
+  // These matter more than they look. A refused image still deposits, with J = 1, which is the FLAT mirror -- and a
+  // flat mirror on a curved surface is biased, not neutral. So a run whose images are nearly all refused has quietly
+  // degraded to a worse model rather than failed, and without these counters it looks identical to a healthy one.
+  long long numImages       = 0;
+  long long numNoData       = 0;
+  long long numInside       = 0;
+  long long numSmallDenom   = 0;
+  long long numLargeJac     = 0;
+  long long numNonPositiveJ = 0;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+    const Real               dx  = m_amr->getDx()[lvl];
+
+    const int nbox = dit.size();
+
+    // Safe to thread over patches: each iteration reads its own surface FAB and particle leaf and appends only to
+    // m_mirrorImages[lvl][din], which is that patch's own container. The counters are reduced rather than shared.
+#pragma omp parallel for schedule(runtime) \
+  reduction(+ : numImages, numNoData, numInside, numSmallDenom, numLargeJac, numNonPositiveJ)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBCellFAB&     surf    = (*surfaceData[lvl])[din];
+      const BaseFab<Real>& surfReg = surf.getSingleValuedFAB();
+
+      const ParticleSoA<P, Traits>& leaf   = a_particles[lvl][din];
+      ParticleSoA<NoPayload>&       images = m_mirrorImages[lvl][din];
+
+      const std::size_t numParticles = leaf.size();
+
+      for (std::size_t i = 0; i < numParticles; i++) {
+        const RealVect pos = leaf.position(i);
+        const IntVect  iv  = ParticleOps::getParticleCellIndex(pos, probLo, dx);
+
+        // Outside the band the surface data was never written, and a particle there has nothing to reflect across.
+        if (surfReg(iv, MirrorDeposition::compStatus) < 0.5) {
+          numNoData++;
+
+          continue;
+        }
+
+        // reflect() takes a contiguous array. A BaseFab stores the component index LAST, so &surfReg(iv, 0) would
+        // walk into the next cell rather than the next component.
+        Real surfaceComponents[MirrorDeposition::numComp];
+        for (int c = 0; c < MirrorDeposition::numComp; c++) {
+          surfaceComponents[c] = surfReg(iv, c);
+        }
+
+        RealVect                  image;
+        Real                      jacobian = 1.0;
+        Real                      d        = 0.0;
+        MirrorDeposition::Refusal refusal  = MirrorDeposition::Refusal::None;
+
+        // A refused image is still deposited, with J = 1. Dropping it would remove the correction in exactly the
+        // cells where the correction is largest.
+        MirrorDeposition::reflect(pos, surfaceComponents, maxJacobian, minDenom, image, jacobian, d, refusal);
+
+        switch (refusal) {
+        case MirrorDeposition::Refusal::SmallDenominator: {
+          numSmallDenom++;
+
+          break;
+        }
+        case MirrorDeposition::Refusal::LargeJacobian: {
+          numLargeJac++;
+
+          break;
+        }
+        case MirrorDeposition::Refusal::NonPositiveJacobian: {
+          numNonPositiveJ++;
+
+          break;
+        }
+        case MirrorDeposition::Refusal::None: {
+          break;
+        }
+        }
+
+        // A particle at or inside the surface has no image to add: the even extension is defined on the fluid side.
+        if (d <= 0.0) {
+          numInside++;
+
+          continue;
+        }
+
+        numImages++;
+
+        images.append(image, a_strength(leaf, i) * jacobian);
+      }
+    }
+  }
+
+  // The ORDINARY remap. A level-preserving one was evaluated and refuted in both directions -- pinning an image to
+  // the coarse level puts it outside the coarse-fine band where it would simply be discarded.
+  m_mirrorImages.remap();
+
+  // Native, because the images are the cut-cell treatment; asking for another one here would apply it twice.
+  m_amr->depositWeight(m_mirrorScratch,
+                       m_realm,
+                       m_phase,
+                       m_mirrorImages,
+                       a_deposition,
+                       a_coarseFineDeposition,
+                       IrregularDeposition::Native);
+
+  // No covered-cell reset. Every image is inside the solid by construction -- that is what reflection means -- and
+  // the density is only defined where kappa > 0. The deposit's contract is that the field is correct where it is
+  // read.
+  DataOps::incr(a_phi, m_mirrorScratch, 1.0);
+
+  if (m_verbosity > 5) {
+    numImages       = ParallelOps::sum(numImages);
+    numNoData       = ParallelOps::sum(numNoData);
+    numInside       = ParallelOps::sum(numInside);
+    numSmallDenom   = ParallelOps::sum(numSmallDenom);
+    numLargeJac     = ParallelOps::sum(numLargeJac);
+    numNonPositiveJ = ParallelOps::sum(numNonPositiveJ);
+
+    pout() << m_name + "::mirrorPass - " << numImages << " images; skipped " << numNoData << " outside the band, "
+           << numInside << " at d <= 0; refused (J = 1, the FLAT mirror) " << numSmallDenom << " small denominator, "
+           << numLargeJac << " large Jacobian, " << numNonPositiveJ << " non-positive Jacobian" << endl;
+  }
 }
 
 #include <CD_NamespaceFooter.H>

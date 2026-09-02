@@ -60,6 +60,9 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
               const int                                                  a_mgInterpOrder,
               const int                                                  a_mgInterpRadius,
               const int                                                  a_mgInterpWeight,
+              const int                                                  a_mirrorBandRadius,
+              const Real                                                 a_mirrorCondTol,
+              const Real                                                 a_mirrorCreaseTol,
               const CellCentroidInterpolation::Type                      a_centroidInterpType,
               const EBCentroidInterpolation::Type                        a_ebInterpType,
               const std::map<phase::which_phase, RefCountedPtr<BaseIF>>& a_baseif,
@@ -97,6 +100,9 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
                                a_mgInterpOrder,
                                a_mgInterpRadius,
                                a_mgInterpWeight,
+                               a_mirrorBandRadius,
+                               a_mirrorCondTol,
+                               a_mirrorCreaseTol,
                                a_centroidInterpType,
                                a_ebInterpType,
                                m_baseif.at(phase::gas),
@@ -115,6 +121,9 @@ Realm::define(const Vector<DisjointBoxLayout>&                           a_grids
                                  a_mgInterpOrder,
                                  a_mgInterpRadius,
                                  a_mgInterpWeight,
+                                 a_mirrorBandRadius,
+                                 a_mirrorCondTol,
+                                 a_mirrorCreaseTol,
                                  a_centroidInterpType,
                                  a_ebInterpType,
                                  m_baseif.at(phase::solid),
@@ -1798,6 +1807,18 @@ const EBAMRCellData&
 Realm::getIrregularCells(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getIrregularCells();
+}
+
+const EBAMRCellData&
+Realm::getMirrorSurfaceData(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getMirrorSurfaceData();
+}
+
+const Vector<int>&
+Realm::getMirrorHasCutCells(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getMirrorHasCutCells();
 }
 
 const AMRMask&

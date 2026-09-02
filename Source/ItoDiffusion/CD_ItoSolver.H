@@ -27,6 +27,7 @@
 #include <CD_EBIntersection.H>
 #include <CD_CellInfo.H>
 #include <CD_ParticleManagement.H>
+#include <CD_IrregularDeposition.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -401,6 +402,35 @@ public:
                   DepositionType                        a_deposition,
                   CoarseFineDeposition                  a_coarseFineDeposition,
                   Gather                                a_gather) const;
+
+  /**
+   * @brief Add the mirrored contribution of the band particles to an already-deposited field.
+   * @details Deposition divides by dx^D and never by kappa, so a cut cell holds kappa*n where the fluid solvers hold
+   * n. This pass removes that by additionally depositing the cloud of each band particle's image, reflected across
+   * the embedded boundary -- a kernel density estimate of the even extension of the density. Under this option, and
+   * only this one, a cut cell therefore holds n rather than kappa*n.
+   * @details Runs after the real deposit and adds to it. Images are built from the VALID holder only: the halo
+   * coarse-fine cores copy particles into a mask holder, so building from that would produce a second image for the
+   * same particle -- the double count that issue #29 fell into. All three cores restore the valid holder before
+   * returning, so running afterwards is safe; the constraint is which holder, not when.
+   * @param[in,out] a_phi                  Field to add the mirrored contribution to.
+   * @param[in]     a_particles            Particles whose images are deposited.
+   * @param[in]     a_deposition           Deposition kernel, the same one the real deposit used.
+   * @param[in]     a_coarseFineDeposition Coarse-fine strategy, likewise.
+   * @param[in]     a_strength             Per-particle strength: leaf.weight(i) from the depositWeight funnel, the
+   *                                       caller's gatherer from the depositGathered one. Both funnels must call
+   *                                       this, or the mapping silently applies to only some of the solver's fields.
+   * @tparam        P                      Payload type of the container.
+   * @tparam        Traits                 Column descriptor for the payload.
+   * @tparam        Strength               Callable (const ParticleSoA<P, Traits>&, std::size_t) -> Real.
+   */
+  template <typename P, typename Traits, typename Strength>
+  void
+  mirrorPass(EBAMRCellData&                      a_phi,
+             const ParticleContainer<P, Traits>& a_particles,
+             const DepositionType                a_deposition,
+             const CoarseFineDeposition          a_coarseFineDeposition,
+             const Strength                      a_strength) const;
 
   /**
    * @brief Remove particles that are inside the EB.
@@ -1384,9 +1414,11 @@ protected:
   Real m_dt;
 
   /**
-   * @brief NGP deposition in cut cells or not
+   * @brief How the cut cells are treated when depositing.
+   * @details One selector replaces the former irr_ngp_deposition/redistribute/blend_conservation triple; see
+   * CD_IrregularDeposition.H for why these must not be independent flags.
    */
-  bool m_forceIrregDepositionNGP;
+  IrregularDeposition m_irregularDeposition;
 
   /**
    * @brief NGP interpolation in cut cells or not
@@ -1397,16 +1429,6 @@ protected:
    * @brief Force usage of NGP when depositing "halo" particles.
    */
   bool m_forceHaloNGP;
-
-  /**
-   * @brief Use mass redistribution or not.
-   */
-  bool m_useRedistribution;
-
-  /**
-   * @brief Flag for blending the deposition clouds with the "non-conservative" divergence.
-   */
-  bool m_blendConservation;
 
   /**
    * @brief If true, solver is diffusive.
@@ -1546,6 +1568,31 @@ protected:
    * @brief Scratch storage for holding the mass difference when using hybrid deposition
    */
   mutable EBAMRIVData m_massDiff;
+
+  /**
+   * @brief Reflected images of the band particles, for IrregularDeposition::Mirror.
+   * @details Rebuilt from scratch by every mirror pass and cleared at its START rather than its end, so that a pass
+   * that aborts partway cannot leak images into the next deposit. Holds no identity: ParticleSoA::append(pos,
+   * weight) leaves the metadata columns invalid, nothing in remap() reads them, and an image is not a particle
+   * anyone can refer to.
+   * @note Allocated per solver here rather than shared on the realm. Sharing one container across every solver on a
+   * (realm, phase) would need it to live on PhaseRealm, which in turn needs the realm name, minimum block size,
+   * level tiles and valid cells that ParticleContainer::define takes and PhaseRealm does not hold -- plus an
+   * in-flight assertion, because a shared mutable scratch is only safe while solvers deposit serially. Owning one
+   * per solver needs none of that, at the cost of one container per species.
+   */
+  mutable ParticleContainer<NoPayload> m_mirrorImages;
+
+  /**
+   * @brief Mesh scratch the mirror images deposit into, before being added to the real field.
+   * @details One component, because EBAMRParticleMesh::depositWeight asserts on that.
+   * @note The images CANNOT be deposited straight into the solver's field, and the reason is not just that every
+   * AMR deposit opens by zeroing its target. The level exchange is a reversed copier with an add op -- the ghost
+   * region is the source and the owner's valid region the destination -- and nothing writes those ghosts back to
+   * zero afterwards. A second deposit into the same field would fold the first pass's ghost content into the valid
+   * region again, silently double counting in proportion to each patch's ghost share.
+   */
+  mutable EBAMRCellData m_mirrorScratch;
 
   /**
    * @brief Various particle containers with identifiers.
@@ -1836,18 +1883,6 @@ protected:
    */
   void
   parseDiffusionGradient();
-
-  /**
-   * @brief Parse whether or not to use redistribution.
-   */
-  void
-  parseRedistribution();
-
-  /**
-   * @brief Parse whether or not to compute a "non-conservative" divergence when redistributing mass.
-   */
-  void
-  parseDivergenceComputation();
 
   /**
    * @brief Parse checkpointing method

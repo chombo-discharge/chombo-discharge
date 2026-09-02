@@ -40,6 +40,7 @@
 #include <CD_OpenMP.H>
 #include <CD_DepositionType.H>
 #include <CD_CoarseFineDeposition.H>
+#include <CD_IrregularDeposition.H>
 #include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
@@ -69,6 +70,26 @@
  * - <b>Transition</b> -- deposit the coarse-side transition particles on the refined-coarse grid at the
  *                        fine-grid width, distributing the result to both levels.
  * Halo, HaloNGP, and Transition require at least one ghost cell.
+ *
+ * <h3>Cut cells, and what this class does NOT do</h3>
+ * The deposition routines take an @c IrregularDeposition, but this class only implements the part of it that the
+ * leaf kernels can answer: NGP in a cut cell, yes or no. Everything else is the CALLER's responsibility.
+ * - <b>Native</b>, <b>NGP</b> -- handled here. These are the two kernel behaviours.
+ * - <b>Mirror</b> -- NOT handled here. It is a second pass that reflects each band particle across the embedded
+ *                    boundary and deposits the image, so it needs an image container, a scratch field and a
+ *                    collective remap, none of which this class owns. See @c ItoSolver::mirrorPass.
+ * - <b>Redistribute</b>, <b>RedistributeBlended</b> -- NOT handled here. They act on the field AFTER the deposit.
+ *                    See @c ItoSolver::redistributeAMR and @c McPhoto::depositHybridDivergence.
+ *
+ * The consequence is worth stating plainly, because it is silent: passing @c Mirror or @c Redistribute to a
+ * deposition routine here and then omitting the caller's half produces @c Native behaviour, with no error and no
+ * diagnostic. The run completes and the output is bit-for-bit what @c Native would have given. A caller that selects
+ * one of those values owns the rest of its meaning.
+ *
+ * This split is deliberate but not ideal -- the enum is named in one place and interpreted in three, so there is no
+ * single source of truth for what a selector means. Centralizing the mirror and the redistribution here is the
+ * natural end state; it needs @c ParticleContainer::define's minimum block size, level tiles, valid cells and realm
+ * name, which this class is not currently given.
  */
 class EBAMRParticleMesh
 {
@@ -244,7 +265,7 @@ public:
    * @param[in]     a_particles            Particles to deposit.
    * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
    * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
-   * @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+   * @param[in]     a_irregularDeposition        Cut-cell deposition strategy.
    */
   template <typename P, typename Traits>
   void
@@ -252,19 +273,24 @@ public:
                 const ParticleContainer<P, Traits>& a_particles,
                 const DepositionType                a_depositionType,
                 const CoarseFineDeposition          a_coarseFineDeposition,
-                const bool                          a_forceIrregNGP)
+                const IrregularDeposition           a_irregularDeposition)
   {
     CH_TIME("EBAMRParticleMesh::depositWeight");
 
     CH_assert(m_isDefined);
 
+    // The leaf kernels answer one question -- NGP in a cut cell, yes or no -- so the selector collapses to a bool
+    // here. Mirror and Redistribute leave the kernel alone and are the CALLER's responsibility; see the class
+    // documentation for why that is silent when the caller forgets.
+    const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
+
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
-        a_interp.depositWeight(a_rho, a_soa, a_depositionType, a_widthScale, a_forceIrregNGP);
+        a_interp.depositWeight(a_rho, a_soa, a_depositionType, a_widthScale, forceIrregNGP);
       };
     const auto patchNGP =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
-        a_interp.depositWeight(a_rho, a_soa, DepositionType::NGP, a_widthScale, a_forceIrregNGP);
+        a_interp.depositWeight(a_rho, a_soa, DepositionType::NGP, a_widthScale, forceIrregNGP);
       };
 
     switch (a_coarseFineDeposition) {
@@ -308,7 +334,7 @@ public:
    * @param[in]     a_particles            Particles to deposit.
    * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
    * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
-   * @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+   * @param[in]     a_irregularDeposition        Cut-cell deposition strategy.
    * @param[in]     a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
    */
   template <typename P, typename Traits, typename CellGather>
@@ -317,12 +343,15 @@ public:
                   const ParticleContainer<P, Traits>& a_particles,
                   const DepositionType                a_depositionType,
                   const CoarseFineDeposition          a_coarseFineDeposition,
-                  const bool                          a_forceIrregNGP,
+                  const IrregularDeposition           a_irregularDeposition,
                   CellGather                          a_cellGather)
   {
     CH_TIME("EBAMRParticleMesh::depositGathered");
 
     CH_assert(m_isDefined);
+
+    // See depositWeight for why the selector collapses to a bool here.
+    const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
 
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
@@ -331,7 +360,7 @@ public:
                                  a_soa,
                                  a_depositionType,
                                  a_widthScale,
-                                 a_forceIrregNGP,
+                                 forceIrregNGP,
                                  [&](const std::size_t a_i, Real* a_out) {
                                    a_out[0] = a_cellGather(a_soa, a_i);
                                  });
@@ -343,7 +372,7 @@ public:
                                  a_soa,
                                  DepositionType::NGP,
                                  a_widthScale,
-                                 a_forceIrregNGP,
+                                 forceIrregNGP,
                                  [&](const std::size_t a_i, Real* a_out) {
                                    a_out[0] = a_cellGather(a_soa, a_i);
                                  });
@@ -388,7 +417,7 @@ public:
    * @param[in]     a_particles            Particles to deposit.
    * @param[in]     a_depositionType       Deposition kernel (NGP/CIC/TSC).
    * @param[in]     a_coarseFineDeposition Coarse-fine handling (Interp / Halo / HaloNGP / Transition).
-   * @param[in]     a_forceIrregNGP        Force NGP in cut cells.
+   * @param[in]     a_irregularDeposition        Cut-cell deposition strategy.
    */
   template <auto... Members, typename P, typename Traits>
   void
@@ -396,19 +425,22 @@ public:
           const ParticleContainer<P, Traits>& a_particles,
           const DepositionType                a_depositionType,
           const CoarseFineDeposition          a_coarseFineDeposition,
-          const bool                          a_forceIrregNGP)
+          const IrregularDeposition           a_irregularDeposition)
   {
     CH_TIME("EBAMRParticleMesh::deposit");
 
     CH_assert(m_isDefined);
 
+    // See depositWeight for why the selector collapses to a bool here.
+    const bool forceIrregNGP = (a_irregularDeposition == IrregularDeposition::NGP);
+
     const auto patch =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
-        a_interp.template deposit<Members...>(a_rho, a_soa, a_depositionType, a_widthScale, a_forceIrregNGP);
+        a_interp.template deposit<Members...>(a_rho, a_soa, a_depositionType, a_widthScale, forceIrregNGP);
       };
     const auto patchNGP =
       [&](const EBParticleMesh& a_interp, EBCellFAB& a_rho, const auto& a_soa, const Real a_widthScale) {
-        a_interp.template deposit<Members...>(a_rho, a_soa, DepositionType::NGP, a_widthScale, a_forceIrregNGP);
+        a_interp.template deposit<Members...>(a_rho, a_soa, DepositionType::NGP, a_widthScale, forceIrregNGP);
       };
 
     switch (a_coarseFineDeposition) {

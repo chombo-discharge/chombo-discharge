@@ -126,8 +126,6 @@ ItoSolver::parseOptions()
   this->parsePlotVariables();
   this->parseDeposition();
   this->parseIntersectionEB();
-  this->parseRedistribution();
-  this->parseDivergenceComputation();
   this->parseCheckpointing();
   this->parseParticleMerger();
 }
@@ -145,8 +143,6 @@ ItoSolver::parseRuntimeOptions()
   this->parseTruncation();
   this->parseDeposition();
   this->parseIntersectionEB();
-  this->parseRedistribution();
-  this->parseDivergenceComputation();
   this->parseCheckpointing();
   this->parseParticleMerger();
 }
@@ -338,8 +334,21 @@ ItoSolver::parseDeposition()
     MayDay::Abort("ItoSolver::parseDeposition - unknown interpolation method for mobility");
   }
 
-  pp.get("irr_ngp_deposition", m_forceIrregDepositionNGP);
+  pp.get("deposition_irreg", str);
+  m_irregularDeposition = irregularDepositionFromString(str);
+
   pp.get("irr_ngp_interp", m_forceIrregInterpolationNGP);
+
+  // Both keys are options of this solver, parsed a few lines apart, which is why the check belongs here: it is the
+  // only place that can name them both. An NGP kernel puts the whole cloud in the particle's own cell, so an image
+  // deposited in that same cell simply doubles it.
+  if (m_deposition == DepositionType::NGP && m_irregularDeposition == IrregularDeposition::Mirror) {
+    MayDay::Error(("ItoSolver::parseDeposition - '" + m_className + ".deposition = ngp' is incompatible with '" +
+                   m_className +
+                   ".deposition_irreg = mirror'; NGP puts the whole cloud in the particle's own cell, so an "
+                   "image in the same cell doubles it.")
+                    .c_str());
+  }
 }
 
 void
@@ -366,32 +375,6 @@ ItoSolver::parseIntersectionEB()
   else {
     MayDay::Error("ItoSolver::parseIntersectionEB -- logic bust");
   }
-}
-
-void
-ItoSolver::parseRedistribution()
-{
-  CH_TIME("ItoSolver::parseRedistribution");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseRedistribution" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-
-  pp.get("redistribute", m_useRedistribution);
-}
-
-void
-ItoSolver::parseDivergenceComputation()
-{
-  CH_TIME("ItoSolver::parseDivergenceComputation");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseDivergenceComputation" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-
-  pp.get("blend_conservation", m_blendConservation);
 }
 
 void
@@ -620,8 +603,14 @@ ItoSolver::registerOperators() const
     // computeDiffusionGradient() differentiates the mesh diffusion field through this operator. PhaseRealm
     // registers it by default, but the dependency is real, so make it explicit rather than inherited.
     m_amr->registerOperator(s_eb_gradient, m_realm, m_phase);
-    if (m_useRedistribution) {
+    if (m_irregularDeposition == IrregularDeposition::Redistribute ||
+        m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
+    }
+
+    // Without this the realm never builds the surface data and the mirror pass would read an empty field.
+    if (m_irregularDeposition == IrregularDeposition::Mirror) {
+      m_amr->registerOperator(s_mirror_deposition, m_realm, m_phase);
     }
 
     // nn_pair_tree/nn_pair_hash both read a particle ghost halo as merge candidates (see
@@ -1126,6 +1115,15 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
 
+  // For mirrored cut-cell deposition. Both are rebuilt from scratch by every pass, so unlike the solver's particle
+  // containers they are simply reallocated here rather than remapped -- there is no state in them to carry across a
+  // regrid. The image container must be redefined at every regrid regardless, because remap() reads the level tiles
+  // and valid cells that the regrid rebuilds.
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    m_amr->allocate(m_mirrorScratch, m_realm, m_phase, ncomp);
+    m_amr->allocate(m_mirrorImages, m_realm);
+  }
+
   // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
   // ghost cell -- the shape those functions document.
   m_amr->allocate(m_kdMergeCellHistogram, m_realm, 1, 1);
@@ -1237,6 +1235,15 @@ ItoSolver::allocate()
   // For "redistributed" particle deposition
   m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
   m_amr->allocate(m_massDiff, m_realm, m_phase, ncomp);
+
+  // For mirrored cut-cell deposition. Both are rebuilt from scratch by every pass, so unlike the solver's particle
+  // containers they are simply reallocated here rather than remapped -- there is no state in them to carry across a
+  // regrid. The image container must be redefined at every regrid regardless, because remap() reads the level tiles
+  // and valid cells that the regrid rebuilds.
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    m_amr->allocate(m_mirrorScratch, m_realm, m_phase, ncomp);
+    m_amr->allocate(m_mirrorImages, m_realm);
+  }
 
   // Per-cell scratch for the kd merges (see ParticleManagement::mergeKDCarve). One component, one
   // ghost cell -- the shape those functions document.
@@ -2208,7 +2215,8 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
   //       is not strictly non-negative.
   // clang-format on
 
-  if (m_useRedistribution) {
+  if (m_irregularDeposition == IrregularDeposition::Redistribute ||
+      m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
     this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass difference
 
@@ -2240,7 +2248,7 @@ ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellDa
     pout() << m_name + "::depositNonConservative" << endl;
   }
 
-  if (m_blendConservation) {
+  if (m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
     m_amr->nonConservativeDivergence(a_depositionNC, a_depositionKappaC, m_realm, m_phase);
   }
   else {
@@ -2286,7 +2294,7 @@ ItoSolver::depositHybrid(EBAMRCellData&     a_depositionH,
         const Real dnc   = divNC(vof, m_comp);
 
         // Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
-        // from other cells. This is why there is a flag m_blendConservation which always
+        // from other cells. This is why there is a RedistributeBlended selector which always
         // gives positive definite results.
         divH(vof, m_comp)   = dc + (1.0 - kappa) * dnc;         // On output, contains hybrid divergence
         deltaM(vof, m_comp) = (1 - kappa) * (dc - kappa * dnc); // Remember, dc already scaled by kappa.

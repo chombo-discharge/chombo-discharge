@@ -32,6 +32,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_Realm.H>
 #include <CD_ParticleGhostMask.H>
+#include <CD_IrregularDeposition.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
@@ -982,7 +983,7 @@ public:
    * @param[in]  a_particles            SoA particle container.
    * @param[in]  a_depositionType       Deposition kernel (e.g. CIC).
    * @param[in]  a_coarseFineDeposition Coarse-fine handling.
-   * @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+   * @param[in]  a_irregularDeposition        Cut-cell deposition strategy.
    * @tparam P      Payload type of the container.
    * @tparam Traits Column descriptor for the payload.
    */
@@ -994,7 +995,7 @@ public:
                 const ParticleContainer<P, Traits>& a_particles,
                 const DepositionType                a_depositionType,
                 const CoarseFineDeposition          a_coarseFineDeposition,
-                const bool                          a_forceIrregNGP);
+                const IrregularDeposition           a_irregularDeposition);
 
   /**
    * @brief Deposit a custom per-particle scalar (a_cellGather) of an SoA container on the mesh.
@@ -1006,7 +1007,7 @@ public:
    * @param[in]  a_particles            SoA particle container.
    * @param[in]  a_depositionType       Deposition kernel (e.g. CIC).
    * @param[in]  a_coarseFineDeposition Coarse-fine handling.
-   * @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+   * @param[in]  a_irregularDeposition        Cut-cell deposition strategy.
    * @param[in]  a_cellGather           Per-particle value gatherer (leaf, index) -> Real.
    * @tparam P          Payload type of the container.
    * @tparam Traits     Column descriptor for the payload.
@@ -1020,7 +1021,7 @@ public:
                   const ParticleContainer<P, Traits>& a_particles,
                   const DepositionType                a_depositionType,
                   const CoarseFineDeposition          a_coarseFineDeposition,
-                  const bool                          a_forceIrregNGP,
+                  const IrregularDeposition           a_irregularDeposition,
                   CellGather                          a_cellGather);
 
   /**
@@ -1033,7 +1034,7 @@ public:
    * @param[in]  a_particles            SoA particle container.
    * @param[in]  a_depositionType       Deposition kernel.
    * @param[in]  a_coarseFineDeposition Coarse-fine handling.
-   * @param[in]  a_forceIrregNGP        Force NGP deposition in cut cells.
+   * @param[in]  a_irregularDeposition        Cut-cell deposition strategy.
    * @tparam Members Pack of payload data-member pointers selecting the column(s).
    * @tparam P       Payload type (deduced).
    * @tparam Traits  Column descriptor (deduced).
@@ -1046,7 +1047,7 @@ public:
                    const ParticleContainer<P, Traits>& a_particles,
                    const DepositionType                a_depositionType,
                    const CoarseFineDeposition          a_coarseFineDeposition,
-                   const bool                          a_forceIrregNGP);
+                   const IrregularDeposition           a_irregularDeposition);
 
   /**
    * @brief Interpolate a mesh scalar field onto the SoA container's weight column.
@@ -2043,6 +2044,42 @@ public:
   getIrregularCells(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Get the per-band-cell surface data used by mirrored deposition, for a Realm and phase.
+   * @details Empty unless the s_mirror_deposition operator was registered on that realm and phase. The component
+   * layout is in CD_MirrorDeposition.H.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return Mirror surface data
+   */
+  const EBAMRCellData&
+  getMirrorSurfaceData(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get, per level, whether that level has any cut cell anywhere in the domain.
+   * @details All-reduced, so every rank sees the same answer -- which the mirror pass requires, because it early-outs
+   * on this and contains a collective.
+   * @param[in] a_realm Realm name
+   * @param[in] a_phase Phase (gas or solid)
+   * @return Per-level cut-cell presence
+   */
+  const Vector<int>&
+  getMirrorHasCutCells(const std::string& a_realm, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Get the largest Jacobian magnitude the mirror pass will trust.
+   * @return AmrMesh.mirror_max_jacobian
+   */
+  Real
+  getMirrorMaxJacobian() const;
+
+  /**
+   * @brief Get the smallest Jacobian denominator the mirror pass will trust.
+   * @return AmrMesh.mirror_min_denom
+   */
+  Real
+  getMirrorMinDenominator() const;
+
+  /**
    * @brief Get EBAMRParticleMesh operator
    * @param[in] a_realm Realm name
    * @param[in] a_phase Phase (gas or solid)
@@ -2331,6 +2368,42 @@ protected:
   int m_redistributionRadius;
 
   /**
+   * @brief Mirror deposition: half-width, in cells, of the band around the embedded boundary that reflects.
+   * @details Bounded on both sides: it must not exceed num_ghost (the exchange has to deliver the cut-cell data it
+   * reads), and AmrMesh::sanityCheck separately requires num_ghost < min_block_size.
+   */
+  int m_mirrorBandRadius;
+
+  /**
+   * @brief Mirror deposition: smallest permitted eigenvalue ratio of U^T U in the shape-operator fit.
+   * @details Rejects a neighbourhood whose usable cut cells are nearly collinear in the tangent plane -- a ridge, a
+   * fin, or a cylinder whose cut cells run along its axis. The neighbour count alone is necessary but not sufficient.
+   */
+  Real m_mirrorConditionTolerance;
+
+  /**
+   * @brief Mirror deposition: largest permitted dimensionless residual of the shape-operator fit.
+   * @details A crease detector. A sphere union, a facet edge or a dielectric corner is not a quadratic patch, and the
+   * residual is what says so.
+   */
+  Real m_mirrorCreaseTolerance;
+
+  /**
+   * @brief Mirror deposition: largest Jacobian magnitude that will be trusted.
+   * @details Sized from a measurement rather than a round number: a concave cavity of radius 3*dx legitimately
+   * produces J = 28.9 under CIC and J = 483.8 under TSC, so a cap below ~10^3 would discard real images in a geometry
+   * this tree ships.
+   */
+  Real m_mirrorMaxJacobian;
+
+  /**
+   * @brief Mirror deposition: smallest Jacobian denominator that will be trusted.
+   * @details The same measurement from the other side; the TSC cavity above runs at a denominator of 4.1E-3, so a
+   * floor above ~1E-3 would discard real images.
+   */
+  Real m_mirrorMinDenominator;
+
+  /**
    * @brief Has grids or not
    */
   bool m_hasGrids;
@@ -2480,6 +2553,12 @@ protected:
    */
   void
   parseRedistributionRadius();
+
+  /**
+   * @brief Parse the mirror-deposition band radius and fit/guard tolerances.
+   */
+  void
+  parseMirrorDeposition();
 
   /**
    * @brief Parse centroid interpolation stencils
