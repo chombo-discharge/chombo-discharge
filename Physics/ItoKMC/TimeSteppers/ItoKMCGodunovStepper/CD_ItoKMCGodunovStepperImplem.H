@@ -190,6 +190,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseOptions() noexcept
   this->parseCheckpointParticles();
   this->parseSecondaryEmissionSpecification();
   this->parseDiffusiveDeposit();
+  this->parseRhoDaggerHop();
   this->parseReactiveFieldCentering();
 }
 
@@ -209,6 +210,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   this->parseCheckpointParticles();
   this->parseSecondaryEmissionSpecification();
   this->parseDiffusiveDeposit();
+  this->parseRhoDaggerHop();
   this->parseReactiveFieldCentering();
 }
 
@@ -428,6 +430,20 @@ ItoKMCGodunovStepper<I, C, R, F>::parseDiffusiveDeposit() noexcept
 
     MayDay::Abort(err.c_str());
   }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::parseRhoDaggerHop() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::parseRhoDaggerHop");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseRhoDaggerHop" << endl;
+  }
+
+  ParmParse pp(this->m_name.c_str());
+
+  pp.get("rho_dagger_hop", m_rhoDaggerHop);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1938,7 +1954,11 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
                  leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(disp[2]));
 
           if (Z != 0) {
-            pointParticles.append(pos + disp, weight);
+            // The hop can be left out of rho^dagger while the particle still takes it below. The grad(D) drift is
+            // never left out: it is deterministic mean transport that the explicit half is meant to account for.
+            const RealVect rhoDaggerDisp = m_rhoDaggerHop ? disp : a_dt * gradD;
+
+            pointParticles.append(pos + rhoDaggerDisp, weight);
           }
         }
       }

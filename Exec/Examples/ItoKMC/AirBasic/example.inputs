@@ -283,6 +283,7 @@ ItoKMCGodunovStepper.max_growth_dt                            = 1.2             
 ItoKMCGodunovStepper.max_shrink_dt                            = 1.2                ## Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.diffusive_deposit                        = reflect            ## Diffusion hop that crosses the EB: 'inside', 'cancel' or 'reflect'
+ItoKMCGodunovStepper.rho_dagger_hop                           = true               ## Include the stochastic diffusion hop in rho^dagger (grad(D) always is)
 ItoKMCGodunovStepper.cond_filter_num                          = 0                  ## Number of filterings for conductivity
 ItoKMCGodunovStepper.cond_filter_max_stride                   = 1                  ## Maximum stride for filter
 ItoKMCGodunovStepper.cond_filter_alpha                        = 0.5                ## Filtering factor (0.5 is a bilinear filter)

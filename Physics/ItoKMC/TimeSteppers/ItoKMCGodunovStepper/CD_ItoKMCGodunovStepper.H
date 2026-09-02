@@ -185,6 +185,16 @@ protected:
   DiffusiveDeposit m_diffusiveDeposit;
 
   /**
+   * @brief If true, the stochastic diffusion hop enters rho^dagger along with the rest of the explicit displacement.
+   * @details The hop has zero mean, so to leading order dropping it shifts the source of the semi-implicit Poisson
+   * equation by dt*D*grad^2(n): the field no longer sees the charge spread over the step, which matters most where
+   * diffusion competes with drift. What it buys is a quieter rho^dagger, since the deposited source no longer
+   * carries the hop's shot noise. The lagged grad(D) drift is unaffected either way -- it is deterministic mean
+   * transport and always enters rho^dagger.
+   */
+  bool m_rhoDaggerHop;
+
+  /**
    * @brief If true, then the HDF5 checkpoint file contained particles that we can read.
    */
   bool m_readCheckpointParticles;
@@ -349,6 +359,12 @@ protected:
    */
   virtual void
   parseDiffusiveDeposit() noexcept;
+
+  /**
+   * @brief Parse whether the stochastic diffusion hop enters rho^dagger.
+   */
+  virtual void
+  parseRhoDaggerHop() noexcept;
 
   /**
    * @brief Reflect a diffusion hop that crosses the embedded boundary back into the fluid.
