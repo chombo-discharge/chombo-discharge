@@ -519,6 +519,17 @@ ItoSolver::getIntersectionAlgorithm() const noexcept
   return m_intersectionAlg;
 }
 
+Real
+ItoSolver::getBisectionStep() const noexcept
+{
+  CH_TIME("ItoSolver::getBisectionStep");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getBisectionStep" << endl;
+  }
+
+  return m_bisectionStep;
+}
+
 const Vector<int>&
 ItoSolver::getParticlesPerCell() const noexcept
 {

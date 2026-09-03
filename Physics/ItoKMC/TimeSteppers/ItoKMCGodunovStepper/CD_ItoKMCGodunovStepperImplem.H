@@ -60,7 +60,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
-  m_diffusiveDeposit               = DiffusiveDeposit::Inside;
+  this->m_diffusiveDeposit         = DiffusiveDeposit::Inside;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
   this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
@@ -322,16 +322,24 @@ ItoKMCGodunovStepper<I, C, R, F>::parseSecondaryEmissionSpecification() noexcept
 
 template <typename I, typename C, typename R, typename F>
 RealVect
-ItoKMCGodunovStepper<I, C, R, F>::reflectDiffusionHop(const RealVect& a_pos,
-                                                      const RealVect& a_disp,
-                                                      const Real      a_fOld,
-                                                      const Real      a_dx) const noexcept
+ItoKMCGodunovStepper<I, C, R, F>::reflectDiffusionHop(const RealVect&      a_pos,
+                                                      const RealVect&      a_disp,
+                                                      const Real           a_fOld,
+                                                      const Real           a_dx,
+                                                      const EBIntersection a_intersectionAlg,
+                                                      const Real           a_bisectStep) const noexcept
 {
-  constexpr int numBisections = 20;
-  constexpr int numAttempts   = 2;
+  // One reflection places the particle in the fluid unless the surface curves back on it, so the second attempt is
+  // for concave corners and thin features. There is no third: the fallback is always available and always safe.
+  constexpr int numAttempts = 2;
+
+  // Ray-cast collision tolerance, relative to dx. Same value the solvers use for their own intersection tests.
+  constexpr Real raycastTolerance = 1.E-3;
 
   const RefCountedPtr<BaseIF>& baseif = (this->m_amr)->getBaseImplicitFunction(this->m_plasmaPhase);
 
+  // Which sign of the implicit function is the fluid, taken from a position known to be in it. Nothing here assumes
+  // which side the implicit function calls positive.
   const Real fluidSign = (a_fOld > 0.0) ? 1.0 : -1.0;
   const Real h         = 1.E-2 * a_dx;
 
@@ -339,39 +347,52 @@ ItoKMCGodunovStepper<I, C, R, F>::reflectDiffusionHop(const RealVect& a_pos,
     return fluidSign * baseif->value(a_x) > 0.0;
   };
 
-  RealVect start = a_pos;
-  RealVect end   = a_pos + a_disp;
+  // The crossing point along [a_pos, a_end], located with whichever algorithm the owning solver was configured with
+  // so that reflection and the absorption test later in the advance agree on where the surface is.
+  const auto findCrossing = [&](const RealVect& a_end, Real& a_s) -> bool {
+    switch (a_intersectionAlg) {
+    case EBIntersection::Bisection: {
+      return ParticleOps::ebIntersectionBisect(baseif, a_pos, a_end, a_bisectStep, a_s);
+    }
+    case EBIntersection::Raycast: {
+      return ParticleOps::ebIntersectionRaycast(baseif, a_pos, a_end, raycastTolerance * a_dx, a_s);
+    }
+    default: {
+      MayDay::Abort("ItoKMCGodunovStepper::reflectDiffusionHop - unsupported EB intersection requested");
+
+      return false;
+    }
+    }
+  };
+
+  RealVect end = a_pos + a_disp;
 
   for (int attempt = 0; attempt < numAttempts; attempt++) {
+    Real s = std::numeric_limits<Real>::max();
 
-    // Bisect for the crossing point. start is in the fluid and end is not, so the bracket is valid by construction.
-    RealVect lo = start;
-    RealVect hi = end;
+    // Always bracketed from a_pos rather than from the previous crossing point. a_pos is in the fluid and the current
+    // end is not, so the bracket is valid on every attempt, and no search is started from a point on the surface --
+    // where both intersection routines would report a crossing at zero path length and reflect about it forever.
+    if (!findCrossing(end, s)) {
 
-    for (int k = 0; k < numBisections; k++) {
-      const RealVect mid = 0.5 * (lo + hi);
-
-      if (inFluid(mid)) {
-        lo = mid;
-      }
-      else {
-        hi = mid;
-      }
+      // No crossing on the segment. Either the reflected point is reachable without one, or the routine could not
+      // resolve the feature that put it inside; the implicit function decides which.
+      return inFluid(end) ? (end - a_pos) : RealVect::Zero;
     }
 
-    const RealVect cross = 0.5 * (lo + hi);
+    const RealVect cross = a_pos + s * (end - a_pos);
 
-    // Surface normal from the gradient of the implicit function.
+    // Surface normal from the gradient of the implicit function at the crossing point.
     RealVect grad = RealVect::Zero;
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      RealVect a = cross;
-      RealVect b = cross;
+      RealVect lo = cross;
+      RealVect hi = cross;
 
-      a[dir] -= h;
-      b[dir] += h;
+      lo[dir] -= h;
+      hi[dir] += h;
 
-      grad[dir] = (baseif->value(b) - baseif->value(a)) / (2.0 * h);
+      grad[dir] = (baseif->value(hi) - baseif->value(lo)) / (2.0 * h);
     }
 
     const Real gradLen = grad.vectorLength();
@@ -382,7 +403,8 @@ ItoKMCGodunovStepper<I, C, R, F>::reflectDiffusionHop(const RealVect& a_pos,
 
     const RealVect n = grad / gradLen;
 
-    // Mirror the overshoot about the surface.
+    // Mirror the part of the path that lies beyond the surface back across it, so a point that would have landed at
+    // depth d inside comes to rest at depth d outside.
     const RealVect overshoot = end - cross;
 
     end = cross + overshoot - 2.0 * overshoot.dotProduct(n) * n;
@@ -390,10 +412,6 @@ ItoKMCGodunovStepper<I, C, R, F>::reflectDiffusionHop(const RealVect& a_pos,
     if (inFluid(end)) {
       return end - a_pos;
     }
-
-    // Reflected back into the solid, which happens at a concave corner or in a thin feature. Try once more from the
-    // crossing point, then give up.
-    start = cross;
   }
 
   return RealVect::Zero;
@@ -1847,7 +1865,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
   this->clearPointParticles(a_rhoDaggerParticles, SpeciesSubset::All);
 
   // Diffusion hops that would have crossed the boundary, and were cancelled or reflected instead.
-  long long numCancelledHops = 0;
+  long long numCrossingHops  = 0;
   long long numTotalHops     = 0;
   long long numReflectFailed = 0;
 
@@ -1882,15 +1900,21 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
-      // For the boundary test on the diffusion hop below.
-      const RefCountedPtr<BaseIF>& baseif = (this->m_amr)->getBaseImplicitFunction(this->m_plasmaPhase);
-      const Real                   dx     = (this->m_amr)->getDx()[lvl];
+      // For the boundary test on the diffusion hop below. The intersection algorithm and its path-march length come
+      // from the solver that owns the particles, so that the crossing point reflection mirrors about and the one the
+      // absorption test finds later in the advance are located the same way.
+      const RefCountedPtr<BaseIF>& baseif          = (this->m_amr)->getBaseImplicitFunction(this->m_plasmaPhase);
+      const Real                   dx              = (this->m_amr)->getDx()[lvl];
+      const EBIntersection         intersectionAlg = solver->getIntersectionAlgorithm();
+      const Real                   bisectStep      = solver->getBisectionStep();
+
+      const bool checkEB = (m_diffusiveDeposit != DiffusiveDeposit::Inside) && !baseif.isNull();
 
       auto& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime) reduction(+ : numCancelledHops, numTotalHops, numReflectFailed)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCrossingHops, numTotalHops, numReflectFailed)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
@@ -1904,6 +1928,14 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           solver->interpolateDiffusionGradient(lvl, din);
         }
 
+        // Particles whose hop crossed the boundary, and the implicit function at their pre-hop position. Only the
+        // crossings are carried, which is a small fraction of the leaf even in a box that touches the surface, so
+        // these stay empty -- and unallocated -- for every box away from the geometry.
+        std::vector<std::size_t> crossings;
+        std::vector<Real>        crossingsFOld;
+
+        // First pass: the displacement for every particle, and the cheap test for whether it crossed. Two implicit
+        // function evaluations per particle, no intersection test.
         for (std::size_t i = 0; i < leaf.size(); i++) {
           const Real     weight = leaf.weight(i);
           const RealVect pos    = leaf.position(i);
@@ -1918,47 +1950,77 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
                                                : RealVect::Zero;
 
           // The total explicit displacement: the stochastic hop plus the lagged grad(D) drift.
-          RealVect disp = hop + a_dt * gradD;
+          const RealVect disp = hop + a_dt * gradD;
+
+          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(disp[0]),
+                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(disp[1]),
+                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(disp[2]));
 
           // The stochastic hop has zero mean and should carry no net transport, but the geometry makes it one-way:
           // a particle in the fluid can hop into the solid, and there are none inside to hop back. What to do about
           // that is ItoKMCGodunovStepper.diffusive_deposit. Drift is untouched here -- a particle carried into the
           // boundary by v*dt still intersects and is absorbed later in the advance, which is real transport.
-          if (m_diffusiveDeposit != DiffusiveDeposit::Inside && !baseif.isNull()) {
+          if (checkEB) {
             const Real fOld = baseif->value(pos);
 
             numTotalHops++;
 
             // A sign CHANGE rather than a sign, so this assumes nothing about which side the implicit function
-            // calls positive. pos is known to be in the fluid because the particle is there now.
+            // calls positive. The particle did not cross when f(x_old)*f(x_new) >= 0; carve off the rest. pos is
+            // known to be in the fluid because the particle is there now.
             if (fOld * baseif->value(pos + disp) < 0.0) {
-              numCancelledHops++;
+              crossings.push_back(i);
+              crossingsFOld.push_back(fOld);
+            }
+          }
 
-              if (m_diffusiveDeposit == DiffusiveDeposit::Cancel) {
-                disp = RealVect::Zero;
-              }
-              else {
-                disp = this->reflectDiffusionHop(pos, disp, fOld, dx);
+          // With the hop left out, the rho^dagger position does not depend on the displacement and therefore not on
+          // anything the boundary handling below does to it, so it is deposited here where grad(D) is still in hand.
+          // The drift is never left out: it is deterministic mean transport that the explicit half must account for.
+          if (Z != 0 && !m_rhoDaggerHop) {
+            pointParticles.append(pos + a_dt * gradD, weight);
+          }
+        }
 
-                // Zero is unambiguous here: a hop that crossed cannot reflect to exactly no displacement, so this is
-                // the routine reporting that it could not place the particle back in the fluid.
-                if (disp == RealVect::Zero) {
-                  numReflectFailed++;
-                }
-              }
+        // Second pass: the carved-off crossings, which are the only particles worth an intersection test.
+        for (std::size_t k = 0; k < crossings.size(); k++) {
+          const std::size_t i    = crossings[k];
+          const Real        fOld = crossingsFOld[k];
+
+          const RealVect pos = leaf.position(i);
+
+          RealVect disp = RealVect(D_DECL(leaf.template get<&ItoParticle::scratch_x>(i),
+                                          leaf.template get<&ItoParticle::scratch_y>(i),
+                                          leaf.template get<&ItoParticle::scratch_z>(i)));
+
+          numCrossingHops++;
+
+          if (m_diffusiveDeposit == DiffusiveDeposit::Cancel) {
+            disp = RealVect::Zero;
+          }
+          else {
+            disp = this->reflectDiffusionHop(pos, disp, fOld, dx, intersectionAlg, bisectStep);
+
+            // Zero is unambiguous here: a hop that crossed cannot reflect to exactly no displacement, so this is
+            // the routine reporting that it could not place the particle back in the fluid.
+            if (disp == RealVect::Zero) {
+              numReflectFailed++;
             }
           }
 
           D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(disp[0]),
                  leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(disp[1]),
                  leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(disp[2]));
+        }
 
-          if (Z != 0) {
-            // The hop can be left out of rho^dagger while the particle still takes it below. The grad(D) drift is
-            // never left out: it is deterministic mean transport that the explicit half is meant to account for.
-            const RealVect rhoDaggerDisp = m_rhoDaggerHop ? disp : a_dt * gradD;
+        // Third pass: the rho^dagger deposit, which has to see the displacement the second pass settled on.
+        if (Z != 0 && m_rhoDaggerHop) {
+          for (std::size_t i = 0; i < leaf.size(); i++) {
+            const RealVect disp = RealVect(D_DECL(leaf.template get<&ItoParticle::scratch_x>(i),
+                                                  leaf.template get<&ItoParticle::scratch_y>(i),
+                                                  leaf.template get<&ItoParticle::scratch_z>(i)));
 
-            pointParticles.append(pos + rhoDaggerDisp, weight);
+            pointParticles.append(leaf.position(i) + disp, leaf.weight(i));
           }
         }
       }
@@ -1966,14 +2028,14 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
   }
 
   // Reduced unconditionally: these are collectives and the condition below is not one.
-  numCancelledHops = ParallelOps::sum(numCancelledHops);
+  numCrossingHops  = ParallelOps::sum(numCrossingHops);
   numTotalHops     = ParallelOps::sum(numTotalHops);
   numReflectFailed = ParallelOps::sum(numReflectFailed);
 
   if (this->m_verbosity > 5 && numTotalHops > 0) {
     pout() << this->m_name + "::diffuseParticlesEulerMaruyama - "
-           << ((m_diffusiveDeposit == DiffusiveDeposit::Cancel) ? "cancelled " : "reflected ") << numCancelledHops
-           << " of " << numTotalHops << " diffusion hops (" << (100.0 * numCancelledHops) / numTotalHops
+           << ((m_diffusiveDeposit == DiffusiveDeposit::Cancel) ? "cancelled " : "reflected ") << numCrossingHops
+           << " of " << numTotalHops << " diffusion hops (" << (100.0 * numCrossingHops) / numTotalHops
            << "%) that would have crossed the EB";
 
     if (m_diffusiveDeposit == DiffusiveDeposit::Reflect) {

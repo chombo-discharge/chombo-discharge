@@ -17,6 +17,7 @@
 #include <CD_ItoKMCStepper.H>
 #include <CD_Timer.H>
 #include <CD_ParticleContainer.H>
+#include <CD_EBIntersection.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -180,11 +181,6 @@ protected:
   bool m_writeCheckpointParticles;
 
   /**
-   * @brief What to do with a diffusion hop that would cross the embedded boundary. See DiffusiveDeposit.
-   */
-  DiffusiveDeposit m_diffusiveDeposit;
-
-  /**
    * @brief If true, the stochastic diffusion hop enters rho^dagger along with the rest of the explicit displacement.
    * @details The hop has zero mean, so to leading order dropping it shifts the source of the semi-implicit Poisson
    * equation by dt*D*grad^2(n): the field no longer sees the charge spread over the step, which matters most where
@@ -214,6 +210,11 @@ protected:
    * @brief If true, particles will be emitted before the reactive step
    */
   bool m_emitSecondaryParticlesBeforeReactions;
+
+  /**
+   * @brief What to do with a diffusion hop that would cross the embedded boundary. See DiffusiveDeposit.
+   */
+  DiffusiveDeposit m_diffusiveDeposit;
 
   /**
    * @brief Which advancement algorithm to use.
@@ -368,22 +369,33 @@ protected:
 
   /**
    * @brief Reflect a diffusion hop that crosses the embedded boundary back into the fluid.
-   * @details Bisects along the segment for the crossing point, takes the surface normal from the gradient of the
-   * implicit function there, and mirrors the remainder of the displacement about it.
+   * @details Locates the crossing point with the solver's own intersection routine, takes the surface normal from the
+   * gradient of the implicit function there, and mirrors the remainder of the displacement about it. The crossing
+   * search always brackets from a_pos, which is known to lie in the fluid, so the bracket is valid on every attempt
+   * and no search is ever started from a point sitting on the surface.
    * @details Reflection can fail to place the particle in the fluid -- at a concave corner, or in a feature thinner
    * than the hop, the mirrored point is inside the solid again. A second reflection is attempted, and if that also
    * fails the hop is cancelled, which is always safe because the pre-hop position is known to be in the fluid.
-   * @note A hop that passes clean THROUGH thin geometry and ends in fluid on the far side is not detected: the
-   * caller's test compares the endpoints only, and both are outside the solid. Catching that needs a swept-path
-   * intersection rather than a sign change.
-   * @param[in] a_pos  Pre-hop position, in the fluid.
-   * @param[in] a_disp Displacement that crosses the boundary.
-   * @param[in] a_fOld Implicit function at a_pos, so the fluid's sign is known without re-evaluating.
-   * @param[in] a_dx   Grid resolution, used to size the gradient stencil.
+   * @note Whether a hop passing clean THROUGH thin geometry is caught is decided by the intersection routine and not
+   * here. Bisection marches the path in intervals of a_bisectStep and sees such a feature only when it is thicker
+   * than one interval; the caller's endpoint sign test never sees one at all. Sphere-tracing the particle would cover
+   * the case for a genuine signed distance function, since the march is driven by the distance to the surface rather
+   * than by a fixed step.
+   * @param[in] a_pos             Pre-hop position, in the fluid.
+   * @param[in] a_disp            Displacement that crosses the boundary.
+   * @param[in] a_fOld            Implicit function at a_pos, so the fluid's sign is known without re-evaluating.
+   * @param[in] a_dx              Grid resolution, used to size the gradient stencil and the ray-cast tolerance.
+   * @param[in] a_intersectionAlg Intersection algorithm, taken from the solver that owns the particle.
+   * @param[in] a_bisectStep      Bisection path-march length, taken from the solver that owns the particle.
    * @return The reflected displacement, or zero if reflection could not place the particle in the fluid.
    */
   virtual RealVect
-  reflectDiffusionHop(const RealVect& a_pos, const RealVect& a_disp, const Real a_fOld, const Real a_dx) const noexcept;
+  reflectDiffusionHop(const RealVect&      a_pos,
+                      const RealVect&      a_disp,
+                      const Real           a_fOld,
+                      const Real           a_dx,
+                      const EBIntersection a_intersectionAlg,
+                      const Real           a_bisectStep) const noexcept;
 
   /**
    * @brief Parse the time-centering of the electric field used for the reactive substep.
