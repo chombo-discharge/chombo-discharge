@@ -979,7 +979,7 @@ ItoKMCGodunovStepper<I, C, R, F>::setOldPositions() noexcept
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime) reduction(+ : numCancelledHops, numTotalHops, numReflectFailed)
+#pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
@@ -1890,7 +1890,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCancelledHops, numTotalHops, numReflectFailed)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
