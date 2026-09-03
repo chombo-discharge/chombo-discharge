@@ -171,9 +171,18 @@ protected:
    * later in the advance; only where its charge is deposited changes. ReflectIto corrects the displacement itself, so
    * the particle never reaches the surface by diffusion at all and the deposit follows it.
    * @note ReflectIto makes the wall reflecting for the diffusive part of the step while it stays absorbing for the
-   * drift part, which is a split along the operator splitting rather than along anything physical. It is retained
-   * because it is closer to the observed behaviour than the alternatives, not because the boundary condition is
-   * settled.
+   * drift part, since a particle carried in by dt*mu*E still intersects and is absorbed later in the advance. That
+   * split follows the operator splitting rather than anything physical, and is a deliberate approximation rather
+   * than a boundary condition. It is the default because the structure it suppresses is not representable here:
+   * the physical depletion layer is D_e/v_drift, some 0.5 to 1.3 um in atmospheric air, against a mesh one to two
+   * orders coarser, and the example cases configure the ions immobile and non-diffusive so the ion half of the
+   * sheath cannot respond at any resolution. What Inside puts in its place is sqrt(2*D*dt) wide -- several times
+   * wider, and tied to dt and dx rather than to D and the wall -- and the endpoint crossing test underneath it is
+   * only O(sqrt(dt)) accurate for an absorbing wall, so it does not converge under time-step refinement.
+   * @note The reasoning above has limits. ReflectIto becomes the wrong choice if the mesh resolves below roughly a
+   * micron, if the ions are made mobile or diffusive so the sheath can respond, or if anode-sheath dynamics are
+   * themselves of interest. A first-passage treatment applied to the whole displacement is the correct
+   * construction in those regimes and is not implemented here. See the ItoKMC chapter of the Sphinx documentation.
    */
   enum class DiffusiveDeposit
   {

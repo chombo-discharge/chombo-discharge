@@ -61,6 +61,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
   this->m_diffusiveDeposit         = DiffusiveDeposit::Inside;
+  this->m_rhoDaggerHop             = true;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
   this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
@@ -1934,13 +1935,22 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           solver->interpolateDiffusionGradient(lvl, din);
         }
 
-        // Hops that crossed the boundary: the particle slot, the implicit function at its pre-hop position, and the
-        // displacement the deposit would have taken. Only the crossings are carried, which is a small fraction of
-        // the leaf even in a box that touches the surface, so these stay empty -- and unallocated -- for every box
-        // away from the geometry.
-        std::vector<std::size_t> crossings;
-        std::vector<Real>        crossingsFOld;
-        std::vector<RealVect>    crossingsDeposit;
+        // The trajectory and the deposit are corrected independently, and are only the same correction when the
+        // deposit carries the hop. Two crossing lists rather than one, because a particle can cross on one
+        // displacement and not the other: with the hop left out of rho^dagger the deposit moves by dt*grad(D)
+        // alone, which can land inside the solid on its own or fail to when the full hop would have. Only the
+        // crossings are carried, so both stay empty -- and unallocated -- for every box away from the geometry.
+        const bool depositFollowsHop = correctTrajectory && m_rhoDaggerHop;
+
+        // Particles whose own displacement crossed. Filled only when the trajectory is corrected.
+        std::vector<std::size_t> hopCrossings;
+        std::vector<Real>        hopCrossingsFOld;
+
+        // Charged particles whose DEPOSIT displacement crossed, when the deposit does not simply follow the
+        // corrected trajectory. Carries that displacement, which is not recoverable from the scratch columns.
+        std::vector<std::size_t> depositCrossings;
+        std::vector<Real>        depositCrossingsFOld;
+        std::vector<RealVect>    depositCrossingsDisp;
 
         // First pass: the displacement for every particle, and the cheap test for whether it crossed.
         for (std::size_t i = 0; i < leaf.size(); i++) {
@@ -1972,88 +1982,118 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
           const bool deposits = (Z != 0);
 
-          // Which displacement the boundary test applies to. ReflectIto corrects the trajectory, so it tests the
-          // particle's own displacement and does so for every species, charged or not. The others correct only the
-          // deposit, so they test what the deposit uses and only where there is a deposit to correct.
-          const RealVect& tested = correctTrajectory ? disp : depositDisp;
+          if (!checkEB) {
+            if (deposits) {
+              pointParticles.append(pos + depositDisp, weight);
+            }
 
-          bool crossed = false;
+            continue;
+          }
 
-          if (checkEB && (correctTrajectory || deposits)) {
-            const Real fOld = baseif->value(pos);
+          // A sign CHANGE rather than a sign, so nothing here assumes which side the implicit function calls
+          // positive. pos is known to be in the fluid because the particle is there now.
+          const Real fOld = baseif->value(pos);
 
+          const auto crosses = [&](const RealVect& a_disp) -> bool {
+            return fOld * baseif->value(pos + a_disp) < 0.0;
+          };
+
+          // The trajectory correction, which only ReflectIto applies, and which applies to every species rather
+          // than only those that deposit.
+          bool hopCrossed = false;
+
+          if (correctTrajectory) {
             numTotalTested++;
 
-            // A sign CHANGE rather than a sign, so this assumes nothing about which side the implicit function
-            // calls positive. Nothing crossed when f(x_old)*f(x_new) >= 0; carve off the rest. pos is known to be
-            // in the fluid because the particle is there now.
-            if (fOld * baseif->value(pos + tested) < 0.0) {
-              crossings.push_back(i);
-              crossingsFOld.push_back(fOld);
-              crossingsDeposit.push_back(depositDisp);
+            hopCrossed = crosses(disp);
 
-              crossed = true;
+            if (hopCrossed) {
+              hopCrossings.push_back(i);
+              hopCrossingsFOld.push_back(fOld);
             }
           }
 
-          // Deposit now unless the second pass can still move it. Under ReflectIto with the hop left out of
-          // rho^dagger the deposit is dt*grad(D), which the trajectory correction cannot reach.
-          if (deposits && (!crossed || (correctTrajectory && !m_rhoDaggerHop))) {
-            pointParticles.append(pos + depositDisp, weight);
+          if (!deposits) {
+            continue;
+          }
+
+          // The deposit. It follows the corrected trajectory when it carries the hop, and is otherwise tested and
+          // corrected on its own displacement -- which is the case the trajectory test cannot stand in for.
+          if (depositFollowsHop) {
+            if (!hopCrossed) {
+              pointParticles.append(pos + depositDisp, weight);
+            }
+          }
+          else {
+
+            // A second, genuinely distinct test when the deposit does not carry the hop, so it counts separately.
+            numTotalTested++;
+
+            if (crosses(depositDisp)) {
+              depositCrossings.push_back(i);
+              depositCrossingsFOld.push_back(fOld);
+              depositCrossingsDisp.push_back(depositDisp);
+            }
+            else {
+              pointParticles.append(pos + depositDisp, weight);
+            }
           }
         }
 
-        // Second pass: the carved-off crossings, which are the only ones worth an intersection test.
-        for (std::size_t k = 0; k < crossings.size(); k++) {
-          const std::size_t i           = crossings[k];
-          const Real        fOld        = crossingsFOld[k];
-          const RealVect    depositDisp = crossingsDeposit[k];
+        // Second pass, trajectories: mirror the particle's own displacement about the boundary. Zero is
+        // unambiguous -- a displacement that crossed cannot reflect to exactly no displacement, so it is the
+        // routine reporting that it could not place the particle back in the fluid, and cancelling the hop is
+        // always safe from a position known to be there.
+        for (std::size_t k = 0; k < hopCrossings.size(); k++) {
+          const std::size_t i    = hopCrossings[k];
+          const Real        fOld = hopCrossingsFOld[k];
+
+          const RealVect pos  = leaf.position(i);
+          const RealVect disp = RealVect(D_DECL(leaf.template get<&ItoParticle::scratch_x>(i),
+                                                leaf.template get<&ItoParticle::scratch_y>(i),
+                                                leaf.template get<&ItoParticle::scratch_z>(i)));
+
+          numCrossings++;
+
+          const RealVect correctedDisp = this->reflectDiffusionHop(pos, disp, fOld, dx, intersectionAlg, bisectStep);
+
+          if (correctedDisp == RealVect::Zero) {
+            numReflectFailed++;
+          }
+
+          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(correctedDisp[0]),
+                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(correctedDisp[1]),
+                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(correctedDisp[2]));
+
+          // The deposit rides along when it carries the hop; otherwise it was handled on its own displacement.
+          if (Z != 0 && depositFollowsHop) {
+            pointParticles.append(pos + correctedDisp, leaf.weight(i));
+          }
+        }
+
+        // Second pass, deposits: create the point particle at the position it keeps. Cancel deposits at the
+        // pre-hop position, which conserves the charge but biases the density towards where it started, and a
+        // reflection that could not reach the fluid falls through to the same place.
+        for (std::size_t k = 0; k < depositCrossings.size(); k++) {
+          const std::size_t i           = depositCrossings[k];
+          const Real        fOld        = depositCrossingsFOld[k];
+          const RealVect    depositDisp = depositCrossingsDisp[k];
 
           const RealVect pos = leaf.position(i);
 
           numCrossings++;
 
-          if (correctTrajectory) {
+          RealVect correctedDisp = RealVect::Zero;
 
-            // Correct the particle's displacement itself. Zero is unambiguous: a displacement that crossed cannot
-            // reflect to exactly no displacement, so it is the routine reporting that it could not place the
-            // particle back in the fluid, and cancelling the hop is always safe from a position known to be there.
-            const RealVect disp = RealVect(D_DECL(leaf.template get<&ItoParticle::scratch_x>(i),
-                                                  leaf.template get<&ItoParticle::scratch_y>(i),
-                                                  leaf.template get<&ItoParticle::scratch_z>(i)));
-
-            const RealVect correctedDisp = this->reflectDiffusionHop(pos, disp, fOld, dx, intersectionAlg, bisectStep);
+          if (m_diffusiveDeposit != DiffusiveDeposit::Cancel) {
+            correctedDisp = this->reflectDiffusionHop(pos, depositDisp, fOld, dx, intersectionAlg, bisectStep);
 
             if (correctedDisp == RealVect::Zero) {
               numReflectFailed++;
             }
-
-            D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(correctedDisp[0]),
-                   leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(correctedDisp[1]),
-                   leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(correctedDisp[2]));
-
-            // The deposit follows the corrected hop when it carries it; otherwise it was made in the first pass.
-            if (Z != 0 && m_rhoDaggerHop) {
-              pointParticles.append(pos + correctedDisp, leaf.weight(i));
-            }
           }
-          else {
 
-            // Correct the deposit only, and create the point particle at the position it keeps. Cancel deposits at
-            // the pre-hop position, which conserves the charge but biases the density towards where it started, and
-            // a reflection that could not reach the fluid falls through to the same place.
-            RealVect correctedDisp = RealVect::Zero;
-
-            if (m_diffusiveDeposit == DiffusiveDeposit::ReflectRho) {
-              correctedDisp = this->reflectDiffusionHop(pos, depositDisp, fOld, dx, intersectionAlg, bisectStep);
-
-              if (correctedDisp == RealVect::Zero) {
-                numReflectFailed++;
-              }
-            }
-
-            pointParticles.append(pos + correctedDisp, leaf.weight(i));
-          }
+          pointParticles.append(pos + correctedDisp, leaf.weight(i));
         }
       }
     }
