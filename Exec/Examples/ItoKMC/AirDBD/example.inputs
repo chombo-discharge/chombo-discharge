@@ -137,7 +137,7 @@ ItoSolver.normal_max                  = 5.0                ## Maximum value (abs
 ItoSolver.diffusion_grad_drift        = true               ## Add grad(D) to the drift so the particles transport D*grad(n), as CdrSolver does
 ItoSolver.checkpointing               = particles          ## 'particles' or 'numbers'
 ItoSolver.ppc_restart                 = 32                 ## Maximum number of computational particles to generate for restarts.
-ItoSolver.deposition_irreg            = native             ## Cut-cell deposition: 'native', 'ngp', 'mirror', 'redistribute', 'redistribute_blended'
+ItoSolver.deposition_irreg            = mirror             ## Cut-cell deposition: 'native', 'ngp', 'mirror', 'redistribute', 'redistribute_blended'
 ItoSolver.irr_ngp_interp              = true               ## Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp             = direct             ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition             = cic                ## Cloud-in-cell for plotting particles.
