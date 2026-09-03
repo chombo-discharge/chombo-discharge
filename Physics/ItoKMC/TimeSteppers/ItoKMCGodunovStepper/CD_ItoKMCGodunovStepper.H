@@ -161,20 +161,26 @@ protected:
   };
 
   /**
-   * @brief What to do with a rho^dagger deposit that would land inside the embedded boundary.
+   * @brief What to do with a diffusion hop that would carry a particle, or its charge, inside the embedded boundary.
    * @details A deposit inside the solid falls in a covered cell, which carries no VoF and contributes nothing to rho,
    * so the charge leaves rho^dagger entirely. The geometry makes that one-way -- a particle in the fluid can hop into
    * the solid and there are none inside to hop back -- so the near-wall region drains at a rate set by
-   * sqrt(2*D*dt)/dx rather than by any physics. This selects what is deposited instead.
-   * @note Every setting affects the DEPOSIT only. The particle's own displacement is never altered: one that hops
-   * into the solid stays there and is absorbed by the intersection test later in the advance, which is the physical
-   * outcome. Reflecting the trajectory as well would be a second, incompatible boundary condition on the same hop.
+   * sqrt(2*D*dt)/dx rather than by any physics.
+   * @details The settings differ in what they correct. Inside, Cancel and ReflectRho leave the particle's own
+   * displacement alone, so a particle that hops into the solid stays there and is absorbed by the intersection test
+   * later in the advance; only where its charge is deposited changes. ReflectIto corrects the displacement itself, so
+   * the particle never reaches the surface by diffusion at all and the deposit follows it.
+   * @note ReflectIto makes the wall reflecting for the diffusive part of the step while it stays absorbing for the
+   * drift part, which is a split along the operator splitting rather than along anything physical. It is retained
+   * because it is closer to the observed behaviour than the alternatives, not because the boundary condition is
+   * settled.
    */
   enum class DiffusiveDeposit
   {
-    Inside,  ///< Deposit from inside the solid, into a covered cell that contributes nothing to rho.
-    Cancel,  ///< Deposit at the pre-hop position. Conserves charge, but biases density towards where it started.
-    Reflect, ///< Deposit at the position mirrored about the boundary, mimicking a uniform plasma up to the wall.
+    Inside,     ///< Deposit from inside the solid, into a covered cell that contributes nothing to rho.
+    Cancel,     ///< Deposit at the pre-hop position. Conserves charge, but biases density towards where it started.
+    ReflectRho, ///< Reflect the deposit about the boundary. The particle's own displacement is untouched.
+    ReflectIto, ///< Reflect the particle's displacement about the boundary. The deposit follows the corrected hop.
   };
 
   /**
