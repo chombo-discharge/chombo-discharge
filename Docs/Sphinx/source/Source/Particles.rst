@@ -399,7 +399,7 @@ Downstream code must first *register* the ghost width(s) it needs; only register
 The ghost width is a **minimum**, measured in *destination* cells:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1839-1840
+   :lines: 1842-1843
    :language: c++
    :dedent: 2
 
@@ -526,7 +526,7 @@ Conversely, if the particle is close to the EB a small step will be used.
 The algorithms that intersect the particles are part of :ref:`Chap:AmrMesh`, and the ray-casting variant is called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1222-1231
+   :lines: 1225-1234
    :language: c++
    :dedent: 2
 

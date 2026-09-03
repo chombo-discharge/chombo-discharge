@@ -1059,7 +1059,10 @@ ItoSolver::intersectParticles(ParticleContainer<ItoParticle>&                   
   CH_assert(!a_ebParticles.isOrganizedByCell());
   CH_assert(!a_domainParticles.isOrganizedByCell());
 
-  constexpr Real tolerance = 0.0;
+  // Relative to dx, and strictly positive: the ray march closes on the surface geometrically and never lands on it,
+  // so a tolerance of zero means the collision is never declared and the march does not terminate. Same value as
+  // McPhoto uses at its own call sites.
+  constexpr Real tolerance = 1.E-3;
 
   switch (a_ebIntersection) {
   case EBIntersection::Raycast: {
