@@ -747,7 +747,7 @@ The recommended pattern for the per-cell family is to cell-sort the leaf, extrac
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleSoA.H
-   :lines: 1547-1569
+   :lines: 1554-1576
    :dedent: 2
    :language: c++
 
