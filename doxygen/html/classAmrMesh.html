@@ -7513,7 +7513,7 @@ template&lt;auto... OldPosition, typename P , typename Traits &gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_ebParticles</td><td>Particles that intersected the EB (cleared and remapped here). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_domainParticles</td><td>Particles that intersected the domain faces (cleared and remapped here). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where the input particles live. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_tolerance</td><td>Tolerance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tolerance</td><td>Collision tolerance, as a fraction of the grid resolution on the level being intersected. The ray march declares a hit once it comes within a_tolerance*dx of the surface, so this must be strictly positive: the march converges on the surface geometrically and never reaches it, so a tolerance of zero means the hit is never declared and the loop does not terminate. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deleteParticles</td><td>If true, intersected particles are removed from a_activeParticles. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_nonDeletionModifier</td><td>Callback applied to each intersected-but-not-deleted particle, given its home leaf and slot index (used e.g. to flag the original particle via a payload column). </td></tr>
   </table>

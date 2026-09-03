@@ -156,6 +156,114 @@ This is the same treatment the CDR half of the step already gives the explicit
 
 
 
+The diffusion hop at embedded boundaries
+----------------------------------------
+
+The Euler-Maruyama update displaces particles by :math:`\sqrt{2D\Delta t}\mathbf{W}` without asking whether the
+result lies inside the solid.
+The random walk therefore has no boundary condition at the embedded boundary: a particle in the fluid can hop into
+the solid, and there are none inside to hop back out.
+The charge that goes with it is deposited in a covered cell, which carries no cut-cell volume and contributes
+nothing to :math:`\rho`, so the near-wall region drains at a rate set by :math:`\sqrt{2D\Delta t}/\Delta x` rather
+than by anything physical.
+What this looks like in a simulation is a spurious *positive* space charge confined to the cut-cell layer, one cell
+wide at every resolution, present whenever the electrons are Ito particles and absent when their diffusion
+coefficient is set to zero.
+
+What happens instead is selected with
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.diffusive_deposit = reflect_ito  # 'inside', 'cancel', 'reflect_rho' or 'reflect_ito'
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 30 50
+
+   * - Setting
+     - Particle trajectory
+     - :math:`\rho^\dagger` deposit
+   * - ``inside``
+     - untouched
+     - deposited inside the solid, and thus lost
+   * - ``cancel``
+     - untouched
+     - deposited at the pre-hop position
+   * - ``reflect_rho``
+     - untouched
+     - mirrored about the boundary
+   * - ``reflect_ito``
+     - mirrored about the boundary
+     - follows the corrected hop
+
+The crossing point is located with the same intersection algorithm the owning :ref:`Chap:ItoSolver` is configured
+with (``ItoSolver.intersection_alg`` and ``ItoSolver.bisect_step``), so that reflection and the absorption test
+later in the advance agree on where the surface is.
+The surface normal is taken from the gradient of the implicit function there and the overshoot is mirrored about
+it, so a point that would have landed at depth :math:`d` inside comes to rest at depth :math:`d` outside.
+A reflection that cannot place the particle back in the fluid -- at a concave corner, or in a feature thinner than
+the hop -- is retried once and then falls back to the pre-hop position.
+Counts of crossings, and of reflections that fell back, are printed at ``ItoKMCGodunovStepper.verbosity > 5``.
+
+A separate switch controls whether the stochastic hop enters :math:`\rho^\dagger` at all:
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.rho_dagger_hop = true  # Include the stochastic hop in rho^dagger
+
+With ``false`` the particle still takes the hop, but the deposit displaces by :math:`\Delta t\nabla D` alone.
+The :math:`\nabla D` drift is never left out, being deterministic mean transport that the explicit half of the
+semi-implicit split must account for exactly.
+
+.. _Chap:ItoKMCDiffusiveDepositApproximation:
+
+Why ``reflect_ito`` is the default
+__________________________________
+
+``reflect_ito`` makes the boundary *reflecting* for the diffusive part of the step while it stays *absorbing* for
+the drift part, since a particle carried into the surface by :math:`\Delta t\mu\mathbf{E}` still intersects and is
+absorbed later in the advance.
+That split follows the operator splitting rather than anything physical, and it is a deliberate approximation
+rather than a boundary condition.
+It is worth stating why it is nonetheless the right default here, because the argument does not survive a change of
+regime.
+
+Diffusive loss of electrons to an anode is real, and with the ions far less mobile it does produce a genuine
+depletion layer carrying net positive charge.
+The question is whether that layer is representable.
+Its thickness is the convection-diffusion scale :math:`D_e/v_{\textrm{drift}}`, which for atmospheric air over
+:math:`E = 10^6` to :math:`3\times 10^7` V/m is roughly :math:`0.5` to :math:`1.3\,\mu\textrm{m}`; the Debye length
+at :math:`n_e \sim 10^{20}\,\textrm{m}^{-3}` and :math:`T_e \sim 3` to :math:`5` eV is :math:`1.3` to
+:math:`1.7\,\mu\textrm{m}`.
+A typical discharge simulation resolves cells one to two orders of magnitude coarser than this, so the layer sits
+below the grid scale.
+In the example cases the ions are additionally configured immobile and non-diffusive, so the ion half of the sheath
+cannot respond at *any* resolution.
+
+What ``inside`` produces in its place is not that layer.
+Its width is the hop length :math:`\sqrt{2D_e\Delta t}`, which is typically several times wider than the physical
+layer and is tied to :math:`\Delta t` and :math:`\Delta x` rather than to :math:`D_e` and the wall.
+The endpoint crossing test is also only :math:`O(\sqrt{\Delta t})` accurate for an absorbing wall
+:cite:`Peters2002`, so the loss it produces does not converge under time-step refinement.
+Suppressing the diffusive wall loss entirely is therefore closer to the truth than resolving it badly: the physical
+effect is invisible on the grid, and the alternative is an artefact several times larger standing in for it.
+
+.. warning::
+
+   This reasoning has limits, and ``reflect_ito`` becomes the wrong choice outside them.
+   Reconsider the setting if the mesh resolves below roughly one micron, if the ions are made mobile or diffusive
+   so that the sheath can respond, or if anode-sheath dynamics are themselves the object of study.
+   In those regimes a first-passage treatment of the absorbing wall, applied to the whole displacement rather than
+   to the diffusive part alone, is the correct construction and is not implemented here.
+
+.. note::
+
+   Two cases are not detected.
+   A hop passing clean *through* geometry thinner than ``ItoSolver.bisect_step`` leaves both endpoints outside the
+   solid and is invisible to the crossing test, and a reflected position is not tested against the domain
+   boundary.
+
+
 Spatial filtering
 -----------------
 

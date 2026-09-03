@@ -994,14 +994,7 @@ These are <code class="docutils literal notranslate"><span class="pre">nn_pair_t
 </ul>
 <p>The recommended pattern for the per-cell family is to cell-sort the leaf, extract a cell’s particles into a small scratch <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code>, merge/split them, and rebuild the leaf.
 <code class="docutils literal notranslate"><span class="pre">ParticleSoA&lt;P&gt;::extractCell</span></code> performs the per-cell extraction</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">m_sorted</span><span class="p">);</span>
-<span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">a_cell</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">numCells</span><span class="p">());</span>
-
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="n">m_cellStart</span><span class="p">[</span><span class="n">a_cell</span><span class="p">],</span><span class="w"> </span><span class="n">m_cellStart</span><span class="p">[</span><span class="n">a_cell</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">]};</span>
-<span class="p">}</span>
-
-<span class="cm">/**</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Extract cell c&#39;s particles (the CSR range [cellStart(c), cellStart(c+1))) into a_out.</span>
 <span class="cm"> * @details a_out is cleared first, then this cell&#39;s particles are appended (all columns, including</span>
 <span class="cm"> * id/rank). Requires the container to be cell-sorted. This is the building block of the per-cell</span>
@@ -1013,9 +1006,17 @@ These are <code class="docutils literal notranslate"><span class="pre">nn_pair_t
 <span class="cm"> * @param[out] a_out  Destination scratch container (cleared on entry; reuse it across cells).</span>
 <span class="cm"> */</span>
 <span class="kt">void</span>
-<span class="n">extractCell</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_cell</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_out</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="nf">extractCell</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_cell</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_out</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">m_sorted</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">a_out</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">cellRange</span><span class="p">(</span><span class="n">a_cell</span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">range</span><span class="p">.</span><span class="n">first</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">range</span><span class="p">.</span><span class="n">second</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">a_out</span><span class="p">.</span><span class="n">appendParticle</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>and the merged result is accumulated into an output <code class="docutils literal notranslate"><span class="pre">ParticleSoA</span></code> (via <code class="docutils literal notranslate"><span class="pre">append</span></code>) which finally replaces the leaf with <code class="docutils literal notranslate"><span class="pre">swap</span></code>.

@@ -171,6 +171,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeO
 <tr class="memitem:ae4db75d50c479cd8990a3711e7910c24" id="r_ae4db75d50c479cd8990a3711e7910c24"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="CD__EBIntersection_8H.html#ad8aa543cfc22c9b4f2a6a6dab88ea1e9">EBIntersection</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae4db75d50c479cd8990a3711e7910c24">getIntersectionAlgorithm</a> () const noexcept</td></tr>
 <tr class="memdesc:ae4db75d50c479cd8990a3711e7910c24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the EB-particle intersection algorithm.  <br /></td></tr>
 <tr class="separator:ae4db75d50c479cd8990a3711e7910c24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0e4725107ce4a3f5dba7a92c724e5f1" id="r_ac0e4725107ce4a3f5dba7a92c724e5f1"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac0e4725107ce4a3f5dba7a92c724e5f1">getBisectionStep</a> () const noexcept</td></tr>
+<tr class="memdesc:ac0e4725107ce4a3f5dba7a92c724e5f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the path-march length used by the bisection intersection algorithm.  <br /></td></tr>
+<tr class="separator:ac0e4725107ce4a3f5dba7a92c724e5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc86cb62b622c8ddfd0b7fb1601afda7" id="r_abc86cb62b622c8ddfd0b7fb1601afda7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#abc86cb62b622c8ddfd0b7fb1601afda7">initialData</a> ()</td></tr>
 <tr class="memdesc:abc86cb62b622c8ddfd0b7fb1601afda7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the initial data.  <br /></td></tr>
 <tr class="separator:abc86cb62b622c8ddfd0b7fb1601afda7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2739,6 +2742,34 @@ template&lt;typename P , typename Traits &gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ac0e4725107ce4a3f5dba7a92c724e5f1" name="ac0e4725107ce4a3f5dba7a92c724e5f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0e4725107ce4a3f5dba7a92c724e5f1">&#9670;&#160;</a></span>getBisectionStep()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoSolver::getBisectionStep </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the path-march length used by the bisection intersection algorithm. </p>
+<p>Only meaningful when the intersection algorithm is EBIntersection::Bisection, which marches the particle path in intervals of this length and refines the first interval that brackets the surface. </p><dl class="section return"><dt>Returns</dt><dd>Bisection step length. </dd></dl>
 
 </div>
 </div>

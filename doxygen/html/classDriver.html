@@ -232,6 +232,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>writeGeometry</b> ()<
 <tr class="memitem:a2d4bf1bdf482b45c5e388047d18bbfc9" id="r_a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a2d4bf1bdf482b45c5e388047d18bbfc9">tagCells</a> (Vector&lt; IntVectSet &gt; &amp;a_allTags, <a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;a_cellTags)</td></tr>
 <tr class="memdesc:a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag cells for refinement. Computes cell tags and global tags (union of cell tags with geometric tags).  <br /></td></tr>
 <tr class="separator:a2d4bf1bdf482b45c5e388047d18bbfc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fe16be6cf5cdaeb8d56610658f9f92e" id="r_a8fe16be6cf5cdaeb8d56610658f9f92e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a8fe16be6cf5cdaeb8d56610658f9f92e">coarsenTags</a> (<a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;a_cellTags) const noexcept</td></tr>
+<tr class="memdesc:a8fe16be6cf5cdaeb8d56610658f9f92e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen the refinement tags so that every level below a tag is tagged as well.  <br /></td></tr>
+<tr class="separator:a8fe16be6cf5cdaeb8d56610658f9f92e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48fbd2567a1e85f8bc7be58b1a12204d" id="r_a48fbd2567a1e85f8bc7be58b1a12204d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a48fbd2567a1e85f8bc7be58b1a12204d">getNumberOfPlotVariables</a> () const</td></tr>
 <tr class="memdesc:a48fbd2567a1e85f8bc7be58b1a12204d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables.  <br /></td></tr>
 <tr class="separator:a48fbd2567a1e85f8bc7be58b1a12204d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -604,6 +607,40 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotLevelset</b></t
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_restartFile</td><td>Path to the restart file. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8fe16be6cf5cdaeb8d56610658f9f92e" name="a8fe16be6cf5cdaeb8d56610658f9f92e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fe16be6cf5cdaeb8d56610658f9f92e">&#9670;&#160;</a></span>coarsenTags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Driver::coarsenTags </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="CD__EBAMRTags_8H.html#a23ff4c2bc0ca3002cc8c0cde60fe9181">EBAMRTags</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellTags</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Coarsen the refinement tags so that every level below a tag is tagged as well. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cellTags</td><td>Tags to coarsen. </td></tr>
   </table>
   </dd>
 </dl>

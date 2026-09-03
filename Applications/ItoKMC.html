@@ -104,6 +104,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reactive-field-centering">Reactive field centering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-nabla-d-drift-correction">The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-diffusion-hop-at-embedded-boundaries">The diffusion hop at embedded boundaries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#why-reflect-ito-is-the-default">Why <code class="docutils literal notranslate"><span class="pre">reflect_ito</span></code> is the default</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
@@ -113,7 +117,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#itokmcphysics">ItoKMCPhysics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#species-definitions">Species definitions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plasma-reactions">Plasma reactions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#surface-reactions">Surface reactions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#transport-coefficients">Transport coefficients</a></li>
 </ul>
@@ -135,9 +139,9 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#townsend-coefficients">Townsend coefficients</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#automatic">Automatic</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Constant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Constant</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tabulated-vs-e-n">Tabulated vs <span class="math notranslate nohighlight">\(E/N\)</span></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">Plotting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Plotting</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#plasma-species">Plasma species</a><ul>
@@ -149,11 +153,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#photon-species">Photon species</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id7">Basic definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Basic definition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#absorption-coefficient">Absorption coefficient</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id9">Plasma reactions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Plasma reactions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reaction-specifiers">Reaction specifiers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rate-calculation">Rate calculation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#scaling">Scaling</a></li>
@@ -166,13 +170,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#chap-itokmcjsondt">Time step calculation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id13">Particle placement</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id14">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id15">Townsend coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16">Townsend coefficients</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tips-and-tricks">Tips and tricks</a></li>
@@ -371,6 +375,112 @@ which includes every model using a tabulated <span class="math notranslate nohig
 The uncorrected particle swarm lags the fluid solution by of order <span class="math notranslate nohighlight">\(\left|\nabla D\right|/\left|\mathbf{V}\right|\)</span>,
 which is a few percent at a streamer head in atmospheric air.</p>
 </div>
+</section>
+<section id="the-diffusion-hop-at-embedded-boundaries">
+<h3>The diffusion hop at embedded boundaries<a class="headerlink" href="#the-diffusion-hop-at-embedded-boundaries" title="Permalink to this heading"></a></h3>
+<p>The Euler-Maruyama update displaces particles by <span class="math notranslate nohighlight">\(\sqrt{2D\Delta t}\mathbf{W}\)</span> without asking whether the
+result lies inside the solid.
+The random walk therefore has no boundary condition at the embedded boundary: a particle in the fluid can hop into
+the solid, and there are none inside to hop back out.
+The charge that goes with it is deposited in a covered cell, which carries no cut-cell volume and contributes
+nothing to <span class="math notranslate nohighlight">\(\rho\)</span>, so the near-wall region drains at a rate set by <span class="math notranslate nohighlight">\(\sqrt{2D\Delta t}/\Delta x\)</span> rather
+than by anything physical.
+What this looks like in a simulation is a spurious <em>positive</em> space charge confined to the cut-cell layer, one cell
+wide at every resolution, present whenever the electrons are Ito particles and absent when their diffusion
+coefficient is set to zero.</p>
+<p>What happens instead is selected with</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.diffusive_deposit = reflect_ito  # &#39;inside&#39;, &#39;cancel&#39;, &#39;reflect_rho&#39; or &#39;reflect_ito&#39;
+</pre></div>
+</div>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 30%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Particle trajectory</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\rho^\dagger\)</span> deposit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">inside</span></code></p></td>
+<td><p>untouched</p></td>
+<td><p>deposited inside the solid, and thus lost</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cancel</span></code></p></td>
+<td><p>untouched</p></td>
+<td><p>deposited at the pre-hop position</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reflect_rho</span></code></p></td>
+<td><p>untouched</p></td>
+<td><p>mirrored about the boundary</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reflect_ito</span></code></p></td>
+<td><p>mirrored about the boundary</p></td>
+<td><p>follows the corrected hop</p></td>
+</tr>
+</tbody>
+</table>
+<p>The crossing point is located with the same intersection algorithm the owning <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a> is configured
+with (<code class="docutils literal notranslate"><span class="pre">ItoSolver.intersection_alg</span></code> and <code class="docutils literal notranslate"><span class="pre">ItoSolver.bisect_step</span></code>), so that reflection and the absorption test
+later in the advance agree on where the surface is.
+The surface normal is taken from the gradient of the implicit function there and the overshoot is mirrored about
+it, so a point that would have landed at depth <span class="math notranslate nohighlight">\(d\)</span> inside comes to rest at depth <span class="math notranslate nohighlight">\(d\)</span> outside.
+A reflection that cannot place the particle back in the fluid – at a concave corner, or in a feature thinner than
+the hop – is retried once and then falls back to the pre-hop position.
+Counts of crossings, and of reflections that fell back, are printed at <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper.verbosity</span> <span class="pre">&gt;</span> <span class="pre">5</span></code>.</p>
+<p>A separate switch controls whether the stochastic hop enters <span class="math notranslate nohighlight">\(\rho^\dagger\)</span> at all:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.rho_dagger_hop = true  # Include the stochastic hop in rho^dagger
+</pre></div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">false</span></code> the particle still takes the hop, but the deposit displaces by <span class="math notranslate nohighlight">\(\Delta t\nabla D\)</span> alone.
+The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift is never left out, being deterministic mean transport that the explicit half of the
+semi-implicit split must account for exactly.</p>
+<section id="why-reflect-ito-is-the-default">
+<span id="chap-itokmcdiffusivedepositapproximation"></span><h4>Why <code class="docutils literal notranslate"><span class="pre">reflect_ito</span></code> is the default<a class="headerlink" href="#why-reflect-ito-is-the-default" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">reflect_ito</span></code> makes the boundary <em>reflecting</em> for the diffusive part of the step while it stays <em>absorbing</em> for
+the drift part, since a particle carried into the surface by <span class="math notranslate nohighlight">\(\Delta t\mu\mathbf{E}\)</span> still intersects and is
+absorbed later in the advance.
+That split follows the operator splitting rather than anything physical, and it is a deliberate approximation
+rather than a boundary condition.
+It is worth stating why it is nonetheless the right default here, because the argument does not survive a change of
+regime.</p>
+<p>Diffusive loss of electrons to an anode is real, and with the ions far less mobile it does produce a genuine
+depletion layer carrying net positive charge.
+The question is whether that layer is representable.
+Its thickness is the convection-diffusion scale <span class="math notranslate nohighlight">\(D_e/v_{\textrm{drift}}\)</span>, which for atmospheric air over
+<span class="math notranslate nohighlight">\(E = 10^6\)</span> to <span class="math notranslate nohighlight">\(3\times 10^7\)</span> V/m is roughly <span class="math notranslate nohighlight">\(0.5\)</span> to <span class="math notranslate nohighlight">\(1.3\,\mu\textrm{m}\)</span>; the Debye length
+at <span class="math notranslate nohighlight">\(n_e \sim 10^{20}\,\textrm{m}^{-3}\)</span> and <span class="math notranslate nohighlight">\(T_e \sim 3\)</span> to <span class="math notranslate nohighlight">\(5\)</span> eV is <span class="math notranslate nohighlight">\(1.3\)</span> to
+<span class="math notranslate nohighlight">\(1.7\,\mu\textrm{m}\)</span>.
+A typical discharge simulation resolves cells one to two orders of magnitude coarser than this, so the layer sits
+below the grid scale.
+In the example cases the ions are additionally configured immobile and non-diffusive, so the ion half of the sheath
+cannot respond at <em>any</em> resolution.</p>
+<p>What <code class="docutils literal notranslate"><span class="pre">inside</span></code> produces in its place is not that layer.
+Its width is the hop length <span class="math notranslate nohighlight">\(\sqrt{2D_e\Delta t}\)</span>, which is typically several times wider than the physical
+layer and is tied to <span class="math notranslate nohighlight">\(\Delta t\)</span> and <span class="math notranslate nohighlight">\(\Delta x\)</span> rather than to <span class="math notranslate nohighlight">\(D_e\)</span> and the wall.
+The endpoint crossing test is also only <span class="math notranslate nohighlight">\(O(\sqrt{\Delta t})\)</span> accurate for an absorbing wall
+<span id="id1">[<a class="reference internal" href="../ZZReferences.html#id167" title="E. A. J. F. Peters and T. M. A. O. M. Barenbrug. Efficient Brownian dynamics simulation of particles near walls. I. Reflecting and absorbing walls. Physical Review E, 66(5):056701, 2002. doi:10.1103/PhysRevE.66.056701.">Peters and Barenbrug, 2002</a>]</span>, so the loss it produces does not converge under time-step refinement.
+Suppressing the diffusive wall loss entirely is therefore closer to the truth than resolving it badly: the physical
+effect is invisible on the grid, and the alternative is an artefact several times larger standing in for it.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This reasoning has limits, and <code class="docutils literal notranslate"><span class="pre">reflect_ito</span></code> becomes the wrong choice outside them.
+Reconsider the setting if the mesh resolves below roughly one micron, if the ions are made mobile or diffusive
+so that the sheath can respond, or if anode-sheath dynamics are themselves the object of study.
+In those regimes a first-passage treatment of the absorbing wall, applied to the whole displacement rather than
+to the diffusive part alone, is the correct construction and is not implemented here.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Two cases are not detected.
+A hop passing clean <em>through</em> geometry thinner than <code class="docutils literal notranslate"><span class="pre">ItoSolver.bisect_step</span></code> leaves both endpoints outside the
+solid and is invisible to the crossing test, and a reflected position is not tested against the domain
+boundary.</p>
+</div>
+</section>
 </section>
 <section id="spatial-filtering">
 <h3>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h3>
@@ -1192,8 +1302,8 @@ Internally, these reactions are implemented through the dual state KMC implement
 During the reaction advance the user only needs to update the <span class="math notranslate nohighlight">\(c_j\)</span> coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine <code class="docutils literal notranslate"><span class="pre">updateReactionRates(...)</span></code>, see <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for the complete specification.</p>
 </section>
-<section id="id1">
-<h3>Photoionization<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<section id="id2">
+<h3>Photoionization<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>Photo-reactions are also represented stoichiometrically as</p>
 <div class="math notranslate nohighlight">
 \[\gamma \xrightarrow{\xi} A + B + \ldots,\]</div>
@@ -1525,8 +1635,8 @@ The advantage of this approach is that one may choose to discard some of the rea
 </div>
 <p>The advantage of using auto-mode for the coefficients is that one automatically ensures consistency between the user-specified list of reactions and the</p>
 </section>
-<section id="id2">
-<h4>Constant<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<section id="id3">
+<h4>Constant<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
 <p>To set a constant Townsend coefficient, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to constant and then specify the value, e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1584,8 +1694,8 @@ This is an optional argument that defaults to <code class="docutils literal notr
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h4>Plotting<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+<section id="id4">
+<h4>Plotting<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
 <p>To include the Townsend coefficients as mesh variables in HDF5 files, include the <code class="docutils literal notranslate"><span class="pre">plot</span></code> specifier, e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1656,8 +1766,8 @@ However, if a species is specified as mobile/diffusive, the user <em>must</em> a
 <p>Mobility and diffusion coefficients are specified by including fields <code class="docutils literal notranslate"><span class="pre">mobility</span></code> and <code class="docutils literal notranslate"><span class="pre">diffusion</span></code> that further specifies how the transport coefficients are calculated.
 Note that the input to these fields should be <em>fluid transport coefficients</em>.
 These fields can be specified in various forms, as shown below.</p>
-<section id="id4">
-<h5>Constant<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h5>
+<section id="id5">
+<h5>Constant<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h5>
 <p>To set a constant coefficient, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to constant and then assign the value.
 For example,</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="nt">&quot;plasma species&quot;</span><span class="w"> </span><span class="p">:</span>
@@ -1822,8 +1932,8 @@ For example:</p>
 </pre></div>
 </div>
 </section>
-<section id="id5">
-<h5>Constant<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h5>
+<section id="id6">
+<h5>Constant<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h5>
 <p>To set a constant temperature, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">constant</span></code> and then specify the temperature.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="nt">&quot;plasma species&quot;</span><span class="w"> </span><span class="p">:</span>
@@ -1841,8 +1951,8 @@ For example:</p>
 </pre></div>
 </div>
 </section>
-<section id="id6">
-<h5>Table vs <span class="math notranslate nohighlight">\(E/N\)</span><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h5>
+<section id="id7">
+<h5>Table vs <span class="math notranslate nohighlight">\(E/N\)</span><a class="headerlink" href="#id7" title="Permalink to this heading"></a></h5>
 <p>To set the species temperature as a function <span class="math notranslate nohighlight">\(T = T\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data <em>versus the mean energy</em>, e.g.</p>
@@ -2138,8 +2248,8 @@ These are defined by an array of entries in a <code class="docutils literal notr
 <li><p>An ID/name for the species.</p></li>
 <li><p>The absorption coefficient for the photon type.</p></li>
 </ul>
-<section id="id7">
-<h4>Basic definition<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
+<section id="id8">
+<h4>Basic definition<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
 <p>A basic definition of a single photon species is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
 <span class="w"> </span><span class="p">[</span>
@@ -2176,8 +2286,8 @@ These are defined by an array of entries in a <code class="docutils literal notr
 </section>
 <section id="absorption-coefficient">
 <h4>Absorption coefficient<a class="headerlink" href="#absorption-coefficient" title="Permalink to this heading"></a></h4>
-<section id="id8">
-<h5>Constant<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h5>
+<section id="id9">
+<h5>Constant<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h5>
 <p>In order to set a constant absorption coefficient, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to constant and then specify the <code class="docutils literal notranslate"><span class="pre">value</span></code> field.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
@@ -2246,8 +2356,8 @@ For example:</p>
 </section>
 </section>
 </section>
-<section id="id9">
-<h3>Plasma reactions<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<section id="id10">
+<h3>Plasma reactions<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
 <p>Plasma reactions are always specified stoichiometrically in the form <span class="math notranslate nohighlight">\(S_A + S_B + \ldots \xrightarrow{k} S_C + S_D + \ldots\)</span>.
 The user must supply the following information:</p>
 <ul class="simple">
@@ -2304,8 +2414,8 @@ The reaction string can then be defined as the string <code class="docutils lite
 <h4>Rate calculation<a class="headerlink" href="#rate-calculation" title="Permalink to this heading"></a></h4>
 <p>Reaction rates can be specified using multiple formats (constant, tabulated, function-based, etc).
 To specify how the rate is computed, one must specify the <code class="docutils literal notranslate"><span class="pre">type</span></code> keyword in the JSON entry.</p>
-<section id="id10">
-<h5>Constant<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h5>
+<section id="id11">
+<h5>Constant<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h5>
 <p>To use a constant reaction rate, the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier must be set to constant and the reaction rate must be specified through the <code class="docutils literal notranslate"><span class="pre">value</span></code> keyword.
 A JSON specification is e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -2419,8 +2529,8 @@ The reason for this is that the Townsend coefficients <span class="math notransl
 By specifying e.g. a reaction string <span class="math notranslate nohighlight">\(\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+\)</span> together with the <code class="docutils literal notranslate"><span class="pre">alpha*v</span></code> or <code class="docutils literal notranslate"><span class="pre">eta*v</span></code> specifiers, one will end up multiplying in the neutral density twice, which will lead to an incorrect rate.</p>
 </div>
 </section>
-<section id="id11">
-<h5>Tabulated vs E/N<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h5>
+<section id="id12">
+<h5>Tabulated vs E/N<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h5>
 </section>
 </section>
 <section id="scaling">
@@ -2656,7 +2766,7 @@ Reactions are ordered identical to the order of the reactions in the JSON specif
 This feature is mostly used for debugging or development efforts.</p>
 </section>
 <section id="chap-itokmcjsondt">
-<span id="id12"></span><h4>Time step calculation<a class="headerlink" href="#chap-itokmcjsondt" title="Permalink to this heading"></a></h4>
+<span id="id13"></span><h4>Time step calculation<a class="headerlink" href="#chap-itokmcjsondt" title="Permalink to this heading"></a></h4>
 <p>The user can manually specify which reactions are to be used when computing a chemistry time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, as discussed in <a class="reference internal" href="#chap-itokmcphysicsdt"><span class="std std-ref">Time step calculation</span></a>.
 To enable a time step calculation, specify the <code class="docutils literal notranslate"><span class="pre">include_dt_calc</span></code> flag in the reaction specifier, as shown below:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
@@ -2676,8 +2786,8 @@ To enable a time step calculation, specify the <code class="docutils literal not
 </div>
 </section>
 </section>
-<section id="id13">
-<h3>Particle placement<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<section id="id14">
+<h3>Particle placement<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
 <p>Specification of secondary particle placement is done through the JSON file by specifying the <code class="docutils literal notranslate"><span class="pre">particle</span> <span class="pre">placement</span></code> field.
 Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, inherited from one of the particles that are already in the cell, or placed randomly in the downstream region of some user-defined species.
 The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, <code class="docutils literal notranslate"><span class="pre">parent</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
@@ -2710,8 +2820,8 @@ If the cell holds no particles of the species in question – which happens for 
 </pre></div>
 </div>
 </section>
-<section id="id14">
-<h3>Photoionization<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<section id="id15">
+<h3>Photoionization<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
 <p>Photoionization reactions are specified by including a <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> array of JSON entries that specify each reaction.
 The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
 Each entry <em>must</em> contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
@@ -2885,8 +2995,8 @@ This is particularly the case for three-body reactions with BOLSIG+ that may req
 <p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
 </div>
 </section>
-<section id="id15">
-<h4>Townsend coefficients<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h4>
+<section id="id16">
+<h4>Townsend coefficients<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h4>
 <p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
 For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
 <div class="admonition warning">
