@@ -1864,10 +1864,10 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
   this->clearPointParticles(a_rhoDaggerParticles, SpeciesSubset::All);
 
-  // Diffusion hops that would have crossed the boundary, and were cancelled or reflected instead.
-  long long numCrossingHops  = 0;
-  long long numTotalHops     = 0;
-  long long numReflectFailed = 0;
+  // rho^dagger deposits that would have landed inside the boundary, and were cancelled or reflected instead.
+  long long numCrossingDeposits = 0;
+  long long numTotalDeposits    = 0;
+  long long numReflectFailed    = 0;
 
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
@@ -1914,7 +1914,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime) reduction(+ : numCrossingHops, numTotalHops, numReflectFailed)
+#pragma omp parallel for schedule(runtime) reduction(+ : numCrossingDeposits, numTotalDeposits, numReflectFailed)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
@@ -1928,14 +1928,16 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           solver->interpolateDiffusionGradient(lvl, din);
         }
 
-        // Particles whose hop crossed the boundary, and the implicit function at their pre-hop position. Only the
-        // crossings are carried, which is a small fraction of the leaf even in a box that touches the surface, so
-        // these stay empty -- and unallocated -- for every box away from the geometry.
+        // Deposits whose displacement crossed the boundary: the particle slot, the implicit function at its pre-hop
+        // position, and the displacement the deposit would have taken. Only the crossings are carried, which is a
+        // small fraction of the leaf even in a box that touches the surface, so these stay empty -- and
+        // unallocated -- for every box away from the geometry.
         std::vector<std::size_t> crossings;
         std::vector<Real>        crossingsFOld;
+        std::vector<RealVect>    crossingsDeposit;
 
-        // First pass: the displacement for every particle, and the cheap test for whether it crossed. Two implicit
-        // function evaluations per particle, no intersection test.
+        // First pass: the displacement for every particle, and the cheap test for whether its DEPOSIT crossed.
+        // Two implicit function evaluations per charged particle, no intersection test.
         for (std::size_t i = 0; i < leaf.size(); i++) {
           const Real     weight = leaf.weight(i);
           const RealVect pos    = leaf.position(i);
@@ -1949,94 +1951,95 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           const RealVect gradD = gradientDrift ? RealVect(D_DECL(p.scratch_x, p.scratch_y, p.scratch_z))
                                                : RealVect::Zero;
 
-          // The total explicit displacement: the stochastic hop plus the lagged grad(D) drift.
+          // The total explicit displacement: the stochastic hop plus the lagged grad(D) drift. This is the
+          // particle's own displacement and it is final. The boundary handling below corrects the rho^dagger
+          // deposit and never the trajectory: a particle that hops into the solid stays there and is absorbed by
+          // the intersection test later in the advance, which is the physical outcome and the one that routes its
+          // charge off the bulk container.
           const RealVect disp = hop + a_dt * gradD;
 
           D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(disp[0]),
                  leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(disp[1]),
                  leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(disp[2]));
 
-          // The stochastic hop has zero mean and should carry no net transport, but the geometry makes it one-way:
-          // a particle in the fluid can hop into the solid, and there are none inside to hop back. What to do about
-          // that is ItoKMCGodunovStepper.diffusive_deposit. Drift is untouched here -- a particle carried into the
-          // boundary by v*dt still intersects and is absorbed later in the advance, which is real transport.
+          if (Z == 0) {
+            continue;
+          }
+
+          // What the rho^dagger deposit displaces by. The hop can be left out of it while the particle still takes
+          // it; the grad(D) drift never is, being deterministic mean transport that the explicit half must account
+          // for. Either way the boundary test below is applied to whatever the deposit actually uses.
+          const RealVect depositDisp = m_rhoDaggerHop ? disp : a_dt * gradD;
+
+          // A displacement landing inside the solid deposits into a covered cell, which carries no VoF and so
+          // contributes nothing to rho -- the charge simply leaves rho^dagger. The near-wall region drains that way
+          // at a rate set by sqrt(2*D*dt)/dx rather than by any physics, because the geometry makes the hop
+          // one-way: a particle in the fluid can hop into the solid and there are none inside to hop back. What to
+          // do instead is ItoKMCGodunovStepper.diffusive_deposit.
           if (checkEB) {
             const Real fOld = baseif->value(pos);
 
-            numTotalHops++;
+            numTotalDeposits++;
 
             // A sign CHANGE rather than a sign, so this assumes nothing about which side the implicit function
-            // calls positive. The particle did not cross when f(x_old)*f(x_new) >= 0; carve off the rest. pos is
+            // calls positive. The deposit did not cross when f(x_old)*f(x_new) >= 0; carve off the rest. pos is
             // known to be in the fluid because the particle is there now.
-            if (fOld * baseif->value(pos + disp) < 0.0) {
+            if (fOld * baseif->value(pos + depositDisp) < 0.0) {
               crossings.push_back(i);
               crossingsFOld.push_back(fOld);
+              crossingsDeposit.push_back(depositDisp);
+
+              // Deposited by the second pass, once the corrected position is known.
+              continue;
             }
           }
 
-          // With the hop left out, the rho^dagger position does not depend on the displacement and therefore not on
-          // anything the boundary handling below does to it, so it is deposited here where grad(D) is still in hand.
-          // The drift is never left out: it is deterministic mean transport that the explicit half must account for.
-          if (Z != 0 && !m_rhoDaggerHop) {
-            pointParticles.append(pos + a_dt * gradD, weight);
-          }
+          pointParticles.append(pos + depositDisp, weight);
         }
 
-        // Second pass: the carved-off crossings, which are the only particles worth an intersection test.
+        // Second pass: the carved-off crossings, which are the only deposits worth an intersection test. Every
+        // point particle is created at the position it keeps -- there is never a deposit to move afterwards, which
+        // is why the rho^dagger particles need carry no displacement of their own.
         for (std::size_t k = 0; k < crossings.size(); k++) {
-          const std::size_t i    = crossings[k];
-          const Real        fOld = crossingsFOld[k];
+          const std::size_t i           = crossings[k];
+          const Real        fOld        = crossingsFOld[k];
+          const RealVect    depositDisp = crossingsDeposit[k];
 
           const RealVect pos = leaf.position(i);
 
-          RealVect disp = RealVect(D_DECL(leaf.template get<&ItoParticle::scratch_x>(i),
-                                          leaf.template get<&ItoParticle::scratch_y>(i),
-                                          leaf.template get<&ItoParticle::scratch_z>(i)));
+          numCrossingDeposits++;
 
-          numCrossingHops++;
+          // Cancel deposits at the pre-hop position, which conserves the charge but biases the density towards
+          // where the particle started.
+          RealVect correctedDisp = RealVect::Zero;
 
-          if (m_diffusiveDeposit == DiffusiveDeposit::Cancel) {
-            disp = RealVect::Zero;
-          }
-          else {
-            disp = this->reflectDiffusionHop(pos, disp, fOld, dx, intersectionAlg, bisectStep);
+          if (m_diffusiveDeposit == DiffusiveDeposit::Reflect) {
+            correctedDisp = this->reflectDiffusionHop(pos, depositDisp, fOld, dx, intersectionAlg, bisectStep);
 
-            // Zero is unambiguous here: a hop that crossed cannot reflect to exactly no displacement, so this is
-            // the routine reporting that it could not place the particle back in the fluid.
-            if (disp == RealVect::Zero) {
+            // Zero is unambiguous here: a displacement that crossed cannot reflect to exactly no displacement, so
+            // this is the routine reporting that it could not place the deposit back in the fluid. Falling through
+            // with it leaves the deposit at the pre-hop position, which is what Cancel does and is always safe.
+            if (correctedDisp == RealVect::Zero) {
               numReflectFailed++;
             }
           }
 
-          D_DECL(leaf.template get<&ItoParticle::scratch_x>(i) = static_cast<ParticleReal>(disp[0]),
-                 leaf.template get<&ItoParticle::scratch_y>(i) = static_cast<ParticleReal>(disp[1]),
-                 leaf.template get<&ItoParticle::scratch_z>(i) = static_cast<ParticleReal>(disp[2]));
-        }
-
-        // Third pass: the rho^dagger deposit, which has to see the displacement the second pass settled on.
-        if (Z != 0 && m_rhoDaggerHop) {
-          for (std::size_t i = 0; i < leaf.size(); i++) {
-            const RealVect disp = RealVect(D_DECL(leaf.template get<&ItoParticle::scratch_x>(i),
-                                                  leaf.template get<&ItoParticle::scratch_y>(i),
-                                                  leaf.template get<&ItoParticle::scratch_z>(i)));
-
-            pointParticles.append(leaf.position(i) + disp, leaf.weight(i));
-          }
+          pointParticles.append(pos + correctedDisp, leaf.weight(i));
         }
       }
     }
   }
 
   // Reduced unconditionally: these are collectives and the condition below is not one.
-  numCrossingHops  = ParallelOps::sum(numCrossingHops);
-  numTotalHops     = ParallelOps::sum(numTotalHops);
-  numReflectFailed = ParallelOps::sum(numReflectFailed);
+  numCrossingDeposits = ParallelOps::sum(numCrossingDeposits);
+  numTotalDeposits    = ParallelOps::sum(numTotalDeposits);
+  numReflectFailed    = ParallelOps::sum(numReflectFailed);
 
-  if (this->m_verbosity > 5 && numTotalHops > 0) {
+  if (this->m_verbosity > 5 && numTotalDeposits > 0) {
     pout() << this->m_name + "::diffuseParticlesEulerMaruyama - "
-           << ((m_diffusiveDeposit == DiffusiveDeposit::Cancel) ? "cancelled " : "reflected ") << numCrossingHops
-           << " of " << numTotalHops << " diffusion hops (" << (100.0 * numCrossingHops) / numTotalHops
-           << "%) that would have crossed the EB";
+           << ((m_diffusiveDeposit == DiffusiveDeposit::Cancel) ? "cancelled " : "reflected ") << numCrossingDeposits
+           << " of " << numTotalDeposits << " rho^dagger deposits (" << (100.0 * numCrossingDeposits) / numTotalDeposits
+           << "%) that would have landed inside the EB";
 
     if (m_diffusiveDeposit == DiffusiveDeposit::Reflect) {
       pout() << "; " << numReflectFailed << " could not be reflected into the fluid and were cancelled";

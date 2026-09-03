@@ -161,18 +161,20 @@ protected:
   };
 
   /**
-   * @brief What to do with a diffusion hop that would land inside the embedded boundary.
-   * @details The stochastic hop has zero mean, so it should produce no net transport -- but the geometry makes it
-   * one-way: a particle in the fluid can hop into the solid, and there are none inside to hop back out. The near-wall
-   * region therefore drains at a rate set by sqrt(2*D*dt)/dx rather than by any physics. This selects what happens
-   * instead. Drift is unaffected in every case: a particle carried into the boundary by v*dt still intersects and is
-   * absorbed, which is real transport at a rate the field sets.
+   * @brief What to do with a rho^dagger deposit that would land inside the embedded boundary.
+   * @details A deposit inside the solid falls in a covered cell, which carries no VoF and contributes nothing to rho,
+   * so the charge leaves rho^dagger entirely. The geometry makes that one-way -- a particle in the fluid can hop into
+   * the solid and there are none inside to hop back -- so the near-wall region drains at a rate set by
+   * sqrt(2*D*dt)/dx rather than by any physics. This selects what is deposited instead.
+   * @note Every setting affects the DEPOSIT only. The particle's own displacement is never altered: one that hops
+   * into the solid stays there and is absorbed by the intersection test later in the advance, which is the physical
+   * outcome. Reflecting the trajectory as well would be a second, incompatible boundary condition on the same hop.
    */
   enum class DiffusiveDeposit
   {
-    Inside,  ///< Leave the hop alone. The particle lands inside the solid and deposits from there.
-    Cancel,  ///< Zero the hop. Conserves charge, but biases density towards the pre-hop position.
-    Reflect, ///< Reflect the hop about the boundary, which is the no-flux condition for a random walk.
+    Inside,  ///< Deposit from inside the solid, into a covered cell that contributes nothing to rho.
+    Cancel,  ///< Deposit at the pre-hop position. Conserves charge, but biases density towards where it started.
+    Reflect, ///< Deposit at the position mirrored about the boundary, mimicking a uniform plasma up to the wall.
   };
 
   /**
@@ -212,7 +214,7 @@ protected:
   bool m_emitSecondaryParticlesBeforeReactions;
 
   /**
-   * @brief What to do with a diffusion hop that would cross the embedded boundary. See DiffusiveDeposit.
+   * @brief What to do with a rho^dagger deposit that would land inside the embedded boundary. See DiffusiveDeposit.
    */
   DiffusiveDeposit m_diffusiveDeposit;
 
@@ -368,7 +370,7 @@ protected:
   parseRhoDaggerHop() noexcept;
 
   /**
-   * @brief Reflect a diffusion hop that crosses the embedded boundary back into the fluid.
+   * @brief Reflect a rho^dagger deposit displacement that crosses the embedded boundary back into the fluid.
    * @details Locates the crossing point with the solver's own intersection routine, takes the surface normal from the
    * gradient of the implicit function there, and mirrors the remainder of the displacement about it. The crossing
    * search always brackets from a_pos, which is known to lie in the fluid, so the bracket is valid on every attempt
@@ -382,7 +384,8 @@ protected:
    * the case for a genuine signed distance function, since the march is driven by the distance to the surface rather
    * than by a fixed step.
    * @param[in] a_pos             Pre-hop position, in the fluid.
-   * @param[in] a_disp            Displacement that crosses the boundary.
+   * @param[in] a_disp            Deposit displacement that crosses the boundary. This is not the particle's own
+   * displacement -- the trajectory is never corrected, only where its charge is deposited.
    * @param[in] a_fOld            Implicit function at a_pos, so the fluid's sign is known without re-evaluating.
    * @param[in] a_dx              Grid resolution, used to size the gradient stencil and the ray-cast tolerance.
    * @param[in] a_intersectionAlg Intersection algorithm, taken from the solver that owns the particle.
