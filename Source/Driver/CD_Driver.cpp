@@ -1877,6 +1877,93 @@ Driver::getFinestTagLevel(const EBAMRTags& a_cellTags) const
   return ParallelOps::max(finestTagLevel);
 }
 
+void
+Driver::coarsenTags(EBAMRTags& a_cellTags) const noexcept
+{
+  CH_TIME("Driver::coarsenTags(EBAMRTags)");
+  if (m_verbosity > 5) {
+    pout() << "Driver::coarsenTags(EBAMRTags)" << endl;
+  }
+
+  constexpr int comp  = 0;
+  constexpr int nComp = 1;
+
+  const int          finestLevel = m_amr->getFinestLevel();
+  const Vector<int>& refRat      = m_amr->getRefinementRatios();
+
+  for (int lvl = finestLevel; lvl > 0; lvl--) {
+    const DisjointBoxLayout& fineDbl   = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& coarDbl   = m_amr->getGrids(m_realm)[lvl - 1];
+    const int                refToCoar = refRat[lvl - 1];
+
+    CH_assert(fineDbl.coarsenable(refToCoar));
+
+    // The tags on this level, coarsened in place. This layout has the same boxes and the same ranks as the fine
+    // level, so the coarsening itself is purely local and only the copyTo below communicates.
+    DisjointBoxLayout coarFineDbl;
+    coarsen(coarFineDbl, fineDbl, refToCoar);
+
+    LevelData<BaseFab<bool>> coarFineTags(coarFineDbl, nComp, IntVect::Zero);
+    LevelData<BaseFab<bool>> coarTags(coarDbl, nComp, IntVect::Zero);
+
+    const DataIterator& fineDit  = fineDbl.dataIterator();
+    const int           fineNbox = fineDit.size();
+
+    // Set the tags as a BaseFab<bool> on the original grids
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < fineNbox; mybox++) {
+      const DataIndex& din = fineDit[mybox];
+
+      BaseFab<bool>&         coarFineFab = coarFineTags[din];
+      const DenseIntVectSet& tags        = (*a_cellTags[lvl])[din];
+
+      coarFineFab.setVal(false);
+
+      auto kernel = [&](const IntVect& iv) -> void {
+        if (tags[iv]) {
+          coarFineFab(coarsen(iv, refToCoar), comp) = true;
+        }
+      };
+
+      // Not vectorizable: data-dependent DenseIntVectSet membership query + conditional write. One-time per regrid.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(fineDbl[din], kernel);
+    }
+
+    // Reset tags on the coarse grids -- this is the scratch BaseFab<bool>, not our DenseIntVectSet target
+    const DataIterator& coarDit  = coarDbl.dataIterator();
+    const int           coarNbox = coarDit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < coarNbox; mybox++) {
+      const DataIndex& din = coarDit[mybox];
+
+      coarTags[din].setVal(false);
+    }
+
+    // The coarsened fine boxes are disjoint, so no coarse cell is written twice and a plain copy is enough.
+    coarFineTags.copyTo(coarTags);
+
+    // Go through the coarse grid; if a tag came in as a result of coarsening, we add it to the coarse grid.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < coarNbox; mybox++) {
+      const DataIndex& din = coarDit[mybox];
+
+      const BaseFab<bool>& coarFab = coarTags[din];
+
+      DenseIntVectSet& tags = (*a_cellTags[lvl - 1])[din];
+
+      auto kernel = [&](const IntVect& iv) -> void {
+        if (coarFab(iv, comp)) {
+          tags |= iv;
+        }
+      };
+
+      // Not vectorizable: data-dependent DenseIntVectSet insertion (loop-carried). One-time per regrid.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(coarDbl[din], kernel);
+    }
+  }
+}
+
 bool
 Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
 {
@@ -1897,6 +1984,10 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
 
   if (!m_cellTagger.isNull()) {
     gotNewTags = m_cellTagger->tagCells(a_cellTags);
+
+    // Tags on a level are what keeps the levels below it alive, so a tag on level l must exist on levels 0 to l-1
+    // as well. Without this the mesh can coarsen past the cell tagger's maximum coarsening level.
+    this->coarsenTags(a_cellTags);
   }
 
   // Gather tags from the cell tagger.

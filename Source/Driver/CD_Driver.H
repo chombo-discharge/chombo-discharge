@@ -707,6 +707,13 @@ protected:
   tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags);
 
   /**
+   * @brief Coarsen the refinement tags so that every level below a tag is tagged as well.
+   * @param[in,out] a_cellTags Tags to coarsen.
+   */
+  void
+  coarsenTags(EBAMRTags& a_cellTags) const noexcept;
+
+  /**
    * @brief Get number of plot variables
    * @return Returns the number of internal plot variables that Driver will write to file.
    */

@@ -144,6 +144,15 @@ public:
   getIntersectionAlgorithm() const noexcept;
 
   /**
+   * @brief Get the path-march length used by the bisection intersection algorithm.
+   * @details Only meaningful when the intersection algorithm is EBIntersection::Bisection, which marches the particle
+   * path in intervals of this length and refines the first interval that brackets the surface.
+   * @return Bisection step length.
+   */
+  virtual Real
+  getBisectionStep() const noexcept;
+
+  /**
    * @brief Set the initial data
    * @details This will add the initial particles and deposit them.
    */

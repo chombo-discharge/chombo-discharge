@@ -938,6 +938,11 @@ AmrMesh::intersectParticlesRaycastIF(
     const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
+    // The ray march converges on the surface geometrically and never reaches it, so the hit has to be declared
+    // within some distance of the surface rather than on it. That distance is a resolution and not a length, which
+    // is why the tolerance is taken relative to dx -- the same scaling McPhoto applies at its own call sites.
+    const Real tolerance = a_tolerance * m_dx[lvl];
+
     const int nbox = dit.size();
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
@@ -989,7 +994,7 @@ AmrMesh::intersectParticlesRaycastIF(
             contactDomain = ParticleOps::domainIntersection(oldPos, newPos, m_probLo, m_probHi, sDomain);
           }
           if (checkEB) {
-            contactEB = ParticleOps::ebIntersectionRaycast(implicitFunction, oldPos, newPos, a_tolerance, sEB);
+            contactEB = ParticleOps::ebIntersectionRaycast(implicitFunction, oldPos, newPos, tolerance, sEB);
           }
 
           // Particle bumped into something. Move it onto the intersection point and transfer it to the EB/domain

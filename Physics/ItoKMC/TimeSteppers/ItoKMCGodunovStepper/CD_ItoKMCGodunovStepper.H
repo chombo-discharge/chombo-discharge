@@ -17,6 +17,7 @@
 #include <CD_ItoKMCStepper.H>
 #include <CD_Timer.H>
 #include <CD_ParticleContainer.H>
+#include <CD_EBIntersection.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -160,9 +161,51 @@ protected:
   };
 
   /**
+   * @brief What to do with a diffusion hop that would carry a particle, or its charge, inside the embedded boundary.
+   * @details A deposit inside the solid falls in a covered cell, which carries no VoF and contributes nothing to rho,
+   * so the charge leaves rho^dagger entirely. The geometry makes that one-way -- a particle in the fluid can hop into
+   * the solid and there are none inside to hop back -- so the near-wall region drains at a rate set by
+   * sqrt(2*D*dt)/dx rather than by any physics.
+   * @details The settings differ in what they correct. Inside, Cancel and ReflectRho leave the particle's own
+   * displacement alone, so a particle that hops into the solid stays there and is absorbed by the intersection test
+   * later in the advance; only where its charge is deposited changes. ReflectIto corrects the displacement itself, so
+   * the particle never reaches the surface by diffusion at all and the deposit follows it.
+   * @note ReflectIto makes the wall reflecting for the diffusive part of the step while it stays absorbing for the
+   * drift part, since a particle carried in by dt*mu*E still intersects and is absorbed later in the advance. That
+   * split follows the operator splitting rather than anything physical, and is a deliberate approximation rather
+   * than a boundary condition. It is the default because the structure it suppresses is not representable here:
+   * the physical depletion layer is D_e/v_drift, some 0.5 to 1.3 um in atmospheric air, against a mesh one to two
+   * orders coarser, and the example cases configure the ions immobile and non-diffusive so the ion half of the
+   * sheath cannot respond at any resolution. What Inside puts in its place is sqrt(2*D*dt) wide -- several times
+   * wider, and tied to dt and dx rather than to D and the wall -- and the endpoint crossing test underneath it is
+   * only O(sqrt(dt)) accurate for an absorbing wall, so it does not converge under time-step refinement.
+   * @note The reasoning above has limits. ReflectIto becomes the wrong choice if the mesh resolves below roughly a
+   * micron, if the ions are made mobile or diffusive so the sheath can respond, or if anode-sheath dynamics are
+   * themselves of interest. A first-passage treatment applied to the whole displacement is the correct
+   * construction in those regimes and is not implemented here. See the ItoKMC chapter of the Sphinx documentation.
+   */
+  enum class DiffusiveDeposit
+  {
+    Inside,     ///< Deposit from inside the solid, into a covered cell that contributes nothing to rho.
+    Cancel,     ///< Deposit at the pre-hop position. Conserves charge, but biases density towards where it started.
+    ReflectRho, ///< Reflect the deposit about the boundary. The particle's own displacement is untouched.
+    ReflectIto, ///< Reflect the particle's displacement about the boundary. The deposit follows the corrected hop.
+  };
+
+  /**
    * @brief If true, then the particles are checkpointed so we can regrid on checkpoint-restart.
    */
   bool m_writeCheckpointParticles;
+
+  /**
+   * @brief If true, the stochastic diffusion hop enters rho^dagger along with the rest of the explicit displacement.
+   * @details The hop has zero mean, so to leading order dropping it shifts the source of the semi-implicit Poisson
+   * equation by dt*D*grad^2(n): the field no longer sees the charge spread over the step, which matters most where
+   * diffusion competes with drift. What it buys is a quieter rho^dagger, since the deposited source no longer
+   * carries the hop's shot noise. The lagged grad(D) drift is unaffected either way -- it is deterministic mean
+   * transport and always enters rho^dagger.
+   */
+  bool m_rhoDaggerHop;
 
   /**
    * @brief If true, then the HDF5 checkpoint file contained particles that we can read.
@@ -184,6 +227,11 @@ protected:
    * @brief If true, particles will be emitted before the reactive step
    */
   bool m_emitSecondaryParticlesBeforeReactions;
+
+  /**
+   * @brief What to do with a rho^dagger deposit that would land inside the embedded boundary. See DiffusiveDeposit.
+   */
+  DiffusiveDeposit m_diffusiveDeposit;
 
   /**
    * @brief Which advancement algorithm to use.
@@ -323,6 +371,49 @@ protected:
    */
   virtual void
   parseSecondaryEmissionSpecification() noexcept;
+
+  /**
+   * @brief Parse what happens to a diffusion hop that would cross the embedded boundary.
+   */
+  virtual void
+  parseDiffusiveDeposit() noexcept;
+
+  /**
+   * @brief Parse whether the stochastic diffusion hop enters rho^dagger.
+   */
+  virtual void
+  parseRhoDaggerHop() noexcept;
+
+  /**
+   * @brief Reflect a rho^dagger deposit displacement that crosses the embedded boundary back into the fluid.
+   * @details Locates the crossing point with the solver's own intersection routine, takes the surface normal from the
+   * gradient of the implicit function there, and mirrors the remainder of the displacement about it. The crossing
+   * search always brackets from a_pos, which is known to lie in the fluid, so the bracket is valid on every attempt
+   * and no search is ever started from a point sitting on the surface.
+   * @details Reflection can fail to place the particle in the fluid -- at a concave corner, or in a feature thinner
+   * than the hop, the mirrored point is inside the solid again. A second reflection is attempted, and if that also
+   * fails the hop is cancelled, which is always safe because the pre-hop position is known to be in the fluid.
+   * @note Whether a hop passing clean THROUGH thin geometry is caught is decided by the intersection routine and not
+   * here. Bisection marches the path in intervals of a_bisectStep and sees such a feature only when it is thicker
+   * than one interval; the caller's endpoint sign test never sees one at all. Sphere-tracing the particle would cover
+   * the case for a genuine signed distance function, since the march is driven by the distance to the surface rather
+   * than by a fixed step.
+   * @param[in] a_pos             Pre-hop position, in the fluid.
+   * @param[in] a_disp            Deposit displacement that crosses the boundary. This is not the particle's own
+   * displacement -- the trajectory is never corrected, only where its charge is deposited.
+   * @param[in] a_fOld            Implicit function at a_pos, so the fluid's sign is known without re-evaluating.
+   * @param[in] a_dx              Grid resolution, used to size the gradient stencil and the ray-cast tolerance.
+   * @param[in] a_intersectionAlg Intersection algorithm, taken from the solver that owns the particle.
+   * @param[in] a_bisectStep      Bisection path-march length, taken from the solver that owns the particle.
+   * @return The reflected displacement, or zero if reflection could not place the particle in the fluid.
+   */
+  virtual RealVect
+  reflectDiffusionHop(const RealVect&      a_pos,
+                      const RealVect&      a_disp,
+                      const Real           a_fOld,
+                      const Real           a_dx,
+                      const EBIntersection a_intersectionAlg,
+                      const Real           a_bisectStep) const noexcept;
 
   /**
    * @brief Parse the time-centering of the electric field used for the reactive substep.

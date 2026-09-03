@@ -1210,7 +1210,10 @@ public:
    * @param[out]   a_ebParticles     Particles that intersected the EB (cleared and remapped here).
    * @param[out]   a_domainParticles Particles that intersected the domain faces (cleared and remapped here).
    * @param[in]    a_phase           Phase where the input particles live.
-   * @param[in]    a_tolerance       Tolerance.
+   * @param[in]    a_tolerance       Collision tolerance, as a fraction of the grid resolution on the level being
+   * intersected. The ray march declares a hit once it comes within a_tolerance*dx of the surface, so this must be
+   * strictly positive: the march converges on the surface geometrically and never reaches it, so a tolerance of zero
+   * means the hit is never declared and the loop does not terminate.
    * @param[in]    a_deleteParticles If true, intersected particles are removed from a_activeParticles.
    * @param[in]    a_nonDeletionModifier Callback applied to each intersected-but-not-deleted particle, given its
    * home leaf and slot index (used e.g. to flag the original particle via a payload column).
