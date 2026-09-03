@@ -1885,14 +1885,6 @@ Driver::coarsenTags(EBAMRTags& a_cellTags) const noexcept
     pout() << "Driver::coarsenTags(EBAMRTags)" << endl;
   }
 
-  // TLDR: TiledMeshRefine builds the level l+1 grids from the tags on level l and then injects proper nesting from
-  //       level l+1 back down into level l. A region can therefore hold every level up to l+1 from a single tag on
-  //       level l, with no tags at all on the levels in between, and it collapses by several levels at once when
-  //       that one tag is coarsened away. We restore a_cellTags[l] >= coarsen(a_cellTags[l+1]) by coarsening each
-  //       level's tags onto the coarsened grids and copying those onto the coarser level. Sweeping from the finest
-  //       level down means a level is coarsened only after it has received everything from above, so a tag reaches
-  //       level 0 in a single pass.
-
   constexpr int comp  = 0;
   constexpr int nComp = 1;
 
@@ -1917,6 +1909,7 @@ Driver::coarsenTags(EBAMRTags& a_cellTags) const noexcept
     const DataIterator& fineDit  = fineDbl.dataIterator();
     const int           fineNbox = fineDit.size();
 
+    // Set the tags as a BaseFab<bool> on the original grids
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < fineNbox; mybox++) {
       const DataIndex& din = fineDit[mybox];
@@ -1936,6 +1929,7 @@ Driver::coarsenTags(EBAMRTags& a_cellTags) const noexcept
       BoxLoops::loop<D_DECL(1, 1, 1)>(fineDbl[din], kernel);
     }
 
+    // Reset tags on the coarse grids -- this is the scratch BaseFab<bool>, not our DenseIntVectSet target
     const DataIterator& coarDit  = coarDbl.dataIterator();
     const int           coarNbox = coarDit.size();
 
@@ -1949,6 +1943,7 @@ Driver::coarsenTags(EBAMRTags& a_cellTags) const noexcept
     // The coarsened fine boxes are disjoint, so no coarse cell is written twice and a plain copy is enough.
     coarFineTags.copyTo(coarTags);
 
+    // Go through the coarse grid; if a tag came in as a result of coarsening, we add it to the coarse grid.
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < coarNbox; mybox++) {
       const DataIndex& din = coarDit[mybox];
