@@ -738,7 +738,7 @@ Often, merging or splitting of particles is required.
 
 * **Per-cell mergers** operate on one cell at a time and are implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
   Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
-  These are ``equal_weight_kd``, ``equal_weight_kd_sampled``, ``reinitialize``, ``reinitialize_bvh``, and ``nn_sfc``.
+  These are ``kd_cell``, ``reinitialize``, and ``nn_sfc``.
 * **Whole-hierarchy mergers** operate collectively across the entire AMR hierarchy rather than one cell at a time.
   None is a per-cell factory, and all are distributed and MPI-safe.
   These are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, ``kd_patch``, and ``kd_skin_nn``.
@@ -776,32 +776,32 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 The particles in each leaf of the tree can then be merged into new particles, one per leaf.
 What distinguishes the kd-based mergers from one another is the rule used to choose each split plane, the rule used to stop the recursion, and whether the tree is built per cell or per patch:
 
-* ``equal_weight_kd``, ``equal_weight_kd_sampled`` and ``reinitialize_bvh`` build one tree **per cell**, splitting so that the two halves carry as nearly equal *weight* as possible.
+* ``kd_cell`` builds one tree **per cell**. ``ItoSolver.kd_cell_partition`` chooses the split rule: ``weight`` splits so the two halves carry as nearly equal *weight* as possible, ``count`` so they hold as nearly equal a particle *count* as possible.
 * ``kd_carve`` and ``kd_patch`` build one tree **per patch**, splitting at the count or weight median and stopping on a live per-cell quota.
 
 Per-cell kd-merges
 __________________
 
-The per-cell partitioner ``buildEqualWeightKDLeaves`` operates on a lightweight AoS particle type (``ParticleManagement::MergeParticle``) carrying the position and weight as data members, plus an opaque payload holding any quantities to be preserved across a merge.
+The per-cell partitioner ``buildKDCellLeaves`` operates on a lightweight AoS particle type (``ParticleManagement::MergeParticle``) carrying the position and weight as data members, plus an opaque payload holding any quantities to be preserved across a merge.
 It recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible -- at each bisection the two halves differ by at most one physical particle.
 It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.
 
 .. note::
 
-   ``ParticleManagement::detail::buildEqualWeightKDLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) lives in the internal ``detail`` namespace -- it implements the partitioning but is not part of the public interface and is not meant to be called directly.
-   The public entry point is the ``makeEqualWeightKDMerger`` factory (see :ref:`below <kd-tree-merging>`), which wraps it.
+   ``ParticleManagement::detail::buildKDCellLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) lives in the internal ``detail`` namespace -- it implements the partitioning but is not part of the public interface and is not meant to be called directly.
+   The public entry point is the ``makeKDCellMerger`` factory (see :ref:`below <kd-tree-merging>`), which wraps it.
 
 .. warning::
 
-   ``buildEqualWeightKDLeaves`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
+   Under the ``weight`` partition ``buildKDCellLeaves`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles); the ``count`` partition never does.
    In this case any other members in the particle type are copied over into the new particles.
 
 .. _kd-tree-merging:
 
-Equal-weight merging (``equal_weight_kd``)
+Per-cell kd merging (``kd_cell``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``ParticleManagement::makeEqualWeightKDMerger`` wraps ``buildEqualWeightKDLeaves`` into a ``ParticleMerger`` functor.
+``ParticleManagement::makeKDCellMerger`` wraps ``buildKDCellLeaves`` into a ``ParticleMerger`` functor.
 The caller provides three lambdas:
 
 * A *gather* function that packs one SoA slot into a ``MergeParticle``.
@@ -819,14 +819,18 @@ Since the weight in the leaves of the tree differ by at most one, the resulting 
    Left: Original particles with weights between 1 and 100.
    Right: Merged particles.
 
-In the weighted-centroid variant (``equal_weight_kd`` in ``ItoSolver``), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
-Particle weights need not be integers, but ``buildEqualWeightKDLeaves`` may create new particles at the kd boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.
+``ItoSolver.kd_cell_placement`` chooses what the scatter-leaf does with a finished leaf.
+With ``centroid`` it computes the weight-averaged position and energy over all particles in the leaf.
+Particle weights need not be integers, but the ``weight`` partition may create new particles at the kd boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced. The ``count`` partition divides no particle and so never overshoots.
 
-The ``equal_weight_kd_sampled`` variant uses the same factory and the same partition, and differs only in the scatter-leaf: the merged particle is placed at one of the leaf's own particles, drawn with probability proportional to weight, rather than at the leaf's weighted centroid.
+With ``sample`` the merged particle is placed at one of the leaf's own particles, drawn with probability proportional to weight.
 The centroid keeps the leaf's mean position and discards its spread, so it is a contraction on the particle positions -- repeated merges drive the sub-cell distribution onto the fixed points of that map, which form a regular sub-cell lattice, identical in every grid cell and therefore coherent across the whole domain.
 A weight-proportional draw from a partition of a sample is itself a sample of the same distribution, so no lattice forms and no sub-cell spread is lost.
 The per-leaf centre of mass is then conserved in expectation rather than exactly; the total weight, the per-cell density and the weight equalization are all unaffected.
-Unlike the reinitialization algorithms below, no spatial information is discarded: the merged particle inherits a position that one of the original particles actually occupied, which also means it can never be placed inside an embedded boundary.
+No spatial information is discarded: the merged particle inherits a position that one of the original particles actually occupied, which also means it can never be placed inside an embedded boundary.
+
+With ``random`` the merged particle is placed at a uniformly random point in the leaf's bounding box, falling back to the centroid in cut cells so that it stays inside the embedded boundary.
+This also avoids the lattice, but the bounding box of a leaf is not the leaf, so the distribution it draws from is not quite the one the particles came from.
 
 Reinitialization algorithms
 ___________________________
@@ -841,7 +845,7 @@ Reinitialization (``reinitialize``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 285-289
+   :lines: 332-336
 
 The returned functor proceeds as follows:
 
@@ -856,21 +860,6 @@ This method requires that particle weights are (close to) integers.
 
    ``makeReinitializeMerger`` captures ``probLo`` at parse time.
    The cell-centre position is computed internally as ``probLo + dx * (gridIndex + 0.5)``, so no grid pointer needs to be retained in the returned functor.
-
-kd-tree reinitialization (``reinitialize_bvh``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The ``reinitialize_bvh`` variant uses the same ``makeEqualWeightKDMerger`` factory and the same per-cell kd partition as ``equal_weight_kd``, but replaces the centroid scatter with a position-reinitialising scatter:
-
-* **Cut-cells** (``volFrac < 1``): the weighted centroid is used to keep the merged particle inside the embedded boundary.
-* **Full cells**: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each kd partition rather than collapsing it to a single point.
-
-Unlike ``reinitialize``, the spatial information is discarded only *within* each leaf, so the coarse-grained distribution across the cell is preserved.
-
-.. note::
-
-   In the full-cell branch, energy is accumulated over the leaf but is *not* normalised by weight -- the stored value is the total (not average) energy of the leaf.
-   This is intentional and matches the original ``ItoSolver`` behaviour.
 
 Nearest-neighbour algorithms
 ____________________________
@@ -906,7 +895,7 @@ SFC pair merging (``nn_sfc``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 200-208
+   :lines: 245-253
 
 The caller provides three lambdas:
 

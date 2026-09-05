@@ -34,17 +34,44 @@
 namespace ParticleManagement {
 
 /**
+ * @brief How a per-cell kd merge divides a node into two children.
+ * @details The two rules answer different questions. The weight median divides the node so the halves
+ * carry as nearly equal a weight as possible, dividing a particle across the split when it has to, which
+ * equalizes the merged weights but can create particles during the build. The count median divides so
+ * the halves hold as nearly equal a particle count as possible and never divides a particle, so it
+ * creates none, at the cost of leaving the merged weights uneven.
+ */
+enum class KDPartition
+{
+  Weight, ///< Split at the weight median; halves carry near-equal weight.
+  Count   ///< Split at the count median; halves hold near-equal particle counts.
+};
+
+/**
+ * @brief Where a per-cell kd merge puts the particle a leaf reduces to.
+ * @details The centroid keeps the leaf's mean position and discards its spread, so repeated merges
+ * contract the sub-cell distribution onto a lattice of leaf centres. Sampling draws one of the leaf's own
+ * particles with probability proportional to weight, which is distribution-preserving and inherits a
+ * position some particle actually occupied. Random draws uniformly from the leaf's bounding box, which
+ * also avoids the lattice but from a distribution that is not quite the leaf's own.
+ */
+enum class KDPlacement
+{
+  Centroid, ///< The leaf's weighted centroid.
+  Sample,   ///< One of the leaf's own particles, drawn with probability proportional to weight.
+  Random    ///< A uniformly random point in the leaf's bounding box.
+};
+
+/**
  * @brief The specific super-particle merge methods.
  */
 enum class ParticleMergeMethod
 {
-  None,                 ///< No merging.
-  EqualWeightKD,        ///< Cell: makeEqualWeightKDMerger.
-  EqualWeightKDSampled, ///< Cell: makeEqualWeightKDMerger, leaf placed at a weight-sampled member.
-  Reinitialize,         ///< Cell: makeReinitializeMerger.
-  ReinitializeBVH,      ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
-  NnSfc,                ///< Cell: makeSfcNearestNeighborMerger.
-  NnPairTree,           ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
+  None,          ///< No merging.
+  KdCell,        ///< Cell: makeKDCellMerger. Partition and placement are chosen independently.
+  Reinitialize,  ///< Cell: makeReinitializeMerger.
+  NnSfc,         ///< Cell: makeSfcNearestNeighborMerger.
+  NnPairTree,    ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
   NnPairOneCell, ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
   NnPairHash,    ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
   KdCarve,       ///< AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries).
@@ -57,10 +84,8 @@ enum class ParticleMergeMethod
  * @brief Map a merge-algorithm selector string to a ParticleMergeMethod.
  * @details Valid input options are:
  * 'none' -> None
- * 'equal_weight_kd' -> EqualWeightKD
- * 'equal_weight_kd_sampled' -> EqualWeightKDSampled
+ * 'kd_cell' -> KdCell
  * 'reinitialize' -> Reinitialize
- * 'reinitialize_bvh' -> ReinitializeBVH
  * 'nn_sfc' -> NnSfc
  * 'nn_pair_tree' -> NnPairTree
  * 'nn_pair_onecell' -> NnPairOneCell
@@ -74,6 +99,24 @@ enum class ParticleMergeMethod
  */
 inline ParticleMergeMethod
 mergeMethodFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a kd partition rule.
+ * @details Valid inputs are 'weight' and 'count'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDPartition.
+ */
+inline KDPartition
+kdPartitionFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a kd placement rule.
+ * @details Valid inputs are 'centroid', 'sample' and 'random'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDPlacement.
+ */
+inline KDPlacement
+kdPlacementFromString(const std::string& a_str) noexcept;
 
 /**
  * @brief Concept for splitting/merging particles
@@ -128,6 +171,7 @@ namespace detail {
  *
  * @param[in]  a_particles         Input particles (copied into internal scratch; not modified).
  * @param[in]  a_maxLeaves         Maximum number of leaf nodes (the per-cell target particle count).
+ * @param[in]  a_partition         Whether each node is divided at the weight median or the count median.
  * @param[in]  a_particleReconcile Reconciliation callback applied to the two daughters when the median is split.
  * @param[out] a_leaves            Filled with one {begin,end} pointer pair per leaf.
  * @warning The returned ranges alias an internal thread-local buffer that is overwritten on the next call to
@@ -135,10 +179,11 @@ namespace detail {
  */
 template <class P, Real P::*weight, RealVect P::*position>
 inline void
-buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
-                         const int                                   a_maxLeaves,
-                         const BinaryParticleReconcile<P>&           a_particleReconcile,
-                         std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
+buildKDCellLeaves(const std::vector<P>&                       a_particles,
+                  const int                                   a_maxLeaves,
+                  const KDPartition                           a_partition,
+                  const BinaryParticleReconcile<P>&           a_particleReconcile,
+                  std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
 
 /**
  * @brief Merge an already spatially-ordered particle list down to a target count by repeatedly combining
@@ -216,7 +261,7 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  *   1. Packs each SoA slot into a lightweight intermediate (@c Packed) via @c a_gather and accumulates
  *      total weight @c W.
  *   2. Returns early if @c W < 2 or the target is non-positive.
- *   3. Calls detail::buildEqualWeightKDLeaves to partition the packed list into at most @c a_numTargetParticles
+ *   3. Calls detail::buildKDCellLeaves to partition the packed list into at most @c a_numTargetParticles
  *      leaves, using @c a_reconcile to fix up daughter particles whenever the median is split.
  *   4. Clears the SoA container, then reduces each leaf by calling @c a_scatterLeaf once per leaf.
  *
@@ -229,11 +274,12 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  *
  * @tparam Packed       Lightweight AoS intermediate type (e.g. MergeParticle<Packed>). Must be copyable.
  * @tparam packWeight   Member-data pointer `Real Packed::*` naming the weight. Forwarded to
- *                      detail::buildEqualWeightKDLeaves for median splitting.
+ *                      detail::buildKDCellLeaves for median splitting.
  * @tparam packPosition Member-data pointer `RealVect Packed::*` naming the position. Forwarded to
- *                      detail::buildEqualWeightKDLeaves for bounding-box splitting.
+ *                      detail::buildKDCellLeaves for bounding-box splitting.
  * @tparam P            SoA payload type.
  * @tparam Traits       Column descriptor for @c P (defaults to ParticleTraits<P>).
+ * @param[in] a_partition   Whether each node is divided at the weight median or the count median.
  * @param[in] a_gather      Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @param[in] a_reconcile   Daughter reconciliation: `(Packed& p1, Packed& p2, const Packed& p0) -> void`.
  * @param[in] a_scatterLeaf Leaf reducer: `(ParticleSoA<P,Traits>&, const Packed* first,
@@ -247,7 +293,8 @@ template <class Packed,
           class P,
           class Traits = ParticleTraits<P>>
 inline ParticleMerger<P, Traits>
-makeEqualWeightKDMerger(
+makeKDCellMerger(
+  const KDPartition                                                                           a_partition,
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
   BinaryParticleReconcile<Packed>                                                             a_reconcile,
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept;

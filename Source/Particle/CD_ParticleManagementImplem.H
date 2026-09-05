@@ -40,17 +40,23 @@ mergeMethodFromString(const std::string& a_str) noexcept
   if (a_str == "none") {
     return ParticleMergeMethod::None;
   }
-  else if (a_str == "equal_weight_kd") {
-    return ParticleMergeMethod::EqualWeightKD;
-  }
-  else if (a_str == "equal_weight_kd_sampled") {
-    return ParticleMergeMethod::EqualWeightKDSampled;
+  else if (a_str == "kd_cell") {
+    return ParticleMergeMethod::KdCell;
   }
   else if (a_str == "reinitialize") {
     return ParticleMergeMethod::Reinitialize;
   }
-  else if (a_str == "reinitialize_bvh") {
-    return ParticleMergeMethod::ReinitializeBVH;
+  else if (a_str == "equal_weight_kd" || a_str == "equal_weight_kd_sampled" || a_str == "reinitialize_bvh") {
+    // These three were the weight-partitioned kd merge under its three placements. They are now one
+    // selector plus two axes; abort rather than silently picking one, so the migration is explicit.
+    const std::string msg = "ParticleManagement::mergeMethodFromString - '" + a_str +
+                            "' has been replaced by 'kd_cell' with ItoSolver.kd_cell_partition = weight and "
+                            "ItoSolver.kd_cell_placement = " +
+                            (a_str == "equal_weight_kd" ? "centroid"
+                                                        : (a_str == "equal_weight_kd_sampled" ? "sample" : "random"));
+    MayDay::Abort(msg.c_str());
+
+    return ParticleMergeMethod::KdCell;
   }
   else if (a_str == "nn_sfc") {
     return ParticleMergeMethod::NnSfc;
@@ -83,16 +89,56 @@ mergeMethodFromString(const std::string& a_str) noexcept
   }
 }
 
+inline KDPartition
+kdPartitionFromString(const std::string& a_str) noexcept
+{
+  if (a_str == "weight") {
+    return KDPartition::Weight;
+  }
+  else if (a_str == "count") {
+    return KDPartition::Count;
+  }
+  else {
+    const std::string msg = "ParticleManagement::kdPartitionFromString - unknown partition '" + a_str +
+                            "' (expected 'weight' or 'count')";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return KDPartition::Weight;
+}
+
+inline KDPlacement
+kdPlacementFromString(const std::string& a_str) noexcept
+{
+  if (a_str == "centroid") {
+    return KDPlacement::Centroid;
+  }
+  else if (a_str == "sample") {
+    return KDPlacement::Sample;
+  }
+  else if (a_str == "random") {
+    return KDPlacement::Random;
+  }
+  else {
+    const std::string msg = "ParticleManagement::kdPlacementFromString - unknown placement '" + a_str +
+                            "' (expected 'centroid', 'sample' or 'random')";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return KDPlacement::Centroid;
+}
+
 namespace detail {
 
 template <class P, Real P::*weight, RealVect P::*position>
 inline void
-buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
-                         const int                                   a_maxLeaves,
-                         const BinaryParticleReconcile<P>&           a_particleReconcile,
-                         std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept
+buildKDCellLeaves(const std::vector<P>&                       a_particles,
+                  const int                                   a_maxLeaves,
+                  const KDPartition                           a_partition,
+                  const BinaryParticleReconcile<P>&           a_particleReconcile,
+                  std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept
 {
-  CH_TIME("ParticleManagement::buildEqualWeightKDLeaves");
+  CH_TIME("ParticleManagement::buildKDCellLeaves");
 
   // Half-open particle range [lo, hi) into the flat working buffer, plus the node weight. This replaces
   // the old heap-allocated, shared_ptr-linked KDNode<P> (one alloc + atomic refcount per node).
@@ -153,10 +199,16 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
     for (std::size_t ni = 0; ni < s_curNodes.size(); ni++) {
       const NodeRange node = s_curNodes[ni];
 
-      if (node.w > splitThresh && splitBudget > 0) {
+      // What makes a node splittable depends on the partition rule. The weight median needs at least two
+      // units of weight to divide; the count median needs at least two particles, and never divides a
+      // particle, so it can drive a node down to a single member regardless of how heavy that member is.
+      const bool splittable = (a_partition == KDPartition::Weight) ? (node.w > splitThresh)
+                                                                   : ((node.hi - node.lo) >= 2);
+
+      if (splittable && splitBudget > 0) {
         splitBudget--;
 
-        // ---- split this node (equal-weight median split) into s_nxt ----
+        // ---- split this node into s_nxt ----
         P* const          beg = s_cur.data() + node.lo;
         P* const          end = s_cur.data() + node.hi;
         const std::size_t n   = node.hi - node.lo;
@@ -180,6 +232,31 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
         std::sort(beg, end, [splitDir](const P& p1, const P& p2) -> bool {
           return (p1.*position)[splitDir] < (p2.*position)[splitDir];
         });
+
+        // Count median. The two halves get as nearly equal a particle COUNT as possible, and no particle
+        // is ever divided, so this path creates no new particles and needs no reconciliation -- the leaf
+        // count can therefore never overshoot the target during the build, unlike the weight median.
+        // The weights of the halves are whatever the partition happens to give.
+        if (a_partition == KDPartition::Count) {
+          const std::size_t mid = n / 2;
+
+          Real wl = 0.0;
+          for (std::size_t i = 0; i < mid; i++) {
+            wl += beg[i].*weight;
+          }
+
+          const std::size_t leftLo = s_nxt.size();
+          s_nxt.insert(s_nxt.end(), beg, beg + mid);
+          s_nxtNodes.push_back({leftLo, s_nxt.size(), wl});
+
+          const std::size_t rightLo = s_nxt.size();
+          s_nxt.insert(s_nxt.end(), beg + mid, end);
+          s_nxtNodes.push_back({rightLo, s_nxt.size(), Wn - wl});
+
+          keepGoing = true;
+
+          continue;
+        }
 
         // B. Weight-balanced median particle.
         std::size_t id = 0;
@@ -259,7 +336,7 @@ buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles
             hasExtraR      = true;
           }
           else {
-            MayDay::Abort("ParticleManagement::buildEqualWeightKDLeaves - logic bust");
+            MayDay::Abort("ParticleManagement::buildKDCellLeaves - logic bust");
           }
         }
         else {
@@ -564,16 +641,17 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
 
 template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition, class P, class Traits>
 inline ParticleMerger<P, Traits>
-makeEqualWeightKDMerger(
+makeKDCellMerger(
+  const KDPartition                                                                           a_partition,
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
   BinaryParticleReconcile<Packed>                                                             a_reconcile,
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept
 {
   return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& a_cellInfo, int a_ppc) noexcept {
-    CH_TIMERS("ParticleManagement::makeEqualWeightKDMerger");
-    CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::populate", t1);
-    CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::build_kd", t2);
-    CH_TIMER("ParticleManagement::makeEqualWeightKDMerger::scatter", t3);
+    CH_TIMERS("ParticleManagement::makeKDCellMerger");
+    CH_TIMER("ParticleManagement::makeKDCellMerger::populate", t1);
+    CH_TIMER("ParticleManagement::makeKDCellMerger::build_kd", t2);
+    CH_TIMER("ParticleManagement::makeKDCellMerger::scatter", t3);
 
     CH_START(t1);
     thread_local std::vector<Packed> particles;
@@ -597,7 +675,7 @@ makeEqualWeightKDMerger(
     CH_START(t2);
     thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
 
-    detail::buildEqualWeightKDLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_reconcile, leaves);
+    detail::buildKDCellLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_partition, a_reconcile, leaves);
     CH_STOP(t2);
 
     CH_START(t3);

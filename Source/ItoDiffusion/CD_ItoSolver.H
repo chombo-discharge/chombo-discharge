@@ -1276,10 +1276,22 @@ protected:
   /**
    * @brief The configured merge method (which specific algorithm).
    * @details Set by parseParticleMerger() from ItoSolver.merge_algorithm. makeSuperparticles()
-   * dispatches on this to run the right algorithm. Defaults to EqualWeightKD (the default
+   * dispatches on this to run the right algorithm. Defaults to KdCell (the default
    * merge_algorithm).
    */
-  ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
+  ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::KdCell;
+
+  /**
+   * @brief kd_cell: how each node is divided into two children.
+   * @details ItoSolver.kd_cell_partition. See mergeKDCell().
+   */
+  ParticleManagement::KDPartition m_kdCellPartition = ParticleManagement::KDPartition::Weight;
+
+  /**
+   * @brief kd_cell: where the particle a leaf reduces to is placed.
+   * @details ItoSolver.kd_cell_placement. See mergeKDCell().
+   */
+  ParticleManagement::KDPlacement m_kdCellPlacement = ParticleManagement::KDPlacement::Centroid;
 
   /**
    * @brief Target number of computational particles per cell, per AMR level.
@@ -1753,33 +1765,23 @@ protected:
   };
 
   /**
-   * @brief Cell-based merge: equal-weight KD partition, one weighted-centroid particle per leaf.
-   * @details Recursively partitions each cell into at most a_particlesPerCell equal-weight KD leaves
-   * and reduces each to one weighted-centroid particle. Requires particle weights >= 1 to split.
-   * Honours the per-level target.
-   * @param[in,out] a_particles        Reduced-particle container to repartition.
-   * @param[in]     a_particlesPerCell Target particle count per cell (per-level).
-   */
-  void
-  mergeEqualWeightKD(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
-
-  /**
-   * @brief Merge particles with a per-cell equal-weight KD partition, placing each leaf at one of its
-   * own members rather than at their weighted centroid.
-   * @details The weighted centroid keeps a leaf's mean position and discards its spread, so it is a
-   * contraction on the particle positions: repeated merges drive the sub-cell distribution onto the
-   * fixed points of that map, which -- because equal-weight leaves of a locally uniform population are
-   * near enough equal-volume sub-boxes -- form a regular sub-cell lattice, identical in every cell and
-   * therefore coherent across the whole domain. Drawing one member with probability proportional to
-   * weight is distribution-preserving instead: a weight-proportional draw from a partition of a sample
-   * of rho is itself a sample of rho, so neither the lattice nor the loss of sub-cell spread occurs.
-   * The per-leaf first moment then holds only in expectation rather than exactly, and because the
-   * partition is per-cell no weight crosses a cell face, leaving the per-cell density untouched.
+   * @brief Cell-based merge: partition each cell's particles with a kd tree and reduce every leaf to one
+   * particle.
+   * @details Two independent choices, both taken from the input script. ItoSolver.kd_cell_partition picks
+   * the split rule: the weight median divides a node so the halves carry near-equal weight, dividing a
+   * particle when it must, which equalizes the merged weights; the count median divides on particle count
+   * and never divides a particle, so it creates none but leaves the weights uneven.
+   * ItoSolver.kd_cell_placement picks where a leaf's particle goes: at the leaf's weighted centroid, at
+   * one of the leaf's own particles drawn with probability proportional to weight, or at a uniformly
+   * random point in the leaf's bounding box. The centroid keeps a leaf's mean position and discards its
+   * spread, so repeated merges contract the sub-cell distribution onto a lattice of leaf centres; the
+   * other two placements avoid that, and sampling additionally inherits a position that one of the
+   * original particles occupied.
    * @param[in,out] a_particles        Particles to merge.
    * @param[in]     a_particlesPerCell Target number of particles per cell (one value, or one per level).
    */
   virtual void
-  mergeEqualWeightKDSampled(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
+  mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Cell-based merge: redistribute each cell's physical particles into near-equal integer
@@ -1791,16 +1793,6 @@ protected:
    */
   void
   mergeReinitialize(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
-
-  /**
-   * @brief Cell-based merge: as mergeEqualWeightKD(), with reinitialized leaf positions.
-   * @details Cut-cells use the weighted centroid (to stay inside the EB); full cells draw a random
-   * point in the leaf bounding box. Honours the per-level target.
-   * @param[in,out] a_particles        Reduced-particle container to repartition.
-   * @param[in]     a_particlesPerCell Target particle count per cell (per-level).
-   */
-  void
-  mergeReinitializeBVH(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Cell-based merge: Hilbert-curve sort, then merge adjacent pairs down to the target.
