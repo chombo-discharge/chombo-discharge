@@ -92,9 +92,9 @@ public:
   operator=(ItoSolver&&) = default;
 
   /**
-   * @brief Set the user-supplied per-cell particle merger used by merge_algorithm = external.
+   * @brief Set the user-supplied per-cell particle merger used by merge_method = external.
    * @details The built-in merge methods build their own per-cell merger internally; this one is used
-   * only when merge_algorithm = external, applied cell-by-cell by makeSuperparticles().
+   * only when merge_method = external, applied cell-by-cell by makeSuperparticles().
    * @note The merger runs on ItoMergeParticle, not ItoParticle: every merge in this solver operates on
    * the reduced particle, and a per-cell merger sees exactly the columns a merge is entitled to change
    * (position, weight, energy). Out-of-tree mergers written against ItoParticle break at compile time.
@@ -931,7 +931,7 @@ public:
   /**
    * @brief Make superparticles for a full container, merging to the solver's configured target.
    * @details The usual entry point: the target is ItoSolver.particles_per_cell and the method is
-   * ItoSolver.merge_algorithm, so a caller that has no opinion about either does not have to carry one.
+   * ItoSolver.merge_method, so a caller that has no opinion about either does not have to carry one.
    * @param[in] a_container Which container to repartition into new superparticles.
    */
   virtual void
@@ -955,7 +955,7 @@ public:
 
   /**
    * @brief Make superparticles with an explicitly chosen method, ignoring the configured
-   * merge_algorithm.
+   * merge_method.
    * @details Lets a caller run a different method than the solver's own (e.g. a stepper choosing a
    * regrid-time merge). Routes through mergeLite(); ParticleMergeMethod::None is a
    * no-op.
@@ -1267,19 +1267,50 @@ protected:
   WhichMobilityInterpolation m_mobilityInterp;
 
   /**
-   * @brief User-supplied per-cell merger for merge_algorithm = external (set via
+   * @brief User-supplied per-cell merger for merge_method = external (set via
    * setParticleCellMerger()). The built-in methods build their own merger locally in the corresponding
    * mergeXxx().
    */
   ParticleManagement::ParticleMerger<ItoMergeParticle> m_particleCellMerger;
 
   /**
-   * @brief The configured merge method (which specific algorithm).
-   * @details Set by parseParticleMerger() from ItoSolver.merge_algorithm. makeSuperparticles()
-   * dispatches on this to run the right algorithm. Defaults to EqualWeightKD (the default
-   * merge_algorithm).
+   * @brief The configured merge method (which scope the merge groups particles over).
+   * @details Set by parseParticleMerger() from ItoSolver.merge_method. makeSuperparticles()
+   * dispatches on this to run the right algorithm. Defaults to KdCell (the default merge_method).
    */
-  ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::EqualWeightKD;
+  ParticleManagement::ParticleMergeMethod m_mergeMethod = ParticleManagement::ParticleMergeMethod::KdCell;
+
+  /**
+   * @brief kd_cell/kd_patch/kd_amr: how each node is divided into two children.
+   * @details ItoSolver.kd_partition. Turned into a crossover length by kdWeightMedianCellWidths().
+   */
+  ParticleManagement::KDPartition m_kdPartition = ParticleManagement::KDPartition::Weight;
+
+  /**
+   * @brief kd_cell/kd_patch/kd_amr: where the particle a leaf reduces to is placed.
+   * @details ItoSolver.kd_placement. See mergeKDCell() and mergeKDImpl().
+   */
+  ParticleManagement::KDPlacement m_kdPlacement = ParticleManagement::KDPlacement::Centroid;
+
+  /**
+   * @brief Where the pieces of a split particle are placed.
+   * @details ItoSolver.split_placement. 'center' reproduces the parent's position, which keeps the
+   * merge from moving any mass but leaves the pieces indistinguishable; 'jitter' and 'cell' spread them
+   * so a cell's particle count and its DISTINCT-position count do not diverge.
+   */
+  ParticleManagement::KDSplitPlacement m_kdSplitPlacement = ParticleManagement::KDSplitPlacement::Center;
+
+  /**
+   * @brief kd_amr: how leaves that touch a patch or rank boundary are resolved.
+   * @details ItoSolver.kd_amr_boundary. Selects between mergeKDImpl() (carve) and mergeKDSkinNn() (nn).
+   */
+  ParticleManagement::KDAmrBoundary m_kdAmrBoundary = ParticleManagement::KDAmrBoundary::Carve;
+
+  /**
+   * @brief nn_amr: which spatial index the neighbour search is backed by.
+   * @details ItoSolver.nn_search.
+   */
+  ParticleManagement::NNSearch m_nnSearch = ParticleManagement::NNSearch::Tree;
 
   /**
    * @brief Target number of computational particles per cell, per AMR level.
@@ -1298,9 +1329,9 @@ protected:
 
   /**
    * @brief Which merge method to run inside ItoSolver::regrid(), or nullopt for "whatever
-   * merge_algorithm says".
+   * merge_method says".
    * @details Set by parseParticleMerger() from ItoSolver.regrid_superparticles. A separate knob from
-   * merge_algorithm because the two are genuinely independent: the regrid merge runs once per regrid
+   * merge_method because the two are genuinely independent: the regrid merge runs once per regrid
    * on a population that has just been redistributed, and a run may reasonably want a cheaper (or no)
    * method there than it uses per step. ParticleMergeMethod::None turns the regrid merge off; the
    * extract/rebuild round-trip still happens, since preRegrid() has already reduced the particles by
@@ -1309,44 +1340,43 @@ protected:
   std::optional<ParticleManagement::ParticleMergeMethod> m_regridMergeMethod;
 
   /**
-   * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local trivial tier to convergence within each
-   * round.
+   * @brief nn_amr: iterate the local trivial tier to convergence within each round.
    * @details Forwarded to ParticleManagement::mergeNearestNeighborsTree()/mergeNearestNeighborsOneCell()/
-   * mergeNearestNeighborsHash(). Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash.
+   * mergeNearestNeighborsHash(). Also read by kd_amr with kd_amr_boundary = nn, whose skin tier is a
+   * nearest-neighbour merge.
    */
-  bool m_nnPairIterate = true;
+  bool m_nnIterate = true;
 
   /**
-   * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: number of fallback candidates per query. The k-nearest
-   * search is done with k = 1 + this. Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash.
+   * @brief nn_amr: number of fallback candidates per query. The k-nearest search is done with
+   * k = 1 + this. Also read by kd_amr with kd_amr_boundary = nn.
    */
-  int m_nnPairFallback = 1;
+  int m_nnFallback = 1;
 
   /**
-   * @brief nn_pair_tree/nn_pair_hash: maximum merge distance in whole cells (Chebyshev). A negative
-   * value means unbounded (std::nullopt). Only used for nn_pair_tree/nn_pair_hash -- nn_pair_onecell's merge
-   * distance is structurally fixed at 1 and does not read this.
+   * @brief nn_amr: maximum merge distance in whole cells (Chebyshev). A negative value means unbounded
+   * (std::nullopt). Not read when nn_search = onecell, whose merge distance is structurally fixed at 1.
    */
-  int m_nnPairMaxCellDistance = -1;
+  int m_nnMaxCellDistance = -1;
 
   /**
-   * @brief nn_pair_tree/nn_pair_onecell/nn_pair_hash: maximum number of drain rounds run per makeSuperparticles()
-   * call.
+   * @brief nn_amr: maximum number of drain rounds run per makeSuperparticles() call.
    * @details Each round merges nearest-neighbor pairs and roughly halves an over-full cell's surplus; the
    * loop also stops early once a round merges nothing. This caps the round count so the cost stays bounded
-   * and predictable rather than running to full convergence. Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash.
+   * and predictable rather than running to full convergence. Also read by kd_amr with
+   * kd_amr_boundary = nn.
    */
-  int m_nnPairMaxRounds = 3;
+  int m_nnMaxRounds = 3;
 
   /**
-   * @brief Leaf size, in cell widths, at or below which the tree build switches from count-median
-   * to weight-median splitting.
-   * @details Forwarded to the a_splitWeightLeafDx argument of ParticleManagement::mergeKDCarve()
-   * and mergeKDPatch() -- see those functions' own docs. Larger values apply the weight median to bigger leaves, giving
-   * more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells; 0 disables it
-   * entirely. Governs the shared tree build, so it applies to both kd_carve and kd_patch.
+   * @brief kd_partition = hybrid: node size, in cell widths, at or below which the split plane switches
+   * from the count median to the weight median.
+   * @details ItoSolver.kd_hybrid_leaf_dx. Only meaningful for KDPartition::Hybrid -- 'weight' and 'count'
+   * are the two limits of the same rule and ignore this. Larger values apply the weight median to bigger
+   * nodes, giving more uniform super-particle weights at some cost to how evenly leaves are apportioned
+   * between cells.
    */
-  Real m_kdSplitWeightLeafDx = 1.0;
+  Real m_kdHybridLeafDx = 1.0;
 
   /**
    * @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a
@@ -1660,10 +1690,10 @@ protected:
    * @brief Run one merge method over an already-extracted reduced-particle container.
    * @details The single place that knows the *shape* of each merge method, so that no caller has to.
    * Two shapes exist and they are not interchangeable:
-   *   - cell-based (equal_weight_kd, reinitialize, reinitialize_bvh, nn_sfc, external): reduce each
+   *   - cell-based (kd_cell, reinitialize, external): reduce each
    *     cell to at most its per-level target, refilling only within that same per-cell budget. These
    *     must NOT be followed by the container-wide split.
-   *   - whole-container (kd_carve, kd_patch, kd_skin_nn, nn_pair_{tree,onecell,hash}): drain over-full
+   *   - whole-container (kd_patch, kd_amr, nn_amr): drain over-full
    *     cells against one crowding threshold for the whole hierarchy, then split under-full cells back
    *     up to it. These MUST split, and they mint scratch ids that are invalidated afterwards.
    * ParticleMergeMethod::None does neither -- not even the split, which would otherwise refill every
@@ -1723,7 +1753,7 @@ protected:
   /**
    * @brief Split every under-full cell up to the target count.
    * @details The whole-container merge/drain phase only reduces over-full cells; this brings cells
-   * below the target back up to it via greedy heaviest-particle splitting (same rule as nn_sfc).
+   * below the target back up to it via greedy heaviest-particle splitting.
    * Called only from mergeLite(), and only for the methods whose shape calls for it -- see there.
    * @param[in,out] a_merge                     Reduced-particle container to split (cell-sorted internally).
    * @param[in]     a_numParticlesPerCellThresh Target particle count per cell.
@@ -1743,25 +1773,35 @@ protected:
   rebuildFromMergeContainer(WhichContainer a_container, ParticleContainer<ItoMergeParticle>& a_merge);
 
   /**
-   * @brief Which EBGeometry point-cloud index backs mergeNnPairSearch()'s per-patch
-   * spatial search -- see ParticleManagement::mergeNearestNeighborsTree()/mergeNearestNeighborsHash().
+   * @brief Turn ItoSolver.kd_partition (and, for 'hybrid', ItoSolver.kd_hybrid_leaf_dx) into the single
+   * crossover length every kd tree build takes.
+   * @details 'weight' and 'count' are the two limits of the size-dependent rule -- a crossover above any
+   * node's size and one below every node's size -- so all three settings reduce to one number and the
+   * cell, patch and AMR builds read the same knob.
+   * @return Node size, in cell widths, at or below which a node splits at the weight median.
    */
-  enum class NnPairSearchBackend
-  {
-    Tree, ///< EBGeometry::PointCloudBVH -- ParticleManagement::mergeNearestNeighborsTree().
-    Hash  ///< EBGeometry::PointCloudHashGrid -- ParticleManagement::mergeNearestNeighborsHash().
-  };
+  Real
+  kdWeightMedianCellWidths() const noexcept;
 
   /**
-   * @brief Cell-based merge: equal-weight KD partition, one weighted-centroid particle per leaf.
-   * @details Recursively partitions each cell into at most a_particlesPerCell equal-weight KD leaves
-   * and reduces each to one weighted-centroid particle. Requires particle weights >= 1 to split.
-   * Honours the per-level target.
-   * @param[in,out] a_particles        Reduced-particle container to repartition.
-   * @param[in]     a_particlesPerCell Target particle count per cell (per-level).
+   * @brief Cell-based merge: partition each cell's particles with a kd tree and reduce every leaf to one
+   * particle.
+   * @details Two independent choices, both taken from the input script. ItoSolver.kd_partition picks
+   * the split rule: the weight median divides a node so the halves carry near-equal weight, dividing a
+   * particle when it must, which equalizes the merged weights; the count median divides on particle count
+   * and never divides a particle, so it creates none but leaves the weights uneven; hybrid takes the
+   * count median down to ItoSolver.kd_hybrid_leaf_dx cell widths and the weight median below that.
+   * ItoSolver.kd_placement picks where a leaf's particle goes: at the leaf's weighted centroid, at
+   * one of the leaf's own particles drawn with probability proportional to weight, or at a uniformly
+   * random point in the leaf's bounding box. The centroid keeps a leaf's mean position and discards its
+   * spread, so repeated merges contract the sub-cell distribution onto a lattice of leaf centres; the
+   * other two placements avoid that, and sampling additionally inherits a position that one of the
+   * original particles occupied.
+   * @param[in,out] a_particles        Particles to merge.
+   * @param[in]     a_particlesPerCell Target number of particles per cell (one value, or one per level).
    */
   void
-  mergeEqualWeightKD(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
+  mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Cell-based merge: redistribute each cell's physical particles into near-equal integer
@@ -1775,29 +1815,8 @@ protected:
   mergeReinitialize(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Cell-based merge: as mergeEqualWeightKD(), with reinitialized leaf positions.
-   * @details Cut-cells use the weighted centroid (to stay inside the EB); full cells draw a random
-   * point in the leaf bounding box. Honours the per-level target.
-   * @param[in,out] a_particles        Reduced-particle container to repartition.
-   * @param[in]     a_particlesPerCell Target particle count per cell (per-level).
-   */
-  void
-  mergeReinitializeBVH(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
-
-  /**
-   * @brief Cell-based merge: Hilbert-curve sort, then merge adjacent pairs down to the target.
-   * @details Splits the heaviest particle when a cell is below target, so unlike the other cell-based
-   * methods it does refill -- but per cell against the per-level target, which is why mergeLite() must
-   * still not run the container-wide split after it. Does not require integer weights.
-   * @param[in,out] a_particles        Reduced-particle container to repartition.
-   * @param[in]     a_particlesPerCell Target particle count per cell (per-level).
-   */
-  void
-  mergeNnSfc(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
-
-  /**
    * @brief Whole-container merge: distributed nearest-neighbour pair merge -- shared implementation
-   * behind the nn_pair_tree and nn_pair_hash selectors.
+   * behind nn_search = tree and nn_search = hash.
    * @details Whole-container, cross-patch/cross-rank AMR merge. Identical in every respect between the
    * two backends (callbacks, id allocation, drain loop); only the
    * ParticleManagement::mergeNearestNeighborsTree()/mergeNearestNeighborsHash() call inside the drain
@@ -1805,18 +1824,19 @@ protected:
    * on this realm (see registerOperators()); it does its own ghost fill and needs no cell sorting. Uses
    * a single crowding threshold -- the coarsest level's a_particlesPerCell entry. Drains over-full
    * cells only; mergeLite() splits afterwards.
-   * @tparam Backend Which point-cloud index to search with (see NnPairSearchBackend).
+   * @tparam Backend Which point-cloud index to search with. Only NNSearch::Tree and NNSearch::Hash are
+   * instantiated; NNSearch::OneCell is mergeNnPairOneCell(), which is a different algorithm.
    * @param[in,out] merge              Reduced-particle container to repartition.
    * @param[in]     a_particlesPerCell Target particle count (only the first entry is used).
    */
-  template <NnPairSearchBackend Backend>
+  template <ParticleManagement::NNSearch Backend>
   void
   mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Whole-container merge: distributed nearest-neighbour pair merge, per-cell PointCloudBVH search.
    * @details As mergeNnPairSearch(), but the merge distance is structurally fixed at Chebyshev cell
-   * distance 1 (own cell and Moore-adjacent neighbours only), so nn_pair_max_cell_dist is not honoured
+   * distance 1 (own cell and Moore-adjacent neighbours only), so nn_max_cell_dist is not honoured
    * by this method. Requires a width-1 particle ghost mask registered on this realm. Drains over-full
    * cells only; mergeLite() splits afterwards.
    * @param[in,out] merge              Reduced-particle container to repartition.
@@ -1826,7 +1846,7 @@ protected:
   mergeNnPairOneCell(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Whole-container merge: kd-tree with a nearest-neighbour skin (the kd_skin_nn selector).
+   * @brief Whole-container merge: kd-tree with a nearest-neighbour skin (kd_amr_boundary = nn).
    * @details Same tree build and per-cell quota as mergeKDImpl(), but the boundary tier is the
    * nearest-neighbour pair merge instead of the carve arbitration. The particles are split across two
    * containers: ParticleManagement::mergeKDInterior() commits every leaf holding no ghost into one, and
@@ -1835,8 +1855,8 @@ protected:
    * distance 1 and so matches the width-1 halo exactly. The skin tier drains each cell to what remains
    * of its target after the interior results are counted against it, so the two tiers share one budget.
    * Fills a width-1 particle ghost mask itself, which must be registered on this realm. Tuned by
-   * nn_pair_iterate/nn_pair_fallback/nn_pair_max_rounds, shared with the nn_pair family;
-   * nn_pair_max_cell_dist does not apply. Drains over-full cells only; mergeLite() splits afterwards.
+   * nn_iterate/nn_fallback/nn_max_rounds, shared with nn_amr; nn_max_cell_dist does not apply. Drains over-full cells
+   * only; mergeLite() splits afterwards.
    * @param[in,out] merge              Reduced-particle container to repartition.
    * @param[in]     a_particlesPerCell Target particle count (only the first entry is used).
    */
@@ -1844,15 +1864,15 @@ protected:
   mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell);
 
   /**
-   * @brief Whole-container merge: whole-patch kd-tree build -- shared implementation behind the
-   * kd_carve and kd_patch selectors.
-   * @details A single, non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/
-   * nn_pair_max_cell_dist equivalents, since there is no configurable search radius or convergence
-   * loop. With a_enableBoundaryCarve the merge fills a width-1 particle ghost mask (which must be
-   * registered on this realm) and arbitrates leaves straddling a patch boundary; without it the merge
-   * is patch-local -- no ghosts, no communication, and a cell straddled by two patches is reduced by
-   * each patch independently. Needs no cell sorting. Uses a single crowding threshold -- the coarsest
-   * level's a_particlesPerCell entry. Drains over-full cells only; mergeLite() splits afterwards.
+   * @brief Whole-container merge: whole-patch kd-tree build -- shared implementation behind kd_patch
+   * and kd_amr with kd_amr_boundary = carve.
+   * @details A single, non-iterative pass: no drain loop, and no nn_iterate/nn_fallback/
+   * nn_max_cell_dist equivalents, since there is no configurable search radius or convergence loop. With
+   * a_enableBoundaryCarve the merge fills a width-1 particle ghost mask (which must be registered on this realm) and
+   * arbitrates leaves straddling a patch boundary; without it the merge is patch-local -- no ghosts, no communication,
+   * and a cell straddled by two patches is reduced by each patch independently. Needs no cell sorting. Uses a single
+   * crowding threshold -- the coarsest level's a_particlesPerCell entry. Drains over-full cells only; mergeLite()
+   * splits afterwards.
    * @param[in,out] merge                 Reduced-particle container to repartition.
    * @param[in]     a_particlesPerCell    Target particle count (only the first entry is used).
    * @param[in]     a_enableBoundaryCarve True to fill ghosts and run the carve tier, false for the

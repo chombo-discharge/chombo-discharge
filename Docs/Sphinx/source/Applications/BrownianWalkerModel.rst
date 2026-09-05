@@ -41,6 +41,9 @@ where :math:`r = \sqrt{x^2 + y^2}`, :math:`\tan\theta = \frac{x}{y}`.
 I.e. the flow field is a circulation around the Cartesian grid origin.
 The diffusion coefficient is simply set to a constant value.
 
+The velocity field can also be made spatially constant by setting ``BrownianWalker.velocity_field = constant``, in which case the field is read from ``BrownianWalker.constant_velocity`` (one component per coordinate direction, always three of them).
+A constant field translates the entire population rigidly, which is useful when the population itself, rather than the flow, is what is under study.
+
 To adjust the velocity field or diffusion coefficients, adjust the configuration options given in :ref:`Chap:BrownianWalkerConfiguration`.
 
 Time stepping
@@ -73,6 +76,14 @@ The configuration options for ``BrownianWalkerStepper`` are given below:
 
 .. literalinclude:: ../../../../Physics/BrownianWalker/CD_BrownianWalkerStepper.options
    :language: text
+
+Setting ``BrownianWalker.plot_particles = true`` will additionally write the bulk particles to an H5Part file on every plot step.
+
+.. note::
+
+   The ``BrownianWalker`` prefix above is a default, not a fixed name.
+   ``BrownianWalkerStepper`` and ``BrownianWalkerSpecies`` both accept the prefix as a constructor argument, so a class deriving from ``BrownianWalkerStepper`` can pass its own name and have every option -- the inherited ones and the ones it adds -- read under a single prefix that matches the class the application instantiates.
+   :file:`$DISCHARGE_HOME/Exec/Examples/BrownianWalker/ParticleMerge` does this.
 
 Setting up a new problem
 ------------------------

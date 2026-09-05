@@ -729,7 +729,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   // Merge super-particles down to the target after the chemistry advance created/removed particles.
   // Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide
-  // (nn_pair_tree/nn_pair_onecell/nn_pair_hash) merge algorithms run, chosen by ItoSolver.merge_algorithm.
+  // (nn_amr, any nn_search backend) merge algorithms run, chosen by ItoSolver.merge_method.
   // makeSuperparticles() cell-sorts internally as needed and returns the container patch-organized.
   this->barrier();
   m_timer.startEvent("Make superparticles");
@@ -2410,7 +2410,9 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       // Create the output folder
-      std::string cmd     = "mkdir -p particles/" + solver->getName();
+      // Quoted: a solver name containing a space would otherwise make the shell create one directory
+      // per word, and the file open then fails with a bare MPI_ERR_NO_SUCH_FILE from inside HDF5.
+      std::string cmd     = "mkdir -p 'particles/" + solver->getName() + "'";
       int         success = 0;
       if (procID() == 0) {
         success = system(cmd.c_str());

@@ -21,21 +21,43 @@
 #include <CD_ParticleLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_EBCoarseToFineInterp.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::BrownianWalker;
 
-BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
+BrownianWalkerStepper::BrownianWalkerStepper() : BrownianWalkerStepper("BrownianWalker")
+{}
+
+BrownianWalkerStepper::BrownianWalkerStepper(const std::string& a_className)
+  : m_phase(phase::gas), m_className(a_className)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper");
 
-  ParmParse pp("BrownianWalker");
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("realm", m_realm);
   pp.get("diffco", m_diffCo);
   pp.get("mobility", m_mobility);
   pp.get("omega", m_omega);
+
+  std::string velocityField;
+  pp.get("velocity_field", velocityField);
+  if (velocityField == "rotational") {
+    m_constantVelocity = false;
+  }
+  else if (velocityField == "constant") {
+    m_constantVelocity = true;
+  }
+  else {
+    MayDay::Error(
+      "BrownianWalkerStepper::BrownianWalkerStepper -- 'velocity_field' must be 'rotational' or 'constant'");
+  }
+
+  Vector<Real> velocity(SpaceDim);
+  pp.getarr("constant_velocity", velocity, 0, SpaceDim);
+  m_velocity = RealVect(D_DECL(velocity[0], velocity[1], velocity[2]));
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
@@ -54,7 +76,12 @@ BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
   }
 }
 
-BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver) : BrownianWalkerStepper()
+BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver)
+  : BrownianWalkerStepper(a_solver, "BrownianWalker")
+{}
+
+BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver, const std::string& a_className)
+  : BrownianWalkerStepper(a_className)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper(full)");
 
@@ -73,7 +100,7 @@ BrownianWalkerStepper::parseRuntimeOptions()
 {
   CH_TIME("BrownianWalkerStepper::parseRuntimeOptions");
 
-  ParmParse pp("BrownianWalker");
+  ParmParse pp(m_className.c_str());
 
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
@@ -163,7 +190,12 @@ BrownianWalkerStepper::setVelocity()
   EBAMRCellData& vel = m_solver->getVelocityFunction();
 
   // Nifty lambda describing the advective field
-  auto veloFunc = [omega = this->m_omega](const RealVect& pos) -> RealVect {
+  auto veloFunc = [omega = this->m_omega, constant = this->m_constantVelocity, velocity = this->m_velocity](
+                    const RealVect& pos) -> RealVect {
+    if (constant) {
+      return velocity;
+    }
+
     const Real r     = pos.vectorLength();
     const Real theta = atan2(pos[1], pos[0]);
 
@@ -358,6 +390,62 @@ BrownianWalkerStepper::printStepReport()
   pout() << "                                   #part = " << localParticles << " (" << globalParticles << ")" << endl;
 }
 
+void
+BrownianWalkerStepper::postPlot()
+{
+  CH_TIME("BrownianWalkerStepper::postPlot");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::postPlot" << endl;
+  }
+
+  this->plotParticles();
+}
+
+void
+BrownianWalkerStepper::plotParticles() const noexcept
+{
+  CH_TIME("BrownianWalkerStepper::plotParticles");
+  if (m_verbosity > 2) {
+    pout() << "BrownianWalkerStepper::plotParticles" << endl;
+  }
+
+  bool plotParticles = false;
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("plot_particles", plotParticles);
+
+  if (plotParticles) {
+    const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    // Create the output folder.
+    // Solver names may contain spaces ("scalar species"), so the path has to be quoted -- an unquoted
+    // one makes the shell create a directory per word and the file open then fails with a bare
+    // MPI_ERR_NO_SUCH_FILE from deep inside HDF5.
+    const std::string dir     = "particles/" + m_solver->getName();
+    const std::string cmd     = "mkdir -p \'" + dir + "\'";
+    int               success = 0;
+
+    if (procID() == 0) {
+      success = system(cmd.c_str());
+    }
+
+    if (success != 0) {
+      MayDay::Error("BrownianWalkerStepper::plotParticles - could not create 'particles' directory");
+    }
+
+    const std::string prefix = "./particles/" + m_solver->getName() + "/" + m_solver->getName();
+
+    char fileChar[1000];
+    sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), m_timeStep, SpaceDim);
+
+    // Written straight from the live SoA container. The output datasets (id, position, weight and the
+    // selected ItoParticle payload columns) come from ParticleTraits<ItoParticle>::h5PartColumns, so the
+    // files match what ItoKMCGodunovStepper writes and the same post-processing reads both.
+    DischargeIO::writeH5Part(std::string(fileChar), particles, m_amr->getProbLo(), m_time);
+  }
+}
+
 bool
 BrownianWalkerStepper::needToRegrid()
 {
@@ -413,7 +501,7 @@ BrownianWalkerStepper::setupSolvers()
     pout() << "BrownianWalkerStepper::setupSolvers" << endl;
   }
 
-  m_species = RefCountedPtr<ItoSpecies>(new BrownianWalkerSpecies());
+  m_species = RefCountedPtr<ItoSpecies>(new BrownianWalkerSpecies(m_className));
 
   m_solver->setVerbosity(m_verbosity);
   m_solver->parseOptions();

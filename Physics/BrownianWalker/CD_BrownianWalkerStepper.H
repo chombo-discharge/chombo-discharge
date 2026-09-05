@@ -45,6 +45,22 @@ public:
   BrownianWalkerStepper();
 
   /**
+   * @brief Constructor which sets the input-script prefix this stepper reads its options under.
+   * @details Every option of a derived stepper -- the ones it inherits and the ones it adds -- then
+   * lives under one prefix that matches the derived class, rather than the user having to know which of
+   * two prefixes a given option belongs to. Defaults to 'BrownianWalker' for this class.
+   * @param[in] a_className Input-script prefix.
+   */
+  BrownianWalkerStepper(const std::string& a_className);
+
+  /**
+   * @brief Full constructor for a derived stepper.
+   * @param[in] a_solver    Ito solver to advance.
+   * @param[in] a_className Input-script prefix.
+   */
+  BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver, const std::string& a_className);
+
+  /**
    * @brief Full constructor. Delegates to the default constructor and stores the provided solver.
    * @param[in] a_solver Ito solver to use for particle advancement.
    */
@@ -187,6 +203,21 @@ public:
   printStepReport() override;
 
   /**
+   * @brief Perform post-plot operations. Writes the particles if asked to.
+   */
+  void
+  postPlot() override;
+
+  /**
+   * @brief Write the solver's bulk particles to an H5Part file, one per plot step.
+   * @details Controlled by BrownianWalker.plot_particles. Files land in
+   * @c particles/&lt;solver&gt;/&lt;solver&gt;.step&lt;step&gt;.&lt;dim&gt;d.h5part, matching the layout
+   * ItoKMCGodunovStepper uses, so the same post-processing works on both.
+   */
+  void
+  plotParticles() const noexcept;
+
+  /**
    * @brief Register the operators required by the solver.
    */
   void
@@ -309,6 +340,27 @@ protected:
    * @brief Angular velocity of the solid-body rotation advection field.
    */
   Real m_omega;
+
+  /**
+   * @brief Input-script prefix this stepper reads its options under.
+   * @details 'BrownianWalker' for this class; a derived stepper passes its own name so that every
+   * option it reads lives under one prefix.
+   */
+  std::string m_className;
+
+  /**
+   * @brief If true, the advective field is spatially constant rather than rotational.
+   * @details BrownianWalker.velocity_field. A constant field translates the whole population rigidly,
+   * which keeps the particle distribution uniform as it moves -- useful when the point of the run is
+   * what some other operator does to that distribution rather than what the flow does to it.
+   */
+  bool m_constantVelocity;
+
+  /**
+   * @brief The advective field used when m_constantVelocity is true.
+   * @details BrownianWalker.constant_velocity.
+   */
+  RealVect m_velocity;
 
   /**
    * @brief If true, verify that the superparticle merge conserves the total particle weight.

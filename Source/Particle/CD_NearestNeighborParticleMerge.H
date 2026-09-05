@@ -529,7 +529,7 @@ struct NNSpatialIndex
  *
  * @b Per-cell pre-filter: if NO cell in this patch is over its a_cellBudget
  * particles, nothing is built (a_index.pointCloud stays null, exactly as if the patch had zero
- * particles) -- the SAME cheap "is this even worth it" check equal_weight_kd effectively gets for
+ * particles) -- the SAME cheap "is this even worth it" check the kd merges effectively get for
  * free by dispatching per cell. This is an EXACT check (not an average-density heuristic, which
  * would be a real bug: a low-average patch can still hold one badly-clustered over-threshold cell):
  * a lightweight per-cell tally of the patch's own particles, keyed exactly as the crowding trigger

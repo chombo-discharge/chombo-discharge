@@ -29,6 +29,7 @@
 #include <DataIterator.H>
 
 // Our includes
+#include <CD_Random.H>
 #include <CD_LevelTiles.H>
 #include <CD_KDParticleMerge.H>
 #include <CD_NamespaceHeader.H>
@@ -260,10 +261,104 @@ kdFillCellHistogram(FArrayBox&                                a_counts,
 }
 
 /**
+ * @brief Cap every resident particle in a crowded cell at that cell's target leaf weight, splitting the
+ * ones above it into pieces.
+ * @details A particle heavier than a leaf's target weight cannot be equalized away by any partition: it
+ * alone sets a floor on whichever leaf it lands in. The whole-patch build is forbidden from dividing a
+ * particle mid-tree (see kdSplitWeightMedian()), which is exactly why its super-particle weights come out
+ * uneven. Dividing beforehand sidesteps that: it is local, it needs no id arbitration, and it happens
+ * before any leaf exists.
+ *
+ * Only CROWDED cells are capped (count > a_ppc). An uncrowded cell's particles are emitted as singleton
+ * leaves and never merged, so splitting there would raise its population above the target with nothing
+ * to bring it back down. Capping a crowded cell only ever raises its count, so it stays crowded and
+ * @a a_cellCounts remains correct for the one thing buildKDQuotaLeaves() asks of it.
+ *
+ * Ghosts are never capped. A ghost belongs to another patch, which is capping it too; splitting it here
+ * as well would double-count its weight.
+ * @tparam Packed See MergeParticle.
+ * @param[in,out] a_particles Gathered particles for this patch; grown in place by the split pieces.
+ * @param[in] a_cellCounts Per-cell true particle counts (see kdFillCellHistogram()).
+ * @param[in] a_cellWeights Per-cell total weight, over the same box as @a a_cellCounts.
+ * @param[in] a_ppc Target particles per cell.
+ * @param[in] a_splitPlacement Where each piece goes -- see ParticleManagement::KDSplitPlacement.
+ * @param[in] a_probLo Physical position of the domain's low corner.
+ * @param[in] a_dx This patch's own cell spacing.
+ */
+template <typename Packed>
+inline void
+kdCapCellWeights(std::vector<MergeParticle<Packed>>& a_particles,
+                 const FArrayBox&                    a_cellCounts,
+                 const FArrayBox&                    a_cellWeights,
+                 const int                           a_ppc,
+                 const KDSplitPlacement              a_splitPlacement,
+                 const RealVect&                     a_probLo,
+                 const RealVect&                     a_dx) noexcept
+{
+  if (a_ppc < 1) {
+    return;
+  }
+
+  const Real spacing = a_dx[0] / std::pow(static_cast<Real>(a_ppc), 1.0 / SpaceDim);
+
+  const std::size_t numOriginal = a_particles.size();
+
+  for (std::size_t i = 0; i < numOriginal; i++) {
+    if (a_particles[i].isGhost) {
+      continue;
+    }
+
+    const IntVect cell = kdCellKeyOf(a_particles[i].position, a_probLo, a_dx);
+
+    if (!a_cellCounts.box().contains(cell) || static_cast<int>(a_cellCounts(cell, 0)) <= a_ppc) {
+      continue;
+    }
+
+    const long long cap = std::max(
+      1LL,
+      static_cast<long long>(std::ceil(a_cellWeights(cell, 0) / static_cast<Real>(a_ppc))));
+    const long long w = static_cast<long long>(std::llround(a_particles[i].weight));
+
+    if (w <= cap) {
+      continue;
+    }
+
+    const long long              numPieces = (w + cap - 1) / cap;
+    const std::vector<long long> pieces    = ParticleManagement::partitionParticleWeights<long long>(w, numPieces);
+
+    if (pieces.empty()) {
+      continue;
+    }
+
+    RealVect cellLo;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      cellLo[dir] = a_probLo[dir] + cell[dir] * a_dx[dir];
+    }
+
+    const MergeParticle<Packed> parent = a_particles[i];
+
+    a_particles[i].weight = static_cast<Real>(pieces[0]);
+
+    for (std::size_t k = 1; k < pieces.size(); k++) {
+      MergeParticle<Packed> piece = parent;
+
+      piece.weight   = static_cast<Real>(pieces[k]);
+      piece.position = ParticleManagement::detail::kdSplitDisplace(a_splitPlacement,
+                                                                   parent.position,
+                                                                   cellLo,
+                                                                   a_dx,
+                                                                   spacing);
+
+      a_particles.push_back(piece);
+    }
+  }
+}
+
+/**
  * @brief Split particles[a_lo,a_hi) in place by the longest axis at the count-median -- the sole
  * split rule used by buildKDQuotaLeaves().
  * @details The split point is the position-sorted median particle (via nth_element), balancing
- * COUNT as evenly as possible -- mirrors equal_weight_kd's own single-cell logic, but by count,
+ * COUNT as evenly as possible -- mirrors the per-cell build's own logic, but by count,
  * never by weight, and with NO synthetic particle splitting (a particle is never divided across
  * the two children). nth_element divides the range in half by count however the positions are
  * distributed, so a tightly clustered node still splits evenly.
@@ -300,11 +395,11 @@ kdSplitCountMedian(std::vector<MergeParticle<Packed>>& a_particles,
  * with half this node's total particle weight on either side.
  * @details Used instead of the count median so that the resulting leaves carry roughly equal total
  * weight, and therefore so do the super-particles they collapse into. Uniform super-particle weight
- * is what keeps statistical noise down, and is the defining property of the equal_weight_kd merge.
+ * is what keeps statistical noise down, and is what kd_partition = weight asks for.
  *
- * Unlike equal_weight_kd this NEVER divides a particle synthetically, so exact equality is not
+ * Unlike the per-cell build this NEVER divides a particle synthetically, so exact equality is not
  * attainable: once a single particle's weight exceeds a leaf's target weight, that particle alone
- * sets a floor no partition can get under. The bound equal_weight_kd guarantees (max/min <= 2) is
+ * sets a floor no partition can get under. The bound the per-cell build guarantees (max/min <= 2) is
  * bought precisely by that synthetic division and is therefore out of reach here by construction.
  *
  * A weight median can land very unevenly BY COUNT -- one dominant particle carrying half the node's
@@ -369,7 +464,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
                    FArrayBox&                          a_used,
                    std::vector<KDLeaf>&                a_leaves,
                    const int                           a_ppc,
-                   const Real                          a_splitWeightLeafDx,
+                   const Real                          a_weightMedianCellWidths,
                    const RealVect&                     a_dx,
                    const RealVect&                     a_probLo,
                    const FArrayBox&                    a_cellCounts) noexcept
@@ -520,7 +615,7 @@ buildKDQuotaLeaves(std::vector<MergeParticle<Packed>>& a_particles,
     // of counts; once it is narrow the weight median is what drives the super-particles toward equal
     // weight. This is an extent test, not a "both corners in one cell" test, so a narrow node
     // straddling a face still qualifies.
-    const std::size_t mid = (nodeSpan <= a_splitWeightLeafDx)
+    const std::size_t mid = (nodeSpan <= a_weightMedianCellWidths)
                               ? kdSplitWeightMedian(a_particles, node.lo, node.hi, splitAxis)
                               : kdSplitCountMedian(a_particles, node.lo, node.hi, splitAxis);
 
@@ -637,6 +732,75 @@ kdCheckCentroid(const RealVect& a_centroid,
 #endif
 }
 
+/**
+ * @brief Place the super-particle a leaf reduces to, given the leaf's members and their weighted
+ * centroid.
+ * @details The three placements differ in what they keep of the leaf. The centroid keeps its mean
+ * position and discards its spread, so repeated merges contract the sub-cell distribution onto a
+ * lattice of leaf centres. Sampling keeps a position one of the leaf's own particles occupied, drawn
+ * with probability proportional to weight, which is distribution-preserving. Random keeps only the
+ * leaf's extent.
+ *
+ * Unlike the per-cell build, these leaves are deliberately not snapped to the grid, so a leaf can
+ * straddle a cell face and the placed particle can land in a different cell from the centroid --
+ * which is what the per-cell leaf quota counted. That is the algorithm working as intended (a leaf
+ * merges across a face precisely because it is allowed to span one), not an error: the quota bounds
+ * how many leaves are centred in a cell, not where each leaf's particle ends up.
+ * @tparam Packed See MergeParticle.
+ * @param[in] a_placement   Which placement to apply.
+ * @param[in] a_centroid    The leaf's weighted centroid, already computed by the caller.
+ * @param[in] a_totalWeight The leaf's total weight, i.e. the sum of @a a_weights.
+ * @param[in] a_boxLo       Low corner of the leaf's bounding box.
+ * @param[in] a_boxHi       High corner of the leaf's bounding box.
+ * @param[in] a_weights     The members' weights, parallel to @a a_positions.
+ * @param[in] a_positions   The members' positions, parallel to @a a_weights.
+ * @return The position to give the merged particle. Always inside [a_boxLo, a_boxHi].
+ */
+template <typename Packed>
+inline RealVect
+kdPlaceMerged(const KDPlacement            a_placement,
+              const RealVect&              a_centroid,
+              const Real                   a_totalWeight,
+              const RealVect&              a_boxLo,
+              const RealVect&              a_boxHi,
+              const std::vector<Real>&     a_weights,
+              const std::vector<RealVect>& a_positions) noexcept
+{
+  switch (a_placement) {
+  case KDPlacement::Centroid: {
+    return a_centroid;
+  }
+  case KDPlacement::Sample: {
+    // Inverse-CDF draw over the members' weights: member i is picked with probability w_i / W.
+    const Real threshold = Random::getUniformReal01() * a_totalWeight;
+
+    Real accumulated = 0.0;
+
+    for (std::size_t i = 0; i < a_weights.size(); i++) {
+      accumulated += a_weights[i];
+
+      if (accumulated >= threshold) {
+        return a_positions[i];
+      }
+    }
+
+    // Only reachable if the accumulation falls short of the threshold by round-off.
+    return a_positions.empty() ? a_centroid : a_positions.back();
+  }
+  case KDPlacement::Random: {
+    RealVect x;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      x[dir] = a_boxLo[dir] + Random::getUniformReal01() * (a_boxHi[dir] - a_boxLo[dir]);
+    }
+
+    return x;
+  }
+  }
+
+  return a_centroid;
+}
+
 } // namespace detail
 
 template <typename P,
@@ -653,7 +817,10 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_leafQuota,
              const AmrMesh&                a_amr,
              const int                     a_ppc,
-             const Real                    a_splitWeightLeafDx,
+             const Real                    a_weightMedianCellWidths,
+             const KDPlacement             a_placement,
+             const bool                    a_capWeights,
+             const KDSplitPlacement        a_splitPlacement,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -901,7 +1068,25 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
       kdFillCellHistogram(cellCounts, combined, probLo, dx);
 
-      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dx, probLo, cellCounts);
+      // Cap before the tree is built. The build itself may not divide a particle, so a heavy one would
+      // otherwise set an unremovable floor on whatever leaf it lands in -- the reason this scope's
+      // super-particle weights come out uneven where the per-cell build's do not.
+      if (a_capWeights) {
+        FArrayBox cellWeights(cellCounts.box(), 1);
+        cellWeights.setVal(0.0);
+
+        for (const MergeParticle<Packed>& p : combined) {
+          const IntVect cell = kdCellKeyOf(p.position, probLo, dx);
+
+          if (cellWeights.box().contains(cell)) {
+            cellWeights(cell, 0) += p.weight;
+          }
+        }
+
+        kdCapCellWeights(combined, cellCounts, cellWeights, a_ppc, a_splitPlacement, probLo, dx);
+      }
+
+      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_weightMedianCellWidths, dx, probLo, cellCounts);
 
       for (const KDLeaf& bl : leaves) {
         members.clear();
@@ -1001,13 +1186,15 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
           // boundary-candidate branch below instead (rather than committing) is what lets a real
           // self-claim be raised for that foreign member, so the argmin actually arbitrates it.
           if (bl.hi - bl.lo >= 2) {
-            std::vector<Packed> payloads;
-            std::vector<Real>   weights;
-            RealVect            centroid = RealVect::Zero;
-            Real                totalW   = 0.0;
+            std::vector<Packed>   payloads;
+            std::vector<Real>     weights;
+            std::vector<RealVect> positions;
+            RealVect              centroid = RealVect::Zero;
+            Real                  totalW   = 0.0;
 
             payloads.reserve(bl.hi - bl.lo);
             weights.reserve(bl.hi - bl.lo);
+            positions.reserve(bl.hi - bl.lo);
 
             for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
               const MergeParticle<Packed>& p = combined[idx];
@@ -1016,6 +1203,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
               payloads.push_back(p.payload);
               weights.push_back(p.weight);
+              positions.push_back(p.position);
               centroid += p.weight * p.position;
               totalW += p.weight;
             }
@@ -1024,10 +1212,20 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
             kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
 
-            if (a_isPositionValid(centroid)) {
+            // The placement can move the particle off the centroid, but never out of the leaf's own
+            // box, so the EB test below still has something inside the leaf to judge. A placement
+            // that lands in the solid falls back to the centroid rather than losing the leaf.
+            RealVect
+              placed = kdPlaceMerged<Packed>(a_placement, centroid, totalW, bl.boxLo, bl.boxHi, weights, positions);
+
+            if (!a_isPositionValid(placed)) {
+              placed = centroid;
+            }
+
+            if (a_isPositionValid(placed)) {
               MergeParticle<Packed> merged;
 
-              merged.position  = centroid;
+              merged.position  = placed;
               merged.weight    = totalW;
               merged.globalID  = a_allocateID();
               merged.ownerRank = myRank;
@@ -1357,12 +1555,13 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
     bool committed = false;
 
     if (totalSurvivors >= 2) {
-      std::vector<Packed> payloads;
-      std::vector<Real>   weights;
-      RealVect            centroid = RealVect::Zero;
-      Real                totalW   = 0.0;
-      RealVect            surviveBoxLo, surviveBoxHi;
-      bool                haveSurviveBox = false;
+      std::vector<Packed>   payloads;
+      std::vector<Real>     weights;
+      std::vector<RealVect> positions;
+      RealVect              centroid = RealVect::Zero;
+      Real                  totalW   = 0.0;
+      RealVect              surviveBoxLo, surviveBoxHi;
+      bool                  haveSurviveBox = false;
 
       payloads.reserve(totalSurvivors);
       weights.reserve(totalSurvivors);
@@ -1372,6 +1571,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
         payloads.push_back(p.payload);
         weights.push_back(p.weight);
+        positions.push_back(p.position);
         centroid += p.weight * p.position;
         totalW += p.weight;
 
@@ -1400,12 +1600,21 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
       kdCheckCentroid(centroid, totalW, surviveBoxLo, surviveBoxHi);
 
-      if (a_isPositionValid(centroid)) {
+      // Same placement rule as the interior tier -- the box here is the surviving members' own, since
+      // the carve may have taken some of the leaf's original members away.
+      RealVect
+        placed = kdPlaceMerged<Packed>(a_placement, centroid, totalW, surviveBoxLo, surviveBoxHi, weights, positions);
+
+      if (!a_isPositionValid(placed)) {
+        placed = centroid;
+      }
+
+      if (a_isPositionValid(placed)) {
         committed = true;
 
         MergeParticle<Packed> merged;
 
-        merged.position  = centroid;
+        merged.position  = placed;
         merged.weight    = totalW;
         merged.globalID  = a_allocateID();
         merged.ownerRank = myRank;
@@ -1565,7 +1774,10 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_leafQuota,
              const AmrMesh&                a_amr,
              const int                     a_ppc,
-             const Real                    a_splitWeightLeafDx,
+             const Real                    a_weightMedianCellWidths,
+             const KDPlacement             a_placement,
+             const bool                    a_capWeights,
+             const KDSplitPlacement        a_splitPlacement,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -1586,7 +1798,10 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
                                      a_leafQuota,
                                      a_amr,
                                      a_ppc,
-                                     a_splitWeightLeafDx,
+                                     a_weightMedianCellWidths,
+                                     a_placement,
+                                     a_capWeights,
+                                     a_splitPlacement,
                                      a_gather,
                                      a_combine,
                                      a_scatter,
@@ -1609,7 +1824,10 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 EBAMRFAB&                     a_leafQuota,
                 const AmrMesh&                a_amr,
                 const int                     a_ppc,
-                const Real                    a_splitWeightLeafDx,
+                const Real                    a_weightMedianCellWidths,
+                const KDPlacement             a_placement,
+                const bool                    a_capWeights,
+                const KDSplitPlacement        a_splitPlacement,
                 const Gather&                 a_gather,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,
@@ -1697,7 +1915,25 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
       kdFillCellHistogram(cellCounts, combined, probLo, dx);
 
-      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_splitWeightLeafDx, dx, probLo, cellCounts);
+      // Cap before the tree is built. The build itself may not divide a particle, so a heavy one would
+      // otherwise set an unremovable floor on whatever leaf it lands in -- the reason this scope's
+      // super-particle weights come out uneven where the per-cell build's do not.
+      if (a_capWeights) {
+        FArrayBox cellWeights(cellCounts.box(), 1);
+        cellWeights.setVal(0.0);
+
+        for (const MergeParticle<Packed>& p : combined) {
+          const IntVect cell = kdCellKeyOf(p.position, probLo, dx);
+
+          if (cellWeights.box().contains(cell)) {
+            cellWeights(cell, 0) += p.weight;
+          }
+        }
+
+        kdCapCellWeights(combined, cellCounts, cellWeights, a_ppc, a_splitPlacement, probLo, dx);
+      }
+
+      buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_weightMedianCellWidths, dx, probLo, cellCounts);
 
       CH_STOP(t_build);
       CH_START(t_commit);
@@ -1732,13 +1968,15 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
           continue;
         }
 
-        std::vector<Packed> payloads;
-        std::vector<Real>   weights;
-        RealVect            centroid = RealVect::Zero;
-        Real                totalW   = 0.0;
+        std::vector<Packed>   payloads;
+        std::vector<Real>     weights;
+        std::vector<RealVect> positions;
+        RealVect              centroid = RealVect::Zero;
+        Real                  totalW   = 0.0;
 
         payloads.reserve(bl.hi - bl.lo);
         weights.reserve(bl.hi - bl.lo);
+        positions.reserve(bl.hi - bl.lo);
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
           const MergeParticle<Packed>& p = combined[idx];
@@ -1749,6 +1987,7 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
           payloads.push_back(p.payload);
           weights.push_back(p.weight);
+          positions.push_back(p.position);
           centroid += p.weight * p.position;
           totalW += p.weight;
         }
@@ -1757,13 +1996,19 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
         kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
 
-        if (!a_isPositionValid(centroid)) {
+        RealVect placed = kdPlaceMerged<Packed>(a_placement, centroid, totalW, bl.boxLo, bl.boxHi, weights, positions);
+
+        if (!a_isPositionValid(placed)) {
+          placed = centroid;
+        }
+
+        if (!a_isPositionValid(placed)) {
           continue;
         }
 
         MergeParticle<Packed> merged;
 
-        merged.position  = centroid;
+        merged.position  = placed;
         merged.weight    = totalW;
         merged.globalID  = a_allocateID();
         merged.ownerRank = myRank;

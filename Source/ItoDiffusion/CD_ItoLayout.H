@@ -230,7 +230,7 @@ public:
    * @brief Rearrange the input container particles into new superparticles for all solvers, each
    * merging to its own configured target.
    * @details The usual entry point: each solver uses its own ItoSolver.particles_per_cell and
-   * merge_algorithm, so a caller with no opinion about either need not carry one.
+   * merge_method, so a caller with no opinion about either need not carry one.
    * @param[in] a_whichContainer Which ItoSolver container to repartition.
    */
   virtual void
@@ -252,7 +252,7 @@ public:
   makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const Vector<int>& a_ppc);
 
   /**
-   * @brief Make superparticles with an explicitly chosen method (ignoring each solver's merge_algorithm)
+   * @brief Make superparticles with an explicitly chosen method (ignoring each solver's merge_method)
    *        -- done for all solvers.
    * @param[in] a_whichContainer Which ItoSolver container to repartition.
    * @param[in] a_ppc            Target particle-per-cell (ppc) per level.

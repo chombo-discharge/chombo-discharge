@@ -14,12 +14,15 @@ BrownianWalker.cfl                     = 1.0       ## CFL-like number.
 BrownianWalker.load_balance            = true      ## Turn on/off particle load balancing
 BrownianWalker.which_balance           = mesh      ## Switch for load balancing method. Either 'mesh' or 'particle'.
 BrownianWalker.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight
+BrownianWalker.plot_particles          = false     ## Write the bulk particles to H5Part on every plot step
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-BrownianWalker.mobility     = 1.0    ## Mobility coefficient
-BrownianWalker.diffco       = 1.0    ## Diffusion coefficient
-BrownianWalker.omega        = 1.0    ## Rotation velocity for advection field
+BrownianWalker.mobility              = 1.0           ## Mobility coefficient
+BrownianWalker.diffco                = 1.0           ## Diffusion coefficient
+BrownianWalker.omega                 = 1.0           ## Rotation velocity for advection field (velocity_field = rotational)
+BrownianWalker.velocity_field        = rotational    ## Advective field. 'rotational' (uses omega) or 'constant' (uses constant_velocity)
+BrownianWalker.constant_velocity     = 1 1 0         ## Advective field when velocity_field = constant
 
 # Cell tagging stuff
 # ------------------

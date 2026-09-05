@@ -39,6 +39,14 @@ public:
   BrownianWalkerSpecies();
 
   /**
+   * @brief Constructor which sets the input-script prefix the species reads its options under.
+   * @details Matches the prefix its stepper reads, so a derived stepper's options -- including the ones
+   * that describe the species -- all live under one name.
+   * @param[in] a_className Input-script prefix.
+   */
+  BrownianWalkerSpecies(const std::string& a_className);
+
+  /**
    * @brief Destructor.
    */
   ~BrownianWalkerSpecies();

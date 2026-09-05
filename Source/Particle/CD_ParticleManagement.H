@@ -34,44 +34,157 @@
 namespace ParticleManagement {
 
 /**
- * @brief The specific super-particle merge methods.
+ * @brief How a kd merge divides a node into two children.
+ * @details The two rules answer different questions. The weight median divides the node so the halves
+ * carry as nearly equal a weight as possible, which equalizes the merged weights. The count median
+ * divides so the halves hold as nearly equal a particle count as possible, at the cost of leaving the
+ * merged weights uneven. Which one is right depends on the node's size: while a node still spans several
+ * cells a split apportions leaves BETWEEN cells, which is a question of counts; once it is narrow the
+ * weight median is what drives the super-particles toward equal weight. Hybrid is that rule, with the
+ * crossover given as a length; Weight and Count are its two limits (crossover at infinity and at zero),
+ * so all three are the same knob and every kd method reads it the same way.
  */
-enum class ParticleMergeMethod
+enum class KDPartition
 {
-  None,            ///< No merging.
-  EqualWeightKD,   ///< Cell: makeEqualWeightKDMerger.
-  Reinitialize,    ///< Cell: makeReinitializeMerger.
-  ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
-  NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
-  NnPairTree,      ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
-  NnPairOneCell,   ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
-  NnPairHash,      ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
-  KdCarve,         ///< AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries).
-  KdPatch,         ///< AMR: mergeKDPatch (same build, patch-local -- no ghosts, no contested particles).
-  KdSkinNn,        ///< AMR: mergeKDInterior for the uncontested tier, nearest-neighbor pairs for the skin.
-  External         ///< Cell: caller-supplied per-cell merger.
+  Weight,      ///< Split at the weight median at every node; halves carry near-equal weight.
+  Count,       ///< Split at the count median at every node; halves hold near-equal particle counts.
+  Hybrid,      ///< Count median while the node is wider than the crossover length, weight median below it.
+  WeightCapped ///< PROTOTYPE. Cap every particle at the target leaf weight, then split at the weight median.
 };
 
 /**
- * @brief Map a merge-algorithm selector string to a ParticleMergeMethod.
+ * @brief Where the pieces of a split particle go.
+ * @details A split divides one particle's weight among several pieces. Putting every piece at the
+ * parent's position perturbs nothing spatially, but it manufactures duplicate positions: the pieces are
+ * indistinguishable, and a placement that inherits member positions reproduces them, so the number of
+ * DISTINCT positions a cell holds falls below its particle count. That loss is invisible in the weight
+ * statistics -- the weights stay perfectly uniform -- while the cell's effective spatial sampling
+ * degrades. Displacing the pieces restores it, at the cost of moving mass a little.
+ */
+enum class KDSplitPlacement
+{
+  Center, ///< Every piece at the parent's position. No spatial perturbation, duplicate positions.
+  Jitter, ///< Each piece drawn from the local mean interparticle spacing around the parent, truncated to the cell.
+  Cell    ///< Each piece drawn uniformly in the owning cell.
+};
+
+/**
+ * @brief Where a kd merge puts the particle a leaf reduces to.
+ * @details The centroid keeps the leaf's mean position and discards its spread, so repeated merges
+ * contract the sub-cell distribution onto a lattice of leaf centres. Sampling draws one of the leaf's own
+ * particles with probability proportional to weight, which is distribution-preserving and inherits a
+ * position some particle actually occupied. Random draws uniformly from the leaf's bounding box, which
+ * also avoids the lattice but from a distribution that is not quite the leaf's own.
+ */
+enum class KDPlacement
+{
+  Centroid, ///< The leaf's weighted centroid.
+  Sample,   ///< One of the leaf's own particles, drawn with probability proportional to weight.
+  Random    ///< A uniformly random point in the leaf's bounding box.
+};
+
+/**
+ * @brief How the AMR-scope kd merge resolves the leaves that touch a patch or rank boundary.
+ * @details Both tiers see the same tree: the difference is only what happens to a leaf whose members are
+ * not all owned by one patch. Carve arbitrates the contested particles between the competing patches in a
+ * single non-iterative exchange, so a boundary leaf merges as one group. Nn leaves the boundary skin to a
+ * nearest-neighbour pair merge instead, which needs no arbitration but drains the skin in rounds.
+ */
+enum class KDAmrBoundary
+{
+  Carve, ///< Arbitrate contested particles between patches (z-buffer carve).
+  Nn     ///< Merge the interior with the kd tree and the boundary skin with nearest-neighbour pairs.
+};
+
+/**
+ * @brief How the AMR-scope nearest-neighbour merge finds a particle's merge candidates.
+ * @details The merge protocol is identical for all three; only the per-patch spatial index differs, and
+ * with it the reachable merge distance.
+ */
+enum class NNSearch
+{
+  Tree,   ///< One whole-patch PointCloudBVH per patch.
+  Hash,   ///< One whole-patch PointCloudHashGrid per patch.
+  OneCell ///< One PointCloudBVH per occupied cell; merge distance structurally fixed at 1 cell.
+};
+
+/**
+ * @brief The super-particle merge methods, named by the scope they group particles over.
+ * @details The scope is the part that changes what the merge can do; how a method groups within that
+ * scope is a separate axis (KDPartition/KDPlacement for the kd methods, NNSearch for the
+ * nearest-neighbour one), so it is not spelled into the selector.
+ */
+enum class ParticleMergeMethod
+{
+  None,         ///< No merging.
+  KdCell,       ///< Cell: makeKDCellMerger, one kd tree per cell.
+  KdPatch,      ///< Patch: mergeKDPatch, one kd tree per patch, patch-local (no ghosts).
+  KdAmr,        ///< AMR: one kd tree per patch, resolved across patches -- see KDAmrBoundary.
+  NnAmr,        ///< AMR: nearest-neighbour pair merge over the hierarchy -- see NNSearch.
+  Reinitialize, ///< Cell: makeReinitializeMerger; positions discarded and redrawn.
+  External      ///< Cell: caller-supplied per-cell merger.
+};
+
+/**
+ * @brief Map a merge-method selector string to a ParticleMergeMethod.
  * @details Valid input options are:
  * 'none' -> None
- * 'equal_weight_kd' -> EqualWeightKD
- * 'reinitialize' -> Reinitialize
- * 'reinitialize_bvh' -> ReinitializeBVH
- * 'nn_sfc' -> NnSfc
- * 'nn_pair_tree' -> NnPairTree
- * 'nn_pair_onecell' -> NnPairOneCell
- * 'nn_pair_hash' -> NnPairHash
- * 'kd_carve' -> KdCarve
+ * 'kd_cell' -> KdCell
  * 'kd_patch' -> KdPatch
- * 'kd_skin_nn' -> KdSkinNn
+ * 'kd_amr' -> KdAmr
+ * 'nn_amr' -> NnAmr
+ * 'reinitialize' -> Reinitialize
  * 'external' -> External
  * @param[in] a_str String selector. Must take one of the above strings.
  * @return The corresponding method; aborts on an unknown selector.
  */
 inline ParticleMergeMethod
 mergeMethodFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a kd partition rule.
+ * @details Valid inputs are 'weight', 'count', 'hybrid' and 'weight_capped'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDPartition.
+ */
+inline KDPartition
+kdPartitionFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a kd placement rule.
+ * @details Valid inputs are 'centroid', 'sample' and 'random'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDPlacement.
+ */
+inline KDPlacement
+kdPlacementFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a split placement rule.
+ * @details Valid inputs are 'center', 'jitter' and 'cell'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDSplitPlacement.
+ */
+inline KDSplitPlacement
+kdSplitPlacementFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a kd AMR boundary rule.
+ * @details Valid inputs are 'carve' and 'nn'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDAmrBoundary.
+ */
+inline KDAmrBoundary
+kdAmrBoundaryFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a nearest-neighbour search backend.
+ * @details Valid inputs are 'tree', 'hash' and 'onecell'.
+ * @param[in] a_str Input string.
+ * @return The corresponding NNSearch.
+ */
+inline NNSearch
+nnSearchFromString(const std::string& a_str) noexcept;
 
 /**
  * @brief Concept for splitting/merging particles
@@ -85,7 +198,7 @@ using ParticleMerger = std::function<
 
 /**
  * @brief Declaration of a reconciliation function when splitting particles.
- * @details This is, for example, passed into the KD-tree equal-weight partitioning structure, which may split a
+ * @details This is, for example, passed into the KD partitioning structure, whose weight median may split a
  * particle such that the weight of the two nodes differ by at most one physical particle. By default, that method will
  * call the particle copy constructor, but this function permits the user to input a reconciliation function that
  * manipulates other class members in the split particles.
@@ -102,12 +215,15 @@ using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 namespace detail {
 
 /**
- * @brief Build an equal-weight KD partition of a list of particles and return the leaf particle ranges.
- * @details Partitions the input particles into at most @c a_maxLeaves spatial groups ("leaves") whose total
- * weights are as equal as possible (they differ by at most one physical particle between sibling nodes). At
- * each split the particles are partitioned along the longest bounding-box axis at the weight-median; the
- * median particle may itself be split so the two halves balance, in which case @c a_particleReconcile fixes
- * up the daughters' non-weight members. This is the partitioning primitive behind super-particle merging:
+ * @brief Build a KD partition of a list of particles and return the leaf particle ranges.
+ * @details Partitions the input particles into at most @c a_maxLeaves spatial groups ("leaves"). Each split
+ * divides the node along the longest bounding-box axis, at the weight median while the node is no wider
+ * than @c a_weightMedianLength and at the count median above that -- the same size-dependent rule the
+ * whole-patch build uses, and the same one a fixed 'weight' or 'count' setting expresses as a crossover
+ * above or below every node's size. Under the weight median the halves carry as nearly equal a weight as
+ * possible (differing by at most one physical particle), which may require dividing the median particle
+ * itself, in which case @c a_particleReconcile fixes up the daughters' non-weight members; the count
+ * median never divides a particle. This is the partitioning primitive behind super-particle merging:
  * the caller reduces each returned leaf range to a single merged particle.
  *
  * Implementation note: the tree is built in a flat, reusable per-thread scratch arena (two ping-ponged
@@ -126,6 +242,15 @@ namespace detail {
  *
  * @param[in]  a_particles         Input particles (copied into internal scratch; not modified).
  * @param[in]  a_maxLeaves         Maximum number of leaf nodes (the per-cell target particle count).
+ * @param[in]  a_weightMedianLength Node size, as a length, at or below which the split plane is the weight
+ *                                  median rather than the count median. Negative disables the weight
+ *                                  median entirely; a huge value selects it everywhere.
+ * @param[in]  a_capWeights        If true, divide every input particle heavier than the target leaf
+ *                                  weight (total weight / @a a_maxLeaves) into co-located integer pieces
+ *                                  before partitioning, so no single particle can dominate a leaf.
+ * @param[in]  a_splitPosition     Where a split particle's pieces go, given the parent's position. The
+ *                                  identity reproduces the parent's position exactly; see
+ *                                  KDSplitPlacement for why that is not always what you want.
  * @param[in]  a_particleReconcile Reconciliation callback applied to the two daughters when the median is split.
  * @param[out] a_leaves            Filled with one {begin,end} pointer pair per leaf.
  * @warning The returned ranges alias an internal thread-local buffer that is overwritten on the next call to
@@ -133,89 +258,27 @@ namespace detail {
  */
 template <class P, Real P::*weight, RealVect P::*position>
 inline void
-buildEqualWeightKDLeaves(const std::vector<P>&                       a_particles,
-                         const int                                   a_maxLeaves,
-                         const BinaryParticleReconcile<P>&           a_particleReconcile,
-                         std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
-
-/**
- * @brief Merge an already spatially-ordered particle list down to a target count by repeatedly combining
- * the nearest adjacent pair.
- * @details The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling
- * curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair
- * (by @c position) is combined repeatedly until @c a_target particles remain. Combining the second
- * particle into the first is delegated to @c a_combine (the caller decides the payload semantics, e.g. a
- * weight-weighted centroid and energy). This does NOT split, so it cannot increase the count -- it is a
- * no-op when the list already has @c a_target or fewer particles (the caller handles the split direction).
- * Operates in place on per-thread scratch (allocation-free after warmup); on return @c a_particles holds the
- * surviving merged particles.
- * @param[in,out] a_particles Spatially-ordered particle list; overwritten with the merged result.
- * @param[in]     a_target    Desired number of particles.
- * @param[in]     a_combine   Callback that combines the second particle into the first.
- */
-template <class P, RealVect P::*position>
-inline void
-mergeAdjacentNearest(std::vector<P>&                          a_particles,
-                     const std::size_t                        a_target,
-                     const std::function<void(P&, const P&)>& a_combine) noexcept;
+buildKDCellLeaves(const std::vector<P>&                           a_particles,
+                  const int                                       a_maxLeaves,
+                  const Real                                      a_weightMedianLength,
+                  const bool                                      a_capWeights,
+                  const std::function<RealVect(const RealVect&)>& a_splitPosition,
+                  const BinaryParticleReconcile<P>&               a_particleReconcile,
+                  std::vector<std::pair<const P*, const P*>>&     a_leaves) noexcept;
 
 } // namespace detail
 
 /**
- * @brief Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.
- * @details Returns a merger functor that reduces (or grows) the particle set in a single SoA cell to the
- * target count without forcing equal weights.
- *
- * When the cell contains more particles than the target:
- *   1. The intermediate list is sorted along a 21-bit Hilbert curve computed from particle positions.
- *   2. `detail::mergeAdjacentNearest` merges the closest adjacent pair repeatedly until the target count is
- *      reached, delegating payload arithmetic to @c a_combine.
- *
- * When the cell contains fewer particles than the target: the heaviest particle (by @c packWeight) is
- * repeatedly split into two co-located halves (weight divided by two, all other fields copied) until the
- * target is reached or no particle has weight >= 2.
- *
- * The three user-supplied lambdas encode the particle-type-specific semantics:
- *   - @c a_gather packs one SoA slot into the lightweight intermediate type @c Packed.
- *   - @c a_combine merges the second @c Packed particle into the first (weight-weighted centroid is the
- *     typical choice, but the caller decides).
- *   - @c a_scatter appends one surviving @c Packed particle back to the (already-cleared) SoA.
- *
- * Implementation note: thread-local scratch vectors are reused across cells so there is no per-cell heap
- * allocation after the first call on a given thread.
- *
- * @tparam Packed      Lightweight AoS intermediate type (e.g. MergeParticle<Packed>). Must be copyable.
- * @tparam packWeight  Member-data pointer `Real Packed::*` naming the weight. Used only for the split path.
- * @tparam packPosition Member-data pointer `RealVect Packed::*` naming the position. Used for Hilbert-key
- *                     computation and forwarded to detail::mergeAdjacentNearest.
- * @tparam P           SoA payload type.
- * @tparam Traits      Column descriptor for @c P (defaults to ParticleTraits<P>).
- * @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
- * @param[in] a_combine  In-place merge: `(Packed& first, const Packed& second) -> void`.
- * @param[in] a_scatter  Append one merged particle: `(ParticleSoA<P,Traits>&, const Packed&) -> void`.
- * @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
- */
-template <class Packed,
-          Real Packed::*packWeight,
-          RealVect Packed::*packPosition,
-          class P,
-          class Traits = ParticleTraits<P>>
-inline ParticleMerger<P, Traits>
-makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
-                             std::function<void(Packed&, const Packed&)>                       a_combine,
-                             std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept;
-
-/**
- * @brief Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.
+ * @brief Create a per-cell KD-tree super-particle merger as a reusable ParticleMerger.
  * @details Returns a merger functor that partitions the particle set in a single SoA cell into at most
- * @c a_numTargetParticles equal-weight KD leaves and reduces each leaf to one output particle.
+ * @c a_numTargetParticles KD leaves and reduces each leaf to one output particle.
  *
  * The algorithm:
  *   1. Packs each SoA slot into a lightweight intermediate (@c Packed) via @c a_gather and accumulates
  *      total weight @c W.
  *   2. Returns early if @c W < 2 or the target is non-positive.
- *   3. Calls detail::buildEqualWeightKDLeaves to partition the packed list into at most @c a_numTargetParticles
- *      leaves, using @c a_reconcile to fix up daughter particles whenever the median is split.
+ *   3. Calls detail::buildKDCellLeaves to partition the packed list into at most @c a_numTargetParticles
+ *      leaves, using @c a_reconcile to fix up daughter particles whenever the weight median is split.
  *   4. Clears the SoA container, then reduces each leaf by calling @c a_scatterLeaf once per leaf.
  *
  * @c a_scatterLeaf receives the raw [first, last) pointer range of the leaf (pointers into the internal
@@ -227,11 +290,16 @@ makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&,
  *
  * @tparam Packed       Lightweight AoS intermediate type (e.g. MergeParticle<Packed>). Must be copyable.
  * @tparam packWeight   Member-data pointer `Real Packed::*` naming the weight. Forwarded to
- *                      detail::buildEqualWeightKDLeaves for median splitting.
+ *                      detail::buildKDCellLeaves for median splitting.
  * @tparam packPosition Member-data pointer `RealVect Packed::*` naming the position. Forwarded to
- *                      detail::buildEqualWeightKDLeaves for bounding-box splitting.
+ *                      detail::buildKDCellLeaves for bounding-box splitting.
  * @tparam P            SoA payload type.
  * @tparam Traits       Column descriptor for @c P (defaults to ParticleTraits<P>).
+ * @param[in] a_weightMedianCellWidths Node size, in cell widths, at or below which the split plane is the
+ *                                    weight median rather than the count median. See KDPartition.
+ * @param[in] a_capWeights            Cap each particle at the target leaf weight before partitioning.
+ * @param[in] a_splitPlacement        Where the pieces of a split particle go. See KDSplitPlacement.
+ * @param[in] a_probLo                Lazy supplier of the domain lower-left corner.
  * @param[in] a_gather      Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @param[in] a_reconcile   Daughter reconciliation: `(Packed& p1, Packed& p2, const Packed& p0) -> void`.
  * @param[in] a_scatterLeaf Leaf reducer: `(ParticleSoA<P,Traits>&, const Packed* first,
@@ -245,7 +313,11 @@ template <class Packed,
           class P,
           class Traits = ParticleTraits<P>>
 inline ParticleMerger<P, Traits>
-makeEqualWeightKDMerger(
+makeKDCellMerger(
+  const Real                                                                                  a_weightMedianCellWidths,
+  const bool                                                                                  a_capWeights,
+  const KDSplitPlacement                                                                      a_splitPlacement,
+  std::function<RealVect()>                                                                   a_probLo,
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
   BinaryParticleReconcile<Packed>                                                             a_reconcile,
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept;
