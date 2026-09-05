@@ -149,7 +149,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoSolver</b> ()<
 <tr class="memdesc:af23a30e574f34c0381af3b9d3753cdad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default move assignment operator.  <br /></td></tr>
 <tr class="separator:af23a30e574f34c0381af3b9d3753cdad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adca353eb3f5e7b93e1bbb642108e74fd" id="r_adca353eb3f5e7b93e1bbb642108e74fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#adca353eb3f5e7b93e1bbb642108e74fd">setParticleCellMerger</a> (const <a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleManagement::ParticleMerger</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_particleCellMerger) noexcept</td></tr>
-<tr class="memdesc:adca353eb3f5e7b93e1bbb642108e74fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the user-supplied per-cell particle merger used by merge_algorithm = external.  <br /></td></tr>
+<tr class="memdesc:adca353eb3f5e7b93e1bbb642108e74fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the user-supplied per-cell particle merger used by merge_method = external.  <br /></td></tr>
 <tr class="separator:adca353eb3f5e7b93e1bbb642108e74fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e6fcdccd99f9369d87b8e74646f0296" id="r_a6e6fcdccd99f9369d87b8e74646f0296"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a6e6fcdccd99f9369d87b8e74646f0296">getName</a> () const</td></tr>
 <tr class="memdesc:a6e6fcdccd99f9369d87b8e74646f0296"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get this solver's name.  <br /></td></tr>
@@ -410,7 +410,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRuntimeO
 <tr class="memdesc:aacf9a566ce16d475ec79b7ae0a494649"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make superparticles for a full container &ndash; this is the AMR version that users will usually call.  <br /></td></tr>
 <tr class="separator:aacf9a566ce16d475ec79b7ae0a494649"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72889dd2312087f9b2e06301ee13fe61" id="r_a72889dd2312087f9b2e06301ee13fe61"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a72889dd2312087f9b2e06301ee13fe61">makeSuperparticles</a> (<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container, const Vector&lt; int &gt; &amp;a_particlesPerCell, const <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> a_method)</td></tr>
-<tr class="memdesc:a72889dd2312087f9b2e06301ee13fe61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make superparticles with an explicitly chosen method, ignoring the configured merge_algorithm.  <br /></td></tr>
+<tr class="memdesc:a72889dd2312087f9b2e06301ee13fe61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make superparticles with an explicitly chosen method, ignoring the configured merge_method.  <br /></td></tr>
 <tr class="separator:a72889dd2312087f9b2e06301ee13fe61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58895ca8816c073f93246a87399dd041" id="r_a58895ca8816c073f93246a87399dd041"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a58895ca8816c073f93246a87399dd041">getParticlesPerCell</a> () const noexcept</td></tr>
 <tr class="memdesc:a58895ca8816c073f93246a87399dd041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the configured target number of computational particles per cell, per AMR level.  <br /></td></tr>
@@ -493,11 +493,6 @@ Protected Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:ac7ea13986249a06a5185c8315e4548bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for deciding how to interpolate particle mobilities.  <a href="classItoSolver.html#ac7ea13986249a06a5185c8315e4548bc">More...</a><br /></td></tr>
 <tr class="separator:ac7ea13986249a06a5185c8315e4548bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3141048e034ed1e5f9b1539162d187fd" id="r_a3141048e034ed1e5f9b1539162d187fd"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">NnPairSearchBackend</a> { <a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da">Tree</a>
-, <a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6">Hash</a>
- }</td></tr>
-<tr class="memdesc:a3141048e034ed1e5f9b1539162d187fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which EBGeometry point-cloud index backs <a class="el" href="classItoSolver.html#a064755a4970e712c708a6431da584d37" title="Whole-container merge: distributed nearest-neighbour pair merge – shared implementation behind the nn...">mergeNnPairSearch()</a>'s per-patch spatial search &ndash; see <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash().  <a href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">More...</a><br /></td></tr>
-<tr class="separator:a3141048e034ed1e5f9b1539162d187fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -535,30 +530,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseParticleMerger</
 <tr class="memitem:ae2a728e97dc9ff974d6ec8a561dba7b9" id="r_ae2a728e97dc9ff974d6ec8a561dba7b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae2a728e97dc9ff974d6ec8a561dba7b9">rebuildFromMergeContainer</a> (<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_merge)</td></tr>
 <tr class="memdesc:ae2a728e97dc9ff974d6ec8a561dba7b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild a container's ItoParticles from the reduced particles.  <br /></td></tr>
 <tr class="separator:ae2a728e97dc9ff974d6ec8a561dba7b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0991f49500f8192d8d81abf99e83f530" id="r_a0991f49500f8192d8d81abf99e83f530"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0991f49500f8192d8d81abf99e83f530">mergeEqualWeightKD</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_particles, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
-<tr class="memdesc:a0991f49500f8192d8d81abf99e83f530"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-based merge: equal-weight KD partition, one weighted-centroid particle per leaf.  <br /></td></tr>
-<tr class="separator:a0991f49500f8192d8d81abf99e83f530"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c086e2719ac84ecf6c28adbd9c7c026" id="r_a8c086e2719ac84ecf6c28adbd9c7c026"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a8c086e2719ac84ecf6c28adbd9c7c026">kdWeightMedianCellWidths</a> () const noexcept</td></tr>
+<tr class="memdesc:a8c086e2719ac84ecf6c28adbd9c7c026"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn ItoSolver.kd_partition (and, for 'hybrid', ItoSolver.kd_hybrid_leaf_dx) into the single crossover length every kd tree build takes.  <br /></td></tr>
+<tr class="separator:a8c086e2719ac84ecf6c28adbd9c7c026"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dfed66f185ad7db37ff069ecb856f96" id="r_a1dfed66f185ad7db37ff069ecb856f96"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1dfed66f185ad7db37ff069ecb856f96">mergeKDCell</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_particles, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
+<tr class="memdesc:a1dfed66f185ad7db37ff069ecb856f96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-based merge: partition each cell's particles with a kd tree and reduce every leaf to one particle.  <br /></td></tr>
+<tr class="separator:a1dfed66f185ad7db37ff069ecb856f96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad05b0674b94031125ff4cd13bd8a7cd7" id="r_ad05b0674b94031125ff4cd13bd8a7cd7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad05b0674b94031125ff4cd13bd8a7cd7">mergeReinitialize</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_particles, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
 <tr class="memdesc:ad05b0674b94031125ff4cd13bd8a7cd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-based merge: redistribute each cell's physical particles into near-equal integer weights at random cell positions.  <br /></td></tr>
 <tr class="separator:ad05b0674b94031125ff4cd13bd8a7cd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29cf37c0a054f156c0ac0677f88ceb3a" id="r_a29cf37c0a054f156c0ac0677f88ceb3a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a29cf37c0a054f156c0ac0677f88ceb3a">mergeReinitializeBVH</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_particles, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
-<tr class="memdesc:a29cf37c0a054f156c0ac0677f88ceb3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-based merge: as <a class="el" href="classItoSolver.html#a0991f49500f8192d8d81abf99e83f530" title="Cell-based merge: equal-weight KD partition, one weighted-centroid particle per leaf.">mergeEqualWeightKD()</a>, with reinitialized leaf positions.  <br /></td></tr>
-<tr class="separator:a29cf37c0a054f156c0ac0677f88ceb3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a351f7e02ac63ba40efe78bfcfa28bf9d" id="r_a351f7e02ac63ba40efe78bfcfa28bf9d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a351f7e02ac63ba40efe78bfcfa28bf9d">mergeNnSfc</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;a_particles, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
-<tr class="memdesc:a351f7e02ac63ba40efe78bfcfa28bf9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-based merge: Hilbert-curve sort, then merge adjacent pairs down to the target.  <br /></td></tr>
-<tr class="separator:a351f7e02ac63ba40efe78bfcfa28bf9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a064755a4970e712c708a6431da584d37" id="r_a064755a4970e712c708a6431da584d37"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">NnPairSearchBackend</a> Backend&gt; </td></tr>
+<tr class="memitem:a064755a4970e712c708a6431da584d37" id="r_a064755a4970e712c708a6431da584d37"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespaceParticleManagement.html#aa5d8674b12db3b5588d2c30437cb5859">ParticleManagement::NNSearch</a> Backend&gt; </td></tr>
 <tr class="memitem:a064755a4970e712c708a6431da584d37"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a064755a4970e712c708a6431da584d37">mergeNnPairSearch</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;merge, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
-<tr class="memdesc:a064755a4970e712c708a6431da584d37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: distributed nearest-neighbour pair merge &ndash; shared implementation behind the nn_pair_tree and nn_pair_hash selectors.  <br /></td></tr>
+<tr class="memdesc:a064755a4970e712c708a6431da584d37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: distributed nearest-neighbour pair merge &ndash; shared implementation behind nn_search = tree and nn_search = hash.  <br /></td></tr>
 <tr class="separator:a064755a4970e712c708a6431da584d37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72924a1b9cfe826c007a5e43044dffa2" id="r_a72924a1b9cfe826c007a5e43044dffa2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a72924a1b9cfe826c007a5e43044dffa2">mergeNnPairOneCell</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;merge, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
 <tr class="memdesc:a72924a1b9cfe826c007a5e43044dffa2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: distributed nearest-neighbour pair merge, per-cell PointCloudBVH search.  <br /></td></tr>
 <tr class="separator:a72924a1b9cfe826c007a5e43044dffa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7f7a17ec94df95b01c06c1788519c67" id="r_aa7f7a17ec94df95b01c06c1788519c67"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa7f7a17ec94df95b01c06c1788519c67">mergeKDSkinNn</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;merge, const Vector&lt; int &gt; &amp;a_particlesPerCell)</td></tr>
-<tr class="memdesc:aa7f7a17ec94df95b01c06c1788519c67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: kd-tree with a nearest-neighbour skin (the kd_skin_nn selector).  <br /></td></tr>
+<tr class="memdesc:aa7f7a17ec94df95b01c06c1788519c67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: kd-tree with a nearest-neighbour skin (kd_amr_boundary = nn).  <br /></td></tr>
 <tr class="separator:aa7f7a17ec94df95b01c06c1788519c67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a001a2977acd7e9c729002959122959ce" id="r_a001a2977acd7e9c729002959122959ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a001a2977acd7e9c729002959122959ce">mergeKDImpl</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;merge, const Vector&lt; int &gt; &amp;a_particlesPerCell, bool a_enableBoundaryCarve)</td></tr>
-<tr class="memdesc:a001a2977acd7e9c729002959122959ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: whole-patch kd-tree build &ndash; shared implementation behind the kd_carve and kd_patch selectors.  <br /></td></tr>
+<tr class="memdesc:a001a2977acd7e9c729002959122959ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whole-container merge: whole-patch kd-tree build &ndash; shared implementation behind kd_patch and kd_amr with kd_amr_boundary = carve.  <br /></td></tr>
 <tr class="separator:a001a2977acd7e9c729002959122959ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32226502e97aa02f9750ca9f19a7d088" id="r_a32226502e97aa02f9750ca9f19a7d088"><td class="memItemLeft" align="right" valign="top"><a id="a32226502e97aa02f9750ca9f19a7d088" name="a32226502e97aa02f9750ca9f19a7d088"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseIntersectionEB</b> ()</td></tr>
@@ -630,35 +622,50 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:aa8a28b6a171ed4a0aa2093e39c42cebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac02a2f6305247faccb86187a701d7d1a" id="r_ac02a2f6305247faccb86187a701d7d1a"><td class="memItemLeft" align="right" valign="top"><a id="ac02a2f6305247faccb86187a701d7d1a" name="ac02a2f6305247faccb86187a701d7d1a"></a>
 <a class="el" href="namespaceParticleManagement.html#a0653357f8d5608240706c875758d1262">ParticleManagement::ParticleMerger</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleCellMerger</b></td></tr>
-<tr class="memdesc:ac02a2f6305247faccb86187a701d7d1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied per-cell merger for merge_algorithm = external (set via <a class="el" href="classItoSolver.html#adca353eb3f5e7b93e1bbb642108e74fd" title="Set the user-supplied per-cell particle merger used by merge_algorithm = external.">setParticleCellMerger()</a>). The built-in methods build their own merger locally in the corresponding mergeXxx(). <br /></td></tr>
+<tr class="memdesc:ac02a2f6305247faccb86187a701d7d1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied per-cell merger for merge_method = external (set via <a class="el" href="classItoSolver.html#adca353eb3f5e7b93e1bbb642108e74fd" title="Set the user-supplied per-cell particle merger used by merge_method = external.">setParticleCellMerger()</a>). The built-in methods build their own merger locally in the corresponding mergeXxx(). <br /></td></tr>
 <tr class="separator:ac02a2f6305247faccb86187a701d7d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae02de16db5891c0576d989cb47025267" id="r_ae02de16db5891c0576d989cb47025267"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae02de16db5891c0576d989cb47025267">m_mergeMethod</a> = <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95ac68ec7c480914423273175f0c02a5d6e">ParticleManagement::ParticleMergeMethod::EqualWeightKD</a></td></tr>
-<tr class="memdesc:ae02de16db5891c0576d989cb47025267"><td class="mdescLeft">&#160;</td><td class="mdescRight">The configured merge method (which specific algorithm).  <br /></td></tr>
+<tr class="memitem:ae02de16db5891c0576d989cb47025267" id="r_ae02de16db5891c0576d989cb47025267"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ae02de16db5891c0576d989cb47025267">m_mergeMethod</a> = <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a8be0368e57e8a4ed31e62b942cd9e2d3">ParticleManagement::ParticleMergeMethod::KdCell</a></td></tr>
+<tr class="memdesc:ae02de16db5891c0576d989cb47025267"><td class="mdescLeft">&#160;</td><td class="mdescRight">The configured merge method (which scope the merge groups particles over).  <br /></td></tr>
 <tr class="separator:ae02de16db5891c0576d989cb47025267"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57cdc2810c101ec4516d6a41abc5ae41" id="r_a57cdc2810c101ec4516d6a41abc5ae41"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a491f066ceb697a56c145dc83187c668d">ParticleManagement::KDPartition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a57cdc2810c101ec4516d6a41abc5ae41">m_kdPartition</a> = <a class="el" href="namespaceParticleManagement.html#a491f066ceb697a56c145dc83187c668da8c489d0946f66d17d73f26366a4bf620">ParticleManagement::KDPartition::Weight</a></td></tr>
+<tr class="memdesc:a57cdc2810c101ec4516d6a41abc5ae41"><td class="mdescLeft">&#160;</td><td class="mdescRight">kd_cell/kd_patch/kd_amr: how each node is divided into two children.  <br /></td></tr>
+<tr class="separator:a57cdc2810c101ec4516d6a41abc5ae41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41e091da70ecf744b8c365f51c529ed5" id="r_a41e091da70ecf744b8c365f51c529ed5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">ParticleManagement::KDPlacement</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a41e091da70ecf744b8c365f51c529ed5">m_kdPlacement</a> = <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527a9b49197cf2fea5efc68ef8a88489e1b6">ParticleManagement::KDPlacement::Centroid</a></td></tr>
+<tr class="memdesc:a41e091da70ecf744b8c365f51c529ed5"><td class="mdescLeft">&#160;</td><td class="mdescRight">kd_cell/kd_patch/kd_amr: where the particle a leaf reduces to is placed.  <br /></td></tr>
+<tr class="separator:a41e091da70ecf744b8c365f51c529ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa6aacf5ed053f62387ecf297bbab1ff" id="r_afa6aacf5ed053f62387ecf297bbab1ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">ParticleManagement::KDSplitPlacement</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#afa6aacf5ed053f62387ecf297bbab1ff">m_kdSplitPlacement</a> = <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2a4f1f6016fc9f3f2353c0cc7c67b292bd">ParticleManagement::KDSplitPlacement::Center</a></td></tr>
+<tr class="memdesc:afa6aacf5ed053f62387ecf297bbab1ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Where the pieces of a split particle are placed.  <br /></td></tr>
+<tr class="separator:afa6aacf5ed053f62387ecf297bbab1ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adca81ddb0a2b2d59d1b9cc8690fd4bc8" id="r_adca81ddb0a2b2d59d1b9cc8690fd4bc8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#a5abdebd581103450e75f7214edbfc8b7">ParticleManagement::KDAmrBoundary</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#adca81ddb0a2b2d59d1b9cc8690fd4bc8">m_kdAmrBoundary</a> = <a class="el" href="namespaceParticleManagement.html#a5abdebd581103450e75f7214edbfc8b7ab5a0f0e22cd81fdd49bf1c26c64f2656">ParticleManagement::KDAmrBoundary::Carve</a></td></tr>
+<tr class="memdesc:adca81ddb0a2b2d59d1b9cc8690fd4bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">kd_amr: how leaves that touch a patch or rank boundary are resolved.  <br /></td></tr>
+<tr class="separator:adca81ddb0a2b2d59d1b9cc8690fd4bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a812c94edd4b9a3a89908df616bd9875b" id="r_a812c94edd4b9a3a89908df616bd9875b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceParticleManagement.html#aa5d8674b12db3b5588d2c30437cb5859">ParticleManagement::NNSearch</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a812c94edd4b9a3a89908df616bd9875b">m_nnSearch</a> = <a class="el" href="namespaceParticleManagement.html#aa5d8674b12db3b5588d2c30437cb5859a3b0c14770e6bd663518496da60f524da">ParticleManagement::NNSearch::Tree</a></td></tr>
+<tr class="memdesc:a812c94edd4b9a3a89908df616bd9875b"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_amr: which spatial index the neighbour search is backed by.  <br /></td></tr>
+<tr class="separator:a812c94edd4b9a3a89908df616bd9875b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad223e1bf4603b593d917d0ccd1d115f5" id="r_ad223e1bf4603b593d917d0ccd1d115f5"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad223e1bf4603b593d917d0ccd1d115f5">m_particlesPerCell</a></td></tr>
 <tr class="memdesc:ad223e1bf4603b593d917d0ccd1d115f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target number of computational particles per cell, per AMR level.  <br /></td></tr>
 <tr class="separator:ad223e1bf4603b593d917d0ccd1d115f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a989c95e6f78eb1880d0ec4a7a340070b" id="r_a989c95e6f78eb1880d0ec4a7a340070b"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a989c95e6f78eb1880d0ec4a7a340070b">m_regridMergeMethod</a></td></tr>
 <tr class="memdesc:a989c95e6f78eb1880d0ec4a7a340070b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which merge method to run inside <a class="el" href="classItoSolver.html#add06b5d41255394546679dcdf6a74108" title="Regrid this solver.">ItoSolver::regrid()</a>, or nullopt for "whatever
-merge_algorithm says".  <br /></td></tr>
+merge_method says".  <br /></td></tr>
 <tr class="separator:a989c95e6f78eb1880d0ec4a7a340070b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc472f1cf97a0ee736df5bc481106dc7" id="r_abc472f1cf97a0ee736df5bc481106dc7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#abc472f1cf97a0ee736df5bc481106dc7">m_nnPairIterate</a> = true</td></tr>
-<tr class="memdesc:abc472f1cf97a0ee736df5bc481106dc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local trivial tier to convergence within each round.  <br /></td></tr>
-<tr class="separator:abc472f1cf97a0ee736df5bc481106dc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac718ee159e5e4aaf35a29b6a9a17bc72" id="r_ac718ee159e5e4aaf35a29b6a9a17bc72"><td class="memItemLeft" align="right" valign="top"><a id="ac718ee159e5e4aaf35a29b6a9a17bc72" name="ac718ee159e5e4aaf35a29b6a9a17bc72"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nnPairFallback</b> = 1</td></tr>
-<tr class="memdesc:ac718ee159e5e4aaf35a29b6a9a17bc72"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_pair_tree/nn_pair_onecell/nn_pair_hash: number of fallback candidates per query. The k-nearest search is done with k = 1 + this. Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash. <br /></td></tr>
-<tr class="separator:ac718ee159e5e4aaf35a29b6a9a17bc72"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a057c436507f04baaef3356c7cbcbc8d1" id="r_a057c436507f04baaef3356c7cbcbc8d1"><td class="memItemLeft" align="right" valign="top"><a id="a057c436507f04baaef3356c7cbcbc8d1" name="a057c436507f04baaef3356c7cbcbc8d1"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nnPairMaxCellDistance</b> = -1</td></tr>
-<tr class="memdesc:a057c436507f04baaef3356c7cbcbc8d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_pair_tree/nn_pair_hash: maximum merge distance in whole cells (Chebyshev). A negative value means unbounded (std::nullopt). Only used for nn_pair_tree/nn_pair_hash &ndash; nn_pair_onecell's merge distance is structurally fixed at 1 and does not read this. <br /></td></tr>
-<tr class="separator:a057c436507f04baaef3356c7cbcbc8d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17f63bc4b8dacdc579911809a155e7b2" id="r_a17f63bc4b8dacdc579911809a155e7b2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a17f63bc4b8dacdc579911809a155e7b2">m_nnPairMaxRounds</a> = 3</td></tr>
-<tr class="memdesc:a17f63bc4b8dacdc579911809a155e7b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_pair_tree/nn_pair_onecell/nn_pair_hash: maximum number of drain rounds run per <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> call.  <br /></td></tr>
-<tr class="separator:a17f63bc4b8dacdc579911809a155e7b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f5137246c292dfdcf4c90e38b12fdbb" id="r_a1f5137246c292dfdcf4c90e38b12fdbb"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1f5137246c292dfdcf4c90e38b12fdbb">m_kdSplitWeightLeafDx</a> = 1.0</td></tr>
-<tr class="memdesc:a1f5137246c292dfdcf4c90e38b12fdbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting.  <br /></td></tr>
-<tr class="separator:a1f5137246c292dfdcf4c90e38b12fdbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf847fa324b8699bbb94d4883c978296" id="r_aaf847fa324b8699bbb94d4883c978296"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aaf847fa324b8699bbb94d4883c978296">m_nnIterate</a> = true</td></tr>
+<tr class="memdesc:aaf847fa324b8699bbb94d4883c978296"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_amr: iterate the local trivial tier to convergence within each round.  <br /></td></tr>
+<tr class="separator:aaf847fa324b8699bbb94d4883c978296"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8984e8155464019d04b293a80832e192" id="r_a8984e8155464019d04b293a80832e192"><td class="memItemLeft" align="right" valign="top"><a id="a8984e8155464019d04b293a80832e192" name="a8984e8155464019d04b293a80832e192"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nnFallback</b> = 1</td></tr>
+<tr class="memdesc:a8984e8155464019d04b293a80832e192"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_amr: number of fallback candidates per query. The k-nearest search is done with k = 1 + this. Also read by kd_amr with kd_amr_boundary = nn. <br /></td></tr>
+<tr class="separator:a8984e8155464019d04b293a80832e192"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac7341263569975d5615f3dba259c0f5" id="r_aac7341263569975d5615f3dba259c0f5"><td class="memItemLeft" align="right" valign="top"><a id="aac7341263569975d5615f3dba259c0f5" name="aac7341263569975d5615f3dba259c0f5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nnMaxCellDistance</b> = -1</td></tr>
+<tr class="memdesc:aac7341263569975d5615f3dba259c0f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_amr: maximum merge distance in whole cells (Chebyshev). A negative value means unbounded (std::nullopt). Not read when nn_search = onecell, whose merge distance is structurally fixed at 1. <br /></td></tr>
+<tr class="separator:aac7341263569975d5615f3dba259c0f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71b1e03c0882aab80b912a87ae7dbc78" id="r_a71b1e03c0882aab80b912a87ae7dbc78"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a71b1e03c0882aab80b912a87ae7dbc78">m_nnMaxRounds</a> = 3</td></tr>
+<tr class="memdesc:a71b1e03c0882aab80b912a87ae7dbc78"><td class="mdescLeft">&#160;</td><td class="mdescRight">nn_amr: maximum number of drain rounds run per <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> call.  <br /></td></tr>
+<tr class="separator:a71b1e03c0882aab80b912a87ae7dbc78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a357d507c987550b426f4c41295dd83c2" id="r_a357d507c987550b426f4c41295dd83c2"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a357d507c987550b426f4c41295dd83c2">m_kdHybridLeafDx</a> = 1.0</td></tr>
+<tr class="memdesc:a357d507c987550b426f4c41295dd83c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">kd_partition = hybrid: node size, in cell widths, at or below which the split plane switches from the count median to the weight median.  <br /></td></tr>
+<tr class="separator:a357d507c987550b426f4c41295dd83c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ecdbaf1fcff7620202eef2892684dcc" id="r_a2ecdbaf1fcff7620202eef2892684dcc"><td class="memItemLeft" align="right" valign="top"><a id="a2ecdbaf1fcff7620202eef2892684dcc" name="a2ecdbaf1fcff7620202eef2892684dcc"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_restartPPC</b></td></tr>
 <tr class="memdesc:a2ecdbaf1fcff7620202eef2892684dcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles used when restarting a simulation &ndash; this is relevant only when restarting from a "fluid" checkpoint file. <br /></td></tr>
@@ -811,7 +818,7 @@ EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_diffusionF
 <tr class="memdesc:a6c9cedeae5f1456da3b2f301042d0971"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered gradient of m_diffusionFunction, used for the grad(D) drift correction.  <br /></td></tr>
 <tr class="separator:a6c9cedeae5f1456da3b2f301042d0971"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad34c0550688c09afe97a3c990f1db62d" id="r_ad34c0550688c09afe97a3c990f1db62d"><td class="memItemLeft" align="right" valign="top">EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad34c0550688c09afe97a3c990f1db62d">m_kdMergeCellHistogram</a></td></tr>
-<tr class="memdesc:ad34c0550688c09afe97a3c990f1db62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>).  <br /></td></tr>
+<tr class="memdesc:ad34c0550688c09afe97a3c990f1db62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>).  <br /></td></tr>
 <tr class="separator:ad34c0550688c09afe97a3c990f1db62d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af71e85b23c94fdc63a714d2fbc029d65" id="r_af71e85b23c94fdc63a714d2fbc029d65"><td class="memItemLeft" align="right" valign="top"><a id="af71e85b23c94fdc63a714d2fbc029d65" name="af71e85b23c94fdc63a714d2fbc029d65"></a>
 EBAMRFAB&#160;</td><td class="memItemRight" valign="bottom"><b>m_kdMergeLeafQuota</b></td></tr>
@@ -858,36 +865,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <div class="textblock"><p>Base class for Ito diffusion particle models. </p>
 <p>This is a particle class for solving Ito diffusion problems dX = v*dt + sqrt(2*D)*dW_t (dW_t is a Wiener process over dt) over an AMR hierarchy. The diffusion coefficient is related to the hydrodynamic diffusion coefficient by D(fluid) = sqrt(2*D(Ito)). </p><dl class="section note"><dt>Note</dt><dd>To use this class, the user must add a species and set the realm and phase where the solver will live. </dd></dl>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
-<a id="a3141048e034ed1e5f9b1539162d187fd" name="a3141048e034ed1e5f9b1539162d187fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3141048e034ed1e5f9b1539162d187fd">&#9670;&#160;</a></span>NnPairSearchBackend</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum class <a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">ItoSolver::NnPairSearchBackend</a></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Which EBGeometry point-cloud index backs <a class="el" href="classItoSolver.html#a064755a4970e712c708a6431da584d37" title="Whole-container merge: distributed nearest-neighbour pair merge – shared implementation behind the nn...">mergeNnPairSearch()</a>'s per-patch spatial search &ndash; see <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash(). </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da" name="a3141048e034ed1e5f9b1539162d187fda3b0c14770e6bd663518496da60f524da"></a>Tree&#160;</td><td class="fielddoc"><p>EBGeometry::PointCloudBVH &ndash; <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6" name="a3141048e034ed1e5f9b1539162d187fdafae8a9257e154175da4193dbf6552ef6"></a>Hash&#160;</td><td class="fielddoc"><p>EBGeometry::PointCloudHashGrid &ndash; <a class="el" href="namespaceParticleManagement.html#abda285ee8fc3e7d5dd0a96deadc98ea9" title="Run one full round of the nearest-neighbor merge algorithm, identical in every respect to mergeNeares...">ParticleManagement::mergeNearestNeighborsHash()</a>. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
 <a id="a93be4b5f935a4ba80472db227c9d75cd" name="a93be4b5f935a4ba80472db227c9d75cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a93be4b5f935a4ba80472db227c9d75cd">&#9670;&#160;</a></span>WhichCheckpoint</h2>
 
@@ -4111,6 +4088,34 @@ template&lt;typename P , typename Traits &gt; </div>
 
 </div>
 </div>
+<a id="a8c086e2719ac84ecf6c28adbd9c7c026" name="a8c086e2719ac84ecf6c28adbd9c7c026"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c086e2719ac84ecf6c28adbd9c7c026">&#9670;&#160;</a></span>kdWeightMedianCellWidths()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoSolver::kdWeightMedianCellWidths </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Turn ItoSolver.kd_partition (and, for 'hybrid', ItoSolver.kd_hybrid_leaf_dx) into the single crossover length every kd tree build takes. </p>
+<p>'weight' and 'count' are the two limits of the size-dependent rule &ndash; a crossover above any node's size and one below every node's size &ndash; so all three settings reduce to one number and the cell, patch and AMR builds read the same knob. </p><dl class="section return"><dt>Returns</dt><dd>Node size, in cell widths, at or below which a node splits at the weight median. </dd></dl>
+
+</div>
+</div>
 <a id="a20274787c43cdb8d0db28b598333d0ca" name="a20274787c43cdb8d0db28b598333d0ca"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a20274787c43cdb8d0db28b598333d0ca">&#9670;&#160;</a></span>makeSuperparticles() <span class="overload">[1/4]</span></h2>
 
@@ -4136,7 +4141,7 @@ template&lt;typename P , typename Traits &gt; </div>
 </div><div class="memdoc">
 
 <p>Make superparticles for a full container, merging to the solver's configured target. </p>
-<p>The usual entry point: the target is ItoSolver.particles_per_cell and the method is ItoSolver.merge_algorithm, so a caller that has no opinion about either does not have to carry one. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The usual entry point: the target is ItoSolver.particles_per_cell and the method is ItoSolver.merge_method, so a caller that has no opinion about either does not have to carry one. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition into new superparticles. </td></tr>
   </table>
@@ -4230,7 +4235,7 @@ template&lt;typename P , typename Traits &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Make superparticles with an explicitly chosen method, ignoring the configured merge_algorithm. </p>
+<p>Make superparticles with an explicitly chosen method, ignoring the configured merge_method. </p>
 <p>Lets a caller run a different method than the solver's own (e.g. a stepper choosing a regrid-time merge). Routes through <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a>; ParticleMergeMethod::None is a no-op. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition. </td></tr>
@@ -4287,8 +4292,8 @@ template&lt;typename P , typename Traits &gt; </div>
 
 </div>
 </div>
-<a id="a0991f49500f8192d8d81abf99e83f530" name="a0991f49500f8192d8d81abf99e83f530"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0991f49500f8192d8d81abf99e83f530">&#9670;&#160;</a></span>mergeEqualWeightKD()</h2>
+<a id="a1dfed66f185ad7db37ff069ecb856f96" name="a1dfed66f185ad7db37ff069ecb856f96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dfed66f185ad7db37ff069ecb856f96">&#9670;&#160;</a></span>mergeKDCell()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4297,7 +4302,7 @@ template&lt;typename P , typename Traits &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void ItoSolver::mergeEqualWeightKD </td>
+          <td class="memname">void ItoSolver::mergeKDCell </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
@@ -4321,11 +4326,11 @@ template&lt;typename P , typename Traits &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Cell-based merge: equal-weight KD partition, one weighted-centroid particle per leaf. </p>
-<p>Recursively partitions each cell into at most a_particlesPerCell equal-weight KD leaves and reduces each to one weighted-centroid particle. Requires particle weights &gt;= 1 to split. Honours the per-level target. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Cell-based merge: partition each cell's particles with a kd tree and reduce every leaf to one particle. </p>
+<p>Two independent choices, both taken from the input script. ItoSolver.kd_partition picks the split rule: the weight median divides a node so the halves carry near-equal weight, dividing a particle when it must, which equalizes the merged weights; the count median divides on particle count and never divides a particle, so it creates none but leaves the weights uneven; hybrid takes the count median down to ItoSolver.kd_hybrid_leaf_dx cell widths and the weight median below that. ItoSolver.kd_placement picks where a leaf's particle goes: at the leaf's weighted centroid, at one of the leaf's own particles drawn with probability proportional to weight, or at a uniformly random point in the leaf's bounding box. The centroid keeps a leaf's mean position and discards its spread, so repeated merges contract the sub-cell distribution onto a lattice of leaf centres; the other two placements avoid that, and sampling additionally inherits a position that one of the original particles occupied. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Reduced-particle container to repartition. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count per cell (per-level). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to merge. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target number of particles per cell (one value, or one per level). </td></tr>
   </table>
   </dd>
 </dl>
@@ -4372,8 +4377,8 @@ template&lt;typename P , typename Traits &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Whole-container merge: whole-patch kd-tree build &ndash; shared implementation behind the kd_carve and kd_patch selectors. </p>
-<p>A single, non-iterative pass: no drain loop, and no nn_pair_iterate/nn_pair_fallback/ nn_pair_max_cell_dist equivalents, since there is no configurable search radius or convergence loop. With a_enableBoundaryCarve the merge fills a width-1 particle ghost mask (which must be registered on this realm) and arbitrates leaves straddling a patch boundary; without it the merge is patch-local &ndash; no ghosts, no communication, and a cell straddled by two patches is reduced by each patch independently. Needs no cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Whole-container merge: whole-patch kd-tree build &ndash; shared implementation behind kd_patch and kd_amr with kd_amr_boundary = carve. </p>
+<p>A single, non-iterative pass: no drain loop, and no nn_iterate/nn_fallback/ nn_max_cell_dist equivalents, since there is no configurable search radius or convergence loop. With a_enableBoundaryCarve the merge fills a width-1 particle ghost mask (which must be registered on this realm) and arbitrates leaves straddling a patch boundary; without it the merge is patch-local &ndash; no ghosts, no communication, and a cell straddled by two patches is reduced by each patch independently. Needs no cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">merge</td><td>Reduced-particle container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4418,8 +4423,8 @@ template&lt;typename P , typename Traits &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Whole-container merge: kd-tree with a nearest-neighbour skin (the kd_skin_nn selector). </p>
-<p>Same tree build and per-cell quota as <a class="el" href="classItoSolver.html#a001a2977acd7e9c729002959122959ce" title="Whole-container merge: whole-patch kd-tree build – shared implementation behind the kd_carve and kd_p...">mergeKDImpl()</a>, but the boundary tier is the nearest-neighbour pair merge instead of the carve arbitration. The particles are split across two containers: <a class="el" href="namespaceParticleManagement.html#a5fc83198c8fc98e293150aca95fabdef" title="Run the uncontested tier of the kd merge, splitting the input into merged and leftover.">ParticleManagement::mergeKDInterior()</a> commits every leaf holding no ghost into one, and what is left &ndash; the contested skin &ndash; is drained from the other by <a class="el" href="namespaceParticleManagement.html#aaf418974eaf19a4608d54eda6a85dcab" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">ParticleManagement::mergeNearestNeighborsOneCell()</a>, whose search radius is fixed at Chebyshev cell distance 1 and so matches the width-1 halo exactly. The skin tier drains each cell to what remains of its target after the interior results are counted against it, so the two tiers share one budget. Fills a width-1 particle ghost mask itself, which must be registered on this realm. Tuned by nn_pair_iterate/nn_pair_fallback/nn_pair_max_rounds, shared with the nn_pair family; nn_pair_max_cell_dist does not apply. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Whole-container merge: kd-tree with a nearest-neighbour skin (kd_amr_boundary = nn). </p>
+<p>Same tree build and per-cell quota as <a class="el" href="classItoSolver.html#a001a2977acd7e9c729002959122959ce" title="Whole-container merge: whole-patch kd-tree build – shared implementation behind kd_patch and kd_amr w...">mergeKDImpl()</a>, but the boundary tier is the nearest-neighbour pair merge instead of the carve arbitration. The particles are split across two containers: <a class="el" href="namespaceParticleManagement.html#ac02d1617da5dde96d29472dadcfe8331" title="Run the uncontested tier of the kd merge, splitting the input into merged and leftover.">ParticleManagement::mergeKDInterior()</a> commits every leaf holding no ghost into one, and what is left &ndash; the contested skin &ndash; is drained from the other by <a class="el" href="namespaceParticleManagement.html#aaf418974eaf19a4608d54eda6a85dcab" title="Run one full round of the one-cell nearest-neighbor merge: the same distributed propose/judge/verdict...">ParticleManagement::mergeNearestNeighborsOneCell()</a>, whose search radius is fixed at Chebyshev cell distance 1 and so matches the width-1 halo exactly. The skin tier drains each cell to what remains of its target after the interior results are counted against it, so the two tiers share one budget. Fills a width-1 particle ghost mask itself, which must be registered on this realm. Tuned by nn_iterate/nn_fallback/nn_max_rounds, shared with nn_amr; nn_max_cell_dist does not apply. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">merge</td><td>Reduced-particle container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4471,8 +4476,8 @@ template&lt;typename P , typename Traits &gt; </div>
 
 <p>Run one merge method over an already-extracted reduced-particle container. </p>
 <p>The single place that knows the <em>shape</em> of each merge method, so that no caller has to. Two shapes exist and they are not interchangeable:</p><ul>
-<li>cell-based (equal_weight_kd, reinitialize, reinitialize_bvh, nn_sfc, external): reduce each cell to at most its per-level target, refilling only within that same per-cell budget. These must NOT be followed by the container-wide split.</li>
-<li>whole-container (kd_carve, kd_patch, kd_skin_nn, nn_pair_{tree,onecell,hash}): drain over-full cells against one crowding threshold for the whole hierarchy, then split under-full cells back up to it. These MUST split, and they mint scratch ids that are invalidated afterwards. ParticleMergeMethod::None does neither &ndash; not even the split, which would otherwise refill every under-full cell in the domain at every regrid. Getting that wrong is silent: nothing fails, the population simply grows. <dl class="params"><dt>Parameters</dt><dd>
+<li>cell-based (kd_cell, reinitialize, external): reduce each cell to at most its per-level target, refilling only within that same per-cell budget. These must NOT be followed by the container-wide split.</li>
+<li>whole-container (kd_patch, kd_amr, nn_amr): drain over-full cells against one crowding threshold for the whole hierarchy, then split under-full cells back up to it. These MUST split, and they mint scratch ids that are invalidated afterwards. ParticleMergeMethod::None does neither &ndash; not even the split, which would otherwise refill every under-full cell in the domain at every regrid. Getting that wrong is silent: nothing fails, the population simply grows. <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Reduced-particle container to merge in place. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count per cell (per-level for the cell-based methods; the whole-container methods use the first entry only). </td></tr>
@@ -4520,7 +4525,7 @@ template&lt;typename P , typename Traits &gt; </div>
 </div><div class="memdoc">
 
 <p>Whole-container merge: distributed nearest-neighbour pair merge, per-cell PointCloudBVH search. </p>
-<p>As <a class="el" href="classItoSolver.html#a064755a4970e712c708a6431da584d37" title="Whole-container merge: distributed nearest-neighbour pair merge – shared implementation behind the nn...">mergeNnPairSearch()</a>, but the merge distance is structurally fixed at Chebyshev cell distance 1 (own cell and Moore-adjacent neighbours only), so nn_pair_max_cell_dist is not honoured by this method. Requires a width-1 particle ghost mask registered on this realm. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>As <a class="el" href="classItoSolver.html#a064755a4970e712c708a6431da584d37" title="Whole-container merge: distributed nearest-neighbour pair merge – shared implementation behind nn_sea...">mergeNnPairSearch()</a>, but the merge distance is structurally fixed at Chebyshev cell distance 1 (own cell and Moore-adjacent neighbours only), so nn_max_cell_dist is not honoured by this method. Requires a width-1 particle ghost mask registered on this realm. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">merge</td><td>Reduced-particle container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
@@ -4536,7 +4541,7 @@ template&lt;typename P , typename Traits &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d187fd">ItoSolver::NnPairSearchBackend</a> Backend&gt; </div>
+template&lt;<a class="el" href="namespaceParticleManagement.html#aa5d8674b12db3b5588d2c30437cb5859">ParticleManagement::NNSearch</a> Backend&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4566,10 +4571,10 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 </table>
 </div><div class="memdoc">
 
-<p>Whole-container merge: distributed nearest-neighbour pair merge &ndash; shared implementation behind the nn_pair_tree and nn_pair_hash selectors. </p>
+<p>Whole-container merge: distributed nearest-neighbour pair merge &ndash; shared implementation behind nn_search = tree and nn_search = hash. </p>
 <p>Whole-container, cross-patch/cross-rank AMR merge. Identical in every respect between the two backends (callbacks, id allocation, drain loop); only the <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsHash() call inside the drain loop differs, selected at compile time via <code>Backend</code>. Requires the particle ghost mask registered on this realm (see <a class="el" href="classItoSolver.html#a174efc0134a7417f1afa737b8f328d16" title="Register operators.">registerOperators()</a>); it does its own ghost fill and needs no cell sorting. Uses a single crowding threshold &ndash; the coarsest level's a_particlesPerCell entry. Drains over-full cells only; <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> splits afterwards. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Backend</td><td>Which point-cloud index to search with (see NnPairSearchBackend). </td></tr>
+    <tr><td class="paramname">Backend</td><td>Which point-cloud index to search with. Only NNSearch::Tree and NNSearch::Hash are instantiated; NNSearch::OneCell is <a class="el" href="classItoSolver.html#a72924a1b9cfe826c007a5e43044dffa2" title="Whole-container merge: distributed nearest-neighbour pair merge, per-cell PointCloudBVH search.">mergeNnPairOneCell()</a>, which is a different algorithm. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4577,51 +4582,6 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">merge</td><td>Reduced-particle container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count (only the first entry is used). </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a351f7e02ac63ba40efe78bfcfa28bf9d" name="a351f7e02ac63ba40efe78bfcfa28bf9d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a351f7e02ac63ba40efe78bfcfa28bf9d">&#9670;&#160;</a></span>mergeNnSfc()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::mergeNnSfc </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particlesPerCell</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Cell-based merge: Hilbert-curve sort, then merge adjacent pairs down to the target. </p>
-<p>Splits the heaviest particle when a cell is below target, so unlike the other cell-based methods it does refill &ndash; but per cell against the per-level target, which is why <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a> must still not run the container-wide split after it. Does not require integer weights. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Reduced-particle container to repartition. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count per cell (per-level). </td></tr>
   </table>
   </dd>
 </dl>
@@ -4664,51 +4624,6 @@ template&lt;<a class="el" href="classItoSolver.html#a3141048e034ed1e5f9b1539162d
 
 <p>Cell-based merge: redistribute each cell's physical particles into near-equal integer weights at random cell positions. </p>
 <p>All output particles carry the same weight-averaged energy. Requires integer weights. Honours the per-level target. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Reduced-particle container to repartition. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count per cell (per-level). </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a29cf37c0a054f156c0ac0677f88ceb3a" name="a29cf37c0a054f156c0ac0677f88ceb3a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a29cf37c0a054f156c0ac0677f88ceb3a">&#9670;&#160;</a></span>mergeReinitializeBVH()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::mergeReinitializeBVH </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structItoMergeParticle.html">ItoMergeParticle</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particlesPerCell</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Cell-based merge: as <a class="el" href="classItoSolver.html#a0991f49500f8192d8d81abf99e83f530" title="Cell-based merge: equal-weight KD partition, one weighted-centroid particle per leaf.">mergeEqualWeightKD()</a>, with reinitialized leaf positions. </p>
-<p>Cut-cells use the weighted centroid (to stay inside the EB); full cells draw a random point in the leaf bounding box. Honours the per-level target. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Reduced-particle container to repartition. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target particle count per cell (per-level). </td></tr>
@@ -5466,8 +5381,8 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Set the user-supplied per-cell particle merger used by merge_algorithm = external. </p>
-<p>The built-in merge methods build their own per-cell merger internally; this one is used only when merge_algorithm = external, applied cell-by-cell by <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a>. </p><dl class="section note"><dt>Note</dt><dd>The merger runs on <a class="el" href="structItoMergeParticle.html" title="Reduced Ito particle: everything an ItoParticle carries that is not recomputed from the mesh.">ItoMergeParticle</a>, not <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>: every merge in this solver operates on the reduced particle, and a per-cell merger sees exactly the columns a merge is entitled to change (position, weight, energy). Out-of-tree mergers written against <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> break at compile time. </dd></dl>
+<p>Set the user-supplied per-cell particle merger used by merge_method = external. </p>
+<p>The built-in merge methods build their own per-cell merger internally; this one is used only when merge_method = external, applied cell-by-cell by <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a>. </p><dl class="section note"><dt>Note</dt><dd>The merger runs on <a class="el" href="structItoMergeParticle.html" title="Reduced Ito particle: everything an ItoParticle carries that is not recomputed from the mesh.">ItoMergeParticle</a>, not <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a>: every merge in this solver operates on the reduced particle, and a per-cell merger sees exactly the columns a merge is entitled to change (position, weight, energy). Out-of-tree mergers written against <a class="el" href="structItoParticle.html" title="SoA payload for ItoSolver particles, i.e. drifting Brownian walkers.">ItoParticle</a> break at compile time. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particleCellMerger</td><td>Per-cell particle merger. </td></tr>
@@ -5803,7 +5718,7 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
 </div><div class="memdoc">
 
 <p>Split every under-full cell up to the target count. </p>
-<p>The whole-container merge/drain phase only reduces over-full cells; this brings cells below the target back up to it via greedy heaviest-particle splitting (same rule as nn_sfc). Called only from <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a>, and only for the methods whose shape calls for it &ndash; see there. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The whole-container merge/drain phase only reduces over-full cells; this brings cells below the target back up to it via greedy heaviest-particle splitting. Called only from <a class="el" href="classItoSolver.html#a0f4346023f8cea9bdb4d76a23ac31421" title="Run one merge method over an already-extracted reduced-particle container.">mergeLite()</a>, and only for the methods whose shape calls for it &ndash; see there. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_merge</td><td>Reduced-particle container to split (cell-sorted internally). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticlesPerCellThresh</td><td>Target particle count per cell. </td></tr>
@@ -6368,6 +6283,56 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
 
 </div>
 </div>
+<a id="adca81ddb0a2b2d59d1b9cc8690fd4bc8" name="adca81ddb0a2b2d59d1b9cc8690fd4bc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adca81ddb0a2b2d59d1b9cc8690fd4bc8">&#9670;&#160;</a></span>m_kdAmrBoundary</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#a5abdebd581103450e75f7214edbfc8b7">ParticleManagement::KDAmrBoundary</a> ItoSolver::m_kdAmrBoundary = <a class="el" href="namespaceParticleManagement.html#a5abdebd581103450e75f7214edbfc8b7ab5a0f0e22cd81fdd49bf1c26c64f2656">ParticleManagement::KDAmrBoundary::Carve</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>kd_amr: how leaves that touch a patch or rank boundary are resolved. </p>
+<p>ItoSolver.kd_amr_boundary. Selects between <a class="el" href="classItoSolver.html#a001a2977acd7e9c729002959122959ce" title="Whole-container merge: whole-patch kd-tree build – shared implementation behind kd_patch and kd_amr w...">mergeKDImpl()</a> (carve) and <a class="el" href="classItoSolver.html#aa7f7a17ec94df95b01c06c1788519c67" title="Whole-container merge: kd-tree with a nearest-neighbour skin (kd_amr_boundary = nn).">mergeKDSkinNn()</a> (nn). </p>
+
+</div>
+</div>
+<a id="a357d507c987550b426f4c41295dd83c2" name="a357d507c987550b426f4c41295dd83c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a357d507c987550b426f4c41295dd83c2">&#9670;&#160;</a></span>m_kdHybridLeafDx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real ItoSolver::m_kdHybridLeafDx = 1.0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>kd_partition = hybrid: node size, in cell widths, at or below which the split plane switches from the count median to the weight median. </p>
+<p>ItoSolver.kd_hybrid_leaf_dx. Only meaningful for KDPartition::Hybrid &ndash; 'weight' and 'count' are the two limits of the same rule and ignore this. Larger values apply the weight median to bigger nodes, giving more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells. </p>
+
+</div>
+</div>
 <a id="ad34c0550688c09afe97a3c990f1db62d" name="ad34c0550688c09afe97a3c990f1db62d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad34c0550688c09afe97a3c990f1db62d">&#9670;&#160;</a></span>m_kdMergeCellHistogram</h2>
 
@@ -6388,13 +6353,13 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>). </p>
+<p>Per-cell occupancy scratch for the kd merges (see <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve</a>). </p>
 <p>Owned here, not by the merge, so the allocation happens once per regrid rather than once per merge call. Allocated and released with the other mesh fields, in <a class="el" href="classItoSolver.html#aa6f2c8ad146edca5e4d248349fda2afb" title="Allocate internal storage.">allocate()</a>/regrid() and <a class="el" href="classItoSolver.html#ad10688731e447c23076992858f989e9b" title="Perform pre-regrid operations.">preRegrid()</a> respectively. </p>
 
 </div>
 </div>
-<a id="a1f5137246c292dfdcf4c90e38b12fdbb" name="a1f5137246c292dfdcf4c90e38b12fdbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f5137246c292dfdcf4c90e38b12fdbb">&#9670;&#160;</a></span>m_kdSplitWeightLeafDx</h2>
+<a id="a57cdc2810c101ec4516d6a41abc5ae41" name="a57cdc2810c101ec4516d6a41abc5ae41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57cdc2810c101ec4516d6a41abc5ae41">&#9670;&#160;</a></span>m_kdPartition</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6403,7 +6368,7 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Real ItoSolver::m_kdSplitWeightLeafDx = 1.0</td>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#a491f066ceb697a56c145dc83187c668d">ParticleManagement::KDPartition</a> ItoSolver::m_kdPartition = <a class="el" href="namespaceParticleManagement.html#a491f066ceb697a56c145dc83187c668da8c489d0946f66d17d73f26366a4bf620">ParticleManagement::KDPartition::Weight</a></td>
         </tr>
       </table>
   </td>
@@ -6413,8 +6378,58 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting. </p>
-<p>Forwarded to the a_splitWeightLeafDx argument of <a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">ParticleManagement::mergeKDCarve()</a> and mergeKDPatch() &ndash; see those functions' own docs. Larger values apply the weight median to bigger leaves, giving more uniform super-particle weights at some cost to how evenly leaves are apportioned between cells; 0 disables it entirely. Governs the shared tree build, so it applies to both kd_carve and kd_patch. </p>
+<p>kd_cell/kd_patch/kd_amr: how each node is divided into two children. </p>
+<p>ItoSolver.kd_partition. Turned into a crossover length by <a class="el" href="classItoSolver.html#a8c086e2719ac84ecf6c28adbd9c7c026" title="Turn ItoSolver.kd_partition (and, for &#39;hybrid&#39;, ItoSolver.kd_hybrid_leaf_dx) into the single crossove...">kdWeightMedianCellWidths()</a>. </p>
+
+</div>
+</div>
+<a id="a41e091da70ecf744b8c365f51c529ed5" name="a41e091da70ecf744b8c365f51c529ed5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41e091da70ecf744b8c365f51c529ed5">&#9670;&#160;</a></span>m_kdPlacement</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">ParticleManagement::KDPlacement</a> ItoSolver::m_kdPlacement = <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527a9b49197cf2fea5efc68ef8a88489e1b6">ParticleManagement::KDPlacement::Centroid</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>kd_cell/kd_patch/kd_amr: where the particle a leaf reduces to is placed. </p>
+<p>ItoSolver.kd_placement. See <a class="el" href="classItoSolver.html#a1dfed66f185ad7db37ff069ecb856f96" title="Cell-based merge: partition each cell&#39;s particles with a kd tree and reduce every leaf to one particl...">mergeKDCell()</a> and <a class="el" href="classItoSolver.html#a001a2977acd7e9c729002959122959ce" title="Whole-container merge: whole-patch kd-tree build – shared implementation behind kd_patch and kd_amr w...">mergeKDImpl()</a>. </p>
+
+</div>
+</div>
+<a id="afa6aacf5ed053f62387ecf297bbab1ff" name="afa6aacf5ed053f62387ecf297bbab1ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa6aacf5ed053f62387ecf297bbab1ff">&#9670;&#160;</a></span>m_kdSplitPlacement</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">ParticleManagement::KDSplitPlacement</a> ItoSolver::m_kdSplitPlacement = <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2a4f1f6016fc9f3f2353c0cc7c67b292bd">ParticleManagement::KDSplitPlacement::Center</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Where the pieces of a split particle are placed. </p>
+<p>ItoSolver.split_placement. 'center' reproduces the parent's position, which keeps the merge from moving any mass but leaves the pieces indistinguishable; 'jitter' and 'cell' spread them so a cell's particle count and its DISTINCT-position count do not diverge. </p>
 
 </div>
 </div>
@@ -6428,7 +6443,7 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> ItoSolver::m_mergeMethod = <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95ac68ec7c480914423273175f0c02a5d6e">ParticleManagement::ParticleMergeMethod::EqualWeightKD</a></td>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95">ParticleManagement::ParticleMergeMethod</a> ItoSolver::m_mergeMethod = <a class="el" href="namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a8be0368e57e8a4ed31e62b942cd9e2d3">ParticleManagement::ParticleMergeMethod::KdCell</a></td>
         </tr>
       </table>
   </td>
@@ -6438,8 +6453,8 @@ template&lt;typename P , typename Traits , typename Strength &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>The configured merge method (which specific algorithm). </p>
-<p>Set by <a class="el" href="classItoSolver.html#a4c33ca03f4f05b4b9c69eaae228ca794" title="Parse the super-particle merger.">parseParticleMerger()</a> from ItoSolver.merge_algorithm. <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> dispatches on this to run the right algorithm. Defaults to EqualWeightKD (the default merge_algorithm). </p>
+<p>The configured merge method (which scope the merge groups particles over). </p>
+<p>Set by <a class="el" href="classItoSolver.html#a4c33ca03f4f05b4b9c69eaae228ca794" title="Parse the super-particle merger.">parseParticleMerger()</a> from ItoSolver.merge_method. <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> dispatches on this to run the right algorithm. Defaults to KdCell (the default merge_method). </p>
 
 </div>
 </div>
@@ -6494,8 +6509,8 @@ weight) leaves the metadata columns invalid, nothing in <a class="el" href="clas
 
 </div>
 </div>
-<a id="abc472f1cf97a0ee736df5bc481106dc7" name="abc472f1cf97a0ee736df5bc481106dc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc472f1cf97a0ee736df5bc481106dc7">&#9670;&#160;</a></span>m_nnPairIterate</h2>
+<a id="aaf847fa324b8699bbb94d4883c978296" name="aaf847fa324b8699bbb94d4883c978296"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf847fa324b8699bbb94d4883c978296">&#9670;&#160;</a></span>m_nnIterate</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6504,7 +6519,7 @@ weight) leaves the metadata columns invalid, nothing in <a class="el" href="clas
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool ItoSolver::m_nnPairIterate = true</td>
+          <td class="memname">bool ItoSolver::m_nnIterate = true</td>
         </tr>
       </table>
   </td>
@@ -6514,13 +6529,13 @@ weight) leaves the metadata columns invalid, nothing in <a class="el" href="clas
 </table>
 </div><div class="memdoc">
 
-<p>nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local trivial tier to convergence within each round. </p>
-<p>Forwarded to <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsOneCell()/ mergeNearestNeighborsHash(). Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash. </p>
+<p>nn_amr: iterate the local trivial tier to convergence within each round. </p>
+<p>Forwarded to <a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071" title="Run one full round (one timestep&#39;s worth) of the nearest-neighbor merge algorithm.">ParticleManagement::mergeNearestNeighborsTree()</a>/mergeNearestNeighborsOneCell()/ mergeNearestNeighborsHash(). Also read by kd_amr with kd_amr_boundary = nn, whose skin tier is a nearest-neighbour merge. </p>
 
 </div>
 </div>
-<a id="a17f63bc4b8dacdc579911809a155e7b2" name="a17f63bc4b8dacdc579911809a155e7b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a17f63bc4b8dacdc579911809a155e7b2">&#9670;&#160;</a></span>m_nnPairMaxRounds</h2>
+<a id="a71b1e03c0882aab80b912a87ae7dbc78" name="a71b1e03c0882aab80b912a87ae7dbc78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71b1e03c0882aab80b912a87ae7dbc78">&#9670;&#160;</a></span>m_nnMaxRounds</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6529,7 +6544,7 @@ weight) leaves the metadata columns invalid, nothing in <a class="el" href="clas
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int ItoSolver::m_nnPairMaxRounds = 3</td>
+          <td class="memname">int ItoSolver::m_nnMaxRounds = 3</td>
         </tr>
       </table>
   </td>
@@ -6539,8 +6554,33 @@ weight) leaves the metadata columns invalid, nothing in <a class="el" href="clas
 </table>
 </div><div class="memdoc">
 
-<p>nn_pair_tree/nn_pair_onecell/nn_pair_hash: maximum number of drain rounds run per <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> call. </p>
-<p>Each round merges nearest-neighbor pairs and roughly halves an over-full cell's surplus; the loop also stops early once a round merges nothing. This caps the round count so the cost stays bounded and predictable rather than running to full convergence. Only used for nn_pair_tree/nn_pair_onecell/nn_pair_hash. </p>
+<p>nn_amr: maximum number of drain rounds run per <a class="el" href="classItoSolver.html#a20274787c43cdb8d0db28b598333d0ca" title="Make superparticles for a full container, merging to the solver&#39;s configured target.">makeSuperparticles()</a> call. </p>
+<p>Each round merges nearest-neighbor pairs and roughly halves an over-full cell's surplus; the loop also stops early once a round merges nothing. This caps the round count so the cost stays bounded and predictable rather than running to full convergence. Also read by kd_amr with kd_amr_boundary = nn. </p>
+
+</div>
+</div>
+<a id="a812c94edd4b9a3a89908df616bd9875b" name="a812c94edd4b9a3a89908df616bd9875b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a812c94edd4b9a3a89908df616bd9875b">&#9670;&#160;</a></span>m_nnSearch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceParticleManagement.html#aa5d8674b12db3b5588d2c30437cb5859">ParticleManagement::NNSearch</a> ItoSolver::m_nnSearch = <a class="el" href="namespaceParticleManagement.html#aa5d8674b12db3b5588d2c30437cb5859a3b0c14770e6bd663518496da60f524da">ParticleManagement::NNSearch::Tree</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>nn_amr: which spatial index the neighbour search is backed by. </p>
+<p>ItoSolver.nn_search. </p>
 
 </div>
 </div>
@@ -6616,8 +6656,8 @@ weight) leaves the metadata columns invalid, nothing in <a class="el" href="clas
 </div><div class="memdoc">
 
 <p>Which merge method to run inside <a class="el" href="classItoSolver.html#add06b5d41255394546679dcdf6a74108" title="Regrid this solver.">ItoSolver::regrid()</a>, or nullopt for "whatever
-merge_algorithm says". </p>
-<p>Set by <a class="el" href="classItoSolver.html#a4c33ca03f4f05b4b9c69eaae228ca794" title="Parse the super-particle merger.">parseParticleMerger()</a> from ItoSolver.regrid_superparticles. A separate knob from merge_algorithm because the two are genuinely independent: the regrid merge runs once per regrid on a population that has just been redistributed, and a run may reasonably want a cheaper (or no) method there than it uses per step. ParticleMergeMethod::None turns the regrid merge off; the extract/rebuild round-trip still happens, since <a class="el" href="classItoSolver.html#ad10688731e447c23076992858f989e9b" title="Perform pre-regrid operations.">preRegrid()</a> has already reduced the particles by then. </p>
+merge_method says". </p>
+<p>Set by <a class="el" href="classItoSolver.html#a4c33ca03f4f05b4b9c69eaae228ca794" title="Parse the super-particle merger.">parseParticleMerger()</a> from ItoSolver.regrid_superparticles. A separate knob from merge_method because the two are genuinely independent: the regrid merge runs once per regrid on a population that has just been redistributed, and a run may reasonably want a cheaper (or no) method there than it uses per step. ParticleMergeMethod::None turns the regrid merge off; the extract/rebuild round-trip still happens, since <a class="el" href="classItoSolver.html#ad10688731e447c23076992858f989e9b" title="Perform pre-regrid operations.">preRegrid()</a> has already reduced the particles by then. </p>
 
 </div>
 </div>

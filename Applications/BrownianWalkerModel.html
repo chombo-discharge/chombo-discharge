@@ -182,6 +182,8 @@ v_z &amp;= 0,\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(r = \sqrt{x^2 + y^2}\)</span>, <span class="math notranslate nohighlight">\(\tan\theta = \frac{x}{y}\)</span>.
 I.e. the flow field is a circulation around the Cartesian grid origin.
 The diffusion coefficient is simply set to a constant value.</p>
+<p>The velocity field can also be made spatially constant by setting <code class="docutils literal notranslate"><span class="pre">BrownianWalker.velocity_field</span> <span class="pre">=</span> <span class="pre">constant</span></code>, in which case the field is read from <code class="docutils literal notranslate"><span class="pre">BrownianWalker.constant_velocity</span></code> (one component per coordinate direction, always three of them).
+A constant field translates the entire population rigidly, which is useful when the population itself, rather than the flow, is what is under study.</p>
 <p>To adjust the velocity field or diffusion coefficients, adjust the configuration options given in <a class="reference internal" href="#chap-brownianwalkerconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
 </section>
 <section id="time-stepping">
@@ -218,12 +220,15 @@ BrownianWalker.cfl                     = 1.0       ## CFL-like number.
 BrownianWalker.load_balance            = true      ## Turn on/off particle load balancing
 BrownianWalker.which_balance           = mesh      ## Switch for load balancing method. Either &#39;mesh&#39; or &#39;particle&#39;.
 BrownianWalker.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight
+BrownianWalker.plot_particles          = false     ## Write the bulk particles to H5Part on every plot step
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-BrownianWalker.mobility     = 1.0    ## Mobility coefficient
-BrownianWalker.diffco       = 1.0    ## Diffusion coefficient
-BrownianWalker.omega        = 1.0    ## Rotation velocity for advection field
+BrownianWalker.mobility              = 1.0           ## Mobility coefficient
+BrownianWalker.diffco                = 1.0           ## Diffusion coefficient
+BrownianWalker.omega                 = 1.0           ## Rotation velocity for advection field (velocity_field = rotational)
+BrownianWalker.velocity_field        = rotational    ## Advective field. &#39;rotational&#39; (uses omega) or &#39;constant&#39; (uses constant_velocity)
+BrownianWalker.constant_velocity     = 1 1 0         ## Advective field when velocity_field = constant
 
 # Cell tagging stuff
 # ------------------
@@ -231,6 +236,13 @@ BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
 BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
 BrownianWalker.buffer          = 0       ## Grow tagged cells
 </pre></div>
+</div>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">BrownianWalker.plot_particles</span> <span class="pre">=</span> <span class="pre">true</span></code> will additionally write the bulk particles to an H5Part file on every plot step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">BrownianWalker</span></code> prefix above is a default, not a fixed name.
+<code class="docutils literal notranslate"><span class="pre">BrownianWalkerStepper</span></code> and <code class="docutils literal notranslate"><span class="pre">BrownianWalkerSpecies</span></code> both accept the prefix as a constructor argument, so a class deriving from <code class="docutils literal notranslate"><span class="pre">BrownianWalkerStepper</span></code> can pass its own name and have every option – the inherited ones and the ones it adds – read under a single prefix that matches the class the application instantiates.
+<code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/BrownianWalker/ParticleMerge</span></code> does this.</p>
 </div>
 </section>
 <section id="setting-up-a-new-problem">

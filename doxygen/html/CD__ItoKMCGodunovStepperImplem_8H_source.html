@@ -878,7 +878,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span> </div>
 <div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span>  <span class="comment">// Merge super-particles down to the target after the chemistry advance created/removed particles.</span></div>
 <div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>  <span class="comment">// Routed through the public ItoSolver::makeSuperparticles() so both per-cell and AMR-wide</span></div>
-<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>  <span class="comment">// (nn_pair_tree/nn_pair_onecell/nn_pair_hash) merge algorithms run, chosen by ItoSolver.merge_algorithm.</span></div>
+<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>  <span class="comment">// (nn_amr, any nn_search backend) merge algorithms run, chosen by ItoSolver.merge_method.</span></div>
 <div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>  <span class="comment">// makeSuperparticles() cell-sorts internally as needed and returns the container patch-organized.</span></div>
 <div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span>  this-&gt;<a class="code hl_function" href="namespaceParallelOps.html#aed6a3c22b5ec18db26ece6fecf1ebf54">barrier</a>();</div>
 <div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span>  m_timer.startEvent(<span class="stringliteral">&quot;Make superparticles&quot;</span>);</div>
@@ -2602,33 +2602,35 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l02410" name="l02410"></a><span class="lineno"> 2410</span>      <span class="keyword">const</span> <a class="code hl_class" href="classParticleContainer.html">ParticleContainer&lt;ItoParticle&gt;</a>&amp; particles = solver-&gt;<a class="code hl_function" href="classParticleContainer.html#af67e7b6e2ac74bc71f0a869652a41090">getParticles</a>(ItoSolver::WhichContainer::Bulk);</div>
 <div class="line"><a id="l02411" name="l02411"></a><span class="lineno"> 2411</span> </div>
 <div class="line"><a id="l02412" name="l02412"></a><span class="lineno"> 2412</span>      <span class="comment">// Create the output folder</span></div>
-<div class="line"><a id="l02413" name="l02413"></a><span class="lineno"> 2413</span>      std::string cmd     = <span class="stringliteral">&quot;mkdir -p particles/&quot;</span> + solver-&gt;getName();</div>
-<div class="line"><a id="l02414" name="l02414"></a><span class="lineno"> 2414</span>      <span class="keywordtype">int</span>         success = 0;</div>
-<div class="line"><a id="l02415" name="l02415"></a><span class="lineno"> 2415</span>      <span class="keywordflow">if</span> (procID() == 0) {</div>
-<div class="line"><a id="l02416" name="l02416"></a><span class="lineno"> 2416</span>        success = system(cmd.c_str());</div>
-<div class="line"><a id="l02417" name="l02417"></a><span class="lineno"> 2417</span>      }</div>
-<div class="line"><a id="l02418" name="l02418"></a><span class="lineno"> 2418</span> </div>
-<div class="line"><a id="l02419" name="l02419"></a><span class="lineno"> 2419</span>      <span class="keywordflow">if</span> (success != 0) {</div>
-<div class="line"><a id="l02420" name="l02420"></a><span class="lineno"> 2420</span>        MayDay::Error(<span class="stringliteral">&quot;ItoKMCGodunovStepper::plotParticles - could not create &#39;particles&#39; directory&quot;</span>);</div>
-<div class="line"><a id="l02421" name="l02421"></a><span class="lineno"> 2421</span>      }</div>
-<div class="line"><a id="l02422" name="l02422"></a><span class="lineno"> 2422</span> </div>
-<div class="line"><a id="l02423" name="l02423"></a><span class="lineno"> 2423</span>      <span class="comment">// Set plot file name</span></div>
-<div class="line"><a id="l02424" name="l02424"></a><span class="lineno"> 2424</span>      <span class="keyword">const</span> std::string prefix = <span class="stringliteral">&quot;./particles/&quot;</span> + solver-&gt;getName() + <span class="stringliteral">&quot;/&quot;</span> + solver-&gt;getName();</div>
-<div class="line"><a id="l02425" name="l02425"></a><span class="lineno"> 2425</span>      <span class="keywordtype">char</span>              fileChar[1000];</div>
-<div class="line"><a id="l02426" name="l02426"></a><span class="lineno"> 2426</span>      sprintf(fileChar, <span class="stringliteral">&quot;%s.step%07d.%dd.h5part&quot;</span>, prefix.c_str(), this-&gt;m_timeStep, SpaceDim);</div>
-<div class="line"><a id="l02427" name="l02427"></a><span class="lineno"> 2427</span> </div>
-<div class="line"><a id="l02428" name="l02428"></a><span class="lineno"> 2428</span>      <span class="comment">// Plot the particles directly from the live SoA container. The output datasets (id, position, weight</span></div>
-<div class="line"><a id="l02429" name="l02429"></a><span class="lineno"> 2429</span>      <span class="comment">// and the selected ItoParticle payload columns) are derived from ParticleTraits&lt;ItoParticle&gt;::h5PartColumns.</span></div>
-<div class="line"><a id="l02430" name="l02430"></a><span class="lineno"> 2430</span>      <a class="code hl_function" href="namespaceDischargeIO.html#a10ce9adf5e883c8699c57ccfeffb05dc">DischargeIO::writeH5Part</a>(std::string(fileChar), particles, this-&gt;m_amr-&gt;<a class="code hl_function" href="classParticleContainer.html#a95f29caf267b88936917ec94ba3f5ff0">getProbLo</a>(), this-&gt;m_time);</div>
-<div class="line"><a id="l02431" name="l02431"></a><span class="lineno"> 2431</span>    }</div>
-<div class="line"><a id="l02432" name="l02432"></a><span class="lineno"> 2432</span>  }</div>
-<div class="line"><a id="l02433" name="l02433"></a><span class="lineno"> 2433</span>}</div>
+<div class="line"><a id="l02413" name="l02413"></a><span class="lineno"> 2413</span>      <span class="comment">// Quoted: a solver name containing a space would otherwise make the shell create one directory</span></div>
+<div class="line"><a id="l02414" name="l02414"></a><span class="lineno"> 2414</span>      <span class="comment">// per word, and the file open then fails with a bare MPI_ERR_NO_SUCH_FILE from inside HDF5.</span></div>
+<div class="line"><a id="l02415" name="l02415"></a><span class="lineno"> 2415</span>      std::string cmd     = <span class="stringliteral">&quot;mkdir -p &#39;particles/&quot;</span> + solver-&gt;getName() + <span class="stringliteral">&quot;&#39;&quot;</span>;</div>
+<div class="line"><a id="l02416" name="l02416"></a><span class="lineno"> 2416</span>      <span class="keywordtype">int</span>         success = 0;</div>
+<div class="line"><a id="l02417" name="l02417"></a><span class="lineno"> 2417</span>      <span class="keywordflow">if</span> (procID() == 0) {</div>
+<div class="line"><a id="l02418" name="l02418"></a><span class="lineno"> 2418</span>        success = system(cmd.c_str());</div>
+<div class="line"><a id="l02419" name="l02419"></a><span class="lineno"> 2419</span>      }</div>
+<div class="line"><a id="l02420" name="l02420"></a><span class="lineno"> 2420</span> </div>
+<div class="line"><a id="l02421" name="l02421"></a><span class="lineno"> 2421</span>      <span class="keywordflow">if</span> (success != 0) {</div>
+<div class="line"><a id="l02422" name="l02422"></a><span class="lineno"> 2422</span>        MayDay::Error(<span class="stringliteral">&quot;ItoKMCGodunovStepper::plotParticles - could not create &#39;particles&#39; directory&quot;</span>);</div>
+<div class="line"><a id="l02423" name="l02423"></a><span class="lineno"> 2423</span>      }</div>
+<div class="line"><a id="l02424" name="l02424"></a><span class="lineno"> 2424</span> </div>
+<div class="line"><a id="l02425" name="l02425"></a><span class="lineno"> 2425</span>      <span class="comment">// Set plot file name</span></div>
+<div class="line"><a id="l02426" name="l02426"></a><span class="lineno"> 2426</span>      <span class="keyword">const</span> std::string prefix = <span class="stringliteral">&quot;./particles/&quot;</span> + solver-&gt;getName() + <span class="stringliteral">&quot;/&quot;</span> + solver-&gt;getName();</div>
+<div class="line"><a id="l02427" name="l02427"></a><span class="lineno"> 2427</span>      <span class="keywordtype">char</span>              fileChar[1000];</div>
+<div class="line"><a id="l02428" name="l02428"></a><span class="lineno"> 2428</span>      sprintf(fileChar, <span class="stringliteral">&quot;%s.step%07d.%dd.h5part&quot;</span>, prefix.c_str(), this-&gt;m_timeStep, SpaceDim);</div>
+<div class="line"><a id="l02429" name="l02429"></a><span class="lineno"> 2429</span> </div>
+<div class="line"><a id="l02430" name="l02430"></a><span class="lineno"> 2430</span>      <span class="comment">// Plot the particles directly from the live SoA container. The output datasets (id, position, weight</span></div>
+<div class="line"><a id="l02431" name="l02431"></a><span class="lineno"> 2431</span>      <span class="comment">// and the selected ItoParticle payload columns) are derived from ParticleTraits&lt;ItoParticle&gt;::h5PartColumns.</span></div>
+<div class="line"><a id="l02432" name="l02432"></a><span class="lineno"> 2432</span>      <a class="code hl_function" href="namespaceDischargeIO.html#a10ce9adf5e883c8699c57ccfeffb05dc">DischargeIO::writeH5Part</a>(std::string(fileChar), particles, this-&gt;m_amr-&gt;<a class="code hl_function" href="classParticleContainer.html#a95f29caf267b88936917ec94ba3f5ff0">getProbLo</a>(), this-&gt;m_time);</div>
+<div class="line"><a id="l02433" name="l02433"></a><span class="lineno"> 2433</span>    }</div>
+<div class="line"><a id="l02434" name="l02434"></a><span class="lineno"> 2434</span>  }</div>
+<div class="line"><a id="l02435" name="l02435"></a><span class="lineno"> 2435</span>}</div>
 </div>
 </div>
-<div class="line"><a id="l02434" name="l02434"></a><span class="lineno"> 2434</span> </div>
-<div class="line"><a id="l02435" name="l02435"></a><span class="lineno"> 2435</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
 <div class="line"><a id="l02436" name="l02436"></a><span class="lineno"> 2436</span> </div>
-<div class="line"><a id="l02437" name="l02437"></a><span class="lineno"> 2437</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l02437" name="l02437"></a><span class="lineno"> 2437</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l02438" name="l02438"></a><span class="lineno"> 2438</span> </div>
+<div class="line"><a id="l02439" name="l02439"></a><span class="lineno"> 2439</span><span class="preprocessor">#endif</span></div>
 </div>
 </div>
 </div>
@@ -2780,7 +2782,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="anamespaceParallelOps_html_acee1ea4f1dc471622d322bef1c3e9028"><div class="ttname"><a href="namespaceParallelOps.html#acee1ea4f1dc471622d322bef1c3e9028">ParallelOps::sum</a></div><div class="ttdeci">Real sum(const Real &amp;a_value) noexcept</div><div class="ttdoc">Compute the sum across all MPI ranks.</div><div class="ttdef"><b>Definition</b> CD_ParallelOpsImplem.H:354</div></div>
 <div class="ttc" id="anamespaceParallelOps_html_aed6a3c22b5ec18db26ece6fecf1ebf54"><div class="ttname"><a href="namespaceParallelOps.html#aed6a3c22b5ec18db26ece6fecf1ebf54">ParallelOps::barrier</a></div><div class="ttdeci">void barrier() noexcept</div><div class="ttdoc">MPI barrier.</div><div class="ttdef"><b>Definition</b> CD_ParallelOpsImplem.H:26</div></div>
 <div class="ttc" id="anamespaceParticleLoops_html_a00a84427e650034af595bdb9b2cde5de"><div class="ttname"><a href="namespaceParticleLoops.html#a00a84427e650034af595bdb9b2cde5de">ParticleLoops::loop</a></div><div class="ttdeci">ALWAYS_INLINE void loop(const ParticleSoA&lt; P, Traits &gt; &amp;a_soa, Functor &amp;&amp;a_kernel)</div><div class="ttdoc">Launch a kernel over every particle in a ParticleSoA, decorating the loop with CD_PRAGMA_SIMD.</div><div class="ttdef"><b>Definition</b> CD_ParticleLoops.H:87</div></div>
-<div class="ttc" id="anamespaceParticleManagement_html_adc14deeefa8aa650656960f7ffa4e5d0"><div class="ttname"><a href="namespaceParticleManagement.html#adc14deeefa8aa650656960f7ffa4e5d0">ParticleManagement::deleteParticles</a></div><div class="ttdeci">void deleteParticles(ParticleSoA&lt; P, Traits &gt; &amp;a_particles, const Real a_weightThresh) noexcept</div><div class="ttdoc">Remove particles from an SoA container if their weight is below the threshold (swap-and-pop).</div><div class="ttdef"><b>Definition</b> CD_ParticleManagementImplem.H:728</div></div>
+<div class="ttc" id="anamespaceParticleManagement_html_adc14deeefa8aa650656960f7ffa4e5d0"><div class="ttname"><a href="namespaceParticleManagement.html#adc14deeefa8aa650656960f7ffa4e5d0">ParticleManagement::deleteParticles</a></div><div class="ttdeci">void deleteParticles(ParticleSoA&lt; P, Traits &gt; &amp;a_particles, const Real a_weightThresh) noexcept</div><div class="ttdoc">Remove particles from an SoA container if their weight is below the threshold (swap-and-pop).</div><div class="ttdef"><b>Definition</b> CD_ParticleManagementImplem.H:788</div></div>
 <div class="ttc" id="anamespaceUnits_html_a1b05588f11c74e3846a8e62e5b29e94d"><div class="ttname"><a href="namespaceUnits.html#a1b05588f11c74e3846a8e62e5b29e94d">Units::eps0</a></div><div class="ttdeci">constexpr Real eps0</div><div class="ttdoc">Permittivity of free space.</div><div class="ttdef"><b>Definition</b> CD_Units.H:30</div></div>
 <div class="ttc" id="anamespaceUnits_html_a6c222b26a27fc4985c5e26ec959f6460"><div class="ttname"><a href="namespaceUnits.html#a6c222b26a27fc4985c5e26ec959f6460">Units::Qe</a></div><div class="ttdeci">constexpr Real Qe</div><div class="ttdoc">Elementary charge.</div><div class="ttdef"><b>Definition</b> CD_Units.H:35</div></div>
 <div class="ttc" id="anamespacephase_html_a23c76f548a5eb1955ed8c929c541108bac0a46ca6c8cf218e8324eddc9518aeed"><div class="ttname"><a href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108bac0a46ca6c8cf218e8324eddc9518aeed">phase::solid</a></div><div class="ttdeci">@ solid</div><div class="ttdoc">Solid (dielectric) phase.</div><div class="ttdef"><b>Definition</b> CD_MultiFluidIndexSpace.H:40</div></div>

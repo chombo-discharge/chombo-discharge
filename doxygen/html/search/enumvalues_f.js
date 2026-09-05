@@ -1,10 +1,7 @@
 var searchData=
 [
-  ['samelevel_0',['SameLevel',['../CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa01984fc837b5005aa130f08922a73de5',1,'CD_ParticleSoA.H']]],
-  ['semiimplicit_1',['SemiImplicit',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a1e854db0a24e35a203c343fc5b9304bda3322852f049ab7b9bc3197cfcc901189',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper']]],
-  ['smalldenominator_2',['SmallDenominator',['../namespaceMirrorDeposition.html#a638b56c446bb3dace59a744dc207c0f7a491aef2ace9272a4455803f39bc999e7',1,'MirrorDeposition']]],
-  ['solid_3',['solid',['../namespacephase.html#a23c76f548a5eb1955ed8c929c541108bac0a46ca6c8cf218e8324eddc9518aeed',1,'phase']]],
-  ['square_4',['square',['../classRodPlaneProfile.html#a87efc0203dc631fd175a3462b9a0b57ba2fc01ec765ec0cb3dcc559126de20b30',1,'RodPlaneProfile']]],
-  ['ssa_5',['SSA',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6ba7c9d6b001a87e497d6b96fbd4c6fdf51',1,'Physics::ItoKMC::ItoKMCPhysics']]],
-  ['stationary_6',['stationary',['../CD__DischargeInceptionStepper_8H.html#a04c05612d839d4ea68a98f2ded8d05bba5146a957bfa51752bd6020691fda598e',1,'StationaryPhysics::DischargeInception'],['../CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967a5146a957bfa51752bd6020691fda598e',1,'StationaryPhysics::ItoKMC']]]
+  ['parent_0',['Parent',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7',1,'Physics::ItoKMC::ItoKMCPhysics']]],
+  ['particle_1',['Particle',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5bfa40eb12c5b1edf05afe9edc8818f3a68f95af3c2f2e56cc8baeee817227d25',1,'Physics::BrownianWalker::BrownianWalkerStepper']]],
+  ['planar_2',['Planar',['../namespaceMirrorDeposition.html#a19afd0b8665028a01fc3d68850721200a93a097009b6443e711996c50b5354adf',1,'MirrorDeposition']]],
+  ['prc_3',['prc',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bae01a919b068424df394a7f38a3a02ed2',1,'Physics::ItoKMC::ItoKMCPhysics::PRC'],['../CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2',1,'PRC:&#160;CD_KMCSolver.H']]]
 ];

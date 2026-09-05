@@ -124,6 +124,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>BrownianWalkerSpecies</b> ()</td></tr>
 <tr class="memdesc:a897d4bfb25160ac87ac149da20004e30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Reads input parameters and draws the initial particle distribution. <br /></td></tr>
 <tr class="separator:a897d4bfb25160ac87ac149da20004e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a927f755629fe7b3433bfac9be3e242b1" id="r_a927f755629fe7b3433bfac9be3e242b1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html#a927f755629fe7b3433bfac9be3e242b1">BrownianWalkerSpecies</a> (const std::string &amp;a_className)</td></tr>
+<tr class="memdesc:a927f755629fe7b3433bfac9be3e242b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor which sets the input-script prefix the species reads its options under.  <br /></td></tr>
+<tr class="separator:a927f755629fe7b3433bfac9be3e242b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66211c26ae96ec4a929628c276b292c1" id="r_a66211c26ae96ec4a929628c276b292c1"><td class="memItemLeft" align="right" valign="top"><a id="a66211c26ae96ec4a929628c276b292c1" name="a66211c26ae96ec4a929628c276b292c1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~BrownianWalkerSpecies</b> ()</td></tr>
 <tr class="memdesc:a66211c26ae96ec4a929628c276b292c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
@@ -225,7 +228,34 @@ std::function&lt; Real(const RealVect &amp;x, const Real &amp;t)&gt;&#160;</td><
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Concrete <a class="el" href="classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol...">ItoSpecies</a> for the Brownian walker physics module. </p>
 <p>Initial particles are drawn from a Gaussian distribution centered at a user-specified position with a user-specified radius. The number of particles, blob center, and blob radius are read from ParmParse at construction time. Each particle is assigned unit weight. </p>
-</div><hr/>The documentation for this class was generated from the following files:<ul>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a927f755629fe7b3433bfac9be3e242b1" name="a927f755629fe7b3433bfac9be3e242b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a927f755629fe7b3433bfac9be3e242b1">&#9670;&#160;</a></span>BrownianWalkerSpecies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">BrownianWalkerSpecies::BrownianWalkerSpecies </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_className</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Constructor which sets the input-script prefix the species reads its options under. </p>
+<p>Matches the prefix its stepper reads, so a derived stepper's options &ndash; including the ones that describe the species &ndash; all live under one name. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_className</td><td>Input-script prefix. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
 <li>Physics/BrownianWalker/<a class="el" href="CD__BrownianWalkerSpecies_8H_source.html">CD_BrownianWalkerSpecies.H</a></li>
 <li>Physics/BrownianWalker/<a class="el" href="CD__BrownianWalkerSpecies_8cpp.html">CD_BrownianWalkerSpecies.cpp</a></li>
 </ul>

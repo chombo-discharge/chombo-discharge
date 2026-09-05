@@ -738,10 +738,10 @@ Often, merging or splitting of particles is required.
 
 * **Per-cell mergers** operate on one cell at a time and are implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
   Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
-  These are ``equal_weight_kd``, ``reinitialize``, ``reinitialize_bvh``, and ``nn_sfc``.
+  These are ``kd_cell`` and ``reinitialize``.
 * **Whole-hierarchy mergers** operate collectively across the entire AMR hierarchy rather than one cell at a time.
   None is a per-cell factory, and all are distributed and MPI-safe.
-  These are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, ``kd_patch``, and ``kd_skin_nn``.
+  These are ``kd_patch``, ``kd_amr`` and ``nn_amr``.
 
 The recommended pattern for the per-cell family is to cell-sort the leaf, extract a cell's particles into a small scratch ``ParticleSoA``, merge/split them, and rebuild the leaf.
 ``ParticleSoA<P>::extractCell`` performs the per-cell extraction
@@ -776,32 +776,32 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 The particles in each leaf of the tree can then be merged into new particles, one per leaf.
 What distinguishes the kd-based mergers from one another is the rule used to choose each split plane, the rule used to stop the recursion, and whether the tree is built per cell or per patch:
 
-* ``equal_weight_kd`` and ``reinitialize_bvh`` build one tree **per cell**, splitting so that the two halves carry as nearly equal *weight* as possible.
-* ``kd_carve`` and ``kd_patch`` build one tree **per patch**, splitting at the count or weight median and stopping on a live per-cell quota.
+* ``kd_cell`` builds one tree **per cell**. ``ItoSolver.kd_partition`` chooses the split rule: ``weight`` splits so the two halves carry as nearly equal *weight* as possible, ``count`` so they hold as nearly equal a particle *count* as possible, and ``hybrid`` takes one then the other by node size.
+* ``kd_patch`` and ``kd_amr`` build one tree **per patch**, splitting at the count or weight median and stopping on a live per-cell quota.
 
 Per-cell kd-merges
 __________________
 
-The per-cell partitioner ``buildEqualWeightKDLeaves`` operates on a lightweight AoS particle type (``ParticleManagement::MergeParticle``) carrying the position and weight as data members, plus an opaque payload holding any quantities to be preserved across a merge.
+The per-cell partitioner ``buildKDCellLeaves`` operates on a lightweight AoS particle type (``ParticleManagement::MergeParticle``) carrying the position and weight as data members, plus an opaque payload holding any quantities to be preserved across a merge.
 It recursively bisects the input particles into spatially coherent leaves whose weights are as equal as possible -- at each bisection the two halves differ by at most one physical particle.
 It returns the leaf particle ranges directly; the tree is built in a flat, reusable scratch buffer rather than as linked node objects.
 
 .. note::
 
-   ``ParticleManagement::detail::buildEqualWeightKDLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) lives in the internal ``detail`` namespace -- it implements the partitioning but is not part of the public interface and is not meant to be called directly.
-   The public entry point is the ``makeEqualWeightKDMerger`` factory (see :ref:`below <kd-tree-merging>`), which wraps it.
+   ``ParticleManagement::detail::buildKDCellLeaves`` (in :file:`$DISCHARGE_HOME/Source/Particle/CD_ParticleManagement.H`) lives in the internal ``detail`` namespace -- it implements the partitioning but is not part of the public interface and is not meant to be called directly.
+   The public entry point is the ``makeKDCellMerger`` factory (see :ref:`below <kd-tree-merging>`), which wraps it.
 
 .. warning::
 
-   ``buildEqualWeightKDLeaves`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles).
+   Under the ``weight`` partition ``buildKDCellLeaves`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles); the ``count`` partition never does.
    In this case any other members in the particle type are copied over into the new particles.
 
 .. _kd-tree-merging:
 
-Equal-weight merging (``equal_weight_kd``)
+Per-cell kd merging (``kd_cell``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``ParticleManagement::makeEqualWeightKDMerger`` wraps ``buildEqualWeightKDLeaves`` into a ``ParticleMerger`` functor.
+``ParticleManagement::makeKDCellMerger`` wraps ``buildKDCellLeaves`` into a ``ParticleMerger`` functor.
 The caller provides three lambdas:
 
 * A *gather* function that packs one SoA slot into a ``MergeParticle``.
@@ -819,8 +819,18 @@ Since the weight in the leaves of the tree differ by at most one, the resulting 
    Left: Original particles with weights between 1 and 100.
    Right: Merged particles.
 
-In the weighted-centroid variant (``equal_weight_kd`` in ``ItoSolver``), the scatter-leaf computes the weight-averaged position and energy over all particles in the leaf.
-Particle weights need not be integers, but ``buildEqualWeightKDLeaves`` may create new particles at the kd boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced.
+``ItoSolver.kd_placement`` chooses what the scatter-leaf does with a finished leaf.
+With ``centroid`` it computes the weight-averaged position and energy over all particles in the leaf.
+Particle weights need not be integers, but the ``weight`` partition may create new particles at the kd boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced. The ``count`` partition divides no particle and so never overshoots.
+
+With ``sample`` the merged particle is placed at one of the leaf's own particles, drawn with probability proportional to weight.
+The centroid keeps the leaf's mean position and discards its spread, so it is a contraction on the particle positions -- repeated merges drive the sub-cell distribution onto the fixed points of that map, which form a regular sub-cell lattice, identical in every grid cell and therefore coherent across the whole domain.
+A weight-proportional draw from a partition of a sample is itself a sample of the same distribution, so no lattice forms and no sub-cell spread is lost.
+The per-leaf centre of mass is then conserved in expectation rather than exactly; the total weight, the per-cell density and the weight equalization are all unaffected.
+No spatial information is discarded: the merged particle inherits a position that one of the original particles actually occupied, which also means it can never be placed inside an embedded boundary.
+
+With ``random`` the merged particle is placed at a uniformly random point in the leaf's bounding box, falling back to the centroid in cut cells so that it stays inside the embedded boundary.
+This also avoids the lattice, but the bounding box of a leaf is not the leaf, so the distribution it draws from is not quite the one the particles came from.
 
 Reinitialization algorithms
 ___________________________
@@ -835,7 +845,7 @@ Reinitialization (``reinitialize``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 283-287
+   :lines: 355-359
 
 The returned functor proceeds as follows:
 
@@ -851,92 +861,57 @@ This method requires that particle weights are (close to) integers.
    ``makeReinitializeMerger`` captures ``probLo`` at parse time.
    The cell-centre position is computed internally as ``probLo + dx * (gridIndex + 0.5)``, so no grid pointer needs to be retained in the returned functor.
 
-kd-tree reinitialization (``reinitialize_bvh``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The ``reinitialize_bvh`` variant uses the same ``makeEqualWeightKDMerger`` factory and the same per-cell kd partition as ``equal_weight_kd``, but replaces the centroid scatter with a position-reinitialising scatter:
-
-* **Cut-cells** (``volFrac < 1``): the weighted centroid is used to keep the merged particle inside the embedded boundary.
-* **Full cells**: a random point is drawn uniformly from the bounding box of the leaf, reinitialising the spatial distribution within each kd partition rather than collapsing it to a single point.
-
-Unlike ``reinitialize``, the spatial information is discarded only *within* each leaf, so the coarse-grained distribution across the cell is preserved.
-
-.. note::
-
-   In the full-cell branch, energy is accumulated over the leaf but is *not* normalised by weight -- the stored value is the total (not average) energy of the leaf.
-   This is intentional and matches the original ``ItoSolver`` behaviour.
-
 Nearest-neighbour algorithms
 ____________________________
 
 Nearest-neighbour algorithms merge each particle with a spatially close partner rather than with everything in its cell.
-``nn_sfc`` does this per cell, using a space-filling-curve ordering.
 
 .. _nn-pair-merging:
 
-The three ``nn_pair_*`` variants are distributed, MPI-safe merges that operate collectively across the whole AMR hierarchy.
-All three share the same propose/judge/verdict protocol and differ only in how merge candidates are found.
+``nn_amr`` is a distributed, MPI-safe merge that operates collectively across the whole AMR hierarchy.
+Its three ``ItoSolver.nn_search`` backends share the same propose/judge/verdict protocol and differ only in how merge candidates are found.
 Each *round* proceeds as follows:
 
 #. Ghost particles are refilled (fresh, exactly once per round) so that a particle's nearest neighbour may be one owned by another patch or rank.
 #. Every particle's nearest neighbour is located, and pairs lying entirely within one patch are merged immediately (the *trivial tier*).
 #. Pairs that straddle a patch or rank boundary are resolved through a single cross-patch propose/judge/verdict exchange, so both owners agree on exactly one merge and no particle is merged twice.
 
-Because a round merges *pairs*, one round only roughly halves an over-full cell's surplus above the target, so a call repeats the round until no round merges anything -- or until ``nn_pair_max_rounds`` rounds have run, whichever comes first. A cell far above the target is therefore not necessarily drained by a single call, and in a running simulation the merge relies on being invoked once per time step -- and on particle motion between invocations -- for further convergence.
+Because a round merges *pairs*, one round only roughly halves an over-full cell's surplus above the target, so a call repeats the round until no round merges anything -- or until ``nn_max_rounds`` rounds have run, whichever comes first. A cell far above the target is therefore not necessarily drained by a single call, and in a running simulation the merge relies on being invoked once per time step -- and on particle motion between invocations -- for further convergence.
 Merged particles need globally unique ids that cannot collide across ranks or rounds, so the caller supplies an id allocator (a rank-namespaced counter suffices).
 
 .. important::
 
-   All three ``nn_pair_*`` methods require a particle ghost mask (width-1 for ``nn_pair_onecell``; width equal to the configured merge distance, or 1, for ``nn_pair_tree``/``nn_pair_hash``), which is only built during a regrid.
+   All three backends require a particle ghost mask (width-1 for ``onecell``; width equal to the configured merge distance, or 1, for ``tree``/``hash``), which is only built during a regrid.
    The mask must therefore be registered *before* the grids are (re)built -- registering it late leaves it empty and the neighbour search will not see cross-patch particles.
-   ``ItoSolver`` handles this automatically when ``merge_algorithm`` selects any of the three, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to any of the three.
+   ``ItoSolver`` registers the mask unconditionally, so ``merge_method = nn_amr`` works whether it is the per-step method or only the regrid-time one.
 
-In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), ``nn_pair_max_rounds`` (cap the number of rounds a single call may run, so the cost stays bounded rather than running to full convergence), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).
+In ``ItoSolver`` the behaviour is tuned through ``nn_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), ``nn_max_rounds`` (cap the number of rounds a single call may run, so the cost stays bounded rather than running to full convergence), and, for ``nn_search = tree``/``hash`` only, ``nn_max_cell_dist`` (cap the neighbour search radius in cells; ``onecell``'s search radius is fixed at 1 and does not read this).
 
-SFC pair merging (``nn_sfc``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Whole-patch BVH search (``nn_search = tree``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``ParticleManagement::makeSfcNearestNeighborMerger`` sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most ``ppc``.
+``nn_search = tree`` is implemented as ``ParticleManagement::mergeNearestNeighborsTree`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H`, and searches for candidates via one whole-patch ``PointCloudBVH`` per patch.
 
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
-   :language: c++
-   :lines: 198-206
+Per-cell BVH search (``nn_search = onecell``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The caller provides three lambdas:
-
-* A *gather* function that packs one SoA slot into a ``MergeParticle``.
-* A *combine* function that merges two adjacent intermediates in place (typically a weighted average of position and energy).
-* A *scatter* function that unpacks one merged intermediate back into the SoA.
-
-Unlike the kd-tree methods, SFC merging does not require integer weights.
-Particle counts below ``ppc`` are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight :math:`\geq 2`).
-The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the kd centroid.
-
-Whole-patch BVH search (``nn_pair_tree``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``nn_pair_tree`` is implemented as ``ParticleManagement::mergeNearestNeighborsTree`` in :file:`$DISCHARGE_HOME/Source/Particle/CD_NearestNeighborParticleMerge.H`, and searches for candidates via one whole-patch ``PointCloudBVH`` per patch.
-
-Per-cell BVH search (``nn_pair_onecell``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``nn_pair_onecell`` is implemented as ``ParticleManagement::mergeNearestNeighborsOneCell`` in the same file, and instead builds one ``PointCloudBVH`` per occupied grid cell.
+``nn_search = onecell`` is implemented as ``ParticleManagement::mergeNearestNeighborsOneCell`` in the same file, and instead builds one ``PointCloudBVH`` per occupied grid cell.
 A query only ever searches its own cell and its Moore-adjacent neighbours, so its merge distance is structurally fixed at Chebyshev cell distance 1.
 
-Whole-patch hash-grid search (``nn_pair_hash``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Whole-patch hash-grid search (``nn_search = hash``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``nn_pair_hash`` is implemented as ``ParticleManagement::mergeNearestNeighborsHash`` in the same file -- identical algorithm and tunables to ``nn_pair_tree``, but searches via one whole-patch ``PointCloudHashGrid`` (a uniform spatial hash grid) per patch instead of a ``PointCloudBVH``.
+``nn_search = hash`` is implemented as ``ParticleManagement::mergeNearestNeighborsHash`` in the same file -- identical algorithm and tunables to ``tree``, but searches via one whole-patch ``PointCloudHashGrid`` (a uniform spatial hash grid) per patch instead of a ``PointCloudBVH``.
 Both point-cloud types expose an identical query interface, and the two entry points share one generic implementation selected via a template parameter over the point-cloud type.
 
 Whole-patch kd-merges
 _____________________
 
-``kd_carve`` and ``kd_patch`` are not built around pairwise nearest-neighbour matching at all.
+``kd_patch`` and ``kd_amr`` are not built around pairwise nearest-neighbour matching at all.
 Both are distributed, MPI-safe whole-container merges declared in :file:`$DISCHARGE_HOME/Source/Particle/CD_KDParticleMerge.H`, and both use the same tree build and the same per-cell quota; they differ only in how patch boundaries are treated.
 
 Each patch's particles are split purely by position into a kd-tree, never snapped to the grid, since particles near a cell face must be able to merge across it.
-The longest axis is bisected at the *count median* -- the plane putting half the node's particles on either side -- while the node is still larger than ``kd_split_weight_leaf_dx`` cell widths, and at the *weight median* -- half the node's particle weight on either side -- once it is smaller.
+The longest axis is bisected at the *count median* -- the plane putting half the node's particles on either side -- while the node is still larger than the ``ItoSolver.kd_partition`` crossover, and at the *weight median* -- half the node's particle weight on either side -- once it is smaller.
 Above that scale a split's job is to apportion leaves between cells, which is a question about counts; below it there is little left to apportion and the weight median drives the resulting super-particles toward equal weight.
 
 Splitting is governed by a **live per-cell quota**.
@@ -951,18 +926,20 @@ This extent bound is applied only as a filter on the finished partition; it neve
 Particles in cells at or below target are excluded from the partition and emitted as singletons.
 A singleton never merges (the merge threshold is two members), so an under-populated cell cannot be drained by a neighbour's merge.
 
-Unlike the ``nn_pair_*`` family there is no iteration, fallback or max-cell-distance equivalent, since there is no drain loop and the per-cell quota alone governs how far splitting goes.
+Unlike ``nn_amr`` there is no iteration, fallback or max-cell-distance equivalent, since there is no drain loop and the per-cell quota alone governs how far splitting goes.
 The maximum extent of a mergeable group is fixed at one cell width rather than exposed as an option: it is a physical bound rather than a dial, and it matches the hardcoded width-1 ghost halo.
 One option applies to both algorithms:
 
-* ``kd_split_weight_leaf_dx`` -- the group size, in cell widths, at or below which the split plane switches from the count median to the weight median. 0 disables the weight median entirely.
+* ``ItoSolver.kd_partition`` -- the split rule, given as the group size at or below which the split plane switches from the count median to the weight median. ``weight`` and ``count`` are the two limits of that rule; ``hybrid`` puts the crossover at ``ItoSolver.kd_hybrid_leaf_dx`` cell widths.
+* ``ItoSolver.split_placement`` -- where the pieces of a split particle go: at the parent (``center``), jittered by the local interparticle spacing (``jitter``), or uniformly in the owning cell (``cell``). ``center`` leaves the pieces co-located, which costs distinct positions without costing weight uniformity.
+* ``ItoSolver.kd_placement`` -- where each group's merged particle is placed: at the group's weighted ``centroid``, at a weight-proportional ``sample`` of its own members, or at a ``random`` point in its bounding box. Because these groups are not snapped to the grid, any of the three (the centroid included) may put the particle in a different cell from the one the per-cell quota counted the group in.
 
 .. _kd-tree-carve-merging:
 
-Carved patch boundaries (``kd_carve``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Carved patch boundaries (``kd_amr_boundary = carve``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``kd_carve`` is implemented as ``ParticleManagement::mergeKDCarve``.
+``kd_amr_boundary = carve`` is implemented as ``ParticleManagement::mergeKDCarve``.
 It builds the tree over each patch's local *plus ghost* particles, and then classifies every group in one of three ways:
 
 * *Interior* -- none of its members' cells are exposed to any neighbouring patch or level, and it holds no ghost member. Such a group merges immediately, with zero communication.
@@ -984,7 +961,7 @@ This also matches the leaf-extent bound exactly: a mergeable group is at most on
 
 .. important::
 
-   ``kd_carve`` requires a width-1 particle ghost mask, registered unconditionally by ``ItoSolver`` (the same requirement and registration timing as the ``nn_pair_*`` family -- see above).
+   ``kd_amr`` requires a width-1 particle ghost mask, registered unconditionally by ``ItoSolver`` (the same requirement and registration timing as ``nn_amr`` -- see above).
 
 Patch-local merging (``kd_patch``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -994,22 +971,22 @@ It selects the same tree build and per-cell quota without the boundary tier: no 
 No particle is ever contested, so there is no claim/verdict/commit exchange and no communication at all.
 
 Each patch therefore reduces only the particles it owns.
-This is cheaper than ``kd_carve`` and free of communication, at the cost of no coordination across a patch boundary: a cell straddled by two patches is reduced by each of them independently.
+This is cheaper than ``kd_amr`` and free of communication, at the cost of no coordination across a patch boundary: a cell straddled by two patches is reduced by each of them independently.
 
 .. warning::
 
    The caller must *not* fill a ghost halo before calling ``kd_patch``.
    A ghost particle reaching the merge would be merged locally while its true owner merges it too, double-counting its weight.
 
-Nearest-neighbour skin (``kd_skin_nn``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nearest-neighbour skin (``kd_amr_boundary = nn``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``kd_skin_nn`` keeps the tree build and per-cell quota but replaces the carve with the nearest-neighbour pair merge, splitting the particles across two containers so that neither tier can merge what the other already did.
+``kd_amr_boundary = nn`` keeps the tree build and per-cell quota but replaces the carve with the nearest-neighbour pair merge, splitting the particles across two containers so that neither tier can merge what the other already did.
 
 First, ``ParticleManagement::mergeKDInterior`` commits every group that holds **no ghost** into a separate container, and removes its members from the working one.
 Holding no ghost is the whole safety condition, and it costs no communication to check: every member of such a group is resident in this patch, and any other patch that draws one of them into a group of its own necessarily sees it as a ghost, which disqualifies that group there by the same test.
 No two patches can therefore commit the same particle.
-Note this is a *weaker* condition than ``kd_carve``'s -- boundary exposure is not consulted at all, so an exposed but uncontested group merges here rather than going to arbitration, which is what makes the skin smaller.
+Note this is a *weaker* condition than the carve's -- boundary exposure is not consulted at all, so an exposed but uncontested group merges here rather than going to arbitration, which is what makes the skin smaller.
 
 What remains in the working container is the skin: groups holding a ghost, plus groups too wide to collapse.
 It is drained by ``ParticleManagement::mergeNearestNeighborsOneCell`` (see :ref:`above <nn-pair-merging>`), whose search radius is fixed at Chebyshev cell distance 1 and so matches the width-1 halo and the one-cell extent bound exactly.
@@ -1020,8 +997,8 @@ Finally the interior container is folded back in, and under-full cells are broug
 
 .. important::
 
-   ``kd_skin_nn`` requires a width-1 particle ghost mask, exactly as ``kd_carve`` does.
-   It is tuned by ``nn_pair_iterate``, ``nn_pair_fallback`` and ``nn_pair_max_rounds``, shared with the ``nn_pair_*`` family; ``nn_pair_max_cell_dist`` does not apply, since the skin tier's radius is structurally fixed at 1.
+   It requires a width-1 particle ghost mask, exactly as the carve does.
+   It is tuned by ``nn_iterate``, ``nn_fallback`` and ``nn_max_rounds``, shared with ``nn_amr``; ``nn_max_cell_dist`` does not apply, since the skin tier's radius is structurally fixed at 1.
 
 Because a skin particle and an interior super-particle live in different containers, they can never merge with each other.
-A cell holding interior results plus a single leftover skin particle therefore finishes one particle above the target -- the same class of residual as ``kd_carve``'s, and not a conservation error.
+A cell holding interior results plus a single leftover skin particle therefore finishes one particle above the target -- the same class of residual as the carve's, and not a conservation error.

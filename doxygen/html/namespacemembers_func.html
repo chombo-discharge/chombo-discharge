@@ -89,8 +89,8 @@ $(function() {
 <li>barrier()&#160;:&#160;<a class="el" href="namespaceParallelOps.html#aed6a3c22b5ec18db26ece6fecf1ebf54">ParallelOps</a></li>
 <li>brentRootFinder()&#160;:&#160;<a class="el" href="namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5">PolyUtils</a></li>
 <li>brentSolve()&#160;:&#160;<a class="el" href="namespacePolyUtils.html#a54737623b93191fb61fc6962e181f912">PolyUtils</a></li>
-<li>buildEqualWeightKDLeaves()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a6fc7b40dd364f95d53d3cba126eb614b">ParticleManagement::detail</a></li>
-<li>buildKDQuotaLeaves()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a686c9cc72c634822c6f36ef6c0a415a5">ParticleManagement::detail</a></li>
+<li>buildKDCellLeaves()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a7e24d99e4438149cb64acc9cb68af367">ParticleManagement::detail</a></li>
+<li>buildKDQuotaLeaves()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a8f0f29bc2e0f546b97b1098524a33fd2">ParticleManagement::detail</a></li>
 <li>bytesAsMB()&#160;:&#160;<a class="el" href="namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc">MemoryReport</a></li>
 </ul>
 
@@ -139,15 +139,22 @@ $(function() {
 
 
 <h3><a id="index_k" name="index_k"></a>- k -</h3><ul>
+<li>kdAmrBoundaryFromString()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a15216af05654708115a9ac92bc94264d">ParticleManagement</a></li>
 <li>kdBBox()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a3f629894f24371ad15bca1c14724342f">ParticleManagement::detail</a></li>
 <li>kdBoxRealBounds()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a5f2efb70d9874cc34fd7463edd7a8033">ParticleManagement::detail</a></li>
+<li>kdCapCellWeights()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a039d5a34ded1466228f021bc6959515e">ParticleManagement::detail</a></li>
 <li>kdCellKeyOf()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a9970d2727c4ed46291efccf5d295e013">ParticleManagement::detail</a></li>
 <li>kdCheckCentroid()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a23e5272b408b32839e69e27e23b5bd2e">ParticleManagement::detail</a></li>
 <li>kdExchangeByRank()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a573710f1883ce3a0a5660c8ae0912315">ParticleManagement::detail</a></li>
 <li>kdFillCellHistogram()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#aaf34c46712c7541d073098cf1daafb7d">ParticleManagement::detail</a></li>
 <li>kdIntVectLess()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a4fc76429d16c72ad6e981f6b4e702ff3">ParticleManagement::detail</a></li>
 <li>kdMaxAxisSpan()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a1ea1e3ef175fb578ce0252ec1ce851c7">ParticleManagement::detail</a></li>
+<li>kdPartitionFromString()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a605d54ec65d41ff924c4e9e1cf011d2f">ParticleManagement</a></li>
+<li>kdPlacementFromString()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#ada9e45e696c297e0c90080477b06234e">ParticleManagement</a></li>
+<li>kdPlaceMerged()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a5f950a5afe6c74af1fa1bdec527facdb">ParticleManagement::detail</a></li>
 <li>kdSplitCountMedian()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a4ea83a810a38dc7624d5f8ab3083ac9f">ParticleManagement::detail</a></li>
+<li>kdSplitDisplace()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a3d0f037c5acbf2a5b3152fb5f4ca3fc4">ParticleManagement::detail</a></li>
+<li>kdSplitPlacementFromString()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a188d69618eb074abddffea01f20e08f7">ParticleManagement</a></li>
 <li>kdSplitWeightMedian()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#acea4e448665505456601713579eeaf5a">ParticleManagement::detail</a></li>
 </ul>
 
@@ -163,16 +170,14 @@ $(function() {
 
 
 <h3><a id="index_m" name="index_m"></a>- m -</h3><ul>
-<li>makeEqualWeightKDMerger()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#ad67e840020de9b17223682bf08f13637">ParticleManagement</a></li>
+<li>makeKDCellMerger()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a375f695f09c57e229d51db0a547ab011">ParticleManagement</a></li>
 <li>makeReinitializeMerger()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a648524eadc9dc97d1f1652fc4b3606d5">ParticleManagement</a></li>
-<li>makeSfcNearestNeighborMerger()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a6ed160136e38c95de7c4ddd1831606f0">ParticleManagement</a></li>
 <li>max()&#160;:&#160;<a class="el" href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps</a></li>
 <li>maxRank()&#160;:&#160;<a class="el" href="namespaceParallelOps.html#a1f36b90ec81f1ce63e3dab287e85f7cc">ParallelOps</a></li>
 <li>meanCurvatureTimesTwo()&#160;:&#160;<a class="el" href="namespaceMirrorDeposition.html#abe495a335972d52689b1081902e3ec1f">MirrorDeposition</a></li>
-<li>mergeAdjacentNearest()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a5bbb6d2c11766c23bb63548c63ba356b">ParticleManagement::detail</a></li>
-<li>mergeKDCarve()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#ad8f9b8b5354562ffe5b731e6cec73ce7">ParticleManagement</a></li>
-<li>mergeKDInterior()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a5fc83198c8fc98e293150aca95fabdef">ParticleManagement</a></li>
-<li>mergeKDPatch()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a95c8a124b6573a90a94e8d2338f517a3">ParticleManagement</a></li>
+<li>mergeKDCarve()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83">ParticleManagement</a></li>
+<li>mergeKDInterior()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#ac02d1617da5dde96d29472dadcfe8331">ParticleManagement</a></li>
+<li>mergeKDPatch()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a480b2a6e13e6fac7eaf92723e7626f48">ParticleManagement</a></li>
 <li>mergeMethodFromString()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#ace7541e61134b0af1e86e6e0e2a260b9">ParticleManagement</a></li>
 <li>mergeNearestNeighborsHash()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#abda285ee8fc3e7d5dd0a96deadc98ea9">ParticleManagement</a></li>
 <li>mergeNearestNeighborsOneCell()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#aaf418974eaf19a4608d54eda6a85dcab">ParticleManagement</a></li>
@@ -190,6 +195,7 @@ $(function() {
 <li>nnMergeExchangeByRank()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a9362f5cbbf7b28e732b0fe86f3868e29">ParticleManagement::detail</a></li>
 <li>nnMergePointToCellDistSquared()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a4fd55d4dbaa9e3a5d7ee1e7e6bb4674a">ParticleManagement::detail</a></li>
 <li>nnMergeWeightedCentroid()&#160;:&#160;<a class="el" href="namespaceParticleManagement_1_1detail.html#a41d0f3f93ba5e24ec7d0100f2ac6474b">ParticleManagement::detail</a></li>
+<li>nnSearchFromString()&#160;:&#160;<a class="el" href="namespaceParticleManagement.html#a98c613bafad5c2a88166f8521801b84d">ParticleManagement</a></li>
 <li>numberFmt()&#160;:&#160;<a class="el" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">DischargeIO</a></li>
 </ul>
 

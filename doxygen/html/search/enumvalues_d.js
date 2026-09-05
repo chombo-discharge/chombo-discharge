@@ -1,7 +1,10 @@
 var searchData=
 [
-  ['parent_0',['Parent',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7',1,'Physics::ItoKMC::ItoKMCPhysics']]],
-  ['particle_1',['Particle',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5bfa40eb12c5b1edf05afe9edc8818f3a68f95af3c2f2e56cc8baeee817227d25',1,'Physics::BrownianWalker::BrownianWalkerStepper']]],
-  ['planar_2',['Planar',['../namespaceMirrorDeposition.html#a19afd0b8665028a01fc3d68850721200a93a097009b6443e711996c50b5354adf',1,'MirrorDeposition']]],
-  ['prc_3',['prc',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bae01a919b068424df394a7f38a3a02ed2',1,'Physics::ItoKMC::ItoKMCPhysics::PRC'],['../CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2',1,'PRC:&#160;CD_KMCSolver.H']]]
+  ['native_0',['Native',['../CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50a925641e0b76c28cc940e8f3ca178d826',1,'CD_IrregularDeposition.H']]],
+  ['ngp_1',['NGP',['../CD__IrregularDeposition_8H.html#a8e651dd19ceab03354d7728f84d51b50afa8c28dda5a64e163a4aae078b92cfab',1,'CD_IrregularDeposition.H']]],
+  ['nn_2',['Nn',['../namespaceParticleManagement.html#a5abdebd581103450e75f7214edbfc8b7a40f7589e01141d438076d3611e4541ff',1,'ParticleManagement']]],
+  ['nnamr_3',['NnAmr',['../namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a733283636c49e9b838085bf8d102bc52',1,'ParticleManagement']]],
+  ['none_4',['none',['../namespaceMirrorDeposition.html#a19afd0b8665028a01fc3d68850721200a6adf97f83acf6453d4a6a4b1070f3754',1,'MirrorDeposition::None'],['../namespaceMirrorDeposition.html#a638b56c446bb3dace59a744dc207c0f7a6adf97f83acf6453d4a6a4b1070f3754',1,'MirrorDeposition::None'],['../namespaceParticleManagement.html#ac69666866ee6c0eaed03b81381b9ce95a6adf97f83acf6453d4a6a4b1070f3754',1,'ParticleManagement::None']]],
+  ['nonpositivejacobian_5',['NonPositiveJacobian',['../namespaceMirrorDeposition.html#a638b56c446bb3dace59a744dc207c0f7a43238566418698488ff16e5f96a80bcf',1,'MirrorDeposition']]],
+  ['numkinds_6',['NumKinds',['../namespaceParticleMemory.html#ad3c67520bd71e4a629cf449e4c28fbb1a3b4e4f61999cd1d0ea21db8f8cd45f50',1,'ParticleMemory']]]
 ];
