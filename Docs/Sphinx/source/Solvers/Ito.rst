@@ -453,6 +453,7 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 
 * ``none`` - No particle merging/splitting is performed.
 * ``equal_weight_kd`` Use a kd-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
+* ``equal_weight_kd_sampled`` The same per-cell equal-weight kd-tree partition as ``equal_weight_kd``, but each leaf is placed at one of its own particles -- drawn with probability proportional to weight -- rather than at the leaf's weighted centroid. The centroid keeps a leaf's mean position and discards its spread, so it contracts the sub-cell particle distribution a little at every merge and, since the leaves of a locally uniform population are near enough equal-volume sub-boxes, drives the particles onto a regular sub-cell lattice that is the same in every grid cell. Drawing one of the leaf's own particles instead is distribution-preserving, so neither the lattice nor the contraction occurs. The trade is that the per-leaf centre of mass is then conserved in expectation rather than exactly; the total weight and the per-cell density are both preserved exactly, and the weights are equalized just as in ``equal_weight_kd``. Prefer this over ``equal_weight_kd`` wherever sub-cell position matters -- near a refinement boundary, or near an embedded boundary, where a centroid is not a position any particle occupied.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
 * ``reinitialize_bvh`` Re-initialize the particles in each node of a kd-tree. Weights are as uniform as possible.
 * ``nn_sfc`` Reach the target particle count by space-filling-curve nearest-neighbour clustering: when there are more particles than the target the nearest neighbours (along a Hilbert curve) are merged until the target count is reached, and when there are fewer the highest-weight particles are split. This gives spatially tight groups but does not equalize the weights.
@@ -476,7 +477,7 @@ In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 82-84
+   :lines: 84-86
 
 .. tip::
    
