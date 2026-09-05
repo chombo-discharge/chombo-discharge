@@ -36,26 +36,60 @@ namespace ParticleManagement {
 inline ParticleMergeMethod
 mergeMethodFromString(const std::string& a_str) noexcept
 {
+  // Legacy selectors. Each one is now a method plus a specifier, or is gone; abort with the replacement
+  // spelled out rather than silently picking one of the axes for the user.
+  const auto replaced = [&a_str](const std::string& a_replacement) -> void {
+    const std::string msg = "ParticleManagement::mergeMethodFromString - '" + a_str + "' has been replaced by " +
+                            a_replacement;
+
+    MayDay::Abort(msg.c_str());
+  };
+
   if (a_str == "none") {
     return ParticleMergeMethod::None;
   }
   else if (a_str == "kd_cell") {
     return ParticleMergeMethod::KdCell;
   }
+  else if (a_str == "kd_patch") {
+    return ParticleMergeMethod::KdPatch;
+  }
+  else if (a_str == "kd_amr") {
+    return ParticleMergeMethod::KdAmr;
+  }
+  else if (a_str == "nn_amr") {
+    return ParticleMergeMethod::NnAmr;
+  }
   else if (a_str == "reinitialize") {
     return ParticleMergeMethod::Reinitialize;
   }
-  else if (a_str == "equal_weight_kd" || a_str == "equal_weight_kd_sampled" || a_str == "reinitialize_bvh") {
-    // These three were the weight-partitioned kd merge under its three placements. They are now one
-    // selector plus two axes; abort rather than silently picking one, so the migration is explicit.
-    const std::string msg = "ParticleManagement::mergeMethodFromString - '" + a_str +
-                            "' has been replaced by 'kd_cell' with ItoSolver.kd_cell_partition = weight and "
-                            "ItoSolver.kd_cell_placement = " +
-                            (a_str == "equal_weight_kd" ? "centroid"
-                                                        : (a_str == "equal_weight_kd_sampled" ? "sample" : "random"));
-    MayDay::Abort(msg.c_str());
+  else if (a_str == "external") {
+    return ParticleMergeMethod::External;
+  }
+  else if (a_str == "kd_carve") {
+    replaced("'kd_amr' with ItoSolver.kd_amr_boundary = carve");
 
-    return ParticleMergeMethod::KdCell;
+    return ParticleMergeMethod::KdAmr;
+  }
+  else if (a_str == "kd_skin_nn") {
+    replaced("'kd_amr' with ItoSolver.kd_amr_boundary = nn");
+
+    return ParticleMergeMethod::KdAmr;
+  }
+  else if (a_str == "nn_pair_tree") {
+    replaced("'nn_amr' with ItoSolver.nn_search = tree");
+
+    return ParticleMergeMethod::NnAmr;
+  }
+  else if (a_str == "nn_pair_hash") {
+    replaced("'nn_amr' with ItoSolver.nn_search = hash");
+
+    return ParticleMergeMethod::NnAmr;
+  }
+  else if (a_str == "nn_pair_onecell") {
+    replaced("'nn_amr' with ItoSolver.nn_search = onecell");
+
+    return ParticleMergeMethod::NnAmr;
   }
   else if (a_str == "nn_sfc") {
     // Removed: a Hilbert sort followed by repeated nearest-adjacent-pair merging inside one cell. It
@@ -65,26 +99,12 @@ mergeMethodFromString(const std::string& a_str) noexcept
 
     return ParticleMergeMethod::None;
   }
-  else if (a_str == "nn_pair_tree") {
-    return ParticleMergeMethod::NnPairTree;
-  }
-  else if (a_str == "nn_pair_onecell") {
-    return ParticleMergeMethod::NnPairOneCell;
-  }
-  else if (a_str == "nn_pair_hash") {
-    return ParticleMergeMethod::NnPairHash;
-  }
-  else if (a_str == "kd_carve") {
-    return ParticleMergeMethod::KdCarve;
-  }
-  else if (a_str == "kd_patch") {
-    return ParticleMergeMethod::KdPatch;
-  }
-  else if (a_str == "kd_skin_nn") {
-    return ParticleMergeMethod::KdSkinNn;
-  }
-  else if (a_str == "external") {
-    return ParticleMergeMethod::External;
+  else if (a_str == "equal_weight_kd" || a_str == "equal_weight_kd_sampled" || a_str == "reinitialize_bvh") {
+    replaced("'kd_cell' with ItoSolver.kd_partition = weight and ItoSolver.kd_placement = " +
+             std::string(a_str == "equal_weight_kd" ? "centroid"
+                                                    : (a_str == "equal_weight_kd_sampled" ? "sample" : "random")));
+
+    return ParticleMergeMethod::KdCell;
   }
   else {
     MayDay::Abort(("ParticleManagement::mergeMethodFromString - unknown merge method '" + a_str + "'").c_str());
@@ -102,9 +122,12 @@ kdPartitionFromString(const std::string& a_str) noexcept
   else if (a_str == "count") {
     return KDPartition::Count;
   }
+  else if (a_str == "hybrid") {
+    return KDPartition::Hybrid;
+  }
   else {
     const std::string msg = "ParticleManagement::kdPartitionFromString - unknown partition '" + a_str +
-                            "' (expected 'weight' or 'count')";
+                            "' (expected 'weight', 'count' or 'hybrid')";
     MayDay::Abort(msg.c_str());
   }
 
@@ -132,13 +155,52 @@ kdPlacementFromString(const std::string& a_str) noexcept
   return KDPlacement::Centroid;
 }
 
+inline KDAmrBoundary
+kdAmrBoundaryFromString(const std::string& a_str) noexcept
+{
+  if (a_str == "carve") {
+    return KDAmrBoundary::Carve;
+  }
+  else if (a_str == "nn") {
+    return KDAmrBoundary::Nn;
+  }
+  else {
+    const std::string msg = "ParticleManagement::kdAmrBoundaryFromString - unknown boundary rule '" + a_str +
+                            "' (expected 'carve' or 'nn')";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return KDAmrBoundary::Carve;
+}
+
+inline NNSearch
+nnSearchFromString(const std::string& a_str) noexcept
+{
+  if (a_str == "tree") {
+    return NNSearch::Tree;
+  }
+  else if (a_str == "hash") {
+    return NNSearch::Hash;
+  }
+  else if (a_str == "onecell") {
+    return NNSearch::OneCell;
+  }
+  else {
+    const std::string msg = "ParticleManagement::nnSearchFromString - unknown search backend '" + a_str +
+                            "' (expected 'tree', 'hash' or 'onecell')";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return NNSearch::Tree;
+}
+
 namespace detail {
 
 template <class P, Real P::*weight, RealVect P::*position>
 inline void
 buildKDCellLeaves(const std::vector<P>&                       a_particles,
                   const int                                   a_maxLeaves,
-                  const KDPartition                           a_partition,
+                  const Real                                  a_weightMedianLength,
                   const BinaryParticleReconcile<P>&           a_particleReconcile,
                   std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept
 {
@@ -203,35 +265,42 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
     for (std::size_t ni = 0; ni < s_curNodes.size(); ni++) {
       const NodeRange node = s_curNodes[ni];
 
-      // What makes a node splittable depends on the partition rule. The weight median needs at least two
-      // units of weight to divide; the count median needs at least two particles, and never divides a
-      // particle, so it can drive a node down to a single member regardless of how heavy that member is.
-      const bool splittable = (a_partition == KDPartition::Weight) ? (node.w > splitThresh)
-                                                                   : ((node.hi - node.lo) >= 2);
+      // ---- split this node into s_nxt ----
+      P* const          beg = s_cur.data() + node.lo;
+      P* const          end = s_cur.data() + node.hi;
+      const std::size_t n   = node.hi - node.lo;
+      const Real        Wn  = node.w;
+
+      // A. Split along the longest bounding-box extent. The box is also what selects the split rule, so
+      // it is computed before the splittability test rather than after it -- the two questions cannot be
+      // separated once the rule depends on the node's size.
+      RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
+      RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
+      for (P* p = beg; p != end; ++p) {
+        const RealVect& pos = (*p).*position;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          loCorner[dir] = std::min(pos[dir], loCorner[dir]);
+          hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
+        }
+      }
+
+      const int splitDir = (hiCorner - loCorner).maxDir(true);
+
+      // A node narrower than the crossover splits at the weight median, a wider one at the count median.
+      // The caller passes a length, not a rule: 'weight' is a crossover at infinity and 'count' one below
+      // zero, so a fixed rule and the size-dependent one are the same knob (see KDPartition).
+      const bool weightMedian = (hiCorner[splitDir] - loCorner[splitDir]) <= a_weightMedianLength;
+
+      // What makes a node splittable depends on the rule that was just chosen for it. The weight median
+      // needs at least two units of weight to divide; the count median needs at least two particles, and
+      // never divides a particle, so it can drive a node down to a single member however heavy that
+      // member is.
+      const bool splittable = weightMedian ? (node.w > splitThresh) : (n >= 2);
 
       if (splittable && splitBudget > 0) {
         splitBudget--;
-
-        // ---- split this node into s_nxt ----
-        P* const          beg = s_cur.data() + node.lo;
-        P* const          end = s_cur.data() + node.hi;
-        const std::size_t n   = node.hi - node.lo;
-        const Real        Wn  = node.w;
-
-        // A. Split along the longest bounding-box extent.
-        RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
-        RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
-
-        for (P* p = beg; p != end; ++p) {
-          const RealVect& pos = (*p).*position;
-
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            loCorner[dir] = std::min(pos[dir], loCorner[dir]);
-            hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
-          }
-        }
-
-        const int splitDir = (hiCorner - loCorner).maxDir(true);
 
         std::sort(beg, end, [splitDir](const P& p1, const P& p2) -> bool {
           return (p1.*position)[splitDir] < (p2.*position)[splitDir];
@@ -241,7 +310,7 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
         // is ever divided, so this path creates no new particles and needs no reconciliation -- the leaf
         // count can therefore never overshoot the target during the build, unlike the weight median.
         // The weights of the halves are whatever the partition happens to give.
-        if (a_partition == KDPartition::Count) {
+        if (!weightMedian) {
           const std::size_t mid = n / 2;
 
           Real wl = 0.0;
@@ -404,7 +473,7 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
 template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition, class P, class Traits>
 inline ParticleMerger<P, Traits>
 makeKDCellMerger(
-  const KDPartition                                                                           a_partition,
+  const Real                                                                                  a_weightMedianCellWidths,
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
   BinaryParticleReconcile<Packed>                                                             a_reconcile,
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept
@@ -437,7 +506,12 @@ makeKDCellMerger(
     CH_START(t2);
     thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
 
-    detail::buildKDCellLeaves<Packed, packWeight, packPosition>(particles, a_ppc, a_partition, a_reconcile, leaves);
+    // The crossover is given in cell widths, so it becomes a length only once the cell is known.
+    detail::buildKDCellLeaves<Packed, packWeight, packPosition>(particles,
+                                                                a_ppc,
+                                                                a_weightMedianCellWidths * a_cellInfo.getDx(),
+                                                                a_reconcile,
+                                                                leaves);
     CH_STOP(t2);
 
     CH_START(t3);

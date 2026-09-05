@@ -413,7 +413,7 @@ ItoSolver::parseParticleMerger()
 
   std::string str;
 
-  pp.get("merge_algorithm", str);
+  pp.get("merge_method", str);
 
   // Target particle count per cell, and the regrid-time merge method. Both live here rather than on a
   // time stepper: the solver is where merging happens, so it is what owns the target to merge to and
@@ -423,7 +423,7 @@ ItoSolver::parseParticleMerger()
   pp.getarr("particles_per_cell", m_particlesPerCell, 0, m_particlesPerCell.size());
 
   // regrid_superparticles selects the merge method run inside ItoSolver::regrid(): one of the
-  // merge_algorithm selectors (incl. 'none' to turn the merge off), or 'solver' to use merge_algorithm.
+  // merge_method selectors (incl. 'none' to turn the merge off), or 'solver' to use merge_method.
   std::string regridMerge;
   pp.get("regrid_superparticles", regridMerge);
   m_regridMergeMethod = (regridMerge == "solver") ? std::optional<ParticleManagement::ParticleMergeMethod>(std::nullopt)
@@ -435,43 +435,46 @@ ItoSolver::parseParticleMerger()
   // 'external' leaves the merger to the user (setParticleCellMerger); 'none' does nothing.
   m_mergeMethod = ParticleManagement::mergeMethodFromString(str);
 
-  // The distributed nearest-neighbor pair merges (nn_pair_tree/nn_pair_onecell/nn_pair_hash) have
-  // extra tunables. Read and validate them UNCONDITIONALLY, not only when merge_algorithm selects
-  // one of them: any of them can also be selected as the regrid-time method
-  // (ItoKMCStepper.regrid_superparticles), which drives makeSuperparticles() through
-  // m_regridMergeMethod and bypasses m_mergeMethod entirely. Gating the read on m_mergeMethod would
-  // silently drop these settings (and skip their validation) for that valid configuration, so they
-  // are mandatory inputs like everything else here.
-  pp.get("nn_pair_iterate", m_nnPairIterate);
-  pp.get("nn_pair_fallback", m_nnPairFallback);
-  pp.get("nn_pair_max_cell_dist", m_nnPairMaxCellDistance);
-  pp.get("nn_pair_max_rounds", m_nnPairMaxRounds);
+  // Every specifier below is read and validated UNCONDITIONALLY, not only when merge_method selects the
+  // family it belongs to: any method can also be selected as the regrid-time method
+  // (ItoSolver.regrid_superparticles), which drives makeSuperparticles() through m_regridMergeMethod and
+  // bypasses m_mergeMethod entirely. Gating the reads on m_mergeMethod would silently drop these
+  // settings (and skip their validation) for that valid configuration, so they are mandatory inputs like
+  // everything else here.
+  std::string nnSearch;
+  pp.get("nn_search", nnSearch);
+  m_nnSearch = ParticleManagement::nnSearchFromString(nnSearch);
 
-  // Same rationale as the nn_pair_* reads above -- kd_carve can also be selected as the
-  // regrid-time method, bypassing m_mergeMethod, so this is a mandatory input like everything else
-  // here rather than gated on m_mergeMethod.
-  std::string kdCellPartition;
-  std::string kdCellPlacement;
-  pp.get("kd_cell_partition", kdCellPartition);
-  pp.get("kd_cell_placement", kdCellPlacement);
-  m_kdCellPartition = ParticleManagement::kdPartitionFromString(kdCellPartition);
-  m_kdCellPlacement = ParticleManagement::kdPlacementFromString(kdCellPlacement);
+  pp.get("nn_iterate", m_nnIterate);
+  pp.get("nn_fallback", m_nnFallback);
+  pp.get("nn_max_cell_dist", m_nnMaxCellDistance);
+  pp.get("nn_max_rounds", m_nnMaxRounds);
 
-  pp.get("kd_split_weight_leaf_dx", m_kdSplitWeightLeafDx);
+  std::string kdPartition;
+  std::string kdPlacement;
+  std::string kdAmrBoundary;
+  pp.get("kd_partition", kdPartition);
+  pp.get("kd_placement", kdPlacement);
+  pp.get("kd_amr_boundary", kdAmrBoundary);
+  m_kdPartition   = ParticleManagement::kdPartitionFromString(kdPartition);
+  m_kdPlacement   = ParticleManagement::kdPlacementFromString(kdPlacement);
+  m_kdAmrBoundary = ParticleManagement::kdAmrBoundaryFromString(kdAmrBoundary);
+
+  pp.get("kd_hybrid_leaf_dx", m_kdHybridLeafDx);
 
   // A bad value here silently produces a degenerate merge, so fail loudly (in every build, not just
   // DEBUG) rather than assert.
-  if (m_nnPairFallback < 0) {
-    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_fallback' must be >= 0");
+  if (m_nnFallback < 0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_fallback' must be >= 0");
   }
-  if (m_nnPairMaxCellDistance == 0) {
-    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_cell_dist' must be >= 1 (or < 0 for unbounded)");
+  if (m_nnMaxCellDistance == 0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_max_cell_dist' must be >= 1 (or < 0 for unbounded)");
   }
-  if (m_nnPairMaxRounds < 1) {
-    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_pair_max_rounds' must be >= 1");
+  if (m_nnMaxRounds < 1) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'nn_max_rounds' must be >= 1");
   }
-  if (m_kdSplitWeightLeafDx < 0.0) {
-    MayDay::Abort("ItoSolver::parseParticleMerger - 'kd_split_weight_leaf_dx' must be >= 0");
+  if (m_kdHybridLeafDx < 0.0) {
+    MayDay::Abort("ItoSolver::parseParticleMerger - 'kd_hybrid_leaf_dx' must be >= 0");
   }
 
   if (m_particlesPerCell.size() < 1) {
@@ -502,7 +505,7 @@ ItoSolver::parseParticleMerger()
 
     if (!isCellBased(m_mergeMethod)) {
       MayDay::Abort("ItoSolver::parseParticleMerger - a per-level 'particles_per_cell' needs a cell-based "
-                    "'merge_algorithm' (kd_cell/reinitialize/external); the "
+                    "'merge_method' (kd_cell/reinitialize/external); the "
                     "whole-container methods use one threshold for the whole hierarchy and would use entry 0 only");
     }
     if (m_regridMergeMethod.has_value() && !isCellBased(m_regridMergeMethod.value()) &&
@@ -629,30 +632,28 @@ ItoSolver::registerOperators() const
       m_amr->registerOperator(s_mirror_deposition, m_realm, m_phase);
     }
 
-    // nn_pair_tree/nn_pair_hash both read a particle ghost halo as merge candidates (see
+    // nn_search = tree/hash both read a particle ghost halo as merge candidates (see
     // mergeNnPairSearch() / ParticleManagement::mergeNearestNeighborsTree()/
-    // mergeNearestNeighborsHash()). Its width is the merge distance nn_pair_max_cell_dist (>= 1), or
-    // 1 when that is unbounded or neither merger is used. Register it here, alongside the other
+    // mergeNearestNeighborsHash()). Its width is the merge distance nn_max_cell_dist (>= 1), or
+    // 1 when that is unbounded or neither backend is used. Register it here, alongside the other
     // operators; the same width must be filled and passed to the round -- shared by both backends
     // since they use the identical ghost-width formula.
-    const int nnPairSearchGhostWidth = (m_nnPairMaxCellDistance < 0) ? 1 : m_nnPairMaxCellDistance;
-    m_amr->registerParticleGhostMask(m_realm, nnPairSearchGhostWidth);
+    const int nnSearchGhostWidth = (m_nnMaxCellDistance < 0) ? 1 : m_nnMaxCellDistance;
+    m_amr->registerParticleGhostMask(m_realm, nnSearchGhostWidth);
 
-    // nn_pair_onecell's merge distance is structurally fixed at 1 (see
-    // the nn_pair_onecell merge / ParticleManagement::mergeNearestNeighborsOneCell()), so it
-    // always needs a width-1 mask regardless of nn_pair_max_cell_dist; register it too (a no-op if
-    // nnPairSearchGhostWidth is already 1).
+    // nn_search = onecell's merge distance is structurally fixed at 1 (see
+    // ParticleManagement::mergeNearestNeighborsOneCell()), so it always needs a width-1 mask regardless
+    // of nn_max_cell_dist; register it too (a no-op if nnSearchGhostWidth is already 1).
     m_amr->registerParticleGhostMask(m_realm, 1);
 
-    // kd_carve and kd_skin_nn both hardcode their ghost width to 1, unlike nn_pair_tree/nn_pair_hash's
-    // nn_pair_max_cell_dist-driven width. mergeKDCarve() likewise bounds a mergeable leaf's
+    // kd_amr hardcodes its ghost width to 1 under either boundary rule, unlike nn_search = tree/hash's
+    // nn_max_cell_dist-driven width. mergeKDCarve() likewise bounds a mergeable leaf's
     // own extent at a fixed one cell width, which the width-1 fill here already matches exactly:
     // buildKDQuotaLeaves() can never see a particle farther away than this fill provides, so a
     // looser leaf bound could not be honoured even if one existed. Registered unconditionally here, same as
     // the two calls above -- a no-op given the width-1 registration already present for
-    // nn_pair_onecell, kept explicit so this doesn't silently depend on that other registration
+    // nn_search = onecell, kept explicit so this doesn't silently depend on that other registration
     // continuing to exist.
-    m_amr->registerParticleGhostMask(m_realm, 1);
   }
 }
 
@@ -1198,7 +1199,7 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
 
     m_amr->remapToNewGrids(m_regridParticles, a_lmin, a_newFinestLevel);
 
-    // nullopt => use the solver's own merge_algorithm.
+    // nullopt => use the solver's own merge_method.
     const ParticleManagement::ParticleMergeMethod method = m_regridMergeMethod.value_or(m_mergeMethod);
 
     this->mergeLite(m_regridParticles, m_particlesPerCell, method);
@@ -3685,33 +3686,47 @@ ItoSolver::mergeLite(ParticleContainer<ItoMergeParticle>&          a_particles,
   }
 
     // ---- whole-container: one crowding threshold over the hierarchy, splits afterwards ----
-  case ParticleManagement::ParticleMergeMethod::NnPairTree: {
-    this->mergeNnPairSearch<NnPairSearchBackend::Tree>(a_particles, a_particlesPerCell);
-
-    break;
-  }
-  case ParticleManagement::ParticleMergeMethod::NnPairHash: {
-    this->mergeNnPairSearch<NnPairSearchBackend::Hash>(a_particles, a_particlesPerCell);
-
-    break;
-  }
-  case ParticleManagement::ParticleMergeMethod::NnPairOneCell: {
-    this->mergeNnPairOneCell(a_particles, a_particlesPerCell);
-
-    break;
-  }
-  case ParticleManagement::ParticleMergeMethod::KdCarve: {
-    this->mergeKDImpl(a_particles, a_particlesPerCell, true);
-
-    break;
-  }
   case ParticleManagement::ParticleMergeMethod::KdPatch: {
     this->mergeKDImpl(a_particles, a_particlesPerCell, false);
 
     break;
   }
-  case ParticleManagement::ParticleMergeMethod::KdSkinNn: {
-    this->mergeKDSkinNn(a_particles, a_particlesPerCell);
+  case ParticleManagement::ParticleMergeMethod::KdAmr: {
+    // The boundary rule is what separates the two AMR-scope kd merges: the same tree, differing only in
+    // what happens to a leaf whose members are not all owned by one patch.
+    switch (m_kdAmrBoundary) {
+    case ParticleManagement::KDAmrBoundary::Carve: {
+      this->mergeKDImpl(a_particles, a_particlesPerCell, true);
+
+      break;
+    }
+    case ParticleManagement::KDAmrBoundary::Nn: {
+      this->mergeKDSkinNn(a_particles, a_particlesPerCell);
+
+      break;
+    }
+    }
+
+    break;
+  }
+  case ParticleManagement::ParticleMergeMethod::NnAmr: {
+    switch (m_nnSearch) {
+    case ParticleManagement::NNSearch::Tree: {
+      this->mergeNnPairSearch<ParticleManagement::NNSearch::Tree>(a_particles, a_particlesPerCell);
+
+      break;
+    }
+    case ParticleManagement::NNSearch::Hash: {
+      this->mergeNnPairSearch<ParticleManagement::NNSearch::Hash>(a_particles, a_particlesPerCell);
+
+      break;
+    }
+    case ParticleManagement::NNSearch::OneCell: {
+      this->mergeNnPairOneCell(a_particles, a_particlesPerCell);
+
+      break;
+    }
+    }
 
     break;
   }
@@ -3773,7 +3788,7 @@ ItoSolver::applyCellMerger(ParticleContainer<ItoMergeParticle>&                 
   ParticleContainer<ItoMergeParticle>& particles = a_particles;
 
   // A cell-based merge needs the leaves cell-sorted for the CSR ranges. Own that here rather than pushing
-  // it onto every caller -- the AMR-collective nn_pair_tree/nn_pair_onecell/nn_pair_hash merges do not use
+  // it onto every caller -- the AMR-collective nn_amr merges do not use
   // this path and need no sort.
   particles.organizeParticlesByCell();
 
@@ -3838,6 +3853,31 @@ ItoSolver::applyCellMerger(ParticleContainer<ItoMergeParticle>&                 
   // container patch-organized on return.
   particles.organizeParticlesByPatch();
 }
+
+Real
+ItoSolver::kdWeightMedianCellWidths() const noexcept
+{
+  CH_TIME("ItoSolver::kdWeightMedianCellWidths");
+
+  // 'weight' and 'count' are the two limits of the size-dependent rule, so all three settings collapse to
+  // one crossover length and every kd tree build -- cell, patch and AMR -- reads the same number. The
+  // limits are expressed as sizes no node can be above or below rather than as special cases in the
+  // builds, so a build has one comparison and no rule enum to switch on.
+  switch (m_kdPartition) {
+  case ParticleManagement::KDPartition::Weight: {
+    return std::numeric_limits<Real>::max();
+  }
+  case ParticleManagement::KDPartition::Count: {
+    return -1.0;
+  }
+  case ParticleManagement::KDPartition::Hybrid: {
+    return m_kdHybridLeafDx;
+  }
+  }
+
+  return m_kdHybridLeafDx;
+}
+
 void
 ItoSolver::mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell)
 {
@@ -3847,11 +3887,12 @@ ItoSolver::mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const V
   }
 
   // Recursively partition a cell's particles into at most a_ppc kd leaves and reduce each leaf to one
-  // particle. Two independent choices: ItoSolver.kd_cell_partition picks the split rule (weight median or
-  // count median) and ItoSolver.kd_cell_placement picks where the leaf's particle goes.
+  // particle. Two independent choices: ItoSolver.kd_partition picks the split rule (weight median, count
+  // median, or one then the other by node size) and ItoSolver.kd_placement picks where the leaf's
+  // particle goes.
   using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
 
-  const ParticleManagement::KDPlacement placement = m_kdCellPlacement;
+  const ParticleManagement::KDPlacement placement = m_kdPlacement;
 
   // Pack the reduced particle's columns into the per-cell AoS intermediate.
   const std::function<PType(const ParticleSoA<ItoMergeParticle>&, std::size_t)> gather =
@@ -3957,10 +3998,11 @@ ItoSolver::mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const V
   };
 
   const ParticleManagement::ParticleMerger<ItoMergeParticle>
-    merger = ParticleManagement::makeKDCellMerger<PType, &PType::weight, &PType::position>(m_kdCellPartition,
-                                                                                           gather,
-                                                                                           reconcile,
-                                                                                           scatterLeaf);
+    merger = ParticleManagement::makeKDCellMerger<PType, &PType::weight, &PType::position>(
+      this->kdWeightMedianCellWidths(),
+      gather,
+      reconcile,
+      scatterLeaf);
 
   this->applyCellMerger(a_particles, a_particlesPerCell, merger);
 }
@@ -4230,7 +4272,7 @@ ItoSolver::rebuildFromMergeContainer(const WhichContainer a_container, ParticleC
   particles.organizeParticlesByPatch();
 }
 
-template <ItoSolver::NnPairSearchBackend Backend>
+template <ParticleManagement::NNSearch Backend>
 void
 ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const Vector<int>& a_particlesPerCell)
 {
@@ -4254,7 +4296,7 @@ ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const V
 
   // The distributed nearest-neighbor merge has no per-level notion -- it uses a SINGLE crowding
   // threshold over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is
-  // uniform wherever nn_pair_tree/nn_pair_hash is used.
+  // uniform wherever nn_amr with nn_search = tree/hash is used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
 
   // 2. Merge callbacks (on the small particle), plus the EB position check and id allocator below.
@@ -4292,10 +4334,9 @@ ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const V
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // A negative nn_pair_max_cell_dist means "no cap" (std::nullopt).
-  const std::optional<int> maxCellDistance = (m_nnPairMaxCellDistance < 0)
-                                               ? std::nullopt
-                                               : std::optional<int>(m_nnPairMaxCellDistance);
+  // A negative nn_max_cell_dist means "no cap" (std::nullopt).
+  const std::optional<int> maxCellDistance = (m_nnMaxCellDistance < 0) ? std::nullopt
+                                                                       : std::optional<int>(m_nnMaxCellDistance);
 
   // Fresh-id allocator handed to mergeNearestNeighborsTree() below (its IDAllocator argument). Why an
   // allocator at all: the merge fabricates brand-new particles (each merged pair becomes one new
@@ -4328,11 +4369,11 @@ ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const V
   // merges nearest-neighbor pairs; merged particles only become candidates on the NEXT round, so one
   // round roughly halves an over-full cell's surplus above the target. The loop stops early once a round
   // merges nothing (the global valid-particle count stops decreasing), i.e. once every over-full cell has
-  // drained to the target. m_nnPairMaxRounds (ItoSolver.nn_pair_max_rounds) caps the number of rounds so
+  // drained to the target. m_nnMaxRounds (ItoSolver.nn_max_rounds) caps the number of rounds so
   // the cost stays bounded and predictable instead of running to full convergence.
   unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
 
-  for (int round = 0; round < m_nnPairMaxRounds; round++) {
+  for (int round = 0; round < m_nnMaxRounds; round++) {
     const unsigned long long nBefore = nAfter;
 
     // Fresh, globally-unique ids each round, assigned before ghosts exist so fillGhostParticles()
@@ -4374,7 +4415,7 @@ ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const V
 
     // Merge particles -- this is the most expensive part of the merge algorithm. The only line in
     // this whole function that differs between the two backends.
-    if constexpr (Backend == NnPairSearchBackend::Hash) {
+    if constexpr (Backend == ParticleManagement::NNSearch::Hash) {
       ParticleManagement::mergeNearestNeighborsHash<ItoMergeParticle, Real>(merge,
                                                                             *m_amr,
                                                                             a_numParticlesPerCellThresh,
@@ -4382,8 +4423,8 @@ ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const V
                                                                             combine,
                                                                             scatter,
                                                                             allocateID,
-                                                                            m_nnPairIterate,
-                                                                            m_nnPairFallback,
+                                                                            m_nnIterate,
+                                                                            m_nnFallback,
                                                                             maxCellDistance,
                                                                             ghostWidth,
                                                                             isPositionValid);
@@ -4396,8 +4437,8 @@ ItoSolver::mergeNnPairSearch(ParticleContainer<ItoMergeParticle>& merge, const V
                                                                             combine,
                                                                             scatter,
                                                                             allocateID,
-                                                                            m_nnPairIterate,
-                                                                            m_nnPairFallback,
+                                                                            m_nnIterate,
+                                                                            m_nnFallback,
                                                                             maxCellDistance,
                                                                             ghostWidth,
                                                                             isPositionValid);
@@ -4423,16 +4464,16 @@ ItoSolver::mergeNnPairOneCell(ParticleContainer<ItoMergeParticle>& merge, const 
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells) using
   // the distributed nearest-neighbor pair merge (per-cell PointCloudBVH search, Chebyshev cell distance
-  // structurally fixed at 1); see the nn_pair_tree merge for the shared five-step outline --
+  // structurally fixed at 1); see mergeNnPairSearch() for the shared five-step outline --
   // this differs only in step 3 (no maxCellDistance, a fixed width-1 ghost halo, and
   // mergeNearestNeighborsOneCell() instead of mergeNearestNeighborsTree()).
 
   // The distributed nearest-neighbor merge has no per-level notion -- it uses a SINGLE crowding
   // threshold over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is
-  // uniform wherever nn_pair_onecell is used.
+  // uniform wherever nn_amr with nn_search = onecell is used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
 
-  // 2. Merge callbacks -- identical reconciliation rule to the nn_pair_tree merge.
+  // 2. Merge callbacks -- identical reconciliation rule to mergeNnPairSearch().
   auto gather = [](const ParticleSoA<ItoMergeParticle>& a_leaf, const std::size_t a_idx) -> Real {
     return a_leaf.template get<&ItoMergeParticle::energy>(a_idx);
   };
@@ -4463,7 +4504,7 @@ ItoSolver::mergeNnPairOneCell(ParticleContainer<ItoMergeParticle>& merge, const 
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // See the nn_pair_tree merge for the id-allocator rationale.
+  // See mergeNnPairSearch() for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
 
@@ -4475,12 +4516,12 @@ ItoSolver::mergeNnPairOneCell(ParticleContainer<ItoMergeParticle>& merge, const 
     return nextID++;
   };
 
-  // 3. Merge phase -- same drain-loop structure as the nn_pair_tree merge, but the ghost width
-  // is fixed at 1 (see mergeNearestNeighborsOneCell()'s own docs on why nn_pair_max_cell_dist does not
+  // 3. Merge phase -- same drain-loop structure as mergeNnPairSearch(), but the ghost width
+  // is fixed at 1 (see mergeNearestNeighborsOneCell()'s own docs on why nn_max_cell_dist does not
   // apply here) and mergeNearestNeighborsOneCell() replaces mergeNearestNeighborsTree().
   unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
 
-  for (int round = 0; round < m_nnPairMaxRounds; round++) {
+  for (int round = 0; round < m_nnMaxRounds; round++) {
     const unsigned long long nBefore = nAfter;
 
     nextID = rankBase;
@@ -4519,8 +4560,8 @@ ItoSolver::mergeNnPairOneCell(ParticleContainer<ItoMergeParticle>& merge, const 
                                                                              combine,
                                                                              scatter,
                                                                              allocateID,
-                                                                             m_nnPairIterate,
-                                                                             m_nnPairFallback,
+                                                                             m_nnIterate,
+                                                                             m_nnFallback,
                                                                              isPositionValid);
 
     nAfter = merge.getNumberOfValidParticlesGlobal();
@@ -4541,7 +4582,7 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
 
   // Reduce every over-full cell to a_particlesPerCell superparticles (and refill under-full cells)
   // with a whole-patch kd-tree merge whose boundary tier is the nearest-neighbor pair merge rather
-  // than kd_carve's arbitration. The particles are split across TWO containers so the two tiers
+  // than the carve arbitration. The particles are split across TWO containers so the two tiers
   // cannot interfere: what one tier has already merged must not be merged again by the other, but
   // must still occupy room in the shared per-cell target. In six steps:
   //
@@ -4624,7 +4665,7 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // See the nn_pair_tree merge for the id-allocator rationale.
+  // See mergeNnPairSearch() for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
 
@@ -4676,7 +4717,8 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
                                                               m_kdMergeLeafQuota,
                                                               *m_amr,
                                                               numParticlesPerCellThresh,
-                                                              m_kdSplitWeightLeafDx,
+                                                              this->kdWeightMedianCellWidths(),
+                                                              m_kdPlacement,
                                                               gather,
                                                               kdCombine,
                                                               kdScatter,
@@ -4752,10 +4794,10 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
 
   interior.clearGhostParticles();
 
-  // 5. Skin tier -- same drain loop as the nn_pair_onecell merge, against the budget above.
+  // 5. Skin tier -- same drain loop as mergeNnPairOneCell(), against the budget above.
   unsigned long long nAfter = merge.getNumberOfValidParticlesGlobal();
 
-  for (int round = 0; round < m_nnPairMaxRounds; round++) {
+  for (int round = 0; round < m_nnMaxRounds; round++) {
     const unsigned long long nBefore = nAfter;
 
     if (round > 0) {
@@ -4772,8 +4814,8 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
                                                                              nnCombine,
                                                                              nnScatter,
                                                                              allocateID,
-                                                                             m_nnPairIterate,
-                                                                             m_nnPairFallback,
+                                                                             m_nnIterate,
+                                                                             m_nnFallback,
                                                                              isPositionValid);
 
     nAfter = merge.getNumberOfValidParticlesGlobal();
@@ -4830,7 +4872,7 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
 
   // The whole-patch kd-tree merges have no per-level notion -- they use a SINGLE crowding threshold
   // over the whole AMR hierarchy. Use the coarsest level's value; in practice this vector is uniform
-  // wherever kd_carve/kd_patch are used.
+  // wherever kd_patch/kd_amr are used.
   const int a_numParticlesPerCellThresh = a_particlesPerCell[0];
 
   // 2. Merge callbacks -- identical reconciliation rule to the nn_pair variants, just N-ary.
@@ -4869,7 +4911,7 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
     return implicitFunction->value(a_pos) < 0.0;
   };
 
-  // See the nn_pair_tree merge for the id-allocator rationale.
+  // See mergeNnPairSearch() for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
 
@@ -4913,7 +4955,8 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                                                              m_kdMergeLeafQuota,
                                                              *m_amr,
                                                              a_numParticlesPerCellThresh,
-                                                             m_kdSplitWeightLeafDx,
+                                                             this->kdWeightMedianCellWidths(),
+                                                             m_kdPlacement,
                                                              gather,
                                                              combine,
                                                              scatter,
@@ -4926,7 +4969,8 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                                                              m_kdMergeLeafQuota,
                                                              *m_amr,
                                                              a_numParticlesPerCellThresh,
-                                                             m_kdSplitWeightLeafDx,
+                                                             this->kdWeightMedianCellWidths(),
+                                                             m_kdPlacement,
                                                              gather,
                                                              combine,
                                                              scatter,

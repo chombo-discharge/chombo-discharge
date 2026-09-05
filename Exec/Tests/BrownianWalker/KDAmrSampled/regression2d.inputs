@@ -73,12 +73,12 @@ ItoSolver.verbosity                 = -1             ## Class verbosity
 # Super-particle merging. The method names the scope the merge groups particles over; how it groups
 # within that scope is set by the kd_* or nn_* specifiers below.
 ItoSolver.particles_per_cell        = 32             ## Target computational particles per cell (one value, or one per level)
-ItoSolver.merge_method              = nn_amr         ## Merge scope. One of 'kd_cell', 'kd_patch', 'kd_amr', 'nn_amr', 'reinitialize', 'none', or 'external'
+ItoSolver.merge_method              = kd_amr         ## Merge scope. One of 'kd_cell', 'kd_patch', 'kd_amr', 'nn_amr', 'reinitialize', 'none', or 'external'
 ItoSolver.regrid_superparticles     = solver         ## Merge run during regrids: 'solver' (use merge_method), 'none', or any merge_method selector
 # kd_cell/kd_patch/kd_amr specifiers.
 ItoSolver.kd_partition              = weight         ## Split rule: 'weight', 'count', or 'hybrid' (count median above kd_hybrid_leaf_dx, weight median below)
 ItoSolver.kd_hybrid_leaf_dx         = 1.0            ## kd_partition = hybrid: node size (cell widths) at which the split switches to the weight median
-ItoSolver.kd_placement              = centroid       ## Leaf placement: 'centroid', 'sample' (weight-sampled member) or 'random' (uniform in the leaf box)
+ItoSolver.kd_placement              = sample         ## Leaf placement: 'centroid', 'sample' (weight-sampled member) or 'random' (uniform in the leaf box)
 ItoSolver.kd_amr_boundary           = carve          ## kd_amr: boundary tier -- 'carve' (arbitrated) or 'nn' (nearest-neighbour skin)
 # nn_amr specifiers. Also read by kd_amr with kd_amr_boundary = nn, whose skin tier is a nn merge.
 ItoSolver.nn_search                 = tree           ## nn_amr: neighbour search -- 'tree', 'hash' or 'onecell'
