@@ -29,6 +29,7 @@
 #include <CD_Random.H>
 #include <CD_ParallelOps.H>
 #include <CD_DischargeIO.H>
+#include <CD_ParticleMergeTagger.H>
 
 using namespace ChomboDischarge;
 
@@ -168,13 +169,15 @@ void
 gatherStats(Stats&                          a_stats,
             ParticleContainer<ItoParticle>& a_particles,
             const RefCountedPtr<AmrMesh>&   a_amr,
-            const int                       a_margin)
+            const int                       a_margin,
+            const int                       a_level)
 {
   a_particles.organizeParticlesByCell();
 
   const RealVect probLo = a_amr->getProbLo();
 
-  for (int lvl = 0; lvl <= a_amr->getFinestLevel(); lvl++) {
+  {
+    const int                lvl    = a_level;
     const DisjointBoxLayout& dbl    = a_amr->getGrids(Realm::Primal)[lvl];
     const Real               dx     = a_amr->getDx()[lvl];
     const Box                domBox = a_amr->getDomains()[lvl].domainBox();
@@ -406,6 +409,120 @@ report(const std::string& a_name, const std::vector<double>& a_hist)
   pout() << endl;
 }
 
+/**
+ * @brief Print the before/after report for one AMR level.
+ * @param[in] a_pre       Statistics gathered before the merge.
+ * @param[in] a_post      Statistics gathered after the merge.
+ * @param[in] a_targetPPC Merge target, for the N_eff comparison.
+ * @param[in] a_blockSize Patch size in cells, for the block-phase histograms.
+ */
+void
+reportLevel(const Stats& a_pre, const Stats& a_post, const int a_targetPPC, const int a_blockSize)
+{
+  const double meanPre  = a_pre.m_sumW / a_pre.m_numCells;
+  const double meanPost = a_post.m_sumW / a_post.m_numCells;
+  const double varPre   = a_pre.m_sumW2 / a_pre.m_numCells - meanPre * meanPre;
+  const double varPost  = a_post.m_sumW2 / a_post.m_numCells - meanPost * meanPost;
+
+  int minN = Stats::s_maxCount;
+  int maxN = 0;
+  for (std::size_t i = 0; i < a_post.m_cellCount.size(); i++) {
+    if (a_post.m_cellCount[i] > 0.0) {
+      minN = std::min(minN, static_cast<int>(i));
+      maxN = std::max(maxN, static_cast<int>(i));
+    }
+  }
+
+  pout() << "  particles  pre -> post = " << a_pre.m_totalParticle << " -> " << a_post.m_totalParticle << endl;
+  pout() << "  weight     pre -> post = " << std::setprecision(12) << a_pre.m_totalWeight << " -> "
+         << a_post.m_totalWeight << std::setprecision(6) << endl;
+  pout() << "  regional weight change = " << (a_post.m_totalWeight - a_pre.m_totalWeight) / a_pre.m_totalWeight << endl;
+  pout() << "  cell weight mean       = " << meanPre << " -> " << meanPost << endl;
+  pout() << "  cell weight stdev      = " << std::sqrt(std::max(0.0, varPre)) << " -> "
+         << std::sqrt(std::max(0.0, varPost)) << "   (rel " << std::sqrt(std::max(0.0, varPost)) / meanPost << ")"
+         << endl;
+  pout() << "  E[(u-0.5)^2] pre->post = " << a_pre.m_sumU2 / (SpaceDim * a_pre.m_totalParticle) << " -> "
+         << a_post.m_sumU2 / (SpaceDim * a_post.m_totalParticle) << "   (uniform 0.0833333)" << endl;
+  pout() << "  particles/cell range   = " << minN << " .. " << maxN << endl;
+
+  // Block-frequency probe: per-cell density and its spread as a function of the cell's phase
+  // within its 8-cell patch. A patch-local algorithm that treats patch-edge cells differently
+  // from interior cells shows up here and nowhere else.
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    pout() << "  block-phase dir " << dir << " mean:";
+    for (int b = 0; b < a_blockSize; b++) {
+      pout() << " " << std::fixed << std::setprecision(5)
+             << (a_post.m_blockW[dir][b] / a_post.m_blockN[dir][b]) / meanPost;
+    }
+    pout() << endl;
+
+    pout() << "  block-phase dir " << dir << " sdev:";
+    for (int b = 0; b < a_blockSize; b++) {
+      const double m = a_post.m_blockW[dir][b] / a_post.m_blockN[dir][b];
+      const double v = a_post.m_blockW2[dir][b] / a_post.m_blockN[dir][b] - m * m;
+      pout() << " " << std::fixed << std::setprecision(5) << std::sqrt(std::max(0.0, v));
+    }
+    pout() << endl;
+  }
+
+  {
+    double unmerged = 0.0;
+    double meanW    = 0.0;
+    for (std::size_t i = 0; i < a_post.m_weightHist.size(); i++) {
+      meanW += static_cast<double>(i) * a_post.m_weightHist[i];
+    }
+    unmerged = a_post.m_weightHist[1];
+    pout() << "  unmerged (w==1) frac   = " << unmerged / a_post.m_totalParticle
+           << "   mean weight = " << meanW / a_post.m_totalParticle << endl;
+    pout() << "  weight histogram (w:frac):";
+    for (std::size_t i = 0; i < a_post.m_weightHist.size(); i++) {
+      if (a_post.m_weightHist[i] / a_post.m_totalParticle > 0.005) {
+        pout() << " " << i << ":" << std::fixed << std::setprecision(3)
+               << a_post.m_weightHist[i] / a_post.m_totalParticle;
+      }
+    }
+    pout() << endl;
+  }
+
+  pout() << "  N_eff per cell         = " << a_post.m_sumNeff / a_post.m_numCells << " of " << a_targetPPC
+         << "   heaviest share = " << a_post.m_sumTopFrac / a_post.m_numCells << "   weight range "
+         << a_post.m_minWeight << " .. " << a_post.m_maxWeight << endl;
+
+  pout() << "  sub-cell lattice |Z_k|, k = 1..8   (uniform floor ~ " << 1.0 / std::sqrt(a_post.m_totalParticle) << ")"
+         << endl;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    pout() << "    dir " << dir << ":";
+    for (int k = 0; k < Stats::s_numModes; k++) {
+      const double c  = a_post.m_cosK[dir][k] / a_post.m_totalParticle;
+      const double sn = a_post.m_sinK[dir][k] / a_post.m_totalParticle;
+      pout() << " " << std::fixed << std::setprecision(5) << std::sqrt(c * c + sn * sn);
+    }
+    pout() << endl;
+  }
+  {
+    double jsum = 0.0;
+    for (const double v : a_post.m_joint) {
+      jsum += v;
+    }
+    const double jflat = jsum / static_cast<double>(a_post.m_joint.size());
+    double       jmin  = 1.E30;
+    double       jmax  = 0.0;
+    for (const double v : a_post.m_joint) {
+      jmin = std::min(jmin, v / jflat);
+      jmax = std::max(jmax, v / jflat);
+    }
+    pout() << "  joint 6^D sub-cell min/max = " << jmin << " / " << jmax << endl;
+  }
+
+  report("  subcell PRE  dir 0", a_pre.m_subCount[0]);
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    report("  subcell POST dir " + std::to_string(dir), a_post.m_subCount[dir]);
+  }
+
+  report("  patch-mass   dir 0", a_post.m_patchWeight[0]);
+}
+
 } // namespace
 
 int
@@ -442,7 +559,7 @@ main(int argc, char* argv[])
 
     Random::seed();
 
-    auto species = RefCountedPtr<ItoSpecies>(new ItoSpecies("aliasing", 0, false, false));
+    auto species = RefCountedPtr<ItoSpecies>(new ItoSpecies("merge_test", 0, false, false));
     auto solver  = RefCountedPtr<ItoSolver>(new ItoSolver());
 
     solver->setVerbosity(-1);
@@ -466,8 +583,39 @@ main(int argc, char* argv[])
     amr->setBaseImplicitFunction(phase::gas, compgeom->getGasImplicitFunction());
     amr->setBaseImplicitFunction(phase::solid, compgeom->getSolidImplicitFunction());
 
-    Vector<IntVectSet> tags(1 + amr->getMaxAmrDepth());
-    amr->regridAmr(tags, 0);
+    // First pass: level 0 only, so the tagger has grids to lay its tags out on.
+    Vector<IntVectSet> emptyTags(1 + amr->getMaxAmrDepth());
+    amr->regridAmr(emptyTags, 0);
+
+    // Second pass: refine the slab the tagger names. Driver normally owns this dance; an application
+    // that drives AmrMesh directly has to do it itself.
+    auto tagger = RefCountedPtr<ParticleMergeTagger>(new ParticleMergeTagger());
+
+    tagger->define(amr);
+    tagger->parseOptions();
+    tagger->regrid();
+
+    if (amr->getMaxAmrDepth() > 0) {
+      EBAMRTags cellTags(1 + amr->getFinestLevel());
+
+      for (int lvl = 0; lvl <= amr->getFinestLevel(); lvl++) {
+        cellTags[lvl] = RefCountedPtr<LayoutData<DenseIntVectSet>>(
+          new LayoutData<DenseIntVectSet>(amr->getGrids(Realm::Primal)[lvl]));
+
+        for (DataIterator dit = amr->getGrids(Realm::Primal)[lvl].dataIterator(); dit.ok(); ++dit) {
+          (*cellTags[lvl])[dit()] = DenseIntVectSet(amr->getGrids(Realm::Primal)[lvl][dit()], false);
+        }
+      }
+
+      tagger->tagCells(cellTags);
+
+      Vector<IntVectSet> levelTags;
+      tagger->gatherTags(levelTags, cellTags);
+      levelTags.resize(1 + amr->getMaxAmrDepth(), IntVectSet());
+
+      amr->regridAmr(levelTags, 0);
+    }
+
     amr->regridOperators(0);
 
     solver->allocate();
@@ -480,6 +628,15 @@ main(int argc, char* argv[])
 
     pout() << "===== ItoSolver particle-merge diagnostic =====" << endl;
     pout() << "domain      = " << amr->getDomains()[0].domainBox() << endl;
+    pout() << "levels      = " << (1 + amr->getFinestLevel()) << endl;
+    for (int lvl = 0; lvl <= amr->getFinestLevel(); lvl++) {
+      long long numCells = 0;
+      for (DataIterator dit = amr->getGrids(Realm::Primal)[lvl].dataIterator(); dit.ok(); ++dit) {
+        numCells += amr->getGrids(Realm::Primal)[lvl][dit()].numPts();
+      }
+      pout() << "  level " << lvl << ": dx = " << amr->getDx()[lvl] << ", cells = " << ParallelOps::sum(numCells)
+             << endl;
+    }
     pout() << "block size  = " << blockSize << endl;
     pout() << "init ppc    = " << initPPC << endl;
     pout() << "target ppc  = " << targetPPC << " (ItoSolver.particles_per_cell)" << endl;
@@ -503,120 +660,30 @@ main(int argc, char* argv[])
         DischargeIO::writeH5Part("parts_" + tag + "_initial.h5part", particles, amr->getProbLo(), 0.0);
       }
 
-      Stats pre(blockSize);
-      gatherStats(pre, particles, amr, margin);
-      pre.reduce();
+      std::vector<Stats> preLevels;
+      for (int lvl = 0; lvl <= amr->getFinestLevel(); lvl++) {
+        preLevels.emplace_back(blockSize);
+        gatherStats(preLevels.back(), particles, amr, margin, lvl);
+        preLevels.back().reduce();
+      }
 
       particles.organizeParticlesByPatch();
       solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
 
-      Stats post(blockSize);
-      gatherStats(post, particles, amr, margin);
-      post.reduce();
-
-      const double meanPre  = pre.m_sumW / pre.m_numCells;
-      const double meanPost = post.m_sumW / post.m_numCells;
-      const double varPre   = pre.m_sumW2 / pre.m_numCells - meanPre * meanPre;
-      const double varPost  = post.m_sumW2 / post.m_numCells - meanPost * meanPost;
-
-      int minN = Stats::s_maxCount;
-      int maxN = 0;
-      for (std::size_t i = 0; i < post.m_cellCount.size(); i++) {
-        if (post.m_cellCount[i] > 0.0) {
-          minN = std::min(minN, static_cast<int>(i));
-          maxN = std::max(maxN, static_cast<int>(i));
-        }
+      std::vector<Stats> postLevels;
+      for (int lvl = 0; lvl <= amr->getFinestLevel(); lvl++) {
+        postLevels.emplace_back(blockSize);
+        gatherStats(postLevels.back(), particles, amr, margin, lvl);
+        postLevels.back().reduce();
       }
 
       pout() << endl << "########## ROUND " << round << " ##########" << endl;
-      pout() << "  particles  pre -> post = " << pre.m_totalParticle << " -> " << post.m_totalParticle << endl;
-      pout() << "  weight     pre -> post = " << std::setprecision(12) << pre.m_totalWeight << " -> "
-             << post.m_totalWeight << std::setprecision(6) << endl;
-      pout() << "  regional weight change = " << (post.m_totalWeight - pre.m_totalWeight) / pre.m_totalWeight << endl;
-      pout() << "  cell weight mean       = " << meanPre << " -> " << meanPost << endl;
-      pout() << "  cell weight stdev      = " << std::sqrt(std::max(0.0, varPre)) << " -> "
-             << std::sqrt(std::max(0.0, varPost)) << "   (rel " << std::sqrt(std::max(0.0, varPost)) / meanPost << ")"
-             << endl;
-      pout() << "  E[(u-0.5)^2] pre->post = " << pre.m_sumU2 / (SpaceDim * pre.m_totalParticle) << " -> "
-             << post.m_sumU2 / (SpaceDim * post.m_totalParticle) << "   (uniform 0.0833333)" << endl;
-      pout() << "  particles/cell range   = " << minN << " .. " << maxN << endl;
 
-      // Block-frequency probe: per-cell density and its spread as a function of the cell's phase
-      // within its 8-cell patch. A patch-local algorithm that treats patch-edge cells differently
-      // from interior cells shows up here and nowhere else.
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        pout() << "  block-phase dir " << dir << " mean:";
-        for (int b = 0; b < blockSize; b++) {
-          pout() << " " << std::fixed << std::setprecision(5)
-                 << (post.m_blockW[dir][b] / post.m_blockN[dir][b]) / meanPost;
-        }
-        pout() << endl;
+      for (int lvl = 0; lvl <= amr->getFinestLevel(); lvl++) {
+        pout() << "----- level " << lvl << " -----" << endl;
 
-        pout() << "  block-phase dir " << dir << " sdev:";
-        for (int b = 0; b < blockSize; b++) {
-          const double m = post.m_blockW[dir][b] / post.m_blockN[dir][b];
-          const double v = post.m_blockW2[dir][b] / post.m_blockN[dir][b] - m * m;
-          pout() << " " << std::fixed << std::setprecision(5) << std::sqrt(std::max(0.0, v));
-        }
-        pout() << endl;
+        reportLevel(preLevels[lvl], postLevels[lvl], targetPPC, blockSize);
       }
-
-      {
-        double unmerged = 0.0;
-        double meanW    = 0.0;
-        for (std::size_t i = 0; i < post.m_weightHist.size(); i++) {
-          meanW += static_cast<double>(i) * post.m_weightHist[i];
-        }
-        unmerged = post.m_weightHist[1];
-        pout() << "  unmerged (w==1) frac   = " << unmerged / post.m_totalParticle
-               << "   mean weight = " << meanW / post.m_totalParticle << endl;
-        pout() << "  weight histogram (w:frac):";
-        for (std::size_t i = 0; i < post.m_weightHist.size(); i++) {
-          if (post.m_weightHist[i] / post.m_totalParticle > 0.005) {
-            pout() << " " << i << ":" << std::fixed << std::setprecision(3)
-                   << post.m_weightHist[i] / post.m_totalParticle;
-          }
-        }
-        pout() << endl;
-      }
-
-      pout() << "  N_eff per cell         = " << post.m_sumNeff / post.m_numCells << " of " << targetPPC
-             << "   heaviest share = " << post.m_sumTopFrac / post.m_numCells << "   weight range " << post.m_minWeight
-             << " .. " << post.m_maxWeight << endl;
-
-      pout() << "  sub-cell lattice |Z_k|, k = 1..8   (uniform floor ~ " << 1.0 / std::sqrt(post.m_totalParticle) << ")"
-             << endl;
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        pout() << "    dir " << dir << ":";
-        for (int k = 0; k < Stats::s_numModes; k++) {
-          const double c  = post.m_cosK[dir][k] / post.m_totalParticle;
-          const double sn = post.m_sinK[dir][k] / post.m_totalParticle;
-          pout() << " " << std::fixed << std::setprecision(5) << std::sqrt(c * c + sn * sn);
-        }
-        pout() << endl;
-      }
-      {
-        double jsum = 0.0;
-        for (const double v : post.m_joint) {
-          jsum += v;
-        }
-        const double jflat = jsum / static_cast<double>(post.m_joint.size());
-        double       jmin  = 1.E30;
-        double       jmax  = 0.0;
-        for (const double v : post.m_joint) {
-          jmin = std::min(jmin, v / jflat);
-          jmax = std::max(jmax, v / jflat);
-        }
-        pout() << "  joint 6^D sub-cell min/max = " << jmin << " / " << jmax << endl;
-      }
-
-      report("  subcell PRE  dir 0", pre.m_subCount[0]);
-
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        report("  subcell POST dir " + std::to_string(dir), post.m_subCount[dir]);
-      }
-
-      report("  patch-mass   dir 0", post.m_patchWeight[0]);
 
       if (writeParts != 0 && round == numRounds) {
         DischargeIO::writeH5Part("parts_" + tag + "_final.h5part", particles, amr->getProbLo(), 1.0 * round);

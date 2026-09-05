@@ -14,8 +14,8 @@ ParticleMerge.tag                 = example    ## Name stem for the H5Part files
 AmrMesh.lo_corner               = 0  0  0        ## Low corner of problem domain
 AmrMesh.hi_corner               = 1  1  1        ## High corner of problem domain
 AmrMesh.verbosity               = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain         = 512 512        ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth           = 0              ## Maximum amr depth
+AmrMesh.coarsest_domain         = 96 96 96       ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 1              ## Maximum amr depth
 AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
 AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
 AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
@@ -39,6 +39,13 @@ AmrMesh.mirror_cond_tol         = 1.E-3          ## Mirror deposition: min eigen
 AmrMesh.mirror_crease_tol       = 1.E-1          ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
 AmrMesh.mirror_max_jacobian     = 1.E4           ## Mirror deposition: refuse (J = 1) above this. Must exceed ~500.
 AmrMesh.mirror_min_denom        = 1.E-4          ## Mirror deposition: refuse (J = 1) below this. Must be under ~4E-3.
+
+# ====================================================================================================
+# ParticleMergeTagger class options
+# ====================================================================================================
+ParticleMergeTagger.refine_dir     = 1       ## Direction the refined slab is bounded in
+ParticleMergeTagger.refine_lo      = 0.40    ## Lower edge of the refined slab, physical coordinate
+ParticleMergeTagger.refine_hi      = 0.60    ## Upper edge of the refined slab, physical coordinate
 
 # ====================================================================================================
 # ItoSolver class options
