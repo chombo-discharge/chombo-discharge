@@ -416,12 +416,10 @@ main(int argc, char* argv[])
   {
     ParmParse pp("ParticleMerge");
 
-    int initPPC   = 32;
-    int targetPPC = 16;
-    int margin    = 16;
+    int initPPC = 32;
+    int margin  = 16;
 
     pp.get("init_ppc", initPPC);
-    pp.get("target_ppc", targetPPC);
     pp.get("margin", margin);
 
     int         numRounds       = 1;
@@ -474,13 +472,17 @@ main(int argc, char* argv[])
 
     solver->allocate();
 
+    // The merge target belongs to the solver -- read it back rather than carrying a second copy in this
+    // example's own options, which could disagree with the one the merge actually uses.
+    const int targetPPC = solver->getParticlesPerCell()[0];
+
     const int blockSize = amr->getMaxBoxSize();
 
     pout() << "===== ItoSolver particle-merge diagnostic =====" << endl;
     pout() << "domain      = " << amr->getDomains()[0].domainBox() << endl;
     pout() << "block size  = " << blockSize << endl;
     pout() << "init ppc    = " << initPPC << endl;
-    pout() << "target ppc  = " << targetPPC << endl;
+    pout() << "target ppc  = " << targetPPC << " (ItoSolver.particles_per_cell)" << endl;
     pout() << "margin      = " << margin << " cells" << endl;
     pout() << "rounds      = " << numRounds << endl;
     pout() << "fill        = "
@@ -506,7 +508,7 @@ main(int argc, char* argv[])
       pre.reduce();
 
       particles.organizeParticlesByPatch();
-      solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, targetPPC);
+      solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
 
       Stats post(blockSize);
       gatherStats(post, particles, amr, margin);

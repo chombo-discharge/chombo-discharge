@@ -1,8 +1,7 @@
 # ====================================================================================================
 # ParticleMerge example options
 # ====================================================================================================
-ParticleMerge.init_ppc            = 32         ## Particles added per cell before every merge
-ParticleMerge.target_ppc          = 16         ## Merge target (must match ItoSolver.particles_per_cell)
+ParticleMerge.init_ppc            = 32         ## Particles added per cell before every merge (the merge target is ItoSolver.particles_per_cell)
 ParticleMerge.rounds              = 10         ## Number of add-then-merge rounds
 ParticleMerge.stratified          = 0          ## 1 = exactly init_ppc per cell, 0 = Poisson over the patch
 ParticleMerge.margin              = 16         ## Cells excluded next to each domain face (multiple of the block size)
