@@ -67,22 +67,18 @@ Driver.refine_dielectrics           = -1                  ## Refine dielectric s
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
 ItoSolver.verbosity                 = -1            ## Class verbosity
-# Super-particle merging. The method names the scope the merge groups particles over; how it groups
-# within that scope is set by the kd_* or nn_* specifiers below.
 ItoSolver.particles_per_cell        = 32            ## Target computational particles per cell (one value, or one per level)
 ItoSolver.merge_method              = kd_cell       ## Merge scope. One of 'kd_cell', 'kd_patch', 'kd_amr', 'nn_amr', 'reinitialize', 'none', or 'external'
 ItoSolver.regrid_superparticles     = solver        ## Merge run during regrids: 'solver' (use merge_method), 'none', or any merge_method selector
-# kd_cell/kd_patch/kd_amr specifiers.
-ItoSolver.kd_partition              = weight        ## Split rule: 'weight', 'count', or 'hybrid' (count median above kd_hybrid_leaf_dx, weight median below)
-ItoSolver.kd_hybrid_leaf_dx         = 1.0           ## kd_partition = hybrid: node size (cell widths) at which the split switches to the weight median
-ItoSolver.kd_placement              = centroid      ## Leaf placement: 'centroid', 'sample' (weight-sampled member) or 'random' (uniform in the leaf box)
-ItoSolver.kd_amr_boundary           = carve         ## kd_amr: boundary tier -- 'carve' (arbitrated) or 'nn' (nearest-neighbour skin)
-# nn_amr specifiers. Also read by kd_amr with kd_amr_boundary = nn, whose skin tier is a nn merge.
-ItoSolver.nn_search                 = tree          ## nn_amr: neighbour search -- 'tree', 'hash' or 'onecell'
-ItoSolver.nn_iterate                = true          ## Iterate the local tier to convergence within each round
-ItoSolver.nn_fallback               = 1             ## Fallback candidates per query
-ItoSolver.nn_max_cell_dist          = 1             ## Max merge distance in cells (Chebyshev); unused by nn_search = onecell (fixed at 1)
-ItoSolver.nn_max_rounds             = 3             ## Max drain rounds per merge (stops early on convergence)
+ItoSolver.kd_partition              = weight        ## kd_cell/kd_patch/kd_amr: split rule. 'weight', 'count', or 'hybrid'
+ItoSolver.kd_hybrid_leaf_dx         = 1.0           ## kd_partition = hybrid: crossover node size, in cell widths
+ItoSolver.kd_placement              = centroid      ## kd_cell/kd_patch/kd_amr: leaf placement. 'centroid', 'sample', or 'random'
+ItoSolver.kd_amr_boundary           = carve         ## kd_amr: boundary tier. 'carve' or 'nn'
+ItoSolver.nn_search                 = tree          ## nn_amr: neighbour search. 'tree', 'hash', or 'onecell'
+ItoSolver.nn_iterate                = true          ## nn_amr/kd_amr_boundary = nn: iterate the local tier within each round
+ItoSolver.nn_fallback               = 1             ## nn_amr/kd_amr_boundary = nn: fallback candidates per query
+ItoSolver.nn_max_cell_dist          = 1             ## nn_amr: max merge distance in cells. Unused by nn_search = onecell
+ItoSolver.nn_max_rounds             = 3             ## nn_amr/kd_amr_boundary = nn: max drain rounds per merge
 ItoSolver.plt_vars                  = phi           ## 'phi', 'vel', 'dco', 'grad_dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg          = bisection     ## Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step               = 1.E-4         ## Bisection step length for intersection tests
