@@ -38,18 +38,19 @@ namespace ParticleManagement {
  */
 enum class ParticleMergeMethod
 {
-  None,            ///< No merging.
-  EqualWeightKD,   ///< Cell: makeEqualWeightKDMerger.
-  Reinitialize,    ///< Cell: makeReinitializeMerger.
-  ReinitializeBVH, ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
-  NnSfc,           ///< Cell: makeSfcNearestNeighborMerger.
-  NnPairTree,      ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
-  NnPairOneCell,   ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
-  NnPairHash,      ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
-  KdCarve,         ///< AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries).
-  KdPatch,         ///< AMR: mergeKDPatch (same build, patch-local -- no ghosts, no contested particles).
-  KdSkinNn,        ///< AMR: mergeKDInterior for the uncontested tier, nearest-neighbor pairs for the skin.
-  External         ///< Cell: caller-supplied per-cell merger.
+  None,                 ///< No merging.
+  EqualWeightKD,        ///< Cell: makeEqualWeightKDMerger.
+  EqualWeightKDSampled, ///< Cell: makeEqualWeightKDMerger, leaf placed at a weight-sampled member.
+  Reinitialize,         ///< Cell: makeReinitializeMerger.
+  ReinitializeBVH,      ///< Cell: makeEqualWeightKDMerger with reinitialized leaf positions.
+  NnSfc,                ///< Cell: makeSfcNearestNeighborMerger.
+  NnPairTree,           ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
+  NnPairOneCell, ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
+  NnPairHash,    ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
+  KdCarve,       ///< AMR: mergeKDCarve (whole-patch kd-tree build, arbitrated patch boundaries).
+  KdPatch,       ///< AMR: mergeKDPatch (same build, patch-local -- no ghosts, no contested particles).
+  KdSkinNn,      ///< AMR: mergeKDInterior for the uncontested tier, nearest-neighbor pairs for the skin.
+  External       ///< Cell: caller-supplied per-cell merger.
 };
 
 /**
@@ -57,6 +58,7 @@ enum class ParticleMergeMethod
  * @details Valid input options are:
  * 'none' -> None
  * 'equal_weight_kd' -> EqualWeightKD
+ * 'equal_weight_kd_sampled' -> EqualWeightKDSampled
  * 'reinitialize' -> Reinitialize
  * 'reinitialize_bvh' -> ReinitializeBVH
  * 'nn_sfc' -> NnSfc

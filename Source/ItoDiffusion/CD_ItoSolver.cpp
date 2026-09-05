@@ -3667,6 +3667,11 @@ ItoSolver::mergeLite(ParticleContainer<ItoMergeParticle>&          a_particles,
 
     return;
   }
+  case ParticleManagement::ParticleMergeMethod::EqualWeightKDSampled: {
+    this->mergeEqualWeightKDSampled(a_particles, a_particlesPerCell);
+
+    return;
+  }
   case ParticleManagement::ParticleMergeMethod::Reinitialize: {
     this->mergeReinitialize(a_particles, a_particlesPerCell);
 
@@ -3890,6 +3895,86 @@ ItoSolver::mergeEqualWeightKD(ParticleContainer<ItoMergeParticle>& a_particles, 
 
     x *= 1.0 / w;
     e *= 1.0 / w;
+
+    ItoMergeParticle payload;
+    payload.energy = static_cast<ParticleReal>(e);
+    a.append(x, w, payload);
+  };
+
+  const ParticleManagement::ParticleMerger<ItoMergeParticle>
+    merger = ParticleManagement::makeEqualWeightKDMerger<PType, &PType::weight, &PType::position>(gather,
+                                                                                                  reconcile,
+                                                                                                  scatterLeaf);
+
+  this->applyCellMerger(a_particles, a_particlesPerCell, merger);
+}
+
+void
+ItoSolver::mergeEqualWeightKDSampled(ParticleContainer<ItoMergeParticle>& a_particles,
+                                     const Vector<int>&                   a_particlesPerCell)
+{
+  CH_TIME("ItoSolver::mergeEqualWeightKDSampled");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::mergeEqualWeightKDSampled" << endl;
+  }
+
+  // Same per-cell equal-weight KD partition as mergeEqualWeightKD, but each leaf is placed at one of
+  // its own members rather than at their weighted centroid. See the declaration for why: the centroid
+  // discards the leaf's spatial spread and drives the sub-cell distribution onto a lattice under
+  // repeated merges, while a weight-proportional draw preserves the distribution exactly. Requires
+  // particle weights >= 1 to split.
+  using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
+
+  // Pack the reduced particle's columns into the per-cell AoS intermediate.
+  const std::function<PType(const ParticleSoA<ItoMergeParticle>&, std::size_t)> gather =
+    [](const ParticleSoA<ItoMergeParticle>& a, const std::size_t i) -> PType {
+    PType p;
+
+    p.weight   = a.weight(i);
+    p.payload  = a.template get<&ItoMergeParticle::energy>(i);
+    p.position = a.position(i);
+
+    return p;
+  };
+
+  // Propagate energy to both daughters when the median particle is split across a KD boundary.
+  const ParticleManagement::BinaryParticleReconcile<PType> reconcile =
+    [](PType& p1, PType& p2, const PType& p0) -> void {
+    p1.payload = p0.payload;
+    p2.payload = p0.payload;
+  };
+
+  // Reduce each KD leaf to one particle carrying the leaf's total weight and mass-weighted energy,
+  // positioned at a member drawn with probability proportional to weight.
+  const std::function<void(ParticleSoA<ItoMergeParticle>&, const PType*, const PType*, const CellInfo&)> scatterLeaf =
+    [](ParticleSoA<ItoMergeParticle>& a, const PType* first, const PType* last, const CellInfo&) -> void {
+    Real w = 0.0;
+    Real e = 0.0;
+
+    for (const PType* p = first; p != last; ++p) {
+      w += p->weight;
+      e += p->weight * p->payload;
+    }
+
+    e *= 1.0 / w;
+
+    // Inverse-CDF draw over the leaf's members. The running sum can fall a rounding step short of the
+    // threshold on the final member, so the position is seeded with the first member and overwritten
+    // on the first member that reaches the threshold -- it is never left unset.
+    const Real threshold = Random::getUniformReal01() * w;
+
+    RealVect x           = first->position;
+    Real     accumulated = 0.0;
+
+    for (const PType* p = first; p != last; ++p) {
+      accumulated += p->weight;
+
+      if (accumulated >= threshold) {
+        x = p->position;
+
+        break;
+      }
+    }
 
     ItoMergeParticle payload;
     payload.energy = static_cast<ParticleReal>(e);

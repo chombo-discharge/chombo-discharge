@@ -1,0 +1,73 @@
+# ====================================================================================================
+# ParticleMerge example options
+# ====================================================================================================
+ParticleMerge.init_ppc            = 32         ## Particles added per cell before every merge
+ParticleMerge.target_ppc          = 16         ## Merge target (must match ItoSolver.particles_per_cell)
+ParticleMerge.rounds              = 10         ## Number of add-then-merge rounds
+ParticleMerge.stratified          = 0          ## 1 = exactly init_ppc per cell, 0 = Poisson over the patch
+ParticleMerge.margin              = 16         ## Cells excluded next to each domain face (multiple of the block size)
+ParticleMerge.write_particles     = 0          ## 1 = write the initial and final populations to H5Part
+ParticleMerge.tag                 = example    ## Name stem for the H5Part files
+
+# ====================================================================================================
+# AmrMesh class options
+# ====================================================================================================
+AmrMesh.lo_corner               = 0  0  0        ## Low corner of problem domain
+AmrMesh.hi_corner               = 1  1  1        ## High corner of problem domain
+AmrMesh.verbosity               = -1             ## Controls verbosity.
+AmrMesh.coarsest_domain         = 512 512        ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 0              ## Maximum amr depth
+AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
+AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
+AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
+AmrMesh.grid_algorithm          = tiled          ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting             = morton         ## 'none', 'shuffle', 'morton'
+AmrMesh.min_block_size          = 8              ## Minimum block size (smallest box / tile size)
+AmrMesh.max_block_size          = 8              ## Maximum allowed box size
+AmrMesh.max_ebis_box            = 8              ## Maximum allowed box size for EBIS generation.
+AmrMesh.ref_rat                 = 2 2 2 2 2 2    ## Refinement ratios (mixed ratios are allowed).
+AmrMesh.num_ghost               = 2              ## Number of ghost cells.
+AmrMesh.lsf_ghost               = 2              ## Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost                = 2              ## Set number of of ghost cells for EB stuff
+AmrMesh.mg_interp_order         = 2              ## Multigrid interpolation order
+AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radius
+AmrMesh.mg_interp_weight        = 1              ## Multigrid interpolation weight (for least squares)
+AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
+AmrMesh.redist_radius           = 1              ## Redistribution radius for hyperbolic conservation laws
+AmrMesh.mirror_band_radius      = 2              ## Mirror deposition: band half-width in cells. Requires num_ghost >= this.
+AmrMesh.mirror_cond_tol         = 1.E-3          ## Mirror deposition: min eigenvalue ratio of U^T U in the curvature fit.
+AmrMesh.mirror_crease_tol       = 1.E-1          ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
+AmrMesh.mirror_max_jacobian     = 1.E4           ## Mirror deposition: refuse (J = 1) above this. Must exceed ~500.
+AmrMesh.mirror_min_denom        = 1.E-4          ## Mirror deposition: refuse (J = 1) below this. Must be under ~4E-3.
+
+# ====================================================================================================
+# ItoSolver class options
+# ====================================================================================================
+ItoSolver.verbosity                   = -1                         ## Class verbosity
+ItoSolver.merge_algorithm             = equal_weight_kd_sampled    ## Merge algorithm under test
+ItoSolver.particles_per_cell          = 16                         ## Target computational particles per cell
+ItoSolver.regrid_superparticles       = solver                     ## Merge run during regrids
+ItoSolver.nn_pair_iterate             = true                       ## nn_pair_*: iterate the local tier to convergence
+ItoSolver.nn_pair_fallback            = 1                          ## nn_pair_*: fallback candidates per query
+ItoSolver.nn_pair_max_cell_dist       = 1                          ## nn_pair_tree/hash: max merge distance in cells
+ItoSolver.nn_pair_max_rounds          = 3                          ## nn_pair_*: max drain rounds per merge
+ItoSolver.kd_split_weight_leaf_dx     = 1.0                        ## kd_carve/kd_patch: leaf size at/below which splitting switches to the weight median
+ItoSolver.plt_vars                    = phi                        ## Plot variables
+ItoSolver.intersection_alg            = bisection                  ## Intersection algorithm for EB-particle intersections.
+ItoSolver.bisect_step                 = 1.E-4                      ## Bisection step length for intersection tests
+ItoSolver.normal_max                  = 5.0                        ## Maximum value (absolute) drawn from the exponential distribution.
+ItoSolver.diffusion_grad_drift        = true                       ## Add grad(D) to the drift
+ItoSolver.checkpointing               = particles                  ## 'particles' or 'numbers'
+ItoSolver.ppc_restart                 = 32                         ## Particles per cell redrawn on restart
+ItoSolver.irr_ngp_interp              = true                       ## Force irregular interpolation in cut cells or not
+ItoSolver.mobility_interp             = direct                     ## How to interpolate mobility
+ItoSolver.plot_deposition             = cic                        ## Cloud-in-cell for plotting particles.
+ItoSolver.deposition                  = cic                        ## Deposition type.
+ItoSolver.deposition_irreg            = native                     ## Cut-cell deposition
+ItoSolver.deposition_cf               = transition                 ## Coarse-fine deposition
+
+# ====================================================================================================
+# Random class options
+# ====================================================================================================
+Random.seed     = 12345    ## RNG seed. < 0 gives a random seed

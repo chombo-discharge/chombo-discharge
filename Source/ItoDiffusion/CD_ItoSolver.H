@@ -1764,6 +1764,24 @@ protected:
   mergeEqualWeightKD(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
+   * @brief Merge particles with a per-cell equal-weight KD partition, placing each leaf at one of its
+   * own members rather than at their weighted centroid.
+   * @details The weighted centroid keeps a leaf's mean position and discards its spread, so it is a
+   * contraction on the particle positions: repeated merges drive the sub-cell distribution onto the
+   * fixed points of that map, which -- because equal-weight leaves of a locally uniform population are
+   * near enough equal-volume sub-boxes -- form a regular sub-cell lattice, identical in every cell and
+   * therefore coherent across the whole domain. Drawing one member with probability proportional to
+   * weight is distribution-preserving instead: a weight-proportional draw from a partition of a sample
+   * of rho is itself a sample of rho, so neither the lattice nor the loss of sub-cell spread occurs.
+   * The per-leaf first moment then holds only in expectation rather than exactly, and because the
+   * partition is per-cell no weight crosses a cell face, leaving the per-cell density untouched.
+   * @param[in,out] a_particles        Particles to merge.
+   * @param[in]     a_particlesPerCell Target number of particles per cell (one value, or one per level).
+   */
+  virtual void
+  mergeEqualWeightKDSampled(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
+
+  /**
    * @brief Cell-based merge: redistribute each cell's physical particles into near-equal integer
    * weights at random cell positions.
    * @details All output particles carry the same weight-averaged energy. Requires integer weights.

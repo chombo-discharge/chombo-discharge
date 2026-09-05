@@ -2,7 +2,7 @@
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity                   = -1             ## Class verbosity
-ItoSolver.merge_algorithm             = kd_carve       ## Particle merging algorithm. One of 'reinitialize', 'equal_weight_kd', 'reinitialize_bvh', 'nn_sfc', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'kd_carve', 'kd_patch', 'kd_skin_nn', 'none', or 'external'
+ItoSolver.merge_algorithm             = kd_carve       ## Particle merging algorithm. One of 'reinitialize', 'equal_weight_kd', 'equal_weight_kd_sampled', 'reinitialize_bvh', 'nn_sfc', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'kd_carve', 'kd_patch', 'kd_skin_nn', 'none', or 'external'
 ItoSolver.particles_per_cell          = 32             ## Target computational particles per cell (one value, or one per level)
 ItoSolver.regrid_superparticles       = solver         ## Merge run during regrids: 'solver' (use merge_algorithm), 'none', or any merge_algorithm selector
 ItoSolver.nn_pair_iterate             = true           ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local tier to convergence within each round

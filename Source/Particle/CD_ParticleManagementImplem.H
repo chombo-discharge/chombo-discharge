@@ -43,6 +43,9 @@ mergeMethodFromString(const std::string& a_str) noexcept
   else if (a_str == "equal_weight_kd") {
     return ParticleMergeMethod::EqualWeightKD;
   }
+  else if (a_str == "equal_weight_kd_sampled") {
+    return ParticleMergeMethod::EqualWeightKDSampled;
+  }
   else if (a_str == "reinitialize") {
     return ParticleMergeMethod::Reinitialize;
   }
