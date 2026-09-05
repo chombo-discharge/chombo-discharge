@@ -45,6 +45,22 @@ public:
   BrownianWalkerStepper();
 
   /**
+   * @brief Constructor which sets the input-script prefix this stepper reads its options under.
+   * @details Every option of a derived stepper -- the ones it inherits and the ones it adds -- then
+   * lives under one prefix that matches the derived class, rather than the user having to know which of
+   * two prefixes a given option belongs to. Defaults to 'BrownianWalker' for this class.
+   * @param[in] a_className Input-script prefix.
+   */
+  BrownianWalkerStepper(const std::string& a_className);
+
+  /**
+   * @brief Full constructor for a derived stepper.
+   * @param[in] a_solver    Ito solver to advance.
+   * @param[in] a_className Input-script prefix.
+   */
+  BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver, const std::string& a_className);
+
+  /**
    * @brief Full constructor. Delegates to the default constructor and stores the provided solver.
    * @param[in] a_solver Ito solver to use for particle advancement.
    */
@@ -324,6 +340,13 @@ protected:
    * @brief Angular velocity of the solid-body rotation advection field.
    */
   Real m_omega;
+
+  /**
+   * @brief Input-script prefix this stepper reads its options under.
+   * @details 'BrownianWalker' for this class; a derived stepper passes its own name so that every
+   * option it reads lives under one prefix.
+   */
+  std::string m_className;
 
   /**
    * @brief If true, the advective field is spatially constant rather than rotational.

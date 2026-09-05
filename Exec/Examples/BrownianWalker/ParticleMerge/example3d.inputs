@@ -93,42 +93,41 @@ ItoSolver.deposition_irreg            = native         ## Cut-cell deposition: '
 ItoSolver.deposition_cf               = transition     ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
-# BrownianWalkerStepper class options.
+# ParticleMergeStepper class options
 # ====================================================================================================
-BrownianWalker.verbosity               = -1        ## Verbosity
-BrownianWalker.realm                   = primal    ## Realm
-BrownianWalker.diffusion               = false     ## Turn on/off diffusion
-BrownianWalker.advection               = true      ## Turn on/off advection
-BrownianWalker.blob_amplitude          = 1.0       ## Blob amplitude
-BrownianWalker.blob_radius             = 0.1       ## Blob radius
-BrownianWalker.blob_center             = 0 0 0     ## Blob center
-BrownianWalker.seed                    = 0         ## RNG seed
-BrownianWalker.num_particles           = 0         ## Number of initial particles
-BrownianWalker.cfl                     = 0.5       ## CFL-like number.
-BrownianWalker.load_balance            = true      ## Turn on/off particle load balancing
-BrownianWalker.which_balance           = mesh      ## Switch for load balancing method. Either 'mesh' or 'particle'.
-BrownianWalker.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight
-BrownianWalker.plot_particles          = false     ## Write the bulk particles to H5Part on every plot step
+ParticleMergeStepper.verbosity               = -1        ## Verbosity
+ParticleMergeStepper.realm                   = primal    ## Realm
+ParticleMergeStepper.diffusion               = false     ## Turn on/off diffusion
+ParticleMergeStepper.advection               = true      ## Turn on/off advection
+ParticleMergeStepper.blob_amplitude          = 1.0       ## Blob amplitude
+ParticleMergeStepper.blob_radius             = 0.1       ## Blob radius
+ParticleMergeStepper.blob_center             = 0 0 0     ## Blob center
+ParticleMergeStepper.seed                    = 0         ## RNG seed
+ParticleMergeStepper.num_particles           = 0         ## Number of initial particles
+ParticleMergeStepper.cfl                     = 0.5       ## CFL-like number.
+ParticleMergeStepper.load_balance            = true      ## Turn on/off particle load balancing
+ParticleMergeStepper.which_balance           = mesh      ## Switch for load balancing method. Either 'mesh' or 'particle'.
+ParticleMergeStepper.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight
+ParticleMergeStepper.plot_particles          = false     ## Write the bulk particles to H5Part on every plot step
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-BrownianWalker.mobility              = 1.0         ## Mobility coefficient
-BrownianWalker.diffco                = 1.0         ## Diffusion coefficient
-BrownianWalker.omega                 = 1.0         ## Rotation velocity for advection field (velocity_field = rotational)
-BrownianWalker.velocity_field        = constant    ## Advective field. 'rotational' (uses omega) or 'constant' (uses constant_velocity)
-BrownianWalker.constant_velocity     = 1 0 0       ## Advective field when velocity_field = constant
+ParticleMergeStepper.mobility              = 1.0         ## Mobility coefficient
+ParticleMergeStepper.diffco                = 1.0         ## Diffusion coefficient
+ParticleMergeStepper.omega                 = 1.0         ## Rotation velocity for advection field (velocity_field = rotational)
+ParticleMergeStepper.velocity_field        = constant    ## Advective field. 'rotational' (uses omega) or 'constant' (uses constant_velocity)
+ParticleMergeStepper.constant_velocity     = 1 0 0       ## Advective field when velocity_field = constant
 
 # Cell tagging stuff
 # ------------------
-BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
-BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
-BrownianWalker.buffer          = 0       ## Grow tagged cells
+ParticleMergeStepper.refine_curv     = 0.1     ## Refine if curvature exceeds this
+ParticleMergeStepper.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
+ParticleMergeStepper.buffer          = 0       ## Grow tagged cells
 
-# ====================================================================================================
-# ParticleMergeStepper class options
-# ====================================================================================================
+# Particle seeding and reporting
+# ------------------------------
 ParticleMergeStepper.new_particles_per_cell     = 32      ## Particles seeded per cell before every advance
-ParticleMergeStepper.print_stats                = true    ## Print merge statistics to pout on every step
+ParticleMergeStepper.print_stats                = true    ## Print per-level merge statistics to pout every step
 
 # ====================================================================================================
 # ParticleMergeTagger class options

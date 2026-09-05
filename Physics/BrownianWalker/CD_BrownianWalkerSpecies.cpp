@@ -21,7 +21,10 @@
 
 using namespace Physics::BrownianWalker;
 
-BrownianWalkerSpecies::BrownianWalkerSpecies()
+BrownianWalkerSpecies::BrownianWalkerSpecies() : BrownianWalkerSpecies("BrownianWalker")
+{}
+
+BrownianWalkerSpecies::BrownianWalkerSpecies(const std::string& a_className)
 {
   CH_TIME("BrownianWalkerSpecies::BrownianWalkerSpecies");
 
@@ -29,7 +32,7 @@ BrownianWalkerSpecies::BrownianWalkerSpecies()
   m_chargeNumber = 0;
 
   // Parse input options.
-  ParmParse    pp("BrownianWalker");
+  ParmParse    pp(a_className.c_str());
   Vector<Real> v;
 
   int seed;

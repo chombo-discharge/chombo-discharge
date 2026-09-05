@@ -492,11 +492,13 @@ reportLevel(const Stats& a_pre,
 
 } // namespace
 ParticleMergeStepper::ParticleMergeStepper(RefCountedPtr<ItoSolver>& a_solver)
-  : Physics::BrownianWalker::BrownianWalkerStepper(a_solver)
+  : Physics::BrownianWalker::BrownianWalkerStepper(a_solver, "ParticleMergeStepper")
 {
   CH_TIME("ParticleMergeStepper::ParticleMergeStepper");
 
-  ParmParse pp("ParticleMergeStepper");
+  // Every option this stepper reads -- the ones inherited from BrownianWalkerStepper and the two added
+  // here -- lives under one prefix that matches the class, rather than splitting across two.
+  ParmParse pp(m_className.c_str());
 
   pp.get("new_particles_per_cell", m_newParticlesPerCell);
   pp.get("print_stats", m_printStats);

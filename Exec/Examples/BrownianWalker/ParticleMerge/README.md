@@ -10,8 +10,8 @@ on top of whatever survived the previous merge, and the base stepper then transp
 it back down to `ItoSolver.particles_per_cell`. Repeating that is what exposes an error that compounds,
 which is the failure mode that matters for an operator applied once per step for thousands of steps.
 
-Run it with `BrownianWalker.diffusion = false` so the only motion is the advective field. Under
-`BrownianWalker.velocity_field = constant` the population translates rigidly, which leaves it uniform and
+Run it with `ParticleMergeStepper.diffusion = false` so the only motion is the advective field. Under
+`ParticleMergeStepper.velocity_field = constant` the population translates rigidly, which leaves it uniform and
 keeps the merge the only thing acting on its shape. There is no geometry and no chemistry.
 
 The grid is two-level. `ParticleMergeTagger` refines a fixed slab, bounded in one direction and
@@ -22,7 +22,7 @@ geometry is seen on every round. That matters because a merge's sub-cell artifac
 they meet at that plane. The report is broken out per level so the two can be compared directly.
 
 Statistics are off by default. Set `ParticleMergeStepper.print_stats = true` to have the per-level report
-written to `pout` on every step, and `BrownianWalker.plot_particles = true` to write the particles
+written to `pout` on every step, and `ParticleMergeStepper.plot_particles = true` to write the particles
 themselves to H5Part (be aware that at the shipped resolution each file is order a gigabyte).
 
 ### What it reports, per level
@@ -57,8 +57,8 @@ make -s -j<num_proc> OPT=HIGH DIM=2
 mpirun -np <num_proc> main2d*.ex example2d.inputs
 ```
 
-The report is written to `pout.0`. Set `ParticleMerge.write_particles = 1` to also write the initial
-and final populations to `parts_<tag>_initial.h5part` and `parts_<tag>_final.h5part`, which can be
+The report is written to `pout.0`. Set `ParticleMergeStepper.plot_particles = true` to also write the
+particles on every plot step to `particles/<solver name>/<solver name>.step*.<dim>d.h5part`, which can be
 opened directly in a particle viewer -- the sub-cell lattice is visible by eye.
 
 Point `ItoSolver.merge_algorithm` at any of the merge algorithms to compare them. The most instructive
@@ -71,9 +71,10 @@ contrasts:
 - `ParticleMergeTagger.ref_box1_*` -- move or resize the refined slab, or set `num_ref_boxes = 0` to run
   on a single level.
 
-### A note on the location
+### A note on the option prefix
 
-This example lives under `Exec/Examples/BrownianWalker` because merging is what a Brownian-walker
-application spends its particle budget on, but it does not use `BrownianWalkerStepper` or any other
-physics module -- it drives `AmrMesh` and `ItoSolver` directly, so the only dependency is
-`discharge-lib`.
+`ParticleMergeStepper` derives from `BrownianWalkerStepper`, and hands its own class name down to the
+base class, which reads every one of its options under that prefix instead of the default
+`BrownianWalker`. An input script therefore has one prefix per class, and it is the class the
+application actually instantiates. `CD_ParticleMergeStepper.options` lists the full inherited set
+alongside the two options this class adds.

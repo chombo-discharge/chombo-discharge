@@ -26,11 +26,15 @@
 
 using namespace Physics::BrownianWalker;
 
-BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
+BrownianWalkerStepper::BrownianWalkerStepper() : BrownianWalkerStepper("BrownianWalker")
+{}
+
+BrownianWalkerStepper::BrownianWalkerStepper(const std::string& a_className)
+  : m_phase(phase::gas), m_className(a_className)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper");
 
-  ParmParse pp("BrownianWalker");
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("realm", m_realm);
@@ -72,7 +76,12 @@ BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
   }
 }
 
-BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver) : BrownianWalkerStepper()
+BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver)
+  : BrownianWalkerStepper(a_solver, "BrownianWalker")
+{}
+
+BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver, const std::string& a_className)
+  : BrownianWalkerStepper(a_className)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper(full)");
 
@@ -91,7 +100,7 @@ BrownianWalkerStepper::parseRuntimeOptions()
 {
   CH_TIME("BrownianWalkerStepper::parseRuntimeOptions");
 
-  ParmParse pp("BrownianWalker");
+  ParmParse pp(m_className.c_str());
 
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
@@ -402,7 +411,7 @@ BrownianWalkerStepper::plotParticles() const noexcept
 
   bool plotParticles = false;
 
-  ParmParse pp("BrownianWalker");
+  ParmParse pp(m_className.c_str());
 
   pp.get("plot_particles", plotParticles);
 
@@ -492,7 +501,7 @@ BrownianWalkerStepper::setupSolvers()
     pout() << "BrownianWalkerStepper::setupSolvers" << endl;
   }
 
-  m_species = RefCountedPtr<ItoSpecies>(new BrownianWalkerSpecies());
+  m_species = RefCountedPtr<ItoSpecies>(new BrownianWalkerSpecies(m_className));
 
   m_solver->setVerbosity(m_verbosity);
   m_solver->parseOptions();

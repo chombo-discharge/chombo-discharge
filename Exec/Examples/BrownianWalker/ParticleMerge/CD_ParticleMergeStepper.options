@@ -1,5 +1,36 @@
 # ====================================================================================================
 # ParticleMergeStepper class options
 # ====================================================================================================
+ParticleMergeStepper.verbosity               = -1        ## Verbosity
+ParticleMergeStepper.realm                   = primal    ## Realm
+ParticleMergeStepper.diffusion               = true      ## Turn on/off diffusion
+ParticleMergeStepper.advection               = true      ## Turn on/off advection
+ParticleMergeStepper.blob_amplitude          = 1.0       ## Blob amplitude
+ParticleMergeStepper.blob_radius             = 0.1       ## Blob radius
+ParticleMergeStepper.blob_center             = 0 0       ## Blob center
+ParticleMergeStepper.seed                    = 0         ## RNG seed
+ParticleMergeStepper.num_particles           = 100       ## Number of initial particles
+ParticleMergeStepper.cfl                     = 1.0       ## CFL-like number.
+ParticleMergeStepper.load_balance            = true      ## Turn on/off particle load balancing
+ParticleMergeStepper.which_balance           = mesh      ## Switch for load balancing method. Either 'mesh' or 'particle'.
+ParticleMergeStepper.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight
+ParticleMergeStepper.plot_particles          = false     ## Write the bulk particles to H5Part on every plot step
+
+# Velocity, diffusion, and CFL
+# ----------------------------
+ParticleMergeStepper.mobility              = 1.0           ## Mobility coefficient
+ParticleMergeStepper.diffco                = 1.0           ## Diffusion coefficient
+ParticleMergeStepper.omega                 = 1.0           ## Rotation velocity for advection field (velocity_field = rotational)
+ParticleMergeStepper.velocity_field        = rotational    ## Advective field. 'rotational' (uses omega) or 'constant' (uses constant_velocity)
+ParticleMergeStepper.constant_velocity     = 1 1 0         ## Advective field when velocity_field = constant
+
+# Cell tagging stuff
+# ------------------
+ParticleMergeStepper.refine_curv     = 0.1     ## Refine if curvature exceeds this
+ParticleMergeStepper.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
+ParticleMergeStepper.buffer          = 0       ## Grow tagged cells
+
+# Particle seeding and reporting
+# ------------------------------
 ParticleMergeStepper.new_particles_per_cell     = 32       ## Particles seeded per cell before every advance
-ParticleMergeStepper.print_stats                = false    ## Print merge statistics to pout on every step
+ParticleMergeStepper.print_stats                = false    ## Print per-level merge statistics to pout every step

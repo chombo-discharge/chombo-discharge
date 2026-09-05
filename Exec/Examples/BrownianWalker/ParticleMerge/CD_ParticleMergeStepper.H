@@ -30,7 +30,10 @@
  * once per step for thousands of steps. The same population is also what initialData() lays down, so
  * the particle time step is bounded from the first step.
  *
- * Run it with BrownianWalker.diffusion = false so the only motion is the advective field. Under a
+ * Every option is read under the ParticleMergeStepper prefix, including the ones inherited from
+ * BrownianWalkerStepper, so the stepper has one prefix and it matches the class name.
+ *
+ * Run it with ParticleMergeStepper.diffusion = false so the only motion is the advective field. Under a
  * constant velocity the population then translates rigidly, which leaves it uniform and keeps the merge
  * the only thing acting on it.
  */
