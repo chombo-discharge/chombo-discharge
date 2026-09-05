@@ -198,6 +198,10 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in] a_placement Where each leaf's merged particle is placed -- see detail::kdPlaceMerged().
  * A leaf here is not snapped to the grid, so any placement (the centroid included) may put the
  * particle in a different cell from the one the per-cell leaf quota counted it in.
+ * @param[in] a_capWeights Divide every resident particle in a crowded cell that is heavier than that
+ * cell's target leaf weight into pieces before the tree is built. This build may not divide a particle
+ * mid-tree, so without it a heavy particle sets an unremovable floor on the leaf it lands in.
+ * @param[in] a_splitPlacement Where each split piece goes -- see ParticleManagement::KDSplitPlacement.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -220,6 +224,8 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              const int                     a_ppc,
              const Real                    a_weightMedianCellWidths,
              const KDPlacement             a_placement,
+             const bool                    a_capWeights,
+             const KDSplitPlacement        a_splitPlacement,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -261,6 +267,10 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
  * @param[in] a_placement Where each leaf's merged particle is placed -- see detail::kdPlaceMerged().
  * A leaf here is not snapped to the grid, so any placement (the centroid included) may put the
  * particle in a different cell from the one the per-cell leaf quota counted it in.
+ * @param[in] a_capWeights Divide every resident particle in a crowded cell that is heavier than that
+ * cell's target leaf weight into pieces before the tree is built. This build may not divide a particle
+ * mid-tree, so without it a heavy particle sets an unremovable floor on the leaf it lands in.
+ * @param[in] a_splitPlacement Where each split piece goes -- see ParticleManagement::KDSplitPlacement.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -283,6 +293,8 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              const int                     a_ppc,
              const Real                    a_weightMedianCellWidths,
              const KDPlacement             a_placement,
+             const bool                    a_capWeights,
+             const KDSplitPlacement        a_splitPlacement,
              const Gather&                 a_gather,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
@@ -332,6 +344,10 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
  * @param[in] a_placement Where each leaf's merged particle is placed -- see detail::kdPlaceMerged().
  * A leaf here is not snapped to the grid, so any placement (the centroid included) may put the
  * particle in a different cell from the one the per-cell leaf quota counted it in.
+ * @param[in] a_capWeights Divide every resident particle in a crowded cell that is heavier than that
+ * cell's target leaf weight into pieces before the tree is built. This build may not divide a particle
+ * mid-tree, so without it a heavy particle sets an unremovable floor on the leaf it lands in.
+ * @param[in] a_splitPlacement Where each split piece goes -- see ParticleManagement::KDSplitPlacement.
  * @param[in] a_gather Per-slot gather callback.
  * @param[in] a_combine N-ary opaque-payload combine callback.
  * @param[in] a_scatter Per-merged-particle scatter callback.
@@ -355,6 +371,8 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 const int                     a_ppc,
                 const Real                    a_weightMedianCellWidths,
                 const KDPlacement             a_placement,
+                const bool                    a_capWeights,
+                const KDSplitPlacement        a_splitPlacement,
                 const Gather&                 a_gather,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,

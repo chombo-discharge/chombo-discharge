@@ -845,7 +845,7 @@ Reinitialization (``reinitialize``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 315-319
+   :lines: 355-359
 
 The returned functor proceeds as follows:
 
@@ -931,6 +931,7 @@ The maximum extent of a mergeable group is fixed at one cell width rather than e
 One option applies to both algorithms:
 
 * ``ItoSolver.kd_partition`` -- the split rule, given as the group size at or below which the split plane switches from the count median to the weight median. ``weight`` and ``count`` are the two limits of that rule; ``hybrid`` puts the crossover at ``ItoSolver.kd_hybrid_leaf_dx`` cell widths.
+* ``ItoSolver.split_placement`` -- where the pieces of a split particle go: at the parent (``center``), jittered by the local interparticle spacing (``jitter``), or uniformly in the owning cell (``cell``). ``center`` leaves the pieces co-located, which costs distinct positions without costing weight uniformity.
 * ``ItoSolver.kd_placement`` -- where each group's merged particle is placed: at the group's weighted ``centroid``, at a weight-proportional ``sample`` of its own members, or at a ``random`` point in its bounding box. Because these groups are not snapped to the grid, any of the three (the centroid included) may put the particle in a different cell from the one the per-cell quota counted the group in.
 
 .. _kd-tree-carve-merging:

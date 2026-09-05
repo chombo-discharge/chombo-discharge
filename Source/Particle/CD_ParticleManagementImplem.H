@@ -125,9 +125,12 @@ kdPartitionFromString(const std::string& a_str) noexcept
   else if (a_str == "hybrid") {
     return KDPartition::Hybrid;
   }
+  else if (a_str == "weight_capped") {
+    return KDPartition::WeightCapped;
+  }
   else {
     const std::string msg = "ParticleManagement::kdPartitionFromString - unknown partition '" + a_str +
-                            "' (expected 'weight', 'count' or 'hybrid')";
+                            "' (expected 'weight', 'count', 'hybrid' or 'weight_capped')";
     MayDay::Abort(msg.c_str());
   }
 
@@ -153,6 +156,27 @@ kdPlacementFromString(const std::string& a_str) noexcept
   }
 
   return KDPlacement::Centroid;
+}
+
+inline KDSplitPlacement
+kdSplitPlacementFromString(const std::string& a_str) noexcept
+{
+  if (a_str == "center") {
+    return KDSplitPlacement::Center;
+  }
+  else if (a_str == "jitter") {
+    return KDSplitPlacement::Jitter;
+  }
+  else if (a_str == "cell") {
+    return KDSplitPlacement::Cell;
+  }
+  else {
+    const std::string msg = "ParticleManagement::kdSplitPlacementFromString - unknown split placement '" + a_str +
+                            "' (expected 'center', 'jitter' or 'cell')";
+    MayDay::Abort(msg.c_str());
+  }
+
+  return KDSplitPlacement::Center;
 }
 
 inline KDAmrBoundary
@@ -196,13 +220,65 @@ nnSearchFromString(const std::string& a_str) noexcept
 
 namespace detail {
 
+/**
+ * @brief Place one piece of a split particle.
+ * @details Shared by the per-cell and whole-patch builds so both spread split pieces the same way.
+ *
+ * The jitter kernel is TRUNCATED to the cell, not clamped and not reflected. Clamping stacks every
+ * out-of-range draw onto the wall. Reflecting folds the overhanging part of the kernel back on top of the
+ * part that stayed, doubling the density within half a bandwidth of each wall -- and since the fold is
+ * per-direction, a parent near a corner is folded once per direction and the corner gets 2^D times the
+ * density it should. Truncation is the correct conditional distribution: draw uniformly from the part of
+ * the kernel that lies inside the cell. Its only cost is a mild inward bias for parents within half a
+ * bandwidth of a wall, which is second order in the bandwidth and has no directional structure.
+ * @param[in] a_placement Which rule to apply. Center returns the parent's position unchanged.
+ * @param[in] a_parent    The parent particle's position.
+ * @param[in] a_cellLo    Low corner of the cell the parent lives in.
+ * @param[in] a_dx        Cell spacing, per direction.
+ * @param[in] a_spacing   Jitter bandwidth -- the local mean interparticle spacing.
+ * @return The piece's position, always inside the parent's cell.
+ */
+inline RealVect
+kdSplitDisplace(const KDSplitPlacement a_placement,
+                const RealVect&        a_parent,
+                const RealVect&        a_cellLo,
+                const RealVect&        a_dx,
+                const Real             a_spacing) noexcept
+{
+  if (a_placement == KDSplitPlacement::Center) {
+    return a_parent;
+  }
+
+  RealVect x;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const Real cellLo = a_cellLo[dir];
+    const Real cellHi = cellLo + a_dx[dir] * (1.0 - 1.0e-12);
+
+    Real lo = cellLo;
+    Real hi = cellHi;
+
+    if (a_placement == KDSplitPlacement::Jitter) {
+      // Truncate the kernel to the cell rather than folding it back in -- see the details above.
+      lo = std::max(cellLo, a_parent[dir] - 0.5 * a_spacing);
+      hi = std::min(cellHi, a_parent[dir] + 0.5 * a_spacing);
+    }
+
+    x[dir] = (hi > lo) ? (lo + (hi - lo) * Random::getUniformReal01()) : lo;
+  }
+
+  return x;
+}
+
 template <class P, Real P::*weight, RealVect P::*position>
 inline void
-buildKDCellLeaves(const std::vector<P>&                       a_particles,
-                  const int                                   a_maxLeaves,
-                  const Real                                  a_weightMedianLength,
-                  const BinaryParticleReconcile<P>&           a_particleReconcile,
-                  std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept
+buildKDCellLeaves(const std::vector<P>&                           a_particles,
+                  const int                                       a_maxLeaves,
+                  const Real                                      a_weightMedianLength,
+                  const bool                                      a_capWeights,
+                  const std::function<RealVect(const RealVect&)>& a_splitPosition,
+                  const BinaryParticleReconcile<P>&               a_particleReconcile,
+                  std::vector<std::pair<const P*, const P*>>&     a_leaves) noexcept
 {
   CH_TIME("ParticleManagement::buildKDCellLeaves");
 
@@ -234,9 +310,10 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
   const std::size_t maxLeaves   = static_cast<std::size_t>(a_maxLeaves);
 
   // Seed the root level. Reserve room for split products: the median split adds at most one particle per
-  // internal node, i.e. fewer than maxLeaves extra particles over the whole build.
+  // internal node, i.e. fewer than maxLeaves extra particles over the whole build. The optional weight
+  // cap below adds at most maxLeaves more, since every piece it makes carries at least the cap.
   s_cur.clear();
-  s_cur.reserve(numInput + maxLeaves);
+  s_cur.reserve(numInput + 2 * maxLeaves);
   s_cur.insert(s_cur.end(), a_particles.begin(), a_particles.end());
 
   // Total weight, read from the working copy.
@@ -245,8 +322,46 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
     W += p.*weight;
   }
 
+  // Optional weight cap. A particle heavier than a leaf's target weight cannot be equalized away by any
+  // partition -- it alone sets a floor on the leaf it lands in -- so divide it into co-located integer
+  // pieces first. The division is exactly conservative and moves no mass, so unlike a median split it
+  // cannot perturb sub-cell position; it only removes the floor. Bounded growth: every piece carries at
+  // least one cap's worth of weight, so at most maxLeaves pieces are ever created.
+  if (a_capWeights && a_maxLeaves > 1) {
+    const long long cap = std::max(1LL, static_cast<long long>(std::ceil(W / static_cast<Real>(a_maxLeaves))));
+
+    const std::size_t numOriginal = s_cur.size();
+
+    for (std::size_t i = 0; i < numOriginal; i++) {
+      const long long w = static_cast<long long>(std::llround(s_cur[i].*weight));
+
+      if (w > cap) {
+        // Integer pieces, each no heavier than the cap, summing exactly to w.
+        const long long              numPieces = (w + cap - 1) / cap;
+        const std::vector<long long> pieces    = partitionParticleWeights<long long>(w, numPieces);
+
+        if (!pieces.empty()) {
+          const P parent = s_cur[i];
+
+          s_cur[i].*weight = static_cast<Real>(pieces[0]);
+
+          for (std::size_t k = 1; k < pieces.size(); k++) {
+            P daughter         = parent;
+            daughter.*weight   = static_cast<Real>(pieces[k]);
+            daughter.*position = a_splitPosition(parent.*position);
+
+            // Same contract as the median split: the caller fixes up the non-weight members.
+            a_particleReconcile(s_cur[i], daughter, parent);
+
+            s_cur.push_back(std::move(daughter));
+          }
+        }
+      }
+    }
+  }
+
   s_curNodes.clear();
-  s_curNodes.push_back({static_cast<std::size_t>(0), numInput, W});
+  s_curNodes.push_back({static_cast<std::size_t>(0), s_cur.size(), W});
 
   // Breadth-first: split every splittable leaf of the current level, streaming the children contiguously
   // into the next buffer, until we reach maxLeaves leaves or nothing can be split further.
@@ -380,6 +495,9 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
             extraL = med;
             extraR = med;
 
+            extraL.*position = a_splitPosition(med.*position);
+            extraR.*position = a_splitPosition(med.*position);
+
             CH_assert(dwl >= 1.0);
             CH_assert(dwr >= 1.0);
 
@@ -395,14 +513,16 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
             hasExtraR = true;
           }
           else if (dwl > 0.0 && dwr == 0.0) {
-            extraL = med;
+            extraL           = med;
+            extraL.*position = a_splitPosition(med.*position);
             CH_assert(dwl >= 1.0);
             wl += dwl;
             extraL.*weight = dwl;
             hasExtraL      = true;
           }
           else if (dwl == 0.0 && dwr > 0.0) {
-            extraR = med;
+            extraR           = med;
+            extraR.*position = a_splitPosition(med.*position);
             CH_assert(dwr >= 1.0);
             wr += dwr;
             extraR.*weight = dwr;
@@ -474,6 +594,9 @@ template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition
 inline ParticleMerger<P, Traits>
 makeKDCellMerger(
   const Real                                                                                  a_weightMedianCellWidths,
+  const bool                                                                                  a_capWeights,
+  const KDSplitPlacement                                                                      a_splitPlacement,
+  std::function<RealVect()>                                                                   a_probLo,
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
   BinaryParticleReconcile<Packed>                                                             a_reconcile,
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept
@@ -503,6 +626,24 @@ makeKDCellMerger(
       return;
     }
 
+    // Where a split particle's pieces go. Center is the identity, so the default costs nothing. In a cut
+    // cell every rule falls back to Center: a displaced piece could otherwise land inside the boundary.
+    const Real     dxCell  = a_cellInfo.getDx();
+    const RealVect cellLo  = a_probLo() + dxCell * RealVect(a_cellInfo.getGridIndex());
+    const bool     regular = a_cellInfo.getVolFrac() >= 1.0;
+
+    // Local mean interparticle spacing -- the finest scale this cell's population can resolve, and so the
+    // natural jitter bandwidth. No free parameter.
+    const Real spacing = dxCell / std::pow(static_cast<Real>(std::max(1, a_ppc)), 1.0 / SpaceDim);
+
+    const std::function<RealVect(const RealVect&)> splitPosition = [=](const RealVect& a_parent) -> RealVect {
+      if (!regular || a_splitPlacement == KDSplitPlacement::Center) {
+        return a_parent;
+      }
+
+      return detail::kdSplitDisplace(a_splitPlacement, a_parent, cellLo, dxCell * RealVect::Unit, spacing);
+    };
+
     CH_START(t2);
     thread_local std::vector<std::pair<const Packed*, const Packed*>> leaves;
 
@@ -510,6 +651,8 @@ makeKDCellMerger(
     detail::buildKDCellLeaves<Packed, packWeight, packPosition>(particles,
                                                                 a_ppc,
                                                                 a_weightMedianCellWidths * a_cellInfo.getDx(),
+                                                                a_capWeights,
+                                                                splitPosition,
                                                                 a_reconcile,
                                                                 leaves);
     CH_STOP(t2);

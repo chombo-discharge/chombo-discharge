@@ -453,12 +453,15 @@ ItoSolver::parseParticleMerger()
   std::string kdPartition;
   std::string kdPlacement;
   std::string kdAmrBoundary;
+  std::string kdSplitPlacement;
   pp.get("kd_partition", kdPartition);
   pp.get("kd_placement", kdPlacement);
   pp.get("kd_amr_boundary", kdAmrBoundary);
-  m_kdPartition   = ParticleManagement::kdPartitionFromString(kdPartition);
-  m_kdPlacement   = ParticleManagement::kdPlacementFromString(kdPlacement);
-  m_kdAmrBoundary = ParticleManagement::kdAmrBoundaryFromString(kdAmrBoundary);
+  pp.get("split_placement", kdSplitPlacement);
+  m_kdPartition      = ParticleManagement::kdPartitionFromString(kdPartition);
+  m_kdPlacement      = ParticleManagement::kdPlacementFromString(kdPlacement);
+  m_kdAmrBoundary    = ParticleManagement::kdAmrBoundaryFromString(kdAmrBoundary);
+  m_kdSplitPlacement = ParticleManagement::kdSplitPlacementFromString(kdSplitPlacement);
 
   pp.get("kd_hybrid_leaf_dx", m_kdHybridLeafDx);
 
@@ -3864,7 +3867,8 @@ ItoSolver::kdWeightMedianCellWidths() const noexcept
   // limits are expressed as sizes no node can be above or below rather than as special cases in the
   // builds, so a build has one comparison and no rule enum to switch on.
   switch (m_kdPartition) {
-  case ParticleManagement::KDPartition::Weight: {
+  case ParticleManagement::KDPartition::Weight:
+  case ParticleManagement::KDPartition::WeightCapped: {
     return std::numeric_limits<Real>::max();
   }
   case ParticleManagement::KDPartition::Count: {
@@ -4000,6 +4004,11 @@ ItoSolver::mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const V
   const ParticleManagement::ParticleMerger<ItoMergeParticle>
     merger = ParticleManagement::makeKDCellMerger<PType, &PType::weight, &PType::position>(
       this->kdWeightMedianCellWidths(),
+      m_kdPartition == ParticleManagement::KDPartition::WeightCapped,
+      m_kdSplitPlacement,
+      [&]() -> RealVect {
+        return m_amr->getProbLo();
+      },
       gather,
       reconcile,
       scatterLeaf);
@@ -4719,6 +4728,9 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
                                                               numParticlesPerCellThresh,
                                                               this->kdWeightMedianCellWidths(),
                                                               m_kdPlacement,
+                                                              m_kdPartition ==
+                                                                ParticleManagement::KDPartition::WeightCapped,
+                                                              m_kdSplitPlacement,
                                                               gather,
                                                               kdCombine,
                                                               kdScatter,
@@ -4957,6 +4969,9 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                                                              a_numParticlesPerCellThresh,
                                                              this->kdWeightMedianCellWidths(),
                                                              m_kdPlacement,
+                                                             m_kdPartition ==
+                                                               ParticleManagement::KDPartition::WeightCapped,
+                                                             m_kdSplitPlacement,
                                                              gather,
                                                              combine,
                                                              scatter,
@@ -4971,6 +4986,9 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                                                              a_numParticlesPerCellThresh,
                                                              this->kdWeightMedianCellWidths(),
                                                              m_kdPlacement,
+                                                             m_kdPartition ==
+                                                               ParticleManagement::KDPartition::WeightCapped,
+                                                             m_kdSplitPlacement,
                                                              gather,
                                                              combine,
                                                              scatter,

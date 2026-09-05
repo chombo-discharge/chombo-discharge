@@ -73,9 +73,10 @@ ItoSolver.verbosity                 = -1              ## Class verbosity
 ItoSolver.particles_per_cell        = 32              ## Target computational particles per cell (one value, or one per level)
 ItoSolver.merge_method              = reinitialize    ## Merge scope. One of 'kd_cell', 'kd_patch', 'kd_amr', 'nn_amr', 'reinitialize', 'none', or 'external'
 ItoSolver.regrid_superparticles     = solver          ## Merge run during regrids: 'solver' (use merge_method), 'none', or any merge_method selector
-ItoSolver.kd_partition              = weight          ## kd_cell/kd_patch/kd_amr: split rule. 'weight', 'count', or 'hybrid'
+ItoSolver.kd_partition              = weight          ## kd_cell/kd_patch/kd_amr: split rule. 'weight', 'count', 'hybrid', or 'weight_capped'
 ItoSolver.kd_hybrid_leaf_dx         = 1.0             ## kd_partition = hybrid: crossover node size, in cell widths
 ItoSolver.kd_placement              = centroid        ## kd_cell/kd_patch/kd_amr: leaf placement. 'centroid', 'sample', or 'random'
+ItoSolver.split_placement           = center          ## kd_*: where a split particle's pieces go. 'center', 'jitter', or 'cell'
 ItoSolver.kd_amr_boundary           = carve           ## kd_amr: boundary tier. 'carve' or 'nn'
 ItoSolver.nn_search                 = tree            ## nn_amr: neighbour search. 'tree', 'hash', or 'onecell'
 ItoSolver.nn_iterate                = true            ## nn_amr/kd_amr_boundary = nn: iterate the local tier within each round

@@ -1293,6 +1293,14 @@ protected:
   ParticleManagement::KDPlacement m_kdPlacement = ParticleManagement::KDPlacement::Centroid;
 
   /**
+   * @brief Where the pieces of a split particle are placed.
+   * @details ItoSolver.split_placement. 'center' reproduces the parent's position, which keeps the
+   * merge from moving any mass but leaves the pieces indistinguishable; 'jitter' and 'cell' spread them
+   * so a cell's particle count and its DISTINCT-position count do not diverge.
+   */
+  ParticleManagement::KDSplitPlacement m_kdSplitPlacement = ParticleManagement::KDSplitPlacement::Center;
+
+  /**
    * @brief kd_amr: how leaves that touch a patch or rank boundary are resolved.
    * @details ItoSolver.kd_amr_boundary. Selects between mergeKDImpl() (carve) and mergeKDSkinNn() (nn).
    */

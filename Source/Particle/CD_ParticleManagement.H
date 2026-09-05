@@ -46,9 +46,26 @@ namespace ParticleManagement {
  */
 enum class KDPartition
 {
-  Weight, ///< Split at the weight median at every node; halves carry near-equal weight.
-  Count,  ///< Split at the count median at every node; halves hold near-equal particle counts.
-  Hybrid  ///< Count median while the node is wider than the crossover length, weight median below it.
+  Weight,      ///< Split at the weight median at every node; halves carry near-equal weight.
+  Count,       ///< Split at the count median at every node; halves hold near-equal particle counts.
+  Hybrid,      ///< Count median while the node is wider than the crossover length, weight median below it.
+  WeightCapped ///< PROTOTYPE. Cap every particle at the target leaf weight, then split at the weight median.
+};
+
+/**
+ * @brief Where the pieces of a split particle go.
+ * @details A split divides one particle's weight among several pieces. Putting every piece at the
+ * parent's position perturbs nothing spatially, but it manufactures duplicate positions: the pieces are
+ * indistinguishable, and a placement that inherits member positions reproduces them, so the number of
+ * DISTINCT positions a cell holds falls below its particle count. That loss is invisible in the weight
+ * statistics -- the weights stay perfectly uniform -- while the cell's effective spatial sampling
+ * degrades. Displacing the pieces restores it, at the cost of moving mass a little.
+ */
+enum class KDSplitPlacement
+{
+  Center, ///< Every piece at the parent's position. No spatial perturbation, duplicate positions.
+  Jitter, ///< Each piece drawn from the local mean interparticle spacing around the parent, truncated to the cell.
+  Cell    ///< Each piece drawn uniformly in the owning cell.
 };
 
 /**
@@ -126,7 +143,7 @@ mergeMethodFromString(const std::string& a_str) noexcept;
 
 /**
  * @brief Turn an input string into a kd partition rule.
- * @details Valid inputs are 'weight', 'count' and 'hybrid'.
+ * @details Valid inputs are 'weight', 'count', 'hybrid' and 'weight_capped'.
  * @param[in] a_str Input string.
  * @return The corresponding KDPartition.
  */
@@ -141,6 +158,15 @@ kdPartitionFromString(const std::string& a_str) noexcept;
  */
 inline KDPlacement
 kdPlacementFromString(const std::string& a_str) noexcept;
+
+/**
+ * @brief Turn an input string into a split placement rule.
+ * @details Valid inputs are 'center', 'jitter' and 'cell'.
+ * @param[in] a_str Input string.
+ * @return The corresponding KDSplitPlacement.
+ */
+inline KDSplitPlacement
+kdSplitPlacementFromString(const std::string& a_str) noexcept;
 
 /**
  * @brief Turn an input string into a kd AMR boundary rule.
@@ -219,6 +245,12 @@ namespace detail {
  * @param[in]  a_weightMedianLength Node size, as a length, at or below which the split plane is the weight
  *                                  median rather than the count median. Negative disables the weight
  *                                  median entirely; a huge value selects it everywhere.
+ * @param[in]  a_capWeights        If true, divide every input particle heavier than the target leaf
+ *                                  weight (total weight / @a a_maxLeaves) into co-located integer pieces
+ *                                  before partitioning, so no single particle can dominate a leaf.
+ * @param[in]  a_splitPosition     Where a split particle's pieces go, given the parent's position. The
+ *                                  identity reproduces the parent's position exactly; see
+ *                                  KDSplitPlacement for why that is not always what you want.
  * @param[in]  a_particleReconcile Reconciliation callback applied to the two daughters when the median is split.
  * @param[out] a_leaves            Filled with one {begin,end} pointer pair per leaf.
  * @warning The returned ranges alias an internal thread-local buffer that is overwritten on the next call to
@@ -226,11 +258,13 @@ namespace detail {
  */
 template <class P, Real P::*weight, RealVect P::*position>
 inline void
-buildKDCellLeaves(const std::vector<P>&                       a_particles,
-                  const int                                   a_maxLeaves,
-                  const Real                                  a_weightMedianLength,
-                  const BinaryParticleReconcile<P>&           a_particleReconcile,
-                  std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
+buildKDCellLeaves(const std::vector<P>&                           a_particles,
+                  const int                                       a_maxLeaves,
+                  const Real                                      a_weightMedianLength,
+                  const bool                                      a_capWeights,
+                  const std::function<RealVect(const RealVect&)>& a_splitPosition,
+                  const BinaryParticleReconcile<P>&               a_particleReconcile,
+                  std::vector<std::pair<const P*, const P*>>&     a_leaves) noexcept;
 
 } // namespace detail
 
@@ -263,6 +297,9 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
  * @tparam Traits       Column descriptor for @c P (defaults to ParticleTraits<P>).
  * @param[in] a_weightMedianCellWidths Node size, in cell widths, at or below which the split plane is the
  *                                    weight median rather than the count median. See KDPartition.
+ * @param[in] a_capWeights            Cap each particle at the target leaf weight before partitioning.
+ * @param[in] a_splitPlacement        Where the pieces of a split particle go. See KDSplitPlacement.
+ * @param[in] a_probLo                Lazy supplier of the domain lower-left corner.
  * @param[in] a_gather      Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
  * @param[in] a_reconcile   Daughter reconciliation: `(Packed& p1, Packed& p2, const Packed& p0) -> void`.
  * @param[in] a_scatterLeaf Leaf reducer: `(ParticleSoA<P,Traits>&, const Packed* first,
@@ -278,6 +315,9 @@ template <class Packed,
 inline ParticleMerger<P, Traits>
 makeKDCellMerger(
   const Real                                                                                  a_weightMedianCellWidths,
+  const bool                                                                                  a_capWeights,
+  const KDSplitPlacement                                                                      a_splitPlacement,
+  std::function<RealVect()>                                                                   a_probLo,
   std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)>                           a_gather,
   BinaryParticleReconcile<Packed>                                                             a_reconcile,
   std::function<void(ParticleSoA<P, Traits>&, const Packed*, const Packed*, const CellInfo&)> a_scatterLeaf) noexcept;

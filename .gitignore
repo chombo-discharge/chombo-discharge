@@ -63,3 +63,8 @@ Dev/
 
 # Serena tooling (local; not project code)
 .serena/
+
+# Editor lock/autosave files (Emacs)
+.\#*
+\#*\#
+*~
