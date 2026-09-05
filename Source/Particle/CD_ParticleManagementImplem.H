@@ -28,7 +28,6 @@
 // Our includes
 #include <CD_Random.H>
 #include <CD_ParticleLoops.H>
-#include <CD_LoadBalancing.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
@@ -59,7 +58,12 @@ mergeMethodFromString(const std::string& a_str) noexcept
     return ParticleMergeMethod::KdCell;
   }
   else if (a_str == "nn_sfc") {
-    return ParticleMergeMethod::NnSfc;
+    // Removed: a Hilbert sort followed by repeated nearest-adjacent-pair merging inside one cell. It
+    // was strictly worse than the per-cell kd merge on every axis that was measured, so it is gone
+    // rather than deprecated.
+    MayDay::Abort("ParticleManagement::mergeMethodFromString - 'nn_sfc' has been removed; use 'kd_cell'");
+
+    return ParticleMergeMethod::None;
   }
   else if (a_str == "nn_pair_tree") {
     return ParticleMergeMethod::NnPairTree;
@@ -395,249 +399,7 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
   }
 }
 
-template <class P, RealVect P::*position>
-inline void
-mergeAdjacentNearest(std::vector<P>&                          a_particles,
-                     const std::size_t                        a_target,
-                     const std::function<void(P&, const P&)>& a_combine) noexcept
-{
-  CH_TIME("ParticleManagement::mergeAdjacentNearest");
-
-  const std::size_t n = a_particles.size();
-  if (a_target == 0 || n <= a_target) {
-    return;
-  }
-
-  auto dist2 = [&a_particles](const std::size_t i, const std::size_t j) -> Real {
-    const RealVect& pi = a_particles[i].*position;
-    const RealVect& pj = a_particles[j].*position;
-
-    Real s = 0.0;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      const Real dd = pi[d] - pj[d];
-
-      s += dd * dd;
-    }
-
-    return s;
-  };
-
-  // Index-based doubly-linked chain over the (spatially-ordered) list + liveness + version tags. No
-  // pointers and no per-call allocation after warmup.
-  thread_local std::vector<int>      prev, next;
-  thread_local std::vector<uint8_t>  alive;
-  thread_local std::vector<uint32_t> ver;
-
-  prev.assign(n, -1);
-  next.assign(n, -1);
-  alive.assign(n, 1);
-  ver.assign(n, 0);
-
-  for (std::size_t i = 0; i < n; i++) {
-    prev[i] = (i == 0) ? -1 : static_cast<int>(i - 1);
-    next[i] = (i + 1 == n) ? -1 : static_cast<int>(i + 1);
-  }
-
-  struct Edge
-  {
-    Real     d;
-    int      a;
-    int      b;
-    uint32_t va;
-    uint32_t vb;
-  };
-
-  const auto cmp = [](const Edge& x, const Edge& y) {
-    return x.d > y.d;
-  }; // min-heap
-
-  thread_local std::vector<Edge> heap;
-
-  heap.clear();
-
-  for (std::size_t i = 0; i + 1 < n; i++) {
-    heap.push_back({dist2(i, i + 1), static_cast<int>(i), static_cast<int>(i + 1), 0, 0});
-  }
-
-  std::make_heap(heap.begin(), heap.end(), cmp);
-
-  std::size_t count = n;
-  while (count > a_target && !heap.empty()) {
-    std::pop_heap(heap.begin(), heap.end(), cmp);
-    const Edge edge = heap.back();
-    heap.pop_back();
-
-    const int a = edge.a;
-    const int b = edge.b;
-
-    if (!alive[a] || !alive[b] || ver[a] != edge.va || ver[b] != edge.vb || next[a] != b) {
-      continue; // stale entry
-    }
-
-    // Combine b into a; a's centroid (and one neighbour) changes, so bump a's version.
-    a_combine(a_particles[a], a_particles[b]);
-    alive[b]     = 0;
-    const int nb = next[b];
-    next[a]      = nb;
-    if (nb >= 0) {
-      prev[nb] = a;
-    }
-
-    count--;
-    ver[a]++;
-
-    if (prev[a] >= 0) {
-      heap.push_back(
-        {dist2(static_cast<std::size_t>(prev[a]), static_cast<std::size_t>(a)), prev[a], a, ver[prev[a]], ver[a]});
-      std::push_heap(heap.begin(), heap.end(), cmp);
-    }
-    if (next[a] >= 0) {
-      heap.push_back(
-        {dist2(static_cast<std::size_t>(a), static_cast<std::size_t>(next[a])), a, next[a], ver[a], ver[next[a]]});
-      std::push_heap(heap.begin(), heap.end(), cmp);
-    }
-  }
-
-  // Compact the survivors back into a_particles (preserving chain order).
-  thread_local std::vector<P> survivors;
-
-  survivors.clear();
-  survivors.reserve(count);
-
-  for (std::size_t i = 0; i < n; i++) {
-    if (alive[i]) {
-      survivors.push_back(a_particles[i]);
-    }
-  }
-
-  a_particles.swap(survivors);
-}
-
 } // namespace detail
-
-template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition, class P, class Traits>
-inline ParticleMerger<P, Traits>
-makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
-                             std::function<void(Packed&, const Packed&)>                       a_combine,
-                             std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept
-{
-  return [=](ParticleSoA<P, Traits>& a_particles, const CellInfo& /*a_cellInfo*/, int a_ppc) noexcept {
-    CH_TIMERS("ParticleManagement::makeSfcNearestNeighborMerger");
-    CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::populate", t1);
-    CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::sort_merge", t2);
-    CH_TIMER("ParticleManagement::makeSfcNearestNeighborMerger::emit", t3);
-
-    CH_START(t1);
-    thread_local std::vector<Packed> particles;
-
-    particles.clear();
-    particles.reserve(a_particles.size());
-
-    Real W = 0.0;
-
-    for (std::size_t i = 0; i < a_particles.size(); i++) {
-      Packed p = a_gather(a_particles, i);
-      W += p.*packWeight;
-      particles.emplace_back(std::move(p));
-    }
-    CH_STOP(t1);
-
-    if (W < 2.0 || a_ppc <= 0) {
-      return;
-    }
-
-    const std::size_t target = static_cast<std::size_t>(a_ppc);
-
-    CH_START(t2);
-    if (particles.size() > target) {
-      RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
-      RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
-
-      for (const Packed& p : particles) {
-        const RealVect& x = p.*packPosition;
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          loCorner[dir] = std::min(loCorner[dir], x[dir]);
-          hiCorner[dir] = std::max(hiCorner[dir], x[dir]);
-        }
-      }
-
-      RealVect invExtent = RealVect::Zero;
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        invExtent[dir] = (hiCorner[dir] > loCorner[dir]) ? 1.0 / (hiCorner[dir] - loCorner[dir]) : 0.0;
-      }
-
-      constexpr uint32_t                                         maxCoord = (1U << 21) - 1U;
-      thread_local std::vector<std::pair<uint64_t, std::size_t>> keyed;
-
-      keyed.clear();
-      keyed.reserve(particles.size());
-
-      for (std::size_t i = 0; i < particles.size(); i++) {
-        const RealVect& x = particles[i].*packPosition;
-
-        std::array<uint32_t, SpaceDim> coords;
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          Real t      = (x[dir] - loCorner[dir]) * invExtent[dir];
-          t           = std::max(0.0, std::min(1.0, t));
-          coords[dir] = static_cast<uint32_t>(t * maxCoord);
-        }
-
-        keyed.emplace_back(LoadBalancing::hilbertIndex<SpaceDim>(coords), i);
-      }
-
-      std::sort(keyed.begin(), keyed.end(), [](const auto& a, const auto& b) {
-        return a.first < b.first;
-      });
-
-      thread_local std::vector<Packed> sorted;
-
-      sorted.clear();
-      sorted.reserve(particles.size());
-
-      for (const auto& k : keyed) {
-        sorted.push_back(particles[k.second]);
-      }
-      particles.swap(sorted);
-
-      detail::mergeAdjacentNearest<Packed, packPosition>(particles, target, a_combine);
-    }
-    else if (particles.size() < target) {
-      while (particles.size() < target) {
-        std::size_t hi = 0;
-
-        for (std::size_t i = 1; i < particles.size(); i++) {
-          if (particles[i].*packWeight > particles[hi].*packWeight) {
-            hi = i;
-          }
-        }
-
-        if (particles[hi].*packWeight < 2.0) {
-          break;
-        }
-
-        // Use floor/ceil rather than *= 0.5 so that integer weights remain integers after
-        // the split. weight * 0.5 on an odd integer (e.g. 3 -> 1.5) produces a fractional
-        // weight that later breaks removePhysicalParticles, which assumes integer weights.
-        const Real hw   = std::floor(particles[hi].*packWeight * 0.5);
-        Packed     half = particles[hi];
-        particles[hi].*packWeight -= hw;
-        half.*packWeight = hw;
-        particles.push_back(half);
-      }
-    }
-    CH_STOP(t2);
-
-    CH_START(t3);
-    a_particles.clear();
-    for (const Packed& p : particles) {
-      a_scatter(a_particles, p);
-    }
-    CH_STOP(t3);
-  };
-}
 
 template <class Packed, Real Packed::*packWeight, RealVect Packed::*packPosition, class P, class Traits>
 inline ParticleMerger<P, Traits>

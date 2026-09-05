@@ -70,7 +70,6 @@ enum class ParticleMergeMethod
   None,          ///< No merging.
   KdCell,        ///< Cell: makeKDCellMerger. Partition and placement are chosen independently.
   Reinitialize,  ///< Cell: makeReinitializeMerger.
-  NnSfc,         ///< Cell: makeSfcNearestNeighborMerger.
   NnPairTree,    ///< AMR: mergeNearestNeighborsTree (whole-patch PointCloudBVH search).
   NnPairOneCell, ///< AMR: mergeNearestNeighborsOneCell (per-cell PointCloudBVH search, Chebyshev distance 1 only).
   NnPairHash,    ///< AMR: mergeNearestNeighborsHash (whole-patch PointCloudHashGrid search).
@@ -86,7 +85,6 @@ enum class ParticleMergeMethod
  * 'none' -> None
  * 'kd_cell' -> KdCell
  * 'reinitialize' -> Reinitialize
- * 'nn_sfc' -> NnSfc
  * 'nn_pair_tree' -> NnPairTree
  * 'nn_pair_onecell' -> NnPairOneCell
  * 'nn_pair_hash' -> NnPairHash
@@ -185,72 +183,7 @@ buildKDCellLeaves(const std::vector<P>&                       a_particles,
                   const BinaryParticleReconcile<P>&           a_particleReconcile,
                   std::vector<std::pair<const P*, const P*>>& a_leaves) noexcept;
 
-/**
- * @brief Merge an already spatially-ordered particle list down to a target count by repeatedly combining
- * the nearest adjacent pair.
- * @details The particles are assumed to be in a spatially coherent order (e.g. sorted along a space-filling
- * curve by the caller), so adjacency in the list approximates spatial proximity. The closest adjacent pair
- * (by @c position) is combined repeatedly until @c a_target particles remain. Combining the second
- * particle into the first is delegated to @c a_combine (the caller decides the payload semantics, e.g. a
- * weight-weighted centroid and energy). This does NOT split, so it cannot increase the count -- it is a
- * no-op when the list already has @c a_target or fewer particles (the caller handles the split direction).
- * Operates in place on per-thread scratch (allocation-free after warmup); on return @c a_particles holds the
- * surviving merged particles.
- * @param[in,out] a_particles Spatially-ordered particle list; overwritten with the merged result.
- * @param[in]     a_target    Desired number of particles.
- * @param[in]     a_combine   Callback that combines the second particle into the first.
- */
-template <class P, RealVect P::*position>
-inline void
-mergeAdjacentNearest(std::vector<P>&                          a_particles,
-                     const std::size_t                        a_target,
-                     const std::function<void(P&, const P&)>& a_combine) noexcept;
-
 } // namespace detail
-
-/**
- * @brief Create a space-filling-curve nearest-neighbor super-particle merger as a reusable ParticleMerger.
- * @details Returns a merger functor that reduces (or grows) the particle set in a single SoA cell to the
- * target count without forcing equal weights.
- *
- * When the cell contains more particles than the target:
- *   1. The intermediate list is sorted along a 21-bit Hilbert curve computed from particle positions.
- *   2. `detail::mergeAdjacentNearest` merges the closest adjacent pair repeatedly until the target count is
- *      reached, delegating payload arithmetic to @c a_combine.
- *
- * When the cell contains fewer particles than the target: the heaviest particle (by @c packWeight) is
- * repeatedly split into two co-located halves (weight divided by two, all other fields copied) until the
- * target is reached or no particle has weight >= 2.
- *
- * The three user-supplied lambdas encode the particle-type-specific semantics:
- *   - @c a_gather packs one SoA slot into the lightweight intermediate type @c Packed.
- *   - @c a_combine merges the second @c Packed particle into the first (weight-weighted centroid is the
- *     typical choice, but the caller decides).
- *   - @c a_scatter appends one surviving @c Packed particle back to the (already-cleared) SoA.
- *
- * Implementation note: thread-local scratch vectors are reused across cells so there is no per-cell heap
- * allocation after the first call on a given thread.
- *
- * @tparam Packed      Lightweight AoS intermediate type (e.g. MergeParticle<Packed>). Must be copyable.
- * @tparam packWeight  Member-data pointer `Real Packed::*` naming the weight. Used only for the split path.
- * @tparam packPosition Member-data pointer `RealVect Packed::*` naming the position. Used for Hilbert-key
- *                     computation and forwarded to detail::mergeAdjacentNearest.
- * @tparam P           SoA payload type.
- * @tparam Traits      Column descriptor for @c P (defaults to ParticleTraits<P>).
- * @param[in] a_gather   Per-slot gather: `(const ParticleSoA<P,Traits>&, std::size_t) -> Packed`.
- * @param[in] a_combine  In-place merge: `(Packed& first, const Packed& second) -> void`.
- * @param[in] a_scatter  Append one merged particle: `(ParticleSoA<P,Traits>&, const Packed&) -> void`.
- * @return A ParticleMerger<P, Traits> ready to be stored in e.g. ItoSolver::m_particleCellMerger.
- */
-template <class Packed,
-          Real Packed::*packWeight,
-          RealVect Packed::*packPosition,
-          class P,
-          class Traits = ParticleTraits<P>>
-inline ParticleMerger<P, Traits>
-makeSfcNearestNeighborMerger(std::function<Packed(const ParticleSoA<P, Traits>&, std::size_t)> a_gather,
-                             std::function<void(Packed&, const Packed&)>                       a_combine,
-                             std::function<void(ParticleSoA<P, Traits>&, const Packed&)>       a_scatter) noexcept;
 
 /**
  * @brief Create an equal-weight KD-tree super-particle merger as a reusable ParticleMerger.

@@ -738,7 +738,7 @@ Often, merging or splitting of particles is required.
 
 * **Per-cell mergers** operate on one cell at a time and are implemented as factory functions in ``ParticleManagement`` that return a ``ParticleMerger<P, Traits>`` functor.
   Each factory accepts user-supplied lambdas for the particle-type-specific gather, reduce, and scatter steps, so the same algorithm can be reused with any ``ParticleSoA`` payload type.
-  These are ``kd_cell``, ``reinitialize``, and ``nn_sfc``.
+  These are ``kd_cell`` and ``reinitialize``.
 * **Whole-hierarchy mergers** operate collectively across the entire AMR hierarchy rather than one cell at a time.
   None is a per-cell factory, and all are distributed and MPI-safe.
   These are ``nn_pair_tree``, ``nn_pair_onecell``, ``nn_pair_hash``, ``kd_carve``, ``kd_patch``, and ``kd_skin_nn``.
@@ -845,7 +845,7 @@ Reinitialization (``reinitialize``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 332-336
+   :lines: 265-269
 
 The returned functor proceeds as follows:
 
@@ -865,7 +865,6 @@ Nearest-neighbour algorithms
 ____________________________
 
 Nearest-neighbour algorithms merge each particle with a spatially close partner rather than with everything in its cell.
-``nn_sfc`` does this per cell, using a space-filling-curve ordering.
 
 .. _nn-pair-merging:
 
@@ -887,25 +886,6 @@ Merged particles need globally unique ids that cannot collide across ranks or ro
    ``ItoSolver`` handles this automatically when ``merge_algorithm`` selects any of the three, and ``ItoKMCStepper`` does the same when its regrid-time merge is set to any of the three.
 
 In ``ItoSolver`` the behaviour is tuned through ``nn_pair_iterate`` (repeat the local trivial-tier merges within a round until no further local pairs remain), ``nn_pair_fallback`` (how many additional candidate neighbours to consider when the nearest is unavailable), ``nn_pair_max_rounds`` (cap the number of rounds a single call may run, so the cost stays bounded rather than running to full convergence), and, for ``nn_pair_tree``/``nn_pair_hash`` only, ``nn_pair_max_cell_dist`` (cap the neighbour search radius in cells; ``nn_pair_onecell``'s search radius is fixed at 1 and does not read this).
-
-SFC pair merging (``nn_sfc``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``ParticleManagement::makeSfcNearestNeighborMerger`` sorts particles along a Hilbert space-filling curve and merges adjacent pairs until the count is at most ``ppc``.
-
-.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
-   :language: c++
-   :lines: 245-253
-
-The caller provides three lambdas:
-
-* A *gather* function that packs one SoA slot into a ``MergeParticle``.
-* A *combine* function that merges two adjacent intermediates in place (typically a weighted average of position and energy).
-* A *scatter* function that unpacks one merged intermediate back into the SoA.
-
-Unlike the kd-tree methods, SFC merging does not require integer weights.
-Particle counts below ``ppc`` are handled by splitting the heaviest particle: its weight is halved and a copy is appended, repeating until the target is reached (only if the heaviest particle has weight :math:`\geq 2`).
-The Hilbert ordering ensures that merged pairs are spatially close, which better preserves spatial correlations than random pairing and typically produces smoother merged distributions than the kd centroid.
 
 Whole-patch BVH search (``nn_pair_tree``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

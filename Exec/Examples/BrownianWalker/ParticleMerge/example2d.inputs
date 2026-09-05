@@ -4,8 +4,8 @@
 AmrMesh.lo_corner               = -1 -1 -1       ## Low corner of problem domain
 AmrMesh.hi_corner               = 1  1  1        ## High corner of problem domain
 AmrMesh.verbosity               = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain         = 512 512        ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth           = 1              ## Maximum amr depth
+AmrMesh.coarsest_domain         = 32 32          ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 2              ## Maximum amr depth
 AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
 AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
 AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
@@ -68,7 +68,7 @@ Driver.refine_dielectrics           = 0                   ## Refine dielectric s
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity                   = -1             ## Class verbosity
-ItoSolver.merge_algorithm             = kd_cell        ## Particle merging algorithm. One of 'kd_cell', 'reinitialize', 'nn_sfc', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'kd_carve', 'kd_patch', 'kd_skin_nn', 'none', or 'external'
+ItoSolver.merge_algorithm             = kd_cell        ## Particle merging algorithm. One of 'kd_cell', 'reinitialize', 'nn_pair_tree', 'nn_pair_onecell', 'nn_pair_hash', 'kd_carve', 'kd_patch', 'kd_skin_nn', 'none', or 'external'
 ItoSolver.particles_per_cell          = 16             ## Target computational particles per cell (one value, or one per level)
 ItoSolver.regrid_superparticles       = solver         ## Merge run during regrids: 'solver' (use merge_algorithm), 'none', or any merge_algorithm selector
 ItoSolver.nn_pair_iterate             = true           ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: iterate the local tier to convergence within each round
@@ -76,7 +76,7 @@ ItoSolver.nn_pair_fallback            = 1              ## nn_pair_tree/nn_pair_o
 ItoSolver.nn_pair_max_cell_dist       = 1              ## nn_pair_tree/nn_pair_hash: max merge distance in cells (Chebyshev); unused by nn_pair_onecell (fixed at 1)
 ItoSolver.nn_pair_max_rounds          = 3              ## nn_pair_tree/nn_pair_onecell/nn_pair_hash: max drain rounds per merge (stops early on convergence)
 ItoSolver.kd_cell_partition           = count          ## kd_cell: split rule -- 'weight' (near-equal leaf weight) or 'count' (near-equal leaf particle count)
-ItoSolver.kd_cell_placement           = sample         ## kd_cell: leaf placement -- 'centroid', 'sample' (weight-sampled member) or 'random' (uniform in the leaf box)
+ItoSolver.kd_cell_placement           = centroid       ## kd_cell: leaf placement -- 'centroid', 'sample' (weight-sampled member) or 'random' (uniform in the leaf box)
 ItoSolver.kd_split_weight_leaf_dx     = 1.0            ## kd_carve/kd_patch: leaf size (cell widths) at/below which splitting switches from count-median to weight-median (0 = never)
 ItoSolver.plt_vars                    = phi vel dco    ## 'phi', 'vel', 'dco', 'grad_dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg            = bisection      ## Intersection algorithm for EB-particle intersections.
@@ -108,7 +108,7 @@ ParticleMergeStepper.cfl                     = 0.5       ## CFL-like number.
 ParticleMergeStepper.load_balance            = true      ## Turn on/off particle load balancing
 ParticleMergeStepper.which_balance           = mesh      ## Switch for load balancing method. Either 'mesh' or 'particle'.
 ParticleMergeStepper.verify_conservation     = false     ## Abort if a superparticle merge does not conserve total weight
-ParticleMergeStepper.plot_particles          = false     ## Write the bulk particles to H5Part on every plot step
+ParticleMergeStepper.plot_particles          = true      ## Write the bulk particles to H5Part on every plot step
 
 # Velocity, diffusion, and CFL
 # ----------------------------
@@ -116,7 +116,7 @@ ParticleMergeStepper.mobility              = 1.0         ## Mobility coefficient
 ParticleMergeStepper.diffco                = 1.0         ## Diffusion coefficient
 ParticleMergeStepper.omega                 = 1.0         ## Rotation velocity for advection field (velocity_field = rotational)
 ParticleMergeStepper.velocity_field        = constant    ## Advective field. 'rotational' (uses omega) or 'constant' (uses constant_velocity)
-ParticleMergeStepper.constant_velocity     = 1 0 0       ## Advective field when velocity_field = constant
+ParticleMergeStepper.constant_velocity     = 0 1 0       ## Advective field when velocity_field = constant
 
 # Cell tagging stuff
 # ------------------
@@ -126,14 +126,14 @@ ParticleMergeStepper.buffer          = 0       ## Grow tagged cells
 
 # Particle seeding and reporting
 # ------------------------------
-ParticleMergeStepper.new_particles_per_cell     = 32      ## Particles seeded per cell before every advance
-ParticleMergeStepper.print_stats                = true    ## Print per-level merge statistics to pout every step
+ParticleMergeStepper.new_particles_per_cell     = 32       ## Particles seeded per cell before every advance
+ParticleMergeStepper.print_stats                = false    ## Print per-level merge statistics to pout every step
 
 # ====================================================================================================
 # ParticleMergeTagger class options
 # ====================================================================================================
 ParticleMergeTagger.buffer            = 0                 ## Grow the tagged region by this many cells
 ParticleMergeTagger.num_ref_boxes     = 1                 ## Number of manual refinement boxes
-ParticleMergeTagger.ref_box1_lo       = -1.0 -0.2 -1.0    ## Lower corner of refinement box 1
-ParticleMergeTagger.ref_box1_hi       = 1.0  0.2  1.0     ## Upper corner of refinement box 1
-ParticleMergeTagger.ref_box1_lvl      = 1                 ## Refine box 1 to this level
+ParticleMergeTagger.ref_box1_lo       = -1.0 -0.1 -1.0    ## Lower corner of refinement box 1
+ParticleMergeTagger.ref_box1_hi       = 1.0  0.1  1.0     ## Upper corner of refinement box 1
+ParticleMergeTagger.ref_box1_lvl      = 2                 ## Refine box 1 to this level

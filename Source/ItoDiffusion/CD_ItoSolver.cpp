@@ -497,13 +497,12 @@ ItoSolver::parseParticleMerger()
     auto isCellBased = [](const ParticleManagement::ParticleMergeMethod a_method) -> bool {
       return a_method == ParticleManagement::ParticleMergeMethod::KdCell ||
              a_method == ParticleManagement::ParticleMergeMethod::Reinitialize ||
-             a_method == ParticleManagement::ParticleMergeMethod::NnSfc ||
              a_method == ParticleManagement::ParticleMergeMethod::External;
     };
 
     if (!isCellBased(m_mergeMethod)) {
       MayDay::Abort("ItoSolver::parseParticleMerger - a per-level 'particles_per_cell' needs a cell-based "
-                    "'merge_algorithm' (kd_cell/reinitialize/nn_sfc/external); the "
+                    "'merge_algorithm' (kd_cell/reinitialize/external); the "
                     "whole-container methods use one threshold for the whole hierarchy and would use entry 0 only");
     }
     if (m_regridMergeMethod.has_value() && !isCellBased(m_regridMergeMethod.value()) &&
@@ -3678,11 +3677,6 @@ ItoSolver::mergeLite(ParticleContainer<ItoMergeParticle>&          a_particles,
 
     return;
   }
-  case ParticleManagement::ParticleMergeMethod::NnSfc: {
-    this->mergeNnSfc(a_particles, a_particlesPerCell);
-
-    return;
-  }
   case ParticleManagement::ParticleMergeMethod::External: {
     // The user supplies the per-cell merger through setParticleCellMerger().
     this->applyCellMerger(a_particles, a_particlesPerCell, m_particleCellMerger);
@@ -4020,58 +4014,6 @@ ItoSolver::mergeReinitialize(ParticleContainer<ItoMergeParticle>& a_particles, c
 }
 
 void
-ItoSolver::mergeNnSfc(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell)
-{
-  CH_TIME("ItoSolver::mergeNnSfc");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::mergeNnSfc" << endl;
-  }
-
-  // Sorts particles along a Hilbert curve, then merges adjacent pairs until the count reaches a_ppc.
-  // Produces better spatial locality than the KD methods and does not require integer weights.
-  using PType = ParticleManagement::MergeParticle<Real>; // payload = energy
-
-  // Pack the reduced particle's columns into the per-cell AoS intermediate.
-  const std::function<PType(const ParticleSoA<ItoMergeParticle>&, std::size_t)> gather =
-    [](const ParticleSoA<ItoMergeParticle>& a, const std::size_t i) -> PType {
-    PType p;
-
-    p.weight   = a.weight(i);
-    p.payload  = a.template get<&ItoMergeParticle::energy>(i);
-    p.position = a.position(i);
-
-    return p;
-  };
-
-  // Weighted-average position and energy when two particles are merged into one.
-  const std::function<void(PType&, const PType&)> combine = [](PType& a, const PType& b) -> void {
-    const Real wa  = a.weight;
-    const Real wb  = b.weight;
-    const Real w   = wa + wb;
-    const Real inv = (w > 0.0) ? 1.0 / w : 0.0;
-
-    a.position = (wa * a.position + wb * b.position) * inv;
-    a.payload  = (wa * a.payload + wb * b.payload) * inv;
-    a.weight   = w;
-  };
-
-  // Unpack the merged intermediate back into the reduced particle and append it to the SoA.
-  const std::function<void(ParticleSoA<ItoMergeParticle>&, const PType&)> scatter = [](ParticleSoA<ItoMergeParticle>& a,
-                                                                                       const PType& p) -> void {
-    ItoMergeParticle payload;
-    payload.energy = static_cast<ParticleReal>(p.payload);
-    a.append(p.position, p.weight, payload);
-  };
-
-  const ParticleManagement::ParticleMerger<ItoMergeParticle>
-    merger = ParticleManagement::makeSfcNearestNeighborMerger<PType, &PType::weight, &PType::position>(gather,
-                                                                                                       combine,
-                                                                                                       scatter);
-
-  this->applyCellMerger(a_particles, a_particlesPerCell, merger);
-}
-
-void
 ItoSolver::extractIntoMergeContainer(const WhichContainer a_container, ParticleContainer<ItoMergeParticle>& a_merge)
 {
   CH_TIME("ItoSolver::extractIntoMergeContainer");
@@ -4175,7 +4117,7 @@ ItoSolver::splitFromMergeContainer(ParticleContainer<ItoMergeParticle>& a_merge,
   // splitting. The merge left the small container patch-organized; cell-sort so the per-cell CSR
   // ranges are valid.
   //
-  // Greedy heaviest-split (same rule as nn_sfc): repeatedly halve the heaviest particle into two
+  // Greedy heaviest-split: repeatedly halve the heaviest particle into two
   // co-located daughters -- floor/ceil so integer weights stay integer and both daughters keep weight
   // >= 1 -- until the cell reaches the target or no particle can be split (heaviest weight < 2).
   // Daughters sit at the parent's position and inherit its energy, so the spatial distribution and the

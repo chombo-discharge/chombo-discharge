@@ -1672,7 +1672,7 @@ protected:
    * @brief Run one merge method over an already-extracted reduced-particle container.
    * @details The single place that knows the *shape* of each merge method, so that no caller has to.
    * Two shapes exist and they are not interchangeable:
-   *   - cell-based (equal_weight_kd, reinitialize, reinitialize_bvh, nn_sfc, external): reduce each
+   *   - cell-based (kd_cell, reinitialize, external): reduce each
    *     cell to at most its per-level target, refilling only within that same per-cell budget. These
    *     must NOT be followed by the container-wide split.
    *   - whole-container (kd_carve, kd_patch, kd_skin_nn, nn_pair_{tree,onecell,hash}): drain over-full
@@ -1735,7 +1735,7 @@ protected:
   /**
    * @brief Split every under-full cell up to the target count.
    * @details The whole-container merge/drain phase only reduces over-full cells; this brings cells
-   * below the target back up to it via greedy heaviest-particle splitting (same rule as nn_sfc).
+   * below the target back up to it via greedy heaviest-particle splitting.
    * Called only from mergeLite(), and only for the methods whose shape calls for it -- see there.
    * @param[in,out] a_merge                     Reduced-particle container to split (cell-sorted internally).
    * @param[in]     a_numParticlesPerCellThresh Target particle count per cell.
@@ -1793,17 +1793,6 @@ protected:
    */
   void
   mergeReinitialize(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
-
-  /**
-   * @brief Cell-based merge: Hilbert-curve sort, then merge adjacent pairs down to the target.
-   * @details Splits the heaviest particle when a cell is below target, so unlike the other cell-based
-   * methods it does refill -- but per cell against the per-level target, which is why mergeLite() must
-   * still not run the container-wide split after it. Does not require integer weights.
-   * @param[in,out] a_particles        Reduced-particle container to repartition.
-   * @param[in]     a_particlesPerCell Target particle count per cell (per-level).
-   */
-  void
-  mergeNnSfc(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
    * @brief Whole-container merge: distributed nearest-neighbour pair merge -- shared implementation
