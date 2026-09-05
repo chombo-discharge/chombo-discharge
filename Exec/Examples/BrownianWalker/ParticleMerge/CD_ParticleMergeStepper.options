@@ -1,0 +1,5 @@
+# ====================================================================================================
+# ParticleMergeStepper class options
+# ====================================================================================================
+ParticleMergeStepper.new_particles_per_cell     = 32       ## Particles seeded per cell before every advance
+ParticleMergeStepper.print_stats                = false    ## Print merge statistics to pout on every step

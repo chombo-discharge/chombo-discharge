@@ -107,9 +107,12 @@ BrownianWalker.seed               = 0       ## RNG seed
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-BrownianWalker.diffco     = 1.0    ## Diffusion coefficient
-BrownianWalker.omega      = 1.0    ## Rotation velocity
-BrownianWalker.cfl        = 0.5    ## CFL number
+BrownianWalker.diffco                = 1.0           ## Diffusion coefficient
+BrownianWalker.omega                 = 1.0           ## Rotation velocity
+BrownianWalker.velocity_field        = rotational    ## 'rotational' (omega) or 'constant' (constant_velocity)
+BrownianWalker.constant_velocity     = 1 1 0         ## Advective field when velocity_field = constant
+BrownianWalker.cfl                   = 0.5           ## CFL number
+BrownianWalker.plot_particles        = false         ## Write bulk particles to H5Part on plot steps
 
 # Cell tagging stuff
 # ------------------

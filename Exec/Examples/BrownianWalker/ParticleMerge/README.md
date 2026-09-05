@@ -3,10 +3,16 @@
 This example measures what `ItoSolver`'s super-particle merging does to a particle population that is
 already correct, so that every deviation it reports is the merge's own doing.
 
-The particles do not move: there is no drift, no diffusion, no chemistry and no geometry. Each round
-seeds a fresh uniform population on top of whatever survived the previous merge and merges the union
-back down to `ItoSolver.particles_per_cell`. Repeating that is what exposes any error that compounds,
-which is the failure mode that matters -- a merge run once per step for thousands of steps.
+It is a `BrownianWalkerStepper` application, so it runs real time steps through the real machinery --
+transport, remap, deposit, regrid, merge. `ParticleMergeStepper` seeds
+`ParticleMergeStepper.new_particles_per_cell` fresh unit-weight particles per cell before every advance,
+on top of whatever survived the previous merge, and the base stepper then transports the union and merges
+it back down to `ItoSolver.particles_per_cell`. Repeating that is what exposes an error that compounds,
+which is the failure mode that matters for an operator applied once per step for thousands of steps.
+
+Run it with `BrownianWalker.diffusion = false` so the only motion is the advective field. Under
+`BrownianWalker.velocity_field = constant` the population translates rigidly, which leaves it uniform and
+keeps the merge the only thing acting on its shape. There is no geometry and no chemistry.
 
 The grid is two-level. `ParticleMergeTagger` refines a fixed slab, bounded in one direction and
 spanning the domain in the others, so the coarse-fine boundary is a flat plane at a position the user
@@ -14,6 +20,10 @@ chose. Because the refined region does not depend on the solution it does not mo
 geometry is seen on every round. That matters because a merge's sub-cell artifacts are locked to the
 *local* cell width: the two levels alias on lattices whose periods differ by the refinement ratio, and
 they meet at that plane. The report is broken out per level so the two can be compared directly.
+
+Statistics are off by default. Set `ParticleMergeStepper.print_stats = true` to have the per-level report
+written to `pout` on every step, and `BrownianWalker.plot_particles = true` to write the particles
+themselves to H5Part (be aware that at the shipped resolution each file is order a gigabyte).
 
 ### What it reports, per level
 
@@ -34,9 +44,11 @@ they meet at that plane. The report is broken out per level so the two can be co
   over its particles.
 - Total weight, population, and particles per cell.
 
-Cells within `ParticleMerge.margin` of a domain face are excluded, so every analysed cell sits in a
-fully populated neighbourhood and the domain edge cannot contaminate the result. Set `margin` to a
-multiple of the block size to keep the block-frequency bins balanced.
+Cells covered by a finer level are excluded from both the seeding and the statistics: they hold no
+particles, because a particle lives on the finest level that covers it, so counting them would report
+empty cells that are not empty. Note that the density ratio spans transport *and* merge -- advection
+moves particles between cells too -- while the sub-cell, weight-spread and block-frequency numbers
+describe the post-merge population directly.
 
 ### Running
 
@@ -56,9 +68,8 @@ contrasts:
   same partition, differing only in where each leaf's particle is put.
 - `ItoSolver.kd_cell_partition` set to `weight` and `count` -- the same placement, differing only in
   how a node is divided. Watch `N_eff`.
-- `ParticleMerge.stratified = 1` against `0` -- an exactly-`init_ppc`-per-cell fill makes a
-  count-median tree bisect onto cell faces, which is a degenerate case worth knowing about but not
-  representative of a running simulation.
+- `ParticleMergeTagger.ref_box1_*` -- move or resize the refined slab, or set `num_ref_boxes = 0` to run
+  on a single level.
 
 ### A note on the location
 

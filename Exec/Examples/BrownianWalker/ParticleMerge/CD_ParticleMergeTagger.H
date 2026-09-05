@@ -6,7 +6,7 @@
 
 /**
  * @file   CD_ParticleMergeTagger.H
- * @brief  Declaration of a cell tagger that refines a fixed, manually specified slab
+ * @brief  Declaration of a cell tagger that refines only where the user says to
  * @author Robert Marskar
  */
 
@@ -19,12 +19,18 @@
 #include <CD_NamespaceHeader.H>
 
 /**
- * @brief Cell tagger that refines a fixed slab of the domain, specified in the input script.
- * @details The slab spans the domain in every direction but one, and is bounded in that one direction
- * by two physical coordinates. Because the refined region is fixed and known, the coarse-fine boundary
- * it produces is a flat plane at a position the user chose, which is what makes it useful for measuring
- * what a merge does on either side of a refinement boundary: no feedback from the solution, no drifting
- * boundary, and the same geometry on every step.
+ * @brief Cell tagger that refines only the manual refinement boxes given in the input script.
+ * @details CellTagger already knows how to read manual refinement boxes -- parseRefinementBoxes() reads
+ * ParticleMergeTagger.num_ref_boxes and the ref_boxN_lo/hi/lvl triplets, and
+ * getManualRefinementLevel() answers, for a position, which level the user asked it to be refined to.
+ * This class does nothing but apply that answer, so the refined region is exactly what the input script
+ * names and nothing else.
+ *
+ * That is the point for a merge study: a refinement box does not depend on the solution, so the
+ * coarse-fine boundary is a surface at a position the user chose and it does not move as the run
+ * proceeds. A merge's sub-cell artifacts are locked to the local cell width, so the two sides of that
+ * boundary alias on lattices whose periods differ by the refinement ratio; holding the boundary still is
+ * what makes the two sides comparable from one step to the next.
  */
 class ParticleMergeTagger : public CellTagger
 {
@@ -41,37 +47,37 @@ public:
 
   /**
    * @brief Define the tagger.
-   * @param[in] a_amr AMR mesh, used for the grids the tags are laid out on.
+   * @param[in] a_amr AMR mesh, which supplies the grids the tags are laid out on.
    */
   virtual void
   define(const RefCountedPtr<AmrMesh>& a_amr) noexcept;
 
   /**
-   * @brief Parse the slab bounds and the direction it is bounded in.
-   * @details Reads ParticleMergeTagger.refine_dir, .refine_lo and .refine_hi.
+   * @brief Parse the manual refinement boxes and the tag buffer.
    */
   void
   parseOptions() override;
 
   /**
-   * @brief Regrid the tagger. Nothing to do -- the tagged region does not depend on the grids.
+   * @brief Regrid the tagger. Nothing to do -- the tagged region does not depend on the grids or the
+   * solution.
    */
   void
   regrid() override;
 
   /**
-   * @brief Tag every cell whose centre falls inside the slab.
+   * @brief Tag every cell the manual refinement boxes ask to be refined beyond its own level.
    * @param[in,out] a_tags Per-level, per-patch tags to fill.
-   * @return True, always: the tags are recomputed from the (fixed) slab every call.
+   * @return True, always: the tags are recomputed from the (fixed) boxes on every call.
    */
   bool
   tagCells(EBAMRTags& a_tags) override;
 
   /**
    * @brief Turn the per-patch tags into the per-level sets that AmrMesh::regridAmr consumes.
-   * @details AmrMesh takes one IntVectSet per level while CellTagger fills a per-patch
-   * LayoutData<DenseIntVectSet>, so something has to bridge the two. Driver does this internally; an
-   * application that drives AmrMesh directly, as this example does, has to do it itself.
+   * @details CellTagger fills a per-patch LayoutData<DenseIntVectSet> while AmrMesh takes one IntVectSet
+   * per level, so something has to bridge the two. Driver does this internally; an application that
+   * drives AmrMesh directly has to do it itself.
    * @param[out] a_levelTags Per-level tags.
    * @param[in]  a_tags      Per-level, per-patch tags as filled by tagCells().
    */
@@ -83,21 +89,6 @@ protected:
    * @brief AMR mesh.
    */
   RefCountedPtr<AmrMesh> m_amr;
-
-  /**
-   * @brief Direction the refined slab is bounded in. It spans the domain in every other direction.
-   */
-  int m_refineDir;
-
-  /**
-   * @brief Lower bound of the refined slab, as a physical coordinate along m_refineDir.
-   */
-  Real m_refineLo;
-
-  /**
-   * @brief Upper bound of the refined slab, as a physical coordinate along m_refineDir.
-   */
-  Real m_refineHi;
 };
 
 #include <CD_NamespaceFooter.H>

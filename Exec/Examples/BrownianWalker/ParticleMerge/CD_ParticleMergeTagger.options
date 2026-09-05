@@ -1,0 +1,8 @@
+# ====================================================================================================
+# ParticleMergeTagger class options
+# ====================================================================================================
+ParticleMergeTagger.buffer            = 0                 ## Grow the tagged region by this many cells
+ParticleMergeTagger.num_ref_boxes     = 1                 ## Number of manual refinement boxes
+ParticleMergeTagger.ref_box1_lo       = -1.0 -0.2 -1.0    ## Lower corner of refinement box 1
+ParticleMergeTagger.ref_box1_hi       = 1.0  0.2  1.0     ## Upper corner of refinement box 1
+ParticleMergeTagger.ref_box1_lvl      = 1                 ## Refine box 1 to this level

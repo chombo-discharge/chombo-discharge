@@ -2410,7 +2410,9 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
       const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       // Create the output folder
-      std::string cmd     = "mkdir -p particles/" + solver->getName();
+      // Quoted: a solver name containing a space would otherwise make the shell create one directory
+      // per word, and the file open then fails with a bare MPI_ERR_NO_SUCH_FILE from inside HDF5.
+      std::string cmd     = "mkdir -p 'particles/" + solver->getName() + "'";
       int         success = 0;
       if (procID() == 0) {
         success = system(cmd.c_str());
