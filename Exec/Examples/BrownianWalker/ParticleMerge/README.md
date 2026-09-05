@@ -61,13 +61,15 @@ The report is written to `pout.0`. Set `ParticleMergeStepper.plot_particles = tr
 particles on every plot step to `particles/<solver name>/<solver name>.step*.<dim>d.h5part`, which can be
 opened directly in a particle viewer -- the sub-cell lattice is visible by eye.
 
-Point `ItoSolver.merge_algorithm` at any of the merge algorithms to compare them. The most instructive
+Point `ItoSolver.merge_method` at any of the merge algorithms to compare them. The most instructive
 contrasts:
 
-- `kd_cell` with `ItoSolver.kd_cell_placement` set to `centroid`, `sample` and `random` in turn -- the
+- `kd_cell` with `ItoSolver.kd_placement` set to `centroid`, `sample` and `random` in turn -- the
   same partition, differing only in where each leaf's particle is put.
-- `ItoSolver.kd_cell_partition` set to `weight` and `count` -- the same placement, differing only in
+- `ItoSolver.kd_partition` set to `weight` and `count` -- the same placement, differing only in
   how a node is divided. Watch `N_eff`.
+- `kd_cell` against `kd_patch` and `kd_amr` -- the same two axes over a wider scope. Their leaves are
+  not confined to one cell, so they can merge across a cell face; watch the per-cell density instead.
 - `ParticleMergeTagger.ref_box1_*` -- move or resize the refined slab, or set `num_ref_boxes = 0` to run
   on a single level.
 

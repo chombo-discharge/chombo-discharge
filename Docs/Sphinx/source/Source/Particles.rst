@@ -819,7 +819,7 @@ Since the weight in the leaves of the tree differ by at most one, the resulting 
    Left: Original particles with weights between 1 and 100.
    Right: Merged particles.
 
-``ItoSolver.kd_cell_placement`` chooses what the scatter-leaf does with a finished leaf.
+``ItoSolver.kd_placement`` chooses what the scatter-leaf does with a finished leaf.
 With ``centroid`` it computes the weight-averaged position and energy over all particles in the leaf.
 Particle weights need not be integers, but the ``weight`` partition may create new particles at the kd boundaries (see warning above), so the total computational-particle count may exceed the target by a small amount during the build before being reduced. The ``count`` partition divides no particle and so never overshoots.
 
@@ -845,7 +845,7 @@ Reinitialization (``reinitialize``)
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
    :language: c++
-   :lines: 312-316
+   :lines: 315-319
 
 The returned functor proceeds as follows:
 
