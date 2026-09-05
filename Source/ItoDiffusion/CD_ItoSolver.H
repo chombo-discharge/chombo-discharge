@@ -1800,7 +1800,7 @@ protected:
    * @param[in,out] a_particles        Particles to merge.
    * @param[in]     a_particlesPerCell Target number of particles per cell (one value, or one per level).
    */
-  virtual void
+  void
   mergeKDCell(ParticleContainer<ItoMergeParticle>& a_particles, const Vector<int>& a_particlesPerCell);
 
   /**
