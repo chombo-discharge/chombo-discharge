@@ -146,6 +146,15 @@ public:
 #endif
 
   /**
+   * @brief Perform pre-plot operations
+   * @details Adds the absorbed-photon deposit on top of the base class' work. McPhoto's mesh density is
+   * read by the plot and checkpoint writers and by nothing else -- the photoionization the KMC kernels see
+   * comes from the photon containers -- so it is filled here rather than once per time step in advance().
+   */
+  virtual void
+  prePlot() noexcept override;
+
+  /**
    * @brief Perform post-plot operations
    */
   virtual void
@@ -341,6 +350,33 @@ protected:
    * into the interpolant (1-theta)*E^k + theta*E^(k+1) that is handed to advanceReactionNetwork.
    */
   EBAMRCellData m_reactiveElectricField;
+
+  /**
+   * @brief Particle-realm accumulator for per-species sums, one component.
+   * @details computeCellConductivity() and computeSemiImplicitRho() both form a charge-weighted sum over
+   * the Ito species and then hand the result to the fluid realm. Summing on the particle realm and crossing
+   * once costs one cross-realm Copier exchange instead of one per species. Not simultaneously live with
+   * ItoKMCStepper::m_particleScratch1, which is the deposition target the sum is accumulated from.
+   */
+  EBAMRCellData m_particleScratchSum;
+
+  /**
+   * @brief Deposition target on the particle realm, solid phase. One component.
+   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
+   */
+  EBAMRCellData m_particleScratchSolid;
+
+  /**
+   * @brief Per-species accumulator on the particle realm, solid phase. One component.
+   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
+   */
+  EBAMRCellData m_particleScratchSumSolid;
+
+  /**
+   * @brief Cross-realm landing buffer on the fluid realm, solid phase. One component.
+   * @details Only allocated when the geometry actually has dielectrics; see allocateInternals().
+   */
+  EBAMRCellData m_fluidScratchSolid;
 
   /**
    * @brief Allocate "internal" storage.

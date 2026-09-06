@@ -25,6 +25,10 @@ thread_local KMCState                                        ItoKMCPhysics::m_km
 thread_local std::vector<std::shared_ptr<const KMCReaction>> ItoKMCPhysics::m_kmcReactionsThreadLocal;
 thread_local KMCState                                        ItoKMCPhysics::m_kmcStateScratch;
 thread_local std::vector<Real>                               ItoKMCPhysics::m_kmcPropensityScratch;
+thread_local std::vector<long long>                          ItoKMCPhysics::m_weightScratch;
+thread_local std::vector<std::shared_ptr<const KMCReaction>> ItoKMCPhysics::m_kmcReactionsDt;
+thread_local std::vector<Real>                               ItoKMCPhysics::m_reactiveDtFactorsDt;
+thread_local std::vector<Real>                               ItoKMCPhysics::m_kmcPropensityScratchDt;
 
 Vector<std::string>
 ItoKMCPhysics::getPlotVariableNames() const noexcept

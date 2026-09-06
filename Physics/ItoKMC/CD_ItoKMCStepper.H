@@ -797,6 +797,16 @@ protected:
   mutable EBAMRIVData m_particleScratchEB;
 
   /**
+   * @brief Per-Ito-species scratch storage on the fluid realm, one component each.
+   * @details computeMobilities() and computeDiffusionCoefficients() evaluate the physics on the fluid realm
+   * and then copy the result onto the particle-realm holders the ItoSolvers own. Both need one scalar
+   * hierarchy per Ito species to do that, and neither needs it to survive the call, but allocating them per
+   * call defines an exchange Copier per level per species on every time step. They do not overlap in time,
+   * so one set serves both.
+   */
+  Vector<EBAMRCellData> m_fluidScratchIto;
+
+  /**
    * @brief Allocate "internal" storage.
    */
   virtual void
@@ -1057,7 +1067,10 @@ protected:
 
   /**
    * @brief Compute the maximum electric field (norm)
-   * @param[in] a_phase Phase where we compute the field.
+   * @details Runs through m_fluidScratch1 rather than allocating a hierarchy of its own -- this is called
+   * once per time step, and AmrMesh::allocate defines an exchange Copier per level.
+   * @param[in] a_phase Phase where we compute the field. Must be the plasma phase, which is the phase the
+   * rest of the body already assumes.
    * @return Computed max reduced electric field
    */
   virtual Real
@@ -1602,15 +1615,35 @@ protected:
   /**
    * @brief Coarsen data for CDR solvers
    * @details Always averages the densities and source terms down the hierarchy -- the coarse valid cells
-   * are read before anything re-averages them. The ghost-cell interpolation is optional because it has no
-   * reader on the reaction-advance path: the next consumers of the density ghost cells are
-   * CdrSolver::computeDivF/computeDivD, both of which interpolate the ghost cells themselves, and the
-   * source-term ghost cells are never read at all (getSource()'s consumers -- plotting and
-   * ItoKMCBackgroundEvaluator -- are valid-cell only, and the plot path fills its own ghost cells).
-   * @param[in] a_interpGhosts Whether to interpolate the ghost cells after averaging.
+   * are read before anything re-averages them. The ghost-cell interpolation is optional, and applies to
+   * the density only: the next consumers of the density ghost cells are CdrSolver::computeDivF/computeDivD,
+   * both of which interpolate the ghost cells themselves, and the source-term ghost cells are never read
+   * at all (getSource()'s consumers -- plotting and ItoKMCBackgroundEvaluator -- are valid-cell only, and
+   * the plot path fills its own ghost cells), so the source term is never ghost-interpolated here.
+   * @param[in] a_interpGhosts Whether to interpolate the density ghost cells after averaging.
    */
   virtual void
   coarsenCDRSolvers(const bool a_interpGhosts) noexcept;
+
+  /**
+   * @brief Whether anything can be emitted from the EB this step, answered globally.
+   * @details Secondary emission is driven by three inputs: particles and photons that struck the boundary,
+   * and the advective flux a mobile CDR species delivers to it. When none of those exist anywhere, the
+   * emission routines still run their full fixed cost -- roughly twenty hierarchy-wide exchanges, per step,
+   * whether or not a single particle reached the EB.
+   *
+   * The test has to be global, because the work it guards is collective: every rank must reach the same
+   * verdict or the ones that skip leave the others waiting in an exchange that never completes. One
+   * Allreduce over the local counts answers it, and those counts are free (the containers track their own
+   * size). Mobility is a static property of the CDR solvers and needs no reduction.
+   *
+   * Skipping leaves the secondary containers holding whatever the last emitting step put there, which is
+   * harmless: nothing reads them unless the emission runs, and fillSecondaryEmissionEB() clears them on
+   * entry when it does.
+   * @return True if secondary emission must be resolved this step.
+   */
+  virtual bool
+  needSecondaryEmissionEB() const noexcept;
 
   /**
    * @brief Resolve particle injection at EBs.

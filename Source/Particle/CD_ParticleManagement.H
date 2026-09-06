@@ -383,6 +383,23 @@ static inline void
 deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) noexcept;
 
 /**
+ * @brief Partition particle weights among a number of computational particles, into a caller-owned buffer.
+ * @details The buffer overload of partitionParticleWeights(T, T), for the per-cell callers: the returning
+ * form allocates a fresh vector on every call, and these run once per grid cell per species inside an
+ * OpenMP region, so the allocator traffic is per cell rather than per time step. A caller that reuses one
+ * buffer (thread-local, where the loop is threaded) pays that once. The partition is identical.
+ * @param[out] a_weights              Receives one weight per computational particle; cleared first, and its
+ *                                    capacity is retained for the next call.
+ * @param[in]  a_numPhysicalParticles Number of physical particles.
+ * @param[in]  a_maxCompParticles     Maximum number of computational particles
+ */
+template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+static inline void
+partitionParticleWeights(std::vector<T>& a_weights,
+                         const T         a_numPhysicalParticles,
+                         const T         a_maxCompParticles) noexcept;
+
+/**
  * @brief Partition particle weights among a number of computational particles
  * @param[in] a_numPhysicalParticles Number of physical particles.
  * @param[in] a_maxCompParticles     Maximum number of computational particles

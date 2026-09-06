@@ -3442,8 +3442,11 @@ ItoKMCJSON::computeEta(const Real a_E, const RealVect& a_pos) const noexcept
   return m_eta(a_E, a_pos);
 }
 
-Vector<Real>
-ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect& a_pos, const RealVect& a_E) const noexcept
+void
+ItoKMCJSON::computeMobilities(Vector<Real>& a_mobilities,
+                              const Real /*a_time*/,
+                              const RealVect& a_pos,
+                              const RealVect& a_E) const noexcept
 {
   if (m_verbose) {
     pout() << m_className + "::computeMobilities" << endl;
@@ -3451,16 +3454,19 @@ ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect& a_pos, cons
 
   const Real E = a_E.vectorLength();
 
-  Vector<Real> mobilityCoefficients(m_numPlasmaSpecies, 0.0);
-  for (int i = 0; i < m_numPlasmaSpecies; i++) {
-    mobilityCoefficients[i] = m_mobilityFunctions[i](E, a_pos);
-  }
+  // resize() rather than assign()/construction: the caller reuses this buffer across cells, so after the
+  // first call it is already the right length and this is a no-op. Every entry is written below, so there is
+  // nothing to zero -- an immobile species carries a constant-zero function and fills its own slot.
+  a_mobilities.resize(m_numPlasmaSpecies);
 
-  return mobilityCoefficients;
+  for (int i = 0; i < m_numPlasmaSpecies; i++) {
+    a_mobilities[i] = m_mobilityFunctions[i](E, a_pos);
+  }
 }
 
-Vector<Real>
-ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/,
+void
+ItoKMCJSON::computeDiffusionCoefficients(Vector<Real>& a_diffusionCoefficients,
+                                         const Real /*a_time*/,
                                          const RealVect& a_pos,
                                          const RealVect& a_E) const noexcept
 {
@@ -3470,12 +3476,12 @@ ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/,
 
   const Real E = a_E.vectorLength();
 
-  Vector<Real> diffusionCoefficients(m_numPlasmaSpecies, 0.0);
-  for (int i = 0; i < m_numPlasmaSpecies; i++) {
-    diffusionCoefficients[i] = m_diffusionCoefficients[i](E, a_pos);
-  }
+  // See computeMobilities() for why this is resize() and not a fresh vector.
+  a_diffusionCoefficients.resize(m_numPlasmaSpecies);
 
-  return diffusionCoefficients;
+  for (int i = 0; i < m_numPlasmaSpecies; i++) {
+    a_diffusionCoefficients[i] = m_diffusionCoefficients[i](E, a_pos);
+  }
 }
 
 void
@@ -3696,6 +3702,30 @@ ItoKMCJSON::needGradients() const noexcept
   }
 
   return needGradient;
+}
+
+bool
+ItoKMCJSON::needGradient(const int a_plasmaIndex) const noexcept
+{
+  CH_TIME("ItoKMCJSON::needGradient");
+  if (m_verbose) {
+    pout() << m_className + "::needGradient" << endl;
+  }
+
+  // m_kmcReactionGradientCorrections holds (enabled, species name) per reaction, and m_plasmaIndexMap
+  // resolves that name to the same index the caller is asking about, so no reaction needs to be
+  // re-parsed here.
+  for (const auto& gradCorr : m_kmcReactionGradientCorrections) {
+    if (gradCorr.first) {
+      const auto& it = m_plasmaIndexMap.find(gradCorr.second);
+
+      if (it != m_plasmaIndexMap.end() && it->second == a_plasmaIndex) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 int

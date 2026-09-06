@@ -120,10 +120,15 @@ KrylovGMRES<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>&
     return true;
   }
 
+  // Tolerance scale. m_residualScale is the host's zero-residual ||rhs - L(0)||; falling back to beta0 when the
+  // host did not supply one reproduces a plain reduction relative to this solve's own initial residual.
+  const Real scale     = (m_residualScale > 0.0) ? m_residualScale : beta0;
+  const Real epsScaled = m_eps * scale;
+
   Real rnorm = beta0;
   int  iter  = 0;
 
-  while (iter < m_maxIter && rnorm > m_eps * beta0) {
+  while (iter < m_maxIter && rnorm > epsScaled) {
 
     // Start a restart cycle: v_0 = r / ||r||.
     const Real beta = op.norm(m_r, 2);
@@ -199,11 +204,10 @@ KrylovGMRES<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>&
       jUsed = j + 1;
 
       if (m_verbosity >= 3) {
-        pout() << "      KrylovGMRES:: iteration = " << iter << ", rel. residual = " << (rnorm / m_residualScale)
-               << endl;
+        pout() << "      KrylovGMRES:: iteration = " << iter << ", rel. residual = " << (rnorm / scale) << endl;
       }
 
-      if (rnorm <= m_eps * beta0 || hjp1 == 0.0) {
+      if (rnorm <= epsScaled || hjp1 == 0.0) {
         break;
       }
     }
@@ -238,7 +242,7 @@ KrylovGMRES<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>*>&
     }
   }
 
-  m_exitStatus   = (rnorm <= m_eps * beta0) ? 1 : 3;
+  m_exitStatus   = (rnorm <= epsScaled) ? 1 : 3;
   m_residualNorm = rnorm;
   m_iterations   = iter;
 

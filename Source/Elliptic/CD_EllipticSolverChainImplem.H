@@ -142,14 +142,17 @@ KrylovSolver<T>::solve(Vec&             a_phi,
   m_mg->init(a_phi, a_rhs, m_lmax, m_lbase);
   m_mg->setBottomSolver(m_lmax, m_lbase);
 
-  // Zero-residual ||rhs - L(0)|| in the adapter norm. The printed residuals are normalized against this so they are
-  // on a common, solver-independent scale (a relative residual), comparable to the convergence tolerance. m_dphi is
-  // the (zero) correction accumulator, reused here as the zero solution.
+  // Zero-residual ||rhs - L(0)|| in the adapter norm. This is the scale the Krylov solvers both print against and
+  // test against, so that eps means what the host solver means by it: the hosts gate the whole solve on
+  // ||rhs - L(phi)|| <= eps*||rhs - L(0)||, and a Krylov solver that instead reduced by eps relative to its own
+  // initial residual would keep iterating long after the host was satisfied -- the better the warm start, the more
+  // of that surplus work, since the target would fall with the guess. m_dphi is the (zero) correction accumulator,
+  // reused here as the zero solution. A zero scale is passed through as-is; the solvers then fall back to their
+  // own initial residual.
   m_op.setToZero(m_dphi);
   m_mg->computeAMRResidual(m_r0, m_dphi, a_rhs, m_lmax, m_lbase, false, false);
 
-  const Real zeroResid     = m_op.norm(m_r0, 2);
-  const Real residualScale = (zeroResid > 0.0) ? zeroResid : 1.0;
+  const Real zeroResid = m_op.norm(m_r0, 2);
 
   // Initial residual r0 = rhs - L_inhomogeneous(phi). This is the only inhomogeneous evaluation; the Krylov matvec
   // and preconditioner run with homogeneous boundary conditions. computeAMRResidual returns rhs - L(phi) in
@@ -174,7 +177,7 @@ KrylovSolver<T>::solve(Vec&             a_phi,
     m_gmres.m_eps           = a_settings.eps;
     m_gmres.m_maxIter       = a_settings.maxIter;
     m_gmres.m_verbosity     = a_settings.verbosity;
-    m_gmres.m_residualScale = residualScale;
+    m_gmres.m_residualScale = zeroResid;
 
     converged         = m_gmres.solve(m_dphi, m_r0);
     exitStatus        = m_gmres.m_exitStatus;
@@ -191,7 +194,7 @@ KrylovSolver<T>::solve(Vec&             a_phi,
     m_bicg.m_eps           = a_settings.eps;
     m_bicg.m_maxIter       = a_settings.maxIter;
     m_bicg.m_verbosity     = a_settings.verbosity;
-    m_bicg.m_residualScale = residualScale;
+    m_bicg.m_residualScale = zeroResid;
 
     converged         = m_bicg.solve(m_dphi, m_r0);
     exitStatus        = m_bicg.m_exitStatus;
@@ -212,7 +215,7 @@ KrylovSolver<T>::solve(Vec&             a_phi,
   // in the per-iteration output, with the absolute norms kept for reference. The verbosity is the host's
   // gmg_verbosity, reused for the Krylov path.
   if (a_settings.verbosity >= 1) {
-    const Real relRes = residualNorm / residualScale;
+    const Real relRes = (zeroResid > 0.0) ? residualNorm / zeroResid : residualNorm;
 
     pout() << "EllipticSolverChain - " << solverTypeName(a_type) << (converged ? " converged" : " did NOT converge")
            << " (rel.res = " << relRes << ", |r| = " << residualNorm << ", |r_zero| = " << zeroResid

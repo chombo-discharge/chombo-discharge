@@ -2661,29 +2661,16 @@ ItoSolver::interpolateMobilities()
     pout() << m_name + "::interpolateMobilities()" << endl;
   }
 
-  if (m_isMobile) {
-    EBAMRCellData velocityMagnitude;
-    m_amr->allocate(velocityMagnitude, m_realm, m_phase, 1);
+  if (!m_isMobile) {
+    return;
+  }
 
-    switch (m_mobilityInterp) {
-    case WhichMobilityInterpolation::Velocity: {
-
-      // Compute |v|
-      DataOps::vectorLength(velocityMagnitude,
-                            m_velocityFunction,
-                            m_amr->getNotCoveredCells(m_realm, m_phase),
-                            m_amr->getMultiCutVofIterator(m_realm, m_phase));
-
-      m_amr->conservativeAverage(velocityMagnitude, m_realm, m_phase);
-      m_amr->interpGhostPwl(velocityMagnitude, m_realm, m_phase);
-
-      break;
-    }
-    default: // Do nothing
-      break;
-    }
-
-    // Call the level version and interpolate the mobilities from the mesh data.
+  // Only the Velocity interpolation reads |v|. Allocating the hierarchy unconditionally cost an
+  // EBCellFactory pass and an exchange Copier per level, per mobile species, per time step, for a buffer
+  // that the Direct path never even looks at -- so the two paths are separated here rather than inside
+  // the per-patch dispatch.
+  switch (m_mobilityInterp) {
+  case WhichMobilityInterpolation::Direct: {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -2694,35 +2681,43 @@ ItoSolver::interpolateMobilities()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        this->interpolateMobilities(lvl, din, (*velocityMagnitude[lvl])[din]);
+        this->interpolateMobilitiesDirect(lvl, din);
       }
     }
-  }
-}
-
-void
-ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept
-{
-  CH_TIME("ItoSolver::interpolateMobilities(lvl, patch)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::interpolateMobilities(lvl, patch)" << endl;
-  }
-
-  CH_assert(m_isMobile);
-
-  switch (m_mobilityInterp) {
-  case WhichMobilityInterpolation::Direct: {
-    this->interpolateMobilitiesDirect(a_lvl, a_dit);
 
     break;
   }
   case WhichMobilityInterpolation::Velocity: {
-    this->interpolateMobilitiesVelocity(a_lvl, a_dit, a_velocityMagnitude);
+    EBAMRCellData velocityMagnitude;
+    m_amr->allocate(velocityMagnitude, m_realm, m_phase, 1);
+
+    // Compute |v|
+    DataOps::vectorLength(velocityMagnitude,
+                          m_velocityFunction,
+                          m_amr->getNotCoveredCells(m_realm, m_phase),
+                          m_amr->getMultiCutVofIterator(m_realm, m_phase));
+
+    m_amr->conservativeAverage(velocityMagnitude, m_realm, m_phase);
+    m_amr->interpGhostPwl(velocityMagnitude, m_realm, m_phase);
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->interpolateMobilitiesVelocity(lvl, din, (*velocityMagnitude[lvl])[din]);
+      }
+    }
 
     break;
   }
   default: {
-    MayDay::Error("ItoSolver::interpolateMobilities(int, DataIndex) - logic bust");
+    MayDay::Error("ItoSolver::interpolateMobilities() - logic bust");
 
     break;
   }

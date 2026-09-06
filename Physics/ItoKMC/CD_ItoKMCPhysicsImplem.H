@@ -106,6 +106,15 @@ ItoKMCPhysics::defineSpeciesMap() noexcept
   }
 }
 
+inline bool
+ItoKMCPhysics::needGradient(const int a_plasmaIndex) const noexcept
+{
+  CH_assert(a_plasmaIndex >= 0);
+  CH_assert(a_plasmaIndex < m_itoSpecies.size() + m_cdrSpecies.size());
+
+  return this->needGradients();
+}
+
 inline void
 ItoKMCPhysics::defineKMC() const noexcept
 {
@@ -126,6 +135,34 @@ ItoKMCPhysics::defineKMC() const noexcept
 
   m_kmcPropensityScratch.resize(m_kmcReactionsThreadLocal.size());
 
+  // Compact the reactions that actually take part in the physics time step calculation. The dt probe at the
+  // end of advanceKMC scales every propensity by m_reactiveDtFactors, which the user sets to zero for every
+  // reaction excluded from that calculation -- so those propensities were evaluated and then multiplied away,
+  // and KMCSolver::computeDt still reduced over the whole reaction set. The probe's cost therefore grew with
+  // the size of the chemistry while only the included reactions could move the answer, and a chemistry that
+  // includes two reactions out of forty paid for all forty, per grid cell, twice per probe.
+  //
+  // The compaction is exact, not an approximation. An excluded reaction contributes muIJ * 0 to every
+  // reactant sum in computeDt, and a reactant whose accumulated mu is zero is skipped there by its own
+  // 'mu > numeric_limits<Real>::min()' guard -- so dropping the excluded reactions and the reactants only
+  // they reach leaves the returned time step bit-identical.
+  //
+  // A model that never sized m_reactiveDtFactors is read as "every reaction counts", matching the parser
+  // default for a reaction with no 'include_dt_calc' entry.
+  m_kmcReactionsDt.resize(0);
+  m_reactiveDtFactorsDt.resize(0);
+
+  for (size_t i = 0; i < m_kmcReactionsThreadLocal.size(); i++) {
+    const Real factor = (i < m_reactiveDtFactors.size()) ? m_reactiveDtFactors[i] : 1.0;
+
+    if (factor != 0.0) {
+      m_kmcReactionsDt.emplace_back(m_kmcReactionsThreadLocal[i]);
+      m_reactiveDtFactorsDt.emplace_back(factor);
+    }
+  }
+
+  m_kmcPropensityScratchDt.resize(m_kmcReactionsDt.size());
+
   m_hasKMCSolver = true;
 }
 
@@ -142,6 +179,10 @@ ItoKMCPhysics::killKMC() const noexcept
   m_kmcStateScratch.define(0, 0);
 
   m_kmcPropensityScratch.resize(0);
+
+  m_kmcReactionsDt.resize(0);
+  m_reactiveDtFactorsDt.resize(0);
+  m_kmcPropensityScratchDt.resize(0);
 
   m_hasKMCSolver = false;
 }
@@ -480,11 +521,20 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // time step. It exists because if there are no electrons but lots of ions, one may get a time step that is too large
   // because X/|sum mu| is zero for the electrons. Similarly, one may get a time step that is too small away from
   // ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron but lots of detachment.
+  //
+  // Everything below runs on the compacted reaction set built by defineKMC(), not on the full one: only the
+  // reactions the user included can move the answer, and the excluded ones cost a propensity evaluation and a
+  // reduction apiece, per probe, per grid cell. With nothing included there is nothing to limit, so the whole
+  // block drops out.
+  if (m_kmcReactionsDt.empty()) {
+    return;
+  }
+
   // Fills the reusable propensity buffer rather than returning one, so that the probes below do not
   // allocate once per reaction per grid cell.
   auto fillPropensitiesDt = [&](const KMCState& a_state) -> void {
-    for (size_t i = 0; i < m_kmcReactionsThreadLocal.size(); i++) {
-      m_kmcPropensityScratch[i] = m_kmcReactionsThreadLocal[i]->propensity(a_state) * m_reactiveDtFactors[i];
+    for (size_t i = 0; i < m_kmcReactionsDt.size(); i++) {
+      m_kmcPropensityScratchDt[i] = m_kmcReactionsDt[i]->propensity(a_state) * m_reactiveDtFactorsDt[i];
     }
   };
 
@@ -492,9 +542,12 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   fillPropensitiesDt(m_kmcState);
 
   a_physicsDt = std::min(a_physicsDt,
-                         m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, m_kmcPropensityScratch, 1.0));
+                         m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsDt, m_kmcPropensityScratchDt, 1.0));
 
-  // Go through reactions that are potentially detaching species and do the calculation again.
+  // Go through reactions that are potentially detaching species and do the calculation again. This probe walks
+  // the FULL reaction set even though the limit is evaluated on the compacted one: an excluded reaction can
+  // still deplete a species that an included reaction depends on, and that depletion is exactly what the probe
+  // is looking for.
   for (const auto& reaction : m_kmcReactionsThreadLocal) {
     const auto N = reaction->computeCriticalNumberOfReactions(m_kmcState);
 
@@ -509,9 +562,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
       fillPropensitiesDt(m_kmcStateScratch);
 
-      a_physicsDt = std::min(
-        a_physicsDt,
-        m_kmcSolver.computeDt(m_kmcStateScratch, m_kmcReactionsThreadLocal, m_kmcPropensityScratch, 1.0));
+      a_physicsDt = std::min(a_physicsDt,
+                             m_kmcSolver.computeDt(m_kmcStateScratch, m_kmcReactionsDt, m_kmcPropensityScratchDt, 1.0));
     }
   }
 }
@@ -592,7 +644,9 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
       if (numParticles > 0LL && m_incrementNewParticles) {
         // If the cell already contains particles, partition the new particle weights and increment the existing
         // particles
-        const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, numParticles);
+        ParticleManagement::partitionParticleWeights(m_weightScratch, diff, numParticles);
+
+        const std::vector<long long>& particleWeights = m_weightScratch;
 
         ParticleSoA<ItoParticle>& particles = *a_particles[i];
 
@@ -603,9 +657,9 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
       else {
         // Adding new particles, which is fairly simple. Just choose weights for the particles and go with one of the
         // placement algorithms.
-        const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(
-          diff,
-          static_cast<long long>(m_maxNewParticles));
+        ParticleManagement::partitionParticleWeights(m_weightScratch, diff, static_cast<long long>(m_maxNewParticles));
+
+        const std::vector<long long>& particleWeights = m_weightScratch;
 
         // Total weight of the particles that were already in the cell. Only the leading numParticles entries are
         // eligible parents -- the appends below grow the container, and a freshly created particle must not become
@@ -833,9 +887,11 @@ ItoKMCPhysics::reconcilePhotons(Vector<ParticleSoA<Photon>*>& a_newPhotons,
   for (int i = 0; i < a_newPhotons.size(); i++) {
     if (a_numNewPhotons[i] > 0LL) {
 
-      const std::vector<long long> photonWeights = ParticleManagement::partitionParticleWeights(
-        static_cast<long long>(a_numNewPhotons[i]),
-        static_cast<long long>(m_maxNewPhotons));
+      ParticleManagement::partitionParticleWeights(m_weightScratch,
+                                                   static_cast<long long>(a_numNewPhotons[i]),
+                                                   static_cast<long long>(m_maxNewPhotons));
+
+      const std::vector<long long>& photonWeights = m_weightScratch;
 
       for (const auto& w : photonWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);

@@ -232,6 +232,22 @@ public:
   needGradients() const noexcept;
 
   /**
+   * @brief Return true if the physics model reads the density gradient of one particular plasma species.
+   * @details Refinement of needGradients(), which answers the same question for the whole model at once.
+   * Computing a gradient costs a cross-realm copy, a coarsening and a ghost interpolation over the whole
+   * AMR hierarchy, per species -- so a model that consults one species' gradient pays for every species'
+   * unless it can say which one it meant.
+   *
+   * The default is the conservative answer: whatever needGradients() says, for every species. A model
+   * that knows better should override this; one that does not keeps working unchanged.
+   * @param[in] a_plasmaIndex Plasma species index, in the ordering used by updateReactionRates()'s
+   *                          density argument: the Ito species first, then the CDR species.
+   * @return True if this species' gradient must be computed.
+   */
+  virtual bool
+  needGradient(const int a_plasmaIndex) const noexcept;
+
+  /**
    * @brief Get the internal mapping from plasma-species index to solver type and solver index.
    * @return Map from plasma species index to (SpeciesType, solver index) pair.
    */
@@ -255,23 +271,37 @@ public:
 
   /**
    * @brief Compute the Ito solver mobilities.
-   * @param[in] a_time Time
-   * @param[in] a_pos  Position
-   * @param[in] a_E    Electric field
-   * @return Must return a vector of non-negative mobility coefficients for the plasma species
+   * @details Fills a caller-owned buffer rather than returning one. This is called once per grid cell, so a
+   * returned Vector<Real> was a heap allocation and a free per cell -- pure overhead, and (with Chombo memory
+   * tracking compiled in) a pair of counter updates on top. The caller hoists one buffer per patch instead.
+   *
+   * Implementations must size a_mobilities to the number of plasma species and fill every entry; a species
+   * that is not mobile should be given zero rather than skipped, so the indexing stays dense.
+   * @param[out] a_mobilities Non-negative mobility coefficient per plasma species. Resized by the callee.
+   * @param[in]  a_time       Time
+   * @param[in]  a_pos        Position
+   * @param[in]  a_E          Electric field
    */
-  virtual Vector<Real>
-  computeMobilities(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept = 0;
+  virtual void
+  computeMobilities(Vector<Real>&   a_mobilities,
+                    const Real      a_time,
+                    const RealVect& a_pos,
+                    const RealVect& a_E) const noexcept = 0;
 
   /**
    * @brief Compute the Ito solver diffusion coefficients
-   * @param[in] a_time Time
-   * @param[in] a_pos  Position
-   * @param[in] a_E    Electric field
-   * @return Must return a vector of non-negative diffusion coefficients for the plasma species
+   * @details Fills a caller-owned buffer; see computeMobilities() for why.
+   * @param[out] a_diffusionCoefficients Non-negative diffusion coefficient per plasma species. Resized by
+   *                                     the callee.
+   * @param[in]  a_time                  Time
+   * @param[in]  a_pos                   Position
+   * @param[in]  a_E                     Electric field
    */
-  virtual Vector<Real>
-  computeDiffusionCoefficients(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept = 0;
+  virtual void
+  computeDiffusionCoefficients(Vector<Real>&   a_diffusionCoefficients,
+                               const Real      a_time,
+                               const RealVect& a_pos,
+                               const RealVect& a_E) const noexcept = 0;
 
   /**
    * @brief Resolve secondary emission at the EB.
@@ -500,10 +530,37 @@ protected:
   static thread_local std::vector<Real> m_kmcPropensityScratch;
 
   /**
+   * @brief Reusable buffer for ParticleManagement::partitionParticleWeights.
+   * @details Reconciliation calls that function once per grid cell per species, from inside an OpenMP
+   * region; the vector-returning form allocates every one of those calls. Thread-local because the
+   * cell loop is threaded, and never shrunk, so the allocation is paid once per thread rather than
+   * once per cell.
+   */
+  static thread_local std::vector<long long> m_weightScratch;
+
+  /**
    * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.
    * @details Set up via defineKMC() to ensure OpenMP thread safety; depopulated by killKMC().
    */
   static thread_local std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactionsThreadLocal;
+
+  /**
+   * @brief The subset of m_kmcReactionsThreadLocal that takes part in the physics time step calculation.
+   * @details Holds the same objects as m_kmcReactionsThreadLocal, not copies, so the per-cell rate updates
+   * written through that list are seen here. Built by defineKMC() from m_reactiveDtFactors; see the
+   * comment there for why the compaction leaves the computed time step unchanged.
+   */
+  static thread_local std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactionsDt;
+
+  /**
+   * @brief Time-step scaling factors for m_kmcReactionsDt, parallel to it.
+   */
+  static thread_local std::vector<Real> m_reactiveDtFactorsDt;
+
+  /**
+   * @brief Propensity buffer for m_kmcReactionsDt, parallel to it.
+   */
+  static thread_local std::vector<Real> m_kmcPropensityScratchDt;
 
   /**
    * @brief List of reactions for the KMC solver

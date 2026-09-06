@@ -2013,15 +2013,6 @@ protected:
   depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
 
   /**
-   * @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.
-   * @param[in] a_lvl               Grid level.
-   * @param[in] a_dit               Grid index.
-   * @param[in] a_velocityMagnitude Velocity magnitude.
-   */
-  virtual void
-  interpolateMobilities(int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
-
-  /**
    * @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch.
    * @param[in] a_lvl Grid level.
    * @param[in] a_dit Grid index.

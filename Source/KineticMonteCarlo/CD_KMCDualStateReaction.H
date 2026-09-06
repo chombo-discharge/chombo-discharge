@@ -104,16 +104,21 @@ public:
 
   /**
    * @brief Get the products from the reaction.
+   * @details By reference, matching getReactants(). Not for the same reason -- the only caller is a
+   * debug-only index check run once at define() -- but a list-valued accessor that copies is a trap
+   * waiting for its first per-cell caller, and the two siblings disagreeing on it is worse than either
+   * convention on its own.
    * @return m_rhsReactives
    */
-  inline std::list<size_t>
+  inline const std::list<size_t>&
   getReactiveProducts() const noexcept;
 
   /**
    * @brief Get the non-reactive products from the reaction.
+   * @details By reference; see getReactiveProducts().
    * @return m_rhsNonReactives
    */
-  inline std::list<size_t>
+  inline const std::list<size_t>&
   getNonReactiveProducts() const noexcept;
 
   /**

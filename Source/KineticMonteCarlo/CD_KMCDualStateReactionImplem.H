@@ -220,14 +220,14 @@ KMCDualStateReaction<State, T>::getReactants() const noexcept
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCDualStateReaction<State, T>::getReactiveProducts() const noexcept
 {
   return m_rhsReactives;
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCDualStateReaction<State, T>::getNonReactiveProducts() const noexcept
 {
   return m_rhsNonReactives;

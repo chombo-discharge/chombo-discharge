@@ -802,35 +802,46 @@ deleteParticles(ParticleSoA<P, Traits>& a_particles, const Real a_weightThresh) 
 }
 
 template <typename T, typename>
-inline std::vector<T>
-partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
+inline void
+partitionParticleWeights(std::vector<T>& a_weights, const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
 {
-  std::vector<T> ret(0);
+  // assign() rather than resize() throughout: it leaves the buffer's capacity alone, which is the whole
+  // point of the overload. The clear() covers the one path that writes nothing.
+  a_weights.clear();
 
   constexpr T zero = (T)0;
   constexpr T one  = (T)1;
 
   if (a_maxCompParticles > zero) {
     if (a_numPhysicalParticles <= a_maxCompParticles) {
-      ret.resize(a_numPhysicalParticles, one);
+      a_weights.assign(a_numPhysicalParticles, one);
     }
     else {
       const T W = a_numPhysicalParticles / a_maxCompParticles;
       T       r = a_numPhysicalParticles % a_maxCompParticles;
 
       if (W > zero) {
-        ret.resize(a_maxCompParticles, W);
+        a_weights.assign(a_maxCompParticles, W);
 
-        for (std::size_t i = 0; i < ret.size() && r > zero; i++) {
-          ret[i] += one;
+        for (std::size_t i = 0; i < a_weights.size() && r > zero; i++) {
+          a_weights[i] += one;
           r--;
         }
       }
       else {
-        ret.resize(1, r);
+        a_weights.assign(1, r);
       }
     }
   }
+}
+
+template <typename T, typename>
+inline std::vector<T>
+partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
+{
+  std::vector<T> ret;
+
+  partitionParticleWeights(ret, a_numPhysicalParticles, a_maxCompParticles);
 
   return ret;
 }

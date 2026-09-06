@@ -109,6 +109,11 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
     return true;
   }
 
+  // Tolerance scale. m_residualScale is the host's zero-residual ||rhs - L(0)||; falling back to rnorm0 when the
+  // host did not supply one reproduces a plain reduction relative to this solve's own initial residual.
+  const Real scale     = (m_residualScale > 0.0) ? m_residualScale : rnorm0;
+  const Real epsScaled = m_eps * scale;
+
   Real rnorm    = rnorm0;
   Real rho      = 1.0;
   Real alpha    = 1.0;
@@ -148,7 +153,7 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
     return true; // stop
   };
 
-  while (iter < m_maxIter && rnorm > m_eps * rnorm0) {
+  while (iter < m_maxIter && rnorm > epsScaled) {
     const Real rnormStart = rnorm; // residual at the start of this iteration (for the convergence-rate report)
 
     const Real rhoNew = op.dotProduct(m_rTilde, m_r);
@@ -185,7 +190,7 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
     op.incr(m_r, m_v, -alpha);     // r = s = r - alpha*v
 
     rnorm = op.norm(m_r, 2);
-    if (rnorm <= m_eps * rnorm0) { // converged on the half-step s
+    if (rnorm <= epsScaled) { // converged on the half-step s
       m_exitStatus = 1;
       iter++; // this (half) iteration was performed -- count it before breaking
 
@@ -222,11 +227,11 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
 
     if (m_verbosity >= 3) {
       // Rate is the iteration-over-iteration reduction factor r_{k-1}/r_k (>1 = converging), matching AMRMultiGrid.
-      pout() << "      KrylovBiCGStab:: iteration = " << iter << ", rel. residual = " << (rnorm / m_residualScale)
+      pout() << "      KrylovBiCGStab:: iteration = " << iter << ", rel. residual = " << (rnorm / scale)
              << ", rate = " << ((rnorm > 0.0) ? rnormStart / rnorm : 0.0) << endl;
     }
 
-    if (rnorm <= m_eps * rnorm0) {
+    if (rnorm <= epsScaled) {
       m_exitStatus = 1;
       iter++; // this iteration was performed -- count it before breaking
 
@@ -245,7 +250,7 @@ KrylovBiCGStab<T>::solve(Vector<LevelData<T>*>& a_phi, const Vector<LevelData<T>
   }
 
   if (m_exitStatus == -1) {
-    m_exitStatus = (rnorm <= m_eps * rnorm0) ? 1 : 3; // converged on the loop guard, else max iterations
+    m_exitStatus = (rnorm <= epsScaled) ? 1 : 3; // converged on the loop guard, else max iterations
   }
 
   m_residualNorm = rnorm;

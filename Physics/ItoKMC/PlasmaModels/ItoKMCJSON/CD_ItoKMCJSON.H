@@ -182,24 +182,45 @@ public:
   needGradients() const noexcept override;
 
   /**
-   * @brief Compute the Ito solver mobilities.
-   * @param[in] a_time Time.
-   * @param[in] a_pos  Physical position.
-   * @param[in] a_E    Electric field vector.
-   * @return Vector of non-negative mobility coefficients for all plasma species.
+   * @brief Return true if any reaction's gradient correction names this plasma species.
+   * @details The gradient corrections parsed out of the chemistry file already carry the species they
+   * apply to, so the answer is exact rather than the base class's blanket yes.
+   * @param[in] a_plasmaIndex Plasma species index (Ito species first, then CDR species).
+   * @return True if this species' gradient is read by at least one reaction.
    */
-  virtual Vector<Real>
-  computeMobilities(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept override;
+  virtual bool
+  needGradient(const int a_plasmaIndex) const noexcept override;
+
+  /**
+   * @brief Compute the Ito solver mobilities.
+   * @details Fills the caller's buffer; an immobile species carries a constant-zero function and so fills
+   * its own slot without a table lookup.
+   * @param[out] a_mobilities Non-negative mobility coefficient for every plasma species. Resized here.
+   * @param[in]  a_time       Time.
+   * @param[in]  a_pos        Physical position.
+   * @param[in]  a_E          Electric field vector.
+   */
+  virtual void
+  computeMobilities(Vector<Real>&   a_mobilities,
+                    const Real      a_time,
+                    const RealVect& a_pos,
+                    const RealVect& a_E) const noexcept override;
 
   /**
    * @brief Compute the Ito solver diffusion coefficients.
-   * @param[in] a_time Time.
-   * @param[in] a_pos  Physical position.
-   * @param[in] a_E    Electric field vector.
-   * @return Vector of non-negative diffusion coefficients for all plasma species.
+   * @details Fills the caller's buffer; a non-diffusive species carries a constant-zero function and so
+   * fills its own slot without a table lookup.
+   * @param[out] a_diffusionCoefficients Non-negative diffusion coefficient for every plasma species.
+   *                                     Resized here.
+   * @param[in]  a_time                  Time.
+   * @param[in]  a_pos                   Physical position.
+   * @param[in]  a_E                     Electric field vector.
    */
-  virtual Vector<Real>
-  computeDiffusionCoefficients(const Real a_time, const RealVect& a_pos, const RealVect& a_E) const noexcept override;
+  virtual void
+  computeDiffusionCoefficients(Vector<Real>&   a_diffusionCoefficients,
+                               const Real      a_time,
+                               const RealVect& a_pos,
+                               const RealVect& a_E) const noexcept override;
 
   /**
    * @brief Resolve secondary emission at the EB.

@@ -36,7 +36,7 @@ class KrylovBiCGStab
 {
 public:
   /**
-   * @brief Relative residual tolerance (against the initial residual norm).
+   * @brief Relative residual tolerance, measured against m_residualScale.
    */
   Real m_eps = 1.E-10;
 
@@ -71,11 +71,16 @@ public:
   int m_iterations = 0;
 
   /**
-   * @brief Display normalization for printed residuals (set to the zero-residual by the driver; 1 = print absolute).
-   * @details Affects only verbose output, not the convergence test. The printed value is the relative residual
-   *          ||r|| / ||r_zero||, so progress is comparable across solvers regardless of their internal norm.
+   * @brief Norm that both the printed residual and the convergence test are measured against.
+   * @details The driver sets this to the zero-residual ||r_zero|| = ||rhs - L(0)||, which is the scale the hosting
+   *          solver itself uses to decide whether a solution has converged. Measuring the exit test on that same
+   *          scale is what makes m_eps mean the same thing here as it does to the caller, and is also what lets a
+   *          warm start pay for itself: scaling the tolerance by this solve's own initial residual instead would
+   *          demand the same reduction factor no matter how good the initial guess was. A non-positive value falls
+   *          back to this solve's initial residual norm, which is the right scale when there is no host to agree
+   *          with.
    */
-  Real m_residualScale = 1.0;
+  Real m_residualScale = 0.0;
 
   /**
    * @brief Default constructor. Call define() before use.
