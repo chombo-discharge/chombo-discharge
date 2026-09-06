@@ -331,16 +331,24 @@ LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
   const T&                    x0      = std::get<2>(m_grid);
   const T&                    delta   = std::get<4>(m_grid);
 
-  size_t idxLo;
+  const size_t numPoints = m_structuredData.size();
+
+  if (numPoints < 2) {
+    throw std::runtime_error("LookupTable1D<T,N,I>::getIndexLo - table must hold at least two points");
+  }
+
+  // Signed on purpose: the floor() below can land a hair below zero for a_x at the very low edge, and
+  // narrowing that straight to size_t would wrap it to an enormous index rather than clamping it.
+  long long idxLo;
 
   switch (spacing) {
   case LookupTable::Spacing::Uniform: {
-    idxLo = std::floor((a_x - x0) / delta);
+    idxLo = static_cast<long long>(std::floor((a_x - x0) / delta));
 
     break;
   }
   case LookupTable::Spacing::Exponential: {
-    idxLo = std::floor(log10(a_x / x0) / delta);
+    idxLo = static_cast<long long>(std::floor(log10(a_x / x0) / delta));
 
     break;
   }
@@ -349,7 +357,15 @@ LookupTable1D<T, N, I>::getIndexLo(const T& a_x) const
   }
   }
 
-  return idxLo;
+  // The caller reads BOTH idxLo and idxLo + 1, so idxLo has to be the low end of a real interval. At
+  // a_x == xmax it is not: the grid is built so that (xmax - x0)/delta and log10(xmax/x0)/delta are
+  // both exactly numPoints - 1, which puts the upper neighbour one past the end of m_structuredData.
+  // Whether the division lands exactly on numPoints - 1 or a hair below is round-off, so the resulting
+  // out-of-bounds read fired for some grids and not others -- e.g. 4 points over one decade, but not
+  // 50 points over three. Clamping to the last interval is correct in both directions: linear
+  // interpolation there returns the endpoint value exactly at xmax, and the lower clamp absorbs a
+  // -0.0 at xmin.
+  return static_cast<size_t>(std::min(std::max(idxLo, 0LL), static_cast<long long>(numPoints) - 2));
 }
 
 template <typename T, size_t N, typename I>
