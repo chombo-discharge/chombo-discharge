@@ -674,76 +674,29 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
         }
 
         for (const auto& w : particleWeights) {
-          RealVect x = RealVect::Zero;
+          RealVect parentPos = RealVect::Zero;
 
-          // Figure out where to place the particles.
-          switch (m_particlePlacement) {
-          case ParticlePlacement::Centroid: {
-            x = a_cellPos + a_centroidPos * a_dx;
+          const bool hasParent = (m_particlePlacement == ParticlePlacement::Parent) &&
+                                 this->sampleParentPosition(parentPos,
+                                                            *a_particles[i],
+                                                            static_cast<std::size_t>(numParticles),
+                                                            parentWeightSum);
 
-            break;
-          }
-          case ParticlePlacement::Random: {
-            x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-
-            break;
-          }
-          case ParticlePlacement::Parent: {
-            // Ionization happens at the electrons, so put the new particle on top of one of the particles that were
-            // already there, drawn with probability proportional to the parent weight. This is the placement that
-            // introduces no sub-grid transport of its own: it neither scatters the new weight across the cell (which
-            // acts as a numerical diffusion) nor pulls it towards the cell centre (which acts as a drag on the front).
-            // The inherited position is by construction on the fluid side of the EB, so no cut-cell test is needed.
-            //
-            // Falls back to a random position when there is nothing to inherit from, e.g. photoionization products
-            // landing in a cell that holds no particles of this species yet.
-            if (numParticles > 0LL && parentWeightSum > 0.0) {
-              const Real r = Random::getUniformReal01() * parentWeightSum;
-
-              Real      runningSum = 0.0;
-              long long parent     = numParticles - 1;
-
-              for (long long j = 0; j < numParticles; j++) {
-                runningSum += a_particles[i]->weight(static_cast<std::size_t>(j));
-
-                if (runningSum >= r) {
-                  parent = j;
-
-                  break;
-                }
-              }
-
-              x = a_particles[i]->position(static_cast<std::size_t>(parent));
-            }
-            else {
-              x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-            }
-
-            break;
-          }
-          case ParticlePlacement::Downstream: {
-            if (hasDownstream) {
-              x = Random::randomPosition(upstreamLo, upstreamHi, upstreamPosition, v);
-
-              if ((x - a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
-                x = upstreamPosition;
-              }
-
-              x = a_cellPos + x * a_dx;
-            }
-            else {
-
-              x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-            }
-
-            break;
-          }
-          default: {
-            MayDay::Error("ItoKMCPhysics::reconcileParticles - logic bust");
-
-            break;
-          }
-          }
+          const RealVect x = this->drawNewParticlePosition(hasParent,
+                                                           parentPos,
+                                                           hasDownstream,
+                                                           upstreamPosition,
+                                                           upstreamLo,
+                                                           upstreamHi,
+                                                           v,
+                                                           a_cellPos,
+                                                           a_centroidPos,
+                                                           a_lo,
+                                                           a_hi,
+                                                           a_bndryCentroid,
+                                                           a_bndryNormal,
+                                                           a_dx,
+                                                           a_kappa);
 
           a_particles[i]->append(x, 1.0 * w, ItoParticle{});
         }
@@ -752,6 +705,262 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
     else if (diff < 0LL) {
       // Removing particles is a bit more difficult because we need to manipulate weights.
       this->removeParticles(*a_particles[i], -diff);
+    }
+  }
+}
+
+inline RealVect
+ItoKMCPhysics::drawNewParticlePosition(const bool     a_hasParent,
+                                       const RealVect a_parentPos,
+                                       const bool     a_hasDownstream,
+                                       const RealVect a_upstreamPos,
+                                       const RealVect a_upstreamLo,
+                                       const RealVect a_upstreamHi,
+                                       const RealVect a_downstreamDirection,
+                                       const RealVect a_cellPos,
+                                       const RealVect a_centroidPos,
+                                       const RealVect a_lo,
+                                       const RealVect a_hi,
+                                       const RealVect a_bndryCentroid,
+                                       const RealVect a_bndryNormal,
+                                       const Real     a_dx,
+                                       const Real     a_kappa) const noexcept
+{
+  RealVect x = RealVect::Zero;
+
+  switch (m_particlePlacement) {
+  case ParticlePlacement::Centroid: {
+    x = a_cellPos + a_centroidPos * a_dx;
+
+    break;
+  }
+  case ParticlePlacement::Random: {
+    x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+    break;
+  }
+  case ParticlePlacement::Parent: {
+    // Ionization happens at the electrons, so put the new particle on top of one of the particles that were
+    // already there, drawn with probability proportional to the parent weight. This is the placement that
+    // introduces no sub-grid transport of its own: it neither scatters the new weight across the cell (which
+    // acts as a numerical diffusion) nor pulls it towards the cell centre (which acts as a drag on the front).
+    // The inherited position is by construction on the fluid side of the EB, so no cut-cell test is needed.
+    //
+    // Falls back to a random position when there is nothing to inherit from, e.g. photoionization products
+    // landing in a cell that holds no particles of this species yet.
+    if (a_hasParent) {
+      x = a_parentPos;
+    }
+    else {
+      x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    }
+
+    break;
+  }
+  case ParticlePlacement::Downstream: {
+    if (a_hasDownstream) {
+      x = Random::randomPosition(a_upstreamLo, a_upstreamHi, a_upstreamPos, a_downstreamDirection);
+
+      if ((x - a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
+        x = a_upstreamPos;
+      }
+
+      x = a_cellPos + x * a_dx;
+    }
+    else {
+
+      x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    }
+
+    break;
+  }
+  default: {
+    MayDay::Error("ItoKMCPhysics::drawNewParticlePosition - logic bust");
+
+    break;
+  }
+  }
+
+  return x;
+}
+
+inline bool
+ItoKMCPhysics::sampleParentPosition(RealVect&                       a_pos,
+                                    const ParticleSoA<ItoParticle>& a_particles,
+                                    const std::size_t               a_numEligible,
+                                    const Real                      a_weightSum) const noexcept
+{
+  if (a_numEligible == 0 || a_weightSum <= 0.0) {
+    return false;
+  }
+
+  const Real r = Random::getUniformReal01() * a_weightSum;
+
+  Real        runningSum = 0.0;
+  std::size_t parent     = a_numEligible - 1;
+
+  for (std::size_t j = 0; j < a_numEligible; j++) {
+    runningSum += a_particles.weight(j);
+
+    if (runningSum >= r) {
+      parent = j;
+
+      break;
+    }
+  }
+
+  a_pos = a_particles.position(parent);
+
+  return true;
+}
+
+inline bool
+ItoKMCPhysics::sampleParentPosition(RealVect&                                a_pos,
+                                    const Vector<ParticleSoA<ItoParticle>*>& a_particles,
+                                    const Real                               a_weightSum) const noexcept
+{
+  if (a_weightSum <= 0.0) {
+    return false;
+  }
+
+  const Real r = Random::getUniformReal01() * a_weightSum;
+
+  Real runningSum = 0.0;
+
+  // The walk is the same one the single-container overload does, only continued across species boundaries. The
+  // trailing fallback covers the case where round-off leaves runningSum a hair below r on the last entry.
+  for (int i = 0; i < a_particles.size(); i++) {
+    const ParticleSoA<ItoParticle>& particles = *a_particles[i];
+
+    for (std::size_t j = 0; j < particles.size(); j++) {
+      runningSum += particles.weight(j);
+
+      if (runningSum >= r) {
+        a_pos = particles.position(j);
+
+        return true;
+      }
+    }
+  }
+
+  for (int i = a_particles.size() - 1; i >= 0; i--) {
+    const ParticleSoA<ItoParticle>& particles = *a_particles[i];
+
+    if (particles.size() > 0) {
+      a_pos = particles.position(particles.size() - 1);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+inline void
+ItoKMCPhysics::reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_cdrParticles,
+                                     const Vector<ParticleSoA<ItoParticle>*>& a_itoParticles,
+                                     const Vector<Real>&                      a_numNewParticles,
+                                     const RealVect                           a_electricField,
+                                     const RealVect                           a_cellPos,
+                                     const RealVect                           a_centroidPos,
+                                     const RealVect                           a_lo,
+                                     const RealVect                           a_hi,
+                                     const RealVect                           a_bndryCentroid,
+                                     const RealVect                           a_bndryNormal,
+                                     const Real                               a_dx,
+                                     const Real                               a_kappa) const noexcept
+{
+  CH_assert(m_isDefined);
+  CH_assert(a_cdrParticles.size() == a_numNewParticles.size());
+  CH_assert(a_itoParticles.size() == m_itoSpecies.size());
+
+  // Most cells produce nothing for most species, and everything below is per-cell setup that such a cell must not
+  // pay for. Note that the productions are >= 0 by contract -- the caller has already split off the removal.
+  bool hasProduction = false;
+
+  for (int i = 0; i < a_numNewParticles.size(); i++) {
+    CH_assert(a_numNewParticles[i] >= 0.0);
+
+    hasProduction = hasProduction || (a_numNewParticles[i] > 0.0);
+  }
+
+  if (!hasProduction) {
+    return;
+  }
+
+  // Downstream placement needs the drift direction and the downstream region, exactly as in reconcileParticles.
+  bool     hasDownstream    = false;
+  RealVect upstreamPosition = RealVect::Zero;
+  RealVect upstreamLo       = -0.5 * RealVect::Unit;
+  RealVect upstreamHi       = +0.5 * RealVect::Unit;
+  RealVect v                = RealVect::Zero;
+
+  if (m_particlePlacement == ParticlePlacement::Downstream) {
+    CH_assert(m_downstreamSpecies >= 0);
+
+    const int Z = m_itoSpecies[m_downstreamSpecies]->getChargeNumber();
+
+    if (Z != 0) {
+      v = Z * a_electricField;
+      v = v / v.vectorLength();
+    }
+
+    hasDownstream = this->computeUpstreamPosition(upstreamPosition,
+                                                  upstreamLo,
+                                                  upstreamHi,
+                                                  Z,
+                                                  *a_itoParticles[m_downstreamSpecies],
+                                                  a_electricField,
+                                                  a_cellPos,
+                                                  a_dx);
+  }
+
+  // Parent placement draws from the Ito particles pooled across species -- see the overload's documentation. The
+  // pooled weight is loop-invariant over both the species and the particles created below, so it is summed once.
+  Real parentWeightSum = 0.0;
+
+  if (m_particlePlacement == ParticlePlacement::Parent) {
+
+    for (int i = 0; i < a_itoParticles.size(); i++) {
+      const ParticleSoA<ItoParticle>& particles = *a_itoParticles[i];
+
+      for (std::size_t j = 0; j < particles.size(); j++) {
+        parentWeightSum += particles.weight(j);
+      }
+    }
+  }
+
+  for (int i = 0; i < a_cdrParticles.size(); i++) {
+    if (a_numNewParticles[i] > 0.0) {
+
+      // Equal weights: unlike the Ito products these are not physical particles that must carry an integer number
+      // of electrons, they are a quadrature of the produced mass over the cell, so there is nothing to partition.
+      const Real w = a_numNewParticles[i] / m_maxNewParticles;
+
+      for (int j = 0; j < m_maxNewParticles; j++) {
+        RealVect parentPos = RealVect::Zero;
+
+        const bool hasParent = (m_particlePlacement == ParticlePlacement::Parent) &&
+                               this->sampleParentPosition(parentPos, a_itoParticles, parentWeightSum);
+
+        const RealVect x = this->drawNewParticlePosition(hasParent,
+                                                         parentPos,
+                                                         hasDownstream,
+                                                         upstreamPosition,
+                                                         upstreamLo,
+                                                         upstreamHi,
+                                                         v,
+                                                         a_cellPos,
+                                                         a_centroidPos,
+                                                         a_lo,
+                                                         a_hi,
+                                                         a_bndryCentroid,
+                                                         a_bndryNormal,
+                                                         a_dx,
+                                                         a_kappa);
+
+        a_cdrParticles[i]->append(x, w);
+      }
     }
   }
 }

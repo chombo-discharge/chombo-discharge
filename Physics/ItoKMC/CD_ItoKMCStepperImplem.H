@@ -111,6 +111,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_timeStep                         = 0;
   m_loadPerCell                      = 1.0;
   m_redistributeCDR                  = true;
+  m_cdrProductInjection              = CdrProductInjection::Particle;
   m_fluidRealm                       = Realm::Primal;
   m_particleRealm                    = Realm::Primal;
   m_minParticleAdvectionCFL          = 0.0;
@@ -158,6 +159,7 @@ ItoKMCStepper<I, C, R, F>::parseOptions() noexcept
   this->parseVerbosity();
   this->parseExitOnFailure();
   this->parseRedistributeCDR();
+  this->parseCdrProducts();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseDualGrid();
@@ -178,6 +180,7 @@ ItoKMCStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   this->parseVerbosity();
   this->parseExitOnFailure();
   this->parseRedistributeCDR();
+  this->parseCdrProducts();
   this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseLoadBalance();
@@ -234,6 +237,34 @@ ItoKMCStepper<I, C, R, F>::parseRedistributeCDR() noexcept
   ParmParse pp(m_name.c_str());
 
   pp.get("redistribute_cdr", m_redistributeCDR);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::parseCdrProducts() noexcept
+{
+  CH_TIME("ItoKMCStepper::parseCdrProducts");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseCdrProducts" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  std::string str;
+
+  pp.get("cdr_products", str);
+
+  if (str == "mesh") {
+    m_cdrProductInjection = CdrProductInjection::Mesh;
+  }
+  else if (str == "particle") {
+    m_cdrProductInjection = CdrProductInjection::Particle;
+  }
+  else {
+    MayDay::Error(("ItoKMCStepper::parseCdrProducts - unknown '" + m_name + ".cdr_products = " + str +
+                   "', must be 'mesh' or 'particle'")
+                    .c_str());
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -624,12 +655,12 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
 
   // Data for CDR-based solver mobilities
   m_cdrMobilities.resize(numCdrSpecies);
-  m_cdrPhotoiProducts.resize(numCdrSpecies);
+  m_cdrProducts.resize(numCdrSpecies);
   for (int i = 0; i < numCdrSpecies; i++) {
     m_amr->allocate(m_cdrMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
 
-    m_cdrPhotoiProducts[i] = RefCountedPtr<ParticleContainer<NoPayload>>(new ParticleContainer<NoPayload>());
-    m_amr->allocate(*m_cdrPhotoiProducts[i], m_particleRealm);
+    m_cdrProducts[i] = RefCountedPtr<ParticleContainer<NoPayload>>(new ParticleContainer<NoPayload>());
+    m_amr->allocate(*m_cdrProducts[i], m_particleRealm);
   }
 
   // Fluid-realm scratch shared by computeMobilities() and computeDiffusionCoefficients().
@@ -694,10 +725,14 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   if (numCdrSpecies > 0) {
     m_amr->allocate(m_fluidCdrPPC, m_fluidRealm, m_plasmaPhase, numCdrSpecies);
     m_amr->allocate(m_fluidOldCdrPPC, m_fluidRealm, m_plasmaPhase, numCdrSpecies);
+    m_amr->allocate(m_particleCdrProduction, m_particleRealm, m_plasmaPhase, numCdrSpecies);
   }
   else {
     m_amr->allocatePointer(m_fluidCdrPPC, m_fluidRealm);
     m_amr->allocatePointer(m_fluidOldCdrPPC, m_fluidRealm);
+
+    // Dummy data, for the same reason as the Ito holders above: the reconciliation kernels take it by reference.
+    m_amr->allocate(m_particleCdrProduction, m_particleRealm, m_plasmaPhase, 1);
   }
 
   if (numPhotonSpecies > 0) {
@@ -1722,7 +1757,7 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
 
   for (int i = 0; i < numCdrSpecies; i++) {
     m_cdrMobilities[i].clear();
-    m_cdrPhotoiProducts[i]->clearParticles();
+    m_cdrProducts[i]->clearParticles();
   }
 
   for (int i = 0; i < numItoSpecies; i++) {
@@ -1755,6 +1790,9 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     m_fluidCdrPPC.clear();
     m_fluidOldCdrPPC.clear();
   }
+
+  // Unconditional: unlike the two above, this one holds real data even when there are no CDR species.
+  m_particleCdrProduction.clear();
 
   m_particleYPC.clear();
   m_fluidYPC.clear();
@@ -4071,69 +4109,133 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   }
   CH_STOP(t3);
 
-  // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
-  // and then add the result back into the CDR solvers.
+  // Turn the per-cell CDR result into the quantities the reconciliation below needs. m_fluidCdrPPC holds the new
+  // count and m_fluidOldCdrPPC the old one, so their difference is the change the network computed; both holders
+  // are dead afterwards and are reused to carry the result.
+  //
+  // Under CdrProductInjection::Particle the change is split by sign, and only the PRODUCTION becomes particles:
+  // that is the half of the change that happens at a point in the cell and therefore has a sub-cell position to be
+  // consistent about. Mass removed from a CDR species is proportional to the cell-averaged density, which carries
+  // no sub-cell information, so it stays in the cell it was taken from. m_fluidCdrPPC then holds the removal (and,
+  // after the deposition below, the total change) and m_fluidOldCdrPPC the production.
+  //
+  // Under CdrProductInjection::Mesh there is nothing to split -- the whole change goes into the cell it was
+  // computed in, and m_fluidCdrPPC carries it straight to reconcileCdrDensities().
   CH_START(t4);
-  for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
-    m_cdrPhotoiProducts[i]->clearParticles();
-    m_cdrPhotoiProducts[i]->organizeParticlesByCell();
+  if (numCdrSpecies > 0) {
+    DataOps::incr(m_fluidCdrPPC, m_fluidOldCdrPPC, -1.0);
+
+    if (m_cdrProductInjection == CdrProductInjection::Particle) {
+      const Vector<RefCountedPtr<LayoutData<VoFIterator>>>& vofIter = m_amr->getVofIterator(m_fluidRealm,
+                                                                                            m_plasmaPhase);
+
+      DataOps::copy(m_fluidOldCdrPPC, m_fluidCdrPPC);
+
+      DataOps::floor(m_fluidOldCdrPPC, 0.0, vofIter);
+      DataOps::roof(m_fluidCdrPPC, 0.0, vofIter);
+
+      m_amr->copyData(m_particleCdrProduction, m_fluidOldCdrPPC);
+    }
   }
 
-  // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
-  // the source terms.
-  this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC, m_electricFieldParticle);
+  for (int i = 0; i < m_cdrProducts.size(); i++) {
+    m_cdrProducts[i]->clearParticles();
+    m_cdrProducts[i]->organizeParticlesByCell();
+  }
+
+  // Reconcile the results -- for the discrete solvers we add/remove particles/photons, and the CDR production is
+  // turned into the particles that the deposition below puts on the mesh.
+  this->reconcileParticles(m_particleItoPPC,
+                           m_particleOldItoPPC,
+                           m_particleYPC,
+                           m_particleCdrProduction,
+                           m_electricFieldParticle);
   CH_STOP(t4);
 
-  // Deposited PointParticles on the mesh and add the result to m_fluidCdrPPC. This is a bit convoluted because
-  // the photoionization products are created in reconcileParticles and  deposited them on the particle realm, but
-  // the resulting products need to end up on in the correct data component in m_fluidCdrPPC.
+  // Deposit the CDR products and add them to the removal already in m_fluidCdrPPC, giving the total per-cell change.
   CH_START(t5);
+  this->depositCdrProducts(m_fluidCdrPPC);
+
+  this->reconcileCdrDensities(m_fluidCdrPPC, a_dt);
+  CH_STOP(t5);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::depositCdrProducts(EBAMRCellData& a_cdrChange) noexcept
+{
+  CH_TIME("ItoKMCStepper::depositCdrProducts");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositCdrProducts" << endl;
+  }
+
+  CH_assert(a_cdrChange.getRealm() == m_fluidRealm);
 
   // Species whose product container is empty on EVERY rank deposit identically zero, so the whole block
   // below -- a halo deposition (which alone is ~3L-1 synchronizing stages), a cross-realm copy, and two
-  // hierarchy-wide passes -- adds nothing to m_fluidCdrPPC. Many plasma models route photoionization to
-  // Ito species rather than CDR species, in which case that is every species on every time step.
+  // hierarchy-wide passes -- adds nothing to a_cdrChange.
   //
   // The test must be global because the work being skipped is collective: every rank has to reach the
   // same verdict for every species. One Allreduce over the whole vector answers it for all of them, and
   // the local counts it reduces are free (the containers track their own size). Skipping leaves stale
   // data in m_particleScratch1/m_fluidScratch1, which is harmless -- both are fully overwritten by their
   // next user.
-  Vector<long long int> numPhotoiProducts(m_cdrPhotoiProducts.size(), 0LL);
+  Vector<long long int> numProducts(m_cdrProducts.size(), 0LL);
 
-  for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
-    numPhotoiProducts[i] = static_cast<long long int>(m_cdrPhotoiProducts[i]->getNumberOfValidParticlesLocal());
+  for (int i = 0; i < m_cdrProducts.size(); i++) {
+    numProducts[i] = static_cast<long long int>(m_cdrProducts[i]->getNumberOfValidParticlesLocal());
   }
 
-  ParallelOps::sum(numPhotoiProducts);
+  ParallelOps::sum(numProducts);
 
-  for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
-    if (numPhotoiProducts[i] == 0LL) {
+  // clang-format off
+  // Under CdrProductInjection::Particle the kernel and the coarse-fine strategy are the Ito solvers' own -- that is
+  // the whole point, so that the two halves of a reaction spread over the mesh the same way. Any solver will do,
+  // since they all parse the same 'ItoSolver.deposition*' keys. Under CdrProductInjection::Mesh the only particles
+  // that reach here are the photoionization products, which have no in-cell representation to fall back on; they
+  // are put down NGP, which is what the code did before the chemistry products could become particles.
+  //
+  // The CUT-CELL strategy is deliberately NOT taken from the solver, because that selector is a normalization and
+  // not a spreading rule, and the normalization here is fixed at both ends by the CDR path:
+  // computeReactiveCdrParticlesPerCell() reads a cut cell as kappa*phi*V physical particles, and
+  // reconcileCdrDensities() writes it back as phi += change/V. IrregularDeposition::NGP is the option that keeps
+  // that convention (a cut cell holds kappa*n) while losing nothing into the solid, so the cut-cell mass balance
+  // -- including the optional redistribution -- is exactly what it was before the products became particles.
+  // Mirror would hand back a true density instead, which is a different quantity from the one the removal branch
+  // and the redistribution are written in; Native, the strategy the photoionization products used to use, lets a
+  // CIC cloud leak into the covered region and quietly loses that mass.
+  // clang-format on
+  const bool useItoKernel = (m_cdrProductInjection == CdrProductInjection::Particle) &&
+                            (m_physics->getNumItoSpecies() > 0);
+
+  const DepositionType       deposition = useItoKernel ? m_ito->getSolvers()[0]->getDeposition() : DepositionType::NGP;
+  const CoarseFineDeposition coarseFineDeposition = useItoKernel ? m_ito->getSolvers()[0]->getCoarseFineDeposition()
+                                                                 : CoarseFineDeposition::Halo;
+
+  for (int i = 0; i < m_cdrProducts.size(); i++) {
+    if (numProducts[i] == 0LL) {
       continue;
     }
 
-    m_cdrPhotoiProducts[i]->organizeParticlesByPatch();
+    m_cdrProducts[i]->organizeParticlesByPatch();
 
     m_amr->depositWeight(m_particleScratch1,
                          m_particleRealm,
                          m_plasmaPhase,
-                         *m_cdrPhotoiProducts[i],
-                         DepositionType::NGP,
-                         CoarseFineDeposition::Halo,
-                         IrregularDeposition::Native);
+                         *m_cdrProducts[i],
+                         deposition,
+                         coarseFineDeposition,
+                         IrregularDeposition::NGP);
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
 
-    EBAMRCellData fluidCdrPPC = m_amr->slice(m_fluidCdrPPC, Interval(i, i));
+    EBAMRCellData cdrChange = m_amr->slice(a_cdrChange, Interval(i, i));
 
-    DataOps::incr(fluidCdrPPC, m_fluidScratch1, 1.0);
+    DataOps::incr(cdrChange, m_fluidScratch1, 1.0);
 
-    m_cdrPhotoiProducts[i]->clearParticles();
+    m_cdrProducts[i]->clearParticles();
   }
-
-  this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
-  CH_STOP(t5);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4383,22 +4485,25 @@ inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                                               const EBAMRCellData& a_oldParticlesPerCell,
                                               const EBAMRCellData& a_newPhotonsPerCell,
+                                              const EBAMRCellData& a_cdrProduction,
                                               const EBAMRCellData& a_electricField) const noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileParticles(EBAMRCellDatax3)");
+  CH_TIME("ItoKMCStepper::reconcileParticles(EBAMRCellDatax4)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileParticles(EBAMRCellDatax3)";
+    pout() << m_name + "::reconcileParticles(EBAMRCellDatax4)";
   }
 
   CH_assert(a_newParticlesPerCell.getRealm() == m_particleRealm);
   CH_assert(a_oldParticlesPerCell.getRealm() == m_particleRealm);
   CH_assert(a_newPhotonsPerCell.getRealm() == m_particleRealm);
+  CH_assert(a_cdrProduction.getRealm() == m_particleRealm);
   CH_assert(a_electricField.getRealm() == m_particleRealm);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->reconcileParticles(*a_newParticlesPerCell[lvl],
                              *a_oldParticlesPerCell[lvl],
                              *a_newPhotonsPerCell[lvl],
+                             *a_cdrProduction[lvl],
                              *a_electricField[lvl],
                              lvl);
   }
@@ -4409,12 +4514,13 @@ inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+                                              const LevelData<EBCellFAB>& a_cdrProduction,
                                               const LevelData<EBCellFAB>& a_electricField,
                                               const int                   a_level) const noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
+  CH_TIME("ItoKMCStepper::reconcileParticles(LevelData<EBCellFAB>x4, int)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileParticles(LevelData<EBCellFAB>x3, int)" << endl;
+    pout() << m_name + "::reconcileParticles(LevelData<EBCellFAB>x4, int)" << endl;
   }
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
@@ -4437,6 +4543,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
     this->reconcileParticles(a_newParticlesPerCell[din],
                              a_oldParticlesPerCell[din],
                              a_newPhotonsPerCell[din],
+                             a_cdrProduction[din],
                              a_electricField[din],
                              a_level,
                              din,
@@ -4450,6 +4557,7 @@ inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                               const EBCellFAB& a_oldParticlesPerCell,
                                               const EBCellFAB& a_newPhotonsPerCell,
+                                              const EBCellFAB& a_cdrProduction,
                                               const EBCellFAB& a_electricField,
                                               const int        a_level,
                                               const DataIndex  a_din,
@@ -4512,7 +4620,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    binLeafToCells(cdrCells[idx], (*m_cdrPhotoiProducts[idx])[a_level][a_din], a_box, a_dx, probLo);
+    binLeafToCells(cdrCells[idx], (*m_cdrProducts[idx])[a_level][a_din], a_box, a_dx, probLo);
   }
 
   // Build the per-cell photon scratch from the SoA bulk/source photon leaves.
@@ -4532,6 +4640,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   Vector<Physics::ItoKMC::FPR> numNewParticles(numItoSpecies);
   Vector<Physics::ItoKMC::FPR> numOldParticles(numItoSpecies);
   Vector<Physics::ItoKMC::FPR> numNewPhotons(numPhotonSpecies);
+
+  // Not an FPR: a CDR species is a continuum and its production is not a particle count, so it is not rounded.
+  Vector<Real> numNewCdrParticles(numCdrSpecies);
+
+  // Under CdrProductInjection::Mesh the production never becomes particles, and a_cdrProduction is not filled at
+  // all, so neither it nor the kernels below may be read.
+  const bool injectCdrProducts = (m_cdrProductInjection == CdrProductInjection::Particle);
 
   // The physics interface also takes the actual particles/photons as argument to its reconciliation routines. This
   // is the storage we use for these; note that it is repopulated in every grid cell (pointing at the per-cell
@@ -4564,7 +4679,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell CDR data
       for (int i = 0; i < numCdrSpecies; i++) {
-        cdrParticles[i] = &cdrCells[i][a_box.index(iv)];
+        cdrParticles[i]       = &cdrCells[i][a_box.index(iv)];
+        numNewCdrParticles[i] = injectCdrProducts ? a_cdrProduction.getSingleValuedFAB()(iv, i) : 0.0;
       }
 
       // Populate the per-cell photon data.
@@ -4610,6 +4726,22 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
+      // Turn the CDR production into particles, so that it reaches the mesh through the same deposition kernel as
+      // the Ito products above rather than landing in this cell alone. Deposited by depositCdrProducts(). A zero
+      // production makes this a no-op, which is what CdrProductInjection::Mesh relies on.
+      m_physics->reconcileCdrParticles(cdrParticles,
+                                       itoParticles,
+                                       numNewCdrParticles,
+                                       electricField,
+                                       cellPos,
+                                       centroidPos,
+                                       lo,
+                                       hi,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       a_dx,
+                                       kappa);
+
       // NOTE: Super-particle merging is NOT done here anymore. It is a separate step run after the
       //       whole chemistry advance (see advanceReactionNetwork(Real)), through the public
       //       ItoSolver::makeSuperparticles(), so that both per-cell and AMR-wide merge algorithms
@@ -4646,7 +4778,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Populate the per-cell CDR data
       for (int i = 0; i < numCdrSpecies; i++) {
-        cdrParticles[i] = &cdrCells[i][a_box.index(iv)];
+        cdrParticles[i]       = &cdrCells[i][a_box.index(iv)];
+        numNewCdrParticles[i] = injectCdrProducts ? a_cdrProduction(vof, i) : 0.0;
       }
 
       // Populate the per-cell photon data.
@@ -4692,6 +4825,20 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
 
+      // Turn the CDR production into particles -- see the regular kernel above.
+      m_physics->reconcileCdrParticles(cdrParticles,
+                                       itoParticles,
+                                       numNewCdrParticles,
+                                       electricField,
+                                       cellPos,
+                                       centroidPos,
+                                       lo,
+                                       hi,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       a_dx,
+                                       kappa);
+
       // NOTE: Super-particle merging is done after the chemistry advance -- see the regular kernel
       //       above and advanceReactionNetwork(Real).
     }
@@ -4731,7 +4878,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    rebuildLeafFromCells((*m_cdrPhotoiProducts[idx])[a_level][a_din], cdrCells[idx], a_box, a_dx, probLo);
+    rebuildLeafFromCells((*m_cdrProducts[idx])[a_level][a_din], cdrCells[idx], a_box, a_dx, probLo);
   }
 }
 
@@ -4773,7 +4920,7 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
       }
 
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-        cdrParticles[solverIt.index()] = &((*m_cdrPhotoiProducts[solverIt.index()])[lvl][din]);
+        cdrParticles[solverIt.index()] = &((*m_cdrProducts[solverIt.index()])[lvl][din]);
       }
 
       for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
@@ -4795,26 +4942,23 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParticlesPerCell,
-                                                 const EBAMRCellData& a_oldParticlesPerCell,
-                                                 const Real           a_dt) noexcept
+ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_cdrChange, const Real a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileCdrDensities(EBAMRCellDatax2, Real)");
+  CH_TIME("ItoKMCStepper::reconcileCdrDensities(EBAMRCellData, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileCdrDensities(EBAMRCellDatax2, Real)" << endl;
+    pout() << m_name + "::reconcileCdrDensities(EBAMRCellData, Real)" << endl;
   }
 
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  CH_assert(a_newParticlesPerCell.getRealm() == m_fluidRealm);
-  CH_assert(a_oldParticlesPerCell.getRealm() == m_fluidRealm);
+  CH_assert(a_cdrChange.getRealm() == m_fluidRealm);
   CH_assert(a_dt > 0.0);
 
   if (numCdrSpecies > 0) {
 
     // Increment, but don't divide by kappa.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      this->reconcileCdrDensities(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], lvl, a_dt);
+      this->reconcileCdrDensities(*a_cdrChange[lvl], lvl, a_dt);
     }
 
     // Redistribute if user calls for it.
@@ -4822,8 +4966,7 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
       for (auto it = m_cdr->iterator(); it.ok(); ++it) {
         const int idx = it.index();
 
-        const EBAMRCellData newPPC = m_amr->slice(a_newParticlesPerCell, Interval(idx, idx));
-        const EBAMRCellData oldPPC = m_amr->slice(a_oldParticlesPerCell, Interval(idx, idx));
+        const EBAMRCellData cdrChange = m_amr->slice(a_cdrChange, Interval(idx, idx));
 
         for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
           const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
@@ -4842,13 +4985,12 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
 
             deltaMass.setVal(0.0);
 
-            const EBCellFAB& newPPC = (*a_newParticlesPerCell[lvl])[din];
-            const EBCellFAB& oldPPC = (*a_oldParticlesPerCell[lvl])[din];
+            const EBCellFAB& change = (*a_cdrChange[lvl])[din];
 
             auto kernel = [&](const VolIndex& vof) -> void {
               const Real kappa = ebisbox.volFrac(vof);
 
-              deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / std::pow(dx, SpaceDim);
+              deltaMass(vof, 0) = change(vof, idx) * (1.0 - kappa) / std::pow(dx, SpaceDim);
             };
 
             VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
@@ -4871,20 +5013,18 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const LevelData<EBCellFAB>& a_newParticlesPerCell,
-                                                 const LevelData<EBCellFAB>& a_oldParticlesPerCell,
+ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const LevelData<EBCellFAB>& a_cdrChange,
                                                  const int                   a_level,
                                                  const Real                  a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileCdrDensities(LD<EBCellFAB>x2, int, Real)");
+  CH_TIME("ItoKMCStepper::reconcileCdrDensities(LD<EBCellFAB>, int, Real)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileCdrDensities(LD<EBCellFAB>x2, int, Real)" << endl;
+    pout() << m_name + "::reconcileCdrDensities(LD<EBCellFAB>, int, Real)" << endl;
   }
 
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  CH_assert(a_newParticlesPerCell.nComp() == numCdrSpecies);
-  CH_assert(a_oldParticlesPerCell.nComp() == numCdrSpecies);
+  CH_assert(a_cdrChange.nComp() == numCdrSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
   const DataIterator&      dit = dbl.dataIterator();
@@ -4896,30 +5036,27 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const LevelData<EBCellFAB>& a_n
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    this
-      ->reconcileCdrDensities(a_newParticlesPerCell[din], a_oldParticlesPerCell[din], a_level, din, dbl[din], dx, a_dt);
+    this->reconcileCdrDensities(a_cdrChange[din], a_level, din, dbl[din], dx, a_dt);
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticlesPerCell,
-                                                 const EBCellFAB& a_oldParticlesPerCell,
+ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_cdrChange,
                                                  const int        a_level,
                                                  const DataIndex  a_din,
                                                  const Box        a_box,
                                                  const Real       a_dx,
                                                  const Real       a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileCdrDensities(EBCellFABx2, int, DataIndex, Box, Realx2)");
+  CH_TIME("ItoKMCStepper::reconcileCdrDensities(EBCellFAB, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileCdrDensities(EBCellFABx2, int, DataIndex, Box, Realx2)" << endl;
+    pout() << m_name + "::reconcileCdrDensities(EBCellFAB, int, DataIndex, Box, Realx2)" << endl;
   }
 
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  CH_assert(a_newParticlesPerCell.nComp() == numCdrSpecies);
-  CH_assert(a_oldParticlesPerCell.nComp() == numCdrSpecies);
+  CH_assert(a_cdrChange.nComp() == numCdrSpecies);
 
   const Real volume = std::pow(a_dx, SpaceDim);
 
@@ -4930,16 +5067,15 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
     EBCellFAB& phi = (*(solver->getPhi()[a_level]))[a_din];
     EBCellFAB& src = (*(solver->getSource()[a_level]))[a_din];
 
-    // Source = (newParticles - oldParticles)/volume
+    // Source = change/volume
     src.setVal(0.0);
-    src.plus(a_newParticlesPerCell, index, 0, 1);
-    src.minus(a_oldParticlesPerCell, index, 0, 1);
+    src.plus(a_cdrChange, index, 0, 1);
     src /= volume;
 
-    // Phi += (newParticles - oldParticles)/volume
+    // Phi += change/volume
     phi += src;
 
-    // Source = (newParticles - oldParticles)/(volume*dt)
+    // Source = change/(volume*dt)
     src /= a_dt;
   }
 }
