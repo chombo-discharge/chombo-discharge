@@ -487,6 +487,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memitem:a9c5fb4a621700bef48880b7867838bfb" id="r_a9c5fb4a621700bef48880b7867838bfb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9c5fb4a621700bef48880b7867838bfb">coarsenCDRSolvers</a> (const bool a_interpGhosts) noexcept</td></tr>
 <tr class="memdesc:a9c5fb4a621700bef48880b7867838bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers.  <br /></td></tr>
 <tr class="separator:a9c5fb4a621700bef48880b7867838bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe1aae47c80aee7c2055a853f588863c" id="r_abe1aae47c80aee7c2055a853f588863c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#abe1aae47c80aee7c2055a853f588863c">needSecondaryEmissionEB</a> () const noexcept</td></tr>
+<tr class="memdesc:abe1aae47c80aee7c2055a853f588863c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether anything can be emitted from the EB this step, answered globally.  <br /></td></tr>
+<tr class="separator:abe1aae47c80aee7c2055a853f588863c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f165cf7747a84abe650c67ca1852ecf" id="r_a5f165cf7747a84abe650c67ca1852ecf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a5f165cf7747a84abe650c67ca1852ecf">fillSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a5f165cf7747a84abe650c67ca1852ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
 <tr class="separator:a5f165cf7747a84abe650c67ca1852ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -876,6 +879,9 @@ EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidScratch
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleScratchEB</b></td></tr>
 <tr class="memdesc:a5e0a1b8ef4446b1591e410d81d692bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for EB-only data on the particle realm. One component. <br /></td></tr>
 <tr class="separator:a5e0a1b8ef4446b1591e410d81d692bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a0c46545b232af0d6b4169bf3c5f39c" id="r_a7a0c46545b232af0d6b4169bf3c5f39c"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7a0c46545b232af0d6b4169bf3c5f39c">m_fluidScratchIto</a></td></tr>
+<tr class="memdesc:a7a0c46545b232af0d6b4169bf3c5f39c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-Ito-species scratch storage on the fluid realm, one component each.  <br /></td></tr>
+<tr class="separator:a7a0c46545b232af0d6b4169bf3c5f39c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classTimeStepper"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classTimeStepper')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
 <tr class="memitem:a3b59b74dcaad022a7e1382865ac82d44 inherit pro_attribs_classTimeStepper" id="r_a3b59b74dcaad022a7e1382865ac82d44"><td class="memItemLeft" align="right" valign="top">
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b></td></tr>
@@ -1364,9 +1370,9 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div><div class="memdoc">
 
 <p>Coarsen data for CDR solvers. </p>
-<p>Always averages the densities and source terms down the hierarchy &ndash; the coarse valid cells are read before anything re-averages them. The ghost-cell interpolation is optional because it has no reader on the reaction-advance path: the next consumers of the density ghost cells are <a class="el" href="classCdrSolver.html#a06082d89e6896cafdfa12e4ac5b20c38" title="Compute div(v*phi) explicitly.">CdrSolver::computeDivF</a>/computeDivD, both of which interpolate the ghost cells themselves, and the source-term ghost cells are never read at all (getSource()'s consumers &ndash; plotting and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundEvaluator.html" title="Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time ...">ItoKMCBackgroundEvaluator</a> &ndash; are valid-cell only, and the plot path fills its own ghost cells). </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Always averages the densities and source terms down the hierarchy &ndash; the coarse valid cells are read before anything re-averages them. The ghost-cell interpolation is optional, and applies to the density only: the next consumers of the density ghost cells are <a class="el" href="classCdrSolver.html#a06082d89e6896cafdfa12e4ac5b20c38" title="Compute div(v*phi) explicitly.">CdrSolver::computeDivF</a>/computeDivD, both of which interpolate the ghost cells themselves, and the source-term ghost cells are never read at all (getSource()'s consumers &ndash; plotting and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundEvaluator.html" title="Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time ...">ItoKMCBackgroundEvaluator</a> &ndash; are valid-cell only, and the plot path fills its own ghost cells), so the source term is never ghost-interpolated here. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhosts</td><td>Whether to interpolate the ghost cells after averaging. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpGhosts</td><td>Whether to interpolate the density ghost cells after averaging. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1971,9 +1977,9 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div><div class="memdoc">
 
 <p>Compute the maximum electric field (norm) </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Runs through m_fluidScratch1 rather than allocating a hierarchy of its own &ndash; this is called once per time step, and <a class="el" href="classAmrMesh.html#a1db67df63dc5a853e9d284c79065c54f" title="Allocate a struct-of-arrays particle container on the given realm.">AmrMesh::allocate</a> defines an exchange Copier per level. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where we compute the field. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase where we compute the field. Must be the plasma phase, which is the phase the rest of the body already assumes. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4058,6 +4064,38 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
+<a id="abe1aae47c80aee7c2055a853f588863c" name="abe1aae47c80aee7c2055a853f588863c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe1aae47c80aee7c2055a853f588863c">&#9670;&#160;</a></span>needSecondaryEmissionEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCStepper::needSecondaryEmissionEB </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether anything can be emitted from the EB this step, answered globally. </p>
+<p>Secondary emission is driven by three inputs: particles and photons that struck the boundary, and the advective flux a mobile CDR species delivers to it. When none of those exist anywhere, the emission routines still run their full fixed cost &ndash; roughly twenty hierarchy-wide exchanges, per step, whether or not a single particle reached the EB.</p>
+<p>The test has to be global, because the work it guards is collective: every rank must reach the same verdict or the ones that skip leave the others waiting in an exchange that never completes. One Allreduce over the local counts answers it, and those counts are free (the containers track their own size). Mobility is a static property of the CDR solvers and needs no reduction.</p>
+<p>Skipping leaves the secondary containers holding whatever the last emitting step put there, which is harmless: nothing reads them unless the emission runs, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a5f165cf7747a84abe650c67ca1852ecf" title="Resolve particle injection at EBs.">fillSecondaryEmissionEB()</a> clears them on entry when it does. </p><dl class="section return"><dt>Returns</dt><dd>True if secondary emission must be resolved this step. </dd></dl>
+
+</div>
+</div>
 <a id="a7824f74638a163e2ee8a27a9217fafac" name="a7824f74638a163e2ee8a27a9217fafac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7824f74638a163e2ee8a27a9217fafac">&#9670;&#160;</a></span>parseDualGrid()</h2>
 
@@ -4403,6 +4441,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 <p>Perform pre-plot operations. </p>
 
 <p>Reimplemented from <a class="el" href="classTimeStepper.html#a20cc9ee90664ed9614bd5d18a7104d24">TimeStepper</a>.</p>
+
+<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a8d1128a260459348eaba5ae89acd4605">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a8d1128a260459348eaba5ae89acd4605">Physics::ItoKMC::ItoKMCGodunovStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverGMG &gt;</a>.</p>
 
 </div>
 </div>
@@ -6381,6 +6421,33 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 <p><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> used for the fluid part (i.e., electrostatic) part of the simulation. </p>
 <dl class="section note"><dt>Note</dt><dd>This is hardcoded to <a class="el" href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e" title="Identifier for perimal realm.">Realm::Primal</a> </dd></dl>
+
+</div>
+</div>
+<a id="a7a0c46545b232af0d6b4169bf3c5f39c" name="a7a0c46545b232af0d6b4169bf3c5f39c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a0c46545b232af0d6b4169bf3c5f39c">&#9670;&#160;</a></span>m_fluidScratchIto</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;EBAMRCellData&gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_fluidScratchIto</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-Ito-species scratch storage on the fluid realm, one component each. </p>
+<p><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aec90ccbc72cd17b71b9297356b516443" title="Compute mesh-based mobilities for LFA coupling.">computeMobilities()</a> and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aa224f120fcfa0b3867fed1d93abe139e" title="Compute mesh-based diffusion coefficients for LFA coupling.">computeDiffusionCoefficients()</a> evaluate the physics on the fluid realm and then copy the result onto the particle-realm holders the ItoSolvers own. Both need one scalar hierarchy per Ito species to do that, and neither needs it to survive the call, but allocating them per call defines an exchange Copier per level per species on every time step. They do not overlap in time, so one set serves both. </p>
 
 </div>
 </div>

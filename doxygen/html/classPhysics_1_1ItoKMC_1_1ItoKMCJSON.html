@@ -182,12 +182,15 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCJSON</b> ()
 <tr class="memitem:ab26daaca1d1373dc63bee1f6e7ee8a37" id="r_ab26daaca1d1373dc63bee1f6e7ee8a37"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab26daaca1d1373dc63bee1f6e7ee8a37">needGradients</a> () const noexcept override</td></tr>
 <tr class="memdesc:ab26daaca1d1373dc63bee1f6e7ee8a37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the physics model requires species density gradients.  <br /></td></tr>
 <tr class="separator:ab26daaca1d1373dc63bee1f6e7ee8a37"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4cf980d45225f1e8fad9bd607820121" id="r_ad4cf980d45225f1e8fad9bd607820121"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ad4cf980d45225f1e8fad9bd607820121">computeMobilities</a> (const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
-<tr class="memdesc:ad4cf980d45225f1e8fad9bd607820121"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver mobilities.  <br /></td></tr>
-<tr class="separator:ad4cf980d45225f1e8fad9bd607820121"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa608c6ed153178fb03bf647ac852a18b" id="r_aa608c6ed153178fb03bf647ac852a18b"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa608c6ed153178fb03bf647ac852a18b">computeDiffusionCoefficients</a> (const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
-<tr class="memdesc:aa608c6ed153178fb03bf647ac852a18b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
-<tr class="separator:aa608c6ed153178fb03bf647ac852a18b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb6bd0aac5b21e39821950bdf4dcaaf6" id="r_acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#acb6bd0aac5b21e39821950bdf4dcaaf6">needGradient</a> (const int a_plasmaIndex) const noexcept override</td></tr>
+<tr class="memdesc:acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if any reaction's gradient correction names this plasma species.  <br /></td></tr>
+<tr class="separator:acb6bd0aac5b21e39821950bdf4dcaaf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afde437524e96ab93cc359fba2b9a0ee8" id="r_afde437524e96ab93cc359fba2b9a0ee8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#afde437524e96ab93cc359fba2b9a0ee8">computeMobilities</a> (Vector&lt; Real &gt; &amp;a_mobilities, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
+<tr class="memdesc:afde437524e96ab93cc359fba2b9a0ee8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver mobilities.  <br /></td></tr>
+<tr class="separator:afde437524e96ab93cc359fba2b9a0ee8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae25a89ea478ba9bd32e0a91bdc8e621c" id="r_ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae25a89ea478ba9bd32e0a91bdc8e621c">computeDiffusionCoefficients</a> (Vector&lt; Real &gt; &amp;a_diffusionCoefficients, const Real a_time, const RealVect &amp;a_pos, const RealVect &amp;a_E) const noexcept override</td></tr>
+<tr class="memdesc:ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the Ito solver diffusion coefficients.  <br /></td></tr>
+<tr class="separator:ae25a89ea478ba9bd32e0a91bdc8e621c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e1ac5f15342141e838b766c610146d8" id="r_a1e1ac5f15342141e838b766c610146d8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a1e1ac5f15342141e838b766c610146d8">secondaryEmissionEB</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_secondaryParticles, Vector&lt; Real &gt; &amp;a_secondaryCDRFluxes, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_secondaryPhotons, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &gt; &amp;a_primaryParticles, const Vector&lt; Real &gt; &amp;a_primaryCDRFluxes, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; &gt; &amp;a_primaryPhotons, const RealVect &amp;a_E, const RealVect &amp;a_cellCenter, const RealVect &amp;a_cellCentroid, const RealVect &amp;a_bndryCentroid, const RealVect &amp;a_bndryNormal, const Real a_bndryArea, const Real a_dx, const Real a_dt, const bool a_isDielectric, const int a_matIndex) const noexcept override</td></tr>
 <tr class="memdesc:a1e1ac5f15342141e838b766c610146d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
 <tr class="separator:a1e1ac5f15342141e838b766c610146d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -741,9 +744,23 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 <tr class="memitem:af250e30db5ae9f6ec10943252c0ee8a2 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_af250e30db5ae9f6ec10943252c0ee8a2"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af250e30db5ae9f6ec10943252c0ee8a2">m_kmcPropensityScratch</a></td></tr>
 <tr class="memdesc:af250e30db5ae9f6ec10943252c0ee8a2 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propensity buffer used by the time step tail of advanceKMC.  <br /></td></tr>
 <tr class="separator:af250e30db5ae9f6ec10943252c0ee8a2 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a58dffa61c7a109e784444a88be56b9 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a8a58dffa61c7a109e784444a88be56b9"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; long long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8a58dffa61c7a109e784444a88be56b9">m_weightScratch</a></td></tr>
+<tr class="memdesc:a8a58dffa61c7a109e784444a88be56b9 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reusable buffer for ParticleManagement::partitionParticleWeights.  <br /></td></tr>
+<tr class="separator:a8a58dffa61c7a109e784444a88be56b9 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf57f007555b5e427f5b542359f0e5c2 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_aaf57f007555b5e427f5b542359f0e5c2"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf57f007555b5e427f5b542359f0e5c2">m_kmcReactionsThreadLocal</a></td></tr>
 <tr class="memdesc:aaf57f007555b5e427f5b542359f0e5c2 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-local copies of KMC reactions used in advanceReactionNetwork.  <br /></td></tr>
 <tr class="separator:aaf57f007555b5e427f5b542359f0e5c2 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08a29838d3f4b7b692224d23d8ab5a4d inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a08a29838d3f4b7b692224d23d8ab5a4d"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a08a29838d3f4b7b692224d23d8ab5a4d">m_kmcReactionsDt</a></td></tr>
+<tr class="memdesc:a08a29838d3f4b7b692224d23d8ab5a4d inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">The subset of m_kmcReactionsThreadLocal that takes part in the physics time step calculation.  <br /></td></tr>
+<tr class="separator:a08a29838d3f4b7b692224d23d8ab5a4d inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f51b4580a2ae34269d75dbaea62975e inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a5f51b4580a2ae34269d75dbaea62975e"><td class="memItemLeft" align="right" valign="top">
+static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_reactiveDtFactorsDt</b></td></tr>
+<tr class="memdesc:a5f51b4580a2ae34269d75dbaea62975e inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time-step scaling factors for m_kmcReactionsDt, parallel to it. <br /></td></tr>
+<tr class="separator:a5f51b4580a2ae34269d75dbaea62975e inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dc84970983d05fe3d30c5489a0a8258 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a8dc84970983d05fe3d30c5489a0a8258"><td class="memItemLeft" align="right" valign="top">
+static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_kmcPropensityScratchDt</b></td></tr>
+<tr class="memdesc:a8dc84970983d05fe3d30c5489a0a8258 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propensity buffer for m_kmcReactionsDt, parallel to it. <br /></td></tr>
+<tr class="separator:a8dc84970983d05fe3d30c5489a0a8258 inherit pro_static_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implementation of <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a> which parses input data from a JSON file. </p>
@@ -1020,8 +1037,8 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 
 </div>
 </div>
-<a id="aa608c6ed153178fb03bf647ac852a18b" name="aa608c6ed153178fb03bf647ac852a18b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa608c6ed153178fb03bf647ac852a18b">&#9670;&#160;</a></span>computeDiffusionCoefficients()</h2>
+<a id="ae25a89ea478ba9bd32e0a91bdc8e621c" name="ae25a89ea478ba9bd32e0a91bdc8e621c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae25a89ea478ba9bd32e0a91bdc8e621c">&#9670;&#160;</a></span>computeDiffusionCoefficients()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1030,8 +1047,14 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; Real &gt; ItoKMCJSON::computeDiffusionCoefficients </td>
+          <td class="memname">void ItoKMCJSON::computeDiffusionCoefficients </td>
           <td>(</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_diffusionCoefficients</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_time</em>, </td>
         </tr>
@@ -1061,17 +1084,17 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 </div><div class="memdoc">
 
 <p>Compute the Ito solver diffusion coefficients. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Fills the caller's buffer; a non-diffusive species carries a constant-zero function and so fills its own slot without a table lookup. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_diffusionCoefficients</td><td>Non-negative diffusion coefficient for every plasma species. Resized here. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field vector. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of non-negative diffusion coefficients for all plasma species. </dd></dl>
 
-<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a229c44b63ea4161d30b22a6413b823ac">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad1aed72f6a18742b38ff9ae254eca82e">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>
@@ -1123,8 +1146,8 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 
 </div>
 </div>
-<a id="ad4cf980d45225f1e8fad9bd607820121" name="ad4cf980d45225f1e8fad9bd607820121"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4cf980d45225f1e8fad9bd607820121">&#9670;&#160;</a></span>computeMobilities()</h2>
+<a id="afde437524e96ab93cc359fba2b9a0ee8" name="afde437524e96ab93cc359fba2b9a0ee8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afde437524e96ab93cc359fba2b9a0ee8">&#9670;&#160;</a></span>computeMobilities()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1133,8 +1156,14 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt; Real &gt; ItoKMCJSON::computeMobilities </td>
+          <td class="memname">void ItoKMCJSON::computeMobilities </td>
           <td>(</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mobilities</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_time</em>, </td>
         </tr>
@@ -1164,17 +1193,17 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 </div><div class="memdoc">
 
 <p>Compute the Ito solver mobilities. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Fills the caller's buffer; an immobile species carries a constant-zero function and so fills its own slot without a table lookup. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_mobilities</td><td>Non-negative mobility coefficient for every plasma species. Resized here. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_time</td><td>Time. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field vector. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of non-negative mobility coefficients for all plasma species. </dd></dl>
 
-<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a9f955bd0692a29c53fc2af441c3c7792">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6accd05bace5e41d24d901720ea8a892">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>
@@ -1833,6 +1862,43 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="acb6bd0aac5b21e39821950bdf4dcaaf6" name="acb6bd0aac5b21e39821950bdf4dcaaf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb6bd0aac5b21e39821950bdf4dcaaf6">&#9670;&#160;</a></span>needGradient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCJSON::needGradient </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_plasmaIndex</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true if any reaction's gradient correction names this plasma species. </p>
+<p>The gradient corrections parsed out of the chemistry file already carry the species they apply to, so the answer is exact rather than the base class's blanket yes. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_plasmaIndex</td><td>Plasma species index (Ito species first, then CDR species). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if this species' gradient is read by at least one reaction. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af7c82f336dfeb54adf62fbfa31740169">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>

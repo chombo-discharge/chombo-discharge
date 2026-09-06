@@ -757,6 +757,22 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="nf">needGradients</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Return true if the physics model reads the density gradient of one particular plasma species.</span>
+<span class="cm">   * @details Refinement of needGradients(), which answers the same question for the whole model at once.</span>
+<span class="cm">   * Computing a gradient costs a cross-realm copy, a coarsening and a ghost interpolation over the whole</span>
+<span class="cm">   * AMR hierarchy, per species -- so a model that consults one species&#39; gradient pays for every species&#39;</span>
+<span class="cm">   * unless it can say which one it meant.</span>
+<span class="cm">   *</span>
+<span class="cm">   * The default is the conservative answer: whatever needGradients() says, for every species. A model</span>
+<span class="cm">   * that knows better should override this; one that does not keeps working unchanged.</span>
+<span class="cm">   * @param[in] a_plasmaIndex Plasma species index, in the ordering used by updateReactionRates()&#39;s</span>
+<span class="cm">   *                          density argument: the Ito species first, then the CDR species.</span>
+<span class="cm">   * @return True if this species&#39; gradient must be computed.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">needGradient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_plasmaIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Get the internal mapping from plasma-species index to solver type and solver index.</span>
 <span class="cm">   * @return Map from plasma species index to (SpeciesType, solver index) pair.</span>
 <span class="cm">   */</span>
@@ -780,23 +796,37 @@ The difference between <code class="docutils literal notranslate"><span class="p
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Compute the Ito solver mobilities.</span>
-<span class="cm">   * @param[in] a_time Time</span>
-<span class="cm">   * @param[in] a_pos  Position</span>
-<span class="cm">   * @param[in] a_E    Electric field</span>
-<span class="cm">   * @return Must return a vector of non-negative mobility coefficients for the plasma species</span>
+<span class="cm">   * @details Fills a caller-owned buffer rather than returning one. This is called once per grid cell, so a</span>
+<span class="cm">   * returned Vector&lt;Real&gt; was a heap allocation and a free per cell -- pure overhead, and (with Chombo memory</span>
+<span class="cm">   * tracking compiled in) a pair of counter updates on top. The caller hoists one buffer per patch instead.</span>
+<span class="cm">   *</span>
+<span class="cm">   * Implementations must size a_mobilities to the number of plasma species and fill every entry; a species</span>
+<span class="cm">   * that is not mobile should be given zero rather than skipped, so the indexing stays dense.</span>
+<span class="cm">   * @param[out] a_mobilities Non-negative mobility coefficient per plasma species. Resized by the callee.</span>
+<span class="cm">   * @param[in]  a_time       Time</span>
+<span class="cm">   * @param[in]  a_pos        Position</span>
+<span class="cm">   * @param[in]  a_E          Electric field</span>
 <span class="cm">   */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">  </span><span class="n">computeMobilities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">computeMobilities</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">   </span><span class="n">a_mobilities</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">      </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Compute the Ito solver diffusion coefficients</span>
-<span class="cm">   * @param[in] a_time Time</span>
-<span class="cm">   * @param[in] a_pos  Position</span>
-<span class="cm">   * @param[in] a_E    Electric field</span>
-<span class="cm">   * @return Must return a vector of non-negative diffusion coefficients for the plasma species</span>
+<span class="cm">   * @details Fills a caller-owned buffer; see computeMobilities() for why.</span>
+<span class="cm">   * @param[out] a_diffusionCoefficients Non-negative diffusion coefficient per plasma species. Resized by</span>
+<span class="cm">   *                                     the callee.</span>
+<span class="cm">   * @param[in]  a_time                  Time</span>
+<span class="cm">   * @param[in]  a_pos                   Position</span>
+<span class="cm">   * @param[in]  a_E                     Electric field</span>
 <span class="cm">   */</span>
-<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
-<span class="w">  </span><span class="n">computeDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">computeDiffusionCoefficients</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">   </span><span class="n">a_diffusionCoefficients</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">      </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Resolve secondary emission at the EB.</span>
@@ -1025,10 +1055,37 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_kmcPropensityScratch</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Reusable buffer for ParticleManagement::partitionParticleWeights.</span>
+<span class="cm">   * @details Reconciliation calls that function once per grid cell per species, from inside an OpenMP</span>
+<span class="cm">   * region; the vector-returning form allocates every one of those calls. Thread-local because the</span>
+<span class="cm">   * cell loop is threaded, and never shrunk, so the allocation is paid once per thread rather than</span>
+<span class="cm">   * once per cell.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_weightScratch</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.</span>
 <span class="cm">   * @details Set up via defineKMC() to ensure OpenMP thread safety; depopulated by killKMC().</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_kmcReactionsThreadLocal</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief The subset of m_kmcReactionsThreadLocal that takes part in the physics time step calculation.</span>
+<span class="cm">   * @details Holds the same objects as m_kmcReactionsThreadLocal, not copies, so the per-cell rate updates</span>
+<span class="cm">   * written through that list are seen here. Built by defineKMC() from m_reactiveDtFactors; see the</span>
+<span class="cm">   * comment there for why the compaction leaves the computed time step unchanged.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_kmcReactionsDt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Time-step scaling factors for m_kmcReactionsDt, parallel to it.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_reactiveDtFactorsDt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Propensity buffer for m_kmcReactionsDt, parallel to it.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_kmcPropensityScratchDt</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief List of reactions for the KMC solver</span>

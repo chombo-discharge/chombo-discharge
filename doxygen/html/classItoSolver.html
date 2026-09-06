@@ -588,9 +588,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCheckpointing</b
 <tr class="memitem:aac2b82ed36f44539366b43564e352846" id="r_aac2b82ed36f44539366b43564e352846"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aac2b82ed36f44539366b43564e352846">depositHybrid</a> (EBAMRCellData &amp;a_depositionH, EBAMRIVData &amp;a_massDifference, const EBAMRIVData &amp;a_depositionNC) const</td></tr>
 <tr class="memdesc:aac2b82ed36f44539366b43564e352846"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "hybrid" deposition phiH = kappa*phiC + (1-kappa)*phiNC. On input, a_depositionH should contain phiC.  <br /></td></tr>
 <tr class="separator:aac2b82ed36f44539366b43564e352846"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a126a3d1358e04233a96845494c6cec5d" id="r_a126a3d1358e04233a96845494c6cec5d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a126a3d1358e04233a96845494c6cec5d">interpolateMobilities</a> (int a_lvl, const DataIndex &amp;a_dit, const EBCellFAB &amp;a_velocityMagnitude) noexcept</td></tr>
-<tr class="memdesc:a126a3d1358e04233a96845494c6cec5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities &ndash; this will switch between the two ways of computing the particle mobility.  <br /></td></tr>
-<tr class="separator:a126a3d1358e04233a96845494c6cec5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5168884a3748a4d6df5e12d134f94436" id="r_a5168884a3748a4d6df5e12d134f94436"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a5168884a3748a4d6df5e12d134f94436">interpolateMobilitiesDirect</a> (int a_lvl, const DataIndex &amp;a_dit) noexcept</td></tr>
 <tr class="memdesc:a5168884a3748a4d6df5e12d134f94436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directly interpolate mobilities. Interpolates for all particles in the specified grid patch.  <br /></td></tr>
 <tr class="separator:a5168884a3748a4d6df5e12d134f94436"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -3521,7 +3518,7 @@ template&lt;typename P , typename Traits &gt; </div>
 </div>
 </div>
 <a id="a06df3eb32ebb71b1858298b2b0d7dd0b" name="a06df3eb32ebb71b1858298b2b0d7dd0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a06df3eb32ebb71b1858298b2b0d7dd0b">&#9670;&#160;</a></span>interpolateMobilities() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a06df3eb32ebb71b1858298b2b0d7dd0b">&#9670;&#160;</a></span>interpolateMobilities()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3545,58 +3542,6 @@ template&lt;typename P , typename Traits &gt; </div>
 
 <p>Interpolate mobilities. </p>
 <p>This will switch between the two ways of computing the particle mobility. </p>
-
-</div>
-</div>
-<a id="a126a3d1358e04233a96845494c6cec5d" name="a126a3d1358e04233a96845494c6cec5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a126a3d1358e04233a96845494c6cec5d">&#9670;&#160;</a></span>interpolateMobilities() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::interpolateMobilities </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>a_lvl</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const DataIndex &amp;&#160;</td>
-          <td class="paramname"><em>a_dit</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
-          <td class="paramname"><em>a_velocityMagnitude</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Interpolate mobilities &ndash; this will switch between the two ways of computing the particle mobility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_velocityMagnitude</td><td>Velocity magnitude. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>

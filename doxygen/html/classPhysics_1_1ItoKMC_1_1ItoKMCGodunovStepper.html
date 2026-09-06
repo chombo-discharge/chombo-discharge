@@ -162,6 +162,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCGodunovStep
 <tr class="memitem:a03385c154c9a31ec9d051c20de0e98e2" id="r_a03385c154c9a31ec9d051c20de0e98e2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a03385c154c9a31ec9d051c20de0e98e2">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept override</td></tr>
 <tr class="memdesc:a03385c154c9a31ec9d051c20de0e98e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid methods &ndash; puts all data on the new mesh.  <br /></td></tr>
 <tr class="separator:a03385c154c9a31ec9d051c20de0e98e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d1128a260459348eaba5ae89acd4605" id="r_a8d1128a260459348eaba5ae89acd4605"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a8d1128a260459348eaba5ae89acd4605">prePlot</a> () noexcept override</td></tr>
+<tr class="memdesc:a8d1128a260459348eaba5ae89acd4605"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-plot operations.  <br /></td></tr>
+<tr class="separator:a8d1128a260459348eaba5ae89acd4605"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53b61caf8a31fa9152408ca99df6631d" id="r_a53b61caf8a31fa9152408ca99df6631d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a53b61caf8a31fa9152408ca99df6631d">postPlot</a> () noexcept override</td></tr>
 <tr class="memdesc:a53b61caf8a31fa9152408ca99df6631d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform post-plot operations.  <br /></td></tr>
 <tr class="separator:a53b61caf8a31fa9152408ca99df6631d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -210,9 +213,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~ItoKMCStepper</b>
 <tr class="memitem:a287f4f8eb9093ec9d42eb44ee7fc8622 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a287f4f8eb9093ec9d42eb44ee7fc8622"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a287f4f8eb9093ec9d42eb44ee7fc8622">registerRealms</a> () noexcept override</td></tr>
 <tr class="memdesc:a287f4f8eb9093ec9d42eb44ee7fc8622 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register realms used for the simulation.  <br /></td></tr>
 <tr class="separator:a287f4f8eb9093ec9d42eb44ee7fc8622 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad50decaac205b11f80c881e68f9d8a07 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_ad50decaac205b11f80c881e68f9d8a07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad50decaac205b11f80c881e68f9d8a07">prePlot</a> () noexcept override</td></tr>
-<tr class="memdesc:ad50decaac205b11f80c881e68f9d8a07 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform pre-plot operations.  <br /></td></tr>
-<tr class="separator:ad50decaac205b11f80c881e68f9d8a07 inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaefc4617efbe459bfc1a86697e29714b inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_aaefc4617efbe459bfc1a86697e29714b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aaefc4617efbe459bfc1a86697e29714b">postRegrid</a> () noexcept override</td></tr>
 <tr class="memdesc:aaefc4617efbe459bfc1a86697e29714b inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform post-regrid operations.  <br /></td></tr>
 <tr class="separator:aaefc4617efbe459bfc1a86697e29714b inherit pub_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -603,6 +603,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memitem:a9c5fb4a621700bef48880b7867838bfb inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a9c5fb4a621700bef48880b7867838bfb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9c5fb4a621700bef48880b7867838bfb">coarsenCDRSolvers</a> (const bool a_interpGhosts) noexcept</td></tr>
 <tr class="memdesc:a9c5fb4a621700bef48880b7867838bfb inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers.  <br /></td></tr>
 <tr class="separator:a9c5fb4a621700bef48880b7867838bfb inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe1aae47c80aee7c2055a853f588863c inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_abe1aae47c80aee7c2055a853f588863c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#abe1aae47c80aee7c2055a853f588863c">needSecondaryEmissionEB</a> () const noexcept</td></tr>
+<tr class="memdesc:abe1aae47c80aee7c2055a853f588863c inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether anything can be emitted from the EB this step, answered globally.  <br /></td></tr>
+<tr class="separator:abe1aae47c80aee7c2055a853f588863c inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f165cf7747a84abe650c67ca1852ecf inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a5f165cf7747a84abe650c67ca1852ecf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a5f165cf7747a84abe650c67ca1852ecf">fillSecondaryEmissionEB</a> (const Real a_dt) noexcept</td></tr>
 <tr class="memdesc:a5f165cf7747a84abe650c67ca1852ecf inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve particle injection at EBs.  <br /></td></tr>
 <tr class="separator:a5f165cf7747a84abe650c67ca1852ecf inherit pro_methods_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -785,6 +788,18 @@ Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"
 <tr class="memitem:a5622d05b1ff17e2c608f18a35ce52c8d" id="r_a5622d05b1ff17e2c608f18a35ce52c8d"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a5622d05b1ff17e2c608f18a35ce52c8d">m_reactiveElectricField</a></td></tr>
 <tr class="memdesc:a5622d05b1ff17e2c608f18a35ce52c8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the electric field that the chemistry is evaluated at.  <br /></td></tr>
 <tr class="separator:a5622d05b1ff17e2c608f18a35ce52c8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1595f39009281ea4aedb282b9eb12f02" id="r_a1595f39009281ea4aedb282b9eb12f02"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1595f39009281ea4aedb282b9eb12f02">m_particleScratchSum</a></td></tr>
+<tr class="memdesc:a1595f39009281ea4aedb282b9eb12f02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle-realm accumulator for per-species sums, one component.  <br /></td></tr>
+<tr class="separator:a1595f39009281ea4aedb282b9eb12f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6dd79492d54b1b1c13e4a1a4d2d49fa1" id="r_a6dd79492d54b1b1c13e4a1a4d2d49fa1"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a6dd79492d54b1b1c13e4a1a4d2d49fa1">m_particleScratchSolid</a></td></tr>
+<tr class="memdesc:a6dd79492d54b1b1c13e4a1a4d2d49fa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition target on the particle realm, solid phase. One component.  <br /></td></tr>
+<tr class="separator:a6dd79492d54b1b1c13e4a1a4d2d49fa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f51c7c36760465caaa736fe033e1164" id="r_a2f51c7c36760465caaa736fe033e1164"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a2f51c7c36760465caaa736fe033e1164">m_particleScratchSumSolid</a></td></tr>
+<tr class="memdesc:a2f51c7c36760465caaa736fe033e1164"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-species accumulator on the particle realm, solid phase. One component.  <br /></td></tr>
+<tr class="separator:a2f51c7c36760465caaa736fe033e1164"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ed8d1933a792157ba09e2d79ef2fc8a" id="r_a7ed8d1933a792157ba09e2d79ef2fc8a"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a7ed8d1933a792157ba09e2d79ef2fc8a">m_fluidScratchSolid</a></td></tr>
+<tr class="memdesc:a7ed8d1933a792157ba09e2d79ef2fc8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cross-realm landing buffer on the fluid realm, solid phase. One component.  <br /></td></tr>
+<tr class="separator:a7ed8d1933a792157ba09e2d79ef2fc8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></td></tr>
 <tr class="memitem:a2180ae82e90e12300adb2c64dcd0f673 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a2180ae82e90e12300adb2c64dcd0f673"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_boxSort</b></td></tr>
@@ -1087,6 +1102,9 @@ EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidScratch
 EBAMRIVData&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleScratchEB</b></td></tr>
 <tr class="memdesc:a5e0a1b8ef4446b1591e410d81d692bac inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch storage for EB-only data on the particle realm. One component. <br /></td></tr>
 <tr class="separator:a5e0a1b8ef4446b1591e410d81d692bac inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a0c46545b232af0d6b4169bf3c5f39c inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper" id="r_a7a0c46545b232af0d6b4169bf3c5f39c"><td class="memItemLeft" align="right" valign="top">Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7a0c46545b232af0d6b4169bf3c5f39c">m_fluidScratchIto</a></td></tr>
+<tr class="memdesc:a7a0c46545b232af0d6b4169bf3c5f39c inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-Ito-species scratch storage on the fluid realm, one component each.  <br /></td></tr>
+<tr class="separator:a7a0c46545b232af0d6b4169bf3c5f39c inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classTimeStepper"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classTimeStepper')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classTimeStepper.html">TimeStepper</a></td></tr>
 <tr class="memitem:a3b59b74dcaad022a7e1382865ac82d44 inherit pro_attribs_classTimeStepper" id="r_a3b59b74dcaad022a7e1382865ac82d44"><td class="memItemLeft" align="right" valign="top">
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_verbosity</b></td></tr>
@@ -1917,6 +1935,38 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
+<a id="a8d1128a260459348eaba5ae89acd4605" name="a8d1128a260459348eaba5ae89acd4605"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d1128a260459348eaba5ae89acd4605">&#9670;&#160;</a></span>prePlot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCGodunovStepper::prePlot </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Perform pre-plot operations. </p>
+<p>Adds the absorbed-photon deposit on top of the base class' work. <a class="el" href="classMcPhoto.html" title="Radiative transfer equation solver using Monte-Carlo simulation.">McPhoto</a>'s mesh density is read by the plot and checkpoint writers and by nothing else &ndash; the photoionization the KMC kernels see comes from the photon containers &ndash; so it is filled here rather than once per time step in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a121c97e6fdf60ab42e6d1985c5bfdfca" title="Advance the Ito-Poisson-KMC system over a_dt.">advance()</a>. </p>
+
+<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad50decaac205b11f80c881e68f9d8a07">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>.</p>
+
+</div>
+</div>
 <a id="ac269a416aa8a7a9cdef32f7c34b64e5d" name="ac269a416aa8a7a9cdef32f7c34b64e5d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac269a416aa8a7a9cdef32f7c34b64e5d">&#9670;&#160;</a></span>preRegrid()</h2>
 
@@ -2427,6 +2477,114 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 <p>Storage for simplified particles that gave us sigma^k. </p>
 <dl class="section note"><dt>Note</dt><dd>Needed for regrids </dd></dl>
+
+</div>
+</div>
+<a id="a7ed8d1933a792157ba09e2d79ef2fc8a" name="a7ed8d1933a792157ba09e2d79ef2fc8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ed8d1933a792157ba09e2d79ef2fc8a">&#9670;&#160;</a></span>m_fluidScratchSolid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html">Physics::ItoKMC::ItoKMCGodunovStepper</a>&lt; I, C, R, F &gt;::m_fluidScratchSolid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cross-realm landing buffer on the fluid realm, solid phase. One component. </p>
+<p>Only allocated when the geometry actually has dielectrics; see <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e" title="Allocate &quot;internal&quot; storage.">allocateInternals()</a>. </p>
+
+</div>
+</div>
+<a id="a6dd79492d54b1b1c13e4a1a4d2d49fa1" name="a6dd79492d54b1b1c13e4a1a4d2d49fa1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6dd79492d54b1b1c13e4a1a4d2d49fa1">&#9670;&#160;</a></span>m_particleScratchSolid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html">Physics::ItoKMC::ItoKMCGodunovStepper</a>&lt; I, C, R, F &gt;::m_particleScratchSolid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposition target on the particle realm, solid phase. One component. </p>
+<p>Only allocated when the geometry actually has dielectrics; see <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e" title="Allocate &quot;internal&quot; storage.">allocateInternals()</a>. </p>
+
+</div>
+</div>
+<a id="a1595f39009281ea4aedb282b9eb12f02" name="a1595f39009281ea4aedb282b9eb12f02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1595f39009281ea4aedb282b9eb12f02">&#9670;&#160;</a></span>m_particleScratchSum</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html">Physics::ItoKMC::ItoKMCGodunovStepper</a>&lt; I, C, R, F &gt;::m_particleScratchSum</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Particle-realm accumulator for per-species sums, one component. </p>
+<p><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a7a176c80a69a9c76391577ee66355498" title="Compute the cell-centered conductivity.">computeCellConductivity()</a> and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#abc3788ae7fefadd1db9a480492264b5a" title="Set up the space charge density for the regrid operation.">computeSemiImplicitRho()</a> both form a charge-weighted sum over the Ito species and then hand the result to the fluid realm. Summing on the particle realm and crossing once costs one cross-realm Copier exchange instead of one per species. Not simultaneously live with <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a418b1eaafec36a45fefecbefd5a3e1e2" title="Scratch storage on the particle realm with 1 component.">ItoKMCStepper::m_particleScratch1</a>, which is the deposition target the sum is accumulated from. </p>
+
+</div>
+</div>
+<a id="a2f51c7c36760465caaa736fe033e1164" name="a2f51c7c36760465caaa736fe033e1164"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f51c7c36760465caaa736fe033e1164">&#9670;&#160;</a></span>m_particleScratchSumSolid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html">Physics::ItoKMC::ItoKMCGodunovStepper</a>&lt; I, C, R, F &gt;::m_particleScratchSumSolid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-species accumulator on the particle realm, solid phase. One component. </p>
+<p>Only allocated when the geometry actually has dielectrics; see <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1b1b4b4596c7d401e7350d23a599002e" title="Allocate &quot;internal&quot; storage.">allocateInternals()</a>. </p>
 
 </div>
 </div>

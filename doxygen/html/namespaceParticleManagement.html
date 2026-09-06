@@ -239,6 +239,10 @@ Functions</h2></td></tr>
 <tr class="memitem:adc14deeefa8aa650656960f7ffa4e5d0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#adc14deeefa8aa650656960f7ffa4e5d0">deleteParticles</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; P, Traits &gt; &amp;a_particles, const Real a_weightThresh) noexcept</td></tr>
 <tr class="memdesc:adc14deeefa8aa650656960f7ffa4e5d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles from an SoA container if their weight is below the threshold (swap-and-pop).  <br /></td></tr>
 <tr class="separator:adc14deeefa8aa650656960f7ffa4e5d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a690ec695825432c243667d2356bc2a00" id="r_a690ec695825432c243667d2356bc2a00"><td class="memTemplParams" colspan="2">template&lt;typename T , typename &gt; </td></tr>
+<tr class="memitem:a690ec695825432c243667d2356bc2a00"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a690ec695825432c243667d2356bc2a00">partitionParticleWeights</a> (std::vector&lt; T &gt; &amp;a_weights, const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept</td></tr>
+<tr class="memdesc:a690ec695825432c243667d2356bc2a00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition particle weights among a number of computational particles, into a caller-owned buffer.  <br /></td></tr>
+<tr class="separator:a690ec695825432c243667d2356bc2a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e0e66d389eb1951abc10af2fdd09a60" id="r_a9e0e66d389eb1951abc10af2fdd09a60"><td class="memTemplParams" colspan="2">template&lt;typename T , typename &gt; </td></tr>
 <tr class="memitem:a9e0e66d389eb1951abc10af2fdd09a60"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a9e0e66d389eb1951abc10af2fdd09a60">partitionParticleWeights</a> (const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept</td></tr>
 <tr class="memdesc:a9e0e66d389eb1951abc10af2fdd09a60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition particle weights among a number of computational particles.  <br /></td></tr>
@@ -2233,7 +2237,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 </div>
 </div>
 <a id="a9e0e66d389eb1951abc10af2fdd09a60" name="a9e0e66d389eb1951abc10af2fdd09a60"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e0e66d389eb1951abc10af2fdd09a60">&#9670;&#160;</a></span>partitionParticleWeights()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e0e66d389eb1951abc10af2fdd09a60">&#9670;&#160;</a></span>partitionParticleWeights() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2277,6 +2281,60 @@ template&lt;typename T , typename &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Return value </dd></dl>
+
+</div>
+</div>
+<a id="a690ec695825432c243667d2356bc2a00" name="a690ec695825432c243667d2356bc2a00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a690ec695825432c243667d2356bc2a00">&#9670;&#160;</a></span>partitionParticleWeights() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleManagement::partitionParticleWeights </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numPhysicalParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_maxCompParticles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Partition particle weights among a number of computational particles, into a caller-owned buffer. </p>
+<p>The buffer overload of partitionParticleWeights(T, T), for the per-cell callers: the returning form allocates a fresh vector on every call, and these run once per grid cell per species inside an OpenMP region, so the allocator traffic is per cell rather than per time step. A caller that reuses one buffer (thread-local, where the loop is threaded) pays that once. The partition is identical. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_weights</td><td>Receives one weight per computational particle; cleared first, and its capacity is retained for the next call. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numPhysicalParticles</td><td>Number of physical particles. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxCompParticles</td><td>Maximum number of computational particles </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

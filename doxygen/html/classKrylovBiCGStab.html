@@ -130,7 +130,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>undefine</b> () noexc
 Public Attributes</h2></td></tr>
 <tr class="memitem:ab63b968821cc0c5e7876e2aa0f55cbac" id="r_ab63b968821cc0c5e7876e2aa0f55cbac"><td class="memItemLeft" align="right" valign="top"><a id="ab63b968821cc0c5e7876e2aa0f55cbac" name="ab63b968821cc0c5e7876e2aa0f55cbac"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_eps</b> = 1.E-10</td></tr>
-<tr class="memdesc:ab63b968821cc0c5e7876e2aa0f55cbac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative residual tolerance (against the initial residual norm). <br /></td></tr>
+<tr class="memdesc:ab63b968821cc0c5e7876e2aa0f55cbac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative residual tolerance, measured against m_residualScale. <br /></td></tr>
 <tr class="separator:ab63b968821cc0c5e7876e2aa0f55cbac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63c5c2c0789e3507c72994febff73ec2" id="r_a63c5c2c0789e3507c72994febff73ec2"><td class="memItemLeft" align="right" valign="top"><a id="a63c5c2c0789e3507c72994febff73ec2" name="a63c5c2c0789e3507c72994febff73ec2"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxIter</b> = 50</td></tr>
@@ -156,8 +156,8 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_residualNorm</b> = 
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_iterations</b> = 0</td></tr>
 <tr class="memdesc:abc946cb27d750b58cc2249c8169ddc15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of iterations performed by the last <a class="el" href="classKrylovBiCGStab.html#a5b4d3cafb6f8f96559bec6f3a56bf58b" title="Solve a_op(a_phi) = a_rhs (homogeneous operator) with preconditioned BiCGStab.">solve()</a>. <br /></td></tr>
 <tr class="separator:abc946cb27d750b58cc2249c8169ddc15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1dc4a1e1674085cc08a297f6b0a4c1e" id="r_aa1dc4a1e1674085cc08a297f6b0a4c1e"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKrylovBiCGStab.html#aa1dc4a1e1674085cc08a297f6b0a4c1e">m_residualScale</a> = 1.0</td></tr>
-<tr class="memdesc:aa1dc4a1e1674085cc08a297f6b0a4c1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Display normalization for printed residuals (set to the zero-residual by the driver; 1 = print absolute).  <br /></td></tr>
+<tr class="memitem:aa1dc4a1e1674085cc08a297f6b0a4c1e" id="r_aa1dc4a1e1674085cc08a297f6b0a4c1e"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKrylovBiCGStab.html#aa1dc4a1e1674085cc08a297f6b0a4c1e">m_residualScale</a> = 0.0</td></tr>
+<tr class="memdesc:aa1dc4a1e1674085cc08a297f6b0a4c1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Norm that both the printed residual and the convergence test are measured against.  <br /></td></tr>
 <tr class="separator:aa1dc4a1e1674085cc08a297f6b0a4c1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -343,13 +343,13 @@ template&lt;class T &gt; </div>
 template&lt;class T &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">Real <a class="el" href="classKrylovBiCGStab.html">KrylovBiCGStab</a>&lt; T &gt;::m_residualScale = 1.0</td>
+          <td class="memname">Real <a class="el" href="classKrylovBiCGStab.html">KrylovBiCGStab</a>&lt; T &gt;::m_residualScale = 0.0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Display normalization for printed residuals (set to the zero-residual by the driver; 1 = print absolute). </p>
-<p>Affects only verbose output, not the convergence test. The printed value is the relative residual ||r|| / ||r_zero||, so progress is comparable across solvers regardless of their internal norm. </p>
+<p>Norm that both the printed residual and the convergence test are measured against. </p>
+<p>The driver sets this to the zero-residual ||r_zero|| = ||rhs - L(0)||, which is the scale the hosting solver itself uses to decide whether a solution has converged. Measuring the exit test on that same scale is what makes m_eps mean the same thing here as it does to the caller, and is also what lets a warm start pay for itself: scaling the tolerance by this solve's own initial residual instead would demand the same reduction factor no matter how good the initial guess was. A non-positive value falls back to this solve's initial residual norm, which is the right scale when there is no host to agree with. </p>
 
 </div>
 </div>
