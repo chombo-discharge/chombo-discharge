@@ -41,6 +41,17 @@
 #include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
 
+namespace {
+/**
+ * @brief HDF5 checkpoint header key holding the git description of the executable that wrote the
+ * file.
+ * @details Driver::writeCheckpointFile stores one string per realm in the same header map, so
+ * Driver::readCheckpointFile has to know this key in order not to mistake the git description for
+ * the name of a realm.
+ */
+constexpr const char* gitHashKey = "git_hash";
+} // namespace
+
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
@@ -2628,6 +2639,9 @@ Driver::writeCheckpointFile()
   header.m_int["step"]          = m_timeStep;
   header.m_int["finestLevel"]   = finestLevel;
 
+  // Provenance -- the git description of the executable that wrote this file.
+  header.m_string[gitHashKey] = DischargeIO::gitHash();
+
   // Write realm names -- these are needed because we also write computational loads to checkpoint files
   // so we can load balance on immediately restart, using the checkpointed loads.
   for (const auto& r : m_amr->getRealms()) {
@@ -2815,10 +2829,15 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
     MayDay::Warning(err.c_str());
   }
 
-  // Get the names of the realms that were checkpointed. This is a part of the HDF header.
+  // Get the names of the realms that were checkpointed. This is a part of the HDF header. The header
+  // also carries the git description of the writing executable, which is not a realm -- taking it
+  // for one would send readCheckpointRealmLoads looking for a "<git description>_loads" data set
+  // that does not exist. Files written before the git description was added simply lack the key.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
   for (const auto& s : header.m_string) {
-    checkpointedLoads.emplace(s.second, Vector<Vector<long int>>());
+    if (s.first != gitHashKey) {
+      checkpointedLoads.emplace(s.second, Vector<Vector<long int>>());
+    }
   }
 
   // Get then names of the realms that will be used for simulations. These are not necessarily the same because users

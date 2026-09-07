@@ -28,6 +28,7 @@
 
 // Our includes
 #include <CD_Initialize.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 std::string dischargeInputFile;
@@ -81,6 +82,7 @@ initialize(int argc, char* argv[])
 | (__| | | | (_) | | | | | | |_) | (_) |_____| (_| | \__ \ (__| | | | (_| | | | (_| |  __/
  \___|_| |_|\___/|_| |_| |_|_.__/ \___/       \__,_|_|___/\___|_| |_|\__,_|_|  \__, |\___|
 )" << endl;
+    pout() << "  Version:           " << DischargeIO::gitHash() << "\n";
     pout() << "  Working directory: " << cwd << "\n";
     pout() << "  Input file:        " << dischargeInputFile << "\n";
     pout() << "  Run command:       ";

@@ -55,6 +55,32 @@ XTRACPPFLAGS += $(GEOMETRIES_INCLUDE)
 # EBGeometry submodule needs to be visible.
 XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/EBGeometry
 
+# Build provenance. GenerateGitHash.sh writes CD_GIT_HASH -- the git description of this source tree
+# -- into a generated header, which CD_DischargeIO.cpp turns into DischargeIO::gitHash(). The header
+# lives outside Source/ so that it is invisible to Doxygen (Docs/doxygen.conf reads only
+# Source/Geometries/Physics) and to SOURCE_DIRS, and it is deliberately NOT a -D flag: Chombo's
+# dependency tracking keys on files, never on the VALUES of -D flags, so a hash passed that way would
+# silently never trigger a rebuild. The script rewrites the header only when the hash changes, so the
+# timestamp-based dependency tracking recompiles exactly one object file, and only when it must.
+#
+# The script is run at makefile-parse time rather than from a rule, because Definitions.make is
+# included by every sub-build (Source, Geometries, each Physics module, each application) and a rule
+# would have no single well-defined place to run first. It never fails: a missing git binary, a
+# release tarball with no .git, or a repository git refuses to touch all yield "unknown".
+#
+# The one-shot sentinel is exported for the same reason as CD_CONFIG_PRECISION_DONE below: recursive
+# $(MAKE) sub-builds re-parse this file, and the generation should happen once per build, not once
+# per recursion level -- which also keeps concurrent sub-makes under -j off the same output file.
+CD_BUILD_INFO_DIR := $(DISCHARGE_HOME)/Lib/Generated
+
+XTRACPPFLAGS += -I$(CD_BUILD_INFO_DIR)
+
+ifndef CD_GIT_HASH_DONE
+$(shell $(DISCHARGE_HOME)/Lib/GenerateGitHash.sh $(CD_BUILD_INFO_DIR)/CD_GitHash.H)
+CD_GIT_HASH_DONE := 1
+endif
+export CD_GIT_HASH_DONE
+
 # Particle payload precision (sets ParticleReal via -DCD_PARTICLE_REAL). Analogous to Chombo's
 # PRECISION flag, but it governs ONLY the SoA particle payload columns -- position and weight are
 # always double regardless. Set it on the command line (make PARTICLE_PRECISION=FLOAT) or in

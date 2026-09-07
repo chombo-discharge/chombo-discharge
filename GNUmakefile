@@ -69,6 +69,7 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/DischargeInception pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticle     pristine
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
+	$(RM) -r $(DISCHARGE_HOME)/Lib/Generated
 
 pristine: allclean
 	$(MAKE) --directory=$(CHOMBO_HOME) realclean
