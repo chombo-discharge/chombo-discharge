@@ -4188,29 +4188,23 @@ ItoKMCStepper<I, C, R, F>::depositCdrProducts(EBAMRCellData& a_cdrChange) noexce
 
   ParallelOps::sum(numProducts);
 
-  // clang-format off
-  // Under CdrProductInjection::Particle the kernel and the coarse-fine strategy are the Ito solvers' own -- that is
-  // the whole point, so that the two halves of a reaction spread over the mesh the same way. Any solver will do,
-  // since they all parse the same 'ItoSolver.deposition*' keys. Under CdrProductInjection::Mesh the only particles
-  // that reach here are the photoionization products, which have no in-cell representation to fall back on; they
-  // are put down NGP, which is what the code did before the chemistry products could become particles.
+  // Under CdrProductInjection::Particle the products go down through ItoSolver::depositWeight, so they get the Ito
+  // solvers' deposition in full -- kernel, coarse-fine strategy, cut-cell strategy and the mirror/redistribution
+  // passes that go with it. That is the whole point: the two halves of a reaction then spread over the mesh the same
+  // way, cut cells included. Any solver will do, since they all parse the same 'ItoSolver.deposition*' keys.
   //
-  // The CUT-CELL strategy is deliberately NOT taken from the solver, because that selector is a normalization and
-  // not a spreading rule, and the normalization here is fixed at both ends by the CDR path:
-  // computeReactiveCdrParticlesPerCell() reads a cut cell as kappa*phi*V physical particles, and
-  // reconcileCdrDensities() writes it back as phi += change/V. IrregularDeposition::NGP is the option that keeps
-  // that convention (a cut cell holds kappa*n) while losing nothing into the solid, so the cut-cell mass balance
-  // -- including the optional redistribution -- is exactly what it was before the products became particles.
-  // Mirror would hand back a true density instead, which is a different quantity from the one the removal branch
-  // and the redistribution are written in; Native, the strategy the photoionization products used to use, lets a
-  // CIC cloud leak into the covered region and quietly loses that mass.
-  // clang-format on
-  const bool useItoKernel = (m_cdrProductInjection == CdrProductInjection::Particle) &&
-                            (m_physics->getNumItoSpecies() > 0);
-
-  const DepositionType       deposition = useItoKernel ? m_ito->getSolvers()[0]->getDeposition() : DepositionType::NGP;
-  const CoarseFineDeposition coarseFineDeposition = useItoKernel ? m_ito->getSolvers()[0]->getCoarseFineDeposition()
-                                                                 : CoarseFineDeposition::Halo;
+  // Taking the cut-cell strategy from the solver is also why reconcileCdrDensities() skips the reactive
+  // redistribution in this mode. The in-cell path is written in the kappa*n convention -- computeReactive-
+  // CdrParticlesPerCell() reads a cut cell as kappa*phi*V and reconcileCdrDensities() writes it back as
+  // phi += change/V, so a cut-cell reaction is damped by kappa and 'redistribute_cdr' exists to push the
+  // resulting (1-kappa) share back out. A production deposited by the Ito solver carries the solver's cut-cell
+  // normalization instead, so there is no such damping left for the redistribution to correct.
+  //
+  // Under CdrProductInjection::Mesh the only particles that reach here are the photoionization products, which have
+  // no in-cell representation to fall back on. They are put down NGP with no cut-cell treatment, which is what the
+  // code did before the chemistry products could become particles.
+  const bool useItoDeposition = (m_cdrProductInjection == CdrProductInjection::Particle) &&
+                                (m_physics->getNumItoSpecies() > 0);
 
   for (int i = 0; i < m_cdrProducts.size(); i++) {
     if (numProducts[i] == 0LL) {
@@ -4219,13 +4213,23 @@ ItoKMCStepper<I, C, R, F>::depositCdrProducts(EBAMRCellData& a_cdrChange) noexce
 
     m_cdrProducts[i]->organizeParticlesByPatch();
 
-    m_amr->depositWeight(m_particleScratch1,
-                         m_particleRealm,
-                         m_plasmaPhase,
-                         *m_cdrProducts[i],
-                         deposition,
-                         coarseFineDeposition,
-                         IrregularDeposition::NGP);
+    if (useItoDeposition) {
+      const auto& solver = m_ito->getSolvers()[0];
+
+      solver->depositWeight(m_particleScratch1,
+                            *m_cdrProducts[i],
+                            solver->getDeposition(),
+                            solver->getCoarseFineDeposition());
+    }
+    else {
+      m_amr->depositWeight(m_particleScratch1,
+                           m_particleRealm,
+                           m_plasmaPhase,
+                           *m_cdrProducts[i],
+                           DepositionType::NGP,
+                           CoarseFineDeposition::Halo,
+                           IrregularDeposition::NGP);
+    }
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
@@ -4641,8 +4645,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   Vector<Physics::ItoKMC::FPR> numOldParticles(numItoSpecies);
   Vector<Physics::ItoKMC::FPR> numNewPhotons(numPhotonSpecies);
 
-  // Not an FPR: a CDR species is a continuum and its production is not a particle count, so it is not rounded.
-  Vector<Real> numNewCdrParticles(numCdrSpecies);
+  Vector<long long> numNewCdrParticles(numCdrSpecies);
 
   // Under CdrProductInjection::Mesh the production never becomes particles, and a_cdrProduction is not filled at
   // all, so neither it nor the kernels below may be read.
@@ -4680,7 +4683,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Populate the per-cell CDR data
       for (int i = 0; i < numCdrSpecies; i++) {
         cdrParticles[i]       = &cdrCells[i][a_box.index(iv)];
-        numNewCdrParticles[i] = injectCdrProducts ? a_cdrProduction.getSingleValuedFAB()(iv, i) : 0.0;
+        numNewCdrParticles[i] = injectCdrProducts ? llround(a_cdrProduction.getSingleValuedFAB()(iv, i)) : 0LL;
       }
 
       // Populate the per-cell photon data.
@@ -4694,6 +4697,27 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
         // have been cleared in upstream code but I'm leaving this in for safety.
         sourcePhotons[i]->clear();
       }
+
+      // Turn the CDR production into particles, so that it reaches the mesh through the same deposition kernel as
+      // the Ito products rather than landing in this cell alone. Deposited by depositCdrProducts(). A zero
+      // production makes this a no-op, which is what CdrProductInjection::Mesh relies on.
+      //
+      // Runs BEFORE the Ito reconciliation so that both halves of a reaction see the same Ito particles. Under
+      // ParticlePlacement::Downstream that is what keeps the downstream region identical for the two: the Ito
+      // products below are placed downstream and so cannot move it, but the photoionization products are placed at
+      // the absorption position and can.
+      m_physics->reconcileCdrParticles(cdrParticles,
+                                       itoParticles,
+                                       numNewCdrParticles,
+                                       electricField,
+                                       cellPos,
+                                       centroidPos,
+                                       lo,
+                                       hi,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       a_dx,
+                                       kappa);
 
       // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost
       // physical particles) or adds new particles (if we gained physical particles)
@@ -4725,22 +4749,6 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
-
-      // Turn the CDR production into particles, so that it reaches the mesh through the same deposition kernel as
-      // the Ito products above rather than landing in this cell alone. Deposited by depositCdrProducts(). A zero
-      // production makes this a no-op, which is what CdrProductInjection::Mesh relies on.
-      m_physics->reconcileCdrParticles(cdrParticles,
-                                       itoParticles,
-                                       numNewCdrParticles,
-                                       electricField,
-                                       cellPos,
-                                       centroidPos,
-                                       lo,
-                                       hi,
-                                       bndryCentroid,
-                                       bndryNormal,
-                                       a_dx,
-                                       kappa);
 
       // NOTE: Super-particle merging is NOT done here anymore. It is a separate step run after the
       //       whole chemistry advance (see advanceReactionNetwork(Real)), through the public
@@ -4779,7 +4787,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Populate the per-cell CDR data
       for (int i = 0; i < numCdrSpecies; i++) {
         cdrParticles[i]       = &cdrCells[i][a_box.index(iv)];
-        numNewCdrParticles[i] = injectCdrProducts ? a_cdrProduction(vof, i) : 0.0;
+        numNewCdrParticles[i] = injectCdrProducts ? llround(a_cdrProduction(vof, i)) : 0LL;
       }
 
       // Populate the per-cell photon data.
@@ -4793,6 +4801,20 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
         // have been cleared in upstream code but I'm leaving this in for safety.
         sourcePhotons[i]->clear();
       }
+
+      // Turn the CDR production into particles -- see the regular kernel above.
+      m_physics->reconcileCdrParticles(cdrParticles,
+                                       itoParticles,
+                                       numNewCdrParticles,
+                                       electricField,
+                                       cellPos,
+                                       centroidPos,
+                                       lo,
+                                       hi,
+                                       bndryCentroid,
+                                       bndryNormal,
+                                       a_dx,
+                                       kappa);
 
       // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost
       // physical particles) or adds new particles (if we gained physical particles)
@@ -4824,20 +4846,6 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, bulkPhotons);
-
-      // Turn the CDR production into particles -- see the regular kernel above.
-      m_physics->reconcileCdrParticles(cdrParticles,
-                                       itoParticles,
-                                       numNewCdrParticles,
-                                       electricField,
-                                       cellPos,
-                                       centroidPos,
-                                       lo,
-                                       hi,
-                                       bndryCentroid,
-                                       bndryNormal,
-                                       a_dx,
-                                       kappa);
 
       // NOTE: Super-particle merging is done after the chemistry advance -- see the regular kernel
       //       above and advanceReactionNetwork(Real).
@@ -4961,8 +4969,11 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_cdrChang
       this->reconcileCdrDensities(*a_cdrChange[lvl], lvl, a_dt);
     }
 
-    // Redistribute if user calls for it.
-    if (m_redistributeCDR) {
+    // Redistribute if the user calls for it. Only under CdrProductInjection::Mesh: the redistribution corrects the
+    // kappa damping that phi += change/V imposes on a cut-cell reaction, and under CdrProductInjection::Particle the
+    // production no longer lands in the cell through that route -- it is deposited by the Ito solver, with the Ito
+    // solver's own cut-cell normalization. See depositCdrProducts().
+    if (m_redistributeCDR && m_cdrProductInjection == CdrProductInjection::Mesh) {
       for (auto it = m_cdr->iterator(); it.ok(); ++it) {
         const int idx = it.index();
 

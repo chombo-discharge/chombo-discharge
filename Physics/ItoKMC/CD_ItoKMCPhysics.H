@@ -438,19 +438,15 @@ public:
 
   /**
    * @brief Turn the CDR mass created by the reaction network into particles.
-   * @details The reaction network yields a per-cell production for each CDR species, which the stepper could add
-   * straight into the cell. It does not, because the Ito products of the very same reaction reach the mesh through
-   * a deposition kernel that is generally not NGP: an ionization event would then put the electron's charge over a
-   * deposition stencil and the ion's charge in a single cell, which is a spurious charge separation on the cell
-   * scale. Emitting the CDR mass as particles here lets the stepper deposit it with the Ito solvers' own kernel, so
-   * both halves of a reaction reach the mesh the same way.
-   * @details The particles carry a real weight -- unlike the Ito products, a CDR species is a continuum and its
-   * production is not quantized. It is spread over m_maxNewParticles particles of equal weight -- the same budget
-   * the Ito products use -- which is what bounds the sampling noise the placement introduces.
-   * @note Only production is handled here. Mass *removed* from a CDR species is proportional to the cell-averaged
-   * density, which is the only sub-cell information a fluid field carries, so the stepper subtracts it in the cell.
+   * @details Emitting the production as particles lets the stepper deposit it with the Ito solvers' deposition, so
+   * both halves of a reaction reach the mesh the same way. The production is partitioned into at most
+   * m_maxNewParticles computational particles of integer weight, exactly as the Ito products are.
+   * @note Only production is handled here. Mass removed from a CDR species carries no sub-cell information, so the
+   * stepper subtracts it in the cell it was taken from.
+   * @note ParticlePlacement::Parent does not apply to these particles -- a CDR product has no parents in the cell,
+   * its container holding only what the current step created -- and falls back to a uniformly random position.
    * @param[in,out] a_cdrParticles     Particle products placed in the CDR solvers.
-   * @param[in]     a_itoParticles     Ito particles in the cell, used as parents for ParticlePlacement::Parent.
+   * @param[in]     a_itoParticles     Ito particles in the cell, used by ParticlePlacement::Downstream.
    * @param[in]     a_numNewParticles  Number of physical particles produced per CDR species. Must be >= 0.
    * @param[in]     a_electricField    Electric field in cell
    * @param[in]     a_cellPos          Cell center position
@@ -466,7 +462,7 @@ public:
   inline void
   reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_cdrParticles,
                         const Vector<ParticleSoA<ItoParticle>*>& a_itoParticles,
-                        const Vector<Real>&                      a_numNewParticles,
+                        const Vector<long long>&                 a_numNewParticles,
                         const RealVect                           a_electricField,
                         const RealVect                           a_cellPos,
                         const RealVect                           a_centroidPos,
@@ -536,11 +532,6 @@ protected:
   bool m_isDefined;
 
   /**
-   * @brief If true, increment onto existing particles rather than creating new ones
-   */
-  bool m_incrementNewParticles;
-
-  /**
    * @brief Is the KMC solver defined or not.
    */
   static thread_local bool m_hasKMCSolver;
@@ -578,6 +569,13 @@ protected:
    * once per cell.
    */
   static thread_local std::vector<long long> m_weightScratch;
+
+  /**
+   * @brief Running sum of the eligible parent weights in a grid cell, used by ParticlePlacement::Parent.
+   * @details Built once per cell and species, so that each of the up to m_maxNewParticles draws is a binary search
+   * rather than another walk over the cell's particles. Thread-local for the same reason as m_weightScratch.
+   */
+  static thread_local std::vector<Real> m_parentWeightScratch;
 
   /**
    * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.
@@ -773,14 +771,12 @@ protected:
 
   /**
    * @brief Draw a position for a particle created by the reaction network in a grid cell.
-   * @details This is the single implementation of ParticlePlacement -- both the Ito products and the CDR products
-   * come through here, so that the two halves of a reaction are placed by the same rule. The caller supplies the
-   * data the placement modes need but cannot derive on their own: a sampled parent (Parent) and the downstream
-   * region (Downstream). Either may be flagged absent, in which case that mode falls back to a uniformly random
-   * position within the cell.
+   * @details The single implementation of ParticlePlacement, shared by the Ito and CDR products. The caller supplies
+   * the sampled parent (Parent) and the downstream region (Downstream); either may be flagged absent, in which case
+   * that mode falls back to a uniformly random position within the cell.
    * @param[in] a_hasParent           True if a_parentPos holds a usable parent position.
-   * @param[in] a_parentPos           Position of the sampled parent particle. Only read for ParticlePlacement::Parent.
    * @param[in] a_hasDownstream       True if the downstream region below is defined.
+   * @param[in] a_parentPos           Position of the sampled parent particle. Only read for ParticlePlacement::Parent.
    * @param[in] a_upstreamPos         Upstream position within the cell, in unit coordinates.
    * @param[in] a_upstreamLo          Lower corner of the downstream region, in unit coordinates.
    * @param[in] a_upstreamHi          Upper corner of the downstream region, in unit coordinates.
@@ -797,8 +793,8 @@ protected:
    */
   inline RealVect
   drawNewParticlePosition(const bool     a_hasParent,
-                          const RealVect a_parentPos,
                           const bool     a_hasDownstream,
+                          const RealVect a_parentPos,
                           const RealVect a_upstreamPos,
                           const RealVect a_upstreamLo,
                           const RealVect a_upstreamHi,
@@ -814,36 +810,30 @@ protected:
 
   /**
    * @brief Draw the position of a parent particle, with probability proportional to particle weight.
-   * @details Used by ParticlePlacement::Parent. The caller passes the weight sum rather than having it recomputed
-   * here, because it is loop-invariant over the particles being created in the cell.
-   * @param[out] a_pos         Position of the drawn parent.
-   * @param[in]  a_particles   Candidate parents.
-   * @param[in]  a_numEligible Number of leading entries of a_particles that may be drawn. Particles created during
-   * the reconciliation are appended to the same container and must not become parents for their own siblings, which
-   * is what this excludes.
-   * @param[in]  a_weightSum   Summed weight of the leading a_numEligible entries.
+   * @details Used by ParticlePlacement::Parent. The caller passes the running weight sum, built by
+   * buildParentWeights(), so that a draw is a binary search rather than another walk over the cell's particles.
+   * @param[out] a_pos               Position of the drawn parent.
+   * @param[in]  a_particles         Candidate parents.
+   * @param[in]  a_cumulativeWeights Running weight sum of the eligible leading entries of a_particles.
    * @return True if a parent was drawn, false if there was nothing to draw from.
    */
   inline bool
   sampleParentPosition(RealVect&                       a_pos,
                        const ParticleSoA<ItoParticle>& a_particles,
-                       const std::size_t               a_numEligible,
-                       const Real                      a_weightSum) const noexcept;
+                       const std::vector<Real>&        a_cumulativeWeights) const noexcept;
 
   /**
-   * @brief Draw the position of a parent particle pooled across all Ito species, proportionally to particle weight.
-   * @details Used when placing CDR products under ParticlePlacement::Parent. A CDR product has no parents of its own
-   * -- its container is transient and holds only what the current step created -- so the parents are the reactants
-   * that do carry a sub-cell position, which are the Ito particles in the cell.
-   * @param[out] a_pos       Position of the drawn parent.
-   * @param[in]  a_particles Candidate parents, one entry per Ito species.
-   * @param[in]  a_weightSum Summed weight over every entry of every container in a_particles.
-   * @return True if a parent was drawn, false if there was nothing to draw from.
+   * @brief Build the running weight sum that sampleParentPosition() draws from.
+   * @details Only the leading a_numEligible entries are eligible parents: the reconciliation appends to the same
+   * container, and a freshly created particle must not become a parent for its siblings.
+   * @param[out] a_cumulativeWeights Receives one running sum per eligible particle; cleared first.
+   * @param[in]  a_particles         Candidate parents.
+   * @param[in]  a_numEligible       Number of leading entries of a_particles that may be drawn.
    */
-  inline bool
-  sampleParentPosition(RealVect&                                a_pos,
-                       const Vector<ParticleSoA<ItoParticle>*>& a_particles,
-                       const Real                               a_weightSum) const noexcept;
+  inline void
+  buildParentWeights(std::vector<Real>&              a_cumulativeWeights,
+                     const ParticleSoA<ItoParticle>& a_particles,
+                     const std::size_t               a_numEligible) const noexcept;
 
   /**
    * @brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.

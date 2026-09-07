@@ -248,7 +248,7 @@ ItoKMCGodunovStepper.verbosity                                = -1              
 ItoKMCGodunovStepper.secondary_emission                       = after_reactions    ## When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
-ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
+ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution. Ignored if cdr_products = particle
 ItoKMCGodunovStepper.cdr_products                             = particle           ## How CDR reaction products reach the mesh. 'mesh' or 'particle'
 ItoKMCGodunovStepper.profile                                  = false              ## Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                                 = none               ## 'conductivity', 'current_density', 'particles_per_patch'
@@ -295,7 +295,6 @@ ItoKMCJSON.chemistry_file     = chemistry.json    ## Chemistry file. Must be sup
 # Kinetic Monte Carlo solver settings.
 ItoKMCJSON.max_new_particles     = 32                 ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons       = 128                ## Maximum number of computational photons to produce in reaction step
-ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
 ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps              = 1.E99              ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient

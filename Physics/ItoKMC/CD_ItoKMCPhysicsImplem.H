@@ -13,6 +13,9 @@
 #ifndef CD_ITOKMCPHYSICSIMPLEM_H
 #define CD_ITOKMCPHYSICSIMPLEM_H
 
+// Std includes
+#include <algorithm>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -36,21 +39,20 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_photoReactions.clear();
 
   // Some default settings (mostly in case user forgets to call the parsing algorithms).
-  m_isDefined             = false;
-  m_debug                 = true;
-  m_hasKMCSolver          = false;
-  m_incrementNewParticles = false;
-  m_downstreamSpecies     = -1;
-  m_maxNewParticles       = 32;
-  m_maxNewPhotons         = 32;
-  m_Ncrit                 = 5;
-  m_eps                   = 2.0;
-  m_NSSA                  = 5;
-  m_maxIter               = 10;
-  m_SSAlim                = 5.0;
-  m_exitTol               = 1.E-6;
-  m_algorithm             = Algorithm::ExplicitEuler;
-  m_particlePlacement     = ParticlePlacement::Random;
+  m_isDefined         = false;
+  m_debug             = true;
+  m_hasKMCSolver      = false;
+  m_downstreamSpecies = -1;
+  m_maxNewParticles   = 32;
+  m_maxNewPhotons     = 32;
+  m_Ncrit             = 5;
+  m_eps               = 2.0;
+  m_NSSA              = 5;
+  m_maxIter           = 10;
+  m_SSAlim            = 5.0;
+  m_exitTol           = 1.E-6;
+  m_algorithm         = Algorithm::ExplicitEuler;
+  m_particlePlacement = ParticlePlacement::Random;
 }
 
 inline ItoKMCPhysics::~ItoKMCPhysics() noexcept
@@ -267,7 +269,10 @@ ItoKMCPhysics::parsePPC() noexcept
 
   pp.get("max_new_particles", m_maxNewParticles);
   pp.get("max_new_photons", m_maxNewPhotons);
-  pp.get("increment_weights", m_incrementNewParticles);
+
+  if (m_maxNewParticles < 1) {
+    MayDay::Abort(("ItoKMCPhysics::parsePPC - '" + m_className + ".max_new_particles' must be >= 1").c_str());
+  }
 }
 
 inline void
@@ -641,65 +646,38 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
     if (diff > 0LL) {
       const long long numParticles = static_cast<long long>(a_particles[i]->size());
 
-      if (numParticles > 0LL && m_incrementNewParticles) {
-        // If the cell already contains particles, partition the new particle weights and increment the existing
-        // particles
-        ParticleManagement::partitionParticleWeights(m_weightScratch, diff, numParticles);
+      // Choose weights for the new particles and go with one of the placement algorithms.
+      ParticleManagement::partitionParticleWeights(m_weightScratch, diff, static_cast<long long>(m_maxNewParticles));
 
-        const std::vector<long long>& particleWeights = m_weightScratch;
+      const std::vector<long long>& particleWeights = m_weightScratch;
 
-        ParticleSoA<ItoParticle>& particles = *a_particles[i];
-
-        for (std::size_t j = 0; j < particles.size() && j < particleWeights.size(); j++) {
-          particles.weight(j) += 1.0 * particleWeights[j];
-        }
+      if (m_particlePlacement == ParticlePlacement::Parent) {
+        this->buildParentWeights(m_parentWeightScratch, *a_particles[i], static_cast<std::size_t>(numParticles));
       }
-      else {
-        // Adding new particles, which is fairly simple. Just choose weights for the particles and go with one of the
-        // placement algorithms.
-        ParticleManagement::partitionParticleWeights(m_weightScratch, diff, static_cast<long long>(m_maxNewParticles));
 
-        const std::vector<long long>& particleWeights = m_weightScratch;
+      for (const auto& w : particleWeights) {
+        RealVect parentPos = RealVect::Zero;
 
-        // Total weight of the particles that were already in the cell. Only the leading numParticles entries are
-        // eligible parents -- the appends below grow the container, and a freshly created particle must not become
-        // a parent for its siblings. Computed once here rather than per new particle.
-        Real parentWeightSum = 0.0;
+        const bool hasParent = (m_particlePlacement == ParticlePlacement::Parent) &&
+                               this->sampleParentPosition(parentPos, *a_particles[i], m_parentWeightScratch);
 
-        if (m_particlePlacement == ParticlePlacement::Parent) {
+        const RealVect x = this->drawNewParticlePosition(hasParent,
+                                                         hasDownstream,
+                                                         parentPos,
+                                                         upstreamPosition,
+                                                         upstreamLo,
+                                                         upstreamHi,
+                                                         v,
+                                                         a_cellPos,
+                                                         a_centroidPos,
+                                                         a_lo,
+                                                         a_hi,
+                                                         a_bndryCentroid,
+                                                         a_bndryNormal,
+                                                         a_dx,
+                                                         a_kappa);
 
-          for (long long j = 0; j < numParticles; j++) {
-            parentWeightSum += a_particles[i]->weight(static_cast<std::size_t>(j));
-          }
-        }
-
-        for (const auto& w : particleWeights) {
-          RealVect parentPos = RealVect::Zero;
-
-          const bool hasParent = (m_particlePlacement == ParticlePlacement::Parent) &&
-                                 this->sampleParentPosition(parentPos,
-                                                            *a_particles[i],
-                                                            static_cast<std::size_t>(numParticles),
-                                                            parentWeightSum);
-
-          const RealVect x = this->drawNewParticlePosition(hasParent,
-                                                           parentPos,
-                                                           hasDownstream,
-                                                           upstreamPosition,
-                                                           upstreamLo,
-                                                           upstreamHi,
-                                                           v,
-                                                           a_cellPos,
-                                                           a_centroidPos,
-                                                           a_lo,
-                                                           a_hi,
-                                                           a_bndryCentroid,
-                                                           a_bndryNormal,
-                                                           a_dx,
-                                                           a_kappa);
-
-          a_particles[i]->append(x, 1.0 * w, ItoParticle{});
-        }
+        a_particles[i]->append(x, 1.0 * w, ItoParticle{});
       }
     }
     else if (diff < 0LL) {
@@ -711,8 +689,8 @@ ItoKMCPhysics::reconcileParticles(Vector<ParticleSoA<ItoParticle>*>& a_particles
 
 inline RealVect
 ItoKMCPhysics::drawNewParticlePosition(const bool     a_hasParent,
-                                       const RealVect a_parentPos,
                                        const bool     a_hasDownstream,
+                                       const RealVect a_parentPos,
                                        const RealVect a_upstreamPos,
                                        const RealVect a_upstreamLo,
                                        const RealVect a_upstreamHi,
@@ -784,82 +762,50 @@ ItoKMCPhysics::drawNewParticlePosition(const bool     a_hasParent,
   return x;
 }
 
-inline bool
-ItoKMCPhysics::sampleParentPosition(RealVect&                       a_pos,
-                                    const ParticleSoA<ItoParticle>& a_particles,
-                                    const std::size_t               a_numEligible,
-                                    const Real                      a_weightSum) const noexcept
+inline void
+ItoKMCPhysics::buildParentWeights(std::vector<Real>&              a_cumulativeWeights,
+                                  const ParticleSoA<ItoParticle>& a_particles,
+                                  const std::size_t               a_numEligible) const noexcept
 {
-  if (a_numEligible == 0 || a_weightSum <= 0.0) {
-    return false;
-  }
+  a_cumulativeWeights.clear();
+  a_cumulativeWeights.reserve(a_numEligible);
 
-  const Real r = Random::getUniformReal01() * a_weightSum;
-
-  Real        runningSum = 0.0;
-  std::size_t parent     = a_numEligible - 1;
+  Real runningSum = 0.0;
 
   for (std::size_t j = 0; j < a_numEligible; j++) {
     runningSum += a_particles.weight(j);
 
-    if (runningSum >= r) {
-      parent = j;
-
-      break;
-    }
+    a_cumulativeWeights.push_back(runningSum);
   }
+}
+
+inline bool
+ItoKMCPhysics::sampleParentPosition(RealVect&                       a_pos,
+                                    const ParticleSoA<ItoParticle>& a_particles,
+                                    const std::vector<Real>&        a_cumulativeWeights) const noexcept
+{
+  if (a_cumulativeWeights.empty() || a_cumulativeWeights.back() <= 0.0) {
+    return false;
+  }
+
+  const Real r = Random::getUniformReal01() * a_cumulativeWeights.back();
+
+  // First entry whose running sum reaches r. The end() case is round-off leaving the last sum a hair below r.
+  const auto it = std::lower_bound(a_cumulativeWeights.cbegin(), a_cumulativeWeights.cend(), r);
+
+  const std::size_t parent = (it == a_cumulativeWeights.cend())
+                               ? a_cumulativeWeights.size() - 1
+                               : static_cast<std::size_t>(it - a_cumulativeWeights.cbegin());
 
   a_pos = a_particles.position(parent);
 
   return true;
 }
 
-inline bool
-ItoKMCPhysics::sampleParentPosition(RealVect&                                a_pos,
-                                    const Vector<ParticleSoA<ItoParticle>*>& a_particles,
-                                    const Real                               a_weightSum) const noexcept
-{
-  if (a_weightSum <= 0.0) {
-    return false;
-  }
-
-  const Real r = Random::getUniformReal01() * a_weightSum;
-
-  Real runningSum = 0.0;
-
-  // The walk is the same one the single-container overload does, only continued across species boundaries. The
-  // trailing fallback covers the case where round-off leaves runningSum a hair below r on the last entry.
-  for (int i = 0; i < a_particles.size(); i++) {
-    const ParticleSoA<ItoParticle>& particles = *a_particles[i];
-
-    for (std::size_t j = 0; j < particles.size(); j++) {
-      runningSum += particles.weight(j);
-
-      if (runningSum >= r) {
-        a_pos = particles.position(j);
-
-        return true;
-      }
-    }
-  }
-
-  for (int i = a_particles.size() - 1; i >= 0; i--) {
-    const ParticleSoA<ItoParticle>& particles = *a_particles[i];
-
-    if (particles.size() > 0) {
-      a_pos = particles.position(particles.size() - 1);
-
-      return true;
-    }
-  }
-
-  return false;
-}
-
 inline void
 ItoKMCPhysics::reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_cdrParticles,
                                      const Vector<ParticleSoA<ItoParticle>*>& a_itoParticles,
-                                     const Vector<Real>&                      a_numNewParticles,
+                                     const Vector<long long>&                 a_numNewParticles,
                                      const RealVect                           a_electricField,
                                      const RealVect                           a_cellPos,
                                      const RealVect                           a_centroidPos,
@@ -879,9 +825,9 @@ ItoKMCPhysics::reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_
   bool hasProduction = false;
 
   for (int i = 0; i < a_numNewParticles.size(); i++) {
-    CH_assert(a_numNewParticles[i] >= 0.0);
+    CH_assert(a_numNewParticles[i] >= 0LL);
 
-    hasProduction = hasProduction || (a_numNewParticles[i] > 0.0);
+    hasProduction = hasProduction || (a_numNewParticles[i] > 0LL);
   }
 
   if (!hasProduction) {
@@ -915,37 +861,24 @@ ItoKMCPhysics::reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_
                                                   a_dx);
   }
 
-  // Parent placement draws from the Ito particles pooled across species -- see the overload's documentation. The
-  // pooled weight is loop-invariant over both the species and the particles created below, so it is summed once.
-  Real parentWeightSum = 0.0;
-
-  if (m_particlePlacement == ParticlePlacement::Parent) {
-
-    for (int i = 0; i < a_itoParticles.size(); i++) {
-      const ParticleSoA<ItoParticle>& particles = *a_itoParticles[i];
-
-      for (std::size_t j = 0; j < particles.size(); j++) {
-        parentWeightSum += particles.weight(j);
-      }
-    }
-  }
+  // ParticlePlacement::Parent has no meaning here: a CDR product has no parents in the cell, its container holding
+  // only what the current step created. drawNewParticlePosition falls back to a uniformly random position.
+  constexpr bool hasParent = false;
+  const RealVect parentPos = RealVect::Zero;
 
   for (int i = 0; i < a_cdrParticles.size(); i++) {
-    if (a_numNewParticles[i] > 0.0) {
+    if (a_numNewParticles[i] > 0LL) {
 
-      // Equal weights: unlike the Ito products these are not physical particles that must carry an integer number
-      // of electrons, they are a quadrature of the produced mass over the cell, so there is nothing to partition.
-      const Real w = a_numNewParticles[i] / m_maxNewParticles;
+      // Same partition as the Ito products: at most m_maxNewParticles computational particles, each carrying an
+      // integer number of physical ones.
+      ParticleManagement::partitionParticleWeights(m_weightScratch,
+                                                   a_numNewParticles[i],
+                                                   static_cast<long long>(m_maxNewParticles));
 
-      for (int j = 0; j < m_maxNewParticles; j++) {
-        RealVect parentPos = RealVect::Zero;
-
-        const bool hasParent = (m_particlePlacement == ParticlePlacement::Parent) &&
-                               this->sampleParentPosition(parentPos, a_itoParticles, parentWeightSum);
-
+      for (const auto& w : m_weightScratch) {
         const RealVect x = this->drawNewParticlePosition(hasParent,
-                                                         parentPos,
                                                          hasDownstream,
+                                                         parentPos,
                                                          upstreamPosition,
                                                          upstreamLo,
                                                          upstreamHi,
@@ -959,7 +892,7 @@ ItoKMCPhysics::reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_
                                                          a_dx,
                                                          a_kappa);
 
-        a_cdrParticles[i]->append(x, w);
+        a_cdrParticles[i]->append(x, 1.0 * w);
       }
     }
   }

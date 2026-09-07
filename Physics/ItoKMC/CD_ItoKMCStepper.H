@@ -355,27 +355,22 @@ protected:
 
   /**
    * @brief How the reaction network's CDR production is put onto the mesh.
-   * @details The Ito products of a reaction reach the mesh through the Ito solvers' deposition kernel, which is
-   * generally not NGP, so an ionization event spreads the electron's charge over a deposition stencil. This selects
-   * whether the CDR half of that same event is treated the same way or is added straight into the cell that
-   * produced it. It is a single selector rather than a flag because the deterministic-quadrature variant is a
-   * plausible third mode.
+   * @details Selects whether the CDR half of a reaction is spread over a deposition stencil like the Ito half, or is
+   * added straight into the cell that produced it.
    */
   enum class CdrProductInjection
   {
     /**
      * @brief Add the production directly into the cell that produced it.
-     * @details NGP by construction, and the behaviour of the code before the products could become particles. The
-     * CDR mass of a reaction then lands in one cell while the Ito mass of the same reaction is spread over a
-     * deposition stencil, which is a charge separation on the cell scale.
+     * @details NGP by construction, and the behaviour of the code before the products could become particles.
      */
     Mesh,
 
     /**
-     * @brief Emit the production as particles and deposit it with the Ito solvers' kernel.
-     * @details Both halves of a reaction then reach the mesh the same way. The particles are placed by the plasma
-     * model's ParticlePlacement policy, so the deposited production carries a sampling error that falls off as
-     * 1/sqrt(max_new_particles), the same budget the Ito products are spread over.
+     * @brief Emit the production as particles and deposit it with the Ito solvers' deposition.
+     * @details The particles are placed by the plasma model's ParticlePlacement policy, so the deposited production
+     * carries a sampling error falling off as 1/sqrt(max_new_particles). Since the cut-cell normalization is then
+     * the Ito solvers', the reactive redistribution does not apply -- see m_redistributeCDR.
      */
     Particle
   };
@@ -481,14 +476,16 @@ protected:
 
   /**
    * @brief Flag for redistributing CDR mass when particles cross the EB.
+   * @details Ignored under CdrProductInjection::Particle, where the production is deposited by the Ito solver and
+   * carries the solver's cut-cell normalization rather than the kappa damping this corrects for.
    */
   bool m_redistributeCDR;
 
   /**
    * @brief How the reaction network's CDR production is put onto the mesh.
-   * @details Photoionization products are unaffected by this: they are created at the photon absorption position
-   * and so have no in-cell representation to fall back on. They are always deposited, NGP under
-   * CdrProductInjection::Mesh and with the Ito kernel under CdrProductInjection::Particle.
+   * @details Photoionization products are unaffected: they are created at the photon absorption position and have no
+   * in-cell representation to fall back on, so they are always deposited -- NGP under CdrProductInjection::Mesh and
+   * with the Ito solvers' deposition under CdrProductInjection::Particle.
    */
   CdrProductInjection m_cdrProductInjection;
 
@@ -681,12 +678,8 @@ protected:
 
   /**
    * @brief Reaction products to be put in the CDR equations, as particles.
-   * @details Everything the reaction network creates for a CDR species passes through here -- both the
-   * photoionization products and the production computed by the KMC advance. The point of routing CDR mass through
-   * particles at all is that it is then deposited with the same kernel as the Ito products of the same reactions,
-   * rather than landing NGP in the cell that produced it; see reconcileCdrDensities() and
-   * ItoKMCPhysics::reconcileCdrParticles(). The containers are filled and emptied within a single call to
-   * advanceReactionNetwork() and carry no state across time steps.
+   * @details Holds both the photoionization products and the production computed by the KMC advance. The containers
+   * are filled and emptied within a single call to advanceReactionNetwork() and carry no state across time steps.
    * @note Defined on the particle realm, because that is where the reconciliation kernels and the Ito solvers'
    * deposition machinery live.
    */
@@ -694,10 +687,9 @@ protected:
 
   /**
    * @brief Per-cell CDR production from the reaction network, on the particle realm.
-   * @details One component per CDR species, holding the number of physical particles produced in the cell (i.e. the
-   * positive part of the change computed by the KMC advance -- the negative part never becomes particles, see
-   * reconcileCdrDensities()). This is the particle-realm copy of that field, which is what the reconciliation
-   * kernels need to turn it into the particles in m_cdrProducts.
+   * @details One component per CDR species, holding the number of physical particles produced in the cell -- the
+   * positive part of the change computed by the KMC advance. The reconciliation kernels turn this into the particles
+   * in m_cdrProducts.
    */
   EBAMRCellData m_particleCdrProduction;
 
@@ -1621,11 +1613,9 @@ protected:
 
   /**
    * @brief Deposit the CDR reaction products in m_cdrProducts and add the result to a per-cell change.
-   * @details This is the step that makes the CDR half of a reaction reach the mesh the same way the Ito half does.
-   * The products are deposited with the deposition kernel and coarse-fine strategy of the Ito solvers; the cut-cell
-   * strategy is fixed rather than inherited, for the normalization reason given in the implementation. With no Ito
-   * solvers in the problem there is no kernel to be consistent with, and the products are deposited NGP, which
-   * reproduces the in-cell injection this routine replaces.
+   * @details Under CdrProductInjection::Particle the products go through ItoSolver::depositWeight, so they get the
+   * Ito solvers' deposition in full -- kernel, coarse-fine strategy and cut-cell strategy alike. With no Ito solvers
+   * in the problem there is nothing to be consistent with and the products are deposited NGP.
    * @param[in,out] a_cdrChange Per-cell change for each CDR species, in number of physical particles. The deposited
    * production is added to what is already there, which is the removal computed by the reaction network.
    * @note a_cdrChange is on the fluid realm; the deposition happens on the particle realm and is copied across.
