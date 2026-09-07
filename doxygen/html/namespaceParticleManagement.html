@@ -181,18 +181,18 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8b717115da8e94da09cf2bb302ed9a83" id="r_a8b717115da8e94da09cf2bb302ed9a83"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </td></tr>
-<tr class="memitem:a8b717115da8e94da09cf2bb302ed9a83"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83">mergeKDCarve</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, EBAMRFAB &amp;a_cellHistogram, EBAMRFAB &amp;a_leafQuota, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const int a_ppc, const Real a_weightMedianCellWidths, const <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">KDPlacement</a> a_placement, const bool a_capWeights, const <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">KDSplitPlacement</a> a_splitPlacement, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
-<tr class="memdesc:a8b717115da8e94da09cf2bb302ed9a83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.  <br /></td></tr>
-<tr class="separator:a8b717115da8e94da09cf2bb302ed9a83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a480b2a6e13e6fac7eaf92723e7626f48" id="r_a480b2a6e13e6fac7eaf92723e7626f48"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </td></tr>
-<tr class="memitem:a480b2a6e13e6fac7eaf92723e7626f48"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a480b2a6e13e6fac7eaf92723e7626f48">mergeKDPatch</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, EBAMRFAB &amp;a_cellHistogram, EBAMRFAB &amp;a_leafQuota, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const int a_ppc, const Real a_weightMedianCellWidths, const <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">KDPlacement</a> a_placement, const bool a_capWeights, const <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">KDSplitPlacement</a> a_splitPlacement, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
-<tr class="memdesc:a480b2a6e13e6fac7eaf92723e7626f48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one patch-local kd-tree merge over every patch this rank owns.  <br /></td></tr>
-<tr class="separator:a480b2a6e13e6fac7eaf92723e7626f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac02d1617da5dde96d29472dadcfe8331" id="r_ac02d1617da5dde96d29472dadcfe8331"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </td></tr>
-<tr class="memitem:ac02d1617da5dde96d29472dadcfe8331"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#ac02d1617da5dde96d29472dadcfe8331">mergeKDInterior</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_interior, EBAMRFAB &amp;a_cellHistogram, EBAMRFAB &amp;a_leafQuota, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const int a_ppc, const Real a_weightMedianCellWidths, const <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">KDPlacement</a> a_placement, const bool a_capWeights, const <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">KDSplitPlacement</a> a_splitPlacement, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid)</td></tr>
-<tr class="memdesc:ac02d1617da5dde96d29472dadcfe8331"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the uncontested tier of the kd merge, splitting the input into merged and leftover.  <br /></td></tr>
-<tr class="separator:ac02d1617da5dde96d29472dadcfe8331"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaef0a8f24d6ba4fee09199d82fddc2cd" id="r_aaef0a8f24d6ba4fee09199d82fddc2cd"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename PatchRegular &gt; </td></tr>
+<tr class="memitem:aaef0a8f24d6ba4fee09199d82fddc2cd"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd">mergeKDCarve</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, EBAMRFAB &amp;a_cellHistogram, EBAMRFAB &amp;a_leafQuota, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const int a_ppc, const Real a_weightMedianCellWidths, const <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">KDPlacement</a> a_placement, const bool a_capWeights, const <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">KDSplitPlacement</a> a_splitPlacement, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid, const PatchRegular &amp;a_isPatchRegular)</td></tr>
+<tr class="memdesc:aaef0a8f24d6ba4fee09199d82fddc2cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.  <br /></td></tr>
+<tr class="separator:aaef0a8f24d6ba4fee09199d82fddc2cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfdcf33a364587e67aa7d1e0caf6ddb6" id="r_adfdcf33a364587e67aa7d1e0caf6ddb6"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename PatchRegular &gt; </td></tr>
+<tr class="memitem:adfdcf33a364587e67aa7d1e0caf6ddb6"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#adfdcf33a364587e67aa7d1e0caf6ddb6">mergeKDPatch</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, EBAMRFAB &amp;a_cellHistogram, EBAMRFAB &amp;a_leafQuota, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const int a_ppc, const Real a_weightMedianCellWidths, const <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">KDPlacement</a> a_placement, const bool a_capWeights, const <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">KDSplitPlacement</a> a_splitPlacement, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid, const PatchRegular &amp;a_isPatchRegular)</td></tr>
+<tr class="memdesc:adfdcf33a364587e67aa7d1e0caf6ddb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one patch-local kd-tree merge over every patch this rank owns.  <br /></td></tr>
+<tr class="separator:adfdcf33a364587e67aa7d1e0caf6ddb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c0e9e74b1b4cea37fad32f00f7c04f4" id="r_a3c0e9e74b1b4cea37fad32f00f7c04f4"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename PatchRegular &gt; </td></tr>
+<tr class="memitem:a3c0e9e74b1b4cea37fad32f00f7c04f4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#a3c0e9e74b1b4cea37fad32f00f7c04f4">mergeKDInterior</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_interior, EBAMRFAB &amp;a_cellHistogram, EBAMRFAB &amp;a_leafQuota, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const int a_ppc, const Real a_weightMedianCellWidths, const <a class="el" href="namespaceParticleManagement.html#aafa95bcf264040644a65b68463081527">KDPlacement</a> a_placement, const bool a_capWeights, const <a class="el" href="namespaceParticleManagement.html#a3015120827881edf88ebd1576e7595e2">KDSplitPlacement</a> a_splitPlacement, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const PosValid &amp;a_isPositionValid, const PatchRegular &amp;a_isPatchRegular)</td></tr>
+<tr class="memdesc:a3c0e9e74b1b4cea37fad32f00f7c04f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the uncontested tier of the kd merge, splitting the input into merged and leftover.  <br /></td></tr>
+<tr class="separator:a3c0e9e74b1b4cea37fad32f00f7c04f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd71a3ca3231841d66f3ed880aaec071" id="r_afd71a3ca3231841d66f3ed880aaec071"><td class="memTemplParams" colspan="2">template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid  = std::function&lt;bool(const RealVect&amp;)&gt;, typename OnMerge  = std::function&lt;             void(const MergeParticle&lt;Packed&gt;&amp;, const MergeParticle&lt;Packed&gt;&amp;, const MergeParticle&lt;Packed&gt;&amp;)&gt;&gt; </td></tr>
 <tr class="memitem:afd71a3ca3231841d66f3ed880aaec071"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceParticleManagement.html#afd71a3ca3231841d66f3ed880aaec071">mergeNearestNeighborsTree</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P, Traits &gt; &amp;a_particles, const <a class="el" href="classAmrMesh.html">AmrMesh</a> &amp;a_amr, const <a class="el" href="classParticleManagement_1_1NNCellBudget.html">NNCellBudget</a> &amp;a_cellBudget, const Gather &amp;a_gather, const Combine &amp;a_combine, const Scatter &amp;a_scatter, const Allocator &amp;a_allocateID, const bool a_iterateLocalTierToConvergence=false, const int a_maxFallbackCandidates=0, const std::optional&lt; int &gt; a_maxCellDistance=std::nullopt, const int a_ghostWidth=1, const PosValid &amp;a_isPositionValid=[](const RealVect &amp;) { return true;}, unsigned long long *a_crossLevelMergeCount=nullptr, const OnMerge &amp;a_onMergeCommitted=[](const <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &amp;, const <a class="el" href="structParticleManagement_1_1MergeParticle.html">MergeParticle</a>&lt; Packed &gt; &amp;) { })</td></tr>
 <tr class="memdesc:afd71a3ca3231841d66f3ed880aaec071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run one full round (one timestep's worth) of the nearest-neighbor merge algorithm.  <br /></td></tr>
@@ -322,7 +322,7 @@ template&lt;typename Packed &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_payloads</td><td>Pointer to the first of <code>a_count</code> parents' payloads. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weights</td><td>Pointer to the first of <code>a_count</code> parents' weights, parallel to <code>a_payloads</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_count</td><td>Number of parents being combined (always &gt;= 2 &ndash; see the merge threshold in <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>/mergeKDPatch()'s own docs). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_count</td><td>Number of parents being combined (always &gt;= 2 &ndash; see the merge threshold in <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>/mergeKDPatch()'s own docs). </td></tr>
   </table>
   </dd>
 </dl>
@@ -1277,13 +1277,13 @@ template&lt;class Context , class P , class Traits  = ParticleTraits&lt;P&gt;&gt
 
 </div>
 </div>
-<a id="a8b717115da8e94da09cf2bb302ed9a83" name="a8b717115da8e94da09cf2bb302ed9a83"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b717115da8e94da09cf2bb302ed9a83">&#9670;&#160;</a></span>mergeKDCarve()</h2>
+<a id="aaef0a8f24d6ba4fee09199d82fddc2cd" name="aaef0a8f24d6ba4fee09199d82fddc2cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaef0a8f24d6ba4fee09199d82fddc2cd">&#9670;&#160;</a></span>mergeKDCarve()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </div>
+template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename PatchRegular &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -1370,7 +1370,13 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const PosValid &amp;&#160;</td>
-          <td class="paramname"><em>a_isPositionValid</em>&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PatchRegular &amp;&#160;</td>
+          <td class="paramname"><em>a_isPatchRegular</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1408,6 +1414,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
     <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
     <tr><td class="paramname">Allocator</td><td>Callable <code>() -&gt; ParticleID</code>, a fresh globally-unique id per committed merge. </td></tr>
     <tr><td class="paramname">PosValid</td><td>Callable <code>(const RealVect&amp;) -&gt; bool</code>; false leaves the group's members untouched. </td></tr>
+    <tr><td class="paramname">PatchRegular</td><td>Callable <code>(int a_lvl, const DataIndex&amp; a_din) -&gt; bool</code>, answering whether that patch grown by one cell is free of cut and covered cells. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1427,19 +1434,20 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-merged-particle scatter callback. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPatchRegular</td><td>Per-patch escape hatch for <em>a_isPositionValid</em>, asked once per patch. Where it returns true every position the patch can produce is in the fluid by construction, so the per-particle predicate &ndash; an implicit-function evaluation, the expensive term in the commit loop &ndash; is skipped outright. It is asked about the patch GROWN BY ONE CELL because the carve's boundary tier places a particle from members up to one ghost cell outside the patch's own box. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ac02d1617da5dde96d29472dadcfe8331" name="ac02d1617da5dde96d29472dadcfe8331"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac02d1617da5dde96d29472dadcfe8331">&#9670;&#160;</a></span>mergeKDInterior()</h2>
+<a id="a3c0e9e74b1b4cea37fad32f00f7c04f4" name="a3c0e9e74b1b4cea37fad32f00f7c04f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c0e9e74b1b4cea37fad32f00f7c04f4">&#9670;&#160;</a></span>mergeKDInterior()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </div>
+template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename PatchRegular &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -1532,7 +1540,13 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const PosValid &amp;&#160;</td>
-          <td class="paramname"><em>a_isPositionValid</em>&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PatchRegular &amp;&#160;</td>
+          <td class="paramname"><em>a_isPatchRegular</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1548,7 +1562,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 </div><div class="memdoc">
 
 <p>Run the uncontested tier of the kd merge, splitting the input into merged and leftover. </p>
-<p>Same tree build and per-cell quota as <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>, but with no arbitration tier at all. In order:</p><ol type="1">
+<p>Same tree build and per-cell quota as <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>, but with no arbitration tier at all. In order:</p><ol type="1">
 <li>Build one kd tree per patch over that patch's own particles plus every ghost, which the caller must already have filled at width 1. Ghosts are never merged, but they take part in the partition: a ghost marks the leaf it lands in as contested, and the quota needs the cell's true occupancy.</li>
 <li>Commit every leaf that holds at least two members, is within detail::s_kdMaxLeafExtent, holds no ghost, and whose centroid <em>a_isPositionValid</em> accepts. Each such leaf becomes one super-particle in <em>a_interior</em> and its members are removed from <em>a_particles</em>.</li>
 <li>Everything else is left untouched in <em>a_particles</em> &ndash; leaves holding a ghost, leaves too wide to collapse, and leaves with a single member.</li>
@@ -1569,6 +1583,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
     <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
     <tr><td class="paramname">Allocator</td><td>Callable <code>() -&gt; ParticleID</code>, a fresh globally-unique id per committed merge. </td></tr>
     <tr><td class="paramname">PosValid</td><td>Callable <code>(const RealVect&amp;) -&gt; bool</code>; false leaves the leaf's members untouched. </td></tr>
+    <tr><td class="paramname">PatchRegular</td><td>Callable <code>(int a_lvl, const DataIndex&amp; a_din) -&gt; bool</code>, answering whether that patch grown by one cell is free of cut and covered cells. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1576,8 +1591,8 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to reduce. On return holds only what was not committed. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_interior</td><td>Receives one super-particle per committed leaf. Must be allocated on the same realm as <em>a_particles</em>, since a leaf is written to the patch it was built on. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cellHistogram</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_leafQuota</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cellHistogram</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_leafQuota</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of the grid layout. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ppc</td><td>Target particles per cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weightMedianCellWidths</td><td>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting &ndash; forwarded verbatim to buildKDQuotaLeaves(). 0 disables the weight median entirely. </td></tr>
@@ -1589,19 +1604,20 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-merged-particle scatter callback. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPatchRegular</td><td>Per-patch escape hatch for <em>a_isPositionValid</em>, asked once per patch. Where it returns true every position the patch can produce is in the fluid by construction, so the per-particle predicate &ndash; an implicit-function evaluation, the expensive term in the commit loop &ndash; is skipped outright. It is asked about the patch GROWN BY ONE CELL because the carve's boundary tier places a particle from members up to one ghost cell outside the patch's own box. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a480b2a6e13e6fac7eaf92723e7626f48" name="a480b2a6e13e6fac7eaf92723e7626f48"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a480b2a6e13e6fac7eaf92723e7626f48">&#9670;&#160;</a></span>mergeKDPatch()</h2>
+<a id="adfdcf33a364587e67aa7d1e0caf6ddb6" name="adfdcf33a364587e67aa7d1e0caf6ddb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfdcf33a364587e67aa7d1e0caf6ddb6">&#9670;&#160;</a></span>mergeKDPatch()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid &gt; </div>
+template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;P&gt;, typename Gather , typename Combine , typename Scatter , typename Allocator , typename PosValid , typename PatchRegular &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -1688,7 +1704,13 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const PosValid &amp;&#160;</td>
-          <td class="paramname"><em>a_isPositionValid</em>&#160;</td>
+          <td class="paramname"><em>a_isPositionValid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const PatchRegular &amp;&#160;</td>
+          <td class="paramname"><em>a_isPatchRegular</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1704,13 +1726,13 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
 </div><div class="memdoc">
 
 <p>Run one patch-local kd-tree merge over every patch this rank owns. </p>
-<p>Same tree build and per-cell quota as <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>, with no boundary tier:</p><ol type="1">
+<p>Same tree build and per-cell quota as <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>, with no boundary tier:</p><ol type="1">
 <li>Build one kd tree per patch over that patch's own particles. The caller must NOT have filled ghosts; a ghost here would be merged locally while its true owner merges it too.</li>
 <li>Every leaf whose largest per-axis extent is within detail::s_kdMaxLeafExtent commits immediately, regardless of boundary exposure. No leaf is ever contested, so there is no claim/verdict/commit exchange and no communication at all.</li>
 <li>A leaf collapses to one merged particle only if it has at least two members and <em>a_isPositionValid</em> accepts the centroid; otherwise its members are left untouched.</li>
 <li>Merged results are placed by a cheap point-in-the-owning-patch test, falling back to <a class="el" href="classParticleContainer.html#aceb244841067af1ac950741902a56150" title="Map a position to its owning (level, grid index, rank) via the finest containing tile.">ParticleContainer::findDestination()</a>.</li>
 </ol>
-<p>Each patch therefore reduces only the particles it owns. Cheaper than <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and free of communication, at the cost of no coordination across a patch boundary: a cell straddled by two patches is reduced by each of them independently. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Each patch therefore reduces only the particles it owns. Cheaper than <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a> and free of communication, at the cost of no coordination across a patch boundary: a cell straddled by two patches is reduced by each of them independently. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">P</td><td>SoA payload type. </td></tr>
     <tr><td class="paramname">Packed</td><td>Opaque reconciliation payload type (see <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>). </td></tr>
@@ -1725,14 +1747,15 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
     <tr><td class="paramname">Scatter</td><td>Callable <code>(<a class="el" href="classParticleSoA.html" title="Arena-backed Struct-of-Arrays particle container for a single grid patch.">ParticleSoA</a>&lt;P,Traits&gt;&amp;, const <a class="el" href="structParticleManagement_1_1MergeParticle.html" title="Minimal, payload-agnostic description of one particle as input to a distributed merge.">MergeParticle</a>&lt;Packed&gt;&amp;) -&gt; void</code>. </td></tr>
     <tr><td class="paramname">Allocator</td><td>Callable <code>() -&gt; ParticleID</code>, a fresh globally-unique id per committed merge. </td></tr>
     <tr><td class="paramname">PosValid</td><td>Callable <code>(const RealVect&amp;) -&gt; bool</code>; false leaves the leaf's members untouched. </td></tr>
+    <tr><td class="paramname">PatchRegular</td><td>Callable <code>(int a_lvl, const DataIndex&amp; a_din) -&gt; bool</code>, answering whether that patch grown by one cell is free of cut and covered cells. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>The real particle container being merged. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cellHistogram</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_leafQuota</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#a8b717115da8e94da09cf2bb302ed9a83" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cellHistogram</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_leafQuota</td><td>Caller-owned per-cell scratch; see <a class="el" href="namespaceParticleManagement.html#aaef0a8f24d6ba4fee09199d82fddc2cd" title="Run one non-iterative pass of the kd-tree carve merge over every patch this rank owns.">mergeKDCarve()</a>'s own docs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amr</td><td>AMR mesh &ndash; source of the grid layout. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ppc</td><td>Target particles per cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weightMedianCellWidths</td><td>Leaf size, in cell widths, at or below which the tree build switches from count-median to weight-median splitting &ndash; forwarded verbatim to buildKDQuotaLeaves(). 0 disables the weight median entirely. </td></tr>
@@ -1744,6 +1767,7 @@ template&lt;typename P , typename Packed , typename Traits  = ParticleTraits&lt;
     <tr><td class="paramdir">[in]</td><td class="paramname">a_scatter</td><td>Per-merged-particle scatter callback. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_allocateID</td><td>Fresh-id allocator. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_isPositionValid</td><td>Position-validity predicate. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_isPatchRegular</td><td>Per-patch escape hatch for <em>a_isPositionValid</em>, asked once per patch. Where it returns true every position the patch can produce is in the fluid by construction, so the per-particle predicate &ndash; an implicit-function evaluation, the expensive term in the commit loop &ndash; is skipped outright. It is asked about the patch GROWN BY ONE CELL because the carve's boundary tier places a particle from members up to one ghost cell outside the patch's own box. </td></tr>
   </table>
   </dd>
 </dl>
