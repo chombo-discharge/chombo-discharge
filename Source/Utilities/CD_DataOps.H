@@ -287,8 +287,12 @@ public:
    * @param[in]    a_stride Cell stride s
    * @param[in]    a_zeroEB Set value in covered cells to zero or not
    * @note This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the
-   * domain corners. This routine may be dangerous to use with EBs as the data inside the EB is either kept as-is or
-   * replaced by zero.
+   * domain corners.
+   * @note Cut cells are filtered with the same tensor-product weights, but neighbors that are covered, outside the
+   * domain, or unreachable by a monotone path are dropped from the stencil and their weight is placed on the center
+   * cell. The resulting stencil is symmetric, so the filter conserves sum(phi) and leaves a uniform field uniform.
+   * @note a_alpha may exceed one, which turns the filter into the compensating (sharpening) pass used to restore the
+   * low-wavenumber amplitude after a sequence of smoothing passes.
    */
   static void
   filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
@@ -301,8 +305,12 @@ public:
    * @param[in]    a_stride Cell stride s
    * @param[in]    a_zeroEB Set value in covered cells to zero or not
    * @note This routine will fill ghost cells outside the domain boundary, but ignore the corner ghost cells at the
-   * domain corners. This routine may be dangerous to use with EBs as the data inside the EB is either kept as-is or
-   * replaced by zero.
+   * domain corners.
+   * @note Cut cells are filtered with the same tensor-product weights, but neighbors that are covered, outside the
+   * domain, or unreachable by a monotone path are dropped from the stencil and their weight is placed on the center
+   * cell. The resulting stencil is symmetric, so the filter conserves sum(phi) and leaves a uniform field uniform.
+   * @note a_alpha may exceed one, which turns the filter into the compensating (sharpening) pass used to restore the
+   * low-wavenumber amplitude after a sequence of smoothing passes.
    */
   static void
   filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;

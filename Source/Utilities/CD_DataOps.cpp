@@ -21,6 +21,7 @@
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_Location.H>
+#include <CD_VofUtils.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_NamespaceHeader.H>
 
@@ -697,7 +698,6 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
   const int     nComp    = a_data.nComp();
 
   CH_assert(a_alpha >= 0.0);
-  CH_assert(a_alpha <= 0.0);
   CH_assert(a_stride > 0);
   CH_assert(a_stride <= ghostVec[0]);
 
@@ -725,14 +725,15 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
     const EBGraph&       ebgraph = ebisbox.getEBGraph();
     const ProblemDomain& domain  = ebisbox.getDomain();
 
-    // All cells that are either irregular or in range of stride-1 of
-    // an irregular cell. These cells are not filtered.
+    // Cells handled by the cut-cell kernel: the irregular cells, plus every cell whose stencil can
+    // reach a covered cell. A regular cell only ever sees a covered cell at a corner of its stencil,
+    // and the cells between the two are irregular, so growing by the stride covers that case.
     IntVectSet irregCells = ebisbox.getIrregIVS(cellBox);
-    irregCells.grow(a_stride - 1);
+    irregCells.grow(a_stride);
     irregCells &= cellBox;
 
-    // Cannot use prebuilt iterator: the IVS is grown by (a_stride - 1) beyond the standard
-    // irregular IVS, so it does not match any pre-built per-patch iterator.
+    // Cannot use prebuilt iterator: the IVS is grown by a_stride beyond the standard irregular IVS,
+    // so it does not match any pre-built per-patch iterator.
     VoFIterator vofit(irregCells, ebgraph);
 
     // Storage for copy of input data.
@@ -810,8 +811,68 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
       MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
 #endif
 
+      // Weight for a neighbor at offset delta is the tensor product over the coordinate directions of
+      // alpha (delta = 0) and beta (|delta| = stride), i.e. the same weights the regular kernel uses.
+      const Real beta = 0.5 * (1.0 - a_alpha);
+
+      // Cut-cell kernel. Neighbors that are covered, that lie outside the domain, or that cannot be
+      // reached by a monotone path are dropped from the stencil, and their weight is put on the center.
+      //
+      // Reachability is symmetric -- if j is reachable from i then i is reachable from j -- so two cells
+      // always assign each other the same weight. Moving the dropped weight onto the center makes the
+      // rows sum to one, and symmetry then makes the columns sum to one as well. The first leaves a
+      // uniform field uniform, the second conserves sum(phi). Dropping a neighbor without moving its
+      // weight to the center would break both, and filling it with a covered value drains phi into
+      // the EB.
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+
+        const Vector<VolIndex> neighbors = VofUtils::getVofsInRadius(vof,
+                                                                     ebisbox,
+                                                                     a_stride,
+                                                                     VofUtils::Connectivity::MonotonePath,
+                                                                     false);
+
+        Real sumWeights = 0.0;
+        Real sumPhi     = 0.0;
+
+        for (int i = 0; i < neighbors.size(); i++) {
+          const VolIndex& curVof = neighbors[i];
+          const IntVect   delta  = curVof.gridIndex() - iv;
+
+          // Outside validBox the clone holds no data. Leaving the weight on the center is what the
+          // regular kernel achieves by extending the data outwards across the domain edge.
+          if (!validBox.contains(curVof.gridIndex())) {
+            continue;
+          }
+
+          // Keep only the offsets the tensor-product stencil uses: each component is zero or +/- stride.
+          Real weight    = 1.0;
+          bool onStencil = true;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            if (delta[dir] == 0) {
+              weight *= a_alpha;
+            }
+            else if (delta[dir] == a_stride || delta[dir] == -a_stride) {
+              weight *= beta;
+            }
+            else {
+              onStencil = false;
+            }
+          }
+
+          if (onStencil) {
+            sumWeights += weight;
+            sumPhi += weight * clone(curVof, 0);
+          }
+        }
+
+        data(vof, icomp) = sumPhi + (1.0 - sumWeights) * clone(vof, 0);
+      };
+
       BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
-      //      BoxLoops::loop(vofit, irregularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
