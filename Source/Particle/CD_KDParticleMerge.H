@@ -184,6 +184,8 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the group's members untouched.
+ * @tparam PatchRegular Callable `(int a_lvl, const DataIndex& a_din) -> bool`, answering whether that
+ * patch grown by one cell is free of cut and covered cells.
  * @param[in] a_amr AMR mesh -- source of the particle ghost masks and grid layout.
  * @param[in,out] a_particles The real particle container being merged.
  * @param[in,out] a_cellHistogram Caller-owned per-cell scratch (1 component, >= 1 ghost cell, this
@@ -207,6 +209,11 @@ kdExchangeByRank(const std::vector<std::vector<T>>& a_sendByRank);
  * @param[in] a_scatter Per-merged-particle scatter callback.
  * @param[in] a_allocateID Fresh-id allocator.
  * @param[in] a_isPositionValid Position-validity predicate.
+ * @param[in] a_isPatchRegular Per-patch escape hatch for @a a_isPositionValid, asked once per patch.
+ * Where it returns true every position the patch can produce is in the fluid by construction, so the
+ * per-particle predicate -- an implicit-function evaluation, the expensive term in the commit loop --
+ * is skipped outright. It is asked about the patch GROWN BY ONE CELL because the carve's boundary tier
+ * places a particle from members up to one ghost cell outside the patch's own box.
  */
 template <typename P,
           typename Packed,
@@ -215,7 +222,8 @@ template <typename P,
           typename Combine,
           typename Scatter,
           typename Allocator,
-          typename PosValid>
+          typename PosValid,
+          typename PatchRegular>
 inline void
 mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
@@ -230,7 +238,8 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
              const Allocator&              a_allocateID,
-             const PosValid&               a_isPositionValid);
+             const PosValid&               a_isPositionValid,
+             const PatchRegular&           a_isPatchRegular);
 
 /**
  * @brief Run one patch-local kd-tree merge over every patch this rank owns.
@@ -256,6 +265,8 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
+ * @tparam PatchRegular Callable `(int a_lvl, const DataIndex& a_din) -> bool`, answering whether that
+ * patch grown by one cell is free of cut and covered cells.
  * @param[in,out] a_particles The real particle container being merged.
  * @param[in,out] a_cellHistogram Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
  * @param[in,out] a_leafQuota Caller-owned per-cell scratch; see mergeKDCarve()'s own docs.
@@ -276,6 +287,11 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
  * @param[in] a_scatter Per-merged-particle scatter callback.
  * @param[in] a_allocateID Fresh-id allocator.
  * @param[in] a_isPositionValid Position-validity predicate.
+ * @param[in] a_isPatchRegular Per-patch escape hatch for @a a_isPositionValid, asked once per patch.
+ * Where it returns true every position the patch can produce is in the fluid by construction, so the
+ * per-particle predicate -- an implicit-function evaluation, the expensive term in the commit loop --
+ * is skipped outright. It is asked about the patch GROWN BY ONE CELL because the carve's boundary tier
+ * places a particle from members up to one ghost cell outside the patch's own box.
  */
 template <typename P,
           typename Packed,
@@ -284,7 +300,8 @@ template <typename P,
           typename Combine,
           typename Scatter,
           typename Allocator,
-          typename PosValid>
+          typename PosValid,
+          typename PatchRegular>
 inline void
 mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
@@ -299,7 +316,8 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
              const Allocator&              a_allocateID,
-             const PosValid&               a_isPositionValid);
+             const PosValid&               a_isPositionValid,
+             const PatchRegular&           a_isPatchRegular);
 
 /**
  * @brief Run the uncontested tier of the kd merge, splitting the input into merged and leftover.
@@ -331,6 +349,8 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
  * @tparam Scatter Callable `(ParticleSoA<P,Traits>&, const MergeParticle<Packed>&) -> void`.
  * @tparam Allocator Callable `() -> ParticleID`, a fresh globally-unique id per committed merge.
  * @tparam PosValid Callable `(const RealVect&) -> bool`; false leaves the leaf's members untouched.
+ * @tparam PatchRegular Callable `(int a_lvl, const DataIndex& a_din) -> bool`, answering whether that
+ * patch grown by one cell is free of cut and covered cells.
  * @param[in,out] a_particles Particles to reduce. On return holds only what was not committed.
  * @param[in,out] a_interior Receives one super-particle per committed leaf. Must be allocated on the
  * same realm as @a a_particles, since a leaf is written to the patch it was built on.
@@ -353,6 +373,11 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
  * @param[in] a_scatter Per-merged-particle scatter callback.
  * @param[in] a_allocateID Fresh-id allocator.
  * @param[in] a_isPositionValid Position-validity predicate.
+ * @param[in] a_isPatchRegular Per-patch escape hatch for @a a_isPositionValid, asked once per patch.
+ * Where it returns true every position the patch can produce is in the fluid by construction, so the
+ * per-particle predicate -- an implicit-function evaluation, the expensive term in the commit loop --
+ * is skipped outright. It is asked about the patch GROWN BY ONE CELL because the carve's boundary tier
+ * places a particle from members up to one ghost cell outside the patch's own box.
  */
 template <typename P,
           typename Packed,
@@ -361,7 +386,8 @@ template <typename P,
           typename Combine,
           typename Scatter,
           typename Allocator,
-          typename PosValid>
+          typename PosValid,
+          typename PatchRegular>
 inline void
 mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 ParticleContainer<P, Traits>& a_interior,
@@ -377,7 +403,8 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,
                 const Allocator&              a_allocateID,
-                const PosValid&               a_isPositionValid);
+                const PosValid&               a_isPositionValid,
+                const PatchRegular&           a_isPatchRegular);
 
 } // namespace ParticleManagement
 
