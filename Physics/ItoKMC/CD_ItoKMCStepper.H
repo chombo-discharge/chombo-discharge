@@ -354,6 +354,28 @@ protected:
   };
 
   /**
+   * @brief How the reaction network's CDR production is put onto the mesh.
+   * @details Selects whether the CDR half of a reaction is spread over a deposition stencil like the Ito half, or is
+   * added straight into the cell that produced it.
+   */
+  enum class CdrProductInjection
+  {
+    /**
+     * @brief Add the production directly into the cell that produced it.
+     * @details NGP by construction, and the behaviour of the code before the products could become particles.
+     */
+    Mesh,
+
+    /**
+     * @brief Emit the production as particles and deposit it with the Ito solvers' deposition.
+     * @details The particles are placed by the plasma model's ParticlePlacement policy, so the deposited production
+     * carries a sampling error falling off as 1/sqrt(max_new_particles). Since the cut-cell normalization is then
+     * the Ito solvers', the reactive redistribution does not apply -- see m_redistributeCDR.
+     */
+    Particle
+  };
+
+  /**
    * @brief Box sorting method when using dual-grid with particle load balancing.
    */
   BoxSorting m_boxSort;
@@ -454,8 +476,18 @@ protected:
 
   /**
    * @brief Flag for redistributing CDR mass when particles cross the EB.
+   * @details Ignored under CdrProductInjection::Particle, where the production is deposited by the Ito solver and
+   * carries the solver's cut-cell normalization rather than the kappa damping this corrects for.
    */
   bool m_redistributeCDR;
+
+  /**
+   * @brief How the reaction network's CDR production is put onto the mesh.
+   * @details Photoionization products are unaffected: they are created at the photon absorption position and have no
+   * in-cell representation to fall back on, so they are always deposited -- NGP under CdrProductInjection::Mesh and
+   * with the Ito solvers' deposition under CdrProductInjection::Particle.
+   */
+  CdrProductInjection m_cdrProductInjection;
 
   /**
    * @brief Using dual grid or not
@@ -645,11 +677,21 @@ protected:
   Vector<EBAMRCellData> m_fluidPhiIto;
 
   /**
-   * @brief Photoionization products to be put in the CDR equations
-   * @note This is agglomerated with Ito particle photoionization functionality, and is
-   * therefore defined on the particle realm.
+   * @brief Reaction products to be put in the CDR equations, as particles.
+   * @details Holds both the photoionization products and the production computed by the KMC advance. The containers
+   * are filled and emptied within a single call to advanceReactionNetwork() and carry no state across time steps.
+   * @note Defined on the particle realm, because that is where the reconciliation kernels and the Ito solvers'
+   * deposition machinery live.
    */
-  mutable Vector<RefCountedPtr<ParticleContainer<NoPayload>>> m_cdrPhotoiProducts;
+  mutable Vector<RefCountedPtr<ParticleContainer<NoPayload>>> m_cdrProducts;
+
+  /**
+   * @brief Per-cell CDR production from the reaction network, on the particle realm.
+   * @details One component per CDR species, holding the number of physical particles produced in the cell -- the
+   * positive part of the change computed by the KMC advance. The reconciliation kernels turn this into the particles
+   * in m_cdrProducts.
+   */
+  EBAMRCellData m_particleCdrProduction;
 
   /**
    * @brief Solver indices used when load-balancing the particle solvers.
@@ -1507,6 +1549,7 @@ protected:
    * @param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance.
    * @param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance.
    * @param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
+   * @param[in] a_cdrProduction        Number of physical particles produced per cell for each CDR species.
    * @param[in] a_electricField        Electric field
    * @note All data should be defined on the particle realm since this is where the particle reconciliation takes place.
    */
@@ -1514,6 +1557,7 @@ protected:
   reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                      const EBAMRCellData& a_oldParticlesPerCell,
                      const EBAMRCellData& a_newPhotonsPerCell,
+                     const EBAMRCellData& a_cdrProduction,
                      const EBAMRCellData& a_electricField) const noexcept;
 
   /**
@@ -1521,6 +1565,7 @@ protected:
    * @param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance.
    * @param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance.
    * @param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
+   * @param[in] a_cdrProduction        Number of physical particles produced per cell for each CDR species.
    * @param[in] a_electricField        Electric field
    * @param[in] a_level                Grid level
    * @note All data should be defined on the particle realm since this is where the particle reconciliation takes place.
@@ -1529,6 +1574,7 @@ protected:
   reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                      const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                      const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+                     const LevelData<EBCellFAB>& a_cdrProduction,
                      const LevelData<EBCellFAB>& a_electricField,
                      const int                   a_level) const noexcept;
 
@@ -1537,6 +1583,7 @@ protected:
    * @param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance.
    * @param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance.
    * @param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
+   * @param[in] a_cdrProduction        Number of physical particles produced per cell for each CDR species.
    * @param[in] a_electricField        Electric field
    * @param[in] a_level                Grid level
    * @param[in] a_din                  Grid index
@@ -1548,6 +1595,7 @@ protected:
   reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                      const EBCellFAB& a_oldParticlesPerCell,
                      const EBCellFAB& a_newPhotonsPerCell,
+                     const EBCellFAB& a_cdrProduction,
                      const EBCellFAB& a_electricField,
                      const int        a_level,
                      const DataIndex  a_din,
@@ -1556,7 +1604,7 @@ protected:
 
   /**
    * @brief Reconcile the results from photoionization reactions
-   * @note This adds particles directly into the ItoSolver particle data holders and into m_cdrPhotoiProducts.
+   * @note This adds particles directly into the ItoSolver particle data holders and into m_cdrProducts.
    * @note This is not used (yet) -- it does a per-patch call to m_physics, which means that its done outside
    * of the cell-sorted requirement of advanceReactionNetwork.
    */
@@ -1564,48 +1612,48 @@ protected:
   reconcilePhotoionization() noexcept;
 
   /**
-   * @brief Reconcile the CDR densities after the reaction network.
-   * @details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol
-   * * dt)
-   * @param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance.
-   * @param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance.
-   * @param[in] a_dt                   Time step
+   * @brief Deposit the CDR reaction products in m_cdrProducts and add the result to a per-cell change.
+   * @details Under CdrProductInjection::Particle the products go through ItoSolver::depositWeight, so they get the
+   * Ito solvers' deposition in full -- kernel, coarse-fine strategy and cut-cell strategy alike. With no Ito solvers
+   * in the problem there is nothing to be consistent with and the products are deposited NGP.
+   * @param[in,out] a_cdrChange Per-cell change for each CDR species, in number of physical particles. The deposited
+   * production is added to what is already there, which is the removal computed by the reaction network.
+   * @note a_cdrChange is on the fluid realm; the deposition happens on the particle realm and is copied across.
    */
   virtual void
-  reconcileCdrDensities(const EBAMRCellData& a_newParticlesPerCell,
-                        const EBAMRCellData& a_oldParticlesPerCell,
-                        const Real           a_dt) noexcept;
+  depositCdrProducts(EBAMRCellData& a_cdrChange) noexcept;
 
   /**
    * @brief Reconcile the CDR densities after the reaction network.
-   * @details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol
-   * * dt)
-   * @param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance.
-   * @param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance.
-   * @param[in] a_level                Grid level
-   * @param[in] a_dt                   Time step
+   * @details This adds a_cdrChange to the densities and sets the source term to a_cdrChange/(vol * dt).
+   * @param[in] a_cdrChange Per-cell change for each CDR species, in number of physical particles.
+   * @param[in] a_dt        Time step
    */
   virtual void
-  reconcileCdrDensities(const LevelData<EBCellFAB>& a_newParticlesPerCell,
-                        const LevelData<EBCellFAB>& a_oldParticlesPerCell,
-                        const int                   a_level,
-                        const Real                  a_dt) noexcept;
+  reconcileCdrDensities(const EBAMRCellData& a_cdrChange, const Real a_dt) noexcept;
 
   /**
    * @brief Reconcile the CDR densities after the reaction network.
-   * @details This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol
-   * * dt)
-   * @param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance.
-   * @param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance.
-   * @param[in] a_level                Grid level
-   * @param[in] a_din                  Grid index
-   * @param[in] a_box                  Grid box
-   * @param[in] a_dx                   Grid resolution.
-   * @param[in] a_dt                   Time step
+   * @details This adds a_cdrChange to the densities and sets the source term to a_cdrChange/(vol * dt).
+   * @param[in] a_cdrChange Per-cell change for each CDR species, in number of physical particles.
+   * @param[in] a_level     Grid level
+   * @param[in] a_dt        Time step
    */
   virtual void
-  reconcileCdrDensities(const EBCellFAB& a_newParticlesPerCell,
-                        const EBCellFAB& a_oldParticlesPerCell,
+  reconcileCdrDensities(const LevelData<EBCellFAB>& a_cdrChange, const int a_level, const Real a_dt) noexcept;
+
+  /**
+   * @brief Reconcile the CDR densities after the reaction network.
+   * @details This adds a_cdrChange to the densities and sets the source term to a_cdrChange/(vol * dt).
+   * @param[in] a_cdrChange Per-cell change for each CDR species, in number of physical particles.
+   * @param[in] a_level     Grid level
+   * @param[in] a_din       Grid index
+   * @param[in] a_box       Grid box
+   * @param[in] a_dx        Grid resolution.
+   * @param[in] a_dt        Time step
+   */
+  virtual void
+  reconcileCdrDensities(const EBCellFAB& a_cdrChange,
                         const int        a_level,
                         const DataIndex  a_din,
                         const Box        a_box,
@@ -1810,6 +1858,12 @@ protected:
    */
   virtual void
   parseRedistributeCDR() noexcept;
+
+  /**
+   * @brief Parse how the reaction network's CDR production reaches the mesh.
+   */
+  virtual void
+  parseCdrProducts() noexcept;
 
   /**
    * @brief Parse the super-particle merge cadence.

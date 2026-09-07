@@ -6,7 +6,8 @@ ItoKMCBackgroundEvaluator.verbosity                                = -1         
 ItoKMCBackgroundEvaluator.secondary_emission                       = after_reactions    ## When to emit secondary particles. Either 'before_reactions' or 'after_reactions'
 ItoKMCBackgroundEvaluator.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
 ItoKMCBackgroundEvaluator.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
-ItoKMCBackgroundEvaluator.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
+ItoKMCBackgroundEvaluator.redistribute_cdr                         = true               ## Turn on/off reactive redistribution. Ignored if cdr_products = particle
+ItoKMCBackgroundEvaluator.cdr_products                             = particle           ## How CDR reaction products reach the mesh. 'mesh' or 'particle'
 ItoKMCBackgroundEvaluator.profile                                  = false              ## Turn on/off run-time profiling
 ItoKMCBackgroundEvaluator.plt_vars                                 = current_density    ## 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCBackgroundEvaluator.dual_grid                                = false              ## Turn on/off dual-grid functionality

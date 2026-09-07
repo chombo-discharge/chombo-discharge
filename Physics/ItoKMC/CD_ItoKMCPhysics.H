@@ -436,6 +436,43 @@ public:
                            Vector<ParticleSoA<NoPayload>*>&    a_cdrParticles,
                            const Vector<ParticleSoA<Photon>*>& a_absorbedPhotons) const noexcept;
 
+  /**
+   * @brief Turn the CDR mass created by the reaction network into particles.
+   * @details Emitting the production as particles lets the stepper deposit it with the Ito solvers' deposition, so
+   * both halves of a reaction reach the mesh the same way. The production is partitioned into at most
+   * m_maxNewParticles computational particles of integer weight, exactly as the Ito products are.
+   * @note Only production is handled here. Mass removed from a CDR species carries no sub-cell information, so the
+   * stepper subtracts it in the cell it was taken from.
+   * @note ParticlePlacement::Parent does not apply to these particles -- a CDR product has no parents in the cell,
+   * its container holding only what the current step created -- and falls back to a uniformly random position.
+   * @param[in,out] a_cdrParticles     Particle products placed in the CDR solvers.
+   * @param[in]     a_itoParticles     Ito particles in the cell, used by ParticlePlacement::Downstream.
+   * @param[in]     a_numNewParticles  Number of physical particles produced per CDR species. Must be >= 0.
+   * @param[in]     a_electricField    Electric field in cell
+   * @param[in]     a_cellPos          Cell center position
+   * @param[in]     a_centroidPos      Cell centroid position
+   * @param[in]     a_lo               Lower corner of the valid region of the cell, in unit coordinates
+   * @param[in]     a_hi               Upper corner of the valid region of the cell, in unit coordinates
+   * @param[in]     a_bndryCentroid    Cut-cell boundary centroid
+   * @param[in]     a_bndryNormal      Cut-cell normal (pointing into the domain)
+   * @param[in]     a_dx               Grid resolution
+   * @param[in]     a_kappa            Cut-cell volume fraction.
+   * @note Public because this is called by ItoKMCStepper
+   */
+  inline void
+  reconcileCdrParticles(Vector<ParticleSoA<NoPayload>*>&         a_cdrParticles,
+                        const Vector<ParticleSoA<ItoParticle>*>& a_itoParticles,
+                        const Vector<long long>&                 a_numNewParticles,
+                        const RealVect                           a_electricField,
+                        const RealVect                           a_cellPos,
+                        const RealVect                           a_centroidPos,
+                        const RealVect                           a_lo,
+                        const RealVect                           a_hi,
+                        const RealVect                           a_bndryCentroid,
+                        const RealVect                           a_bndryNormal,
+                        const Real                               a_dx,
+                        const Real                               a_kappa) const noexcept;
+
 protected:
   /**
    * @brief KMC time-stepping algorithms available for advancing the reaction network.
@@ -495,11 +532,6 @@ protected:
   bool m_isDefined;
 
   /**
-   * @brief If true, increment onto existing particles rather than creating new ones
-   */
-  bool m_incrementNewParticles;
-
-  /**
    * @brief Is the KMC solver defined or not.
    */
   static thread_local bool m_hasKMCSolver;
@@ -537,6 +569,13 @@ protected:
    * once per cell.
    */
   static thread_local std::vector<long long> m_weightScratch;
+
+  /**
+   * @brief Running sum of the eligible parent weights in a grid cell, used by ParticlePlacement::Parent.
+   * @details Built once per cell and species, so that each of the up to m_maxNewParticles draws is a binary search
+   * rather than another walk over the cell's particles. Thread-local for the same reason as m_weightScratch.
+   */
+  static thread_local std::vector<Real> m_parentWeightScratch;
 
   /**
    * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.
@@ -729,6 +768,72 @@ protected:
    */
   inline void
   removeParticles(ParticleSoA<ItoParticle>& a_particles, const long long a_numToRemove) const;
+
+  /**
+   * @brief Draw a position for a particle created by the reaction network in a grid cell.
+   * @details The single implementation of ParticlePlacement, shared by the Ito and CDR products. The caller supplies
+   * the sampled parent (Parent) and the downstream region (Downstream); either may be flagged absent, in which case
+   * that mode falls back to a uniformly random position within the cell.
+   * @param[in] a_hasParent           True if a_parentPos holds a usable parent position.
+   * @param[in] a_hasDownstream       True if the downstream region below is defined.
+   * @param[in] a_parentPos           Position of the sampled parent particle. Only read for ParticlePlacement::Parent.
+   * @param[in] a_upstreamPos         Upstream position within the cell, in unit coordinates.
+   * @param[in] a_upstreamLo          Lower corner of the downstream region, in unit coordinates.
+   * @param[in] a_upstreamHi          Upper corner of the downstream region, in unit coordinates.
+   * @param[in] a_downstreamDirection Normalized drift direction of the downstream species.
+   * @param[in] a_cellPos             Cell center position
+   * @param[in] a_centroidPos         Cell centroid position
+   * @param[in] a_lo                  Lower corner of the valid region of the cell, in unit coordinates
+   * @param[in] a_hi                  Upper corner of the valid region of the cell, in unit coordinates
+   * @param[in] a_bndryCentroid       Cut-cell boundary centroid
+   * @param[in] a_bndryNormal         Cut-cell normal (pointing into the domain)
+   * @param[in] a_dx                  Grid resolution
+   * @param[in] a_kappa               Cut-cell volume fraction
+   * @return Physical position for the new particle.
+   */
+  inline RealVect
+  drawNewParticlePosition(const bool     a_hasParent,
+                          const bool     a_hasDownstream,
+                          const RealVect a_parentPos,
+                          const RealVect a_upstreamPos,
+                          const RealVect a_upstreamLo,
+                          const RealVect a_upstreamHi,
+                          const RealVect a_downstreamDirection,
+                          const RealVect a_cellPos,
+                          const RealVect a_centroidPos,
+                          const RealVect a_lo,
+                          const RealVect a_hi,
+                          const RealVect a_bndryCentroid,
+                          const RealVect a_bndryNormal,
+                          const Real     a_dx,
+                          const Real     a_kappa) const noexcept;
+
+  /**
+   * @brief Draw the position of a parent particle, with probability proportional to particle weight.
+   * @details Used by ParticlePlacement::Parent. The caller passes the running weight sum, built by
+   * buildParentWeights(), so that a draw is a binary search rather than another walk over the cell's particles.
+   * @param[out] a_pos               Position of the drawn parent.
+   * @param[in]  a_particles         Candidate parents.
+   * @param[in]  a_cumulativeWeights Running weight sum of the eligible leading entries of a_particles.
+   * @return True if a parent was drawn, false if there was nothing to draw from.
+   */
+  inline bool
+  sampleParentPosition(RealVect&                       a_pos,
+                       const ParticleSoA<ItoParticle>& a_particles,
+                       const std::vector<Real>&        a_cumulativeWeights) const noexcept;
+
+  /**
+   * @brief Build the running weight sum that sampleParentPosition() draws from.
+   * @details Only the leading a_numEligible entries are eligible parents: the reconciliation appends to the same
+   * container, and a freshly created particle must not become a parent for its siblings.
+   * @param[out] a_cumulativeWeights Receives one running sum per eligible particle; cleared first.
+   * @param[in]  a_particles         Candidate parents.
+   * @param[in]  a_numEligible       Number of leading entries of a_particles that may be drawn.
+   */
+  inline void
+  buildParentWeights(std::vector<Real>&              a_cumulativeWeights,
+                     const ParticleSoA<ItoParticle>& a_particles,
+                     const std::size_t               a_numEligible) const noexcept;
 
   /**
    * @brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.
