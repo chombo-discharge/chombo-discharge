@@ -21,6 +21,7 @@
 #include <ParmParse.H>
 #include <ParticleIO.H>
 #include <EBCellFactory.H>
+#include <EBISLayout.H>
 
 // Our includes
 #include <CD_ItoSolver.H>
@@ -4687,6 +4688,16 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
     return implicitFunction->value(a_pos) < 0.0;
   };
 
+  // See mergeKDImpl() for why the whole-patch kd merges get a per-patch escape hatch from
+  // isPositionValid(), and for why it is the patch grown by one cell that has to be regular.
+  const Vector<EBISLayout>& ebisLayout = m_amr->getEBISLayout(m_realm, m_phase);
+
+  const bool ebGhostCoversHalo = m_amr->getNumberOfEbGhostCells() >= 1;
+
+  auto isPatchRegular = [&ebisLayout, ebGhostCoversHalo](const int a_lvl, const DataIndex& a_din) -> bool {
+    return ebGhostCoversHalo && ebisLayout[a_lvl][a_din].isAllRegular();
+  };
+
   // See mergeNnPairSearch() for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
@@ -4748,7 +4759,8 @@ ItoSolver::mergeKDSkinNn(ParticleContainer<ItoMergeParticle>& merge, const Vecto
                                                               kdCombine,
                                                               kdScatter,
                                                               allocateID,
-                                                              isPositionValid);
+                                                              isPositionValid,
+                                                              isPatchRegular);
 
   merge.clearGhostParticles();
 
@@ -4936,6 +4948,24 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
     return implicitFunction->value(a_pos) < 0.0;
   };
 
+  // Per-patch escape hatch from isPositionValid(). A patch with no cut or covered cell has no solid in
+  // it for a merged particle to land in, so the implicit function -- the expensive term in the commit
+  // loop, evaluated once per super-particle produced -- is skipped there outright rather than evaluated
+  // to a foregone true. Most patches in a discharge geometry are regular, so this removes the large
+  // majority of the evaluations.
+  const Vector<EBISLayout>& ebisLayout = m_amr->getEBISLayout(m_realm, m_phase);
+
+  // isAllRegular() speaks for the EBISBox's whole region, which is the patch grown by AmrMesh.eb_ghost.
+  // The merge asks about the patch grown by ONE cell -- the carve tier can place a particle built from
+  // members that far outside the patch -- so the EBISBox answers the right question only when that
+  // option leaves at least one ghost cell. Checked here rather than assumed: below one, no patch
+  // reports regular and every position is tested exactly as before.
+  const bool ebGhostCoversHalo = m_amr->getNumberOfEbGhostCells() >= 1;
+
+  auto isPatchRegular = [&ebisLayout, ebGhostCoversHalo](const int a_lvl, const DataIndex& a_din) -> bool {
+    return ebGhostCoversHalo && ebisLayout[a_lvl][a_din].isAllRegular();
+  };
+
   // See mergeNnPairSearch() for the id-allocator rationale.
   constexpr ParticleID rankStride = 1000000000000LL;
   const ParticleID     rankBase   = static_cast<ParticleID>(procID()) * rankStride;
@@ -4989,7 +5019,8 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                                                              combine,
                                                              scatter,
                                                              allocateID,
-                                                             isPositionValid);
+                                                             isPositionValid,
+                                                             isPatchRegular);
   }
   else {
     ParticleManagement::mergeKDPatch<ItoMergeParticle, Real>(merge,
@@ -5006,7 +5037,8 @@ ItoSolver::mergeKDImpl(ParticleContainer<ItoMergeParticle>& merge,
                                                              combine,
                                                              scatter,
                                                              allocateID,
-                                                             isPositionValid);
+                                                             isPositionValid,
+                                                             isPatchRegular);
   }
 }
 

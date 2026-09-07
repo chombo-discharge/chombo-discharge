@@ -764,7 +764,9 @@ kdCheckCentroid(const RealVect& a_centroid,
  * @param[in] a_boxLo       Low corner of the leaf's bounding box.
  * @param[in] a_boxHi       High corner of the leaf's bounding box.
  * @param[in] a_weights     The members' weights, parallel to @a a_positions.
- * @param[in] a_positions   The members' positions, parallel to @a a_weights.
+ * @param[in] a_positions   The members' positions, parallel to @a a_weights. Read only by
+ * KDPlacement::Sample, so callers may leave it empty for the other two placements rather than
+ * filling a vector no branch will look at.
  * @return The position to give the merged particle. Always inside [a_boxLo, a_boxHi].
  */
 template <typename Packed>
@@ -782,6 +784,9 @@ kdPlaceMerged(const KDPlacement            a_placement,
     return a_centroid;
   }
   case KDPlacement::Sample: {
+    // This is the one branch that reads a_positions, so it is also the one that needs it filled.
+    CH_assert(a_positions.size() == a_weights.size());
+
     // Inverse-CDF draw over the members' weights: member i is picked with probability w_i / W.
     const Real threshold = Random::getUniformReal01() * a_totalWeight;
 
@@ -821,7 +826,8 @@ template <typename P,
           typename Combine,
           typename Scatter,
           typename Allocator,
-          typename PosValid>
+          typename PosValid,
+          typename PatchRegular>
 inline void
 mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
@@ -836,7 +842,8 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
              const Allocator&              a_allocateID,
-             const PosValid&               a_isPositionValid)
+             const PosValid&               a_isPositionValid,
+             const PatchRegular&           a_isPatchRegular)
 {
   using namespace detail;
 
@@ -1014,6 +1021,18 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
   std::vector<KDLeaf>   leaves;
   std::vector<KDMember> members;
 
+  // Commit scratch, hoisted for the same reason and cleared per committed leaf. Declared per leaf
+  // these cost a malloc/free apiece every time a leaf commits, and a leaf commits about as often as
+  // a super-particle is produced -- the busiest count in the whole merge. The interior tier below and
+  // the boundary tier further down are never live at the same time, so both share these.
+  std::vector<Packed>   payloads;
+  std::vector<Real>     weights;
+  std::vector<RealVect> positions;
+
+  // Only KDPlacement::Sample reads the members' positions; filling them for the other placements is a
+  // store per member per leaf that nothing goes on to read.
+  const bool needPositions = (a_placement == KDPlacement::Sample);
+
   // Which cells hold a particle that some other box can also see. Read from the realm, which derives it
   // from the three ghost masks when they are built; see Realm::m_particleGhostExposure.
   const AMRMask& exposure = a_amr.getParticleGhostExposure(realm, 1);
@@ -1037,6 +1056,16 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
       const DataIndex& din = dit[mybox];
 
       ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      // Asked once per patch, then short-circuited into every position test below. Where the patch holds
+      // no cut or covered cell there is no solid for a merged particle to land in, and the implicit
+      // function evaluation -- the expensive term in the commit loop, paid once per super-particle -- is
+      // skipped entirely rather than evaluated to a foregone conclusion.
+      const bool patchRegular = a_isPatchRegular(lvl, din);
+
+      const auto positionValid = [&](const RealVect& a_pos) -> bool {
+        return patchRegular || a_isPositionValid(a_pos);
+      };
 
       const BaseFab<bool>& exposureDin = (*exposure[lvl])[din];
 
@@ -1094,7 +1123,7 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
           }
         }
 
-        kdCapCellWeights(combined, cellCounts, cellWeights, a_ppc, a_splitPlacement, probLo, dx, a_isPositionValid);
+        kdCapCellWeights(combined, cellCounts, cellWeights, a_ppc, a_splitPlacement, probLo, dx, positionValid);
       }
 
       buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_weightMedianCellWidths, dx, probLo, cellCounts);
@@ -1197,15 +1226,19 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
           // boundary-candidate branch below instead (rather than committing) is what lets a real
           // self-claim be raised for that foreign member, so the argmin actually arbitrates it.
           if (bl.hi - bl.lo >= 2) {
-            std::vector<Packed>   payloads;
-            std::vector<Real>     weights;
-            std::vector<RealVect> positions;
-            RealVect              centroid = RealVect::Zero;
-            Real                  totalW   = 0.0;
+            RealVect centroid = RealVect::Zero;
+            Real     totalW   = 0.0;
+
+            payloads.clear();
+            weights.clear();
+            positions.clear();
 
             payloads.reserve(bl.hi - bl.lo);
             weights.reserve(bl.hi - bl.lo);
-            positions.reserve(bl.hi - bl.lo);
+
+            if (needPositions) {
+              positions.reserve(bl.hi - bl.lo);
+            }
 
             for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
               const MergeParticle<Packed>& p = combined[idx];
@@ -1214,7 +1247,11 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
               payloads.push_back(p.payload);
               weights.push_back(p.weight);
-              positions.push_back(p.position);
+
+              if (needPositions) {
+                positions.push_back(p.position);
+              }
+
               centroid += p.weight * p.position;
               totalW += p.weight;
             }
@@ -1226,14 +1263,22 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
             // The placement can move the particle off the centroid, but never out of the leaf's own
             // box, so the EB test below still has something inside the leaf to judge. A placement
             // that lands in the solid falls back to the centroid rather than losing the leaf.
+            //
+            // The fallback is nested inside the first test rather than sequenced after it so that an
+            // accepted position costs ONE predicate call. the predicate evaluates the geometry's
+            // implicit function, which is the expensive term here, and it is paid once per committed
+            // leaf -- i.e. once per super-particle produced.
             RealVect
               placed = kdPlaceMerged<Packed>(a_placement, centroid, totalW, bl.boxLo, bl.boxHi, weights, positions);
 
-            if (!a_isPositionValid(placed)) {
-              placed = centroid;
+            bool placedValid = positionValid(placed);
+
+            if (!placedValid && placed != centroid) {
+              placed      = centroid;
+              placedValid = positionValid(placed);
             }
 
-            if (a_isPositionValid(placed)) {
+            if (placedValid) {
               MergeParticle<Packed> merged;
 
               merged.position  = placed;
@@ -1566,23 +1611,32 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
     bool committed = false;
 
     if (totalSurvivors >= 2) {
-      std::vector<Packed>   payloads;
-      std::vector<Real>     weights;
-      std::vector<RealVect> positions;
-      RealVect              centroid = RealVect::Zero;
-      Real                  totalW   = 0.0;
-      RealVect              surviveBoxLo, surviveBoxHi;
-      bool                  haveSurviveBox = false;
+      RealVect centroid = RealVect::Zero;
+      Real     totalW   = 0.0;
+      RealVect surviveBoxLo, surviveBoxHi;
+      bool     haveSurviveBox = false;
+
+      payloads.clear();
+      weights.clear();
+      positions.clear();
 
       payloads.reserve(totalSurvivors);
       weights.reserve(totalSurvivors);
+
+      if (needPositions) {
+        positions.reserve(totalSurvivors);
+      }
 
       auto accumulate = [&](const ParticleID a_id) {
         const MergeParticle<Packed>& p = findParticle(a_id);
 
         payloads.push_back(p.payload);
         weights.push_back(p.weight);
-        positions.push_back(p.position);
+
+        if (needPositions) {
+          positions.push_back(p.position);
+        }
+
         centroid += p.weight * p.position;
         totalW += p.weight;
 
@@ -1611,16 +1665,26 @@ mergeKDCarve(ParticleContainer<P, Traits>& a_particles,
 
       kdCheckCentroid(centroid, totalW, surviveBoxLo, surviveBoxHi);
 
-      // Same placement rule as the interior tier -- the box here is the surviving members' own, since
-      // the carve may have taken some of the leaf's original members away.
+      // Same placement rule as the interior tier, fallback nested for the same reason -- one predicate
+      // call whenever the placed position is accepted. The box here is the surviving members' own,
+      // since the carve may have taken some of the leaf's original members away.
       RealVect
         placed = kdPlaceMerged<Packed>(a_placement, centroid, totalW, surviveBoxLo, surviveBoxHi, weights, positions);
 
-      if (!a_isPositionValid(placed)) {
-        placed = centroid;
+      // Same per-patch escape hatch as the interior tier, asked of the patch this box belongs to. This
+      // tier is the reason a_isPatchRegular is defined over the patch GROWN BY ONE CELL: surviveBox is
+      // built from surviving members that may be foreign, and a foreign member sits up to one ghost
+      // cell outside box.patchIdx's own box.
+      const PatchWork& boxPatch = patchWork[box.patchIdx];
+
+      bool placedValid = a_isPatchRegular(boxPatch.level, boxPatch.din) || a_isPositionValid(placed);
+
+      if (!placedValid && placed != centroid) {
+        placed      = centroid;
+        placedValid = a_isPositionValid(placed);
       }
 
-      if (a_isPositionValid(placed)) {
+      if (placedValid) {
         committed = true;
 
         MergeParticle<Packed> merged;
@@ -1778,7 +1842,8 @@ template <typename P,
           typename Combine,
           typename Scatter,
           typename Allocator,
-          typename PosValid>
+          typename PosValid,
+          typename PatchRegular>
 inline void
 mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              EBAMRFAB&                     a_cellHistogram,
@@ -1793,7 +1858,8 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
              const Combine&                a_combine,
              const Scatter&                a_scatter,
              const Allocator&              a_allocateID,
-             const PosValid&               a_isPositionValid)
+             const PosValid&               a_isPositionValid,
+             const PatchRegular&           a_isPatchRegular)
 {
   // The patch-local merge is the ghost-free case of mergeKDInterior() writing back into its own
   // container, so it delegates rather than repeating the body.
@@ -1817,7 +1883,8 @@ mergeKDPatch(ParticleContainer<P, Traits>& a_particles,
                                      a_combine,
                                      a_scatter,
                                      a_allocateID,
-                                     a_isPositionValid);
+                                     a_isPositionValid,
+                                     a_isPatchRegular);
 }
 
 template <typename P,
@@ -1827,7 +1894,8 @@ template <typename P,
           typename Combine,
           typename Scatter,
           typename Allocator,
-          typename PosValid>
+          typename PosValid,
+          typename PatchRegular>
 inline void
 mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 ParticleContainer<P, Traits>& a_interior,
@@ -1843,7 +1911,8 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
                 const Combine&                a_combine,
                 const Scatter&                a_scatter,
                 const Allocator&              a_allocateID,
-                const PosValid&               a_isPositionValid)
+                const PosValid&               a_isPositionValid,
+                const PatchRegular&           a_isPatchRegular)
 {
   using namespace detail;
 
@@ -1877,6 +1946,17 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
   // earlier patches instead of starting from nothing.
   std::vector<KDLeaf> leaves;
 
+  // Commit scratch, hoisted for the same reason and cleared per committed leaf. Declared per leaf
+  // these cost a malloc/free apiece every time a leaf commits, and a leaf commits about as often as
+  // a super-particle is produced -- the busiest count in the whole merge.
+  std::vector<Packed>   payloads;
+  std::vector<Real>     weights;
+  std::vector<RealVect> positions;
+
+  // Only KDPlacement::Sample reads the members' positions; filling them for the other placements is a
+  // store per member per leaf that nothing goes on to read.
+  const bool needPositions = (a_placement == KDPlacement::Sample);
+
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_amr.getGrids(realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
@@ -1891,6 +1971,16 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
       const DataIndex& din = dit[mybox];
 
       ParticleSoA<P, Traits>& leaf = a_particles[lvl][din];
+
+      // Asked once per patch, then short-circuited into every position test below. Where the patch holds
+      // no cut or covered cell there is no solid for a merged particle to land in, and the implicit
+      // function evaluation -- the expensive term in the commit loop, paid once per super-particle -- is
+      // skipped entirely rather than evaluated to a foregone conclusion.
+      const bool patchRegular = a_isPatchRegular(lvl, din);
+
+      const auto positionValid = [&](const RealVect& a_pos) -> bool {
+        return patchRegular || a_isPositionValid(a_pos);
+      };
 
       // Ghosts ARE gathered, unlike mergeKDPatch(). They are never merged here, but they must take
       // part in the partition: a ghost is what marks the leaf it lands in as contested, and the
@@ -1941,7 +2031,7 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
           }
         }
 
-        kdCapCellWeights(combined, cellCounts, cellWeights, a_ppc, a_splitPlacement, probLo, dx, a_isPositionValid);
+        kdCapCellWeights(combined, cellCounts, cellWeights, a_ppc, a_splitPlacement, probLo, dx, positionValid);
       }
 
       buildKDQuotaLeaves(combined, quota, leaves, a_ppc, a_weightMedianCellWidths, dx, probLo, cellCounts);
@@ -1979,15 +2069,19 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
           continue;
         }
 
-        std::vector<Packed>   payloads;
-        std::vector<Real>     weights;
-        std::vector<RealVect> positions;
-        RealVect              centroid = RealVect::Zero;
-        Real                  totalW   = 0.0;
+        RealVect centroid = RealVect::Zero;
+        Real     totalW   = 0.0;
+
+        payloads.clear();
+        weights.clear();
+        positions.clear();
 
         payloads.reserve(bl.hi - bl.lo);
         weights.reserve(bl.hi - bl.lo);
-        positions.reserve(bl.hi - bl.lo);
+
+        if (needPositions) {
+          positions.reserve(bl.hi - bl.lo);
+        }
 
         for (std::size_t idx = bl.lo; idx < bl.hi; idx++) {
           const MergeParticle<Packed>& p = combined[idx];
@@ -1998,7 +2092,11 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
           payloads.push_back(p.payload);
           weights.push_back(p.weight);
-          positions.push_back(p.position);
+
+          if (needPositions) {
+            positions.push_back(p.position);
+          }
+
           centroid += p.weight * p.position;
           totalW += p.weight;
         }
@@ -2007,14 +2105,23 @@ mergeKDInterior(ParticleContainer<P, Traits>& a_particles,
 
         kdCheckCentroid(centroid, totalW, bl.boxLo, bl.boxHi);
 
+        // A placement that lands in the solid falls back to the centroid rather than losing the leaf.
+        // The fallback is nested inside the first test rather than sequenced after it so that an
+        // accepted position costs ONE predicate call. the predicate evaluates the geometry's
+        // implicit function, which is the expensive term here, and it is paid once per committed leaf
+        // -- i.e. once per super-particle produced.
         RealVect placed = kdPlaceMerged<Packed>(a_placement, centroid, totalW, bl.boxLo, bl.boxHi, weights, positions);
 
-        if (!a_isPositionValid(placed)) {
-          placed = centroid;
-        }
+        if (!positionValid(placed)) {
+          if (placed == centroid) {
+            continue;
+          }
 
-        if (!a_isPositionValid(placed)) {
-          continue;
+          placed = centroid;
+
+          if (!positionValid(placed)) {
+            continue;
+          }
         }
 
         MergeParticle<Packed> merged;
