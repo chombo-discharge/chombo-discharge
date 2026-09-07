@@ -41,6 +41,17 @@
  */
 namespace DischargeIO {
 /**
+ * @brief Get the git description of the source tree that this executable was compiled from.
+ * @details The string is stamped into the library at compile time by Lib/GenerateGitHash.sh, and is
+ * the output of 'git describe --tags --always --dirty' -- e.g. "v26.08-26-ge5f3ef39d" or, if the
+ * working tree had uncommitted changes, "v26.08-26-ge5f3ef39d-dirty". It is the string "unknown" if
+ * the source tree was not a git repository when it was compiled, or if git was not available.
+ * @return Git description of the compiled source tree.
+ */
+std::string
+gitHash() noexcept;
+
+/**
  * @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as
  * 123,456
  * @param[in] n Number to format as string with separator

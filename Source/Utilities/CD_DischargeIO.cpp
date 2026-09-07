@@ -22,7 +22,16 @@
 // Our includes
 #include <CD_DischargeIO.H>
 #include <CD_BoxLoops.H>
+#include <CD_GitHash.H>
 #include <CD_NamespaceHeader.H>
+
+std::string
+DischargeIO::gitHash() noexcept
+{
+  CH_TIME("DischargeIO::gitHash()");
+
+  return std::string(CD_GIT_HASH);
+}
 
 std::string
 DischargeIO::numberFmt(const long long n, char sep) noexcept
@@ -125,6 +134,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   pp.query("use_prob_lo", useProbLo);
 
   header.m_string["filetype"]    = "VanillaAMRFileType";
+  header.m_string["git_hash"]    = gitHash();
   header.m_int["num_levels"]     = a_numLevels;
   header.m_int["num_components"] = numCompTotal;
   if (useProbLo) {

@@ -434,7 +434,17 @@ for test in config.sections():
                                     else:
                                         print("\t Comparing files " + regFile +  " and " + str(benFile))
 
-                                        compare_command = "h5diff " + regFile + " " + benFile
+                                        # The root group of a plot file carries the git description of
+                                        # the executable that wrote it (see
+                                        # DischargeIO::writeEBHDF5Header). Benchmarks are generated
+                                        # from the pre-change tree and compared against the
+                                        # post-change tree, so that attribute differs by construction
+                                        # and h5diff would otherwise fail every comparison in the
+                                        # suite. --exclude-attribute drops the attributes of the named
+                                        # object only: everything under /level_N -- the data sets and
+                                        # their dt/dx/time/prob_domain/ref_ratio attributes -- is
+                                        # still compared, as is /Chombo_global.
+                                        compare_command = "h5diff --exclude-attribute / " + regFile + " " + benFile
                                         if args.silent:
                                             compare_code = subprocess.call(compare_command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
                                         else:

@@ -36,6 +36,9 @@ compile_commands.events.json
 **/*.a
 **/*.o
 
+# Build-time provenance header written by Lib/GenerateGitHash.sh
+Lib/Generated/
+
 Exec/Examples/DischargeInception/**/report.txt
 Exec/Examples/DischargeInception/**/report.txt
 Exec/Examples/DischargeInception/**/report.txt
