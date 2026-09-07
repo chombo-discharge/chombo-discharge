@@ -78,6 +78,9 @@ The test suite can generate benchmark files which can later be compared against 
 This is often a good idea if one wants to ensure that modifications to the ``chombo-discharge`` source code do not unintentionally change the output of computer simulations. 
 In this case one can run the test suite and generate benchmark files *before* adding changes to ``chombo-discharge``.
 Once the code development is completed, the benchmark files can later be bit-wise (using `h5diff <https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm>`_) compared against the results of a later test suite.
+The comparison is run with ``--exclude-attribute /``, which skips the attributes of the HDF5 root group.
+Those attributes include the version of the code that wrote the file (see :ref:`Chap:Version`), which differs between the benchmark and the comparison run by construction.
+The simulation data itself, and the per-level attributes, are compared as usual.
 
 This consists of the following steps:
 

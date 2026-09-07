@@ -215,7 +215,10 @@ By default, this will compile without MPI and HDF5 support.</p>
 <p>The test suite can generate benchmark files which can later be compared against new test suite output files.
 This is often a good idea if one wants to ensure that modifications to the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code do not unintentionally change the output of computer simulations.
 In this case one can run the test suite and generate benchmark files <em>before</em> adding changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-Once the code development is completed, the benchmark files can later be bit-wise (using <a class="reference external" href="https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm">h5diff</a>) compared against the results of a later test suite.</p>
+Once the code development is completed, the benchmark files can later be bit-wise (using <a class="reference external" href="https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm">h5diff</a>) compared against the results of a later test suite.
+The comparison is run with <code class="docutils literal notranslate"><span class="pre">--exclude-attribute</span> <span class="pre">/</span></code>, which skips the attributes of the HDF5 root group.
+Those attributes include the version of the code that wrote the file (see <a class="reference internal" href="Control.html#chap-version"><span class="std std-ref">Version reporting</span></a>), which differs between the benchmark and the comparison run by construction.
+The simulation data itself, and the per-level attributes, are compared as usual.</p>
 <p>This consists of the following steps:</p>
 <ol class="arabic">
 <li><p><em>Before</em> making changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, generate benchmark files with</p>

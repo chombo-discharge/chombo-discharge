@@ -122,83 +122,86 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="foldopen" id="foldopen00042" data-start="{" data-end="}">
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="namespaceDischargeIO.html">   42</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceDischargeIO.html">DischargeIO</a> {</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>std::string</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><a class="code hl_function" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a>(<span class="keywordtype">long</span> <span class="keywordtype">long</span> n, <span class="keywordtype">char</span> a_sep = <span class="charliteral">&#39;,&#39;</span>) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>Vector&lt;std::string&gt;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><a class="code hl_function" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a>(<span class="keyword">const</span> Vector&lt;long long&gt;&amp; a_numbers, <span class="keywordtype">char</span> a_sep = <span class="charliteral">&#39;,&#39;</span>) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>writeEBHDF5(<span class="keyword">const</span> std::string&amp;                   a_filename,</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            <span class="keyword">const</span> Vector&lt;std::string&gt;&amp;           a_variableNames,</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>            <span class="keyword">const</span> Vector&lt;DisjointBoxLayout&gt;&amp;     a_grids,</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <span class="keyword">const</span> Vector&lt;LevelData&lt;EBCellFAB&gt;*&gt;&amp; a_data,</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <span class="keyword">const</span> Vector&lt;ProblemDomain&gt;&amp;         a_domains,</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            <span class="keyword">const</span> Vector&lt;Real&gt;&amp;                  a_dx,</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>            <span class="keyword">const</span> Vector&lt;int&gt;&amp;                   a_refinementRatios,</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            Real                                 a_dt,</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            Real                                 a_time,</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>            <span class="keyword">const</span> RealVect&amp;                      a_probLo,</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            <span class="keywordtype">int</span>                                  a_numLevels,</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            <span class="keywordtype">int</span>                                  a_numGhost) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>writeEBHDF5Header(HDF5Handle&amp;                a_handleH5,</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                  <span class="keywordtype">int</span>                        a_numLevels,</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                  <span class="keyword">const</span> RealVect&amp;            a_probLo,</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                  <span class="keyword">const</span> Vector&lt;std::string&gt;&amp; a_variableNames) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>writeEBHDF5Level(HDF5Handle&amp;                 a_handleH5,</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>                 <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_outputData,</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>                 <span class="keyword">const</span> ProblemDomain&amp;        a_domain,</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                 Real                        a_dx,</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>                 Real                        a_dt,</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>                 Real                        a_time,</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>                 <span class="keywordtype">int</span>                         a_level,</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>                 <span class="keywordtype">int</span>                         a_refRatio,</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                 <span class="keywordtype">int</span>                         a_numGhost) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>writeEBHDF5(<span class="keyword">const</span> EBAMRCellData&amp; a_data, <span class="keyword">const</span> std::string&amp; a_file);</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><a class="code hl_function" href="namespaceDischargeIO.html#a10ce9adf5e883c8699c57ccfeffb05dc">writeH5Part</a>(std::string                         a_filename,</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            <span class="keyword">const</span> <a class="code hl_class" href="classParticleContainer.html">ParticleContainer&lt;P, Traits&gt;</a>&amp; a_particles,</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            RealVect                            a_shift,</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>            Real                                a_time) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>writeCheckParticlesToHDF(HDF5Handle&amp;                               a_handle,</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                         <span class="keyword">const</span> LayoutData&lt;<a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&gt;&amp; a_particles,</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>                         <span class="keyword">const</span> std::string&amp;                        a_dataType);</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>readCheckParticlesFromHDF(HDF5Handle&amp;                         a_handle,</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>                          LayoutData&lt;<a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&gt;&amp; a_particles,</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>                          <span class="keyword">const</span> std::string&amp;                  a_dataType);</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>} <span class="comment">// namespace DischargeIO</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>std::string</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><a class="code hl_function" href="namespaceDischargeIO.html#aec7a4c1041aca8f06e4cf04bcebe4c2a">gitHash</a>() <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>std::string</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><a class="code hl_function" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a>(<span class="keywordtype">long</span> <span class="keywordtype">long</span> n, <span class="keywordtype">char</span> a_sep = <span class="charliteral">&#39;,&#39;</span>) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>Vector&lt;std::string&gt;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><a class="code hl_function" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a>(<span class="keyword">const</span> Vector&lt;long long&gt;&amp; a_numbers, <span class="keywordtype">char</span> a_sep = <span class="charliteral">&#39;,&#39;</span>) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>writeEBHDF5(<span class="keyword">const</span> std::string&amp;                   a_filename,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            <span class="keyword">const</span> Vector&lt;std::string&gt;&amp;           a_variableNames,</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            <span class="keyword">const</span> Vector&lt;DisjointBoxLayout&gt;&amp;     a_grids,</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            <span class="keyword">const</span> Vector&lt;LevelData&lt;EBCellFAB&gt;*&gt;&amp; a_data,</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <span class="keyword">const</span> Vector&lt;ProblemDomain&gt;&amp;         a_domains,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            <span class="keyword">const</span> Vector&lt;Real&gt;&amp;                  a_dx,</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            <span class="keyword">const</span> Vector&lt;int&gt;&amp;                   a_refinementRatios,</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            Real                                 a_dt,</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            Real                                 a_time,</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            <span class="keyword">const</span> RealVect&amp;                      a_probLo,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>            <span class="keywordtype">int</span>                                  a_numLevels,</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            <span class="keywordtype">int</span>                                  a_numGhost) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>writeEBHDF5Header(HDF5Handle&amp;                a_handleH5,</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                  <span class="keywordtype">int</span>                        a_numLevels,</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                  <span class="keyword">const</span> RealVect&amp;            a_probLo,</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                  <span class="keyword">const</span> Vector&lt;std::string&gt;&amp; a_variableNames) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>writeEBHDF5Level(HDF5Handle&amp;                 a_handleH5,</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>                 <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_outputData,</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>                 <span class="keyword">const</span> ProblemDomain&amp;        a_domain,</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>                 Real                        a_dx,</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                 Real                        a_dt,</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>                 Real                        a_time,</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>                 <span class="keywordtype">int</span>                         a_level,</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>                 <span class="keywordtype">int</span>                         a_refRatio,</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>                 <span class="keywordtype">int</span>                         a_numGhost) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>writeEBHDF5(<span class="keyword">const</span> EBAMRCellData&amp; a_data, <span class="keyword">const</span> std::string&amp; a_file);</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><a class="code hl_function" href="namespaceDischargeIO.html#a10ce9adf5e883c8699c57ccfeffb05dc">writeH5Part</a>(std::string                         a_filename,</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>            <span class="keyword">const</span> <a class="code hl_class" href="classParticleContainer.html">ParticleContainer&lt;P, Traits&gt;</a>&amp; a_particles,</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>            RealVect                            a_shift,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>            Real                                a_time) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="preprocessor">#ifdef CH_USE_HDF5</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>writeCheckParticlesToHDF(HDF5Handle&amp;                               a_handle,</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                         <span class="keyword">const</span> LayoutData&lt;<a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&gt;&amp; a_particles,</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                         <span class="keyword">const</span> std::string&amp;                        a_dataType);</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, <span class="keyword">typename</span> Traits&gt;</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>readCheckParticlesFromHDF(HDF5Handle&amp;                         a_handle,</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>                          LayoutData&lt;<a class="code hl_class" href="classParticleSoA.html">ParticleSoA&lt;P, Traits&gt;</a>&gt;&amp; a_particles,</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>                          <span class="keyword">const</span> std::string&amp;                  a_dataType);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>} <span class="comment">// namespace DischargeIO</span></div>
 </div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="preprocessor">#include &lt;<a class="code" href="CD__DischargeIOImplem_8H.html">CD_DischargeIOImplem.H</a>&gt;</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="preprocessor">#include &lt;<a class="code" href="CD__DischargeIOImplem_8H.html">CD_DischargeIOImplem.H</a>&gt;</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__DischargeIOImplem_8H_html"><div class="ttname"><a href="CD__DischargeIOImplem_8H.html">CD_DischargeIOImplem.H</a></div><div class="ttdoc">Implementation of CD_DischargeIO.H.</div></div>
 <div class="ttc" id="aCD__EBAMRData_8H_html"><div class="ttname"><a href="CD__EBAMRData_8H.html">CD_EBAMRData.H</a></div><div class="ttdoc">Class for holding data across EBAMR hierarchies.</div></div>
 <div class="ttc" id="aCD__ParticleContainer_8H_html"><div class="ttname"><a href="CD__ParticleContainer_8H.html">CD_ParticleContainer.H</a></div><div class="ttdoc">Declaration of an AMR-hierarchy container that owns per-patch ParticleSoA leaves.</div></div>
@@ -207,7 +210,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassParticleSoA_html"><div class="ttname"><a href="classParticleSoA.html">ParticleSoA</a></div><div class="ttdoc">Arena-backed Struct-of-Arrays particle container for a single grid patch.</div><div class="ttdef"><b>Definition</b> CD_ParticleSoA.H:655</div></div>
 <div class="ttc" id="anamespaceDischargeIO_html"><div class="ttname"><a href="namespaceDischargeIO.html">DischargeIO</a></div><div class="ttdoc">Namespace which encapsulates chombo-discharge IO functionality.</div><div class="ttdef"><b>Definition</b> CD_DischargeIO.H:42</div></div>
 <div class="ttc" id="anamespaceDischargeIO_html_a10ce9adf5e883c8699c57ccfeffb05dc"><div class="ttname"><a href="namespaceDischargeIO.html#a10ce9adf5e883c8699c57ccfeffb05dc">DischargeIO::writeH5Part</a></div><div class="ttdeci">void writeH5Part(std::string a_filename, const ParticleContainer&lt; P, Traits &gt; &amp;a_particles, RealVect a_shift, Real a_time) noexcept</div><div class="ttdoc">Write an SoA particle container to an H5Part file (quick visualization).</div><div class="ttdef"><b>Definition</b> CD_DischargeIOImplem.H:201</div></div>
-<div class="ttc" id="anamespaceDischargeIO_html_a957da12ee406f8da1ebe1a2f4395012b"><div class="ttname"><a href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">DischargeIO::numberFmt</a></div><div class="ttdeci">std::string numberFmt(long long n, char a_sep=',') noexcept</div><div class="ttdoc">Number formatting method – writes big numbers using an input separator. E.g. the number 123456 is wri...</div><div class="ttdef"><b>Definition</b> CD_DischargeIO.cpp:28</div></div>
+<div class="ttc" id="anamespaceDischargeIO_html_a957da12ee406f8da1ebe1a2f4395012b"><div class="ttname"><a href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">DischargeIO::numberFmt</a></div><div class="ttdeci">std::string numberFmt(long long n, char a_sep=',') noexcept</div><div class="ttdoc">Number formatting method – writes big numbers using an input separator. E.g. the number 123456 is wri...</div><div class="ttdef"><b>Definition</b> CD_DischargeIO.cpp:37</div></div>
+<div class="ttc" id="anamespaceDischargeIO_html_aec7a4c1041aca8f06e4cf04bcebe4c2a"><div class="ttname"><a href="namespaceDischargeIO.html#aec7a4c1041aca8f06e4cf04bcebe4c2a">DischargeIO::gitHash</a></div><div class="ttdeci">std::string gitHash() noexcept</div><div class="ttdoc">Get the git description of the source tree that this executable was compiled from.</div><div class="ttdef"><b>Definition</b> CD_DischargeIO.cpp:29</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

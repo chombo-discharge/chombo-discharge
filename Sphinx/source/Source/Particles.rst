@@ -710,7 +710,7 @@ Simple particle visualization can be performed by writing ``H5Part`` compatible 
 This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DischargeIO.H
-   :lines: 160-165
+   :lines: 171-176
    :language: c++
 
 This routine permits particles to be written (in parallel, when using MPI) into a file readable by VisIt.

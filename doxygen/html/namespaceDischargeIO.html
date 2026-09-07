@@ -87,6 +87,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:aec7a4c1041aca8f06e4cf04bcebe4c2a" id="r_aec7a4c1041aca8f06e4cf04bcebe4c2a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#aec7a4c1041aca8f06e4cf04bcebe4c2a">gitHash</a> () noexcept</td></tr>
+<tr class="memdesc:aec7a4c1041aca8f06e4cf04bcebe4c2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the git description of the source tree that this executable was compiled from.  <br /></td></tr>
+<tr class="separator:aec7a4c1041aca8f06e4cf04bcebe4c2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a957da12ee406f8da1ebe1a2f4395012b" id="r_a957da12ee406f8da1ebe1a2f4395012b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDischargeIO.html#a957da12ee406f8da1ebe1a2f4395012b">numberFmt</a> (long long n, char a_sep=',') noexcept</td></tr>
 <tr class="memdesc:a957da12ee406f8da1ebe1a2f4395012b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number formatting method &ndash; writes big numbers using an input separator. E.g. the number 123456 is written as 123,456.  <br /></td></tr>
 <tr class="separator:a957da12ee406f8da1ebe1a2f4395012b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -101,6 +104,34 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace which encapsulates chombo-discharge IO functionality. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a id="aec7a4c1041aca8f06e4cf04bcebe4c2a" name="aec7a4c1041aca8f06e4cf04bcebe4c2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec7a4c1041aca8f06e4cf04bcebe4c2a">&#9670;&#160;</a></span>gitHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string DischargeIO::gitHash </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the git description of the source tree that this executable was compiled from. </p>
+<p>The string is stamped into the library at compile time by Lib/GenerateGitHash.sh, and is the output of 'git describe &ndash;tags &ndash;always &ndash;dirty' &ndash; e.g. "v26.08-26-ge5f3ef39d" or, if the working tree had uncommitted changes, "v26.08-26-ge5f3ef39d-dirty". It is the string "unknown" if the source tree was not a git repository when it was compiled, or if git was not available. </p><dl class="section return"><dt>Returns</dt><dd>Git description of the compiled source tree. </dd></dl>
+
+</div>
+</div>
 <a id="a215905b464e4689a2e0b98b560857c5c" name="a215905b464e4689a2e0b98b560857c5c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a215905b464e4689a2e0b98b560857c5c">&#9670;&#160;</a></span>numberFmt() <span class="overload">[1/2]</span></h2>
 
