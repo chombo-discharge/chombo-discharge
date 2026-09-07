@@ -69,15 +69,16 @@ These limits are given by the following input variables:
 
 .. literalinclude:: ../../../../Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepper.options
    :language: text
-   :lines: 19-31
+   :lines: 20-32
 
 Particle placement
 ------------------
 
-The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support three methods for placing new particles:
+The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support four methods for placing new particles:
 
 #. Place all particles on the cell centroid.
 #. Randomly distribute the new particles within the grid cell.
+#. Place each new particle on top of one of the particles already in the cell, drawn with probability proportional to the parent weight.
 #. Compute an upstream position within the grid cell and randomly distribute the particles in the downstream region.
 
 The methods each have their advantages and disadvantages.
@@ -85,7 +86,58 @@ Placing all new particles on the cell centroid has the advantage that there will
 Randomly distributing the new particles has the advantage that it generates secondary particles more evenly over the reaction region.
 Both these methods (``centroid`` and ``random``) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
+The parent method avoids it in a different way: it introduces no sub-grid transport at all, since a new particle simply inherits the position of one that was already there.
 See :ref:`Chap:ItoKMCJSON` for instructions on how to assign the particle placement method.
+
+.. _Chap:ItoKMCCdrProducts:
+
+CDR reaction products
+---------------------
+
+A reaction can create both Îto and CDR products, and the two do not have to reach the mesh the same way.
+Îto products are particles at a sub-cell position, and reach the mesh through the Îto solvers' deposition kernel, which is usually not nearest-grid-point.
+CDR products have no particles of their own, so the reaction network's per-cell production can simply be added to the cell that computed it.
+An ionization event then spreads the electron's charge over a deposition stencil while leaving the ion's charge in a single cell, which is a spurious charge separation on the cell scale, proportional to the ionization rate and therefore largest at the streamer head.
+
+Which of the two is used is set by
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.cdr_products = particle  # 'mesh' or 'particle'
+
+``mesh``
+   Add the production straight into the cell that produced it.
+
+``particle``
+   Emit the production as computational particles and deposit them exactly as the Îto solvers deposit theirs -- same kernel, same coarse-fine strategy, same cut-cell strategy, including the mirroring or redistribution passes that go with it.
+   Both halves of a reaction then reach the mesh the same way.
+   This is the default.
+
+Only *production* becomes particles.
+Mass removed from a CDR species is proportional to the cell-averaged density, which carries no sub-cell information, so it is subtracted in the cell it was taken from.
+The reaction network reports a net change per species, which is split by sign for this.
+
+.. note::
+
+   The production is partitioned into at most ``ItoKMCJSON.max_new_particles`` computational particles of integer weight, exactly as the Îto products are.
+   That key must be at least 1; the run aborts otherwise.
+   The placement is stochastic, so the deposited production carries a sampling error falling off as :math:`1/\sqrt{N}` in the number of particles used.
+
+.. note::
+
+   The ``parent`` placement method (see :ref:`Chap:ItoKMCJSONParticlePlacement`) does not apply to CDR products.
+   A CDR product has no parents in the cell -- its particle container is transient and holds only what the current time step created -- so it falls back to a uniformly random position within the cell.
+   The other three placement methods apply unchanged.
+
+.. warning::
+
+   ``ItoKMCGodunovStepper.redistribute_cdr`` is ignored when ``cdr_products = particle``.
+   The reactive redistribution exists to correct the :math:`\kappa` damping that the in-cell injection imposes on a cut-cell reaction; once the production is deposited by the Îto solver it carries the solver's own cut-cell normalization, and there is no such damping left to correct.
+
+.. warning::
+
+   Photoionization products are unaffected by this setting.
+   They are created at the photon absorption position and have no in-cell representation to fall back on, so they are always deposited -- nearest-grid-point under ``mesh``, and with the Îto solvers' deposition under ``particle``.
 
 Reactive field centering
 ------------------------
@@ -2157,6 +2209,8 @@ To enable a time step calculation, specify the ``include_dt_calc`` flag in the r
 
    It is normally sufficient to enable :math:`\Delta t` calculations for the ionizing reactions.
 
+.. _Chap:ItoKMCJSONParticlePlacement:
+
 Particle placement
 ------------------
 
@@ -2169,6 +2223,7 @@ The ``parent`` method draws one of the particles that were already in the cell, 
 This is the placement that introduces no sub-grid transport of its own: unlike ``random`` it does not scatter the new weight across the cell, and unlike ``centroid`` it does not pull the new weight towards the cell centre.
 Both of those act as numerical transport terms whose magnitude is set by the grid resolution rather than by the physics.
 If the cell holds no particles of the species in question -- which happens for photoionization products -- ``parent`` falls back to ``random``.
+It also falls back to ``random`` for CDR reaction products, which have no parents at all -- see :ref:`Chap:ItoKMCCdrProducts`.
 
 The following four specifiers are all valid:
 

@@ -1,7 +1,7 @@
 var searchData=
 [
   ['parent_0',['Parent',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7',1,'Physics::ItoKMC::ItoKMCPhysics']]],
-  ['particle_1',['Particle',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5bfa40eb12c5b1edf05afe9edc8818f3a68f95af3c2f2e56cc8baeee817227d25',1,'Physics::BrownianWalker::BrownianWalkerStepper']]],
+  ['particle_1',['particle',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a5bfa40eb12c5b1edf05afe9edc8818f3a68f95af3c2f2e56cc8baeee817227d25',1,'Physics::BrownianWalker::BrownianWalkerStepper::Particle'],['../classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4',1,'Physics::ItoKMC::ItoKMCStepper::Particle']]],
   ['planar_2',['Planar',['../namespaceMirrorDeposition.html#a19afd0b8665028a01fc3d68850721200a93a097009b6443e711996c50b5354adf',1,'MirrorDeposition']]],
   ['prc_3',['prc',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6bae01a919b068424df394a7f38a3a02ed2',1,'Physics::ItoKMC::ItoKMCPhysics::PRC'],['../CD__KMCSolver_8H.html#a44a86cfb3c9eee456028c00d618ea9d4ae01a919b068424df394a7f38a3a02ed2',1,'PRC:&#160;CD_KMCSolver.H']]]
 ];

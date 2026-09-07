@@ -216,6 +216,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>killKMC</b> () const 
 <tr class="memitem:adf966b3246d43386b2eb3c5d7eb64f73" id="r_adf966b3246d43386b2eb3c5d7eb64f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#adf966b3246d43386b2eb3c5d7eb64f73">reconcilePhotoionization</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_itoParticles, Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; * &gt; &amp;a_cdrParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structPhoton.html">Photon</a> &gt; * &gt; &amp;a_absorbedPhotons) const noexcept</td></tr>
 <tr class="memdesc:adf966b3246d43386b2eb3c5d7eb64f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile photoionization reactions.  <br /></td></tr>
 <tr class="separator:adf966b3246d43386b2eb3c5d7eb64f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae21344a5837d0e53604f19c09e0f7e6b" id="r_ae21344a5837d0e53604f19c09e0f7e6b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae21344a5837d0e53604f19c09e0f7e6b">reconcileCdrParticles</a> (Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; * &gt; &amp;a_cdrParticles, const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_itoParticles, const Vector&lt; long long &gt; &amp;a_numNewParticles, const RealVect a_electricField, const RealVect a_cellPos, const RealVect a_centroidPos, const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_bndryNormal, const Real a_dx, const Real a_kappa) const noexcept</td></tr>
+<tr class="memdesc:ae21344a5837d0e53604f19c09e0f7e6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn the CDR mass created by the reaction network into particles.  <br /></td></tr>
+<tr class="separator:ae21344a5837d0e53604f19c09e0f7e6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -274,6 +277,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseAlgorithm</b> ()
 <tr class="memitem:a7470e40fd0da1ee7d7481bf9b879deca" id="r_a7470e40fd0da1ee7d7481bf9b879deca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7470e40fd0da1ee7d7481bf9b879deca">removeParticles</a> (<a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const long long a_numToRemove) const</td></tr>
 <tr class="memdesc:a7470e40fd0da1ee7d7481bf9b879deca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles from the input list.  <br /></td></tr>
 <tr class="separator:a7470e40fd0da1ee7d7481bf9b879deca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94df7d5ddca4354da82731c1f61cfac8" id="r_a94df7d5ddca4354da82731c1f61cfac8"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a94df7d5ddca4354da82731c1f61cfac8">drawNewParticlePosition</a> (const bool a_hasParent, const bool a_hasDownstream, const RealVect a_parentPos, const RealVect a_upstreamPos, const RealVect a_upstreamLo, const RealVect a_upstreamHi, const RealVect a_downstreamDirection, const RealVect a_cellPos, const RealVect a_centroidPos, const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_bndryNormal, const Real a_dx, const Real a_kappa) const noexcept</td></tr>
+<tr class="memdesc:a94df7d5ddca4354da82731c1f61cfac8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a position for a particle created by the reaction network in a grid cell.  <br /></td></tr>
+<tr class="separator:a94df7d5ddca4354da82731c1f61cfac8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3e451ffc4c2784910c56f7c50eb13ca" id="r_ad3e451ffc4c2784910c56f7c50eb13ca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad3e451ffc4c2784910c56f7c50eb13ca">sampleParentPosition</a> (RealVect &amp;a_pos, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const std::vector&lt; Real &gt; &amp;a_cumulativeWeights) const noexcept</td></tr>
+<tr class="memdesc:ad3e451ffc4c2784910c56f7c50eb13ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw the position of a parent particle, with probability proportional to particle weight.  <br /></td></tr>
+<tr class="separator:ad3e451ffc4c2784910c56f7c50eb13ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad22f814b3709926aa7928586570379eb" id="r_ad22f814b3709926aa7928586570379eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad22f814b3709926aa7928586570379eb">buildParentWeights</a> (std::vector&lt; Real &gt; &amp;a_cumulativeWeights, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const std::size_t a_numEligible) const noexcept</td></tr>
+<tr class="memdesc:ad22f814b3709926aa7928586570379eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the running weight sum that <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad3e451ffc4c2784910c56f7c50eb13ca" title="Draw the position of a parent particle, with probability proportional to particle weight.">sampleParentPosition()</a> draws from.  <br /></td></tr>
+<tr class="separator:ad22f814b3709926aa7928586570379eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84199081445a4d223467ab7630b219f1" id="r_a84199081445a4d223467ab7630b219f1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a84199081445a4d223467ab7630b219f1">computeUpstreamPosition</a> (RealVect &amp;a_pos, RealVect &amp;a_lo, RealVect &amp;a_hi, const int &amp;a_Z, const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const RealVect &amp;a_electricField, const RealVect &amp;a_cellPos, const Real &amp;a_dx) const noexcept</td></tr>
 <tr class="memdesc:a84199081445a4d223467ab7630b219f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.  <br /></td></tr>
 <tr class="separator:a84199081445a4d223467ab7630b219f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -313,10 +325,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_debug</b></td></tr>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:aeb965c335c41dd5a92e8f76b73c1951f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:aeb965c335c41dd5a92e8f76b73c1951f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0be1c26b09ac6b11ad3c77b0b2b0a9b8" id="r_a0be1c26b09ac6b11ad3c77b0b2b0a9b8"><td class="memItemLeft" align="right" valign="top"><a id="a0be1c26b09ac6b11ad3c77b0b2b0a9b8" name="a0be1c26b09ac6b11ad3c77b0b2b0a9b8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_incrementNewParticles</b></td></tr>
-<tr class="memdesc:a0be1c26b09ac6b11ad3c77b0b2b0a9b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, increment onto existing particles rather than creating new ones. <br /></td></tr>
-<tr class="separator:a0be1c26b09ac6b11ad3c77b0b2b0a9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf93dd374d062265d09611aa5ea6677e" id="r_aaf93dd374d062265d09611aa5ea6677e"><td class="memItemLeft" align="right" valign="top"><a id="aaf93dd374d062265d09611aa5ea6677e" name="aaf93dd374d062265d09611aa5ea6677e"></a>
 std::vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_kmcReactions</b></td></tr>
 <tr class="memdesc:aaf93dd374d062265d09611aa5ea6677e"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of reactions for the KMC solver. <br /></td></tr>
@@ -407,6 +415,9 @@ static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa17
 <tr class="memitem:a8a58dffa61c7a109e784444a88be56b9" id="r_a8a58dffa61c7a109e784444a88be56b9"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; long long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8a58dffa61c7a109e784444a88be56b9">m_weightScratch</a></td></tr>
 <tr class="memdesc:a8a58dffa61c7a109e784444a88be56b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reusable buffer for ParticleManagement::partitionParticleWeights.  <br /></td></tr>
 <tr class="separator:a8a58dffa61c7a109e784444a88be56b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4fcb8344186275cb88b4c1ee67b8aea" id="r_af4fcb8344186275cb88b4c1ee67b8aea"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af4fcb8344186275cb88b4c1ee67b8aea">m_parentWeightScratch</a></td></tr>
+<tr class="memdesc:af4fcb8344186275cb88b4c1ee67b8aea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Running sum of the eligible parent weights in a grid cell, used by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7" title="Place particles on an existing particle, drawn with probability proportional to its weight.">ParticlePlacement::Parent</a>.  <br /></td></tr>
+<tr class="separator:af4fcb8344186275cb88b4c1ee67b8aea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf57f007555b5e427f5b542359f0e5c2" id="r_aaf57f007555b5e427f5b542359f0e5c2"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf57f007555b5e427f5b542359f0e5c2">m_kmcReactionsThreadLocal</a></td></tr>
 <tr class="memdesc:aaf57f007555b5e427f5b542359f0e5c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-local copies of KMC reactions used in advanceReactionNetwork.  <br /></td></tr>
 <tr class="separator:aaf57f007555b5e427f5b542359f0e5c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -600,6 +611,58 @@ static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight"
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_kappa</td><td>Cut-cell volume fraction. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad22f814b3709926aa7928586570379eb" name="ad22f814b3709926aa7928586570379eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad22f814b3709926aa7928586570379eb">&#9670;&#160;</a></span>buildParentWeights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCPhysics::buildParentWeights </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_cumulativeWeights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::size_t&#160;</td>
+          <td class="paramname"><em>a_numEligible</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the running weight sum that <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad3e451ffc4c2784910c56f7c50eb13ca" title="Draw the position of a parent particle, with probability proportional to particle weight.">sampleParentPosition()</a> draws from. </p>
+<p>Only the leading a_numEligible entries are eligible parents: the reconciliation appends to the same container, and a freshly created particle must not become a parent for its siblings. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_cumulativeWeights</td><td>Receives one running sum per eligible particle; cleared first. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Candidate parents. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numEligible</td><td>Number of leading entries of a_particles that may be drawn. </td></tr>
   </table>
   </dd>
 </dl>
@@ -938,6 +1001,143 @@ static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight"
 
 <p>Build internal representation of how we distinguish the Ito and CDR solvers. </p>
 <dl class="section note"><dt>Note</dt><dd>This should ALWAYS be called after initializing the species since <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito-KMC-Poisson system of equations.">ItoKMCStepper</a> will rely on it. </dd></dl>
+
+</div>
+</div>
+<a id="a94df7d5ddca4354da82731c1f61cfac8" name="a94df7d5ddca4354da82731c1f61cfac8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94df7d5ddca4354da82731c1f61cfac8">&#9670;&#160;</a></span>drawNewParticlePosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RealVect ItoKMCPhysics::drawNewParticlePosition </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_hasParent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_hasDownstream</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_parentPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_upstreamPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_upstreamLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_upstreamHi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_downstreamDirection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_cellPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_centroidPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_lo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_hi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_bndryCentroid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_bndryNormal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_kappa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw a position for a particle created by the reaction network in a grid cell. </p>
+<p>The single implementation of ParticlePlacement, shared by the Ito and CDR products. The caller supplies the sampled parent (Parent) and the downstream region (Downstream); either may be flagged absent, in which case that mode falls back to a uniformly random position within the cell. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hasParent</td><td>True if a_parentPos holds a usable parent position. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hasDownstream</td><td>True if the downstream region below is defined. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_parentPos</td><td>Position of the sampled parent particle. Only read for <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7" title="Place particles on an existing particle, drawn with probability proportional to its weight.">ParticlePlacement::Parent</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_upstreamPos</td><td>Upstream position within the cell, in unit coordinates. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_upstreamLo</td><td>Lower corner of the downstream region, in unit coordinates. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_upstreamHi</td><td>Upper corner of the downstream region, in unit coordinates. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_downstreamDirection</td><td>Normalized drift direction of the downstream species. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPos</td><td>Cell center position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_centroidPos</td><td>Cell centroid position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower corner of the valid region of the cell, in unit coordinates </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper corner of the valid region of the cell, in unit coordinates </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>Cut-cell boundary centroid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>Cut-cell normal (pointing into the domain) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_kappa</td><td>Cut-cell volume fraction </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Physical position for the new particle. </dd></dl>
 
 </div>
 </div>
@@ -1647,6 +1847,125 @@ static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight"
 
 </div>
 </div>
+<a id="ae21344a5837d0e53604f19c09e0f7e6b" name="ae21344a5837d0e53604f19c09e0f7e6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae21344a5837d0e53604f19c09e0f7e6b">&#9670;&#160;</a></span>reconcileCdrParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCPhysics::reconcileCdrParticles </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_cdrParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_itoParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; long long &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_numNewParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_electricField</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_cellPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_centroidPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_lo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_hi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_bndryCentroid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_bndryNormal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_kappa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Turn the CDR mass created by the reaction network into particles. </p>
+<p>Emitting the production as particles lets the stepper deposit it with the Ito solvers' deposition, so both halves of a reaction reach the mesh the same way. The production is partitioned into at most m_maxNewParticles computational particles of integer weight, exactly as the Ito products are. </p><dl class="section note"><dt>Note</dt><dd>Only production is handled here. Mass removed from a CDR species carries no sub-cell information, so the stepper subtracts it in the cell it was taken from. </dd>
+<dd>
+<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7" title="Place particles on an existing particle, drawn with probability proportional to its weight.">ParticlePlacement::Parent</a> does not apply to these particles &ndash; a CDR product has no parents in the cell, its container holding only what the current step created &ndash; and falls back to a uniformly random position. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrParticles</td><td>Particle products placed in the CDR solvers. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_itoParticles</td><td>Ito particles in the cell, used by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a1f26ed6d29f1966178f4eaa5b920f551" title="Place particles in the downstream region relative to the primary particle drift.">ParticlePlacement::Downstream</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numNewParticles</td><td>Number of physical particles produced per CDR species. Must be &gt;= 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field in cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPos</td><td>Cell center position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_centroidPos</td><td>Cell centroid position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower corner of the valid region of the cell, in unit coordinates </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper corner of the valid region of the cell, in unit coordinates </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>Cut-cell boundary centroid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryNormal</td><td>Cut-cell normal (pointing into the domain) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_kappa</td><td>Cut-cell volume fraction. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Public because this is called by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito-KMC-Poisson system of equations.">ItoKMCStepper</a> </dd></dl>
+
+</div>
+</div>
 <a id="aa8bd2aecb157a010ba469670db21f1dd" name="aa8bd2aecb157a010ba469670db21f1dd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa8bd2aecb157a010ba469670db21f1dd">&#9670;&#160;</a></span>reconcileParticles()</h2>
 
@@ -1974,6 +2293,59 @@ static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight"
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ad3e451ffc4c2784910c56f7c50eb13ca" name="ad3e451ffc4c2784910c56f7c50eb13ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3e451ffc4c2784910c56f7c50eb13ca">&#9670;&#160;</a></span>sampleParentPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ItoKMCPhysics::sampleParentPosition </td>
+          <td>(</td>
+          <td class="paramtype">RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_pos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleSoA.html">ParticleSoA</a>&lt; <a class="el" href="structItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_cumulativeWeights</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw the position of a parent particle, with probability proportional to particle weight. </p>
+<p>Used by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7" title="Place particles on an existing particle, drawn with probability proportional to its weight.">ParticlePlacement::Parent</a>. The caller passes the running weight sum, built by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad22f814b3709926aa7928586570379eb" title="Build the running weight sum that sampleParentPosition() draws from.">buildParentWeights()</a>, so that a draw is a binary search rather than another walk over the cell's particles. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_pos</td><td>Position of the drawn parent. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Candidate parents. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cumulativeWeights</td><td>Running weight sum of the eligible leading entries of a_particles. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if a parent was drawn, false if there was nothing to draw from. </dd></dl>
 
 </div>
 </div>
@@ -2410,6 +2782,31 @@ static thread_local std::vector&lt; Real &gt;&#160;</td><td class="memItemRight"
 
 <p>Solver setting for the Cao et. al algorithm. </p>
 <p>Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. </p>
+
+</div>
+</div>
+<a id="af4fcb8344186275cb88b4c1ee67b8aea" name="af4fcb8344186275cb88b4c1ee67b8aea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4fcb8344186275cb88b4c1ee67b8aea">&#9670;&#160;</a></span>m_parentWeightScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">thread_local std::vector&lt; Real &gt; ItoKMCPhysics::m_parentWeightScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Running sum of the eligible parent weights in a grid cell, used by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa6e9e09095e6fb652536663026257774a30269022e9d8f51beaabb52e5d0de2b7" title="Place particles on an existing particle, drawn with probability proportional to its weight.">ParticlePlacement::Parent</a>. </p>
+<p>Built once per cell and species, so that each of the up to m_maxNewParticles draws is a binary search rather than another walk over the cell's particles. Thread-local for the same reason as m_weightScratch. </p>
 
 </div>
 </div>

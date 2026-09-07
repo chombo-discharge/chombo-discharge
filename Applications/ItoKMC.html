@@ -102,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cdr-reaction-products">CDR reaction products</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reactive-field-centering">Reactive field centering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-nabla-d-drift-correction">The <span class="math notranslate nohighlight">\(\nabla D\)</span> drift correction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-diffusion-hop-at-embedded-boundaries">The diffusion hop at embedded boundaries</a><ul>
@@ -170,7 +171,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#chap-itokmcjsondt">Time step calculation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id14">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chap-itokmcjsonparticleplacement">Particle placement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id15">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
@@ -310,10 +311,11 @@ ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99           
 </section>
 <section id="particle-placement">
 <h3>Particle placement<a class="headerlink" href="#particle-placement" title="Permalink to this heading"></a></h3>
-<p>The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support three methods for placing new particles:</p>
+<p>The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support four methods for placing new particles:</p>
 <ol class="arabic simple">
 <li><p>Place all particles on the cell centroid.</p></li>
 <li><p>Randomly distribute the new particles within the grid cell.</p></li>
+<li><p>Place each new particle on top of one of the particles already in the cell, drawn with probability proportional to the parent weight.</p></li>
 <li><p>Compute an upstream position within the grid cell and randomly distribute the particles in the downstream region.</p></li>
 </ol>
 <p>The methods each have their advantages and disadvantages.
@@ -321,7 +323,52 @@ Placing all new particles on the cell centroid has the advantage that there will
 Randomly distributing the new particles has the advantage that it generates secondary particles more evenly over the reaction region.
 Both these methods (<code class="docutils literal notranslate"><span class="pre">centroid</span></code> and <code class="docutils literal notranslate"><span class="pre">random</span></code>) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
+The parent method avoids it in a different way: it introduces no sub-grid transport at all, since a new particle simply inherits the position of one that was already there.
 See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a> for instructions on how to assign the particle placement method.</p>
+</section>
+<section id="cdr-reaction-products">
+<span id="chap-itokmccdrproducts"></span><h3>CDR reaction products<a class="headerlink" href="#cdr-reaction-products" title="Permalink to this heading"></a></h3>
+<p>A reaction can create both Îto and CDR products, and the two do not have to reach the mesh the same way.
+Îto products are particles at a sub-cell position, and reach the mesh through the Îto solvers’ deposition kernel, which is usually not nearest-grid-point.
+CDR products have no particles of their own, so the reaction network’s per-cell production can simply be added to the cell that computed it.
+An ionization event then spreads the electron’s charge over a deposition stencil while leaving the ion’s charge in a single cell, which is a spurious charge separation on the cell scale, proportional to the ionization rate and therefore largest at the streamer head.</p>
+<p>Which of the two is used is set by</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.cdr_products = particle  # &#39;mesh&#39; or &#39;particle&#39;
+</pre></div>
+</div>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mesh</span></code></dt><dd><p>Add the production straight into the cell that produced it.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">particle</span></code></dt><dd><p>Emit the production as computational particles and deposit them exactly as the Îto solvers deposit theirs – same kernel, same coarse-fine strategy, same cut-cell strategy, including the mirroring or redistribution passes that go with it.
+Both halves of a reaction then reach the mesh the same way.
+This is the default.</p>
+</dd>
+</dl>
+<p>Only <em>production</em> becomes particles.
+Mass removed from a CDR species is proportional to the cell-averaged density, which carries no sub-cell information, so it is subtracted in the cell it was taken from.
+The reaction network reports a net change per species, which is split by sign for this.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The production is partitioned into at most <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON.max_new_particles</span></code> computational particles of integer weight, exactly as the Îto products are.
+That key must be at least 1; the run aborts otherwise.
+The placement is stochastic, so the deposited production carries a sampling error falling off as <span class="math notranslate nohighlight">\(1/\sqrt{N}\)</span> in the number of particles used.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">parent</span></code> placement method (see <a class="reference internal" href="#chap-itokmcjsonparticleplacement"><span class="std std-ref">Particle placement</span></a>) does not apply to CDR products.
+A CDR product has no parents in the cell – its particle container is transient and holds only what the current time step created – so it falls back to a uniformly random position within the cell.
+The other three placement methods apply unchanged.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper.redistribute_cdr</span></code> is ignored when <code class="docutils literal notranslate"><span class="pre">cdr_products</span> <span class="pre">=</span> <span class="pre">particle</span></code>.
+The reactive redistribution exists to correct the <span class="math notranslate nohighlight">\(\kappa\)</span> damping that the in-cell injection imposes on a cut-cell reaction; once the production is deposited by the Îto solver it carries the solver’s own cut-cell normalization, and there is no such damping left to correct.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Photoionization products are unaffected by this setting.
+They are created at the photon absorption position and have no in-cell representation to fall back on, so they are always deposited – nearest-grid-point under <code class="docutils literal notranslate"><span class="pre">mesh</span></code>, and with the Îto solvers’ deposition under <code class="docutils literal notranslate"><span class="pre">particle</span></code>.</p>
+</div>
 </section>
 <section id="reactive-field-centering">
 <h3>Reactive field centering<a class="headerlink" href="#reactive-field-centering" title="Permalink to this heading"></a></h3>
@@ -961,6 +1008,43 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                           </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">NoPayload</span><span class="o">&gt;*&gt;&amp;</span><span class="w">    </span><span class="n">a_cdrParticles</span><span class="p">,</span>
 <span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_absorbedPhotons</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Turn the CDR mass created by the reaction network into particles.</span>
+<span class="cm">   * @details Emitting the production as particles lets the stepper deposit it with the Ito solvers&#39; deposition, so</span>
+<span class="cm">   * both halves of a reaction reach the mesh the same way. The production is partitioned into at most</span>
+<span class="cm">   * m_maxNewParticles computational particles of integer weight, exactly as the Ito products are.</span>
+<span class="cm">   * @note Only production is handled here. Mass removed from a CDR species carries no sub-cell information, so the</span>
+<span class="cm">   * stepper subtracts it in the cell it was taken from.</span>
+<span class="cm">   * @note ParticlePlacement::Parent does not apply to these particles -- a CDR product has no parents in the cell,</span>
+<span class="cm">   * its container holding only what the current step created -- and falls back to a uniformly random position.</span>
+<span class="cm">   * @param[in,out] a_cdrParticles     Particle products placed in the CDR solvers.</span>
+<span class="cm">   * @param[in]     a_itoParticles     Ito particles in the cell, used by ParticlePlacement::Downstream.</span>
+<span class="cm">   * @param[in]     a_numNewParticles  Number of physical particles produced per CDR species. Must be &gt;= 0.</span>
+<span class="cm">   * @param[in]     a_electricField    Electric field in cell</span>
+<span class="cm">   * @param[in]     a_cellPos          Cell center position</span>
+<span class="cm">   * @param[in]     a_centroidPos      Cell centroid position</span>
+<span class="cm">   * @param[in]     a_lo               Lower corner of the valid region of the cell, in unit coordinates</span>
+<span class="cm">   * @param[in]     a_hi               Upper corner of the valid region of the cell, in unit coordinates</span>
+<span class="cm">   * @param[in]     a_bndryCentroid    Cut-cell boundary centroid</span>
+<span class="cm">   * @param[in]     a_bndryNormal      Cut-cell normal (pointing into the domain)</span>
+<span class="cm">   * @param[in]     a_dx               Grid resolution</span>
+<span class="cm">   * @param[in]     a_kappa            Cut-cell volume fraction.</span>
+<span class="cm">   * @note Public because this is called by ItoKMCStepper</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">reconcileCdrParticles</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">NoPayload</span><span class="o">&gt;*&gt;&amp;</span><span class="w">         </span><span class="n">a_cdrParticles</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_itoParticles</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;&amp;</span><span class="w">                 </span><span class="n">a_numNewParticles</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_electricField</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_cellPos</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_centroidPos</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_lo</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_hi</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_bndryCentroid</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                           </span><span class="n">a_bndryNormal</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                               </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                               </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
 <span class="k">protected</span><span class="o">:</span>
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief KMC time-stepping algorithms available for advancing the reaction network.</span>
@@ -1020,11 +1104,6 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_isDefined</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * @brief If true, increment onto existing particles rather than creating new ones</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_incrementNewParticles</span><span class="p">;</span>
-
-<span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Is the KMC solver defined or not.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_hasKMCSolver</span><span class="p">;</span>
@@ -1062,6 +1141,13 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">   * once per cell.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_weightScratch</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Running sum of the eligible parent weights in a grid cell, used by ParticlePlacement::Parent.</span>
+<span class="cm">   * @details Built once per cell and species, so that each of the up to m_maxNewParticles draws is a binary search</span>
+<span class="cm">   * rather than another walk over the cell&#39;s particles. Thread-local for the same reason as m_weightScratch.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_parentWeightScratch</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Thread-local copies of KMC reactions used in advanceReactionNetwork.</span>
@@ -1254,6 +1340,72 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">   */</span>
 <span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">removeParticles</span><span class="p">(</span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">a_numToRemove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Draw a position for a particle created by the reaction network in a grid cell.</span>
+<span class="cm">   * @details The single implementation of ParticlePlacement, shared by the Ito and CDR products. The caller supplies</span>
+<span class="cm">   * the sampled parent (Parent) and the downstream region (Downstream); either may be flagged absent, in which case</span>
+<span class="cm">   * that mode falls back to a uniformly random position within the cell.</span>
+<span class="cm">   * @param[in] a_hasParent           True if a_parentPos holds a usable parent position.</span>
+<span class="cm">   * @param[in] a_hasDownstream       True if the downstream region below is defined.</span>
+<span class="cm">   * @param[in] a_parentPos           Position of the sampled parent particle. Only read for ParticlePlacement::Parent.</span>
+<span class="cm">   * @param[in] a_upstreamPos         Upstream position within the cell, in unit coordinates.</span>
+<span class="cm">   * @param[in] a_upstreamLo          Lower corner of the downstream region, in unit coordinates.</span>
+<span class="cm">   * @param[in] a_upstreamHi          Upper corner of the downstream region, in unit coordinates.</span>
+<span class="cm">   * @param[in] a_downstreamDirection Normalized drift direction of the downstream species.</span>
+<span class="cm">   * @param[in] a_cellPos             Cell center position</span>
+<span class="cm">   * @param[in] a_centroidPos         Cell centroid position</span>
+<span class="cm">   * @param[in] a_lo                  Lower corner of the valid region of the cell, in unit coordinates</span>
+<span class="cm">   * @param[in] a_hi                  Upper corner of the valid region of the cell, in unit coordinates</span>
+<span class="cm">   * @param[in] a_bndryCentroid       Cut-cell boundary centroid</span>
+<span class="cm">   * @param[in] a_bndryNormal         Cut-cell normal (pointing into the domain)</span>
+<span class="cm">   * @param[in] a_dx                  Grid resolution</span>
+<span class="cm">   * @param[in] a_kappa               Cut-cell volume fraction</span>
+<span class="cm">   * @return Physical position for the new particle.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
+<span class="w">  </span><span class="nf">drawNewParticlePosition</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_hasParent</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">     </span><span class="n">a_hasDownstream</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_parentPos</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_upstreamPos</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_upstreamLo</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_upstreamHi</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_downstreamDirection</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_cellPos</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_centroidPos</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_lo</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_hi</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_bndryCentroid</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_bndryNormal</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">     </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Draw the position of a parent particle, with probability proportional to particle weight.</span>
+<span class="cm">   * @details Used by ParticlePlacement::Parent. The caller passes the running weight sum, built by</span>
+<span class="cm">   * buildParentWeights(), so that a draw is a binary search rather than another walk over the cell&#39;s particles.</span>
+<span class="cm">   * @param[out] a_pos               Position of the drawn parent.</span>
+<span class="cm">   * @param[in]  a_particles         Candidate parents.</span>
+<span class="cm">   * @param[in]  a_cumulativeWeights Running weight sum of the eligible leading entries of a_particles.</span>
+<span class="cm">   * @return True if a parent was drawn, false if there was nothing to draw from.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">sampleParentPosition</span><span class="p">(</span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                       </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">        </span><span class="n">a_cumulativeWeights</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * @brief Build the running weight sum that sampleParentPosition() draws from.</span>
+<span class="cm">   * @details Only the leading a_numEligible entries are eligible parents: the reconciliation appends to the same</span>
+<span class="cm">   * container, and a freshly created particle must not become a parent for its siblings.</span>
+<span class="cm">   * @param[out] a_cumulativeWeights Receives one running sum per eligible particle; cleared first.</span>
+<span class="cm">   * @param[in]  a_particles         Candidate parents.</span>
+<span class="cm">   * @param[in]  a_numEligible       Number of leading entries of a_particles that may be drawn.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">buildParentWeights</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">              </span><span class="n">a_cumulativeWeights</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleSoA</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w">               </span><span class="n">a_numEligible</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.</span>
@@ -2843,8 +2995,8 @@ To enable a time step calculation, specify the <code class="docutils literal not
 </div>
 </section>
 </section>
-<section id="id14">
-<h3>Particle placement<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<section id="chap-itokmcjsonparticleplacement">
+<span id="id14"></span><h3>Particle placement<a class="headerlink" href="#chap-itokmcjsonparticleplacement" title="Permalink to this heading"></a></h3>
 <p>Specification of secondary particle placement is done through the JSON file by specifying the <code class="docutils literal notranslate"><span class="pre">particle</span> <span class="pre">placement</span></code> field.
 Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, inherited from one of the particles that are already in the cell, or placed randomly in the downstream region of some user-defined species.
 The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, <code class="docutils literal notranslate"><span class="pre">parent</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
@@ -2852,7 +3004,8 @@ If specifying <code class="docutils literal notranslate"><span class="pre">downs
 <p>The <code class="docutils literal notranslate"><span class="pre">parent</span></code> method draws one of the particles that were already in the cell, with probability proportional to its weight, and puts the new particle on top of it.
 This is the placement that introduces no sub-grid transport of its own: unlike <code class="docutils literal notranslate"><span class="pre">random</span></code> it does not scatter the new weight across the cell, and unlike <code class="docutils literal notranslate"><span class="pre">centroid</span></code> it does not pull the new weight towards the cell centre.
 Both of those act as numerical transport terms whose magnitude is set by the grid resolution rather than by the physics.
-If the cell holds no particles of the species in question – which happens for photoionization products – <code class="docutils literal notranslate"><span class="pre">parent</span></code> falls back to <code class="docutils literal notranslate"><span class="pre">random</span></code>.</p>
+If the cell holds no particles of the species in question – which happens for photoionization products – <code class="docutils literal notranslate"><span class="pre">parent</span></code> falls back to <code class="docutils literal notranslate"><span class="pre">random</span></code>.
+It also falls back to <code class="docutils literal notranslate"><span class="pre">random</span></code> for CDR reaction products, which have no parents at all – see <a class="reference internal" href="#chap-itokmccdrproducts"><span class="std std-ref">CDR reaction products</span></a>.</p>
 <p>The following four specifiers are all valid:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
 <span class="p">{</span>

@@ -20,9 +20,10 @@ var searchData=
   ['buildgrids_17',['buildGrids',['../classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e',1,'AmrMesh']]],
   ['buildkdcellleaves_18',['buildKDCellLeaves',['../namespaceParticleManagement_1_1detail.html#a7e24d99e4438149cb64acc9cb68af367',1,'ParticleManagement::detail']]],
   ['buildkdquotaleaves_19',['buildKDQuotaLeaves',['../namespaceParticleManagement_1_1detail.html#a8f0f29bc2e0f546b97b1098524a33fd2',1,'ParticleManagement::detail']]],
-  ['buildsolidgeometry_20',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
-  ['bytesasmb_21',['bytesasmb',['../namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc',1,'MemoryReport::bytesAsMB(const long long a_bytes)'],['../namespaceMemoryReport.html#ab3506c17223b7c61eb67ac42d60affb2',1,'MemoryReport::bytesAsMB(const Real a_bytes)']]],
-  ['bytespan_22',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
-  ['bytespanimpl_23',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
-  ['bytesperparticle_24',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
+  ['buildparentweights_20',['buildParentWeights',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad22f814b3709926aa7928586570379eb',1,'Physics::ItoKMC::ItoKMCPhysics']]],
+  ['buildsolidgeometry_21',['buildSolidGeometry',['../classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee',1,'ComputationalGeometry']]],
+  ['bytesasmb_22',['bytesasmb',['../namespaceMemoryReport.html#a7c01094cddb205837af8ecea08a46fdc',1,'MemoryReport::bytesAsMB(const long long a_bytes)'],['../namespaceMemoryReport.html#ab3506c17223b7c61eb67ac42d60affb2',1,'MemoryReport::bytesAsMB(const Real a_bytes)']]],
+  ['bytespan_23',['byteSpan',['../classParticleSoA.html#adfa210dce5d7e74830bed05dabff3539',1,'ParticleSoA']]],
+  ['bytespanimpl_24',['byteSpanImpl',['../classParticleSoA.html#a5fccb05869961d7b7c7ffce07f56f07d',1,'ParticleSoA']]],
+  ['bytesperparticle_25',['bytesPerParticle',['../classParticleSoA.html#a3cf1907caad24d059361a8627b25cee6',1,'ParticleSoA']]]
 ];

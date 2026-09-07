@@ -270,6 +270,11 @@ Protected Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a54d67602291e8ffb0167ede3ea0485a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">An enum for encapsulating how time steps were restricted. <br /></td></tr>
 <tr class="separator:a54d67602291e8ffb0167ede3ea0485a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7e95aad0cb65813f6682de9d8ad1c89" id="r_ad7e95aad0cb65813f6682de9d8ad1c89"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89">CdrProductInjection</a> { <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a710fdb6adb881b408116ef95335e1961">Mesh</a>
+, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4">Particle</a>
+ }</td></tr>
+<tr class="memdesc:ad7e95aad0cb65813f6682de9d8ad1c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the reaction network's CDR production is put onto the mesh.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89">More...</a><br /></td></tr>
+<tr class="separator:ad7e95aad0cb65813f6682de9d8ad1c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -463,27 +468,30 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>averageDiffus
 <tr class="memitem:a45ea918deba13aeab6adf0e0fb3e4195" id="r_a45ea918deba13aeab6adf0e0fb3e4195"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a45ea918deba13aeab6adf0e0fb3e4195">advanceReactionNetwork</a> (EBCellFAB &amp;a_particlesPerCell, EBCellFAB &amp;a_newPhotonsPerCell, const EBCellFAB &amp;a_electricField, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) const noexcept</td></tr>
 <tr class="memdesc:a45ea918deba13aeab6adf0e0fb3e4195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chemistry advance over time a_dt. Patch version.  <br /></td></tr>
 <tr class="separator:a45ea918deba13aeab6adf0e0fb3e4195"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf8512ce00b2b2e6ff0c1dd55847173c" id="r_acf8512ce00b2b2e6ff0c1dd55847173c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#acf8512ce00b2b2e6ff0c1dd55847173c">reconcileParticles</a> (const EBAMRCellData &amp;a_newParticlesPerCell, const EBAMRCellData &amp;a_oldParticlesPerCell, const EBAMRCellData &amp;a_newPhotonsPerCell, const EBAMRCellData &amp;a_electricField) const noexcept</td></tr>
-<tr class="memdesc:acf8512ce00b2b2e6ff0c1dd55847173c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
-<tr class="separator:acf8512ce00b2b2e6ff0c1dd55847173c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a515bc0d8b56ab6519fab3bd5e3630e4b" id="r_a515bc0d8b56ab6519fab3bd5e3630e4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a515bc0d8b56ab6519fab3bd5e3630e4b">reconcileParticles</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_newParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_oldParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_newPhotonsPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_electricField, const int a_level) const noexcept</td></tr>
-<tr class="memdesc:a515bc0d8b56ab6519fab3bd5e3630e4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
-<tr class="separator:a515bc0d8b56ab6519fab3bd5e3630e4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a544cc8af6e40cfd363bab0113b86a85d" id="r_a544cc8af6e40cfd363bab0113b86a85d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a544cc8af6e40cfd363bab0113b86a85d">reconcileParticles</a> (const EBCellFAB &amp;a_newParticlesPerCell, const EBCellFAB &amp;a_oldParticlesPerCell, const EBCellFAB &amp;a_newPhotonsPerCell, const EBCellFAB &amp;a_electricField, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx) const noexcept</td></tr>
-<tr class="memdesc:a544cc8af6e40cfd363bab0113b86a85d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
-<tr class="separator:a544cc8af6e40cfd363bab0113b86a85d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39a4942db9c07c680cb5230e8f98b3c9" id="r_a39a4942db9c07c680cb5230e8f98b3c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a39a4942db9c07c680cb5230e8f98b3c9">reconcileParticles</a> (const EBAMRCellData &amp;a_newParticlesPerCell, const EBAMRCellData &amp;a_oldParticlesPerCell, const EBAMRCellData &amp;a_newPhotonsPerCell, const EBAMRCellData &amp;a_cdrProduction, const EBAMRCellData &amp;a_electricField) const noexcept</td></tr>
+<tr class="memdesc:a39a4942db9c07c680cb5230e8f98b3c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
+<tr class="separator:a39a4942db9c07c680cb5230e8f98b3c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac147f662f4e3dd2ebc34eb7010f22ca1" id="r_ac147f662f4e3dd2ebc34eb7010f22ca1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ac147f662f4e3dd2ebc34eb7010f22ca1">reconcileParticles</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_newParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_oldParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_newPhotonsPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_cdrProduction, const LevelData&lt; EBCellFAB &gt; &amp;a_electricField, const int a_level) const noexcept</td></tr>
+<tr class="memdesc:ac147f662f4e3dd2ebc34eb7010f22ca1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
+<tr class="separator:ac147f662f4e3dd2ebc34eb7010f22ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc750186d8d994085db0744d9fcf9dd9" id="r_acc750186d8d994085db0744d9fcf9dd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#acc750186d8d994085db0744d9fcf9dd9">reconcileParticles</a> (const EBCellFAB &amp;a_newParticlesPerCell, const EBCellFAB &amp;a_oldParticlesPerCell, const EBCellFAB &amp;a_newPhotonsPerCell, const EBCellFAB &amp;a_cdrProduction, const EBCellFAB &amp;a_electricField, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx) const noexcept</td></tr>
+<tr class="memdesc:acc750186d8d994085db0744d9fcf9dd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation.  <br /></td></tr>
+<tr class="separator:acc750186d8d994085db0744d9fcf9dd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b4cf782feaf3960583a2371e517b80a" id="r_a7b4cf782feaf3960583a2371e517b80a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7b4cf782feaf3960583a2371e517b80a">reconcilePhotoionization</a> () noexcept</td></tr>
 <tr class="memdesc:a7b4cf782feaf3960583a2371e517b80a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the results from photoionization reactions.  <br /></td></tr>
 <tr class="separator:a7b4cf782feaf3960583a2371e517b80a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acebd521a5007f2a0958109c77b1dc412" id="r_acebd521a5007f2a0958109c77b1dc412"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#acebd521a5007f2a0958109c77b1dc412">reconcileCdrDensities</a> (const EBAMRCellData &amp;a_newParticlesPerCell, const EBAMRCellData &amp;a_oldParticlesPerCell, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:acebd521a5007f2a0958109c77b1dc412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
-<tr class="separator:acebd521a5007f2a0958109c77b1dc412"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a954a71d5234cc88f88f88bcfc830e799" id="r_a954a71d5234cc88f88f88bcfc830e799"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a954a71d5234cc88f88f88bcfc830e799">reconcileCdrDensities</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_newParticlesPerCell, const LevelData&lt; EBCellFAB &gt; &amp;a_oldParticlesPerCell, const int a_level, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a954a71d5234cc88f88f88bcfc830e799"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
-<tr class="separator:a954a71d5234cc88f88f88bcfc830e799"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80725850b9ff7f3de4798fa4bc4f4fe1" id="r_a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a80725850b9ff7f3de4798fa4bc4f4fe1">reconcileCdrDensities</a> (const EBCellFAB &amp;a_newParticlesPerCell, const EBCellFAB &amp;a_oldParticlesPerCell, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) noexcept</td></tr>
-<tr class="memdesc:a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
-<tr class="separator:a80725850b9ff7f3de4798fa4bc4f4fe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7707fed6320dbe1a5c5f9f8cf3cec790" id="r_a7707fed6320dbe1a5c5f9f8cf3cec790"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7707fed6320dbe1a5c5f9f8cf3cec790">depositCdrProducts</a> (EBAMRCellData &amp;a_cdrChange) noexcept</td></tr>
+<tr class="memdesc:a7707fed6320dbe1a5c5f9f8cf3cec790"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit the CDR reaction products in m_cdrProducts and add the result to a per-cell change.  <br /></td></tr>
+<tr class="separator:a7707fed6320dbe1a5c5f9f8cf3cec790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad23b5d9304cbcfb9a69b835f99e8d2e5" id="r_ad23b5d9304cbcfb9a69b835f99e8d2e5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad23b5d9304cbcfb9a69b835f99e8d2e5">reconcileCdrDensities</a> (const EBAMRCellData &amp;a_cdrChange, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:ad23b5d9304cbcfb9a69b835f99e8d2e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
+<tr class="separator:ad23b5d9304cbcfb9a69b835f99e8d2e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adab647dfa6a7590fcfc1b579c676e833" id="r_adab647dfa6a7590fcfc1b579c676e833"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#adab647dfa6a7590fcfc1b579c676e833">reconcileCdrDensities</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_cdrChange, const int a_level, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:adab647dfa6a7590fcfc1b579c676e833"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
+<tr class="separator:adab647dfa6a7590fcfc1b579c676e833"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a67e60c38196f9f4bd44bae9cc33383" id="r_a9a67e60c38196f9f4bd44bae9cc33383"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9a67e60c38196f9f4bd44bae9cc33383">reconcileCdrDensities</a> (const EBCellFAB &amp;a_cdrChange, const int a_level, const DataIndex a_din, const Box a_box, const Real a_dx, const Real a_dt) noexcept</td></tr>
+<tr class="memdesc:a9a67e60c38196f9f4bd44bae9cc33383"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconcile the CDR densities after the reaction network.  <br /></td></tr>
+<tr class="separator:a9a67e60c38196f9f4bd44bae9cc33383"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c5fb4a621700bef48880b7867838bfb" id="r_a9c5fb4a621700bef48880b7867838bfb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9c5fb4a621700bef48880b7867838bfb">coarsenCDRSolvers</a> (const bool a_interpGhosts) noexcept</td></tr>
 <tr class="memdesc:a9c5fb4a621700bef48880b7867838bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data for CDR solvers.  <br /></td></tr>
 <tr class="separator:a9c5fb4a621700bef48880b7867838bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -550,6 +558,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseExitOnFa
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseRedistributeCDR</b> () noexcept</td></tr>
 <tr class="memdesc:a52ccbfb26c477f45dccee82e01c67a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse CDR mass redistribution when assigning reactive products. <br /></td></tr>
 <tr class="separator:a52ccbfb26c477f45dccee82e01c67a68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e536576872fd03bf2fcb8b77387de68" id="r_a4e536576872fd03bf2fcb8b77387de68"><td class="memItemLeft" align="right" valign="top"><a id="a4e536576872fd03bf2fcb8b77387de68" name="a4e536576872fd03bf2fcb8b77387de68"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseCdrProducts</b> () noexcept</td></tr>
+<tr class="memdesc:a4e536576872fd03bf2fcb8b77387de68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse how the reaction network's CDR production reaches the mesh. <br /></td></tr>
+<tr class="separator:a4e536576872fd03bf2fcb8b77387de68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48af9427bef887295ae18eb23aaee3fd" id="r_a48af9427bef887295ae18eb23aaee3fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a48af9427bef887295ae18eb23aaee3fd">parseSuperParticles</a> () noexcept</td></tr>
 <tr class="memdesc:a48af9427bef887295ae18eb23aaee3fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the super-particle merge cadence.  <br /></td></tr>
 <tr class="separator:a48af9427bef887295ae18eb23aaee3fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -644,10 +656,12 @@ std::function&lt; Real(const Real a_time)&gt;&#160;</td><td class="memItemRight"
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_abortOnFailure</b></td></tr>
 <tr class="memdesc:a0a7d2db73226d81115fb6cd7a4f9ae86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for aborting the simulation if the Poisson solver fails to converge. <br /></td></tr>
 <tr class="separator:a0a7d2db73226d81115fb6cd7a4f9ae86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cf5dc7123b4f112583e71838d9778f0" id="r_a3cf5dc7123b4f112583e71838d9778f0"><td class="memItemLeft" align="right" valign="top"><a id="a3cf5dc7123b4f112583e71838d9778f0" name="a3cf5dc7123b4f112583e71838d9778f0"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_redistributeCDR</b></td></tr>
-<tr class="memdesc:a3cf5dc7123b4f112583e71838d9778f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for redistributing CDR mass when particles cross the EB. <br /></td></tr>
+<tr class="memitem:a3cf5dc7123b4f112583e71838d9778f0" id="r_a3cf5dc7123b4f112583e71838d9778f0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a3cf5dc7123b4f112583e71838d9778f0">m_redistributeCDR</a></td></tr>
+<tr class="memdesc:a3cf5dc7123b4f112583e71838d9778f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for redistributing CDR mass when particles cross the EB.  <br /></td></tr>
 <tr class="separator:a3cf5dc7123b4f112583e71838d9778f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72895f7512be22f292ba4e08a0ad683a" id="r_a72895f7512be22f292ba4e08a0ad683a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89">CdrProductInjection</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a72895f7512be22f292ba4e08a0ad683a">m_cdrProductInjection</a></td></tr>
+<tr class="memdesc:a72895f7512be22f292ba4e08a0ad683a"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the reaction network's CDR production is put onto the mesh.  <br /></td></tr>
+<tr class="separator:a72895f7512be22f292ba4e08a0ad683a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac04fc8360ede969479eb0ea9105a9b0c" id="r_ac04fc8360ede969479eb0ea9105a9b0c"><td class="memItemLeft" align="right" valign="top"><a id="ac04fc8360ede969479eb0ea9105a9b0c" name="ac04fc8360ede969479eb0ea9105a9b0c"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_dualGrid</b></td></tr>
 <tr class="memdesc:ac04fc8360ede969479eb0ea9105a9b0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Using dual grid or not. <br /></td></tr>
@@ -786,9 +800,12 @@ Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"
 Vector&lt; EBAMRCellData &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluidPhiIto</b></td></tr>
 <tr class="memdesc:a0d6e950a46c51ea66fa9107f597f84a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the Ito species densities on the fluid realm. <br /></td></tr>
 <tr class="separator:a0d6e950a46c51ea66fa9107f597f84a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73688780d217a0a0b9a8521c2277f5a8" id="r_a73688780d217a0a0b9a8521c2277f5a8"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a73688780d217a0a0b9a8521c2277f5a8">m_cdrPhotoiProducts</a></td></tr>
-<tr class="memdesc:a73688780d217a0a0b9a8521c2277f5a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Photoionization products to be put in the CDR equations.  <br /></td></tr>
-<tr class="separator:a73688780d217a0a0b9a8521c2277f5a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07f79b8d581afd416585df819bd4f5b7" id="r_a07f79b8d581afd416585df819bd4f5b7"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="structNoPayload.html">NoPayload</a> &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a07f79b8d581afd416585df819bd4f5b7">m_cdrProducts</a></td></tr>
+<tr class="memdesc:a07f79b8d581afd416585df819bd4f5b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reaction products to be put in the CDR equations, as particles.  <br /></td></tr>
+<tr class="separator:a07f79b8d581afd416585df819bd4f5b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a070e7d254a6a131cd4a8d509e49bc5a7" id="r_a070e7d254a6a131cd4a8d509e49bc5a7"><td class="memItemLeft" align="right" valign="top">EBAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a070e7d254a6a131cd4a8d509e49bc5a7">m_particleCdrProduction</a></td></tr>
+<tr class="memdesc:a070e7d254a6a131cd4a8d509e49bc5a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-cell CDR production from the reaction network, on the particle realm.  <br /></td></tr>
+<tr class="separator:a070e7d254a6a131cd4a8d509e49bc5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9e87817a9a5538143e13d6d2042f805" id="r_ac9e87817a9a5538143e13d6d2042f805"><td class="memItemLeft" align="right" valign="top"><a id="ac9e87817a9a5538143e13d6d2042f805" name="ac9e87817a9a5538143e13d6d2042f805"></a>
 Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_loadBalanceIndices</b></td></tr>
 <tr class="memdesc:ac9e87817a9a5538143e13d6d2042f805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver indices used when load-balancing the particle solvers. <br /></td></tr>
@@ -915,7 +932,43 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG&gt;<br />
 class Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</div><p>Abstract <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> for the Ito-KMC-Poisson system of equations. </p>
 <p>Couples Ito stochastic drift-diffusion solvers (type <code>I</code>), CDR fluid solvers (type <code>C</code>), Monte Carlo photon transport solvers (type <code>R</code>), and a field solver (type <code>F</code>) through the <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.">ItoKMCPhysics</a> interface. Subclasses must implement <code><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab325e43a12236bb4530d32d0ce5bbab5" title="Advancement method. Needs to be implemented by subclasses.">advance()</a></code> to define the time-integration scheme. The default template arguments use standard chombo-discharge solver implementations. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="ad7e95aad0cb65813f6682de9d8ad1c89" name="ad7e95aad0cb65813f6682de9d8ad1c89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7e95aad0cb65813f6682de9d8ad1c89">&#9670;&#160;</a></span>CdrProductInjection</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89">Physics::ItoKMC::ItoKMCStepper::CdrProductInjection</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How the reaction network's CDR production is put onto the mesh. </p>
+<p>Selects whether the CDR half of a reaction is spread over a deposition stencil like the Ito half, or is added straight into the cell that produced it. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ad7e95aad0cb65813f6682de9d8ad1c89a710fdb6adb881b408116ef95335e1961" name="ad7e95aad0cb65813f6682de9d8ad1c89a710fdb6adb881b408116ef95335e1961"></a>Mesh&#160;</td><td class="fielddoc"><p>Add the production directly into the cell that produced it. </p>
+<p>NGP by construction, and the behaviour of the code before the products could become particles. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4" name="ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4"></a>Particle&#160;</td><td class="fielddoc"><p>Emit the production as particles and deposit it with the Ito solvers' deposition. </p>
+<p>The particles are placed by the plasma model's ParticlePlacement policy, so the deposited production carries a sampling error falling off as 1/sqrt(max_new_particles). Since the cut-cell normalization is then the Ito solvers', the reactive redistribution does not apply &ndash; see m_redistributeCDR. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a81b11368275f303489fa1aac26b49792" name="a81b11368275f303489fa1aac26b49792"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a81b11368275f303489fa1aac26b49792">&#9670;&#160;</a></span>ItoKMCStepper()</h2>
 
@@ -2990,6 +3043,43 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
+<a id="a7707fed6320dbe1a5c5f9f8cf3cec790" name="a7707fed6320dbe1a5c5f9f8cf3cec790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7707fed6320dbe1a5c5f9f8cf3cec790">&#9670;&#160;</a></span>depositCdrProducts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I , typename C , typename R , typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ItoKMCStepper::depositCdrProducts </td>
+          <td>(</td>
+          <td class="paramtype">EBAMRCellData &amp;&#160;</td>
+          <td class="paramname"><em>a_cdrChange</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Deposit the CDR reaction products in m_cdrProducts and add the result to a per-cell change. </p>
+<p>Under <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4" title="Emit the production as particles and deposit it with the Ito solvers&#39; deposition.">CdrProductInjection::Particle</a> the products go through <a class="el" href="classItoSolver.html#a66829749b8ec2e57ac7f83c9363af294" title="Deposit the SoA weight column on the mesh (kappa-conservative + redistribution).">ItoSolver::depositWeight</a>, so they get the Ito solvers' deposition in full &ndash; kernel, coarse-fine strategy and cut-cell strategy alike. With no Ito solvers in the problem there is nothing to be consistent with and the products are deposited NGP. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_cdrChange</td><td>Per-cell change for each CDR species, in number of physical particles. The deposited production is added to what is already there, which is the removal computed by the reaction network. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>a_cdrChange is on the fluid realm; the deposition happens on the particle realm and is copied across. </dd></dl>
+
+</div>
+</div>
 <a id="a68690c283c56311d8440a70b8008a7fa" name="a68690c283c56311d8440a70b8008a7fa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a68690c283c56311d8440a70b8008a7fa">&#9670;&#160;</a></span>depositParticles() <span class="overload">[1/2]</span></h2>
 
@@ -4530,8 +4620,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
-<a id="acebd521a5007f2a0958109c77b1dc412" name="acebd521a5007f2a0958109c77b1dc412"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acebd521a5007f2a0958109c77b1dc412">&#9670;&#160;</a></span>reconcileCdrDensities() <span class="overload">[1/3]</span></h2>
+<a id="ad23b5d9304cbcfb9a69b835f99e8d2e5" name="ad23b5d9304cbcfb9a69b835f99e8d2e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad23b5d9304cbcfb9a69b835f99e8d2e5">&#9670;&#160;</a></span>reconcileCdrDensities() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4545,13 +4635,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td class="memname">void ItoKMCStepper::reconcileCdrDensities </td>
           <td>(</td>
           <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
-          <td class="paramname"><em>a_newParticlesPerCell</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
-          <td class="paramname"><em>a_oldParticlesPerCell</em>, </td>
+          <td class="paramname"><em>a_cdrChange</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4573,22 +4657,18 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div><div class="memdoc">
 
 <p>Reconcile the CDR densities after the reaction network. </p>
-<p>This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol</p><ul>
-<li>dt) <dl class="params"><dt>Parameters</dt><dd>
+<p>This adds a_cdrChange to the densities and sets the source term to a_cdrChange/(vol * dt). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_newParticlesPerCell</td><td>Particles per cell after the chemistry advance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldParticlesPerCell</td><td>Particles per cell before the chemistry advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrChange</td><td>Per-cell change for each CDR species, in number of physical particles. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
   </table>
   </dd>
 </dl>
-</li>
-</ul>
 
 </div>
 </div>
-<a id="a80725850b9ff7f3de4798fa4bc4f4fe1" name="a80725850b9ff7f3de4798fa4bc4f4fe1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80725850b9ff7f3de4798fa4bc4f4fe1">&#9670;&#160;</a></span>reconcileCdrDensities() <span class="overload">[2/3]</span></h2>
+<a id="a9a67e60c38196f9f4bd44bae9cc33383" name="a9a67e60c38196f9f4bd44bae9cc33383"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a67e60c38196f9f4bd44bae9cc33383">&#9670;&#160;</a></span>reconcileCdrDensities() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4602,13 +4682,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td class="memname">void ItoKMCStepper::reconcileCdrDensities </td>
           <td>(</td>
           <td class="paramtype">const EBCellFAB &amp;&#160;</td>
-          <td class="paramname"><em>a_newParticlesPerCell</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
-          <td class="paramname"><em>a_oldParticlesPerCell</em>, </td>
+          <td class="paramname"><em>a_cdrChange</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4654,11 +4728,9 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div><div class="memdoc">
 
 <p>Reconcile the CDR densities after the reaction network. </p>
-<p>This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol</p><ul>
-<li>dt) <dl class="params"><dt>Parameters</dt><dd>
+<p>This adds a_cdrChange to the densities and sets the source term to a_cdrChange/(vol * dt). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_newParticlesPerCell</td><td>Particles per cell after the chemistry advance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldParticlesPerCell</td><td>Particles per cell before the chemistry advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrChange</td><td>Per-cell change for each CDR species, in number of physical particles. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Grid box </td></tr>
@@ -4667,13 +4739,11 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
   </table>
   </dd>
 </dl>
-</li>
-</ul>
 
 </div>
 </div>
-<a id="a954a71d5234cc88f88f88bcfc830e799" name="a954a71d5234cc88f88f88bcfc830e799"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a954a71d5234cc88f88f88bcfc830e799">&#9670;&#160;</a></span>reconcileCdrDensities() <span class="overload">[3/3]</span></h2>
+<a id="adab647dfa6a7590fcfc1b579c676e833" name="adab647dfa6a7590fcfc1b579c676e833"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adab647dfa6a7590fcfc1b579c676e833">&#9670;&#160;</a></span>reconcileCdrDensities() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4687,13 +4757,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td class="memname">void ItoKMCStepper::reconcileCdrDensities </td>
           <td>(</td>
           <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_newParticlesPerCell</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_oldParticlesPerCell</em>, </td>
+          <td class="paramname"><em>a_cdrChange</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4721,23 +4785,19 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div><div class="memdoc">
 
 <p>Reconcile the CDR densities after the reaction network. </p>
-<p>This adds the a_newPPC - a_oldPPC to the densities and sets the source term to (a_newPPC - a_oldPPC)/(vol</p><ul>
-<li>dt) <dl class="params"><dt>Parameters</dt><dd>
+<p>This adds a_cdrChange to the densities and sets the source term to a_cdrChange/(vol * dt). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_newParticlesPerCell</td><td>Particles per cell after the chemistry advance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldParticlesPerCell</td><td>Particles per cell before the chemistry advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrChange</td><td>Per-cell change for each CDR species, in number of physical particles. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
   </table>
   </dd>
 </dl>
-</li>
-</ul>
 
 </div>
 </div>
-<a id="acf8512ce00b2b2e6ff0c1dd55847173c" name="acf8512ce00b2b2e6ff0c1dd55847173c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf8512ce00b2b2e6ff0c1dd55847173c">&#9670;&#160;</a></span>reconcileParticles() <span class="overload">[1/3]</span></h2>
+<a id="a39a4942db9c07c680cb5230e8f98b3c9" name="a39a4942db9c07c680cb5230e8f98b3c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39a4942db9c07c680cb5230e8f98b3c9">&#9670;&#160;</a></span>reconcileParticles() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4764,6 +4824,12 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td></td>
           <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
           <td class="paramname"><em>a_newPhotonsPerCell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBAMRCellData &amp;&#160;</td>
+          <td class="paramname"><em>a_cdrProduction</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4790,6 +4856,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newParticlesPerCell</td><td>Particles per cell after the chemistry advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldParticlesPerCell</td><td>Particles per cell before the chemistry advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newPhotonsPerCell</td><td>Newly generated photons per cell after the chemistry advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrProduction</td><td>Number of physical particles produced per cell for each CDR species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field </td></tr>
   </table>
   </dd>
@@ -4798,8 +4865,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
-<a id="a544cc8af6e40cfd363bab0113b86a85d" name="a544cc8af6e40cfd363bab0113b86a85d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a544cc8af6e40cfd363bab0113b86a85d">&#9670;&#160;</a></span>reconcileParticles() <span class="overload">[2/3]</span></h2>
+<a id="acc750186d8d994085db0744d9fcf9dd9" name="acc750186d8d994085db0744d9fcf9dd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc750186d8d994085db0744d9fcf9dd9">&#9670;&#160;</a></span>reconcileParticles() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4826,6 +4893,12 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td></td>
           <td class="paramtype">const EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_newPhotonsPerCell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_cdrProduction</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4876,6 +4949,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newParticlesPerCell</td><td>Particles per cell after the chemistry advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldParticlesPerCell</td><td>Particles per cell before the chemistry advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newPhotonsPerCell</td><td>Newly generated photons per cell after the chemistry advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrProduction</td><td>Number of physical particles produced per cell for each CDR species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index </td></tr>
@@ -4888,8 +4962,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 
 </div>
 </div>
-<a id="a515bc0d8b56ab6519fab3bd5e3630e4b" name="a515bc0d8b56ab6519fab3bd5e3630e4b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a515bc0d8b56ab6519fab3bd5e3630e4b">&#9670;&#160;</a></span>reconcileParticles() <span class="overload">[3/3]</span></h2>
+<a id="ac147f662f4e3dd2ebc34eb7010f22ca1" name="ac147f662f4e3dd2ebc34eb7010f22ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac147f662f4e3dd2ebc34eb7010f22ca1">&#9670;&#160;</a></span>reconcileParticles() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4916,6 +4990,12 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
           <td></td>
           <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_newPhotonsPerCell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_cdrProduction</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -4948,6 +5028,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newParticlesPerCell</td><td>Particles per cell after the chemistry advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_oldParticlesPerCell</td><td>Particles per cell before the chemistry advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newPhotonsPerCell</td><td>Newly generated photons per cell after the chemistry advance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cdrProduction</td><td>Number of physical particles produced per cell for each CDR species. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
   </table>
@@ -4983,7 +5064,7 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div><div class="memdoc">
 
 <p>Reconcile the results from photoionization reactions. </p>
-<dl class="section note"><dt>Note</dt><dd>This adds particles directly into the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> particle data holders and into m_cdrPhotoiProducts. </dd>
+<dl class="section note"><dt>Note</dt><dd>This adds particles directly into the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> particle data holders and into m_cdrProducts. </dd>
 <dd>
 This is not used (yet) &ndash; it does a per-patch call to m_physics, which means that its done outside of the cell-sorted requirement of advanceReactionNetwork. </dd></dl>
 
@@ -6100,8 +6181,8 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 </div>
 </div>
-<a id="a73688780d217a0a0b9a8521c2277f5a8" name="a73688780d217a0a0b9a8521c2277f5a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a73688780d217a0a0b9a8521c2277f5a8">&#9670;&#160;</a></span>m_cdrPhotoiProducts</h2>
+<a id="a72895f7512be22f292ba4e08a0ad683a" name="a72895f7512be22f292ba4e08a0ad683a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72895f7512be22f292ba4e08a0ad683a">&#9670;&#160;</a></span>m_cdrProductInjection</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6112,7 +6193,34 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Vector&lt;RefCountedPtr&lt;<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt;<a class="el" href="structNoPayload.html">NoPayload</a>&gt; &gt; &gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_cdrPhotoiProducts</td>
+          <td class="memname"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89">CdrProductInjection</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_cdrProductInjection</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How the reaction network's CDR production is put onto the mesh. </p>
+<p>Photoionization products are unaffected: they are created at the photon absorption position and have no in-cell representation to fall back on, so they are always deposited &ndash; NGP under <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a710fdb6adb881b408116ef95335e1961" title="Add the production directly into the cell that produced it.">CdrProductInjection::Mesh</a> and with the Ito solvers' deposition under <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4" title="Emit the production as particles and deposit it with the Ito solvers&#39; deposition.">CdrProductInjection::Particle</a>. </p>
+
+</div>
+</div>
+<a id="a07f79b8d581afd416585df819bd4f5b7" name="a07f79b8d581afd416585df819bd4f5b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07f79b8d581afd416585df819bd4f5b7">&#9670;&#160;</a></span>m_cdrProducts</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;RefCountedPtr&lt;<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt;<a class="el" href="structNoPayload.html">NoPayload</a>&gt; &gt; &gt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_cdrProducts</td>
         </tr>
       </table>
   </td>
@@ -6122,8 +6230,8 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 </table>
 </div><div class="memdoc">
 
-<p>Photoionization products to be put in the CDR equations. </p>
-<dl class="section note"><dt>Note</dt><dd>This is agglomerated with Ito particle photoionization functionality, and is therefore defined on the particle realm. </dd></dl>
+<p>Reaction products to be put in the CDR equations, as particles. </p>
+<p>Holds both the photoionization products and the production computed by the KMC advance. The containers are filled and emptied within a single call to <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a36907acbc61c507c48ae84b3d06249a4" title="Chemistry advance over time a_dt.">advanceReactionNetwork()</a> and carry no state across time steps. </p><dl class="section note"><dt>Note</dt><dd>Defined on the particle realm, because that is where the reconciliation kernels and the Ito solvers' deposition machinery live. </dd></dl>
 
 </div>
 </div>
@@ -6559,6 +6667,33 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 </div>
 </div>
+<a id="a070e7d254a6a131cd4a8d509e49bc5a7" name="a070e7d254a6a131cd4a8d509e49bc5a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a070e7d254a6a131cd4a8d509e49bc5a7">&#9670;&#160;</a></span>m_particleCdrProduction</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EBAMRCellData <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_particleCdrProduction</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-cell CDR production from the reaction network, on the particle realm. </p>
+<p>One component per CDR species, holding the number of physical particles produced in the cell &ndash; the positive part of the change computed by the KMC advance. The reconciliation kernels turn this into the particles in m_cdrProducts. </p>
+
+</div>
+</div>
 <a id="acb3a491600dd656bedae9bd2b1bdec56" name="acb3a491600dd656bedae9bd2b1bdec56"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acb3a491600dd656bedae9bd2b1bdec56">&#9670;&#160;</a></span>m_particleEPS</h2>
 
@@ -6718,6 +6853,33 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 <p>Phase where we solve for the plasma. </p>
 <dl class="section note"><dt>Note</dt><dd>This is hardcoded to <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108bad0a7c1eb8fd916c8b7ec85be0fd23b38" title="Gas phase.">phase::gas</a> </dd></dl>
+
+</div>
+</div>
+<a id="a3cf5dc7123b4f112583e71838d9778f0" name="a3cf5dc7123b4f112583e71838d9778f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cf5dc7123b4f112583e71838d9778f0">&#9670;&#160;</a></span>m_redistributeCDR</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverGMG&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_redistributeCDR</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Flag for redistributing CDR mass when particles cross the EB. </p>
+<p>Ignored under <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad7e95aad0cb65813f6682de9d8ad1c89a5e9328c486b44b9a58bca20f7f2064f4" title="Emit the production as particles and deposit it with the Ito solvers&#39; deposition.">CdrProductInjection::Particle</a>, where the production is deposited by the Ito solver and carries the solver's cut-cell normalization rather than the kappa damping this corrects for. </p>
 
 </div>
 </div>
