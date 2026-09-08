@@ -126,7 +126,7 @@ Tessellation.mesh_file       = armadillo.stl    ## Ply file
 Tessellation.partitioner     = default          ## Partitioner. Valid options are 'default', 'overlap', 'sah'
 Tessellation.use_bvh         = true             ## Use bounding volume hierarchy for accelerating search
 Tessellation.z_coord         = 0.0              ## z-coordinate for 2D slicing this object
-Tessellation.flip_inside     = false
+Tessellation.flip_inside     = true
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
