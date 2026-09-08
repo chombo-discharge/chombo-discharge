@@ -2,22 +2,42 @@
  * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
-   @return True if regular, false otherwise
  */
 
 /**
- * @brief  CD_ScanShopImplem.H
+ * @file   CD_ScanShopImplem.H
  * @brief  Implementation of CD_ScanShop.H
  * @author Robert Marskar
- * @return True if regular, false otherwise
  */
 
 #ifndef CD_SCANSHOPIMPLEM_H
 #define CD_SCANSHOPIMPLEM_H
 
+// Std includes
+#include <algorithm>
+
 // Our includes
 #include <CD_ScanShop.H>
 #include <CD_NamespaceHeader.H>
+
+inline int
+ScanShop::getScanSkip(Real a_slack, Real a_dx) const
+{
+  // A signed distance function changes by at most the distance travelled, so no cell centre closer than
+  // a_slack to the evaluated point can cross the threshold. Those cells are passed over. The guard keeps
+  // the skipped distance strictly below a_slack, so a cell exactly a_slack away is still evaluated.
+  if (!m_distanceSkip || a_slack <= 0.0) {
+    return 0;
+  }
+
+  int skip = static_cast<int>(a_slack / a_dx);
+
+  if (skip * a_dx >= a_slack) {
+    skip--;
+  }
+
+  return std::max(skip, 0);
+}
 
 inline bool
 ScanShop::isRegular(Box a_box, const RealVect& a_probLo, Real a_dx) const
@@ -26,15 +46,21 @@ ScanShop::isRegular(Box a_box, const RealVect& a_probLo, Real a_dx) const
 
   // Short-circuit search over the box: a direct index loop with early return rather than a BoxLoops::loop,
   // since BoxLoops::loop cannot break early and m_baseIF->value(...) is expensive.
+  const Real halfDiagonal = 0.5 * a_dx * sqrt(SpaceDim);
+
 #if CH_SPACEDIM == 3
   for (int k = a_box.smallEnd(2); k <= a_box.bigEnd(2); k++) {
 #endif
     for (int j = a_box.smallEnd(1); j <= a_box.bigEnd(1); j++) {
       for (int i = a_box.smallEnd(0); i <= a_box.bigEnd(0); i++) {
         const RealVect point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(IntVect(D_DECL(i, j, k))));
-        if (m_baseIF->value(point) >= -0.5 * a_dx * sqrt(SpaceDim)) {
+        const Real     value = m_baseIF->value(point);
+
+        if (value >= -halfDiagonal) {
           return false;
         }
+
+        i += this->getScanSkip(-value - halfDiagonal, a_dx);
       }
     }
 #if CH_SPACEDIM == 3
@@ -51,15 +77,21 @@ ScanShop::isCovered(Box a_box, const RealVect& a_probLo, Real a_dx) const
 
   // Short-circuit search over the box: a direct index loop with early return rather than a BoxLoops::loop,
   // since BoxLoops::loop cannot break early and m_baseIF->value(...) is expensive.
+  const Real halfDiagonal = 0.5 * a_dx * sqrt(SpaceDim);
+
 #if CH_SPACEDIM == 3
   for (int k = a_box.smallEnd(2); k <= a_box.bigEnd(2); k++) {
 #endif
     for (int j = a_box.smallEnd(1); j <= a_box.bigEnd(1); j++) {
       for (int i = a_box.smallEnd(0); i <= a_box.bigEnd(0); i++) {
         const RealVect point = a_probLo + a_dx * (0.5 * RealVect::Unit + RealVect(IntVect(D_DECL(i, j, k))));
-        if (m_baseIF->value(point) <= 0.5 * a_dx * sqrt(SpaceDim)) {
+        const Real     value = m_baseIF->value(point);
+
+        if (value <= halfDiagonal) {
           return false;
         }
+
+        i += this->getScanSkip(value - halfDiagonal, a_dx);
       }
     }
 #if CH_SPACEDIM == 3

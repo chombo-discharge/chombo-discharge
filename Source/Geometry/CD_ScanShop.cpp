@@ -34,6 +34,7 @@ ScanShop::ScanShop(const BaseIF&        a_localGeom,
     m_fileName("ScanShopReport.dat"),
     m_boxSorting(BoxSorting::Morton),
     m_profile(false),
+    m_distanceSkip(false),
     m_ebGhost(a_ebGhost),
     m_baseIF(&a_localGeom),
     m_hasScanLevel(false)
@@ -50,6 +51,7 @@ ScanShop::ScanShop(const BaseIF&        a_localGeom,
 
   std::string str;
   pp.query("profile", m_profile);
+  pp.query("distance_skip", m_distanceSkip);
   pp.query("box_sorting", str);
 
   if (str == "none") {
