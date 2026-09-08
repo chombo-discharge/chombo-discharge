@@ -172,6 +172,13 @@ protected:
   bool m_profile;
 
   /**
+   * @brief Whether or not the box scan may skip cells using the implicit function value as a distance.
+   * @details Only correct when the implicit function is a signed distance function. Set through
+   * ScanShop.distance_skip.
+   */
+  bool m_distanceSkip;
+
+  /**
    * @brief Scan level where we first begin to break up boxes. This is relative the EBIS level.
    */
   int m_scanLevel;
@@ -255,10 +262,24 @@ protected:
   buildCoarseLevel(int a_level, int a_maxGridSize);
 
   /**
+   * @brief Number of cells along the scan line that can be passed over without evaluating the implicit function.
+   * @details A signed distance function changes by at most the distance travelled, so a cell centre closer than
+   * a_slack to the last evaluated point cannot cross the regular/covered threshold. Returns zero unless the
+   * distance skip is enabled, because implicit functions that are not signed distance functions (noise-displaced
+   * surfaces, for example) can change faster than that.
+   * @param[in] a_slack Distance by which the last evaluated point cleared the threshold
+   * @param[in] a_dx    Grid resolution on level
+   * @return Number of additional cells to advance the scan by
+   */
+  inline int
+  getScanSkip(Real a_slack, Real a_dx) const;
+
+  /**
    * @brief Check if every point in input box is regular
    * @param[in] a_box    Cell-centered box
    * @param[in] a_probLo Lower-left corner of simulation domain
    * @param[in] a_dx     Grid resolution
+   * @return True if regular, false otherwise
    */
   inline bool
   isRegular(Box a_box, const RealVect& a_probLo, Real a_dx) const;
