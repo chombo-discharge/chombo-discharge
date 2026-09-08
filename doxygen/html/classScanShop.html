@@ -165,6 +165,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a912623ff8876423afcdb1a6b9469ffe6" id="r_a912623ff8876423afcdb1a6b9469ffe6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a912623ff8876423afcdb1a6b9469ffe6">buildCoarseLevel</a> (int a_level, int a_maxGridSize)</td></tr>
 <tr class="memdesc:a912623ff8876423afcdb1a6b9469ffe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the "coarse level" where we initiate the recursion process.  <br /></td></tr>
 <tr class="separator:a912623ff8876423afcdb1a6b9469ffe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a765cd8a6a38b572b3ee7e21ae30b6861" id="r_a765cd8a6a38b572b3ee7e21ae30b6861"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a765cd8a6a38b572b3ee7e21ae30b6861">getScanSkip</a> (Real a_slack, Real a_dx) const</td></tr>
+<tr class="memdesc:a765cd8a6a38b572b3ee7e21ae30b6861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of cells along the scan line that can be passed over without evaluating the implicit function.  <br /></td></tr>
+<tr class="separator:a765cd8a6a38b572b3ee7e21ae30b6861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87214e505921afbc4c86e0745273bc47" id="r_a87214e505921afbc4c86e0745273bc47"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a87214e505921afbc4c86e0745273bc47">isRegular</a> (Box a_box, const RealVect &amp;a_probLo, Real a_dx) const</td></tr>
 <tr class="memdesc:a87214e505921afbc4c86e0745273bc47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if every point in input box is regular.  <br /></td></tr>
 <tr class="separator:a87214e505921afbc4c86e0745273bc47"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -196,6 +199,9 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_fileName</b>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></tr>
 <tr class="memdesc:aa7e623b835cf0ffa5ba7cd42ef31e6d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool for run-time profiling of <a class="el" href="classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves.">ScanShop</a>. <br /></td></tr>
 <tr class="separator:aa7e623b835cf0ffa5ba7cd42ef31e6d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45ce20885076b17e41f0134ec5c62db8" id="r_a45ce20885076b17e41f0134ec5c62db8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanShop.html#a45ce20885076b17e41f0134ec5c62db8">m_distanceSkip</a></td></tr>
+<tr class="memdesc:a45ce20885076b17e41f0134ec5c62db8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not the box scan may skip cells using the implicit function value as a distance.  <br /></td></tr>
+<tr class="separator:a45ce20885076b17e41f0134ec5c62db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60aaa005b1fc74be96f4908cbe5c2b81" id="r_a60aaa005b1fc74be96f4908cbe5c2b81"><td class="memItemLeft" align="right" valign="top"><a id="a60aaa005b1fc74be96f4908cbe5c2b81" name="a60aaa005b1fc74be96f4908cbe5c2b81"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_scanLevel</b></td></tr>
 <tr class="memdesc:a60aaa005b1fc74be96f4908cbe5c2b81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scan level where we first begin to break up boxes. This is relative the EBIS level. <br /></td></tr>
@@ -556,6 +562,52 @@ std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 
 </div>
 </div>
+<a id="a765cd8a6a38b572b3ee7e21ae30b6861" name="a765cd8a6a38b572b3ee7e21ae30b6861"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a765cd8a6a38b572b3ee7e21ae30b6861">&#9670;&#160;</a></span>getScanSkip()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ScanShop::getScanSkip </td>
+          <td>(</td>
+          <td class="paramtype">Real&#160;</td>
+          <td class="paramname"><em>a_slack</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of cells along the scan line that can be passed over without evaluating the implicit function. </p>
+<p>A signed distance function changes by at most the distance travelled, so a cell centre closer than a_slack to the last evaluated point cannot cross the regular/covered threshold. Returns zero unless the distance skip is enabled, because implicit functions that are not signed distance functions (noise-displaced surfaces, for example) can change faster than that. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_slack</td><td>Distance by which the last evaluated point cleared the threshold </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution on level </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of additional cells to advance the scan by </dd></dl>
+
+</div>
+</div>
 <a id="ab0d4d504c8e42a10f7fe376974de5ade" name="ab0d4d504c8e42a10f7fe376974de5ade"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab0d4d504c8e42a10f7fe376974de5ade">&#9670;&#160;</a></span>getSortedBoxesAndTypes()</h2>
 
@@ -763,16 +815,14 @@ std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 </div><div class="memdoc">
 
 <p>Check if every point in input box is regular. </p>
-<p><a class="el" href="CD__ScanShopImplem_8H_source.html">CD_ScanShopImplem.H</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Cell-centered box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of simulation domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
   </table>
   </dd>
 </dl>
-<p>Implementation of <a class="el" href="CD__ScanShop_8H.html" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio...">CD_ScanShop.H</a> </p><dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>True if regular, false otherwise </dd></dl>
 
 </div>
@@ -945,6 +995,31 @@ std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 
 <p>Box maps. </p>
 <p>BoxType is a essentially just an integer on each patch which is =0,1,2 depending on whether or not the box is covered/regular/cut. </p>
+
+</div>
+</div>
+<a id="a45ce20885076b17e41f0134ec5c62db8" name="a45ce20885076b17e41f0134ec5c62db8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45ce20885076b17e41f0134ec5c62db8">&#9670;&#160;</a></span>m_distanceSkip</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ScanShop::m_distanceSkip</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether or not the box scan may skip cells using the implicit function value as a distance. </p>
+<p>Only correct when the implicit function is a signed distance function. Set through ScanShop.distance_skip. </p>
 
 </div>
 </div>
