@@ -180,8 +180,14 @@ crossingPosition(const CutCellSurface& a_surface, const int a_edge, const Real a
 
   Real t = a_surface.m_crossing[a_edge];
 
-  t = std::max(t, a_tolerance);
-  t = std::min(t, 1.0 - a_tolerance);
+  // A crossing recorded exactly at an endpoint sits on a corner the interface passes through,
+  // so it is already where it belongs and displacing it would open a sliver of the
+  // displacement's own width. Every other crossing is held off the endpoints, which is what
+  // keeps the combinatorics generic.
+  if (t != 0.0 && t != 1.0) {
+    t = std::max(t, a_tolerance);
+    t = std::min(t, 1.0 - a_tolerance);
+  }
 
   RealVect x = RealVect::Zero;
 

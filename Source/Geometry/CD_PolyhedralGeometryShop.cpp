@@ -16,6 +16,7 @@
 // Chombo includes
 #include <BoxIterator.H>
 #include <IntVectSet.H>
+#include <LoHiSide.H>
 #include <MayDay.H>
 
 // Our includes
@@ -181,7 +182,17 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
     // an edge carries a crossing exactly when its two ends disagree under the one predicate the
     // corners are classified by, so the number of crossings on a face counts sign changes
     if (CutCellBody::isFluid(loValue) != CutCellBody::isFluid(hiValue)) {
-      a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, hiValue, a_probLo, a_dx);
+      // a corner at exactly zero is on the interface, so the crossing is that corner rather
+      // than a root to be searched for
+      if (loValue == 0.0) {
+        a_surface.m_crossing[e] = 0.0;
+      }
+      else if (hiValue == 0.0) {
+        a_surface.m_crossing[e] = 1.0;
+      }
+      else {
+        a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, hiValue, a_probLo, a_dx);
+      }
     }
   }
 }
@@ -319,6 +330,8 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     intercept[dir].setVal(CutCellSurface::s_noCrossing);
   }
 
+  IntVectSet droppedCells;
+
   for (IVSIterator ivsIt(irregularCells); ivsIt.ok(); ++ivsIt) {
     const IntVect iv = ivsIt();
 
@@ -341,7 +354,9 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       continue;
     }
 
-    if (body.volumeFraction() < m_volumeThreshold) {
+    if (m_volumeThreshold > 0.0 && body.volumeFraction() < m_volumeThreshold) {
+      droppedCells |= iv;
+
       a_regIrregCovered(iv, 0) = -1;
 
       continue;
@@ -360,6 +375,43 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     this->fillNode(node, body, a_regIrregCovered, iv, a_domain);
 
     a_nodes.push_back(node);
+  }
+
+  // A cell dropped for carrying no fluid worth keeping has just become covered, so the faces its
+  // irregular neighbours point back with no longer lead anywhere, and the regular ones among
+  // them are now full cells with a covered face.
+  for (IVSIterator ivsIt(droppedCells); ivsIt.ok(); ++ivsIt) {
+    const IntVect iv = ivsIt();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect other = iv + sign(sit()) * BASISV(dir);
+
+        if (!a_validRegion.contains(other) || a_regIrregCovered(other, 0) != 0) {
+          continue;
+        }
+
+        bool found = false;
+
+        for (int n = 0; n < a_nodes.size() && !found; n++) {
+          if (a_nodes[n].m_cell == other) {
+            const int arcIndex = a_nodes[n].index(dir, flip(sit()));
+
+            a_nodes[n].m_arc[arcIndex].resize(0);
+            a_nodes[n].m_areaFrac[arcIndex].resize(0);
+            a_nodes[n].m_faceCentroid[arcIndex].resize(0);
+
+            found = true;
+          }
+        }
+
+        if (!found) {
+          MayDay::Error("PolyhedralGeometryShop::fillGraph - an irregular neighbour has no node");
+        }
+      }
+    }
+
+    GeometryShop::fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
   }
 
   (void)a_di;
