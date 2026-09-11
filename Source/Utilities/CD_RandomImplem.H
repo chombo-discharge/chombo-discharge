@@ -117,9 +117,11 @@ Random::getPoisson(const Real a_mean)
     ret = poisson(s_rng);
   }
   else {
+    // Normal approximation for large means. The continuous draw is rounded to the nearest integer;
+    // truncating it would bias every sample by -1/2.
     std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
 
-    ret = (T)std::max(normal(s_rng), (Real)0.0);
+    ret = (T)llround(std::max(normal(s_rng), (Real)0.0));
   }
 
   return ret;
