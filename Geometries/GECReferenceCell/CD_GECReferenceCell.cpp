@@ -42,7 +42,7 @@ GECReferenceCell::GECReferenceCell()
   ImpFunc vessel;
 
   // Lower electrode and insulator objects
-  innerElectrodeLo = std::make_shared<RoundedCylinderSDF<Real>>(0.5 * r1 + c, c, 1.0);
+  innerElectrodeLo = std::make_shared<RoundedCylinderSDF<Real>>(r1, c, 1.0);
   innerElectrodeLo = EBGeometry::Translate<Real>(innerElectrodeLo, -0.5 * yhat - 0.5 * g * yhat);
   insulatorLo      = std::make_shared<CylinderSDF<Real>>(-yhat, -0.5 * g * yhat, 0.5 * (r2 + r3));
   outerElectrodeLo = std::make_shared<TorusSDF<Real>>(zero, r3 - c, c);
@@ -56,7 +56,7 @@ GECReferenceCell::GECReferenceCell()
   outerElectrodeHi = EBGeometry::Reflect<Real>(outerElectrodeLo, 1);
 
   // Cylindrical vessel -- subtract all the other parts.
-  vessel = std::make_shared<RoundedCylinderSDF<Real>>(0.5 * r4 + 1E-3, 1E-3, H);
+  vessel = std::make_shared<RoundedCylinderSDF<Real>>(r4, 1E-3, H);
   vessel = EBGeometry::Complement<Real>(vessel);
   vessel = EBGeometry::Difference<Real>(vessel, innerElectrodeLo);
   vessel = EBGeometry::Difference<Real>(vessel, outerElectrodeLo);
