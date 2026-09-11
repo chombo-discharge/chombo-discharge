@@ -85,6 +85,18 @@ public:
   classify(const CutCellSurface& a_surface) noexcept;
 
   /**
+   * @brief Whether one side of the interface is present only as exact zeros.
+   * @details A facet lying in a node plane leaves every corner on one side at exactly zero. The
+   * signs then disagree and the corner test reads the cell as cut, but a side represented only
+   * by exact zeros encloses nothing.
+   * @param[in] a_surface   Corner values in the cell's own frame.
+   * @param[in] a_fluidSide Which side to test.
+   * @return True if that side is present and every one of its corners is exactly zero.
+   */
+  static bool
+  touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept;
+
+  /**
    * @brief Which side of the interface a value lies on.
    * @details One predicate for corners and crossings alike, matching the sign test in
    * GeometryShop::insideOutsideFromNodes. The side is read off the sign bit, so a node at

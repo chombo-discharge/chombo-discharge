@@ -448,20 +448,59 @@ CutCellBody::classify(const CutCellSurface& a_surface) noexcept
   const Real first     = a_surface.m_corner[0];
   const Real firstSign = std::copysign(1.0, first);
 
+  bool cut = false;
+
   for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
     const Real value = a_surface.m_corner[c];
     const Real sign  = std::copysign(1.0, value);
 
     if ((value == 0.0 || first == 0.0) && sign * firstSign < 0.0) {
-      return Kind::Cut;
+      cut = true;
     }
 
     if (value * first < 0.0) {
-      return Kind::Cut;
+      cut = true;
     }
   }
 
+  // A facet lying in a node plane leaves every corner on one side at exactly zero. The signs
+  // then disagree and the sign test alone reads the cell as cut, but a side represented only by
+  // exact zeros encloses nothing: the cell is entirely on the other side, with the face in that
+  // plane covered. Building it instead yields a sliver as wide as the crossings are held off
+  // the edge endpoints, which is dust of a size no volume threshold is scaled to catch.
+  if (cut) {
+    if (touchesOnly(a_surface, true)) {
+      return Kind::Covered;
+    }
+
+    if (touchesOnly(a_surface, false)) {
+      return Kind::Regular;
+    }
+
+    return Kind::Cut;
+  }
+
   return (firstSign < 0.0) ? Kind::Regular : Kind::Covered;
+}
+
+bool
+CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept
+{
+  bool any = false;
+
+  for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+    const Real value = a_surface.m_corner[c];
+
+    if (isFluid(value) == a_fluidSide) {
+      any = true;
+
+      if (value != 0.0) {
+        return false;
+      }
+    }
+  }
+
+  return any;
 }
 
 void
