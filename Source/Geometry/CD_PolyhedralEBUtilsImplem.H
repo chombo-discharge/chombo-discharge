@@ -28,6 +28,119 @@ isFluid(const Real a_value) noexcept
   return std::copysign(1.0, a_value) < 0.0;
 }
 
+inline Real
+maxPrincipalCurvature(const Real a_stencil[s_curvatureStencilSize], const Real a_spacing) noexcept
+{
+  // Offsets are packed base three, so stepping one lattice point in direction d changes the
+  // index by 3^d.
+  int stride[SpaceDim];
+  int centre = 0;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    stride[d] = (d == 0) ? 1 : stride[d - 1] * 3;
+    centre += stride[d];
+  }
+
+  const Real f0 = a_stencil[centre];
+
+  Real gradient[SpaceDim];
+  Real hessian[SpaceDim][SpaceDim];
+
+  for (int d = 0; d < SpaceDim; d++) {
+    const Real fp = a_stencil[centre + stride[d]];
+    const Real fm = a_stencil[centre - stride[d]];
+
+    gradient[d]   = 0.5 * (fp - fm) / a_spacing;
+    hessian[d][d] = (fp - 2.0 * f0 + fm) / (a_spacing * a_spacing);
+  }
+
+  for (int d = 0; d < SpaceDim; d++) {
+    for (int e = d + 1; e < SpaceDim; e++) {
+      const Real fpp = a_stencil[centre + stride[d] + stride[e]];
+      const Real fpm = a_stencil[centre + stride[d] - stride[e]];
+      const Real fmp = a_stencil[centre - stride[d] + stride[e]];
+      const Real fmm = a_stencil[centre - stride[d] - stride[e]];
+
+      hessian[d][e] = 0.25 * (fpp - fpm - fmp + fmm) / (a_spacing * a_spacing);
+      hessian[e][d] = hessian[d][e];
+    }
+  }
+
+  Real gradientSquared = 0.0;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    gradientSquared += gradient[d] * gradient[d];
+  }
+
+  // A vanishing gradient is a point the level set does not pass through cleanly, and the
+  // curvature there is not defined. Reporting zero leaves such a cell unrefined by this
+  // criterion rather than refined on a divided-by-nothing value.
+  if (gradientSquared <= 0.0) {
+    return 0.0;
+  }
+
+  const Real gradientLength = std::sqrt(gradientSquared);
+
+  Real trace = 0.0;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    trace += hessian[d][d];
+  }
+
+  Real quadratic = 0.0;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    for (int e = 0; e < SpaceDim; e++) {
+      quadratic += gradient[d] * hessian[d][e] * gradient[e];
+    }
+  }
+
+  // Sum of the principal curvatures: the divergence of the unit normal.
+  const Real curvatureSum = (gradientSquared * trace - quadratic) / (gradientSquared * gradientLength);
+
+#if CH_SPACEDIM == 3
+  // The Gaussian curvature is the same quadratic form taken against the adjugate of the Hessian,
+  // which for a symmetric matrix is its cofactor matrix. With the sum and the product of the two
+  // principal curvatures in hand they follow from the quadratic they are the roots of.
+  const Real a = hessian[0][0];
+  const Real b = hessian[0][1];
+  const Real c = hessian[0][2];
+  const Real d = hessian[1][1];
+  const Real e = hessian[1][2];
+  const Real f = hessian[2][2];
+
+  Real adjugate[3][3];
+
+  adjugate[0][0] = d * f - e * e;
+  adjugate[0][1] = c * e - b * f;
+  adjugate[0][2] = b * e - c * d;
+  adjugate[1][0] = adjugate[0][1];
+  adjugate[1][1] = a * f - c * c;
+  adjugate[1][2] = b * c - a * e;
+  adjugate[2][0] = adjugate[0][2];
+  adjugate[2][1] = adjugate[1][2];
+  adjugate[2][2] = a * d - b * b;
+
+  Real adjugateForm = 0.0;
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      adjugateForm += gradient[i] * adjugate[i][j] * gradient[j];
+    }
+  }
+
+  const Real gaussian = adjugateForm / (gradientSquared * gradientSquared);
+  const Real mean     = 0.5 * curvatureSum;
+
+  // Equal principal curvatures make the discriminant zero, and rounding can carry it just below.
+  const Real discriminant = std::max(mean * mean - gaussian, 0.0);
+
+  return std::abs(mean) + std::sqrt(discriminant);
+#else
+  return std::abs(curvatureSum);
+#endif
+}
+
 namespace detail {
 
 inline int

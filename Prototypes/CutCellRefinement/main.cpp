@@ -24,6 +24,7 @@
 #include <CD_CylinderSdf.H>
 #include <CD_Electrode.H>
 #include <CD_GeometryStepper.H>
+#include <CD_PolyhedralEBUtils.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::Geometry;
@@ -308,6 +309,27 @@ faceBends(const BaseIF&   a_implicitFunction,
   return n;
 }
 
+// Sample the implicit function on the lattice the curvature estimator expects, centred on a_point.
+inline void
+curvatureStencil(const BaseIF&   a_implicitFunction,
+                 const RealVect& a_point,
+                 const Real      a_spacing,
+                 Real            a_stencil[PolyhedralEB::s_curvatureStencilSize])
+{
+  for (int i = 0; i < PolyhedralEB::s_curvatureStencilSize; i++) {
+    RealVect x = a_point;
+
+    int packed = i;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      x[d] += a_spacing * static_cast<Real>((packed % 3) - 1);
+      packed /= 3;
+    }
+
+    a_stencil[i] = a_implicitFunction.value(x);
+  }
+}
+
 void
 exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileName)
 {
@@ -336,6 +358,7 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
   for (int d = 0; d < SpaceDim; d++) {
     out << ",bndryCentroid" << d;
   }
+  out << ",kappa,kappaDx";
   for (int face = 0; face < 2 * SpaceDim; face++) {
     out << ",numFaces" << face << ",areaFrac" << face;
     for (int d = 0; d < SpaceDim; d++) {
@@ -403,6 +426,25 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
         const RealVect bndryCentroid = ebisBox.bndryCentroid(vof);
         for (int d = 0; d < SpaceDim; d++) {
           out << "," << bndryCentroid[d];
+        }
+
+        // Measured on the surface itself, at a lattice spacing of one cell width: the bend of
+        // the surface across this cell rather than its pointwise differential curvature.
+        {
+          RealVect x = probLo;
+
+          for (int d = 0; d < SpaceDim; d++) {
+            x[d] += dx[lvl] * (static_cast<Real>(iv[d]) + 0.5 + bndryCentroid[d]);
+          }
+
+          x = projectToSurface(*implicitFunction, x, dx[lvl]);
+
+          Real stencil[PolyhedralEB::s_curvatureStencilSize];
+          curvatureStencil(*implicitFunction, x, dx[lvl], stencil);
+
+          const Real kappa = PolyhedralEB::maxPrincipalCurvature(stencil, dx[lvl]);
+
+          out << "," << kappa << "," << kappa * dx[lvl];
         }
 
         for (int dir = 0; dir < SpaceDim; dir++) {

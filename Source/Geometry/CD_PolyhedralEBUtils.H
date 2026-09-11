@@ -34,6 +34,31 @@ inline bool
 isFluid(const Real a_value) noexcept;
 
 /**
+ * @brief Number of samples in the stencil the curvature is measured from.
+ */
+constexpr int s_curvatureStencilSize = (SpaceDim == 2) ? 9 : 27;
+
+/**
+ * @brief Largest principal curvature of the level set through a stencil of implicit function values.
+ * @details The samples sit on a 3^SpaceDim lattice of spacing a_spacing, centred on the point the
+ * curvature is wanted at, and are indexed by sum_d (o_d + 1) * 3^d over offsets o_d in {-1, 0, 1}.
+ * Gradient and Hessian are central differences of those samples, and the principal curvatures
+ * follow from them in closed form, so no eigenvalue solve is needed. Dividing through by the
+ * gradient magnitude makes the result independent of how the implicit function is scaled, which
+ * matters because only some of them are signed distance functions.
+ *
+ * The spacing is what the measurement is relative to. At a spacing of one cell width the result
+ * is the bend of the surface across a cell, which stays finite where two surfaces meet in a
+ * crease; measured at a spacing approaching zero the same crease diverges instead. The former is
+ * what a refinement criterion wants, since a crease is not something more resolution can fix.
+ * @param[in] a_stencil Implicit function sampled on the lattice.
+ * @param[in] a_spacing Lattice spacing.
+ * @return Largest principal curvature in magnitude, or zero where the gradient vanishes.
+ */
+inline Real
+maxPrincipalCurvature(const Real a_stencil[s_curvatureStencilSize], const Real a_spacing) noexcept;
+
+/**
  * @brief Cell topology and polygon geometry the cut cell classes are assembled from.
  * @details Corners, edges and faces are indexed in the cell's own [-1/2, 1/2]^SpaceDim frame:
  * corner c has offset ((c >> d) & 1) in direction d, and an edge is parameterised from its low
