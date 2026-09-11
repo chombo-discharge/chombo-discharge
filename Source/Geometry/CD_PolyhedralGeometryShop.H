@@ -138,6 +138,32 @@ protected:
   int m_refinement;
 
   /**
+   * @brief Classify every cell of a region from the bodies of the cells they subdivide.
+   * @details Only meaningful when the generated cells refine the ones the surface is
+   * reconstructed on. The surface is reconstructed once per coarse cell and cut down, and each
+   * generated cell takes its classification from the piece of the coarse body it received. A
+   * coarse cell that never met the interface hands the same answer to all of its children
+   * without any body being built at all.
+   *
+   * Classifying this way rather than from the generated cell's own corner values keeps one
+   * classification for the geometry, made at the resolution where the surface was
+   * reconstructed and single-valuedness was mandated, rather than one per resolution.
+   * @param[out] a_regIrregCovered Regular/Covered/Irregular cells
+   * @param[out] a_irregularCells  The irregular cells within the valid region
+   * @param[in]  a_validRegion     Grid region
+   * @param[in]  a_ghostRegion     Grid region, including ghost cells
+   * @param[in]  a_probLo          Lower-left corner of computational domain
+   * @param[in]  a_dx              Grid resolution of the generated cells
+   */
+  void
+  classifyFromParents(BaseFab<int>&   a_regIrregCovered,
+                      IntVectSet&     a_irregularCells,
+                      const Box&      a_validRegion,
+                      const Box&      a_ghostRegion,
+                      const RealVect& a_probLo,
+                      const Real&     a_dx) const;
+
+  /**
    * @brief Build a cell's body by cutting the body of the coarser cell containing it.
    * @details The coarse cell's surface is reconstructed at the coarser resolution and cut,
    * rather than the cell's own surface being reconstructed at its own resolution, so that the
@@ -149,7 +175,10 @@ protected:
    * @return True if the coarse body closed and the cut succeeded.
    */
   bool
-  buildRefinedBody(PolyhedralEB::CutCellBody& a_body, const IntVect& a_cell, const RealVect& a_probLo, const Real& a_dx) const;
+  buildRefinedBody(PolyhedralEB::CutCellBody& a_body,
+                   const IntVect&             a_cell,
+                   const RealVect&            a_probLo,
+                   const Real&                a_dx) const;
 
   /**
    * @brief Evaluate the implicit function at every node of a region.
