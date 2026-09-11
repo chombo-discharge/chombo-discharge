@@ -330,19 +330,9 @@ protected:
   Real m_volumeFraction;
 
   /**
-   * @brief Volume centroid.
-   */
-  RealVect m_volumeCentroid;
-
-  /**
    * @brief Area fraction of each cell face, indexed 2*dir + side.
    */
   Real m_areaFraction[s_numFaces];
-
-  /**
-   * @brief Centroid of each cell face, indexed 2*dir + side.
-   */
-  RealVect m_faceCentroid[s_numFaces];
 
   /**
    * @brief Magnitude of the interface's area vector.
@@ -353,6 +343,16 @@ protected:
    * @brief Area of the interface itself.
    */
   Real m_trueBoundaryArea;
+
+  /**
+   * @brief Volume centroid.
+   */
+  RealVect m_volumeCentroid;
+
+  /**
+   * @brief Centroid of each cell face, indexed 2*dir + side.
+   */
+  RealVect m_faceCentroid[s_numFaces];
 
   /**
    * @brief Unit normal to the interface, into the fluid.
