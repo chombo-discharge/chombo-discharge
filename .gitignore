@@ -71,3 +71,18 @@ Dev/
 .\#*
 \#*\#
 *~
+
+# Prototype scratch: build products and run output under Prototypes/
+Prototypes/**/o/
+Prototypes/**/d/
+Prototypes/**/f/
+Prototypes/**/p/
+Prototypes/**/mpi/
+Prototypes/**/plt/
+Prototypes/**/chk/
+Prototypes/**/geo/
+Prototypes/**/crash/
+Prototypes/**/regrid/
+Prototypes/**/restart/
+Prototypes/**/__pycache__/
+Prototypes/**/*.csv
