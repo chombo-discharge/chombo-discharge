@@ -830,7 +830,13 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
 
         x[a_dir] = a_coordinate;
 
-        cut.m_segmentFace[cut.m_numVertices] = polygon.m_segmentFace[i];
+        // Leaving the half-space, the segment starting here runs along the cut and so belongs
+        // to the face the cut creates. Entering it, the segment continues along the edge it
+        // came from and keeps that edge's face. Only the two-dimensional moments read this,
+        // where the cut leaves an edge of the clipped polygon rather than a separate cap.
+        const bool leaving = fa <= detail::s_clipTolerance;
+
+        cut.m_segmentFace[cut.m_numVertices] = leaving ? (2 * a_dir + (a_keepLow ? 1 : 0)) : polygon.m_segmentFace[i];
         cut.m_vertexEdge[cut.m_numVertices]  = -1;
         cut.m_vertex[cut.m_numVertices++]    = x;
       }
@@ -840,13 +846,7 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
       continue;
     }
 
-    Real     area = 0.0;
-    RealVect vector;
-    RealVect centroid;
-
-    detail::polygonMoments(cut.m_vertex, cut.m_numVertices, area, vector, centroid);
-
-    if (area < s_nullArea) {
+    if (detail::polygonArea(cut.m_vertex, cut.m_numVertices) < s_nullArea) {
       continue;
     }
 
@@ -945,13 +945,7 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
       continue;
     }
 
-    Real     area = 0.0;
-    RealVect vector;
-    RealVect centroid;
-
-    detail::polygonMoments(loop.m_vertex, loop.m_numVertices, area, vector, centroid);
-
-    if (area >= s_nullArea) {
+    if (detail::polygonArea(loop.m_vertex, loop.m_numVertices) >= s_nullArea) {
       a_out.m_numPolygons++;
     }
   }

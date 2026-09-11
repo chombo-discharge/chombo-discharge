@@ -238,6 +238,18 @@ vertexKey(const RealVect& a_x) noexcept;
 inline bool
 lexLess(const RealVect& a_a, const RealVect& a_b) noexcept;
 
+/**
+ * @brief Area of a simple polygon, in whichever dimension it lives.
+ * @details In three dimensions this is the length of the area vector; in two it is the shoelace
+ * sum, where there is no area vector to take a length of. Used where only the size matters, so
+ * that a clipped polygon can be tested for being worth keeping in either dimension.
+ * @param[in] a_vertex Polygon vertices in circuit order.
+ * @param[in] a_num    Number of vertices.
+ * @return Polygon area.
+ */
+inline Real
+polygonArea(const RealVect* a_vertex, const int a_num) noexcept;
+
 } // namespace detail
 } // namespace PolyhedralEB
 

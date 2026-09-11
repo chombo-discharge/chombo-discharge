@@ -405,6 +405,35 @@ lexLess(const RealVect& a_a, const RealVect& a_b) noexcept
   return a_a[SpaceDim - 1] < a_b[SpaceDim - 1];
 }
 
+inline Real
+polygonArea(const RealVect* a_vertex, const int a_num) noexcept
+{
+  if (a_num < 3) {
+    return 0.0;
+  }
+
+#if CH_SPACEDIM == 3
+  Real     unused = 0.0;
+  RealVect vector;
+  RealVect centroid;
+
+  polygonMoments(a_vertex, a_num, unused, vector, centroid);
+
+  return unused;
+#else
+  Real twice = 0.0;
+
+  for (int i = 0; i < a_num; i++) {
+    const RealVect& a = a_vertex[i];
+    const RealVect& b = a_vertex[(i + 1) % a_num];
+
+    twice += a[0] * b[1] - b[0] * a[1];
+  }
+
+  return 0.5 * std::abs(twice);
+#endif
+}
+
 } // namespace detail
 } // namespace PolyhedralEB
 
