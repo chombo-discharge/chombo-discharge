@@ -28,7 +28,8 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::GeometryShop)
+ComputationalGeometry::ComputationalGeometry()
+  : m_eps0(1.0), m_generator(Generator::GeometryShop), m_geometryRefinement(1)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -59,12 +60,13 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 }
 
 void
-ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain)
+ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain, const int a_refinement)
 {
-  CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain)");
+  CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain, int)");
 
-  m_generator  = Generator::PolyhedralShop;
-  m_scanDomain = a_beginDomain;
+  m_generator          = Generator::PolyhedralShop;
+  m_scanDomain         = a_beginDomain;
+  m_geometryRefinement = a_refinement;
 }
 
 void
@@ -228,7 +230,8 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             m_scanDomain,
                                             m_maxGhostEB,
                                             s_thresh,
-                                            s_strictGeometry);
+                                            s_strictGeometry,
+                                            m_geometryRefinement);
 
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
@@ -308,7 +311,8 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               m_scanDomain,
                                               m_maxGhostEB,
                                               s_thresh,
-                                              s_strictGeometry);
+                                              s_strictGeometry,
+                                              m_geometryRefinement);
 
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 

@@ -3,6 +3,7 @@
 # ====================================================================================================
 Driver.verbosity                    = 2                   ## Driver verbosity.
 Driver.geometry_generation          = chombo-discharge    ## Grid generation, 'chombo-discharge', 'chombo', or 'polyhedral'
+Driver.geometry_refinement          = 1                   ## Refine the polyhedral cells this many times from a coarser surface
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
 Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)

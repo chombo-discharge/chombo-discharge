@@ -88,9 +88,11 @@ public:
    * integrals of an explicitly reconstructed surface rather than quadratures of the implicit
    * function.
    * @param[in] a_beginDomain Level on which to initiate the load balancing sequence
+   * @param[in] a_refinement  How many times the generated cells refine the cells the surface is
+   * reconstructed on. One reconstructs on the generated cells themselves.
    */
   void
-  usePolyhedralShop(const ProblemDomain& a_beginDomain);
+  usePolyhedralShop(const ProblemDomain& a_beginDomain, const int a_refinement);
 
   /**
    * @brief Set dielectrics
@@ -202,6 +204,11 @@ protected:
    * @brief Generator selected by the user.
    */
   Generator m_generator;
+
+  /**
+   * @brief Refinement between the cells the surface is reconstructed on and the ones generated.
+   */
+  int m_geometryRefinement;
 
   /**
    * @brief Grid level where we begin using ScanShop
