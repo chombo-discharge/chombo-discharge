@@ -108,8 +108,36 @@ where :math:`\mathcal{P}` is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.
 
 The interval :math:`\Delta t` handed to the solver is substepped, and each substep is limited such that the propensities change by no more than a relative factor :math:`\epsilon`.
-This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see :ref:`Chap:KMCHybridAdvance`.
+This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see :ref:`Chap:KMCLeapCondition`.
 Substeps that yield an invalid state are rejected and retried with a halved time step, so :math:`\epsilon` is what controls the accuracy of the leap while step rejection only guards validity.
+
+.. _Chap:KMCLeapCondition:
+
+Leap condition
+______________
+
+The leap :math:`\tau` is bounded, for every reactant :math:`X_i` of the reactions being leaped, by the smallest of
+
+.. math::
+
+   \tau \leq \frac{f_i}{\left|\mu_i\right|},\quad
+   \tau \leq \frac{f_i^2}{\sigma_i^2},\quad
+   \tau \leq \frac{f_i}{\lambda_i},
+
+where :math:`f_i = \max\left(\epsilon X_i, 1\right)` and
+
+.. math::
+
+   \mu_i = \sum_r \nu_{ir} a_r,\quad
+   \sigma_i^2 = \sum_r \nu_{ir}^2 a_r,\quad
+   \lambda_i = \sum_{r:\, \nu_{ir} < 0} \left|\nu_{ir}\right| a_r.
+
+The first two bounds are the leap condition of :cite:t:`Cao2006` on the mean and variance of the *net* change in :math:`X_i`.
+The third bounds the *gross* consumption of :math:`X_i`: the reactions that remove it may not, between them, be expected to fire more than :math:`f_i` times during the leap.
+The net change does not see this when production and loss nearly cancel, as they do for a fast intermediate in quasi-steady state, and the Poisson-sampled firings of the fast reaction then routinely exceed the population they draw on.
+Such a leap is rejected and retried with a smaller step, but the accepted step is then conditioned on the outcome of the random draw, which biases the result.
+The consumption bound resolves the fast reaction instead, and for a reactant that is only consumed it coincides with the first bound.
+Note that all three bounds are inactive for :math:`\epsilon \geq 1`, in which case the leap is limited only by step rejection.
 
 Tau-leaping variants
 ____________________
@@ -163,32 +191,36 @@ Assume that we wish to integrate over some time :math:`\Delta t`, which proceeds
    The critical reactions are defined as the subset of :math:`\vec{R}` that are within :math:`N_{\textrm{crit}}` firings away from exhausting one of its reactants.
    The non-critical reactions are defined as the remaining subset.
 
-#. Compute time steps until the firing of the next critical reaction, and a time step such that the propensities of the non-critical reactions do not change by more than some relative factor :math:`\epsilon`.
-   Let these time steps be given by :math:`\Delta \tau_{\textrm{c}}`\ and :math:`\Delta \tau_{\textrm{nc}}`.
-
-#. Select a reactive substep within :math:`\Delta t` from
+#. Compute a time step :math:`\Delta \tau_{\textrm{nc}}` such that the non-critical reactions satisfy the leap condition in :ref:`Chap:KMCLeapCondition`, and let the leap candidate be
 
    .. math::
 
-      \Delta \tau = \min\left[\Delta t - \tau, \min\left(\Delta \tau_{\textrm{c}}, \Delta \tau_{\textrm{nc}}\right)\right]
+      \Delta \tau_{\textrm{leap}} = \min\left(\Delta t - \tau, \Delta \tau_{\textrm{nc}}\right).
+
+#. If :math:`A\Delta\tau_{\textrm{leap}}` is smaller than some specified threshold, where :math:`A` is the total propensity of *all* reactions, tau leaping is inefficient and the whole reaction set is advanced with the SSA over :math:`\Delta\tau_{\textrm{leap}}` (or until a specified number of reactions have fired).
+   Let :math:`\tau \rightarrow \tau + \Delta\tau_{\textrm{leap}}` (or the time of the last firing) and return to step 2.
+   This decision is made from :math:`\Delta\tau_{\textrm{leap}}` alone, before any critical waiting time is drawn, so that it cannot depend on the value of that draw.
+
+#. Draw the time :math:`\Delta \tau_{\textrm{c}}` until the firing of the next critical reaction and select the reactive substep
+
+   .. math::
+
+      \Delta \tau = \min\left(\Delta \tau_{\textrm{leap}}, \Delta \tau_{\textrm{c}}\right).
 
 #. Resolve reactions as follows:
 
-   a. If :math:`\Delta \tau_{\textrm{c}} < \Delta \tau_{\textrm{nc}}` and :math:`\Delta \tau_{\textrm{c}} < \Delta t - \tau` then one critical reaction fires.
-      Determine the reaction type using the SSA algorithm.
-
-      Next, advance the state using tau leaping for the non-critical reaction.
+   a. If :math:`\Delta \tau_{\textrm{c}} < \Delta \tau_{\textrm{leap}}` then one critical reaction fires.
+      Advance the state using tau leaping for the non-critical reactions over :math:`\Delta\tau`, and then fire one critical reaction whose type is determined using the SSA algorithm.
 
    b. Otherwise: No critical reactions fire.
       Advance the state using tau-leaping for the non-critical reactions only.
-      An exception is made if :math:`A\Delta\tau` is smaller than some specified threshold in which case we switch to SSA advancement (which is more efficient in this limit). 
 
 #. Check if :math:`\vec{X}` is a thermodynamically valid state.
 
    a. If the state is valid, accept it and let :math:`\tau \rightarrow \tau + \Delta\tau`.
 
    b. If the state is invalid, reject the advancement.
-      Let :math:`\Delta\tau_{\textrm{nc}} \rightarrow \Delta \tau_{\textrm{nc}}/2` and return to step 4).
+      Let :math:`\Delta\tau_{\textrm{nc}} \rightarrow \Delta \tau_{\textrm{nc}}/2` and return to step 3).
 
 #. If :math:`\tau < \Delta t`, return to step 2.
 
@@ -196,7 +228,7 @@ The :cite:t:`Cao2006` algorithm requires algorithmic specifications as follows:
 
 * The factor :math:`\epsilon` which determines the non-critical time step.
 * The factor :math:`N_{\textrm{crit}}` which determines which reactions are critical or not.
-* Factors for determining when and how to switch to the SSA-based algorithm in step 5b. 
+* Factors for determining when and how to switch to the SSA-based algorithm in step 4.
 
 .. _Chap:KMCSolver:
 
@@ -327,7 +359,7 @@ The most general one that uses the hybrid advance is
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 423-433
+   :lines: 439-449
    :dedent: 2
 
 When using the hybrid algorithm, the user should set the hybrid solver parameters through the function

@@ -1,0 +1,24 @@
+# ====================================================================================================
+# StiffTwoGroup -- a slow branching reaction feeding a fast relaxation reaction. The exact mean of
+# e + el at stop_time follows from the moment equations, see README.md.
+# ====================================================================================================
+ItoKMCJSON.verbose               = false
+ItoKMCJSON.debug                 = false
+ItoKMCJSON.chemistry_file        = chemistry.json
+ItoKMCJSON.max_new_particles     = 16
+ItoKMCJSON.max_new_photons       = 64
+ItoKMCJSON.increment_weights     = false
+ItoKMCJSON.crit_num              = 5                  ## How many firings away from a negative particle number
+ItoKMCJSON.prop_eps              = 0.5                ## Maximum relative change in propensity function
+ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
+ItoKMCJSON.SSA_lim               = 2.0                ## When to enter SSA instead of tau-leaping
+ItoKMCJSON.max_iter              = 5                  ## Maximum iterations for implicit solvers
+ItoKMCJSON.exit_tolerance        = 1.E-6              ## Exit tolerance for implicit solvers
+ItoKMCJSON.algorithm             = hybrid_midpoint    ## Integration algorithm
+
+# Driver settings.
+Random.seed     = -1         ## Initial random seed (-1 = from clock)
+num_runs        = 20000      ## Independent realizations per rank
+stop_time       = 1.0E-9     ## Stop time
+max_dt          = 1.0E-11    ## Fixed step handed to advanceKMC
+exact_mean      = 993.89     ## Exact mean of e + el at stop_time for the rates in chemistry.json

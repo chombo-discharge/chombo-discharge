@@ -239,7 +239,7 @@ public:
   getNonCriticalTimeStep(const State& a_state) const noexcept;
 
   /**
-   * @brief Get the non-critical time step.
+   * @brief Get the non-critical time step, treating every input reaction as non-critical.
    * @param[in] a_state     State vector.
    * @param[in] a_reactions Reaction list.
    * @return Non-critical tau-leaping time step.
@@ -250,13 +250,29 @@ public:
 
   /**
    * @brief Get the non-critical time step.
+   * @details The step is the smallest of three bounds, each taken over every species X_i that is a reactant of any
+   * reaction in a_reactions, with f_i = max(eps * X_i, 1) and the sums running over the non-critical reactions only:
+   *
+   * 1. f_i / |mu_i|, where mu_i = sum_j nu_ij * a_j is the expected net change of X_i,
+   * 2. f_i^2 / sigma_i^2, where sigma_i^2 = sum_j nu_ij^2 * a_j is its variance,
+   * 3. f_i / lambda_i, where lambda_i = sum_{j : nu_ij < 0} |nu_ij| * a_j is the expected consumption of X_i.
+   *
+   * The first two are the leap condition of Cao et al. on the net change. The species set is that of the paper: it
+   * includes the reactants of the critical reactions, so that a leap cannot change their propensities by more than
+   * the leap condition allows, and a species at zero population is bounded to one expected net change (f_i = 1)
+   * rather than left unbounded. The third bounds the gross consumption, which the net change does not see when
+   * production and loss cancel: it keeps the Poisson-sampled firings of a fast reaction below the population it draws
+   * on, so that a stiff reaction is resolved rather than leaped over and then rejected. For a reactant that is only
+   * consumed the third bound coincides with the first.
    * @param[in] a_state                   State vector.
-   * @param[in] a_nonCriticalReactions    Non-critical reactions.
+   * @param[in] a_reactions               All reactions; their reactants are the species the bounds are taken over.
+   * @param[in] a_nonCriticalReactions    Non-critical reactions, a subset of a_reactions.
    * @param[in] a_nonCriticalPropensities Non-critical propensities.
    * @return Non-critical tau-leaping time step.
    */
   inline Real
   getNonCriticalTimeStep(const State&             a_state,
+                         const ReactionList&      a_reactions,
                          const ReactionList&      a_nonCriticalReactions,
                          const std::vector<Real>& a_nonCriticalPropensities) const noexcept;
 
@@ -448,6 +464,14 @@ public:
 
   /**
    * @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
+   * @details Each substep partitions the reactions into critical and non-critical ones and computes the leap
+   * candidate from the tau-leaping condition on the non-critical reactions. If the leap would carry fewer than
+   * m_SSAlim expected firings the whole reaction set is advanced with the exact SSA instead; this choice is made
+   * from the leap candidate alone, before the waiting time to the next critical firing is drawn, so that it does not
+   * depend on that draw. Otherwise the non-critical reactions are leaped over the shorter of the leap candidate and
+   * the critical waiting time, and one critical reaction fires when the waiting time is the shorter. Substeps that
+   * produce an invalid state are rejected and retried with a halved leap candidate; the critical waiting time is
+   * drawn afresh on every retry.
    * @param[in,out] a_state      State vector to advance.
    * @param[in]    a_reactions  Reactions to advance with.
    * @param[in]    a_dt         Time increment.
@@ -524,6 +548,14 @@ protected:
   mutable std::vector<Real> m_sigmaScratch;
 
   /**
+   * @brief Scratch accumulator for the per-reactant expected consumption, indexed by species.
+   * @details Sums |nu_ij| * a_j over the reactions that consume species i, i.e. the loss side of
+   * m_muScratch without the production that cancels it. Needed only by getNonCriticalTimeStep.
+   * Same reentrancy caveat.
+   */
+  mutable std::vector<Real> m_lossScratch;
+
+  /**
    * @brief Scratch holding the distinct reactants of the reaction list currently being processed.
    * @details Replaces the sorted, uniqued std::list the two time step routines used to rebuild on
    * every call. Same reentrancy caveat.
@@ -539,10 +571,10 @@ protected:
 
   /**
    * @brief Fill m_reactantScratch with the distinct reactants of the input reactions.
-   * @details Replaces concatenating the reactions' reactant lists and then sorting and uniquing
-   * them. The distinct set is the same; only the order differs, and both callers use it purely as a
-   * set to reduce over. The scratch buffers are sized from the largest reactant index seen, which
-   * keeps the routine independent of the State type's interface.
+   * @details A single pass with membership stamps, so the set is built without sorting; the order
+   * is that of first appearance, and both callers use it purely as a set to reduce over. The scratch
+   * buffers are sized from the largest reactant index seen, which keeps the routine independent of
+   * the State type's interface.
    * @param[in] a_reactions Reactions whose reactants are collected.
    */
   inline void
