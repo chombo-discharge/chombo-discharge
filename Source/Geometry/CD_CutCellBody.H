@@ -211,11 +211,6 @@ protected:
   static constexpr int s_maxVertices = 14;
 
   /**
-   * @brief Distance within which a vertex counts as lying in a cell face.
-   */
-  static constexpr Real s_planeTolerance = 1.0E-12;
-
-  /**
    * @brief Distance by which a crossing is held off an edge's endpoints.
    * @details A corner exactly on the interface makes the surface tangent to the faces meeting
    * there, so the contour touches a face without cutting any of its edges and marching squares

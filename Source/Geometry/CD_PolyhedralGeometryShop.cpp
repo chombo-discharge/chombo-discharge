@@ -70,7 +70,6 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
                                      const IntVect&  a_cell,
                                      const int       a_edge,
                                      const Real      a_lo,
-                                     const Real      a_hi,
                                      const RealVect& a_probLo,
                                      const Real&     a_dx) const
 {
@@ -135,8 +134,6 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
     a_intercept[dir](edgeIV, 0) = root;
   }
 
-  (void)a_hi;
-
   return root;
 }
 
@@ -191,7 +188,7 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
         a_surface.m_crossing[e] = 1.0;
       }
       else {
-        a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, hiValue, a_probLo, a_dx);
+        a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, a_probLo, a_dx);
       }
     }
   }

@@ -147,7 +147,6 @@ protected:
    * @param[in]     a_cell      Cell the edge is being read from
    * @param[in]     a_edge      Edge index within the cell
    * @param[in]     a_lo        Implicit function at the edge's low corner
-   * @param[in]     a_hi        Implicit function at the edge's high corner
    * @param[in]     a_probLo    Lower-left corner of computational domain
    * @param[in]     a_dx        Grid resolution
    * @return Position along the edge, parameterised from its low corner.
@@ -157,7 +156,6 @@ protected:
                const IntVect&  a_cell,
                const int       a_edge,
                const Real      a_lo,
-               const Real      a_hi,
                const RealVect& a_probLo,
                const Real&     a_dx) const;
 
