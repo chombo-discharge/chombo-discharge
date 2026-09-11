@@ -1,0 +1,179 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * @file   CD_PolyhedralEBUtils.H
+ * @brief  Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from.
+ * @author Robert Marskar
+ */
+
+#ifndef CD_POLYHEDRALEBUTILS_H
+#define CD_POLYHEDRALEBUTILS_H
+
+// Chombo includes
+#include <RealVect.H>
+
+// Our includes
+#include <CD_CutCellSurface.H>
+#include <CD_NamespaceHeader.H>
+
+namespace PolyhedralEB {
+
+/**
+ * @brief Which side of the interface a value lies on.
+ * @details One predicate for corners and crossings alike, matching the sign test in
+ * GeometryShop::insideOutsideFromNodes. The side is read off the sign bit, so a node at
+ * negative zero is fluid and one at positive zero is solid.
+ * @param[in] a_value Implicit function value.
+ * @return True if the value is on the fluid side.
+ */
+inline bool
+isFluid(const Real a_value) noexcept;
+
+/**
+ * @brief Cell topology and polygon geometry the cut cell classes are assembled from.
+ * @details Corners, edges and faces are indexed in the cell's own [-1/2, 1/2]^SpaceDim frame:
+ * corner c has offset ((c >> d) & 1) in direction d, and an edge is parameterised from its low
+ * corner. Two neighbouring cells therefore address a shared corner or edge identically.
+ */
+namespace detail {
+
+#if CH_SPACEDIM == 3
+/**
+ * @brief The two directions transverse to each coordinate direction.
+ */
+constexpr int s_transverse[3][2] = {{1, 2}, {0, 2}, {0, 1}};
+#endif
+
+/**
+ * @brief Direction a cell edge runs along.
+ * @param[in] a_edge Edge index in [0, CutCellSurface::s_numEdges).
+ * @return Coordinate direction of the edge.
+ */
+inline int
+edgeDirection(const int a_edge) noexcept;
+
+/**
+ * @brief Corner offsets of a cell edge's low end.
+ * @param[in]  a_edge   Edge index in [0, CutCellSurface::s_numEdges).
+ * @param[out] a_offset Corner offsets, zero in the direction the edge runs along.
+ */
+inline void
+edgeOrigin(const int a_edge, int a_offset[SpaceDim]) noexcept;
+
+/**
+ * @brief The corners a cell edge joins, low end first.
+ * @param[in]  a_edge Edge index in [0, CutCellSurface::s_numEdges).
+ * @param[out] a_lo   Corner at the edge's low end.
+ * @param[out] a_hi   Corner at the edge's high end.
+ */
+inline void
+edgeCorners(const int a_edge, int& a_lo, int& a_hi) noexcept;
+
+/**
+ * @brief Position of a cell corner in the cell's own frame.
+ * @param[in] a_corner Corner index in [0, CutCellSurface::s_numCorners).
+ * @return Corner position.
+ */
+inline RealVect
+cornerPosition(const int a_corner) noexcept;
+
+/**
+ * @brief The corners of a cell face, in circuit order around the face.
+ * @param[in]  a_dir    Coordinate direction of the face normal.
+ * @param[in]  a_side   Which of the two faces in that direction.
+ * @param[out] a_corner Face corners in circuit order.
+ */
+inline void
+faceCorners(const int a_dir, const int a_side, int a_corner[1 << (SpaceDim - 1)]) noexcept;
+
+/**
+ * @brief Index of the edge running along a_dir whose low corner has the given offsets.
+ * @param[in] a_dir    Coordinate direction the edge runs along.
+ * @param[in] a_offset Corner offsets of the edge's low end.
+ * @return Edge index in [0, CutCellSurface::s_numEdges).
+ */
+inline int
+edgeIndex(const int a_dir, const int a_offset[SpaceDim]) noexcept;
+
+/**
+ * @brief The edges of a cell face, edge i joining face corners i and i+1.
+ * @param[in]  a_dir  Coordinate direction of the face normal.
+ * @param[in]  a_side Which of the two faces in that direction.
+ * @param[out] a_edge Face edges in circuit order.
+ */
+inline void
+faceEdges(const int a_dir, const int a_side, int a_edge[2 * (SpaceDim - 1)]) noexcept;
+
+/**
+ * @brief Position of an edge crossing in the cell's own frame.
+ * @param[in] a_surface   Corner values and edge crossings of the cell.
+ * @param[in] a_edge      Edge index in [0, CutCellSurface::s_numEdges).
+ * @param[in] a_tolerance Distance by which the crossing is held off the edge's endpoints.
+ * @return Crossing position.
+ */
+inline RealVect
+crossingPosition(const CutCellSurface& a_surface, const int a_edge, const Real a_tolerance) noexcept;
+
+/**
+ * @brief Area, area vector and centroid of a simple planar polygon in circuit order.
+ * @details Areas are taken signed about the polygon's own normal. A face contour that is a
+ * polyline rather than a single chord leaves a non-convex polygon, and summing unsigned
+ * triangle areas over a fan over-counts those.
+ * @param[in]  a_vertex   Polygon vertices in circuit order.
+ * @param[in]  a_num      Number of vertices.
+ * @param[out] a_area     Polygon area.
+ * @param[out] a_vector   Polygon area vector.
+ * @param[out] a_centroid Polygon centroid.
+ */
+inline void
+polygonMoments(const RealVect* a_vertex,
+               const int       a_num,
+               Real&           a_area,
+               RealVect&       a_vector,
+               RealVect&       a_centroid) noexcept;
+
+#if CH_SPACEDIM == 3
+/**
+ * @brief The chords on a cell face, each an ordered pair of edge indices.
+ * @details A face with two crossings carries one chord. A face whose corners alternate fluid
+ * and solid carries four crossings and there are two ways to join them; the bilinear
+ * interpolant of the four corner values decides it. The saddle shares its side with exactly
+ * one of the two diagonals: that diagonal meets through the middle, and the other is the pair
+ * the chords cut off. Both cells adjoining the face hold the same four values, so they cannot
+ * disagree.
+ * @param[in]  a_dir     Coordinate direction of the face normal.
+ * @param[in]  a_side    Which of the two faces in that direction.
+ * @param[in]  a_surface Corner values and edge crossings of the cell.
+ * @param[out] a_pair    Each chord's two edge indices.
+ * @return Number of chords, or -1 if the face carries an impossible number of crossings.
+ */
+inline int
+facePairs(const int a_dir, const int a_side, const CutCellSurface& a_surface, int a_pair[2][2]) noexcept;
+
+/**
+ * @brief Order the crossings into closed loops, or fail if they do not form clean cycles.
+ * @details Every crossing lies on exactly two faces and every face pairs its crossings up, so
+ * each node has degree two and the graph is a disjoint union of cycles. Several cycles is
+ * legal: the interface simply enters the cell as several sheets.
+ * @param[in]  a_surface Corner values and edge crossings of the cell.
+ * @param[out] a_loop    Edge indices of every loop, one loop after the other.
+ * @param[out] a_start   Where each loop begins in a_loop, with the total length last.
+ * @return Number of loops, or -1 if the crossings do not form clean cycles.
+ */
+inline int
+crossingLoops(const CutCellSurface& a_surface,
+              int                   a_loop[CutCellSurface::s_numEdges],
+              int                   a_start[CutCellSurface::s_numEdges + 1]) noexcept;
+#endif
+} // namespace detail
+} // namespace PolyhedralEB
+
+#include <CD_NamespaceFooter.H>
+
+#include <CD_PolyhedralEBUtilsImplem.H>
+
+#endif
