@@ -231,10 +231,15 @@ PolyhedralGeometryShop::fillNode(IrregNode&           a_node,
         arc.resize(1, 0);
       }
 
-      // a face with no area open to flux carries no arc either. The aperture is forced to an
-      // exact zero rather than a small number, and both cells sharing the face compute it from
-      // the same crossings, so the two sides cannot disagree about whether the face is there
-      if (arc.size() > 0 && a_body.areaFraction(dir, sit()) > 0.0) {
+      // A face with no area open to flux carries no arc either, but only where the cell across
+      // it is itself cut. The aperture is forced to an exact zero rather than a small number,
+      // and two cut cells sharing a face compute it from the same crossings, so they cannot
+      // disagree about whether the face is there. A regular neighbour has no crossings to agree
+      // with and its faces are open by definition, so the arc stays whatever the aperture says.
+      const bool neighbourIsCut = a_domain.contains(shifted) && a_regIrregCovered(shifted, 0) == 0;
+      const bool faceIsOpen     = !neighbourIsCut || a_body.areaFraction(dir, sit()) > 0.0;
+
+      if (arc.size() > 0 && faceIsOpen) {
         areaFrac.resize(1, a_body.areaFraction(dir, sit()));
         faceCentroid.resize(1, a_body.faceCentroid(dir, sit()));
       }
