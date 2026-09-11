@@ -241,7 +241,9 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state) const noexc
 {
   const auto& partitionedReactions = this->partitionReactions(a_state, m_reactions);
 
-  return this->getNonCriticalTimeStep(a_state, partitionedReactions.second);
+  const std::vector<Real> propensities = this->propensities(a_state, partitionedReactions.second);
+
+  return this->getNonCriticalTimeStep(a_state, m_reactions, partitionedReactions.second, propensities);
 }
 
 template <typename R, typename State, typename T>
@@ -250,7 +252,7 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state, const React
 {
   const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
-  return this->getNonCriticalTimeStep(a_state, a_reactions, propensities);
+  return this->getNonCriticalTimeStep(a_state, a_reactions, a_reactions, propensities);
 }
 
 template <typename R, typename State, typename T>
@@ -271,6 +273,7 @@ KMCSolver<R, State, T>::gatherDistinctReactants(const ReactionList& a_reactions)
     m_seenScratch.resize(numSpecies, 0);
     m_muScratch.resize(numSpecies, 0.0);
     m_sigmaScratch.resize(numSpecies, 0.0);
+    m_lossScratch.resize(numSpecies, 0.0);
   }
 
   // Collect the distinct reactants. The stamps make this a single pass with no sort: a reactant is
@@ -296,10 +299,12 @@ KMCSolver<R, State, T>::gatherDistinctReactants(const ReactionList& a_reactions)
 template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
+                                               const ReactionList&      a_reactions,
                                                const ReactionList&      a_nonCriticalReactions,
                                                const std::vector<Real>& a_nonCriticalPropensities) const noexcept
 {
   CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
+  CH_assert(a_nonCriticalReactions.size() <= a_reactions.size());
 
   constexpr Real one = 1.0;
 
@@ -309,15 +314,20 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 
   if (numReactions > 0) {
 
-    // 1. Gather the distinct reactants involved in the non-critical reactions.
-    this->gatherDistinctReactants(a_nonCriticalReactions);
+    // 1. Gather the distinct reactants of ALL reactions. A reactant of a critical reaction that the non-critical
+    // reactions produce must be bounded too, since the critical propensities are frozen during the leap and must
+    // not drift more than the leap condition allows.
+    this->gatherDistinctReactants(a_reactions);
 
     for (const size_t reactant : m_reactantScratch) {
       m_muScratch[reactant]    = 0.0;
       m_sigmaScratch[reactant] = 0.0;
+      m_lossScratch[reactant]  = 0.0;
     }
 
-    // 2. Accumulate the expected change and variance per reactant. The loops are ordered reaction-
+    // 2. Accumulate the expected net change, its variance, and the expected consumption per reactant.
+    // The consumption only collects the reactions that remove the reactant, so it is the loss side
+    // of the net change without the production that may cancel it. The loops are ordered reaction-
     // major so that each reaction's state change is fetched once per reactant from its dense table
     // rather than through a map lookup; the sums are the same as reactant-major.
     for (size_t i = 0; i < numReactions; i++) {
@@ -328,6 +338,10 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 
         m_muScratch[reactant] += muIJ * p;
         m_sigmaScratch[reactant] += muIJ * muIJ * p;
+
+        if (muIJ < 0) {
+          m_lossScratch[reactant] -= muIJ * p;
+        }
       }
     }
 
@@ -341,29 +355,39 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
       // the underlying state.
       const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
 
-      if (Xi > (T)0) {
+      // Set gi to 1 for now. A more complex version would parse this through an input parameter
+      // where the user has inspected the highest-order-reaction.
+      constexpr Real gi = 1.0;
 
-        // Set gi to 1 for now. A more complex version would parse this through an input parameter
-        // where the user has inspected the highest-order-reaction.
-        constexpr Real gi = 1.0;
+      Real dt1 = std::numeric_limits<Real>::max();
+      Real dt2 = std::numeric_limits<Real>::max();
+      Real dt3 = std::numeric_limits<Real>::max();
 
-        Real dt1 = std::numeric_limits<Real>::max();
-        Real dt2 = std::numeric_limits<Real>::max();
+      // The floor of one applies at every population, so a reactant at zero is bounded to one
+      // expected net change rather than left unbounded. This is what lets the critical reactions
+      // respond to a species that the leap produces from nothing.
+      const Real f = std::max(m_eps * Xi / gi, one);
 
-        const Real f = std::max(m_eps * Xi / gi, one);
+      const Real mu     = std::abs(m_muScratch[reactant]);
+      const Real sigma2 = std::abs(m_sigmaScratch[reactant]);
+      const Real loss   = m_lossScratch[reactant];
 
-        const Real mu     = std::abs(m_muScratch[reactant]);
-        const Real sigma2 = std::abs(m_sigmaScratch[reactant]);
-
-        if (mu > std::numeric_limits<Real>::min()) {
-          dt1 = f / mu;
-        }
-        if (sigma2 > std::numeric_limits<Real>::min()) {
-          dt2 = (f * f) / sigma2;
-        }
-
-        dt = std::min(dt, std::min(dt1, dt2));
+      // Leap condition on the mean and variance of the net change.
+      if (mu > std::numeric_limits<Real>::min()) {
+        dt1 = f / mu;
       }
+      if (sigma2 > std::numeric_limits<Real>::min()) {
+        dt2 = (f * f) / sigma2;
+      }
+
+      // Bound on the gross consumption: the reactions that remove this reactant may not, between
+      // them, be expected to fire more than f times. This is what keeps the Poisson draws of a fast
+      // reaction below the population it draws on when a producing reaction hides its loss from mu.
+      if (loss > std::numeric_limits<Real>::min()) {
+        dt3 = f / loss;
+      }
+
+      dt = std::min(dt, std::min(dt1, std::min(dt2, dt3)));
     }
   }
 
@@ -860,7 +884,7 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
       // changes.
       const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
-      const Real dtLeap = this->getNonCriticalTimeStep(a_state, a_reactions, propensities);
+      const Real dtLeap = this->getNonCriticalTimeStep(a_state, a_reactions, a_reactions, propensities);
 
       Real curDt = std::min(a_dt - curTime, dtLeap);
 
@@ -981,8 +1005,9 @@ KMCSolver<R, State, T>::advanceHybrid(
   // Outer loop is for reactive substepping over a_dt.
   while (curTime < a_dt) {
 
-    // Partition reactions into critical and non-critical reactions and compute the critical and non-critical time
-    // steps.
+    // Partition reactions into critical and non-critical reactions. The propensities are those of the state at the
+    // start of the substep: the critical firing (if any) is selected from them, and the non-critical leap starts from
+    // the same state.
     const std::pair<ReactionList, ReactionList> partitionedReactions = this->partitionReactions(a_state, a_reactions);
 
     const ReactionList& criticalReactions    = partitionedReactions.first;
@@ -991,101 +1016,83 @@ KMCSolver<R, State, T>::advanceHybrid(
     const std::vector<Real> propensitiesCrit    = this->propensities(a_state, criticalReactions);
     const std::vector<Real> propensitiesNonCrit = this->propensities(a_state, nonCriticalReactions);
 
-    Real dtCrit    = this->getCriticalTimeStep(propensitiesCrit);
-    Real dtNonCrit = this->getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);
+    // Leap candidate from the tau-leaping condition on the non-critical reactions. Halved on every rejected step.
+    Real dtNonCrit = this->getNonCriticalTimeStep(a_state, a_reactions, nonCriticalReactions, propensitiesNonCrit);
 
-    // Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state,
-    // e.g. a state with a negative number of particles.
+    // Total propensity of the whole reaction set, which decides between tau-leaping and the SSA below.
+    const Real A = this->totalPropensity(a_state, a_reactions);
+
+    // The loop is for step rejection in case we end up with an invalid state, e.g. a state with a negative number of
+    // particles.
     bool validStep = false;
 
     while (!validStep) {
 
-      // Do a backup of the advancement state to operate on. This is necessary because the tau-leaping
-      // algorithms advance the state but we may need to reject those steps if we end up with a thermodynamically
-      // invalid state.
-      State state = a_state;
+      // The leap candidate, bounded by the remaining time. It is a function of the state only, so the choice between
+      // the SSA and tau-leaping below is made without reference to any random draw.
+      const Real dtLeap = std::min(a_dt - curTime, dtNonCrit);
 
-      // Compute the time step to be used.
-      const Real curDt = std::min(a_dt - curTime, std::min(dtCrit, dtNonCrit));
-
-      // Are we only doing non-critical reactions?
-      const bool nonCriticalOnly = (dtNonCrit < dtCrit) || (criticalReactions.size() == 0) ||
-                                   (dtCrit > (a_dt - curTime));
-
-      // Decide whether tau-leaping is efficient enough, or whether we should fall back to an exact SSA advancement
-      // over the WHOLE reaction set. This decision is made independently of whether a critical reaction is pending --
-      // in low-activity regimes exact SSA is both cheaper and more accurate than tau-leaping, so it must be available
-      // in the critical branch as well. SSA is only used when the user has permitted at least one SSA step
-      // (m_numSSA > 0); otherwise we always tau-leap, which also avoids a no-progress infinite loop when m_numSSA == 0.
-      const Real A      = this->totalPropensity(state, a_reactions);
-      const bool useSSA = (m_numSSA >= one) && (A * curDt < m_SSAlim);
+      // Fall back to an exact SSA advancement of the WHOLE reaction set when the leap is expected to carry fewer than
+      // m_SSAlim firings; in that limit the SSA is both cheaper and more accurate than tau-leaping. This is only done
+      // when the user has permitted at least one SSA step (m_numSSA > 0); otherwise we always tau-leap, which also
+      // avoids a no-progress infinite loop when m_numSSA == 0.
+      const bool useSSA = (m_numSSA >= one) && (A * dtLeap < m_SSAlim);
 
       if (useSSA) {
-        // TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.
-
-        // Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA >= curDt or
-        // we've exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).
+        // Advance with the SSA until either dtLeap has elapsed or m_numSSA reactions have fired. A firing whose
+        // waiting time reaches beyond dtLeap is not applied; the state is advanced to dtLeap and the waiting time is
+        // drawn again in the next substep, which is exact because the waiting time is memoryless.
         Real dtSSA  = 0.0;
         T    numSSA = 0;
 
-        while (dtSSA < curDt && numSSA < m_numSSA) {
+        while (dtSSA < dtLeap && numSSA < m_numSSA) {
 
           // Recompute propensities for the full reaction set and advance everything using the SSA.
           const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
-          Real Asum = 0.0;
-          for (size_t i = 0; i < propensities.size(); i++) {
-            Asum += propensities[i];
-          }
+          const Real dtReact = this->getCriticalTimeStep(propensities);
 
-          // Compute the time to the next reaction.
-          const Real dtReact = this->getCriticalTimeStep(Asum);
-
-          if (dtSSA + dtReact < curDt) {
+          if (dtSSA + dtReact < dtLeap) {
             this->stepSSA(a_state, a_reactions, propensities);
 
             dtSSA += dtReact;
             numSSA += one;
           }
           else {
-
-            // Next reaction occurred outside the substep -- break out of the loop.
-            dtSSA = curDt;
+            dtSSA = dtLeap;
           }
         }
 
         validStep = true;
         curTime += dtSSA;
       }
-      else if (nonCriticalOnly) {
-        // Do the tau-leaping over the non-critical reactions only.
-        a_propagator(state, nonCriticalReactions, curDt);
-
-        // Check if we need to reject the state and rather try again with a smaller non-critical time step.
-        validStep = state.isValidState();
-
-        if (validStep) {
-          a_state = state;
-
-          curTime += curDt;
-        }
-        else {
-          dtNonCrit *= 0.5;
-        }
-      }
       else {
-        // TLDR: Here, one critical reaction fires. We tau-leap the non-critical reactions over curDt and fire exactly
-        //       one critical reaction using the SSA. The non-critical tau-leap is performed FIRST, while the state is
-        //       still at the start of the step, so that its propensities are evaluated at the start-of-step state. The
-        //       single critical firing is then applied as a fixed stoichiometric increment -- its reaction was already
-        //       selected from the start-of-step propensities (propensitiesCrit), so applying it last is exact. This
-        //       keeps both contributions consistent with the start-of-step state, as required by the
-        //       Cao-Gillespie-Petzold scheme.
+        // Waiting time to the next critical firing. Drawn only now, after the SSA decision, and drawn again on every
+        // retry, so that every draw is either used or discarded together with the step it belonged to.
+        const Real dtCrit = (criticalReactions.size() > 0) ? this->getCriticalTimeStep(propensitiesCrit)
+                                                           : std::numeric_limits<Real>::max();
+
+        // One critical reaction fires if it is due before the leap candidate runs out; the substep then ends at the
+        // firing.
+        const bool fireCritical = (dtCrit < dtLeap);
+
+        const Real curDt = fireCritical ? dtCrit : dtLeap;
+
+        // Operate on a copy so that the step can be rejected.
+        State state = a_state;
+
+        // Tau-leap the non-critical reactions over curDt. This is done FIRST, while the state is still at the start of
+        // the substep, so that the leap propensities are evaluated at the start-of-substep state. The single critical
+        // firing is then applied as a fixed stoichiometric increment; its reaction is selected from the
+        // start-of-substep propensities (propensitiesCrit), so applying it last is exact. Both contributions are thus
+        // consistent with the start-of-substep state, as required by the Cao-Gillespie-Petzold scheme.
         a_propagator(state, nonCriticalReactions, curDt);
 
-        this->stepSSA(state, criticalReactions, propensitiesCrit);
+        if (fireCritical) {
+          this->stepSSA(state, criticalReactions, propensitiesCrit);
+        }
 
-        // Check if we need to reject the state and rather try again with a smaller non-critical time step.
+        // Check if we need to reject the state and rather try again with a smaller leap candidate.
         validStep = state.isValidState();
 
         if (validStep) {
