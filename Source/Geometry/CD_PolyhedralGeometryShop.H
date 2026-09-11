@@ -169,12 +169,12 @@ protected:
    * @param[in]     a_dx         Grid resolution
    */
   void
-  buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
-               CutCellSurface&      a_surface,
-               const BaseFab<Real>& a_nodeValues,
-               const IntVect&       a_cell,
-               const RealVect&      a_probLo,
-               const Real&          a_dx) const;
+  buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
+               PolyhedralEB::CutCellSurface& a_surface,
+               const BaseFab<Real>&          a_nodeValues,
+               const IntVect&                a_cell,
+               const RealVect&               a_probLo,
+               const Real&                   a_dx) const;
 
   /**
    * @brief Write a cut cell's node from its body.
@@ -188,11 +188,11 @@ protected:
    * @param[in]  a_domain           Domain
    */
   void
-  fillNode(IrregNode&           a_node,
-           const CutCellBody&   a_body,
-           const BaseFab<int>&  a_regIrregCovered,
-           const IntVect&       a_cell,
-           const ProblemDomain& a_domain) const;
+  fillNode(IrregNode&                       a_node,
+           const PolyhedralEB::CutCellBody& a_body,
+           const BaseFab<int>&              a_regIrregCovered,
+           const IntVect&                   a_cell,
+           const ProblemDomain&             a_domain) const;
 };
 
 #include <CD_NamespaceFooter.H>

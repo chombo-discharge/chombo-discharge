@@ -17,6 +17,8 @@
 #include <CD_CutCellSurface.H>
 #include <CD_NamespaceHeader.H>
 
+namespace PolyhedralEB {
+
 inline CutCellSurface::CutCellSurface() noexcept
 {
   for (int edge = 0; edge < s_numEdges; edge++) {
@@ -33,6 +35,8 @@ CutCellSurface::hasCrossing(const int a_edge) const noexcept
 {
   return m_crossing[a_edge] != s_noCrossing;
 }
+
+} // namespace PolyhedralEB
 
 #include <CD_NamespaceFooter.H>
 

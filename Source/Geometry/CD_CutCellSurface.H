@@ -19,6 +19,8 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
+namespace PolyhedralEB {
+
 /**
  * @brief The values a cut cell's embedded boundary is reconstructed from.
  * @details Holds the implicit function at the cell's corners and the parameter along each cell
@@ -77,6 +79,8 @@ public:
    */
   Real m_corner[s_numCorners];
 };
+
+} // namespace PolyhedralEB
 
 #include <CD_NamespaceFooter.H>
 

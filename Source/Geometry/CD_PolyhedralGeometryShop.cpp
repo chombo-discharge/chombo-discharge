@@ -73,12 +73,12 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
                                      const RealVect& a_probLo,
                                      const Real&     a_dx) const
 {
-  const int dir = a_edge / (CutCellSurface::s_numEdges / SpaceDim);
+  const int dir = a_edge / (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
 
   IntVect edgeIV = a_cell;
 
   {
-    const int local = a_edge % (CutCellSurface::s_numEdges / SpaceDim);
+    const int local = a_edge % (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
 
 #if CH_SPACEDIM == 3
     constexpr int transverse[3][2] = {{1, 2}, {0, 2}, {0, 1}};
@@ -90,7 +90,8 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
 #endif
   }
 
-  if (a_intercept[dir].box().contains(edgeIV) && a_intercept[dir](edgeIV, 0) != CutCellSurface::s_noCrossing) {
+  if (a_intercept[dir].box().contains(edgeIV) &&
+      a_intercept[dir](edgeIV, 0) != PolyhedralEB::CutCellSurface::s_noCrossing) {
     return a_intercept[dir](edgeIV, 0);
   }
 
@@ -115,7 +116,7 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
 
     const Real value = m_baseIF->value(x);
 
-    if (CutCellBody::isFluid(value) == CutCellBody::isFluid(loValue)) {
+    if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(loValue)) {
       lo      = mid;
       loValue = value;
     }
@@ -138,16 +139,16 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
 }
 
 void
-PolyhedralGeometryShop::buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
-                                     CutCellSurface&      a_surface,
-                                     const BaseFab<Real>& a_nodeValues,
-                                     const IntVect&       a_cell,
-                                     const RealVect&      a_probLo,
-                                     const Real&          a_dx) const
+PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
+                                     PolyhedralEB::CutCellSurface& a_surface,
+                                     const BaseFab<Real>&          a_nodeValues,
+                                     const IntVect&                a_cell,
+                                     const RealVect&               a_probLo,
+                                     const Real&                   a_dx) const
 {
-  a_surface = CutCellSurface();
+  a_surface = PolyhedralEB::CutCellSurface();
 
-  for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
     IntVect node = a_cell;
 
     for (int d = 0; d < SpaceDim; d++) {
@@ -157,9 +158,9 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
     a_surface.m_corner[c] = a_nodeValues(node, 0);
   }
 
-  for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
-    const int dir   = e / (CutCellSurface::s_numEdges / SpaceDim);
-    const int local = e % (CutCellSurface::s_numEdges / SpaceDim);
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    const int dir   = e / (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
+    const int local = e % (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
 
     int low = 0;
 
@@ -178,7 +179,7 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
 
     // an edge carries a crossing exactly when its two ends disagree under the one predicate the
     // corners are classified by, so the number of crossings on a face counts sign changes
-    if (CutCellBody::isFluid(loValue) != CutCellBody::isFluid(hiValue)) {
+    if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
       // a corner at exactly zero is on the interface, so the crossing is that corner rather
       // than a root to be searched for
       if (loValue == 0.0) {
@@ -195,11 +196,11 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>        a_intercept[SpaceDim],
 }
 
 void
-PolyhedralGeometryShop::fillNode(IrregNode&           a_node,
-                                 const CutCellBody&   a_body,
-                                 const BaseFab<int>&  a_regIrregCovered,
-                                 const IntVect&       a_cell,
-                                 const ProblemDomain& a_domain) const
+PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
+                                 const PolyhedralEB::CutCellBody& a_body,
+                                 const BaseFab<int>&              a_regIrregCovered,
+                                 const IntVect&                   a_cell,
+                                 const ProblemDomain&             a_domain) const
 {
   a_node.m_cell          = a_cell;
   a_node.m_cellIndex     = 0;
@@ -277,9 +278,9 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
-    CutCellSurface surface;
+    PolyhedralEB::CutCellSurface surface;
 
-    for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
       IntVect node = iv;
 
       for (int d = 0; d < SpaceDim; d++) {
@@ -289,13 +290,13 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       surface.m_corner[c] = nodeValues(node, 0);
     }
 
-    switch (CutCellBody::classify(surface)) {
-    case CutCellBody::Kind::Covered: {
+    switch (PolyhedralEB::CutCellBody::classify(surface)) {
+    case PolyhedralEB::CutCellBody::Kind::Covered: {
       a_regIrregCovered(iv, 0) = -1;
 
       break;
     }
-    case CutCellBody::Kind::Regular: {
+    case PolyhedralEB::CutCellBody::Kind::Regular: {
       a_regIrregCovered(iv, 0) = 1;
 
       break;
@@ -330,7 +331,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     edgeBox.enclosedCells(dir);
 
     intercept[dir].define(edgeBox, 1);
-    intercept[dir].setVal(CutCellSurface::s_noCrossing);
+    intercept[dir].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
   }
 
   IntVectSet droppedCells;
@@ -338,10 +339,10 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   for (IVSIterator ivsIt(irregularCells); ivsIt.ok(); ++ivsIt) {
     const IntVect iv = ivsIt();
 
-    CutCellSurface surface;
+    PolyhedralEB::CutCellSurface surface;
     this->buildSurface(intercept, surface, nodeValues, iv, a_probLo, a_dx);
 
-    CutCellBody body;
+    PolyhedralEB::CutCellBody body;
 
     if (!body.define(surface)) {
       if (m_strict) {

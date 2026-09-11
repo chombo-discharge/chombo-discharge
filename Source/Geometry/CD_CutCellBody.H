@@ -18,8 +18,10 @@
 #include <LoHiSide.H>
 
 // Our includes
-#include <CD_CutCellSurface.H>
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_NamespaceHeader.H>
+
+namespace PolyhedralEB {
 
 /**
  * @brief The closed polyhedron bounding the fluid in one cut cell, and its moments.
@@ -95,17 +97,6 @@ public:
    */
   static bool
   touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept;
-
-  /**
-   * @brief Which side of the interface a value lies on.
-   * @details One predicate for corners and crossings alike, matching the sign test in
-   * GeometryShop::insideOutsideFromNodes. The side is read off the sign bit, so a node at
-   * negative zero is fluid and one at positive zero is solid.
-   * @param[in] a_value Implicit function value.
-   * @return True if the value is on the fluid side.
-   */
-  static bool
-  isFluid(const Real a_value) noexcept;
 
   /**
    * @brief Volume fraction.
@@ -369,6 +360,8 @@ protected:
    */
   RealVect m_closure;
 };
+
+} // namespace PolyhedralEB
 
 #include <CD_NamespaceFooter.H>
 

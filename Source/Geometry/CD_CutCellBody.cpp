@@ -15,415 +15,10 @@
 
 // Our includes
 #include <CD_CutCellBody.H>
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_NamespaceHeader.H>
 
-namespace {
-
-/**
- * @brief The two directions transverse to each coordinate direction.
- */
-#if CH_SPACEDIM == 3
-constexpr int s_transverse[3][2] = {{1, 2}, {0, 2}, {0, 1}};
-#endif
-
-/**
- * @brief Direction a cell edge runs along.
- */
-inline int
-edgeDirection(const int a_edge) noexcept
-{
-  return a_edge / (CutCellSurface::s_numEdges / SpaceDim);
-}
-
-/**
- * @brief Corner offsets of a cell edge's low end.
- */
-inline void
-edgeOrigin(const int a_edge, int a_offset[SpaceDim]) noexcept
-{
-  const int dir   = edgeDirection(a_edge);
-  const int local = a_edge % (CutCellSurface::s_numEdges / SpaceDim);
-
-  for (int d = 0; d < SpaceDim; d++) {
-    a_offset[d] = 0;
-  }
-
-#if CH_SPACEDIM == 3
-  a_offset[s_transverse[dir][0]] = local & 1;
-  a_offset[s_transverse[dir][1]] = (local >> 1) & 1;
-#else
-  a_offset[1 - dir] = local & 1;
-#endif
-
-  a_offset[dir] = 0;
-}
-
-/**
- * @brief The corners a cell edge joins, low end first.
- */
-inline void
-edgeCorners(const int a_edge, int& a_lo, int& a_hi) noexcept
-{
-  const int dir = edgeDirection(a_edge);
-
-  int offset[SpaceDim];
-  edgeOrigin(a_edge, offset);
-
-  a_lo = 0;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    a_lo |= offset[d] << d;
-  }
-
-  a_hi = a_lo | (1 << dir);
-}
-
-/**
- * @brief Position of a cell corner in the cell's own frame.
- */
-inline RealVect
-cornerPosition(const int a_corner) noexcept
-{
-  RealVect x = RealVect::Zero;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    x[d] = -0.5 + static_cast<Real>((a_corner >> d) & 1);
-  }
-
-  return x;
-}
-
-/**
- * @brief The corners of a cell face, in circuit order around the face.
- */
-inline void
-faceCorners(const int a_dir, const int a_side, int a_corner[1 << (SpaceDim - 1)]) noexcept
-{
-#if CH_SPACEDIM == 3
-  const int t0 = s_transverse[a_dir][0];
-  const int t1 = s_transverse[a_dir][1];
-
-  const int ring[4][2] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
-
-  for (int i = 0; i < 4; i++) {
-    a_corner[i] = (a_side << a_dir) | (ring[i][0] << t0) | (ring[i][1] << t1);
-  }
-#else
-  const int t = 1 - a_dir;
-
-  for (int i = 0; i < 2; i++) {
-    a_corner[i] = (a_side << a_dir) | (i << t);
-  }
-#endif
-}
-
-/**
- * @brief Index of the edge running along a_dir whose low corner has the given offsets.
- */
-inline int
-edgeIndex(const int a_dir, const int a_offset[SpaceDim]) noexcept
-{
-#if CH_SPACEDIM == 3
-  return 4 * a_dir + ((a_offset[s_transverse[a_dir][0]] & 1) | ((a_offset[s_transverse[a_dir][1]] & 1) << 1));
-#else
-  return 2 * a_dir + (a_offset[1 - a_dir] & 1);
-#endif
-}
-
-/**
- * @brief The edges of a cell face, edge i joining face corners i and i+1.
- */
-inline void
-faceEdges(const int a_dir, const int a_side, int a_edge[2 * (SpaceDim - 1)]) noexcept
-{
-#if CH_SPACEDIM == 3
-  const int t0 = s_transverse[a_dir][0];
-  const int t1 = s_transverse[a_dir][1];
-
-  // each entry is the t0 and t1 offset of the edge's low corner, and the direction it runs
-  const int spec[4][3] = {{0, 0, t0}, {1, 0, t1}, {1, 1, t0}, {0, 1, t1}};
-
-  for (int i = 0; i < 4; i++) {
-    int offset[SpaceDim];
-
-    for (int d = 0; d < SpaceDim; d++) {
-      offset[d] = 0;
-    }
-
-    offset[a_dir] = a_side;
-    offset[t0]    = spec[i][0];
-    offset[t1]    = spec[i][1];
-
-    const int run = spec[i][2];
-
-    offset[run] = 0;
-
-    a_edge[i] = edgeIndex(run, offset);
-  }
-#else
-  (void)a_dir;
-  (void)a_side;
-  (void)a_edge;
-#endif
-}
-
-/**
- * @brief Position of an edge crossing in the cell's own frame.
- */
-inline RealVect
-crossingPosition(const CutCellSurface& a_surface, const int a_edge, const Real a_tolerance) noexcept
-{
-  const int dir = edgeDirection(a_edge);
-
-  int offset[SpaceDim];
-  edgeOrigin(a_edge, offset);
-
-  Real t = a_surface.m_crossing[a_edge];
-
-  // A crossing recorded exactly at an endpoint sits on a corner the interface passes through,
-  // so it is already where it belongs and displacing it would open a sliver of the
-  // displacement's own width. Every other crossing is held off the endpoints, which is what
-  // keeps the combinatorics generic.
-  if (t != 0.0 && t != 1.0) {
-    t = std::max(t, a_tolerance);
-    t = std::min(t, 1.0 - a_tolerance);
-  }
-
-  RealVect x = RealVect::Zero;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    x[d] = -0.5 + static_cast<Real>(offset[d]);
-  }
-
-  x[dir] = -0.5 + t;
-
-  return x;
-}
-
-/**
- * @brief Area, area vector and centroid of a simple planar polygon in circuit order.
- * @details Areas are taken signed about the polygon's own normal. A face contour that is a
- * polyline rather than a single chord leaves a non-convex polygon, and summing unsigned
- * triangle areas over a fan over-counts those.
- */
-inline void
-polygonMoments(const RealVect* a_vertex,
-               const int       a_num,
-               Real&           a_area,
-               RealVect&       a_vector,
-               RealVect&       a_centroid) noexcept
-{
-  a_area     = 0.0;
-  a_vector   = RealVect::Zero;
-  a_centroid = RealVect::Zero;
-
-  if (a_num < 3) {
-    return;
-  }
-
-#if CH_SPACEDIM == 3
-  for (int i = 1; i < a_num - 1; i++) {
-    const RealVect u = a_vertex[i] - a_vertex[0];
-    const RealVect v = a_vertex[i + 1] - a_vertex[0];
-
-    a_vector += 0.5 * RealVect(D_DECL(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]));
-  }
-
-  a_area = a_vector.vectorLength();
-
-  if (a_area <= 0.0) {
-    return;
-  }
-
-  const RealVect unit = a_vector / a_area;
-
-  for (int i = 1; i < a_num - 1; i++) {
-    const RealVect u = a_vertex[i] - a_vertex[0];
-    const RealVect v = a_vertex[i + 1] - a_vertex[0];
-
-    const RealVect n = RealVect(
-      D_DECL(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]));
-
-    const Real w = 0.5 * n.dotProduct(unit);
-
-    a_centroid += w * (a_vertex[0] + a_vertex[i] + a_vertex[i + 1]) / 3.0;
-  }
-
-  a_centroid /= a_area;
-#else
-  (void)a_vertex;
-#endif
-}
-
-#if CH_SPACEDIM == 3
-/**
- * @brief The chords on a cell face, each an ordered pair of edge indices.
- * @details A face with two crossings carries one chord. A face whose corners alternate fluid
- * and solid carries four crossings and there are two ways to join them; the bilinear
- * interpolant of the four corner values decides it. The saddle shares its side with exactly
- * one of the two diagonals: that diagonal meets through the middle, and the other is the pair
- * the chords cut off. Both cells adjoining the face hold the same four values, so they cannot
- * disagree.
- * @return Number of chords, or -1 if the face carries an impossible number of crossings.
- */
-inline int
-facePairs(const int a_dir, const int a_side, const CutCellSurface& a_surface, int a_pair[2][2]) noexcept
-{
-  int faceEdge[4];
-  int faceCorner[4];
-
-  faceEdges(a_dir, a_side, faceEdge);
-  faceCorners(a_dir, a_side, faceCorner);
-
-  int hit[4];
-  int numHit = 0;
-
-  for (int i = 0; i < 4; i++) {
-    if (a_surface.hasCrossing(faceEdge[i])) {
-      hit[numHit++] = i;
-    }
-  }
-
-  if (numHit == 0) {
-    return 0;
-  }
-
-  if (numHit == 2) {
-    a_pair[0][0] = faceEdge[hit[0]];
-    a_pair[0][1] = faceEdge[hit[1]];
-
-    return 1;
-  }
-
-  if (numHit != 4) {
-    return -1;
-  }
-
-  const Real f00 = a_surface.m_corner[faceCorner[0]];
-  const Real f10 = a_surface.m_corner[faceCorner[1]];
-  const Real f11 = a_surface.m_corner[faceCorner[2]];
-  const Real f01 = a_surface.m_corner[faceCorner[3]];
-
-  const Real den    = f00 + f11 - f10 - f01;
-  const Real saddle = (std::abs(den) > 0.0) ? (f00 * f11 - f10 * f01) / den : (f00 + f11);
-
-  if (CutCellBody::isFluid(saddle) == CutCellBody::isFluid(f00)) {
-    a_pair[0][0] = faceEdge[0]; // chords cut off face corners 1 and 3
-    a_pair[0][1] = faceEdge[1];
-    a_pair[1][0] = faceEdge[2];
-    a_pair[1][1] = faceEdge[3];
-  }
-  else {
-    a_pair[0][0] = faceEdge[3]; // chords cut off face corners 0 and 2
-    a_pair[0][1] = faceEdge[0];
-    a_pair[1][0] = faceEdge[1];
-    a_pair[1][1] = faceEdge[2];
-  }
-
-  return 2;
-}
-
-/**
- * @brief Order the crossings into closed loops, or fail if they do not form clean cycles.
- * @details Every crossing lies on exactly two faces and every face pairs its crossings up, so
- * each node has degree two and the graph is a disjoint union of cycles. Several cycles is
- * legal: the interface simply enters the cell as several sheets.
- * @return Number of loops, or -1 if the crossings do not form clean cycles.
- */
-inline int
-crossingLoops(const CutCellSurface& a_surface,
-              int                   a_loop[CutCellSurface::s_numEdges],
-              int                   a_start[CutCellSurface::s_numEdges + 1]) noexcept
-{
-  constexpr int numEdges = CutCellSurface::s_numEdges;
-
-  int adjacent[numEdges][2];
-  int degree[numEdges] = {0};
-
-  for (int d = 0; d < SpaceDim; d++) {
-    for (int side = 0; side < 2; side++) {
-      int       pair[2][2];
-      const int numPairs = facePairs(d, side, a_surface, pair);
-
-      if (numPairs < 0) {
-        return -1;
-      }
-
-      for (int k = 0; k < numPairs; k++) {
-        const int x = pair[k][0];
-        const int y = pair[k][1];
-
-        if (degree[x] > 1 || degree[y] > 1) {
-          return -1;
-        }
-
-        adjacent[x][degree[x]++] = y;
-        adjacent[y][degree[y]++] = x;
-      }
-    }
-  }
-
-  int numCrossings = 0;
-
-  for (int e = 0; e < numEdges; e++) {
-    if (a_surface.hasCrossing(e)) {
-      numCrossings++;
-
-      if (degree[e] != 2) {
-        return -1;
-      }
-    }
-  }
-
-  if (numCrossings < 3) {
-    return -1;
-  }
-
-  bool used[numEdges] = {false};
-  int  numLoops       = 0;
-  int  put            = 0;
-
-  a_start[0] = 0;
-
-  for (int e = 0; e < numEdges; e++) {
-    if (!a_surface.hasCrossing(e) || used[e]) {
-      continue;
-    }
-
-    const int begin = put;
-
-    int previous = -1;
-    int current  = e;
-
-    while (true) {
-      used[current] = true;
-      a_loop[put++] = current;
-
-      const int next = (adjacent[current][0] != previous) ? adjacent[current][0] : adjacent[current][1];
-
-      if (next == e) {
-        break;
-      }
-
-      if (used[next] || put > numEdges) {
-        return -1;
-      }
-
-      previous = current;
-      current  = next;
-    }
-
-    if (put - begin < 3) {
-      return -1;
-    }
-
-    a_start[++numLoops] = put;
-  }
-
-  return numLoops;
-}
-#endif
-} // namespace
+namespace PolyhedralEB {
 
 CutCellBody::CutCellBody() noexcept
 {
@@ -440,12 +35,6 @@ CutCellBody::CutCellBody() noexcept
     m_areaFraction[f] = 0.0;
     m_faceCentroid[f] = RealVect::Zero;
   }
-}
-
-bool
-CutCellBody::isFluid(const Real a_value) noexcept
-{
-  return std::copysign(1.0, a_value) < 0.0;
 }
 
 CutCellBody::Kind
@@ -520,7 +109,7 @@ CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide
         offset[k] = (low >> k) & 1;
       }
 
-      const int  edge = edgeIndex(d, offset);
+      const int  edge = detail::edgeIndex(d, offset);
       const Real t    = a_surface.m_crossing[edge];
 
       if (!a_surface.hasCrossing(edge)) {
@@ -548,7 +137,7 @@ CutCellBody::orientOutward(Polygon& a_polygon, const int a_dir, const int a_side
   RealVect vector;
   RealVect centroid;
 
-  polygonMoments(a_polygon.m_vertex, a_polygon.m_numVertices, area, vector, centroid);
+  detail::polygonMoments(a_polygon.m_vertex, a_polygon.m_numVertices, area, vector, centroid);
 
   if (vector.dotProduct(outward) < 0.0) {
     for (int i = 0; i < a_polygon.m_numVertices / 2; i++) {
@@ -567,8 +156,8 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
   int faceEdge[4];
   int faceCorner[4];
 
-  faceEdges(a_dir, a_side, faceEdge);
-  faceCorners(a_dir, a_side, faceCorner);
+  detail::faceEdges(a_dir, a_side, faceEdge);
+  detail::faceCorners(a_dir, a_side, faceCorner);
 
   int numHit = 0;
 
@@ -577,7 +166,7 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
   }
 
   int       pair[2][2] = {{-1, -1}, {-1, -1}};
-  const int numPairs   = facePairs(a_dir, a_side, a_surface, pair);
+  const int numPairs   = detail::facePairs(a_dir, a_side, a_surface, pair);
 
   if (numPairs < 0) {
     return -1;
@@ -591,12 +180,12 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     for (int i = 0; i < 4; i++) {
       if (isFluid(a_surface.m_corner[faceCorner[i]])) {
         polygon.m_vertexEdge[polygon.m_numVertices] = -1;
-        polygon.m_vertex[polygon.m_numVertices++]   = cornerPosition(faceCorner[i]);
+        polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(faceCorner[i]);
       }
 
       if (a_surface.hasCrossing(faceEdge[i])) {
         polygon.m_vertexEdge[polygon.m_numVertices] = faceEdge[i];
-        polygon.m_vertex[polygon.m_numVertices++]   = crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
+        polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
       }
     }
 
@@ -610,7 +199,7 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     RealVect vector;
     RealVect centroid;
 
-    polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
+    detail::polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
 
     if (area <= 0.0) {
       return 0;
@@ -663,11 +252,11 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     for (int i = 0; i < 4; i++) {
       if (isFluid(a_surface.m_corner[faceCorner[i]])) {
         polygon.m_vertexEdge[polygon.m_numVertices] = -1;
-        polygon.m_vertex[polygon.m_numVertices++]   = cornerPosition(faceCorner[i]);
+        polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(faceCorner[i]);
       }
 
       polygon.m_vertexEdge[polygon.m_numVertices] = faceEdge[i];
-      polygon.m_vertex[polygon.m_numVertices++]   = crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
+      polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
     }
 
     this->orientOutward(polygon, a_dir, a_side);
@@ -676,7 +265,7 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     RealVect vector;
     RealVect centroid;
 
-    polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
+    detail::polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
 
     if (area <= 0.0) {
       return 0;
@@ -702,11 +291,11 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     polygon.m_face        = 2 * a_dir + a_side;
 
     polygon.m_vertexEdge[polygon.m_numVertices] = previous;
-    polygon.m_vertex[polygon.m_numVertices++]   = crossingPosition(a_surface, previous, s_edgeTolerance);
+    polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, previous, s_edgeTolerance);
     polygon.m_vertexEdge[polygon.m_numVertices] = -1;
-    polygon.m_vertex[polygon.m_numVertices++]   = cornerPosition(faceCorner[i]);
+    polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(faceCorner[i]);
     polygon.m_vertexEdge[polygon.m_numVertices] = faceEdge[i];
-    polygon.m_vertex[polygon.m_numVertices++]   = crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
+    polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
 
     this->orientOutward(polygon, a_dir, a_side);
 
@@ -714,7 +303,7 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     RealVect vector;
     RealVect centroid;
 
-    polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
+    detail::polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
 
     if (area > 0.0) {
       a_out[numOut++] = polygon;
@@ -748,7 +337,7 @@ CutCellBody::defineDegenerate(const CutCellSurface& a_surface, const Kind a_kind
       }
 
       int faceCorner[1 << (SpaceDim - 1)];
-      faceCorners(d, side, faceCorner);
+      detail::faceCorners(d, side, faceCorner);
 
       bool allZero = true;
 
@@ -860,7 +449,7 @@ CutCellBody::accumulateMoments() noexcept
     RealVect vector;
     RealVect centroid;
 
-    polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
+    detail::polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
 
     m_closure += vector;
 
@@ -953,13 +542,13 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
     if (isFluid(a_surface.m_corner[ringCorner[i]])) {
       ring[polygon.m_numVertices]                 = i;
       polygon.m_vertexEdge[polygon.m_numVertices] = -1;
-      polygon.m_vertex[polygon.m_numVertices++]   = cornerPosition(ringCorner[i]);
+      polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(ringCorner[i]);
     }
 
     if (a_surface.hasCrossing(ringEdge[i])) {
       ring[polygon.m_numVertices]                 = -(i + 1);
       polygon.m_vertexEdge[polygon.m_numVertices] = ringEdge[i];
-      polygon.m_vertex[polygon.m_numVertices++]   = crossingPosition(a_surface, ringEdge[i], s_edgeTolerance);
+      polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, ringEdge[i], s_edgeTolerance);
     }
   }
 
@@ -975,10 +564,10 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
     else {
       const int position = (here >= 0) ? here : (-here - 1);
       const int edge     = ringEdge[position];
-      const int dir      = edgeDirection(edge);
+      const int dir      = detail::edgeDirection(edge);
 
       int offset[SpaceDim];
-      edgeOrigin(edge, offset);
+      detail::edgeOrigin(edge, offset);
 
       polygon.m_segmentFace[i] = 2 * (1 - dir) + offset[1 - dir];
     }
@@ -1055,7 +644,7 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
   int loop[CutCellSurface::s_numEdges];
   int start[CutCellSurface::s_numEdges + 1];
 
-  const int numLoops = crossingLoops(a_surface, loop, start);
+  const int numLoops = detail::crossingLoops(a_surface, loop, start);
 
   if (numLoops <= 0) {
     return false;
@@ -1112,7 +701,7 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
     RealVect apex = RealVect::Zero;
 
     for (int i = begin; i < end; i++) {
-      apex += crossingPosition(a_surface, loop[i], s_edgeTolerance);
+      apex += detail::crossingPosition(a_surface, loop[i], s_edgeTolerance);
     }
 
     apex /= static_cast<Real>(end - begin);
@@ -1124,8 +713,8 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
       triangle.m_numVertices = 3;
       triangle.m_face        = -1;
       triangle.m_vertex[0]   = apex;
-      triangle.m_vertex[1]   = crossingPosition(a_surface, loop[i], s_edgeTolerance);
-      triangle.m_vertex[2]   = crossingPosition(a_surface, loop[nextInLoop], s_edgeTolerance);
+      triangle.m_vertex[1]   = detail::crossingPosition(a_surface, loop[i], s_edgeTolerance);
+      triangle.m_vertex[2]   = detail::crossingPosition(a_surface, loop[nextInLoop], s_edgeTolerance);
 
       for (int k = 0; k < 3; k++) {
         triangle.m_vertexEdge[k] = -1;
@@ -1135,7 +724,7 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
       RealVect vector;
       RealVect centroid;
 
-      polygonMoments(triangle.m_vertex, triangle.m_numVertices, area, vector, centroid);
+      detail::polygonMoments(triangle.m_vertex, triangle.m_numVertices, area, vector, centroid);
 
       if (area >= s_nullArea) {
         if (m_numPolygons >= s_maxPolygons) {
@@ -1245,5 +834,7 @@ CutCellBody::divergenceResidual() const noexcept
 
   return residual.vectorLength();
 }
+
+} // namespace PolyhedralEB
 
 #include <CD_NamespaceFooter.H>
