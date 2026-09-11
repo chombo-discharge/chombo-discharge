@@ -102,11 +102,6 @@ protected:
   std::string m_geometryGeneration;
 
   /**
-   * @brief Whether the polyhedral generator aborts on a cell whose body will not close.
-   */
-  bool m_strictGeometry;
-
-  /**
    * @brief Output directory for output files.
    */
   std::string m_outputDirectory;

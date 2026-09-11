@@ -239,13 +239,9 @@ More importantly for what this is intended to support, the eight cells of a subd
 
 Everything else is deliberately left alone.
 The cell classification, the graph, and the treatment of regular cells bordering a covered one are ``Chombo``'s, so a run with ``polyhedral`` produces the same cut-cell topology as one without it; only the moments differ.
-A cell whose reconstructed polyhedron fails to close aborts the run rather than being silently approximated, which can be relaxed with
-
-.. code-block:: text
-
-   Driver.geometry_strict = false
-
-although no geometry tested so far has triggered it.
+A cell whose reconstructed polyhedron fails to close aborts the run rather than being silently approximated.
+No geometry tested so far has produced one, and while the generator is being developed a cell it cannot close is an edge case worth seeing rather than one worth approximating around.
+There is deliberately no input-file option for this, so that relaxing it is an edit to ``ComputationalGeometry`` rather than something a run can do by accident.
 
 .. note::
 

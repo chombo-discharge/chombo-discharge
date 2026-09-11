@@ -28,7 +28,7 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::Chombo), m_strictGeometry(true)
+ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::Chombo)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -59,13 +59,12 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 }
 
 void
-ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain, const bool a_strict)
+ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain)
 {
-  CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain, bool)");
+  CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain)");
 
-  m_generator      = Generator::Polyhedral;
-  m_scanDomain     = a_beginDomain;
-  m_strictGeometry = a_strict;
+  m_generator  = Generator::Polyhedral;
+  m_scanDomain = a_beginDomain;
 }
 
 void
@@ -229,7 +228,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             m_scanDomain,
                                             m_maxGhostEB,
                                             s_thresh,
-                                            m_strictGeometry);
+                                            s_strictGeometry);
 
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
@@ -309,7 +308,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               m_scanDomain,
                                               m_maxGhostEB,
                                               s_thresh,
-                                              m_strictGeometry);
+                                              s_strictGeometry);
 
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
