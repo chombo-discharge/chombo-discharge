@@ -85,6 +85,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#concept">Concept</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stochastic-simulation-algorithm">Stochastic simulation algorithm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tau-leaping">Tau leaping</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#leap-condition">Leap condition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tau-leaping-variants">Tau-leaping variants</a></li>
 </ul>
 </li>
@@ -101,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#c1-avalanche-model">C1: Avalanche model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#c2-schlogl-model">C2: Schlögl model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c3-stiff-two-group-model">C3: Stiff two-group model</a></li>
 </ul>
 </li>
 </ul>
@@ -234,8 +236,28 @@ The state is then advanced as</p>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.</p>
 <p>The interval <span class="math notranslate nohighlight">\(\Delta t\)</span> handed to the solver is substepped, and each substep is limited such that the propensities change by no more than a relative factor <span class="math notranslate nohighlight">\(\epsilon\)</span>.
-This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a>.
+This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see <a class="reference internal" href="#chap-kmcleapcondition"><span class="std std-ref">Leap condition</span></a>.
 Substeps that yield an invalid state are rejected and retried with a halved time step, so <span class="math notranslate nohighlight">\(\epsilon\)</span> is what controls the accuracy of the leap while step rejection only guards validity.</p>
+<section id="leap-condition">
+<span id="chap-kmcleapcondition"></span><h3>Leap condition<a class="headerlink" href="#leap-condition" title="Permalink to this heading"></a></h3>
+<p>The leap <span class="math notranslate nohighlight">\(\tau\)</span> is bounded, for every reactant <span class="math notranslate nohighlight">\(X_i\)</span> of the reactions being leaped, by the smallest of</p>
+<div class="math notranslate nohighlight">
+\[\tau \leq \frac{f_i}{\left|\mu_i\right|},\quad
+\tau \leq \frac{f_i^2}{\sigma_i^2},\quad
+\tau \leq \frac{f_i}{\lambda_i},\]</div>
+<p>where <span class="math notranslate nohighlight">\(f_i = \max\left(\epsilon X_i, 1\right)\)</span> and</p>
+<div class="math notranslate nohighlight">
+\[\mu_i = \sum_r \nu_{ir} a_r,\quad
+\sigma_i^2 = \sum_r \nu_{ir}^2 a_r,\quad
+\lambda_i = \sum_{r:\, \nu_{ir} &lt; 0} \left|\nu_{ir}\right| a_r.\]</div>
+<p>The first two bounds are the leap condition of <span id="id3">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span> on the mean and variance of the <em>net</em> change in <span class="math notranslate nohighlight">\(X_i\)</span>.
+The third bounds the <em>gross</em> consumption of <span class="math notranslate nohighlight">\(X_i\)</span>: the reactions that remove it may not, between them, be expected to fire more than <span class="math notranslate nohighlight">\(f_i\)</span> times during the leap.
+The net change does not see this when production and loss nearly cancel, as they do for a fast intermediate in quasi-steady state, and the Poisson-sampled firings of the fast reaction then routinely exceed the population they draw on.
+Such a leap is rejected and retried with a smaller step, but the accepted step is then conditioned on the outcome of the random draw, which biases the result.
+The consumption bound resolves the fast reaction instead, and for a reactant that is only consumed it coincides with the first bound.
+Note that <span class="math notranslate nohighlight">\(\epsilon\)</span> scales all three bounds but never removes them: for <span class="math notranslate nohighlight">\(\epsilon \geq 1\)</span> the expected consumption of a reactant may reach or exceed its population, so the bounds no longer keep the sampled firings below the populations and the validity of the leap then rests on step rejection alone.
+The floor <span class="math notranslate nohighlight">\(f_i = 1\)</span> at zero population applies for any <span class="math notranslate nohighlight">\(\epsilon\)</span>.</p>
+</section>
 <section id="tau-leaping-variants">
 <h3>Tau-leaping variants<a class="headerlink" href="#tau-leaping-variants" title="Permalink to this heading"></a></h3>
 <p>The following forms of tau-leaping are also supported:</p>
@@ -267,44 +289,46 @@ In practice, the time step then has to be limited to <span class="math notransla
 </section>
 <section id="hybrid-algorithm">
 <span id="chap-kmchybridadvance"></span><h2>Hybrid algorithm<a class="headerlink" href="#hybrid-algorithm" title="Permalink to this heading"></a></h2>
-<p>The hybrid algorithm is taken from <span id="id3">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span>.
+<p>The hybrid algorithm is taken from <span id="id4">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span>.
 Assume that we wish to integrate over some time <span class="math notranslate nohighlight">\(\Delta t\)</span>, which proceeds as follows:</p>
 <ol class="arabic">
 <li><p>Let <span class="math notranslate nohighlight">\(\tau = 0\)</span> be the simulated time within <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
 <li><p>Partition the reaction set <span class="math notranslate nohighlight">\(\vec{R}\)</span> into <em>critical</em> and <em>non-critical</em> reactions.
 The critical reactions are defined as the subset of <span class="math notranslate nohighlight">\(\vec{R}\)</span> that are within <span class="math notranslate nohighlight">\(N_{\textrm{crit}}\)</span> firings away from exhausting one of its reactants.
 The non-critical reactions are defined as the remaining subset.</p></li>
-<li><p>Compute time steps until the firing of the next critical reaction, and a time step such that the propensities of the non-critical reactions do not change by more than some relative factor <span class="math notranslate nohighlight">\(\epsilon\)</span>.
-Let these time steps be given by <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{c}}\)</span>and <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{nc}}\)</span>.</p></li>
-<li><p>Select a reactive substep within <span class="math notranslate nohighlight">\(\Delta t\)</span> from</p>
+<li><p>Compute a time step <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{nc}}\)</span> such that the non-critical reactions satisfy the leap condition in <a class="reference internal" href="#chap-kmcleapcondition"><span class="std std-ref">Leap condition</span></a>, and let the leap candidate be</p>
 <div class="math notranslate nohighlight">
-\[\Delta \tau = \min\left[\Delta t - \tau, \min\left(\Delta \tau_{\textrm{c}}, \Delta \tau_{\textrm{nc}}\right)\right]\]</div>
+\[\Delta \tau_{\textrm{leap}} = \min\left(\Delta t - \tau, \Delta \tau_{\textrm{nc}}\right).\]</div>
+</li>
+<li><p>If <span class="math notranslate nohighlight">\(A\Delta\tau_{\textrm{leap}}\)</span> is smaller than some specified threshold, where <span class="math notranslate nohighlight">\(A\)</span> is the total propensity of <em>all</em> reactions, tau leaping is inefficient and the whole reaction set is advanced with the SSA over <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{leap}}\)</span> (or until a specified number of reactions have fired).
+Let <span class="math notranslate nohighlight">\(\tau \rightarrow \tau + \Delta\tau_{\textrm{leap}}\)</span> (or the time of the last firing) and return to step 2.
+This decision is made from <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{leap}}\)</span> alone, before any critical waiting time is drawn, so that it cannot depend on the value of that draw.</p></li>
+<li><p>Draw the time <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{c}}\)</span> until the firing of the next critical reaction and select the reactive substep</p>
+<div class="math notranslate nohighlight">
+\[\Delta \tau = \min\left(\Delta \tau_{\textrm{leap}}, \Delta \tau_{\textrm{c}}\right).\]</div>
 </li>
 <li><p>Resolve reactions as follows:</p>
-<ol class="loweralpha">
-<li><p>If <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{c}} &lt; \Delta \tau_{\textrm{nc}}\)</span> and <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{c}} &lt; \Delta t - \tau\)</span> then one critical reaction fires.
-Determine the reaction type using the SSA algorithm.</p>
-<p>Next, advance the state using tau leaping for the non-critical reaction.</p>
-</li>
+<ol class="loweralpha simple">
+<li><p>If <span class="math notranslate nohighlight">\(\Delta \tau_{\textrm{c}} &lt; \Delta \tau_{\textrm{leap}}\)</span> then one critical reaction fires.
+Advance the state using tau leaping for the non-critical reactions over <span class="math notranslate nohighlight">\(\Delta\tau\)</span>, and then fire one critical reaction whose type is determined using the SSA algorithm.</p></li>
 <li><p>Otherwise: No critical reactions fire.
-Advance the state using tau-leaping for the non-critical reactions only.
-An exception is made if <span class="math notranslate nohighlight">\(A\Delta\tau\)</span> is smaller than some specified threshold in which case we switch to SSA advancement (which is more efficient in this limit).</p></li>
+Advance the state using tau-leaping for the non-critical reactions only.</p></li>
 </ol>
 </li>
 <li><p>Check if <span class="math notranslate nohighlight">\(\vec{X}\)</span> is a thermodynamically valid state.</p>
 <ol class="loweralpha simple">
 <li><p>If the state is valid, accept it and let <span class="math notranslate nohighlight">\(\tau \rightarrow \tau + \Delta\tau\)</span>.</p></li>
 <li><p>If the state is invalid, reject the advancement.
-Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \rightarrow \Delta \tau_{\textrm{nc}}/2\)</span> and return to step 4).</p></li>
+Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \rightarrow \Delta \tau_{\textrm{nc}}/2\)</span> and return to step 3).</p></li>
 </ol>
 </li>
 <li><p>If <span class="math notranslate nohighlight">\(\tau &lt; \Delta t\)</span>, return to step 2.</p></li>
 </ol>
-<p>The <span id="id4">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span> algorithm requires algorithmic specifications as follows:</p>
+<p>The <span id="id5">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span> algorithm requires algorithmic specifications as follows:</p>
 <ul class="simple">
 <li><p>The factor <span class="math notranslate nohighlight">\(\epsilon\)</span> which determines the non-critical time step.</p></li>
 <li><p>The factor <span class="math notranslate nohighlight">\(N_{\textrm{crit}}\)</span> which determines which reactions are critical or not.</p></li>
-<li><p>Factors for determining when and how to switch to the SSA-based algorithm in step 5b.</p></li>
+<li><p>Factors for determining when and how to switch to the SSA-based algorithm in step 4.</p></li>
 </ul>
 </section>
 <section id="implementation">
@@ -537,6 +561,7 @@ The following two implementations are currently in use:</p>
 <ul class="simple">
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C1</span></code></p></li>
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2</span></code></p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C3</span></code></p></li>
 </ul>
 <section id="c1-avalanche-model">
 <h3>C1: Avalanche model<a class="headerlink" href="#c1-avalanche-model" title="Permalink to this heading"></a></h3>
@@ -549,10 +574,10 @@ X + \emptyset &amp;\xrightarrow{k_a} \emptyset\end{split}\]</div>
 <div class="math notranslate nohighlight">
 \[X(t) \approx X(0)\exp\left[(k_i-k_a)t\right].\]</div>
 <p>Figure <a class="reference internal" href="#fig-kineticmontecarloc1"><span class="std std-numref">Fig. 24</span></a> shows the Kinetic Monte Carlo solution for <span class="math notranslate nohighlight">\(k_i = 2k_a = 2\)</span> and <span class="math notranslate nohighlight">\(X(0) = 10\)</span>.</p>
-<figure class="align-center" id="id5">
+<figure class="align-center" id="id6">
 <span id="fig-kineticmontecarloc1"></span><a class="reference internal image-reference" href="../_images/KineticMonteCarloC1.png"><img alt="../_images/KineticMonteCarloC1.png" src="../_images/KineticMonteCarloC1.png" style="width: 50%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 24 </span><span class="caption-text">Comparison of Kinetic Monte Carlo solution with reaction rate equation for an avalanche-like problem.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 24 </span><span class="caption-text">Comparison of Kinetic Monte Carlo solution with reaction rate equation for an avalanche-like problem.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -574,10 +599,32 @@ c_3 &amp;= 10^{-3}, \\
 c_4 &amp;= 3.5\end{split}\]</div>
 <p>and <span class="math notranslate nohighlight">\(B_1 = 10^5\)</span>, <span class="math notranslate nohighlight">\(B_2 = 2\times 10^5\)</span>.
 The initial state is <span class="math notranslate nohighlight">\(X(0) = 250\)</span>.</p>
-<figure class="align-center" id="id6">
+<figure class="align-center" id="id7">
 <span id="fig-kineticmontecarloc2"></span><a class="reference internal image-reference" href="../_images/KineticMonteCarloC2.png"><img alt="../_images/KineticMonteCarloC2.png" src="../_images/KineticMonteCarloC2.png" style="width: 50%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 25 </span><span class="caption-text">Convergence to bi-stable states for the Schlögl model.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 25 </span><span class="caption-text">Convergence to bi-stable states for the Schlögl model.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="c3-stiff-two-group-model">
+<h3>C3: Stiff two-group model<a class="headerlink" href="#c3-stiff-two-group-model" title="Permalink to this heading"></a></h3>
+<p>A stiff two-group electron chemistry is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C3</span></code>.
+A slow branching reaction feeds a fast reaction that relaxes back,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}e &amp;\xrightarrow{\nu_i} el + el + M^+, \\
+el &amp;\xrightarrow{\nu_r} e,\end{split}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\nu_i = 7.468\times 10^{9}\,\textrm{s}^{-1}\)</span> and <span class="math notranslate nohighlight">\(\nu_r = 1.741\times 10^{11}\,\textrm{s}^{-1}\)</span>, so that <span class="math notranslate nohighlight">\(el\)</span> turns over <span class="math notranslate nohighlight">\(\nu_r\Delta t = 1.74\)</span> times per step of <span class="math notranslate nohighlight">\(\Delta t = 10\,\textrm{ps}\)</span>.
+Every reaction is first order, so the moment equations</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{\textrm{d}}{\textrm{d}t}\begin{pmatrix}\langle e\rangle \\ \langle el\rangle\end{pmatrix} = \begin{pmatrix} -\nu_i &amp; \nu_r \\ 2\nu_i &amp; -\nu_r\end{pmatrix}\begin{pmatrix}\langle e\rangle \\ \langle el\rangle\end{pmatrix}\end{split}\]</div>
+<p>are exact and the program integrates them for reference.
+The example runs many realizations from a specified number of initial electrons and prints the mean populations after every step, so both limits can be checked: many realizations, and many initial particles where tau leaping rather than the SSA does the work.
+This is the case that requires the consumption bound in <a class="reference internal" href="#chap-kmcleapcondition"><span class="std std-ref">Leap condition</span></a>: the net change of <span class="math notranslate nohighlight">\(el\)</span> is small however many times it turns over, and a leap bounded by the net change alone samples more relaxations than there are <span class="math notranslate nohighlight">\(el\)</span> particles.
+Figure <a class="reference internal" href="#fig-kineticmontecarloc3"><span class="std std-numref">Fig. 26</span></a> shows the hybrid midpoint solution for <span class="math notranslate nohighlight">\(\epsilon = 0.5\)</span> and <span class="math notranslate nohighlight">\(N_{\textrm{crit}} = 5\)</span>, starting from a single electron; the mean of <span class="math notranslate nohighlight">\(e + el\)</span> at <span class="math notranslate nohighlight">\(t = 1\,\textrm{ns}\)</span> agrees with the moment equations to within the sampling error of <span class="math notranslate nohighlight">\(0.2\%\)</span>.</p>
+<figure class="align-center" id="id8">
+<span id="fig-kineticmontecarloc3"></span><a class="reference internal image-reference" href="../_images/KineticMonteCarloC3.png"><img alt="../_images/KineticMonteCarloC3.png" src="../_images/KineticMonteCarloC3.png" style="width: 50%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 26 </span><span class="caption-text">Mean populations for the stiff two-group model, hybrid midpoint tau leaping against the moment equations.</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>

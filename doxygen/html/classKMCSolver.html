@@ -169,11 +169,11 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~KMCSolver</b> () 
 <tr class="memdesc:aeca5a8c19de0c47f5e79a2cae2b7e861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-critical time step.  <br /></td></tr>
 <tr class="separator:aeca5a8c19de0c47f5e79a2cae2b7e861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac93b870a9f83c0cb4920ea39fee33ed1" id="r_ac93b870a9f83c0cb4920ea39fee33ed1"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ac93b870a9f83c0cb4920ea39fee33ed1">getNonCriticalTimeStep</a> (const State &amp;a_state, const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;a_reactions) const noexcept</td></tr>
-<tr class="memdesc:ac93b870a9f83c0cb4920ea39fee33ed1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-critical time step.  <br /></td></tr>
+<tr class="memdesc:ac93b870a9f83c0cb4920ea39fee33ed1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-critical time step, treating every input reaction as non-critical.  <br /></td></tr>
 <tr class="separator:ac93b870a9f83c0cb4920ea39fee33ed1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6fad69b415e6b0ac2fb6c24104fbb77" id="r_aa6fad69b415e6b0ac2fb6c24104fbb77"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#aa6fad69b415e6b0ac2fb6c24104fbb77">getNonCriticalTimeStep</a> (const State &amp;a_state, const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;a_nonCriticalReactions, const std::vector&lt; Real &gt; &amp;a_nonCriticalPropensities) const noexcept</td></tr>
-<tr class="memdesc:aa6fad69b415e6b0ac2fb6c24104fbb77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-critical time step.  <br /></td></tr>
-<tr class="separator:aa6fad69b415e6b0ac2fb6c24104fbb77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3cfaf391556de29e0e21a2da7ae1150" id="r_ae3cfaf391556de29e0e21a2da7ae1150"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#ae3cfaf391556de29e0e21a2da7ae1150">getNonCriticalTimeStep</a> (const State &amp;a_state, const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;a_reactions, const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;a_nonCriticalReactions, const std::vector&lt; Real &gt; &amp;a_nonCriticalPropensities) const noexcept</td></tr>
+<tr class="memdesc:ae3cfaf391556de29e0e21a2da7ae1150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the non-critical time step.  <br /></td></tr>
+<tr class="separator:ae3cfaf391556de29e0e21a2da7ae1150"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a213d882a0aec2acbcbec9bb9b5222526" id="r_a213d882a0aec2acbcbec9bb9b5222526"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a213d882a0aec2acbcbec9bb9b5222526">computeDt</a> (const State &amp;a_state, const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;a_reactions, const std::vector&lt; Real &gt; &amp;a_propensities, Real a_epsilon) const noexcept</td></tr>
 <tr class="memdesc:a213d882a0aec2acbcbec9bb9b5222526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step using the leap condition on the mean value.  <br /></td></tr>
 <tr class="separator:a213d882a0aec2acbcbec9bb9b5222526"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -276,6 +276,9 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_exitTol</b></td></t
 <tr class="memitem:a1488e34edac2a019e283428e9b8b2813" id="r_a1488e34edac2a019e283428e9b8b2813"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a1488e34edac2a019e283428e9b8b2813">m_sigmaScratch</a></td></tr>
 <tr class="memdesc:a1488e34edac2a019e283428e9b8b2813"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant propensity variance, indexed by species.  <br /></td></tr>
 <tr class="separator:a1488e34edac2a019e283428e9b8b2813"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef118d7b90e77ea304ed1f0c0f3f3fe4" id="r_aef118d7b90e77ea304ed1f0c0f3f3fe4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#aef118d7b90e77ea304ed1f0c0f3f3fe4">m_lossScratch</a></td></tr>
+<tr class="memdesc:aef118d7b90e77ea304ed1f0c0f3f3fe4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch accumulator for the per-reactant expected consumption, indexed by species.  <br /></td></tr>
+<tr class="separator:aef118d7b90e77ea304ed1f0c0f3f3fe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eb262f77c7e064bda9b364371de57db" id="r_a0eb262f77c7e064bda9b364371de57db"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSolver.html#a0eb262f77c7e064bda9b364371de57db">m_reactantScratch</a></td></tr>
 <tr class="memdesc:a0eb262f77c7e064bda9b364371de57db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scratch holding the distinct reactants of the reaction list currently being processed.  <br /></td></tr>
 <tr class="separator:a0eb262f77c7e064bda9b364371de57db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -444,7 +447,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Each substep partitions the reactions into critical and non-critical ones and computes the leap candidate from the tau-leaping condition on the non-critical reactions. If the leap would carry fewer than m_SSAlim expected firings the whole reaction set is advanced with the exact SSA instead; this choice is made from the leap candidate alone, before the waiting time to the next critical firing is drawn, so that it does not depend on that draw. Otherwise the non-critical reactions are leaped over the shorter of the leap candidate and the critical waiting time, and one critical reaction fires when the waiting time is the shorter. Substeps that produce an invalid state are rejected and retried with a halved leap candidate; the critical waiting time is drawn afresh on every retry. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_state</td><td>State vector to advance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>Reactions to advance with. </td></tr>
@@ -855,7 +858,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Fill m_reactantScratch with the distinct reactants of the input reactions. </p>
-<p>Replaces concatenating the reactions' reactant lists and then sorting and uniquing them. The distinct set is the same; only the order differs, and both callers use it purely as a set to reduce over. The scratch buffers are sized from the largest reactant index seen, which keeps the routine independent of the State type's interface. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>A single pass with membership stamps, so the set is built without sorting; the order is that of first appearance, and both callers use it purely as a set to reduce over. The scratch buffers are sized from the largest reactant index seen, which keeps the routine independent of the State type's interface. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>Reactions whose reactants are collected. </td></tr>
   </table>
@@ -1063,63 +1066,8 @@ template&lt;typename R , typename State , typename T &gt; </div>
 
 </div>
 </div>
-<a id="aa6fad69b415e6b0ac2fb6c24104fbb77" name="aa6fad69b415e6b0ac2fb6c24104fbb77"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa6fad69b415e6b0ac2fb6c24104fbb77">&#9670;&#160;</a></span>getNonCriticalTimeStep() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename R , typename State , typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Real <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::getNonCriticalTimeStep </td>
-          <td>(</td>
-          <td class="paramtype">const State &amp;&#160;</td>
-          <td class="paramname"><em>a_state</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_nonCriticalReactions</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::vector&lt; Real &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_nonCriticalPropensities</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the non-critical time step. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_state</td><td>State vector. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_nonCriticalReactions</td><td>Non-critical reactions. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_nonCriticalPropensities</td><td>Non-critical propensities. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Non-critical tau-leaping time step. </dd></dl>
-
-</div>
-</div>
 <a id="ac93b870a9f83c0cb4920ea39fee33ed1" name="ac93b870a9f83c0cb4920ea39fee33ed1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac93b870a9f83c0cb4920ea39fee33ed1">&#9670;&#160;</a></span>getNonCriticalTimeStep() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac93b870a9f83c0cb4920ea39fee33ed1">&#9670;&#160;</a></span>getNonCriticalTimeStep() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1154,7 +1102,7 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get the non-critical time step. </p>
+<p>Get the non-critical time step, treating every input reaction as non-critical. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_state</td><td>State vector. </td></tr>
@@ -1164,6 +1112,74 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Non-critical tau-leaping time step. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Computes propensities and calls the other version. </dd></dl>
+
+</div>
+</div>
+<a id="ae3cfaf391556de29e0e21a2da7ae1150" name="ae3cfaf391556de29e0e21a2da7ae1150"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3cfaf391556de29e0e21a2da7ae1150">&#9670;&#160;</a></span>getNonCriticalTimeStep() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::getNonCriticalTimeStep </td>
+          <td>(</td>
+          <td class="paramtype">const State &amp;&#160;</td>
+          <td class="paramname"><em>a_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_reactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classKMCSolver.html#a060ac3ddb8e0f0c5147a4d069bab04ae">ReactionList</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_nonCriticalReactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_nonCriticalPropensities</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the non-critical time step. </p>
+<p>The step is the smallest of three bounds, each taken over every species X_i that is a reactant of any reaction in a_reactions, with f_i = max(eps * X_i, 1) and the sums running over the non-critical reactions only:</p>
+<ol type="1">
+<li>f_i / |mu_i|, where mu_i = sum_j nu_ij * a_j is the expected net change of X_i,</li>
+<li>f_i^2 / sigma_i^2, where sigma_i^2 = sum_j nu_ij^2 * a_j is its variance,</li>
+<li>f_i / lambda_i, where lambda_i = sum_{j : nu_ij &lt; 0} |nu_ij| * a_j is the expected consumption of X_i.</li>
+</ol>
+<p>The first two are the leap condition of Cao et al. on the net change. The species set is that of the paper: it includes the reactants of the critical reactions, so that a leap cannot change their propensities by more than the leap condition allows, and a species at zero population is bounded to one expected net change (f_i = 1) rather than left unbounded. The third bounds the gross consumption, which the net change does not see when production and loss cancel: it keeps the Poisson-sampled firings of a fast reaction below the population it draws on, so that a stiff reaction is resolved rather than leaped over and then rejected. For a reactant that is only consumed the third bound coincides with the first. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_state</td><td>State vector. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_reactions</td><td>All reactions; their reactants are the species the bounds are taken over. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nonCriticalReactions</td><td>Non-critical reactions, a subset of a_reactions. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nonCriticalPropensities</td><td>Non-critical propensities. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Non-critical tau-leaping time step. </dd></dl>
 
 </div>
 </div>
@@ -2134,6 +2150,33 @@ template&lt;typename R , typename State , typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="aef118d7b90e77ea304ed1f0c0f3f3fe4" name="aef118d7b90e77ea304ed1f0c0f3f3fe4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef118d7b90e77ea304ed1f0c0f3f3fe4">&#9670;&#160;</a></span>m_lossScratch</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename State , typename T  = long long&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Real&gt; <a class="el" href="classKMCSolver.html">KMCSolver</a>&lt; R, State, T &gt;::m_lossScratch</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scratch accumulator for the per-reactant expected consumption, indexed by species. </p>
+<p>Sums |nu_ij| * a_j over the reactions that consume species i, i.e. the loss side of m_muScratch without the production that cancels it. Needed only by getNonCriticalTimeStep. Same reentrancy caveat. </p>
+
+</div>
+</div>
 <a id="a728f4b627c7a72bb80f61dd52deb3727" name="a728f4b627c7a72bb80f61dd52deb3727"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a728f4b627c7a72bb80f61dd52deb3727">&#9670;&#160;</a></span>m_muScratch</h2>
 
