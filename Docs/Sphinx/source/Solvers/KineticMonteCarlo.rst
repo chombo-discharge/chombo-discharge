@@ -137,7 +137,8 @@ The third bounds the *gross* consumption of :math:`X_i`: the reactions that remo
 The net change does not see this when production and loss nearly cancel, as they do for a fast intermediate in quasi-steady state, and the Poisson-sampled firings of the fast reaction then routinely exceed the population they draw on.
 Such a leap is rejected and retried with a smaller step, but the accepted step is then conditioned on the outcome of the random draw, which biases the result.
 The consumption bound resolves the fast reaction instead, and for a reactant that is only consumed it coincides with the first bound.
-Note that all three bounds are inactive for :math:`\epsilon \geq 1`, in which case the leap is limited only by step rejection.
+Note that :math:`\epsilon` scales all three bounds but never removes them: for :math:`\epsilon \geq 1` the expected consumption of a reactant may reach or exceed its population, so the bounds no longer keep the sampled firings below the populations and the validity of the leap then rests on step rejection alone.
+The floor :math:`f_i = 1` at zero population applies for any :math:`\epsilon`.
 
 Tau-leaping variants
 ____________________
