@@ -255,6 +255,16 @@ protected:
      * @brief Cell face this polygon lies in, or -1 if it is part of the interface.
      */
     int m_face;
+
+    /**
+     * @brief Cell face the segment leaving each vertex lies in, or -1 for the interface.
+     * @details Two dimensions only, where the fluid region is one polygon whose segments lie in
+     * different cell faces. Which face a segment belongs to is read off the circuit that
+     * produced it rather than from where its endpoints sit: a sliver no wider than the distance
+     * crossings are held off the edge endpoints has every vertex within any position tolerance
+     * of the same face plane, and a positional test then assigns the whole polygon to it.
+     */
+    int m_segmentFace[s_maxVertices];
   };
 
   /**

@@ -805,17 +805,7 @@ CutCellBody::accumulateMoments() noexcept
 
       const RealVect midpoint = 0.5 * (a + b);
 
-      int face = -1;
-
-      for (int d = 0; d < SpaceDim && face < 0; d++) {
-        for (int side = 0; side < 2 && face < 0; side++) {
-          const Real plane = -0.5 + static_cast<Real>(side);
-
-          if (std::abs(a[d] - plane) < s_planeTolerance && std::abs(b[d] - plane) < s_planeTolerance) {
-            face = 2 * d + side;
-          }
-        }
-      }
+      const int face = polygon.m_segmentFace[i];
 
       if (face >= 0) {
         const Real signedLength = outward[face / 2] * ((face % 2 == 0) ? -1.0 : 1.0);
@@ -925,15 +915,43 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
   polygon.m_numVertices = 0;
   polygon.m_face        = -1;
 
+  // a vertex carries the circuit position it came from, negative for a crossing and
+  // non-negative for a corner, so that each segment can be attributed to the cell face whose
+  // stretch of the circuit produced it
+  int ring[s_maxVertices];
+
   for (int i = 0; i < 4; i++) {
     if (isFluid(a_surface.m_corner[ringCorner[i]])) {
+      ring[polygon.m_numVertices]                 = i;
       polygon.m_vertexEdge[polygon.m_numVertices] = -1;
       polygon.m_vertex[polygon.m_numVertices++]   = cornerPosition(ringCorner[i]);
     }
 
     if (a_surface.hasCrossing(ringEdge[i])) {
+      ring[polygon.m_numVertices]                 = -(i + 1);
       polygon.m_vertexEdge[polygon.m_numVertices] = ringEdge[i];
       polygon.m_vertex[polygon.m_numVertices++]   = crossingPosition(a_surface, ringEdge[i], s_edgeTolerance);
+    }
+  }
+
+  // a segment lies in a cell face unless both its ends are crossings, which is the interface.
+  // The face is the one holding the stretch of circuit the segment came from.
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    const int here = ring[i];
+    const int next = ring[(i + 1) % polygon.m_numVertices];
+
+    if (here < 0 && next < 0) {
+      polygon.m_segmentFace[i] = -1;
+    }
+    else {
+      const int position = (here >= 0) ? here : (-here - 1);
+      const int edge     = ringEdge[position];
+      const int dir      = edgeDirection(edge);
+
+      int offset[SpaceDim];
+      edgeOrigin(edge, offset);
+
+      polygon.m_segmentFace[i] = 2 * (1 - dir) + offset[1 - dir];
     }
   }
 
@@ -953,11 +971,24 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
   }
 
   if (twiceArea < 0.0) {
-    for (int i = 0; i < polygon.m_numVertices / 2; i++) {
-      const int j = polygon.m_numVertices - 1 - i;
+    const int n = polygon.m_numVertices;
+
+    int reversed[s_maxVertices];
+
+    // reversing the circuit turns the segment leaving vertex i into the one arriving at it
+    for (int i = 0; i < n; i++) {
+      reversed[i] = polygon.m_segmentFace[(n - 2 - i + n) % n];
+    }
+
+    for (int i = 0; i < n / 2; i++) {
+      const int j = n - 1 - i;
 
       std::swap(polygon.m_vertex[i], polygon.m_vertex[j]);
       std::swap(polygon.m_vertexEdge[i], polygon.m_vertexEdge[j]);
+    }
+
+    for (int i = 0; i < n; i++) {
+      polygon.m_segmentFace[i] = reversed[i];
     }
   }
 
