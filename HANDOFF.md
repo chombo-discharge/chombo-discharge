@@ -100,6 +100,19 @@ Offline, against the moments Chombo stores, over 48,798 cut cells: zero cells de
 closing to 4e-16, and `Σ(alpha_hi − alpha_lo) = a_B n` reproduced to 4.4e-16 in the area and 6.7e-10
 in the normal on every geometry.
 
+### Solvers
+
+`Electrostatics/MechShaft` with plain multigrid, iterations for `chombo-discharge` / `polyhedral`:
+**10 / 11** in two dimensions, **15 / 15** in three. `Electrostatics/ProfiledSurface` with BiCGStab:
+4 / 4 and 5 / 5. Bare multigrid does not converge on that geometry for *either* generator, which is
+why the shipped default is a solver chain rather than `gmg` alone.
+
+EBIS coarsening, three levels deep: the divergence identity holds to 3.3e-16 on every level, the
+volume fraction conserves to 1.8e-15 over 5,597 coarse cells, and there are no pathologies of any
+kind -- no kappa or alpha out of range, no centroid outside its own cell, no isolated or ghost cells.
+The numbers match the existing generator.
+
+
 ## 4. The rules that were expensive to find
 
 Full list in `PLAN.md` §5. The four that will bite a reimplementation:
@@ -123,20 +136,45 @@ and derive the threshold from the quantity's dimension — the same sliver is an
 *no* volume, not when its volume is below a tolerance, and a legitimate corner sliver of leg 1e-4 has
 kappa 1.7e-13 with apertures of 5e-9. Test topology with exact zeros.
 
-**The 1e-12 edge displacement manufactures dust, and the dust must be recognised by where it came
-from.** Crossings are held off edge endpoints to keep the combinatorics generic. That costs slivers
-whose size does *not* scale the way a threshold assumes, so no threshold catches them. Three variants
-appeared, all resolved by recognising the cause rather than the magnitude:
-1. A facet in a node plane leaves one side present only as exact zeros. The sign test calls the cell
-   cut; it is not, and building it yields a slab of width 1e-12 whose kappa scales as the
-   displacement itself rather than its cube, clearing a 1e-15 threshold comfortably. Rule:
-   a side represented only by exact zeros encloses nothing. **This rule belongs in `classify`, not in
-   the body assembly** — the generator classifies every cell but only assembles the ones
-   classification calls cut.
-2. A crossing recorded exactly at an edge endpoint sits on a corner the interface passes through.
+**Recognise a degeneracy by where it came from, never by how big it is.** This is the single most
+productive rule in the project, and it was learned five separate times.
+
+Crossings are held off edge endpoints by `s_edgeTolerance = 1e-12` so the combinatorics stay generic.
+That displacement buys genericity and pays in artifacts, and the artifacts cannot be caught by any
+magnitude threshold, because **their size does not scale the way a threshold assumes**. A displaced
+corner sliver is a slab, not a corner: its volume fraction goes as the displacement itself rather
+than as its cube, so 1e-12 sails through a 1e-15 cut. Every attempt to tune a tolerance failed;
+every fix that asked *what produced this* worked.
+
+The five instances, in the order they appeared:
+
+1. **A facet in a node plane** leaves one side present only as exact zeros. The sign test calls the
+   cell cut; it is not. Rule: a side represented only by exact zeros encloses nothing. **This rule
+   belongs in `classify`, not in the body assembly** -- the generator classifies every cell but only
+   assembles the ones classification calls cut. Putting it in the wrong place made those cells be
+   collected as irregular, assembled as degenerate, and then dropped for having no volume.
+2. **A crossing recorded exactly at an edge endpoint** sits on a corner the interface passes through.
    Displacing it opens a face aperture of 1e-12 where the truth is zero. Rule: leave those alone.
-3. A face with no area open to flux carries no arc. Both cells sharing a face compute the aperture
-   from the same crossings, so the two sides cannot disagree about whether the face is there.
+3. **A face with no area open to flux carries no arc.** Both cells sharing a face compute the
+   aperture from the same crossings, so the two sides cannot disagree about whether the face is
+   there. The one exception is a regular neighbour, which is full and whose faces are open by
+   definition; withholding the arc there makes EBGraph stop with "former regular vof not connected
+   to anything".
+4. **A segment's cell face follows from the circuit that produced it, not from where its endpoints
+   sit.** In two dimensions the fluid region is one polygon whose segments lie in different faces. A
+   positional test with a 1e-12 plane tolerance attributes *every* segment of a 1e-12-wide sliver to
+   the same face, the interface chord included; they cancel, every aperture reads zero, the faces
+   are withheld, and coarsening reports multi-valued cells. That was 114 multi-valued VoFs against
+   Chombo's 6.
+5. **A corner is on the interface when its crossings are pinned to it**, not when its value is small.
+   A machined surface puts corners at 4e-17 rather than at exactly zero, so instance 1 misses them
+   and the cell is built as a wedge of width 1e-12 with kappa around 1e-19. Ask instead whether every
+   edge leaving the corner towards the other side turns over within the displacement distance. This
+   subsumes instance 1, since a corner at zero pins its own crossings.
+
+If a sixth appears, the question to ask is not "what tolerance separates these" but "what step
+created this, and can I test for that step".
+
 
 ## 5. The Chombo bug, for the record
 
@@ -165,10 +203,12 @@ convergence test for.
 ## 7. What to do next, in order
 
 1. **Run the regression suite.** `-dim 2` and `-dim 3`, default generator unchanged, to confirm
-   nothing moved for existing users. Then a `polyhedral` pass to see what does. Not yet done.
-2. **The Poisson A/B.** The reason the switch exists: same grids, same graph, same crossings, only
-   the moments differ, so it isolates exactly what second-order apertures cost. This is the number
-   that decides whether Milestone 2 is worth building. Not yet done.
+   nothing moved for existing users. Then a `polyhedral` pass to see what does. Not yet done, and it
+   is the last thing standing between this and review.
+2. **A convergence study.** The solver comparison in section 3 says the cost is near zero at the
+   resolutions tested, but not what happens as the grid refines. The apertures are second order
+   rather than third, so a study on a geometry with an analytic solution is what turns "no measured
+   penalty" into a statement about the scheme.
 3. **Milestone 2** — retain `CutCellSurface` and refine by clipping. `PLAN_MILESTONES.md`. The
    clipper already exists and is verified in `spike/refine_spike.cpp`; 230,400 descendants over nine
    geometries, all seven moments conserving to 9.4e-16, zero topology defects. Depth 3 has not been
@@ -182,7 +222,24 @@ flux registers and redistribution stencils accept a cut cell whose neighbour is 
 The geometry can be made exactly conservative across that interface; the solvers are a separate
 question, and nothing in this work answers it.
 
-## 8. Known limits
+## 8. One investigation worth not repeating
+
+Plain multigrid took 1.5 to 1.9 times as many iterations with `polyhedral` on MechShaft. The obvious
+reading -- that dropping the apertures from third order to second had made the coarse-grid operators
+worse -- was wrong, and the measurement that showed it was cheap: **with AMR switched off the two
+generators needed the same number of iterations**, 8 and 8 in three dimensions. A genuine order
+penalty appears on a single level. This one did not, it did not grow with depth, and it never
+appeared on ProfiledSurface at any bottom-drop setting.
+
+The cause was instance 5 in section 4: 224 cells built as 1e-19 wedges and then removed again by the
+volume threshold, each leaving a hole where Chombo has a cell, with the holes falling along the
+coarse-fine interface. Fixing the classification closed the gap to zero in three dimensions.
+
+Keep the general lesson. Before attributing a solver symptom to the accuracy of the discretisation,
+**turn off AMR**. If the symptom survives it is the operator; if it does not it is the graph, and the
+graph is where the artifacts of section 4 live.
+
+## 9. Known limits
 
 - `Prototypes/CutCellRefinement/spike/refine_spike.cpp` still lacks the face-bend and apex
   representation. Both default off in Milestone 1, so its feature set matches, but Milestone 2 on

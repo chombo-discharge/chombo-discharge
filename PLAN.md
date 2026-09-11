@@ -216,22 +216,34 @@ classification, crossing detection, and the saddle test must all use the *same* 
 that predicate is `copysign(1.0, v) < 0.0`, because that is what Chombo uses. Negative zero
 produced four distinct bugs in this work.
 
-### 5.4 Small-but-not-zero decides something qualitative
+### 5.4 Recognise a degeneracy by where it came from, never by how big it is
 
-The dominant failure family, stated once: a quantity that is small but not exactly zero passes
-a `> 0` test and then decides something *qualitative* — a weighted-mean centroid, a connected
-component, a face classification. Concretely:
+The single most productive rule in this work, learned five separate times.
 
-- Apertures of 1e-28 dictating an entire weighted-mean centroid (three separate sites).
-- Sliver triangles of ~1e-23 area left by holding crossings off edge endpoints; clipping
-  detaches one and it reads as a second connected component. 125 cells were reported
-  multi-valued on the strength of a speck of volume 1e-24.
-- **Cull thresholds must match the dimension of the quantity.** The same sliver is an *area* of
-  order 1e-24 in 3-D but a *length* of order 1e-12 in 2-D. One shared constant caught it in 3-D
-  and sailed straight past it in 2-D.
+Crossings are held off edge endpoints by 1e-12 so the combinatorics stay generic. That displacement
+buys genericity and pays in artifacts, and no magnitude threshold catches them, because **their size
+does not scale the way a threshold assumes**. A displaced corner sliver is a slab rather than a
+corner: its volume fraction goes as the displacement itself rather than as its cube, so 1e-12 sails
+through a 1e-15 cut. Every attempt to tune a tolerance failed; every fix that asked *what produced
+this* worked.
 
-Guard every magnitude comparison with a threshold, derive the threshold from the quantity's
-dimension, and force covered and full faces to exactly 0 and 1.
+| # | the artifact | the test that works |
+| --- | --- | --- |
+| 1 | a facet in a node plane leaves one side present only as exact zeros | a side represented only by exact zeros encloses nothing -- **in `classify`, not in the body assembly** |
+| 2 | a crossing at an edge endpoint, displaced, opens a 1e-12 aperture | leave a crossing that is already at an endpoint alone |
+| 3 | a zero aperture on a face that the graph still carries | a face with no area open to flux carries no arc, unless the neighbour is regular |
+| 4 | a positional face test attributes every segment of a sliver to one face | a segment's face follows from the circuit that produced it |
+| 5 | corners at 4e-17, missed by 1, built as 1e-19 wedges | a corner is on the interface when its crossings are pinned to it |
+
+The same family in its older form: a quantity small but not exactly zero passing a `> 0` test and
+then deciding something *qualitative*. Apertures of 1e-28 dictating a weighted-mean centroid; slivers
+of 1e-23 reading as a second connected component. Guard every magnitude comparison, and derive the
+threshold from the quantity's dimension -- the same sliver is an *area* of 1e-24 in 3-D and a
+*length* of 1e-12 in 2-D.
+
+If a sixth appears, the question is not "what tolerance separates these" but "what step created this,
+and can I test for that step".
+
 
 ### 5.5 And the mirror error: a threshold that is too coarse
 
@@ -304,7 +316,25 @@ amplify rounding. It does not propagate, but solvers should not assume machine p
 Cross-cell consistency: fine-face apertures and face centroids agree to 1e-16 computed from
 either side.
 
-### 6.3 C++ spike
+### 6.3 Solvers
+
+`Electrostatics/MechShaft` with plain multigrid, iterations for the existing generator against this
+one: **10 / 11** in two dimensions, **15 / 15** in three. `Electrostatics/ProfiledSurface` with
+BiCGStab: 4 / 4 and 5 / 5; bare multigrid does not converge there for *either* generator.
+
+EBIS coarsening, three levels deep: the divergence identity holds to 3.3e-16 on every level, the
+volume fraction conserves to 1.8e-15 over 5,597 coarse cells, and there are no pathologies of any
+kind. The numbers match the existing generator.
+
+A caution on how that was reached. Plain multigrid initially took 1.5 to 1.9 times as many
+iterations, which reads as the third-to-second-order aperture trade damaging the coarse-grid
+operators. It was not: **with AMR switched off the two generators needed the same number of
+iterations**, and a genuine order penalty appears on a single level. The cause was §5.4 instance 5,
+and fixing the classification closed the gap. Before attributing a solver symptom to the accuracy of
+the discretisation, turn off AMR -- if the symptom survives it is the operator, and if it does not it
+is the graph.
+
+### 6.4 C++ spike
 
 `spike/refine_spike.cpp`, storage = 12 crossings + 8 corners, body rebuilt on demand.
 
@@ -317,7 +347,7 @@ either side.
 
 100k cells built and refined one level: 0.62 s, against a 1 s budget.
 
-### 6.4 Two dimensions
+### 6.5 Two dimensions
 
 The construction degenerates cleanly: the patch is a single chord rather than a triangle fan,
 and clipping a polygon by a half-plane closes itself, so there are no cap loops. Nine
@@ -328,7 +358,7 @@ refusals, zero topology defects.
 moments to 1e-13, because in 2-D the interface inside a cut cell genuinely *is* a straight
 chord. The third-to-second-order trade below is a 3-D-only cost.
 
-### 6.5 Against Chombo's stored moments
+### 6.6 Against Chombo's stored moments
 
 For planar interfaces the construction reproduces Chombo's existing moments to 1e-15, so the
 change is invisible wherever the geometry is genuinely planar. On curved geometry the apertures
