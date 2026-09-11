@@ -164,6 +164,19 @@ public:
   boundaryCentroid() const noexcept;
 
   /**
+   * @brief Subdivide the body into the 2^SpaceDim cells that partition it.
+   * @details Clips the polygons by the cell's own mid-planes and caps each opening that leaves,
+   * so the children are literal sub-bodies of this one rather than reconstructions of it. Every
+   * coarsening relation is then an identity about a partition rather than a condition to
+   * satisfy, which is what makes the children's moments sum back to this body's exactly.
+   * @param[out] a_children The children, each expressed in its own frame, ordered so that child
+   * c sits on the high side of direction d when bit d of c is set.
+   * @return True if every child closed; false if one of them could not be assembled.
+   */
+  bool
+  refine(CutCellBody a_children[1 << SpaceDim]) const noexcept;
+
+  /**
    * @brief How far the assembled polygons are from enclosing a volume.
    * @details The sum of the outward area vectors over every polygon, which vanishes for a
    * closed surface. Non-zero means the face polygons and the interface patch disagree about
@@ -295,6 +308,21 @@ protected:
    */
   void
   orientOutward(Polygon& a_polygon, const int a_dir, const int a_side) const noexcept;
+
+  /**
+   * @brief Cut the body with an axis-aligned half-space, capping the opening that leaves.
+   * @details The cap is assembled from the segments the cut leaves lying in the plane, and they
+   * are consumed as segments rather than as vertices: a cross-section can have several
+   * components and two of them may meet at a shared vertex, and marking that vertex used drops
+   * one loop and splices the other.
+   * @param[in]  a_dir        Coordinate direction of the cutting plane's normal.
+   * @param[in]  a_coordinate Where the plane sits along that direction.
+   * @param[in]  a_keepLow    Whether to keep the side below the plane.
+   * @param[out] a_out        The cut body.
+   * @return True if the result fitted in the body's fixed storage.
+   */
+  bool
+  clip(const int a_dir, const Real a_coordinate, const bool a_keepLow, CutCellBody& a_out) const noexcept;
 
   /**
    * @brief Take the moments of the assembled polygons.

@@ -381,6 +381,30 @@ crossingLoops(const CutCellSurface& a_surface,
 }
 #endif
 
+inline VertexKey
+vertexKey(const RealVect& a_x) noexcept
+{
+  VertexKey key = {};
+
+  for (int d = 0; d < SpaceDim; d++) {
+    key.m_q[d] = std::lround(a_x[d] * 1.0E11);
+  }
+
+  return key;
+}
+
+inline bool
+lexLess(const RealVect& a_a, const RealVect& a_b) noexcept
+{
+  for (int d = 0; d < SpaceDim - 1; d++) {
+    if (a_a[d] != a_b[d]) {
+      return a_a[d] < a_b[d];
+    }
+  }
+
+  return a_a[SpaceDim - 1] < a_b[SpaceDim - 1];
+}
+
 } // namespace detail
 } // namespace PolyhedralEB
 

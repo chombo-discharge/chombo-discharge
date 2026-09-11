@@ -767,6 +767,253 @@ CutCellBody::define(const CutCellSurface& a_surface) noexcept
   return closed && inRange;
 }
 
+bool
+CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow, CutCellBody& a_out) const noexcept
+{
+  a_out = CutCellBody();
+
+  RealVect  segmentFrom[s_maxPolygons];
+  RealVect  segmentTo[s_maxPolygons];
+  detail::VertexKey keyFrom[s_maxPolygons];
+  detail::VertexKey keyTo[s_maxPolygons];
+  int       segmentFace[s_maxPolygons];
+
+  int numSegments = 0;
+
+  const Real sign = a_keepLow ? 1.0 : -1.0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& polygon = m_polygon[ip];
+
+    if (a_out.m_numPolygons >= s_maxPolygons) {
+      return false;
+    }
+
+    Polygon& cut = a_out.m_polygon[a_out.m_numPolygons];
+
+    cut.m_numVertices = 0;
+    cut.m_face        = polygon.m_face;
+
+    for (int i = 0; i < polygon.m_numVertices; i++) {
+      const RealVect& a = polygon.m_vertex[i];
+      const RealVect& b = polygon.m_vertex[(i + 1) % polygon.m_numVertices];
+
+      const Real fa = sign * (a[a_dir] - a_coordinate);
+      const Real fb = sign * (b[a_dir] - a_coordinate);
+
+      if (cut.m_numVertices + 2 > s_maxVertices) {
+        return false;
+      }
+
+      if (fa <= detail::s_clipTolerance) {
+        RealVect keep = a;
+
+        if (fa >= -detail::s_clipTolerance) {
+          keep[a_dir] = a_coordinate;
+        }
+
+        cut.m_segmentFace[cut.m_numVertices] = polygon.m_segmentFace[i];
+        cut.m_vertexEdge[cut.m_numVertices]  = polygon.m_vertexEdge[i];
+        cut.m_vertex[cut.m_numVertices++]    = keep;
+      }
+
+      if ((fa < -detail::s_clipTolerance && fb > detail::s_clipTolerance) || (fb < -detail::s_clipTolerance && fa > detail::s_clipTolerance)) {
+        // interpolate from the lexicographically lower end, whichever way this polygon walks
+        // the edge, so that the two polygons sharing it land on the same point bit for bit
+        const bool      ordered = detail::lexLess(a, b);
+        const RealVect& first   = ordered ? a : b;
+        const RealVect& second  = ordered ? b : a;
+        const Real      f0      = ordered ? fa : fb;
+        const Real      f1      = ordered ? fb : fa;
+
+        RealVect x = first + (f0 / (f0 - f1)) * (second - first);
+
+        x[a_dir] = a_coordinate;
+
+        cut.m_segmentFace[cut.m_numVertices] = polygon.m_segmentFace[i];
+        cut.m_vertexEdge[cut.m_numVertices]  = -1;
+        cut.m_vertex[cut.m_numVertices++]    = x;
+      }
+    }
+
+    if (cut.m_numVertices < 3) {
+      continue;
+    }
+
+    Real     area = 0.0;
+    RealVect vector;
+    RealVect centroid;
+
+    detail::polygonMoments(cut.m_vertex, cut.m_numVertices, area, vector, centroid);
+
+    if (area < s_nullArea) {
+      continue;
+    }
+
+    a_out.m_numPolygons++;
+
+    bool whollyInPlane = true;
+
+    for (int i = 0; i < cut.m_numVertices; i++) {
+      whollyInPlane = whollyInPlane && (std::abs(cut.m_vertex[i][a_dir] - a_coordinate) < detail::s_clipTolerance);
+    }
+
+    if (whollyInPlane) {
+      continue;
+    }
+
+    for (int i = 0; i < cut.m_numVertices; i++) {
+      const RealVect& a = cut.m_vertex[i];
+      const RealVect& b = cut.m_vertex[(i + 1) % cut.m_numVertices];
+
+      if (numSegments >= s_maxPolygons) {
+        return false;
+      }
+
+      const bool bothInPlane = std::abs(a[a_dir] - a_coordinate) < detail::s_clipTolerance &&
+                               std::abs(b[a_dir] - a_coordinate) < detail::s_clipTolerance;
+
+      if (bothInPlane && detail::vertexKey(a) != detail::vertexKey(b)) {
+        segmentFrom[numSegments] = b;
+        segmentTo[numSegments]   = a;
+        keyFrom[numSegments]     = detail::vertexKey(b);
+        keyTo[numSegments]       = detail::vertexKey(a);
+        segmentFace[numSegments] = 2 * a_dir + (a_keepLow ? 1 : 0);
+        numSegments++;
+      }
+    }
+  }
+
+  bool used[s_maxPolygons] = {false};
+
+  for (int s0 = 0; s0 < numSegments; s0++) {
+    if (used[s0]) {
+      continue;
+    }
+
+    used[s0] = true;
+
+    if (a_out.m_numPolygons >= s_maxPolygons) {
+      return false;
+    }
+
+    Polygon& loop = a_out.m_polygon[a_out.m_numPolygons];
+
+    loop.m_numVertices = 0;
+    loop.m_face        = segmentFace[s0];
+
+    loop.m_segmentFace[loop.m_numVertices] = segmentFace[s0];
+    loop.m_vertexEdge[loop.m_numVertices]  = -1;
+    loop.m_vertex[loop.m_numVertices++]    = segmentFrom[s0];
+
+    RealVect        current    = segmentTo[s0];
+    detail::VertexKey       currentKey = keyTo[s0];
+    const detail::VertexKey endKey     = keyFrom[s0];
+
+    bool closed = false;
+
+    for (int guard = 0; guard <= numSegments + 1; guard++) {
+      if (currentKey == endKey) {
+        closed = true;
+
+        break;
+      }
+
+      int next = -1;
+
+      for (int j = 0; j < numSegments && next < 0; j++) {
+        if (!used[j] && keyFrom[j] == currentKey) {
+          next = j;
+        }
+      }
+
+      if (next < 0 || loop.m_numVertices >= s_maxVertices) {
+        break;
+      }
+
+      used[next] = true;
+
+      loop.m_segmentFace[loop.m_numVertices] = segmentFace[s0];
+      loop.m_vertexEdge[loop.m_numVertices]  = -1;
+      loop.m_vertex[loop.m_numVertices++]    = current;
+
+      current    = segmentTo[next];
+      currentKey = keyTo[next];
+    }
+
+    if (!closed || loop.m_numVertices < 3) {
+      continue;
+    }
+
+    Real     area = 0.0;
+    RealVect vector;
+    RealVect centroid;
+
+    detail::polygonMoments(loop.m_vertex, loop.m_numVertices, area, vector, centroid);
+
+    if (area >= s_nullArea) {
+      a_out.m_numPolygons++;
+    }
+  }
+
+  return true;
+}
+
+bool
+CutCellBody::refine(CutCellBody a_children[1 << SpaceDim]) const noexcept
+{
+  constexpr int numChildren = 1 << SpaceDim;
+
+  // Cut as a tree. Splitting on the first direction gives two bodies rather than 2^SpaceDim,
+  // and splitting those on the second gives four, so each plane is applied once per body it
+  // actually divides instead of once per child. The last direction writes the children
+  // directly, so the working buffers only ever hold half of them.
+  CutCellBody buffer[2][numChildren / 2];
+
+  buffer[0][0] = *this;
+
+  int source = 0;
+  int count  = 1;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    const bool last = (d == SpaceDim - 1);
+
+    for (int i = 0; i < count; i++) {
+      for (int side = 0; side < 2; side++) {
+        // the child's index carries the side it took in bit d, which is the same convention the
+        // frame shift below reads
+        const int    destination = i + side * count;
+        CutCellBody& target      = last ? a_children[destination] : buffer[1 - source][destination];
+
+        if (!buffer[source][i].clip(d, 0.0, side == 0, target)) {
+          return false;
+        }
+      }
+    }
+
+    source = 1 - source;
+    count *= 2;
+  }
+
+  for (int c = 0; c < numChildren; c++) {
+    CutCellBody& child = a_children[c];
+
+    for (int ip = 0; ip < child.m_numPolygons; ip++) {
+      for (int iv = 0; iv < child.m_polygon[ip].m_numVertices; iv++) {
+        for (int d = 0; d < SpaceDim; d++) {
+          const Real centre = -0.25 + 0.5 * static_cast<Real>((c >> d) & 1);
+
+          child.m_polygon[ip].m_vertex[iv][d] = 2.0 * (child.m_polygon[ip].m_vertex[iv][d] - centre);
+        }
+      }
+    }
+
+    child.accumulateMoments();
+  }
+
+  return true;
+}
+
 Real
 CutCellBody::volumeFraction() const noexcept
 {

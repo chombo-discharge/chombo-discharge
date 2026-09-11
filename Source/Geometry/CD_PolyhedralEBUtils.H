@@ -169,6 +169,75 @@ crossingLoops(const CutCellSurface& a_surface,
               int                   a_loop[CutCellSurface::s_numEdges],
               int                   a_start[CutCellSurface::s_numEdges + 1]) noexcept;
 #endif
+/**
+ * @brief Distance within which a clipped vertex is placed exactly on the cutting plane.
+ * @details A vertex kept within tolerance of the plane must be put exactly on it, or the cap
+ * it belongs to stops being recognised as lying in a cell face and its area is charged to the
+ * interface instead.
+ */
+constexpr Real s_clipTolerance = 1.0E-12;
+
+/**
+ * @brief A vertex's identity, quantised, for matching cap segments up.
+ * @details Compared component by component rather than hashed: a hash collision would splice
+ * two cap loops into one.
+ */
+struct VertexKey
+{
+  /**
+   * @brief Quantised position.
+   */
+  long m_q[SpaceDim] = {0};
+
+  /**
+   * @brief Whether two vertices quantise to the same position.
+   * @param[in] a_other Key to compare against.
+   * @return True if every component matches.
+   */
+  bool
+  operator==(const VertexKey& a_other) const noexcept
+  {
+    bool same = true;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      same = same && (m_q[d] == a_other.m_q[d]);
+    }
+
+    return same;
+  }
+
+  /**
+   * @brief Whether two vertices quantise to different positions.
+   * @param[in] a_other Key to compare against.
+   * @return True if any component differs.
+   */
+  bool
+  operator!=(const VertexKey& a_other) const noexcept
+  {
+    return !(*this == a_other);
+  }
+};
+
+/**
+ * @brief Quantise a vertex to its identity.
+ * @param[in] a_x Vertex position.
+ * @return The vertex's key.
+ */
+inline VertexKey
+vertexKey(const RealVect& a_x) noexcept;
+
+/**
+ * @brief Order two points so an edge is always interpolated from the same end.
+ * @details Two polygons sharing an edge walk it in opposite directions, and a + t(b - a) is
+ * only algebraically equal to b + t'(a - b): the two differ in the last bits, which is enough
+ * to put them in different quantisation buckets and break the cap loop that has to join them.
+ * @param[in] a_a First point.
+ * @param[in] a_b Second point.
+ * @return True if the first point comes first.
+ */
+inline bool
+lexLess(const RealVect& a_a, const RealVect& a_b) noexcept;
+
 } // namespace detail
 } // namespace PolyhedralEB
 
