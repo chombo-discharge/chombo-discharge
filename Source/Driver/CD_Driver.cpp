@@ -1205,7 +1205,13 @@ Driver::parseGeometryGeneration()
   pp.get("geometry_generation", m_geometryGeneration);
   pp.get("geometry_scan_level", m_geoScanLevel);
 
-  if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo")) {
+  // absent from input files written before the polyhedral generator existed, and a cell that
+  // will not close is worth stopping for, so the fallback is the strict one
+  m_strictGeometry = true;
+  pp.query("geometry_strict", m_strictGeometry);
+
+  if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo" ||
+        m_geometryGeneration == "polyhedral")) {
     MayDay::Abort("Driver:parseGeometryGeneration - unsupported argument requested");
   }
 }
@@ -1403,7 +1409,7 @@ Driver::setupGeometryOnly()
   const Real t0 = Timer::wallClock();
 
   // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
-  if (m_geometryGeneration == "chombo-discharge") {
+  if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
 
     // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
     // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
@@ -1425,7 +1431,12 @@ Driver::setupGeometryOnly()
 
     EBISLevel::s_distributedData = true;
 
-    m_computationalGeometry->useScanShop(scanDomain);
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(scanDomain, m_strictGeometry);
+    }
+    else {
+      m_computationalGeometry->useScanShop(scanDomain);
+    }
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();
@@ -1489,7 +1500,7 @@ Driver::setupFresh(const int a_initialRegrids)
   this->sanityCheck(); // Sanity check before doing anything expensive
 
   // Need to specify geometry generation method.
-  if (m_geometryGeneration == "chombo-discharge") {
+  if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
     // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
     // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
     // base AMR level, which we make here.
@@ -1510,7 +1521,12 @@ Driver::setupFresh(const int a_initialRegrids)
 
     EBISLevel::s_distributedData = true;
 
-    m_computationalGeometry->useScanShop(scanDomain);
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(scanDomain, m_strictGeometry);
+    }
+    else {
+      m_computationalGeometry->useScanShop(scanDomain);
+    }
   }
   else if (m_geometryGeneration == "chombo") {
     if (m_ebisMemoryLoadBalance) {
@@ -1643,9 +1659,15 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
   this->sanityCheck(); // Sanity check before doing anything expensive
 
   // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
-  if (m_geometryGeneration == "chombo-discharge") {
+  if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
     EBISLevel::s_distributedData = true;
-    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel], m_strictGeometry);
+    }
+    else {
+      m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+    }
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();

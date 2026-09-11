@@ -83,6 +83,17 @@ public:
   useChomboShop();
 
   /**
+   * @brief Generate the geometry with PolyhedralGeometryShop.
+   * @details Same topology as the chombo-discharge generator, but the moments are exact
+   * integrals of an explicitly reconstructed surface rather than quadratures of the implicit
+   * function.
+   * @param[in] a_beginDomain Level on which to initiate the load balancing sequence
+   * @param[in] a_strict      Whether a cell whose body will not close aborts the run
+   */
+  void
+  usePolyhedralShop(const ProblemDomain& a_beginDomain, const bool a_strict);
+
+  /**
    * @brief Set dielectrics
    * @param[in] a_dielectrics Dielectris
    */
@@ -171,7 +182,25 @@ protected:
   /**
    * @brief True if we use the chombo-discharge geometry generation utility.
    */
-  bool m_useScanShop;
+  /**
+   * @brief Which generator to build the geometry with.
+   */
+  enum class Generator
+  {
+    Chombo,
+    ChomboDischarge,
+    Polyhedral
+  };
+
+  /**
+   * @brief Generator selected by the user.
+   */
+  Generator m_generator;
+
+  /**
+   * @brief Whether the polyhedral generator aborts on a cell whose body will not close.
+   */
+  bool m_strictGeometry;
 
   /**
    * @brief Grid level where we begin using ScanShop

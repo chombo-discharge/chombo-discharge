@@ -24,10 +24,11 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_NewIntersectionIF.H>
 #include <CD_ScanShop.H>
+#include <CD_PolyhedralGeometryShop.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_useScanShop(false)
+ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::Chombo), m_strictGeometry(true)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -53,8 +54,18 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 
   // TLDR: If you called this function you signal that ComputationalGeometry will use ScanShop for geometry generation.
 
-  m_useScanShop = true;
-  m_scanDomain  = a_beginDomain;
+  m_generator  = Generator::ChomboDischarge;
+  m_scanDomain = a_beginDomain;
+}
+
+void
+ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain, const bool a_strict)
+{
+  CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain, bool)");
+
+  m_generator      = Generator::Polyhedral;
+  m_scanDomain     = a_beginDomain;
+  m_strictGeometry = a_strict;
 }
 
 void
@@ -64,8 +75,8 @@ ComputationalGeometry::useChomboShop()
 
   // TLDR: If you called this function you signal that ComputationalGeometry will use Chombo's GeometryShop for geometry
   // generation.
-  m_useScanShop = false;
-  m_scanDomain  = ProblemDomain();
+  m_generator  = Generator::Chombo;
+  m_scanDomain = ProblemDomain();
 }
 
 const Vector<Dielectric>&
@@ -170,7 +181,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
   // Define the multifluid index space.
-  const bool useDistributedData = m_useScanShop;
+  const bool useDistributedData = (m_generator != Generator::Chombo);
 
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
                                  a_probLo,
@@ -208,8 +219,23 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 
   m_implicitFunctionGas = RefCountedPtr<BaseIF>(new NewIntersectionIF(parts));
 
-  // Build the EBIS geometry. Use either ScanShop or Chombo here.
-  if (m_useScanShop) {
+  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
+  if (m_generator == Generator::Polyhedral) {
+    auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionGas,
+                                            0,
+                                            a_finestDx,
+                                            a_probLo,
+                                            a_finestDomain,
+                                            m_scanDomain,
+                                            m_maxGhostEB,
+                                            s_thresh,
+                                            m_strictGeometry);
+
+    shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
+
+    a_geoserver = static_cast<GeometryService*>(shop);
+  }
+  else if (m_generator == Generator::ChomboDischarge) {
     auto* scanShop = new ScanShop(*m_implicitFunctionGas,
                                   0,
                                   a_finestDx,
@@ -273,8 +299,23 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
 
     m_implicitFunctionSolid = RefCountedPtr<BaseIF>(new IntersectionIF(parts));
 
-    // Build the EBIS geometry. Use either ScanShop or Chombo here.
-    if (m_useScanShop) {
+    // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
+    if (m_generator == Generator::Polyhedral) {
+      auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionSolid,
+                                              0,
+                                              a_finestDx,
+                                              a_probLo,
+                                              a_finestDomain,
+                                              m_scanDomain,
+                                              m_maxGhostEB,
+                                              s_thresh,
+                                              m_strictGeometry);
+
+      shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
+
+      a_geoserver = static_cast<GeometryService*>(shop);
+    }
+    else if (m_generator == Generator::ChomboDischarge) {
       auto* scanShop = new ScanShop(*m_implicitFunctionSolid,
                                     0,
                                     a_finestDx,
