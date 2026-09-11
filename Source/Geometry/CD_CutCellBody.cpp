@@ -495,12 +495,41 @@ CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide
   bool any = false;
 
   for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
-    const Real value = a_surface.m_corner[c];
+    if (isFluid(a_surface.m_corner[c]) != a_fluidSide) {
+      continue;
+    }
 
-    if (isFluid(value) == a_fluidSide) {
-      any = true;
+    any = true;
 
-      if (value != 0.0) {
+    // the corner is on the interface when every edge leaving it towards the other side turns
+    // over within the distance crossings are held off the endpoints by. Asking where the
+    // crossing is, rather than how small the corner value is, keeps this a question about the
+    // surface rather than about a magnitude
+    for (int d = 0; d < SpaceDim; d++) {
+      const int other = c ^ (1 << d);
+
+      if (isFluid(a_surface.m_corner[other]) == a_fluidSide) {
+        continue;
+      }
+
+      const int low = c & ~(1 << d);
+
+      int offset[SpaceDim];
+
+      for (int k = 0; k < SpaceDim; k++) {
+        offset[k] = (low >> k) & 1;
+      }
+
+      const int  edge = edgeIndex(d, offset);
+      const Real t    = a_surface.m_crossing[edge];
+
+      if (!a_surface.hasCrossing(edge)) {
+        return false;
+      }
+
+      const Real distance = (((c >> d) & 1) == 1) ? (1.0 - t) : t;
+
+      if (distance > s_edgeTolerance) {
         return false;
       }
     }
