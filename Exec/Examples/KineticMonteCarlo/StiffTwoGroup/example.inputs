@@ -1,6 +1,6 @@
 # ====================================================================================================
-# StiffTwoGroup -- a slow branching reaction feeding a fast relaxation reaction. The exact mean of
-# e + el at stop_time follows from the moment equations, see README.md.
+# StiffTwoGroup -- a slow branching reaction feeding a fast relaxation reaction. The mean populations
+# are compared against the moment equations, see README.md.
 # ====================================================================================================
 ItoKMCJSON.verbose               = false
 ItoKMCJSON.debug                 = false
@@ -17,8 +17,8 @@ ItoKMCJSON.exit_tolerance        = 1.E-6              ## Exit tolerance for impl
 ItoKMCJSON.algorithm             = hybrid_midpoint    ## Integration algorithm
 
 # Driver settings.
-Random.seed     = -1         ## Initial random seed (-1 = from clock)
-num_runs        = 20000      ## Independent realizations per rank
-stop_time       = 1.0E-9     ## Stop time
-max_dt          = 1.0E-11    ## Fixed step handed to advanceKMC
-exact_mean      = 993.89     ## Exact mean of e + el at stop_time for the rates in chemistry.json
+Random.seed           = -1         ## Initial random seed (-1 = from clock)
+num_runs              = 20000      ## Independent realizations per rank
+initial_particles     = 1          ## Initial number of electrons in the e group
+stop_time             = 1.0E-9     ## Stop time
+max_dt                = 1.0E-11    ## Fixed step handed to advanceKMC
