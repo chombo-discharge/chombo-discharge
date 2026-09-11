@@ -28,7 +28,7 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::Chombo)
+ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::GeometryShop)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -54,7 +54,7 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 
   // TLDR: If you called this function you signal that ComputationalGeometry will use ScanShop for geometry generation.
 
-  m_generator  = Generator::ChomboDischarge;
+  m_generator  = Generator::ScanShop;
   m_scanDomain = a_beginDomain;
 }
 
@@ -63,7 +63,7 @@ ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain)");
 
-  m_generator  = Generator::Polyhedral;
+  m_generator  = Generator::PolyhedralShop;
   m_scanDomain = a_beginDomain;
 }
 
@@ -74,7 +74,7 @@ ComputationalGeometry::useChomboShop()
 
   // TLDR: If you called this function you signal that ComputationalGeometry will use Chombo's GeometryShop for geometry
   // generation.
-  m_generator  = Generator::Chombo;
+  m_generator  = Generator::GeometryShop;
   m_scanDomain = ProblemDomain();
 }
 
@@ -180,7 +180,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
   // Define the multifluid index space.
-  const bool useDistributedData = (m_generator != Generator::Chombo);
+  const bool useDistributedData = (m_generator != Generator::GeometryShop);
 
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
                                  a_probLo,
@@ -219,7 +219,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
   m_implicitFunctionGas = RefCountedPtr<BaseIF>(new NewIntersectionIF(parts));
 
   // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
-  if (m_generator == Generator::Polyhedral) {
+  if (m_generator == Generator::PolyhedralShop) {
     auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionGas,
                                             0,
                                             a_finestDx,
@@ -234,7 +234,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 
     a_geoserver = static_cast<GeometryService*>(shop);
   }
-  else if (m_generator == Generator::ChomboDischarge) {
+  else if (m_generator == Generator::ScanShop) {
     auto* scanShop = new ScanShop(*m_implicitFunctionGas,
                                   0,
                                   a_finestDx,
@@ -299,7 +299,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
     m_implicitFunctionSolid = RefCountedPtr<BaseIF>(new IntersectionIF(parts));
 
     // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
-    if (m_generator == Generator::Polyhedral) {
+    if (m_generator == Generator::PolyhedralShop) {
       auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionSolid,
                                               0,
                                               a_finestDx,
@@ -314,7 +314,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
 
       a_geoserver = static_cast<GeometryService*>(shop);
     }
-    else if (m_generator == Generator::ChomboDischarge) {
+    else if (m_generator == Generator::ScanShop) {
       auto* scanShop = new ScanShop(*m_implicitFunctionSolid,
                                     0,
                                     a_finestDx,

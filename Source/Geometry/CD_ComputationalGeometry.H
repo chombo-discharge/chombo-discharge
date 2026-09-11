@@ -188,16 +188,14 @@ protected:
   Real m_eps0;
 
   /**
-   * @brief True if we use the chombo-discharge geometry generation utility.
-   */
-  /**
    * @brief Which generator to build the geometry with.
+   * @details Each enumerator names the class that the geometry is generated with.
    */
   enum class Generator
   {
-    Chombo,
-    ChomboDischarge,
-    Polyhedral
+    GeometryShop,
+    ScanShop,
+    PolyhedralShop
   };
 
   /**
