@@ -1205,6 +1205,11 @@ Driver::parseGeometryGeneration()
   pp.get("geometry_generation", m_geometryGeneration);
   pp.get("geometry_scan_level", m_geoScanLevel);
 
+  // absent from input files written before the polyhedral generator existed; one reconstructs
+  // each cell's surface on the cell itself, which is the behaviour without it
+  m_geometryRefinement = 1;
+  pp.query("geometry_refinement", m_geometryRefinement);
+
   if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo" ||
         m_geometryGeneration == "polyhedral")) {
     MayDay::Abort("Driver:parseGeometryGeneration - unsupported argument requested");
@@ -1427,7 +1432,7 @@ Driver::setupGeometryOnly()
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->usePolyhedralShop(scanDomain);
+      m_computationalGeometry->usePolyhedralShop(scanDomain, m_geometryRefinement);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
@@ -1517,7 +1522,7 @@ Driver::setupFresh(const int a_initialRegrids)
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->usePolyhedralShop(scanDomain);
+      m_computationalGeometry->usePolyhedralShop(scanDomain, m_geometryRefinement);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
@@ -1658,7 +1663,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel]);
+      m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel], m_geometryRefinement);
     }
     else {
       m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);

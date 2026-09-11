@@ -58,6 +58,8 @@ public:
    * @param[in] a_ebGhost      Number of EB ghost cells
    * @param[in] a_thrshdVoF    Volume fraction below which a cut cell is dropped
    * @param[in] a_strict       Whether a declined cell aborts the run
+   * @param[in] a_refinement   How many times the generated cells are a refinement of the cells
+   * the surface is reconstructed on. One reconstructs on the generated cells themselves.
    */
   PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                          const int            a_verbosity,
@@ -67,7 +69,8 @@ public:
                          const ProblemDomain& a_scanLevel,
                          const int            a_ebGhost,
                          const Real           a_thrshdVoF,
-                         const bool           a_strict);
+                         const bool           a_strict,
+                         const int            a_refinement);
 
   /**
    * @brief Destructor.
@@ -124,6 +127,29 @@ protected:
    * @brief Volume fraction below which a cut cell carries no fluid worth keeping.
    */
   Real m_volumeThreshold;
+
+  /**
+   * @brief Refinement between the cells the surface is reconstructed on and the ones generated.
+   * @details At one, each cell's surface is reconstructed on the cell itself. At two, it is
+   * reconstructed on the cell's parent and cut in half along each direction, so the generated
+   * cells are literal sub-bodies of a coarser reconstruction and their moments sum back to it
+   * exactly. Higher powers of two cut repeatedly.
+   */
+  int m_refinement;
+
+  /**
+   * @brief Build a cell's body by cutting the body of the coarser cell containing it.
+   * @details The coarse cell's surface is reconstructed at the coarser resolution and cut,
+   * rather than the cell's own surface being reconstructed at its own resolution, so that the
+   * cells of a refinement partition the geometry the coarser level sees.
+   * @param[out] a_body    The cell's body, in its own frame
+   * @param[in]  a_cell    The cell
+   * @param[in]  a_probLo  Lower-left corner of computational domain
+   * @param[in]  a_dx      Grid resolution of the generated cells
+   * @return True if the coarse body closed and the cut succeeded.
+   */
+  bool
+  buildRefinedBody(PolyhedralEB::CutCellBody& a_body, const IntVect& a_cell, const RealVect& a_probLo, const Real& a_dx) const;
 
   /**
    * @brief Evaluate the implicit function at every node of a region.

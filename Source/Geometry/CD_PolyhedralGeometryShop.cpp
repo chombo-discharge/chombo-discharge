@@ -12,6 +12,7 @@
 
 // Std includes
 #include <sstream>
+#include <algorithm>
 
 // Chombo includes
 #include <BoxIterator.H>
@@ -31,11 +32,13 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                                                const ProblemDomain& a_scanLevel,
                                                const int            a_ebGhost,
                                                const Real           a_thrshdVoF,
-                                               const bool           a_strict)
+                                               const bool           a_strict,
+                                               const int            a_refinement)
   : ScanShop(a_localGeom, a_verbosity, a_dx, a_probLo, a_finestDomain, a_scanLevel, a_ebGhost, a_thrshdVoF)
 {
   m_strict          = a_strict;
   m_volumeThreshold = a_thrshdVoF;
+  m_refinement      = std::max(1, a_refinement);
 }
 
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
@@ -195,6 +198,82 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[S
   }
 }
 
+bool
+PolyhedralGeometryShop::buildRefinedBody(PolyhedralEB::CutCellBody&    a_body,
+                                         const IntVect&  a_cell,
+                                         const RealVect& a_probLo,
+                                         const Real&     a_dx) const
+{
+  // The cell's ancestor at the resolution the surface is reconstructed on, and where the cell
+  // sits inside it.
+  IntVect ancestor = a_cell;
+  IntVect offset   = IntVect::Zero;
+
+  int stride = 1;
+
+  for (int r = 1; r < m_refinement; r *= 2) {
+    for (int d = 0; d < SpaceDim; d++) {
+      offset[d] += (((ancestor[d] % 2) + 2) % 2) * stride;
+      ancestor[d] = (ancestor[d] >= 0) ? (ancestor[d] / 2) : -((-ancestor[d] + 1) / 2);
+    }
+
+    stride *= 2;
+  }
+
+  const Real coarseDx = a_dx * static_cast<Real>(m_refinement);
+
+  // the ancestor's surface is reconstructed at its own resolution, with its own edge cache, so
+  // that nothing here depends on the fine level's caches
+  BaseFab<Real> intercept[SpaceDim];
+
+  for (int d = 0; d < SpaceDim; d++) {
+    Box edgeBox(ancestor, ancestor);
+
+    edgeBox.surroundingNodes();
+    edgeBox.enclosedCells(d);
+
+    intercept[d].define(edgeBox, 1);
+    intercept[d].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
+  }
+
+  BaseFab<Real> nodeValues;
+  this->fillNodeValues(nodeValues, Box(ancestor, ancestor), a_probLo, coarseDx);
+
+  PolyhedralEB::CutCellSurface surface;
+  this->buildSurface(intercept, surface, nodeValues, ancestor, a_probLo, coarseDx);
+
+  PolyhedralEB::CutCellBody coarse;
+
+  if (!coarse.define(surface)) {
+    return false;
+  }
+
+  // cut down to the cell, one level at a time
+  for (int r = m_refinement; r > 1; r /= 2) {
+    PolyhedralEB::CutCellBody children[1 << SpaceDim];
+
+    if (!coarse.refine(children)) {
+      return false;
+    }
+
+    int which = 0;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      which |= (((offset[d] / (r / 2)) & 1) << d);
+    }
+
+    for (int d = 0; d < SpaceDim; d++) {
+      offset[d] %= (r / 2);
+    }
+
+    coarse = children[which];
+  }
+
+  a_body = coarse;
+
+  return true;
+}
+
 void
 PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
                                  const PolyhedralEB::CutCellBody& a_body,
@@ -340,11 +419,20 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = ivsIt();
 
     PolyhedralEB::CutCellSurface surface;
-    this->buildSurface(intercept, surface, nodeValues, iv, a_probLo, a_dx);
+    PolyhedralEB::CutCellBody    body;
 
-    PolyhedralEB::CutCellBody body;
+    bool built = false;
 
-    if (!body.define(surface)) {
+    if (m_refinement > 1) {
+      built = this->buildRefinedBody(body, iv, a_probLo, a_dx);
+    }
+    else {
+      this->buildSurface(intercept, surface, nodeValues, iv, a_probLo, a_dx);
+
+      built = body.define(surface);
+    }
+
+    if (!built) {
       if (m_strict) {
         std::ostringstream message;
 

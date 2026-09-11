@@ -102,6 +102,11 @@ protected:
   std::string m_geometryGeneration;
 
   /**
+   * @brief Refinement between the cells the polyhedral generator reconstructs on and generates.
+   */
+  int m_geometryRefinement;
+
+  /**
    * @brief Output directory for output files.
    */
   std::string m_outputDirectory;
