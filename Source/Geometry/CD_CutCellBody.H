@@ -99,6 +99,18 @@ public:
   touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept;
 
   /**
+   * @brief How this body relates to the interface, read off the body itself.
+   * @details A body with no polygons encloses nothing and the cell is covered. One whose
+   * polygons all lie in cell faces never meets the interface, so the cell is full. Anything
+   * else is cut. Asking the body rather than the corner values is what lets a cell produced by
+   * subdividing another inherit its classification instead of being classified afresh at a
+   * resolution the surface was never reconstructed on.
+   * @return Regular, Covered or Cut.
+   */
+  Kind
+  kind() const noexcept;
+
+  /**
    * @brief Volume fraction.
    * @return Fraction of the cell occupied by fluid.
    */

@@ -198,11 +198,95 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[S
   }
 }
 
+void
+PolyhedralGeometryShop::classifyFromParents(BaseFab<int>&   a_regIrregCovered,
+                                            IntVectSet&     a_irregularCells,
+                                            const Box&      a_validRegion,
+                                            const Box&      a_ghostRegion,
+                                            const RealVect& a_probLo,
+                                            const Real&     a_dx) const
+{
+  const Real coarseDx = a_dx * static_cast<Real>(m_refinement);
+
+  Box coarseRegion = a_ghostRegion;
+  coarseRegion.coarsen(m_refinement);
+
+  BaseFab<Real> nodeValues;
+  this->fillNodeValues(nodeValues, coarseRegion, a_probLo, coarseDx);
+
+  for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
+    const IntVect fine = bit();
+
+    IntVect coarse = fine;
+    coarse.coarsen(m_refinement);
+
+    PolyhedralEB::CutCellSurface surface;
+
+    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+      IntVect node = coarse;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        node[d] += (c >> d) & 1;
+      }
+
+      surface.m_corner[c] = nodeValues(node, 0);
+    }
+
+    // a coarse cell the interface never enters gives the same answer to every cell below it,
+    // and no body has to be built to find that out
+    const PolyhedralEB::CutCellBody::Kind coarseKind = PolyhedralEB::CutCellBody::classify(surface);
+
+    if (coarseKind != PolyhedralEB::CutCellBody::Kind::Cut) {
+      a_regIrregCovered(fine, 0) = (coarseKind == PolyhedralEB::CutCellBody::Kind::Regular) ? 1 : -1;
+
+      continue;
+    }
+
+    PolyhedralEB::CutCellBody body;
+
+    if (!this->buildRefinedBody(body, fine, a_probLo, a_dx)) {
+      if (m_strict) {
+        std::ostringstream message;
+
+        message << "PolyhedralGeometryShop::classifyFromParents - could not cut the body down to cell " << fine;
+
+        MayDay::Error(message.str().c_str());
+      }
+
+      a_regIrregCovered(fine, 0) = -1;
+
+      continue;
+    }
+
+    switch (body.kind()) {
+    case PolyhedralEB::CutCellBody::Kind::Covered: {
+      a_regIrregCovered(fine, 0) = -1;
+
+      break;
+    }
+    case PolyhedralEB::CutCellBody::Kind::Regular: {
+      a_regIrregCovered(fine, 0) = 1;
+
+      break;
+    }
+    default: {
+      a_regIrregCovered(fine, 0) = 0;
+
+      if (a_validRegion.contains(fine)) {
+        a_irregularCells |= fine;
+      }
+
+      break;
+    }
+    }
+  }
+}
+
 bool
-PolyhedralGeometryShop::buildRefinedBody(PolyhedralEB::CutCellBody&    a_body,
-                                         const IntVect&  a_cell,
-                                         const RealVect& a_probLo,
-                                         const Real&     a_dx) const
+PolyhedralGeometryShop::buildRefinedBody(PolyhedralEB::CutCellBody& a_body,
+                                         const IntVect&             a_cell,
+                                         const RealVect&            a_probLo,
+                                         const Real&                a_dx) const
 {
   // The cell's ancestor at the resolution the surface is reconstructed on, and where the cell
   // sits inside it.
@@ -354,7 +438,11 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
   IntVectSet irregularCells;
 
-  for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
+  if (m_refinement > 1) {
+    this->classifyFromParents(a_regIrregCovered, irregularCells, a_validRegion, a_ghostRegion, a_probLo, a_dx);
+  }
+
+  for (BoxIterator bit(a_ghostRegion); bit.ok() && m_refinement == 1; ++bit) {
     const IntVect iv = bit();
 
     PolyhedralEB::CutCellSurface surface;

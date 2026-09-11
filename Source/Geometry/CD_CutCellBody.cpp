@@ -772,11 +772,11 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
 {
   a_out = CutCellBody();
 
-  RealVect  segmentFrom[s_maxPolygons];
-  RealVect  segmentTo[s_maxPolygons];
+  RealVect          segmentFrom[s_maxPolygons];
+  RealVect          segmentTo[s_maxPolygons];
   detail::VertexKey keyFrom[s_maxPolygons];
   detail::VertexKey keyTo[s_maxPolygons];
-  int       segmentFace[s_maxPolygons];
+  int               segmentFace[s_maxPolygons];
 
   int numSegments = 0;
 
@@ -817,7 +817,8 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
         cut.m_vertex[cut.m_numVertices++]    = keep;
       }
 
-      if ((fa < -detail::s_clipTolerance && fb > detail::s_clipTolerance) || (fb < -detail::s_clipTolerance && fa > detail::s_clipTolerance)) {
+      if ((fa < -detail::s_clipTolerance && fb > detail::s_clipTolerance) ||
+          (fb < -detail::s_clipTolerance && fa > detail::s_clipTolerance)) {
         // interpolate from the lexicographically lower end, whichever way this polygon walks
         // the edge, so that the two polygons sharing it land on the same point bit for bit
         const bool      ordered = detail::lexLess(a, b);
@@ -906,7 +907,7 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
     loop.m_vertexEdge[loop.m_numVertices]  = -1;
     loop.m_vertex[loop.m_numVertices++]    = segmentFrom[s0];
 
-    RealVect        current    = segmentTo[s0];
+    RealVect                current    = segmentTo[s0];
     detail::VertexKey       currentKey = keyTo[s0];
     const detail::VertexKey endKey     = keyFrom[s0];
 
@@ -1006,6 +1007,22 @@ CutCellBody::refine(CutCellBody a_children[1 << SpaceDim]) const noexcept
   }
 
   return true;
+}
+
+CutCellBody::Kind
+CutCellBody::kind() const noexcept
+{
+  if (m_numPolygons == 0) {
+    return Kind::Covered;
+  }
+
+  for (int i = 0; i < m_numPolygons; i++) {
+    if (m_polygon[i].m_face < 0) {
+      return Kind::Cut;
+    }
+  }
+
+  return Kind::Regular;
 }
 
 Real
