@@ -1,7 +1,7 @@
-## Exec/Examples/KineticMonteCarlo/StiffTwoGroup
+## Convergence/KineticMonteCarlo/C3
 
-This example runs the Kinetic Monte Carlo solver on a stiff two-group electron chemistry and compares
-the mean population against the exact solution. It is the reproducer for
+This example compares Kinetic Monte Carlo solutions with the exact mean for a stiff two-group electron
+chemistry. It is the reproducer for
 [issue #728](https://github.com/chombo-discharge/chombo-discharge/issues/728), where the hybrid
 tau-leaping algorithms lost reactions when one reaction turned its reactant over faster than the step.
 
@@ -25,7 +25,7 @@ equations itself, so the reference always matches the chemistry that was run.
 
 # Running the example
 
-```mpirun -np <num_proc> main2d.*ex example.inputs```
+```mpirun -np <num_proc> main2d.*ex convergence.inputs```
 
 Every rank prints the same table of means over all realizations on all ranks to its `pout.*` file,
 one row per step handed to `advanceKMC`, with the columns

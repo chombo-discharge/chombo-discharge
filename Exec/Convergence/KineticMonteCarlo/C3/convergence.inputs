@@ -1,6 +1,6 @@
 # ====================================================================================================
-# StiffTwoGroup -- a slow branching reaction feeding a fast relaxation reaction. The mean populations
-# are compared against the moment equations, see README.md.
+# Convergence/KineticMonteCarlo/C3 -- a slow branching reaction feeding a fast relaxation reaction.
+# The mean populations are compared against the moment equations, see README.md.
 # ====================================================================================================
 ItoKMCJSON.verbose               = false
 ItoKMCJSON.debug                 = false

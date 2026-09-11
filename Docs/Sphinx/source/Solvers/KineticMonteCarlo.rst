@@ -385,7 +385,8 @@ Verification
 Verification tests for ``KMCSolver`` are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C1`
-* :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`  
+* :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`
+* :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C3`
 
 C1: Avalanche model
 ___________________
@@ -446,4 +447,34 @@ The initial state is :math:`X(0) = 250`.
    :align: center
 
    Convergence to bi-stable states for the Schlögl model.
+
+C3: Stiff two-group model
+_________________________
+
+A stiff two-group electron chemistry is given in :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C3`.
+A slow branching reaction feeds a fast reaction that relaxes back,
+
+.. math::
+
+   e &\xrightarrow{\nu_i} el + el + M^+, \\
+   el &\xrightarrow{\nu_r} e,
+
+with :math:`\nu_i = 7.468\times 10^{9}\,\textrm{s}^{-1}` and :math:`\nu_r = 1.741\times 10^{11}\,\textrm{s}^{-1}`, so that :math:`el` turns over :math:`\nu_r\Delta t = 1.74` times per step of :math:`\Delta t = 10\,\textrm{ps}`.
+Every reaction is first order, so the moment equations
+
+.. math::
+
+   \frac{\textrm{d}}{\textrm{d}t}\begin{pmatrix}\langle e\rangle \\ \langle el\rangle\end{pmatrix} = \begin{pmatrix} -\nu_i & \nu_r \\ 2\nu_i & -\nu_r\end{pmatrix}\begin{pmatrix}\langle e\rangle \\ \langle el\rangle\end{pmatrix}
+
+are exact and the program integrates them for reference.
+The example runs many realizations from a specified number of initial electrons and prints the mean populations after every step, so both limits can be checked: many realizations, and many initial particles where tau leaping rather than the SSA does the work.
+This is the case that requires the consumption bound in :ref:`Chap:KMCLeapCondition`: the net change of :math:`el` is small however many times it turns over, and a leap bounded by the net change alone samples more relaxations than there are :math:`el` particles.
+Figure :numref:`Fig:KineticMonteCarloC3` shows the hybrid midpoint solution for :math:`\epsilon = 0.5` and :math:`N_{\textrm{crit}} = 5`, starting from a single electron; the mean of :math:`e + el` at :math:`t = 1\,\textrm{ns}` agrees with the moment equations to within the sampling error of :math:`0.2\%`.
+
+.. _Fig:KineticMonteCarloC3:
+.. figure:: /_static/figures/KineticMonteCarloC3.png
+   :width: 50%
+   :align: center
+
+   Mean populations for the stiff two-group model, hybrid midpoint tau leaping against the moment equations.
 
