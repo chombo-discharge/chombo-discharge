@@ -192,6 +192,13 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // Define the multifluid index space.
   const bool useDistributedData = (m_generator != Generator::GeometryShop);
 
+  // A level the generator only hands back part of cannot be coarsened into the level below it, so
+  // each level is generated in turn and then overwritten, where a finer level exists, by the
+  // coarsening of it. Only the polyhedral generator does that, and only when it has been told
+  // where the geometry needs resolving.
+  m_multifluidIndexSpace->setGenerateEveryLevel(m_generator == Generator::PolyhedralShop &&
+                                                m_aggregationTags.size() > 0);
+
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
                                  a_probLo,
                                  a_finestDx,
