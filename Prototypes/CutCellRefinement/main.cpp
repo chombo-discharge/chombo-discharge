@@ -483,11 +483,12 @@ exportSheetCancellation(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDept
 
   std::ofstream out(a_fileName);
   out << std::setprecision(17);
-  out << "depth,cells,cancelling,worstRatio,worstVolFrac,worstBndryArea,worstTrueArea,worstResidual\n";
+  out << "depth,cells,cancelling,worstRatio,worstVolFrac,worstBndryArea,worstTrueArea,worstResidual,multiSheet\n";
 
   for (int depth = 0; depth <= a_maxDepth; depth++) {
     long int cells      = 0;
     long int cancelling = 0;
+    long int multiSheet = 0;
 
     Real worstRatio    = 0.0;
     Real worstVol      = 0.0;
@@ -528,6 +529,21 @@ exportSheetCancellation(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDept
         cancelling++;
       }
 
+      // How many separate sheets of interface the cell holds, at the resolution the body is
+      // built on. More than one is a cell the single-valued construction cannot honour.
+#if CH_SPACEDIM == 3
+      {
+        const PolyhedralEB::CutCellSurface surface = sampleSurface(*implicitFunction, iv, probLo, dx[0], true);
+
+        int loop[PolyhedralEB::CutCellSurface::s_numEdges];
+        int start[PolyhedralEB::CutCellSurface::s_numEdges + 1];
+
+        if (PolyhedralEB::detail::crossingLoops(surface, loop, start) > 1) {
+          multiSheet++;
+        }
+      }
+#endif
+
       if (ratio > worstRatio) {
         worstRatio    = ratio;
         worstVol      = body.volumeFraction();
@@ -538,7 +554,7 @@ exportSheetCancellation(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDept
     }
 
     out << depth << "," << cells << "," << cancelling << "," << worstRatio << "," << worstVol << "," << worstBndry
-        << "," << worstTrue << "," << worstResidual << "\n";
+        << "," << worstTrue << "," << worstResidual << "," << multiSheet << "\n";
   }
 }
 
