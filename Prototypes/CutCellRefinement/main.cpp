@@ -439,7 +439,7 @@ exportCoarseningSeam(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_f
 
   std::ofstream out(a_fileName);
   out << std::setprecision(17);
-  out << "level,dx,volumeCoarse,volumeFine,boundaryCoarse,boundaryFine,worstAperture\n";
+  out << "level,dx,volumeCoarse,volumeFine,boundaryCoarse,boundaryFine,worstAperture,roundTrip\n";
 
   constexpr int numChildren = 1 << SpaceDim;
   constexpr int numPerFace  = 1 << (SpaceDim - 1);
@@ -507,8 +507,33 @@ exportCoarseningSeam(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_f
           }
         }
 
+        // refine then coarsen has to give this body back: the children partition it, so the
+        // moments they are summed from are the ones they were cut from.
+        Real roundTrip = -1.0;
+
+        PolyhedralEB::CutCellBody split[numChildren];
+
+        if (coarse.refine(split)) {
+          PolyhedralEB::CutCellBody rebuilt;
+
+          rebuilt.coarsen(split);
+
+          roundTrip = std::abs(rebuilt.volumeFraction() - coarse.volumeFraction());
+          roundTrip = std::max(roundTrip, std::abs(rebuilt.boundaryArea() - coarse.boundaryArea()));
+
+          for (int d = 0; d < SpaceDim; d++) {
+            for (SideIterator sit; sit.ok(); ++sit) {
+              roundTrip = std::max(roundTrip, std::abs(rebuilt.areaFraction(d, sit()) - coarse.areaFraction(d, sit())));
+            }
+
+            roundTrip = std::max(roundTrip, std::abs(rebuilt.volumeCentroid()[d] - coarse.volumeCentroid()[d]));
+            roundTrip = std::max(roundTrip, std::abs(rebuilt.normal()[d] - coarse.normal()[d]));
+            roundTrip = std::max(roundTrip, std::abs(rebuilt.boundaryCentroid()[d] - coarse.boundaryCentroid()[d]));
+          }
+        }
+
         out << lvl << "," << dx[lvl] << "," << coarse.volumeFraction() << "," << volumeFine << ","
-            << coarse.boundaryArea() << "," << boundaryFine << "," << worst << "\n";
+            << coarse.boundaryArea() << "," << boundaryFine << "," << worst << "," << roundTrip << "\n";
       }
     }
   }
