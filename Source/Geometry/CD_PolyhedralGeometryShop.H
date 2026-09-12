@@ -82,10 +82,13 @@ public:
    * The tags are indexed coarsest first, as the pre-pass in ComputationalGeometry returns them,
    * and a_coarsestDomain says which of this object's levels the first of them belongs to.
    * @param[in] a_tags           Cells on each level whose geometry comes from below them.
+   * @param[in] a_regions        Boxes each level was swept over, and so how much of it to carry.
    * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
    */
   void
-  setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain) noexcept;
+  setAggregationTags(const Vector<IntVectSet>&  a_tags,
+                     const Vector<Vector<Box>>& a_regions,
+                     const ProblemDomain&       a_coarsestDomain) noexcept;
 
   /**
    * @brief Destructor.
@@ -156,6 +159,11 @@ protected:
    * @brief Cells whose geometry is taken from a reconstruction below them, coarsest level first.
    */
   Vector<IntVectSet> m_aggregationTags;
+
+  /**
+   * @brief Boxes each level is carried over, coarsest first.
+   */
+  Vector<Vector<Box>> m_aggregationRegions;
 
   /**
    * @brief Index into m_domains of the level the first entry of m_aggregationTags belongs to.

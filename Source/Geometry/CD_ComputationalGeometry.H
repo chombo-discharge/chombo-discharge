@@ -180,10 +180,13 @@ public:
    * @details Must be set before buildGeometries, since that is when the generator is made. The
    * tags are the ones getCurvatureTags returns, coarsest level first.
    * @param[in] a_tags           Cells on each level whose geometry comes from a finer surface.
+   * @param[in] a_regions        Boxes each level was swept over, which is how much of it to carry.
    * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
    */
   void
-  setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain);
+  setAggregationTags(const Vector<IntVectSet>&  a_tags,
+                     const Vector<Vector<Box>>& a_regions,
+                     const ProblemDomain&       a_coarsestDomain);
 
   /**
    * @brief Where the interface bends too sharply for the resolution it sits on.
@@ -201,6 +204,9 @@ public:
    * Each level is swept only where the level above it tagged, with TiledMeshRefine turning tags
    * into the regions to descend into, so the work follows the surface rather than the volume and
    * proper nesting is left to the code that already does it.
+   * @param[out] a_regions       Boxes each level was swept over, coarsest first. These are what
+   * the grids of a run are built from, so a level carried only where the geometry needs it has to
+   * be carried over exactly these and not over the tags with a margin guessed around them.
    * @param[in] a_coarsestDomain Domain of the coarsest level.
    * @param[in] a_refRatios      Refinement ratio between each level and the next. Must reach
    * a_maxDepth, which is the pre-pass's own cap and need not be how deep the run may refine.
@@ -222,7 +228,8 @@ public:
    * @return Tags on each level, coarsest first.
    */
   Vector<IntVectSet>
-  getCurvatureTags(const ProblemDomain& a_coarsestDomain,
+  getCurvatureTags(Vector<Vector<Box>>& a_regions,
+                   const ProblemDomain& a_coarsestDomain,
                    const Vector<int>&   a_refRatios,
                    const IntVect&       a_tileSize,
                    const IntVect&       a_maxBlockSize,
@@ -282,6 +289,11 @@ protected:
    * @brief Cells whose geometry the generator takes from a finer surface, coarsest level first.
    */
   Vector<IntVectSet> m_aggregationTags;
+
+  /**
+   * @brief Boxes each level was swept over, coarsest first, and so how much of it to carry.
+   */
+  Vector<Vector<Box>> m_aggregationRegions;
 
   /**
    * @brief Domain the first entry of m_aggregationTags belongs to.

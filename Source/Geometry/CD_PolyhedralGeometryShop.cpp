@@ -433,13 +433,15 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
 }
 
 void
-PolyhedralGeometryShop::setAggregationTags(const Vector<IntVectSet>& a_tags,
-                                           const ProblemDomain&      a_coarsestDomain) noexcept
+PolyhedralGeometryShop::setAggregationTags(const Vector<IntVectSet>&  a_tags,
+                                           const Vector<Vector<Box>>& a_regions,
+                                           const ProblemDomain&       a_coarsestDomain) noexcept
 {
   CH_TIME("PolyhedralGeometryShop::setAggregationTags");
 
-  m_aggregationTags  = a_tags;
-  m_aggregationLevel = -1;
+  m_aggregationTags    = a_tags;
+  m_aggregationRegions = a_regions;
+  m_aggregationLevel   = -1;
 
   for (int lvl = 0; lvl < static_cast<int>(m_domains.size()); lvl++) {
     if (m_domains[lvl].domainBox() == a_coarsestDomain.domainBox()) {

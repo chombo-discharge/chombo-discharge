@@ -389,7 +389,10 @@ exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
     refRatios.push_back(2);
   }
 
-  const Vector<IntVectSet> tags = a_compgeom->getCurvatureTags(a_amr->getDomains()[0],
+  Vector<Vector<Box>> regions;
+
+  const Vector<IntVectSet> tags = a_compgeom->getCurvatureTags(regions,
+                                                               a_amr->getDomains()[0],
                                                                refRatios,
                                                                a_amr->getBlockingFactor() * IntVect::Unit,
                                                                a_amr->getMaxBoxSize() * IntVect::Unit,

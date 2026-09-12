@@ -537,7 +537,9 @@ ComputationalGeometry::buildImplicitFunctions()
 }
 
 void
-ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain)
+ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>&  a_tags,
+                                          const Vector<Vector<Box>>& a_regions,
+                                          const ProblemDomain&       a_coarsestDomain)
 {
   CH_TIME("ComputationalGeometry::setAggregationTags");
 
@@ -565,11 +567,13 @@ ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>& a_tags, cons
     }
   }
 
-  m_aggregationDomain = a_coarsestDomain;
+  m_aggregationRegions = a_regions;
+  m_aggregationDomain  = a_coarsestDomain;
 }
 
 Vector<IntVectSet>
-ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
+ComputationalGeometry::getCurvatureTags(Vector<Vector<Box>>& a_regions,
+                                        const ProblemDomain& a_coarsestDomain,
                                         const Vector<int>&   a_refRatios,
                                         const IntVect&       a_tileSize,
                                         const IntVect&       a_maxBlockSize,
@@ -607,7 +611,9 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
   // The coarsest level is swept whole; every finer one only where the level above it tagged. The
   // coarsest is cut into boxes for no other reason than to have something to share out, since
   // there is one region there and every rank would otherwise sweep all of it.
-  Vector<Vector<Box>> regions(tags.size());
+  Vector<Vector<Box>>& regions = a_regions;
+
+  regions.resize(tags.size());
 
   domainSplit(a_coarsestDomain, regions[0], a_maxBlockSize[0]);
 
@@ -672,7 +678,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             s_strictGeometry,
                                             m_geometryRefinement);
 
-    shop->setAggregationTags(m_aggregationTags, m_aggregationDomain);
+    shop->setAggregationTags(m_aggregationTags, m_aggregationRegions, m_aggregationDomain);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -727,7 +733,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               s_strictGeometry,
                                               m_geometryRefinement);
 
-      shop->setAggregationTags(m_aggregationTags, m_aggregationDomain);
+      shop->setAggregationTags(m_aggregationTags, m_aggregationRegions, m_aggregationDomain);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
       a_geoserver = static_cast<GeometryService*>(shop);

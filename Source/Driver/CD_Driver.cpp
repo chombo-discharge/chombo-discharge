@@ -1491,7 +1491,10 @@ Driver::setupGeometryOnly()
       refRatios.push_back(2);
     }
 
-    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+    Vector<Vector<Box>> curvatureRegions;
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(curvatureRegions,
+                                                                m_amr->getDomains()[0],
                                                                 refRatios,
                                                                 m_amr->getBlockingFactor() * IntVect::Unit,
                                                                 m_amr->getMaxBoxSize() * IntVect::Unit,
@@ -1501,7 +1504,7 @@ Driver::setupGeometryOnly()
                                                                 m_irregTagGrowth,
                                                                 m_curvatureTagsDepth);
 
-    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, curvatureRegions, m_amr->getDomains()[0]);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
@@ -1607,7 +1610,10 @@ Driver::setupFresh(const int a_initialRegrids)
       refRatios.push_back(2);
     }
 
-    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+    Vector<Vector<Box>> curvatureRegions;
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(curvatureRegions,
+                                                                m_amr->getDomains()[0],
                                                                 refRatios,
                                                                 m_amr->getBlockingFactor() * IntVect::Unit,
                                                                 m_amr->getMaxBoxSize() * IntVect::Unit,
@@ -1617,7 +1623,7 @@ Driver::setupFresh(const int a_initialRegrids)
                                                                 m_irregTagGrowth,
                                                                 m_curvatureTagsDepth);
 
-    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, curvatureRegions, m_amr->getDomains()[0]);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
@@ -1778,7 +1784,10 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
       refRatios.push_back(2);
     }
 
-    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+    Vector<Vector<Box>> curvatureRegions;
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(curvatureRegions,
+                                                                m_amr->getDomains()[0],
                                                                 refRatios,
                                                                 m_amr->getBlockingFactor() * IntVect::Unit,
                                                                 m_amr->getMaxBoxSize() * IntVect::Unit,
@@ -1788,7 +1797,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
                                                                 m_irregTagGrowth,
                                                                 m_curvatureTagsDepth);
 
-    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, curvatureRegions, m_amr->getDomains()[0]);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
