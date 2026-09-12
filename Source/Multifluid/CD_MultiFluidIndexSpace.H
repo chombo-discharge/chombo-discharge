@@ -60,6 +60,17 @@ public:
   virtual ~MultiFluidIndexSpace();
 
   /**
+   * @brief Ask for every level of the index spaces to be built from the generator.
+   * @details Must be set before define. Chombo otherwise builds the finest level and coarsens it,
+   * which is only right where the finest level describes the whole domain. A generator that hands
+   * back part of a level -- because that is where the geometry needs resolving -- leaves the
+   * coarsening nothing to read outside that part, so each level has to be asked for in turn.
+   * @param[in] a_generateEveryLevel Whether each level is built from the generator.
+   */
+  virtual void
+  setGenerateEveryLevel(const bool a_generateEveryLevel) noexcept;
+
+  /**
    * @brief Define function
    * @param[in] a_domain          Finest domain
    * @param[in] a_origin          Lower-left corner
@@ -129,6 +140,10 @@ public:
   numPhases() const;
 
 protected:
+  /**
+   * @brief Whether each level of the index spaces is built from the generator rather than coarsened.
+   */
+  bool m_generateEveryLevel;
   /**
    * @brief EBIndexSpaces
    */
