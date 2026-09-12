@@ -268,6 +268,16 @@ protected:
   Real m_refineAngle;
 
   /**
+   * @brief How deep the implicit function is allowed to ask for refinement, or -1 for not at all.
+   * @details Selects the pre-pass in ComputationalGeometry::getCurvatureTags, which finds where
+   * the geometry is under-resolved from the implicit function alone rather than from the cut
+   * cells. Its tags are added to the ones read off the embedded boundary, so leaving this at -1
+   * is what the run did before the pre-pass existed. A cap is mandatory because creases and
+   * features thinner than a few cells go on asking for refinement at every resolution.
+   */
+  int m_curvatureTagsDepth;
+
+  /**
    * @brief Profile or not
    */
   bool m_profile;
