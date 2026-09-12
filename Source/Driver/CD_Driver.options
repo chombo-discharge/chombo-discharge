@@ -2,7 +2,8 @@
 # Driver class options
 # ====================================================================================================
 Driver.verbosity                    = 2                   ## Driver verbosity.
-Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_generation          = chombo-discharge    ## Grid generation, 'chombo-discharge', 'chombo', or 'polyhedral'
+Driver.geometry_refinement          = 1                   ## Refine the polyhedral cells this many times from a coarser surface
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
 Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
@@ -29,5 +30,6 @@ Driver.restart                      = 0                   ## Restart step (less 
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger.
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
 Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_curvature             = -1                  ## Depth the implicit function is resolved to, below the grid too (-1 => off)
 Driver.refine_electrodes            = 0                   ## Refine electrode surfaces to specified level ( < 0 will refine everything)
 Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces to specified level ( < 0 will refine everything)

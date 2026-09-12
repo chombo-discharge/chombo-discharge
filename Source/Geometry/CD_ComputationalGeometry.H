@@ -19,11 +19,13 @@
 #include <Box.H>
 #include <RealVect.H>
 #include <ProblemDomain.H>
+#include <IntVectSet.H>
 
 // Our includes
 #include <CD_Dielectric.H>
 #include <CD_Electrode.H>
 #include <CD_MultiFluidIndexSpace.H>
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
@@ -81,6 +83,18 @@ public:
    */
   void
   useChomboShop();
+
+  /**
+   * @brief Generate the geometry with PolyhedralGeometryShop.
+   * @details Same topology as the chombo-discharge generator, but the moments are exact
+   * integrals of an explicitly reconstructed surface rather than quadratures of the implicit
+   * function.
+   * @param[in] a_beginDomain Level on which to initiate the load balancing sequence
+   * @param[in] a_refinement  How many times the generated cells refine the cells the surface is
+   * reconstructed on. One reconstructs on the generated cells themselves.
+   */
+  void
+  usePolyhedralShop(const ProblemDomain& a_beginDomain, const int a_refinement);
 
   /**
    * @brief Set dielectrics
@@ -152,11 +166,86 @@ public:
                   const int            a_maxGhostEB,
                   const int            a_maxCoarsen = -1);
 
+  /**
+   * @brief Assemble the implicit functions for the two phases from the objects set on this class.
+   * @details Called by buildGeometries before it makes the generators, and callable ahead of it
+   * by anything that needs to read the geometry before the index spaces exist. Doing it twice is
+   * harmless: the result depends only on the electrodes and dielectrics.
+   */
+  void
+  buildImplicitFunctions();
+
+  /**
+   * @brief Say where the polyhedral generator should take its geometry from below the cells.
+   * @details Must be set before buildGeometries, since that is when the generator is made. The
+   * tags are the ones getCurvatureTags returns, coarsest level first.
+   * @param[in] a_tags           Cells on each level whose geometry comes from a finer surface.
+   * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
+   */
+  void
+  setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain);
+
+  /**
+   * @brief Where the interface bends too sharply for the resolution it sits on.
+   * @details A pre-pass over the implicit function alone. Each candidate cell's interface normal
+   * is fitted to the positions of its edge crossings, and a cell whose normal turns by more than
+   * a_angle against any of its neighbours' is tagged. No moments, no connectivity and no index
+   * space are built, so the tags can be had before any geometry is committed and nothing has to
+   * be generated and thrown away.
+   *
+   * Normals come from crossingNormal rather than from derivatives of the implicit function,
+   * because root finding only asks where the function changes sign. Implicit functions that are
+   * not differentiable at their own zero set are common enough that a derivative-based criterion
+   * fails on geometries already in the test suite.
+   *
+   * Each level is swept only where the level above it tagged, with TiledMeshRefine turning tags
+   * into the regions to descend into, so the work follows the surface rather than the volume and
+   * proper nesting is left to the code that already does it.
+   * @param[in] a_coarsestDomain Domain of the coarsest level.
+   * @param[in] a_refRatios      Refinement ratio between each level and the next. Must reach
+   * a_maxDepth, which is the pre-pass's own cap and need not be how deep the run may refine.
+   * @param[in] a_tileSize       Tile size for the clustering, in cells.
+   * @param[in] a_maxBlockSize   Largest box the clustering may emit, in cells.
+   * @param[in] a_probLo         Lower left corner of the domain.
+   * @param[in] a_coarsestDx     Grid spacing on the coarsest level.
+   * @param[in] a_angle          Turn, in degrees, above which a cell is tagged.
+   * @param[in] a_growth         Cells by which each level's tags are grown before the next level
+   * is swept. The refined region then reaches past the cells that asked for it, which is what
+   * keeps the boundary between coarsened and freshly generated cells away from the features that
+   * asked for the refinement in the first place.
+   * @param[in] a_maxDepth       Hard cap on how many levels deep the pre-pass will go. Needed
+   * rather than optional: where two surfaces meet in a crease the turn does not fall off under
+   * refinement, because a crease is a crease at every resolution, so nothing but the cap stops
+   * those cells refining forever. A feature thinner than a few cells also keeps asking for more,
+   * until its two sides stop reaching each other through a neighbour stencil, which takes it to
+   * around three or four cells thick.
+   * @return Tags on each level, coarsest first.
+   */
+  Vector<IntVectSet>
+  getCurvatureTags(const ProblemDomain& a_coarsestDomain,
+                   const Vector<int>&   a_refRatios,
+                   const IntVect&       a_tileSize,
+                   const IntVect&       a_maxBlockSize,
+                   const RealVect&      a_probLo,
+                   const Real&          a_coarsestDx,
+                   const Real&          a_angle,
+                   const int            a_growth,
+                   const int            a_maxDepth) const;
+
 protected:
   /**
    * @brief Threshold for Vof computation
    */
   constexpr static Real s_thresh = 1.E-15;
+
+  /**
+   * @brief Whether a cut cell whose body will not close stops the run.
+   * @details Loud by choice while the polyhedral generator is being developed: a cell it cannot
+   * close is an edge case worth seeing rather than one worth approximating around. No geometry
+   * tested has produced one. Not exposed as an option, so that turning it off is a deliberate
+   * edit rather than something an input file can do by accident.
+   */
+  constexpr static bool s_strictGeometry = true;
 
   /**
    * @brief Multifluid index spaces
@@ -169,9 +258,35 @@ protected:
   Real m_eps0;
 
   /**
-   * @brief True if we use the chombo-discharge geometry generation utility.
+   * @brief Which generator to build the geometry with.
+   * @details Each enumerator names the class that the geometry is generated with.
    */
-  bool m_useScanShop;
+  enum class Generator
+  {
+    GeometryShop,
+    ScanShop,
+    PolyhedralShop
+  };
+
+  /**
+   * @brief Generator selected by the user.
+   */
+  Generator m_generator;
+
+  /**
+   * @brief Refinement between the cells the surface is reconstructed on and the ones generated.
+   */
+  int m_geometryRefinement;
+
+  /**
+   * @brief Cells whose geometry the generator takes from a finer surface, coarsest level first.
+   */
+  Vector<IntVectSet> m_aggregationTags;
+
+  /**
+   * @brief Domain the first entry of m_aggregationTags belongs to.
+   */
+  ProblemDomain m_aggregationDomain;
 
   /**
    * @brief Grid level where we begin using ScanShop
@@ -202,6 +317,55 @@ protected:
    * @brief The solid-phase implicit function (i.e. the inside of the dielectrics).
    */
   RefCountedPtr<BaseIF> m_implicitFunctionSolid;
+
+  /**
+   * @brief Tag the cells in a region that the resolution does not do justice to.
+   * @details Two things are looked for. A cell whose interface turns by more than a_angle against
+   * a neighbour's is under-resolved because the surface bends inside it. A cell that no corner
+   * reports as cut but that the interface passes through anyway is under-resolved because the
+   * feature is thinner than the cell, and only sampling the edge midpoints and the cell centre
+   * finds it. That sampling is confined to cells whose smallest corner value does not exceed the
+   * largest change across any of their edges, which bounds how far the interface could reach from
+   * the values themselves rather than from assuming a signed distance function.
+   *
+   * Node values and edge crossings are evaluated once each and shared between the cells that meet
+   * on them, so a cell costs one implicit function evaluation plus a root find on each of its
+   * edges that carries a sign change. Normals are wanted one cell beyond the region so that every
+   * cell in it can be compared against all of its neighbours.
+   * @param[in,out] a_tags             Tagged cells, added to.
+   * @param[in]     a_region           Cells to tag over.
+   * @param[in]     a_domain           Domain of the level the region sits on.
+   * @param[in]     a_implicitFunction Implicit function to reconstruct from.
+   * @param[in]     a_probLo           Lower left corner of the domain.
+   * @param[in]     a_dx               Grid spacing on this level.
+   * @param[in]     a_angle            Turn, in degrees, above which a cell is tagged.
+   */
+  void
+  tagUnderResolvedCells(IntVectSet&                  a_tags,
+                        const Box&                   a_region,
+                        const ProblemDomain&         a_domain,
+                        const RefCountedPtr<BaseIF>& a_implicitFunction,
+                        const RealVect&              a_probLo,
+                        const Real&                  a_dx,
+                        const Real&                  a_angle) const;
+
+  /**
+   * @brief Position along a cell edge where the implicit function changes sign.
+   * @details Bisection, addressed by the edge rather than by either of the cells sharing it, so
+   * that every cell reaching the edge is handed the same interval and gets the same root back.
+   * @param[in] a_implicitFunction Implicit function to find the root of.
+   * @param[in] a_lowPoint         Position of the edge's low end.
+   * @param[in] a_dir              Direction the edge runs along.
+   * @param[in] a_lowValue         Implicit function at the edge's low end.
+   * @param[in] a_dx               Length of the edge.
+   * @return Root, as a fraction of the edge measured from its low end.
+   */
+  Real
+  edgeRoot(const RefCountedPtr<BaseIF>& a_implicitFunction,
+           const RealVect&              a_lowPoint,
+           const int                    a_dir,
+           const Real&                  a_lowValue,
+           const Real&                  a_dx) const;
 
   /**
    * @brief Set up the geometry generation tool for the gas phase.

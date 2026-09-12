@@ -63,7 +63,8 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
     m_dt(0.0),
     m_time(0.0),
     m_profile(false),
-    m_doCoarsening(true)
+    m_doCoarsening(true),
+    m_curvatureTagsDepth(-1)
 {
   CH_TIME("Driver::Driver");
 
@@ -362,6 +363,23 @@ Driver::getGeometryTags()
   // Grow tags with specified factor.
   for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
     m_geomTags[lvl].grow(m_irregTagGrowth);
+  }
+
+  // A second source of geometric tags, read off the implicit function rather than off the cut
+  // cells. It sees what the embedded boundary cannot: a feature thinner than a cell leaves every
+  // corner on the same side of it and so has no cut cell to read a normal from. These were taken
+  // before the geometry was built, since the generator needed them, and are already grown by the
+  // same factor as the tags above.
+  for (int lvl = 0; lvl < std::min(maxAmrDepth, static_cast<int>(m_curvatureTags.size())); lvl++) {
+    if (m_verbosity > 2) {
+      const long long fromBoundary = ParallelOps::sum(static_cast<long long>(m_geomTags[lvl].numPts()));
+      const long long fromFunction = ParallelOps::sum(static_cast<long long>(m_curvatureTags[lvl].numPts()));
+
+      pout() << "Driver::getGeometryTags - level " << lvl << " tagged " << fromBoundary
+             << " cells from the embedded boundary and " << fromFunction << " from the implicit function" << endl;
+    }
+
+    m_geomTags[lvl] |= m_curvatureTags[lvl];
   }
 
   // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
@@ -1205,7 +1223,13 @@ Driver::parseGeometryGeneration()
   pp.get("geometry_generation", m_geometryGeneration);
   pp.get("geometry_scan_level", m_geoScanLevel);
 
-  if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo")) {
+  // absent from input files written before the polyhedral generator existed; one reconstructs
+  // each cell's surface on the cell itself, which is the behaviour without it
+  m_geometryRefinement = 1;
+  pp.query("geometry_refinement", m_geometryRefinement);
+
+  if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo" ||
+        m_geometryGeneration == "polyhedral")) {
     MayDay::Abort("Driver:parseGeometryGeneration - unsupported argument requested");
   }
 }
@@ -1226,10 +1250,16 @@ Driver::parseGeometryRefinement()
   const auto c1 = m_refineAngle;
   const auto c2 = m_conductorTagsDepth;
   const auto c3 = m_dielectricTagsDepth;
+  const auto c4 = m_curvatureTagsDepth;
 
   pp.get("refine_angles", m_refineAngle);
   pp.get("refine_electrodes", m_conductorTagsDepth);
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
+
+  // Absent from input files written before the pre-pass existed, and off is what those files
+  // meant, so the fallback leaves the geometry tags to the embedded boundary alone.
+  m_curvatureTagsDepth = -1;
+  pp.query("refine_curvature", m_curvatureTagsDepth);
 
   if (m_conductorTagsDepth < 0) {
     m_conductorTagsDepth = m_amr->getMaxAmrDepth();
@@ -1243,7 +1273,8 @@ Driver::parseGeometryRefinement()
   // we can avoid regrid if they didn't change. This is my clunky way of doing that.
   if (m_timeStep >
       0) { // Simulation is already running, and we need to check if we need new geometric tags for regridding.
-    if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth) {
+    if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth ||
+        c4 != m_curvatureTagsDepth) {
       m_needsNewGeometricTags = true;
     }
   }
@@ -1403,7 +1434,7 @@ Driver::setupGeometryOnly()
   const Real t0 = Timer::wallClock();
 
   // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
-  if (m_geometryGeneration == "chombo-discharge") {
+  if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
 
     // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
     // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
@@ -1425,7 +1456,12 @@ Driver::setupGeometryOnly()
 
     EBISLevel::s_distributedData = true;
 
-    m_computationalGeometry->useScanShop(scanDomain);
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(scanDomain, m_geometryRefinement);
+    }
+    else {
+      m_computationalGeometry->useScanShop(scanDomain);
+    }
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();
@@ -1439,6 +1475,34 @@ Driver::setupGeometryOnly()
   }
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+
+  // The generator needs these before it exists, so they are taken from the implicit function here
+  // and read again later as a source of geometric tags.
+  m_curvatureTags.resize(0);
+
+  if (m_curvatureTagsDepth > 0) {
+    m_computationalGeometry->buildImplicitFunctions();
+
+    // The pre-pass may reach below the finest grid level: a cell can take its geometry from a
+    // surface reconstructed under it without there being cells there to hold it.
+    Vector<int> refRatios = m_amr->getRefinementRatios();
+
+    while (static_cast<int>(refRatios.size()) < m_curvatureTagsDepth) {
+      refRatios.push_back(2);
+    }
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+                                                                refRatios,
+                                                                m_amr->getBlockingFactor() * IntVect::Unit,
+                                                                m_amr->getMaxBoxSize() * IntVect::Unit,
+                                                                m_amr->getProbLo(),
+                                                                m_amr->getDx()[0],
+                                                                m_refineAngle,
+                                                                m_irregTagGrowth,
+                                                                m_curvatureTagsDepth);
+
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+  }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
@@ -1489,7 +1553,7 @@ Driver::setupFresh(const int a_initialRegrids)
   this->sanityCheck(); // Sanity check before doing anything expensive
 
   // Need to specify geometry generation method.
-  if (m_geometryGeneration == "chombo-discharge") {
+  if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
     // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
     // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
     // base AMR level, which we make here.
@@ -1510,7 +1574,12 @@ Driver::setupFresh(const int a_initialRegrids)
 
     EBISLevel::s_distributedData = true;
 
-    m_computationalGeometry->useScanShop(scanDomain);
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(scanDomain, m_geometryRefinement);
+    }
+    else {
+      m_computationalGeometry->useScanShop(scanDomain);
+    }
   }
   else if (m_geometryGeneration == "chombo") {
     if (m_ebisMemoryLoadBalance) {
@@ -1523,6 +1592,34 @@ Driver::setupFresh(const int a_initialRegrids)
   }
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  // The generator needs these before it exists, so they are taken from the implicit function here
+  // and read again later as a source of geometric tags.
+  m_curvatureTags.resize(0);
+
+  if (m_curvatureTagsDepth > 0) {
+    m_computationalGeometry->buildImplicitFunctions();
+
+    // The pre-pass may reach below the finest grid level: a cell can take its geometry from a
+    // surface reconstructed under it without there being cells there to hold it.
+    Vector<int> refRatios = m_amr->getRefinementRatios();
+
+    while (static_cast<int>(refRatios.size()) < m_curvatureTagsDepth) {
+      refRatios.push_back(2);
+    }
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+                                                                refRatios,
+                                                                m_amr->getBlockingFactor() * IntVect::Unit,
+                                                                m_amr->getMaxBoxSize() * IntVect::Unit,
+                                                                m_amr->getProbLo(),
+                                                                m_amr->getDx()[0],
+                                                                m_refineAngle,
+                                                                m_irregTagGrowth,
+                                                                m_curvatureTagsDepth);
+
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+  }
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
@@ -1643,9 +1740,15 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
   this->sanityCheck(); // Sanity check before doing anything expensive
 
   // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
-  if (m_geometryGeneration == "chombo-discharge") {
+  if (m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "polyhedral") {
     EBISLevel::s_distributedData = true;
-    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+
+    if (m_geometryGeneration == "polyhedral") {
+      m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel], m_geometryRefinement);
+    }
+    else {
+      m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+    }
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();
@@ -1659,6 +1762,34 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
   }
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+
+  // The generator needs these before it exists, so they are taken from the implicit function here
+  // and read again later as a source of geometric tags.
+  m_curvatureTags.resize(0);
+
+  if (m_curvatureTagsDepth > 0) {
+    m_computationalGeometry->buildImplicitFunctions();
+
+    // The pre-pass may reach below the finest grid level: a cell can take its geometry from a
+    // surface reconstructed under it without there being cells there to hold it.
+    Vector<int> refRatios = m_amr->getRefinementRatios();
+
+    while (static_cast<int>(refRatios.size()) < m_curvatureTagsDepth) {
+      refRatios.push_back(2);
+    }
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+                                                                refRatios,
+                                                                m_amr->getBlockingFactor() * IntVect::Unit,
+                                                                m_amr->getMaxBoxSize() * IntVect::Unit,
+                                                                m_amr->getProbLo(),
+                                                                m_amr->getDx()[0],
+                                                                m_refineAngle,
+                                                                m_irregTagGrowth,
+                                                                m_curvatureTagsDepth);
+
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+  }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
