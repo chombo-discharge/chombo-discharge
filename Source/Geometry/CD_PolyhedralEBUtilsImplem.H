@@ -28,6 +28,126 @@ isFluid(const Real a_value) noexcept
   return std::copysign(1.0, a_value) < 0.0;
 }
 
+inline RealVect
+gradientNormal(const CutCellSurface& a_surface) noexcept
+{
+  RealVect gradient = RealVect::Zero;
+
+  for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+    for (int d = 0; d < SpaceDim; d++) {
+      if (((c >> d) & 1) == 0) {
+        gradient[d] += a_surface.m_corner[c | (1 << d)] - a_surface.m_corner[c];
+      }
+    }
+  }
+
+  const Real length = gradient.vectorLength();
+
+  if (length <= 0.0) {
+    return RealVect::Zero;
+  }
+
+  // The fluid is where the implicit function is negative, so the normal runs against its gradient.
+  return -gradient / length;
+}
+
+inline RealVect
+crossingNormal(const CutCellSurface& a_surface) noexcept
+{
+  RealVect point[CutCellSurface::s_numEdges];
+
+  int numPoints = 0;
+
+  for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+    if (a_surface.hasCrossing(e)) {
+      point[numPoints++] = detail::crossingPosition(a_surface, e, 0.0);
+    }
+  }
+
+  if (numPoints < SpaceDim) {
+    return RealVect::Zero;
+  }
+
+  RealVect centre = RealVect::Zero;
+
+  for (int i = 0; i < numPoints; i++) {
+    centre += point[i];
+  }
+
+  centre /= static_cast<Real>(numPoints);
+
+  Real covariance[SpaceDim][SpaceDim] = {{0.0}};
+
+  for (int i = 0; i < numPoints; i++) {
+    const RealVect offset = point[i] - centre;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      for (int e = 0; e < SpaceDim; e++) {
+        covariance[d][e] += offset[d] * offset[e];
+      }
+    }
+  }
+
+  // The adjugate of a singular matrix has its columns in the null space, so for points that lie
+  // in a plane it is built from the plane's normal. The longest column is the best conditioned.
+  Real adjugate[SpaceDim][SpaceDim];
+
+#if CH_SPACEDIM == 3
+  const Real a = covariance[0][0];
+  const Real b = covariance[0][1];
+  const Real c = covariance[0][2];
+  const Real d = covariance[1][1];
+  const Real e = covariance[1][2];
+  const Real f = covariance[2][2];
+
+  adjugate[0][0] = d * f - e * e;
+  adjugate[0][1] = c * e - b * f;
+  adjugate[0][2] = b * e - c * d;
+  adjugate[1][0] = adjugate[0][1];
+  adjugate[1][1] = a * f - c * c;
+  adjugate[1][2] = b * c - a * e;
+  adjugate[2][0] = adjugate[0][2];
+  adjugate[2][1] = adjugate[1][2];
+  adjugate[2][2] = a * d - b * b;
+#else
+  adjugate[0][0] = covariance[1][1];
+  adjugate[0][1] = -covariance[0][1];
+  adjugate[1][0] = -covariance[0][1];
+  adjugate[1][1] = covariance[0][0];
+#endif
+
+  RealVect normal      = RealVect::Zero;
+  Real     bestLength2 = 0.0;
+
+  for (int col = 0; col < SpaceDim; col++) {
+    RealVect candidate;
+
+    for (int row = 0; row < SpaceDim; row++) {
+      candidate[row] = adjugate[row][col];
+    }
+
+    const Real length2 = candidate.dotProduct(candidate);
+
+    if (length2 > bestLength2) {
+      bestLength2 = length2;
+      normal      = candidate;
+    }
+  }
+
+  if (bestLength2 <= 0.0) {
+    return RealVect::Zero;
+  }
+
+  normal /= std::sqrt(bestLength2);
+
+  // The fit fixes the plane but not which way round it faces; the corner values do that.
+  if (normal.dotProduct(gradientNormal(a_surface)) < 0.0) {
+    normal = -normal;
+  }
+
+  return normal;
+}
+
 inline Real
 maxPrincipalCurvature(const Real a_stencil[s_curvatureStencilSize], const Real a_spacing) noexcept
 {
