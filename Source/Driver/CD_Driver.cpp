@@ -367,31 +367,19 @@ Driver::getGeometryTags()
 
   // A second source of geometric tags, read off the implicit function rather than off the cut
   // cells. It sees what the embedded boundary cannot: a feature thinner than a cell leaves every
-  // corner on the same side of it and so has no cut cell to read a normal from. It grows its own
-  // tags by the same factor as the ones above, so that both are buffered once and alike.
-  if (m_curvatureTagsDepth > 0) {
-    const Vector<IntVectSet> curvatureTags = m_computationalGeometry->getCurvatureTags(
-      m_amr->getDomains()[0],
-      m_amr->getRefinementRatios(),
-      m_amr->getBlockingFactor() * IntVect::Unit,
-      m_amr->getMaxBoxSize() * IntVect::Unit,
-      m_amr->getProbLo(),
-      m_amr->getDx()[0],
-      m_refineAngle,
-      m_irregTagGrowth,
-      m_curvatureTagsDepth);
+  // corner on the same side of it and so has no cut cell to read a normal from. These were taken
+  // before the geometry was built, since the generator needed them, and are already grown by the
+  // same factor as the tags above.
+  for (int lvl = 0; lvl < std::min(maxAmrDepth, static_cast<int>(m_curvatureTags.size())); lvl++) {
+    if (m_verbosity > 2) {
+      const long long fromBoundary = ParallelOps::sum(static_cast<long long>(m_geomTags[lvl].numPts()));
+      const long long fromFunction = ParallelOps::sum(static_cast<long long>(m_curvatureTags[lvl].numPts()));
 
-    for (int lvl = 0; lvl < std::min(maxAmrDepth, static_cast<int>(curvatureTags.size())); lvl++) {
-      if (m_verbosity > 2) {
-        const long long fromBoundary = ParallelOps::sum(static_cast<long long>(m_geomTags[lvl].numPts()));
-        const long long fromFunction = ParallelOps::sum(static_cast<long long>(curvatureTags[lvl].numPts()));
-
-        pout() << "Driver::getGeometryTags - level " << lvl << " tagged " << fromBoundary
-               << " cells from the embedded boundary and " << fromFunction << " from the implicit function" << endl;
-      }
-
-      m_geomTags[lvl] |= curvatureTags[lvl];
+      pout() << "Driver::getGeometryTags - level " << lvl << " tagged " << fromBoundary
+             << " cells from the embedded boundary and " << fromFunction << " from the implicit function" << endl;
     }
+
+    m_geomTags[lvl] |= m_curvatureTags[lvl];
   }
 
   // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
@@ -1273,8 +1261,6 @@ Driver::parseGeometryRefinement()
   m_curvatureTagsDepth = -1;
   pp.query("refine_curvature", m_curvatureTagsDepth);
 
-  m_curvatureTagsDepth = std::min(m_curvatureTagsDepth, m_amr->getMaxAmrDepth());
-
   if (m_conductorTagsDepth < 0) {
     m_conductorTagsDepth = m_amr->getMaxAmrDepth();
   }
@@ -1490,6 +1476,34 @@ Driver::setupGeometryOnly()
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
 
+  // The generator needs these before it exists, so they are taken from the implicit function here
+  // and read again later as a source of geometric tags.
+  m_curvatureTags.resize(0);
+
+  if (m_curvatureTagsDepth > 0) {
+    m_computationalGeometry->buildImplicitFunctions();
+
+    // The pre-pass may reach below the finest grid level: a cell can take its geometry from a
+    // surface reconstructed under it without there being cells there to hold it.
+    Vector<int> refRatios = m_amr->getRefinementRatios();
+
+    while (static_cast<int>(refRatios.size()) < m_curvatureTagsDepth) {
+      refRatios.push_back(2);
+    }
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+                                                                refRatios,
+                                                                m_amr->getBlockingFactor() * IntVect::Unit,
+                                                                m_amr->getMaxBoxSize() * IntVect::Unit,
+                                                                m_amr->getProbLo(),
+                                                                m_amr->getDx()[0],
+                                                                m_refineAngle,
+                                                                m_irregTagGrowth,
+                                                                m_curvatureTagsDepth);
+
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+  }
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
@@ -1578,6 +1592,34 @@ Driver::setupFresh(const int a_initialRegrids)
   }
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+  // The generator needs these before it exists, so they are taken from the implicit function here
+  // and read again later as a source of geometric tags.
+  m_curvatureTags.resize(0);
+
+  if (m_curvatureTagsDepth > 0) {
+    m_computationalGeometry->buildImplicitFunctions();
+
+    // The pre-pass may reach below the finest grid level: a cell can take its geometry from a
+    // surface reconstructed under it without there being cells there to hold it.
+    Vector<int> refRatios = m_amr->getRefinementRatios();
+
+    while (static_cast<int>(refRatios.size()) < m_curvatureTagsDepth) {
+      refRatios.push_back(2);
+    }
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+                                                                refRatios,
+                                                                m_amr->getBlockingFactor() * IntVect::Unit,
+                                                                m_amr->getMaxBoxSize() * IntVect::Unit,
+                                                                m_amr->getProbLo(),
+                                                                m_amr->getDx()[0],
+                                                                m_refineAngle,
+                                                                m_irregTagGrowth,
+                                                                m_curvatureTagsDepth);
+
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+  }
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
@@ -1720,6 +1762,34 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
   }
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+
+  // The generator needs these before it exists, so they are taken from the implicit function here
+  // and read again later as a source of geometric tags.
+  m_curvatureTags.resize(0);
+
+  if (m_curvatureTagsDepth > 0) {
+    m_computationalGeometry->buildImplicitFunctions();
+
+    // The pre-pass may reach below the finest grid level: a cell can take its geometry from a
+    // surface reconstructed under it without there being cells there to hold it.
+    Vector<int> refRatios = m_amr->getRefinementRatios();
+
+    while (static_cast<int>(refRatios.size()) < m_curvatureTagsDepth) {
+      refRatios.push_back(2);
+    }
+
+    m_curvatureTags = m_computationalGeometry->getCurvatureTags(m_amr->getDomains()[0],
+                                                                refRatios,
+                                                                m_amr->getBlockingFactor() * IntVect::Unit,
+                                                                m_amr->getMaxBoxSize() * IntVect::Unit,
+                                                                m_amr->getProbLo(),
+                                                                m_amr->getDx()[0],
+                                                                m_refineAngle,
+                                                                m_irregTagGrowth,
+                                                                m_curvatureTagsDepth);
+
+    m_computationalGeometry->setAggregationTags(m_curvatureTags, m_amr->getDomains()[0]);
+  }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),

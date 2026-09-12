@@ -176,6 +176,8 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
 {
   CH_TIME("ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)");
 
+  this->buildImplicitFunctions();
+
   // Set the default maximum number of EB ghosts that we will ever use. This is needed because ScanShop will look
   // through grown grid patches when it determines if a grid patch is irregular or not.
   m_maxGhostEB = a_maxGhostEB;
@@ -479,6 +481,62 @@ ComputationalGeometry::tagUnderResolvedCells(IntVectSet&                  a_tags
   }
 }
 
+void
+ComputationalGeometry::buildImplicitFunctions()
+{
+  CH_TIME("ComputationalGeometry::buildImplicitFunctions");
+
+  // The gas phase is the region outside every object, which is the intersection of the regions
+  // outside each of them.
+  Vector<BaseIF*> parts;
+
+  for (int i = 0; i < m_dielectrics.size(); i++) {
+    parts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
+  }
+  for (int i = 0; i < m_electrodes.size(); i++) {
+    parts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
+  }
+
+  m_implicitFunctionGas = RefCountedPtr<BaseIF>(new NewIntersectionIF(parts));
+
+  // The solid phase is the region inside the dielectrics and outside the electrodes. Without
+  // dielectrics there is no such phase and the function is left null.
+  Vector<BaseIF*> dielectricParts;
+  Vector<BaseIF*> electrodeParts;
+
+  for (int i = 0; i < m_dielectrics.size(); i++) {
+    dielectricParts.push_back(&(*m_dielectrics[i].getImplicitFunction()));
+  }
+  for (int i = 0; i < m_electrodes.size(); i++) {
+    electrodeParts.push_back(&(*m_electrodes[i].getImplicitFunction()));
+  }
+
+  if (dielectricParts.size() == 0) {
+    m_implicitFunctionSolid = RefCountedPtr<BaseIF>();
+  }
+  else {
+    Vector<BaseIF*> solidParts;
+
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF>(new NewIntersectionIF(dielectricParts));
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF>(new NewIntersectionIF(electrodeParts));
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(new ComplementIF(*dielBaseIF));
+
+    solidParts.push_back(&(*dielCompIF));
+    solidParts.push_back(&(*elecBaseIF));
+
+    m_implicitFunctionSolid = RefCountedPtr<BaseIF>(new IntersectionIF(solidParts));
+  }
+}
+
+void
+ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain)
+{
+  CH_TIME("ComputationalGeometry::setAggregationTags");
+
+  m_aggregationTags   = a_tags;
+  m_aggregationDomain = a_coarsestDomain;
+}
+
 Vector<IntVectSet>
 ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
                                         const Vector<int>&   a_refRatios,
@@ -570,18 +628,6 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
-  // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build
-  // the various parts and then create the implicit function for the gas-phas using constructive solid geometry.
-  Vector<BaseIF*> parts;
-  for (int i = 0; i < m_dielectrics.size(); i++) {
-    parts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
-  }
-  for (int i = 0; i < m_electrodes.size(); i++) {
-    parts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
-  }
-
-  m_implicitFunctionGas = RefCountedPtr<BaseIF>(new NewIntersectionIF(parts));
-
   // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
   if (m_generator == Generator::PolyhedralShop) {
     auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionGas,
@@ -595,6 +641,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             s_strictGeometry,
                                             m_geometryRefinement);
 
+    shop->setAggregationTags(m_aggregationTags, m_aggregationDomain);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -630,38 +677,11 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
   // The "solid phase", i.e. the part inside dielectrics is a bit more complicated to compute. We want to get the region
   // outside the electrodes but inside the dielectrics. Fortunately there is a way to do this.
 
-  // Get all the parts (dielectrics/electrodes)
-  Vector<BaseIF*> dielectricParts;
-  Vector<BaseIF*> electrodeParts;
-
-  for (int i = 0; i < m_dielectrics.size(); i++) {
-    dielectricParts.push_back(&(*m_dielectrics[i].getImplicitFunction()));
-  }
-
-  for (int i = 0; i < m_electrodes.size(); i++) {
-    electrodeParts.push_back(&(*m_electrodes[i].getImplicitFunction()));
-  }
-
-  // Create EBIndexSpace. If there are no solid phases, return null
-  if (dielectricParts.size() == 0) {
+  // Without dielectrics there is no solid phase to generate.
+  if (m_implicitFunctionSolid.isNull()) {
     a_geoserver = nullptr;
   }
   else {
-    Vector<BaseIF*> parts;
-
-    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF>(
-      new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics.
-    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF>(
-      new NewIntersectionIF(electrodeParts)); // This is the region outside the the electrodes.
-    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(
-      new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
-
-    // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection
-    // of the region "inside" dielectrics and outside the electrods.
-    parts.push_back(&(*dielCompIF));
-    parts.push_back(&(*elecBaseIF));
-
-    m_implicitFunctionSolid = RefCountedPtr<BaseIF>(new IntersectionIF(parts));
 
     // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
     if (m_generator == Generator::PolyhedralShop) {
@@ -676,6 +696,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               s_strictGeometry,
                                               m_geometryRefinement);
 
+      shop->setAggregationTags(m_aggregationTags, m_aggregationDomain);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
       a_geoserver = static_cast<GeometryService*>(shop);

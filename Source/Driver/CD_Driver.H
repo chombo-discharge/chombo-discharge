@@ -268,14 +268,25 @@ protected:
   Real m_refineAngle;
 
   /**
-   * @brief How deep the implicit function is allowed to ask for refinement, or -1 for not at all.
+   * @brief How far below the coarsest level the implicit function is resolved, or -1 for not at all.
    * @details Selects the pre-pass in ComputationalGeometry::getCurvatureTags, which finds where
    * the geometry is under-resolved from the implicit function alone rather than from the cut
    * cells. Its tags are added to the ones read off the embedded boundary, so leaving this at -1
-   * is what the run did before the pre-pass existed. A cap is mandatory because creases and
-   * features thinner than a few cells go on asking for refinement at every resolution.
+   * is what the run did before the pre-pass existed, and they also tell the generator which cells
+   * to build from a surface reconstructed below them. It may therefore reach deeper than the
+   * finest grid level, since a cell can be built from a surface finer than itself without there
+   * being cells to hold that surface. A cap is mandatory because creases and features thinner
+   * than a few cells go on asking for refinement at every resolution.
    */
   int m_curvatureTagsDepth;
+
+  /**
+   * @brief Cells the implicit function asks to have refined, coarsest level first.
+   * @details Computed once, before the geometry is built, because the generator needs to know
+   * which cells to take from a finer surface, and read again afterwards as a source of geometric
+   * tags. Empty while Driver.refine_curvature leaves the pre-pass off.
+   */
+  Vector<IntVectSet> m_curvatureTags;
 
   /**
    * @brief Profile or not

@@ -36,9 +36,10 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                                                const int            a_refinement)
   : ScanShop(a_localGeom, a_verbosity, a_dx, a_probLo, a_finestDomain, a_scanLevel, a_ebGhost, a_thrshdVoF)
 {
-  m_strict          = a_strict;
-  m_volumeThreshold = a_thrshdVoF;
-  m_refinement      = std::max(1, a_refinement);
+  m_strict           = a_strict;
+  m_volumeThreshold  = a_thrshdVoF;
+  m_refinement       = std::max(1, a_refinement);
+  m_aggregationLevel = -1;
 }
 
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
@@ -417,6 +418,134 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
 }
 
 void
+PolyhedralGeometryShop::setAggregationTags(const Vector<IntVectSet>& a_tags,
+                                           const ProblemDomain&      a_coarsestDomain) noexcept
+{
+  CH_TIME("PolyhedralGeometryShop::setAggregationTags");
+
+  m_aggregationTags  = a_tags;
+  m_aggregationLevel = -1;
+
+  for (int lvl = 0; lvl < static_cast<int>(m_domains.size()); lvl++) {
+    if (m_domains[lvl].domainBox() == a_coarsestDomain.domainBox()) {
+      m_aggregationLevel = lvl;
+
+      break;
+    }
+  }
+
+  if (m_aggregationLevel < 0 && a_tags.size() > 0) {
+    MayDay::Error("PolyhedralGeometryShop::setAggregationTags - the tags do not sit on a level of this hierarchy");
+  }
+}
+
+void
+PolyhedralGeometryShop::fillAggregationDepth(BaseFab<int>& a_depth, const Box& a_region, const Real& a_dx) const
+{
+  CH_TIME("PolyhedralGeometryShop::fillAggregationDepth");
+
+  a_depth.resize(a_region, 1);
+  a_depth.setVal(0);
+
+  if (m_aggregationLevel < 0) {
+    return;
+  }
+
+  // Which level of this hierarchy is being generated, and which of the tags belongs to it. The
+  // hierarchy runs finest first and the tags coarsest first, so the two indices run opposite ways.
+  int level = -1;
+
+  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
+    if (std::abs(m_dx[lvl] - a_dx) <= 1.0E-12 * a_dx) {
+      level = lvl;
+
+      break;
+    }
+  }
+
+  const int here = m_aggregationLevel - level;
+
+  if (level < 0 || here < 0) {
+    return;
+  }
+
+  // A cell tagged on this level is one deep; a cell whose descendants were tagged one level below
+  // it is two, and so on. The tags run coarsest first, so descending means walking up their
+  // index, and each set is brought back to this level to be read off. Those below the finest
+  // level of the hierarchy still count: a cell can be built from a surface finer than any cell.
+  for (int step = 0; here + step < static_cast<int>(m_aggregationTags.size()); step++) {
+    const int which = here + step;
+
+    const int ratio = 1 << step;
+
+    IntVectSet tags = m_aggregationTags[which];
+
+    tags &= refine(a_region, ratio);
+
+    if (tags.isEmpty()) {
+      break;
+    }
+
+    tags.coarsen(ratio);
+
+    for (IVSIterator ivsIt(tags); ivsIt.ok(); ++ivsIt) {
+      const IntVect iv = ivsIt();
+
+      if (a_region.contains(iv)) {
+        a_depth(iv, 0) = std::max(a_depth(iv, 0), step + 1);
+      }
+    }
+  }
+}
+
+bool
+PolyhedralGeometryShop::buildAggregatedBody(PolyhedralEB::CutCellBody& a_body,
+                                            const IntVect&             a_cell,
+                                            const RealVect&            a_probLo,
+                                            const Real&                a_dx,
+                                            const int                  a_depth) const
+{
+  if (a_depth <= 0) {
+    BaseFab<Real> nodeValues;
+    this->fillNodeValues(nodeValues, Box(a_cell, a_cell), a_probLo, a_dx);
+
+    BaseFab<Real> intercept[SpaceDim];
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      Box edgeBox = nodeValues.box();
+      edgeBox.enclosedCells(dir);
+
+      intercept[dir].resize(edgeBox, 1);
+      intercept[dir].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
+    }
+
+    PolyhedralEB::CutCellSurface surface;
+
+    this->buildSurface(intercept, surface, nodeValues, a_cell, a_probLo, a_dx);
+
+    return a_body.define(surface);
+  }
+
+  constexpr int numChildren = 1 << SpaceDim;
+
+  PolyhedralEB::CutCellBody child[numChildren];
+
+  for (int c = 0; c < numChildren; c++) {
+    IntVect fine = 2 * a_cell;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      fine[d] += (c >> d) & 1;
+    }
+
+    if (!this->buildAggregatedBody(child[c], fine, a_probLo, 0.5 * a_dx, a_depth - 1)) {
+      return false;
+    }
+  }
+
+  return a_body.coarsen(child);
+}
+
+void
 PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                                   Vector<IrregNode>&   a_nodes,
                                   const Box&           a_validRegion,
@@ -503,6 +632,11 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
   IntVectSet droppedCells;
 
+  // Where a finer level covers this one, the cells under it are not reconstructed here a second
+  // time: their geometry comes up from the cells that partition them.
+  BaseFab<int> aggregationDepth;
+  this->fillAggregationDepth(aggregationDepth, a_ghostRegion, a_dx);
+
   for (IVSIterator ivsIt(irregularCells); ivsIt.ok(); ++ivsIt) {
     const IntVect iv = ivsIt();
 
@@ -513,6 +647,9 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
     if (m_refinement > 1) {
       built = this->buildRefinedBody(body, iv, a_probLo, a_dx);
+    }
+    else if (aggregationDepth(iv, 0) > 0) {
+      built = this->buildAggregatedBody(body, iv, a_probLo, a_dx, aggregationDepth(iv, 0));
     }
     else {
       this->buildSurface(intercept, surface, nodeValues, iv, a_probLo, a_dx);
