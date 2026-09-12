@@ -23,6 +23,9 @@
 // Our includes
 #include <CD_TiledMeshRefine.H>
 #include <CD_Units.H>
+
+// Std includes
+#include <limits>
 #include <CD_ComputationalGeometry.H>
 #include <CD_NewIntersectionIF.H>
 #include <CD_ScanShop.H>
@@ -238,15 +241,15 @@ ComputationalGeometry::edgeRoot(const RefCountedPtr<BaseIF>& a_implicitFunction,
 }
 
 void
-ComputationalGeometry::tagBendingCells(IntVectSet&                  a_tags,
-                                       const Box&                   a_region,
-                                       const ProblemDomain&         a_domain,
-                                       const RefCountedPtr<BaseIF>& a_implicitFunction,
-                                       const RealVect&              a_probLo,
-                                       const Real&                  a_dx,
-                                       const Real&                  a_angle) const
+ComputationalGeometry::tagUnderResolvedCells(IntVectSet&                  a_tags,
+                                             const Box&                   a_region,
+                                             const ProblemDomain&         a_domain,
+                                             const RefCountedPtr<BaseIF>& a_implicitFunction,
+                                             const RealVect&              a_probLo,
+                                             const Real&                  a_dx,
+                                             const Real&                  a_angle) const
 {
-  CH_TIME("ComputationalGeometry::tagBendingCells");
+  CH_TIME("ComputationalGeometry::tagUnderResolvedCells");
 
   // A cell is compared against every neighbour, so normals are wanted one cell out from the
   // region the tags are for.
@@ -357,6 +360,81 @@ ComputationalGeometry::tagBendingCells(IntVectSet&                  a_tags,
     }
   }
 
+  // A feature thinner than a cell leaves every corner on the same side, so the cell reads as
+  // regular and the bend test never sees it. Sampling inside the cell is what catches it, and
+  // it is only worth sampling where the interface could plausibly reach: a cell whose smallest
+  // corner value exceeds the largest change across any of its edges is further from the surface
+  // than the function is seen to move over the cell. That bound comes from the data rather than
+  // from assuming a signed distance function, which not all of them are.
+  for (BoxIterator bit(a_region); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    if (isCut(iv, 0) == 1) {
+      continue;
+    }
+
+    Real smallest = std::numeric_limits<Real>::max();
+    Real spread   = 0.0;
+
+    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+      IntVect node = iv;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        node[d] += (c >> d) & 1;
+      }
+
+      smallest = std::min(smallest, std::abs(nodeValues(node, 0)));
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (((c >> d) & 1) == 0) {
+          IntVect other = node;
+          other[d] += 1;
+
+          spread = std::max(spread, std::abs(nodeValues(other, 0) - nodeValues(node, 0)));
+        }
+      }
+    }
+
+    if (smallest > spread) {
+      continue;
+    }
+
+    const Real cornerSide = nodeValues(iv, 0);
+
+    bool hidden = false;
+
+    for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges && !hidden; e++) {
+      const int dir = PolyhedralEB::detail::edgeDirection(e);
+
+      int offset[SpaceDim];
+      PolyhedralEB::detail::edgeOrigin(e, offset);
+
+      RealVect x = a_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += a_dx * static_cast<Real>(iv[d] + offset[d]);
+      }
+
+      x[dir] += 0.5 * a_dx;
+
+      hidden = PolyhedralEB::isFluid(a_implicitFunction->value(x)) != PolyhedralEB::isFluid(cornerSide);
+    }
+
+    if (!hidden) {
+      RealVect centre = a_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        centre[d] += a_dx * (static_cast<Real>(iv[d]) + 0.5);
+      }
+
+      hidden = PolyhedralEB::isFluid(a_implicitFunction->value(centre)) != PolyhedralEB::isFluid(cornerSide);
+    }
+
+    if (hidden) {
+      a_tags |= iv;
+    }
+  }
+
   const Real cosineThreshold = std::cos(a_angle * Units::pi / 180.0);
 
   for (BoxIterator bit(a_region); bit.ok(); ++bit) {
@@ -443,7 +521,7 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
       }
 
       for (const auto& region : regions[lvl].stdVector()) {
-        this->tagBendingCells(tags[lvl], region, domains[lvl], implicitFunction, a_probLo, dx[lvl], a_angle);
+        this->tagUnderResolvedCells(tags[lvl], region, domains[lvl], implicitFunction, a_probLo, dx[lvl], a_angle);
       }
     }
 

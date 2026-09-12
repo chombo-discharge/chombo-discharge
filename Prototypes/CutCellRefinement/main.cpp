@@ -19,6 +19,7 @@
 #include <CD_RoughSphere.H>
 #include <CD_Tessellation.H>
 #include <PlaneIF.H>
+#include <IntersectionIF.H>
 #include <CD_TorusSdf.H>
 #include <CD_SphereSdf.H>
 #include <CD_CylinderSdf.H>
@@ -758,6 +759,34 @@ main(int argc, char* argv[])
     }
   };
 
+  // A tilted plate of a set thickness. Below one cell thick every corner of every cell it passes
+  // through lands on the same side of it, so the plate is invisible to the corner signs and to
+  // anything built from them -- which is the case a bend criterion cannot see.
+  class Slab : public ComputationalGeometry
+  {
+  public:
+    Slab(const RealVect& a_normal, const RealVect& a_point, const Real a_thickness)
+    {
+      RealVect unit = a_normal;
+      unit /= unit.vectorLength();
+
+      Vector<BaseIF*> planes;
+
+      // An electrode's implicit function is negative inside the solid, and IntersectionIF takes
+      // the larger of the two, so each plane is oriented negative on the slab's side of itself.
+      planes.push_back(new PlaneIF(unit, a_point - 0.5 * a_thickness * unit, true));
+      planes.push_back(new PlaneIF(unit, a_point + 0.5 * a_thickness * unit, false));
+
+      RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF>(new IntersectionIF(planes));
+
+      m_electrodes.push_back(Electrode(slab, true));
+
+      for (int i = 0; i < planes.size(); i++) {
+        delete planes[i];
+      }
+    }
+  };
+
   // A sphere at a configurable centre. Shifting the centre by a fraction of a cell sweeps the phase
   // of the surface relative to the grid, which is what exposes tangency and near-degenerate cuts.
   class Sphere : public ComputationalGeometry
@@ -897,6 +926,18 @@ main(int argc, char* argv[])
     queryVect("Plane", "normal", normal);
     queryVect("Plane", "point", point);
     compgeom = RefCountedPtr<ComputationalGeometry>(new TiltedPlane(normal, point));
+  }
+  else if (whichGeom == "slab") {
+    RealVect normal    = RealVect(D_DECL(0.3721, -0.5839, 0.7214));
+    RealVect point     = RealVect(D_DECL(0.013, -0.021, 0.037));
+    Real     thickness = 0.01;
+    queryVect("Slab", "normal", normal);
+    queryVect("Slab", "point", point);
+    {
+      ParmParse pp("Slab");
+      pp.query("thickness", thickness);
+    }
+    compgeom = RefCountedPtr<ComputationalGeometry>(new Slab(normal, point, thickness));
   }
   else if (whichGeom == "tessellation") {
     compgeom = RefCountedPtr<ComputationalGeometry>(new Tessellation());

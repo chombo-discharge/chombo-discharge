@@ -193,7 +193,9 @@ public:
    * @param[in] a_maxDepth       Hard cap on how many levels deep the pre-pass will go. Needed
    * rather than optional: where two surfaces meet in a crease the turn does not fall off under
    * refinement, because a crease is a crease at every resolution, so nothing but the cap stops
-   * those cells refining forever.
+   * those cells refining forever. A feature thinner than a few cells also keeps asking for more,
+   * until its two sides stop reaching each other through a neighbour stencil, which takes it to
+   * around three or four cells thick.
    * @return Tags on each level, coarsest first.
    */
   Vector<IntVectSet>
@@ -283,11 +285,19 @@ protected:
   RefCountedPtr<BaseIF> m_implicitFunctionSolid;
 
   /**
-   * @brief Tag the cells in a region whose interface turns too sharply against a neighbour's.
-   * @details Node values and edge crossings are evaluated once each and shared between the cells
-   * that meet on them, so a cell costs one implicit function evaluation plus a root find on each
-   * of its edges that carries a sign change. Normals are wanted one cell beyond the region so
-   * that every cell in it can be compared against all of its neighbours.
+   * @brief Tag the cells in a region that the resolution does not do justice to.
+   * @details Two things are looked for. A cell whose interface turns by more than a_angle against
+   * a neighbour's is under-resolved because the surface bends inside it. A cell that no corner
+   * reports as cut but that the interface passes through anyway is under-resolved because the
+   * feature is thinner than the cell, and only sampling the edge midpoints and the cell centre
+   * finds it. That sampling is confined to cells whose smallest corner value does not exceed the
+   * largest change across any of their edges, which bounds how far the interface could reach from
+   * the values themselves rather than from assuming a signed distance function.
+   *
+   * Node values and edge crossings are evaluated once each and shared between the cells that meet
+   * on them, so a cell costs one implicit function evaluation plus a root find on each of its
+   * edges that carries a sign change. Normals are wanted one cell beyond the region so that every
+   * cell in it can be compared against all of its neighbours.
    * @param[in,out] a_tags             Tagged cells, added to.
    * @param[in]     a_region           Cells to tag over.
    * @param[in]     a_domain           Domain of the level the region sits on.
@@ -297,13 +307,13 @@ protected:
    * @param[in]     a_angle            Turn, in degrees, above which a cell is tagged.
    */
   void
-  tagBendingCells(IntVectSet&                  a_tags,
-                  const Box&                   a_region,
-                  const ProblemDomain&         a_domain,
-                  const RefCountedPtr<BaseIF>& a_implicitFunction,
-                  const RealVect&              a_probLo,
-                  const Real&                  a_dx,
-                  const Real&                  a_angle) const;
+  tagUnderResolvedCells(IntVectSet&                  a_tags,
+                        const Box&                   a_region,
+                        const ProblemDomain&         a_domain,
+                        const RefCountedPtr<BaseIF>& a_implicitFunction,
+                        const RealVect&              a_probLo,
+                        const Real&                  a_dx,
+                        const Real&                  a_angle) const;
 
   /**
    * @brief Position along a cell edge where the implicit function changes sign.
