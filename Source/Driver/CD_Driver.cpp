@@ -360,9 +360,15 @@ Driver::getGeometryTags()
     geomTags |= condTags;
   }
 
+  // Grow tags with specified factor.
+  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
+    m_geomTags[lvl].grow(m_irregTagGrowth);
+  }
+
   // A second source of geometric tags, read off the implicit function rather than off the cut
   // cells. It sees what the embedded boundary cannot: a feature thinner than a cell leaves every
-  // corner on the same side of it and so has no cut cell to read a normal from.
+  // corner on the same side of it and so has no cut cell to read a normal from. It grows its own
+  // tags by the same factor as the ones above, so that both are buffered once and alike.
   if (m_curvatureTagsDepth > 0) {
     const Vector<IntVectSet> curvatureTags = m_computationalGeometry->getCurvatureTags(
       m_amr->getDomains()[0],
@@ -372,6 +378,7 @@ Driver::getGeometryTags()
       m_amr->getProbLo(),
       m_amr->getDx()[0],
       m_refineAngle,
+      m_irregTagGrowth,
       m_curvatureTagsDepth);
 
     for (int lvl = 0; lvl < std::min(maxAmrDepth, static_cast<int>(curvatureTags.size())); lvl++) {
@@ -385,11 +392,6 @@ Driver::getGeometryTags()
 
       m_geomTags[lvl] |= curvatureTags[lvl];
     }
-  }
-
-  // Grow tags with specified factor.
-  for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
-    m_geomTags[lvl].grow(m_irregTagGrowth);
   }
 
   // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.

@@ -487,6 +487,7 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
                                         const RealVect&      a_probLo,
                                         const Real&          a_coarsestDx,
                                         const Real&          a_angle,
+                                        const int            a_growth,
                                         const int            a_maxDepth) const
 {
   CH_TIME("ComputationalGeometry::getCurvatureTags");
@@ -540,6 +541,11 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
                                     a_angle);
       }
     }
+
+    // Reach past the cells that asked for the refinement, so that the boundary of the refined
+    // region does not land on the feature that caused it.
+    tags[lvl].grow(a_growth);
+    tags[lvl] &= domains[lvl].domainBox();
 
     if (lvl == static_cast<int>(tags.size()) - 1) {
       break;

@@ -378,6 +378,7 @@ void
 exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                     const RefCountedPtr<AmrMesh>&               a_amr,
                     const Real                                  a_angle,
+                    const int                                   a_growth,
                     const int                                   a_maxDepth,
                     const std::string&                          a_fileName)
 {
@@ -395,6 +396,7 @@ exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                                                                a_amr->getProbLo(),
                                                                a_amr->getDx()[0],
                                                                a_angle,
+                                                               a_growth,
                                                                a_maxDepth);
 
   std::ofstream out(a_fileName);
@@ -1051,17 +1053,19 @@ main(int argc, char* argv[])
   snprintf(fileName, sizeof(fileName), "cutcells.%dd.%d.csv", SpaceDim, procID());
   {
     Real angle    = 15.0;
+    int  growth   = 0;
     int  maxDepth = 3;
     {
       ParmParse pp("Prototype");
       pp.query("curvature_angle", angle);
+      pp.query("curvature_growth", growth);
       pp.query("curvature_max_depth", maxDepth);
     }
 
     char tagFile[256];
     snprintf(tagFile, sizeof(tagFile), "curvaturetags.%dd.%d.csv", SpaceDim, procID());
 
-    exportCurvatureTags(compgeom, amr, angle, maxDepth, std::string(tagFile));
+    exportCurvatureTags(compgeom, amr, angle, growth, maxDepth, std::string(tagFile));
   }
 
   {
