@@ -25,6 +25,7 @@
 #include <BRMeshRefine.H>
 
 // Our includes
+#include <CD_LoadBalancing.H>
 #include <CD_TiledMeshRefine.H>
 #include <CD_Units.H>
 #include <CD_ComputationalGeometry.H>
@@ -540,7 +541,30 @@ ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>& a_tags, cons
 {
   CH_TIME("ComputationalGeometry::setAggregationTags");
 
-  m_aggregationTags   = a_tags;
+  // The tags arrive as each rank found them, over its own share of the regions, which is how the
+  // tags read off the embedded boundary are carried too. That is fine for tagging, where the
+  // union across ranks is what regridding gathers anyway. It is not fine for deciding how much of
+  // a level to carry: every rank decides that for its own boxes, and it has to decide it from all
+  // the tags rather than from the ones it happened to find, or the coverage comes out with holes
+  // that move with the decomposition.
+  m_aggregationTags.resize(a_tags.size());
+
+  for (int lvl = 0; lvl < static_cast<int>(a_tags.size()); lvl++) {
+    Vector<Box> boxes;
+
+    for (IVSIterator ivsIt(a_tags[lvl]); ivsIt.ok(); ++ivsIt) {
+      boxes.push_back(Box(ivsIt(), ivsIt()));
+    }
+
+    LoadBalancing::gatherBoxes(boxes);
+
+    m_aggregationTags[lvl].makeEmpty();
+
+    for (int i = 0; i < boxes.size(); i++) {
+      m_aggregationTags[lvl] |= boxes[i];
+    }
+  }
+
   m_aggregationDomain = a_coarsestDomain;
 }
 
