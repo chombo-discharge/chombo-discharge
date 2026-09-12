@@ -24,6 +24,14 @@ MultiFluidIndexSpace::MultiFluidIndexSpace()
   for (int i = 0; i < m_ebis.size(); i++) {
     m_ebis[i] = RefCountedPtr<EBIndexSpace>(new EBIndexSpace());
   }
+
+  m_generateEveryLevel = false;
+}
+
+void
+MultiFluidIndexSpace::setGenerateEveryLevel(const bool a_generateEveryLevel) noexcept
+{
+  m_generateEveryLevel = a_generateEveryLevel;
 }
 
 MultiFluidIndexSpace::~MultiFluidIndexSpace() = default;
@@ -43,7 +51,12 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
   if (a_distributedData) {
     m_ebis[phase::gas]->setDistributedData();
   }
-  m_ebis[phase::gas]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::gas], a_nCellMax, a_max_coar);
+  if (m_generateEveryLevel) {
+    m_ebis[phase::gas]->defineEveryLevel(a_domain, a_origin, a_dx, *a_geoservers[phase::gas], a_nCellMax, a_max_coar);
+  }
+  else {
+    m_ebis[phase::gas]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::gas], a_nCellMax, a_max_coar);
+  }
 
   MemoryReport::getMaxMinMemoryUsage();
 
@@ -55,7 +68,13 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
     if (a_distributedData) {
       m_ebis[phase::solid]->setDistributedData();
     }
-    m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
+    if (m_generateEveryLevel) {
+      m_ebis[phase::solid]
+        ->defineEveryLevel(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
+    }
+    else {
+      m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
+    }
 
     MemoryReport::getMaxMinMemoryUsage();
   }
