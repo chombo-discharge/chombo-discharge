@@ -204,6 +204,20 @@ public:
   coarsenKind(const Kind a_kinds[1 << SpaceDim]) noexcept;
 
   /**
+   * @brief Whether one plane can stand for this body's interface.
+   * @details False where the interface turns so far within the cell that its patches face away
+   * from each other, so that the area carrying flux is not the area that is there. See
+   * s_maxAreaSpread.
+   *
+   * Asked of a body rather than enforced by it: a coarse level cannot resolve everything and is
+   * not meant to, so it is only on the level where the cells are claimed to be single valued
+   * that a body failing this is a body that should not have been built.
+   * @return True if the interface can be represented.
+   */
+  bool
+  interfaceIsOneSided() const noexcept;
+
+  /**
    * @brief Subdivide the body into the 2^SpaceDim cells that partition it.
    * @details Clips the polygons by the cell's own mid-planes and caps each opening that leaves,
    * so the children are literal sub-bodies of this one rather than reconstructions of it. Every
@@ -276,6 +290,23 @@ protected:
    * cannot represent it. Displacing the crossing makes the combinatorics generic.
    */
   static constexpr Real s_edgeTolerance = 1.0E-12;
+
+  /**
+   * @brief How far the interface's area may exceed the magnitude of its area vector.
+   * @details The ratio between the two is one over the cosine of the spread of the patch normals
+   * about their mean, so it says how far the interface turns within the cell. Two patches meeting
+   * at a right angle give the square root of two, three meeting at a corner give the square root
+   * of three, and no convex feature gives more. Past two the interface has turned beyond a right
+   * angle and is folding back on itself, which is a cell holding sheets that face away from each
+   * other.
+   *
+   * Such a cell has no single plane, and EBData stores one plane. The area vectors cancel, so the
+   * area that carries flux goes to nothing while the interface is really there, and the
+   * divergence identity does not notice: an interface lying wholly inside a cell touches none of
+   * its faces, so the identity reads zero against zero. Refusing is the only thing that catches
+   * it. The cure is resolution, which is what the cell is refused in favour of.
+   */
+  static constexpr Real s_maxAreaSpread = 2.0;
 
   /**
    * @brief Area below which a polygon carries no moment and is dropped.

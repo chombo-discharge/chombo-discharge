@@ -1220,6 +1220,16 @@ CutCellBody::coarsen(const CutCellBody a_children[1 << SpaceDim]) noexcept
   return this->divergenceResidual() <= s_nullArea + s_edgeTolerance;
 }
 
+bool
+CutCellBody::interfaceIsOneSided() const noexcept
+{
+  if (m_trueBoundaryArea <= s_nullArea) {
+    return true;
+  }
+
+  return m_trueBoundaryArea <= s_maxAreaSpread * m_boundaryArea;
+}
+
 CutCellBody::Kind
 CutCellBody::kind() const noexcept
 {

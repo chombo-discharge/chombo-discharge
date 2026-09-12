@@ -740,13 +740,34 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       built = body.define(surface);
     }
 
+    // A cell holding a feature finer than itself has no single plane to stand for its interface.
+    // Only worth refusing where the cells are claimed to be single valued, which is the finest
+    // level: every coarser one is going to fail to resolve something, and is not asked to.
+    const bool finestLevel = std::abs(a_dx - m_dx[0]) <= 1.0E-12 * a_dx;
+
+    if (built && finestLevel && !body.interfaceIsOneSided()) {
+      built = false;
+    }
+
     if (!built) {
       if (m_strict) {
         std::ostringstream message;
 
-        message << "PolyhedralGeometryShop::fillGraph - could not close the body in cell " << iv
-                << " (closure residual " << body.closureResidual() << ", volume fraction " << body.volumeFraction()
-                << ")";
+        // The two ways a cell is refused read very differently, and saying which is which is the
+        // difference between looking for a bug and reaching for more resolution.
+        if (!body.interfaceIsOneSided()) {
+          message << "PolyhedralGeometryShop::fillGraph - the interface folds back on itself in cell " << iv
+                  << ", so no single plane stands for it (interface area " << body.trueBoundaryArea() << " against "
+                  << body.boundaryArea()
+                  << " carrying flux). The cell holds a feature finer than itself and wants resolving.";
+        }
+        else {
+          // A body built here is asked to close; one carried up from below is asked to satisfy the
+          // divergence identity instead, so both are reported rather than guessing which applies.
+          message << "PolyhedralGeometryShop::fillGraph - could not build the body in cell " << iv
+                  << " (closure residual " << body.closureResidual() << ", divergence residual "
+                  << body.divergenceResidual() << ", volume fraction " << body.volumeFraction() << ")";
+        }
 
         MayDay::Error(message.str().c_str());
       }
