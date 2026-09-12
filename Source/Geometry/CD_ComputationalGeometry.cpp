@@ -495,14 +495,14 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
 
   // The pre-pass descends on its own cap, which has nothing to do with how deep the run is
   // allowed to refine, so the ratios have to reach that far whatever the AMR hierarchy is.
-  if (a_refRatios.size() < tags.size() - 1) {
+  if (static_cast<int>(a_refRatios.size()) < static_cast<int>(tags.size()) - 1) {
     MayDay::Error("ComputationalGeometry::getCurvatureTags - too few refinement ratios for the requested depth");
   }
 
   Vector<ProblemDomain> domains(tags.size(), a_coarsestDomain);
   Vector<Real>          dx(tags.size(), a_coarsestDx);
 
-  for (int lvl = 1; lvl < tags.size(); lvl++) {
+  for (int lvl = 1; lvl < static_cast<int>(tags.size()); lvl++) {
     domains[lvl] = refine(domains[lvl - 1], a_refRatios[lvl - 1]);
     dx[lvl]      = dx[lvl - 1] / static_cast<Real>(a_refRatios[lvl - 1]);
   }
@@ -521,11 +521,11 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
 
   domainSplit(a_coarsestDomain, regions[0], a_maxBlockSize[0]);
 
-  for (int lvl = 0; lvl < tags.size(); lvl++) {
+  for (int lvl = 0; lvl < static_cast<int>(tags.size()); lvl++) {
 
     // Each rank takes its own share of the regions and tags only within them, which is how the
     // tags read off the embedded boundary are distributed too. TiledMeshRefine gathers them.
-    for (int i = procID(); i < regions[lvl].size(); i += numProc()) {
+    for (int i = procID(); i < static_cast<int>(regions[lvl].size()); i += numProc()) {
       for (const auto& implicitFunction : implicitFunctions) {
         if (implicitFunction.isNull()) {
           continue;
@@ -541,7 +541,7 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
       }
     }
 
-    if (lvl == tags.size() - 1) {
+    if (lvl == static_cast<int>(tags.size()) - 1) {
       break;
     }
 
@@ -550,7 +550,7 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
 
     meshRefine.regrid(grids, tags);
 
-    regions[lvl + 1] = (lvl + 1 < grids.size()) ? grids[lvl + 1] : Vector<Box>();
+    regions[lvl + 1] = (lvl + 1 < static_cast<int>(grids.size())) ? grids[lvl + 1] : Vector<Box>();
   }
 
   return tags;

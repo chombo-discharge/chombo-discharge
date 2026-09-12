@@ -26,6 +26,7 @@
 #include <CD_Electrode.H>
 #include <CD_GeometryStepper.H>
 #include <CD_PolyhedralEBUtils.H>
+#include <CD_CutCellBody.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::Geometry;
@@ -383,7 +384,7 @@ exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
   // The pre-pass goes as deep as it is asked to, which is not tied to how deep this run refines.
   Vector<int> refRatios = a_amr->getRefinementRatios();
 
-  while (refRatios.size() < a_maxDepth) {
+  while (static_cast<int>(refRatios.size()) < a_maxDepth) {
     refRatios.push_back(2);
   }
 
@@ -413,6 +414,100 @@ exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
         out << "," << iv[d];
       }
       out << "\n";
+    }
+  }
+}
+
+// Measure the seam that a partially refined index space would carry.
+//
+// Where a fine level exists, the coarse cells under it come through coarsening and agree with
+// their children by construction. Where it does not, the coarse cells are reconstructed at their
+// own resolution. Along the boundary between the two, a coarse cell built one way sits next to
+// one built the other, and a face they share carries a single stored aperture. This reports how
+// far apart the two constructions are: for every cut cell, the moments taken from the coarse
+// reconstruction against the same moments summed from eight independently reconstructed children.
+void
+exportCoarseningSeam(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileName)
+{
+  const RefCountedPtr<BaseIF>&     implicitFunction = a_amr->getBaseImplicitFunction(phase::gas);
+  const Vector<DisjointBoxLayout>& grids            = a_amr->getGrids(Realm::primal);
+  const Vector<EBISLayout>&        ebisl            = a_amr->getEBISLayout(Realm::primal, phase::gas);
+  const Vector<Real>&              dx               = a_amr->getDx();
+  const RealVect                   probLo           = a_amr->getProbLo();
+
+  std::ofstream out(a_fileName);
+  out << std::setprecision(17);
+  out << "level,dx,volumeCoarse,volumeFine,boundaryCoarse,boundaryFine,worstAperture\n";
+
+  constexpr int numChildren = 1 << SpaceDim;
+  constexpr int numPerFace  = 1 << (SpaceDim - 1);
+
+  for (int lvl = 0; lvl <= a_amr->getFinestLevel(); lvl++) {
+    for (DataIterator dit = grids[lvl].dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&   ebisBox  = ebisl[lvl][dit()];
+      const IntVectSet irregIVS = ebisBox.getIrregIVS(grids[lvl][dit()]);
+
+      for (IVSIterator ivsIt(irregIVS); ivsIt.ok(); ++ivsIt) {
+        const IntVect& iv = ivsIt();
+
+        PolyhedralEB::CutCellBody coarse;
+
+        if (!coarse.define(sampleSurface(*implicitFunction, iv, probLo, dx[lvl], true))) {
+          continue;
+        }
+
+        PolyhedralEB::CutCellBody child[numChildren];
+
+        bool built = true;
+
+        for (int c = 0; c < numChildren && built; c++) {
+          IntVect fine = 2 * iv;
+
+          for (int d = 0; d < SpaceDim; d++) {
+            fine[d] += (c >> d) & 1;
+          }
+
+          built = child[c].define(sampleSurface(*implicitFunction, fine, probLo, 0.5 * dx[lvl], true));
+        }
+
+        if (!built) {
+          continue;
+        }
+
+        Real volumeFine   = 0.0;
+        Real boundaryFine = 0.0;
+
+        for (int c = 0; c < numChildren; c++) {
+          volumeFine += child[c].volumeFraction();
+          boundaryFine += child[c].boundaryArea();
+        }
+
+        volumeFine /= static_cast<Real>(numChildren);
+        boundaryFine /= static_cast<Real>(numPerFace);
+
+        Real worst = 0.0;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const int bit = (sit() == Side::Lo) ? 0 : 1;
+
+            Real fine = 0.0;
+
+            for (int c = 0; c < numChildren; c++) {
+              if (((c >> d) & 1) == bit) {
+                fine += child[c].areaFraction(d, sit());
+              }
+            }
+
+            fine /= static_cast<Real>(numPerFace);
+
+            worst = std::max(worst, std::abs(fine - coarse.areaFraction(d, sit())));
+          }
+        }
+
+        out << lvl << "," << dx[lvl] << "," << coarse.volumeFraction() << "," << volumeFine << ","
+            << coarse.boundaryArea() << "," << boundaryFine << "," << worst << "\n";
+      }
     }
   }
 }
@@ -967,6 +1062,13 @@ main(int argc, char* argv[])
     snprintf(tagFile, sizeof(tagFile), "curvaturetags.%dd.%d.csv", SpaceDim, procID());
 
     exportCurvatureTags(compgeom, amr, angle, maxDepth, std::string(tagFile));
+  }
+
+  {
+    char seamFile[256];
+    snprintf(seamFile, sizeof(seamFile), "seam.%dd.%d.csv", SpaceDim, procID());
+
+    exportCoarseningSeam(amr, std::string(seamFile));
   }
 
   exportCutCells(amr, std::string(fileName));
