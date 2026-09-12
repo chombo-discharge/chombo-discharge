@@ -428,6 +428,90 @@ exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 // one built the other, and a face they share carries a single stored aperture. This reports how
 // far apart the two constructions are: for every cut cell, the moments taken from the coarse
 // reconstruction against the same moments summed from eight independently reconstructed children.
+// Build a cell's body from the cells that partition it, reconstructed a level finer, and those
+// from theirs, down to a_depth. At depth zero this is just the reconstruction on the cell itself.
+// This is the operation a coarse level performs where a finer one covers it: its geometry comes
+// up through coarsening rather than being reconstructed a second time at its own resolution.
+bool
+buildAggregated(const BaseIF&              a_implicitFunction,
+                PolyhedralEB::CutCellBody& a_body,
+                const IntVect&             a_cell,
+                const RealVect&            a_probLo,
+                const Real                 a_dx,
+                const int                  a_depth)
+{
+  if (a_depth <= 0) {
+    return a_body.define(sampleSurface(a_implicitFunction, a_cell, a_probLo, a_dx, true));
+  }
+
+  constexpr int numChildren = 1 << SpaceDim;
+
+  PolyhedralEB::CutCellBody child[numChildren];
+
+  for (int c = 0; c < numChildren; c++) {
+    IntVect fine = 2 * a_cell;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      fine[d] += (c >> d) & 1;
+    }
+
+    if (!buildAggregated(a_implicitFunction, child[c], fine, a_probLo, 0.5 * a_dx, a_depth - 1)) {
+      return false;
+    }
+  }
+
+  return a_body.coarsen(child);
+}
+
+// Total up the geometry the whole surface carries, at a range of aggregation depths, so that the
+// figures can be set against the ones the geometry is known to have.
+void
+exportAggregationTotals(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDepth, const std::string& a_fileName)
+{
+  const RefCountedPtr<BaseIF>&     implicitFunction = a_amr->getBaseImplicitFunction(phase::gas);
+  const Vector<DisjointBoxLayout>& grids            = a_amr->getGrids(Realm::primal);
+  const Vector<EBISLayout>&        ebisl            = a_amr->getEBISLayout(Realm::primal, phase::gas);
+  const Vector<Real>&              dx               = a_amr->getDx();
+  const RealVect                   probLo           = a_amr->getProbLo();
+
+  std::ofstream out(a_fileName);
+  out << std::setprecision(17);
+  out << "depth,dx,cells,cutVolume,boundaryArea,trueBoundaryArea\n";
+
+  const int lvl = 0;
+
+  for (int depth = 0; depth <= a_maxDepth; depth++) {
+    Real     volume   = 0.0;
+    Real     boundary = 0.0;
+    Real     patch    = 0.0;
+    long int cells    = 0;
+
+    for (DataIterator dit = grids[lvl].dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&   ebisBox  = ebisl[lvl][dit()];
+      const IntVectSet irregIVS = ebisBox.getIrregIVS(grids[lvl][dit()]);
+
+      for (IVSIterator ivsIt(irregIVS); ivsIt.ok(); ++ivsIt) {
+        PolyhedralEB::CutCellBody body;
+
+        if (!buildAggregated(*implicitFunction, body, ivsIt(), probLo, dx[lvl], depth)) {
+          continue;
+        }
+
+        cells++;
+        volume += body.volumeFraction();
+        boundary += body.boundaryArea();
+        patch += body.trueBoundaryArea();
+      }
+    }
+
+    const Real cellVolume = std::pow(dx[lvl], SpaceDim);
+    const Real cellArea   = std::pow(dx[lvl], SpaceDim - 1);
+
+    out << depth << "," << dx[lvl] << "," << cells << "," << volume * cellVolume << "," << boundary * cellArea << ","
+        << patch * cellArea << "\n";
+  }
+}
+
 void
 exportCoarseningSeam(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileName)
 {
@@ -1098,6 +1182,21 @@ main(int argc, char* argv[])
     snprintf(seamFile, sizeof(seamFile), "seam.%dd.%d.csv", SpaceDim, procID());
 
     exportCoarseningSeam(amr, std::string(seamFile));
+  }
+
+  {
+    int aggregationDepth = 0;
+    {
+      ParmParse pp("Prototype");
+      pp.query("aggregation_depth", aggregationDepth);
+    }
+
+    if (aggregationDepth > 0) {
+      char aggFile[256];
+      snprintf(aggFile, sizeof(aggFile), "aggregation.%dd.%d.csv", SpaceDim, procID());
+
+      exportAggregationTotals(amr, aggregationDepth, std::string(aggFile));
+    }
   }
 
   exportCutCells(amr, std::string(fileName));
