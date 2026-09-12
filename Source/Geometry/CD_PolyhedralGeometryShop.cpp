@@ -498,6 +498,45 @@ PolyhedralGeometryShop::fillAggregationDepth(BaseFab<int>& a_depth, const Box& a
   }
 }
 
+PolyhedralEB::CutCellBody::Kind
+PolyhedralGeometryShop::aggregatedKind(const IntVect&  a_cell,
+                                       const RealVect& a_probLo,
+                                       const Real&     a_dx,
+                                       const int       a_depth) const
+{
+  if (a_depth <= 0) {
+    PolyhedralEB::CutCellSurface surface;
+
+    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+      RealVect x = a_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += a_dx * static_cast<Real>(a_cell[d] + ((c >> d) & 1));
+      }
+
+      surface.m_corner[c] = m_baseIF->value(x);
+    }
+
+    return PolyhedralEB::CutCellBody::classify(surface);
+  }
+
+  constexpr int numChildren = 1 << SpaceDim;
+
+  PolyhedralEB::CutCellBody::Kind kinds[numChildren];
+
+  for (int c = 0; c < numChildren; c++) {
+    IntVect fine = 2 * a_cell;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      fine[d] += (c >> d) & 1;
+    }
+
+    kinds[c] = this->aggregatedKind(fine, a_probLo, 0.5 * a_dx, a_depth - 1);
+  }
+
+  return PolyhedralEB::CutCellBody::coarsenKind(kinds);
+}
+
 bool
 PolyhedralGeometryShop::buildAggregatedBody(PolyhedralEB::CutCellBody& a_body,
                                             const IntVect&             a_cell,
@@ -565,6 +604,11 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   BaseFab<Real> nodeValues;
   this->fillNodeValues(nodeValues, a_ghostRegion, a_probLo, a_dx);
 
+  // Where a finer level covers this one, a cell is classified at the resolution its geometry will
+  // come from rather than at its own.
+  BaseFab<int> aggregationDepth;
+  this->fillAggregationDepth(aggregationDepth, a_ghostRegion, a_dx);
+
   IntVectSet irregularCells;
 
   if (m_refinement > 1) {
@@ -586,7 +630,11 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       surface.m_corner[c] = nodeValues(node, 0);
     }
 
-    switch (PolyhedralEB::CutCellBody::classify(surface)) {
+    const PolyhedralEB::CutCellBody::Kind kind = (aggregationDepth(iv, 0) > 0)
+                                                   ? this->aggregatedKind(iv, a_probLo, a_dx, aggregationDepth(iv, 0))
+                                                   : PolyhedralEB::CutCellBody::classify(surface);
+
+    switch (kind) {
     case PolyhedralEB::CutCellBody::Kind::Covered: {
       a_regIrregCovered(iv, 0) = -1;
 
@@ -631,11 +679,6 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   }
 
   IntVectSet droppedCells;
-
-  // Where a finer level covers this one, the cells under it are not reconstructed here a second
-  // time: their geometry comes up from the cells that partition them.
-  BaseFab<int> aggregationDepth;
-  this->fillAggregationDepth(aggregationDepth, a_ghostRegion, a_dx);
 
   for (IVSIterator ivsIt(irregularCells); ivsIt.ok(); ++ivsIt) {
     const IntVect iv = ivsIt();

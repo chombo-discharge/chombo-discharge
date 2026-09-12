@@ -99,12 +99,12 @@ public:
   touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept;
 
   /**
-   * @brief How this body relates to the interface, read off the body itself.
-   * @details A body with no polygons encloses nothing and the cell is covered. One whose
-   * polygons all lie in cell faces never meets the interface, so the cell is full. Anything
-   * else is cut. Asking the body rather than the corner values is what lets a cell produced by
-   * subdividing another inherit its classification instead of being classified afresh at a
-   * resolution the surface was never reconstructed on.
+   * @brief How this body relates to the interface.
+   * @details Settled when the body was built and carried from there, rather than worked out
+   * again from corner values at whatever resolution the cell happens to sit on. A body built
+   * from the cells that partition it takes theirs: cut if any of them is cut, and otherwise
+   * whichever side they all lie on. That is what stops a cell being called whole because its
+   * own corners agree, when the surface it was built from passes through it.
    * @return Regular, Covered or Cut.
    */
   Kind
@@ -174,6 +174,16 @@ public:
    */
   const RealVect&
   boundaryCentroid() const noexcept;
+
+  /**
+   * @brief How a cell relates to the interface, given how the cells partitioning it do.
+   * @details Cut if any of them is cut, and cut also if some are whole and others covered, since
+   * the interface has to pass between them. Otherwise whichever side they all lie on.
+   * @param[in] a_kinds Kind of each of the cells partitioning the cell, in any order.
+   * @return Regular, Covered or Cut.
+   */
+  static Kind
+  coarsenKind(const Kind a_kinds[1 << SpaceDim]) noexcept;
 
   /**
    * @brief Subdivide the body into the 2^SpaceDim cells that partition it.
@@ -352,6 +362,15 @@ protected:
   clip(const int a_dir, const Real a_coordinate, const bool a_keepLow, CutCellBody& a_out) const noexcept;
 
   /**
+   * @brief Read the classification off the polygons this body is made of.
+   * @details A body with no polygons encloses nothing and the cell is covered. One whose polygons
+   * all lie in cell faces never meets the interface, so the cell is full. Anything else is cut.
+   * @return Regular, Covered or Cut.
+   */
+  Kind
+  kindFromPolygons() const noexcept;
+
+  /**
    * @brief Take the moments of the assembled polygons.
    * @details Face apertures are accumulated signed about the outward normal, because where the
    * interface lies in a cell face it bounds a hole in that face and the aperture is the net
@@ -364,6 +383,11 @@ protected:
    * @brief The polygons bounding the fluid.
    */
   Polygon m_polygon[s_maxPolygons];
+
+  /**
+   * @brief How this body relates to the interface, as settled when it was built.
+   */
+  Kind m_kind;
 
   /**
    * @brief Number of polygons in use.

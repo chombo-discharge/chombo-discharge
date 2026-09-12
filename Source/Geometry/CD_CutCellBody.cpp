@@ -22,6 +22,7 @@ namespace PolyhedralEB {
 
 CutCellBody::CutCellBody() noexcept
 {
+  m_kind             = Kind::Covered;
   m_numPolygons      = 0;
   m_volumeFraction   = 0.0;
   m_volumeCentroid   = RealVect::Zero;
@@ -35,6 +36,42 @@ CutCellBody::CutCellBody() noexcept
     m_areaFraction[f] = 0.0;
     m_faceCentroid[f] = RealVect::Zero;
   }
+}
+
+CutCellBody::Kind
+CutCellBody::coarsenKind(const Kind a_kinds[1 << SpaceDim]) noexcept
+{
+  constexpr int numChildren = 1 << SpaceDim;
+
+  bool anyCut     = false;
+  bool anyRegular = false;
+  bool anyCovered = false;
+
+  for (int c = 0; c < numChildren; c++) {
+    switch (a_kinds[c]) {
+    case Kind::Cut: {
+      anyCut = true;
+
+      break;
+    }
+    case Kind::Regular: {
+      anyRegular = true;
+
+      break;
+    }
+    default: {
+      anyCovered = true;
+
+      break;
+    }
+    }
+  }
+
+  if (anyCut || (anyRegular && anyCovered)) {
+    return Kind::Cut;
+  }
+
+  return anyRegular ? Kind::Regular : Kind::Covered;
 }
 
 CutCellBody::Kind
@@ -750,6 +787,8 @@ CutCellBody::define(const CutCellSurface& a_surface) noexcept
   if (kind != Kind::Cut) {
     this->defineDegenerate(a_surface, kind);
 
+    m_kind = kind;
+
     return true;
   }
 
@@ -758,6 +797,8 @@ CutCellBody::define(const CutCellSurface& a_surface) noexcept
   }
 
   this->accumulateMoments();
+
+  m_kind = this->kindFromPolygons();
 
   // verify rather than assume: a folded patch leaves the body open or the volume outside its
   // range, and every individual moment can still look plausible when it does
@@ -1004,6 +1045,8 @@ CutCellBody::refine(CutCellBody a_children[1 << SpaceDim]) const noexcept
     }
 
     child.accumulateMoments();
+
+    child.m_kind = child.kindFromPolygons();
   }
 
   return true;
@@ -1017,6 +1060,17 @@ CutCellBody::coarsen(const CutCellBody a_children[1 << SpaceDim]) noexcept
   constexpr Real areaScale   = 2.0 * volumeScale;
 
   *this = CutCellBody();
+
+  // The cell is cut if the surface passes through any of the cells partitioning it, whatever its
+  // own corners say. This is the whole point of building it from them: a feature finer than the
+  // cell leaves every corner on one side, and reading the corners would call the cell whole.
+  Kind kinds[numChildren];
+
+  for (int c = 0; c < numChildren; c++) {
+    kinds[c] = a_children[c].kind();
+  }
+
+  m_kind = CutCellBody::coarsenKind(kinds);
 
   RealVect volumeMoment   = RealVect::Zero;
   RealVect boundaryVector = RealVect::Zero;
@@ -1101,6 +1155,12 @@ CutCellBody::coarsen(const CutCellBody a_children[1 << SpaceDim]) noexcept
 
 CutCellBody::Kind
 CutCellBody::kind() const noexcept
+{
+  return m_kind;
+}
+
+CutCellBody::Kind
+CutCellBody::kindFromPolygons() const noexcept
 {
   if (m_numPolygons == 0) {
     return Kind::Covered;
