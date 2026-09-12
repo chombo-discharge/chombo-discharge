@@ -313,7 +313,11 @@ faceBends(const BaseIF&   a_implicitFunction,
 // position of the sign change along each edge that has one. No moments and no interior, which is
 // all a refinement criterion needs.
 inline PolyhedralEB::CutCellSurface
-sampleSurface(const BaseIF& a_implicitFunction, const IntVect& a_cell, const RealVect& a_probLo, const Real a_dx)
+sampleSurface(const BaseIF&   a_implicitFunction,
+              const IntVect&  a_cell,
+              const RealVect& a_probLo,
+              const Real      a_dx,
+              const bool      a_root)
 {
   PolyhedralEB::CutCellSurface surface;
 
@@ -337,7 +341,8 @@ sampleSurface(const BaseIF& a_implicitFunction, const IntVect& a_cell, const Rea
     PolyhedralEB::detail::edgeCorners(e, lo, hi);
 
     if (PolyhedralEB::isFluid(surface.m_corner[lo]) != PolyhedralEB::isFluid(surface.m_corner[hi])) {
-      surface.m_crossing[e] = edgeCrossing(a_implicitFunction, corner[lo], corner[hi]);
+      surface.m_crossing[e] = a_root ? edgeCrossing(a_implicitFunction, corner[lo], corner[hi])
+                                     : surface.m_corner[lo] / (surface.m_corner[lo] - surface.m_corner[hi]);
     }
   }
 
@@ -362,6 +367,52 @@ curvatureStencil(const BaseIF&   a_implicitFunction,
     }
 
     a_stencil[i] = a_implicitFunction.value(x);
+  }
+}
+
+// Run the curvature pre-pass and write the cells it tags, so that the tags it produces from the
+// implicit function alone can be set against the ones the embedded boundary produces.
+void
+exportCurvatureTags(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
+                    const RefCountedPtr<AmrMesh>&               a_amr,
+                    const Real                                  a_angle,
+                    const int                                   a_maxDepth,
+                    const std::string&                          a_fileName)
+{
+  // The pre-pass goes as deep as it is asked to, which is not tied to how deep this run refines.
+  Vector<int> refRatios = a_amr->getRefinementRatios();
+
+  while (refRatios.size() < a_maxDepth) {
+    refRatios.push_back(2);
+  }
+
+  const Vector<IntVectSet> tags = a_compgeom->getCurvatureTags(a_amr->getDomains()[0],
+                                                               refRatios,
+                                                               a_amr->getBlockingFactor() * IntVect::Unit,
+                                                               a_amr->getMaxBoxSize() * IntVect::Unit,
+                                                               a_amr->getProbLo(),
+                                                               a_amr->getDx()[0],
+                                                               a_angle,
+                                                               a_maxDepth);
+
+  std::ofstream out(a_fileName);
+
+  out << "level";
+  for (int d = 0; d < SpaceDim; d++) {
+    out << ",iv" << d;
+  }
+  out << "\n";
+
+  for (int lvl = 0; lvl < tags.size(); lvl++) {
+    for (IVSIterator ivsIt(tags[lvl]); ivsIt.ok(); ++ivsIt) {
+      const IntVect iv = ivsIt();
+
+      out << lvl;
+      for (int d = 0; d < SpaceDim; d++) {
+        out << "," << iv[d];
+      }
+      out << "\n";
+    }
   }
 }
 
@@ -399,6 +450,9 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
   }
   for (int d = 0; d < SpaceDim; d++) {
     out << ",gNormal" << d;
+  }
+  for (int d = 0; d < SpaceDim; d++) {
+    out << ",lNormal" << d;
   }
   for (int face = 0; face < 2 * SpaceDim; face++) {
     out << ",numFaces" << face << ",areaFrac" << face;
@@ -489,7 +543,7 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
         }
 
         {
-          const PolyhedralEB::CutCellSurface surface = sampleSurface(*implicitFunction, iv, probLo, dx[lvl]);
+          const PolyhedralEB::CutCellSurface surface = sampleSurface(*implicitFunction, iv, probLo, dx[lvl], true);
 
           const RealVect crossingN = PolyhedralEB::crossingNormal(surface);
           const RealVect gradientN = PolyhedralEB::gradientNormal(surface);
@@ -499,6 +553,13 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
           }
           for (int d = 0; d < SpaceDim; d++) {
             out << "," << gradientN[d];
+          }
+
+          const PolyhedralEB::CutCellSurface linear  = sampleSurface(*implicitFunction, iv, probLo, dx[lvl], false);
+          const RealVect                     linearN = PolyhedralEB::crossingNormal(linear);
+
+          for (int d = 0; d < SpaceDim; d++) {
+            out << "," << linearN[d];
           }
         }
 
@@ -852,6 +913,20 @@ main(int argc, char* argv[])
 
   char fileName[256];
   snprintf(fileName, sizeof(fileName), "cutcells.%dd.%d.csv", SpaceDim, procID());
+  {
+    Real angle    = 15.0;
+    int  maxDepth = 3;
+    {
+      ParmParse pp("Prototype");
+      pp.query("curvature_angle", angle);
+      pp.query("curvature_max_depth", maxDepth);
+    }
+
+    char tagFile[256];
+    snprintf(tagFile, sizeof(tagFile), "curvaturetags.%dd.%d.csv", SpaceDim, procID());
+
+    exportCurvatureTags(compgeom, amr, angle, maxDepth, std::string(tagFile));
+  }
 
   exportCutCells(amr, std::string(fileName));
 
