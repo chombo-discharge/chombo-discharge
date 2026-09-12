@@ -309,6 +309,41 @@ faceBends(const BaseIF&   a_implicitFunction,
   return n;
 }
 
+// Reconstruct a cut cell's surface from the implicit function alone: corner values, and the
+// position of the sign change along each edge that has one. No moments and no interior, which is
+// all a refinement criterion needs.
+inline PolyhedralEB::CutCellSurface
+sampleSurface(const BaseIF& a_implicitFunction, const IntVect& a_cell, const RealVect& a_probLo, const Real a_dx)
+{
+  PolyhedralEB::CutCellSurface surface;
+
+  RealVect corner[PolyhedralEB::CutCellSurface::s_numCorners];
+
+  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+    RealVect x = a_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      x[d] += a_dx * static_cast<Real>(a_cell[d] + ((c >> d) & 1));
+    }
+
+    corner[c]           = x;
+    surface.m_corner[c] = a_implicitFunction.value(x);
+  }
+
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    int lo = 0;
+    int hi = 0;
+
+    PolyhedralEB::detail::edgeCorners(e, lo, hi);
+
+    if (PolyhedralEB::isFluid(surface.m_corner[lo]) != PolyhedralEB::isFluid(surface.m_corner[hi])) {
+      surface.m_crossing[e] = edgeCrossing(a_implicitFunction, corner[lo], corner[hi]);
+    }
+  }
+
+  return surface;
+}
+
 // Sample the implicit function on the lattice the curvature estimator expects, centred on a_point.
 inline void
 curvatureStencil(const BaseIF&   a_implicitFunction,
@@ -359,6 +394,12 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
     out << ",bndryCentroid" << d;
   }
   out << ",kappa,kappaDx";
+  for (int d = 0; d < SpaceDim; d++) {
+    out << ",xNormal" << d;
+  }
+  for (int d = 0; d < SpaceDim; d++) {
+    out << ",gNormal" << d;
+  }
   for (int face = 0; face < 2 * SpaceDim; face++) {
     out << ",numFaces" << face << ",areaFrac" << face;
     for (int d = 0; d < SpaceDim; d++) {
@@ -445,6 +486,20 @@ exportCutCells(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_fileNam
           const Real kappa = PolyhedralEB::maxPrincipalCurvature(stencil, dx[lvl]);
 
           out << "," << kappa << "," << kappa * dx[lvl];
+        }
+
+        {
+          const PolyhedralEB::CutCellSurface surface = sampleSurface(*implicitFunction, iv, probLo, dx[lvl]);
+
+          const RealVect crossingN = PolyhedralEB::crossingNormal(surface);
+          const RealVect gradientN = PolyhedralEB::gradientNormal(surface);
+
+          for (int d = 0; d < SpaceDim; d++) {
+            out << "," << crossingN[d];
+          }
+          for (int d = 0; d < SpaceDim; d++) {
+            out << "," << gradientN[d];
+          }
         }
 
         for (int dir = 0; dir < SpaceDim; dir++) {

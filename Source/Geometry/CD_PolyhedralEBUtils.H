@@ -34,6 +34,33 @@ inline bool
 isFluid(const Real a_value) noexcept;
 
 /**
+ * @brief Unit normal of the plane through a cut cell's edge crossings.
+ * @details Total least squares through the crossing points: the normal is the direction the
+ * points spread least in, which is the null space of their covariance, read off its adjugate
+ * rather than from an eigenvalue solve. Three crossings span the plane exactly and more are
+ * fitted. Only the positions of the sign changes enter, never how fast the implicit function
+ * moves through them, so this survives implicit functions whose derivatives do not exist at
+ * their own zero set. The orientation is taken from the corner values, pointing into the fluid.
+ * @param[in] a_surface Corner values and edge crossings of the cell.
+ * @return Unit normal in the cell's own frame, or zero where the crossings do not span a plane.
+ */
+inline RealVect
+crossingNormal(const CutCellSurface& a_surface) noexcept;
+
+/**
+ * @brief Unit normal from the gradient of the multilinear interpolant of the corner values.
+ * @details Cheaper than crossingNormal, needing no crossings at all, and likewise insensitive to
+ * how the implicit function is scaled: a monotone reparameterisation rescales the gradient but
+ * does not turn it. It is evaluated at the cell centre rather than on the surface, so it is the
+ * less faithful of the two where the interface runs near a corner.
+ * @param[in] a_surface Corner values of the cell.
+ * @return Unit normal in the cell's own frame, pointing into the fluid, or zero where the
+ * corner values are flat.
+ */
+inline RealVect
+gradientNormal(const CutCellSurface& a_surface) noexcept;
+
+/**
  * @brief Number of samples in the stencil the curvature is measured from.
  */
 constexpr int s_curvatureStencilSize = (SpaceDim == 2) ? 9 : 27;
@@ -51,6 +78,14 @@ constexpr int s_curvatureStencilSize = (SpaceDim == 2) ? 9 : 27;
  * is the bend of the surface across a cell, which stays finite where two surfaces meet in a
  * crease; measured at a spacing approaching zero the same crease diverges instead. The former is
  * what a refinement criterion wants, since a crease is not something more resolution can fix.
+ *
+ * Only valid where the implicit function is twice differentiable at its own zero set. That is a
+ * real restriction rather than a formality: PerlinSphereSdf returns the square root of the
+ * difference of squared radii, whose second derivative is unbounded at the surface, and the
+ * curvature of a sphere measured through it diverges under refinement instead of converging to
+ * the inverse radius. Where the implicit function cannot be trusted that far, take the normals
+ * from crossingNormal and compare them between neighbouring cells instead; root finding only
+ * asks where the function changes sign, never how fast.
  * @param[in] a_stencil Implicit function sampled on the lattice.
  * @param[in] a_spacing Lattice spacing.
  * @return Largest principal curvature in magnitude, or zero where the gradient vanishes.
