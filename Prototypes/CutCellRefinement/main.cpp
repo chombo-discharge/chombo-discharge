@@ -465,6 +465,83 @@ buildAggregated(const BaseIF&              a_implicitFunction,
 
 // Total up the geometry the whole surface carries, at a range of aggregation depths, so that the
 // figures can be set against the ones the geometry is known to have.
+// Look for cells holding more than one sheet of interface.
+//
+// A cell built from the cells partitioning it can end up with two patches of interface facing
+// opposite ways -- a feature thinner than the cell passing through it leaves one on each side.
+// EBData stores one plane per cell, so such a cell cannot be described: the area vectors cancel,
+// leaving the magnitude of their sum near zero while the interface is really there. Worse, a body
+// whose interface is wholly inside it touches none of its faces, so the divergence identity reads
+// zero equals zero and the body is accepted. This reports what the moments actually come to.
+void
+exportSheetCancellation(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDepth, const std::string& a_fileName)
+{
+  const RefCountedPtr<BaseIF>& implicitFunction = a_amr->getBaseImplicitFunction(phase::gas);
+  const Vector<Real>&          dx               = a_amr->getDx();
+  const RealVect               probLo           = a_amr->getProbLo();
+  const ProblemDomain&         domain           = a_amr->getDomains()[0];
+
+  std::ofstream out(a_fileName);
+  out << std::setprecision(17);
+  out << "depth,cells,cancelling,worstRatio,worstVolFrac,worstBndryArea,worstTrueArea,worstResidual\n";
+
+  for (int depth = 0; depth <= a_maxDepth; depth++) {
+    long int cells      = 0;
+    long int cancelling = 0;
+
+    Real worstRatio    = 0.0;
+    Real worstVol      = 0.0;
+    Real worstBndry    = 0.0;
+    Real worstTrue     = 0.0;
+    Real worstResidual = 0.0;
+
+    for (BoxIterator bit(domain.domainBox()); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      // Only cells the interface could reach are worth building.
+      RealVect centre = probLo;
+      for (int d = 0; d < SpaceDim; d++) {
+        centre[d] += dx[0] * (static_cast<Real>(iv[d]) + 0.5);
+      }
+
+      if (std::abs(implicitFunction->value(centre)) > dx[0] * std::sqrt(1.0 * SpaceDim)) {
+        continue;
+      }
+
+      PolyhedralEB::CutCellBody body;
+
+      if (!buildAggregated(*implicitFunction, body, iv, probLo, dx[0], depth)) {
+        continue;
+      }
+
+      if (body.kind() != PolyhedralEB::CutCellBody::Kind::Cut) {
+        continue;
+      }
+
+      cells++;
+
+      // Two sheets facing opposite ways cancel in the sum while both count in the total.
+      const Real ratio = (body.boundaryArea() > 0.0) ? (body.trueBoundaryArea() / body.boundaryArea())
+                                                     : ((body.trueBoundaryArea() > 0.0) ? 1.0E30 : 1.0);
+
+      if (ratio > 1.5) {
+        cancelling++;
+      }
+
+      if (ratio > worstRatio) {
+        worstRatio    = ratio;
+        worstVol      = body.volumeFraction();
+        worstBndry    = body.boundaryArea();
+        worstTrue     = body.trueBoundaryArea();
+        worstResidual = body.divergenceResidual();
+      }
+    }
+
+    out << depth << "," << cells << "," << cancelling << "," << worstRatio << "," << worstVol << "," << worstBndry
+        << "," << worstTrue << "," << worstResidual << "\n";
+  }
+}
+
 void
 exportAggregationTotals(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDepth, const std::string& a_fileName)
 {
@@ -1196,6 +1273,11 @@ main(int argc, char* argv[])
       snprintf(aggFile, sizeof(aggFile), "aggregation.%dd.%d.csv", SpaceDim, procID());
 
       exportAggregationTotals(amr, aggregationDepth, std::string(aggFile));
+
+      char sheetFile[256];
+      snprintf(sheetFile, sizeof(sheetFile), "sheets.%dd.%d.csv", SpaceDim, procID());
+
+      exportSheetCancellation(amr, aggregationDepth, std::string(sheetFile));
     }
   }
 
