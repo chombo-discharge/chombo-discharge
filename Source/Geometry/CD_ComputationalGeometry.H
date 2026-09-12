@@ -190,6 +190,10 @@ public:
    * @param[in] a_probLo         Lower left corner of the domain.
    * @param[in] a_coarsestDx     Grid spacing on the coarsest level.
    * @param[in] a_angle          Turn, in degrees, above which a cell is tagged.
+   * @param[in] a_growth         Cells by which each level's tags are grown before the next level
+   * is swept. The refined region then reaches past the cells that asked for it, which is what
+   * keeps the boundary between coarsened and freshly generated cells away from the features that
+   * asked for the refinement in the first place.
    * @param[in] a_maxDepth       Hard cap on how many levels deep the pre-pass will go. Needed
    * rather than optional: where two surfaces meet in a crease the turn does not fall off under
    * refinement, because a crease is a crease at every resolution, so nothing but the cap stops
@@ -206,6 +210,7 @@ public:
                    const RealVect&      a_probLo,
                    const Real&          a_coarsestDx,
                    const Real&          a_angle,
+                   const int            a_growth,
                    const int            a_maxDepth) const;
 
 protected:
