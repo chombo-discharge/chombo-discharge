@@ -167,6 +167,25 @@ public:
                   const int            a_maxCoarsen = -1);
 
   /**
+   * @brief Assemble the implicit functions for the two phases from the objects set on this class.
+   * @details Called by buildGeometries before it makes the generators, and callable ahead of it
+   * by anything that needs to read the geometry before the index spaces exist. Doing it twice is
+   * harmless: the result depends only on the electrodes and dielectrics.
+   */
+  void
+  buildImplicitFunctions();
+
+  /**
+   * @brief Say where the polyhedral generator should take its geometry from below the cells.
+   * @details Must be set before buildGeometries, since that is when the generator is made. The
+   * tags are the ones getCurvatureTags returns, coarsest level first.
+   * @param[in] a_tags           Cells on each level whose geometry comes from a finer surface.
+   * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
+   */
+  void
+  setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain);
+
+  /**
    * @brief Where the interface bends too sharply for the resolution it sits on.
    * @details A pre-pass over the implicit function alone. Each candidate cell's interface normal
    * is fitted to the positions of its edge crossings, and a cell whose normal turns by more than
@@ -258,6 +277,16 @@ protected:
    * @brief Refinement between the cells the surface is reconstructed on and the ones generated.
    */
   int m_geometryRefinement;
+
+  /**
+   * @brief Cells whose geometry the generator takes from a finer surface, coarsest level first.
+   */
+  Vector<IntVectSet> m_aggregationTags;
+
+  /**
+   * @brief Domain the first entry of m_aggregationTags belongs to.
+   */
+  ProblemDomain m_aggregationDomain;
 
   /**
    * @brief Grid level where we begin using ScanShop

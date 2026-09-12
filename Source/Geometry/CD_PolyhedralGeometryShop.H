@@ -73,6 +73,21 @@ public:
                          const int            a_refinement);
 
   /**
+   * @brief Say where the surface is reconstructed below the cells it is generating.
+   * @details A cell the tags cover has its geometry taken from the cells that partition it,
+   * reconstructed a level finer, and those from theirs, as deep as the tags go. Nothing is
+   * reconstructed twice at two resolutions: a level the tags cover comes up through coarsening,
+   * which is what keeps a coarse cell and the fine cells under it describing one surface.
+   *
+   * The tags are indexed coarsest first, as the pre-pass in ComputationalGeometry returns them,
+   * and a_coarsestDomain says which of this object's levels the first of them belongs to.
+   * @param[in] a_tags           Cells on each level whose geometry comes from below them.
+   * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
+   */
+  void
+  setAggregationTags(const Vector<IntVectSet>& a_tags, const ProblemDomain& a_coarsestDomain) noexcept;
+
+  /**
    * @brief Destructor.
    */
   ~PolyhedralGeometryShop() override;
@@ -138,6 +153,18 @@ protected:
   int m_refinement;
 
   /**
+   * @brief Cells whose geometry is taken from a reconstruction below them, coarsest level first.
+   */
+  Vector<IntVectSet> m_aggregationTags;
+
+  /**
+   * @brief Index into m_domains of the level the first entry of m_aggregationTags belongs to.
+   * @details Negative when no tags have been supplied, which leaves every cell reconstructed at
+   * its own resolution.
+   */
+  int m_aggregationLevel;
+
+  /**
    * @brief Classify every cell of a region from the bodies of the cells they subdivide.
    * @details Only meaningful when the generated cells refine the ones the surface is
    * reconstructed on. The surface is reconstructed once per coarse cell and cut down, and each
@@ -179,6 +206,33 @@ protected:
                    const IntVect&             a_cell,
                    const RealVect&            a_probLo,
                    const Real&                a_dx) const;
+
+  /**
+   * @brief How far below a cell the surface it is built from is reconstructed.
+   * @details Filled from the tags, coarsened to the level being generated: a cell tagged on this
+   * level is one level deep, a cell whose children were tagged on the next is two, and so on.
+   * @param[out] a_depth  Depth of each cell in the region.
+   * @param[in]  a_region Cells to fill.
+   * @param[in]  a_dx     Grid spacing on the level being generated.
+   */
+  void
+  fillAggregationDepth(BaseFab<int>& a_depth, const Box& a_region, const Real& a_dx) const;
+
+  /**
+   * @brief Build a cell's body from the cells that partition it, recursively.
+   * @param[out] a_body   Body of the cell, in its own frame.
+   * @param[in]  a_cell   Cell to build.
+   * @param[in]  a_probLo Lower left corner of the domain.
+   * @param[in]  a_dx     Grid spacing of the cell.
+   * @param[in]  a_depth  How many levels below the cell the surface is reconstructed on.
+   * @return True if the body closed.
+   */
+  bool
+  buildAggregatedBody(PolyhedralEB::CutCellBody& a_body,
+                      const IntVect&             a_cell,
+                      const RealVect&            a_probLo,
+                      const Real&                a_dx,
+                      const int                  a_depth) const;
 
   /**
    * @brief Evaluate the implicit function at every node of a region.
