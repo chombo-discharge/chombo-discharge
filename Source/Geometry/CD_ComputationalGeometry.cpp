@@ -21,6 +21,8 @@
 #include <ComplementIF.H>
 
 // Our includes
+#include <CD_TiledMeshRefine.H>
+#include <CD_Units.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_NewIntersectionIF.H>
 #include <CD_ScanShop.H>
@@ -198,6 +200,266 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
       delete geoServices[i];
     }
   }
+}
+
+Real
+ComputationalGeometry::edgeRoot(const RefCountedPtr<BaseIF>& a_implicitFunction,
+                                const RealVect&              a_lowPoint,
+                                const int                    a_dir,
+                                const Real&                  a_lowValue,
+                                const Real&                  a_dx) const
+{
+  Real lo       = 0.0;
+  Real hi       = 1.0;
+  Real lowValue = a_lowValue;
+
+  for (int iter = 0; iter < 100; iter++) {
+    const Real mid = 0.5 * (lo + hi);
+
+    RealVect x = a_lowPoint;
+    x[a_dir] += a_dx * mid;
+
+    const Real value = a_implicitFunction->value(x);
+
+    if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(lowValue)) {
+      lo       = mid;
+      lowValue = value;
+    }
+    else {
+      hi = mid;
+    }
+
+    if (hi - lo < 1.0E-15) {
+      break;
+    }
+  }
+
+  return 0.5 * (lo + hi);
+}
+
+void
+ComputationalGeometry::tagBendingCells(IntVectSet&                  a_tags,
+                                       const Box&                   a_region,
+                                       const ProblemDomain&         a_domain,
+                                       const RefCountedPtr<BaseIF>& a_implicitFunction,
+                                       const RealVect&              a_probLo,
+                                       const Real&                  a_dx,
+                                       const Real&                  a_angle) const
+{
+  CH_TIME("ComputationalGeometry::tagBendingCells");
+
+  // A cell is compared against every neighbour, so normals are wanted one cell out from the
+  // region the tags are for.
+  const Box grownRegion = grow(a_region, 1) & a_domain;
+
+  Box nodeBox = grownRegion;
+  nodeBox.surroundingNodes();
+
+  BaseFab<Real> nodeValues(nodeBox, 1);
+
+  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
+    const IntVect node = bit();
+
+    RealVect x = a_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      x[d] += a_dx * static_cast<Real>(node[d]);
+    }
+
+    nodeValues(node, 0) = a_implicitFunction->value(x);
+  }
+
+  // Edges are shared by the cells meeting along them, so each root is found once and addressed
+  // by the edge's own low node.
+  BaseFab<Real> intercept[SpaceDim];
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    Box edgeBox = nodeBox;
+    edgeBox.enclosedCells(dir);
+
+    intercept[dir].define(edgeBox, 1);
+    intercept[dir].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
+  }
+
+  BaseFab<Real> normal(grownRegion, SpaceDim);
+  BaseFab<int>  isCut(grownRegion, 1);
+
+  normal.setVal(0.0);
+  isCut.setVal(0);
+
+  for (BoxIterator bit(grownRegion); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    PolyhedralEB::CutCellSurface surface;
+
+    bool cut = false;
+
+    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+      IntVect node = iv;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        node[d] += (c >> d) & 1;
+      }
+
+      surface.m_corner[c] = nodeValues(node, 0);
+
+      cut = cut || (PolyhedralEB::isFluid(surface.m_corner[c]) != PolyhedralEB::isFluid(surface.m_corner[0]));
+    }
+
+    if (!cut) {
+      continue;
+    }
+
+    for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+      int lo = 0;
+      int hi = 0;
+
+      PolyhedralEB::detail::edgeCorners(e, lo, hi);
+
+      if (PolyhedralEB::isFluid(surface.m_corner[lo]) == PolyhedralEB::isFluid(surface.m_corner[hi])) {
+        continue;
+      }
+
+      const int dir = PolyhedralEB::detail::edgeDirection(e);
+
+      int offset[SpaceDim];
+      PolyhedralEB::detail::edgeOrigin(e, offset);
+
+      IntVect edgeIV = iv;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        edgeIV[d] += offset[d];
+      }
+
+      if (intercept[dir](edgeIV, 0) == PolyhedralEB::CutCellSurface::s_noCrossing) {
+        RealVect lowPoint = a_probLo;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          lowPoint[d] += a_dx * static_cast<Real>(edgeIV[d]);
+        }
+
+        intercept[dir](edgeIV, 0) = this->edgeRoot(a_implicitFunction, lowPoint, dir, surface.m_corner[lo], a_dx);
+      }
+
+      surface.m_crossing[e] = intercept[dir](edgeIV, 0);
+    }
+
+    const RealVect cellNormal = PolyhedralEB::crossingNormal(surface);
+
+    if (cellNormal.vectorLength() <= 0.0) {
+      continue;
+    }
+
+    isCut(iv, 0) = 1;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      normal(iv, d) = cellNormal[d];
+    }
+  }
+
+  const Real cosineThreshold = std::cos(a_angle * Units::pi / 180.0);
+
+  for (BoxIterator bit(a_region); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    if (isCut(iv, 0) == 0) {
+      continue;
+    }
+
+    RealVect here;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      here[d] = normal(iv, d);
+    }
+
+    bool bends = false;
+
+    for (BoxIterator nit(Box(iv - IntVect::Unit, iv + IntVect::Unit)); nit.ok() && !bends; ++nit) {
+      const IntVect other = nit();
+
+      if (other == iv || !grownRegion.contains(other) || isCut(other, 0) == 0) {
+        continue;
+      }
+
+      RealVect there;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        there[d] = normal(other, d);
+      }
+
+      bends = here.dotProduct(there) < cosineThreshold;
+    }
+
+    if (bends) {
+      a_tags |= iv;
+    }
+  }
+}
+
+Vector<IntVectSet>
+ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
+                                        const Vector<int>&   a_refRatios,
+                                        const IntVect&       a_tileSize,
+                                        const IntVect&       a_maxBlockSize,
+                                        const RealVect&      a_probLo,
+                                        const Real&          a_coarsestDx,
+                                        const Real&          a_angle,
+                                        const int            a_maxDepth) const
+{
+  CH_TIME("ComputationalGeometry::getCurvatureTags");
+
+  Vector<IntVectSet> tags(std::max(a_maxDepth, 1));
+
+  // The pre-pass descends on its own cap, which has nothing to do with how deep the run is
+  // allowed to refine, so the ratios have to reach that far whatever the AMR hierarchy is.
+  if (a_refRatios.size() < tags.size() - 1) {
+    MayDay::Error("ComputationalGeometry::getCurvatureTags - too few refinement ratios for the requested depth");
+  }
+
+  Vector<ProblemDomain> domains(tags.size(), a_coarsestDomain);
+  Vector<Real>          dx(tags.size(), a_coarsestDx);
+
+  for (int lvl = 1; lvl < tags.size(); lvl++) {
+    domains[lvl] = refine(domains[lvl - 1], a_refRatios[lvl - 1]);
+    dx[lvl]      = dx[lvl - 1] / static_cast<Real>(a_refRatios[lvl - 1]);
+  }
+
+  const TiledMeshRefine meshRefine(a_coarsestDomain, a_refRatios, a_tileSize, a_maxBlockSize);
+
+  RefCountedPtr<BaseIF> implicitFunctions[2];
+
+  implicitFunctions[0] = m_implicitFunctionGas;
+  implicitFunctions[1] = m_implicitFunctionSolid;
+
+  // The coarsest level is swept whole; every finer one only where the level above it tagged.
+  Vector<Vector<Box>> regions(tags.size());
+
+  regions[0] = Vector<Box>(1, a_coarsestDomain.domainBox());
+
+  for (int lvl = 0; lvl < tags.size(); lvl++) {
+    for (const auto& implicitFunction : implicitFunctions) {
+      if (implicitFunction.isNull()) {
+        continue;
+      }
+
+      for (const auto& region : regions[lvl].stdVector()) {
+        this->tagBendingCells(tags[lvl], region, domains[lvl], implicitFunction, a_probLo, dx[lvl], a_angle);
+      }
+    }
+
+    if (lvl == tags.size() - 1) {
+      break;
+    }
+
+    // The cap is what stops a crease, where the turn never falls off under refinement.
+    Vector<Vector<Box>> grids;
+
+    meshRefine.regrid(grids, tags);
+
+    regions[lvl + 1] = (lvl + 1 < grids.size()) ? grids[lvl + 1] : Vector<Box>();
+  }
+
+  return tags;
 }
 
 void

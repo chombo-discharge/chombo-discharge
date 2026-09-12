@@ -19,11 +19,13 @@
 #include <Box.H>
 #include <RealVect.H>
 #include <ProblemDomain.H>
+#include <IntVectSet.H>
 
 // Our includes
 #include <CD_Dielectric.H>
 #include <CD_Electrode.H>
 #include <CD_MultiFluidIndexSpace.H>
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
@@ -164,6 +166,46 @@ public:
                   const int            a_maxGhostEB,
                   const int            a_maxCoarsen = -1);
 
+  /**
+   * @brief Where the interface bends too sharply for the resolution it sits on.
+   * @details A pre-pass over the implicit function alone. Each candidate cell's interface normal
+   * is fitted to the positions of its edge crossings, and a cell whose normal turns by more than
+   * a_angle against any of its neighbours' is tagged. No moments, no connectivity and no index
+   * space are built, so the tags can be had before any geometry is committed and nothing has to
+   * be generated and thrown away.
+   *
+   * Normals come from crossingNormal rather than from derivatives of the implicit function,
+   * because root finding only asks where the function changes sign. Implicit functions that are
+   * not differentiable at their own zero set are common enough that a derivative-based criterion
+   * fails on geometries already in the test suite.
+   *
+   * Each level is swept only where the level above it tagged, with TiledMeshRefine turning tags
+   * into the regions to descend into, so the work follows the surface rather than the volume and
+   * proper nesting is left to the code that already does it.
+   * @param[in] a_coarsestDomain Domain of the coarsest level.
+   * @param[in] a_refRatios      Refinement ratio between each level and the next. Must reach
+   * a_maxDepth, which is the pre-pass's own cap and need not be how deep the run may refine.
+   * @param[in] a_tileSize       Tile size for the clustering, in cells.
+   * @param[in] a_maxBlockSize   Largest box the clustering may emit, in cells.
+   * @param[in] a_probLo         Lower left corner of the domain.
+   * @param[in] a_coarsestDx     Grid spacing on the coarsest level.
+   * @param[in] a_angle          Turn, in degrees, above which a cell is tagged.
+   * @param[in] a_maxDepth       Hard cap on how many levels deep the pre-pass will go. Needed
+   * rather than optional: where two surfaces meet in a crease the turn does not fall off under
+   * refinement, because a crease is a crease at every resolution, so nothing but the cap stops
+   * those cells refining forever.
+   * @return Tags on each level, coarsest first.
+   */
+  Vector<IntVectSet>
+  getCurvatureTags(const ProblemDomain& a_coarsestDomain,
+                   const Vector<int>&   a_refRatios,
+                   const IntVect&       a_tileSize,
+                   const IntVect&       a_maxBlockSize,
+                   const RealVect&      a_probLo,
+                   const Real&          a_coarsestDx,
+                   const Real&          a_angle,
+                   const int            a_maxDepth) const;
+
 protected:
   /**
    * @brief Threshold for Vof computation
@@ -239,6 +281,47 @@ protected:
    * @brief The solid-phase implicit function (i.e. the inside of the dielectrics).
    */
   RefCountedPtr<BaseIF> m_implicitFunctionSolid;
+
+  /**
+   * @brief Tag the cells in a region whose interface turns too sharply against a neighbour's.
+   * @details Node values and edge crossings are evaluated once each and shared between the cells
+   * that meet on them, so a cell costs one implicit function evaluation plus a root find on each
+   * of its edges that carries a sign change. Normals are wanted one cell beyond the region so
+   * that every cell in it can be compared against all of its neighbours.
+   * @param[in,out] a_tags             Tagged cells, added to.
+   * @param[in]     a_region           Cells to tag over.
+   * @param[in]     a_domain           Domain of the level the region sits on.
+   * @param[in]     a_implicitFunction Implicit function to reconstruct from.
+   * @param[in]     a_probLo           Lower left corner of the domain.
+   * @param[in]     a_dx               Grid spacing on this level.
+   * @param[in]     a_angle            Turn, in degrees, above which a cell is tagged.
+   */
+  void
+  tagBendingCells(IntVectSet&                  a_tags,
+                  const Box&                   a_region,
+                  const ProblemDomain&         a_domain,
+                  const RefCountedPtr<BaseIF>& a_implicitFunction,
+                  const RealVect&              a_probLo,
+                  const Real&                  a_dx,
+                  const Real&                  a_angle) const;
+
+  /**
+   * @brief Position along a cell edge where the implicit function changes sign.
+   * @details Bisection, addressed by the edge rather than by either of the cells sharing it, so
+   * that every cell reaching the edge is handed the same interval and gets the same root back.
+   * @param[in] a_implicitFunction Implicit function to find the root of.
+   * @param[in] a_lowPoint         Position of the edge's low end.
+   * @param[in] a_dir              Direction the edge runs along.
+   * @param[in] a_lowValue         Implicit function at the edge's low end.
+   * @param[in] a_dx               Length of the edge.
+   * @return Root, as a fraction of the edge measured from its low end.
+   */
+  Real
+  edgeRoot(const RefCountedPtr<BaseIF>& a_implicitFunction,
+           const RealVect&              a_lowPoint,
+           const int                    a_dir,
+           const Real&                  a_lowValue,
+           const Real&                  a_dx) const;
 
   /**
    * @brief Set up the geometry generation tool for the gas phase.
