@@ -1207,14 +1207,32 @@ CutCellBody::coarsen(const CutCellBody a_children[1 << SpaceDim]) noexcept
     }
   }
 
-  m_boundaryArea = boundaryVector.vectorLength();
+  // The interface is taken from the apertures rather than from the children's own interfaces,
+  // which is what the divergence identity says it is: what leaves through the faces has to arrive
+  // through the boundary. Summing the children's interfaces instead only agrees when the faces
+  // they share cancel, and a child the corner values call covered sitting against one that calls
+  // the face between them half open does not cancel. The identity is exact whether or not the
+  // children agree, so it is the thing to build on.
+  RealVect apertureVector = RealVect::Zero;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    apertureVector[d] = m_areaFraction[2 * d + 1] - m_areaFraction[2 * d];
+  }
+
+  m_boundaryArea = apertureVector.vectorLength();
 
   if (m_trueBoundaryArea > 0.0) {
     m_boundaryCentroid = boundaryMoment / m_trueBoundaryArea;
   }
 
   if (m_boundaryArea > 0.0) {
-    m_normal = -boundaryVector / m_boundaryArea;
+    m_normal = apertureVector / m_boundaryArea;
+  }
+  else if (boundaryVector.vectorLength() > 0.0) {
+    // Nothing leaves through the faces, so the identity fixes neither the area nor the direction.
+    // The children's interfaces still say which way it faces, and interfaceIsOneSided will refuse
+    // the cell on the finest level, where such a thing is not allowed to stand.
+    m_normal = -boundaryVector / boundaryVector.vectorLength();
   }
 
   return this->divergenceResidual() <= s_nullArea + s_edgeTolerance;

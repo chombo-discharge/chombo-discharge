@@ -473,6 +473,79 @@ buildAggregated(const BaseIF&              a_implicitFunction,
 // leaving the magnitude of their sum near zero while the interface is really there. Worse, a body
 // whose interface is wholly inside it touches none of its faces, so the divergence identity reads
 // zero equals zero and the body is accepted. This reports what the moments actually come to.
+// Find where building a cell from the cells that partition it leaves the divergence identity
+// unsatisfied, and show the parent against its children so the face that fails to cancel is
+// visible. Two siblings share an internal face and it should contribute nothing to the parent,
+// which only holds if they agree about it.
+void
+exportAggregationFailures(const RefCountedPtr<AmrMesh>& a_amr, const int a_depth, const std::string& a_fileName)
+{
+  const RefCountedPtr<BaseIF>& implicitFunction = a_amr->getBaseImplicitFunction(phase::gas);
+  const Vector<Real>&          dx               = a_amr->getDx();
+  const RealVect               probLo           = a_amr->getProbLo();
+  const ProblemDomain&         domain           = a_amr->getDomains()[0];
+
+  std::ofstream out(a_fileName);
+  out << std::setprecision(10);
+
+  constexpr int numChildren = 1 << SpaceDim;
+
+  long int failures = 0;
+
+  for (BoxIterator bit(domain.domainBox()); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    RealVect centre = probLo;
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += dx[0] * (static_cast<Real>(iv[d]) + 0.5);
+    }
+
+    if (std::abs(implicitFunction->value(centre)) > dx[0] * std::sqrt(1.0 * SpaceDim)) {
+      continue;
+    }
+
+    PolyhedralEB::CutCellBody body;
+
+    if (buildAggregated(*implicitFunction, body, iv, probLo, dx[0], a_depth)) {
+      continue;
+    }
+
+    failures++;
+
+    if (failures > 3) {
+      continue;
+    }
+
+    out << "cell " << iv << " dx " << dx[0] << " divergence " << body.divergenceResidual() << " volFrac "
+        << body.volumeFraction() << " aB " << body.boundaryArea() << " trueA " << body.trueBoundaryArea() << " normal "
+        << body.normal() << "\n";
+
+    for (int d = 0; d < SpaceDim; d++) {
+      out << "   parent aperture dir " << d << " lo " << body.areaFraction(d, Side::Lo) << " hi "
+          << body.areaFraction(d, Side::Hi) << "\n";
+    }
+
+    for (int c = 0; c < numChildren; c++) {
+      IntVect fine = 2 * iv;
+      for (int d = 0; d < SpaceDim; d++) {
+        fine[d] += (c >> d) & 1;
+      }
+
+      PolyhedralEB::CutCellBody child;
+      const bool                ok = buildAggregated(*implicitFunction, child, fine, probLo, 0.5 * dx[0], a_depth - 1);
+
+      out << "   child " << c << " built " << ok << " kind " << static_cast<int>(child.kind()) << " volFrac "
+          << child.volumeFraction() << " aB " << child.boundaryArea() << " divergence " << child.divergenceResidual();
+      for (int d = 0; d < SpaceDim; d++) {
+        out << " | dir" << d << " lo " << child.areaFraction(d, Side::Lo) << " hi " << child.areaFraction(d, Side::Hi);
+      }
+      out << "\n";
+    }
+  }
+
+  out << "total failures " << failures << "\n";
+}
+
 void
 exportSheetCancellation(const RefCountedPtr<AmrMesh>& a_amr, const int a_maxDepth, const std::string& a_fileName)
 {
@@ -1294,6 +1367,11 @@ main(int argc, char* argv[])
       snprintf(sheetFile, sizeof(sheetFile), "sheets.%dd.%d.csv", SpaceDim, procID());
 
       exportSheetCancellation(amr, aggregationDepth, std::string(sheetFile));
+
+      char failFile[256];
+      snprintf(failFile, sizeof(failFile), "aggfail.%dd.%d.csv", SpaceDim, procID());
+
+      exportAggregationFailures(amr, aggregationDepth, std::string(failFile));
     }
   }
 
