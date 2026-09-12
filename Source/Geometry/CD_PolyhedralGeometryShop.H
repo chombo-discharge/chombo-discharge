@@ -219,6 +219,22 @@ protected:
   fillAggregationDepth(BaseFab<int>& a_depth, const Box& a_region, const Real& a_dx) const;
 
   /**
+   * @brief How a cell relates to the interface, judged at the resolution it is built from.
+   * @details Only the corner signs are needed, not the bodies, so this is cheap enough to ask of
+   * every cell the tags cover before deciding which of them are cut. Asking it rather than the
+   * cell's own corners is what stops a cell being called whole when a feature finer than it
+   * passes through, which would leave its neighbours carrying apertures through a face the graph
+   * says is solid.
+   * @param[in] a_cell   Cell to classify.
+   * @param[in] a_probLo Lower left corner of the domain.
+   * @param[in] a_dx     Grid spacing of the cell.
+   * @param[in] a_depth  How many levels below the cell the surface is reconstructed on.
+   * @return Regular, Covered or Cut.
+   */
+  PolyhedralEB::CutCellBody::Kind
+  aggregatedKind(const IntVect& a_cell, const RealVect& a_probLo, const Real& a_dx, const int a_depth) const;
+
+  /**
    * @brief Build a cell's body from the cells that partition it, recursively.
    * @param[out] a_body   Body of the cell, in its own frame.
    * @param[in]  a_cell   Cell to build.
