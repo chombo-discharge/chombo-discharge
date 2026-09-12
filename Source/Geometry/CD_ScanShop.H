@@ -252,6 +252,19 @@ protected:
   buildFinerLevels(int a_coarserLevel, int a_maxGridSize);
 
   /**
+   * @brief Whether a box is worth carrying on a level finer than the one the scan starts on.
+   * @details Every box by default, which is a level spanning the whole domain. A generator that
+   * knows where the geometry needs resolving says no elsewhere, and the level then exists only
+   * there. Nothing may ask for embedded boundary data outside what is kept, so the grids a run
+   * uses have to come from the index space.
+   * @param[in] a_box   Box on that level.
+   * @param[in] a_level Level the box belongs to, finest first.
+   * @return True if the box is kept.
+   */
+  virtual bool
+  retainBox(const Box& a_box, const int a_level) const noexcept;
+
+  /**
    * @brief Build the "coarse level" where we initiate the recursion process.
    * @details This level must be defined in order to recurse towards deeper levels. Which is why this is ALWAYS called
    * exact ONCE before buildFinerLevels builds the finer levels.

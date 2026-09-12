@@ -477,6 +477,42 @@ buildAggregated(const BaseIF&              a_implicitFunction,
 // unsatisfied, and show the parent against its children so the face that fails to cancel is
 // visible. Two siblings share an internal face and it should contribute nothing to the parent,
 // which only holds if they agree about it.
+// Check the invariant a partially covered index space rests on: every grid a run uses has to lie
+// inside what the index space actually holds at that level. Nothing enforces it -- the grids come
+// from tags and the coverage from the geometry -- so it is worth asking rather than assuming.
+void
+reportCoverage(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<ComputationalGeometry>& a_compgeom)
+{
+  const RefCountedPtr<EBIndexSpace>& ebis = a_compgeom->getMfIndexSpace()->getEBIndexSpace(phase::gas);
+
+  const Vector<DisjointBoxLayout>& grids   = a_amr->getGrids(Realm::primal);
+  const Vector<ProblemDomain>&     domains = a_amr->getDomains();
+
+  for (int lvl = 0; lvl <= a_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& ebisGrids = ebis->getGrids(domains[lvl]);
+
+    IntVectSet covered;
+    for (int i = 0; i < ebisGrids.boxArray().size(); i++) {
+      covered |= ebisGrids.boxArray()[i];
+    }
+
+    long int inside  = 0;
+    long int outside = 0;
+
+    for (int i = 0; i < grids[lvl].boxArray().size(); i++) {
+      if (covered.contains(grids[lvl].boxArray()[i])) {
+        inside++;
+      }
+      else {
+        outside++;
+      }
+    }
+
+    pout() << "COVERAGE level " << lvl << ": amr boxes " << (inside + outside) << ", inside the index space " << inside
+           << ", outside " << outside << ", index space boxes " << ebisGrids.boxArray().size() << endl;
+  }
+}
+
 void
 exportAggregationFailures(const RefCountedPtr<AmrMesh>& a_amr, const int a_depth, const std::string& a_fileName)
 {
@@ -1323,6 +1359,8 @@ main(int argc, char* argv[])
   auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
   engine->setupAndRun();
+
+  reportCoverage(amr, compgeom);
 
   char fileName[256];
   snprintf(fileName, sizeof(fileName), "cutcells.%dd.%d.csv", SpaceDim, procID());

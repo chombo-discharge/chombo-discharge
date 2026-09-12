@@ -196,6 +196,12 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
   m_timer.stopEvent("Make grids");
 }
 
+bool
+ScanShop::retainBox(const Box& /*a_box*/, const int /*a_level*/) const noexcept
+{
+  return true;
+}
+
 void
 ScanShop::buildCoarseLevel(int a_level, int a_maxGridSize)
 {
@@ -308,6 +314,10 @@ ScanShop::buildFinerLevels(int a_coarserLevel, int a_maxGridSize)
 
         const GeometryService::InOut& boxType = (*m_boxMap[coarLvl])[din];
 
+        if (!this->retainBox(fineBox, fineLvl)) {
+          continue;
+        }
+
         if (boxType == GeometryService::Covered) {
           localCoveredBoxes.push_back(fineBox);
         }
@@ -319,6 +329,10 @@ ScanShop::buildFinerLevels(int a_coarserLevel, int a_maxGridSize)
           domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
 
           for (const auto& box : boxes.stdVector()) {
+            if (!this->retainBox(box, fineLvl)) {
+              continue;
+            }
+
             const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
 
             const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
