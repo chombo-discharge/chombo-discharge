@@ -189,6 +189,21 @@ public:
   refine(CutCellBody a_children[1 << SpaceDim]) const noexcept;
 
   /**
+   * @brief Build this body's moments from the bodies of the cells that partition it.
+   * @details The inverse of refine, and the operation that lets a cell whose geometry was
+   * reconstructed at a finer resolution be carried up to a coarser one without being
+   * reconstructed there a second time. Only the moments are taken: the children partition this
+   * cell, so its volume, apertures and interface area are theirs summed and rescaled, and no
+   * polyhedron has to be reassembled to read them off. Where the interface is a plane the result
+   * is the same as reconstructing here; where it curves it is better, because it is the finer
+   * description that was integrated.
+   * @param[in] a_children The children, each in its own frame, ordered as refine orders them.
+   * @return True if the children leave a body with a boundary that closes.
+   */
+  bool
+  coarsen(const CutCellBody a_children[1 << SpaceDim]) noexcept;
+
+  /**
    * @brief How far the assembled polygons are from enclosing a volume.
    * @details The sum of the outward area vectors over every polygon, which vanishes for a
    * closed surface. Non-zero means the face polygons and the interface patch disagree about

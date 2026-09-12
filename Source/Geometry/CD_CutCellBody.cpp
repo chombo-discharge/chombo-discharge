@@ -1009,6 +1009,96 @@ CutCellBody::refine(CutCellBody a_children[1 << SpaceDim]) const noexcept
   return true;
 }
 
+bool
+CutCellBody::coarsen(const CutCellBody a_children[1 << SpaceDim]) noexcept
+{
+  constexpr int  numChildren = 1 << SpaceDim;
+  constexpr Real volumeScale = 1.0 / static_cast<Real>(numChildren);
+  constexpr Real areaScale   = 2.0 * volumeScale;
+
+  *this = CutCellBody();
+
+  RealVect volumeMoment   = RealVect::Zero;
+  RealVect boundaryVector = RealVect::Zero;
+  RealVect boundaryMoment = RealVect::Zero;
+
+  Real     faceArea[s_numFaces] = {0.0};
+  RealVect faceMoment[s_numFaces];
+
+  for (int f = 0; f < s_numFaces; f++) {
+    faceMoment[f] = RealVect::Zero;
+  }
+
+  for (int c = 0; c < numChildren; c++) {
+    const CutCellBody& child = a_children[c];
+
+    // Where the child sits in this cell's frame, and how a point in the child's own frame maps
+    // into it.
+    RealVect origin;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      origin[d] = -0.25 + 0.5 * static_cast<Real>((c >> d) & 1);
+    }
+
+    const Real volume = volumeScale * child.m_volumeFraction;
+
+    m_volumeFraction += volume;
+    volumeMoment += volume * (origin + 0.5 * child.m_volumeCentroid);
+
+    const RealVect vector = -child.m_boundaryArea * child.m_normal;
+    const Real     patch  = areaScale * child.m_trueBoundaryArea;
+
+    boundaryVector += areaScale * vector;
+    m_trueBoundaryArea += patch;
+    boundaryMoment += patch * (origin + 0.5 * child.m_boundaryCentroid);
+
+    m_closure += areaScale * child.m_closure;
+
+    // Only the children lying against a face of this cell carry any of its aperture.
+    for (int d = 0; d < SpaceDim; d++) {
+      for (int side = 0; side < 2; side++) {
+        if (((c >> d) & 1) != side) {
+          continue;
+        }
+
+        const int  f    = 2 * d + side;
+        const Real area = areaScale * child.m_areaFraction[f];
+
+        faceArea[f] += area;
+        faceMoment[f] += area * (origin + 0.5 * child.m_faceCentroid[f]);
+      }
+    }
+  }
+
+  if (m_volumeFraction > 0.0) {
+    m_volumeCentroid = volumeMoment / m_volumeFraction;
+  }
+
+  for (int f = 0; f < s_numFaces; f++) {
+    if (std::abs(faceArea[f]) <= s_nullArea) {
+      m_areaFraction[f] = 0.0;
+      m_faceCentroid[f] = RealVect::Zero;
+    }
+    else {
+      m_areaFraction[f]        = faceArea[f];
+      m_faceCentroid[f]        = faceMoment[f] / faceArea[f];
+      m_faceCentroid[f][f / 2] = 0.0;
+    }
+  }
+
+  m_boundaryArea = boundaryVector.vectorLength();
+
+  if (m_trueBoundaryArea > 0.0) {
+    m_boundaryCentroid = boundaryMoment / m_trueBoundaryArea;
+  }
+
+  if (m_boundaryArea > 0.0) {
+    m_normal = -boundaryVector / m_boundaryArea;
+  }
+
+  return this->divergenceResidual() <= s_nullArea + s_edgeTolerance;
+}
+
 CutCellBody::Kind
 CutCellBody::kind() const noexcept
 {
