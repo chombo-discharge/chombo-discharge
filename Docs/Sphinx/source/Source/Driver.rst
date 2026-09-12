@@ -161,7 +161,7 @@ Various class options are available for adjusting the behavior of the ``Driver``
 Below, we include the current template options file for the ``Driver`` class.
 
 .. literalinclude:: ../../../../Source/Driver/CD_Driver.options
-   :emphasize-lines: 4,8-13,17-18,20-21,24-27,29-33
+   :emphasize-lines: 4,8-13,17-18,20-21,24-27,29-34
    :caption: Template input options for the ``Driver`` class. Runtime adjustable options are highlighted.
 
 We point out that the ``output_directory`` directory variable is *only* for the HDF5 plot files, whereas other files like ``pout.*`` are put in the directory in which the executable was run.

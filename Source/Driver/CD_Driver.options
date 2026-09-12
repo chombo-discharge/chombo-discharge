@@ -30,5 +30,6 @@ Driver.restart                      = 0                   ## Restart step (less 
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger.
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
 Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_curvature             = -1                  ## Depth the implicit function may ask for refinement to (-1 => never)
 Driver.refine_electrodes            = 0                   ## Refine electrode surfaces to specified level ( < 0 will refine everything)
 Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces to specified level ( < 0 will refine everything)

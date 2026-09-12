@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <MFIndexSpace.H>
 #include <IntersectionIF.H>
@@ -19,13 +22,11 @@
 #include <WrappedGShop.H>
 #include <GeometryShop.H>
 #include <ComplementIF.H>
+#include <BRMeshRefine.H>
 
 // Our includes
 #include <CD_TiledMeshRefine.H>
 #include <CD_Units.H>
-
-// Std includes
-#include <limits>
 #include <CD_ComputationalGeometry.H>
 #include <CD_NewIntersectionIF.H>
 #include <CD_ScanShop.H>
@@ -253,7 +254,11 @@ ComputationalGeometry::tagUnderResolvedCells(IntVectSet&                  a_tags
 
   // A cell is compared against every neighbour, so normals are wanted one cell out from the
   // region the tags are for.
-  const Box grownRegion = grow(a_region, 1) & a_domain;
+  // The reach of the comparison. Two, to match the radius the criterion read off the embedded
+  // boundary compares over, so that the two see the same neighbourhood of each cell.
+  constexpr int radius = 2;
+
+  const Box grownRegion = grow(a_region, radius) & a_domain;
 
   Box nodeBox = grownRegion;
   nodeBox.surroundingNodes();
@@ -452,7 +457,7 @@ ComputationalGeometry::tagUnderResolvedCells(IntVectSet&                  a_tags
 
     bool bends = false;
 
-    for (BoxIterator nit(Box(iv - IntVect::Unit, iv + IntVect::Unit)); nit.ok() && !bends; ++nit) {
+    for (BoxIterator nit(Box(iv - radius * IntVect::Unit, iv + radius * IntVect::Unit)); nit.ok() && !bends; ++nit) {
       const IntVect other = nit();
 
       if (other == iv || !grownRegion.contains(other) || isCut(other, 0) == 0) {
@@ -509,19 +514,30 @@ ComputationalGeometry::getCurvatureTags(const ProblemDomain& a_coarsestDomain,
   implicitFunctions[0] = m_implicitFunctionGas;
   implicitFunctions[1] = m_implicitFunctionSolid;
 
-  // The coarsest level is swept whole; every finer one only where the level above it tagged.
+  // The coarsest level is swept whole; every finer one only where the level above it tagged. The
+  // coarsest is cut into boxes for no other reason than to have something to share out, since
+  // there is one region there and every rank would otherwise sweep all of it.
   Vector<Vector<Box>> regions(tags.size());
 
-  regions[0] = Vector<Box>(1, a_coarsestDomain.domainBox());
+  domainSplit(a_coarsestDomain, regions[0], a_maxBlockSize[0]);
 
   for (int lvl = 0; lvl < tags.size(); lvl++) {
-    for (const auto& implicitFunction : implicitFunctions) {
-      if (implicitFunction.isNull()) {
-        continue;
-      }
 
-      for (const auto& region : regions[lvl].stdVector()) {
-        this->tagUnderResolvedCells(tags[lvl], region, domains[lvl], implicitFunction, a_probLo, dx[lvl], a_angle);
+    // Each rank takes its own share of the regions and tags only within them, which is how the
+    // tags read off the embedded boundary are distributed too. TiledMeshRefine gathers them.
+    for (int i = procID(); i < regions[lvl].size(); i += numProc()) {
+      for (const auto& implicitFunction : implicitFunctions) {
+        if (implicitFunction.isNull()) {
+          continue;
+        }
+
+        this->tagUnderResolvedCells(tags[lvl],
+                                    regions[lvl][i],
+                                    domains[lvl],
+                                    implicitFunction,
+                                    a_probLo,
+                                    dx[lvl],
+                                    a_angle);
       }
     }
 

@@ -63,7 +63,8 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
     m_dt(0.0),
     m_time(0.0),
     m_profile(false),
-    m_doCoarsening(true)
+    m_doCoarsening(true),
+    m_curvatureTagsDepth(-1)
 {
   CH_TIME("Driver::Driver");
 
@@ -357,6 +358,33 @@ Driver::getGeometryTags()
     // Things from depth specifications
     geomTags |= dielTags;
     geomTags |= condTags;
+  }
+
+  // A second source of geometric tags, read off the implicit function rather than off the cut
+  // cells. It sees what the embedded boundary cannot: a feature thinner than a cell leaves every
+  // corner on the same side of it and so has no cut cell to read a normal from.
+  if (m_curvatureTagsDepth > 0) {
+    const Vector<IntVectSet> curvatureTags = m_computationalGeometry->getCurvatureTags(
+      m_amr->getDomains()[0],
+      m_amr->getRefinementRatios(),
+      m_amr->getBlockingFactor() * IntVect::Unit,
+      m_amr->getMaxBoxSize() * IntVect::Unit,
+      m_amr->getProbLo(),
+      m_amr->getDx()[0],
+      m_refineAngle,
+      m_curvatureTagsDepth);
+
+    for (int lvl = 0; lvl < std::min(maxAmrDepth, static_cast<int>(curvatureTags.size())); lvl++) {
+      if (m_verbosity > 2) {
+        const long long fromBoundary = ParallelOps::sum(static_cast<long long>(m_geomTags[lvl].numPts()));
+        const long long fromFunction = ParallelOps::sum(static_cast<long long>(curvatureTags[lvl].numPts()));
+
+        pout() << "Driver::getGeometryTags - level " << lvl << " tagged " << fromBoundary
+               << " cells from the embedded boundary and " << fromFunction << " from the implicit function" << endl;
+      }
+
+      m_geomTags[lvl] |= curvatureTags[lvl];
+    }
   }
 
   // Grow tags with specified factor.
@@ -1232,10 +1260,18 @@ Driver::parseGeometryRefinement()
   const auto c1 = m_refineAngle;
   const auto c2 = m_conductorTagsDepth;
   const auto c3 = m_dielectricTagsDepth;
+  const auto c4 = m_curvatureTagsDepth;
 
   pp.get("refine_angles", m_refineAngle);
   pp.get("refine_electrodes", m_conductorTagsDepth);
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
+
+  // Absent from input files written before the pre-pass existed, and off is what those files
+  // meant, so the fallback leaves the geometry tags to the embedded boundary alone.
+  m_curvatureTagsDepth = -1;
+  pp.query("refine_curvature", m_curvatureTagsDepth);
+
+  m_curvatureTagsDepth = std::min(m_curvatureTagsDepth, m_amr->getMaxAmrDepth());
 
   if (m_conductorTagsDepth < 0) {
     m_conductorTagsDepth = m_amr->getMaxAmrDepth();
@@ -1249,7 +1285,8 @@ Driver::parseGeometryRefinement()
   // we can avoid regrid if they didn't change. This is my clunky way of doing that.
   if (m_timeStep >
       0) { // Simulation is already running, and we need to check if we need new geometric tags for regridding.
-    if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth) {
+    if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth ||
+        c4 != m_curvatureTagsDepth) {
       m_needsNewGeometricTags = true;
     }
   }
