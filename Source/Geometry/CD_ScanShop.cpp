@@ -329,10 +329,6 @@ ScanShop::buildFinerLevels(int a_coarserLevel, int a_maxGridSize)
           domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
 
           for (const auto& box : boxes.stdVector()) {
-            if (!this->retainBox(box, fineLvl)) {
-              continue;
-            }
-
             const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
 
             const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);

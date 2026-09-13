@@ -257,7 +257,12 @@ protected:
    * knows where the geometry needs resolving says no elsewhere, and the level then exists only
    * there. Nothing may ask for embedded boundary data outside what is kept, so the grids a run
    * uses have to come from the index space.
-   * @param[in] a_box   Box on that level.
+   *
+   * Asked once for the whole refinement of a coarse box, before that refinement is split up, so
+   * that a coarse box is either carried in full or not at all. Coarsening a level reads a coarse
+   * cell's whole refinement at once and skips any coarse box it cannot read in full, and a coarse
+   * box the coarsening skips holds no record of what lies under it for anything to refine through.
+   * @param[in] a_box   Refinement of a coarse box, on that level.
    * @param[in] a_level Level the box belongs to, finest first.
    * @return True if the box is kept.
    */
