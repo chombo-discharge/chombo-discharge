@@ -176,17 +176,14 @@ public:
   buildImplicitFunctions();
 
   /**
-   * @brief Say where the polyhedral generator should take its geometry from below the cells.
+   * @brief Say how much of each level the generator should carry.
    * @details Must be set before buildGeometries, since that is when the generator is made. The
-   * tags are the ones getCurvatureTags returns, coarsest level first.
-   * @param[in] a_tags           Cells on each level whose geometry comes from a finer surface.
+   * boxes are the ones getCurvatureTags clustered its tags into, coarsest level first.
    * @param[in] a_regions        Boxes each level was swept over, which is how much of it to carry.
-   * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
+   * @param[in] a_coarsestDomain Domain of the first entry in a_regions.
    */
   void
-  setAggregationTags(const Vector<IntVectSet>&  a_tags,
-                     const Vector<Vector<Box>>& a_regions,
-                     const ProblemDomain&       a_coarsestDomain);
+  setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain);
 
   /**
    * @brief Get the boxes the geometry was generated over, coarsest level first.
@@ -197,7 +194,7 @@ public:
    * @return Boxes each level was generated over.
    */
   const Vector<Vector<Box>>&
-  getAggregationRegions() const noexcept;
+  getCoverageRegions() const noexcept;
 
   /**
    * @brief Where the interface bends too sharply for the resolution it sits on.
@@ -297,19 +294,14 @@ protected:
   int m_geometryRefinement;
 
   /**
-   * @brief Cells whose geometry the generator takes from a finer surface, coarsest level first.
-   */
-  Vector<IntVectSet> m_aggregationTags;
-
-  /**
    * @brief Boxes each level was swept over, coarsest first, and so how much of it to carry.
    */
-  Vector<Vector<Box>> m_aggregationRegions;
+  Vector<Vector<Box>> m_coverageRegions;
 
   /**
-   * @brief Domain the first entry of m_aggregationTags belongs to.
+   * @brief Domain the first entry of m_coverageRegions belongs to.
    */
-  ProblemDomain m_aggregationDomain;
+  ProblemDomain m_coverageDomain;
 
   /**
    * @brief Whether each level of the index space is generated in turn rather than coarsened down

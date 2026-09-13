@@ -25,7 +25,6 @@
 #include <BRMeshRefine.H>
 
 // Our includes
-#include <CD_LoadBalancing.H>
 #include <CD_TiledMeshRefine.H>
 #include <CD_Units.H>
 #include <CD_ComputationalGeometry.H>
@@ -192,7 +191,13 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // coarsening of it. Only the polyhedral generator does that, and only when it has been told
   // where the geometry needs resolving. The generators are told as well, since a level that comes
   // up through coarsening is not one to reconstruct from below.
-  m_generateEveryLevel = (m_generator == Generator::PolyhedralShop && m_aggregationTags.size() > 0);
+  bool haveFinerRegions = false;
+
+  for (int lvl = 1; lvl < static_cast<int>(m_coverageRegions.size()); lvl++) {
+    haveFinerRegions = haveFinerRegions || (m_coverageRegions[lvl].size() > 0);
+  }
+
+  m_generateEveryLevel = (m_generator == Generator::PolyhedralShop && haveFinerRegions);
 
   this->buildGasGeometry(geoServices[phase::gas], a_finestDomain, a_probLo, a_finestDx);
   this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
@@ -539,44 +544,20 @@ ComputationalGeometry::buildImplicitFunctions()
 }
 
 void
-ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>&  a_tags,
-                                          const Vector<Vector<Box>>& a_regions,
-                                          const ProblemDomain&       a_coarsestDomain)
+ComputationalGeometry::setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain)
 {
-  CH_TIME("ComputationalGeometry::setAggregationTags");
+  CH_TIME("ComputationalGeometry::setCoverage");
 
-  // The tags arrive as each rank found them, over its own share of the regions, which is how the
-  // tags read off the embedded boundary are carried too. That is fine for tagging, where the
-  // union across ranks is what regridding gathers anyway. It is not fine for deciding how much of
-  // a level to carry: every rank decides that for its own boxes, and it has to decide it from all
-  // the tags rather than from the ones it happened to find, or the coverage comes out with holes
-  // that move with the decomposition.
-  m_aggregationTags.resize(a_tags.size());
-
-  for (int lvl = 0; lvl < static_cast<int>(a_tags.size()); lvl++) {
-    Vector<Box> boxes;
-
-    for (IVSIterator ivsIt(a_tags[lvl]); ivsIt.ok(); ++ivsIt) {
-      boxes.push_back(Box(ivsIt(), ivsIt()));
-    }
-
-    LoadBalancing::gatherBoxes(boxes);
-
-    m_aggregationTags[lvl].makeEmpty();
-
-    for (int i = 0; i < boxes.size(); i++) {
-      m_aggregationTags[lvl] |= boxes[i];
-    }
-  }
-
-  m_aggregationRegions = a_regions;
-  m_aggregationDomain  = a_coarsestDomain;
+  // The boxes come from clustering the tags, which every rank already sees the same way, so how
+  // much of a level is carried does not depend on which of the tags a rank happened to find.
+  m_coverageRegions = a_regions;
+  m_coverageDomain  = a_coarsestDomain;
 }
 
 const Vector<Vector<Box>>&
-ComputationalGeometry::getAggregationRegions() const noexcept
+ComputationalGeometry::getCoverageRegions() const noexcept
 {
-  return m_aggregationRegions;
+  return m_coverageRegions;
 }
 
 Vector<IntVectSet>
@@ -702,16 +683,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             s_strictGeometry,
                                             m_geometryRefinement);
 
-    // Where every level is generated in turn, a coarse cell's geometry comes up through the
-    // coarsening of the level below it rather than from a reconstruction under the cell itself,
-    // so the tags say only how much of each level to carry. Reconstructing under the cell as well
-    // would not merely repeat the work: the depth a cell is reconstructed at varies from cell to
-    // cell, a face is shared by two of them, and the two agree on its area only where the
-    // interface is planar. Across a curved interface they do not, and the cell that loses the
-    // face is left violating the divergence identity.
-    shop->setAggregationTags(m_generateEveryLevel ? Vector<IntVectSet>() : m_aggregationTags,
-                             m_aggregationRegions,
-                             m_aggregationDomain);
+    shop->setCoverage(m_coverageRegions, m_coverageDomain);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -766,16 +738,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               s_strictGeometry,
                                               m_geometryRefinement);
 
-      // Where every level is generated in turn, a coarse cell's geometry comes up through the
-      // coarsening of the level below it rather than from a reconstruction under the cell itself,
-      // so the tags say only how much of each level to carry. Reconstructing under the cell as well
-      // would not merely repeat the work: the depth a cell is reconstructed at varies from cell to
-      // cell, a face is shared by two of them, and the two agree on its area only where the
-      // interface is planar. Across a curved interface they do not, and the cell that loses the
-      // face is left violating the divergence identity.
-      shop->setAggregationTags(m_generateEveryLevel ? Vector<IntVectSet>() : m_aggregationTags,
-                               m_aggregationRegions,
-                               m_aggregationDomain);
+      shop->setCoverage(m_coverageRegions, m_coverageDomain);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
       a_geoserver = static_cast<GeometryService*>(shop);

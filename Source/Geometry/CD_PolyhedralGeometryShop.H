@@ -73,22 +73,16 @@ public:
                          const int            a_refinement);
 
   /**
-   * @brief Say where the surface is reconstructed below the cells it is generating.
-   * @details A cell the tags cover has its geometry taken from the cells that partition it,
-   * reconstructed a level finer, and those from theirs, as deep as the tags go. Nothing is
-   * reconstructed twice at two resolutions: a level the tags cover comes up through coarsening,
-   * which is what keeps a coarse cell and the fine cells under it describing one surface.
-   *
-   * The tags are indexed coarsest first, as the pre-pass in ComputationalGeometry returns them,
-   * and a_coarsestDomain says which of this object's levels the first of them belongs to.
-   * @param[in] a_tags           Cells on each level whose geometry comes from below them.
-   * @param[in] a_regions        Boxes each level was swept over, and so how much of it to carry.
-   * @param[in] a_coarsestDomain Domain of the first entry in a_tags.
+   * @brief Say how much of each level to carry.
+   * @details A level is generated only over these boxes; elsewhere it is left out, and the levels
+   * below it take what lies there through coarsening instead. The boxes are indexed coarsest
+   * first, as the pre-pass in ComputationalGeometry returns them, and a_coarsestDomain says which
+   * of this object's levels the first of them belongs to.
+   * @param[in] a_regions        Boxes each level is carried over.
+   * @param[in] a_coarsestDomain Domain of the first entry in a_regions.
    */
   void
-  setAggregationTags(const Vector<IntVectSet>&  a_tags,
-                     const Vector<Vector<Box>>& a_regions,
-                     const ProblemDomain&       a_coarsestDomain) noexcept;
+  setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain) noexcept;
 
   /**
    * @brief Destructor.
@@ -156,14 +150,9 @@ protected:
   int m_refinement;
 
   /**
-   * @brief Cells whose geometry is taken from a reconstruction below them, coarsest level first.
-   */
-  Vector<IntVectSet> m_aggregationTags;
-
-  /**
    * @brief Boxes each level is carried over, coarsest first.
    */
-  Vector<Vector<Box>> m_aggregationRegions;
+  Vector<Vector<Box>> m_coverageRegions;
 
   /**
    * @brief Keep a level only where it is carried.
@@ -178,11 +167,10 @@ protected:
   retainBox(const Box& a_box, const int a_level) const noexcept override;
 
   /**
-   * @brief Index into m_domains of the level the first entry of m_aggregationTags belongs to.
-   * @details Negative when no tags have been supplied, which leaves every cell reconstructed at
-   * its own resolution.
+   * @brief Index into m_domains of the level the first entry of m_coverageRegions belongs to.
+   * @details Negative when no boxes have been supplied, which carries every level in full.
    */
-  int m_aggregationLevel;
+  int m_coverageLevel;
 
   /**
    * @brief Classify every cell of a region from the bodies of the cells they subdivide.
@@ -226,49 +214,6 @@ protected:
                    const IntVect&             a_cell,
                    const RealVect&            a_probLo,
                    const Real&                a_dx) const;
-
-  /**
-   * @brief How far below a cell the surface it is built from is reconstructed.
-   * @details Filled from the tags, coarsened to the level being generated: a cell tagged on this
-   * level is one level deep, a cell whose children were tagged on the next is two, and so on.
-   * @param[out] a_depth  Depth of each cell in the region.
-   * @param[in]  a_region Cells to fill.
-   * @param[in]  a_dx     Grid spacing on the level being generated.
-   */
-  void
-  fillAggregationDepth(BaseFab<int>& a_depth, const Box& a_region, const Real& a_dx) const;
-
-  /**
-   * @brief How a cell relates to the interface, judged at the resolution it is built from.
-   * @details Only the corner signs are needed, not the bodies, so this is cheap enough to ask of
-   * every cell the tags cover before deciding which of them are cut. Asking it rather than the
-   * cell's own corners is what stops a cell being called whole when a feature finer than it
-   * passes through, which would leave its neighbours carrying apertures through a face the graph
-   * says is solid.
-   * @param[in] a_cell   Cell to classify.
-   * @param[in] a_probLo Lower left corner of the domain.
-   * @param[in] a_dx     Grid spacing of the cell.
-   * @param[in] a_depth  How many levels below the cell the surface is reconstructed on.
-   * @return Regular, Covered or Cut.
-   */
-  PolyhedralEB::CutCellBody::Kind
-  aggregatedKind(const IntVect& a_cell, const RealVect& a_probLo, const Real& a_dx, const int a_depth) const;
-
-  /**
-   * @brief Build a cell's body from the cells that partition it, recursively.
-   * @param[out] a_body   Body of the cell, in its own frame.
-   * @param[in]  a_cell   Cell to build.
-   * @param[in]  a_probLo Lower left corner of the domain.
-   * @param[in]  a_dx     Grid spacing of the cell.
-   * @param[in]  a_depth  How many levels below the cell the surface is reconstructed on.
-   * @return True if the body closed.
-   */
-  bool
-  buildAggregatedBody(PolyhedralEB::CutCellBody& a_body,
-                      const IntVect&             a_cell,
-                      const RealVect&            a_probLo,
-                      const Real&                a_dx,
-                      const int                  a_depth) const;
 
   /**
    * @brief Evaluate the implicit function at every node of a region.

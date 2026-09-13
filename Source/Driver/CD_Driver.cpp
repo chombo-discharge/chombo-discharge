@@ -1504,7 +1504,7 @@ Driver::setupGeometryOnly()
                                                                 m_irregTagGrowth,
                                                                 m_curvatureTagsDepth);
 
-    m_computationalGeometry->setAggregationTags(m_curvatureTags, curvatureRegions, m_amr->getDomains()[0]);
+    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0]);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
@@ -1558,10 +1558,10 @@ Driver::regridAmrOntoGeometry(const int a_lmin, const int a_hardcap)
   // cells whose embedded boundary data was never generated: the operators that read across a
   // refinement boundary ask a coarse cell which fine cells lie under it, and a cell the index
   // space does not carry a finer level over holds no record of that.
-  const Vector<Vector<Box>>& aggregationRegions = m_computationalGeometry->getAggregationRegions();
+  const Vector<Vector<Box>>& coverageRegions = m_computationalGeometry->getCoverageRegions();
 
-  if (aggregationRegions.size() > 0) {
-    m_amr->regridAmr(aggregationRegions, a_lmin);
+  if (coverageRegions.size() > 0) {
+    m_amr->regridAmr(coverageRegions, a_lmin);
   }
   else {
     m_amr->regridAmr(m_geomTags, a_lmin, a_hardcap);
@@ -1646,7 +1646,7 @@ Driver::setupFresh(const int a_initialRegrids)
                                                                 m_irregTagGrowth,
                                                                 m_curvatureTagsDepth);
 
-    m_computationalGeometry->setAggregationTags(m_curvatureTags, curvatureRegions, m_amr->getDomains()[0]);
+    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0]);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
@@ -1820,7 +1820,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
                                                                 m_irregTagGrowth,
                                                                 m_curvatureTagsDepth);
 
-    m_computationalGeometry->setAggregationTags(m_curvatureTags, curvatureRegions, m_amr->getDomains()[0]);
+    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0]);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
