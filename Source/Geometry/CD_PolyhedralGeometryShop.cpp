@@ -445,14 +445,11 @@ PolyhedralGeometryShop::retainBox(const Box& a_box, const int a_level) const noe
     return true;
   }
 
-  // Reach a whole box past what the region asks for. Coarsening a box reads what lies under the
-  // cells around it, so the outermost boxes carried are the ones the boxes inside them read and
-  // are not coarsened themselves. Carrying only as far as the region would put that seam inside
-  // the region, where the cells are supposed to come up through coarsening.
-  const Box coarseBox = coarsen(a_box, 2);
-
-  Box parent = grow(coarseBox, m_ebGhost);
-  parent.grow(coarseBox.size());
+  // Reach past what the region asks for. Coarsening a cell reads what lies under the cells around
+  // it, so the outermost cells carried are the ones the cells inside them read and do not come up
+  // through coarsening themselves. One cell would do; the ghost region the generator already
+  // wants is wider than that, so nothing extra is carried for it.
+  const Box parent = grow(coarsen(a_box, 2), m_ebGhost);
 
   for (int i = 0; i < m_aggregationRegions[which].size(); i++) {
     if (parent.intersectsNotEmpty(coarsen(m_aggregationRegions[which][i], 2))) {
