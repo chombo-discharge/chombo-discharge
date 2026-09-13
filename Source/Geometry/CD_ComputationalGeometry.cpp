@@ -654,6 +654,22 @@ ComputationalGeometry::getCurvatureTags(Vector<Vector<Box>>& a_regions,
     regions[lvl + 1] = (lvl + 1 < static_cast<int>(grids.size())) ? grids[lvl + 1] : Vector<Box>();
   }
 
+  // The regions above were each captured when only the levels above them had been swept, and
+  // nesting travels upward: tagging deeper can widen a level that was already clustered. Cluster
+  // once more with every tag in hand, which is what the grids of a run are built from, so that
+  // what is carried and what is asked for are the same boxes rather than nearly the same.
+  {
+    Vector<Vector<Box>> grids;
+
+    meshRefine.regrid(grids, tags);
+
+    for (int lvl = 0; lvl < static_cast<int>(regions.size()); lvl++) {
+      if (lvl > 0 && lvl < static_cast<int>(grids.size())) {
+        regions[lvl] = grids[lvl];
+      }
+    }
+  }
+
   return tags;
 }
 
