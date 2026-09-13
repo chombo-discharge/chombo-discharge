@@ -1136,6 +1136,24 @@ AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int
 }
 
 void
+AmrMesh::regridAmr(const Vector<Vector<Box>>& a_boxes, const int a_lmin)
+{
+  CH_TIME("AmrMesh::regridAmr(Vector<Vector<Box> >, int)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::regridAmr(Vector<Vector<Box> >, int)" << endl;
+  }
+
+  CH_assert(a_lmin >= 0);
+
+  this->buildGrids(a_boxes, a_lmin);
+  this->defineRealms();
+
+  for (auto& r : m_realms) {
+    r.second->regridBase(a_lmin);
+  }
+}
+
+void
 AmrMesh::regridOperators(const int a_lmin)
 {
   CH_TIME("AmrMesh::regridOperators(int)");
@@ -1262,6 +1280,55 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
   }
 
+  this->defineGrids(newBoxes, a_lmin);
+}
+
+void
+AmrMesh::buildGrids(const Vector<Vector<Box>>& a_boxes, const int a_lmin)
+{
+  CH_TIME("AmrMesh::buildGrids(Vector<Vector<Box> >, int)");
+  if (m_verbosity > 2) {
+    pout() << "AmrMesh::buildGrids(Vector<Vector<Box> >, int)" << endl;
+  }
+
+  CH_assert(a_lmin >= 0);
+
+  // A hierarchy stops where it runs out of grids, so the finest level is the last one that has
+  // any. Level zero is not read from the boxes: it always covers the whole domain, and splitting
+  // it here is what keeps it on the blocking factor that may have changed since the boxes were
+  // made.
+  int finestLevel = 0;
+
+  for (int lvl = 1; lvl < static_cast<int>(a_boxes.size()); lvl++) {
+    if (a_boxes[lvl].size() == 0) {
+      break;
+    }
+
+    finestLevel = lvl;
+  }
+
+  m_finestLevel = std::min(finestLevel, m_maxAmrDepth);
+  m_finestLevel = std::min(m_finestLevel, m_maxSimulationDepth);
+
+  Vector<Vector<Box>> newBoxes(1 + m_finestLevel);
+
+  domainSplit(m_domains[0], newBoxes[0], m_maxBlockSize, m_minBlockSize);
+
+  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
+    newBoxes[lvl] = a_boxes[lvl];
+  }
+
+  this->defineGrids(newBoxes, a_lmin);
+}
+
+void
+AmrMesh::defineGrids(Vector<Vector<Box>>& a_newBoxes, const int a_lmin)
+{
+  CH_TIME("AmrMesh::defineGrids(Vector<Vector<Box> >, int)");
+  if (m_verbosity > 2) {
+    pout() << "AmrMesh::defineGrids(Vector<Vector<Box> >, int)" << endl;
+  }
+
   // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
   Vector<Vector<int>> processorIDs(1 + m_finestLevel);
 
@@ -1272,10 +1339,10 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
     // Sort boxes to ensure locality.
-    LoadBalancing::sort(newBoxes[lvl], m_boxSort);
+    LoadBalancing::sort(a_newBoxes[lvl], m_boxSort);
 
     // Compute the loads for the boxes, using the number of cells in the box as a proxy.
-    const Vector<Box>& levelBoxes = newBoxes[lvl];
+    const Vector<Box>& levelBoxes = a_newBoxes[lvl];
     Vector<long int>   boxLoads(levelBoxes.size());
 
     for (int ibox = 0; ibox < levelBoxes.size(); ibox++) {
@@ -1283,7 +1350,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     }
 
     // Load balance this grid -- assign grid subsets to the least loaded rank.
-    LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, boxLoads, newBoxes[lvl]);
+    LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, boxLoads, a_newBoxes[lvl]);
   }
 
   // Now we define the grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
@@ -1291,7 +1358,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     m_grids.resize(1 + m_finestLevel);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       m_grids[lvl] = DisjointBoxLayout();
-      m_grids[lvl].define(newBoxes[lvl], processorIDs[lvl], m_domains[lvl]);
+      m_grids[lvl].define(a_newBoxes[lvl], processorIDs[lvl], m_domains[lvl]);
       m_grids[lvl].close();
     }
   }
@@ -1303,7 +1370,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     }
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) { // Create new ones from tags
       m_grids[lvl] = DisjointBoxLayout();
-      m_grids[lvl].define(newBoxes[lvl], processorIDs[lvl], m_domains[lvl]);
+      m_grids[lvl].define(a_newBoxes[lvl], processorIDs[lvl], m_domains[lvl]);
       m_grids[lvl].close();
     }
   }

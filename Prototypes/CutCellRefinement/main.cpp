@@ -483,6 +483,201 @@ buildAggregated(const BaseIF&              a_implicitFunction,
 // Check the invariant a partially covered index space rests on: every grid a run uses has to lie
 // inside what the index space actually holds at that level. Nothing enforces it -- the grids come
 // from tags and the coverage from the geometry -- so it is worth asking rather than assuming.
+// Check that a partially carried index space is sound before anything is asked to solve on it.
+//
+// Four things, reported per level rather than asserted, so that one run says everything that is
+// wrong rather than the first thing. Faces first, since a face the two cells sharing it disagree
+// about is what every failure so far has come down to.
+void
+validateIndexSpace(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<ComputationalGeometry>& a_compgeom)
+{
+  const RefCountedPtr<EBIndexSpace>& ebis   = a_compgeom->getMfIndexSpace()->getEBIndexSpace(phase::gas);
+  const Vector<DisjointBoxLayout>&   grids  = a_amr->getGrids(Realm::primal);
+  const Vector<EBISLayout>&          ebisl  = a_amr->getEBISLayout(Realm::primal, phase::gas);
+  const Vector<Real>&                dx     = a_amr->getDx();
+  const Vector<int>&                 refRat = a_amr->getRefinementRatios();
+
+  for (int lvl = 0; lvl <= a_amr->getFinestLevel(); lvl++) {
+    long int faceMismatch    = 0;
+    long int openIntoCovered = 0;
+    long int divergenceBad   = 0;
+    Real     worstDivergence = 0.0;
+    int      reported        = 0;
+
+    // Where the next level down sits, so a fault can be placed relative to the coarse-fine
+    // boundary rather than only counted.
+    IntVectSet finerCoverage;
+    if (lvl < a_amr->getFinestLevel()) {
+      const Vector<Box> finerBoxes = grids[lvl + 1].boxArray();
+      for (int i = 0; i < finerBoxes.size(); i++) {
+        finerCoverage |= coarsen(finerBoxes[i], refRat[lvl]);
+      }
+    }
+
+    IntVectSet levelCoverage;
+    {
+      const Vector<Box> levelBoxes = grids[lvl].boxArray();
+      for (int i = 0; i < levelBoxes.size(); i++) {
+        levelCoverage |= levelBoxes[i];
+      }
+    }
+
+    for (DataIterator dit = grids[lvl].dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&   ebisBox = ebisl[lvl][dit()];
+      const Box&       box     = grids[lvl][dit()];
+      const IntVectSet irreg   = ebisBox.getIrregIVS(box);
+
+      for (IVSIterator ivsIt(irreg); ivsIt.ok(); ++ivsIt) {
+        const Vector<VolIndex> vofs = ebisBox.getVoFs(ivsIt());
+
+        for (int iv = 0; iv < vofs.size(); iv++) {
+          const VolIndex& vof = vofs[iv];
+
+          RealVect apertureVector = RealVect::Zero;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            for (SideIterator sit; sit.ok(); ++sit) {
+              const Vector<FaceIndex> faces = ebisBox.getFaces(vof, dir, sit());
+
+              Real area = 0.0;
+              for (int f = 0; f < faces.size(); f++) {
+                area += ebisBox.areaFrac(faces[f]);
+              }
+
+              apertureVector[dir] += (sit() == Side::Hi) ? area : -area;
+
+              // The cell across each face has to agree that the face is there.
+              const IntVect other = vof.gridIndex() + sign(sit()) * BASISV(dir);
+
+              if (!box.contains(other)) {
+                continue;
+              }
+
+              if (ebisBox.isCovered(other) && area > 0.0) {
+                openIntoCovered++;
+              }
+
+              if (!ebisBox.isCovered(other)) {
+                const Vector<VolIndex> otherVoFs = ebisBox.getVoFs(other);
+                int                    backFaces = 0;
+                for (int j = 0; j < otherVoFs.size(); j++) {
+                  backFaces += ebisBox.getFaces(otherVoFs[j], dir, flip(sit())).size();
+                }
+                if (backFaces < faces.size()) {
+                  faceMismatch++;
+
+                  if (reported < 8) {
+                    reported++;
+
+                    pout() << "   ASYM lvl " << lvl << " " << vof.gridIndex() << " dir " << dir << " side "
+                           << (sit() == Side::Lo ? "lo" : "hi") << " faces " << faces.size() << " back " << backFaces
+                           << " area " << area << " | this kappa " << ebisBox.volFrac(vof) << " bndry "
+                           << ebisBox.bndryArea(vof) << " n " << ebisBox.normal(vof) << " | other " << other << " nvof "
+                           << otherVoFs.size() << " kappa " << ebisBox.volFrac(otherVoFs[0]) << " bndry "
+                           << ebisBox.bndryArea(otherVoFs[0]) << " n " << ebisBox.normal(otherVoFs[0]) << endl;
+                  }
+                }
+              }
+            }
+          }
+
+          const RealVect residual = apertureVector - ebisBox.bndryArea(vof) * ebisBox.normal(vof);
+          const Real     r        = residual.vectorLength();
+
+          worstDivergence = std::max(worstDivergence, r);
+          if (r > 1.0E-9) {
+            divergenceBad++;
+
+            if (reported < 8) {
+              reported++;
+
+              // Is the cell at the edge of what this level carries?
+              bool onLevelEdge = false;
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                for (SideIterator sit; sit.ok(); ++sit) {
+                  if (!levelCoverage.contains(vof.gridIndex() + sign(sit()) * BASISV(dir))) {
+                    onLevelEdge = true;
+                  }
+                }
+              }
+
+              pout() << "   BAD lvl " << lvl << " " << vof.gridIndex() << " res " << r << " nvof " << vofs.size()
+                     << " kappa " << ebisBox.volFrac(vof) << " bndryArea " << ebisBox.bndryArea(vof) << " normal "
+                     << ebisBox.normal(vof) << " aperture " << apertureVector << " underFiner "
+                     << finerCoverage.contains(vof.gridIndex()) << " onLevelEdge " << onLevelEdge << endl;
+            }
+          }
+        }
+      }
+    }
+
+    pout() << "VALIDATE lvl " << lvl << " dx " << dx[lvl] << ": faceMismatch " << faceMismatch << " openIntoCovered "
+           << openIntoCovered << " divergenceBad " << divergenceBad << " worstDivergence " << worstDivergence << endl;
+  }
+
+  // Coarsening has to conserve: a coarse cell holds what its fine cells hold.
+  for (int lvl = 0; lvl < a_amr->getFinestLevel(); lvl++) {
+    const int ratio = refRat[lvl];
+
+    Real     worstVolume = 0.0;
+    long int checked     = 0;
+
+    for (DataIterator dit = grids[lvl + 1].dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&   fineBox = ebisl[lvl + 1][dit()];
+      const IntVectSet irreg   = fineBox.getIrregIVS(grids[lvl + 1][dit()]);
+
+      IntVectSet coarseSeen;
+      for (IVSIterator ivsIt(irreg); ivsIt.ok(); ++ivsIt) {
+        IntVect civ = ivsIt();
+        civ.coarsen(ratio);
+        coarseSeen |= civ;
+      }
+
+      for (IVSIterator ivsIt(coarseSeen); ivsIt.ok(); ++ivsIt) {
+        const Box fineCells = refine(Box(ivsIt(), ivsIt()), ratio);
+
+        Real fineVolume = 0.0;
+        bool complete   = true;
+
+        for (BoxIterator bit(fineCells); bit.ok(); ++bit) {
+          if (!grids[lvl + 1][dit()].contains(bit())) {
+            complete = false;
+            break;
+          }
+          const Vector<VolIndex> fv = fineBox.getVoFs(bit());
+          for (int j = 0; j < fv.size(); j++) {
+            fineVolume += fineBox.volFrac(fv[j]);
+          }
+        }
+
+        if (!complete) {
+          continue;
+        }
+
+        fineVolume /= std::pow(Real(ratio), SpaceDim);
+
+        // The coarse cell may live on another rank's box; only check where we hold it.
+        for (DataIterator cdit = grids[lvl].dataIterator(); cdit.ok(); ++cdit) {
+          if (!grids[lvl][cdit()].contains(ivsIt())) {
+            continue;
+          }
+          const EBISBox&         coarBox    = ebisl[lvl][cdit()];
+          Real                   coarVolume = 0.0;
+          const Vector<VolIndex> cv         = coarBox.getVoFs(ivsIt());
+          for (int j = 0; j < cv.size(); j++) {
+            coarVolume += coarBox.volFrac(cv[j]);
+          }
+          worstVolume = std::max(worstVolume, std::abs(coarVolume - fineVolume));
+          checked++;
+        }
+      }
+    }
+
+    pout() << "VALIDATE coarsening " << lvl + 1 << "->" << lvl << ": cells " << checked << " worstVolumeMismatch "
+           << worstVolume << endl;
+  }
+}
+
 void
 reportCoverage(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<ComputationalGeometry>& a_compgeom)
 {
@@ -1364,6 +1559,8 @@ main(int argc, char* argv[])
   engine->setupAndRun();
 
   reportCoverage(amr, compgeom);
+
+  validateIndexSpace(amr, compgeom);
 
   char fileName[256];
   snprintf(fileName, sizeof(fileName), "cutcells.%dd.%d.csv", SpaceDim, procID());

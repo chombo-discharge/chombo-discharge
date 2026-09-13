@@ -432,6 +432,30 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
   }
 }
 
+bool
+PolyhedralGeometryShop::retainBox(const Box& a_box, const int a_level) const noexcept
+{
+  if (m_aggregationLevel < 0) {
+    return true;
+  }
+
+  const int which = m_aggregationLevel - a_level;
+
+  if (which < 0 || which >= static_cast<int>(m_aggregationRegions.size())) {
+    return true;
+  }
+
+  const Box parent = grow(coarsen(a_box, 2), m_ebGhost);
+
+  for (int i = 0; i < m_aggregationRegions[which].size(); i++) {
+    if (parent.intersectsNotEmpty(coarsen(m_aggregationRegions[which][i], 2))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void
 PolyhedralGeometryShop::setAggregationTags(const Vector<IntVectSet>&  a_tags,
                                            const Vector<Vector<Box>>& a_regions,

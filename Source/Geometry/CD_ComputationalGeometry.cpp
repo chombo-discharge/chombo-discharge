@@ -36,7 +36,7 @@
 #include <CD_NamespaceHeader.H>
 
 ComputationalGeometry::ComputationalGeometry()
-  : m_eps0(1.0), m_generator(Generator::GeometryShop), m_geometryRefinement(1)
+  : m_eps0(1.0), m_generator(Generator::GeometryShop), m_geometryRefinement(1), m_generateEveryLevel(false)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -187,18 +187,20 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // can be passed to Chombo. Note that the
   Vector<GeometryService*> geoServices(2, nullptr);
 
+  // A level the generator only hands back part of cannot be coarsened into the level below it, so
+  // each level is generated in turn and then overwritten, where a finer level exists, by the
+  // coarsening of it. Only the polyhedral generator does that, and only when it has been told
+  // where the geometry needs resolving. The generators are told as well, since a level that comes
+  // up through coarsening is not one to reconstruct from below.
+  m_generateEveryLevel = (m_generator == Generator::PolyhedralShop && m_aggregationTags.size() > 0);
+
   this->buildGasGeometry(geoServices[phase::gas], a_finestDomain, a_probLo, a_finestDx);
   this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
   // Define the multifluid index space.
   const bool useDistributedData = (m_generator != Generator::GeometryShop);
 
-  // A level the generator only hands back part of cannot be coarsened into the level below it, so
-  // each level is generated in turn and then overwritten, where a finer level exists, by the
-  // coarsening of it. Only the polyhedral generator does that, and only when it has been told
-  // where the geometry needs resolving.
-  m_multifluidIndexSpace->setGenerateEveryLevel(m_generator == Generator::PolyhedralShop &&
-                                                m_aggregationTags.size() > 0);
+  m_multifluidIndexSpace->setGenerateEveryLevel(m_generateEveryLevel);
 
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
                                  a_probLo,
@@ -571,6 +573,12 @@ ComputationalGeometry::setAggregationTags(const Vector<IntVectSet>&  a_tags,
   m_aggregationDomain  = a_coarsestDomain;
 }
 
+const Vector<Vector<Box>>&
+ComputationalGeometry::getAggregationRegions() const noexcept
+{
+  return m_aggregationRegions;
+}
+
 Vector<IntVectSet>
 ComputationalGeometry::getCurvatureTags(Vector<Vector<Box>>& a_regions,
                                         const ProblemDomain& a_coarsestDomain,
@@ -694,7 +702,16 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             s_strictGeometry,
                                             m_geometryRefinement);
 
-    shop->setAggregationTags(m_aggregationTags, m_aggregationRegions, m_aggregationDomain);
+    // Where every level is generated in turn, a coarse cell's geometry comes up through the
+    // coarsening of the level below it rather than from a reconstruction under the cell itself,
+    // so the tags say only how much of each level to carry. Reconstructing under the cell as well
+    // would not merely repeat the work: the depth a cell is reconstructed at varies from cell to
+    // cell, a face is shared by two of them, and the two agree on its area only where the
+    // interface is planar. Across a curved interface they do not, and the cell that loses the
+    // face is left violating the divergence identity.
+    shop->setAggregationTags(m_generateEveryLevel ? Vector<IntVectSet>() : m_aggregationTags,
+                             m_aggregationRegions,
+                             m_aggregationDomain);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -749,7 +766,16 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               s_strictGeometry,
                                               m_geometryRefinement);
 
-      shop->setAggregationTags(m_aggregationTags, m_aggregationRegions, m_aggregationDomain);
+      // Where every level is generated in turn, a coarse cell's geometry comes up through the
+      // coarsening of the level below it rather than from a reconstruction under the cell itself,
+      // so the tags say only how much of each level to carry. Reconstructing under the cell as well
+      // would not merely repeat the work: the depth a cell is reconstructed at varies from cell to
+      // cell, a face is shared by two of them, and the two agree on its area only where the
+      // interface is planar. Across a curved interface they do not, and the cell that loses the
+      // face is left violating the divergence identity.
+      shop->setAggregationTags(m_generateEveryLevel ? Vector<IntVectSet>() : m_aggregationTags,
+                               m_aggregationRegions,
+                               m_aggregationDomain);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
       a_geoserver = static_cast<GeometryService*>(shop);

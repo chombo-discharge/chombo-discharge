@@ -1532,8 +1532,18 @@ Driver::setupGeometryOnly()
     this->writeMemoryUsage();
   }
 
-  // Regrid using geometric tags only.
-  m_amr->regridAmr(m_geomTags, 0);
+  // Regrid using geometric tags only. Where the pre-pass ran, the index space was carried only
+  // over the boxes it produced, so the grids are taken from those boxes rather than clustered
+  // again from the tags: an independent clustering of the same tags comes out nearly the same,
+  // and the cells where it differs are cells whose geometry was never generated.
+  const Vector<Vector<Box>>& aggregationRegions = m_computationalGeometry->getAggregationRegions();
+
+  if (aggregationRegions.size() > 0) {
+    m_amr->regridAmr(aggregationRegions, 0);
+  }
+  else {
+    m_amr->regridAmr(m_geomTags, 0);
+  }
 
   if (m_verbosity > 0) {
     this->gridReport();

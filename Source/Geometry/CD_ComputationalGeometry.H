@@ -189,6 +189,17 @@ public:
                      const ProblemDomain&       a_coarsestDomain);
 
   /**
+   * @brief Get the boxes the geometry was generated over, coarsest level first.
+   * @details Empty unless the pre-pass ran. Where the index space is carried only over part of a
+   * level, these are the boxes it was carried over, so grids built anywhere else ask for embedded
+   * boundary data that was never generated. Indexed as the AMR hierarchy is, coarsest first,
+   * which is the opposite of how the index space indexes its own levels.
+   * @return Boxes each level was generated over.
+   */
+  const Vector<Vector<Box>>&
+  getAggregationRegions() const noexcept;
+
+  /**
    * @brief Where the interface bends too sharply for the resolution it sits on.
    * @details A pre-pass over the implicit function alone. Each candidate cell's interface normal
    * is fitted to the positions of its edge crossings, and a cell whose normal turns by more than
@@ -299,6 +310,12 @@ protected:
    * @brief Domain the first entry of m_aggregationTags belongs to.
    */
   ProblemDomain m_aggregationDomain;
+
+  /**
+   * @brief Whether each level of the index space is generated in turn rather than coarsened down
+   * from the finest one.
+   */
+  bool m_generateEveryLevel;
 
   /**
    * @brief Grid level where we begin using ScanShop

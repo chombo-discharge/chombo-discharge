@@ -1585,6 +1585,21 @@ public:
   regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /**
+   * @brief Regrid AMR onto grids that are given rather than generated. This version generates the
+   * Realms, but not the operators.
+   * @details The boxes are used as they stand, so whoever supplies them owns proper nesting and
+   * the blocking factor. This exists so that the grids of the run can be made the same object as
+   * the grids some other part of the code has already committed to, rather than an independent
+   * clustering of the same tags that is only nearly the same. The boxes are indexed as the AMR
+   * hierarchy is, coarsest first, which is not how an index space indexes its levels.
+   * @param[in] a_boxes Boxes for each level, coarsest first. The level zero entry is ignored since
+   * that level always covers the whole domain.
+   * @param[in] a_lmin  Coarsest grid level allowed to change.
+   */
+  void
+  regridAmr(const Vector<Vector<Box>>& a_boxes, const int a_lmin);
+
+  /**
    * @brief Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm.
    * @param[in] a_realm Realm name
    * @param[in] a_procs Processor IDs
@@ -2452,6 +2467,25 @@ protected:
    */
   void
   buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+
+  /**
+   * @brief Build new internal AMR grids from boxes that are given rather than generated.
+   * @param[in] a_boxes Boxes for each level, coarsest first. The level zero entry is ignored since
+   * that level always covers the whole domain and is split here on the current blocking factor.
+   * @param[in] a_lmin  The finest grid level which changes.
+   * @details The finest level is taken from the boxes, capped by the AmrMesh restrictions. Levels
+   * are read until the first one with no boxes, since a hierarchy stops where it runs out of grids.
+   */
+  void
+  buildGrids(const Vector<Vector<Box>>& a_boxes, const int a_lmin);
+
+  /**
+   * @brief Load balance the boxes and define m_grids from them.
+   * @param[in,out] a_newBoxes Boxes for each level, coarsest first. Sorted in place for locality.
+   * @param[in]     a_lmin     The finest grid level which changes. Levels below it keep their grids.
+   */
+  void
+  defineGrids(Vector<Vector<Box>>& a_newBoxes, const int a_lmin);
 
   /**
    * @brief Build copiers for copying between realms

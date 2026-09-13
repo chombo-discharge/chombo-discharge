@@ -166,6 +166,18 @@ protected:
   Vector<Vector<Box>> m_aggregationRegions;
 
   /**
+   * @brief Keep a level only where it is carried.
+   * @details Asked once for the whole refinement of a coarse box, so a coarse box is carried in
+   * full or not at all: coarsening reads a coarse cell's whole refinement at once and skips any
+   * box it cannot read in full.
+   * @param[in] a_box   Refinement of a coarse box, on that level.
+   * @param[in] a_level Level the box belongs to, finest first.
+   * @return True if the box is kept.
+   */
+  virtual bool
+  retainBox(const Box& a_box, const int a_level) const noexcept override;
+
+  /**
    * @brief Index into m_domains of the level the first entry of m_aggregationTags belongs to.
    * @details Negative when no tags have been supplied, which leaves every cell reconstructed at
    * its own resolution.
