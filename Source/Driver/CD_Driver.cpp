@@ -1532,18 +1532,7 @@ Driver::setupGeometryOnly()
     this->writeMemoryUsage();
   }
 
-  // Regrid using geometric tags only. Where the pre-pass ran, the index space was carried only
-  // over the boxes it produced, so the grids are taken from those boxes rather than clustered
-  // again from the tags: an independent clustering of the same tags comes out nearly the same,
-  // and the cells where it differs are cells whose geometry was never generated.
-  const Vector<Vector<Box>>& aggregationRegions = m_computationalGeometry->getAggregationRegions();
-
-  if (aggregationRegions.size() > 0) {
-    m_amr->regridAmr(aggregationRegions, 0);
-  }
-  else {
-    m_amr->regridAmr(m_geomTags, 0);
-  }
+  this->regridAmrOntoGeometry(0, -1);
 
   if (m_verbosity > 0) {
     this->gridReport();
@@ -1552,6 +1541,30 @@ Driver::setupGeometryOnly()
   //  this->writeMemoryUsage();
   if (m_plotInterval > 0) {
     this->writeGeometry(); // Write geometry only
+  }
+}
+
+void
+Driver::regridAmrOntoGeometry(const int a_lmin, const int a_hardcap)
+{
+  CH_TIME("Driver::regridAmrOntoGeometry(int, int)");
+  if (m_verbosity > 2) {
+    pout() << "Driver::regridAmrOntoGeometry(int, int)" << endl;
+  }
+
+  // Where the pre-pass ran, the index space was carried only over the boxes it produced, so the
+  // grids are taken from those boxes rather than clustered again from the tags. An independent
+  // clustering of the same tags comes out nearly the same, and the cells where it differs are
+  // cells whose embedded boundary data was never generated: the operators that read across a
+  // refinement boundary ask a coarse cell which fine cells lie under it, and a cell the index
+  // space does not carry a finer level over holds no record of that.
+  const Vector<Vector<Box>>& aggregationRegions = m_computationalGeometry->getAggregationRegions();
+
+  if (aggregationRegions.size() > 0) {
+    m_amr->regridAmr(aggregationRegions, a_lmin);
+  }
+  else {
+    m_amr->regridAmr(m_geomTags, a_lmin, a_hardcap);
   }
 }
 
@@ -1665,7 +1678,7 @@ Driver::setupFresh(const int a_initialRegrids)
   // base level and upwards, so no hardcap on the permitted grids.
   const int lmin    = 0;
   const int hardcap = -1;
-  m_amr->regridAmr(m_geomTags, lmin, hardcap);
+  this->regridAmrOntoGeometry(lmin, hardcap);
   const int lmax = m_amr->getFinestLevel();
 
   // Allocate internal storage

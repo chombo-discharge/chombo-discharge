@@ -566,6 +566,19 @@ protected:
   setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
 
   /**
+   * @brief Regrid the AMR hierarchy onto the geometry.
+   * @details Takes the grids from the boxes the geometry was generated over where the pre-pass
+   * produced any, and from the geometric tags otherwise. The two are not interchangeable once the
+   * index space is carried over part of a level only: an independent clustering of the same tags
+   * comes out nearly the same, and the cells where it differs are cells whose embedded boundary
+   * data was never generated.
+   * @param[in] a_lmin    Coarsest grid level allowed to change.
+   * @param[in] a_hardcap Grid generation hardcap, used only when the grids come from tags.
+   */
+  void
+  regridAmrOntoGeometry(const int a_lmin, const int a_hardcap);
+
+  /**
    * @brief Setup function for fresh (non-restart) simulations.
    * @param[in] a_initialRegrids Number of initial regrids to perform during setup.
    */
