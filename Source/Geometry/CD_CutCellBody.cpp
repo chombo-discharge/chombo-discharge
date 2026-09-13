@@ -79,6 +79,34 @@ CutCellBody::classify(const CutCellSurface& a_surface) noexcept
 }
 
 bool
+CutCellBody::interfaceLiesInFace(const CutCellSurface& a_surface) noexcept
+{
+  for (int d = 0; d < SpaceDim; d++) {
+    for (int side = 0; side < 2; side++) {
+      int faceCorner[1 << (SpaceDim - 1)];
+
+      detail::faceCorners(d, side, faceCorner);
+
+      // Every corner of the face is on the solid side. In a cell classify has called regular
+      // that can only be a face the interface lies in, since the only solid corners such a cell
+      // has are ones touchesOnly found on the interface. A cell whose corners are all fluid has
+      // no such face, so the test costs those cells the loop and nothing else.
+      bool allSolid = true;
+
+      for (int k = 0; k < (1 << (SpaceDim - 1)); k++) {
+        allSolid = allSolid && !isFluid(a_surface.m_corner[faceCorner[k]]);
+      }
+
+      if (allSolid) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+bool
 CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept
 {
   bool any = false;
@@ -94,12 +122,16 @@ CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide
     // over within the distance crossings are held off the endpoints by. Asking where the
     // crossing is, rather than how small the corner value is, keeps this a question about the
     // surface rather than about a magnitude
+    bool reachesOtherSide = false;
+
     for (int d = 0; d < SpaceDim; d++) {
       const int other = c ^ (1 << d);
 
       if (isFluid(a_surface.m_corner[other]) == a_fluidSide) {
         continue;
       }
+
+      reachesOtherSide = true;
 
       const int low = c & ~(1 << d);
 
@@ -121,6 +153,15 @@ CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide
       if (distance > s_edgeTolerance) {
         return false;
       }
+    }
+
+    // A corner every one of whose neighbours is on its own side has no edge to read a crossing
+    // from, and nothing above has tested it. It is enclosed by its own side rather than sitting
+    // on the interface, so the side it belongs to encloses something and this is a cut cell. The
+    // shape the rule is written for, a facet lying in a node plane, leaves every corner on that
+    // side facing one across the cell, so it is unaffected.
+    if (!reachesOtherSide) {
+      return false;
     }
   }
 

@@ -297,7 +297,20 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       break;
     }
     case PolyhedralEB::CutCellBody::Kind::Regular: {
-      a_regIrregCovered(iv, 0) = 1;
+      // A cell the interface only grazes is full, which is why it is classified regular, but the
+      // face the interface lies in is closed. A regular cell has every face open, so this one is
+      // given a body instead: leaving it regular has the cut cell across that face read the face
+      // from the interface, find nothing of it open, and drop its side of a face this cell keeps.
+      if (PolyhedralEB::CutCellBody::interfaceLiesInFace(surface)) {
+        a_regIrregCovered(iv, 0) = 0;
+
+        if (a_validRegion.contains(iv)) {
+          irregularCells |= iv;
+        }
+      }
+      else {
+        a_regIrregCovered(iv, 0) = 1;
+      }
 
       break;
     }

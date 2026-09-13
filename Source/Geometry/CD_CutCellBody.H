@@ -99,6 +99,23 @@ public:
   touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept;
 
   /**
+   * @brief Whether the interface lies exactly in one of the cell's faces.
+   * @details A cell the interface only grazes is full, and classify calls it regular for that
+   * reason, but the face the interface lies in is closed: the fluid ends there. Such a cell is
+   * not a regular cell, whose every face is open by definition, and it has to carry a body
+   * saying so. Leaving it regular has the cut cell across that face read the face from the
+   * interface, find nothing of it open, and drop its side of a face the full cell keeps.
+   *
+   * Only meaningful for a cell classify has called regular: the test is that every corner of
+   * some face is on the solid side, which in such a cell means those corners are on the
+   * interface.
+   * @param[in] a_surface Corner values in the cell's own frame.
+   * @return True if some face has all of its corners on the interface.
+   */
+  static bool
+  interfaceLiesInFace(const CutCellSurface& a_surface) noexcept;
+
+  /**
    * @brief Volume fraction.
    * @return Fraction of the cell occupied by fluid.
    */
