@@ -545,6 +545,14 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 
   static_cast<GeometryService&>(shop).postMakeBoxLayout(dbl, coarseDx * RealVect::Unit);
 
+  // The generated-at-its-own-resolution comparison below fills the graph at the fine spacing, and
+  // the generator records a surface for every cut cell it makes, so the fine level's store has to
+  // exist before it is asked to.
+  DisjointBoxLayout fineDbl;
+  refine(fineDbl, dbl, refinement);
+
+  static_cast<GeometryService&>(shop).postMakeBoxLayout(fineDbl, fineDx * RealVect::Unit);
+
   LayoutData<Vector<IrregNode>> coarseNodes(dbl);
   LayoutData<BaseFab<int>>      coarseKinds(dbl);
 
@@ -618,11 +626,16 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
     }
   }
 
-  long long refused      = 0;
-  long long parents      = 0;
-  long long coarseCut    = 0;
-  long long volumeBad    = 0;
-  long long faceMismatch = 0;
+  long long refused         = 0;
+  long long parents         = 0;
+  long long compared        = 0;
+  long long eitherCut       = 0;
+  long long volumeDiffers   = 0;
+  long long topologyDiffers = 0;
+  Real      worstCutVsGen   = 0.0;
+  long long coarseCut       = 0;
+  long long volumeBad       = 0;
+  long long faceMismatch    = 0;
 
   Real worstVolume = 0.0;
   Real worstFace   = 0.0;
@@ -721,6 +734,65 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
       }
     }
 
+    // The same cells, generated at their own resolution instead of cut from their parent. If the
+    // two agree then it does not matter which way a refined layout is filled; if they do not, the
+    // difference is the information coarsening threw away.
+    {
+      const Box fineValid = fineBox;
+
+      Box fineGhost = grow(fineValid, 1);
+      fineGhost &= fineDomain.domainBox();
+
+      BaseFab<int>      genKinds;
+      Vector<IrregNode> genNodes;
+
+      shop.fillGraph(genKinds, genNodes, fineValid, fineGhost, fineDomain, probLo, fineDx, dit());
+
+      BaseFab<Real> genVolume(fineValid, 1);
+
+      for (BoxIterator bit(fineValid); bit.ok(); ++bit) {
+        genVolume(bit(), 0) = (genKinds(bit(), 0) > 0) ? 1.0 : 0.0;
+      }
+
+      for (int n = 0; n < genNodes.size(); n++) {
+        if (fineValid.contains(genNodes[n].m_cell)) {
+          genVolume(genNodes[n].m_cell, 0) = genNodes[n].m_volFrac;
+        }
+      }
+
+      for (BoxIterator bit(fineValid); bit.ok(); ++bit) {
+        if (fineVolume(bit(), 0) < 0.0) {
+          continue;
+        }
+
+        const Real cut = fineVolume(bit(), 0);
+        const Real gen = genVolume(bit(), 0);
+
+        const bool cutIsCut = (cut > 0.0 && cut < 1.0);
+        const bool genIsCut = (gen > 0.0 && gen < 1.0);
+
+        compared++;
+
+        if (!cutIsCut && !genIsCut) {
+          continue;
+        }
+
+        eitherCut++;
+
+        if (cutIsCut != genIsCut) {
+          topologyDiffers++;
+        }
+
+        const Real d = std::abs(cut - gen);
+
+        worstCutVsGen = std::max(worstCutVsGen, d);
+
+        if (d > 1.0E-12) {
+          volumeDiffers++;
+        }
+      }
+    }
+
     // the volume of the cells under a coarse one has to come to the coarse one's
     for (BoxIterator bit(coarseBox); bit.ok(); ++bit) {
       Box under(bit(), bit());
@@ -780,9 +852,164 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
     }
   }
 
+  pout() << "CUTvsGEN depth " << a_depth << ": cutCells " << eitherCut << " volumeDiffers " << volumeDiffers
+         << " topologyDiffers " << topologyDiffers << " worst " << worstCutVsGen << endl;
+
   pout() << "REFINEFILL depth " << a_depth << " dx " << fineDx << ": parents " << parents << " refused " << refused
          << " coarseCutCells " << coarseCut << " volumeBad " << volumeBad << " worstVolume " << worstVolume
          << " faceMismatch " << faceMismatch << " worstFace " << worstFace << endl;
+}
+
+// How many vertices a multichord face polygon needs.
+//
+// A chord-carrying cell whose neighbour is coarsened takes that face's chords from the neighbour's
+// children instead of drawing one of its own. The face is a square; under one halving it is a 3x3
+// node grid with twelve sub-edges, and the fluid region on it is bounded by the nodes that lie in
+// the fluid together with the crossings on those sub-edges. That count is what the polygon has to
+// hold, and it is what decides whether the representation can carry a multichord seam.
+//
+// Counted here rather than built, because the count is all that is in question: the cap is on
+// vertices, and a walk of the boundary would visit exactly these.
+void
+validateMultichordFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
+                       const RefCountedPtr<AmrMesh>&               a_amr,
+                       const int                                   a_numCells)
+{
+  CH_TIME("validateMultichordFace");
+
+  const RefCountedPtr<BaseIF>& implicitFunction = a_compgeom->getGasImplicitFunction();
+
+  if (implicitFunction.isNull()) {
+    return;
+  }
+
+  const RealVect probLo = a_amr->getProbLo();
+  const Real     dx     = a_amr->getDx()[0];
+
+  long long faces      = 0;
+  int       worstOne   = 0;
+  int       worstMulti = 0;
+  long long over14     = 0;
+  long long over20     = 0;
+
+  Box slab = a_amr->getDomains()[0].domainBox();
+
+  for (int d = 0; d < SpaceDim; d++) {
+    if (slab.size(d) > a_numCells) {
+      slab.setBig(d, slab.smallEnd(d) + a_numCells - 1);
+    }
+  }
+
+  for (BoxIterator bit(slab); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    RealVect lo = probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      lo[d] += dx * iv[d];
+    }
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (int side = 0; side < 2; side++) {
+        int trans[SpaceDim - 1];
+        transverseDirs(dir, trans);
+
+        // the nine nodes of the halved face, and the values there
+        Real value[3][3];
+
+        for (int i = 0; i < 3; i++) {
+          for (int j = 0; j < 3; j++) {
+            RealVect x = lo;
+            x[dir] += side * dx;
+            x[trans[0]] += 0.5 * dx * i;
+#if CH_SPACEDIM == 3
+            x[trans[1]] += 0.5 * dx * j;
+#endif
+            value[i][j] = implicitFunction->value(x);
+          }
+        }
+
+        // is this face cut at all, at the coarse spacing?
+        const bool coarseCut = !((value[0][0] < 0.0) == (value[2][0] < 0.0) &&
+                                 (value[0][0] < 0.0) == (value[0][2] < 0.0) &&
+                                 (value[0][0] < 0.0) == (value[2][2] < 0.0));
+
+        bool anyFine = false;
+
+        for (int i = 0; i < 3 && !anyFine; i++) {
+          for (int j = 0; j < 3 && !anyFine; j++) {
+            anyFine = anyFine || ((value[i][j] < 0.0) != (value[0][0] < 0.0));
+          }
+        }
+
+        if (!coarseCut && !anyFine) {
+          continue;
+        }
+
+        faces++;
+
+        // one chord: the four corners in the fluid, plus the crossings on the four coarse edges
+        int one = 0;
+
+        for (int i = 0; i < 3; i += 2) {
+          for (int j = 0; j < 3; j += 2) {
+            if (value[i][j] < 0.0) {
+              one++;
+            }
+          }
+        }
+
+        if ((value[0][0] < 0.0) != (value[2][0] < 0.0))
+          one++;
+        if ((value[0][2] < 0.0) != (value[2][2] < 0.0))
+          one++;
+        if ((value[0][0] < 0.0) != (value[0][2] < 0.0))
+          one++;
+        if ((value[2][0] < 0.0) != (value[2][2] < 0.0))
+          one++;
+
+        // multichord: every node in the fluid, plus every crossing on the twelve sub-edges
+        int multi = 0;
+
+        for (int i = 0; i < 3; i++) {
+          for (int j = 0; j < 3; j++) {
+            if (value[i][j] < 0.0) {
+              multi++;
+            }
+          }
+        }
+
+        for (int i = 0; i < 2; i++) {
+          for (int j = 0; j < 3; j++) {
+            if ((value[i][j] < 0.0) != (value[i + 1][j] < 0.0)) {
+              multi++;
+            }
+          }
+        }
+
+        for (int i = 0; i < 3; i++) {
+          for (int j = 0; j < 2; j++) {
+            if ((value[i][j] < 0.0) != (value[i][j + 1] < 0.0)) {
+              multi++;
+            }
+          }
+        }
+
+        worstOne   = std::max(worstOne, one);
+        worstMulti = std::max(worstMulti, multi);
+
+        if (multi > 14) {
+          over14++;
+        }
+        if (multi > 20) {
+          over20++;
+        }
+      }
+    }
+  }
+
+  pout() << "MULTIFACE faces " << faces << " worstSingleChord " << worstOne << " worstMultichord " << worstMulti
+         << " over14 " << over14 << " over20 " << over20 << endl;
 }
 
 // Check that a partially carried index space is sound before anything is asked to solve on it.
@@ -1903,6 +2130,16 @@ main(int argc, char* argv[])
   reportCoverage(amr, compgeom);
 
   validateIndexSpace(amr, compgeom);
+
+  {
+    int cells = 32;
+    {
+      ParmParse pp("Prototype");
+      pp.query("multichord_cells", cells);
+    }
+
+    validateMultichordFace(compgeom, amr, cells);
+  }
 
   {
     int depth         = 2;
