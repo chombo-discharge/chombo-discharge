@@ -243,6 +243,59 @@ Items 1, 3 and 4 as originally written are done or superseded. What stands now:
    paths, through `Driver::regridAmrOntoGeometry`. Run-time regrids still cluster from tags and can
    ask for refinement outside what the index space carries. #732's job.
 
+### The plan for refinement, as it stands
+
+Settled, so they are not reopened:
+
+| | |
+| --- | --- |
+| how a child is built | always a cut from its parent. No root finding below the level the surface was taken at, ever |
+| what persists | the surface, 160 bytes a cut cell. Not the body, which is 4,544 and cheap to rebuild from the surface |
+| what is transient | bodies. Materialised per parent for the length of a build or a regrid, then dropped |
+| the moments | recomputed per child, inside `refine`, by integrating the child's own polygons. Not a separate step, not interpolated, and no root finding |
+| a regrid | copies moments *and* surfaces where old and new grids overlap, and cuts from the parent only for cut cells that are genuinely new |
+
+The storage decision turns on one asymmetry: reconstruction is root finding, of order a hundred
+implicit-function evaluations a crossing, while building a body from a finished surface is one
+arithmetic pass at 2.7 microseconds. Keeping the surface avoids the expensive half. Keeping the
+body as well would save a further quarter of the per-cell time for twenty-eight times the memory,
+which at six hundred thousand cut cells a level is 96 MB against 2.7 GB.
+
+**Phase 1, the driver and the on-demand fill.** A `LevelData<BaseIVFAB<CutCellSurface>>` a level,
+beside `EBData`, moving under the same `copyTo`. A driver that cuts a parent once and keeps the
+whole child set, rather than cutting a path per cell. A hook on `GeometryService`, so only the
+polyhedral generator implements it, letting `fillEBISLayout` serve boxes outside a level's own
+grids. `m_finerNodes` on every irregular coarse cell, since `PhaseRealm::defineEBLevelGrid` promises
+`setMaxRefinementRatio` for every level below the finest. And a look at whether `reconcileSeam`
+becomes vacuous once the fine cells under a generated coarse cell are exact cuts of it.
+
+**Phase 2, the regrid.** An entry in the EBIS fill path that takes the old level and the new grids
+and copies what still applies; derivation only for new cut cells; and the coverage-only restriction
+in `Driver::regridAmrOntoGeometry` lifted, which is what makes run-time regrids and the cell tagger
+legal.
+
+**Phase 3, the depth sweep.** Time and memory at depths one to ten. Not before Phase 1: measuring
+the present path would only measure the waste described below.
+
+### Where it will hurt
+
+- **The cut, not the byte count, is the cost at depth.** See the note below on `buildRefinedBody`.
+- **`PhaseRealm::defineEBLevelGrid` is already 11.5%** of a geometry-only run -- 4.4 s of 38.4 s on
+  MechanicalShaft at 128^3 -- and it is exactly what the fill hook extends. Work added there lands
+  on a path that is already the second largest single item.
+- **A cut holds about 72 kB of bodies live.** `refine` keeps `buffer[2][4]` and its caller keeps
+  `children[8]`, at 4,544 bytes each. Depth is iterative so it does not accumulate, but these loops
+  are `#pragma omp parallel for`, so it is per thread.
+- **The surface store costs an exchange.** 96 MB a level is cheap; the extra `LevelData` is added to
+  a path where `copyTo` inside `coarsenFrom` is already 7.7% of the run.
+- **The surface store is load-bearing, not an optimisation.** With reconstruction off the table, a
+  cut cell whose surface is lost cannot be refined at all, so it has to survive a regrid and a load
+  balance. It does not have to survive a checkpoint -- `setupForRestart` rebuilds the geometry --
+  which makes restart pay a reconstruction, as a start-up cost.
+- **The timings above are borrowed.** 2.7 microseconds to build and 0.9 an output cell to refine
+  come from the spike: single threaded, and from before the polygon store was sized down. Nothing
+  here rests on them except the storage decision, which has a twenty-eight-fold margin.
+
 ### Two things refinement must not be built without
 
 Both found while sizing the body store, both cheap to design in and expensive to retrofit.
