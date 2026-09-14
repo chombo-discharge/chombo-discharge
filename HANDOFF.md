@@ -243,6 +243,34 @@ Items 1, 3 and 4 as originally written are done or superseded. What stands now:
    paths, through `Driver::regridAmrOntoGeometry`. Run-time regrids still cluster from tags and can
    ask for refinement outside what the index space carries. #732's job.
 
+### Two things refinement must not be built without
+
+Both found while sizing the body store, both cheap to design in and expensive to retrofit.
+
+**`buildRefinedBody` throws away seven eighths of its work, at every level, for every cell.** It
+walks from the ancestor down to the wanted cell, and at each step refines the parent into all eight
+children, keeps one, and copies it over the parent. It then repeats the entire chain -- including a
+fresh surface reconstruction, with the root finding that implies -- for the *next* fine cell in the
+same parent. At refinement 2 `PLAN.md` already records the coarse surface being reconstructed nine
+times per coarse cell. At ten levels it is of order eighty body refinements per fine cell, plus one
+reconstruction, with the discarded children being exactly the cells that will be asked for next.
+
+Whatever fills a refined layout should cut a parent once and keep the whole child set while the
+level is being built, rather than cutting a path per cell. This is a question about the shape of
+the refinement driver, not an optimisation to apply afterwards.
+
+**A regrid must move what it already has.** When the grids change, the cells that survive keep their
+geometry: their moments, and whatever representation refinement needs, should be copied rather than
+rebuilt, and only genuinely new cut cells should be derived. That means the EBIS fill path needs a
+notion of regridding rather than only of building -- something that can be handed the old level and
+take from it what still applies. Rebuilding every cut cell on every regrid is the difference between
+geometry being a start-up cost and being a per-regrid cost, and at plasma-simulation depths the
+second is not affordable.
+
+It also constrains the representation: anything moved between grids is moved between *ranks*, so a
+descendant cannot hold a raw pointer into a parent's storage. Whatever a refined cell keeps has to
+survive being serialised and load balanced.
+
 **The largest unknown is no longer structural.** Whether the existing multigrid, flux registers and
 redistribution stencils accept a cut cell whose neighbour is a *coarser* cut cell is still open, but
 it is now a question about accuracy rather than about whether the thing runs at all: over a partly
