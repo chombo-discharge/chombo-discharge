@@ -277,6 +277,30 @@ legal.
 **Phase 3, the depth sweep.** Time and memory at depths one to ten. Not before Phase 1: measuring
 the present path would only measure the waste described below.
 
+### Why the level is extended, rather than the layout patched
+
+`EBISLevel::fillEBISLayout` is a thin wrapper around `EBISLayoutImplem::define`, which builds a
+local `LevelData<EBGraph>` on the requested grids and copies from the level's own. A box with no
+source keeps the factory default, silently. So there is no missing-box branch to hook, and the
+choice is between patching the layout after the fact and extending the level so the copy finds
+something.
+
+The level is extended, and the reason is ownership rather than taste. Cutting a cell needs its
+parent's surface, and the surfaces are kept on the layouts the generator made for itself, which are
+not the layouts a realm asks about: the two are load balanced separately, so the parent surface a
+rank needs to fill a box will often be on another rank. Extending the level does the cutting on the
+generator's own layout, where the surfaces are local, and leaves the distribution to the copy that
+`EBISLayoutImplem::define` already performs.
+
+That carries one requirement into the extension itself: a box added to a level has to be given to
+the rank that owns the parent region it will be cut from, or the problem simply moves up a level.
+The load balance of the extension is ours to choose, so this costs nothing but has to be chosen
+deliberately.
+
+The level only ever grows. A regrid that stops asking for a region leaves what was built for it in
+place, since the same region tends to be asked for again a few steps later, and a cell that is
+still there is a cell nobody has to cut twice.
+
 ### Where it will hurt
 
 - **The cut, not the byte count, is the cost at depth.** See the note below on `buildRefinedBody`.
