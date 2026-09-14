@@ -508,4 +508,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
+#include <CD_CutCellBodyImplem.H>
+
 #endif
