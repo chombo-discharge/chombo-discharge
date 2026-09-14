@@ -589,7 +589,7 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
       Vector<IntVect> theirCells;
       Vector<Real>    theirValues;
 
-      shop.getSurfaces(theirCells, theirValues, ghost & dbl[source()], coarseDx, source());
+      shop.getSurfaces(theirCells, theirValues, ghost & dbl[source()], coarseDx);
 
       for (int n = 0; n < theirCells.size(); n++) {
         cells.push_back(theirCells[n]);

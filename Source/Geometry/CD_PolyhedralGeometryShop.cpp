@@ -939,8 +939,7 @@ void
 PolyhedralGeometryShop::getSurfaces(Vector<IntVect>& a_cells,
                                     Vector<Real>&    a_values,
                                     const Box&       a_region,
-                                    const Real&      a_dx,
-                                    const DataIndex& a_di) const
+                                    const Real&      a_dx) const
 {
   CH_TIME("PolyhedralGeometryShop::getSurfaces");
 
@@ -953,20 +952,31 @@ PolyhedralGeometryShop::getSurfaces(Vector<IntVect>& a_cells,
     return;
   }
 
-  const Vector<IntVect>&                      cells    = (*m_surfaceCells[level])[a_di];
-  const Vector<PolyhedralEB::CutCellSurface>& surfaces = (*m_surfaces[level])[a_di];
+  // Every box this object holds of the level is looked through, rather than the one the caller
+  // names: the level that asks may have grown since it was made, and its boxes are then not the
+  // ones the surfaces were recorded against.
+  const BoxLayout& dbl = m_surfaces[level]->boxLayout();
 
-  for (int n = 0; n < cells.size(); n++) {
-    if (!a_region.contains(cells[n])) {
+  for (DataIterator dit = m_surfaces[level]->dataIterator(); dit.ok(); ++dit) {
+    if (!dbl[dit()].intersectsNotEmpty(a_region)) {
       continue;
     }
 
-    a_cells.push_back(cells[n]);
+    const Vector<IntVect>&                      cells    = (*m_surfaceCells[level])[dit()];
+    const Vector<PolyhedralEB::CutCellSurface>& surfaces = (*m_surfaces[level])[dit()];
 
-    const int offset = a_values.size();
-    a_values.resize(offset + PolyhedralEB::CutCellSurface::s_numValues);
+    for (int n = 0; n < cells.size(); n++) {
+      if (!a_region.contains(cells[n])) {
+        continue;
+      }
 
-    surfaces[n].store(&a_values[offset], 1);
+      a_cells.push_back(cells[n]);
+
+      const int offset = a_values.size();
+      a_values.resize(offset + PolyhedralEB::CutCellSurface::s_numValues);
+
+      surfaces[n].store(&a_values[offset], 1);
+    }
   }
 }
 

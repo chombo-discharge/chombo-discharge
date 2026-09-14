@@ -154,16 +154,11 @@ public:
    * @brief Hand back what was kept for each cut cell of a box.
    * @param[out] a_cells  Cut cells of the box, in the order their values appear.
    * @param[out] a_values Values per entry of a_cells.
-   * @param[in]  a_region Box wanted.
-   * @param[in]  a_dx     Grid resolution of the level the box belongs to.
-   * @param[in]  a_di     Index of the box in the layout this object was given.
+   * @param[in]  a_region Cells wanted.
+   * @param[in]  a_dx     Grid resolution of the level the cells belong to.
    */
   void
-  getSurfaces(Vector<IntVect>& a_cells,
-              Vector<Real>&    a_values,
-              const Box&       a_region,
-              const Real&      a_dx,
-              const DataIndex& a_di) const override;
+  getSurfaces(Vector<IntVect>& a_cells, Vector<Real>& a_values, const Box& a_region, const Real& a_dx) const override;
 
   /**
    * @brief Resolution of the level a region has to be cut from.

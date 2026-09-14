@@ -306,6 +306,34 @@ What that leaves for **4b**: a box added to a level has to go to a rank that hol
 parent of its *ghost* region, not just of its valid region. Refusals are counted by the prototype's
 `REFINEFILL` line, so the cost of whatever rule 4b picks is measurable before it is committed to.
 
+**Step 4b extends a level one level at a time, never in a single deep cut.** The first design cut
+each new box from the finest level that described it, which is wrong for a reason that only shows up
+under partial coverage: two levels that were both generated are not refinements of one another, and
+a coarse level near the carried region is the *coarsening* of the finer one, so cutting it does not
+give back the cells it was coarsened from. Boxes taking different ancestors would then disagree on
+the faces between them, and since `setMaxRefinementRatio` asks for `ebrefine(coarseAMRlayout, irat)`
+-- always larger than what the level above carries -- boxes that straddle the carried boundary are
+the norm rather than the exception.
+
+Cutting from level l+1 alone removes that: every cut is one refinement deep, every neighbour in the
+new region came from the same level's description, and level l+1 is itself made to cover what is
+needed by the same procedure, recursively, terminating at the coarsest level which is always
+carried in full. The intermediate cells this materialises are not waste -- they are what a partial
+index space owes `GraphNode::refine` anyway -- and because the level only ever grows, each is cut
+once rather than once per request.
+
+What remains is a single seam, between the cells a level generated and the cells it was extended
+with, and it is the seam `reconcileSeam` already handles with the roles swapped: there the coarsened
+side was authoritative and the generated side took its interface from its apertures; here the
+generated side is authoritative, since it is what the coarser levels were coarsened from, and the
+cut side adjusts. A box is therefore wholly copied or wholly cut, never partly both, or the
+disagreement lands inside a box where there is no seam to reconcile.
+
+The new boxes are built at the coarse resolution and refined, which makes them two-aligned by
+construction, so `coarsen(newBox, 2)` is a layout the parent surfaces can be fetched onto with a
+`copyTo`. That rests on the level's own boxes being two-aligned, which they are: a level's grids
+come from bisecting the domain, and the grids asked for come from `ebrefine`.
+
 **Phase 1, the driver and the on-demand fill.** A `LevelData<BaseIVFAB<CutCellSurface>>` a level,
 beside `EBData`, moving under the same `copyTo`. A driver that cuts a parent once and keeps the
 whole child set, rather than cutting a path per cell. A hook on `GeometryService`, so only the
