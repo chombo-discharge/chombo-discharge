@@ -13,6 +13,9 @@
 // Std includes
 #include <cmath>
 
+// Chombo includes
+#include <CH_assert.H>
+
 // Our includes
 #include <CD_CutCellBody.H>
 #include <CD_PolyhedralEBUtils.H>
@@ -168,9 +171,13 @@ CutCellBody::touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide
   return any;
 }
 
+#if CH_SPACEDIM == 3
 void
 CutCellBody::orientOutward(Polygon& a_polygon, const int a_dir, const int a_side) const noexcept
 {
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
   RealVect outward = RealVect::Zero;
   outward[a_dir]   = (a_side == 0) ? -1.0 : 1.0;
 
@@ -193,7 +200,9 @@ CutCellBody::orientOutward(Polygon& a_polygon, const int a_dir, const int a_side
 int
 CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a_surface, Polygon* a_out) const noexcept
 {
-#if CH_SPACEDIM == 3
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
   int faceEdge[4];
   int faceCorner[4];
 
@@ -229,6 +238,8 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
         polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
       }
     }
+
+    CH_assert(polygon.m_numVertices <= s_maxVertices);
 
     if (polygon.m_numVertices < 3) {
       return 0;
@@ -280,6 +291,8 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
     }
   }
 
+  CH_assert(numIsolated == 2);
+
   if (numIsolated != 2) {
     return -1;
   }
@@ -299,6 +312,8 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
       polygon.m_vertexEdge[polygon.m_numVertices] = faceEdge[i];
       polygon.m_vertex[polygon.m_numVertices++]   = detail::crossingPosition(a_surface, faceEdge[i], s_edgeTolerance);
     }
+
+    CH_assert(polygon.m_numVertices <= s_maxVertices);
 
     this->orientOutward(polygon, a_dir, a_side);
 
@@ -352,19 +367,14 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
   }
 
   return numOut;
-#else
-  (void)a_dir;
-  (void)a_side;
-  (void)a_surface;
-  (void)a_out;
-
-  return -1;
-#endif
 }
+#endif
 
 void
 CutCellBody::defineDegenerate(const CutCellSurface& a_surface, const Kind a_kind) noexcept
 {
+  CH_assert(a_kind != Kind::Cut);
+
   m_volumeFraction = (a_kind == Kind::Regular) ? 1.0 : 0.0;
 
   for (int d = 0; d < SpaceDim; d++) {
@@ -404,16 +414,24 @@ CutCellBody::defineDegenerate(const CutCellSurface& a_surface, const Kind a_kind
     m_trueBoundaryArea = length;
     m_normal           = areaVector / length;
 
-    // the boundary here is the covered face, so its centroid is that face's own centre
+    // the boundary here is the covered face, so its centroid is that face's own centre. A
+    // regular cell has at most one such face: two would leave a corner with no edge towards
+    // the fluid side, which classify reads as cut.
     if (a_kind == Kind::Regular) {
+      int numCovered = 0;
+
       for (int d = 0; d < SpaceDim; d++) {
         for (int side = 0; side < 2; side++) {
           if (m_areaFraction[2 * d + side] == 0.0) {
+            numCovered++;
+
             m_boundaryCentroid    = RealVect::Zero;
             m_boundaryCentroid[d] = -0.5 + static_cast<Real>(side);
           }
         }
       }
+
+      CH_assert(numCovered == 1);
     }
   }
 }
@@ -437,6 +455,8 @@ CutCellBody::accumulateMoments() noexcept
   m_closure = RealVect::Zero;
 
 #if CH_SPACEDIM == 2
+  CH_assert(m_numPolygons == 1);
+
   // the fluid region is a single polygon, and each of its segments is either an aperture or the
   // chord the interface follows
   if (m_numPolygons == 1) {
@@ -466,6 +486,8 @@ CutCellBody::accumulateMoments() noexcept
 
       const int face = polygon.m_segmentFace[i];
 
+      CH_assert(face >= -1 && face < s_numFaces);
+
       if (face >= 0) {
         const Real signedLength = outward[face / 2] * ((face % 2 == 0) ? -1.0 : 1.0);
 
@@ -491,6 +513,8 @@ CutCellBody::accumulateMoments() noexcept
     RealVect centroid;
 
     detail::polygonMoments(polygon.m_vertex, polygon.m_numVertices, area, vector, centroid);
+
+    CH_assert(polygon.m_face >= -1 && polygon.m_face < s_numFaces);
 
     m_closure += vector;
 
@@ -613,6 +637,8 @@ CutCellBody::defineCut(const CutCellSurface& a_surface) noexcept
       polygon.m_segmentFace[i] = 2 * (1 - dir) + offset[1 - dir];
     }
   }
+
+  CH_assert(polygon.m_numVertices <= s_maxVertices);
 
   if (polygon.m_numVertices < 3) {
     return false;
@@ -823,12 +849,16 @@ CutCellBody::volumeCentroid() const noexcept
 Real
 CutCellBody::areaFraction(const int a_dir, const Side::LoHiSide a_side) const noexcept
 {
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+
   return m_areaFraction[2 * a_dir + ((a_side == Side::Lo) ? 0 : 1)];
 }
 
 const RealVect&
 CutCellBody::faceCentroid(const int a_dir, const Side::LoHiSide a_side) const noexcept
 {
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+
   return m_faceCentroid[2 * a_dir + ((a_side == Side::Lo) ? 0 : 1)];
 }
 

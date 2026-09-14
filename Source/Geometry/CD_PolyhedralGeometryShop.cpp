@@ -15,11 +15,13 @@
 
 // Chombo includes
 #include <BoxIterator.H>
+#include <CH_assert.H>
 #include <IntVectSet.H>
 #include <LoHiSide.H>
 #include <MayDay.H>
 
 // Our includes
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_NamespaceHeader.H>
 
@@ -34,6 +36,9 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                                                const bool           a_strict)
   : ScanShop(a_localGeom, a_verbosity, a_dx, a_probLo, a_finestDomain, a_scanLevel, a_ebGhost, a_thrshdVoF)
 {
+  CH_assert(a_dx > 0.0);
+  CH_assert(a_thrshdVoF >= 0.0 && a_thrshdVoF <= 1.0);
+
   m_strict          = a_strict;
   m_volumeThreshold = a_thrshdVoF;
 }
@@ -47,6 +52,8 @@ PolyhedralGeometryShop::fillNodeValues(BaseFab<Real>&  a_nodeValues,
                                        const RealVect& a_probLo,
                                        const Real&     a_dx) const
 {
+  CH_assert(a_dx > 0.0);
+
   Box nodeBox = a_region;
   nodeBox.surroundingNodes();
 
@@ -73,21 +80,18 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
                                      const RealVect& a_probLo,
                                      const Real&     a_dx) const
 {
-  const int dir = a_edge / (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
+  CH_assert(a_dx > 0.0);
 
+  const int dir = PolyhedralEB::detail::edgeDirection(a_edge);
+
+  int offset[SpaceDim];
+  PolyhedralEB::detail::edgeOrigin(a_edge, offset);
+
+  // the edge is addressed by the node at its low end
   IntVect edgeIV = a_cell;
 
-  {
-    const int local = a_edge % (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
-
-#if CH_SPACEDIM == 3
-    constexpr int transverse[3][2] = {{1, 2}, {0, 2}, {0, 1}};
-
-    edgeIV[transverse[dir][0]] += local & 1;
-    edgeIV[transverse[dir][1]] += (local >> 1) & 1;
-#else
-    edgeIV[1 - dir] += local & 1;
-#endif
+  for (int d = 0; d < SpaceDim; d++) {
+    edgeIV[d] += offset[d];
   }
 
   if (a_intercept[dir].box().contains(edgeIV) &&
@@ -139,15 +143,10 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
 }
 
 void
-PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
-                                     PolyhedralEB::CutCellSurface& a_surface,
-                                     const BaseFab<Real>&          a_nodeValues,
-                                     const IntVect&                a_cell,
-                                     const RealVect&               a_probLo,
-                                     const Real&                   a_dx) const
+PolyhedralGeometryShop::fillCorners(PolyhedralEB::CutCellSurface& a_surface,
+                                    const BaseFab<Real>&          a_nodeValues,
+                                    const IntVect&                a_cell) const
 {
-  a_surface = PolyhedralEB::CutCellSurface();
-
   for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
     IntVect node = a_cell;
 
@@ -157,23 +156,29 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[S
 
     a_surface.m_corner[c] = a_nodeValues(node, 0);
   }
+}
+
+void
+PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
+                                     PolyhedralEB::CutCellSurface& a_surface,
+                                     const BaseFab<Real>&          a_nodeValues,
+                                     const IntVect&                a_cell,
+                                     const RealVect&               a_probLo,
+                                     const Real&                   a_dx) const
+{
+  a_surface = PolyhedralEB::CutCellSurface();
+
+  this->fillCorners(a_surface, a_nodeValues, a_cell);
 
   for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
-    const int dir   = e / (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
-    const int local = e % (PolyhedralEB::CutCellSurface::s_numEdges / SpaceDim);
+    int low  = -1;
+    int high = -1;
 
-    int low = 0;
+    PolyhedralEB::detail::edgeCorners(e, low, high);
 
-#if CH_SPACEDIM == 3
-    constexpr int transverse[3][2] = {{1, 2}, {0, 2}, {0, 1}};
+    CH_assert(low >= 0 && low < PolyhedralEB::CutCellSurface::s_numCorners);
+    CH_assert(high >= 0 && high < PolyhedralEB::CutCellSurface::s_numCorners);
 
-    low |= (local & 1) << transverse[dir][0];
-    low |= ((local >> 1) & 1) << transverse[dir][1];
-#else
-    low |= (local & 1) << (1 - dir);
-#endif
-
-    const int  high    = low | (1 << dir);
     const Real loValue = a_surface.m_corner[low];
     const Real hiValue = a_surface.m_corner[high];
 
@@ -202,6 +207,9 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
                                  const IntVect&                   a_cell,
                                  const ProblemDomain&             a_domain) const
 {
+  CH_assert(a_regIrregCovered.box().contains(a_cell));
+  CH_assert(a_regIrregCovered(a_cell, 0) == 0);
+
   a_node.m_cell          = a_cell;
   a_node.m_cellIndex     = 0;
   a_node.m_volFrac       = a_body.volumeFraction();
@@ -216,6 +224,13 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
       Vector<int>      arc;
       Vector<Real>     areaFrac;
       Vector<RealVect> faceCentroid;
+
+      // a neighbour inside the domain is inside the ghost region the flags were built on
+      CH_assert(!a_domain.contains(shifted) || a_regIrregCovered.box().contains(shifted));
+
+      // the face polygons are oriented outward before their areas are summed, so a net
+      // aperture is never negative
+      CH_assert(a_body.areaFraction(dir, sit()) >= 0.0);
 
       // the arcs are topology: they follow the covered set and the domain, not the moments, so
       // the graph is the one GeometryShop would have built
@@ -266,6 +281,8 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   CH_TIME("PolyhedralGeometryShop::fillGraph");
 
   CH_assert(a_domain.contains(a_ghostRegion));
+  CH_assert(a_ghostRegion.contains(a_validRegion));
+  CH_assert(a_dx > 0.0);
 
   a_regIrregCovered.resize(a_ghostRegion, 1);
   a_nodes.resize(0);
@@ -279,16 +296,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = bit();
 
     PolyhedralEB::CutCellSurface surface;
-
-    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
-      IntVect node = iv;
-
-      for (int d = 0; d < SpaceDim; d++) {
-        node[d] += (c >> d) & 1;
-      }
-
-      surface.m_corner[c] = nodeValues(node, 0);
-    }
+    this->fillCorners(surface, nodeValues, iv);
 
     switch (PolyhedralEB::CutCellBody::classify(surface)) {
     case PolyhedralEB::CutCellBody::Kind::Covered: {
@@ -326,6 +334,23 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     }
   }
 
+  // A node is looked up again by its cell when a neighbour of it is dropped, so the position of
+  // each cell's node in a_nodes is kept per cell. Nodes are appended in three places, and each
+  // registers what it appended.
+  BaseFab<int> nodeIndex(a_validRegion, 1);
+  nodeIndex.setVal(-1);
+
+  auto indexNodes = [&](const int a_from) -> void {
+    for (int n = a_from; n < static_cast<int>(a_nodes.size()); n++) {
+      const IntVect& cell = a_nodes[n].m_cell;
+
+      CH_assert(a_validRegion.contains(cell));
+      CH_assert(nodeIndex(cell, 0) < 0);
+
+      nodeIndex(cell, 0) = n;
+    }
+  };
+
   // a regular cell bordering a covered one is a full cell with a covered face, and the node for
   // it is the one GeometryShop builds
   for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
@@ -333,6 +358,8 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       GeometryShop::fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, bit(), a_dx);
     }
   }
+
+  indexNodes(0);
 
   BaseFab<Real> intercept[SpaceDim];
 
@@ -392,6 +419,8 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     this->fillNode(node, body, a_regIrregCovered, iv, a_domain);
 
     a_nodes.push_back(node);
+
+    indexNodes(static_cast<int>(a_nodes.size()) - 1);
   }
 
   // A cell dropped for carrying no fluid worth keeping has just become covered, so the faces its
@@ -408,27 +437,27 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
           continue;
         }
 
-        bool found = false;
+        const int n = nodeIndex(other, 0);
 
-        for (int n = 0; n < a_nodes.size() && !found; n++) {
-          if (a_nodes[n].m_cell == other) {
-            const int arcIndex = a_nodes[n].index(dir, flip(sit()));
-
-            a_nodes[n].m_arc[arcIndex].resize(0);
-            a_nodes[n].m_areaFrac[arcIndex].resize(0);
-            a_nodes[n].m_faceCentroid[arcIndex].resize(0);
-
-            found = true;
-          }
-        }
-
-        if (!found) {
+        if (n < 0) {
           MayDay::Error("PolyhedralGeometryShop::fillGraph - an irregular neighbour has no node");
         }
+
+        const int arcIndex = a_nodes[n].index(dir, flip(sit()));
+
+        a_nodes[n].m_arc[arcIndex].resize(0);
+        a_nodes[n].m_areaFrac[arcIndex].resize(0);
+        a_nodes[n].m_faceCentroid[arcIndex].resize(0);
       }
     }
 
+    // the regular neighbours this converts get nodes of their own, which a later dropped cell
+    // may need to find
+    const int numNodes = static_cast<int>(a_nodes.size());
+
     GeometryShop::fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
+
+    indexNodes(numNodes);
   }
 
   (void)a_di;

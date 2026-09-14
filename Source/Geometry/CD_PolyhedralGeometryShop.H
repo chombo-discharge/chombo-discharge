@@ -160,6 +160,16 @@ protected:
                const Real&     a_dx) const;
 
   /**
+   * @brief Read one cell's corner values off the node values.
+   * @details Corner c of the cell is the node offset by ((c >> d) & 1) in each direction d.
+   * @param[out] a_surface    Surface whose corners are filled. Its crossings are left alone.
+   * @param[in]  a_nodeValues Node-centred implicit function values
+   * @param[in]  a_cell       The cell
+   */
+  void
+  fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_nodeValues, const IntVect& a_cell) const;
+
+  /**
    * @brief Gather the corner values and edge crossings one cell's surface is built from.
    * @param[in,out] a_intercept  Edge-centred crossing cache
    * @param[out]    a_surface    The values the cell's body is reconstructed from

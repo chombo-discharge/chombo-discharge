@@ -18,6 +18,7 @@
 #include <LoHiSide.H>
 
 // Our includes
+#include <CD_CutCellSurface.H>
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_NamespaceHeader.H>
 
@@ -289,6 +290,7 @@ protected:
   bool
   defineCut(const CutCellSurface& a_surface) noexcept;
 
+#if CH_SPACEDIM == 3
   /**
    * @brief The fluid part of one cell face, as outward-oriented polygons.
    * @details Walks the face's circuit of corners and edges, keeping fluid corners and inserting
@@ -296,7 +298,7 @@ protected:
    * are read off the chord pairing rather than off the corner signs, so that the face cannot
    * disagree with the loop assembly, which trusts that pairing.
    * @param[in]  a_dir     Coordinate direction of the face normal.
-   * @param[in]  a_side    Which of the two faces in that direction.
+   * @param[in]  a_side    0 for the low face in that direction, 1 for the high face.
    * @param[in]  a_surface Corner values and edge crossings in the cell's own frame.
    * @param[out] a_out     Room for up to two polygons.
    * @return Number of polygons written, or -1 if the face could not be walked.
@@ -308,10 +310,11 @@ protected:
    * @brief Reverse a face polygon if its area vector points into the fluid.
    * @param[in,out] a_polygon Polygon lying in the given cell face.
    * @param[in]     a_dir     Coordinate direction of the face normal.
-   * @param[in]     a_side    Which of the two faces in that direction.
+   * @param[in]     a_side    0 for the low face in that direction, 1 for the high face.
    */
   void
   orientOutward(Polygon& a_polygon, const int a_dir, const int a_side) const noexcept;
+#endif
 
   /**
    * @brief Take the moments of the assembled polygons.

@@ -16,6 +16,9 @@
 // Std includes
 #include <cmath>
 
+// Chombo includes
+#include <CH_assert.H>
+
 // Our includes
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_NamespaceHeader.H>
@@ -33,12 +36,16 @@ namespace detail {
 inline int
 edgeDirection(const int a_edge) noexcept
 {
+  CH_assert(a_edge >= 0 && a_edge < CutCellSurface::s_numEdges);
+
   return a_edge / (CutCellSurface::s_numEdges / SpaceDim);
 }
 
 inline void
 edgeOrigin(const int a_edge, int a_offset[SpaceDim]) noexcept
 {
+  CH_assert(a_edge >= 0 && a_edge < CutCellSurface::s_numEdges);
+
   const int dir   = edgeDirection(a_edge);
   const int local = a_edge % (CutCellSurface::s_numEdges / SpaceDim);
 
@@ -59,6 +66,8 @@ edgeOrigin(const int a_edge, int a_offset[SpaceDim]) noexcept
 inline void
 edgeCorners(const int a_edge, int& a_lo, int& a_hi) noexcept
 {
+  CH_assert(a_edge >= 0 && a_edge < CutCellSurface::s_numEdges);
+
   const int dir = edgeDirection(a_edge);
 
   int offset[SpaceDim];
@@ -76,6 +85,8 @@ edgeCorners(const int a_edge, int& a_lo, int& a_hi) noexcept
 inline RealVect
 cornerPosition(const int a_corner) noexcept
 {
+  CH_assert(a_corner >= 0 && a_corner < CutCellSurface::s_numCorners);
+
   RealVect x = RealVect::Zero;
 
   for (int d = 0; d < SpaceDim; d++) {
@@ -88,6 +99,9 @@ cornerPosition(const int a_corner) noexcept
 inline void
 faceCorners(const int a_dir, const int a_side, int a_corner[1 << (SpaceDim - 1)]) noexcept
 {
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
 #if CH_SPACEDIM == 3
   const int t0 = s_transverse[a_dir][0];
   const int t1 = s_transverse[a_dir][1];
@@ -109,6 +123,12 @@ faceCorners(const int a_dir, const int a_side, int a_corner[1 << (SpaceDim - 1)]
 inline int
 edgeIndex(const int a_dir, const int a_offset[SpaceDim]) noexcept
 {
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+
+  for (int d = 0; d < SpaceDim; d++) {
+    CH_assert(a_offset[d] == 0 || a_offset[d] == 1);
+  }
+
 #if CH_SPACEDIM == 3
   return 4 * a_dir + ((a_offset[s_transverse[a_dir][0]] & 1) | ((a_offset[s_transverse[a_dir][1]] & 1) << 1));
 #else
@@ -116,43 +136,13 @@ edgeIndex(const int a_dir, const int a_offset[SpaceDim]) noexcept
 #endif
 }
 
-inline void
-faceEdges(const int a_dir, const int a_side, int a_edge[2 * (SpaceDim - 1)]) noexcept
-{
-#if CH_SPACEDIM == 3
-  const int t0 = s_transverse[a_dir][0];
-  const int t1 = s_transverse[a_dir][1];
-
-  // each entry is the t0 and t1 offset of the edge's low corner, and the direction it runs
-  const int spec[4][3] = {{0, 0, t0}, {1, 0, t1}, {1, 1, t0}, {0, 1, t1}};
-
-  for (int i = 0; i < 4; i++) {
-    int offset[SpaceDim];
-
-    for (int d = 0; d < SpaceDim; d++) {
-      offset[d] = 0;
-    }
-
-    offset[a_dir] = a_side;
-    offset[t0]    = spec[i][0];
-    offset[t1]    = spec[i][1];
-
-    const int run = spec[i][2];
-
-    offset[run] = 0;
-
-    a_edge[i] = edgeIndex(run, offset);
-  }
-#else
-  (void)a_dir;
-  (void)a_side;
-  (void)a_edge;
-#endif
-}
-
 inline RealVect
 crossingPosition(const CutCellSurface& a_surface, const int a_edge, const Real a_tolerance) noexcept
 {
+  CH_assert(a_edge >= 0 && a_edge < CutCellSurface::s_numEdges);
+  CH_assert(a_surface.hasCrossing(a_edge));
+  CH_assert(a_tolerance >= 0.0 && a_tolerance < 0.5);
+
   const int dir = edgeDirection(a_edge);
 
   int offset[SpaceDim];
@@ -180,6 +170,38 @@ crossingPosition(const CutCellSurface& a_surface, const int a_edge, const Real a
   return x;
 }
 
+#if CH_SPACEDIM == 3
+inline void
+faceEdges(const int a_dir, const int a_side, int a_edge[4]) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
+  const int t0 = s_transverse[a_dir][0];
+  const int t1 = s_transverse[a_dir][1];
+
+  // each entry is the t0 and t1 offset of the edge's low corner, and the direction it runs
+  const int spec[4][3] = {{0, 0, t0}, {1, 0, t1}, {1, 1, t0}, {0, 1, t1}};
+
+  for (int i = 0; i < 4; i++) {
+    int offset[SpaceDim];
+
+    for (int d = 0; d < SpaceDim; d++) {
+      offset[d] = 0;
+    }
+
+    offset[a_dir] = a_side;
+    offset[t0]    = spec[i][0];
+    offset[t1]    = spec[i][1];
+
+    const int run = spec[i][2];
+
+    offset[run] = 0;
+
+    a_edge[i] = edgeIndex(run, offset);
+  }
+}
+
 inline void
 polygonMoments(const RealVect* a_vertex,
                const int       a_num,
@@ -187,6 +209,9 @@ polygonMoments(const RealVect* a_vertex,
                RealVect&       a_vector,
                RealVect&       a_centroid) noexcept
 {
+  CH_assert(a_num >= 0);
+  CH_assert(a_num == 0 || a_vertex != nullptr);
+
   a_area     = 0.0;
   a_vector   = RealVect::Zero;
   a_centroid = RealVect::Zero;
@@ -195,12 +220,11 @@ polygonMoments(const RealVect* a_vertex,
     return;
   }
 
-#if CH_SPACEDIM == 3
   for (int i = 1; i < a_num - 1; i++) {
     const RealVect u = a_vertex[i] - a_vertex[0];
     const RealVect v = a_vertex[i + 1] - a_vertex[0];
 
-    a_vector += 0.5 * RealVect(D_DECL(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]));
+    a_vector += 0.5 * RealVect(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]);
   }
 
   a_area = a_vector.vectorLength();
@@ -215,8 +239,7 @@ polygonMoments(const RealVect* a_vertex,
     const RealVect u = a_vertex[i] - a_vertex[0];
     const RealVect v = a_vertex[i + 1] - a_vertex[0];
 
-    const RealVect n = RealVect(
-      D_DECL(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]));
+    const RealVect n = RealVect(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]);
 
     const Real w = 0.5 * n.dotProduct(unit);
 
@@ -224,15 +247,14 @@ polygonMoments(const RealVect* a_vertex,
   }
 
   a_centroid /= a_area;
-#else
-  (void)a_vertex;
-#endif
 }
 
-#if CH_SPACEDIM == 3
 inline int
 facePairs(const int a_dir, const int a_side, const CutCellSurface& a_surface, int a_pair[2][2]) noexcept
 {
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
   int faceEdge[4];
   int faceCorner[4];
 
@@ -353,6 +375,8 @@ crossingLoops(const CutCellSurface& a_surface,
     int current  = e;
 
     while (true) {
+      CH_assert(put < numEdges);
+
       used[current] = true;
       a_loop[put++] = current;
 
@@ -373,6 +397,8 @@ crossingLoops(const CutCellSurface& a_surface,
     if (put - begin < 3) {
       return -1;
     }
+
+    CH_assert(numLoops < numEdges);
 
     a_start[++numLoops] = put;
   }
