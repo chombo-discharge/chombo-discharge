@@ -35,7 +35,11 @@
 #include <CD_NamespaceHeader.H>
 
 ComputationalGeometry::ComputationalGeometry()
-  : m_eps0(1.0), m_generator(Generator::GeometryShop), m_geometryRefinement(1), m_generateEveryLevel(false)
+  : m_eps0(1.0),
+    m_generator(Generator::GeometryShop),
+    m_geometryRefinement(1),
+    m_generateEveryLevel(false),
+    m_coverageBuffer(0)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -564,7 +568,9 @@ ComputationalGeometry::buildImplicitFunctions()
 }
 
 void
-ComputationalGeometry::setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain)
+ComputationalGeometry::setCoverage(const Vector<Vector<Box>>& a_regions,
+                                   const ProblemDomain&       a_coarsestDomain,
+                                   const int                  a_buffer)
 {
   CH_TIME("ComputationalGeometry::setCoverage");
 
@@ -572,6 +578,7 @@ ComputationalGeometry::setCoverage(const Vector<Vector<Box>>& a_regions, const P
   // much of a level is carried does not depend on which of the tags a rank happened to find.
   m_coverageRegions = a_regions;
   m_coverageDomain  = a_coarsestDomain;
+  m_coverageBuffer  = a_buffer;
 }
 
 const Vector<Vector<Box>>&
@@ -703,7 +710,7 @@ ComputationalGeometry::buildGasGeometry(RefCountedPtr<GeometryService>& a_geoser
                                             s_strictGeometry,
                                             m_geometryRefinement);
 
-    shop->setCoverage(m_coverageRegions, m_coverageDomain);
+    shop->setCoverage(m_coverageRegions, m_coverageDomain, m_coverageBuffer);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
     if (!m_geometrySurfaceFile.empty()) {
@@ -762,7 +769,7 @@ ComputationalGeometry::buildSolidGeometry(RefCountedPtr<GeometryService>& a_geos
                                               s_strictGeometry,
                                               m_geometryRefinement);
 
-      shop->setCoverage(m_coverageRegions, m_coverageDomain);
+      shop->setCoverage(m_coverageRegions, m_coverageDomain, m_coverageBuffer);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
       if (!m_geometrySurfaceFile.empty()) {

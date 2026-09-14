@@ -192,9 +192,10 @@ public:
    * boxes are the ones getCurvatureTags clustered its tags into, coarsest level first.
    * @param[in] a_regions        Boxes each level was swept over, which is how much of it to carry.
    * @param[in] a_coarsestDomain Domain of the first entry in a_regions.
+   * @param[in] a_buffer         Cells to carry beyond what the boxes ask for, on every level.
    */
   void
-  setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain);
+  setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain, const int a_buffer);
 
   /**
    * @brief Get the boxes the geometry was generated over, coarsest level first.
@@ -318,6 +319,11 @@ protected:
    * @brief Domain the first entry of m_coverageRegions belongs to.
    */
   ProblemDomain m_coverageDomain;
+
+  /**
+   * @brief Cells carried beyond what the coverage boxes ask for, on every level.
+   */
+  int m_coverageBuffer;
 
   /**
    * @brief Whether each level of the index space is generated in turn rather than coarsened down

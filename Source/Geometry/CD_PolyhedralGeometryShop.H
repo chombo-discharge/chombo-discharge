@@ -97,9 +97,10 @@ public:
    * of this object's levels the first of them belongs to.
    * @param[in] a_regions        Boxes each level is carried over.
    * @param[in] a_coarsestDomain Domain of the first entry in a_regions.
+   * @param[in] a_buffer         Cells to carry beyond what the boxes ask for, on every level.
    */
   void
-  setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain) noexcept;
+  setCoverage(const Vector<Vector<Box>>& a_regions, const ProblemDomain& a_coarsestDomain, const int a_buffer) noexcept;
 
   /**
    * @brief Destructor.
@@ -288,6 +289,15 @@ protected:
    * @details Negative when no boxes have been supplied, which carries every level in full.
    */
   int m_coverageLevel;
+
+  /**
+   * @brief Cells carried beyond what the coverage boxes ask for, on every level.
+   * @details Zero carries exactly what was asked. Carrying wider costs cut cells now and saves
+   * cutting them again when the simulation's grids move into them, so the right value is the one
+   * that keeps the index space ahead of the grids for a few regrids. It is quantised by the box
+   * size: boxes are retained whole, so this only bites where it reaches across a box boundary.
+   */
+  int m_coverageBuffer;
 
   /**
    * @brief File the reconstructed surface is written to, or empty when none is written.

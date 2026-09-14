@@ -47,6 +47,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_volumeThreshold = a_thrshdVoF;
   m_refinement      = std::max(1, a_refinement);
   m_coverageLevel   = -1;
+  m_coverageBuffer  = 0;
 }
 
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
@@ -598,7 +599,7 @@ PolyhedralGeometryShop::retainBox(const Box& a_box, const int a_level) const noe
   // it, so the outermost cells carried are the ones the cells inside them read and do not come up
   // through coarsening themselves. One cell would do; the ghost region the generator already
   // wants is wider than that, so nothing extra is carried for it.
-  const Box parent = grow(coarsen(a_box, 2), m_ebGhost);
+  const Box parent = grow(coarsen(a_box, 2), m_ebGhost + m_coverageBuffer);
 
   for (int i = 0; i < m_coverageRegions[which].size(); i++) {
     if (parent.intersectsNotEmpty(coarsen(m_coverageRegions[which][i], 2))) {
@@ -611,11 +612,15 @@ PolyhedralGeometryShop::retainBox(const Box& a_box, const int a_level) const noe
 
 void
 PolyhedralGeometryShop::setCoverage(const Vector<Vector<Box>>& a_regions,
-                                    const ProblemDomain&       a_coarsestDomain) noexcept
+                                    const ProblemDomain&       a_coarsestDomain,
+                                    const int                  a_buffer) noexcept
 {
   CH_TIME("PolyhedralGeometryShop::setCoverage");
 
+  CH_assert(a_buffer >= 0);
+
   m_coverageRegions = a_regions;
+  m_coverageBuffer  = a_buffer;
   m_coverageLevel   = -1;
 
   for (int lvl = 0; lvl < static_cast<int>(m_domains.size()); lvl++) {

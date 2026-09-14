@@ -113,6 +113,15 @@ protected:
   std::string m_geometrySurfaceFile;
 
   /**
+   * @brief Cells the index space is carried beyond what the simulation's grids ask for.
+   * @details Zero carries exactly what is asked. Carrying wider costs cut cells now and saves
+   * cutting them again when the grids move into them, so that filling an EBISLayout stays a plain
+   * copy for several regrids rather than cutting on each. Quantised by the box size, since boxes
+   * are retained whole.
+   */
+  int m_ebisBuffer;
+
+  /**
    * @brief Output directory for output files.
    */
   std::string m_outputDirectory;

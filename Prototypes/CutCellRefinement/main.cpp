@@ -803,6 +803,11 @@ validateIndexSpace(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<Comp
     long int faceMismatch    = 0;
     long int openIntoCovered = 0;
     long int divergenceBad   = 0;
+    long int badFullCells    = 0;
+    long int acrossCovered   = 0;
+    long int acrossRegular   = 0;
+    long int acrossIrregular = 0;
+    long int acrossOutside   = 0;
     Real     worstDivergence = 0.0;
     int      reported        = 0;
 
@@ -868,7 +873,7 @@ validateIndexSpace(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<Comp
                 if (backFaces < faces.size()) {
                   faceMismatch++;
 
-                  if (reported < 8) {
+                  if (reported < 0) {
                     reported++;
 
                     pout() << "   ASYM lvl " << lvl << " " << vof.gridIndex() << " dir " << dir << " side "
@@ -890,7 +895,36 @@ validateIndexSpace(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<Comp
           if (r > 1.0E-9) {
             divergenceBad++;
 
-            if (reported < 8) {
+            // What sits across each face the cell does not have. A full cell bordering a covered
+            // one has to carry that face as its boundary; bordering a regular one it does not.
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              for (SideIterator sit; sit.ok(); ++sit) {
+                if (ebisBox.getFaces(vof, dir, sit()).size() > 0) {
+                  continue;
+                }
+
+                const IntVect other = vof.gridIndex() + sign(sit()) * BASISV(dir);
+
+                if (!ebisBox.getRegion().contains(other)) {
+                  acrossOutside++;
+                }
+                else if (ebisBox.isCovered(other)) {
+                  acrossCovered++;
+                }
+                else if (ebisBox.isRegular(other)) {
+                  acrossRegular++;
+                }
+                else {
+                  acrossIrregular++;
+                }
+              }
+            }
+
+            if (ebisBox.isRegular(vof.gridIndex())) {
+              badFullCells++;
+            }
+
+            if (reported < 300) {
               reported++;
 
               // Is the cell at the edge of what this level carries?
@@ -915,6 +949,12 @@ validateIndexSpace(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<Comp
 
     pout() << "VALIDATE lvl " << lvl << " dx " << dx[lvl] << ": faceMismatch " << faceMismatch << " openIntoCovered "
            << openIntoCovered << " divergenceBad " << divergenceBad << " worstDivergence " << worstDivergence << endl;
+
+    if (divergenceBad > 0) {
+      pout() << "VALIDATE lvl " << lvl << " of the " << divergenceBad << " bad cells, " << badFullCells
+             << " are full cells; the faces they lack sit across " << acrossCovered << " covered, " << acrossRegular
+             << " regular, " << acrossIrregular << " irregular and " << acrossOutside << " outside" << endl;
+    }
   }
 
   // Coarsening has to conserve: a coarse cell holds what its fine cells hold.

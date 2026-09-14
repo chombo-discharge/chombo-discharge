@@ -1236,6 +1236,9 @@ Driver::parseGeometryGeneration()
     m_geometrySurfaceFile = "";
   }
 
+  m_ebisBuffer = 0;
+  pp.query("ebis_buffer", m_ebisBuffer);
+
   if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo" ||
         m_geometryGeneration == "polyhedral")) {
     MayDay::Abort("Driver:parseGeometryGeneration - unsupported argument requested");
@@ -1512,7 +1515,7 @@ Driver::setupGeometryOnly()
                                                                 m_irregTagGrowth,
                                                                 depth);
 
-    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0]);
+    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0], m_ebisBuffer);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
@@ -1661,7 +1664,7 @@ Driver::setupFresh(const int a_initialRegrids)
                                                                 m_irregTagGrowth,
                                                                 depth);
 
-    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0]);
+    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0], m_ebisBuffer);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
@@ -1842,7 +1845,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
                                                                 m_irregTagGrowth,
                                                                 depth);
 
-    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0]);
+    m_computationalGeometry->setCoverage(curvatureRegions, m_amr->getDomains()[0], m_ebisBuffer);
   }
 
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
