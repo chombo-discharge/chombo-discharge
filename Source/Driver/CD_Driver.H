@@ -268,17 +268,13 @@ protected:
   Real m_refineAngle;
 
   /**
-   * @brief How far below the coarsest level the implicit function is resolved, or -1 for not at all.
-   * @details Selects the pre-pass in ComputationalGeometry::getCurvatureTags, which finds where
-   * the geometry is under-resolved from the implicit function alone rather than from the cut
-   * cells. Its tags are added to the ones read off the embedded boundary, so leaving this at -1
-   * is what the run did before the pre-pass existed, and they also tell the generator which cells
-   * to build from a surface reconstructed below them. It may therefore reach deeper than the
-   * finest grid level, since a cell can be built from a surface finer than itself without there
-   * being cells to hold that surface. A cap is mandatory because creases and features thinner
-   * than a few cells go on asking for refinement at every resolution.
+   * @brief Whether to carry the geometry only where the interface needs resolving.
+   * @details Off unless asked for, and only ever on for the polyhedral generator: the other two
+   * generate every level in full, and a run that selects them has to get the grids it always got.
+   * The depth the pre-pass resolves to is the depth of the hierarchy, since the grids are built
+   * from the boxes it produces and there is nothing below the finest level to carry.
    */
-  int m_curvatureTagsDepth;
+  bool m_refineCurvature;
 
   /**
    * @brief Cells the implicit function asks to have refined, coarsest level first.
