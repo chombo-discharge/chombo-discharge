@@ -172,6 +172,24 @@ protected:
   Vector<Vector<Box>> m_coverageRegions;
 
   /**
+   * @brief The cut cells of each box, in the order their surfaces were recorded.
+   * @details Indexed by level, coarsest first, then by box. Kept alongside m_surfaces rather than
+   * in one container of pairs, so that both are plain Vectors inside the LayoutData the layout
+   * already provides.
+   */
+  Vector<RefCountedPtr<LayoutData<Vector<IntVect>>>> m_surfaceCells;
+
+  /**
+   * @brief What each cut cell was reconstructed from, kept for refining it later.
+   * @details A cell finer than any the index space carries can only be had by cutting its parent,
+   * and cutting a parent needs the parent's body, which is rebuilt from this. Reconstructing the
+   * surface instead would mean root finding again -- of order a hundred implicit-function
+   * evaluations a crossing -- which is the cost this exists to avoid. At 160 bytes a cut cell it
+   * is a fraction of the body it rebuilds.
+   */
+  Vector<RefCountedPtr<LayoutData<Vector<PolyhedralEB::CutCellSurface>>>> m_surfaces;
+
+  /**
    * @brief Keep a level only where it is carried.
    * @details Asked once for the whole refinement of a coarse box, so a coarse box is carried in
    * full or not at all: coarsening reads a coarse cell's whole refinement at once and skips any
@@ -182,6 +200,24 @@ protected:
    */
   virtual bool
   retainBox(const Box& a_box, const int a_level) const noexcept override;
+
+  /**
+   * @brief Size the surface store for a level once its layout is known.
+   * @details Called by EBISLevel after it makes the grids and before it asks for any graph, which
+   * is the only point at which this object learns the layout the surfaces will be recorded on.
+   * @param[in] a_dbl Layout of the level.
+   * @param[in] a_dx  Grid spacing of the level, which is what says which level it is.
+   */
+  virtual void
+  postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx) override;
+
+  /**
+   * @brief Which level of this hierarchy a spacing belongs to.
+   * @param[in] a_dx Grid spacing.
+   * @return Index into m_dx, or -1 if the spacing is not one of this hierarchy's.
+   */
+  int
+  levelFromDx(const Real a_dx) const noexcept;
 
   /**
    * @brief Index into m_domains of the level the first entry of m_coverageRegions belongs to.

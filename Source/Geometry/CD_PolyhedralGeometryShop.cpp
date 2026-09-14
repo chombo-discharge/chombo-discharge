@@ -544,6 +544,43 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
   }
 }
 
+int
+PolyhedralGeometryShop::levelFromDx(const Real a_dx) const noexcept
+{
+  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
+    if (std::abs(m_dx[lvl] - a_dx) <= 1.0E-12 * a_dx) {
+      return lvl;
+    }
+  }
+
+  return -1;
+}
+
+void
+PolyhedralGeometryShop::postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx)
+{
+  CH_TIME("PolyhedralGeometryShop::postMakeBoxLayout");
+
+  ScanShop::postMakeBoxLayout(a_dbl, a_dx);
+
+  const int level = this->levelFromDx(a_dx[0]);
+
+  if (level < 0) {
+    return;
+  }
+
+  if (static_cast<int>(m_surfaces.size()) < static_cast<int>(m_dx.size())) {
+    m_surfaceCells.resize(m_dx.size());
+    m_surfaces.resize(m_dx.size());
+  }
+
+  // The surfaces are recorded as the graph is filled, which happens once per box of this layout
+  // and after this call, so the store is only sized here
+  m_surfaceCells[level] = RefCountedPtr<LayoutData<Vector<IntVect>>>(new LayoutData<Vector<IntVect>>(a_dbl));
+  m_surfaces[level]     = RefCountedPtr<LayoutData<Vector<PolyhedralEB::CutCellSurface>>>(
+    new LayoutData<Vector<PolyhedralEB::CutCellSurface>>(a_dbl));
+}
+
 bool
 PolyhedralGeometryShop::retainBox(const Box& a_box, const int a_level) const noexcept
 {
@@ -605,6 +642,8 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                                   const DataIndex&     a_di) const
 {
   CH_TIME("PolyhedralGeometryShop::fillGraph");
+
+  const int level = (static_cast<int>(m_surfaces.size()) > 0) ? this->levelFromDx(a_dx) : -1;
 
   CH_assert(a_domain.contains(a_ghostRegion));
   CH_assert(a_ghostRegion.contains(a_validRegion));
@@ -802,6 +841,15 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     }
 
     indexNodes(static_cast<int>(a_nodes.size()) - 1);
+
+    // Keep what the cell was reconstructed from, so that a finer cell can be had by cutting this
+    // one rather than by finding its roots again. Only on the path where this cell's own surface
+    // is what it was built from: where the body came from cutting a coarser one, the surface that
+    // matters is that ancestor's and is already kept against it.
+    if (m_refinement == 1 && level >= 0) {
+      (*m_surfaceCells[level])[a_di].push_back(iv);
+      (*m_surfaces[level])[a_di].push_back(surface);
+    }
   }
 
   // A cell dropped for carrying no fluid worth keeping has just become covered, so the faces its
