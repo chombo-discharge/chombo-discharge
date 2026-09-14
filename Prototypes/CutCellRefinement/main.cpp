@@ -27,6 +27,9 @@
 #include <CD_GeometryStepper.H>
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_CutCellBody.H>
+#include <BRMeshRefine.H>
+#include <LoadBalance.H>
+#include <CD_PolyhedralGeometryShop.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::Geometry;
@@ -483,6 +486,236 @@ buildAggregated(const BaseIF&              a_implicitFunction,
 // Check the invariant a partially covered index space rests on: every grid a run uses has to lie
 // inside what the index space actually holds at that level. Nothing enforces it -- the grids come
 // from tags and the coverage from the geometry -- so it is worth asking rather than assuming.
+// Cuts a level the generator never built, and checks what comes out against the level it was cut
+// from.
+//
+// The shop is driven directly rather than through the index space. The surfaces it keeps live on
+// the layouts it makes for itself, and until EBISLevel learns to ask for a level it does not
+// hold, going in the front door would only reach the levels that were generated.
+//
+// Three things are asked of the result. The volume of the fine cells under a coarse one has to
+// come to the coarse one's, which is the property the whole approach rests on: a child is a piece
+// of its parent, not a fresh reconstruction that happens to sit inside it. Two fine cells sharing
+// a face have to agree on its area. And the fill has to answer at all -- a refusal is counted
+// rather than ignored, because a box the generator cannot cut is a box the index space would be
+// left without.
+void
+validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
+                    const RefCountedPtr<AmrMesh>&               a_amr,
+                    const int                                   a_depth,
+                    const int                                   a_coarseBoxSize)
+{
+  CH_TIME("validateRefinedFill");
+
+  if (a_depth <= 0) {
+    return;
+  }
+
+  const RefCountedPtr<BaseIF>& implicitFunction = a_compgeom->getGasImplicitFunction();
+
+  if (implicitFunction.isNull()) {
+    return;
+  }
+
+  const RealVect probLo  = a_amr->getProbLo();
+  const int      ebGhost = 1;
+
+  // The level that is generated, and the finer one cut from it. The shop coarsens down from the
+  // finest domain it is handed, so the finest of its levels is the one being cut, not the one
+  // being generated.
+  const ProblemDomain coarseDomain = a_amr->getDomains()[0];
+  const Real          coarseDx     = a_amr->getDx()[0];
+
+  const int refinement = 1 << a_depth;
+
+  ProblemDomain fineDomain = coarseDomain;
+  fineDomain.refine(refinement);
+
+  const Real fineDx = coarseDx / static_cast<Real>(refinement);
+
+  PolyhedralGeometryShop shop(*implicitFunction, 0, fineDx, probLo, fineDomain, fineDomain, ebGhost, 0.0, true, 1);
+
+  Vector<Box> boxes;
+  domainSplit(coarseDomain, boxes, a_coarseBoxSize, 1);
+
+  Vector<int> ranks;
+  LoadBalance(ranks, boxes);
+
+  DisjointBoxLayout dbl(boxes, ranks, coarseDomain);
+
+  static_cast<GeometryService&>(shop).postMakeBoxLayout(dbl, coarseDx * RealVect::Unit);
+
+  LayoutData<Vector<IrregNode>> coarseNodes(dbl);
+  LayoutData<BaseFab<int>>      coarseKinds(dbl);
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+    const Box valid = dbl[dit()];
+
+    Box ghost = grow(valid, ebGhost);
+    ghost &= coarseDomain.domainBox();
+
+    shop.fillGraph(coarseKinds[dit()], coarseNodes[dit()], valid, ghost, coarseDomain, probLo, coarseDx, dit());
+  }
+
+  long long refused      = 0;
+  long long parents      = 0;
+  long long coarseCut    = 0;
+  long long volumeBad    = 0;
+  long long faceMismatch = 0;
+
+  Real worstVolume = 0.0;
+  Real worstFace   = 0.0;
+
+  const Real tolerance = 1.0E-12;
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+    const Box coarseBox = dbl[dit()];
+    const Box fineBox   = refine(coarseBox, refinement);
+
+    // What the coarse level says each of its cells holds, which is what the fine cells under it
+    // have to come to.
+    BaseFab<Real> coarseVolume(coarseBox, 1);
+
+    for (BoxIterator bit(coarseBox); bit.ok(); ++bit) {
+      coarseVolume(bit(), 0) = (coarseKinds[dit()](bit(), 0) > 0) ? 1.0 : 0.0;
+    }
+
+    const Vector<IrregNode>& nodes = coarseNodes[dit()];
+
+    for (int n = 0; n < nodes.size(); n++) {
+      if (coarseBox.contains(nodes[n].m_cell)) {
+        coarseVolume(nodes[n].m_cell, 0) = nodes[n].m_volFrac;
+      }
+    }
+
+    // The fine cells, as the fill hands them back. Apertures are kept for the whole refinement of
+    // the coarse box rather than one call at a time, so that faces two separate calls produced
+    // are checked against each other as well.
+    BaseFab<Real> fineVolume(fineBox, 1);
+    BaseFab<Real> fineAperture(fineBox, 2 * SpaceDim);
+
+    fineVolume.setVal(-1.0);
+    fineAperture.setVal(-1.0);
+
+    // one call per parent, which is what the driver is meant to do: cut a parent once and keep
+    // the whole child set rather than cutting a path per output cell
+    for (BoxIterator parentIt(coarseBox); parentIt.ok(); ++parentIt) {
+      Box chunk(parentIt(), parentIt());
+      chunk.refine(refinement);
+
+      Box chunkGhost = grow(chunk, ebGhost);
+      chunkGhost &= fineDomain.domainBox();
+
+      BaseFab<int>      kinds;
+      Vector<IrregNode> fineNodes;
+
+      parents++;
+
+      if (!shop.fillRefinedGraph(kinds, fineNodes, chunk, chunkGhost, fineDomain, probLo, fineDx)) {
+        refused++;
+
+        continue;
+      }
+
+      for (BoxIterator bit(chunk); bit.ok(); ++bit) {
+        const Real full = (kinds(bit(), 0) > 0) ? 1.0 : 0.0;
+
+        fineVolume(bit(), 0) = full;
+
+        for (int c = 0; c < 2 * SpaceDim; c++) {
+          fineAperture(bit(), c) = full;
+        }
+      }
+
+      for (int n = 0; n < fineNodes.size(); n++) {
+        const IntVect& iv = fineNodes[n].m_cell;
+
+        if (!chunk.contains(iv)) {
+          continue;
+        }
+
+        fineVolume(iv, 0) = fineNodes[n].m_volFrac;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const int index = fineNodes[n].index(dir, sit());
+
+            Real aperture = 0.0;
+
+            for (int f = 0; f < fineNodes[n].m_areaFrac[index].size(); f++) {
+              aperture += fineNodes[n].m_areaFrac[index][f];
+            }
+
+            fineAperture(iv, 2 * dir + ((sit() == Side::Lo) ? 0 : 1)) = aperture;
+          }
+        }
+      }
+    }
+
+    // the volume of the cells under a coarse one has to come to the coarse one's
+    for (BoxIterator bit(coarseBox); bit.ok(); ++bit) {
+      Box under(bit(), bit());
+      under.refine(refinement);
+
+      Real sum = 0.0;
+      bool got = true;
+
+      for (BoxIterator sub(under); sub.ok(); ++sub) {
+        if (fineVolume(sub(), 0) < 0.0) {
+          got = false;
+
+          break;
+        }
+
+        sum += fineVolume(sub(), 0);
+      }
+
+      if (!got) {
+        continue;
+      }
+
+      if (coarseKinds[dit()](bit(), 0) == 0) {
+        coarseCut++;
+      }
+
+      const Real mismatch = std::abs(sum / static_cast<Real>(under.numPts()) - coarseVolume(bit(), 0));
+
+      worstVolume = std::max(worstVolume, mismatch);
+
+      if (mismatch > tolerance) {
+        volumeBad++;
+      }
+    }
+
+    // two fine cells sharing a face have to agree on its area
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      Box interior = fineBox;
+      interior.growHi(dir, -1);
+
+      for (BoxIterator bit(interior); bit.ok(); ++bit) {
+        const IntVect lo = bit();
+        const IntVect hi = lo + BASISV(dir);
+
+        if (fineAperture(lo, 2 * dir + 1) < 0.0 || fineAperture(hi, 2 * dir) < 0.0) {
+          continue;
+        }
+
+        const Real difference = std::abs(fineAperture(lo, 2 * dir + 1) - fineAperture(hi, 2 * dir));
+
+        worstFace = std::max(worstFace, difference);
+
+        if (difference > tolerance) {
+          faceMismatch++;
+        }
+      }
+    }
+  }
+
+  pout() << "REFINEFILL depth " << a_depth << " dx " << fineDx << ": parents " << parents << " refused " << refused
+         << " coarseCutCells " << coarseCut << " volumeBad " << volumeBad << " worstVolume " << worstVolume
+         << " faceMismatch " << faceMismatch << " worstFace " << worstFace << endl;
+}
+
 // Check that a partially carried index space is sound before anything is asked to solve on it.
 //
 // Four things, reported per level rather than asserted, so that one run says everything that is
@@ -1561,6 +1794,18 @@ main(int argc, char* argv[])
   reportCoverage(amr, compgeom);
 
   validateIndexSpace(amr, compgeom);
+
+  {
+    int depth         = 2;
+    int coarseBoxSize = 8;
+    {
+      ParmParse pp("Prototype");
+      pp.query("refined_fill_depth", depth);
+      pp.query("refined_fill_box", coarseBoxSize);
+    }
+
+    validateRefinedFill(compgeom, amr, depth, coarseBoxSize);
+  }
 
   char fileName[256];
   snprintf(fileName, sizeof(fileName), "cutcells.%dd.%d.csv", SpaceDim, procID());

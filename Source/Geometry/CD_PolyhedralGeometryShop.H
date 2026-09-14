@@ -141,11 +141,47 @@ public:
             const Real&          a_dx,
             const DataIndex&     a_di) const override;
 
+  /**
+   * @brief Fill the graph and the nodes of a box on a level that was never generated.
+   * @details The cells are cut from the stored surfaces of the finest level that was generated
+   * over the region, rather than reconstructed at their own resolution, so they are literal
+   * sub-bodies of cells the index space already holds and their moments sum back to them.
+   *
+   * Each parent is cut once and its whole refinement kept, rather than a path being cut per
+   * output cell: the children a path throws away are exactly the cells asked for next, and at
+   * depth that is the difference between paying for the surface and paying for the volume.
+   *
+   * The surfaces live on the layouts this object made for itself, and nothing here fetches one
+   * from another rank. A box whose parents are not held locally is refused rather than filled
+   * from an incomplete parent, so it is the caller's business to ask a rank that can answer.
+   * @param[out] a_regIrregCovered Regular/Covered/Irregular cells
+   * @param[out] a_nodes           Nodes
+   * @param[in]  a_validRegion     Grid region
+   * @param[in]  a_ghostRegion     Grid region, including ghost cells
+   * @param[in]  a_domain          Domain
+   * @param[in]  a_probLo          Lower-left corner of computational domain
+   * @param[in]  a_dx              Grid resolution of the cells being filled
+   * @return True if the box could be cut from surfaces this rank holds.
+   */
+  bool
+  fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
+                   Vector<IrregNode>&   a_nodes,
+                   const Box&           a_validRegion,
+                   const Box&           a_ghostRegion,
+                   const ProblemDomain& a_domain,
+                   const RealVect&      a_probLo,
+                   const Real&          a_dx) const;
+
 protected:
   /**
    * @brief Residual above which the stored moments and the ones PolyGeom recomputes disagree.
    */
   static constexpr Real s_divergenceTolerance = 1.0E-9;
+
+  /**
+   * @brief Marks a cell no parent has answered for yet.
+   */
+  static constexpr int s_unclassified = -2;
 
   /**
    * @brief Whether a declined cell aborts the run rather than falling back.
@@ -382,6 +418,73 @@ protected:
                const IntVect&                a_cell,
                const RealVect&               a_probLo,
                const Real&                   a_dx) const;
+
+  /**
+   * @brief Finest generated level that describes the whole of a region.
+   * @details Which level a cell is cut from is settled by the geometry and not by which rank is
+   * asking. Two levels that were both generated are not refinements of one another -- each was
+   * built at its own resolution -- so two neighbouring boxes cut from different ancestors would
+   * not agree on the face between them, and taking whichever level the asking rank happened to
+   * hold would make that depend on the load balance.
+   *
+   * Costs a walk over the level's boxes. Worth revisiting if the caller ever knows the answer
+   * already, which the level being extended generally does.
+   * @param[in] a_ghostRegion Region to be filled, on its own level.
+   * @param[in] a_level       Level the region belongs to, finest first.
+   * @return Level to cut from, finest first, or -1 if no level describes the whole region.
+   */
+  int
+  cuttableParent(const Box& a_ghostRegion, const int a_level) const noexcept;
+
+  /**
+   * @brief Whether this rank holds every surface a region has to be cut from.
+   * @details Only a parent whose surface was kept has to be held. Everything under a whole or
+   * empty parent is the same kind, and the corner values say which without any surface being
+   * read, so asking for the whole region instead would refuse boxes that are perfectly
+   * answerable.
+   * @param[in] a_nodeValues   Node-centred implicit function values over the region.
+   * @param[in] a_coarseRegion The region's parents, on the level they are held at.
+   * @param[in] a_level        Level the parents belong to, finest first.
+   * @return True if every parent that carries a surface sits in a box this rank holds.
+   */
+  bool
+  parentsAreLocal(const BaseFab<Real>& a_nodeValues, const Box& a_coarseRegion, const int a_level) const noexcept;
+
+  /**
+   * @brief Whether a cell is one the generator gives a body and keeps the surface of.
+   * @details Single-sourced because a cell finer than the level it is cut from is only reachable
+   * where its parent's surface was kept, and a rule that says which cells those are in one place
+   * and which cells were kept in another is a rule that will drift.
+   *
+   * A cut cell, and also a cell the interface only grazes: that cell is full, which is why
+   * classify calls it regular, but the face the interface lies in is closed and a regular cell
+   * has every face open.
+   * @param[in] a_surface The values the cell would be reconstructed from.
+   * @return True if the cell is treated as irregular.
+   */
+  static bool
+  isRecorded(const PolyhedralEB::CutCellSurface& a_surface) noexcept;
+
+  /**
+   * @brief Turn cells that carry no fluid worth keeping into covered ones.
+   * @details A dropped cell has just become covered, so the faces its irregular neighbours point
+   * back with no longer lead anywhere, and the regular ones among them are now full cells with a
+   * covered face. Where a neighbour's node is is read off a_nodes rather than tracked by the
+   * caller, since the nodes carry the cell they belong to.
+   * @param[in,out] a_nodes           Nodes, appended to for the regular cells this converts
+   * @param[in,out] a_regIrregCovered Regular/Covered/Irregular cells
+   * @param[in]     a_droppedCells    Cells that were dropped
+   * @param[in]     a_validRegion     Grid region
+   * @param[in]     a_domain          Domain
+   * @param[in]     a_dx              Grid resolution
+   */
+  void
+  dropCells(Vector<IrregNode>&   a_nodes,
+            BaseFab<int>&        a_regIrregCovered,
+            const IntVectSet&    a_droppedCells,
+            const Box&           a_validRegion,
+            const ProblemDomain& a_domain,
+            const Real&          a_dx) const;
 
   /**
    * @brief Write a cut cell's node from its body.

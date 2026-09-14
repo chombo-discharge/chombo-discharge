@@ -652,6 +652,11 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   a_regIrregCovered.resize(a_ghostRegion, 1);
   a_nodes.resize(0);
 
+  // Every cell is written below, from the parent that holds it. Starting from a value no cell can
+  // end on is what turns a parent this rank turned out not to hold into a refusal rather than
+  // into a hole in the graph that nothing downstream would question.
+  a_regIrregCovered.setVal(s_unclassified);
+
   BaseFab<Real> nodeValues;
   this->fillNodeValues(nodeValues, a_ghostRegion, a_probLo, a_dx);
 
@@ -667,60 +672,20 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     PolyhedralEB::CutCellSurface surface;
     this->fillCorners(surface, nodeValues, iv);
 
-    const PolyhedralEB::CutCellBody::Kind kind = PolyhedralEB::CutCellBody::classify(surface);
-
-    switch (kind) {
-    case PolyhedralEB::CutCellBody::Kind::Covered: {
-      a_regIrregCovered(iv, 0) = -1;
-
-      break;
-    }
-    case PolyhedralEB::CutCellBody::Kind::Regular: {
-      // A cell the interface only grazes is full, which is why it is classified regular, but the
-      // face the interface lies in is closed. A regular cell has every face open, so this one is
-      // given a body instead: leaving it regular has the cut cell across that face read the face
-      // from the interface, find nothing of it open, and drop its side of a face this cell keeps.
-      if (PolyhedralEB::CutCellBody::interfaceLiesInFace(surface)) {
-        a_regIrregCovered(iv, 0) = 0;
-
-        if (a_validRegion.contains(iv)) {
-          irregularCells |= iv;
-        }
-      }
-      else {
-        a_regIrregCovered(iv, 0) = 1;
-      }
-
-      break;
-    }
-    default: {
+    if (PolyhedralGeometryShop::isRecorded(surface)) {
       a_regIrregCovered(iv, 0) = 0;
 
       if (a_validRegion.contains(iv)) {
         irregularCells |= iv;
       }
-
-      break;
     }
+    else {
+      a_regIrregCovered(iv,
+                        0) = (PolyhedralEB::CutCellBody::classify(surface) == PolyhedralEB::CutCellBody::Kind::Regular)
+                               ? 1
+                               : -1;
     }
   }
-
-  // A node is looked up again by its cell when a neighbour of it is dropped, so the position of
-  // each cell's node in a_nodes is kept per cell. Nodes are appended in three places, and each
-  // registers what it appended.
-  BaseFab<int> nodeIndex(a_validRegion, 1);
-  nodeIndex.setVal(-1);
-
-  auto indexNodes = [&](const int a_from) -> void {
-    for (int n = a_from; n < static_cast<int>(a_nodes.size()); n++) {
-      const IntVect& cell = a_nodes[n].m_cell;
-
-      CH_assert(a_validRegion.contains(cell));
-      CH_assert(nodeIndex(cell, 0) < 0);
-
-      nodeIndex(cell, 0) = n;
-    }
-  };
 
   // a regular cell bordering a covered one is a full cell with a covered face, and the node for
   // it is the one GeometryShop builds
@@ -729,8 +694,6 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       GeometryShop::fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, bit(), a_dx);
     }
   }
-
-  indexNodes(0);
 
   BaseFab<Real> intercept[SpaceDim];
 
@@ -840,8 +803,6 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       }
     }
 
-    indexNodes(static_cast<int>(a_nodes.size()) - 1);
-
     // Keep what the cell was reconstructed from, so that a finer cell can be had by cutting this
     // one rather than by finding its roots again. Only on the path where this cell's own surface
     // is what it was built from: where the body came from cutting a coarser one, the surface that
@@ -852,10 +813,43 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     }
   }
 
-  // A cell dropped for carrying no fluid worth keeping has just become covered, so the faces its
-  // irregular neighbours point back with no longer lead anywhere, and the regular ones among
-  // them are now full cells with a covered face.
-  for (IVSIterator ivsIt(droppedCells); ivsIt.ok(); ++ivsIt) {
+  this->dropCells(a_nodes, a_regIrregCovered, droppedCells, a_validRegion, a_domain, a_dx);
+}
+
+void
+PolyhedralGeometryShop::dropCells(Vector<IrregNode>&   a_nodes,
+                                  BaseFab<int>&        a_regIrregCovered,
+                                  const IntVectSet&    a_droppedCells,
+                                  const Box&           a_validRegion,
+                                  const ProblemDomain& a_domain,
+                                  const Real&          a_dx) const
+{
+  CH_TIME("PolyhedralGeometryShop::dropCells");
+
+  if (a_droppedCells.isEmpty()) {
+    return;
+  }
+
+  // Where each cell's node sits in a_nodes. Rebuilt from the nodes rather than carried along by
+  // the caller, and appended to below as the regular cells this converts get nodes of their own,
+  // which a later dropped cell may need to find.
+  BaseFab<int> nodeIndex(a_validRegion, 1);
+  nodeIndex.setVal(-1);
+
+  auto indexNodes = [&](const int a_from) -> void {
+    for (int n = a_from; n < static_cast<int>(a_nodes.size()); n++) {
+      const IntVect& cell = a_nodes[n].m_cell;
+
+      CH_assert(a_validRegion.contains(cell));
+      CH_assert(nodeIndex(cell, 0) < 0);
+
+      nodeIndex(cell, 0) = n;
+    }
+  };
+
+  indexNodes(0);
+
+  for (IVSIterator ivsIt(a_droppedCells); ivsIt.ok(); ++ivsIt) {
     const IntVect iv = ivsIt();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
@@ -869,7 +863,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
         const int n = nodeIndex(other, 0);
 
         if (n < 0) {
-          MayDay::Error("PolyhedralGeometryShop::fillGraph - an irregular neighbour has no node");
+          MayDay::Error("PolyhedralGeometryShop::dropCells - an irregular neighbour has no node");
         }
 
         const int arcIndex = a_nodes[n].index(dir, flip(sit()));
@@ -880,16 +874,360 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       }
     }
 
-    // the regular neighbours this converts get nodes of their own, which a later dropped cell
-    // may need to find
     const int numNodes = static_cast<int>(a_nodes.size());
 
     GeometryShop::fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, iv, a_dx);
 
     indexNodes(numNodes);
   }
+}
 
-  (void)a_di;
+bool
+PolyhedralGeometryShop::isRecorded(const PolyhedralEB::CutCellSurface& a_surface) noexcept
+{
+  const PolyhedralEB::CutCellBody::Kind kind = PolyhedralEB::CutCellBody::classify(a_surface);
+
+  if (kind == PolyhedralEB::CutCellBody::Kind::Covered) {
+    return false;
+  }
+
+  if (kind == PolyhedralEB::CutCellBody::Kind::Regular) {
+    return PolyhedralEB::CutCellBody::interfaceLiesInFace(a_surface);
+  }
+
+  return true;
+}
+
+int
+PolyhedralGeometryShop::cuttableParent(const Box& a_ghostRegion, const int a_level) const noexcept
+{
+  for (int lvl = a_level + 1; lvl < static_cast<int>(m_surfaces.size()); lvl++) {
+    if (m_surfaces[lvl].isNull()) {
+      continue;
+    }
+
+    const Box coarseRegion = coarsen(a_ghostRegion, 1 << (lvl - a_level));
+
+    // The boxes of a layout are disjoint, so what the level describes is the sum of the overlaps
+    // and it describes the whole region exactly when that comes to all of it. Every box of the
+    // level is walked, not only this rank's, so that every rank reaches the same answer.
+    const BoxLayout& dbl = m_surfaces[lvl]->boxLayout();
+
+    long long covered = 0;
+
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const Box overlap = dbl[lit()] & coarseRegion;
+
+      covered += overlap.numPts();
+    }
+
+    if (covered == coarseRegion.numPts()) {
+      return lvl;
+    }
+  }
+
+  return -1;
+}
+
+bool
+PolyhedralGeometryShop::parentsAreLocal(const BaseFab<Real>& a_nodeValues,
+                                        const Box&           a_coarseRegion,
+                                        const int            a_level) const noexcept
+{
+  BaseFab<int> wanted(a_coarseRegion, 1);
+  wanted.setVal(0);
+
+  long long numWanted = 0;
+
+  for (BoxIterator bit(a_coarseRegion); bit.ok(); ++bit) {
+    PolyhedralEB::CutCellSurface surface;
+    this->fillCorners(surface, a_nodeValues, bit());
+
+    if (PolyhedralGeometryShop::isRecorded(surface)) {
+      wanted(bit(), 0) = 1;
+
+      numWanted++;
+    }
+  }
+
+  const BoxLayout& dbl = m_surfaces[a_level]->boxLayout();
+
+  long long numHeld = 0;
+
+  for (DataIterator dit = m_surfaces[a_level]->dataIterator(); dit.ok(); ++dit) {
+    const Box overlap = dbl[dit()] & a_coarseRegion;
+
+    for (BoxIterator bit(overlap); bit.ok(); ++bit) {
+      numHeld += wanted(bit(), 0);
+    }
+  }
+
+  return numHeld == numWanted;
+}
+
+bool
+PolyhedralGeometryShop::fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
+                                         Vector<IrregNode>&   a_nodes,
+                                         const Box&           a_validRegion,
+                                         const Box&           a_ghostRegion,
+                                         const ProblemDomain& a_domain,
+                                         const RealVect&      a_probLo,
+                                         const Real&          a_dx) const
+{
+  CH_TIME("PolyhedralGeometryShop::fillRefinedGraph");
+
+  CH_assert(a_domain.contains(a_ghostRegion));
+  CH_assert(a_ghostRegion.contains(a_validRegion));
+  CH_assert(a_dx > 0.0);
+
+  // Only the path that reconstructs each cell's surface on the cell itself records one, so it is
+  // the only path a finer cell can be cut from.
+  if (m_refinement != 1) {
+    return false;
+  }
+
+  const int level = this->levelFromDx(a_dx);
+
+  if (level < 0) {
+    return false;
+  }
+
+  const int parent = this->cuttableParent(a_ghostRegion, level);
+
+  if (parent < 0) {
+    return false;
+  }
+
+  const int  depth      = parent - level;
+  const int  refinement = 1 << depth;
+  const Real coarseDx   = a_dx * static_cast<Real>(refinement);
+
+  const Box coarseRegion = coarsen(a_ghostRegion, refinement);
+
+  // A parent the interface never entered has no surface stored against it, and its corner values
+  // are enough to say which side of the interface everything under it lies on. Wanted by the
+  // locality test as well as by the fill, so taken once.
+  BaseFab<Real> nodeValues;
+  this->fillNodeValues(nodeValues, coarseRegion, a_probLo, coarseDx);
+
+  // Which level answers is settled above by the geometry alone; whether this rank can answer for
+  // it is a separate question, and a refusal here is the caller's to fix by asking a rank that
+  // holds the parents.
+  if (!this->parentsAreLocal(nodeValues, coarseRegion, parent)) {
+    return false;
+  }
+
+  a_regIrregCovered.resize(a_ghostRegion, 1);
+  a_nodes.resize(0);
+
+  // The bodies of the cut cells this box owns, kept until the classification of the whole ghost
+  // region is known, since a node reads the classification of its neighbours. Keeping them costs
+  // the surface of the box; cutting the parents a second time to avoid it would cost its volume.
+  Vector<PolyhedralEB::CutCellBody> bodies;
+
+  BaseFab<int> bodyIndex(a_validRegion, 1);
+  bodyIndex.setVal(-1);
+
+  // The parent whose refinement is being walked, so that a child that comes out wrong says which
+  // cut produced it rather than only where it landed.
+  IntVect parentCell = IntVect::Zero;
+
+  auto visit = [&](const IntVect& a_cell, const PolyhedralEB::CutCellBody& a_body, const int a_depthRemaining) -> void {
+    Box sub(a_cell, a_cell);
+    sub.refine(1 << a_depthRemaining);
+    sub &= a_ghostRegion;
+
+    if (sub.isEmpty()) {
+      return;
+    }
+
+    switch (a_body.kind()) {
+    case PolyhedralEB::CutCellBody::Kind::Covered: {
+      a_regIrregCovered.setVal(-1, sub, 0, 1);
+
+      break;
+    }
+    case PolyhedralEB::CutCellBody::Kind::Regular: {
+      a_regIrregCovered.setVal(1, sub, 0, 1);
+
+      break;
+    }
+    default: {
+      // only a cell followed to the bottom is still cut, so this is one cell
+      CH_assert(a_depthRemaining == 0);
+
+      a_regIrregCovered(a_cell, 0) = 0;
+
+      if (a_validRegion.contains(a_cell)) {
+        // A body cut from its parent is asked to satisfy the divergence identity rather than to
+        // close: it is a piece of a closed body, and the identity is what the coarsening of it
+        // will be read through. Asked here rather than where the node is written, so that the
+        // parent it came from is still known.
+        if (m_strict && a_body.divergenceResidual() > s_divergenceTolerance) {
+          std::ostringstream message;
+
+          message << "PolyhedralGeometryShop::fillRefinedGraph - cell " << a_cell << ", cut " << depth
+                  << " levels out of cell " << parentCell << " on level " << parent
+                  << ", does not satisfy sum(alpha_hi - alpha_lo) = a_B*n (residual " << a_body.divergenceResidual()
+                  << ", volume fraction " << a_body.volumeFraction() << ")";
+
+          MayDay::Error(message.str().c_str());
+        }
+
+        bodyIndex(a_cell, 0) = static_cast<int>(bodies.size());
+
+        bodies.push_back(a_body);
+      }
+
+      break;
+    }
+    }
+  };
+
+  const BoxLayout& dbl = m_surfaces[parent]->boxLayout();
+
+  for (DataIterator dit = m_surfaces[parent]->dataIterator(); dit.ok(); ++dit) {
+    const Box overlap = dbl[dit()] & coarseRegion;
+
+    if (overlap.isEmpty()) {
+      continue;
+    }
+
+    // Where each parent's surface sits in the box's list. The list is in the order the graph was
+    // filled in, so it is walked once here rather than searched once per cell.
+    const Vector<IntVect>&                      cells    = (*m_surfaceCells[parent])[dit()];
+    const Vector<PolyhedralEB::CutCellSurface>& surfaces = (*m_surfaces[parent])[dit()];
+
+    BaseFab<int> surfaceIndex(overlap, 1);
+    surfaceIndex.setVal(-1);
+
+    for (int n = 0; n < cells.size(); n++) {
+      if (overlap.contains(cells[n])) {
+        surfaceIndex(cells[n], 0) = n;
+      }
+    }
+
+    for (BoxIterator bit(overlap); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      const int n = surfaceIndex(iv, 0);
+
+      if (n < 0) {
+        // No surface was stored, so the parent was whole or empty and everything under it is the
+        // same. A parent whose corners say otherwise was declined or dropped when the level was
+        // generated, and there is nothing to cut it from.
+        PolyhedralEB::CutCellSurface surface;
+        this->fillCorners(surface, nodeValues, iv);
+
+        if (PolyhedralGeometryShop::isRecorded(surface)) {
+          if (m_strict) {
+            std::ostringstream message;
+
+            message << "PolyhedralGeometryShop::fillRefinedGraph - cell " << iv << " on level " << parent
+                    << " is cut but holds no surface to cut it from";
+
+            MayDay::Error(message.str().c_str());
+          }
+
+          return false;
+        }
+
+        Box sub(iv, iv);
+        sub.refine(refinement);
+        sub &= a_ghostRegion;
+
+        const PolyhedralEB::CutCellBody::Kind kind = PolyhedralEB::CutCellBody::classify(surface);
+
+        a_regIrregCovered.setVal((kind == PolyhedralEB::CutCellBody::Kind::Regular) ? 1 : -1, sub, 0, 1);
+
+        continue;
+      }
+
+      PolyhedralEB::CutCellBody body;
+
+      if (!body.define(surfaces[n])) {
+        if (m_strict) {
+          std::ostringstream message;
+
+          message << "PolyhedralGeometryShop::fillRefinedGraph - the stored surface of cell " << iv << " on level "
+                  << parent << " does not close (residual " << body.closureResidual() << ")";
+
+          MayDay::Error(message.str().c_str());
+        }
+
+        return false;
+      }
+
+      parentCell = iv;
+
+      if (!PolyhedralEB::refineSubtree(body, iv, depth, visit)) {
+        if (m_strict) {
+          std::ostringstream message;
+
+          message << "PolyhedralGeometryShop::fillRefinedGraph - could not cut cell " << iv << " on level " << parent
+                  << " down " << depth << " levels";
+
+          MayDay::Error(message.str().c_str());
+        }
+
+        return false;
+      }
+    }
+  }
+
+  for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
+    if (a_regIrregCovered(bit(), 0) == s_unclassified) {
+      if (m_strict) {
+        std::ostringstream message;
+
+        message << "PolyhedralGeometryShop::fillRefinedGraph - no parent on level " << parent << " answered for cell "
+                << bit();
+
+        MayDay::Error(message.str().c_str());
+      }
+
+      return false;
+    }
+  }
+
+  // a regular cell bordering a covered one is a full cell with a covered face, and the node for
+  // it is the one GeometryShop builds
+  for (BoxIterator bit(a_ghostRegion); bit.ok(); ++bit) {
+    if (a_regIrregCovered(bit(), 0) == -1) {
+      GeometryShop::fixRegularCellsNextToCovered(a_nodes, a_regIrregCovered, a_validRegion, a_domain, bit(), a_dx);
+    }
+  }
+
+  IntVectSet droppedCells;
+
+  for (BoxIterator bit(a_validRegion); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    const int n = bodyIndex(iv, 0);
+
+    if (n < 0) {
+      continue;
+    }
+
+    const PolyhedralEB::CutCellBody& body = bodies[n];
+
+    if (m_volumeThreshold > 0.0 && body.volumeFraction() < m_volumeThreshold) {
+      droppedCells |= iv;
+
+      a_regIrregCovered(iv, 0) = -1;
+
+      continue;
+    }
+
+    IrregNode node;
+    this->fillNode(node, body, a_regIrregCovered, iv, a_domain);
+
+    a_nodes.push_back(node);
+  }
+
+  this->dropCells(a_nodes, a_regIrregCovered, droppedCells, a_validRegion, a_domain, a_dx);
+
+  return true;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -189,6 +189,30 @@ The five instances, in the order they appeared:
 If a sixth appears, the question to ask is not "what tolerance separates these" but "what step
 created this, and can I test for that step".
 
+**Two computations of the same point cannot be compared for equality.** A separate rule, found when
+refinement was first cut two levels deep, and the one exception to the paragraph above -- the fix is
+a tolerance, but it is a *welding* distance between two answers to one question, not a threshold
+separating two geometric situations.
+
+`CutCellBody::clip` stitches the cap it creates out of the segments its polygons leave in the
+cutting plane, matching one segment's end to the next one's start. A vertex where two polygons meet
+is computed once along each polygon's own edge, and where those edges are nearly parallel the
+intersection is ill conditioned: the two answers agreed to 1.3e-15 in one case and to 8.8e-13 in
+another. Matching was done on a key quantised to 1e-11, which has no tolerance at all -- two answers
+either side of a rounding boundary go to different buckets however close they are. `-12692178242`
+against `-12692178243`, and the walk stops.
+
+What made it expensive rather than merely wrong is what happened next: the loop failed to close, the
+cap was dropped, and **`clip` returned `true`**. The body came back missing a whole face, with
+moments, a volume fraction and every appearance of an answer -- closure residual 0.93 on a cell of
+volume fraction 0.84. This is what the capsule's "loses volume at depth >= 2" was; it was never a
+drift.
+
+Both halves are fixed: cap vertices are welded by distance (`detail::s_weldTolerance`, 1e-10, with a
+nearest-match walk so a vertex two loops pass close to cannot splice them), and a cap that fails to
+close now makes `clip` refuse. Depth 1 hid it because a single cut of a freshly reconstructed body
+does not produce the near-parallel edges; the second cut, of an already clipped body, does.
+
 
 ## 5. The Chombo bug, for the record
 
@@ -260,6 +284,27 @@ implicit-function evaluations a crossing, while building a body from a finished 
 arithmetic pass at 2.7 microseconds. Keeping the surface avoids the expensive half. Keeping the
 body as well would save a further quarter of the per-cell time for twenty-eight times the memory,
 which at six hundred thousand cut cells a level is 96 MB against 2.7 GB.
+
+**Step 4a is done.** `PolyhedralGeometryShop::fillRefinedGraph` fills the graph and the nodes of a
+box on a level that was never generated, by cutting the stored surfaces of a level that was. Each
+parent is cut once and its whole refinement kept -- `refineSubtree` -- rather than a path being cut
+per output cell, which is the shape the driver had to have. Two rules came out of building it:
+
+- **Which level a box is cut from is settled by the geometry, never by which rank is asking.** Two
+  levels that were both generated are not refinements of one another, so two neighbouring boxes cut
+  from different ancestors would not agree on the face between them -- and taking whichever level
+  the asking rank happened to hold would make that depend on the load balance.
+  `cuttableParent` therefore walks every box of a level, not only this rank's. Locality is a
+  separate question, asked afterwards by `parentsAreLocal`, and a rank that cannot answer refuses.
+- **Only a parent that carries a surface has to be held locally.** Everything under a whole or empty
+  parent is the same kind and its corner values say which, so requiring the whole parent region
+  would refuse boxes that are perfectly answerable. This is what `PolyhedralGeometryShop::isRecorded`
+  is for, and it is single-sourced with the rule `fillGraph` records by, because a rule that says
+  which cells are kept in one place and which cells are wanted in another will drift.
+
+What that leaves for **4b**: a box added to a level has to go to a rank that holds every recorded
+parent of its *ghost* region, not just of its valid region. Refusals are counted by the prototype's
+`REFINEFILL` line, so the cost of whatever rule 4b picks is measurable before it is committed to.
 
 **Phase 1, the driver and the on-demand fill.** A `LevelData<BaseIVFAB<CutCellSurface>>` a level,
 beside `EBData`, moving under the same `copyTo`. A driver that cuts a parent once and keeps the
@@ -388,6 +433,14 @@ graph is where the artifacts of section 4 live.
   correct.
 - A cell edge cut twice, where a solid wedge is thinner than a cell, is a resolution limit of any
   edge-crossing representation, marching cubes included. No instance survives in the present suite.
+- **`Driver.geometry_refinement = 2` does not work in two dimensions**, and did not before any of
+  the refinement work: the generated cells come out violating the divergence identity by exactly one
+  -- a whole unit face missing -- with `fillGraph` refusing cell (6,8) on a 64^2 sphere. Confirmed
+  against the unmodified tree, so it is a defect in the 2-D side of `CutCellBody::refine`, not a
+  regression. It is unreachable in any shipped configuration, since the option defaults to one and
+  nothing in the suite raises it, and three dimensions is clean at refinement two on all four
+  geometries. Worth fixing before the option is offered for 2-D use.
+
 - `faceCentroid`'s normal-direction component is write-only in Chombo: `FaceData::m_faceCentroid` is
   a `RealVect` but a face is (SpaceDim−1)-dimensional, every consumer skips that slot, and
   `EBISLevel::sanityCheck` only bounds-checks it against `0.5 + tolerance`, which a stale ±0.5 passes.
