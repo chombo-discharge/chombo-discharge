@@ -264,53 +264,29 @@ crossingLoops(const CutCellSurface& a_surface,
 constexpr Real s_clipTolerance = 1.0E-12;
 
 /**
- * @brief A vertex's identity, quantised, for matching cap segments up.
- * @details Compared component by component rather than hashed: a hash collision would splice
- * two cap loops into one.
+ * @brief Distance within which two cap vertices are taken to be the same one.
+ * @details A vertex where two of a body's polygons meet is computed once along each polygon's
+ * own edge, and those two intersections are ill conditioned where the edges are nearly parallel:
+ * the answers agree to about a part in a thousand billion rather than bit for bit. Cap loops are
+ * stitched by matching one segment's end to the next one's start, so the match has to be made at
+ * that distance and not exactly.
+ *
+ * Set far below any cap edge that carries area -- a cell is one unit across in this frame -- and
+ * far above the disagreement two intersections of the same point produce, which is what leaves a
+ * band to choose from at all. Quantising instead, which is what this replaced, has no such band:
+ * two answers either side of a rounding boundary go to different buckets however close they are,
+ * the loop then fails to close, and the body silently loses a whole face.
  */
-struct VertexKey
-{
-  /**
-   * @brief Quantised position.
-   */
-  long m_q[SpaceDim] = {0};
-
-  /**
-   * @brief Whether two vertices quantise to the same position.
-   * @param[in] a_other Key to compare against.
-   * @return True if every component matches.
-   */
-  bool
-  operator==(const VertexKey& a_other) const noexcept
-  {
-    bool same = true;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      same = same && (m_q[d] == a_other.m_q[d]);
-    }
-
-    return same;
-  }
-
-  /**
-   * @brief Whether two vertices quantise to different positions.
-   * @param[in] a_other Key to compare against.
-   * @return True if any component differs.
-   */
-  bool
-  operator!=(const VertexKey& a_other) const noexcept
-  {
-    return !(*this == a_other);
-  }
-};
+constexpr Real s_weldTolerance = 1.0E-10;
 
 /**
- * @brief Quantise a vertex to its identity.
- * @param[in] a_x Vertex position.
- * @return The vertex's key.
+ * @brief Whether two positions are the same vertex.
+ * @param[in] a_a First position.
+ * @param[in] a_b Second position.
+ * @return True if they lie within s_weldTolerance of one another.
  */
-inline VertexKey
-vertexKey(const RealVect& a_x) noexcept;
+inline bool
+sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept;
 
 /**
  * @brief Order two points so an edge is always interpolated from the same end.

@@ -908,13 +908,17 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
 {
   a_out = CutCellBody();
 
-  RealVect          segmentFrom[s_maxPolygons];
-  RealVect          segmentTo[s_maxPolygons];
-  detail::VertexKey keyFrom[s_maxPolygons];
-  detail::VertexKey keyTo[s_maxPolygons];
-  int               segmentFace[s_maxPolygons];
+#if CH_SPACEDIM == 3
+  // Where the cut crosses each polygon it leaves a segment in the cutting plane, and those
+  // segments bound the cap the cut creates. Three dimensions only: in two the cut leaves an edge
+  // of the clipped polygon itself, tagged with the face it lies in, and there is no separate cap
+  // to assemble -- so a walk over these segments would never close, and must not be asked to.
+  RealVect segmentFrom[s_maxPolygons];
+  RealVect segmentTo[s_maxPolygons];
+  int      segmentFace[s_maxPolygons];
 
   int numSegments = 0;
+#endif
 
   const Real sign = a_keepLow ? 1.0 : -1.0;
 
@@ -989,6 +993,7 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
 
     a_out.m_numPolygons++;
 
+#if CH_SPACEDIM == 3
     bool whollyInPlane = true;
 
     for (int i = 0; i < cut.m_numVertices; i++) {
@@ -1010,17 +1015,17 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
       const bool bothInPlane = std::abs(a[a_dir] - a_coordinate) < detail::s_clipTolerance &&
                                std::abs(b[a_dir] - a_coordinate) < detail::s_clipTolerance;
 
-      if (bothInPlane && detail::vertexKey(a) != detail::vertexKey(b)) {
+      if (bothInPlane && !detail::sameVertex(a, b)) {
         segmentFrom[numSegments] = b;
         segmentTo[numSegments]   = a;
-        keyFrom[numSegments]     = detail::vertexKey(b);
-        keyTo[numSegments]       = detail::vertexKey(a);
         segmentFace[numSegments] = 2 * a_dir + (a_keepLow ? 1 : 0);
         numSegments++;
       }
     }
+#endif
   }
 
+#if CH_SPACEDIM == 3
   bool used[s_maxPolygons] = {false};
 
   for (int s0 = 0; s0 < numSegments; s0++) {
@@ -1043,23 +1048,32 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
     loop.m_vertexEdge[loop.m_numVertices]  = -1;
     loop.m_vertex[loop.m_numVertices++]    = segmentFrom[s0];
 
-    RealVect                current    = segmentTo[s0];
-    detail::VertexKey       currentKey = keyTo[s0];
-    const detail::VertexKey endKey     = keyFrom[s0];
+    RealVect        current = segmentTo[s0];
+    const RealVect& end     = segmentFrom[s0];
 
     bool closed = false;
 
     for (int guard = 0; guard <= numSegments + 1; guard++) {
-      if (currentKey == endKey) {
+      if (detail::sameVertex(current, end)) {
         closed = true;
 
         break;
       }
 
-      int next = -1;
+      // the nearest segment starting where this one ended, rather than the first within reach,
+      // so that a vertex two loops pass close to does not splice them together
+      int  next = -1;
+      Real best = detail::s_weldTolerance;
 
-      for (int j = 0; j < numSegments && next < 0; j++) {
-        if (!used[j] && keyFrom[j] == currentKey) {
+      for (int j = 0; j < numSegments; j++) {
+        if (used[j]) {
+          continue;
+        }
+
+        const Real distance = (segmentFrom[j] - current).vectorLength();
+
+        if (distance <= best) {
+          best = distance;
           next = j;
         }
       }
@@ -1074,11 +1088,17 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
       loop.m_vertexEdge[loop.m_numVertices]  = -1;
       loop.m_vertex[loop.m_numVertices++]    = current;
 
-      current    = segmentTo[next];
-      currentKey = keyTo[next];
+      current = segmentTo[next];
     }
 
-    if (!closed || loop.m_numVertices < 3) {
+    // A cap that does not close is a face the body will be left without, and a body missing a
+    // face still has moments and still looks like an answer. Refusing here is what turns that
+    // into a cell the caller can decline rather than one it cannot tell from a good one.
+    if (!closed) {
+      return false;
+    }
+
+    if (loop.m_numVertices < 3) {
       continue;
     }
 
@@ -1086,6 +1106,7 @@ CutCellBody::clip(const int a_dir, const Real a_coordinate, const bool a_keepLow
       a_out.m_numPolygons++;
     }
   }
+#endif
 
   return true;
 }

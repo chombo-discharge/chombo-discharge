@@ -640,16 +640,10 @@ crossingLoops(const CutCellSurface& a_surface,
 }
 #endif
 
-inline VertexKey
-vertexKey(const RealVect& a_x) noexcept
+inline bool
+sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept
 {
-  VertexKey key = {};
-
-  for (int d = 0; d < SpaceDim; d++) {
-    key.m_q[d] = std::lround(a_x[d] * 1.0E11);
-  }
-
-  return key;
+  return (a_a - a_b).vectorLength() <= s_weldTolerance;
 }
 
 inline bool
