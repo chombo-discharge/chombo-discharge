@@ -268,19 +268,11 @@ protected:
   Real m_refineAngle;
 
   /**
-   * @brief Whether to carry the geometry only where the interface needs resolving.
-   * @details Off unless asked for, and only ever on for the polyhedral generator: the other two
-   * generate every level in full, and a run that selects them has to get the grids it always got.
-   * The depth the pre-pass resolves to is the depth of the hierarchy, since the grids are built
-   * from the boxes it produces and there is nothing below the finest level to carry.
-   */
-  bool m_refineCurvature;
-
-  /**
    * @brief Cells the implicit function asks to have refined, coarsest level first.
-   * @details Computed once, before the geometry is built, because the generator needs to know
-   * which cells to take from a finer surface, and read again afterwards as a source of geometric
-   * tags. Empty while Driver.refine_curvature leaves the pre-pass off.
+   * @details Computed once, before the geometry is built, because the generator needs to know how
+   * much of each level to carry, and read again afterwards as a source of geometric tags. Empty
+   * for any generator but the polyhedral one, which is the only one that can be handed part of a
+   * level.
    */
   Vector<IntVectSet> m_curvatureTags;
 

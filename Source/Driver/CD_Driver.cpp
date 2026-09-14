@@ -63,8 +63,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
     m_dt(0.0),
     m_time(0.0),
     m_profile(false),
-    m_doCoarsening(true),
-    m_refineCurvature(false)
+    m_doCoarsening(true)
 {
   CH_TIME("Driver::Driver");
 
@@ -1250,16 +1249,10 @@ Driver::parseGeometryRefinement()
   const auto c1 = m_refineAngle;
   const auto c2 = m_conductorTagsDepth;
   const auto c3 = m_dielectricTagsDepth;
-  const auto c4 = m_refineCurvature;
 
   pp.get("refine_angles", m_refineAngle);
   pp.get("refine_electrodes", m_conductorTagsDepth);
   pp.get("refine_dielectrics", m_dielectricTagsDepth);
-
-  // Absent from input files written before the pre-pass existed, and off is what those files
-  // meant, so the fallback leaves the geometry tags to the embedded boundary alone.
-  m_refineCurvature = false;
-  pp.query("refine_curvature", m_refineCurvature);
 
   if (m_conductorTagsDepth < 0) {
     m_conductorTagsDepth = m_amr->getMaxAmrDepth();
@@ -1273,7 +1266,7 @@ Driver::parseGeometryRefinement()
   // we can avoid regrid if they didn't change. This is my clunky way of doing that.
   if (m_timeStep >
       0) { // Simulation is already running, and we need to check if we need new geometric tags for regridding.
-    if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth || c4 != m_refineCurvature) {
+    if (c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth) {
       m_needsNewGeometricTags = true;
     }
   }
@@ -1479,10 +1472,11 @@ Driver::setupGeometryOnly()
   // and read again later as a source of geometric tags.
   m_curvatureTags.resize(0);
 
-  // Only the polyhedral generator can be handed part of a level. The other two build every level
-  // in full, and a run that selects one of them has to get the grids it has always got, so the
-  // pre-pass does not run at all and nothing downstream sees a coverage to build grids from.
-  if (m_refineCurvature && m_geometryGeneration == "polyhedral") {
+  // Only the polyhedral generator can be handed part of a level, and selecting it is what asks
+  // for one. The other two build every level in full, and a run that selects one of them has to
+  // get the grids it has always got, so the pre-pass does not run at all and nothing downstream
+  // sees a coverage to build grids from.
+  if (m_geometryGeneration == "polyhedral") {
     m_computationalGeometry->buildImplicitFunctions();
 
     // The pre-pass resolves as deep as the hierarchy goes, which is one level per entry and so one
@@ -1626,10 +1620,11 @@ Driver::setupFresh(const int a_initialRegrids)
   // and read again later as a source of geometric tags.
   m_curvatureTags.resize(0);
 
-  // Only the polyhedral generator can be handed part of a level. The other two build every level
-  // in full, and a run that selects one of them has to get the grids it has always got, so the
-  // pre-pass does not run at all and nothing downstream sees a coverage to build grids from.
-  if (m_refineCurvature && m_geometryGeneration == "polyhedral") {
+  // Only the polyhedral generator can be handed part of a level, and selecting it is what asks
+  // for one. The other two build every level in full, and a run that selects one of them has to
+  // get the grids it has always got, so the pre-pass does not run at all and nothing downstream
+  // sees a coverage to build grids from.
+  if (m_geometryGeneration == "polyhedral") {
     m_computationalGeometry->buildImplicitFunctions();
 
     // The pre-pass resolves as deep as the hierarchy goes, which is one level per entry and so one
@@ -1805,10 +1800,11 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
   // and read again later as a source of geometric tags.
   m_curvatureTags.resize(0);
 
-  // Only the polyhedral generator can be handed part of a level. The other two build every level
-  // in full, and a run that selects one of them has to get the grids it has always got, so the
-  // pre-pass does not run at all and nothing downstream sees a coverage to build grids from.
-  if (m_refineCurvature && m_geometryGeneration == "polyhedral") {
+  // Only the polyhedral generator can be handed part of a level, and selecting it is what asks
+  // for one. The other two build every level in full, and a run that selects one of them has to
+  // get the grids it has always got, so the pre-pass does not run at all and nothing downstream
+  // sees a coverage to build grids from.
+  if (m_geometryGeneration == "polyhedral") {
     m_computationalGeometry->buildImplicitFunctions();
 
     // The pre-pass resolves as deep as the hierarchy goes, which is one level per entry and so one
