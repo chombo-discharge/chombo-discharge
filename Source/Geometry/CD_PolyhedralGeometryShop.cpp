@@ -929,50 +929,75 @@ PolyhedralGeometryShop::cuttableParent(const Box& a_ghostRegion, const int a_lev
   return -1;
 }
 
-bool
-PolyhedralGeometryShop::parentsAreLocal(const BaseFab<Real>& a_nodeValues,
-                                        const Box&           a_coarseRegion,
-                                        const int            a_level) const noexcept
+int
+PolyhedralGeometryShop::numSurfaceComponents() const
 {
-  BaseFab<int> wanted(a_coarseRegion, 1);
-  wanted.setVal(0);
+  return (m_refinement == 1) ? PolyhedralEB::CutCellSurface::s_numValues : 0;
+}
 
-  long long numWanted = 0;
+void
+PolyhedralGeometryShop::getSurfaces(Vector<IntVect>& a_cells,
+                                    Vector<Real>&    a_values,
+                                    const Box&       a_region,
+                                    const Real&      a_dx,
+                                    const DataIndex& a_di) const
+{
+  CH_TIME("PolyhedralGeometryShop::getSurfaces");
 
-  for (BoxIterator bit(a_coarseRegion); bit.ok(); ++bit) {
-    PolyhedralEB::CutCellSurface surface;
-    this->fillCorners(surface, a_nodeValues, bit());
+  a_cells.resize(0);
+  a_values.resize(0);
 
-    if (PolyhedralGeometryShop::isRecorded(surface)) {
-      wanted(bit(), 0) = 1;
+  const int level = this->levelFromDx(a_dx);
 
-      numWanted++;
-    }
+  if (level < 0 || level >= static_cast<int>(m_surfaces.size()) || m_surfaces[level].isNull()) {
+    return;
   }
 
-  const BoxLayout& dbl = m_surfaces[a_level]->boxLayout();
+  const Vector<IntVect>&                      cells    = (*m_surfaceCells[level])[a_di];
+  const Vector<PolyhedralEB::CutCellSurface>& surfaces = (*m_surfaces[level])[a_di];
 
-  long long numHeld = 0;
-
-  for (DataIterator dit = m_surfaces[a_level]->dataIterator(); dit.ok(); ++dit) {
-    const Box overlap = dbl[dit()] & a_coarseRegion;
-
-    for (BoxIterator bit(overlap); bit.ok(); ++bit) {
-      numHeld += wanted(bit(), 0);
+  for (int n = 0; n < cells.size(); n++) {
+    if (!a_region.contains(cells[n])) {
+      continue;
     }
+
+    a_cells.push_back(cells[n]);
+
+    const int offset = a_values.size();
+    a_values.resize(offset + PolyhedralEB::CutCellSurface::s_numValues);
+
+    surfaces[n].store(&a_values[offset], 1);
+  }
+}
+
+Real
+PolyhedralGeometryShop::refinedFillParentDx(const Box& a_ghostRegion, const Real& a_dx) const
+{
+  if (m_refinement != 1) {
+    return -1.0;
   }
 
-  return numHeld == numWanted;
+  const int level = this->levelFromDx(a_dx);
+
+  if (level < 0) {
+    return -1.0;
+  }
+
+  const int parent = this->cuttableParent(a_ghostRegion, level);
+
+  return (parent < 0) ? -1.0 : m_dx[parent];
 }
 
 bool
-PolyhedralGeometryShop::fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
-                                         Vector<IrregNode>&   a_nodes,
-                                         const Box&           a_validRegion,
-                                         const Box&           a_ghostRegion,
-                                         const ProblemDomain& a_domain,
-                                         const RealVect&      a_probLo,
-                                         const Real&          a_dx) const
+PolyhedralGeometryShop::fillRefinedGraph(BaseFab<int>&          a_regIrregCovered,
+                                         Vector<IrregNode>&     a_nodes,
+                                         const Box&             a_validRegion,
+                                         const Box&             a_ghostRegion,
+                                         const ProblemDomain&   a_domain,
+                                         const RealVect&        a_probLo,
+                                         const Real&            a_dx,
+                                         const BaseIVFAB<Real>& a_parents,
+                                         const Real&            a_parentDx) const
 {
   CH_TIME("PolyhedralGeometryShop::fillRefinedGraph");
 
@@ -992,9 +1017,11 @@ PolyhedralGeometryShop::fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
     return false;
   }
 
-  const int parent = this->cuttableParent(a_ghostRegion, level);
+  // Which level the parents came from is the caller's word, since the caller is what fetched
+  // them. It has to be one of this hierarchy's and coarser than the level being filled.
+  const int parent = this->levelFromDx(a_parentDx);
 
-  if (parent < 0) {
+  if (parent <= level) {
     return false;
   }
 
@@ -1009,13 +1036,6 @@ PolyhedralGeometryShop::fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
   // locality test as well as by the fill, so taken once.
   BaseFab<Real> nodeValues;
   this->fillNodeValues(nodeValues, coarseRegion, a_probLo, coarseDx);
-
-  // Which level answers is settled above by the geometry alone; whether this rank can answer for
-  // it is a separate question, and a refusal here is the caller's to fix by asking a rank that
-  // holds the parents.
-  if (!this->parentsAreLocal(nodeValues, coarseRegion, parent)) {
-    return false;
-  }
 
   a_regIrregCovered.resize(a_ghostRegion, 1);
   a_nodes.resize(0);
@@ -1084,94 +1104,85 @@ PolyhedralGeometryShop::fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
     }
   };
 
-  const BoxLayout& dbl = m_surfaces[parent]->boxLayout();
+  const IntVectSet& held = a_parents.getIVS();
 
-  for (DataIterator dit = m_surfaces[parent]->dataIterator(); dit.ok(); ++dit) {
-    const Box overlap = dbl[dit()] & coarseRegion;
+  for (BoxIterator bit(coarseRegion); bit.ok(); ++bit) {
+    const IntVect iv = bit();
 
-    if (overlap.isEmpty()) {
+    if (!held.contains(iv)) {
+      // Nothing was kept for this parent, so it was whole or empty and everything under it is the
+      // same. A parent whose corners say otherwise was declined when the level was generated, or
+      // the caller handed over an incomplete set; either way there is nothing to cut it from.
+      PolyhedralEB::CutCellSurface surface;
+      this->fillCorners(surface, nodeValues, iv);
+
+      if (PolyhedralGeometryShop::isRecorded(surface)) {
+        if (m_strict) {
+          std::ostringstream message;
+
+          message << "PolyhedralGeometryShop::fillRefinedGraph - cell " << iv << " on level " << parent
+                  << " is cut but no surface was handed over for it";
+
+          MayDay::Error(message.str().c_str());
+        }
+
+        return false;
+      }
+
+      Box sub(iv, iv);
+      sub.refine(refinement);
+      sub &= a_ghostRegion;
+
+      const PolyhedralEB::CutCellBody::Kind kind = PolyhedralEB::CutCellBody::classify(surface);
+
+      a_regIrregCovered.setVal((kind == PolyhedralEB::CutCellBody::Kind::Regular) ? 1 : -1, sub, 0, 1);
+
       continue;
     }
 
-    // Where each parent's surface sits in the box's list. The list is in the order the graph was
-    // filled in, so it is walked once here rather than searched once per cell.
-    const Vector<IntVect>&                      cells    = (*m_surfaceCells[parent])[dit()];
-    const Vector<PolyhedralEB::CutCellSurface>& surfaces = (*m_surfaces[parent])[dit()];
+    // The generator mandates single-valued cut cells, so a parent is one volume of fluid and its
+    // surface sits at the first index.
+    const VolIndex vof(iv, 0);
 
-    BaseFab<int> surfaceIndex(overlap, 1);
-    surfaceIndex.setVal(-1);
+    // Read out a component at a time rather than off one pointer: a BaseIVFAB holds a component
+    // at a time, so consecutive components of one cell are a whole level's cut cells apart.
+    Real values[PolyhedralEB::CutCellSurface::s_numValues];
 
-    for (int n = 0; n < cells.size(); n++) {
-      if (overlap.contains(cells[n])) {
-        surfaceIndex(cells[n], 0) = n;
-      }
+    for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numValues; c++) {
+      values[c] = a_parents(vof, c);
     }
 
-    for (BoxIterator bit(overlap); bit.ok(); ++bit) {
-      const IntVect iv = bit();
+    PolyhedralEB::CutCellSurface surface;
+    surface.load(values, 1);
 
-      const int n = surfaceIndex(iv, 0);
+    PolyhedralEB::CutCellBody body;
 
-      if (n < 0) {
-        // No surface was stored, so the parent was whole or empty and everything under it is the
-        // same. A parent whose corners say otherwise was declined or dropped when the level was
-        // generated, and there is nothing to cut it from.
-        PolyhedralEB::CutCellSurface surface;
-        this->fillCorners(surface, nodeValues, iv);
+    if (!body.define(surface)) {
+      if (m_strict) {
+        std::ostringstream message;
 
-        if (PolyhedralGeometryShop::isRecorded(surface)) {
-          if (m_strict) {
-            std::ostringstream message;
+        message << "PolyhedralGeometryShop::fillRefinedGraph - the surface handed over for cell " << iv << " on level "
+                << parent << " does not close (residual " << body.closureResidual() << ")";
 
-            message << "PolyhedralGeometryShop::fillRefinedGraph - cell " << iv << " on level " << parent
-                    << " is cut but holds no surface to cut it from";
-
-            MayDay::Error(message.str().c_str());
-          }
-
-          return false;
-        }
-
-        Box sub(iv, iv);
-        sub.refine(refinement);
-        sub &= a_ghostRegion;
-
-        const PolyhedralEB::CutCellBody::Kind kind = PolyhedralEB::CutCellBody::classify(surface);
-
-        a_regIrregCovered.setVal((kind == PolyhedralEB::CutCellBody::Kind::Regular) ? 1 : -1, sub, 0, 1);
-
-        continue;
+        MayDay::Error(message.str().c_str());
       }
 
-      PolyhedralEB::CutCellBody body;
+      return false;
+    }
 
-      if (!body.define(surfaces[n])) {
-        if (m_strict) {
-          std::ostringstream message;
+    parentCell = iv;
 
-          message << "PolyhedralGeometryShop::fillRefinedGraph - the stored surface of cell " << iv << " on level "
-                  << parent << " does not close (residual " << body.closureResidual() << ")";
+    if (!PolyhedralEB::refineSubtree(body, iv, depth, visit)) {
+      if (m_strict) {
+        std::ostringstream message;
 
-          MayDay::Error(message.str().c_str());
-        }
+        message << "PolyhedralGeometryShop::fillRefinedGraph - could not cut cell " << iv << " on level " << parent
+                << " down " << depth << " levels";
 
-        return false;
+        MayDay::Error(message.str().c_str());
       }
 
-      parentCell = iv;
-
-      if (!PolyhedralEB::refineSubtree(body, iv, depth, visit)) {
-        if (m_strict) {
-          std::ostringstream message;
-
-          message << "PolyhedralGeometryShop::fillRefinedGraph - could not cut cell " << iv << " on level " << parent
-                  << " down " << depth << " levels";
-
-          MayDay::Error(message.str().c_str());
-        }
-
-        return false;
-      }
+      return false;
     }
   }
 

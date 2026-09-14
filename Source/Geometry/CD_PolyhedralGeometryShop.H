@@ -142,18 +142,47 @@ public:
             const DataIndex&     a_di) const override;
 
   /**
+   * @brief How many numbers this generator keeps per cut cell so that the cell can be refined.
+   * @details None unless each cell's surface is reconstructed on the cell itself, since that is
+   * the only path that records one.
+   * @return Values per cut cell, or zero if none are kept.
+   */
+  int
+  numSurfaceComponents() const override;
+
+  /**
+   * @brief Hand back what was kept for each cut cell of a box.
+   * @param[out] a_cells  Cut cells of the box, in the order their values appear.
+   * @param[out] a_values Values per entry of a_cells.
+   * @param[in]  a_region Box wanted.
+   * @param[in]  a_dx     Grid resolution of the level the box belongs to.
+   * @param[in]  a_di     Index of the box in the layout this object was given.
+   */
+  void
+  getSurfaces(Vector<IntVect>& a_cells,
+              Vector<Real>&    a_values,
+              const Box&       a_region,
+              const Real&      a_dx,
+              const DataIndex& a_di) const override;
+
+  /**
+   * @brief Resolution of the level a region has to be cut from.
+   * @param[in] a_ghostRegion Region wanted, including its ghost cells, on its own level.
+   * @param[in] a_dx          Grid resolution of that region.
+   * @return Resolution of the level to cut from, or a negative number if none describes it.
+   */
+  Real
+  refinedFillParentDx(const Box& a_ghostRegion, const Real& a_dx) const override;
+
+  /**
    * @brief Fill the graph and the nodes of a box on a level that was never generated.
-   * @details The cells are cut from the stored surfaces of the finest level that was generated
-   * over the region, rather than reconstructed at their own resolution, so they are literal
-   * sub-bodies of cells the index space already holds and their moments sum back to them.
+   * @details The cells are cut from the surfaces of the coarser level handed in, rather than
+   * reconstructed at their own resolution, so they are literal sub-bodies of cells the index
+   * space already holds and their moments sum back to them.
    *
    * Each parent is cut once and its whole refinement kept, rather than a path being cut per
    * output cell: the children a path throws away are exactly the cells asked for next, and at
    * depth that is the difference between paying for the surface and paying for the volume.
-   *
-   * The surfaces live on the layouts this object made for itself, and nothing here fetches one
-   * from another rank. A box whose parents are not held locally is refused rather than filled
-   * from an incomplete parent, so it is the caller's business to ask a rank that can answer.
    * @param[out] a_regIrregCovered Regular/Covered/Irregular cells
    * @param[out] a_nodes           Nodes
    * @param[in]  a_validRegion     Grid region
@@ -161,16 +190,20 @@ public:
    * @param[in]  a_domain          Domain
    * @param[in]  a_probLo          Lower-left corner of computational domain
    * @param[in]  a_dx              Grid resolution of the cells being filled
-   * @return True if the box could be cut from surfaces this rank holds.
+   * @param[in]  a_parents         Surfaces of the coarser level's cut cells
+   * @param[in]  a_parentDx        Grid resolution of that coarser level
+   * @return True if the box could be cut from the parents handed in.
    */
   bool
-  fillRefinedGraph(BaseFab<int>&        a_regIrregCovered,
-                   Vector<IrregNode>&   a_nodes,
-                   const Box&           a_validRegion,
-                   const Box&           a_ghostRegion,
-                   const ProblemDomain& a_domain,
-                   const RealVect&      a_probLo,
-                   const Real&          a_dx) const;
+  fillRefinedGraph(BaseFab<int>&          a_regIrregCovered,
+                   Vector<IrregNode>&     a_nodes,
+                   const Box&             a_validRegion,
+                   const Box&             a_ghostRegion,
+                   const ProblemDomain&   a_domain,
+                   const RealVect&        a_probLo,
+                   const Real&            a_dx,
+                   const BaseIVFAB<Real>& a_parents,
+                   const Real&            a_parentDx) const override;
 
 protected:
   /**
@@ -435,20 +468,6 @@ protected:
    */
   int
   cuttableParent(const Box& a_ghostRegion, const int a_level) const noexcept;
-
-  /**
-   * @brief Whether this rank holds every surface a region has to be cut from.
-   * @details Only a parent whose surface was kept has to be held. Everything under a whole or
-   * empty parent is the same kind, and the corner values say which without any surface being
-   * read, so asking for the whole region instead would refuse boxes that are perfectly
-   * answerable.
-   * @param[in] a_nodeValues   Node-centred implicit function values over the region.
-   * @param[in] a_coarseRegion The region's parents, on the level they are held at.
-   * @param[in] a_level        Level the parents belong to, finest first.
-   * @return True if every parent that carries a surface sits in a box this rank holds.
-   */
-  bool
-  parentsAreLocal(const BaseFab<Real>& a_nodeValues, const Box& a_coarseRegion, const int a_level) const noexcept;
 
   /**
    * @brief Whether a cell is one the generator gives a body and keeps the surface of.

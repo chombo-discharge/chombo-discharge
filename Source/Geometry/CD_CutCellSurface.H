@@ -49,6 +49,29 @@ public:
   static constexpr Real s_noCrossing = -1.0;
 
   /**
+   * @brief How many numbers a surface is, when it is written out as plain values.
+   */
+  static constexpr int s_numValues = s_numEdges + s_numCorners;
+
+  /**
+   * @brief Write the surface out as plain values.
+   * @details So that it can live in the index space beside the moments and travel with them. The
+   * crossings come first and the corners after, which is the order load reads them back in.
+   * @param[out] a_values Space for s_numValues numbers, strided by a_stride.
+   * @param[in]  a_stride Distance between consecutive values.
+   */
+  inline void
+  store(Real* a_values, const int a_stride) const noexcept;
+
+  /**
+   * @brief Read a surface back from plain values.
+   * @param[in] a_values s_numValues numbers as store wrote them, strided by a_stride.
+   * @param[in] a_stride Distance between consecutive values.
+   */
+  inline void
+  load(const Real* a_values, const int a_stride) noexcept;
+
+  /**
    * @brief Constructor. Leaves every edge without a crossing and every corner at zero.
    */
   CutCellSurface() noexcept;

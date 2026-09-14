@@ -557,6 +557,67 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
     shop.fillGraph(coarseKinds[dit()], coarseNodes[dit()], valid, ghost, coarseDomain, probLo, coarseDx, dit());
   }
 
+  // The parents are handed to the fill rather than looked up by it, since in the index space they
+  // live on the level and not on the generator. They are assembled here the same way EBISLevel
+  // assembles them, so that this exercises the interface the index space will use.
+  const int numComponents = shop.numSurfaceComponents();
+
+  LayoutData<RefCountedPtr<EBGraph>>         coarseGraphs(dbl);
+  LayoutData<RefCountedPtr<BaseIVFAB<Real>>> coarseSurfaces(dbl);
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+    const Box valid = dbl[dit()];
+
+    Box ghost = grow(valid, ebGhost);
+    ghost &= coarseDomain.domainBox();
+
+    // A BaseIVFAB asks its graph only how many volumes each of its cells holds, and the generator
+    // mandates single-valued cut cells, so an all-regular graph over the region gives the same one
+    // volume per cell that the index space's own graph does. Building the real graph here would
+    // cover the valid region alone -- buildGraph redefines itself to the region it is given --
+    // and the parents wanted reach past it.
+    coarseGraphs[dit()] = RefCountedPtr<EBGraph>(new EBGraph(ghost));
+    coarseGraphs[dit()]->setToAllRegular();
+
+    // Reaching past the box, since cutting a fine box needs the parents of its ghost cells too.
+    // The index space does this with a copyTo; here the boxes this rank holds are gathered by
+    // hand, which is why a box whose ghost parents sit on another rank is refused below.
+    Vector<IntVect> cells;
+    Vector<Real>    values;
+
+    for (DataIterator source = dbl.dataIterator(); source.ok(); ++source) {
+      Vector<IntVect> theirCells;
+      Vector<Real>    theirValues;
+
+      shop.getSurfaces(theirCells, theirValues, ghost & dbl[source()], coarseDx, source());
+
+      for (int n = 0; n < theirCells.size(); n++) {
+        cells.push_back(theirCells[n]);
+
+        for (int comp = 0; comp < numComponents; comp++) {
+          values.push_back(theirValues[n * numComponents + comp]);
+        }
+      }
+    }
+
+    IntVectSet ivs;
+
+    for (int n = 0; n < cells.size(); n++) {
+      ivs |= cells[n];
+    }
+
+    coarseSurfaces[dit()] = RefCountedPtr<BaseIVFAB<Real>>(
+      new BaseIVFAB<Real>(ivs, *coarseGraphs[dit()], numComponents));
+
+    for (int n = 0; n < cells.size(); n++) {
+      const VolIndex vof(cells[n], 0);
+
+      for (int comp = 0; comp < numComponents; comp++) {
+        (*coarseSurfaces[dit()])(vof, comp) = values[n * numComponents + comp];
+      }
+    }
+  }
+
   long long refused      = 0;
   long long parents      = 0;
   long long coarseCut    = 0;
@@ -611,7 +672,15 @@ validateRefinedFill(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 
       parents++;
 
-      if (!shop.fillRefinedGraph(kinds, fineNodes, chunk, chunkGhost, fineDomain, probLo, fineDx)) {
+      if (!shop.fillRefinedGraph(kinds,
+                                 fineNodes,
+                                 chunk,
+                                 chunkGhost,
+                                 fineDomain,
+                                 probLo,
+                                 fineDx,
+                                 *coarseSurfaces[dit()],
+                                 coarseDx)) {
         refused++;
 
         continue;
