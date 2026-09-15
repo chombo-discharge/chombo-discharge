@@ -502,6 +502,7 @@ CutCellBody::appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cel
   }
 }
 
+#if CH_SPACEDIM == 3
 bool
 CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out, const int a_maxOut, int& a_numOut)
   const noexcept
@@ -911,6 +912,8 @@ CutCellBody::closeInterface() noexcept
 
   return true;
 }
+
+#endif
 
 void
 CutCellBody::accumulateMoments() noexcept

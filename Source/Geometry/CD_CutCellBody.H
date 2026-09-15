@@ -268,6 +268,7 @@ public:
   void
   appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cellCentre, const Real a_dx) const noexcept;
 
+#if CH_SPACEDIM == 3
   /**
    * @brief Replace one face's chord with the chords of the children that cover it.
    * @details The face is described at the resolution of the level below rather than this cell's,
@@ -292,6 +293,8 @@ public:
    */
   bool
   closeInterface() noexcept;
+
+#endif
 
   /**
    * @brief Residual in the identity the moments must satisfy among themselves.
