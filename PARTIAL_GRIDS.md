@@ -122,6 +122,39 @@ inside that must be described. Regular space need not be. That does not forbid b
 over the cut cells with `TiledMeshRefine`; it says the carried set is cut-cell boxes plus a collar,
 and the collar has to be classified honestly where it is covered.
 
+## How big the overlap actually is
+
+The restriction sweep computes, for each irregular box on a level, `coarsen(grow(box, 1), 2)` on its
+parent. Where that lands outside the parent's own irregular boxes it overlaps boxes the parent had
+classified regular or covered, and those would have to be split. Measured on ProfiledSurface in 2D,
+serial so the counts are global, `min_block_size = max_block_size = 4`, `max_ebis_box = 8`,
+`buffer_size = 1`, `refine_geometry = 6`:
+
+| fine -> parent | forced | already irregular there | spilling | of which on regular/covered | parent boxes hit | cells in them |
+| --- | --- | --- | --- | --- | --- | --- |
+| 3 -> 4 | 180 | 160 | 20 | 20 | **6** | 384 |
+| 4 -> 5 | 180 | 170 | 10 | 10 | **2** | 512 |
+| 5 -> 6 | 570 | 560 | 10 | 10 | **2** | 128 |
+| 6 -> 7 | 290 | 290 | 0 | 0 | 0 | 0 |
+| 7 -> 8 and coarser | | all | 0 | 0 | 0 | 0 |
+
+So the spill is 3 to 6 per cent of what the restriction forces, it stops entirely below level 6, and
+it touches **two to six boxes per level**. Splitting those is cheap. The concern that the parent
+would have to be repartitioned wholesale is not borne out here.
+
+Two things to be careful of before generalising:
+
+- **This geometry has no covered boxes at all.** Every level reports `covered 0`: a profiled plane
+  cut by a half-space leaves regular and irregular boxes only. A geometry with bulk solid may spill
+  onto covered boxes, which are the ones that cannot be dropped.
+- **The hierarchy truncates.** Levels 0 to 2 hold no boxes: `retainBox` drops them because the
+  curvature pre-pass asks for nothing at that depth. That is partial coverage working as intended,
+  but it means the finest levels in these runs are not exercised, and the measurement only covers
+  levels 3 and coarser.
+
+Counting both cells and boxes mattered. The cell spill looks negligible either way, but the box
+count is what costs, and it is the number that says splitting is affordable.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
