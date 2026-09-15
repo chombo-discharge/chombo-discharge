@@ -308,12 +308,41 @@ it, a cube edge slicing through the cell's interior without touching a corner, a
 children are cut. `makeSurface` brackets on `isFluid` along the twelve cell edges; a feature that
 enters and leaves through the same face crosses no edge and is invisible to that test.
 
-So the multichord cannot fix these: there is no chord on the coarse side to replace. What would is
-refusing to leave such a cell coarse, which is what the curvature tagging in #731 is for -- and a
-cell whose corners are all fluid is exactly the cell that tagging also cannot see. The single chord
-fails the same test in every rotation and with two orders of magnitude more area, so the multichord
-is doing its job; this is the part of the seam it does not reach, and it is the coarse cell's fault,
-not the seam's.
+That blind cell is the trigger, but it is not what makes the hole. The hole is a chord snapped onto
+a Cartesian cell edge, and it is manufactured on the coarse side of the seam.
+
+Of the 2182 interface segments in that surface, exactly three lie along a cell edge -- two coordinates
+constant and both on the grid -- and all three are unmatched. They are the whole cell edge
+`x = 0, y = 0.375, z in [0, 0.125]` together with two fragments of the same line, all three belonging
+to one coarse fan with its apex at (-0.0409, 0.3361, 0.0654). Over the full sweep:
+
+| interface segments lying along a Cartesian cell edge | count |
+| --- | --- |
+| on the coarse side | 555 |
+| on the fine side | 0 |
+| in the seam plane | 555 of 555 |
+| unmatched | 483 |
+
+and 145 of the 146 failing rotations have at least one. Nothing else in the surface does this: a
+segment along a cell edge is by construction not part of the embedded boundary.
+
+The mechanism is the seam's own asymmetry. `buildSeam` rebuilds one face at fine spacing and leaves
+the cell's other five coarse. `closeInterface` decides what is a chord by pairing each face polygon's
+edges against the body's other face polygons -- an edge with a partner is a cell edge, one without is
+interface. At the cell above, the multichorded seam face sees the body touch the shared edge
+`y = 0.375` because its fine sub-faces resolve it, while that cell's own `y = 0.375` face still
+carries a coarse chord and has all four corners in the fluid, so it registers nothing there. The
+seam face's boundary along that edge finds no partner and the whole cell edge is emitted as
+interface.
+
+So the pairing test in `closeInterface` assumes all six faces are described at the same spacing, and
+the multichord breaks that assumption. The fix has to reach the faces adjacent to the seam face, not
+only the seam face itself. Until it does, the invariant is worth asserting on its own: **no interface
+segment may lie along a Cartesian cell edge**, which catches 145 of the 146 failures directly.
+
+The single chord fails the same watertightness test in every rotation and with two orders of
+magnitude more area, so the multichord is still doing its job -- this is the part of the seam it
+does not yet reach.
 
 The case is exported under `Prototypes/CutCellRefinement/break_case/`: both mixed surfaces, the two
 single-resolution controls, the two mesh blocks, the unclosed segments as a polyline, and the coarse
