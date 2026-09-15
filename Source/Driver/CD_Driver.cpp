@@ -1562,29 +1562,15 @@ Driver::regridAmrOntoGeometry(const int a_lmin, const int a_hardcap)
     pout() << "Driver::regridAmrOntoGeometry(int, int)" << endl;
   }
 
-  // Where the pre-pass ran, the grids are the ones the index space was built on, read back from it
-  // rather than rebuilt from the regions both were asked to resolve. The generator does not carry
-  // exactly what it was asked for: it retains a box whose coarsening, grown by the ghost width,
-  // touches a region, and it retains boxes whole. Rebuilding from the regions therefore leaves the
-  // simulation refined over less than the index space is, and the surplus is invisible until an
-  // operator reads across a refinement boundary and finds a cell with no record of what lies under
-  // it. Reading the grids back makes the two the same set by construction.
+  // Where the pre-pass ran, the grids are the boxes it produced. They are not the boxes the index
+  // space is generated over, and must not be: retainBox reaches a ghost width past them so that a
+  // box's ghost cells have geometry in them, and grids that reached as far would have ghost cells
+  // the index space never carried. An unfilled graph reads as regular fluid rather than as missing,
+  // so that loss would not announce itself.
   const Vector<Vector<Box>>& coverageRegions = m_computationalGeometry->getCoverageRegions();
 
   if (coverageRegions.size() > 0) {
-    const RefCountedPtr<EBIndexSpace>& ebis = m_computationalGeometry->getMfIndexSpace()->getEBIndexSpace(phase::gas);
-
-    Vector<Vector<Box>> boxes(coverageRegions.size());
-
-    for (int lvl = 0; lvl < static_cast<int>(boxes.size()); lvl++) {
-      if (lvl >= static_cast<int>(m_amr->getDomains().size())) {
-        break;
-      }
-
-      boxes[lvl] = ebis->getGrids(m_amr->getDomains()[lvl]).boxArray();
-    }
-
-    m_amr->regridAmr(boxes, a_lmin);
+    m_amr->regridAmr(coverageRegions, a_lmin);
   }
   else {
     m_amr->regridAmr(m_geomTags, a_lmin, a_hardcap);
@@ -2459,25 +2445,30 @@ Driver::checkGridsAgainstIndexSpace(const Vector<DisjointBoxLayout>& a_grids) co
       fromIndexSpace |= ebisGrids.boxArray()[i];
     }
 
-    IntVectSet onlyGrids = fromGrids;
-    onlyGrids -= fromIndexSpace;
+    // The index space is wider than the grids on purpose, so the test is containment rather than
+    // equality, and it is the grids grown by the ghost width that have to be contained: an unfilled
+    // graph reads as regular fluid, so a ghost cell the index space never carried is silently wrong
+    // rather than missing.
+    IntVectSet grown;
 
-    IntVectSet onlyIndexSpace = fromIndexSpace;
-    onlyIndexSpace -= fromGrids;
+    for (int i = 0; i < a_grids[lvl].boxArray().size(); i++) {
+      Box box = a_grids[lvl].boxArray()[i];
+      box.grow(m_amr->getNumberOfEbGhostCells());
+      box &= domain.domainBox();
 
-    if (onlyGrids.numPts() > 0 || onlyIndexSpace.numPts() > 0) {
-      std::ostringstream message;
-
-      message << "Driver::checkGridsAgainstIndexSpace - on level " << lvl << " the grids hold " << onlyGrids.numPts()
-              << " cells the index space does not, and the index space holds " << onlyIndexSpace.numPts()
-              << " the grids do not";
-
-      MayDay::Error(message.str().c_str());
+      grown |= box;
     }
 
-    if (a_grids[lvl].boxArray().size() != ebisGrids.boxArray().size()) {
-      pout() << "Driver::checkGridsAgainstIndexSpace - level " << lvl << " covers the same cells through "
-             << a_grids[lvl].boxArray().size() << " boxes rather than " << ebisGrids.boxArray().size() << endl;
+    grown -= fromIndexSpace;
+
+    if (grown.numPts() > 0) {
+      std::ostringstream message;
+
+      message << "Driver::checkGridsAgainstIndexSpace - on level " << lvl << ", " << grown.numPts()
+              << " cells of the grids grown by the " << m_amr->getNumberOfEbGhostCells()
+              << " ghost cells the geometry needs lie outside what the index space carries";
+
+      MayDay::Error(message.str().c_str());
     }
   }
 }
