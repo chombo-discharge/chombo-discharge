@@ -488,8 +488,31 @@ The exact criterion is the same statement one dimension down. Two fine sub-edges
 crossings; the coarse edge carries at most one. Where the counts differ the coarse cell cannot
 describe that edge, and every face meeting it inherits the contradiction. That is `markCoarseEdges`,
 and over the sweep it is exact in both directions -- 209 marked, 209 torn, none missed, at every
-resolution tested. Refuse there, name the cell, and the failure is loud instead of a hole in a
-surface nobody looks at.
+resolution tested.
+
+### The trap
+
+`SeamBody::s_refinementTrap` makes `buildSeam` run that test before it builds anything and refuse
+with reason 7 when a seam-face edge fails it. The cell is named rather than turned into a body that
+contradicts itself, and the caller's answer is to refine it.
+
+| 1000 rotations, 25527 seam cells | trap off | trap on |
+| --- | --- | --- |
+| cells refused | 0 | 209, all reason 7 |
+| cells emitting an interface segment on a cell edge | 209 | **0** |
+| seam faces merging into more than one component | 185 | **0** |
+
+Refused equals marked equals previously-torn, at every resolution: 287 of 11776 seam cells at
+`dx = 0.25`, 209 of 25527 at 0.125, 356 of 52907 at 0.0625, and zero torn cells left in all three.
+
+It does not fire where it should not. The sphere at the same configuration keeps all 12 of its seam
+cells, refuses none and stays watertight -- 664 triangles, every edge shared twice. The cube rotated
+45 degrees about the Cartesian diagonal keeps all 30 and refuses none.
+
+The trap is a stopgap with a known shape. What it catches is a coarse cell that would have to be
+multi-valued to hold what the level below sees, and the long-term rule is that such a cell may not
+sit at a refinement boundary at all -- the tagging has to guarantee it, rather than the seam
+discovering it.
 
 ## What will bite
 

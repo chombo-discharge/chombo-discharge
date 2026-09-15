@@ -1083,9 +1083,83 @@ makeSurface(const BaseIF&                 a_implicitFunction,
 // four-crossing saddle logic, which is the most error-prone thing in this whole representation.
 // They are the face polygons of the cells abutting the face, obtained from the same faceWalk at
 // their own spacing and mapped into this cell's frame. The rest of the body is untouched.
+// Pass A of the seam restriction: which of a coarse cell's edges does endpoint bracketing get wrong?
+//
+// An edge with fluid at both ends and solid across the middle carries two crossings, and the sign
+// test between the ends reports none. Split in half, each piece holds one crossing and the level
+// below finds both. Where the two counts differ, the coarse cell's 1-D description is not the
+// restriction of the fine one, and every face meeting that edge inherits the error: the faces
+// disagree about whether the edge borders fluid, and closeInterface renders the disagreement as
+// interface lying along the edge.
+//
+// This only detects. It marks the edges a patch would have to rebuild.
+int
+markCoarseEdges(const BaseIF&   a_implicitFunction,
+                const RealVect& a_centre,
+                const Real      a_dx,
+                const int       a_seamDir,
+                const int       a_seamSide,
+                bool*           a_marked,
+                int&            a_onSeamFace,
+                int&            a_elsewhere)
+{
+  a_onSeamFace = 0;
+  a_elsewhere  = 0;
+
+  int total = 0;
+
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    int     dir;
+    IntVect loOffset;
+    edgeGeometry(e, dir, loOffset);
+
+    RealVect lo = a_centre;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      lo[d] += a_dx * (loOffset[d] - 0.5);
+    }
+
+    RealVect hi = lo;
+    hi[dir] += a_dx;
+
+    RealVect mid = lo;
+    mid[dir] += 0.5 * a_dx;
+
+    const bool fLo  = PolyhedralEB::isFluid(a_implicitFunction.value(lo));
+    const bool fHi  = PolyhedralEB::isFluid(a_implicitFunction.value(hi));
+    const bool fMid = PolyhedralEB::isFluid(a_implicitFunction.value(mid));
+
+    const int coarse   = (fLo != fHi) ? 1 : 0;
+    const int restrict = ((fLo != fMid) ? 1 : 0) + ((fMid != fHi) ? 1 : 0);
+
+    a_marked[e] = (coarse != restrict);
+
+    if (a_marked[e]) {
+      total++;
+
+      // the seam face is the one whose fine neighbours supply the restriction; an edge lies in it
+      // when it runs transverse to the seam and sits on the seam side
+      if (dir != a_seamDir && loOffset[a_seamDir] == a_seamSide) {
+        a_onSeamFace++;
+      }
+      else {
+        a_elsewhere++;
+      }
+    }
+  }
+
+  return total;
+}
+
 class SeamBody : public PolyhedralEB::CutCellBody
 {
 public:
+  /**
+   * @brief Whether buildSeam refuses a cell whose seam face has an edge the coarse level cannot
+   *        describe, rather than building a body that contradicts itself.
+   */
+  static bool s_refinementTrap;
+
   // Returns false if the assembly does not fit. a_gap is the closure residual, which is what the
   // interface loop would have to absorb: the body's other faces and its interface still describe
   // the single chord this face no longer has.
@@ -1839,6 +1913,26 @@ public:
       return false;
     }
 
+    // The refinement trap. Two fine sub-edges carry up to two crossings and a coarse edge carries at
+    // most one, so where the counts differ the coarse cell cannot describe that edge at all: every
+    // face meeting it inherits a contradiction, and stitching four fine apertures into the coarse
+    // face's single aperture would need the cell to be multi-valued. Nothing downstream can repair
+    // that, so refuse here and let the caller refine.
+    if (s_refinementTrap) {
+      bool marked[PolyhedralEB::CutCellSurface::s_numEdges];
+
+      int onSeamFace = 0;
+      int elsewhere  = 0;
+
+      markCoarseEdges(a_implicitFunction, a_centre, a_dx, a_seamDir, a_seamSide, marked, onSeamFace, elsewhere);
+
+      if (onSeamFace > 0) {
+        a_why = 7;
+
+        return false;
+      }
+    }
+
     // what the single chord said this face's aperture was
     a_singleChord = this->areaFraction(a_seamDir, (a_seamSide == 0) ? Side::Lo : Side::Hi);
     a_fineSum     = 0.0;
@@ -1975,6 +2069,8 @@ public:
     return true;
   }
 };
+
+bool SeamBody::s_refinementTrap = true;
 
 // Measure what a multichord seam face costs and what it leaves for the interface to absorb.
 void
@@ -2327,74 +2423,6 @@ validateSeamFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 
   pout() << "SEAMFACE built " << cells << " refused " << refused << " maxPolygons " << maxPolys << " (cap 20)"
          << " maxVertices " << maxVerts << " (cap 20) worstClosureGap " << worstGap << endl;
-}
-
-// Pass A of the seam restriction: which of a coarse cell's edges does endpoint bracketing get wrong?
-//
-// An edge with fluid at both ends and solid across the middle carries two crossings, and the sign
-// test between the ends reports none. Split in half, each piece holds one crossing and the level
-// below finds both. Where the two counts differ, the coarse cell's 1-D description is not the
-// restriction of the fine one, and every face meeting that edge inherits the error: the faces
-// disagree about whether the edge borders fluid, and closeInterface renders the disagreement as
-// interface lying along the edge.
-//
-// This only detects. It marks the edges a patch would have to rebuild.
-int
-markCoarseEdges(const BaseIF&   a_implicitFunction,
-                const RealVect& a_centre,
-                const Real      a_dx,
-                const int       a_seamDir,
-                const int       a_seamSide,
-                bool*           a_marked,
-                int&            a_onSeamFace,
-                int&            a_elsewhere)
-{
-  a_onSeamFace = 0;
-  a_elsewhere  = 0;
-
-  int total = 0;
-
-  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
-    int     dir;
-    IntVect loOffset;
-    edgeGeometry(e, dir, loOffset);
-
-    RealVect lo = a_centre;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      lo[d] += a_dx * (loOffset[d] - 0.5);
-    }
-
-    RealVect hi = lo;
-    hi[dir] += a_dx;
-
-    RealVect mid = lo;
-    mid[dir] += 0.5 * a_dx;
-
-    const bool fLo  = PolyhedralEB::isFluid(a_implicitFunction.value(lo));
-    const bool fHi  = PolyhedralEB::isFluid(a_implicitFunction.value(hi));
-    const bool fMid = PolyhedralEB::isFluid(a_implicitFunction.value(mid));
-
-    const int coarse   = (fLo != fHi) ? 1 : 0;
-    const int restrict = ((fLo != fMid) ? 1 : 0) + ((fMid != fHi) ? 1 : 0);
-
-    a_marked[e] = (coarse != restrict);
-
-    if (a_marked[e]) {
-      total++;
-
-      // the seam face is the one whose fine neighbours supply the restriction; an edge lies in it
-      // when it runs transverse to the seam and sits on the seam side
-      if (dir != a_seamDir && loOffset[a_seamDir] == a_seamSide) {
-        a_onSeamFace++;
-      }
-      else {
-        a_elsewhere++;
-      }
-    }
-  }
-
-  return total;
 }
 
 // A real coarse-fine boundary, and what the seam looks like across it.
@@ -4168,6 +4196,7 @@ main(int argc, char* argv[])
     int      sweep  = 0;
     int      write  = 0;
     int      passB  = 0;
+    int      trap   = 1;
     Real     span   = 90.0;
     Real     size   = 0.25;
     RealVect center = RealVect::Zero;
@@ -4180,9 +4209,12 @@ main(int argc, char* argv[])
       pp.query("twolevel_size", size);
       pp.query("twolevel_write", write);
       pp.query("twolevel_passb", passB);
+      pp.query("twolevel_trap", trap);
     }
 
     queryVect("Prototype", "twolevel_center", center);
+
+    SeamBody::s_refinementTrap = (trap > 0);
 
     // split 0 leaves only the fine block and split == coarse only the coarse one, which is how the
     // seam is told apart from what the triangulation does at a single resolution
