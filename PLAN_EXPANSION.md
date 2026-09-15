@@ -514,6 +514,81 @@ multi-valued to hold what the level below sees, and the long-term rule is that s
 sit at a refinement boundary at all -- the tagging has to guarantee it, rather than the seam
 discovering it.
 
+## Plan: the multichord and the trap in #731
+
+### Why it is #731's business
+
+`EBIndexSpace::defineEveryLevel` generates each level over the boxes `retainBox` keeps, then calls
+`coarsenFrom` on the level below, which overwrites the cells under the finer level's footprint and
+leaves the rest as generated. The boundary of that footprint is a coarse-fine seam *inside one EBIS
+level*: a generated cell on one side, a coarsened cell on the other, sharing a face whose aperture
+has been computed two ways. Partial coverage is what creates that seam, so describing it correctly
+is part of making generation work with partial coverage rather than something added on top.
+
+The seam is computable from what the shop already holds. `m_coverageRegions` is indexed coarsest
+first and `retainBox` maps level to index as `which = m_coverageLevel - a_level`, so the finer
+level's footprint at level L is entry `which + 1`, and a generated cell is at the seam when it abuts
+`coarsen(m_coverageRegions[which + 1], 2)` without lying in it.
+
+The fine sub-faces need not be read from the finer level. They are cut from the implicit function at
+half spacing, as the prototype does, and agree with the finer level bit for bit because both bracket
+the same sub-edges with the same function from the same endpoints. That removes any ordering
+dependency between levels.
+
+### The obstacle
+
+`CutCellBody::defineCut` builds the interface from `detail::crossingLoops`, which reads the twelve
+edge crossings of the `CutCellSurface` and orients each loop against the face polygons through
+`Polygon::m_vertexEdge`. A multichorded face has vertices that are not crossings of the coarse
+cell's edges at all, and the prototype sets `m_vertexEdge` to -1 on them. So `crossingLoops` cannot
+describe a restricted cell, and the polygon-based closure the prototype uses -- collect the face
+polygons' unshared edges, walk them into loops -- is a requirement, not an optimisation.
+
+It should be a *second* path, entered only for restricted cells. Making it the only path would
+rebuild every cell in #730's verified generation through untested code for no gain.
+
+### Steps
+
+**1. One decision to settle first.** Does the trap refuse everywhere, or only at a seam? At uniform
+resolution every cell is blind alike, so the surface is watertight and only inaccurate; trapping
+there would refuse any geometry with a sharp edge, at any resolution, and take the regression suite
+with it. Only at a seam does the blindness become a topological defect, and that is where the
+prototype measured the trap exact. Recommend: refuse at the seam, count and report elsewhere.
+
+**2. `CutCellBody` gains the polygon-based interface closure.** Port `SeamBody::closeInterface`. It
+needs no new state -- it reads `m_polygon` and writes back interface polygons with `m_face = -1`.
+
+**3. `CutCellBody` gains `mergeCoplanar` and `restrictFace`.** Both prototype-proven. Carry the
+zero-area early return with them: a face the body covers completely merges to nothing, and that is an
+answer, not a failure. Without it, 17 of 600 seam cells were refused at grid-aligned placement.
+Measure `s_maxPolygons` rather than trusting it -- restricting several faces of one cell overflowed
+the cap in the prototype and came back as refusal reason 4.
+
+**4. The trap.** `PolyhedralGeometryShop::buildSurface`, in the branch where an edge's two ends agree
+and it records no crossing; its own comment states the assumption a double crossing breaks. One
+midpoint evaluation per edge, and `buildSurface` is per-cell so the cost lands only on cut cells.
+
+**5. The shop restricts at the seam.** In `fillGraph`, a generated cell abutting the finer footprint
+has the faces it shares with that footprint restricted before its node is filled. Four sub-surface
+constructions per restricted face, on a set that scales as the seam area.
+
+**6. Validation, cheapest first.** The existing regression suite must be bit-identical wherever no
+coverage regions exist: with no finer footprint there is no seam, nothing is restricted, and nothing
+may move. Then the prototype's acceptance numbers against the library rather than the prototype --
+no torn cells, no disconnected merged faces, face fractions matching the sum of the fine sub-faces to
+round-off. Then the two-level and swept-cube harnesses re-pointed at `CutCellBody`.
+
+### What this does not fix
+
+A cell whose solid inclusion enters and leaves through one face without crossing any cell edge has no
+crossings at all, classifies Regular, and is invisible to the trap as well as to the multichord. The
+break case's blind neighbour was caught only because it shared a double-crossed edge with its cut
+neighbour. Nothing here detects the general case.
+
+The degenerate fan is still open: a restricted cell whose interface loop lies in one face plane gets
+an apex in that plane and encloses no volume. `CutCellBody::interfaceLiesInFace` already exists and
+should be read before anything is built on top of it.
+
 ## What will bite
 
 - **The prototype harness no longer measures locality.** It hands over parents gathered from local
