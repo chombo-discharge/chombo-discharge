@@ -1115,6 +1115,32 @@ public:
   {
     a_why    = 0;
     a_numOut = 0;
+
+    // A seam face that the body covers completely carries no polygon, and that is an answer, not a
+    // failure. It happens wherever a face of the geometry lands on a cell face: the crossings sit on
+    // the face's own edges, faceWalk returns slivers of no area, and everything below cancels them
+    // against each other. Refusing here would drop the cell back to a single chord, which is the
+    // crack the multichord exists to remove.
+    Real inputArea = 0.0;
+
+    for (int ip = 0; ip < a_num; ip++) {
+      RealVect twice = RealVect::Zero;
+
+      for (int i = 0; i < a_in[ip].m_numVertices; i++) {
+        const RealVect& a = a_in[ip].m_vertex[i];
+        const RealVect& b = a_in[ip].m_vertex[(i + 1) % a_in[ip].m_numVertices];
+
+        twice += PolyGeom::cross(a, b);
+      }
+
+      inputArea += 0.5 * twice.vectorLength();
+    }
+
+    // the face is one unit square in these coordinates, so this is a sliver a weld tolerance wide
+    if (inputArea <= PolyhedralEB::detail::s_weldTolerance) {
+      return true;
+    }
+
     RealVect from[4 * s_maxVertices];
     RealVect to[4 * s_maxVertices];
 
@@ -2063,10 +2089,255 @@ validateSeamFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 // cell subdivided a face of its own, so a multichord face always met a single-chord neighbour and
 // the surface cracked by construction.
 //
-// Two surfaces are written. In both, the fine block is the fine cells' own interfaces and the
-// coarse block is the coarse cells' own. They differ only in what the last column of coarse cells
-// puts on the face it shares with the fine block: one chord of its own, or the chords of the cells
-// on the other side. The first should crack along that plane and the second should not.
+// Both blocks together cover the whole body, so the union of the interface triangles is a closed
+// surface exactly when the seam agrees, and edge valence in the exported STL decides it. Two
+// surfaces are written where a path is given: they differ only in what the last column of coarse
+// cells puts on the face it shares with the fine block -- one chord of its own, or the chords of
+// the cells on the other side.
+void
+twoLevelSeam(const BaseIF&      a_implicitFunction,
+             const RealVect&    a_probLo,
+             const Real         a_dxCoarse,
+             const int          a_numCoarse,
+             const int          a_split,
+             const std::string& a_stlPrefix,
+             int&               a_coarseCut,
+             int&               a_coarsePlainRefused,
+             int&               a_fineCut,
+             int&               a_finePlainRefused,
+             int&               a_seamCells,
+             int&               a_seamRefused,
+             int*               a_seamWhy,
+             int*               a_mergeWhy,
+             const int          a_numWhy,
+             Real&              a_worstMulti,
+             Real&              a_worstSingle,
+             Real&              a_worstClosure)
+{
+  CH_TIME("twoLevelSeam");
+
+  const Real dxC = a_dxCoarse;
+  const Real dxF = 0.5 * dxC;
+
+  a_coarseCut          = 0;
+  a_coarsePlainRefused = 0;
+  a_fineCut            = 0;
+  a_finePlainRefused   = 0;
+  a_seamCells          = 0;
+  a_seamRefused        = 0;
+  a_worstMulti         = 0.0;
+  a_worstSingle        = 0.0;
+  a_worstClosure       = 0.0;
+
+  for (int i = 0; i < a_numWhy; i++) {
+    a_seamWhy[i]  = 0;
+    a_mergeWhy[i] = 0;
+  }
+
+  const bool writing = !a_stlPrefix.empty();
+
+  std::ofstream multi;
+  std::ofstream single;
+
+  long long multiFacets  = 0;
+  long long singleFacets = 0;
+
+  if (writing) {
+    multi.open(a_stlPrefix + "_multichord.stl");
+    single.open(a_stlPrefix + "_singlechord.stl");
+
+    multi << std::scientific << std::setprecision(17) << "solid multichord\n";
+    single << std::scientific << std::setprecision(17) << "solid singlechord\n";
+  }
+
+  const Box coarseBox(IntVect::Zero, (a_numCoarse - 1) * IntVect::Unit);
+
+  for (BoxIterator bit(coarseBox); bit.ok(); ++bit) {
+    if (bit()[0] >= a_split) {
+      continue;
+    }
+
+    RealVect centre = a_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += dxC * (bit()[d] + 0.5);
+    }
+
+    PolyhedralEB::CutCellSurface coarse;
+    makeSurface(a_implicitFunction, centre, dxC, coarse);
+
+    if (PolyhedralEB::CutCellBody::classify(coarse) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    a_coarseCut++;
+
+    SeamBody plain;
+
+    if (!plain.buildPlain(coarse)) {
+      a_coarsePlainRefused++;
+
+      continue;
+    }
+
+    if (writing) {
+      plain.appendInterfaceSTL(single, centre, dxC, singleFacets);
+    }
+
+    bool wroteMulti = false;
+
+    if (bit()[0] == a_split - 1) {
+      SeamBody seam;
+
+      int  polys = 0, verts = 0, why = 0, mergeWhy = 0, leftover = 0, subFaces = 0;
+      int  loops = 0, needFan = 0, needFlat = 0, flatLoops = 0;
+      Real gap = 0.0, bend = 0.0, singleChord = 0.0, multiChord = 0.0, fineSum = 0.0;
+
+      const bool ok = seam.buildSeam(a_implicitFunction,
+                                     coarse,
+                                     centre,
+                                     dxC,
+                                     0,
+                                     1,
+                                     polys,
+                                     verts,
+                                     gap,
+                                     why,
+                                     mergeWhy,
+                                     leftover,
+                                     subFaces,
+                                     loops,
+                                     needFan,
+                                     needFlat,
+                                     flatLoops,
+                                     bend,
+                                     singleChord,
+                                     multiChord,
+                                     fineSum);
+
+      a_seamCells++;
+
+      if (ok) {
+        if (writing) {
+          seam.appendInterfaceSTL(multi, centre, dxC, multiFacets);
+        }
+
+        wroteMulti = true;
+
+        a_worstMulti   = std::max(a_worstMulti, std::abs(multiChord - 0.25 * fineSum));
+        a_worstSingle  = std::max(a_worstSingle, std::abs(singleChord - 0.25 * fineSum));
+        a_worstClosure = std::max(a_worstClosure, gap);
+      }
+      else {
+        a_seamRefused++;
+
+        if (writing) {
+          pout() << "TWOLEVEL refused " << bit() << " why " << why << " mergeWhy " << mergeWhy << " subFaces "
+                 << subFaces << " leftover " << leftover << " singleChord " << singleChord << " fineSum " << fineSum
+                 << endl;
+        }
+
+        if (why >= 0 && why < a_numWhy) {
+          a_seamWhy[why]++;
+        }
+
+        if (mergeWhy > 0 && mergeWhy < a_numWhy) {
+          a_mergeWhy[mergeWhy]++;
+        }
+      }
+    }
+
+    if (writing && !wroteMulti) {
+      plain.appendInterfaceSTL(multi, centre, dxC, multiFacets);
+    }
+  }
+
+  // the fine block, identical in both files
+  const Box fineBox(IntVect(D_DECL(2 * a_split, 0, 0)),
+                    IntVect(D_DECL(2 * a_numCoarse - 1, 2 * a_numCoarse - 1, 2 * a_numCoarse - 1)));
+
+  for (BoxIterator bit(fineBox); bit.ok(); ++bit) {
+    RealVect centre = a_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += dxF * (bit()[d] + 0.5);
+    }
+
+    PolyhedralEB::CutCellSurface fine;
+    makeSurface(a_implicitFunction, centre, dxF, fine);
+
+    if (PolyhedralEB::CutCellBody::classify(fine) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    a_fineCut++;
+
+    SeamBody body;
+
+    if (!body.buildPlain(fine)) {
+      a_finePlainRefused++;
+
+      continue;
+    }
+
+    if (writing) {
+      body.appendInterfaceSTL(multi, centre, dxF, multiFacets);
+      body.appendInterfaceSTL(single, centre, dxF, singleFacets);
+    }
+  }
+
+  if (writing) {
+    multi << "endsolid multichord\n";
+    single << "endsolid singlechord\n";
+
+    multi.close();
+    single.close();
+  }
+}
+
+// The two blocks as meshes VisIt can overlay.
+void
+writeTwoLevelGrids(const std::string& a_prefix,
+                   const RealVect&    a_probLo,
+                   const Real         a_dxCoarse,
+                   const int          a_numCoarse,
+                   const int          a_split)
+{
+  for (int which = 0; which < 2; which++) {
+    const bool isFine = (which == 1);
+    const Real dx     = isFine ? 0.5 * a_dxCoarse : a_dxCoarse;
+    const int  iLo    = isFine ? 2 * a_split : 0;
+    const int  iHi    = isFine ? 2 * a_numCoarse : a_split;
+    const int  jHi    = isFine ? 2 * a_numCoarse : a_numCoarse;
+
+    std::ofstream grid(a_prefix + (isFine ? "_fine.vtk" : "_coarse.vtk"));
+
+    grid << std::scientific;
+    grid << "# vtk DataFile Version 3.0\n" << (isFine ? "fine block\n" : "coarse block\n") << "ASCII\n";
+    grid << "DATASET RECTILINEAR_GRID\n";
+    grid << "DIMENSIONS " << (iHi - iLo + 1) << " " << (jHi + 1) << " " << (jHi + 1) << "\n";
+
+    grid << "X_COORDINATES " << (iHi - iLo + 1) << " double\n";
+    for (int i = iLo; i <= iHi; i++) {
+      grid << (a_probLo[0] + dx * i) << " ";
+    }
+    grid << "\n";
+
+    const char* rest[2] = {"Y_COORDINATES", "Z_COORDINATES"};
+
+    for (int d = 0; d < 2; d++) {
+      grid << rest[d] << " " << (jHi + 1) << " double\n";
+      for (int j = 0; j <= jHi; j++) {
+        grid << (a_probLo[d + 1] + dx * j) << " ";
+      }
+      grid << "\n";
+    }
+
+    grid.close();
+  }
+}
+
+// The seam on the geometry supplied by the inputs file, exported for inspection.
 void
 validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                      const RefCountedPtr<AmrMesh>&               a_amr,
@@ -2083,176 +2354,172 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 
   const RealVect probLo = a_amr->getProbLo();
   const Real     dxC    = a_amr->getDx()[0] * (a_amr->getDomains()[0].domainBox().size(0) / a_numCoarse);
-  const Real     dxF    = 0.5 * dxC;
 
-  std::ofstream multi("seam2_multichord.stl");
-  std::ofstream single("seam2_singlechord.stl");
+  constexpr int numWhy = 8;
 
-  multi << std::scientific << "solid multichord\n";
-  single << std::scientific << "solid singlechord\n";
+  int  why[numWhy];
+  int  mergeWhy[numWhy];
+  int  coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
+  Real worstMulti = 0.0, worstSingle = 0.0, worstClosure = 0.0;
 
-  long long multiFacets  = 0;
-  long long singleFacets = 0;
+  twoLevelSeam(*implicitFunction,
+               probLo,
+               dxC,
+               a_numCoarse,
+               a_split,
+               "seam2",
+               coarseCut,
+               coarsePlain,
+               fineCut,
+               finePlain,
+               seamCells,
+               seamRefused,
+               why,
+               mergeWhy,
+               numWhy,
+               worstMulti,
+               worstSingle,
+               worstClosure);
 
-  long long boundaryFaces = 0;
-  long long conserveBad   = 0;
+  writeTwoLevelGrids("seam2", probLo, dxC, a_numCoarse, a_split);
 
-  Real worstMulti  = 0.0;
-  Real worstSingle = 0.0;
+  pout() << "TWOLEVEL seamCells " << seamCells << " refused " << seamRefused << " worstMultichord " << worstMulti
+         << " worstSingleChord " << worstSingle << " worstClosure " << worstClosure << endl;
+  pout() << "TWOLEVEL coarseCut " << coarseCut << " coarseRefused " << coarsePlain << " fineCut " << fineCut
+         << " fineRefused " << finePlain << endl;
+}
 
-  const Box coarseBox(IntVect::Zero, (a_numCoarse - 1) * IntVect::Unit);
+// The same seam, swept over the Euler angles of a rotated cube. A cube is the hard case: its edges
+// and corners land on cell centres and cell faces, which is where the chords degenerate, and
+// rotating it walks those degeneracies through every relative orientation.
+void
+sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
+                  const int                     a_numCoarse,
+                  const int                     a_split,
+                  const int                     a_samples,
+                  const Real                    a_span,
+                  const Real                    a_size,
+                  const RealVect&               a_center,
+                  const bool                    a_write)
+{
+  CH_TIME("sweepTwoLevelSeam");
 
-  for (BoxIterator bit(coarseBox); bit.ok(); ++bit) {
-    if (bit()[0] >= a_split) {
-      continue;
-    }
+  if (procID() != 0) {
+    return;
+  }
 
-    RealVect centre = probLo;
+  const RealVect probLo = a_amr->getProbLo();
+  const Real     dxC    = a_amr->getDx()[0] * (a_amr->getDomains()[0].domainBox().size(0) / a_numCoarse);
 
-    for (int d = 0; d < SpaceDim; d++) {
-      centre[d] += dxC * (bit()[d] + 0.5);
-    }
+  constexpr int numWhy = 8;
 
-    PolyhedralEB::CutCellSurface coarse;
-    makeSurface(*implicitFunction, centre, dxC, coarse);
+  int  totalRotations = 0, totalSeam = 0, totalRefused = 0, badRotations = 0;
+  int  totalWhy[numWhy];
+  int  totalMergeWhy[numWhy];
+  Real worstMulti = 0.0, worstSingle = 0.0, worstClosure = 0.0;
 
-    if (PolyhedralEB::CutCellBody::classify(coarse) != PolyhedralEB::CutCellBody::Kind::Cut) {
-      continue;
-    }
+  RealVect worstAngles = RealVect::Zero;
 
-    SeamBody plain;
+  for (int i = 0; i < numWhy; i++) {
+    totalWhy[i]      = 0;
+    totalMergeWhy[i] = 0;
+  }
 
-    if (!plain.buildPlain(coarse)) {
-      continue;
-    }
+  for (int ia = 0; ia < a_samples; ia++) {
+    for (int ib = 0; ib < a_samples; ib++) {
+      for (int ic = 0; ic < a_samples; ic++) {
+        const RealVect angles(D_DECL(a_span * ia / a_samples, a_span * ib / a_samples, a_span * ic / a_samples));
 
-    plain.appendInterfaceSTL(single, centre, dxC, singleFacets);
+        Vector<RealVect> normals;
+        Vector<Real>     offsets;
 
-    const bool onBoundary = (bit()[0] == a_split - 1);
+        for (int d = 0; d < SpaceDim; d++) {
+          for (int s = 0; s < 2; s++) {
+            RealVect n = RealVect::Zero;
+            n[d]       = (s == 0) ? -1.0 : 1.0;
 
-    bool wroteMulti = false;
-
-    if (onBoundary) {
-      SeamBody seam;
-
-      int  polys = 0, verts = 0, why = 0, mergeWhy = 0, leftover = 0, subFaces = 0;
-      int  loops = 0, needFan = 0, needFlat = 0, flatLoops = 0;
-      Real gap = 0.0, bend = 0.0, singleChord = 0.0, multiChord = 0.0, fineSum = 0.0;
-
-      if (seam.buildSeam(*implicitFunction,
-                         coarse,
-                         centre,
-                         dxC,
-                         0,
-                         1,
-                         polys,
-                         verts,
-                         gap,
-                         why,
-                         mergeWhy,
-                         leftover,
-                         subFaces,
-                         loops,
-                         needFan,
-                         needFlat,
-                         flatLoops,
-                         bend,
-                         singleChord,
-                         multiChord,
-                         fineSum)) {
-        seam.appendInterfaceSTL(multi, centre, dxC, multiFacets);
-
-        wroteMulti = true;
-
-        // what the cells on the other side hold for the shared face, against what each side of the
-        // seam says it is
-        boundaryFaces++;
-
-        worstMulti  = std::max(worstMulti, std::abs(multiChord - 0.25 * fineSum));
-        worstSingle = std::max(worstSingle, std::abs(singleChord - 0.25 * fineSum));
-
-        if (std::abs(multiChord - 0.25 * fineSum) > 1.0E-12) {
-          conserveBad++;
+            normals.push_back(rotate(n, angles));
+            offsets.push_back(a_size);
+          }
         }
+
+        const ConvexBody cube(normals, offsets, a_center);
+
+        int  why[numWhy];
+        int  mergeWhy[numWhy];
+        int  coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
+        Real multi = 0.0, singleChord = 0.0, closure = 0.0;
+
+        std::string prefix;
+
+        if (a_write) {
+          char name[64];
+          snprintf(name, sizeof(name), "sweep_%02d_%02d_%02d", ia, ib, ic);
+          prefix = name;
+        }
+
+        twoLevelSeam(cube,
+                     probLo,
+                     dxC,
+                     a_numCoarse,
+                     a_split,
+                     prefix,
+                     coarseCut,
+                     coarsePlain,
+                     fineCut,
+                     finePlain,
+                     seamCells,
+                     seamRefused,
+                     why,
+                     mergeWhy,
+                     numWhy,
+                     multi,
+                     singleChord,
+                     closure);
+
+        totalRotations++;
+        totalSeam += seamCells;
+        totalRefused += seamRefused;
+
+        for (int i = 0; i < numWhy; i++) {
+          totalWhy[i] += why[i];
+          totalMergeWhy[i] += mergeWhy[i];
+        }
+
+        const bool bad = (seamRefused > 0) || (coarsePlain > 0) || (finePlain > 0) || (multi > 1.0E-10);
+
+        if (bad) {
+          badRotations++;
+
+          pout() << "SWEEP bad angles " << angles << " seamCells " << seamCells << " refused " << seamRefused
+                 << " coarseRefused " << coarsePlain << " fineRefused " << finePlain << " worstMultichord " << multi
+                 << " worstClosure " << closure << endl;
+        }
+
+        if (multi > worstMulti) {
+          worstMulti  = multi;
+          worstAngles = angles;
+        }
+
+        worstSingle  = std::max(worstSingle, singleChord);
+        worstClosure = std::max(worstClosure, closure);
       }
     }
-
-    if (!wroteMulti) {
-      plain.appendInterfaceSTL(multi, centre, dxC, multiFacets);
-    }
   }
 
-  // the fine block, identical in both files
-  const Box fineBox(IntVect(D_DECL(2 * a_split, 0, 0)),
-                    IntVect(D_DECL(2 * a_numCoarse - 1, 2 * a_numCoarse - 1, 2 * a_numCoarse - 1)));
-
-  for (BoxIterator bit(fineBox); bit.ok(); ++bit) {
-    RealVect centre = probLo;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      centre[d] += dxF * (bit()[d] + 0.5);
-    }
-
-    PolyhedralEB::CutCellSurface fine;
-    makeSurface(*implicitFunction, centre, dxF, fine);
-
-    if (PolyhedralEB::CutCellBody::classify(fine) != PolyhedralEB::CutCellBody::Kind::Cut) {
-      continue;
-    }
-
-    SeamBody body;
-
-    if (!body.buildPlain(fine)) {
-      continue;
-    }
-
-    body.appendInterfaceSTL(multi, centre, dxF, multiFacets);
-    body.appendInterfaceSTL(single, centre, dxF, singleFacets);
+  pout() << "SWEEP rotations " << totalRotations << " bad " << badRotations << " seamCells " << totalSeam << " refused "
+         << totalRefused << endl;
+  pout() << "SWEEP why";
+  for (int i = 0; i < numWhy; i++) {
+    pout() << " " << i << ":" << totalWhy[i];
   }
-
-  multi << "endsolid multichord\n";
-  single << "endsolid singlechord\n";
-
-  multi.close();
-  single.close();
-
-  // the two blocks as meshes VisIt can overlay
-  for (int which = 0; which < 2; which++) {
-    const bool isFine = (which == 1);
-    const Real dx     = isFine ? dxF : dxC;
-    const int  iLo    = isFine ? 2 * a_split : 0;
-    const int  iHi    = isFine ? 2 * a_numCoarse : a_split;
-    const int  jHi    = isFine ? 2 * a_numCoarse : a_numCoarse;
-
-    std::ofstream grid(isFine ? "seam2_fine.vtk" : "seam2_coarse.vtk");
-
-    grid << std::scientific;
-    grid << "# vtk DataFile Version 3.0\n" << (isFine ? "fine block\n" : "coarse block\n") << "ASCII\n";
-    grid << "DATASET RECTILINEAR_GRID\n";
-    grid << "DIMENSIONS " << (iHi - iLo + 1) << " " << (jHi + 1) << " " << (jHi + 1) << "\n";
-
-    grid << "X_COORDINATES " << (iHi - iLo + 1) << " double\n";
-    for (int i = iLo; i <= iHi; i++) {
-      grid << (probLo[0] + dx * i) << " ";
-    }
-    grid << "\n";
-
-    const char* rest[2] = {"Y_COORDINATES", "Z_COORDINATES"};
-
-    for (int d = 0; d < 2; d++) {
-      grid << rest[d] << " " << (jHi + 1) << " double\n";
-      for (int j = 0; j <= jHi; j++) {
-        grid << (probLo[d + 1] + dx * j) << " ";
-      }
-      grid << "\n";
-    }
-
-    grid.close();
+  pout() << " mergeWhy";
+  for (int i = 0; i < numWhy; i++) {
+    pout() << " " << i << ":" << totalMergeWhy[i];
   }
-
-  pout() << "TWOLEVEL boundaryFaces " << boundaryFaces << " conserveBad " << conserveBad << " worstMultichord "
-         << worstMulti << " worstSingleChord " << worstSingle << endl;
-  pout() << "TWOLEVEL facets multichord " << multiFacets << " singlechord " << singleFacets << endl;
+  pout() << endl;
+  pout() << "SWEEP worstMultichord " << worstMulti << " at " << worstAngles << " worstSingleChord " << worstSingle
+         << " worstClosure " << worstClosure << endl;
 }
 
 // Check that a partially carried index space is sound before anything is asked to solve on it.
@@ -3375,16 +3642,32 @@ main(int argc, char* argv[])
   validateIndexSpace(amr, compgeom);
 
   {
-    int coarse = 0;
-    int split  = 0;
+    int      coarse = 0;
+    int      split  = 0;
+    int      sweep  = 0;
+    int      write  = 0;
+    Real     span   = 90.0;
+    Real     size   = 0.25;
+    RealVect center = RealVect::Zero;
     {
       ParmParse pp("Prototype");
       pp.query("twolevel_coarse", coarse);
       pp.query("twolevel_split", split);
+      pp.query("twolevel_sweep", sweep);
+      pp.query("twolevel_span", span);
+      pp.query("twolevel_size", size);
+      pp.query("twolevel_write", write);
     }
 
+    queryVect("Prototype", "twolevel_center", center);
+
     if (coarse > 0 && split > 0) {
-      validateTwoLevelSeam(compgeom, amr, coarse, split);
+      if (sweep > 0) {
+        sweepTwoLevelSeam(amr, coarse, split, sweep, span, size, center, write > 0);
+      }
+      else {
+        validateTwoLevelSeam(compgeom, amr, coarse, split);
+      }
     }
   }
 

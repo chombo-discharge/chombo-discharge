@@ -241,6 +241,61 @@ fine sub-faces:
 So the multichord is what makes the coarse-fine boundary topologically closed and conservative; the
 single chord is neither, and the failure is not small.
 
+## The rotated cube, 1000 orientations
+
+A sphere is the easy case: nothing is planar, no facet can land on a cell face, and the chords never
+come out collinear. A cube is the hard one, and it is also the shape the polyhedral representation
+exists for. `sweepTwoLevelSeam` runs the same two-level configuration over a cube swept through ten
+values of each Euler angle across a quadrant -- 1000 orientations, 25527 seam cells.
+
+Three things had to be fixed or separated before the sweep said anything.
+
+**`mergeCoplanar` refused a seam face the body covers completely.** A cube face landing on a cell
+face puts the crossings on the face's own edges, `faceWalk` returns slivers of no area, and the edge
+cancellation leaves either nothing or fewer than three edges -- reported as `why 6`, merge reasons 1
+and 6. An empty merged face is the answer there, not a failure: the aperture is zero on both sides
+(measured `singleChord 1.0e-12`, `fineSum 0`). Refusing dropped the cell back to a single chord,
+which is the crack the multichord exists to remove. It now returns success with no polygon when the
+input sub-faces enclose less than a weld tolerance of area. That alone was 17 refusals in 600 seam
+cells at grid-aligned placement, and 0 after.
+
+**The STL was written at six digits.** Collinear segments that partition the same line exactly then
+miss each other by ~1e-7, and a T-junction reads as a crack. At seventeen digits the same files lose
+almost all of their apparent defects. Any watertightness claim measured off a six-digit export is
+worthless.
+
+**A body face lying on a cell face produces no cut cells at all**, so no interface polygon, so a hole
+in any export of interface triangles. A cube of half-width 0.25 on a 0.125 mesh has all six faces on
+cell planes; at uniform resolution its surface shows 48 open edges at 0 degrees and 32 at a generic
+angle, total length exactly the perimeter of the missing facets. Nudging the centre to
+(0.0131, 0.0172, 0.0193) takes every one of those to zero, at every angle tested. Nothing is wrong:
+the covered/regular boundary carries that surface, and no cut cell is asked to.
+
+With those separated, the sweep measures the seam and nothing else.
+
+| | multichord | single chord |
+| --- | --- | --- |
+| seam cells refused, of 25527 | 0 | -- |
+| worst face-fraction error, generic centre | 3.3e-16 | 4.8e-1 |
+| worst face-fraction error, centre on the grid | 6.0e-11 | 3.8e-1 |
+| worst closure residual | 3.9e-16 | -- |
+| rotations whose surface is watertight | 854 of 1000 | 0 of 1000 |
+| total unclosed area over the sweep | 7.8e-2 | 7.3e+0 |
+| median unclosed area per rotation | 3.2e-4 | 6.4e-3 |
+
+Watertight here means: every edge shared by exactly two triangles once T-junctions are resolved --
+the coarse side merges collinear fine chords into one segment, which leaves the fine side's vertices
+in the middle of it. That is a vertex-sharing difference, not a gap, and the partition is exact.
+
+The 146 rotations that do not close leave slivers of one shape: a coarse segment lying along a
+coarse cell edge, against two fine segments that dip past that edge by a fraction of a fine cell.
+The multichord replaces the chord on the seam face only; where the contour grazes the coarse cell's
+*other* faces, the coarse cell's own chord there is what the interface closes against, and the fine
+cells resolve a dip it cannot see. Worst case over the sweep is 3.3e-3 of area against a coarse face
+of 1.6e-2, on a surface of 1.34. The single chord fails the same test in every rotation and by two
+orders of magnitude more area, so the multichord is doing its job; this is the part of the seam it
+does not reach.
+
 ## What will bite
 
 - **The prototype harness no longer measures locality.** It hands over parents gathered from local
