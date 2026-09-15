@@ -1306,6 +1306,25 @@ public:
     return true;
   }
 
+  // The face polygons this body holds, in cell-relative coordinates, where a cell edge is where two
+  // coordinates are both +/- 0.5.
+  void
+  dumpPolygons(const char* a_tag) const
+  {
+    pout() << "DUMP " << a_tag << " polygons " << m_numPolygons << endl;
+
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      pout() << "  poly " << ip << " face " << m_polygon[ip].m_face << " verts " << m_polygon[ip].m_numVertices;
+
+      for (int i = 0; i < m_polygon[ip].m_numVertices; i++) {
+        pout() << " (" << m_polygon[ip].m_vertex[i][0] << "," << m_polygon[ip].m_vertex[i][1] << ","
+               << m_polygon[ip].m_vertex[i][2] << ")";
+      }
+
+      pout() << endl;
+    }
+  }
+
   // Write this body's interface patch as STL facets, in physical coordinates.
   //
   // Only the interface is written: the cell-face polygons are not part of the embedded boundary
@@ -2101,6 +2120,7 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
              const int          a_numCoarse,
              const int          a_split,
              const std::string& a_stlPrefix,
+             const IntVect&     a_dumpCell,
              int&               a_coarseCut,
              int&               a_coarsePlainRefused,
              int&               a_fineCut,
@@ -2193,6 +2213,16 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
       int  loops = 0, needFan = 0, needFlat = 0, flatLoops = 0;
       Real gap = 0.0, bend = 0.0, singleChord = 0.0, multiChord = 0.0, fineSum = 0.0;
 
+      const bool dumping = writing && (bit() == a_dumpCell);
+
+      if (dumping) {
+        SeamBody before;
+
+        if (before.buildPlain(coarse)) {
+          before.dumpPolygons("plain");
+        }
+      }
+
       const bool ok = seam.buildSeam(a_implicitFunction,
                                      coarse,
                                      centre,
@@ -2216,6 +2246,10 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
                                      fineSum);
 
       a_seamCells++;
+
+      if (dumping) {
+        seam.dumpPolygons("seam");
+      }
 
       if (ok) {
         if (writing) {
@@ -2357,6 +2391,20 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
 
   constexpr int numWhy = 8;
 
+  IntVect dumpCell = IntVect::Unit * (-1);
+  {
+    Vector<int> v;
+    ParmParse   pp("Prototype");
+
+    if (pp.contains("twolevel_dump_cell")) {
+      pp.getarr("twolevel_dump_cell", v, 0, SpaceDim);
+
+      for (int d = 0; d < SpaceDim; d++) {
+        dumpCell[d] = v[d];
+      }
+    }
+  }
+
   int  why[numWhy];
   int  mergeWhy[numWhy];
   int  coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
@@ -2368,6 +2416,7 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                a_numCoarse,
                a_split,
                "seam2",
+               dumpCell,
                coarseCut,
                coarsePlain,
                fineCut,
@@ -2464,6 +2513,7 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
                      a_numCoarse,
                      a_split,
                      prefix,
+                     IntVect::Unit * (-1),
                      coarseCut,
                      coarsePlain,
                      fineCut,
