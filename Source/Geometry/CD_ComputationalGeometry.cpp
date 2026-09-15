@@ -66,6 +66,12 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 }
 
 void
+ComputationalGeometry::setGeometryGridFile(const std::string& a_fileName) noexcept
+{
+  m_geometryGridFile = a_fileName;
+}
+
+void
 ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain, const int a_refinement)
 {
   CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain, int)");
@@ -686,6 +692,10 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
     shop->setCoverage(m_coverageRegions, m_coverageDomain);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
+    if (!m_geometryGridFile.empty()) {
+      shop->setGridFileName(m_geometryGridFile + ".gas");
+    }
+
     a_geoserver = static_cast<GeometryService*>(shop);
   }
   else if (m_generator == Generator::ScanShop) {
@@ -740,6 +750,10 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
 
       shop->setCoverage(m_coverageRegions, m_coverageDomain);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
+
+      if (!m_geometryGridFile.empty()) {
+        shop->setGridFileName(m_geometryGridFile + ".solid");
+      }
 
       a_geoserver = static_cast<GeometryService*>(shop);
     }

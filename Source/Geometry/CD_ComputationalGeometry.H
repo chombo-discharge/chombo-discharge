@@ -85,6 +85,16 @@ public:
   useChomboShop();
 
   /**
+   * @brief Write the grids the polyhedral generator builds the index space over, as STL.
+   * @details One file per phase and level, named for the base name given here with the phase and
+   *          the level appended. These are the boxes left after the generator has filtered them,
+   *          which is what the index space is actually built on. An empty name writes nothing.
+   * @param[in] a_fileName Base name for the output, or empty to write nothing.
+   */
+  void
+  setGeometryGridFile(const std::string& a_fileName) noexcept;
+
+  /**
    * @brief Generate the geometry with PolyhedralGeometryShop.
    * @details Same topology as the chombo-discharge generator, but the moments are exact
    * integrals of an explicitly reconstructed surface rather than quadratures of the implicit
@@ -292,6 +302,11 @@ protected:
    * @brief Refinement between the cells the surface is reconstructed on and the ones generated.
    */
   int m_geometryRefinement;
+
+  /**
+   * @brief Base name for writing the grids the index space is generated over, or empty for none.
+   */
+  std::string m_geometryGridFile;
 
   /**
    * @brief Boxes each level was swept over, coarsest first, and so how much of it to carry.

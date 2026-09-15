@@ -12,6 +12,8 @@
 
 // Std includes
 #include <sstream>
+#include <fstream>
+#include <iomanip>
 #include <algorithm>
 
 // Chombo includes
@@ -49,6 +51,108 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
 
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
 {}
+
+void
+PolyhedralGeometryShop::setGridFileName(const std::string& a_fileName) noexcept
+{
+  m_gridFile = a_fileName;
+}
+
+void
+PolyhedralGeometryShop::postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx)
+{
+  CH_TIME("PolyhedralGeometryShop::postMakeBoxLayout");
+
+  ScanShop::postMakeBoxLayout(a_dbl, a_dx);
+
+  if (m_gridFile.empty()) {
+    return;
+  }
+
+  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
+    if (std::abs(m_dx[lvl] - a_dx[0]) <= 1.0E-12 * m_dx[lvl]) {
+      this->writeGridSTL(a_dbl, lvl);
+
+      break;
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::writeGridSTL(const DisjointBoxLayout& a_dbl, const int a_level) const noexcept
+{
+  CH_TIME("PolyhedralGeometryShop::writeGridSTL");
+
+  if (procID() != 0) {
+    return;
+  }
+
+  const Real dx = m_dx[a_level];
+
+  std::ostringstream name;
+  name << m_gridFile << ".level" << a_level << ".stl";
+
+  std::ofstream out(name.str());
+
+  if (!out.good()) {
+    return;
+  }
+
+  out << std::scientific << std::setprecision(17) << "solid grids\n";
+
+  const Vector<Box>& boxes = a_dbl.boxArray();
+
+  for (int ibox = 0; ibox < boxes.size(); ibox++) {
+    RealVect lo = m_probLo;
+    RealVect hi = m_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      lo[d] += dx * static_cast<Real>(boxes[ibox].smallEnd(d));
+      hi[d] += dx * static_cast<Real>(boxes[ibox].bigEnd(d) + 1);
+    }
+
+    // two triangles per face, wound so that the normal points out of the box
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const int t1 = (dir + 1) % SpaceDim;
+      const int t2 = (dir + 2) % SpaceDim;
+
+      for (int side = 0; side < 2; side++) {
+        RealVect corner[4];
+
+        for (int c = 0; c < 4; c++) {
+          corner[c]      = lo;
+          corner[c][dir] = (side == 0) ? lo[dir] : hi[dir];
+          corner[c][t1]  = (c == 1 || c == 2) ? hi[t1] : lo[t1];
+          corner[c][t2]  = (c == 2 || c == 3) ? hi[t2] : lo[t2];
+        }
+
+        const int order[2][3] = {{0, 1, 2}, {0, 2, 3}};
+
+        for (int tri = 0; tri < 2; tri++) {
+          out << "  facet normal 0 0 0\n    outer loop\n";
+
+          for (int v = 0; v < 3; v++) {
+            const int iv = (side == 0) ? order[tri][2 - v] : order[tri][v];
+
+            out << "      vertex";
+
+            for (int d = 0; d < SpaceDim; d++) {
+              out << " " << corner[iv][d];
+            }
+
+            out << "\n";
+          }
+
+          out << "    endloop\n  endfacet\n";
+        }
+      }
+    }
+  }
+
+  out << "endsolid grids\n";
+
+  out.close();
+}
 
 void
 PolyhedralGeometryShop::fillNodeValues(BaseFab<Real>&  a_nodeValues,

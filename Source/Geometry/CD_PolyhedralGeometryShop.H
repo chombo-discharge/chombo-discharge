@@ -73,6 +73,17 @@ public:
                          const int            a_refinement);
 
   /**
+   * @brief Write the grids this shop generates the index space over, as an STL file per level.
+   * @details The grids are the boxes left after retainBox has filtered them, which is what the
+   *          index space is actually built on and is not otherwise visible. Each box becomes twelve
+   *          triangles in physical coordinates, and each level its own file named for the base
+   *          name given here with the level appended. An empty name writes nothing.
+   * @param[in] a_fileName Base name for the output, or empty to write nothing.
+   */
+  void
+  setGridFileName(const std::string& a_fileName) noexcept;
+
+  /**
    * @brief Say how much of each level to carry.
    * @details A level is generated only over these boxes; elsewhere it is left out, and the levels
    * below it take what lies there through coarsening instead. The boxes are indexed coarsest
@@ -171,6 +182,27 @@ protected:
    * @details Negative when no boxes have been supplied, which carries every level in full.
    */
   int m_coverageLevel;
+
+  /**
+   * @brief Base name for the grid output, or empty when no grids are written.
+   */
+  std::string m_gridFile;
+
+  /**
+   * @brief Called once per level with the grids that level's index space is generated over.
+   * @param[in] a_dbl The grids, after retainBox has filtered them.
+   * @param[in] a_dx  Spacing of the level these grids belong to.
+   */
+  void
+  postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx) override;
+
+  /**
+   * @brief Write one level's grids as an STL file of boxes.
+   * @param[in] a_dbl   The grids the index space is generated over on this level.
+   * @param[in] a_level Index into m_dx of the level these grids belong to.
+   */
+  void
+  writeGridSTL(const DisjointBoxLayout& a_dbl, const int a_level) const noexcept;
 
   /**
    * @brief Classify every cell of a region from the bodies of the cells they subdivide.
