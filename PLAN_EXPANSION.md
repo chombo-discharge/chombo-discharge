@@ -201,6 +201,46 @@ clean case: its seam lies on planar faces and the agreement is exact.
 Topology was never at risk -- `reconcileSeam` writes areas, not connectivity, and the graph is what
 #731 certifies at `faceMismatch 0`. What is at stake is metric agreement to better than 1e-3.
 
+## The multichord seam, tested across a real coarse-fine boundary
+
+The first seam harness was worthless: it walked a *uniform* slab and, for every cut cell, subdivided
+one of that cell's own faces. Nothing was coarsened, nothing had children, and a multichord face
+always met a single-chord neighbour, so the exported surface cracked by construction. The numbers it
+produced (closure, per-cell conservation) were real but answered a question nobody asked.
+
+`validateTwoLevelSeam` builds the configuration the multichord exists for. Half the domain is carried
+at `dxC`, half at `dxC/2`; the coarse column adjacent to the interface puts the abutting fine chords
+on the shared face and single chords everywhere else; every other cell on both sides is
+single-chorded. Both blocks together cover the whole sphere, so the union of the interface triangles
+is a closed surface *if and only if* the seam agrees -- which makes edge valence the test, not
+eyeballing an STL.
+
+Sphere, radius 0.25, 16 coarse cells across `[-1,1]`, interface at `x = 0` through the centre:
+
+| | triangles | edges | valence | open boundary |
+| --- | --- | --- | --- | --- |
+| multichord | 664 | 996 | all 2 | none |
+| single chord | 648 | 992 | 40 at 1, rest 2 | 40 edges, total length 3.12 |
+
+The multichord surface is watertight. All 28 edges lying in the seam plane pair one coarse triangle
+with one fine triangle -- the coarse cell's chorded sub-faces and the fine cells' real faces are the
+same segments, not merely close ones.
+
+The single-chord surface tears along the full great circle: its 40 open edges have *every* endpoint
+at `x = 0` exactly, and their total length 3.12 is twice the circumference 2*pi*0.25 = 1.571 -- the
+coarse rim and the fine rim, both open, nowhere else damaged.
+
+Conservation over the 12 cut cells on the interface, coarse face fraction against the sum of the four
+fine sub-faces:
+
+| | worst error |
+| --- | --- |
+| multichord | 2.5e-13 |
+| single chord | 4.1e-2 |
+
+So the multichord is what makes the coarse-fine boundary topologically closed and conservative; the
+single chord is neither, and the failure is not small.
+
 ## What will bite
 
 - **The prototype harness no longer measures locality.** It hands over parents gathered from local

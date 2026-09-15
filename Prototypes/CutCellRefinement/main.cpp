@@ -1012,6 +1012,1249 @@ validateMultichordFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
          << " over14 " << over14 << " over20 " << over20 << endl;
 }
 
+// Build one cell's surface straight from the implicit function, in its own [-1/2,1/2] frame.
+static void
+makeSurface(const BaseIF&                 a_implicitFunction,
+            const RealVect&               a_cellCentre,
+            const Real                    a_dx,
+            PolyhedralEB::CutCellSurface& a_surface)
+{
+  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+    RealVect x = a_cellCentre;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      x[d] += a_dx * (((c >> d) & 1) - 0.5);
+    }
+
+    a_surface.m_corner[c] = a_implicitFunction.value(x);
+  }
+
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    int     dir;
+    IntVect loOffset;
+    edgeGeometry(e, dir, loOffset);
+
+    RealVect lo = a_cellCentre;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      lo[d] += a_dx * (loOffset[d] - 0.5);
+    }
+
+    RealVect hi = lo;
+    hi[dir] += a_dx;
+
+    // Bracket and bisect on the same predicate the body classifies corners with. A test on the
+    // product of the endpoint values disagrees with it wherever a value is a negative zero, and
+    // the surface is then internally inconsistent: a corner the body calls fluid sits on an edge
+    // this says never crosses.
+    const Real fLo = a_implicitFunction.value(lo);
+    const Real fHi = a_implicitFunction.value(hi);
+
+    if (PolyhedralEB::isFluid(fLo) == PolyhedralEB::isFluid(fHi)) {
+      a_surface.m_crossing[e] = PolyhedralEB::CutCellSurface::s_noCrossing;
+
+      continue;
+    }
+
+    Real tLo = 0.0;
+    Real tHi = 1.0;
+
+    for (int iter = 0; iter < 60 && (tHi - tLo) > 1.0E-15; iter++) {
+      const Real     tMid = 0.5 * (tLo + tHi);
+      const RealVect xMid = lo + tMid * (hi - lo);
+
+      if (PolyhedralEB::isFluid(a_implicitFunction.value(xMid)) == PolyhedralEB::isFluid(fLo)) {
+        tLo = tMid;
+      }
+      else {
+        tHi = tMid;
+      }
+    }
+
+    a_surface.m_crossing[e] = 0.5 * (tLo + tHi);
+  }
+}
+
+// A cell one of whose faces carries the chords of the cells on the other side of it, instead of a
+// single chord of its own.
+//
+// The face polygons for that face are not assembled by a wider face walk -- faceWalk is built
+// around a face having four edges and four corners, and generalising it means redoing the
+// four-crossing saddle logic, which is the most error-prone thing in this whole representation.
+// They are the face polygons of the cells abutting the face, obtained from the same faceWalk at
+// their own spacing and mapped into this cell's frame. The rest of the body is untouched.
+class SeamBody : public PolyhedralEB::CutCellBody
+{
+public:
+  // Returns false if the assembly does not fit. a_gap is the closure residual, which is what the
+  // interface loop would have to absorb: the body's other faces and its interface still describe
+  // the single chord this face no longer has.
+  // Attach the interface to whatever the face polygons leave open.
+  //
+  // In a closed body every edge is shared by exactly two polygons, traversed once each way. The
+  // face polygons share their cell-edge segments with each other; every edge they do not share is
+  // where the interface has to attach. So the patch can be read off the faces rather than built
+  // from the cell's crossing loop, which is what lets a face carry any number of chords: the
+  // construction never asks how many.
+  //
+  // Orientation comes free. A face traverses its open edge one way, so the interface traverses it
+  // the other, which is exactly the rule a closed surface obeys.
+  // Merge coplanar polygons that share edges into the single polygon bounding their union.
+  //
+  // Their shared edges are traversed once each way, so dropping every edge that has a reverse
+  // among the others leaves exactly the union's boundary, and walking what remains gives it in
+  // order. Orientation is inherited: the surviving edges keep the direction they had.
+  //
+  // Collinear vertices are then dropped, which is what makes the merged boundary match the
+  // neighbouring faces. A sub-face's edge along a cell edge is half the length of the coarse face's
+  // edge beside it, so without this the two never compare equal, and every cell edge is mistaken
+  // for a chord.
+  bool
+  mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out, const int a_maxOut, int& a_numOut, int& a_why)
+    const
+  {
+    a_why    = 0;
+    a_numOut = 0;
+    RealVect from[4 * s_maxVertices];
+    RealVect to[4 * s_maxVertices];
+
+    int numEdges = 0;
+
+    for (int ip = 0; ip < a_num; ip++) {
+      for (int i = 0; i < a_in[ip].m_numVertices; i++) {
+        const RealVect& a = a_in[ip].m_vertex[i];
+        const RealVect& b = a_in[ip].m_vertex[(i + 1) % a_in[ip].m_numVertices];
+
+        if (PolyhedralEB::detail::sameVertex(a, b)) {
+          continue;
+        }
+
+        bool interior = false;
+
+        for (int jp = 0; jp < a_num && !interior; jp++) {
+          if (jp == ip) {
+            continue;
+          }
+
+          for (int j = 0; j < a_in[jp].m_numVertices && !interior; j++) {
+            const RealVect& c = a_in[jp].m_vertex[j];
+            const RealVect& d = a_in[jp].m_vertex[(j + 1) % a_in[jp].m_numVertices];
+
+            interior = PolyhedralEB::detail::sameVertex(a, d) && PolyhedralEB::detail::sameVertex(b, c);
+          }
+        }
+
+        if (!interior) {
+          if (numEdges >= 4 * s_maxVertices) {
+            return false;
+          }
+
+          from[numEdges] = a;
+          to[numEdges]   = b;
+          numEdges++;
+        }
+      }
+    }
+
+    if (numEdges < 3) {
+      a_why = 1;
+
+      return false;
+    }
+
+    bool used[4 * s_maxVertices] = {false};
+
+    // The union need not be one connected region. A cube's edge grazing the corner of a quadrant
+    // leaves a sliver detached from the main patch, and a face is allowed to carry a polygon for
+    // each: accumulateMoments sums over polygons, so nothing has to be joined that geometry has
+    // separated. Refusing here instead would throw away exactly the cells the multichord is for.
+    for (int seed = 0; seed < numEdges; seed++) {
+      if (used[seed]) {
+        continue;
+      }
+
+      RealVect walk[4 * s_maxVertices];
+
+      int numWalk = 0;
+
+      used[seed]      = true;
+      walk[numWalk++] = from[seed];
+
+      RealVect       current = to[seed];
+      const RealVect end     = from[seed];
+
+      bool closed = false;
+
+      for (int guard = 0; guard <= numEdges && !closed; guard++) {
+        if (PolyhedralEB::detail::sameVertex(current, end)) {
+          closed = true;
+
+          break;
+        }
+
+        int next = -1;
+
+        for (int j = 0; j < numEdges && next < 0; j++) {
+          if (!used[j] && PolyhedralEB::detail::sameVertex(from[j], current)) {
+            next = j;
+          }
+        }
+
+        if (next < 0 || numWalk >= 4 * s_maxVertices) {
+          a_why = 2;
+
+          return false;
+        }
+
+        used[next]      = true;
+        walk[numWalk++] = current;
+        current         = to[next];
+      }
+
+      if (!closed) {
+        a_why = 3;
+
+        return false;
+      }
+
+      if (a_numOut >= a_maxOut) {
+        a_why = 7;
+
+        return false;
+      }
+
+      // drop vertices that sit on the straight line between their neighbours
+      Polygon& out = a_out[a_numOut];
+
+      out.m_numVertices = 0;
+      out.m_face        = a_in[0].m_face;
+
+      for (int i = 0; i < numWalk; i++) {
+        const RealVect& prev = walk[(i + numWalk - 1) % numWalk];
+        const RealVect& here = walk[i];
+        const RealVect& next = walk[(i + 1) % numWalk];
+
+        const RealVect back  = here - prev;
+        const RealVect ahead = next - here;
+
+        const Real backLength  = back.vectorLength();
+        const Real aheadLength = ahead.vectorLength();
+
+        bool straight = false;
+
+        if (backLength > 0.0 && aheadLength > 0.0) {
+          const RealVect unit = back / backLength;
+
+          const Real along = ahead.dotProduct(unit);
+
+          straight = (along > 0.0) && ((ahead - along * unit).vectorLength() <= 1.0E-11 * aheadLength);
+        }
+
+        if (straight) {
+          continue;
+        }
+
+        if (out.m_numVertices >= s_maxVertices) {
+          a_why = 5;
+
+          return false;
+        }
+
+        out.m_vertexEdge[out.m_numVertices]  = -1;
+        out.m_segmentFace[out.m_numVertices] = a_in[0].m_face;
+        out.m_vertex[out.m_numVertices++]    = here;
+      }
+
+      // a loop that collapses under the collinear pass enclosed nothing
+      if (out.m_numVertices >= 3) {
+        a_numOut++;
+      }
+    }
+
+    if (a_numOut == 0) {
+      a_why = 6;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  // Write this body's interface patch as STL facets, in physical coordinates.
+  //
+  // Only the interface is written: the cell-face polygons are not part of the embedded boundary
+  // and would bury it. Polygons are already triangles where the fan produced them, but anything
+  // wider is fanned about its own vertex mean so the file is triangles throughout.
+  void
+  appendInterfaceSTL(std::ofstream& a_file, const RealVect& a_centre, const Real a_dx, long long& a_count) const
+  {
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      const Polygon& p = m_polygon[ip];
+
+      if (p.m_face >= 0 || p.m_numVertices < 3) {
+        continue;
+      }
+
+      RealVect mean = RealVect::Zero;
+
+      for (int i = 0; i < p.m_numVertices; i++) {
+        mean += p.m_vertex[i];
+      }
+
+      mean /= static_cast<Real>(p.m_numVertices);
+
+      const int numTriangles = (p.m_numVertices == 3) ? 1 : p.m_numVertices;
+
+      for (int t = 0; t < numTriangles; t++) {
+        RealVect v[3];
+
+        if (p.m_numVertices == 3) {
+          v[0] = p.m_vertex[0];
+          v[1] = p.m_vertex[1];
+          v[2] = p.m_vertex[2];
+        }
+        else {
+          v[0] = mean;
+          v[1] = p.m_vertex[t];
+          v[2] = p.m_vertex[(t + 1) % p.m_numVertices];
+        }
+
+        for (int k = 0; k < 3; k++) {
+          v[k] = a_centre + a_dx * v[k];
+        }
+
+        const RealVect e1 = v[1] - v[0];
+        const RealVect e2 = v[2] - v[0];
+
+        RealVect n = RealVect(
+          D_DECL(e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]));
+
+        const Real length = n.vectorLength();
+
+        if (length > 0.0) {
+          n /= length;
+        }
+
+        a_file << "  facet normal " << n[0] << " " << n[1] << " " << n[2] << "\n";
+        a_file << "    outer loop\n";
+
+        for (int k = 0; k < 3; k++) {
+          a_file << "      vertex " << v[k][0] << " " << v[k][1] << " " << v[k][2] << "\n";
+        }
+
+        a_file << "    endloop\n  endfacet\n";
+
+        a_count++;
+      }
+    }
+  }
+
+  // The body as the generator makes it today, one chord per face, for comparison.
+  bool
+  buildPlain(const PolyhedralEB::CutCellSurface& a_coarse)
+  {
+    return this->define(a_coarse) && m_kind == Kind::Cut;
+  }
+
+  // Counts first: how many loops the faces leave open, how planar they are, and what the polygon
+  // total would be if every loop were fanned against if only the non-planar ones were. A planar
+  // loop is already a polygon and needs no fan at all.
+  bool
+  closeInterface(int& a_loops, int& a_neededFan, int& a_neededPlanar, int& a_planarLoops, Real& a_worstBend)
+  {
+    a_loops        = 0;
+    a_neededFan    = m_numPolygons;
+    a_neededPlanar = m_numPolygons;
+    a_planarLoops  = 0;
+    a_worstBend    = 0.0;
+
+    RealVect from[s_maxPolygons * s_maxVertices];
+    RealVect to[s_maxPolygons * s_maxVertices];
+
+    int numOpen = 0;
+
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      const Polygon& p = m_polygon[ip];
+
+      for (int i = 0; i < p.m_numVertices; i++) {
+        const RealVect& a = p.m_vertex[i];
+        const RealVect& b = p.m_vertex[(i + 1) % p.m_numVertices];
+
+        if (PolyhedralEB::detail::sameVertex(a, b)) {
+          continue;
+        }
+
+        bool shared = false;
+
+        for (int jp = 0; jp < m_numPolygons && !shared; jp++) {
+          if (jp == ip) {
+            continue;
+          }
+
+          const Polygon& q = m_polygon[jp];
+
+          for (int j = 0; j < q.m_numVertices && !shared; j++) {
+            const RealVect& c = q.m_vertex[j];
+            const RealVect& d = q.m_vertex[(j + 1) % q.m_numVertices];
+
+            shared = PolyhedralEB::detail::sameVertex(a, d) && PolyhedralEB::detail::sameVertex(b, c);
+          }
+        }
+
+        if (!shared) {
+          from[numOpen] = b;
+          to[numOpen]   = a;
+          numOpen++;
+        }
+      }
+    }
+
+    if (numOpen == 0) {
+      return true;
+    }
+
+    bool used[s_maxPolygons * s_maxVertices] = {false};
+
+    for (int s0 = 0; s0 < numOpen; s0++) {
+      if (used[s0]) {
+        continue;
+      }
+
+      used[s0] = true;
+
+      RealVect loop[s_maxVertices];
+
+      int numLoop = 0;
+
+      loop[numLoop++] = from[s0];
+
+      RealVect       current = to[s0];
+      const RealVect end     = from[s0];
+
+      bool closed = false;
+
+      for (int guard = 0; guard <= numOpen && !closed; guard++) {
+        if (PolyhedralEB::detail::sameVertex(current, end)) {
+          closed = true;
+
+          break;
+        }
+
+        int next = -1;
+
+        for (int j = 0; j < numOpen && next < 0; j++) {
+          if (!used[j] && PolyhedralEB::detail::sameVertex(from[j], current)) {
+            next = j;
+          }
+        }
+
+        if (next < 0 || numLoop >= s_maxVertices) {
+          break;
+        }
+
+        used[next] = true;
+
+        loop[numLoop++] = current;
+        current         = to[next];
+      }
+
+      if (!closed || numLoop < 3) {
+        return false;
+      }
+
+      a_loops++;
+
+      // how far the loop departs from a plane, measured against its own size so that a big loop
+      // and a small one are judged the same way
+      RealVect areaVector = RealVect::Zero;
+
+      for (int i = 0; i < numLoop; i++) {
+        const RealVect& u = loop[i];
+        const RealVect& v = loop[(i + 1) % numLoop];
+
+        areaVector += 0.5 *
+                      RealVect(D_DECL(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]));
+      }
+
+      const Real areaLength = areaVector.vectorLength();
+
+      Real bend = 0.0;
+
+      if (areaLength > 1.0E-30) {
+        const RealVect normal = areaVector / areaLength;
+
+        for (int i = 0; i < numLoop; i++) {
+          bend = std::max(bend, std::abs((loop[i] - loop[0]).dotProduct(normal)));
+        }
+
+        bend /= std::sqrt(areaLength);
+      }
+
+      a_worstBend = std::max(a_worstBend, bend);
+
+      const bool planar = (bend < 1.0E-10);
+
+      a_planarLoops += planar ? 1 : 0;
+
+      a_neededFan += numLoop;
+      a_neededPlanar += planar ? 1 : numLoop;
+
+      RealVect apex = RealVect::Zero;
+
+      for (int i = 0; i < numLoop; i++) {
+        apex += loop[i];
+      }
+
+      apex /= static_cast<Real>(numLoop);
+
+      for (int i = 0; i < numLoop; i++) {
+        if (m_numPolygons >= s_maxPolygons) {
+          return false;
+        }
+
+        Polygon& t = m_polygon[m_numPolygons];
+
+        t.m_numVertices = 3;
+        t.m_face        = -1;
+
+        t.m_vertex[0] = apex;
+        t.m_vertex[1] = loop[i];
+        t.m_vertex[2] = loop[(i + 1) % numLoop];
+
+        for (int k = 0; k < 3; k++) {
+          t.m_vertexEdge[k]  = -1;
+          t.m_segmentFace[k] = -1;
+        }
+
+        m_numPolygons++;
+      }
+    }
+
+    return true;
+  }
+
+  bool
+  buildSeam(const BaseIF&                       a_implicitFunction,
+            const PolyhedralEB::CutCellSurface& a_coarse,
+            const RealVect&                     a_centre,
+            const Real                          a_dx,
+            const int                           a_seamDir,
+            const int                           a_seamSide,
+            int&                                a_polygons,
+            int&                                a_widest,
+            Real&                               a_gap,
+            int&                                a_why,
+            int&                                a_mergeWhy,
+            int&                                a_leftover,
+            int&                                a_subFaces,
+            int&                                a_loops,
+            int&                                a_neededFan,
+            int&                                a_neededPlanar,
+            int&                                a_planarLoops,
+            Real&                               a_worstBend,
+            Real&                               a_singleChord,
+            Real&                               a_multiChord,
+            Real&                               a_fineSum)
+  {
+    a_why      = 0;
+    a_mergeWhy = 0;
+    a_leftover = 0;
+    a_subFaces = 0;
+
+    if (!this->define(a_coarse)) {
+      a_why = 1;
+
+      return false;
+    }
+
+    if (m_kind != Kind::Cut) {
+      a_why = 2;
+
+      return false;
+    }
+
+    // what the single chord said this face's aperture was
+    a_singleChord = this->areaFraction(a_seamDir, (a_seamSide == 0) ? Side::Lo : Side::Hi);
+    a_fineSum     = 0.0;
+
+    const Real before = this->closureResidual();
+
+    // drop what the single chord put on this face
+    const int seamFace = 2 * a_seamDir + a_seamSide;
+
+    // the seam face's chord goes, and so does the interface, which was built to meet it
+    int kept = 0;
+
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      if (m_polygon[ip].m_face != seamFace && m_polygon[ip].m_face >= 0) {
+        m_polygon[kept++] = m_polygon[ip];
+      }
+    }
+
+    m_numPolygons = kept;
+
+    // and put the abutting cells' chords there instead
+    Polygon sub[4 * (1 << (SpaceDim - 1))];
+
+    int numSub = 0;
+
+    for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
+      // the quadrant of this cell touching the seam face
+      int which = 0;
+      int bit   = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (d == a_seamDir) {
+          which |= a_seamSide << d;
+        }
+        else {
+          which |= ((q >> bit) & 1) << d;
+          bit++;
+        }
+      }
+
+      RealVect origin;
+      RealVect childCentre = a_centre;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        origin[d] = -0.25 + 0.5 * static_cast<Real>((which >> d) & 1);
+        childCentre[d] += 0.5 * a_dx * (((which >> d) & 1) - 0.5);
+      }
+
+      PolyhedralEB::CutCellSurface fine;
+      makeSurface(a_implicitFunction, childCentre, 0.5 * a_dx, fine);
+
+      Polygon walked[2];
+
+      const int numWalked = this->faceWalk(a_seamDir, a_seamSide, fine, walked);
+
+      if (numWalked < 0) {
+        a_why = 3;
+
+        return false;
+      }
+
+      // what the cell on the other side of this quadrant holds for the shared face
+      PolyhedralEB::CutCellBody fineBody;
+
+      if (fineBody.define(fine)) {
+        a_fineSum += fineBody.areaFraction(a_seamDir, (a_seamSide == 0) ? Side::Lo : Side::Hi);
+      }
+
+      for (int n = 0; n < numWalked; n++) {
+        if (numSub >= 4 * (1 << (SpaceDim - 1))) {
+          a_why = 4;
+
+          return false;
+        }
+
+        Polygon& to = sub[numSub];
+
+        to = walked[n];
+
+        for (int iv = 0; iv < to.m_numVertices; iv++) {
+          to.m_vertex[iv] = origin + 0.5 * walked[n].m_vertex[iv];
+        }
+
+        numSub++;
+      }
+    }
+
+    // one polygon for the face, not one per quadrant
+    if (numSub > 0) {
+      Polygon merged[1 << (SpaceDim - 1)];
+
+      int numMerged = 0;
+      int mergeWhy  = 0;
+
+      if (!this->mergeCoplanar(sub, numSub, merged, 1 << (SpaceDim - 1), numMerged, mergeWhy)) {
+        a_why      = 6;
+        a_mergeWhy = mergeWhy;
+        a_subFaces = numSub;
+
+        return false;
+      }
+
+      for (int n = 0; n < numMerged; n++) {
+        if (m_numPolygons >= s_maxPolygons) {
+          a_why = 4;
+
+          return false;
+        }
+
+        m_polygon[m_numPolygons++] = merged[n];
+      }
+    }
+
+    if (!this->closeInterface(a_loops, a_neededFan, a_neededPlanar, a_planarLoops, a_worstBend)) {
+      a_why = 5;
+
+      return false;
+    }
+
+    this->accumulateMoments();
+
+    a_polygons   = m_numPolygons;
+    a_widest     = this->widestPolygon();
+    a_gap        = this->closureResidual();
+    a_multiChord = this->areaFraction(a_seamDir, (a_seamSide == 0) ? Side::Lo : Side::Hi);
+
+    (void)before;
+
+    return true;
+  }
+};
+
+// Measure what a multichord seam face costs and what it leaves for the interface to absorb.
+void
+validateSeamFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
+                 const RefCountedPtr<AmrMesh>&               a_amr,
+                 const int                                   a_numCells)
+{
+  CH_TIME("validateSeamFace");
+
+  const RefCountedPtr<BaseIF>& implicitFunction = a_compgeom->getGasImplicitFunction();
+
+  if (implicitFunction.isNull()) {
+    return;
+  }
+
+  const RealVect probLo = a_amr->getProbLo();
+  const Real     dx     = a_amr->getDx()[0];
+
+  long long cells            = 0;
+  long long refused          = 0;
+  long long why1             = 0;
+  long long why2             = 0;
+  long long why3             = 0;
+  long long why4             = 0;
+  long long why5             = 0;
+  long long why6             = 0;
+  long long mergeWhyCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  int       reportedRefusals = 0;
+  int       maxNeedFan       = 0;
+  int       maxNeedFlat      = 0;
+  long long totalLoops       = 0;
+  long long planarLoops      = 0;
+  Real      worstBend        = 0.0;
+  long long conserveBad      = 0;
+  Real      worstConserve    = 0.0;
+  Real      worstChordShift  = 0.0;
+  int       maxPolys         = 0;
+  int       maxVerts         = 0;
+  Real      worstGap         = 0.0;
+
+  Box slab = a_amr->getDomains()[0].domainBox();
+
+  for (int d = 0; d < SpaceDim; d++) {
+    if (slab.size(d) > a_numCells) {
+      slab.setBig(d, slab.smallEnd(d) + a_numCells - 1);
+    }
+  }
+
+  int stlFace = -1;
+  {
+    ParmParse pp("Prototype");
+    pp.query("seamface_stl_face", stlFace);
+  }
+
+  std::ofstream multiFile;
+  std::ofstream plainFile;
+
+  long long multiFacets = 0;
+  long long plainFacets = 0;
+
+  if (stlFace >= 0 && procID() == 0) {
+    multiFile.open("seam_multichord.stl");
+    plainFile.open("seam_singlechord.stl");
+
+    multiFile << std::scientific;
+    plainFile << std::scientific;
+
+    multiFile << "solid multichord\n";
+    plainFile << "solid singlechord\n";
+  }
+
+  for (BoxIterator bit(slab); bit.ok(); ++bit) {
+    RealVect centre = probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += dx * (bit()[d] + 0.5);
+    }
+
+    PolyhedralEB::CutCellSurface coarse;
+    makeSurface(*implicitFunction, centre, dx, coarse);
+
+    if (PolyhedralEB::CutCellBody::classify(coarse) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    if (stlFace >= 0 && plainFile.is_open()) {
+      SeamBody plain;
+
+      if (plain.buildPlain(coarse)) {
+        plain.appendInterfaceSTL(plainFile, centre, dx, plainFacets);
+      }
+    }
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (int side = 0; side < 2; side++) {
+        SeamBody body;
+
+        int  polys     = 0;
+        int  verts     = 0;
+        Real gap       = 0.0;
+        int  why       = 0;
+        int  loops     = 0;
+        int  needFan   = 0;
+        int  needFlat  = 0;
+        int  flatLoops = 0;
+        Real bend      = 0.0;
+        Real single    = 0.0;
+        Real multi     = 0.0;
+        Real fine      = 0.0;
+
+        int mergeWhy = 0;
+        int leftover = 0;
+        int subFaces = 0;
+
+        const bool ok = body.buildSeam(*implicitFunction,
+                                       coarse,
+                                       centre,
+                                       dx,
+                                       dir,
+                                       side,
+                                       polys,
+                                       verts,
+                                       gap,
+                                       why,
+                                       mergeWhy,
+                                       leftover,
+                                       subFaces,
+                                       loops,
+                                       needFan,
+                                       needFlat,
+                                       flatLoops,
+                                       bend,
+                                       single,
+                                       multi,
+                                       fine);
+
+        maxNeedFan  = std::max(maxNeedFan, needFan);
+        maxNeedFlat = std::max(maxNeedFlat, needFlat);
+        totalLoops += loops;
+        planarLoops += flatLoops;
+        worstBend = std::max(worstBend, bend);
+
+        if (!ok) {
+          refused++;
+          why1 += (why == 1);
+          why2 += (why == 2);
+          why3 += (why == 3);
+          why4 += (why == 4);
+          why5 += (why == 5);
+          why6 += (why == 6);
+
+          if (why == 6) {
+            mergeWhyCount[mergeWhy]++;
+
+            if (mergeWhy == 4 && reportedRefusals < 3) {
+              reportedRefusals++;
+
+              pout() << "  DUMP cell " << bit() << " face " << (2 * dir + side) << " subFacePolygons " << subFaces
+                     << " leftoverEdges " << leftover << endl;
+
+              // what the coarse cell looks like
+              PolyhedralEB::CutCellBody coarseBody;
+              coarseBody.define(coarse);
+
+              pout() << "    coarse corners";
+              for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+                pout() << " " << (PolyhedralEB::isFluid(coarse.m_corner[c]) ? "F" : "S");
+              }
+              pout() << "  kappa " << coarseBody.volumeFraction() << " oneSided " << coarseBody.interfaceIsOneSided()
+                     << " bndryArea " << coarseBody.boundaryArea() << " trueArea " << coarseBody.trueBoundaryArea()
+                     << endl;
+
+              // and each quadrant of the face
+              for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
+                int which = 0;
+                int bitq  = 0;
+                for (int d = 0; d < SpaceDim; d++) {
+                  if (d == dir) {
+                    which |= side << d;
+                  }
+                  else {
+                    which |= ((q >> bitq) & 1) << d;
+                    bitq++;
+                  }
+                }
+
+                RealVect childCentre = centre;
+                for (int d = 0; d < SpaceDim; d++) {
+                  childCentre[d] += 0.5 * dx * (((which >> d) & 1) - 0.5);
+                }
+
+                PolyhedralEB::CutCellSurface fineSurf;
+                makeSurface(*implicitFunction, childCentre, 0.5 * dx, fineSurf);
+
+                PolyhedralEB::CutCellBody fineBody;
+                const bool                fineOk = fineBody.define(fineSurf);
+
+                const char* kindName = "?";
+                if (fineOk) {
+                  switch (fineBody.kind()) {
+                  case PolyhedralEB::CutCellBody::Kind::Regular:
+                    kindName = "Regular";
+                    break;
+                  case PolyhedralEB::CutCellBody::Kind::Covered:
+                    kindName = "Covered";
+                    break;
+                  default:
+                    kindName = "Cut";
+                    break;
+                  }
+                }
+
+                pout() << "    quadrant " << q << " kind " << kindName << " kappa "
+                       << (fineOk ? fineBody.volumeFraction() : -1.0) << " faceAperture "
+                       << (fineOk ? fineBody.areaFraction(dir, (side == 0) ? Side::Lo : Side::Hi) : -1.0) << endl;
+              }
+            }
+          }
+
+          continue;
+        }
+
+        cells++;
+
+        // Conservation of the seam face: the multichord aperture has to be what the cells on the
+        // other side hold, averaged over the quadrants, or the two sides of the seam disagree
+        // about how much is open.
+        const Real conserve = std::abs(multi - 0.25 * fine);
+
+        worstConserve = std::max(worstConserve, conserve);
+
+        if (conserve > 1.0E-12) {
+          conserveBad++;
+        }
+
+        worstChordShift = std::max(worstChordShift, std::abs(multi - single));
+
+        if (stlFace >= 0 && multiFile.is_open() && (2 * dir + side) == stlFace) {
+          body.appendInterfaceSTL(multiFile, centre, dx, multiFacets);
+        }
+
+        maxPolys = std::max(maxPolys, polys);
+        maxVerts = std::max(maxVerts, verts);
+        worstGap = std::max(worstGap, gap);
+      }
+    }
+  }
+
+  pout() << "SEAMFACE refusals: defineFailed " << why1 << " notCut " << why2 << " faceWalkFailed " << why3
+         << " overPolygonCap " << why4 << " interfaceFailed " << why5 << " mergeFailed " << why6 << endl;
+  pout() << "SEAMFACE mergeReasons: tooFewEdges " << mergeWhyCount[1] << " walkStuck " << mergeWhyCount[2]
+         << " didNotClose " << mergeWhyCount[3] << " moreThanOneLoop " << mergeWhyCount[4] << " vertexOverflow "
+         << mergeWhyCount[5] << " degenerate " << mergeWhyCount[6] << endl;
+  // The cells the surface lives in, as a rectilinear mesh VisIt can overlay on the STL. Cell data
+  // says what the generator made of each one, so a facet can be read against the cell that
+  // produced it.
+  if (stlFace >= 0 && procID() == 0) {
+    std::ofstream grid("seam_grid.vtk");
+
+    grid << std::scientific;
+
+    const IntVect lo = slab.smallEnd();
+    const IntVect hi = slab.bigEnd();
+
+    grid << "# vtk DataFile Version 3.0\n";
+    grid << "Cartesian cells carrying the cut-cell surface\n";
+    grid << "ASCII\n";
+    grid << "DATASET RECTILINEAR_GRID\n";
+    grid << "DIMENSIONS " << (hi[0] - lo[0] + 2) << " " << (hi[1] - lo[1] + 2) << " "
+         << (SpaceDim == 3 ? (hi[SpaceDim - 1] - lo[SpaceDim - 1] + 2) : 1) << "\n";
+
+    const char* axis[3] = {"X_COORDINATES", "Y_COORDINATES", "Z_COORDINATES"};
+
+    for (int d = 0; d < 3; d++) {
+      if (d < SpaceDim) {
+        grid << axis[d] << " " << (hi[d] - lo[d] + 2) << " double\n";
+
+        for (int i = lo[d]; i <= hi[d] + 1; i++) {
+          grid << (probLo[d] + dx * i) << " ";
+        }
+
+        grid << "\n";
+      }
+      else {
+        grid << axis[d] << " 1 double\n0\n";
+      }
+    }
+
+    const long long numCells = slab.numPts();
+
+    grid << "CELL_DATA " << numCells << "\n";
+    grid << "SCALARS kind int 1\nLOOKUP_TABLE default\n";
+
+    for (BoxIterator bit(slab); bit.ok(); ++bit) {
+      RealVect centre = probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        centre[d] += dx * (bit()[d] + 0.5);
+      }
+
+      PolyhedralEB::CutCellSurface surface;
+      makeSurface(*implicitFunction, centre, dx, surface);
+
+      const PolyhedralEB::CutCellBody::Kind kind = PolyhedralEB::CutCellBody::classify(surface);
+
+      grid << ((kind == PolyhedralEB::CutCellBody::Kind::Regular)
+                 ? 1
+                 : ((kind == PolyhedralEB::CutCellBody::Kind::Covered) ? -1 : 0))
+           << "\n";
+    }
+
+    grid << "SCALARS kappa double 1\nLOOKUP_TABLE default\n";
+
+    for (BoxIterator bit(slab); bit.ok(); ++bit) {
+      RealVect centre = probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        centre[d] += dx * (bit()[d] + 0.5);
+      }
+
+      PolyhedralEB::CutCellSurface surface;
+      makeSurface(*implicitFunction, centre, dx, surface);
+
+      PolyhedralEB::CutCellBody body;
+
+      grid << (body.define(surface) ? body.volumeFraction() : -1.0) << "\n";
+    }
+
+    grid.close();
+
+    pout() << "SEAMFACE wrote seam_grid.vtk over " << numCells << " cells" << endl;
+  }
+
+  if (multiFile.is_open()) {
+    multiFile << "endsolid multichord\n";
+    plainFile << "endsolid singlechord\n";
+
+    multiFile.close();
+    plainFile.close();
+
+    pout() << "SEAMFACE stl: multichord facets " << multiFacets << " singlechord facets " << plainFacets << endl;
+  }
+
+  pout() << "SEAMFACE loops " << totalLoops << " planar " << planarLoops << " worstBend " << worstBend
+         << " polygonsNeeded fan " << maxNeedFan << " planarKept " << maxNeedFlat << endl;
+  pout() << "SEAMFACE conservation: bad " << conserveBad << " worst " << worstConserve << " chordShift "
+         << worstChordShift << endl;
+
+  pout() << "SEAMFACE built " << cells << " refused " << refused << " maxPolygons " << maxPolys << " (cap 20)"
+         << " maxVertices " << maxVerts << " (cap 20) worstClosureGap " << worstGap << endl;
+}
+
+// A real coarse-fine boundary, and what the seam looks like across it.
+//
+// Half the domain is carried at one spacing and half at twice the resolution, which is the
+// arrangement the multichord exists for and the one the earlier harness never had: there, every
+// cell subdivided a face of its own, so a multichord face always met a single-chord neighbour and
+// the surface cracked by construction.
+//
+// Two surfaces are written. In both, the fine block is the fine cells' own interfaces and the
+// coarse block is the coarse cells' own. They differ only in what the last column of coarse cells
+// puts on the face it shares with the fine block: one chord of its own, or the chords of the cells
+// on the other side. The first should crack along that plane and the second should not.
+void
+validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
+                     const RefCountedPtr<AmrMesh>&               a_amr,
+                     const int                                   a_numCoarse,
+                     const int                                   a_split)
+{
+  CH_TIME("validateTwoLevelSeam");
+
+  const RefCountedPtr<BaseIF>& implicitFunction = a_compgeom->getGasImplicitFunction();
+
+  if (implicitFunction.isNull() || procID() != 0) {
+    return;
+  }
+
+  const RealVect probLo = a_amr->getProbLo();
+  const Real     dxC    = a_amr->getDx()[0] * (a_amr->getDomains()[0].domainBox().size(0) / a_numCoarse);
+  const Real     dxF    = 0.5 * dxC;
+
+  std::ofstream multi("seam2_multichord.stl");
+  std::ofstream single("seam2_singlechord.stl");
+
+  multi << std::scientific << "solid multichord\n";
+  single << std::scientific << "solid singlechord\n";
+
+  long long multiFacets  = 0;
+  long long singleFacets = 0;
+
+  long long boundaryFaces = 0;
+  long long conserveBad   = 0;
+
+  Real worstMulti  = 0.0;
+  Real worstSingle = 0.0;
+
+  const Box coarseBox(IntVect::Zero, (a_numCoarse - 1) * IntVect::Unit);
+
+  for (BoxIterator bit(coarseBox); bit.ok(); ++bit) {
+    if (bit()[0] >= a_split) {
+      continue;
+    }
+
+    RealVect centre = probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += dxC * (bit()[d] + 0.5);
+    }
+
+    PolyhedralEB::CutCellSurface coarse;
+    makeSurface(*implicitFunction, centre, dxC, coarse);
+
+    if (PolyhedralEB::CutCellBody::classify(coarse) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    SeamBody plain;
+
+    if (!plain.buildPlain(coarse)) {
+      continue;
+    }
+
+    plain.appendInterfaceSTL(single, centre, dxC, singleFacets);
+
+    const bool onBoundary = (bit()[0] == a_split - 1);
+
+    bool wroteMulti = false;
+
+    if (onBoundary) {
+      SeamBody seam;
+
+      int  polys = 0, verts = 0, why = 0, mergeWhy = 0, leftover = 0, subFaces = 0;
+      int  loops = 0, needFan = 0, needFlat = 0, flatLoops = 0;
+      Real gap = 0.0, bend = 0.0, singleChord = 0.0, multiChord = 0.0, fineSum = 0.0;
+
+      if (seam.buildSeam(*implicitFunction,
+                         coarse,
+                         centre,
+                         dxC,
+                         0,
+                         1,
+                         polys,
+                         verts,
+                         gap,
+                         why,
+                         mergeWhy,
+                         leftover,
+                         subFaces,
+                         loops,
+                         needFan,
+                         needFlat,
+                         flatLoops,
+                         bend,
+                         singleChord,
+                         multiChord,
+                         fineSum)) {
+        seam.appendInterfaceSTL(multi, centre, dxC, multiFacets);
+
+        wroteMulti = true;
+
+        // what the cells on the other side hold for the shared face, against what each side of the
+        // seam says it is
+        boundaryFaces++;
+
+        worstMulti  = std::max(worstMulti, std::abs(multiChord - 0.25 * fineSum));
+        worstSingle = std::max(worstSingle, std::abs(singleChord - 0.25 * fineSum));
+
+        if (std::abs(multiChord - 0.25 * fineSum) > 1.0E-12) {
+          conserveBad++;
+        }
+      }
+    }
+
+    if (!wroteMulti) {
+      plain.appendInterfaceSTL(multi, centre, dxC, multiFacets);
+    }
+  }
+
+  // the fine block, identical in both files
+  const Box fineBox(IntVect(D_DECL(2 * a_split, 0, 0)),
+                    IntVect(D_DECL(2 * a_numCoarse - 1, 2 * a_numCoarse - 1, 2 * a_numCoarse - 1)));
+
+  for (BoxIterator bit(fineBox); bit.ok(); ++bit) {
+    RealVect centre = probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += dxF * (bit()[d] + 0.5);
+    }
+
+    PolyhedralEB::CutCellSurface fine;
+    makeSurface(*implicitFunction, centre, dxF, fine);
+
+    if (PolyhedralEB::CutCellBody::classify(fine) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    SeamBody body;
+
+    if (!body.buildPlain(fine)) {
+      continue;
+    }
+
+    body.appendInterfaceSTL(multi, centre, dxF, multiFacets);
+    body.appendInterfaceSTL(single, centre, dxF, singleFacets);
+  }
+
+  multi << "endsolid multichord\n";
+  single << "endsolid singlechord\n";
+
+  multi.close();
+  single.close();
+
+  // the two blocks as meshes VisIt can overlay
+  for (int which = 0; which < 2; which++) {
+    const bool isFine = (which == 1);
+    const Real dx     = isFine ? dxF : dxC;
+    const int  iLo    = isFine ? 2 * a_split : 0;
+    const int  iHi    = isFine ? 2 * a_numCoarse : a_split;
+    const int  jHi    = isFine ? 2 * a_numCoarse : a_numCoarse;
+
+    std::ofstream grid(isFine ? "seam2_fine.vtk" : "seam2_coarse.vtk");
+
+    grid << std::scientific;
+    grid << "# vtk DataFile Version 3.0\n" << (isFine ? "fine block\n" : "coarse block\n") << "ASCII\n";
+    grid << "DATASET RECTILINEAR_GRID\n";
+    grid << "DIMENSIONS " << (iHi - iLo + 1) << " " << (jHi + 1) << " " << (jHi + 1) << "\n";
+
+    grid << "X_COORDINATES " << (iHi - iLo + 1) << " double\n";
+    for (int i = iLo; i <= iHi; i++) {
+      grid << (probLo[0] + dx * i) << " ";
+    }
+    grid << "\n";
+
+    const char* rest[2] = {"Y_COORDINATES", "Z_COORDINATES"};
+
+    for (int d = 0; d < 2; d++) {
+      grid << rest[d] << " " << (jHi + 1) << " double\n";
+      for (int j = 0; j <= jHi; j++) {
+        grid << (probLo[d + 1] + dx * j) << " ";
+      }
+      grid << "\n";
+    }
+
+    grid.close();
+  }
+
+  pout() << "TWOLEVEL boundaryFaces " << boundaryFaces << " conserveBad " << conserveBad << " worstMultichord "
+         << worstMulti << " worstSingleChord " << worstSingle << endl;
+  pout() << "TWOLEVEL facets multichord " << multiFacets << " singlechord " << singleFacets << endl;
+}
+
 // Check that a partially carried index space is sound before anything is asked to solve on it.
 //
 // Four things, reported per level rather than asserted, so that one run says everything that is
@@ -2130,6 +3373,30 @@ main(int argc, char* argv[])
   reportCoverage(amr, compgeom);
 
   validateIndexSpace(amr, compgeom);
+
+  {
+    int coarse = 0;
+    int split  = 0;
+    {
+      ParmParse pp("Prototype");
+      pp.query("twolevel_coarse", coarse);
+      pp.query("twolevel_split", split);
+    }
+
+    if (coarse > 0 && split > 0) {
+      validateTwoLevelSeam(compgeom, amr, coarse, split);
+    }
+  }
+
+  {
+    int cells = 32;
+    {
+      ParmParse pp("Prototype");
+      pp.query("seamface_cells", cells);
+    }
+
+    validateSeamFace(compgeom, amr, cells);
+  }
 
   {
     int cells = 32;
