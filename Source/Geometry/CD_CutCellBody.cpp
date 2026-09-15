@@ -474,6 +474,34 @@ CutCellBody::defineDegenerate(const CutCellSurface& a_surface, const Kind a_kind
 }
 
 void
+CutCellBody::appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cellCentre, const Real a_dx) const noexcept
+{
+  if (m_kind != Kind::Cut) {
+    return;
+  }
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& p = m_polygon[ip];
+
+    if (p.m_face >= 0 || p.m_numVertices < 3) {
+      continue;
+    }
+
+    // the interface is already fanned, but a polygon carrying more than three vertices is fanned
+    // again here rather than left for the reader to triangulate
+    for (int v = 1; v + 1 < p.m_numVertices; v++) {
+      const RealVect* corner[3] = {&p.m_vertex[0], &p.m_vertex[v], &p.m_vertex[v + 1]};
+
+      for (int k = 0; k < 3; k++) {
+        for (int d = 0; d < SpaceDim; d++) {
+          a_facets.push_back(a_cellCentre[d] + a_dx * (*corner[k])[d]);
+        }
+      }
+    }
+  }
+}
+
+void
 CutCellBody::accumulateMoments() noexcept
 {
   Real     faceArea[s_numFaces] = {0.0};

@@ -1227,13 +1227,13 @@ Driver::parseGeometryGeneration()
   m_geometryRefinement = 1;
   pp.query("geometry_refinement", m_geometryRefinement);
 
-  // the grids the index space is generated over are otherwise invisible: they are what is left
-  // after the generator has filtered the layout, not the simulation's own grids
-  m_geometryGridFile = "none";
-  pp.query("geometry_grid_stl", m_geometryGridFile);
+  // the reconstructed boundary is otherwise invisible: what reaches the plot files is a level set
+  // sampled on the grids, not the surface the moments were taken from
+  m_geometrySurfaceFile = "none";
+  pp.query("geometry_surface_stl", m_geometrySurfaceFile);
 
-  if (m_geometryGridFile == "none") {
-    m_geometryGridFile = "";
+  if (m_geometrySurfaceFile == "none") {
+    m_geometrySurfaceFile = "";
   }
 
   if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo" ||
@@ -1458,7 +1458,7 @@ Driver::setupGeometryOnly()
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->setGeometryGridFile(m_geometryGridFile);
+      m_computationalGeometry->setGeometrySurfaceFile(m_geometrySurfaceFile);
       m_computationalGeometry->usePolyhedralShop(scanDomain, m_geometryRefinement);
     }
     else {
@@ -1609,7 +1609,7 @@ Driver::setupFresh(const int a_initialRegrids)
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->setGeometryGridFile(m_geometryGridFile);
+      m_computationalGeometry->setGeometrySurfaceFile(m_geometrySurfaceFile);
       m_computationalGeometry->usePolyhedralShop(scanDomain, m_geometryRefinement);
     }
     else {
@@ -1788,7 +1788,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
     EBISLevel::s_distributedData = true;
 
     if (m_geometryGeneration == "polyhedral") {
-      m_computationalGeometry->setGeometryGridFile(m_geometryGridFile);
+      m_computationalGeometry->setGeometrySurfaceFile(m_geometrySurfaceFile);
       m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel], m_geometryRefinement);
     }
     else {

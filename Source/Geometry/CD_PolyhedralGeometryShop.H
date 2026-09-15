@@ -73,15 +73,21 @@ public:
                          const int            a_refinement);
 
   /**
-   * @brief Write the grids this shop generates the index space over, as an STL file per level.
-   * @details The grids are the boxes left after retainBox has filtered them, which is what the
-   *          index space is actually built on and is not otherwise visible. Each box becomes twelve
-   *          triangles in physical coordinates, and each level its own file named for the base
-   *          name given here with the level appended. An empty name writes nothing.
-   * @param[in] a_fileName Base name for the output, or empty to write nothing.
+   * @brief Write the embedded boundary this shop reconstructs, as one composite STL.
+   * @details The surface is the interface polygons of every cut cell, in physical coordinates. A
+   *          cell whose region a finer level also carries is left out, so what is written is the
+   *          finest description of each part of the geometry rather than one surface per level.
+   *          An empty name writes nothing. Call flushSurfaceSTL once the index space is built.
+   * @param[in] a_fileName File to write, or empty to write nothing.
    */
   void
-  setGridFileName(const std::string& a_fileName) noexcept;
+  setSurfaceFileName(const std::string& a_fileName) noexcept;
+
+  /**
+   * @brief Write what has been collected, gathering it across ranks first.
+   */
+  void
+  flushSurfaceSTL() const noexcept;
 
   /**
    * @brief Say how much of each level to carry.
@@ -184,25 +190,58 @@ protected:
   int m_coverageLevel;
 
   /**
-   * @brief Base name for the grid output, or empty when no grids are written.
+   * @brief File the reconstructed surface is written to, or empty when none is written.
    */
-  std::string m_gridFile;
+  std::string m_surfaceFile;
 
   /**
-   * @brief Called once per level with the grids that level's index space is generated over.
+   * @brief Boxes each level's index space is generated over, indexed finest first.
+   * @details Recorded as each level's layout is made, which happens finest first, so that a cell
+   * can be tested against the level below it while its own level is still being filled.
+   */
+  Vector<Vector<Box>> m_levelBoxes;
+
+  /**
+   * @brief Interface triangles collected on this rank, nine reals each.
+   * @details Held behind a pointer because the cells are filled through a const interface.
+   */
+  RefCountedPtr<Vector<Real>> m_facets;
+
+  /**
+   * @brief Cells already written, per level.
+   * @details A level is filled more than once when the data is distributed -- once to measure the
+   * load and once on the balanced layout -- and a cell reached twice would be written twice. The
+   * geometry is the same either way, so the first answer is kept and the rest skipped.
+   */
+  RefCountedPtr<Vector<IntVectSet>> m_exportedCells;
+
+  /**
+   * @brief Which level of this hierarchy a spacing belongs to.
+   * @param[in] a_dx Grid spacing.
+   * @return Index into m_dx, or -1 if the spacing is not one of this hierarchy's.
+   */
+  int
+  levelFromDx(const Real a_dx) const noexcept;
+
+  /**
+   * @brief Whether a finer level also carries this cell's region, so that it is left out.
+   * @param[in] a_cell  Cell on level a_level.
+   * @param[in] a_level Index into m_dx of the level the cell belongs to.
+   * @return True when the level one finer covers it.
+   */
+  bool
+  coveredByFiner(const IntVect& a_cell, const int a_level) const noexcept;
+
+  /**
+   * @brief Record the boxes a level's index space is generated over.
+   * @details Called by EBISLevel after it makes the grids and before it asks for any graph, which
+   * is the only point at which the boxes a level is generated over are visible. Levels arrive
+   * finest first, so a cell can be tested against the level below it while its own is being filled.
    * @param[in] a_dbl The grids, after retainBox has filtered them.
    * @param[in] a_dx  Spacing of the level these grids belong to.
    */
   void
   postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx) override;
-
-  /**
-   * @brief Write one level's grids as an STL file of boxes.
-   * @param[in] a_dbl   The grids the index space is generated over on this level.
-   * @param[in] a_level Index into m_dx of the level these grids belong to.
-   */
-  void
-  writeGridSTL(const DisjointBoxLayout& a_dbl, const int a_level) const noexcept;
 
   /**
    * @brief Classify every cell of a region from the bodies of the cells they subdivide.

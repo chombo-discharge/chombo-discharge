@@ -107,10 +107,10 @@ protected:
   int m_geometryRefinement;
 
   /**
-   * @brief Base name for writing the grids the polyhedral generator builds the index space over,
-   *        or empty when none are written.
+   * @brief Base name for writing the boundary the polyhedral generator reconstructs, or empty
+   *        when none is written.
    */
-  std::string m_geometryGridFile;
+  std::string m_geometrySurfaceFile;
 
   /**
    * @brief Output directory for output files.

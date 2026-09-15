@@ -256,6 +256,19 @@ public:
   closureResidual() const noexcept;
 
   /**
+   * @brief Append this body's interface, as triangles in physical coordinates.
+   * @details The interface is the embedded boundary inside this cell: the polygons the body holds
+   *          that belong to no cell face. Each is written as a fan of triangles, nine reals per
+   *          triangle, so that the result can be gathered across ranks and written as one surface.
+   *          Nothing is appended by a body that is not cut.
+   * @param[in,out] a_facets     Coordinates to append to.
+   * @param[in]     a_cellCentre Centre of this cell, in physical coordinates.
+   * @param[in]     a_dx         Grid spacing of the level this cell belongs to.
+   */
+  void
+  appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cellCentre, const Real a_dx) const noexcept;
+
+  /**
    * @brief Residual in the identity the moments must satisfy among themselves.
    * @details The divergence theorem applied to a constant field, which holds for any closed
    * body whether or not its interface patch is planar. This is also the relation PolyGeom uses

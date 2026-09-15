@@ -85,14 +85,15 @@ public:
   useChomboShop();
 
   /**
-   * @brief Write the grids the polyhedral generator builds the index space over, as STL.
-   * @details One file per phase and level, named for the base name given here with the phase and
-   *          the level appended. These are the boxes left after the generator has filtered them,
-   *          which is what the index space is actually built on. An empty name writes nothing.
+   * @brief Write the embedded boundary the polyhedral generator reconstructs, as STL.
+   * @details One file per phase, named for the base name given here with the phase appended. It
+   *          holds the interface of every cut cell that no finer level also carries, so it is the
+   *          finest description of each part of the geometry rather than one surface per level.
+   *          An empty name writes nothing.
    * @param[in] a_fileName Base name for the output, or empty to write nothing.
    */
   void
-  setGeometryGridFile(const std::string& a_fileName) noexcept;
+  setGeometrySurfaceFile(const std::string& a_fileName) noexcept;
 
   /**
    * @brief Generate the geometry with PolyhedralGeometryShop.
@@ -304,9 +305,9 @@ protected:
   int m_geometryRefinement;
 
   /**
-   * @brief Base name for writing the grids the index space is generated over, or empty for none.
+   * @brief Base name for writing the reconstructed surface, or empty for none.
    */
-  std::string m_geometryGridFile;
+  std::string m_geometrySurfaceFile;
 
   /**
    * @brief Boxes each level was swept over, coarsest first, and so how much of it to carry.

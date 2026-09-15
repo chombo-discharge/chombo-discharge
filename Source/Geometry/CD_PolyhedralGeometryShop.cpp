@@ -53,9 +53,42 @@ PolyhedralGeometryShop::~PolyhedralGeometryShop()
 {}
 
 void
-PolyhedralGeometryShop::setGridFileName(const std::string& a_fileName) noexcept
+PolyhedralGeometryShop::setSurfaceFileName(const std::string& a_fileName) noexcept
 {
-  m_gridFile = a_fileName;
+  m_surfaceFile = a_fileName;
+
+  if (!m_surfaceFile.empty() && m_facets.isNull()) {
+    m_facets        = RefCountedPtr<Vector<Real>>(new Vector<Real>());
+    m_exportedCells = RefCountedPtr<Vector<IntVectSet>>(new Vector<IntVectSet>(m_dx.size()));
+  }
+}
+
+int
+PolyhedralGeometryShop::levelFromDx(const Real a_dx) const noexcept
+{
+  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
+    if (std::abs(m_dx[lvl] - a_dx) <= 1.0E-12 * m_dx[lvl]) {
+      return lvl;
+    }
+  }
+
+  return -1;
+}
+
+bool
+PolyhedralGeometryShop::coveredByFiner(const IntVect& a_cell, const int a_level) const noexcept
+{
+  if (a_level <= 0 || a_level >= static_cast<int>(m_levelBoxes.size())) {
+    return false;
+  }
+
+  for (int i = 0; i < m_levelBoxes[a_level - 1].size(); i++) {
+    if (coarsen(m_levelBoxes[a_level - 1][i], 2).contains(a_cell)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void
@@ -65,91 +98,66 @@ PolyhedralGeometryShop::postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const 
 
   ScanShop::postMakeBoxLayout(a_dbl, a_dx);
 
-  if (m_gridFile.empty()) {
+  const int level = this->levelFromDx(a_dx[0]);
+
+  if (level < 0) {
     return;
   }
 
-  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
-    if (std::abs(m_dx[lvl] - a_dx[0]) <= 1.0E-12 * m_dx[lvl]) {
-      this->writeGridSTL(a_dbl, lvl);
-
-      break;
-    }
+  if (static_cast<int>(m_levelBoxes.size()) < static_cast<int>(m_dx.size())) {
+    m_levelBoxes.resize(m_dx.size());
   }
+
+  m_levelBoxes[level] = a_dbl.boxArray();
 }
 
 void
-PolyhedralGeometryShop::writeGridSTL(const DisjointBoxLayout& a_dbl, const int a_level) const noexcept
+PolyhedralGeometryShop::flushSurfaceSTL() const noexcept
 {
-  CH_TIME("PolyhedralGeometryShop::writeGridSTL");
+  CH_TIME("PolyhedralGeometryShop::flushSurfaceSTL");
+
+  if (m_surfaceFile.empty() || m_facets.isNull()) {
+    return;
+  }
+
+  Vector<Vector<Real>> everyone;
+  Vector<Real>         mine = *m_facets;
+
+  gather(everyone, mine, 0);
 
   if (procID() != 0) {
     return;
   }
 
-  const Real dx = m_dx[a_level];
-
-  std::ostringstream name;
-  name << m_gridFile << ".level" << a_level << ".stl";
-
-  std::ofstream out(name.str());
+  std::ofstream out(m_surfaceFile);
 
   if (!out.good()) {
     return;
   }
 
-  out << std::scientific << std::setprecision(17) << "solid grids\n";
+  out << std::scientific << std::setprecision(17) << "solid interface\n";
 
-  const Vector<Box>& boxes = a_dbl.boxArray();
+  for (int rank = 0; rank < everyone.size(); rank++) {
+    const Vector<Real>& facets = everyone[rank];
 
-  for (int ibox = 0; ibox < boxes.size(); ibox++) {
-    RealVect lo = m_probLo;
-    RealVect hi = m_probLo;
+    for (int i = 0; i + 3 * SpaceDim <= facets.size(); i += 3 * SpaceDim) {
+      out << "  facet normal 0 0 0\n    outer loop\n";
 
-    for (int d = 0; d < SpaceDim; d++) {
-      lo[d] += dx * static_cast<Real>(boxes[ibox].smallEnd(d));
-      hi[d] += dx * static_cast<Real>(boxes[ibox].bigEnd(d) + 1);
-    }
+      for (int v = 0; v < 3; v++) {
+        out << "      vertex";
 
-    // two triangles per face, wound so that the normal points out of the box
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      const int t1 = (dir + 1) % SpaceDim;
-      const int t2 = (dir + 2) % SpaceDim;
-
-      for (int side = 0; side < 2; side++) {
-        RealVect corner[4];
-
-        for (int c = 0; c < 4; c++) {
-          corner[c]      = lo;
-          corner[c][dir] = (side == 0) ? lo[dir] : hi[dir];
-          corner[c][t1]  = (c == 1 || c == 2) ? hi[t1] : lo[t1];
-          corner[c][t2]  = (c == 2 || c == 3) ? hi[t2] : lo[t2];
+        for (int d = 0; d < SpaceDim; d++) {
+          out << " " << facets[i + SpaceDim * v + d];
         }
 
-        const int order[2][3] = {{0, 1, 2}, {0, 2, 3}};
-
-        for (int tri = 0; tri < 2; tri++) {
-          out << "  facet normal 0 0 0\n    outer loop\n";
-
-          for (int v = 0; v < 3; v++) {
-            const int iv = (side == 0) ? order[tri][2 - v] : order[tri][v];
-
-            out << "      vertex";
-
-            for (int d = 0; d < SpaceDim; d++) {
-              out << " " << corner[iv][d];
-            }
-
-            out << "\n";
-          }
-
-          out << "    endloop\n  endfacet\n";
-        }
+        out << "\n";
       }
+
+      out << "    endloop\n  endfacet\n";
     }
   }
 
-  out << "endsolid grids\n";
+  out << "endsolid interface\n";
 
   out.close();
 }
@@ -773,6 +781,25 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     this->fillNode(node, body, a_regIrregCovered, iv, a_domain);
 
     a_nodes.push_back(node);
+
+    // The surface is written from the finest level that carries each part of the geometry, so a
+    // cell the level below also carries contributes nothing: what it holds is what that level
+    // coarsened, and the finer description is the one to keep.
+    if (!m_surfaceFile.empty() && !m_facets.isNull()) {
+      const int exportLevel = this->levelFromDx(a_dx);
+
+      if (exportLevel >= 0 && !this->coveredByFiner(iv, exportLevel) && !(*m_exportedCells)[exportLevel].contains(iv)) {
+        RealVect centre = a_probLo;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          centre[d] += a_dx * (static_cast<Real>(iv[d]) + 0.5);
+        }
+
+        body.appendInterfaceFacets(*m_facets, centre, a_dx);
+
+        (*m_exportedCells)[exportLevel] |= iv;
+      }
+    }
 
     indexNodes(static_cast<int>(a_nodes.size()) - 1);
   }

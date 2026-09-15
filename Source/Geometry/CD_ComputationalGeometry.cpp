@@ -66,9 +66,9 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 }
 
 void
-ComputationalGeometry::setGeometryGridFile(const std::string& a_fileName) noexcept
+ComputationalGeometry::setGeometrySurfaceFile(const std::string& a_fileName) noexcept
 {
-  m_geometryGridFile = a_fileName;
+  m_geometrySurfaceFile = a_fileName;
 }
 
 void
@@ -222,6 +222,18 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
                                  a_maxCoarsen);
 
   // Delete temps.
+  // the surface is collected cell by cell as the levels are filled, and cannot be written until
+  // every level has been, because a cell is only left out once the level below it has been seen
+  if (!m_geometrySurfaceFile.empty()) {
+    for (int i = 0; i < geoServices.size(); i++) {
+      const auto* shop = dynamic_cast<const PolyhedralGeometryShop*>(geoServices[i]);
+
+      if (shop != nullptr) {
+        shop->flushSurfaceSTL();
+      }
+    }
+  }
+
   for (int i = 0; i < 2; i++) {
     if (geoServices[i] != nullptr) {
       delete geoServices[i];
@@ -692,8 +704,8 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
     shop->setCoverage(m_coverageRegions, m_coverageDomain);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
-    if (!m_geometryGridFile.empty()) {
-      shop->setGridFileName(m_geometryGridFile + ".gas");
+    if (!m_geometrySurfaceFile.empty()) {
+      shop->setSurfaceFileName(m_geometrySurfaceFile + ".gas.stl");
     }
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -751,8 +763,8 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
       shop->setCoverage(m_coverageRegions, m_coverageDomain);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
 
-      if (!m_geometryGridFile.empty()) {
-        shop->setGridFileName(m_geometryGridFile + ".solid");
+      if (!m_geometrySurfaceFile.empty()) {
+        shop->setSurfaceFileName(m_geometrySurfaceFile + ".solid.stl");
       }
 
       a_geoserver = static_cast<GeometryService*>(shop);
