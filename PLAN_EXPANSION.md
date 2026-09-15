@@ -287,14 +287,37 @@ Watertight here means: every edge shared by exactly two triangles once T-junctio
 the coarse side merges collinear fine chords into one segment, which leaves the fine side's vertices
 in the middle of it. That is a vertex-sharing difference, not a gap, and the partition is exact.
 
-The 146 rotations that do not close leave slivers of one shape: a coarse segment lying along a
-coarse cell edge, against two fine segments that dip past that edge by a fraction of a fine cell.
-The multichord replaces the chord on the seam face only; where the contour grazes the coarse cell's
-*other* faces, the coarse cell's own chord there is what the interface closes against, and the fine
-cells resolve a dip it cannot see. Worst case over the sweep is 3.3e-3 of area against a coarse face
-of 1.6e-2, on a surface of 1.34. The single chord fails the same test in every rotation and by two
-orders of magnitude more area, so the multichord is doing its job; this is the part of the seam it
-does not reach.
+### What the 146 are
+
+The residue is a seam property, not a triangulation one. At the worst orientation, (18, 45, 72):
+
+| configuration | unmatched edges | gap area |
+| --- | --- | --- |
+| uniform coarse only | 0 | 0 |
+| uniform fine only | 0 | 0 |
+| mixed, single chord | 16 | 8.3e-3 |
+| mixed, multichord | 3 | 3.3e-3 |
+
+Same geometry, same code, same orientation: both single-resolution surfaces close exactly, and only
+the resolution jump tears.
+
+The three residual segments are one triangular gap, and the cause is not the seam construction. The
+coarse cell at x in [-0.125, 0], y in [0.375, 0.5], z in [0, 0.125] has all eight corners in the
+fluid, so it classifies Regular and carries no chord at all -- while the solid reaches 0.041 inside
+it, a cube edge slicing through the cell's interior without touching a corner, and three of its eight
+children are cut. `makeSurface` brackets on `isFluid` along the twelve cell edges; a feature that
+enters and leaves through the same face crosses no edge and is invisible to that test.
+
+So the multichord cannot fix these: there is no chord on the coarse side to replace. What would is
+refusing to leave such a cell coarse, which is what the curvature tagging in #731 is for -- and a
+cell whose corners are all fluid is exactly the cell that tagging also cannot see. The single chord
+fails the same test in every rotation and with two orders of magnitude more area, so the multichord
+is doing its job; this is the part of the seam it does not reach, and it is the coarse cell's fault,
+not the seam's.
+
+The case is exported under `Prototypes/CutCellRefinement/break_case/`: both mixed surfaces, the two
+single-resolution controls, the two mesh blocks, the unclosed segments as a polyline, and the coarse
+cell that misses the feature as a single hexahedron.
 
 ## What will bite
 

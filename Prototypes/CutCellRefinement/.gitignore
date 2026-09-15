@@ -2,3 +2,4 @@
 # Prototype geometry exports
 *.stl
 *.vtk
+*.ply

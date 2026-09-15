@@ -3661,7 +3661,9 @@ main(int argc, char* argv[])
 
     queryVect("Prototype", "twolevel_center", center);
 
-    if (coarse > 0 && split > 0) {
+    // split 0 leaves only the fine block and split == coarse only the coarse one, which is how the
+    // seam is told apart from what the triangulation does at a single resolution
+    if (coarse > 0 && split >= 0) {
       if (sweep > 0) {
         sweepTwoLevelSeam(amr, coarse, split, sweep, span, size, center, write > 0);
       }
