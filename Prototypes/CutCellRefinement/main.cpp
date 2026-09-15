@@ -1306,6 +1306,192 @@ public:
     return true;
   }
 
+  // Replace one face's chord with the chords of the four children that cover it. This is what
+  // buildSeam does to the seam face, applied to an arbitrary face, and it also drops the interface
+  // because the interface was built to meet the chord being replaced.
+  bool
+  restrictFace(const BaseIF&   a_implicitFunction,
+               const RealVect& a_centre,
+               const Real      a_dx,
+               const int       a_dir,
+               const int       a_side,
+               int&            a_why,
+               int&            a_mergeWhy)
+  {
+    const int face = 2 * a_dir + a_side;
+
+    int kept = 0;
+
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      if (m_polygon[ip].m_face != face && m_polygon[ip].m_face >= 0) {
+        m_polygon[kept++] = m_polygon[ip];
+      }
+    }
+
+    m_numPolygons = kept;
+
+    Polygon sub[4 * (1 << (SpaceDim - 1))];
+
+    int numSub = 0;
+
+    for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
+      int which = 0;
+      int bit   = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (d == a_dir) {
+          which |= a_side << d;
+        }
+        else {
+          which |= ((q >> bit) & 1) << d;
+          bit++;
+        }
+      }
+
+      RealVect origin;
+      RealVect childCentre = a_centre;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        origin[d] = -0.25 + 0.5 * static_cast<Real>((which >> d) & 1);
+        childCentre[d] += 0.5 * a_dx * (((which >> d) & 1) - 0.5);
+      }
+
+      PolyhedralEB::CutCellSurface fine;
+      makeSurface(a_implicitFunction, childCentre, 0.5 * a_dx, fine);
+
+      Polygon walked[2];
+
+      const int numWalked = this->faceWalk(a_dir, a_side, fine, walked);
+
+      if (numWalked < 0) {
+        a_why = 3;
+
+        return false;
+      }
+
+      for (int n = 0; n < numWalked; n++) {
+        if (numSub >= 4 * (1 << (SpaceDim - 1))) {
+          a_why = 4;
+
+          return false;
+        }
+
+        Polygon& to = sub[numSub];
+
+        to = walked[n];
+
+        for (int iv = 0; iv < to.m_numVertices; iv++) {
+          to.m_vertex[iv] = origin + 0.5 * walked[n].m_vertex[iv];
+        }
+
+        numSub++;
+      }
+    }
+
+    if (numSub > 0) {
+      Polygon merged[1 << (SpaceDim - 1)];
+
+      int numMerged = 0;
+
+      if (!this->mergeCoplanar(sub, numSub, merged, 1 << (SpaceDim - 1), numMerged, a_mergeWhy)) {
+        a_why = 6;
+
+        return false;
+      }
+
+      for (int n = 0; n < numMerged; n++) {
+        if (m_numPolygons >= s_maxPolygons) {
+          a_why = 4;
+
+          return false;
+        }
+
+        m_polygon[m_numPolygons++] = merged[n];
+      }
+    }
+
+    return true;
+  }
+
+  // Pass B. Restrict the seam face, and every face that meets it across an edge the coarse cell
+  // gets wrong, so that all faces sharing such an edge describe it the same way. Restricting only
+  // the seam face is what leaves the two descriptions in contradiction.
+  bool
+  buildRestricted(const BaseIF&                       a_implicitFunction,
+                  const PolyhedralEB::CutCellSurface& a_coarse,
+                  const RealVect&                     a_centre,
+                  const Real                          a_dx,
+                  const int                           a_seamDir,
+                  const int                           a_seamSide,
+                  const bool*                         a_marked,
+                  int&                                a_facesRestricted,
+                  int&                                a_why,
+                  int&                                a_mergeWhy)
+  {
+    a_facesRestricted = 0;
+    a_why             = 0;
+    a_mergeWhy        = 0;
+
+    if (!this->define(a_coarse)) {
+      a_why = 1;
+
+      return false;
+    }
+
+    if (m_kind != Kind::Cut) {
+      a_why = 2;
+
+      return false;
+    }
+
+    if (!this->restrictFace(a_implicitFunction, a_centre, a_dx, a_seamDir, a_seamSide, a_why, a_mergeWhy)) {
+      return false;
+    }
+
+    a_facesRestricted++;
+
+    for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+      if (!a_marked[e]) {
+        continue;
+      }
+
+      int     dir;
+      IntVect loOffset;
+      edgeGeometry(e, dir, loOffset);
+
+      // only edges of the seam face have a finer description to restrict from
+      if (dir == a_seamDir || loOffset[a_seamDir] != a_seamSide) {
+        continue;
+      }
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (d == dir || d == a_seamDir) {
+          continue;
+        }
+
+        if (!this->restrictFace(a_implicitFunction, a_centre, a_dx, d, loOffset[d], a_why, a_mergeWhy)) {
+          return false;
+        }
+
+        a_facesRestricted++;
+      }
+    }
+
+    int loops = 0, needFan = 0, needFlat = 0, flatLoops = 0;
+
+    Real bend = 0.0;
+
+    if (!this->closeInterface(loops, needFan, needFlat, flatLoops, bend)) {
+      a_why = 5;
+
+      return false;
+    }
+
+    this->accumulateMoments();
+
+    return true;
+  }
+
   // Interface segments lying along a cell edge, which the embedded boundary never does except
   // where two of this body's faces disagree about that edge.
   int
@@ -2222,6 +2408,7 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
              const int          a_split,
              const std::string& a_stlPrefix,
              const IntVect&     a_dumpCell,
+             const bool         a_passB,
              int&               a_coarseCut,
              int&               a_coarsePlainRefused,
              int&               a_fineCut,
@@ -2240,7 +2427,10 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
              int&               a_cellsMarkedOnSeamFace,
              int&               a_cellsTorn,
              int&               a_predicted,
-             int&               a_missed)
+             int&               a_missed,
+             int&               a_facesRestricted,
+             int&               a_restrictRefused,
+             int&               a_blindNeighbours)
 {
   CH_TIME("twoLevelSeam");
 
@@ -2301,7 +2491,25 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
     PolyhedralEB::CutCellSurface coarse;
     makeSurface(a_implicitFunction, centre, dxC, coarse);
 
+    const bool isSeamColumn = (bit()[0] == a_split - 1);
+
     if (PolyhedralEB::CutCellBody::classify(coarse) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      // A cell the corner test calls uniform can still have a face the level below cuts: its edges
+      // carry an even number of crossings, so every corner reports the same side. It is skipped
+      // here, which is why restricting its cut neighbour's shared face only moves the hole.
+      if (isSeamColumn) {
+        bool marked[PolyhedralEB::CutCellSurface::s_numEdges];
+
+        int onSeamFace = 0;
+        int elsewhere  = 0;
+
+        markCoarseEdges(a_implicitFunction, centre, dxC, 0, 1, marked, onSeamFace, elsewhere);
+
+        if (onSeamFace > 0) {
+          a_blindNeighbours++;
+        }
+      }
+
       continue;
     }
 
@@ -2321,7 +2529,7 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
 
     bool wroteMulti = false;
 
-    if (bit()[0] == a_split - 1) {
+    if (isSeamColumn) {
       SeamBody seam;
 
       int  polys = 0, verts = 0, why = 0, mergeWhy = 0, leftover = 0, subFaces = 0;
@@ -2382,6 +2590,28 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
 
       if (dumping) {
         seam.dumpPolygons("seam");
+      }
+
+      if (ok && a_passB) {
+        // Pass B: rebuild the seam face and every face meeting it across a marked edge, so the
+        // faces sharing that edge cannot contradict one another
+        SeamBody restricted;
+
+        int faces = 0, whyB = 0, mergeWhyB = 0;
+
+        if (restricted.buildRestricted(a_implicitFunction, coarse, centre, dxC, 0, 1, marked, faces, whyB, mergeWhyB)) {
+          seam = restricted;
+
+          a_facesRestricted += faces;
+        }
+        else {
+          a_restrictRefused++;
+
+          if (writing) {
+            pout() << "PASSB refused " << bit() << " why " << whyB << " mergeWhy " << mergeWhyB << " faces " << faces
+                   << endl;
+          }
+        }
       }
 
       if (ok) {
@@ -2556,11 +2786,21 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
     }
   }
 
-  int  why[numWhy];
-  int  mergeWhy[numWhy];
-  int  coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
-  int  markedEdges = 0, markedOnSeamFace = 0, cellsMarked = 0, cellsMarkedOnSeamFace = 0;
-  int  cellsTorn = 0, predicted = 0, missed = 0;
+  int why[numWhy];
+  int mergeWhy[numWhy];
+  int coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
+  int markedEdges = 0, markedOnSeamFace = 0, cellsMarked = 0, cellsMarkedOnSeamFace = 0;
+  int cellsTorn = 0, predicted = 0, missed = 0, facesRestricted = 0, restrictRefused = 0;
+  int blindNeighbours = 0;
+
+  bool passB = false;
+  {
+    ParmParse pp("Prototype");
+    int       v = 0;
+    pp.query("twolevel_passb", v);
+    passB = (v > 0);
+  }
+
   Real worstMulti = 0.0, worstSingle = 0.0, worstClosure = 0.0;
 
   twoLevelSeam(*implicitFunction,
@@ -2570,6 +2810,7 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                a_split,
                "seam2",
                dumpCell,
+               passB,
                coarseCut,
                coarsePlain,
                fineCut,
@@ -2588,7 +2829,10 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                cellsMarkedOnSeamFace,
                cellsTorn,
                predicted,
-               missed);
+               missed,
+               facesRestricted,
+               restrictRefused,
+               blindNeighbours);
 
   writeTwoLevelGrids("seam2", probLo, dxC, a_numCoarse, a_split);
 
@@ -2599,6 +2843,8 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
   pout() << "PASSA markedEdges " << markedEdges << " onSeamFace " << markedOnSeamFace << " cellsMarked " << cellsMarked
          << " cellsMarkedOnSeamFace " << cellsMarkedOnSeamFace << " cellsTorn " << cellsTorn << " predicted "
          << predicted << " missed " << missed << endl;
+  pout() << "PASSB facesRestricted " << facesRestricted << " refused " << restrictRefused << " blindNeighbours "
+         << blindNeighbours << endl;
 }
 
 // The same seam, swept over the Euler angles of a rotated cube. A cube is the hard case: its edges
@@ -2612,7 +2858,8 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
                   const Real                    a_span,
                   const Real                    a_size,
                   const RealVect&               a_center,
-                  const bool                    a_write)
+                  const bool                    a_write,
+                  const bool                    a_passB)
 {
   CH_TIME("sweepTwoLevelSeam");
 
@@ -2627,7 +2874,7 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
 
   int  totalRotations = 0, totalSeam = 0, totalRefused = 0, badRotations = 0;
   int  sumMarkedEdges = 0, sumOnSeamFace = 0, sumCellsMarked = 0, sumCellsOnSeamFace = 0;
-  int  sumCellsTorn = 0, sumPredicted = 0, sumMissed = 0;
+  int  sumCellsTorn = 0, sumPredicted = 0, sumMissed = 0, sumFaces = 0, sumRestrictRefused = 0, sumBlind = 0;
   int  totalWhy[numWhy];
   int  totalMergeWhy[numWhy];
   Real worstMulti = 0.0, worstSingle = 0.0, worstClosure = 0.0;
@@ -2663,7 +2910,8 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
         int  mergeWhy[numWhy];
         int  coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
         int  markedEdges = 0, markedOnSeamFace = 0, cellsMarked = 0, cellsMarkedOnSeamFace = 0;
-        int  cellsTorn = 0, predicted = 0, missed = 0;
+        int  cellsTorn = 0, predicted = 0, missed = 0, facesRestricted = 0, restrictRefused = 0;
+        int  blindNeighbours = 0;
         Real multi = 0.0, singleChord = 0.0, closure = 0.0;
 
         std::string prefix;
@@ -2681,6 +2929,7 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
                      a_split,
                      prefix,
                      IntVect::Unit * (-1),
+                     a_passB,
                      coarseCut,
                      coarsePlain,
                      fineCut,
@@ -2699,7 +2948,10 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
                      cellsMarkedOnSeamFace,
                      cellsTorn,
                      predicted,
-                     missed);
+                     missed,
+                     facesRestricted,
+                     restrictRefused,
+                     blindNeighbours);
 
         totalRotations++;
         totalSeam += seamCells;
@@ -2711,6 +2963,9 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
         sumCellsTorn += cellsTorn;
         sumPredicted += predicted;
         sumMissed += missed;
+        sumFaces += facesRestricted;
+        sumRestrictRefused += restrictRefused;
+        sumBlind += blindNeighbours;
 
         for (int i = 0; i < numWhy; i++) {
           totalWhy[i] += why[i];
@@ -2754,6 +3009,8 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
   pout() << "PASSA markedEdges " << sumMarkedEdges << " onSeamFace " << sumOnSeamFace << " cellsMarked "
          << sumCellsMarked << " cellsMarkedOnSeamFace " << sumCellsOnSeamFace << " cellsTorn " << sumCellsTorn
          << " predicted " << sumPredicted << " missed " << sumMissed << endl;
+  pout() << "PASSB facesRestricted " << sumFaces << " refused " << sumRestrictRefused << " blindNeighbours " << sumBlind
+         << endl;
 }
 
 // Check that a partially carried index space is sound before anything is asked to solve on it.
@@ -3880,6 +4137,7 @@ main(int argc, char* argv[])
     int      split  = 0;
     int      sweep  = 0;
     int      write  = 0;
+    int      passB  = 0;
     Real     span   = 90.0;
     Real     size   = 0.25;
     RealVect center = RealVect::Zero;
@@ -3891,6 +4149,7 @@ main(int argc, char* argv[])
       pp.query("twolevel_span", span);
       pp.query("twolevel_size", size);
       pp.query("twolevel_write", write);
+      pp.query("twolevel_passb", passB);
     }
 
     queryVect("Prototype", "twolevel_center", center);
@@ -3899,7 +4158,7 @@ main(int argc, char* argv[])
     // seam is told apart from what the triangulation does at a single resolution
     if (coarse > 0 && split >= 0) {
       if (sweep > 0) {
-        sweepTwoLevelSeam(amr, coarse, split, sweep, span, size, center, write > 0);
+        sweepTwoLevelSeam(amr, coarse, split, sweep, span, size, center, write > 0, passB > 0);
       }
       else {
         validateTwoLevelSeam(compgeom, amr, coarse, split);

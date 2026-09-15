@@ -404,6 +404,48 @@ counting legitimate geometry as a symptom. Which of the 86 are real has to be se
 symptom test -- an interface segment on a cell edge is a defect only where the geometry does not
 itself lie on that edge -- before the number means anything.
 
+## Pass B: restricting the adjacent faces, and why it is not enough on its own
+
+`restrictFace` is `buildSeam`'s face rebuild, generalised to any face: drop that face's chord, walk
+the four children that cover it, merge. `buildRestricted` calls it for the seam face and then for
+every face meeting the seam face across an edge Pass A marked, so that all faces sharing such an edge
+describe it the same way.
+
+It does what it was meant to do, and it does not help.
+
+| 1000 rotations, 25527 seam cells | Pass B off | Pass B on |
+| --- | --- | --- |
+| cells emitting an interface segment on a cell edge | 209 | **41** |
+| faces restricted | 25527 | 25722 |
+| cells the restriction could not close | 0 | 7 |
+| rotations whose surface is not watertight | 146 | 148 |
+| total unclosed area | 7.83e-2 | 8.54e-2 |
+
+Four fifths of the intra-cell contradictions are gone: the seam face and its neighbours now agree
+about the marked edge. The surface is no better. The hole moved from *two faces of one cell
+disagreeing* to *one face of two cells disagreeing* -- restricting face 3 of a cut cell leaves its
+coarse neighbour still describing that same face the old way.
+
+The cost is nothing: 25722 face restrictions against 25527 seam cells is 195 faces beyond the seam
+faces `buildSeam` already rebuilt.
+
+What blocks it is classification, not restriction. Counting the coarse cells in the seam column that
+the corner test calls uniform but that carry a marked edge on their seam face gives **161** -- against
+209 marked edges in all. Three of every four marked edges have a cell on the other side that is never
+built as a body at all, so there is nothing there to restrict. Those are the cells whose edges carry
+an even number of crossings, so every corner reports the same side.
+
+The conclusion is the one the premise already implied, now measured: **the restriction is a property
+of the edge and has to be applied by every cell that touches it**, which means a cell's kind must
+come from the restricted faces and not from its corners. A cell the corners call Regular whose face
+the level below cuts is a cut cell.
+
+That is where the representability question has to be answered rather than deferred. Such a cell's
+solid inclusion enters and leaves through one face, so its interface loop lies entirely in that
+face's plane; the fan apex is the mean of the loop vertices and therefore lies in the plane too, and
+every fan triangle is coplanar with the face. The area is right and the volume is zero. Either the
+apex stops being the loop's centroid, or the moments stop coming from the fan.
+
 ## What will bite
 
 - **The prototype harness no longer measures locality.** It hands over parents gathered from local
