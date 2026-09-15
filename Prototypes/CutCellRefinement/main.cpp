@@ -1818,12 +1818,14 @@ public:
             Real&                               a_worstBend,
             Real&                               a_singleChord,
             Real&                               a_multiChord,
-            Real&                               a_fineSum)
+            Real&                               a_fineSum,
+            int&                                a_components)
   {
-    a_why      = 0;
-    a_mergeWhy = 0;
-    a_leftover = 0;
-    a_subFaces = 0;
+    a_why        = 0;
+    a_mergeWhy   = 0;
+    a_leftover   = 0;
+    a_subFaces   = 0;
+    a_components = 0;
 
     if (!this->define(a_coarse)) {
       a_why = 1;
@@ -1938,6 +1940,11 @@ public:
 
         return false;
       }
+
+      // The four fine faces carry four apertures and the coarse face carries one. Where their union
+      // is disconnected no single aperture describes it, and a coarse cell that is required to be
+      // single-valued cannot hold the result. That is a refusal, not something to patch.
+      a_components = numMerged;
 
       for (int n = 0; n < numMerged; n++) {
         if (m_numPolygons >= s_maxPolygons) {
@@ -2078,9 +2085,10 @@ validateSeamFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
         Real multi     = 0.0;
         Real fine      = 0.0;
 
-        int mergeWhy = 0;
-        int leftover = 0;
-        int subFaces = 0;
+        int mergeWhy   = 0;
+        int leftover   = 0;
+        int subFaces   = 0;
+        int components = 0;
 
         const bool ok = body.buildSeam(*implicitFunction,
                                        coarse,
@@ -2102,7 +2110,8 @@ validateSeamFace(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                                        bend,
                                        single,
                                        multi,
-                                       fine);
+                                       fine,
+                                       components);
 
         maxNeedFan  = std::max(maxNeedFan, needFan);
         maxNeedFlat = std::max(maxNeedFlat, needFlat);
@@ -2430,7 +2439,9 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
              int&               a_missed,
              int&               a_facesRestricted,
              int&               a_restrictRefused,
-             int&               a_blindNeighbours)
+             int&               a_blindNeighbours,
+             int&               a_multiValued,
+             int&               a_multiValuedTorn)
 {
   CH_TIME("twoLevelSeam");
 
@@ -2536,6 +2547,8 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
       int  loops = 0, needFan = 0, needFlat = 0, flatLoops = 0;
       Real gap = 0.0, bend = 0.0, singleChord = 0.0, multiChord = 0.0, fineSum = 0.0;
 
+      int components = 0;
+
       const bool dumping = writing && (bit() == a_dumpCell);
 
       if (dumping) {
@@ -2584,7 +2597,8 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
                                      bend,
                                      singleChord,
                                      multiChord,
-                                     fineSum);
+                                     fineSum,
+                                     components);
 
       a_seamCells++;
 
@@ -2616,6 +2630,14 @@ twoLevelSeam(const BaseIF&      a_implicitFunction,
 
       if (ok) {
         const int torn = seam.cellEdgeInterfaceSegments();
+
+        if (components > 1) {
+          a_multiValued++;
+
+          if (torn > 0) {
+            a_multiValuedTorn++;
+          }
+        }
 
         if (torn > 0) {
           a_cellsTorn++;
@@ -2791,7 +2813,7 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
   int coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
   int markedEdges = 0, markedOnSeamFace = 0, cellsMarked = 0, cellsMarkedOnSeamFace = 0;
   int cellsTorn = 0, predicted = 0, missed = 0, facesRestricted = 0, restrictRefused = 0;
-  int blindNeighbours = 0;
+  int blindNeighbours = 0, multiValued = 0, multiValuedTorn = 0;
 
   bool passB = false;
   {
@@ -2832,7 +2854,9 @@ validateTwoLevelSeam(const RefCountedPtr<ComputationalGeometry>& a_compgeom,
                missed,
                facesRestricted,
                restrictRefused,
-               blindNeighbours);
+               blindNeighbours,
+               multiValued,
+               multiValuedTorn);
 
   writeTwoLevelGrids("seam2", probLo, dxC, a_numCoarse, a_split);
 
@@ -2875,6 +2899,7 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
   int  totalRotations = 0, totalSeam = 0, totalRefused = 0, badRotations = 0;
   int  sumMarkedEdges = 0, sumOnSeamFace = 0, sumCellsMarked = 0, sumCellsOnSeamFace = 0;
   int  sumCellsTorn = 0, sumPredicted = 0, sumMissed = 0, sumFaces = 0, sumRestrictRefused = 0, sumBlind = 0;
+  int  sumMultiValued = 0, sumMultiValuedTorn = 0;
   int  totalWhy[numWhy];
   int  totalMergeWhy[numWhy];
   Real worstMulti = 0.0, worstSingle = 0.0, worstClosure = 0.0;
@@ -2911,7 +2936,7 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
         int  coarseCut = 0, coarsePlain = 0, fineCut = 0, finePlain = 0, seamCells = 0, seamRefused = 0;
         int  markedEdges = 0, markedOnSeamFace = 0, cellsMarked = 0, cellsMarkedOnSeamFace = 0;
         int  cellsTorn = 0, predicted = 0, missed = 0, facesRestricted = 0, restrictRefused = 0;
-        int  blindNeighbours = 0;
+        int  blindNeighbours = 0, multiValued = 0, multiValuedTorn = 0;
         Real multi = 0.0, singleChord = 0.0, closure = 0.0;
 
         std::string prefix;
@@ -2951,7 +2976,9 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
                      missed,
                      facesRestricted,
                      restrictRefused,
-                     blindNeighbours);
+                     blindNeighbours,
+                     multiValued,
+                     multiValuedTorn);
 
         totalRotations++;
         totalSeam += seamCells;
@@ -2966,6 +2993,8 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
         sumFaces += facesRestricted;
         sumRestrictRefused += restrictRefused;
         sumBlind += blindNeighbours;
+        sumMultiValued += multiValued;
+        sumMultiValuedTorn += multiValuedTorn;
 
         for (int i = 0; i < numWhy; i++) {
           totalWhy[i] += why[i];
@@ -3011,6 +3040,7 @@ sweepTwoLevelSeam(const RefCountedPtr<AmrMesh>& a_amr,
          << " predicted " << sumPredicted << " missed " << sumMissed << endl;
   pout() << "PASSB facesRestricted " << sumFaces << " refused " << sumRestrictRefused << " blindNeighbours " << sumBlind
          << endl;
+  pout() << "MULTIVALUED seamFaces " << sumMultiValued << " ofWhichTorn " << sumMultiValuedTorn << endl;
 }
 
 // Check that a partially carried index space is sound before anything is asked to solve on it.

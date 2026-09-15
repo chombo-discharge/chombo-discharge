@@ -446,6 +446,51 @@ face's plane; the fan apex is the mean of the loop vertices and therefore lies i
 every fan triangle is coplanar with the face. The area is right and the volume is zero. Either the
 apex stops being the loop's centroid, or the moments stop coming from the fan.
 
+## Where the seam question is actually posed, and what to fail on
+
+Every failure is at a sharp feature. Over 125 rotations at a coarse spacing of 0.0625, all 90
+residual segments lie within **one coarse cell of a cube edge**; not one is on a planar part of the
+surface. The seam construction is sound wherever the coarse-fine boundary meets planar geometry, and
+fails only where an edge of the geometry passes through a seam cell.
+
+Nor does refinement remove it, because a cube's edge is sharp at every scale. Over the full sweep the
+count of double-crossed seam edges runs 287, 209, 356 as the spacing halves twice: no decay. For a
+*smooth* surface of curvature radius R a cell edge double-crosses only if it passes within about
+dx^2/8R of the surface, which refinement does collapse -- the sphere sweep has zero double crossings
+at any resolution. A wedge is scale-free and always has cells along it. What does converge is the
+damage: total unclosed area over 125 rotations falls 6.6e-2, 1.0e-2, 3.8e-3, but the gap per affected
+cell stays a near-constant fraction of a coarse cell face (3.3%, 3.3%, 1.3%). Relative to the mesh
+the defect does not shrink. Refinement is error control, not a guarantee.
+
+The named worst case passes. A cube rotated 45 degrees about the Cartesian diagonal -- Euler angles
+(32.1545477813, 18.0964308122, 32.1545477813) in the prototype's convention -- gives no marked edges,
+no torn cells and no residual after T-junctions, at half-width 0.25 where its edges cross the seam
+plane and at half-width 0.9 where the seam sees only flat faces. (At 0.9 the surface is clipped by
+the domain: all 418 of its open edges have both endpoints on the domain boundary and none is a seam
+defect.)
+
+### The refusal
+
+Four fine faces carry four apertures; the coarse face carries one. Where their union is disconnected
+no single aperture describes it, and a coarse cell required to be single-valued cannot hold the
+result. `mergeCoplanar` already reports the component count, so the test is free.
+
+| over 1000 rotations, 25527 seam cells | count | of which tear |
+| --- | --- | --- |
+| seam faces merging into more than one component | 185 | **185** |
+| seam-face edges the coarse cell gets wrong | 209 | **209** |
+| cells that tear | 209 | -- |
+
+The disconnected-face test never fires on a sound cell, and it is a strict subset: 185 of the 209.
+The other 24 keep a connected face and still disagree with the face beside them.
+
+The exact criterion is the same statement one dimension down. Two fine sub-edges carry up to two
+crossings; the coarse edge carries at most one. Where the counts differ the coarse cell cannot
+describe that edge, and every face meeting it inherits the contradiction. That is `markCoarseEdges`,
+and over the sweep it is exact in both directions -- 209 marked, 209 torn, none missed, at every
+resolution tested. Refuse there, name the cell, and the failure is loud instead of a hole in a
+surface nobody looks at.
+
 ## What will bite
 
 - **The prototype harness no longer measures locality.** It hands over parents gathered from local
