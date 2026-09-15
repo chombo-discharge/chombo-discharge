@@ -693,6 +693,12 @@ polygonArea(const RealVect* a_vertex, const int a_num) noexcept
 #endif
 }
 
+inline bool
+sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept
+{
+  return (a_a - a_b).vectorLength() <= s_weldTolerance;
+}
+
 } // namespace detail
 } // namespace PolyhedralEB
 

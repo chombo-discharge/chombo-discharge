@@ -264,6 +264,23 @@ crossingLoops(const CutCellSurface& a_surface,
 constexpr Real s_clipTolerance = 1.0E-12;
 
 /**
+ * @brief How close two vertices must be to be the same vertex.
+ * @details A distance rather than a quantisation: two positions either side of a quantisation
+ * boundary are arbitrarily far apart in the quantised sense however close they are in space, and a
+ * loop that fails to close for that reason is silently dropped rather than reported.
+ */
+constexpr Real s_weldTolerance = 1.0E-10;
+
+/**
+ * @brief Whether two vertices are the same vertex.
+ * @param[in] a_a First vertex.
+ * @param[in] a_b Second vertex.
+ * @return True if they lie within s_weldTolerance of one another.
+ */
+inline bool
+sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept;
+
+/**
  * @brief A vertex's identity, quantised, for matching cap segments up.
  * @details Compared component by component rather than hashed: a hash collision would splice
  * two cap loops into one.
