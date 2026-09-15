@@ -348,6 +348,62 @@ The case is exported under `Prototypes/CutCellRefinement/break_case/`: both mixe
 single-resolution controls, the two mesh blocks, the unclosed segments as a polyline, and the coarse
 cell that misses the feature as a single hexahedron.
 
+## Pass A: isolating the coarse edges the restriction would have to fix
+
+The seam does not fail because the multichord is wrong. It fails because the multichord restricts
+the *face* description from the level below and leaves the *edge* description at coarse sampling.
+A face polygon's chord endpoints live on the face's boundary edges, so a face rebuilt from the
+children carries the children's crossings on those edges while the cell's other four faces still
+carry none. The two then disagree about whether the shared cell edge borders fluid, and
+`closeInterface`, which pairs along edges, renders the disagreement as interface lying on the edge.
+
+The root is a cell edge with two crossings. At the failing cell the edge `x = 0, y = 0.375` reads
+fluid at both ends and solid across 87% of its middle, so the sign test between the endpoints finds
+nothing; split in half, each piece holds one crossing and the level below finds both. Of the 544
+coarse cell edges lying in that seam plane, exactly one behaves this way -- and it is that one.
+
+`markCoarseEdges` is the detector: bracket each of the twelve cell edges as a whole and again as two
+halves, and mark the edge where the counts differ. Twelve extra function evaluations per seam cut
+cell. `SeamBody::cellEdgeInterfaceSegments` counts the symptom independently -- interface segments
+with two coordinates pinned at the cell boundary -- so the two can be compared without going through
+an STL.
+
+Over the 1000-rotation sweep, 25527 seam cells:
+
+| | cube off the grid | cube on the grid |
+| --- | --- | --- |
+| marked edges, all twelve directions | 1267 | 1094 |
+| marked edges lying on the seam face | 209 | 150 |
+| cells with a marked seam-face edge | 209 | 150 |
+| cells that actually tear | 209 | 236 |
+| tears predicted | 209 | 150 |
+| tears missed | **0** | 86 |
+
+Off the grid the three numbers coincide exactly: every torn cell has exactly one marked seam-face
+edge, and every marked seam-face edge yields exactly one torn cell. The patch set is 209 of 25527
+seam cells, 0.8%, and it is bounded by geometry rather than by a refinement criterion feeding back
+into itself.
+
+Marked edges *not* on the seam face -- 1058 of the 1267 -- cause no tear, which is the argument for
+restricting only in the seam plane. Their four surrounding cells are all coarse and all blind the
+same way, so they agree with each other; the description is inaccurate there but consistent, and
+consistency is what watertightness needs.
+
+Two gaps the pass exposes, both for Pass B rather than against it:
+
+**The blind neighbour never reaches the detector.** Cell (7,11,8) has all eight corners in the fluid,
+classifies Regular, and is skipped before `markCoarseEdges` runs -- yet it shares the marked edge and
+must adopt the same description or the disagreement simply moves one cell over. Pass B has to run the
+edge test on the cells adjacent to the seam as well as the cut ones, and be willing to turn a Regular
+cell into a cut one on the strength of it.
+
+**On the grid, 86 tears are unpredicted.** The half-edge test cannot see an edge that lies *in* the
+surface: every sample returns the same side of it. But a cube face lying on a cell face also means
+the embedded boundary genuinely runs along cell edges there, so `cellEdgeInterfaceSegments` is
+counting legitimate geometry as a symptom. Which of the 86 are real has to be settled by refining the
+symptom test -- an interface segment on a cell edge is a defect only where the geometry does not
+itself lie on that edge -- before the number means anything.
+
 ## What will bite
 
 - **The prototype harness no longer measures locality.** It hands over parents gathered from local
