@@ -1560,16 +1560,29 @@ Driver::regridAmrOntoGeometry(const int a_lmin, const int a_hardcap)
     pout() << "Driver::regridAmrOntoGeometry(int, int)" << endl;
   }
 
-  // Where the pre-pass ran, the index space was carried only over the boxes it produced, so the
-  // grids are taken from those boxes rather than clustered again from the tags. An independent
-  // clustering of the same tags comes out nearly the same, and the cells where it differs are
-  // cells whose embedded boundary data was never generated: the operators that read across a
-  // refinement boundary ask a coarse cell which fine cells lie under it, and a cell the index
-  // space does not carry a finer level over holds no record of that.
+  // Where the pre-pass ran, the grids are the ones the index space was built on, read back from it
+  // rather than rebuilt from the regions both were asked to resolve. The generator does not carry
+  // exactly what it was asked for: it retains a box whose coarsening, grown by the ghost width,
+  // touches a region, and it retains boxes whole. Rebuilding from the regions therefore leaves the
+  // simulation refined over less than the index space is, and the surplus is invisible until an
+  // operator reads across a refinement boundary and finds a cell with no record of what lies under
+  // it. Reading the grids back makes the two the same set by construction.
   const Vector<Vector<Box>>& coverageRegions = m_computationalGeometry->getCoverageRegions();
 
   if (coverageRegions.size() > 0) {
-    m_amr->regridAmr(coverageRegions, a_lmin);
+    const RefCountedPtr<EBIndexSpace>& ebis = m_computationalGeometry->getMfIndexSpace()->getEBIndexSpace(phase::gas);
+
+    Vector<Vector<Box>> boxes(coverageRegions.size());
+
+    for (int lvl = 0; lvl < static_cast<int>(boxes.size()); lvl++) {
+      if (lvl >= static_cast<int>(m_amr->getDomains().size())) {
+        break;
+      }
+
+      boxes[lvl] = ebis->getGrids(m_amr->getDomains()[lvl]).boxArray();
+    }
+
+    m_amr->regridAmr(boxes, a_lmin);
   }
   else {
     m_amr->regridAmr(m_geomTags, a_lmin, a_hardcap);
