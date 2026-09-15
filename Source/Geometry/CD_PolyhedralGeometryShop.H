@@ -202,10 +202,11 @@ protected:
   Vector<Vector<Box>> m_levelBoxes;
 
   /**
-   * @brief Interface triangles collected on this rank, nine reals each.
-   * @details Held behind a pointer because the cells are filled through a const interface.
+   * @brief Interface triangles collected on this rank, per level, nine reals each.
+   * @details Held behind a pointer because the cells are filled through a const interface, and kept
+   * per level so that each level's contribution can be written on its own as well as composited.
    */
-  RefCountedPtr<Vector<Real>> m_facets;
+  RefCountedPtr<Vector<Vector<Real>>> m_facets;
 
   /**
    * @brief Cells already written, per level.
@@ -214,6 +215,11 @@ protected:
    * geometry is the same either way, so the first answer is kept and the rest skipped.
    */
   RefCountedPtr<Vector<IntVectSet>> m_exportedCells;
+
+  /**
+   * @brief Cells left out of the surface because a finer level carries them, per level.
+   */
+  RefCountedPtr<Vector<long long>> m_skippedCells;
 
   /**
    * @brief Which level of this hierarchy a spacing belongs to.

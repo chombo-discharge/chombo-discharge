@@ -58,8 +58,9 @@ PolyhedralGeometryShop::setSurfaceFileName(const std::string& a_fileName) noexce
   m_surfaceFile = a_fileName;
 
   if (!m_surfaceFile.empty() && m_facets.isNull()) {
-    m_facets        = RefCountedPtr<Vector<Real>>(new Vector<Real>());
+    m_facets        = RefCountedPtr<Vector<Vector<Real>>>(new Vector<Vector<Real>>(m_dx.size()));
     m_exportedCells = RefCountedPtr<Vector<IntVectSet>>(new Vector<IntVectSet>(m_dx.size()));
+    m_skippedCells  = RefCountedPtr<Vector<long long>>(new Vector<long long>(m_dx.size(), 0));
   }
 }
 
@@ -120,46 +121,90 @@ PolyhedralGeometryShop::flushSurfaceSTL() const noexcept
     return;
   }
 
-  Vector<Vector<Real>> everyone;
-  Vector<Real>         mine = *m_facets;
+  // one file per level as well as the composite, so that a triangle at an unexpected size can be
+  // attributed to the level that wrote it
+  std::string stem = m_surfaceFile;
 
-  gather(everyone, mine, 0);
-
-  if (procID() != 0) {
-    return;
+  if (stem.size() > 4 && stem.compare(stem.size() - 4, 4, ".stl") == 0) {
+    stem.resize(stem.size() - 4);
   }
 
-  std::ofstream out(m_surfaceFile);
+  std::ofstream composite;
 
-  if (!out.good()) {
-    return;
+  if (procID() == 0) {
+    composite.open(m_surfaceFile);
+
+    composite << std::scientific << std::setprecision(17) << "solid interface\n";
   }
 
-  out << std::scientific << std::setprecision(17) << "solid interface\n";
+  for (int lvl = 0; lvl < static_cast<int>(m_facets->size()); lvl++) {
+    Vector<Vector<Real>> everyone;
+    Vector<Real>         mine = (*m_facets)[lvl];
 
-  for (int rank = 0; rank < everyone.size(); rank++) {
-    const Vector<Real>& facets = everyone[rank];
+    gather(everyone, mine, 0);
 
-    for (int i = 0; i + 3 * SpaceDim <= facets.size(); i += 3 * SpaceDim) {
-      out << "  facet normal 0 0 0\n    outer loop\n";
+    if (procID() != 0) {
+      continue;
+    }
 
-      for (int v = 0; v < 3; v++) {
-        out << "      vertex";
+    long long facetsHere = 0;
 
-        for (int d = 0; d < SpaceDim; d++) {
-          out << " " << facets[i + SpaceDim * v + d];
+    for (int rank = 0; rank < everyone.size(); rank++) {
+      facetsHere += everyone[rank].size() / (3 * SpaceDim);
+    }
+
+    std::ofstream level;
+
+    if (facetsHere > 0) {
+      std::ostringstream name;
+      name << stem << ".level" << lvl << ".stl";
+
+      level.open(name.str());
+      level << std::scientific << std::setprecision(17) << "solid interface\n";
+    }
+
+    for (int rank = 0; rank < everyone.size(); rank++) {
+      const Vector<Real>& facets = everyone[rank];
+
+      for (int i = 0; i + 3 * SpaceDim <= facets.size(); i += 3 * SpaceDim) {
+        std::ostringstream facet;
+
+        facet << "  facet normal 0 0 0\n    outer loop\n";
+
+        for (int v = 0; v < 3; v++) {
+          facet << "      vertex";
+
+          for (int d = 0; d < SpaceDim; d++) {
+            facet << " " << facets[i + SpaceDim * v + d];
+          }
+
+          facet << "\n";
         }
 
-        out << "\n";
-      }
+        facet << "    endloop\n  endfacet\n";
 
-      out << "    endloop\n  endfacet\n";
+        if (composite.is_open()) {
+          composite << facet.str();
+        }
+
+        if (level.is_open()) {
+          level << facet.str();
+        }
+      }
     }
+
+    if (level.is_open()) {
+      level << "endsolid interface\n";
+      level.close();
+    }
+
+    pout() << "SURFACE level " << lvl << " dx " << m_dx[lvl] << " triangles " << facetsHere << endl;
   }
 
-  out << "endsolid interface\n";
-
-  out.close();
+  if (composite.is_open()) {
+    composite << "endsolid interface\n";
+    composite.close();
+  }
 }
 
 void
@@ -788,6 +833,10 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     if (!m_surfaceFile.empty() && !m_facets.isNull()) {
       const int exportLevel = this->levelFromDx(a_dx);
 
+      if (exportLevel >= 0 && this->coveredByFiner(iv, exportLevel)) {
+        (*m_skippedCells)[exportLevel]++;
+      }
+
       if (exportLevel >= 0 && !this->coveredByFiner(iv, exportLevel) && !(*m_exportedCells)[exportLevel].contains(iv)) {
         RealVect centre = a_probLo;
 
@@ -795,7 +844,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
           centre[d] += a_dx * (static_cast<Real>(iv[d]) + 0.5);
         }
 
-        body.appendInterfaceFacets(*m_facets, centre, a_dx);
+        body.appendInterfaceFacets((*m_facets)[exportLevel], centre, a_dx);
 
         (*m_exportedCells)[exportLevel] |= iv;
       }
