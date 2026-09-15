@@ -52,158 +52,108 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
 {}
 
-void
-PolyhedralGeometryShop::setSurfaceFileName(const std::string& a_fileName) noexcept
+Real
+PolyhedralGeometryShop::edgeRoot(const IntVect&  a_edgeIV,
+                                 const int       a_dir,
+                                 const Real      a_loValue,
+                                 const RealVect& a_probLo,
+                                 const Real&     a_dx) const noexcept
 {
-  m_surfaceFile = a_fileName;
+  RealVect lowPoint = a_probLo;
 
-  if (!m_surfaceFile.empty() && m_facets.isNull()) {
-    m_facets        = RefCountedPtr<Vector<Vector<Real>>>(new Vector<Vector<Real>>(m_dx.size()));
-    m_exportedCells = RefCountedPtr<Vector<IntVectSet>>(new Vector<IntVectSet>(m_dx.size()));
-    m_skippedCells  = RefCountedPtr<Vector<long long>>(new Vector<long long>(m_dx.size(), 0));
+  for (int d = 0; d < SpaceDim; d++) {
+    lowPoint[d] += a_dx * static_cast<Real>(a_edgeIV[d]);
   }
-}
 
-int
-PolyhedralGeometryShop::levelFromDx(const Real a_dx) const noexcept
-{
-  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
-    if (std::abs(m_dx[lvl] - a_dx) <= 1.0E-12 * m_dx[lvl]) {
-      return lvl;
+  Real lo      = 0.0;
+  Real hi      = 1.0;
+  Real loValue = a_loValue;
+
+  for (int iter = 0; iter < 100; iter++) {
+    const Real mid = 0.5 * (lo + hi);
+
+    RealVect x = lowPoint;
+    x[a_dir] += a_dx * mid;
+
+    const Real value = m_baseIF->value(x);
+
+    if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(loValue)) {
+      lo      = mid;
+      loValue = value;
+    }
+    else {
+      hi = mid;
+    }
+
+    if (hi - lo < 1.0E-15) {
+      break;
     }
   }
 
-  return -1;
-}
-
-bool
-PolyhedralGeometryShop::coveredByFiner(const IntVect& a_cell, const int a_level) const noexcept
-{
-  if (a_level <= 0 || a_level >= static_cast<int>(m_levelBoxes.size())) {
-    return false;
-  }
-
-  for (int i = 0; i < m_levelBoxes[a_level - 1].size(); i++) {
-    if (coarsen(m_levelBoxes[a_level - 1][i], 2).contains(a_cell)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-void
-PolyhedralGeometryShop::postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx)
-{
-  CH_TIME("PolyhedralGeometryShop::postMakeBoxLayout");
-
-  ScanShop::postMakeBoxLayout(a_dbl, a_dx);
-
-  const int level = this->levelFromDx(a_dx[0]);
-
-  if (level < 0) {
-    return;
-  }
-
-  if (static_cast<int>(m_levelBoxes.size()) < static_cast<int>(m_dx.size())) {
-    m_levelBoxes.resize(m_dx.size());
-  }
-
-  m_levelBoxes[level] = a_dbl.boxArray();
+  return 0.5 * (lo + hi);
 }
 
 void
-PolyhedralGeometryShop::flushSurfaceSTL() const noexcept
+PolyhedralGeometryShop::interfaceFacets(Vector<Real>&   a_facets,
+                                        const IntVect&  a_cell,
+                                        const RealVect& a_probLo,
+                                        const Real      a_dx) const noexcept
 {
-  CH_TIME("PolyhedralGeometryShop::flushSurfaceSTL");
+  PolyhedralEB::CutCellSurface surface;
 
-  if (m_surfaceFile.empty() || m_facets.isNull()) {
-    return;
-  }
+  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+    RealVect x = a_probLo;
 
-  // one file per level as well as the composite, so that a triangle at an unexpected size can be
-  // attributed to the level that wrote it
-  std::string stem = m_surfaceFile;
-
-  if (stem.size() > 4 && stem.compare(stem.size() - 4, 4, ".stl") == 0) {
-    stem.resize(stem.size() - 4);
-  }
-
-  std::ofstream composite;
-
-  if (procID() == 0) {
-    composite.open(m_surfaceFile);
-
-    composite << std::scientific << std::setprecision(17) << "solid interface\n";
-  }
-
-  for (int lvl = 0; lvl < static_cast<int>(m_facets->size()); lvl++) {
-    Vector<Vector<Real>> everyone;
-    Vector<Real>         mine = (*m_facets)[lvl];
-
-    gather(everyone, mine, 0);
-
-    if (procID() != 0) {
-      continue;
+    for (int d = 0; d < SpaceDim; d++) {
+      x[d] += a_dx * static_cast<Real>(a_cell[d] + ((c >> d) & 1));
     }
 
-    long long facetsHere = 0;
+    surface.m_corner[c] = m_baseIF->value(x);
+  }
 
-    for (int rank = 0; rank < everyone.size(); rank++) {
-      facetsHere += everyone[rank].size() / (3 * SpaceDim);
-    }
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    int low  = -1;
+    int high = -1;
 
-    std::ofstream level;
+    PolyhedralEB::detail::edgeCorners(e, low, high);
 
-    if (facetsHere > 0) {
-      std::ostringstream name;
-      name << stem << ".level" << lvl << ".stl";
+    const Real loValue = surface.m_corner[low];
+    const Real hiValue = surface.m_corner[high];
 
-      level.open(name.str());
-      level << std::scientific << std::setprecision(17) << "solid interface\n";
-    }
+    if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
+      if (loValue == 0.0) {
+        surface.m_crossing[e] = 0.0;
+      }
+      else if (hiValue == 0.0) {
+        surface.m_crossing[e] = 1.0;
+      }
+      else {
+        const int dir = PolyhedralEB::detail::edgeDirection(e);
 
-    for (int rank = 0; rank < everyone.size(); rank++) {
-      const Vector<Real>& facets = everyone[rank];
+        int offset[SpaceDim];
+        PolyhedralEB::detail::edgeOrigin(e, offset);
 
-      for (int i = 0; i + 3 * SpaceDim <= facets.size(); i += 3 * SpaceDim) {
-        std::ostringstream facet;
+        IntVect edgeIV = a_cell;
 
-        facet << "  facet normal 0 0 0\n    outer loop\n";
-
-        for (int v = 0; v < 3; v++) {
-          facet << "      vertex";
-
-          for (int d = 0; d < SpaceDim; d++) {
-            facet << " " << facets[i + SpaceDim * v + d];
-          }
-
-          facet << "\n";
+        for (int d = 0; d < SpaceDim; d++) {
+          edgeIV[d] += offset[d];
         }
 
-        facet << "    endloop\n  endfacet\n";
-
-        if (composite.is_open()) {
-          composite << facet.str();
-        }
-
-        if (level.is_open()) {
-          level << facet.str();
-        }
+        surface.m_crossing[e] = this->edgeRoot(edgeIV, dir, loValue, a_probLo, a_dx);
       }
     }
-
-    if (level.is_open()) {
-      level << "endsolid interface\n";
-      level.close();
-    }
-
-    pout() << "SURFACE level " << lvl << " dx " << m_dx[lvl] << " triangles " << facetsHere << endl;
   }
 
-  if (composite.is_open()) {
-    composite << "endsolid interface\n";
-    composite.close();
+  PolyhedralEB::CutCellBody body;
+
+  if (body.define(surface)) {
+    RealVect centre = a_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      centre[d] += a_dx * (static_cast<Real>(a_cell[d]) + 0.5);
+    }
+
+    body.appendInterfaceFacets(a_facets, centre, a_dx);
   }
 }
 
@@ -263,38 +213,7 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
   // bisection between the two endpoints. The endpoints are taken from the shared node values
   // and the edge is addressed by its own index, so every cell reaching this edge hands the
   // solver the same interval and gets the same root back
-  RealVect lowPoint = a_probLo;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    lowPoint[d] += a_dx * static_cast<Real>(edgeIV[d]);
-  }
-
-  Real lo      = 0.0;
-  Real hi      = 1.0;
-  Real loValue = a_lo;
-
-  for (int iter = 0; iter < 100; iter++) {
-    const Real mid = 0.5 * (lo + hi);
-
-    RealVect x = lowPoint;
-    x[dir] += a_dx * mid;
-
-    const Real value = m_baseIF->value(x);
-
-    if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(loValue)) {
-      lo      = mid;
-      loValue = value;
-    }
-    else {
-      hi = mid;
-    }
-
-    if (hi - lo < 1.0E-15) {
-      break;
-    }
-  }
-
-  const Real root = 0.5 * (lo + hi);
+  const Real root = this->edgeRoot(edgeIV, dir, a_lo, a_probLo, a_dx);
 
   if (a_intercept[dir].box().contains(edgeIV)) {
     a_intercept[dir](edgeIV, 0) = root;
@@ -826,29 +745,6 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     this->fillNode(node, body, a_regIrregCovered, iv, a_domain);
 
     a_nodes.push_back(node);
-
-    // The surface is written from the finest level that carries each part of the geometry, so a
-    // cell the level below also carries contributes nothing: what it holds is what that level
-    // coarsened, and the finer description is the one to keep.
-    if (!m_surfaceFile.empty() && !m_facets.isNull()) {
-      const int exportLevel = this->levelFromDx(a_dx);
-
-      if (exportLevel >= 0 && this->coveredByFiner(iv, exportLevel)) {
-        (*m_skippedCells)[exportLevel]++;
-      }
-
-      if (exportLevel >= 0 && !this->coveredByFiner(iv, exportLevel) && !(*m_exportedCells)[exportLevel].contains(iv)) {
-        RealVect centre = a_probLo;
-
-        for (int d = 0; d < SpaceDim; d++) {
-          centre[d] += a_dx * (static_cast<Real>(iv[d]) + 0.5);
-        }
-
-        body.appendInterfaceFacets((*m_facets)[exportLevel], centre, a_dx);
-
-        (*m_exportedCells)[exportLevel] |= iv;
-      }
-    }
 
     indexNodes(static_cast<int>(a_nodes.size()) - 1);
   }

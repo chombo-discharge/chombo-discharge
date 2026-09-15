@@ -96,6 +96,17 @@ public:
   setGeometrySurfaceFile(const std::string& a_fileName) noexcept;
 
   /**
+   * @brief The generator that built one phase's index space.
+   * @details Null when the geometry was not built, or was built by something other than the
+   *          polyhedral generator. It is kept alive for as long as the index space it built, so a
+   *          cell can be reconstructed from it long after generation.
+   * @param[in] a_phase Phase to ask about.
+   * @return The generator, or null.
+   */
+  const RefCountedPtr<GeometryService>&
+  getGeometryGenerator(const phase::which_phase a_phase) const noexcept;
+
+  /**
    * @brief Generate the geometry with PolyhedralGeometryShop.
    * @details Same topology as the chombo-discharge generator, but the moments are exact
    * integrals of an explicitly reconstructed surface rather than quadratures of the implicit
@@ -326,6 +337,16 @@ protected:
   bool m_generateEveryLevel;
 
   /**
+   * @brief The generators, one per phase, kept for as long as the index space they built.
+   * @details The index space borrows a raw pointer to its generator and keeps it: EBISLevel holds
+   * a const GeometryService* that it never owns. Everything Chombo does with it today happens
+   * while the index space is being defined, so a generator that lived only that long was enough.
+   * Refining a cell that the index space did not carry has to ask the generator afterwards, which
+   * means it has to outlive the call that built the geometry.
+   */
+  Vector<RefCountedPtr<GeometryService>> m_geoservers;
+
+  /**
    * @brief Grid level where we begin using ScanShop
    */
   ProblemDomain m_scanDomain;
@@ -406,29 +427,29 @@ protected:
 
   /**
    * @brief Set up the geometry generation tool for the gas phase.
-   * @param[in,out] a_geoserver     Geometry service object which is later used for making build the EB information.
-   * @param[in]    a_finestDomain  Finest domain which will be used
-   * @param[in]    a_probLo        Lower-left corner of simulation domain.
-   * @param[in]    a_finestDx      Finest resolution which will be used.
+   * @param[out] a_geoserver     Generator, owned here and borrowed by the index space.
+   * @param[in]  a_finestDomain  Finest domain which will be used
+   * @param[in]  a_probLo        Lower-left corner of simulation domain.
+   * @param[in]  a_finestDx      Finest resolution which will be used.
    */
   void
-  buildGasGeometry(GeometryService*&    a_geoserver,
-                   const ProblemDomain& a_finestDomain,
-                   const RealVect&      a_probLo,
-                   const Real           a_finestDx);
+  buildGasGeometry(RefCountedPtr<GeometryService>& a_geoserver,
+                   const ProblemDomain&            a_finestDomain,
+                   const RealVect&                 a_probLo,
+                   const Real                      a_finestDx);
 
   /**
    * @brief Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics.
-   * @param[in,out] a_geoserver     Geometry service object which is later used for making build the EB information.
-   * @param[in]    a_finestDomain  Finest domain which will be used
-   * @param[in]    a_probLo        Lower-left corner of simulation domain.
-   * @param[in]    a_finestDx      Finest resolution which will be used.
+   * @param[out] a_geoserver     Generator, owned here and borrowed by the index space.
+   * @param[in]  a_finestDomain  Finest domain which will be used
+   * @param[in]  a_probLo        Lower-left corner of simulation domain.
+   * @param[in]  a_finestDx      Finest resolution which will be used.
    */
   void
-  buildSolidGeometry(GeometryService*&    a_geoserver,
-                     const ProblemDomain& a_finestDomain,
-                     const RealVect&      a_probLo,
-                     const Real           a_finestDx);
+  buildSolidGeometry(RefCountedPtr<GeometryService>& a_geoserver,
+                     const ProblemDomain&            a_finestDomain,
+                     const RealVect&                 a_probLo,
+                     const Real                      a_finestDx);
 };
 
 #include <CD_NamespaceFooter.H>

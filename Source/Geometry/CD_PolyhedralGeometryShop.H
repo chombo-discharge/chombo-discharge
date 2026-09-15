@@ -73,21 +73,20 @@ public:
                          const int            a_refinement);
 
   /**
-   * @brief Write the embedded boundary this shop reconstructs, as one composite STL.
-   * @details The surface is the interface polygons of every cut cell, in physical coordinates. A
-   *          cell whose region a finer level also carries is left out, so what is written is the
-   *          finest description of each part of the geometry rather than one surface per level.
-   *          An empty name writes nothing. Call flushSurfaceSTL once the index space is built.
-   * @param[in] a_fileName File to write, or empty to write nothing.
+   * @brief The embedded boundary inside one cell, as triangles in physical coordinates.
+   * @details The cell is reconstructed the same way generation reconstructs it, from the same
+   *          implicit function and the same bracketing, so the triangles are the ones the index
+   *          space was built from. Nothing is appended for a cell that is not cut.
+   * @param[in,out] a_facets Coordinates to append to, nine reals per triangle.
+   * @param[in]     a_cell   Cell to reconstruct.
+   * @param[in]     a_probLo Lower-left corner of the domain.
+   * @param[in]     a_dx     Grid spacing of the level the cell belongs to.
    */
   void
-  setSurfaceFileName(const std::string& a_fileName) noexcept;
-
-  /**
-   * @brief Write what has been collected, gathering it across ranks first.
-   */
-  void
-  flushSurfaceSTL() const noexcept;
+  interfaceFacets(Vector<Real>&   a_facets,
+                  const IntVect&  a_cell,
+                  const RealVect& a_probLo,
+                  const Real      a_dx) const noexcept;
 
   /**
    * @brief Say how much of each level to carry.
@@ -190,64 +189,17 @@ protected:
   int m_coverageLevel;
 
   /**
-   * @brief File the reconstructed surface is written to, or empty when none is written.
+   * @brief Bisect one cell edge for the crossing on it.
+   * @param[in] a_edgeIV  Node at the low end of the edge.
+   * @param[in] a_dir     Direction the edge runs in.
+   * @param[in] a_loValue Implicit function at the low end.
+   * @param[in] a_probLo  Lower-left corner of the domain.
+   * @param[in] a_dx      Grid spacing.
+   * @return Position along the edge, in [0,1].
    */
-  std::string m_surfaceFile;
-
-  /**
-   * @brief Boxes each level's index space is generated over, indexed finest first.
-   * @details Recorded as each level's layout is made, which happens finest first, so that a cell
-   * can be tested against the level below it while its own level is still being filled.
-   */
-  Vector<Vector<Box>> m_levelBoxes;
-
-  /**
-   * @brief Interface triangles collected on this rank, per level, nine reals each.
-   * @details Held behind a pointer because the cells are filled through a const interface, and kept
-   * per level so that each level's contribution can be written on its own as well as composited.
-   */
-  RefCountedPtr<Vector<Vector<Real>>> m_facets;
-
-  /**
-   * @brief Cells already written, per level.
-   * @details A level is filled more than once when the data is distributed -- once to measure the
-   * load and once on the balanced layout -- and a cell reached twice would be written twice. The
-   * geometry is the same either way, so the first answer is kept and the rest skipped.
-   */
-  RefCountedPtr<Vector<IntVectSet>> m_exportedCells;
-
-  /**
-   * @brief Cells left out of the surface because a finer level carries them, per level.
-   */
-  RefCountedPtr<Vector<long long>> m_skippedCells;
-
-  /**
-   * @brief Which level of this hierarchy a spacing belongs to.
-   * @param[in] a_dx Grid spacing.
-   * @return Index into m_dx, or -1 if the spacing is not one of this hierarchy's.
-   */
-  int
-  levelFromDx(const Real a_dx) const noexcept;
-
-  /**
-   * @brief Whether a finer level also carries this cell's region, so that it is left out.
-   * @param[in] a_cell  Cell on level a_level.
-   * @param[in] a_level Index into m_dx of the level the cell belongs to.
-   * @return True when the level one finer covers it.
-   */
-  bool
-  coveredByFiner(const IntVect& a_cell, const int a_level) const noexcept;
-
-  /**
-   * @brief Record the boxes a level's index space is generated over.
-   * @details Called by EBISLevel after it makes the grids and before it asks for any graph, which
-   * is the only point at which the boxes a level is generated over are visible. Levels arrive
-   * finest first, so a cell can be tested against the level below it while its own is being filled.
-   * @param[in] a_dbl The grids, after retainBox has filtered them.
-   * @param[in] a_dx  Spacing of the level these grids belong to.
-   */
-  void
-  postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx) override;
+  Real
+  edgeRoot(const IntVect& a_edgeIV, const int a_dir, const Real a_loValue, const RealVect& a_probLo, const Real& a_dx)
+    const noexcept;
 
   /**
    * @brief Classify every cell of a region from the bodies of the cells they subdivide.

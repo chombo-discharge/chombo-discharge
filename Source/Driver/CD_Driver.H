@@ -107,6 +107,33 @@ protected:
   int m_geometryRefinement;
 
   /**
+   * @brief Check that the grids being written describe the same cells the index space does.
+   * @details Only where the pre-pass ran: elsewhere the index space carries every level in full
+   * and the simulation does not, and the two are expected to differ. Errors out on a mismatch,
+   * since the surface is written from the grids and the moments are read from the index space.
+   * @param[in] a_grids Grids about to be written.
+   */
+  void
+  checkGridsAgainstIndexSpace(const Vector<DisjointBoxLayout>& a_grids) const;
+
+  /**
+   * @brief Write the reconstructed embedded boundary, taken from the grids the simulation runs on.
+   * @details Valid cells only, and a cell a finer level also covers is left to that finer level, so
+   * the surface is written at the resolution the discretisation holds it at. One file per phase,
+   * plus one per level beside it.
+   */
+  void
+  writeGeometrySurface() const;
+
+  /**
+   * @brief Write collected triangles, gathering them across ranks first.
+   * @param[in] a_facets   Triangles per level, nine reals each.
+   * @param[in] a_fileName File for the composite; each level gets one beside it.
+   */
+  void
+  writeSurfaceSTL(const Vector<Vector<Real>>& a_facets, const std::string& a_fileName) const;
+
+  /**
    * @brief Base name for writing the boundary the polyhedral generator reconstructs, or empty
    *        when none is written.
    */
