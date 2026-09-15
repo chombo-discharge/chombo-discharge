@@ -110,6 +110,17 @@ PolyhedralGeometryShop::postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const 
   }
 
   m_levelBoxes[level] = a_dbl.boxArray();
+
+  if (static_cast<int>(m_surfaces.size()) < static_cast<int>(m_dx.size())) {
+    m_surfaceCells.resize(m_dx.size());
+    m_surfaces.resize(m_dx.size());
+  }
+
+  // The surfaces are recorded as the graph is filled, which happens once per box of this layout
+  // and after this call, so the store is only sized here
+  m_surfaceCells[level] = RefCountedPtr<LayoutData<Vector<IntVect>>>(new LayoutData<Vector<IntVect>>(a_dbl));
+  m_surfaces[level]     = RefCountedPtr<LayoutData<Vector<PolyhedralEB::CutCellSurface>>>(
+    new LayoutData<Vector<PolyhedralEB::CutCellSurface>>(a_dbl));
 }
 
 void
@@ -543,43 +554,6 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
       a_node.m_faceCentroid[nodeIndex] = faceCentroid;
     }
   }
-}
-
-int
-PolyhedralGeometryShop::levelFromDx(const Real a_dx) const noexcept
-{
-  for (int lvl = 0; lvl < static_cast<int>(m_dx.size()); lvl++) {
-    if (std::abs(m_dx[lvl] - a_dx) <= 1.0E-12 * a_dx) {
-      return lvl;
-    }
-  }
-
-  return -1;
-}
-
-void
-PolyhedralGeometryShop::postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx)
-{
-  CH_TIME("PolyhedralGeometryShop::postMakeBoxLayout");
-
-  ScanShop::postMakeBoxLayout(a_dbl, a_dx);
-
-  const int level = this->levelFromDx(a_dx[0]);
-
-  if (level < 0) {
-    return;
-  }
-
-  if (static_cast<int>(m_surfaces.size()) < static_cast<int>(m_dx.size())) {
-    m_surfaceCells.resize(m_dx.size());
-    m_surfaces.resize(m_dx.size());
-  }
-
-  // The surfaces are recorded as the graph is filled, which happens once per box of this layout
-  // and after this call, so the store is only sized here
-  m_surfaceCells[level] = RefCountedPtr<LayoutData<Vector<IntVect>>>(new LayoutData<Vector<IntVect>>(a_dbl));
-  m_surfaces[level]     = RefCountedPtr<LayoutData<Vector<PolyhedralEB::CutCellSurface>>>(
-    new LayoutData<Vector<PolyhedralEB::CutCellSurface>>(a_dbl));
 }
 
 bool

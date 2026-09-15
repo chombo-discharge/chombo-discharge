@@ -326,14 +326,6 @@ protected:
   RefCountedPtr<Vector<IntVectSet>> m_exportedCells;
 
   /**
-   * @brief Which level of this hierarchy a spacing belongs to.
-   * @param[in] a_dx Grid spacing.
-   * @return Index into m_dx, or -1 if the spacing is not one of this hierarchy's.
-   */
-  int
-  levelFromDx(const Real a_dx) const noexcept;
-
-  /**
    * @brief Whether a finer level also carries this cell's region, so that it is left out.
    * @param[in] a_cell  Cell on level a_level.
    * @param[in] a_level Index into m_dx of the level the cell belongs to.
@@ -341,17 +333,6 @@ protected:
    */
   bool
   coveredByFiner(const IntVect& a_cell, const int a_level) const noexcept;
-
-  /**
-   * @brief Record the boxes a level's index space is generated over.
-   * @details Called by EBISLevel after it makes the grids and before it asks for any graph, which
-   * is the only point at which the boxes a level is generated over are visible. Levels arrive
-   * finest first, so a cell can be tested against the level below it while its own is being filled.
-   * @param[in] a_dbl The grids, after retainBox has filtered them.
-   * @param[in] a_dx  Spacing of the level these grids belong to.
-   */
-  void
-  postMakeBoxLayout(const DisjointBoxLayout& a_dbl, const RealVect& a_dx) override;
 
   /**
    * @brief Classify every cell of a region from the bodies of the cells they subdivide.
