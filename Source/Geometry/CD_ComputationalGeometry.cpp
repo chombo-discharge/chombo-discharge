@@ -305,6 +305,22 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   this->buildImplicitFunctions();
 
+  // The algorithm, in the order it runs (the record of why it looks like this is PARTIAL_GRIDS.md):
+  //
+  //   0. Start level, per phase: domainSplit the whole domain and classify every box regular, covered or
+  //      irregular (buildStartLevel, classifyBox).
+  //   1. Upward, per phase, to m_maxEbDepth: a regular or covered box refines whole with its tag. An irregular
+  //      box is split into classified pieces if the implicit function's normal turns by more than m_refineAngle
+  //      between neighbouring cells near the surface; otherwise it is a leaf and nothing is built above it
+  //      (buildFinerLevels, exceedsCurvature).
+  //   2. Tiles, once, after both phases: the union of the two phases' irregular boxes on every level is tiled by
+  //      TiledMeshRefine into a properly nested set common to both phases (makeTiles). This is the coverage the
+  //      simulation regrids onto.
+  //   3. Per phase: every tile lies inside an irregular box (it is irregular), inside a regular or covered box
+  //      (it inherits, and the box is recorded as hit), or above a leaf of this phase (it is classified)
+  //      (classifyTiles).
+  //   4. Per phase: every hit regular or covered box is cut down to what the tiles left of it (decimateBoxes).
+  //
   // Steps 0 and 1, per phase. A phase without an implicit function is one regular box on every level, and
   // takes no further part.
   for (int p = 0; p < 2; p++) {

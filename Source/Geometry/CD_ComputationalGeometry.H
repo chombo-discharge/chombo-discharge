@@ -147,29 +147,10 @@ public:
    * @brief Build the grids the index space is generated over, per phase and per level.
    * @details The grids are built before any index space exists, from the implicit functions alone. Level 0 is
    * a_startDomain, built whole; every finer level is a factor-two refinement of it, up to a_maxEbDepth levels.
-   * Every box made here is at most a_maxBlockSize wide and lies on the a_maxBlockSize lattice, so the
-   * cut-cell grids of both phases are unions of the same super-tiles.
-   *
-   * The algorithm, in the order it runs (the record of why it looks like this is PARTIAL_GRIDS.md):
-   *
-   *   0. Start level, per phase: domainSplit the whole domain and classify every box regular, covered or
-   *      irregular (classifyBox).
-   *   1. Upward, per phase, to a_maxEbDepth: a regular or covered box refines whole with its tag. An irregular
-   *      box is split into classified pieces if the implicit function's normal turns by more than a_refineAngle
-   *      between neighbouring cells near the surface (exceedsCurvature); otherwise it is a leaf and nothing is
-   *      built above it.
-   *   2. Tiles, once, after both phases: the union of the two phases' irregular boxes on every level is tiled
-   *      by TiledMeshRefine into a properly nested set common to both phases (makeTiles). This is the coverage
-   *      the simulation regrids onto.
-   *   3. Per phase: every tile lies inside an irregular box (it is irregular), inside a regular or covered box
-   *      (it inherits, and the box is recorded as hit), or above a leaf of this phase (it is classified)
-   *      (classifyTiles).
-   *   4. Per phase: every hit regular or covered box is cut down to what the tiles left of it (decimateBoxes).
-   *
-   * The result, per phase and per level, is a box list with a classification for every box, read by the
-   * geometry generators through getGrids/getGridTypes. Without an implicit function a phase is one regular box
-   * on every level.
-   *
+   * Every box made here is at most a_maxBlockSize wide and lies on the a_maxBlockSize lattice, so the cut-cell
+   * grids of both phases are unions of the same super-tiles. The result, per phase and per level, is a box list
+   * with a classification for every box, read through getGrids/getGridTypes; the cut-cell tiles common to both
+   * phases are read through getTiles. Without an implicit function a phase is one regular box on every level.
    * @param[in] a_startDomain  Coarsest domain built here, level 0. Built whole in both phases.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_startDx      Grid spacing on a_startDomain.
