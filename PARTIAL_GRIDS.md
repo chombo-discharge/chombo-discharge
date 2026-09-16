@@ -277,6 +277,123 @@ Two things now, both needed by the sweep and neither expressible in a three-valu
 - that a box is **present but not a reason to refine below it**, so that `retainBox` keeps pruning the
   subtree it would otherwise re-open.
 
+## How the EBIS machinery operates: five facts
+
+**F1 -- classification is per box, and Regular/Covered boxes are never generated.** The per-box loop
+in `EBISLevel`:
+
+```cpp
+inout = a_geoserver.InsideOutside(region, a_domain, a_origin, a_dx, din);
+if      (inout == Regular) ebgraph.setToAllRegular();
+else if (inout == Covered) ebgraph.setToAllCovered();
+else                       { a_geoserver.fillGraph(...); ebgraph.buildGraph(...); }
+```
+
+A box classified Regular or Covered costs one tag and never touches the generator. `fillGraph` -- the
+polyhedral path -- runs only for Irregular boxes. So the "outside" costs a tag per box, not a
+computation per box.
+
+**F2 -- but it needs a box.** `EBISLevel` classifies only the boxes `makeGrids` handed it. The
+four-argument `InsideOutside` at line 288 is inside `makeBoxes`, the fallback decomposition used only
+when the generator supplies no layout. Whatever is not in a box is never asked, and reads `AllRegular`.
+
+**F3 -- a hole's parent is always generated, never coarsened.** `coarsenFrom` builds `fineCoverage`
+from `coarsen(a_fineEBIS.m_grids.boxArray(), 2)` and overwrites only there, and by its own comment leaves
+the outermost ring of the fine footprint alone. A hole has no fine footprint, so the coarse cell above it
+keeps the body `fillGraph` built. The cuttable parent exists by construction.
+
+**F4 -- the fill-from-parent contract is already declared, on the Chombo side.** The branch above adds
+to `GeometryService`: `numSurfaceComponents`, `getSurfaces`, `refinedFillParentDx`, `fillRefinedGraph`,
+all defaulting to refusal. What it never had was a guarantee of what it fills *from* (F3) or a definition
+of which cells are holes.
+
+**F5 -- the layout is assignment, not negotiation.** `makeGrids` does `a_grids = m_grids[whichLevel]`.
+Whatever `Vector<DisjointBoxLayout>` is built becomes the EBIS layout verbatim. Nothing downstream
+re-nests, re-splits, or fills gaps.
+
+## The two questions, constrained by the facts
+
+**Q1 -- classifying everything outside the nested cut-cell grids.** By F1 and F2 it splits by type:
+
+- *regular outside* may be omitted: the default is the right answer;
+- *covered outside* must be carried, **in full, at every level**. Not a collar. Three reasons, each
+  sufficient: AMR level 0 is `domainSplit` of the whole domain and requests every cell; physics tags put
+  fine grids inside dielectrics, which are covered to the gas phase; and in multi-fluid the solid phase's
+  covered region is the gas phase's fluid, so between the two index spaces essentially everything is
+  requested somewhere.
+
+By F1 that is still cheap: interior solid is bulky and describes in few large boxes, and refining a
+covered box whole keeps it one box per level regardless of depth. It is also exactly the constraint the
+current `retainBox` placement violates, since it drops covered refinements on the same terms as
+irregular ones. Moving the test into the Irregular branch -- `boxType == Irregular && retainBox(...)`
+-- keeps every covered region at one box per level and leaves the subtree pruning where the subtree is.
+A non-retained Irregular box then falls through the `else if` chain with nothing pushed: the outer
+switch has no final `else`.
+
+The one place box arithmetic happens: covered boxes must be disjoint from the nested irregular grids,
+and their shared boundary is the surface. Each level's covered set is the coarser level's covered boxes
+refined whole, minus the nested grids -- a few big boxes minus a rim.
+
+**Q2 -- filling the hole.** The hole is load-bearing: it terminates the recursion. Retaining an
+Irregular box whole instead does not make a hole, it makes a seed -- at the next level it is an
+Irregular parent and is either split (pruning lost) or retained whole again, one full-width box per
+level to the bottom, each through `fillGraph`. Absence is the only cheap terminator, and it is the
+fourth state `InOut` cannot express seen from the other side.
+
+A grid that lands in a hole must therefore not read the factory default. By F3 its parent has a body;
+by F4 the contract to cut that body is declared. What #731 lacks is the *trigger*: today only
+`EBGraphFactory` answers for an uncarried region, with `AllRegular`. So the actual dependency between
+the PRs, stated sharply: #731 creates holes; #732 supplies the fill path; #731 shipped the holes without
+it. The definition #732 needs from here: **a hole is a cell below the nested grids' resolution whose
+coarse parent is Irregular.** Regular and covered parents are not holes; F1 answers for them.
+
+This also changes what the containment check at `Driver::regrid` line 668 should assert. Not "grids
+stay inside the carried region" -- unmaintainable once physics drives the tags -- but "a grid outside the
+carried region sits only over holes with cuttable parents, never over nothing". #731 cannot satisfy that
+alone; the assertion should fail there until #732 lands.
+
+## Plan of attack
+
+1. Build the properly nested `Vector<DisjointBoxLayout>` over the cut cells in `ComputationalGeometry`,
+   from the tags `getCurvatureTags` already produces, through `TiledMeshRefine` as it already does. No
+   EBIS contact.
+2. Carry all covered regions on every level as large boxes refined whole, disjoint from the nested grids.
+   Regular gets nothing.
+3. Hand the result to the shop as the layout, replacing `buildFinerLevels` below the scan level. By F5
+   that is the whole integration.
+4. Define and record the hole -- below the nested resolution, Irregular parent -- so #732 fills against
+   a definition.
+5. Move the containment check to line 668 with the meaning above.
+
+Not yet looked at: the seam at the scan level, where `buildCoarseLevel`'s full coverage stops and the
+nested grids start. The two must agree there.
+
+## The downward sweep in ScanShop, and why the clip is not quadratic
+
+An alternative to step 3 that stays inside ScanShop: since every rank already holds every box, a
+downward sweep that grows and coarsens the irregular grids onto each parent level, then clips the
+parent's regular/covered boxes against the result. The worry is the clip: every regular/covered box on
+a level against every cut-cell box, which at 12 levels is 370k against 149k.
+
+It is not that. The forced set on level L is `coarsen(grow(fineIrreg, 1), 2)`, and fine irregular boxes
+come *only* from splitting Irregular parents -- a Regular or Covered parent is refined whole and its
+refinement is pushed with the parent's tag, never rescanned (`localRegularBoxes.push_back(fineBox)`). So
+`fineIrreg` is contained in `refine(coarseIrreg, 2)` exactly, growing by one fine cell reaches at most
+half a coarse cell past it, and coarsening puts the forced set inside `grow(coarseIrreg, 1)`. Therefore:
+
+**a regular or covered box can be hit by the forced set only if it is a neighbour of an irregular box
+on the same level, within one cell.**
+
+That is precisely the relation `computeNeighbors` builds, with the `grow(box, 1)` reach, by a windowed
+x-sorted sweep. The clip set is the irregular-to-non-irregular adjacency, which scales with the surface
+of the irregular region in boxes, not with the product of the two counts. The measured spill -- 2 to 6
+boxes per level -- is what that adjacency looks like on the profiled plane.
+
+The argument holds for the cumulative sweep too, since the grown irregular set contains the original
+and the containment is stated against whichever set is current. It does depend on `m_neighbors` being
+computable for every box, which is the replicated-classification point above: the adjacency needs to
+know which boxes are irregular, and today only the owning rank does.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
@@ -286,6 +403,7 @@ Two things now, both needed by the sweep and neither expressible in a three-valu
 - Whether anything downstream iterates `EBISLevel::m_grids` expecting the level to tile the domain.
   `EBCoarseFineParticleMesh::defineStencils` walking every irregular cell of the coarse level was one
   such surprise already; the consumers have not been audited.
+- The seam at the scan level between `buildCoarseLevel`'s full coverage and the nested grids.
 - Whether anything downstream assumes `m_neighbors` was built by `computeNeighbors` with the
   `grow(box, 1)` reach. A list supplied through `closeN` with a different reach would change ghost
   exchange silently.
