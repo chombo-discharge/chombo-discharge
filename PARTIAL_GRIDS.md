@@ -492,10 +492,18 @@ the adjacent grown box -- trading a sliver of regular area for irregular, the ch
 keeps every box on the level at or above the minimum and is bounded by the same `2g` argument, since
 absorption never grows anything by more than a sub-minimum dimension.
 
-## Whether the decimation is needed at all
+## Whether the decimation is needed at all (superseded -- see the next section)
 
-Before the how of clipping regular/covered boxes, the whether -- because the argument that it is
-unnecessary is short, and if it holds the hard part of the plan goes away.
+The argument below was rejected. Two things it misses: (1) restricting the finer irregular boxes to the
+level below does not produce a superset of that level's irregular boxes but a *different* tiling --
+`2^D` boxes of size `M/2 + g` under each coarse box of size `M`, overlapping each other and the parent --
+so the irregular sets of adjacent levels do not agree and the level has to be re-tiled; and (2) once the
+level is re-tiled, a tile that straddles the old irregular region and a regular/covered box has one tag,
+so the regular/covered box must give the tile up. Decimation is forced by the tiling, not by geometry.
+The section is kept because the geometric facts in it (the band is regular/covered by construction)
+still hold and still matter: they are what lets the carved tiles inherit their tag instead of being
+reclassified. The design that replaces it is in the next section.
+
 
 **What the buffer has to be.** The nesting requirement is that level L-1 be *generated* in a band at
 least `g` wide around L's footprint, so that nothing adjacent to L is served from L-2. Generated means
@@ -541,6 +549,96 @@ Tile alignment with the simulation's grids makes `fillEBISLayout`'s copies box-t
 coincide rather than fragmented. And `TiledMeshRefine` already made this choice for the same problem.
 The overshoot is at most one tile per side, the quantisation `retainBox` already pays.
 
+## The repartition: `TiledMeshRefine` is the tiler, and the decimation it leaves
+
+**Why the restricted sets disagree.** One coarse Irregular box `B` of size `M` at level L-1 has `2^D`
+fine Irregular boxes of size `M` under it at level L. Restricting each -- `coarsen(grow(fine_i, g), 2)`
+-- gives `2^D` boxes of size `M/2 + g` at L-1, overlapping each other, overlapping `B`, and smaller than
+`M`. That is not a superset of L-1's irregular set; it is a finer, non-disjoint re-tiling of nearly the
+same region plus a rim. The union has to be re-tiled, and the re-tiling has to be canonical (disjoint,
+sized, aligned) or a `DisjointBoxLayout` cannot be built from it. This is the repartition, per level.
+
+**`TiledMeshRefine` already is that repartition** (`Source/AmrMesh/CD_TiledMeshRefine.{H,cpp}`). Read
+from source:
+
+- Input: `regrid(Vector<Vector<Box>>& grids, const Vector<IntVectSet>& tags)`. Tags on level `l-1`
+  produce tiles on level `l` (`makeLevelTiles` maps a coarse tag to the fine tile containing it,
+  `iv = (tag - coarProbLo) / (tileSize / refToCoar)`, line 338 ff). Tags are rank-local; the only
+  communication is `gatherSuperTiles`, which assumes a rank's tags are disjoint from every other rank's
+  -- ScanShop's rank-owned irregular boxes satisfy that.
+- Representation: `SuperTiles` -- `std::unordered_set<uint64_t> m_full` of full `max_block_size`
+  super-tiles keyed by `encodeSuper` (21 bits per direction) plus `m_partial` key -> sub-tile bitmask.
+  This is the Morton-dedup idea from the previous section, already written: a packed key and a hash
+  set, materialising fine tiles only at the boundary of the region.
+- Nesting: `nestFrom` (line 224) adds `coarsen(grow(fineTile, 1), ref)` for every finer tile, in bulk
+  for full super-tiles, per sub-tile for partial ones. The buffer is therefore **one fine tile** of
+  `tileSize` fine cells, i.e. `tileSize / ref` coarse cells. The nesting requirement
+  `T_{L-1} ⊇ coarsen(grow(T_L, g))` is met whenever `tileSize ≥ g`, which `min_block_size ≥ 2g` gives.
+  The compounding of the previous sections is absorbed: each level's buffer is taken from that level's
+  finished tile set, which already contains the level above's buffer.
+- Output: `makeBoxesFromTiles` -- one `max_block_size` box per full super-tile, `packTiles`
+  (Berger-Rigoutsos on tiles, exact, never covers an untagged tile) for partial ones. Boxes are disjoint,
+  tile-aligned, between `tileSize` and `max_block_size` per direction, and emitted in sorted-key order so
+  **the list is identical on every rank** without a broadcast.
+- Level 0 of its output is only the nesting buffer of level 1 (`regrid` line 300); `AmrMesh` discards
+  it (`newBoxes[0] = oldBoxes[0]`, `CD_AmrMesh.cpp` line 1254). For EB generation level 0 would be the
+  scan level, which `buildCoarseLevel` builds whole, so the same discard applies.
+
+Fed with `tags[l] = I_l` (the Irregular boxes ScanShop's upward build produced at level `l`, coarsened by
+the refinement ratio so they land on level `l-1` where `regrid` expects them -- coarsen-then-refine
+overshoots by at most `ref-1` cells, which the tile snap absorbs anyway), it returns `T_l ⊇ I_l`,
+properly nested with a one-tile buffer, curvature-adapted because `I_l` is (the coverage regions have
+already pruned it through `retainBox`). No new type: the rule in `CLAUDE.md` § Data structures applies
+and is satisfied by using this class rather than writing a Morton set.
+
+Two gaps, both small:
+
+- `regrid` consumes tags with `IVSIterator`, per cell. Tagging whole irregular boxes costs the
+  irregular *volume* per rank (own boxes only) -- the same volume `fillGraph` iterates anyway, so it is
+  not the quadratic term, but it is `M^D` work per box for nothing. `nestFrom`'s `addNest` lambda
+  already is the box-to-tiles primitive (`BoxIterator` over the tile-coordinate box); a box-tag entry
+  point is that lambda exposed.
+- The EBIS `maxGridSize` must be a multiple of `max_block_size`, so that no tile box straddles two
+  ScanShop boxes. ScanShop's boxes are `maxGridSize`-lattice-aligned (`domainSplit` at the scan level,
+  refined whole above it, irregular boxes split to `maxGridSize`); with that constraint every tile box
+  lies inside exactly one ScanShop box. The tag inheritance and the subtraction below both rely on it.
+
+**The decimation, given `T_l`.** Per level, with `S_l` the ScanShop layout (replicated `m_boxes` plus
+the rank-local `m_boxMap` tags, which need a gather of one `int` per box to be usable everywhere):
+
+1. For each tile box `t ∈ T_l`, locate the ScanShop box `B ∋ t`. Point location in a disjoint box set:
+   the BVH over `S_l` from the previous section answers it in `O(log N)`; the dual walk is not needed
+   because one side is now a point query. `T_l` scales with the surface, so this is `O(|T| log N)`.
+2. `t` **inherits `B`'s tag.** If `B` is Irregular, `t` is Irregular. If `B` is Regular or Covered, `t`
+   is Regular or Covered -- correct without any geometric query, because a sub-box of a box that
+   classified Regular/Covered over its `m_ebGhost`-grown region is Regular/Covered over its own grown
+   region. This is where the previous section's geometric fact does its work: the band is
+   regular/covered by construction, so nothing needs `isRegular`/`isCovered` here. Mark such `B` as
+   hit.
+3. For each hit `B`: remainder `= B \ ∪{t ⊆ B}`, tagged as `B` was. Done in super-tile coordinates
+   (`B / max_block_size` is exact under the constraint above) with `TreeIntVectSet`: `define(B)` is one
+   full node (`&full` sentinel, `TreeIntVectSet.cpp` line 1744), each `-= t` descends `O(depth)` and
+   splits nodes (`remove`, line 1736), `createBoxes` emits one box per remaining full node -- an
+   octree-graded decomposition, every box a multiple of `max_block_size`, `O(hits_B · depth)` boxes.
+   `numPts()` is never called on this path (only `operator<` calls it, line 964), so the `int` overflow
+   at large boxes does not bite; the static scratch vectors (`index_local`, `parents_local`, lines
+   1069-1070) make it non-reentrant, which is fine serially per rank.
+4. New layout of level `l` = `T_l` with inherited tags, plus remainders, plus untouched ScanShop boxes.
+   Every rank computes the same list (replicated inputs, deterministic steps), then the existing
+   `LoadBalancing` assigns it. Irregular tiles that were not Irregular in `S_l` do not exist -- an
+   Irregular tile is one that lies inside an `I_l` box -- so `fillGraph` runs on exactly the cut region
+   plus the tile quantisation, no more.
+
+The cost has no term in `|R_l| + |C_l|` beyond building the BVH once per level: the forbidden
+`O(irregular × (regular + covered))` does not appear. What is paid is the tile overshoot
+(`≤ max_block_size` per side, as `retainBox` already pays) and the octree grading of decimated
+remainders, which is the same shape `TreeIntVectSet::createBoxes` produces everywhere else in Chombo.
+
+**What this settles from the open list.** The question "must irregular *boxes* be nested, or only the
+carried *region*" is decided by construction rather than by audit: the tiles are nested, the carved
+tiles carry honest tags, and nothing downstream is asked to tolerate a half-and-half box. It stays in
+the list below only as the audit of what downstream assumes, which is still unperformed.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
@@ -550,8 +648,12 @@ The overshoot is at most one tile per side, the quantisation `retainBox` already
 - Whether anything downstream iterates `EBISLevel::m_grids` expecting the level to tile the domain.
   `EBCoarseFineParticleMesh::defineStencils` walking every irregular cell of the coarse level was one
   such surprise already; the consumers have not been audited.
-- Whether anything downstream requires the irregular *boxes* to be nested rather than the carried
-  *region*. This decides whether regular/covered boxes ever need cutting. Not audited.
+- What downstream assumes about the irregular boxes level to level. The design above nests them by
+  construction, so this no longer decides whether regular/covered boxes are cut; it is still the
+  audit of consumers that has not been done.
+- That the tile-inherits-tag step is sound when the EBIS `maxGridSize` is a multiple of
+  `max_block_size`. Argued from ScanShop's lattice alignment; not checked against a run with the two
+  parameters unequal.
 - Why the coverage regions fail buffered nesting at block size 4 when they come out of
   `TiledMeshRefine`, whose `nestFrom` is meant to enforce it. Measured, not explained.
 - The seam at the scan level between `buildCoarseLevel`'s full coverage and the nested grids.
