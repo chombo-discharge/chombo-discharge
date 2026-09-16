@@ -264,9 +264,23 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 {
   CH_TIME("ComputationalGeometry::makeGrids");
 
-  // The design requires a_minBlockSize >= 2 * a_maxGhostEB (the one-tile nesting buffer must cover the ghost
-  // cells) and a_maxBlockSize a multiple of a_minBlockSize. Neither is enforced yet, since nothing is built yet.
+  CH_assert(!a_startDomain.domainBox().isEmpty());
+  CH_assert(a_finestDx > 0.0);
+  CH_assert(a_refineAngle >= 0.0);
   CH_assert(a_maxEbDepth >= 0);
+  CH_assert(a_maxGhostEB >= 0);
+  CH_assert(a_minBlockSize > 0);
+  CH_assert(a_maxBlockSize % a_minBlockSize == 0);
+
+  // The one-tile nesting buffer between levels has to cover the ghost cells.
+  CH_assert(a_minBlockSize >= 2 * a_maxGhostEB);
+
+  // The start domain and every level above it are tiled, so they must decompose into whole tiles. The levels
+  // below the start domain are built whole and box by box, as ScanShop builds them, and may be smaller than a
+  // tile; nothing is required of them.
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    CH_assert(a_startDomain.domainBox().size(dir) % a_minBlockSize == 0);
+  }
 
   m_gridProbLo   = a_probLo;
   m_maxEbDepth   = a_maxEbDepth;

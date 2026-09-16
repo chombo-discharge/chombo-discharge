@@ -472,7 +472,8 @@ protected:
    * a signed-distance function; the second half makes the agreement hold by construction instead. Pseudocode:
    *
    *   for lvl = m_startLevel - 1 down to 0, per phase:
-   *     boxes = domainSplit(m_gridDomains[lvl], m_maxBlockSize)
+   *     boxes = domainSplit(m_gridDomains[lvl], m_maxBlockSize)   -- no block factor: these levels are not tiled
+   *                                                               -- and the coarsest may be smaller than a tile
    *     for each box (this rank's share): type = classifyBox(box, lvl, phase)
    *     gather onto every rank, in a fixed order
    *     m_levelBoxes/m_levelBoxTypes and m_grids/m_gridTypes on lvl = boxes, types    -- nothing to decimate
