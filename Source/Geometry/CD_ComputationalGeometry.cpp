@@ -410,6 +410,8 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->decimateBoxes(gasTileTypes, solidTileTypes, tileHosts);
   this->buildCoarserLevels();
 
+  this->reportGrids();
+
   // The polyhedral surface on these grids, for inspection. A hidden option of the polyhedral generator.
   if (m_generator == Generator::PolyhedralShop) {
     ParmParse pp("PolyhedralShop");
@@ -1186,70 +1188,113 @@ ComputationalGeometry::writeSurfaceSTL() const
       continue;
     }
 
-    Vector<Real> facets;
+    Vector<Real> composite;
 
-    this->collectFacets(facets, phases[p]);
+    for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
+      Vector<Real> levelFacets;
 
-    Vector<Vector<Real>> everyone;
+      this->collectFacets(levelFacets, phases[p], lvl);
 
-    gather(everyone, facets, 0);
+      this->writeSTL("surface_mesh_" + phaseNames[p] + ".level" + std::to_string(lvl) + ".stl",
+                     phaseNames[p] + "_level" + std::to_string(lvl),
+                     levelFacets);
 
-    if (procID() != 0) {
-      continue;
+      composite.append(levelFacets);
     }
 
-    const std::string fileName = "surface_mesh_" + phaseNames[p] + ".stl";
-
-    std::ofstream out(fileName);
-
-    if (!out.good()) {
-      MayDay::Error("ComputationalGeometry::writeSurfaceSTL - could not open the file");
-    }
-
-    out << std::scientific << std::setprecision(17) << "solid " << phaseNames[p] << "\n";
-
-    for (int rank = 0; rank < everyone.size(); rank++) {
-      const Vector<Real>& rankFacets = everyone[rank];
-
-      for (int i = 0; i + 9 <= rankFacets.size(); i += 9) {
-        const RealVect a(D_DECL(rankFacets[i + 0], rankFacets[i + 1], rankFacets[i + 2]));
-        const RealVect b(D_DECL(rankFacets[i + 3], rankFacets[i + 4], rankFacets[i + 5]));
-        const RealVect c(D_DECL(rankFacets[i + 6], rankFacets[i + 7], rankFacets[i + 8]));
-
-        RealVect n = PolyGeom::cross(b - a, c - a);
-
-        if (n.vectorLength() > 0.0) {
-          n /= n.vectorLength();
-        }
-
-        out << "  facet normal";
-
-        for (int d = 0; d < 3; d++) {
-          out << " " << ((d < SpaceDim) ? n[d] : 0.0);
-        }
-
-        out << "\n    outer loop\n";
-
-        for (int v = 0; v < 3; v++) {
-          out << "      vertex";
-
-          for (int d = 0; d < 3; d++) {
-            out << " " << ((d < SpaceDim) ? rankFacets[i + 3 * v + d] : 0.0);
-          }
-
-          out << "\n";
-        }
-
-        out << "    endloop\n  endfacet\n";
-      }
-    }
-
-    out << "endsolid " << phaseNames[p] << "\n";
+    this->writeSTL("surface_mesh_" + phaseNames[p] + ".stl", phaseNames[p], composite);
   }
 }
 
 void
-ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase) const
+ComputationalGeometry::writeSTL(const std::string&  a_fileName,
+                                const std::string&  a_name,
+                                const Vector<Real>& a_facets) const
+{
+  CH_TIME("ComputationalGeometry::writeSTL");
+
+  Vector<Vector<Real>> everyone;
+
+  gather(everyone, a_facets, 0);
+
+  if (procID() != 0) {
+    return;
+  }
+
+  std::ofstream out(a_fileName);
+
+  if (!out.good()) {
+    MayDay::Error("ComputationalGeometry::writeSTL - could not open the file");
+  }
+
+  out << std::scientific << std::setprecision(17) << "solid " << a_name << "\n";
+
+  for (int rank = 0; rank < everyone.size(); rank++) {
+    const Vector<Real>& rankFacets = everyone[rank];
+
+    for (int i = 0; i + 9 <= rankFacets.size(); i += 9) {
+      const RealVect a(D_DECL(rankFacets[i + 0], rankFacets[i + 1], rankFacets[i + 2]));
+      const RealVect b(D_DECL(rankFacets[i + 3], rankFacets[i + 4], rankFacets[i + 5]));
+      const RealVect c(D_DECL(rankFacets[i + 6], rankFacets[i + 7], rankFacets[i + 8]));
+
+      RealVect n = PolyGeom::cross(b - a, c - a);
+
+      if (n.vectorLength() > 0.0) {
+        n /= n.vectorLength();
+      }
+
+      out << "  facet normal";
+
+      for (int d = 0; d < 3; d++) {
+        out << " " << ((d < SpaceDim) ? n[d] : 0.0);
+      }
+
+      out << "\n    outer loop\n";
+
+      for (int v = 0; v < 3; v++) {
+        out << "      vertex";
+
+        for (int d = 0; d < 3; d++) {
+          out << " " << ((d < SpaceDim) ? rankFacets[i + 3 * v + d] : 0.0);
+        }
+
+        out << "\n";
+      }
+
+      out << "    endloop\n  endfacet\n";
+    }
+  }
+
+  out << "endsolid " << a_name << "\n";
+}
+
+void
+ComputationalGeometry::reportGrids() const
+{
+  CH_TIME("ComputationalGeometry::reportGrids");
+
+  pout() << "ComputationalGeometry::makeGrids - levels " << m_domains.size() << ", start level " << m_startLevel
+         << ", stop level " << m_stopLevel << endl;
+
+  for (int lvl = 0; lvl < m_domains.size(); lvl++) {
+    int gasCount[3]   = {0, 0, 0};
+    int solidCount[3] = {0, 0, 0};
+
+    for (int i = 0; i < m_boxes[lvl].size(); i++) {
+      gasCount[static_cast<int>(m_gasTypes[lvl][i])]++;
+      solidCount[static_cast<int>(m_solidTypes[lvl][i])]++;
+    }
+
+    pout() << "  level " << lvl << " domain " << m_domains[lvl].domainBox().size() << " dx " << m_dx[lvl] << ": boxes "
+           << m_boxes[lvl].size() << ", tiles " << m_tiles[lvl].size() << "; gas regular/covered/irregular "
+           << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
+           << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
+           << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular] << endl;
+  }
+}
+
+void
+ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase, const int a_level) const
 {
   CH_TIME("ComputationalGeometry::collectFacets");
 
@@ -1260,7 +1305,8 @@ ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_
 
   const Vector<Vector<GeometryService::InOut>>& types = this->types(a_phase);
 
-  for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
+  {
+    const int  lvl    = a_level;
     const Real dx     = m_dx[lvl];
     const Box& domain = m_domains[lvl].domainBox();
 
@@ -1397,13 +1443,7 @@ ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_
         }
 #endif
 
-        RealVect centre = m_probLo;
-
-        for (int d = 0; d < SpaceDim; d++) {
-          centre[d] += dx * (static_cast<Real>(iv[d]) + 0.5);
-        }
-
-        body.appendInterfaceFacets(a_facets, centre, dx);
+        body.appendInterfaceFacets(a_facets, iv, m_probLo, dx);
       }
     }
   }

@@ -166,13 +166,19 @@ public:
    * @details The interface is the embedded boundary inside this cell: the polygons the body holds
    *          that belong to no cell face. Each is written as a fan of triangles, nine reals per
    *          triangle, so that the result can be gathered across ranks and written as one surface.
-   *          Nothing is appended by a body that is not cut.
-   * @param[in,out] a_facets     Coordinates to append to.
-   * @param[in]     a_cellCentre Centre of this cell, in physical coordinates.
-   * @param[in]     a_dx         Grid spacing of the level this cell belongs to.
+   *          Nothing is appended by a body that is not cut. Coordinates are formed from the cell
+   *          index rather than the cell centre, so that a vertex two cells share -- a point on
+   *          their common face, or a crossing on a common edge -- is the same double from both.
+   * @param[in,out] a_facets Coordinates to append to.
+   * @param[in]     a_cell   Index of this cell.
+   * @param[in]     a_probLo Lower-left corner of the domain.
+   * @param[in]     a_dx     Grid spacing of the level this cell belongs to.
    */
   void
-  appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cellCentre, const Real a_dx) const noexcept;
+  appendInterfaceFacets(Vector<Real>&   a_facets,
+                        const IntVect&  a_cell,
+                        const RealVect& a_probLo,
+                        const Real      a_dx) const noexcept;
 
 #if CH_SPACEDIM == 3
   /**

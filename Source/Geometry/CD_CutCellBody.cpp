@@ -736,7 +736,10 @@ CutCellBody::closeInterface() noexcept
 }
 
 void
-CutCellBody::appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cellCentre, const Real a_dx) const noexcept
+CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
+                                   const IntVect&  a_cell,
+                                   const RealVect& a_probLo,
+                                   const Real      a_dx) const noexcept
 {
   // a body that is not cut holds no interface polygon, so the loop appends nothing for it
   for (int ip = 0; ip < m_numPolygons; ip++) {
@@ -753,7 +756,9 @@ CutCellBody::appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cel
 
       for (int k = 0; k < 3; k++) {
         for (int d = 0; d < SpaceDim; d++) {
-          a_facets.push_back(a_cellCentre[d] + a_dx * (*corner[k])[d]);
+          // a face vertex sits at local 0.5 exactly, so this is an integer times the spacing from
+          // either side of the face; a shared edge crossing has the same local offset in both cells
+          a_facets.push_back(a_probLo[d] + a_dx * (static_cast<Real>(a_cell[d]) + ((*corner[k])[d] + 0.5)));
         }
       }
     }

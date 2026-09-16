@@ -204,7 +204,9 @@ public:
    * level, and its interface triangles are written from the finest level that carries it. Where a cut cell
    * borders a region the next finer level carries, the shared face is restricted to the finer level's chords
    * before the interface is closed, so the surface meets across the level boundary. The files are
-   * surface_mesh_gas.stl and surface_mesh_solid.stl; a phase without an implicit function writes nothing.
+   * surface_mesh_gas.stl and surface_mesh_solid.stl, with each level's contribution also written on its own
+   * as surface_mesh_gas.level<n>.stl and likewise for the solid; a phase without an implicit function writes
+   * nothing.
    * Three dimensions only; the interface of a two-dimensional cell is a segment, not a triangle. Collective:
    * every rank reconstructs its share of the boxes and rank 0 writes. Run by makeGrids under the polyhedral
    * generator when PolyhedralShop.write_stl is set.
@@ -371,9 +373,25 @@ protected:
    * it do is a multi-valued coarse cell in disguise and stops the run, as does a body that will not close.
    * @param[out] a_facets Triangle coordinates, appended to.
    * @param[in]  a_phase  Phase.
+   * @param[in]  a_level  Level to collect from.
    */
   void
-  collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase) const;
+  collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase, const int a_level) const;
+
+  /**
+   * @brief Write triangles gathered from every rank as one STL file.
+   * @param[in] a_fileName File to write.
+   * @param[in] a_name     Solid name inside the file.
+   * @param[in] a_facets   This rank's triangles, nine reals each.
+   */
+  void
+  writeSTL(const std::string& a_fileName, const std::string& a_name, const Vector<Real>& a_facets) const;
+
+  /**
+   * @brief Report the boxes and tiles of every level to pout.
+   */
+  void
+  reportGrids() const;
 
   /**
    * @brief Build the composite implicit functions of the two phases from the electrodes and dielectrics.
