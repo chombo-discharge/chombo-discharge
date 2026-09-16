@@ -14,6 +14,11 @@
 #include <cmath>
 
 // Chombo includes
+#include <BaseFab.H>
+#include <BoxIterator.H>
+#include <BRMeshRefine.H>
+#include <IntVectSet.H>
+#include <SPMD.H>
 #include <MFIndexSpace.H>
 #include <IntersectionIF.H>
 #include <UnionIF.H>
@@ -27,6 +32,9 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_NewIntersectionIF.H>
+#include <CD_ParallelOps.H>
+#include <CD_TiledMeshRefine.H>
+#include <CD_Units.H>
 #include <CD_ScanShop.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_MemoryReport.H>
@@ -465,7 +473,17 @@ ComputationalGeometry::buildStartLevel(const phase::which_phase a_phase)
 {
   CH_TIME("ComputationalGeometry::buildStartLevel");
 
-  // Step 0. See the header for the pseudocode.
+  // The start domain decomposes into whole tiles (checked in makeGrids), so the block factor is the tile: every
+  // box is a whole number of tiles, and at most a super-tile wide.
+  Vector<Box> boxes;
+
+  domainSplit(m_domains[m_startLevel], boxes, m_maxBlockSize, m_minBlockSize);
+
+  const Vector<GeometryService::InOut> types = this->classifyBoxes(boxes, m_startLevel, a_phase);
+
+  for (int i = 0; i < boxes.size(); i++) {
+    this->boxes(a_phase, types[i])[m_startLevel].push_back(boxes[i]);
+  }
 }
 
 void
@@ -473,7 +491,128 @@ ComputationalGeometry::buildFinerLevels(const phase::which_phase a_phase)
 {
   CH_TIME("ComputationalGeometry::buildFinerLevels");
 
-  // Step 1. See the header for the pseudocode.
+  Vector<Vector<Box>>& regularBoxes   = this->boxes(a_phase, GeometryService::Regular);
+  Vector<Vector<Box>>& coveredBoxes   = this->boxes(a_phase, GeometryService::Covered);
+  Vector<Vector<Box>>& irregularBoxes = this->boxes(a_phase, GeometryService::Irregular);
+
+  for (int lvl = m_startLevel; lvl < m_stopLevel; lvl++) {
+
+    // Regular and covered boxes refine whole, keeping their tag. They go in first, in their parents' order, so
+    // that a parent's refinement sits at the parent's index on the next level.
+    for (int i = 0; i < regularBoxes[lvl].size(); i++) {
+      regularBoxes[lvl + 1].push_back(refine(regularBoxes[lvl][i], 2));
+    }
+
+    for (int i = 0; i < coveredBoxes[lvl].size(); i++) {
+      coveredBoxes[lvl + 1].push_back(refine(coveredBoxes[lvl][i], 2));
+    }
+
+    // An irregular box splits if the surface inside it turns too sharply for this level; otherwise it is a leaf
+    // and nothing is built above it. The pieces of every box that splits are classified together so that the
+    // work is shared once per level rather than once per box.
+    const Vector<int> flags = this->splitFlags(irregularBoxes[lvl], lvl, a_phase);
+
+    Vector<Box> pieces;
+
+    for (int i = 0; i < irregularBoxes[lvl].size(); i++) {
+      if (flags[i] != 0) {
+        Vector<Box> split;
+
+        domainSplit(refine(irregularBoxes[lvl][i], 2), split, m_maxBlockSize, m_minBlockSize);
+
+        pieces.append(split);
+      }
+    }
+
+    const Vector<GeometryService::InOut> types = this->classifyBoxes(pieces, lvl + 1, a_phase);
+
+    for (int i = 0; i < pieces.size(); i++) {
+      this->boxes(a_phase, types[i])[lvl + 1].push_back(pieces[i]);
+    }
+  }
+}
+
+Vector<GeometryService::InOut>
+ComputationalGeometry::classifyBoxes(const Vector<Box>&       a_boxes,
+                                     const int                a_level,
+                                     const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::classifyBoxes");
+
+  // The classification travels as an integer so that one all-reduce assembles it: a rank writes only the
+  // entries it owns and leaves the rest at zero, and the sum is the union.
+  constexpr int regular   = 1;
+  constexpr int covered   = 2;
+  constexpr int irregular = 3;
+
+  Vector<int> codes(a_boxes.size(), 0);
+
+  for (int i = procID(); i < a_boxes.size(); i += numProc()) {
+    switch (this->classifyBox(a_boxes[i], a_level, a_phase)) {
+    case GeometryService::Regular: {
+      codes[i] = regular;
+
+      break;
+    }
+    case GeometryService::Covered: {
+      codes[i] = covered;
+
+      break;
+    }
+    default: {
+      codes[i] = irregular;
+
+      break;
+    }
+    }
+  }
+
+  ParallelOps::sum(codes);
+
+  Vector<GeometryService::InOut> types(a_boxes.size(), GeometryService::Irregular);
+
+  for (int i = 0; i < a_boxes.size(); i++) {
+    switch (codes[i]) {
+    case regular: {
+      types[i] = GeometryService::Regular;
+
+      break;
+    }
+    case covered: {
+      types[i] = GeometryService::Covered;
+
+      break;
+    }
+    case irregular: {
+      types[i] = GeometryService::Irregular;
+
+      break;
+    }
+    default: {
+      MayDay::Error("ComputationalGeometry::classifyBoxes - a box was classified by no rank or by several");
+
+      break;
+    }
+    }
+  }
+
+  return types;
+}
+
+Vector<int>
+ComputationalGeometry::splitFlags(const Vector<Box>& a_boxes, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::splitFlags");
+
+  Vector<int> flags(a_boxes.size(), 0);
+
+  for (int i = procID(); i < a_boxes.size(); i += numProc()) {
+    flags[i] = this->exceedsCurvature(a_boxes[i], a_level, a_phase) ? 1 : 0;
+  }
+
+  ParallelOps::sum(flags);
+
+  return flags;
 }
 
 GeometryService::InOut
@@ -481,8 +620,43 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
 {
   CH_TIME("ComputationalGeometry::classifyBox");
 
-  // ScanShop::isRegular/isCovered on the implicit function. See the header for the pseudocode.
-  return GeometryService::Irregular;
+  // ScanShop::isRegular/isCovered on the implicit function. A cell centre within half a cell diagonal of the
+  // zero set may belong to a cut cell, and one such cell makes the box irregular. Otherwise every centre is on
+  // one side, and that side is the classification; both sides without a cell in between is not possible for a
+  // continuous function and is reported rather than resolved.
+  const BaseIF& f = *(this->getImplicitFunction(a_phase));
+
+  const Real dx           = m_dx[a_level];
+  const Real halfDiagonal = 0.5 * dx * std::sqrt(static_cast<Real>(SpaceDim));
+  const Box  grown        = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
+
+  bool anyFluid = false;
+  bool anySolid = false;
+
+  for (BoxIterator bit(grown); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    RealVect x = m_probLo;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      x[dir] += dx * (static_cast<Real>(iv[dir]) + 0.5);
+    }
+
+    const Real value = f.value(x);
+
+    if (std::abs(value) <= halfDiagonal) {
+      return GeometryService::Irregular;
+    }
+
+    anyFluid = anyFluid || (value < 0.0);
+    anySolid = anySolid || (value > 0.0);
+  }
+
+  if (anyFluid && anySolid) {
+    MayDay::Error("ComputationalGeometry::classifyBox - a box holds fluid and solid but no cell near the surface");
+  }
+
+  return anySolid ? GeometryService::Covered : GeometryService::Regular;
 }
 
 bool
@@ -490,7 +664,88 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
 {
   CH_TIME("ComputationalGeometry::exceedsCurvature");
 
-  // The band test on finite-difference normals. See the header for the pseudocode.
+  // Normals are taken on the cells near the zero set, one cell beyond the box so that a pair across the box
+  // boundary is seen from both sides, by central differences of the implicit function. The first pair of
+  // neighbouring band cells whose normals differ by more than the refinement angle decides.
+  const BaseIF& f = *(this->getImplicitFunction(a_phase));
+
+  const Real dx    = m_dx[a_level];
+  const Real band  = dx * std::sqrt(static_cast<Real>(SpaceDim));
+  const Real h     = 0.5 * dx;
+  const Box  valid = a_box & m_domains[a_level].domainBox();
+  const Box  grown = grow(a_box, 1) & m_domains[a_level].domainBox();
+
+  BaseFab<Real> normal(grown, SpaceDim);
+  BaseFab<int>  inBand(grown, 1);
+
+  inBand.setVal(0);
+
+  for (BoxIterator bit(grown); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    RealVect x = m_probLo;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      x[dir] += dx * (static_cast<Real>(iv[dir]) + 0.5);
+    }
+
+    if (std::abs(f.value(x)) <= band) {
+      RealVect n = RealVect::Zero;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        RealVect xHi = x;
+        RealVect xLo = x;
+
+        xHi[dir] += h;
+        xLo[dir] -= h;
+
+        n[dir] = f.value(xHi) - f.value(xLo);
+      }
+
+      const Real length = n.vectorLength();
+
+      if (length > 0.0) {
+        n /= length;
+
+        inBand(iv, 0) = 1;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          normal(iv, dir) = n[dir];
+        }
+      }
+    }
+  }
+
+  const Real cosThreshold = std::cos(m_refineAngle * Units::pi / 180.0);
+
+  for (BoxIterator bit(valid); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    if (inBand(iv, 0) == 0) {
+      continue;
+    }
+
+    const Box neighbours = grow(Box(iv, iv), 1) & grown;
+
+    for (BoxIterator nit(neighbours); nit.ok(); ++nit) {
+      const IntVect jv = nit();
+
+      if (jv == iv || inBand(jv, 0) == 0) {
+        continue;
+      }
+
+      Real dot = 0.0;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        dot += normal(iv, dir) * normal(jv, dir);
+      }
+
+      if (dot < cosThreshold) {
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
@@ -499,7 +754,46 @@ ComputationalGeometry::makeTiles()
 {
   CH_TIME("ComputationalGeometry::makeTiles");
 
-  // Step 2. See the header for the pseudocode.
+  const int numAbove = m_stopLevel - m_startLevel;
+
+  if (numAbove == 0) {
+    return;
+  }
+
+  // TiledMeshRefine tiles level k from tags on level k - 1 and takes the start domain as its level 0, so the
+  // irregular boxes of builder level lvl enter, coarsened by two, as tags for tiler level lvl - m_startLevel.
+  // Tags are rank-local and the tiler gathers them, so each rank tags only its share of the boxes.
+  const phase::which_phase phases[2] = {phase::gas, phase::solid};
+
+  Vector<IntVectSet> tags(numAbove);
+
+  for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+    IntVectSet& levelTags = tags[lvl - m_startLevel - 1];
+
+    for (const phase::which_phase& curPhase : phases) {
+      const Vector<Box>& irregularBoxes = this->boxes(curPhase, GeometryService::Irregular)[lvl];
+
+      for (int i = procID(); i < irregularBoxes.size(); i += numProc()) {
+        levelTags |= coarsen(irregularBoxes[i], 2);
+      }
+    }
+  }
+
+  const Vector<int> refRatios(1 + numAbove, 2);
+
+  TiledMeshRefine tiler(m_domains[m_startLevel],
+                        refRatios,
+                        m_minBlockSize * IntVect::Unit,
+                        m_maxBlockSize * IntVect::Unit);
+
+  Vector<Vector<Box>> tiles;
+
+  const int finestTiled = tiler.regrid(tiles, tags);
+
+  // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
+  for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
+    m_tiles[lvl] = tiles[lvl - m_startLevel];
+  }
 }
 
 void
@@ -509,7 +803,7 @@ ComputationalGeometry::classifyTiles(const phase::which_phase                a_p
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
 
-  // Step 3. See the header for the pseudocode.
+  // Step 3. Waits for the containing-box lookup; see the header for the pseudocode.
 }
 
 void
@@ -519,7 +813,7 @@ ComputationalGeometry::decimateBoxes(const phase::which_phase                   
 {
   CH_TIME("ComputationalGeometry::decimateBoxes");
 
-  // Step 4. See the header for the pseudocode.
+  // Step 4. Waits for step 3; see the header for the pseudocode.
 }
 
 void
@@ -527,7 +821,31 @@ ComputationalGeometry::buildCoarserLevels()
 {
   CH_TIME("ComputationalGeometry::buildCoarserLevels");
 
-  // Step 5. See the header for the pseudocode.
+  // The levels coarser than the start domain are built as ScanShop builds them: whole, each box classified on
+  // its own. No block factor, since these levels are not tiled and the coarsest may be smaller than a tile. A
+  // phase without an implicit function already has its one regular box on every level.
+  const phase::which_phase phases[2] = {phase::gas, phase::solid};
+
+  for (const phase::which_phase& curPhase : phases) {
+    if (this->getImplicitFunction(curPhase).isNull()) {
+      continue;
+    }
+
+    for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
+      Vector<Box> boxes;
+
+      domainSplit(m_domains[lvl], boxes, m_maxBlockSize);
+
+      const Vector<GeometryService::InOut> types = this->classifyBoxes(boxes, lvl, curPhase);
+
+      for (int i = 0; i < boxes.size(); i++) {
+        this->boxes(curPhase, types[i])[lvl].push_back(boxes[i]);
+      }
+    }
+  }
+
+  // The push-down -- a box containing a finer irregular box is irregular -- waits for the containing-box
+  // lookup; see the header for the pseudocode.
 }
 
 void

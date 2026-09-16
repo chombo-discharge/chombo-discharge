@@ -425,6 +425,29 @@ protected:
   buildFinerLevels(const phase::which_phase a_phase);
 
   /**
+   * @brief Classify a list of boxes, the work shared between the ranks.
+   * @details Rank r classifies every box whose index is r modulo the number of ranks; the answers are
+   * combined with one all-reduce, so every rank returns the full list in the input order.
+   * @param[in] a_boxes Boxes to classify, identical on every rank.
+   * @param[in] a_level Level the boxes live on.
+   * @param[in] a_phase Phase whose implicit function is asked.
+   * @return One classification per box, parallel to a_boxes.
+   */
+  Vector<GeometryService::InOut>
+  classifyBoxes(const Vector<Box>& a_boxes, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Whether a list of irregular boxes must split, the work shared between the ranks.
+   * @details Same distribution as classifyBoxes, with exceedsCurvature as the test.
+   * @param[in] a_boxes Irregular boxes to test, identical on every rank.
+   * @param[in] a_level Level the boxes live on.
+   * @param[in] a_phase Phase whose implicit function is asked.
+   * @return One flag per box, parallel to a_boxes.
+   */
+  Vector<int>
+  splitFlags(const Vector<Box>& a_boxes, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
    * @brief Classify a box of one phase on one level as regular, covered or irregular.
    * @details Pseudocode, ScanShop::isRegular/isCovered on the implicit function directly:
    *
