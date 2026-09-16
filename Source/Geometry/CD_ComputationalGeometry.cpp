@@ -22,6 +22,7 @@
 #include <WrappedGShop.H>
 #include <GeometryShop.H>
 #include <ComplementIF.H>
+#include <MayDay.H>
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
@@ -264,22 +265,42 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 {
   CH_TIME("ComputationalGeometry::makeGrids");
 
-  CH_assert(!a_startDomain.domainBox().isEmpty());
-  CH_assert(a_finestDx > 0.0);
-  CH_assert(a_refineAngle >= 0.0);
-  CH_assert(a_maxEbDepth >= 0);
-  CH_assert(a_maxGhostEB >= 0);
-  CH_assert(a_minBlockSize > 0);
-  CH_assert(a_maxBlockSize % a_minBlockSize == 0);
+  // Preconditions. Hard aborts rather than assertions: a violation here produces grids the index space would
+  // serve silently wrong, and the cost of the check is nothing.
+  if (a_startDomain.domainBox().isEmpty()) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the start domain is empty");
+  }
+  if (a_finestDx <= 0.0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the finest grid spacing must be positive");
+  }
+  if (a_refineAngle < 0.0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the refinement angle must not be negative");
+  }
+  if (a_maxEbDepth < 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the depth must not be negative");
+  }
+  if (a_maxGhostEB < 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the ghost width must not be negative");
+  }
+  if (a_minBlockSize <= 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the tile size must be positive");
+  }
+  if (a_maxBlockSize % a_minBlockSize != 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the super-tile size must be a multiple of the tile size");
+  }
 
   // The one-tile nesting buffer between levels has to cover the ghost cells.
-  CH_assert(a_minBlockSize >= 2 * a_maxGhostEB);
+  if (a_minBlockSize < 2 * a_maxGhostEB) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the tile size must be at least twice the ghost width");
+  }
 
   // The start domain and every level above it are tiled, so they must decompose into whole tiles. The levels
   // below the start domain are built whole and box by box, as ScanShop builds them, and may be smaller than a
   // tile; nothing is required of them.
   for (int dir = 0; dir < SpaceDim; dir++) {
-    CH_assert(a_startDomain.domainBox().size(dir) % a_minBlockSize == 0);
+    if (a_startDomain.domainBox().size(dir) % a_minBlockSize != 0) {
+      MayDay::Error("ComputationalGeometry::makeGrids - the start domain does not decompose into whole tiles");
+    }
   }
 
   m_gridProbLo   = a_probLo;
