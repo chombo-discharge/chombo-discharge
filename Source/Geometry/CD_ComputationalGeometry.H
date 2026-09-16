@@ -145,14 +145,16 @@ public:
 
   /**
    * @brief Build the grids the index space is generated over, per phase and per level.
-   * @details The grids are built before any index space exists, from the implicit functions alone. Level 0 is
-   * the start domain, built whole; every finer level is a factor-two refinement of it, up to a_maxEbDepth levels,
-   * the last of which has spacing a_finestDx. Every box made here is at most a_maxBlockSize wide and lies on
-   * the a_maxBlockSize lattice, so the cut-cell grids of both phases are unions of the same super-tiles. The
-   * result, per phase and per level, is a box list with a classification for every box, read through
+   * @details The grids are built before any index space exists, from the implicit functions alone. The start
+   * domain is built whole; every finer level is a factor-two refinement of it, up to a_maxEbDepth levels, the
+   * last of which has spacing a_finestDx; every coarser level, down to the coarsest domain that can still be
+   * coarsened by two, is built whole as well, as ScanShop builds them. Levels are indexed from that coarsest
+   * domain, and getLevel finds the index of a domain. Every box made here is at most a_maxBlockSize wide and
+   * lies on the a_maxBlockSize lattice, so the cut-cell grids of both phases are unions of the same super-tiles.
+   * The result, per phase and per level, is a box list with a classification for every box, read through
    * getGrids/getGridTypes; the cut-cell tiles common to both phases are read through getTiles. Without an
    * implicit function a phase is one regular box on every level.
-   * @param[in] a_startDomain   Coarsest domain built here, level 0. Built whole in both phases.
+   * @param[in] a_startDomain  Domain the upward pass starts from. Built whole in both phases.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_finestDx     Grid spacing on the finest level, a_maxEbDepth refinements above a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
@@ -174,16 +176,24 @@ public:
             const int            a_maxGhostEB);
 
   /**
-   * @brief Number of levels makeGrids built, level 0 being the start domain.
+   * @brief Number of levels makeGrids built, level 0 being the coarsest domain.
    * @return Number of levels; zero before makeGrids has run.
    */
   int
   getNumGridLevels() const noexcept;
 
   /**
+   * @brief Level index of a domain among the levels makeGrids built.
+   * @param[in] a_domain Domain to look up.
+   * @return Its level, 0 being the coarsest domain, or -1 if makeGrids built no such level.
+   */
+  int
+  getLevel(const ProblemDomain& a_domain) const noexcept;
+
+  /**
    * @brief Final grids of one phase on one level, after decimation.
    * @param[in] a_phase Phase.
-   * @param[in] a_level Level, 0 being the start domain.
+   * @param[in] a_level Level, 0 being the coarsest domain.
    * @return Boxes of the level, parallel to getGridTypes.
    */
   const Vector<Box>&
@@ -192,7 +202,7 @@ public:
   /**
    * @brief Classification of each box in getGrids.
    * @param[in] a_phase Phase.
-   * @param[in] a_level Level, 0 being the start domain.
+   * @param[in] a_level Level, 0 being the coarsest domain.
    * @return One classification per box, parallel to getGrids.
    */
   const Vector<GeometryService::InOut>&
@@ -203,7 +213,7 @@ public:
    * @details These are the regular, covered and irregular boxes as the upward pass left them; the irregular
    * ones are what the tiles are made from, and what will be shown as a simulation grid for inspection.
    * @param[in] a_phase Phase.
-   * @param[in] a_level Level, 0 being the start domain.
+   * @param[in] a_level Level, 0 being the coarsest domain.
    * @param[in] a_type  Classification to select.
    * @return The boxes with that classification.
    */
@@ -213,7 +223,7 @@ public:
   /**
    * @brief The properly nested cut-cell tiles on one level, common to both phases.
    * @details This is the coverage the simulation regrids onto.
-   * @param[in] a_level Level, 0 being the start domain.
+   * @param[in] a_level Level, 0 being the coarsest domain.
    * @return Tiles of the level.
    */
   const Vector<Box>&
@@ -322,10 +332,10 @@ protected:
    * @brief Step 0: build and classify the start level of one phase.
    * @details Pseudocode:
    *
-   *   boxes = domainSplit(m_gridDomains[0], m_maxBlockSize)
-   *   for each box (this rank's share): type = classifyBox(box, 0, phase)
+   *   boxes = domainSplit(m_gridDomains[m_startLevel], m_maxBlockSize)
+   *   for each box (this rank's share): type = classifyBox(box, m_startLevel, phase)
    *   gather boxes and types onto every rank, in a fixed order
-   *   m_levelBoxes[phase][0], m_levelBoxTypes[phase][0] = boxes, types
+   *   m_levelBoxes[phase][m_startLevel], m_levelBoxTypes[phase][m_startLevel] = boxes, types
    *
    * @param[in] a_phase Phase to build.
    */
@@ -333,10 +343,10 @@ protected:
   buildStartLevel(const phase::which_phase a_phase);
 
   /**
-   * @brief Step 1: the upward pass of one phase, from the start level to m_maxEbDepth.
+   * @brief Step 1: the upward pass of one phase, from the start level to the finest level.
    * @details Pseudocode:
    *
-   *   for lvl = 0 .. m_maxEbDepth - 1:
+   *   for lvl = m_startLevel .. m_startLevel + m_maxEbDepth - 1:
    *     for each box on lvl (this rank's share):
    *       if type is Regular or Covered:
    *         push refine(box, 2) on lvl + 1 with the same type          -- never a hole beneath these
@@ -397,11 +407,12 @@ protected:
    * @brief Step 2: tile the union of both phases' irregular boxes into one properly nested set per level.
    * @details Runs once, after both phases have finished the upward pass. Pseudocode:
    *
-   *   for lvl = 1 .. m_maxEbDepth:
+   *   for lvl = m_startLevel + 1 .. m_startLevel + m_maxEbDepth:
    *     tags[lvl - 1] = union over phases of the irregular boxes on lvl, coarsened by two
    *                     -- TiledMeshRefine takes tags on the level below the one it tiles
-   *   TiledMeshRefine(m_gridDomains[0], ratio 2, m_minBlockSize, m_maxBlockSize).regrid(tiles, tags)
-   *   m_tiles[lvl] = tiles[lvl] for lvl >= 1; level 0 is whole and is not tiled
+   *   TiledMeshRefine(m_gridDomains[m_startLevel], ratio 2, m_minBlockSize, m_maxBlockSize).regrid(tiles, tags)
+   *   m_tiles[lvl] = tiles[lvl - m_startLevel] for lvl > m_startLevel; the start level and below are whole and
+   *   are not tiled
    *
    * Every irregular box is a super-tile already, so the union is exact in tile units. The nesting buffer is one
    * tile per level, which is at least m_maxGhostEB when m_minBlockSize >= 2 * m_maxGhostEB. No collar is added
@@ -415,7 +426,7 @@ protected:
    * @brief Step 3: place every tile of every level in this phase's boxes and classify it.
    * @details Pseudocode:
    *
-   *   for lvl = 1 .. m_maxEbDepth:
+   *   for lvl = m_startLevel + 1 .. m_startLevel + m_maxEbDepth:
    *     walk the BVH over m_levelBoxes[phase][lvl] against the BVH over m_tiles[lvl]
    *     for each tile t (every box is a super-tile or a whole refinement of one, so t meets at most one box):
    *       if t lies in box b:
@@ -437,7 +448,7 @@ protected:
    * final grids of the phase.
    * @details Pseudocode:
    *
-   *   for lvl = 0 .. m_maxEbDepth:
+   *   for lvl = m_startLevel .. m_startLevel + m_maxEbDepth:
    *     grids = every tile on lvl with its type from m_tileTypes
    *     for each box b on lvl:
    *       tiles = { t : m_tileHost[phase][lvl][t] == b }
@@ -454,9 +465,41 @@ protected:
   decimateBoxes(const phase::which_phase a_phase);
 
   /**
-   * @brief Domains of the levels makeGrids builds, level 0 being the start domain.
+   * @brief Step 5: build the levels coarser than the start level, and push irregularity down onto every whole
+   * level.
+   * @details The coarser levels are built as ScanShop builds them, whole and each box classified on its own.
+   * On its own a box's classification agrees with the level above only because classifyBox is conservative for
+   * a signed-distance function; the second half makes the agreement hold by construction instead. Pseudocode:
+   *
+   *   for lvl = m_startLevel - 1 down to 0, per phase:
+   *     boxes = domainSplit(m_gridDomains[lvl], m_maxBlockSize)
+   *     for each box (this rank's share): type = classifyBox(box, lvl, phase)
+   *     gather onto every rank, in a fixed order
+   *     m_levelBoxes/m_levelBoxTypes and m_grids/m_gridTypes on lvl = boxes, types    -- nothing to decimate
+   *
+   *   for lvl = finest - 1 down to 0, per phase:
+   *     for each Irregular box b in m_grids[phase][lvl + 1]:
+   *       the box of m_grids[phase][lvl] containing coarsen(b, 2) is Irregular
+   *       -- exactly one box contains it: every box is a whole super-tile, a whole refinement of one, or a union
+   *       -- of whole tiles, and coarsen(b, 2) is at most half a tile wide on the same lattice. The box it flips
+   *       -- is a tile or a super-tile, never a decimated remainder, since above the start level a finer
+   *       -- irregular tile always lies inside a tile of this level by nesting.
+   *
+   * Runs after decimation: the coarser levels depend on nothing above them, and the push-down needs the final
+   * lists of every level above the one it marks.
+   */
+  void
+  buildCoarserLevels();
+
+  /**
+   * @brief Domains of the levels makeGrids builds, level 0 being the coarsest domain.
    */
   Vector<ProblemDomain> m_gridDomains;
+
+  /**
+   * @brief Index into m_gridDomains of the start domain; every level below it is built whole.
+   */
+  int m_startLevel;
 
   /**
    * @brief Grid spacings of the levels makeGrids builds.

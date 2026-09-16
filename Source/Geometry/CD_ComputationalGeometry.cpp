@@ -36,6 +36,7 @@ ComputationalGeometry::ComputationalGeometry()
     m_generator(Generator::GeometryShop),
     m_maxGhostEB(0),
     m_gridProbLo(RealVect::Zero),
+    m_startLevel(0),
     m_maxEbDepth(0),
     m_minBlockSize(0),
     m_maxBlockSize(0),
@@ -274,16 +275,29 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   m_maxGhostEB   = a_maxGhostEB;
   m_refineAngle  = a_refineAngle;
 
-  // Every level is a factor-two refinement of the start domain, and the finest one has the finest spacing.
-  const int numLevels = 1 + m_maxEbDepth;
+  // The levels are every factor-two coarsening of the start domain down to the coarsest domain that can still be
+  // coarsened by two, the start domain itself, and m_maxEbDepth refinements above it, the last of which has the
+  // finest spacing. Level 0 is the coarsest domain.
+  m_startLevel = 0;
+
+  for (ProblemDomain coarDomain = a_startDomain; coarDomain.domainBox().coarsenable(2); coarDomain.coarsen(2)) {
+    m_startLevel++;
+  }
+
+  const int numLevels = m_startLevel + 1 + m_maxEbDepth;
 
   m_gridDomains.resize(numLevels);
   m_gridDx.resize(numLevels);
 
-  m_gridDomains[0] = a_startDomain;
-  m_gridDx[0]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
+  m_gridDomains[m_startLevel] = a_startDomain;
+  m_gridDx[m_startLevel]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
 
-  for (int lvl = 1; lvl < numLevels; lvl++) {
+  for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
+    m_gridDomains[lvl] = coarsen(m_gridDomains[lvl + 1], 2);
+    m_gridDx[lvl]      = 2.0 * m_gridDx[lvl + 1];
+  }
+
+  for (int lvl = m_startLevel + 1; lvl < numLevels; lvl++) {
     m_gridDomains[lvl] = refine(m_gridDomains[lvl - 1], 2);
     m_gridDx[lvl]      = 0.5 * m_gridDx[lvl - 1];
   }
@@ -323,6 +337,8 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //      (it inherits, and the box is recorded as hit), or above a leaf of this phase (it is classified)
   //      (classifyTiles).
   //   4. Per phase: every hit regular or covered box is cut down to what the tiles left of it (decimateBoxes).
+  //   5. The levels coarser than the start level, whole and classified box by box as ScanShop builds them; then,
+  //      from the finest level down, a box containing a finer irregular box is irregular (buildCoarserLevels).
   //
   // Steps 0 and 1, per phase. A phase without an implicit function is one regular box on every level, and
   // takes no further part.
@@ -351,12 +367,29 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     this->classifyTiles(curPhase);
     this->decimateBoxes(curPhase);
   }
+
+  // Step 5, once.
+  this->buildCoarserLevels();
 }
 
 int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
   return m_gridDomains.size();
+}
+
+int
+ComputationalGeometry::getLevel(const ProblemDomain& a_domain) const noexcept
+{
+  int level = -1;
+
+  for (int lvl = 0; lvl < m_gridDomains.size(); lvl++) {
+    if (m_gridDomains[lvl].domainBox() == a_domain.domainBox()) {
+      level = lvl;
+    }
+  }
+
+  return level;
 }
 
 const Vector<Box>&
@@ -452,6 +485,14 @@ ComputationalGeometry::decimateBoxes(const phase::which_phase a_phase)
   CH_TIME("ComputationalGeometry::decimateBoxes");
 
   // Step 4. See the header for the pseudocode.
+}
+
+void
+ComputationalGeometry::buildCoarserLevels()
+{
+  CH_TIME("ComputationalGeometry::buildCoarserLevels");
+
+  // Step 5. See the header for the pseudocode.
 }
 
 void

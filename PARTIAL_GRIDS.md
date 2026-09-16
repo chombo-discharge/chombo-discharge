@@ -844,7 +844,23 @@ tile, `createBoxes`), correct, octree-graded, not tight. The tile lists recorded
 interface any packer consumes, so replacing this step touches nothing else. The final list at `l`
 for the phase is `T_l` with its tags, the remainders, and every box no tile touched.
 
-### Step 5 -- what is handed over, and to whom
+### Step 5 -- the coarser levels, and irregularity pushed down
+
+ScanShop builds every level at and below its scan level whole -- `domainSplit`, each box classified on its
+own -- and no level below the scan level looks at any other (`CD_ScanShop.cpp` lines 147-156, 200-272).
+The builder does the same for the levels coarser than the start domain, down to the coarsest domain that
+can still be coarsened by two, with `max_block_size` as the split; no tiles, no decimation. Levels are
+indexed from that coarsest domain, and the shop looks its domain up with `getLevel`.
+
+Then the reconciliation ScanShop does not do: from the finest level down, **a box that contains a finer
+irregular box is irregular**. On its own a whole level's classification agrees with the level above only
+because the test is conservative for a signed-distance function; this makes it hold by construction, for
+the start level as well as the coarser ones. One containment per finer irregular box: `coarsen(b, 2)` is at
+most half a tile wide on the shared lattice and lies in exactly one box. The box it flips is a tile or a
+super-tile, never a decimated remainder -- above the start level a finer irregular tile lies inside a tile
+of this level by nesting. Runs after decimation, because the push-down reads the final lists.
+
+### Step 6 -- what is handed over, and to whom
 
 - To the shop (#732): per phase, per level, the final list and tags. `makeGrids` load-balances it;
   `InsideOutside` returns the recorded tag; `fillGraph` runs on Irregular boxes only.
