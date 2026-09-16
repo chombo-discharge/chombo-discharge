@@ -492,6 +492,55 @@ the adjacent grown box -- trading a sliver of regular area for irregular, the ch
 keeps every box on the level at or above the minimum and is bounded by the same `2g` argument, since
 absorption never grows anything by more than a sub-minimum dimension.
 
+## Whether the decimation is needed at all
+
+Before the how of clipping regular/covered boxes, the whether -- because the argument that it is
+unnecessary is short, and if it holds the hard part of the plan goes away.
+
+**What the buffer has to be.** The nesting requirement is that level L-1 be *generated* in a band at
+least `g` wide around L's footprint, so that nothing adjacent to L is served from L-2. Generated means
+present in L-1's layout with a correct classification. It does not mean tagged Irregular: a Regular tag
+is a correct generated answer for a regular cell.
+
+**What the band is made of.** By containment, every cut cell of L-1 near L's footprint is already
+inside an L-1 Irregular box -- a fine irregular box comes only from splitting an Irregular parent, so
+the surface never passes through a box classified Regular or Covered. The part of the `g`-band that
+spills onto regular/covered boxes is therefore, by construction, geometrically regular or covered. The
+spill measurement showed exactly that: 20, 10 and 10 cells landing on regular/covered boxes, none cut.
+
+So for the spill:
+
+- **regular** -- needs nothing; it is already correct and presence is free;
+- **covered** -- must be carried, which is the constraint already established (all covered regions,
+  every level, refined whole);
+- **cut** -- is already in an Irregular box, **unless `retainBox` pruned that box's refinement.**
+
+That last case is the only work: **un-prune Irregular refinements within `g` of the finer footprint.**
+Those are splits of coarse Irregular boxes, already tile-aligned, already the right size, already
+classified by the existing path. No regular or covered box is touched, so there is nothing to decimate,
+no sliver to absorb, and no dual walk to run.
+
+**`retainBox` already contains a `g`-buffer.** `grow(coarsen(a_box, 2), m_ebGhost)` grows the parent by
+the ghost width before testing it against coverage, so retention is meant to keep exactly that band.
+The nesting violations at block size 4 are then not a missing mechanism but a quantisation: retention is
+decided per whole coarse box, against coverage regions that may themselves not be buffered-nested at
+that tile size. A smaller problem than re-partitioning levels.
+
+**The question that decides it:** does anything downstream require the *irregular boxes* to be nested,
+as opposed to the *carried region*? Something that walks irregular boxes level to level and assumes a
+parent box for each child box would need box nesting. The multichord does not -- it needs the finer
+level's children of a seam cell, which is containment, not a buffer. `coarsenFrom` does not -- its ring
+needs generated neighbours of any tag. If nothing does, the decimation, the slivers, the snapping and
+the BVH are answering a question nobody asked. Unresolved; listed below.
+
+**If regular/covered boxes do have to be cut, snap to the simulation's tile size.** Three reasons. The
+box is the unit of graph cost -- an Irregular-tagged box allocates its `BaseFab<GraphNode>` over its
+whole region however few cells are cut -- so once the minimum size is `2g` or more, free-form clipping
+plus sliver absorption converges on the same box count as snapping, and snapping is deterministic.
+Tile alignment with the simulation's grids makes `fillEBISLayout`'s copies box-to-box where they
+coincide rather than fragmented. And `TiledMeshRefine` already made this choice for the same problem.
+The overshoot is at most one tile per side, the quantisation `retainBox` already pays.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
@@ -501,6 +550,10 @@ absorption never grows anything by more than a sub-minimum dimension.
 - Whether anything downstream iterates `EBISLevel::m_grids` expecting the level to tile the domain.
   `EBCoarseFineParticleMesh::defineStencils` walking every irregular cell of the coarse level was one
   such surprise already; the consumers have not been audited.
+- Whether anything downstream requires the irregular *boxes* to be nested rather than the carried
+  *region*. This decides whether regular/covered boxes ever need cutting. Not audited.
+- Why the coverage regions fail buffered nesting at block size 4 when they come out of
+  `TiledMeshRefine`, whose `nestFrom` is meant to enforce it. Measured, not explained.
 - The seam at the scan level between `buildCoarseLevel`'s full coverage and the nested grids.
 - That the dual walk is `O(output + depth)` on these box sets. The argument is the standard one for
   spatially coherent BVHs; it has not been measured on the 12-level hierarchy.
