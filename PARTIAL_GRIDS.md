@@ -791,7 +791,10 @@ From level `l` to `l+1`, for each box at `l`:
   **splits** -- `refine(box, 2)`, `domainSplit` to `max_block_size`, each piece classified as in step 0
   -- and the scan moves to the next box. A box no pair in fails is a **leaf**: nothing is pushed
   beneath it, which is the hole above it.
-- stop when no box split, or `l+1 == the stop domain`.
+- run to the stop domain regardless: once no irregular box remains the curvature test has nothing to do,
+  but regular and covered boxes still refine whole onto every remaining level. A level above the last
+  split is partial (regular/covered descendants, tiles where curvature reached, holes elsewhere), never
+  missing.
 
 Across a sharp edge the angle is the dihedral angle at every `dx` and never shrinks, so edges refine
 to `the stop domain`. That is intended (it is where the multichord seam lives) and it is what
