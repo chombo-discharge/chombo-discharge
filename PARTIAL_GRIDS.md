@@ -921,6 +921,49 @@ From the shop, answering `makeGrids`/`InsideOutside`/`fillGraph` for a domain it
 listed, i.e. consulting the builder by domain. From #732, the stop level's leaves keeping their surfaces
 (`m_surfaces`), which is the store everything above is cut from.
 
+### What the index space asks, and the one rule that answers it
+
+From `EBISLevel.cpp`: classification is asked on `grow(box, 1)`, not on the box and not on `ebGhost`
+(`region = grow(a_grids[din],1) & domain; InsideOutside(region, ...)`, lines 419-425); Regular and
+Covered set the tag, anything else runs `fillGraph` over `grow(region, 1)` and `buildGraph` over
+`region`. Each `EBGraph` covers its box plus one cell, and the ring is where the box's boundary faces
+come from. `EBISLayoutImplem::define` fills the per-simulation-box graph over `box + nghost` by
+`m_graph.copyTo`, and `m_graph` has zero ghosts (line 326), so the copy takes the source boxes' **valid
+regions only**: a simulation box's ghost ring is served by the neighbouring carried boxes' interiors,
+never by anyone's one-cell ring. Ghost cells bite only where a neighbour is uncarried -- the hole case.
+
+**The rule.** `classify(box, domain)`: if the box's cells meet a stored irregular box that is the deepest
+stored box there (a tile on this level, or an irregular leaf below, i.e. a hole), Irregular; otherwise
+the sign of `f` at one point says Regular or Covered. One implicit-function call, no regular/covered
+lookup. The answer is valid on `grow(box, 1)` without testing the ring, because of the margin the
+upward pass builds in: classifying with `grow(box, m_maxGhostEB)` puts **every cut cell at least
+`m_maxGhostEB ≥ 1` cells inside an irregular box**. A box outside the irregular region therefore has a
+clean ring; so does a tile that inherited Regular from such a box; so does a transient box above the
+stop domain inside a stop-level regular region (the margin is coarse cells, the ring fine cells). The
+ring must *not* be tested against the irregular region: remainder boxes are adjacent to tiles by
+construction and would all come out Irregular. This is why the `m_maxGhostEB` growth stays in steps 0,
+1 and 5 although the index space asks about one cell.
+
+**What it does to storage.** Regular versus covered need not be stored -- it is one call -- but the
+regular/covered *region* must be: a hole and a remainder look the same if only tiles are kept, and the
+hole must stay uncarried while the remainder is carried. So the lists stay for the layout's sake. The
+BVH holds every box the upward pass *created* -- the start level, every split piece, the tiles -- and
+none of the refine-whole copies, whose AABBs in the common coordinate system equal their parents'. Step
+3's hole-tile case and the transient boxes above the stop domain need no separate handling; both are
+this rule. The shop's `InsideOutside` is this rule; the shop may refine an Irregular answer by clipping
+the ancestor's polyhedra (#732) where the box is finer than the box it was cut from.
+
+**The queries** (one BVH per phase, all levels in the stop domain's index space, half-open AABBs in
+doubles, exact for every level above and below):
+
+- `classify(phase, box, domain) -> InOut` -- the rule above; conservative over the pieces of a box that
+  straddles stored boxes: Regular iff all regular, Covered iff all covered, else Irregular.
+- `ancestor(phase, cell, domain, Box&, int& level) -> InOut` -- the deepest stored box containing the
+  cell, for a fill that needs the leaf whose polyhedra to cut. A cell never straddles.
+
+A walk that reaches level 0 without a hit, or a query coarser than level 0, is an abort: the start
+level and below are whole.
+
 ### Step 6 -- what is handed over, and to whom
 
 - To the shop (#732): per phase, per level, the final list and tags. `makeGrids` load-balances it;
