@@ -203,13 +203,14 @@ public:
    * @details Every cut cell of every irregular box is reconstructed from the implicit function at its own
    * level, and its interface triangles are written from the finest level that carries it. Where a cut cell
    * borders a region the next finer level carries, the shared face is restricted to the finer level's chords
-   * before the interface is closed, so the surface meets across the level boundary. A phase without an
-   * implicit function writes nothing. Three dimensions only; the interface of a two-dimensional cell is a
-   * segment, not a triangle. Collective: every rank reconstructs its share of the boxes and rank 0 writes.
-   * @param[in] a_stem File name stem; the files are the stem followed by .gas.stl and .solid.stl.
+   * before the interface is closed, so the surface meets across the level boundary. The files are
+   * surface_mesh_gas.stl and surface_mesh_solid.stl; a phase without an implicit function writes nothing.
+   * Three dimensions only; the interface of a two-dimensional cell is a segment, not a triangle. Collective:
+   * every rank reconstructs its share of the boxes and rank 0 writes. Run by makeGrids under the polyhedral
+   * generator when PolyhedralShop.write_stl is set.
    */
   void
-  writeSurfaceSTL(const std::string& a_stem) const;
+  writeSurfaceSTL() const;
 
   /**
    * @brief Build geometries and the MFIndexSpace.

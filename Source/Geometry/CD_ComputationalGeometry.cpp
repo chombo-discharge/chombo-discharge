@@ -32,6 +32,7 @@
 #include <GeometryShop.H>
 #include <ComplementIF.H>
 #include <MayDay.H>
+#include <ParmParse.H>
 #include <PolyGeom.H>
 
 // Our includes
@@ -408,6 +409,19 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->classifyTiles(firstChild, numChildren, gasTileTypes, solidTileTypes, tileHosts);
   this->decimateBoxes(gasTileTypes, solidTileTypes, tileHosts);
   this->buildCoarserLevels();
+
+  // The polyhedral surface on these grids, for inspection. A hidden option of the polyhedral generator.
+  if (m_generator == Generator::PolyhedralShop) {
+    ParmParse pp("PolyhedralShop");
+
+    bool writeSTL = false;
+
+    pp.query("write_stl", writeSTL);
+
+    if (writeSTL) {
+      this->writeSurfaceSTL();
+    }
+  }
 }
 
 int
@@ -1160,7 +1174,7 @@ ComputationalGeometry::buildCoarserLevels()
 }
 
 void
-ComputationalGeometry::writeSurfaceSTL(const std::string& a_stem) const
+ComputationalGeometry::writeSurfaceSTL() const
 {
   CH_TIME("ComputationalGeometry::writeSurfaceSTL");
 
@@ -1184,7 +1198,7 @@ ComputationalGeometry::writeSurfaceSTL(const std::string& a_stem) const
       continue;
     }
 
-    const std::string fileName = a_stem + "." + phaseNames[p] + ".stl";
+    const std::string fileName = "surface_mesh_" + phaseNames[p] + ".stl";
 
     std::ofstream out(fileName);
 
