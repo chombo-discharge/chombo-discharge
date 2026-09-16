@@ -148,9 +148,9 @@ public:
    * @details Built before any index space exists, from the implicit functions alone. The start domain is built
    * whole, as is every coarser domain down to the coarsest that can still be coarsened by two; above it the
    * levels are factor-two refinements up to and including the stop domain. Levels are
-   * indexed from the coarsest domain; getLevel finds the index of a domain. Every box lies on the
-   * a_maxBlockSize lattice, so the cut-cell grids of both phases are unions of the same super-tiles. Without an
-   * implicit function a phase is one regular box on every level.
+   * indexed from the coarsest domain; getLevel finds the index of a domain. There is one box hierarchy for both
+   * phases, built from both implicit functions together, and every box carries one classification per phase.
+   * Without any implicit function every level is one regular box.
    * @param[in] a_startDomain  Domain the upward pass starts from.
    * @param[in] a_stopDomain   Finest domain built; a factor-two refinement of a_startDomain some number of times.
    * @param[in] a_probLo       Lower-left corner of the domain.
@@ -192,7 +192,7 @@ public:
    * @param[in] a_type  Regular, covered or irregular.
    * @return The boxes.
    */
-  const Vector<Box>&
+  Vector<Box>
   getBoxes(const phase::which_phase a_phase, const int a_level, const GeometryService::InOut a_type) const noexcept;
 
   /**
@@ -332,34 +332,19 @@ protected:
   Vector<Vector<Box>> m_tiles;
 
   /**
-   * @brief Regular boxes of the gas phase, per level.
+   * @brief Boxes per level, common to both phases.
    */
-  Vector<Vector<Box>> m_gasRegularBoxes;
+  Vector<Vector<Box>> m_boxes;
 
   /**
-   * @brief Covered boxes of the gas phase, per level.
+   * @brief Gas-phase classification of each box in m_boxes, parallel to it.
    */
-  Vector<Vector<Box>> m_gasCoveredBoxes;
+  Vector<Vector<GeometryService::InOut>> m_gasTypes;
 
   /**
-   * @brief Irregular boxes of the gas phase, per level.
+   * @brief Solid-phase classification of each box in m_boxes, parallel to it.
    */
-  Vector<Vector<Box>> m_gasIrregularBoxes;
-
-  /**
-   * @brief Regular boxes of the solid phase, per level.
-   */
-  Vector<Vector<Box>> m_solidRegularBoxes;
-
-  /**
-   * @brief Covered boxes of the solid phase, per level.
-   */
-  Vector<Vector<Box>> m_solidCoveredBoxes;
-
-  /**
-   * @brief Irregular boxes of the solid phase, per level.
-   */
-  Vector<Vector<Box>> m_solidIrregularBoxes;
+  Vector<Vector<GeometryService::InOut>> m_solidTypes;
 
   /**
    * @brief Build the composite implicit functions of the two phases from the electrodes and dielectrics.
@@ -370,90 +355,89 @@ protected:
   buildImplicitFunctions();
 
   /**
-   * @brief The per-level box list of one phase and one classification.
+   * @brief The per-level classifications of one phase.
    * @param[in] a_phase Phase.
-   * @param[in] a_type  Regular, covered or irregular.
-   * @return The list, indexed by level.
+   * @return m_gasTypes or m_solidTypes.
    */
-  Vector<Vector<Box>>&
-  boxes(const phase::which_phase a_phase, const GeometryService::InOut a_type) noexcept;
+  Vector<Vector<GeometryService::InOut>>&
+  types(const phase::which_phase a_phase) noexcept;
 
   /**
-   * @brief The per-level box list of one phase and one classification.
+   * @brief The per-level classifications of one phase.
    * @param[in] a_phase Phase.
-   * @param[in] a_type  Regular, covered or irregular.
-   * @return The list, indexed by level.
+   * @return m_gasTypes or m_solidTypes.
    */
-  const Vector<Vector<Box>>&
-  boxes(const phase::which_phase a_phase, const GeometryService::InOut a_type) const noexcept;
+  const Vector<Vector<GeometryService::InOut>>&
+  types(const phase::which_phase a_phase) const noexcept;
 
   /**
-   * @brief Step 0: build and classify the start level of one phase.
+   * @brief Step 0: build and classify the start level.
    * @details Pseudocode:
    *
-   *   for each box of domainSplit(m_domains[m_startLevel], m_maxBlockSize) (this rank's share):
-   *     append it to the phase's regular, covered or irregular list on m_startLevel, per classifyBox
-   *   gather the three lists onto every rank, in a fixed order
-   *
-   * @param[in] a_phase Phase to build.
+   *   m_boxes[m_startLevel] = domainSplit(m_domains[m_startLevel], m_maxBlockSize, block factor m_minBlockSize)
+   *   classifyBoxes(m_boxes[m_startLevel], m_startLevel) -> m_gasTypes, m_solidTypes on m_startLevel
    */
   void
-  buildStartLevel(const phase::which_phase a_phase);
+  buildStartLevel();
 
   /**
-   * @brief Step 1: the upward pass of one phase, from the start level to the finest level.
+   * @brief Step 1: the upward pass, from the start level to the stop level.
    * @details Pseudocode:
    *
    *   for lvl = m_startLevel .. m_stopLevel - 1:
-   *     for each regular or covered box on lvl (this rank's share):
-   *       append refine(box, 2) to the same list on lvl + 1                -- never a hole beneath these
-   *     for each irregular box on lvl (this rank's share):
-   *       if exceedsCurvature(box, lvl, phase):
-   *         for each piece of domainSplit(refine(box, 2), m_maxBlockSize):
-   *           append it to the list on lvl + 1 that classifyBox(piece, lvl + 1, phase) names
-   *       else:
-   *         leaf: nothing is appended; the region above it is a hole on lvl + 1
-   *     gather lvl + 1 onto every rank, in a fixed order
+   *     for each box on lvl that is regular or covered in both phases:
+   *       append refine(box, 2) on lvl + 1 with both tags                   -- never a hole beneath these
+   *     for the boxes on lvl that are irregular in some phase:
+   *       flags = splitFlags(...): exceedsCurvature in any phase where the box is irregular
+   *       for each box with a flag: pieces = domainSplit(refine(box, 2), m_maxBlockSize, m_minBlockSize)
+   *       classifyBoxes(all pieces, lvl + 1) in both phases, append on lvl + 1
+   *       a box without a flag is a leaf: nothing is appended, the region above it is a hole on lvl + 1
    *
-   *   The loop always runs to m_stopLevel: once no irregular box remains the curvature test has nothing to do,
-   *   but the regular and covered boxes still refine whole onto every remaining level, so no level is left
-   *   empty that should hold them.
-   *
-   * @param[in] a_phase Phase to build.
+   *   The loop always runs to m_stopLevel: once no box splits, the curvature test has nothing to do, but the
+   *   boxes that are regular or covered in both phases still refine whole onto every remaining level.
    */
   void
-  buildFinerLevels(const phase::which_phase a_phase);
+  buildFinerLevels();
 
   /**
-   * @brief Classify a list of boxes, the work shared between the ranks.
+   * @brief Classify a list of boxes in both phases, the work shared between the ranks.
    * @details Rank r classifies every box whose index is r modulo the number of ranks; the answers are
-   * combined with one all-reduce, so every rank returns the full list in the input order.
-   * @param[in] a_boxes Boxes to classify, identical on every rank.
-   * @param[in] a_level Level the boxes live on.
-   * @param[in] a_phase Phase whose implicit function is asked.
-   * @return One classification per box, parallel to a_boxes.
+   * combined with one all-reduce, so every rank returns the full lists in the input order.
+   * @param[in]  a_boxes      Boxes to classify, identical on every rank.
+   * @param[in]  a_level      Level the boxes live on.
+   * @param[out] a_gasTypes   Gas-phase classification of each box.
+   * @param[out] a_solidTypes Solid-phase classification of each box.
    */
-  Vector<GeometryService::InOut>
-  classifyBoxes(const Vector<Box>& a_boxes, const int a_level, const phase::which_phase a_phase) const;
+  void
+  classifyBoxes(const Vector<Box>&              a_boxes,
+                const int                       a_level,
+                Vector<GeometryService::InOut>& a_gasTypes,
+                Vector<GeometryService::InOut>& a_solidTypes) const;
 
   /**
-   * @brief Whether a list of irregular boxes must split, the work shared between the ranks.
-   * @details Same distribution as classifyBoxes, with exceedsCurvature as the test.
-   * @param[in] a_boxes Irregular boxes to test, identical on every rank.
-   * @param[in] a_level Level the boxes live on.
-   * @param[in] a_phase Phase whose implicit function is asked.
+   * @brief Whether each box must split, the work shared between the ranks.
+   * @details Same distribution as classifyBoxes. A box splits if exceedsCurvature holds in any phase in which
+   * the box is irregular; a box irregular in neither phase never splits.
+   * @param[in] a_boxes      Boxes to test, identical on every rank.
+   * @param[in] a_level      Level the boxes live on.
+   * @param[in] a_gasTypes   Gas-phase classification of each box.
+   * @param[in] a_solidTypes Solid-phase classification of each box.
    * @return One flag per box, parallel to a_boxes.
    */
   Vector<int>
-  splitFlags(const Vector<Box>& a_boxes, const int a_level, const phase::which_phase a_phase) const;
+  splitFlags(const Vector<Box>&                    a_boxes,
+             const int                             a_level,
+             const Vector<GeometryService::InOut>& a_gasTypes,
+             const Vector<GeometryService::InOut>& a_solidTypes) const;
 
   /**
    * @brief Classify a box of one phase on one level as regular, covered or irregular.
-   * @details Pseudocode, ScanShop::isRegular/isCovered on the implicit function directly:
+   * @details ScanShop::isRegular/isCovered on the implicit function directly; a phase without an implicit
+   * function is regular everywhere. Pseudocode:
    *
    *   grown = grow(box, m_maxGhostEB) & domain
    *   halfDiagonal = 0.5 * dx * sqrt(SpaceDim)
-   *   regular = every cell centre in grown has f(x) < -halfDiagonal   -- with the signed-distance scan skip
+   *   regular = every cell centre in grown has f(x) < -halfDiagonal
    *   covered = every cell centre in grown has f(x) >  halfDiagonal
    *   return Regular, Covered, or Irregular if neither
    *
@@ -468,16 +452,17 @@ protected:
   /**
    * @brief Whether the implicit function's normal turns by more than m_refineAngle inside a box.
    * @details Cut cells do not exist at this point and are not looked for; the test runs on the implicit
-   * function in the band of cells near its zero set. Pseudocode:
+   * function in the band of cells near its zero set. A phase without an implicit function never asks for a
+   * split. Pseudocode:
    *
    *   grown = grow(box, 1) & domain
-   *   for each cell centre x in grown with |f(x)| <= sqrt(SpaceDim) * dx      -- scan skip prunes the rest
+   *   for each cell centre x in grown with |f(x)| <= sqrt(SpaceDim) * dx
    *     n(x) = central difference of f at x, normalised
-   *   for each such cell and each of its neighbours in the band:
+   *   for each such cell in the box and each of its neighbours in the band:
    *     if angle(n(cell), n(neighbour)) > m_refineAngle: return true      -- early exit
    *   return false
    *
-   * Across a sharp edge the angle never shrinks with dx, so edges refine to the finest level. That is intended.
+   * Across a sharp edge the angle never shrinks with dx, so edges refine to the stop level. That is intended.
    *
    * @param[in] a_box   Box to test.
    * @param[in] a_level Level the box lives on.
@@ -488,69 +473,72 @@ protected:
   exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
-   * @brief Step 2: tile the union of both phases' irregular boxes into one properly nested set per level.
-   * @details Runs once, after both phases have finished the upward pass. Pseudocode:
+   * @brief Step 2: tile the boxes that are irregular in either phase into one properly nested set per level.
+   * @details Pseudocode:
    *
    *   for lvl = m_startLevel + 1 .. m_stopLevel:
-   *     tags[lvl - 1] = union over phases of the irregular boxes on lvl, coarsened by two
+   *     tags[lvl - 1] = every box on lvl irregular in some phase, coarsened by two
    *                     -- TiledMeshRefine takes tags on the level below the one it tiles
    *   TiledMeshRefine(m_domains[m_startLevel], ratio 2, m_minBlockSize, m_maxBlockSize).regrid(tiles, tags)
    *   m_tiles[lvl] = tiles[lvl - m_startLevel] for lvl > m_startLevel; the start level and below are whole and
    *   are not tiled
    *
-   * Every irregular box is a super-tile already, so the union is exact in tile units. The nesting buffer is one
-   * tile per level, which is at least m_maxGhostEB when m_minBlockSize >= 2 * m_maxGhostEB. No collar is added
-   * beyond the union: a simulation ghost cell that reaches past the tiles into a hole is filled by the index
-   * space from the irregular leaf beneath it, not carried here.
+   * Every box is a super-tile already, so the tags are exact in tile units. The nesting buffer is one tile per
+   * level, which is at least m_maxGhostEB when m_minBlockSize >= 2 * m_maxGhostEB. No collar is added: a
+   * simulation ghost cell that reaches past the tiles into a hole is the index space's to fill, not carried here.
    */
   void
   makeTiles();
 
   /**
-   * @brief Step 3: place every tile of every level in this phase's boxes and classify it.
+   * @brief Step 3: place every tile of every level in the boxes and classify it in both phases.
    * @details Pseudocode:
    *
    *   for lvl = m_startLevel + 1 .. m_stopLevel:
-   *     walk the BVH over the phase's boxes on lvl against the BVH over m_tiles[lvl]
-   *     for each tile t (every box is a super-tile or a whole refinement of one, so t meets at most one box):
-   *       if t lies in an irregular box:            a_tileTypes[lvl][t] = Irregular,  a_tileHosts[lvl][t] = -1
-   *       else if t lies in regular/covered box i:  a_tileTypes[lvl][t] = that type,  a_tileHosts[lvl][t] = i
-   *       else (above a leaf of this phase):        a_tileTypes[lvl][t] = classifyBox(t, lvl, phase), host -1
+   *     for each tile t on lvl (every box is a super-tile or a whole refinement of one, so t lies in at most one):
+   *       if t lies in box i:
+   *         a_tileHosts[lvl][t] = i
+   *         per phase: regular or covered box -> t inherits; irregular box -> classifyBox(t, lvl, phase),
+   *                    since the box is conservative and t may be clear of the surface
+   *       else (above a leaf, a hole):
+   *         a_tileHosts[lvl][t] = -1
+   *         per phase: classifyBox(t, lvl, phase) -- a carried tile is generated from the implicit function at
+   *                    its own level, so that is the consistent answer
    *
    * Nothing is cut here; the hosts are what decimateBoxes reads.
    *
-   * @param[in]  a_phase     Phase to classify the tiles for.
-   * @param[out] a_tileTypes Classification of each tile, indexed [level][tile].
-   * @param[out] a_tileHosts Index of the regular or covered box each tile lies in, or -1, indexed [level][tile].
+   * @param[out] a_gasTileTypes   Gas-phase classification of each tile, indexed [level][tile].
+   * @param[out] a_solidTileTypes Solid-phase classification of each tile, indexed [level][tile].
+   * @param[out] a_tileHosts      Index of the box each tile lies in, or -1, indexed [level][tile].
    */
   void
-  classifyTiles(const phase::which_phase                a_phase,
-                Vector<Vector<GeometryService::InOut>>& a_tileTypes,
+  classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+                Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
                 Vector<Vector<int>>&                    a_tileHosts) const;
 
   /**
-   * @brief Step 4: cut every hit regular or covered box down to what the tiles left of it, and replace the
-   * phase's lists on the tiled levels with the result.
+   * @brief Step 4: cut every hit box down to what the tiles left of it, and replace the lists on the tiled
+   * levels with the result.
    * @details Pseudocode:
    *
    *   for lvl = m_startLevel + 1 .. m_stopLevel:
-   *     irregular on lvl = the tiles typed Irregular                       -- the tiles cover every irregular box
-   *     for regular and for covered:
-   *       new list = the tiles typed so
-   *       for each box b in the old list:
-   *         tiles = { t : a_tileHosts[lvl][t] == b }
-   *         if tiles is empty: new list += b
-   *         else:              new list += b minus tiles
+   *     new list = every tile on lvl with its two classifications
+   *     for each box b on lvl:
+   *       tiles = { t : a_tileHosts[lvl][t] == b }
+   *       if tiles is empty:                         new list += b with its two classifications
+   *       else if b is irregular in some phase:      nothing, the tiles cover it
+   *       else:                                      new list += (b minus tiles) with b's two classifications
    *                            -- first implementation: TreeIntVectSet in tile coordinates, then createBoxes;
    *                            -- correct and octree-graded, not tight; the packer is replaceable here
+   *     m_boxes, m_gasTypes, m_solidTypes on lvl = new list
    *
-   * @param[in] a_phase     Phase to assemble.
-   * @param[in] a_tileTypes Classification of each tile, from classifyTiles.
-   * @param[in] a_tileHosts Host of each tile, from classifyTiles.
+   * @param[in] a_gasTileTypes   Gas-phase classification of each tile, from classifyTiles.
+   * @param[in] a_solidTileTypes Solid-phase classification of each tile, from classifyTiles.
+   * @param[in] a_tileHosts      Host of each tile, from classifyTiles.
    */
   void
-  decimateBoxes(const phase::which_phase                      a_phase,
-                const Vector<Vector<GeometryService::InOut>>& a_tileTypes,
+  decimateBoxes(const Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+                const Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
                 const Vector<Vector<int>>&                    a_tileHosts);
 
   /**
@@ -560,19 +548,17 @@ protected:
    * On its own a box's classification agrees with the level above only because classifyBox is conservative for
    * a signed-distance function; the second half makes the agreement hold by construction instead. Pseudocode:
    *
-   *   for lvl = m_startLevel - 1 down to 0, per phase:
-   *     for each box of domainSplit(m_domains[lvl], m_maxBlockSize) (this rank's share):
-   *       append it to the phase's regular, covered or irregular list on lvl, per classifyBox
-   *       -- no block factor: these levels are not tiled and the coarsest may be smaller than a tile
-   *     gather onto every rank, in a fixed order
+   *   for lvl = m_startLevel - 1 down to 0:
+   *     m_boxes[lvl] = domainSplit(m_domains[lvl], m_maxBlockSize)   -- no block factor: these levels are not
+   *                                                                  -- tiled and the coarsest may be smaller
+   *                                                                  -- than a tile
+   *     classifyBoxes(m_boxes[lvl], lvl) in both phases
    *
    *   for lvl = m_stopLevel - 1 down to 0, per phase:
-   *     for each irregular box b on lvl + 1:
-   *       move the box on lvl containing coarsen(b, 2) from the regular or covered list to the irregular one
+   *     for each box b on lvl + 1 irregular in that phase:
+   *       the box on lvl containing coarsen(b, 2) is irregular in that phase
    *       -- exactly one box contains it: every box is a whole super-tile, a whole refinement of one, or a union
-   *       -- of whole tiles, and coarsen(b, 2) is at most half a tile wide on the same lattice. The box it moves
-   *       -- is a tile or a super-tile, never a decimated remainder, since above the start level a finer
-   *       -- irregular tile always lies inside a tile of this level by nesting.
+   *       -- of whole tiles, and coarsen(b, 2) is at most half a tile wide on the same lattice.
    *
    * Runs after decimation: the coarser levels depend on nothing above them, and the push-down needs the final
    * lists of every level above the one it marks.

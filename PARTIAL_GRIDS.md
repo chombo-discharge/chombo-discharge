@@ -964,6 +964,27 @@ doubles, exact for every level above and below):
 A walk that reaches level 0 without a hit, or a query coarser than level 0, is an abort: the start
 level and below are whole.
 
+### One hierarchy for both phases
+
+Superseding the per-phase upward builds of steps 0-1 and the union in step 2: the boxes are built once, in
+tandem, from both implicit functions. Every box carries one classification per phase. A box refines whole
+only if it is regular or covered in both phases; it is a candidate to split if irregular in either, and
+splits if the curvature test fails in any phase in which it is irregular; pieces are classified in both. The
+tiler's tags are the boxes irregular in either phase, so `makeTiles` has no union to form. Step 3 places a
+tile in the one box that contains it, or in a hole, and per phase inherits a regular or covered box's tag or
+classifies by that phase's implicit function at the tile's own level -- inside an irregular box because the
+box is conservative and the tile may be clear of the surface, in a hole because a carried tile is generated
+from the implicit function at its level, not cut from its parent. Decimation cuts each hit box once,
+remainders carrying both tags. What it removes: the union, the cross-phase hole case, the second walk, the
+second decimation, and later the second BVH. What it costs: a box irregular in one phase is tiled for both,
+so the other phase carries those tiles as tags. Both index spaces then have identical layouts, which is what
+Chombo's `MFIndexSpace` stitching assumed; unused, but no longer contradicted. Storage is one `m_boxes` per
+level with `m_gasTypes` and `m_solidTypes` parallel to it.
+
+A consequence to carry to #732: a hole tile classified from the implicit function sits beside uncarried
+cells that would be cut from the leaf's polyhedra if a ghost ring reached them, and the two descriptions of
+the surface need not agree at their shared boundary. The seam problem, in a new place.
+
 ### Step 6 -- what is handed over, and to whom
 
 - To the shop (#732): per phase, per level, the final list and tags. `makeGrids` load-balances it;
