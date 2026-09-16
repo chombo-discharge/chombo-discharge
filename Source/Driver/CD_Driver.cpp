@@ -1432,6 +1432,8 @@ Driver::setupGeometryOnly()
     else {
       m_computationalGeometry->useScanShop(scanDomain);
     }
+
+    this->makeGeometryGrids(scanDomain);
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();
@@ -1485,6 +1487,40 @@ Driver::setupGeometryOnly()
 }
 
 void
+Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
+{
+  CH_TIME("Driver::makeGeometryGrids");
+  if (m_verbosity > 5) {
+    pout() << "Driver::makeGeometryGrids" << endl;
+  }
+
+  // The finest domain is a factor-two refinement of the start domain some number of times; that number is the
+  // depth the grids may reach, and it also gives the start domain's grid spacing from the finest one.
+  const ProblemDomain& finestDomain = m_amr->getFinestDomain();
+
+  ProblemDomain curDomain  = a_startDomain;
+  int           maxEbDepth = 0;
+  Real          startDx    = m_amr->getFinestDx();
+
+  while (curDomain.domainBox().size(0) < finestDomain.domainBox().size(0)) {
+    curDomain.refine(2);
+    maxEbDepth++;
+    startDx *= 2.0;
+  }
+
+  CH_assert(curDomain == finestDomain);
+
+  m_computationalGeometry->makeGrids(a_startDomain,
+                                     m_amr->getProbLo(),
+                                     startDx,
+                                     maxEbDepth,
+                                     m_amr->getMinBlockSize(),
+                                     m_amr->getMaxBlockSize(),
+                                     m_amr->getNumberOfEbGhostCells(),
+                                     m_refineAngle);
+}
+
+void
 Driver::setupFresh(const int a_initialRegrids)
 {
   CH_TIME("Driver::setupFresh");
@@ -1522,6 +1558,8 @@ Driver::setupFresh(const int a_initialRegrids)
     else {
       m_computationalGeometry->useScanShop(scanDomain);
     }
+
+    this->makeGeometryGrids(scanDomain);
   }
   else if (m_geometryGeneration == "chombo") {
     if (m_ebisMemoryLoadBalance) {
@@ -1663,6 +1701,8 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
     else {
       m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
     }
+
+    this->makeGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();

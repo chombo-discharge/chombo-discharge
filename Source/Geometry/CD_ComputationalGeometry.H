@@ -15,6 +15,7 @@
 
 // Chombo includes
 #include <BaseIF.H>
+#include <GeometryService.H>
 #include <MFIndexSpace.H>
 #include <Box.H>
 #include <RealVect.H>
@@ -143,6 +144,100 @@ public:
   getImplicitFunction(const phase::which_phase a_phase) const;
 
   /**
+   * @brief Build the grids the index space is generated over, per phase and per level.
+   * @details The grids are built before any index space exists, from the implicit functions alone. Level 0 is
+   * a_startDomain, built whole; every finer level is a factor-two refinement of it, up to a_maxEbDepth levels.
+   * Every box made here is at most a_maxBlockSize wide and lies on the a_maxBlockSize lattice, so the
+   * cut-cell grids of both phases are unions of the same super-tiles.
+   *
+   * The algorithm, in the order it runs (the record of why it looks like this is PARTIAL_GRIDS.md):
+   *
+   *   0. Start level, per phase: domainSplit the whole domain and classify every box regular, covered or
+   *      irregular (classifyBox).
+   *   1. Upward, per phase, to a_maxEbDepth: a regular or covered box refines whole with its tag. An irregular
+   *      box is split into classified pieces if the implicit function's normal turns by more than a_refineAngle
+   *      between neighbouring cells near the surface (exceedsCurvature); otherwise it is a leaf and nothing is
+   *      built above it.
+   *   2. Tiles, once, after both phases: the union of the two phases' irregular boxes on every level is tiled
+   *      by TiledMeshRefine into a properly nested set common to both phases (makeTiles). This is the coverage
+   *      the simulation regrids onto.
+   *   3. Per phase: every tile lies inside an irregular box (it is irregular), inside a regular or covered box
+   *      (it inherits, and the box is recorded as hit), or above a leaf of this phase (it is classified)
+   *      (classifyTiles).
+   *   4. Per phase: every hit regular or covered box is cut down to what the tiles left of it (decimateBoxes).
+   *
+   * The result, per phase and per level, is a box list with a classification for every box, read by the
+   * geometry generators through getGrids/getGridTypes. Without an implicit function a phase is one regular box
+   * on every level.
+   *
+   * @param[in] a_startDomain  Coarsest domain built here, level 0. Built whole in both phases.
+   * @param[in] a_probLo       Lower-left corner of the domain.
+   * @param[in] a_startDx      Grid spacing on a_startDomain.
+   * @param[in] a_maxEbDepth   Number of factor-two levels above a_startDomain that may be built.
+   * @param[in] a_minBlockSize Tile size in cells: the finest granularity of the cut-cell grids, and the nesting
+   *                           buffer between levels. Must be at least twice a_maxGhostEB.
+   * @param[in] a_maxBlockSize Super-tile size in cells: the size every box made here is split to. A multiple of
+   *                           a_minBlockSize.
+   * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified.
+   * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
+   */
+  virtual void
+  makeGrids(const ProblemDomain& a_startDomain,
+            const RealVect&      a_probLo,
+            const Real           a_startDx,
+            const int            a_maxEbDepth,
+            const int            a_minBlockSize,
+            const int            a_maxBlockSize,
+            const int            a_maxGhostEB,
+            const Real           a_refineAngle);
+
+  /**
+   * @brief Number of levels makeGrids built, level 0 being the start domain.
+   * @return Number of levels; zero before makeGrids has run.
+   */
+  int
+  getNumGridLevels() const noexcept;
+
+  /**
+   * @brief Final grids of one phase on one level, after decimation.
+   * @param[in] a_phase Phase.
+   * @param[in] a_level Level, 0 being the start domain.
+   * @return Boxes of the level, parallel to getGridTypes.
+   */
+  const Vector<Box>&
+  getGrids(const phase::which_phase a_phase, const int a_level) const noexcept;
+
+  /**
+   * @brief Classification of each box in getGrids.
+   * @param[in] a_phase Phase.
+   * @param[in] a_level Level, 0 being the start domain.
+   * @return One classification per box, parallel to getGrids.
+   */
+  const Vector<GeometryService::InOut>&
+  getGridTypes(const phase::which_phase a_phase, const int a_level) const noexcept;
+
+  /**
+   * @brief Boxes of one classification that the upward pass made for a phase on a level, before tiling.
+   * @details These are the regular, covered and irregular boxes as the upward pass left them; the irregular
+   * ones are what the tiles are made from, and what will be shown as a simulation grid for inspection.
+   * @param[in] a_phase Phase.
+   * @param[in] a_level Level, 0 being the start domain.
+   * @param[in] a_type  Classification to select.
+   * @return The boxes with that classification.
+   */
+  Vector<Box>
+  getBoxes(const phase::which_phase a_phase, const int a_level, const GeometryService::InOut a_type) const noexcept;
+
+  /**
+   * @brief The properly nested cut-cell tiles on one level, common to both phases.
+   * @details This is the coverage the simulation regrids onto.
+   * @param[in] a_level Level, 0 being the start domain.
+   * @return Tiles of the level.
+   */
+  const Vector<Box>&
+  getTiles(const int a_level) const noexcept;
+
+  /**
    * @brief Build geometries and the MFIndexSpace.
    * @param[in] a_finestDomain Finest domain
    * @param[in] a_probLo       Lower-left corner
@@ -232,6 +327,222 @@ protected:
    * @brief The solid-phase implicit function (i.e. the inside of the dielectrics).
    */
   RefCountedPtr<BaseIF> m_implicitFunctionSolid;
+
+  /**
+   * @brief Build the composite implicit functions of the two phases from the electrodes and dielectrics.
+   * @details The gas phase is the region outside every object; the solid phase is the region inside the
+   * dielectrics and outside the electrodes, and is left null when there are no dielectrics.
+   */
+  void
+  buildImplicitFunctions();
+
+  /**
+   * @brief Step 0: build and classify the start level of one phase.
+   * @details Pseudocode:
+   *
+   *   boxes = domainSplit(m_gridDomains[0], m_maxBlockSize)
+   *   for each box (this rank's share): type = classifyBox(box, 0, phase)
+   *   gather boxes and types onto every rank, in a fixed order
+   *   m_levelBoxes[phase][0], m_levelBoxTypes[phase][0] = boxes, types
+   *
+   * @param[in] a_phase Phase to build.
+   */
+  void
+  buildStartLevel(const phase::which_phase a_phase);
+
+  /**
+   * @brief Step 1: the upward pass of one phase, from the start level to m_maxEbDepth.
+   * @details Pseudocode:
+   *
+   *   for lvl = 0 .. m_maxEbDepth - 1:
+   *     for each box on lvl (this rank's share):
+   *       if type is Regular or Covered:
+   *         push refine(box, 2) on lvl + 1 with the same type          -- never a hole beneath these
+   *       else if exceedsCurvature(box, lvl, phase):
+   *         for each piece of domainSplit(refine(box, 2), m_maxBlockSize):
+   *           push piece on lvl + 1 with classifyBox(piece, lvl + 1, phase)
+   *       else:
+   *         leaf: nothing is pushed; the region above it is a hole on lvl + 1
+   *     gather lvl + 1 onto every rank, in a fixed order
+   *     stop if no rank split a box
+   *
+   * @param[in] a_phase Phase to build.
+   */
+  void
+  buildFinerLevels(const phase::which_phase a_phase);
+
+  /**
+   * @brief Classify a box of one phase on one level as regular, covered or irregular.
+   * @details Pseudocode, ScanShop::isRegular/isCovered on the implicit function directly:
+   *
+   *   grown = grow(box, m_maxGhostEB) & domain
+   *   halfDiagonal = 0.5 * dx * sqrt(SpaceDim)
+   *   regular = every cell centre in grown has f(x) < -halfDiagonal   -- with the signed-distance scan skip
+   *   covered = every cell centre in grown has f(x) >  halfDiagonal
+   *   return Regular, Covered, or Irregular if neither
+   *
+   * @param[in] a_box   Box to classify.
+   * @param[in] a_level Level the box lives on.
+   * @param[in] a_phase Phase whose implicit function is asked.
+   * @return The classification.
+   */
+  GeometryService::InOut
+  classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Whether the implicit function's normal turns by more than m_refineAngle inside a box.
+   * @details Cut cells do not exist at this point and are not looked for; the test runs on the implicit
+   * function in the band of cells near its zero set. Pseudocode:
+   *
+   *   grown = grow(box, 1) & domain
+   *   for each cell centre x in grown with |f(x)| <= sqrt(SpaceDim) * dx      -- scan skip prunes the rest
+   *     n(x) = central difference of f at x, normalised
+   *   for each such cell and each of its neighbours in the band:
+   *     if angle(n(cell), n(neighbour)) > m_refineAngle: return true      -- early exit
+   *   return false
+   *
+   * Across a sharp edge the angle never shrinks with dx, so edges refine to m_maxEbDepth. That is intended.
+   *
+   * @param[in] a_box   Box to test.
+   * @param[in] a_level Level the box lives on.
+   * @param[in] a_phase Phase whose implicit function is asked.
+   * @return True if the box must be split.
+   */
+  bool
+  exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Step 2: tile the union of both phases' irregular boxes into one properly nested set per level.
+   * @details Runs once, after both phases have finished the upward pass. Pseudocode:
+   *
+   *   for lvl = 1 .. m_maxEbDepth:
+   *     tags[lvl - 1] = union over phases of the irregular boxes on lvl, coarsened by two
+   *                     -- TiledMeshRefine takes tags on the level below the one it tiles
+   *   TiledMeshRefine(m_gridDomains[0], ratio 2, m_minBlockSize, m_maxBlockSize).regrid(tiles, tags)
+   *   m_tiles[lvl] = tiles[lvl] for lvl >= 1; level 0 is whole and is not tiled
+   *
+   * Every irregular box is a super-tile already, so the union is exact in tile units. The nesting buffer is one
+   * tile per level, which is at least m_maxGhostEB when m_minBlockSize >= 2 * m_maxGhostEB. No collar is added
+   * beyond the union: a simulation ghost cell that reaches past the tiles into a hole is filled by the index
+   * space from the irregular leaf beneath it, not carried here.
+   */
+  void
+  makeTiles();
+
+  /**
+   * @brief Step 3: place every tile of every level in this phase's boxes and classify it.
+   * @details Pseudocode:
+   *
+   *   for lvl = 1 .. m_maxEbDepth:
+   *     walk the BVH over m_levelBoxes[phase][lvl] against the BVH over m_tiles[lvl]
+   *     for each tile t (every box is a super-tile or a whole refinement of one, so t meets at most one box):
+   *       if t lies in box b:
+   *         m_tileHost[phase][lvl][t] = b
+   *         m_tileTypes[phase][lvl][t] = type of b                -- Irregular stays Irregular; Regular/Covered inherit
+   *       else:                                                   -- above a leaf of this phase on lvl - 1
+   *         m_tileHost[phase][lvl][t] = -1
+   *         m_tileTypes[phase][lvl][t] = classifyBox(t, lvl, phase)
+   *
+   * Nothing is cut here; which tiles each regular or covered box hosts is what decimateBoxes reads.
+   *
+   * @param[in] a_phase Phase to classify the tiles for.
+   */
+  void
+  classifyTiles(const phase::which_phase a_phase);
+
+  /**
+   * @brief Step 4: cut every hit regular or covered box down to what the tiles left of it, and assemble the
+   * final grids of the phase.
+   * @details Pseudocode:
+   *
+   *   for lvl = 0 .. m_maxEbDepth:
+   *     grids = every tile on lvl with its type from m_tileTypes
+   *     for each box b on lvl:
+   *       tiles = { t : m_tileHost[phase][lvl][t] == b }
+   *       if tiles is empty:   grids += b with its type
+   *       else if b is Irregular: nothing                          -- the tiles already cover it
+   *       else:                grids += (b minus tiles) with b's type
+   *                             -- first implementation: TreeIntVectSet in tile coordinates, then createBoxes;
+   *                             -- correct and octree-graded, not tight; the packer is replaceable here
+   *     m_grids[phase][lvl], m_gridTypes[phase][lvl] = grids
+   *
+   * @param[in] a_phase Phase to assemble.
+   */
+  void
+  decimateBoxes(const phase::which_phase a_phase);
+
+  /**
+   * @brief Domains of the levels makeGrids builds, level 0 being the start domain.
+   */
+  Vector<ProblemDomain> m_gridDomains;
+
+  /**
+   * @brief Grid spacings of the levels makeGrids builds.
+   */
+  Vector<Real> m_gridDx;
+
+  /**
+   * @brief Lower-left corner of the domain, as makeGrids was given it.
+   */
+  RealVect m_gridProbLo;
+
+  /**
+   * @brief Number of levels above the start domain that makeGrids may build.
+   */
+  int m_maxEbDepth;
+
+  /**
+   * @brief Tile size, in cells.
+   */
+  int m_minBlockSize;
+
+  /**
+   * @brief Super-tile size, in cells; the size every box makeGrids makes is split to.
+   */
+  int m_maxBlockSize;
+
+  /**
+   * @brief Angle, in degrees, between neighbouring normals above which an irregular box is split.
+   */
+  Real m_refineAngle;
+
+  /**
+   * @brief Boxes the upward pass made, indexed [phase][level], before tiling and decimation.
+   * @details Kept as made: the irregular ones are what the tiles come from, and the three classifications
+   * are what getBoxes selects among.
+   */
+  Vector<Vector<Vector<Box>>> m_levelBoxes;
+
+  /**
+   * @brief Classification of each box in m_levelBoxes, parallel to it.
+   */
+  Vector<Vector<Vector<GeometryService::InOut>>> m_levelBoxTypes;
+
+  /**
+   * @brief The properly nested cut-cell tiles, indexed [level], common to both phases.
+   */
+  Vector<Vector<Box>> m_tiles;
+
+  /**
+   * @brief For each tile, indexed [phase][level][tile]: the index into m_levelBoxes of the box it lies in, or -1
+   * when it lies above a leaf of that phase.
+   */
+  Vector<Vector<Vector<int>>> m_tileHost;
+
+  /**
+   * @brief Classification of each tile in each phase, indexed [phase][level][tile].
+   */
+  Vector<Vector<Vector<GeometryService::InOut>>> m_tileTypes;
+
+  /**
+   * @brief Final grids, indexed [phase][level]: the tiles, the decimated remainders, and the untouched boxes.
+   */
+  Vector<Vector<Vector<Box>>> m_grids;
+
+  /**
+   * @brief Classification of each box in m_grids, parallel to it.
+   */
+  Vector<Vector<Vector<GeometryService::InOut>>> m_gridTypes;
 
   /**
    * @brief Set up the geometry generation tool for the gas phase.

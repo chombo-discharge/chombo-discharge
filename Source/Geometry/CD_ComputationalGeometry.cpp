@@ -28,7 +28,15 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_generator(Generator::GeometryShop)
+ComputationalGeometry::ComputationalGeometry()
+  : m_eps0(1.0),
+    m_generator(Generator::GeometryShop),
+    m_maxGhostEB(0),
+    m_gridProbLo(RealVect::Zero),
+    m_maxEbDepth(0),
+    m_minBlockSize(0),
+    m_maxBlockSize(0),
+    m_refineAngle(0.0)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -172,8 +180,9 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
   // through grown grid patches when it determines if a grid patch is irregular or not.
   m_maxGhostEB = a_maxGhostEB;
 
-  // Build the geoservers. This creates the composite implicit functions and the GeometryService* objects which
-  // can be passed to Chombo. Note that the
+  // Build the composite implicit functions and then the GeometryService* objects which can be passed to Chombo.
+  this->buildImplicitFunctions();
+
   Vector<GeometryService*> geoServices(2, nullptr);
 
   this->buildGasGeometry(geoServices[phase::gas], a_finestDomain, a_probLo, a_finestDx);
@@ -199,24 +208,240 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
 }
 
 void
+ComputationalGeometry::buildImplicitFunctions()
+{
+  CH_TIME("ComputationalGeometry::buildImplicitFunctions()");
+
+  Vector<BaseIF*> dielectricParts;
+  Vector<BaseIF*> electrodeParts;
+  Vector<BaseIF*> allParts;
+
+  for (int i = 0; i < m_dielectrics.size(); i++) {
+    dielectricParts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
+    allParts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
+  }
+
+  for (int i = 0; i < m_electrodes.size(); i++) {
+    electrodeParts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
+    allParts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
+  }
+
+  // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here.
+  m_implicitFunctionGas = RefCountedPtr<BaseIF>(new NewIntersectionIF(allParts));
+
+  // The solid phase is the region inside the dielectrics and outside the electrodes: the intersection of the
+  // complement of "outside the dielectrics" with "outside the electrodes". There is none without dielectrics.
+  if (dielectricParts.size() == 0) {
+    m_implicitFunctionSolid = RefCountedPtr<BaseIF>();
+  }
+  else {
+    Vector<BaseIF*> parts;
+
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF>(new NewIntersectionIF(dielectricParts));
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF>(new NewIntersectionIF(electrodeParts));
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(new ComplementIF(*dielBaseIF));
+
+    parts.push_back(&(*dielCompIF));
+    parts.push_back(&(*elecBaseIF));
+
+    m_implicitFunctionSolid = RefCountedPtr<BaseIF>(new IntersectionIF(parts));
+  }
+}
+
+void
+ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
+                                 const RealVect&      a_probLo,
+                                 const Real           a_startDx,
+                                 const int            a_maxEbDepth,
+                                 const int            a_minBlockSize,
+                                 const int            a_maxBlockSize,
+                                 const int            a_maxGhostEB,
+                                 const Real           a_refineAngle)
+{
+  CH_TIME("ComputationalGeometry::makeGrids");
+
+  // The design requires a_minBlockSize >= 2 * a_maxGhostEB (the one-tile nesting buffer must cover the ghost
+  // cells) and a_maxBlockSize a multiple of a_minBlockSize. Neither is enforced yet, since nothing is built yet.
+  CH_assert(a_maxEbDepth >= 0);
+
+  m_gridProbLo   = a_probLo;
+  m_maxEbDepth   = a_maxEbDepth;
+  m_minBlockSize = a_minBlockSize;
+  m_maxBlockSize = a_maxBlockSize;
+  m_maxGhostEB   = a_maxGhostEB;
+  m_refineAngle  = a_refineAngle;
+
+  // Every level is a factor-two refinement of the start domain.
+  const int numLevels = 1 + m_maxEbDepth;
+
+  m_gridDomains.resize(numLevels);
+  m_gridDx.resize(numLevels);
+
+  m_gridDomains[0] = a_startDomain;
+  m_gridDx[0]      = a_startDx;
+
+  for (int lvl = 1; lvl < numLevels; lvl++) {
+    m_gridDomains[lvl] = refine(m_gridDomains[lvl - 1], 2);
+    m_gridDx[lvl]      = 0.5 * m_gridDx[lvl - 1];
+  }
+
+  m_levelBoxes.resize(2);
+  m_levelBoxTypes.resize(2);
+  m_tileHost.resize(2);
+  m_tileTypes.resize(2);
+  m_grids.resize(2);
+  m_gridTypes.resize(2);
+
+  for (int p = 0; p < 2; p++) {
+    m_levelBoxes[p].resize(numLevels);
+    m_levelBoxTypes[p].resize(numLevels);
+    m_tileHost[p].resize(numLevels);
+    m_tileTypes[p].resize(numLevels);
+    m_grids[p].resize(numLevels);
+    m_gridTypes[p].resize(numLevels);
+  }
+
+  m_tiles.resize(numLevels);
+
+  this->buildImplicitFunctions();
+
+  // Steps 0 and 1, per phase. A phase without an implicit function is one regular box on every level, and
+  // takes no further part.
+  for (int p = 0; p < 2; p++) {
+    const phase::which_phase curPhase = static_cast<phase::which_phase>(p);
+
+    if (this->getImplicitFunction(curPhase).isNull()) {
+      for (int lvl = 0; lvl < numLevels; lvl++) {
+        m_levelBoxes[p][lvl].push_back(m_gridDomains[lvl].domainBox());
+        m_levelBoxTypes[p][lvl].push_back(GeometryService::Regular);
+      }
+    }
+    else {
+      this->buildStartLevel(curPhase);
+      this->buildFinerLevels(curPhase);
+    }
+  }
+
+  // Step 2, once.
+  this->makeTiles();
+
+  // Steps 3 and 4, per phase.
+  for (int p = 0; p < 2; p++) {
+    const phase::which_phase curPhase = static_cast<phase::which_phase>(p);
+
+    this->classifyTiles(curPhase);
+    this->decimateBoxes(curPhase);
+  }
+}
+
+int
+ComputationalGeometry::getNumGridLevels() const noexcept
+{
+  return m_gridDomains.size();
+}
+
+const Vector<Box>&
+ComputationalGeometry::getGrids(const phase::which_phase a_phase, const int a_level) const noexcept
+{
+  return m_grids[a_phase][a_level];
+}
+
+const Vector<GeometryService::InOut>&
+ComputationalGeometry::getGridTypes(const phase::which_phase a_phase, const int a_level) const noexcept
+{
+  return m_gridTypes[a_phase][a_level];
+}
+
+Vector<Box>
+ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
+                                const int                    a_level,
+                                const GeometryService::InOut a_type) const noexcept
+{
+  Vector<Box> boxes;
+
+  const Vector<Box>&                    levelBoxes = m_levelBoxes[a_phase][a_level];
+  const Vector<GeometryService::InOut>& levelTypes = m_levelBoxTypes[a_phase][a_level];
+
+  for (int i = 0; i < levelBoxes.size(); i++) {
+    if (levelTypes[i] == a_type) {
+      boxes.push_back(levelBoxes[i]);
+    }
+  }
+
+  return boxes;
+}
+
+const Vector<Box>&
+ComputationalGeometry::getTiles(const int a_level) const noexcept
+{
+  return m_tiles[a_level];
+}
+
+void
+ComputationalGeometry::buildStartLevel(const phase::which_phase a_phase)
+{
+  CH_TIME("ComputationalGeometry::buildStartLevel");
+
+  // Step 0. See the header for the pseudocode.
+}
+
+void
+ComputationalGeometry::buildFinerLevels(const phase::which_phase a_phase)
+{
+  CH_TIME("ComputationalGeometry::buildFinerLevels");
+
+  // Step 1. See the header for the pseudocode.
+}
+
+GeometryService::InOut
+ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::classifyBox");
+
+  // ScanShop::isRegular/isCovered on the implicit function. See the header for the pseudocode.
+  return GeometryService::Irregular;
+}
+
+bool
+ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::exceedsCurvature");
+
+  // The band test on finite-difference normals. See the header for the pseudocode.
+  return false;
+}
+
+void
+ComputationalGeometry::makeTiles()
+{
+  CH_TIME("ComputationalGeometry::makeTiles");
+
+  // Step 2. See the header for the pseudocode.
+}
+
+void
+ComputationalGeometry::classifyTiles(const phase::which_phase a_phase)
+{
+  CH_TIME("ComputationalGeometry::classifyTiles");
+
+  // Step 3. See the header for the pseudocode.
+}
+
+void
+ComputationalGeometry::decimateBoxes(const phase::which_phase a_phase)
+{
+  CH_TIME("ComputationalGeometry::decimateBoxes");
+
+  // Step 4. See the header for the pseudocode.
+}
+
+void
 ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                         const ProblemDomain& a_finestDomain,
                                         const RealVect&      a_probLo,
                                         const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
-
-  // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build
-  // the various parts and then create the implicit function for the gas-phas using constructive solid geometry.
-  Vector<BaseIF*> parts;
-  for (int i = 0; i < m_dielectrics.size(); i++) {
-    parts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
-  }
-  for (int i = 0; i < m_electrodes.size(); i++) {
-    parts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
-  }
-
-  m_implicitFunctionGas = RefCountedPtr<BaseIF>(new NewIntersectionIF(parts));
 
   // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
   if (m_generator == Generator::PolyhedralShop) {
@@ -262,42 +487,11 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
 {
   CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
-  // The "solid phase", i.e. the part inside dielectrics is a bit more complicated to compute. We want to get the region
-  // outside the electrodes but inside the dielectrics. Fortunately there is a way to do this.
-
-  // Get all the parts (dielectrics/electrodes)
-  Vector<BaseIF*> dielectricParts;
-  Vector<BaseIF*> electrodeParts;
-
-  for (int i = 0; i < m_dielectrics.size(); i++) {
-    dielectricParts.push_back(&(*m_dielectrics[i].getImplicitFunction()));
-  }
-
-  for (int i = 0; i < m_electrodes.size(); i++) {
-    electrodeParts.push_back(&(*m_electrodes[i].getImplicitFunction()));
-  }
-
-  // Create EBIndexSpace. If there are no solid phases, return null
-  if (dielectricParts.size() == 0) {
+  // There is no solid phase without dielectrics.
+  if (m_implicitFunctionSolid.isNull()) {
     a_geoserver = nullptr;
   }
   else {
-    Vector<BaseIF*> parts;
-
-    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF>(
-      new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics.
-    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF>(
-      new NewIntersectionIF(electrodeParts)); // This is the region outside the the electrodes.
-    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(
-      new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
-
-    // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection
-    // of the region "inside" dielectrics and outside the electrods.
-    parts.push_back(&(*dielCompIF));
-    parts.push_back(&(*elecBaseIF));
-
-    m_implicitFunctionSolid = RefCountedPtr<BaseIF>(new IntersectionIF(parts));
-
     // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
     if (m_generator == Generator::PolyhedralShop) {
       auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionSolid,
