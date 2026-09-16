@@ -673,6 +673,21 @@ the list below only as the audit of what downstream assumes, which is still unpe
   along one direction as a post-pass. Whether that layer is acceptable, or the tiles should be coarsened
   to super-tiles for the purposes of decimation to keep the layer flat, is the user's call.
 
+**Decision: record the intersections, decimate last.** With `R`, `C` the regular and covered box
+sets and `I` the irregular set, the dual walk records, for each `r ∈ R ∪ C`, the list of boxes of `I`
+(the tiles) that intersect it. Nothing is cut during the walk. The decimation runs once, at the end, over
+those lists -- so the packing algorithm (octree, implicit Berger-Rigoutsos, peel-and-pack, or none) is a
+separate step that can be replaced or tuned without touching the walk or the tiler. Tightness is
+deferred; it may not be needed.
+
+**Where this is built.** The grid set -- properly nested irregular tiles, curvature-adapted, with `R`
+and `C` decimated against them so every level is fully classified -- is built in `ComputationalGeometry`,
+not in ScanShop. It will resemble ScanShop's upward build but is written from scratch with curvature in
+it from the start. That re-scopes the PR stack: #731 becomes the mesh-building PR; #732, rebased later,
+becomes the EBIS-generating PR that consumes those grids; a third PR on top takes the regrid path. The
+work recorded in this document from #731 (surface export, generator keep-alive, the 3D restricted-face
+seam machinery, this file) moves to #732, and #731 is reset to #730's head to start the mesh builder.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
