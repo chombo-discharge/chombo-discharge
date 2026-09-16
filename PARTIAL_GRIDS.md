@@ -748,12 +748,17 @@ first; the record quotes EBIS code elsewhere with the opposite convention.
 
 ### Inputs
 
-- coarsest domain, refinement ratio 2 throughout;
+- coarsest domain, its grid spacing, and `probLo` -- the implicit functions are evaluated at physical
+  points, so the builder needs the resolution, not only the index space; refinement ratio 2
+  throughout;
 - the start level, from Driver: the finest level built whole;
 - `max_eb_depth`, the finest level the upward pass may reach whatever the curvature says (today's
   `max_amr_depth`, renamed in the calls because the terminology may change);
-- `maxGridSize` (the EBIS box size) and the simulation's `min_block_size`/`max_block_size` (tile and
-  super-tile); `maxGridSize` must be a multiple of `max_block_size`;
+- the simulation's `min_block_size`/`max_block_size`: tile and super-tile for the tiler, and also the
+  size every box the upward pass makes is split to. The EBIS `maxGridSize` does not enter: ScanShop
+  used it for the start-level split and for splitting a refined irregular box, and using
+  `max_block_size` for both puts every box the builder makes on the super-tile lattice, so the union
+  in step 2 is exact in tile units and a tile lies in exactly one box by construction;
 - `m_maxGhostEB`; `refine_angles`; the two implicit functions.
 
 ### State, per phase `p` and per level `l`
@@ -764,7 +769,7 @@ until a shop load-balances it. The lists persist for the life of the object.
 
 ### Step 0 -- the start level and below
 
-`domainSplit` of the whole domain to `maxGridSize`; every box classified by cell-centre values on the
+`domainSplit` of the whole domain to `max_block_size`; every box classified by cell-centre values on the
 box grown by `m_maxGhostEB`: regular iff every value `< -halfDiagonal`, covered iff every value
 `> halfDiagonal`, irregular otherwise, with the scan skip that assumes signed distance
 (`ScanShop::isRegular`/`isCovered`, `CD_ScanShopImplem.H` lines 43-100, made callable on an implicit
@@ -782,7 +787,7 @@ From level `l` to `l+1`, for each box at `l`:
   rest), evaluate the normal there by central differences of `f` (no implicit function in the tree
   implements `BaseIF::derivative`; the base throws), and compare each band cell's normal with those of
   its band neighbours. The first pair whose angle exceeds `refine_angles` ends the scan: the box
-  **splits** -- `refine(box, 2)`, `domainSplit` to `maxGridSize`, each piece classified as in step 0
+  **splits** -- `refine(box, 2)`, `domainSplit` to `max_block_size`, each piece classified as in step 0
   -- and the scan moves to the next box. A box no pair in fails is a **leaf**: nothing is pushed
   beneath it, which is the hole above it.
 - stop when no box split, or `l+1 == max_eb_depth`.
@@ -800,8 +805,9 @@ are gathered and every rank holds all of them in a deterministic order.
 
 `tags_l = I_l^gas ∪ I_l^solid` for every level above the start level. One `TiledMeshRefine` with the
 start-level domain as its coarsest, ratio 2, tile `min_block_size`, super-tile `max_block_size`; each
-irregular box enters as `coarsen(box, 2)` on the level below (or through a box-tag entry: `nestFrom`'s
-`addNest` lambda is that primitive). Its level 0 is the start level, already whole, and is discarded
+irregular box is a super-tile already, so it enters exactly, as `coarsen(box, 2)` on the level below
+or through a box-tag entry (`nestFrom`'s `addNest` lambda is that primitive). Its level 0 is the
+start level, already whole, and is discarded
 as `AmrMesh` discards it. The buffer is one tile per level, `≥ m_maxGhostEB` when
 `min_block_size ≥ 2 · ghost`. Output `T_l`: disjoint, tile-aligned, identical on every rank. This is
 the downward sweep; `regrid` descends internally and injects the buffer level by level.
@@ -812,8 +818,9 @@ answering for those cells is the index space's job (below), not the builder's.
 ### Step 3 -- the walk, per phase
 
 BVH over the phase's `R_l ∪ C_l ∪ I_l` and BVH over `T_l` (`EBGeometry`'s `TreeBVH`, half-open
-AABBs `{smallEnd, bigEnd + 1}` so the strict test equals `intersectsNotEmpty`); dual walk. With
-`maxGridSize` a multiple of `max_block_size`, a tile meets at most one box. Every tile at level `l`
+AABBs `{smallEnd, bigEnd + 1}` so the strict test equals `intersectsNotEmpty`); dual walk. Every box
+the builder made is a super-tile or a whole refinement of one, so a tile meets at most one box. Every
+tile at level `l`
 lies in exactly one of three places, and the walk records which:
 
 1. **inside an irregular box** of this phase at `l`: tag Irregular;
@@ -857,8 +864,8 @@ for the phase is `T_l` with its tags, the remainders, and every box no tile touc
 
 ### Constraints on the inputs
 
-`maxGridSize` a multiple of `max_block_size`; `min_block_size ≥ 2 · m_maxGhostEB`; the start level
-whole in both phases; the signed-distance assumption behind the scan skip, already made by ScanShop.
+`min_block_size ≥ 2 · m_maxGhostEB`; the start level whole in both phases; the signed-distance
+assumption behind the scan skip, already made by ScanShop.
 
 ### Left open
 
