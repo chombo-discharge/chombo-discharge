@@ -394,6 +394,104 @@ and the containment is stated against whichever set is current. It does depend o
 computable for every box, which is the replicated-classification point above: the adjacency needs to
 know which boxes are irregular, and today only the owning rank does.
 
+## The compounding, made precise
+
+Take the realistic starting point: irregular grids on consecutive levels contained in each other with
+coinciding boundaries -- zero margin -- which is exactly what `buildFinerLevels` produces, since the
+fine irregular boxes are splits of the coarse ones. Each level must grow by its ghost width `g` and
+restrict onto the level below, which then grows by its own `g`. In each level's own cells, the excess
+beyond the original irregular set is
+
+```
+g/2 + g = 1.5g,   0.75g + g = 1.75g,   0.875g + g = 1.875g,   ...  ->  2g
+```
+
+It compounds from `g` to `2g` and stops there, because the coarsening halves what is inherited every
+level. It does not run away. But `2g` is the number that matters, and the consequence is this:
+
+**the boxes a level's grown set can touch are those within `2g` cells of its original irregular region,
+which is `ceil(2g / boxSize)` boxes deep.** At `g = 4, box = 8` that is one box and the original
+neighbours suffice. At `g = 4, box = 4` -- the run where the nesting violations appeared -- it is two,
+and the original neighbours miss the outer ring. So `m_neighbors` as `computeNeighbors` builds it, at
+reach 1 from the original layout, is insufficient on both counts: wrong reach, and stale after the
+first amendment. The practical constraint is boxes no smaller than `2g`, which is stronger than "larger
+than the ghost width".
+
+## Finding the overlaps: the dual BVH walk
+
+The clip on each level -- the parent's regular/covered boxes against the freshly grown irregular boxes
+-- must not be `O(N_irreg x (N_reg + N_cov))`; at 12 levels that is 149k against 370k. Two
+observations fix it.
+
+First, the grown boxes do **not** sit on the `maxGridSize` lattice. The original partition does, but
+growing by `g` cells puts the grown boxes at arbitrary offsets, so any lattice-keyed scheme has to snap
+them outward, at a cost of up to `maxGridSize - 1` cells per side. Without snapping, index the boxes
+themselves.
+
+Second, EBGeometry is a submodule and has what is needed. `TreeBVH<T, P, BV, K>` over arbitrary
+primitives with a bounding volume, `AABBT<T>` with `intersects`, SAH builders (`SAH2WaySplit`,
+`SAHKWaySplit`) that handle disparately sized primitives, `PackedBVH` for a flat copy, and node access
+-- `getBoundingVolume()`, `getChildren()`, `getPrimitives()`, `isLeaf()`, `getChildOffsets()`.
+
+**The algorithm.** Build one tree over the grown irregular boxes and one over the regular/covered
+boxes, both with `P = Box` and `BV = AABBT<double>`. Then walk the two together:
+
+```
+walk(a, b):
+  if (!a.bv.intersects(b.bv))       return
+  if (a.isLeaf() && b.isLeaf())     test primitives pairwise with Box::intersectsNotEmpty; return
+  if (a.isLeaf())                   for c in b.children: walk(a, c); return
+  if (b.isLeaf())                   for c in a.children: walk(c, b); return
+  descend the larger volume:        for c in children(larger): walk(c, other)
+```
+
+Cost is proportional to the number of overlapping *node pairs*, `O(output + depth)` for two spatially
+coherent sets. A whole subtree of regular/covered boxes far from the surface is dismissed by a single
+root-level `intersects`, not once per box -- which is where the big empty boxes are. No adjacency, no
+alignment assumption, no replicated classification needed to find overlaps: the trees are built from
+box lists every rank already holds. The single-tree `traverse()` EBGeometry provides is query-shaped
+(prune predicate plus leaf evaluator) and would give the "index one, query with each of the other"
+form instead; the dual walk is not provided and is about thirty lines on top of the node access.
+
+**The float question, and why it is not a narrowing.** `T` must be floating point
+(`static_assert(std::is_floating_point_v<T>)`). Box corners are integers, and every integer below 2^53
+is exact in a `double`; at 500k cells a side the corners are ~10^6. The conversion is lossless.
+
+**But `AABBT::intersects` is strict:** `lo < other.hi && hi > other.lo`, with the comment "touching edges
+are not overlapping". That decides the construction. Build the AABB from `{smallEnd, bigEnd + 1}` --
+the half-open extent -- and the strict test on integer-valued doubles *is* `Box::intersectsNotEmpty`
+for cell-centred boxes, on every axis:
+
+- `[0,7]` and `[8,15]`: AABBs `[0,8)` and `[8,16)`, `8 < 8` false, correctly not overlapping;
+- `[0,8]` and `[8,15]`: AABBs `[0,9)` and `[8,16)`, overlapping, correctly detected.
+
+Built from `bigEnd` inclusive instead, `[0,8]` against `[8,15]` gives `8 > 8` false and a real overlap
+is pruned, silently. The half-open construction is required by the strict test, not a preference.
+
+So the node-level prune is exact rather than conservative-with-slack, which matters in a dual walk
+because a loose prune costs node-pair visits at every level. The `intersectsNotEmpty` at the leaves is
+the authoritative statement of what is meant and insurance against the AABB ever being rebuilt from
+inclusive corners; it costs integer compares on pairs that already passed an exact filter.
+
+**Keep the primitive cell-centred.** Converting the stored boxes to node-centred gives the same AABB
+numbers -- `surroundingNodes([0,7])` is `[0,8]` -- so it changes no prune decision, and it costs two
+things. `intersectsNotEmpty` on node-centred boxes reports touching cell boxes as overlapping (they
+share the node plane), so the leaf test would need an `enclosedCells` first to be correct. And the
+decimation operates on cells, so every clip would convert back, with the half-open/closed distinction
+reappearing there where it is harder to see than in one constructor. Face-centred is direction-dependent
+and strictly worse. The primitive is the cell-centred `Box`, unchanged; the AABB is a derived filter
+built once from `{smallEnd, bigEnd + 1}`.
+
+**Two-dimensional builds:** `intersects` is hardcoded to three components and asserts `lo <= hi` on
+each. Fill the third axis with `[0, 1)` on every box so it always overlaps and never asserts.
+
+**What the walk does not solve:** the sliver. `R \ F` with `F`'s edge at an arbitrary offset inside `R`
+can leave a remnant a cell or two thick, and no alignment fixes that once the grown boxes are off the
+lattice. The rule at clip time is to absorb any remnant with a dimension below the minimum box size into
+the adjacent grown box -- trading a sliver of regular area for irregular, the cheap direction -- which
+keeps every box on the level at or above the minimum and is bounded by the same `2g` argument, since
+absorption never grows anything by more than a sub-minimum dimension.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
@@ -404,6 +502,8 @@ know which boxes are irregular, and today only the owning rank does.
   `EBCoarseFineParticleMesh::defineStencils` walking every irregular cell of the coarse level was one
   such surprise already; the consumers have not been audited.
 - The seam at the scan level between `buildCoarseLevel`'s full coverage and the nested grids.
+- That the dual walk is `O(output + depth)` on these box sets. The argument is the standard one for
+  spatially coherent BVHs; it has not been measured on the 12-level hierarchy.
 - Whether anything downstream assumes `m_neighbors` was built by `computeNeighbors` with the
   `grow(box, 1)` reach. A list supplied through `closeN` with a different reach would change ghost
   exchange silently.
