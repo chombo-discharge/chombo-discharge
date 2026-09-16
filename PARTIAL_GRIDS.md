@@ -155,6 +155,128 @@ Two things to be careful of before generalising:
 Counting both cells and boxes mattered. The cell spill looks negligible either way, but the box
 count is what costs, and it is the number that says splitting is affordable.
 
+## How the grids reach the generator, and whose grids they are
+
+`EBISLevel` does not receive a layout -- it asks for one:
+
+```cpp
+(const_cast<GeometryService*>(&a_geoserver))->makeGrids(a_domain, m_grids, a_nCellMax, 15);
+```
+
+and `ScanShop::makeGrids` matches `a_domain` against `m_domains` and hands back its own, by assignment:
+
+```cpp
+if (m_hasThisLevel[whichLevel]) { a_grids = m_grids[whichLevel]; }
+```
+
+So `EBISLevel::m_grids` *is* `ScanShop::m_grids[lvl]`. There is no second decomposition and nowhere for
+anything to nest them on the way through; the `else` branch is a `MayDay::Warning` reading "This should
+not happen!". `EBISLevel` then walks that layout calling `InsideOutside` (the `m_boxMap` cache lookup)
+and `fillGraph`, which is the virtual `PolyhedralGeometryShop` overrides to build the bodies.
+
+ScanShop decides where, PolyhedralGeometryShop decides what, EBISLevel iterates. So the polyhedra are
+built on grids that are not properly nested, and nothing downstream is positioned to fix that.
+
+The properly nested grids in the system are the curvature regions from
+`ComputationalGeometry::getCurvatureTags`, which do go through `TiledMeshRefine` -- twice, with a comment
+that nesting travels upward so tagging deeper can widen a level already clustered. Those never become
+the EBIS layout. They reach the shop through `setCoverage` and are used only as a filter. A filter can
+remove boxes from a decomposition that is not nested; it cannot make the survivors nested.
+
+## retainBox: one call site, and what it prunes
+
+Called in exactly one place, `ScanShop::buildFinerLevels`, and the position in the function is the point:
+
+```cpp
+const Box fineBox = refine(coarBox, 2);
+const GeometryService::InOut& boxType = (*m_boxMap[coarLvl])[din];
+
+if (!this->retainBox(fineBox, fineLvl)) {
+  continue;                          // before the type switch, before domainSplit
+}
+```
+
+It takes the **refined** box on the **finer** level and decides whether that refinement is created at
+all. `ScanShop`'s own version returns true unconditionally; `PolyhedralGeometryShop` overrides it to test
+`grow(coarsen(a_box, 2), m_ebGhost)` against `m_coverageRegions`. `buildCoarseLevel` never consults it,
+so levels at and above the scan level are always built in full.
+
+Because the test precedes the type switch, dropping an **irregular** refinement skips `domainSplit`
+entirely, and the saving is double:
+
+- the 2^D pieces the split would have produced are never created, nor anything they would have spawned:
+  it prunes a subtree, not a level;
+- the cut cells stay at level L's resolution rather than being re-cut at L+1, so the graph nodes and the
+  moments for that region are held once at the coarse spacing instead of 2^D times at the fine one.
+
+Same geometry, same requested depth (`max_amr_depth = 12`, ProfiledSurface 2D, serial):
+
+| generation | cut-cell | regular | covered | total |
+| --- | --- | --- | --- | --- |
+| `polyhedral`, retainBox active | 83 | 190 | 0 | **273** |
+| `chombo-discharge`, retainBox always true | 149121 | 199888 | 170524 | **519533** |
+
+A factor of about 1900, entirely subtree pruning. The zero in the covered column is the same effect: the
+pruning stops before reaching the depths at which the bulk solid would be decomposed at all. At ten
+levels the unpruned hierarchy is 23125 cut-cell, 22022 regular and 15266 covered, 60413 boxes.
+
+**ScanShop knows nothing about curvature.** Zero occurrences of `curvature`, `angle` or `normal` in
+either of its files. Its irregular split is a uniform `domainSplit` to `maxGridSize` followed by a binary
+occupancy test per piece, on the box grown by `m_ebGhost`. There are two distinct savings and only one is
+curvature-driven: ScanShop keeps a Regular or Covered coarse box whole when refining it, which is driven
+by emptiness; `retainBox` prunes subtrees, which is driven by the pre-pass.
+
+The two pull against the nesting fix. The first depends on big regular boxes staying whole, which is what
+the nesting bites into. The second depends on dropping refinements, which is what creates the holes that
+make containment fragile. And a box the sweep forces onto a parent is one `retainBox` would have pruned,
+so it re-opens a subtree beneath it unless the sweep can also say "keep pruning below this".
+
+## What the containers will and will not do
+
+**`NeighborIterator` is `DisjointBoxLayout`-only.** `m_neighbors` and `computeNeighbors()` are protected
+members of `DisjointBoxLayout` and `NeighborIterator` is its friend. `BoxLayout`, which permits
+overlapping boxes, has no neighbour machinery at all. So an overlapping layout of "regular/covered plus
+grown irregular" cannot be asked for neighbours -- the one query wanted is the one the permissive
+container lacks. Nor can it be promoted: `DisjointBoxLayout::define(const BoxLayout&)` checks
+`isDisjoint` and throws.
+
+`DisjointBoxLayout::closeN(neighbours)` does let a layout be closed with a neighbour list supplied from
+outside, so the adjacency is not welded to the box set. It is protected.
+
+**The neighbour reach is `grow(box, 1)`**, which is exactly what the restriction needs, since
+`coarsen(grow(fineBox, 1), 2)` extends at most one coarse cell past its parent. The build is a windowed
+sweep, not a quadratic scan -- boxes are x-sorted, `maxI` is the largest extent in x, and the window
+advances monotonically -- so it is O(N x window). But it is built over `dataIterator()`, so `m_neighbors`
+is populated only for boxes this rank owns, and it includes periodic images which must be `unshift`ed
+before intersecting.
+
+**The boxes are replicated; the classification is not.** `BoxLayout::m_boxes` is a
+`RefCountedPtr<Vector<Entry>>` with `Entry = {Box box; unsigned int m_procID;}` -- every rank holds every
+box, about 36 bytes each in 3D. `ScanShop::m_boxMap` is a `LayoutData<InOut>`, so a rank knows the
+classification only of boxes it owns. That asymmetry is the whole source of the two-ranks-carving-the-
+same-box race: rank A can see rank B's box but not that it is irregular. An `InOut` is four bytes against
+the thirty-six already replicated, so closing the asymmetry costs a tenth of what the boxes cost. The
+price is that every rank then redoes the whole sweep rather than its share.
+
+**`IntVectSet` is viable as box algebra and fatal as a cell set.** A full box is a single `&full` sentinel,
+so holding a huge region costs nothing and subtracting a small box grows it by O(log) nodes;
+`TreeIntVectSet::createBoxes` emits one box per full node, so it grades rather than fragmenting. But
+`numPts()` returns `int` -- at 500k^3 that overflows silently, and every count printed by the probes in
+this session came through it -- and `IVSIterator` is per-`IntVect`. The probes used exactly the operations
+that do not scale. What the sweep needs is box-minus-box, which decomposes into at most `2*SpaceDim`
+boxes and enumerates no cells. No such helper exists: nothing in Chombo's `BoxTools` or in `Source`
+matches `removeBoxFromBox`, `boxSubtract` or `complementOf`, and `IntVectSet::operator-=(Box)` is the
+cell-set one.
+
+## What `InOut` cannot say
+
+Two things now, both needed by the sweep and neither expressible in a three-valued
+`GeometryService::InOut`:
+
+- that a box is carried **because a finer level needs it**, as distinct from because the geometry cuts it;
+- that a box is **present but not a reason to refine below it**, so that `retainBox` keeps pruning the
+  subtree it would otherwise re-open.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
@@ -164,6 +286,11 @@ count is what costs, and it is the number that says splitting is affordable.
 - Whether anything downstream iterates `EBISLevel::m_grids` expecting the level to tile the domain.
   `EBCoarseFineParticleMesh::defineStencils` walking every irregular cell of the coarse level was one
   such surprise already; the consumers have not been audited.
+- Whether anything downstream assumes `m_neighbors` was built by `computeNeighbors` with the
+  `grow(box, 1)` reach. A list supplied through `closeN` with a different reach would change ghost
+  exchange silently.
+- Whether `EBData` short-circuits on the tag the way `EBGraph` does. Still unchecked, and it decides
+  whether a carried covered box is as cheap as the graph analysis suggests.
 
 ## The seam, for when the grids are settled
 
