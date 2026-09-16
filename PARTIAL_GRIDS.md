@@ -864,6 +864,30 @@ most half a tile wide on the shared lattice and lies in exactly one box. The box
 super-tile, never a decimated remainder -- above the start level a finer irregular tile lies inside a tile
 of this level by nesting. Runs after decimation, because the push-down reads the final lists.
 
+### The ancestor rule, and what lies above the stop domain
+
+Refining a regular or covered box whole costs nothing per level: `refine(box, 2)` is one box, never
+split, so the count of regular/covered boxes is constant from the start level up and each is one `int`
+of graph. Carrying them to a stop domain far finer than curvature reaches changes only that constant.
+Inside `[start, stop]` there is therefore no gap: covered is known from the refined-whole covered boxes,
+regular by default, cut cells from tiles where curvature reached and from cutting the leaf's polyhedra
+where it did not.
+
+Today the stop domain is the finest AMR domain, so the simulation cannot exceed it. If the index space
+is later stopped coarser than that, a finer simulation level is not an `EBISLayout` that fills wrong but
+one that does not exist -- the level-extension machinery #732 removed from Chombo was the attempt to
+answer that. Should it be needed, the answer is the same rule that fills holes:
+
+> **The classification of any cell on any level is that of the deepest existing box containing its
+> ancestor.** Regular or covered: the cell inherits it. Irregular -- necessarily a leaf, since a deeper
+> box would otherwise exist -- the cell is cut from that leaf's stored polyhedra.
+
+Inside `[start, stop]` this is the hole fill. Above the stop domain it needs no storage: coarsen the
+query to the stop level, locate it in that level's lists (the BVH), inherit or cut. "Refine
+regular/covered symbolically" and "take the BVH one step further" give identical answers; the BVH form
+merely does not materialise the boxes. One lookup serves both roles, and whichever PR needs it should
+implement it once.
+
 ### Step 6 -- what is handed over, and to whom
 
 - To the shop (#732): per phase, per level, the final list and tags. `makeGrids` load-balances it;
