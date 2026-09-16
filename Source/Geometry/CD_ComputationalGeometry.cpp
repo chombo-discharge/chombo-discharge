@@ -33,15 +33,15 @@
 #include <CD_NamespaceHeader.H>
 
 ComputationalGeometry::ComputationalGeometry()
-  : m_eps0(1.0),
-    m_generator(Generator::GeometryShop),
+  : m_generator(Generator::GeometryShop),
+    m_probLo(RealVect::Zero),
+    m_eps0(1.0),
+    m_refineAngle(0.0),
     m_maxGhostEB(0),
-    m_gridProbLo(RealVect::Zero),
     m_startLevel(0),
     m_maxEbDepth(0),
     m_minBlockSize(0),
-    m_maxBlockSize(0),
-    m_refineAngle(0.0)
+    m_maxBlockSize(0)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -303,7 +303,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     }
   }
 
-  m_gridProbLo   = a_probLo;
+  m_probLo       = a_probLo;
   m_maxEbDepth   = a_maxEbDepth;
   m_minBlockSize = a_minBlockSize;
   m_maxBlockSize = a_maxBlockSize;
@@ -321,39 +321,29 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   const int numLevels = m_startLevel + 1 + m_maxEbDepth;
 
-  m_gridDomains.resize(numLevels);
-  m_gridDx.resize(numLevels);
+  m_domains.resize(numLevels);
+  m_dx.resize(numLevels);
 
-  m_gridDomains[m_startLevel] = a_startDomain;
-  m_gridDx[m_startLevel]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
+  m_domains[m_startLevel] = a_startDomain;
+  m_dx[m_startLevel]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
 
   for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
-    m_gridDomains[lvl] = coarsen(m_gridDomains[lvl + 1], 2);
-    m_gridDx[lvl]      = 2.0 * m_gridDx[lvl + 1];
+    m_domains[lvl] = coarsen(m_domains[lvl + 1], 2);
+    m_dx[lvl]      = 2.0 * m_dx[lvl + 1];
   }
 
   for (int lvl = m_startLevel + 1; lvl < numLevels; lvl++) {
-    m_gridDomains[lvl] = refine(m_gridDomains[lvl - 1], 2);
-    m_gridDx[lvl]      = 0.5 * m_gridDx[lvl - 1];
-  }
-
-  m_levelBoxes.resize(2);
-  m_levelBoxTypes.resize(2);
-  m_tileHost.resize(2);
-  m_tileTypes.resize(2);
-  m_grids.resize(2);
-  m_gridTypes.resize(2);
-
-  for (int p = 0; p < 2; p++) {
-    m_levelBoxes[p].resize(numLevels);
-    m_levelBoxTypes[p].resize(numLevels);
-    m_tileHost[p].resize(numLevels);
-    m_tileTypes[p].resize(numLevels);
-    m_grids[p].resize(numLevels);
-    m_gridTypes[p].resize(numLevels);
+    m_domains[lvl] = refine(m_domains[lvl - 1], 2);
+    m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
   }
 
   m_tiles.resize(numLevels);
+  m_gasRegularBoxes.resize(numLevels);
+  m_gasCoveredBoxes.resize(numLevels);
+  m_gasIrregularBoxes.resize(numLevels);
+  m_solidRegularBoxes.resize(numLevels);
+  m_solidCoveredBoxes.resize(numLevels);
+  m_solidIrregularBoxes.resize(numLevels);
 
   this->buildImplicitFunctions();
 
@@ -361,10 +351,10 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //
   //   0. Start level, per phase: domainSplit the whole domain and classify every box regular, covered or
   //      irregular (buildStartLevel, classifyBox).
-  //   1. Upward, per phase, to m_maxEbDepth: a regular or covered box refines whole with its tag. An irregular
-  //      box is split into classified pieces if the implicit function's normal turns by more than m_refineAngle
-  //      between neighbouring cells near the surface; otherwise it is a leaf and nothing is built above it
-  //      (buildFinerLevels, exceedsCurvature).
+  //   1. Upward, per phase, to the finest level: a regular or covered box refines whole with its tag. An
+  //      irregular box is split into classified pieces if the implicit function's normal turns by more than
+  //      m_refineAngle between neighbouring cells near the surface; otherwise it is a leaf and nothing is built
+  //      above it (buildFinerLevels, exceedsCurvature).
   //   2. Tiles, once, after both phases: the union of the two phases' irregular boxes on every level is tiled by
   //      TiledMeshRefine into a properly nested set common to both phases (makeTiles). This is the coverage the
   //      simulation regrids onto.
@@ -377,13 +367,14 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //
   // Steps 0 and 1, per phase. A phase without an implicit function is one regular box on every level, and
   // takes no further part.
-  for (int p = 0; p < 2; p++) {
-    const phase::which_phase curPhase = static_cast<phase::which_phase>(p);
+  const phase::which_phase phases[2] = {phase::gas, phase::solid};
 
+  for (const phase::which_phase& curPhase : phases) {
     if (this->getImplicitFunction(curPhase).isNull()) {
+      Vector<Vector<Box>>& regularBoxes = this->boxes(curPhase, GeometryService::Regular);
+
       for (int lvl = 0; lvl < numLevels; lvl++) {
-        m_levelBoxes[p][lvl].push_back(m_gridDomains[lvl].domainBox());
-        m_levelBoxTypes[p][lvl].push_back(GeometryService::Regular);
+        regularBoxes[lvl].push_back(m_domains[lvl].domainBox());
       }
     }
     else {
@@ -396,11 +387,12 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->makeTiles();
 
   // Steps 3 and 4, per phase.
-  for (int p = 0; p < 2; p++) {
-    const phase::which_phase curPhase = static_cast<phase::which_phase>(p);
+  for (const phase::which_phase& curPhase : phases) {
+    Vector<Vector<GeometryService::InOut>> tileTypes(numLevels);
+    Vector<Vector<int>>                    tileHosts(numLevels);
 
-    this->classifyTiles(curPhase);
-    this->decimateBoxes(curPhase);
+    this->classifyTiles(curPhase, tileTypes, tileHosts);
+    this->decimateBoxes(curPhase, tileTypes, tileHosts);
   }
 
   // Step 5, once.
@@ -410,7 +402,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
-  return m_gridDomains.size();
+  return m_domains.size();
 }
 
 int
@@ -418,8 +410,8 @@ ComputationalGeometry::getLevel(const ProblemDomain& a_domain) const noexcept
 {
   int level = -1;
 
-  for (int lvl = 0; lvl < m_gridDomains.size(); lvl++) {
-    if (m_gridDomains[lvl].domainBox() == a_domain.domainBox()) {
+  for (int lvl = 0; lvl < m_domains.size(); lvl++) {
+    if (m_domains[lvl].domainBox() == a_domain.domainBox()) {
       level = lvl;
     }
   }
@@ -428,40 +420,37 @@ ComputationalGeometry::getLevel(const ProblemDomain& a_domain) const noexcept
 }
 
 const Vector<Box>&
-ComputationalGeometry::getGrids(const phase::which_phase a_phase, const int a_level) const noexcept
-{
-  return m_grids[a_phase][a_level];
-}
-
-const Vector<GeometryService::InOut>&
-ComputationalGeometry::getGridTypes(const phase::which_phase a_phase, const int a_level) const noexcept
-{
-  return m_gridTypes[a_phase][a_level];
-}
-
-Vector<Box>
 ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
                                 const int                    a_level,
                                 const GeometryService::InOut a_type) const noexcept
 {
-  Vector<Box> boxes;
-
-  const Vector<Box>&                    levelBoxes = m_levelBoxes[a_phase][a_level];
-  const Vector<GeometryService::InOut>& levelTypes = m_levelBoxTypes[a_phase][a_level];
-
-  for (int i = 0; i < levelBoxes.size(); i++) {
-    if (levelTypes[i] == a_type) {
-      boxes.push_back(levelBoxes[i]);
-    }
-  }
-
-  return boxes;
+  return this->boxes(a_phase, a_type)[a_level];
 }
 
-const Vector<Box>&
-ComputationalGeometry::getTiles(const int a_level) const noexcept
+Vector<Vector<Box>>&
+ComputationalGeometry::boxes(const phase::which_phase a_phase, const GeometryService::InOut a_type) noexcept
 {
-  return m_tiles[a_level];
+  const auto& constThis = *this;
+
+  return const_cast<Vector<Vector<Box>>&>(constThis.boxes(a_phase, a_type));
+}
+
+const Vector<Vector<Box>>&
+ComputationalGeometry::boxes(const phase::which_phase a_phase, const GeometryService::InOut a_type) const noexcept
+{
+  const bool gas = (a_phase == phase::gas);
+
+  switch (a_type) {
+  case GeometryService::Regular: {
+    return gas ? m_gasRegularBoxes : m_solidRegularBoxes;
+  }
+  case GeometryService::Covered: {
+    return gas ? m_gasCoveredBoxes : m_solidCoveredBoxes;
+  }
+  default: {
+    return gas ? m_gasIrregularBoxes : m_solidIrregularBoxes;
+  }
+  }
 }
 
 void
@@ -507,7 +496,9 @@ ComputationalGeometry::makeTiles()
 }
 
 void
-ComputationalGeometry::classifyTiles(const phase::which_phase a_phase)
+ComputationalGeometry::classifyTiles(const phase::which_phase                a_phase,
+                                     Vector<Vector<GeometryService::InOut>>& a_tileTypes,
+                                     Vector<Vector<int>>&                    a_tileHosts) const
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
 
@@ -515,7 +506,9 @@ ComputationalGeometry::classifyTiles(const phase::which_phase a_phase)
 }
 
 void
-ComputationalGeometry::decimateBoxes(const phase::which_phase a_phase)
+ComputationalGeometry::decimateBoxes(const phase::which_phase                      a_phase,
+                                     const Vector<Vector<GeometryService::InOut>>& a_tileTypes,
+                                     const Vector<Vector<int>>&                    a_tileHosts)
 {
   CH_TIME("ComputationalGeometry::decimateBoxes");
 
