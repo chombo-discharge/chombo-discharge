@@ -1494,10 +1494,14 @@ Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
     pout() << "Driver::makeGeometryGrids" << endl;
   }
 
+  // The start domain may be coarser than the coarsest AMR level, so its spacing is taken from the finest one.
+  const ProblemDomain& finestDomain = m_amr->getFinestDomain();
+  const Real startDx = m_amr->getFinestDx() * (finestDomain.domainBox().size(0) / a_startDomain.domainBox().size(0));
+
   m_computationalGeometry->makeGrids(a_startDomain,
-                                     m_amr->getFinestDomain(),
+                                     finestDomain,
                                      m_amr->getProbLo(),
-                                     m_amr->getFinestDx(),
+                                     startDx,
                                      m_refineAngle,
                                      m_amr->getMinBlockSize(),
                                      m_amr->getMaxBlockSize(),

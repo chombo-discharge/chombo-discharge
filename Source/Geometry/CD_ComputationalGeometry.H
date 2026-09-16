@@ -147,14 +147,14 @@ public:
    * @brief Build the grids the index space is generated over.
    * @details Built before any index space exists, from the implicit functions alone. The start domain is built
    * whole, as is every coarser domain down to the coarsest that can still be coarsened by two; above it the
-   * levels are factor-two refinements up to and including the stop domain, which has spacing a_finestDx. Levels
-   * are indexed from the coarsest domain; getLevel finds the index of a domain. Every box lies on the
+   * levels are factor-two refinements up to and including the stop domain. Levels are
+   * indexed from the coarsest domain; getLevel finds the index of a domain. Every box lies on the
    * a_maxBlockSize lattice, so the cut-cell grids of both phases are unions of the same super-tiles. Without an
    * implicit function a phase is one regular box on every level.
    * @param[in] a_startDomain  Domain the upward pass starts from.
    * @param[in] a_stopDomain   Finest domain built; a factor-two refinement of a_startDomain some number of times.
    * @param[in] a_probLo       Lower-left corner of the domain.
-   * @param[in] a_finestDx     Grid spacing on a_stopDomain.
+   * @param[in] a_startDx      Grid spacing on a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
    * @param[in] a_minBlockSize Tile size in cells. At least twice a_maxGhostEB.
    * @param[in] a_maxBlockSize Super-tile size in cells. A multiple of a_minBlockSize.
@@ -164,7 +164,7 @@ public:
   makeGrids(const ProblemDomain& a_startDomain,
             const ProblemDomain& a_stopDomain,
             const RealVect&      a_probLo,
-            const Real           a_finestDx,
+            const Real           a_startDx,
             const Real           a_refineAngle,
             const int            a_minBlockSize,
             const int            a_maxBlockSize,

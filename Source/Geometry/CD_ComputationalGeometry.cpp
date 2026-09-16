@@ -257,7 +257,7 @@ void
 ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const ProblemDomain& a_stopDomain,
                                  const RealVect&      a_probLo,
-                                 const Real           a_finestDx,
+                                 const Real           a_startDx,
                                  const Real           a_refineAngle,
                                  const int            a_minBlockSize,
                                  const int            a_maxBlockSize,
@@ -270,8 +270,8 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   if (a_startDomain.domainBox().isEmpty()) {
     MayDay::Error("ComputationalGeometry::makeGrids - the start domain is empty");
   }
-  if (a_finestDx <= 0.0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the finest grid spacing must be positive");
+  if (a_startDx <= 0.0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the grid spacing must be positive");
   }
   if (a_refineAngle < 0.0) {
     MayDay::Error("ComputationalGeometry::makeGrids - the refinement angle must not be negative");
@@ -331,12 +331,17 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
 
-  m_domains[m_stopLevel] = a_stopDomain;
-  m_dx[m_stopLevel]      = a_finestDx;
+  m_domains[m_startLevel] = a_startDomain;
+  m_dx[m_startLevel]      = a_startDx;
 
-  for (int lvl = m_stopLevel - 1; lvl >= 0; lvl--) {
+  for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
     m_domains[lvl] = coarsen(m_domains[lvl + 1], 2);
     m_dx[lvl]      = 2.0 * m_dx[lvl + 1];
+  }
+
+  for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+    m_domains[lvl] = refine(m_domains[lvl - 1], 2);
+    m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
   }
 
   m_tiles.resize(numLevels);
