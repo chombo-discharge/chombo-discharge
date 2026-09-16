@@ -414,7 +414,10 @@ protected:
    *       else:
    *         leaf: nothing is appended; the region above it is a hole on lvl + 1
    *     gather lvl + 1 onto every rank, in a fixed order
-   *     stop if no rank split a box
+   *
+   *   The loop always runs to m_stopLevel: once no irregular box remains the curvature test has nothing to do,
+   *   but the regular and covered boxes still refine whole onto every remaining level, so no level is left
+   *   empty that should hold them.
    *
    * @param[in] a_phase Phase to build.
    */
