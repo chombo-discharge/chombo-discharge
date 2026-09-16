@@ -174,6 +174,34 @@ public:
   void
   appendInterfaceFacets(Vector<Real>& a_facets, const RealVect& a_cellCentre, const Real a_dx) const noexcept;
 
+#if CH_SPACEDIM == 3
+  /**
+   * @brief Replace one face's chord with the chords of the children that cover it.
+   * @details The face is described at the resolution of the level below rather than this cell's,
+   *          which is what makes it agree with cells on the other side of a refinement boundary.
+   *          The interface is dropped with it, since it was built to meet the chord being replaced;
+   *          call closeInterface once every face that needs restricting has been.
+   * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
+   * @param[in] a_dir      Direction of the face.
+   * @param[in] a_side     Side of the cell the face is on.
+   * @return True if the children's chords merged into a face this body can hold.
+   */
+  bool
+  restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept;
+
+  /**
+   * @brief Rebuild the interface from the face polygons this body holds.
+   * @details Every face-polygon edge that no other face polygon carries in reverse bounds the
+   *          interface, and walking those edges gives its loops. Used instead of the crossing loops
+   *          once a face has been restricted, since a restricted face has vertices that are not
+   *          crossings of this cell's edges at all.
+   * @return True if every loop closed and the result fitted in the body's storage.
+   */
+  bool
+  closeInterface() noexcept;
+
+#endif
+
   /**
    * @brief Residual in the identity the moments must satisfy among themselves.
    * @details The divergence theorem applied to a constant field, which holds for any closed
@@ -253,34 +281,6 @@ protected:
      */
     int m_segmentFace[s_maxVertices];
   };
-
-#if CH_SPACEDIM == 3
-  /**
-   * @brief Replace one face's chord with the chords of the children that cover it.
-   * @details The face is described at the resolution of the level below rather than this cell's,
-   *          which is what makes it agree with cells on the other side of a refinement boundary.
-   *          The interface is dropped with it, since it was built to meet the chord being replaced;
-   *          call closeInterface once every face that needs restricting has been.
-   * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
-   * @param[in] a_dir      Direction of the face.
-   * @param[in] a_side     Side of the cell the face is on.
-   * @return True if the children's chords merged into a face this body can hold.
-   */
-  bool
-  restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept;
-
-  /**
-   * @brief Rebuild the interface from the face polygons this body holds.
-   * @details Every face-polygon edge that no other face polygon carries in reverse bounds the
-   *          interface, and walking those edges gives its loops. Used instead of the crossing loops
-   *          once a face has been restricted, since a restricted face has vertices that are not
-   *          crossings of this cell's edges at all.
-   * @return True if every loop closed and the result fitted in the body's storage.
-   */
-  bool
-  closeInterface() noexcept;
-
-#endif
 
   /**
    * @brief Moments of a cell the interface only touches, never enters.

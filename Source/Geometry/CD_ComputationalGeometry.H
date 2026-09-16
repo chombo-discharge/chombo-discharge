@@ -13,6 +13,9 @@
 #ifndef CD_COMPUTATIONALGEOMETRY_H
 #define CD_COMPUTATIONALGEOMETRY_H
 
+// Std includes
+#include <string>
+
 // Chombo includes
 #include <BaseIF.H>
 #include <GeometryService.H>
@@ -196,6 +199,19 @@ public:
   getBoxes(const phase::which_phase a_phase, const int a_level, const GeometryService::InOut a_type) const noexcept;
 
   /**
+   * @brief Write the embedded boundary reconstructed on the grids makeGrids built, one STL per phase.
+   * @details Every cut cell of every irregular box is reconstructed from the implicit function at its own
+   * level, and its interface triangles are written from the finest level that carries it. Where a cut cell
+   * borders a region the next finer level carries, the shared face is restricted to the finer level's chords
+   * before the interface is closed, so the surface meets across the level boundary. A phase without an
+   * implicit function writes nothing. Three dimensions only; the interface of a two-dimensional cell is a
+   * segment, not a triangle. Collective: every rank reconstructs its share of the boxes and rank 0 writes.
+   * @param[in] a_stem File name stem; the files are the stem followed by .gas.stl and .solid.stl.
+   */
+  void
+  writeSurfaceSTL(const std::string& a_stem) const;
+
+  /**
    * @brief Build geometries and the MFIndexSpace.
    * @param[in] a_finestDomain Finest domain
    * @param[in] a_probLo       Lower-left corner
@@ -345,6 +361,18 @@ protected:
    * @brief Solid-phase classification of each box in m_boxes, parallel to it.
    */
   Vector<Vector<GeometryService::InOut>> m_solidTypes;
+
+  /**
+   * @brief Interface triangles of one phase, from this rank's share of the boxes, nine reals per triangle.
+   * @details Per level, the cells the next finer level carries are skipped, and a cut cell with such a cell
+   * across one of its faces has that face restricted to the finer cells' chords (restrictFace) and its
+   * interface rebuilt (closeInterface). A coarse edge that carries no crossing while both finer edges under
+   * it do is a multi-valued coarse cell in disguise and stops the run, as does a body that will not close.
+   * @param[out] a_facets Triangle coordinates, appended to.
+   * @param[in]  a_phase  Phase.
+   */
+  void
+  collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase) const;
 
   /**
    * @brief Build the composite implicit functions of the two phases from the electrodes and dielectrics.

@@ -1205,6 +1205,14 @@ Driver::parseGeometryGeneration()
   pp.get("geometry_generation", m_geometryGeneration);
   pp.get("geometry_scan_level", m_geoScanLevel);
 
+  m_geometrySurfaceFile = "none";
+
+  pp.query("geometry_surface_stl", m_geometrySurfaceFile);
+
+  if (m_geometrySurfaceFile == "none") {
+    m_geometrySurfaceFile = "";
+  }
+
   if (!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo" ||
         m_geometryGeneration == "polyhedral")) {
     MayDay::Abort("Driver:parseGeometryGeneration - unsupported argument requested");
@@ -1506,6 +1514,10 @@ Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
                                      m_amr->getMinBlockSize(),
                                      m_amr->getMaxBlockSize(),
                                      m_amr->getNumberOfEbGhostCells());
+
+  if (!m_geometrySurfaceFile.empty()) {
+    m_computationalGeometry->writeSurfaceSTL(m_geometrySurfaceFile);
+  }
 }
 
 void

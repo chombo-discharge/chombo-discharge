@@ -263,6 +263,11 @@ protected:
   Real m_refineAngle;
 
   /**
+   * @brief File name stem for the embedded boundary reconstructed on the geometry grids, or empty for none.
+   */
+  std::string m_geometrySurfaceFile;
+
+  /**
    * @brief Profile or not
    */
   bool m_profile;

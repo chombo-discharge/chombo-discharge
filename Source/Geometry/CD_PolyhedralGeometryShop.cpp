@@ -103,7 +103,7 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
   // bisection between the two endpoints. The endpoints are taken from the shared node values
   // and the edge is addressed by its own index, so every cell reaching this edge hands the
   // solver the same interval and gets the same root back
-  const Real root = PolyhedralGeometryShop::edgeRoot(*m_baseIF, edgeIV, dir, a_lo, a_hi, a_probLo, a_dx);
+  const Real root = PolyhedralGeometryShop::edgeRoot(*m_baseIF, edgeIV, dir, a_lo, a_probLo, a_dx);
 
   if (a_intercept[dir].box().contains(edgeIV)) {
     a_intercept[dir](edgeIV, 0) = root;
@@ -112,26 +112,11 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
   return root;
 }
 
-bool
-PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept
-{
-  return (a_threshold > 0.0) && (1.0 - a_body.volumeFraction() < a_threshold) && (a_body.boundaryArea() < a_threshold);
-}
-
-Real
-PolyhedralGeometryShop::snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept
-{
-  const Real value = a_function.value(a_point);
-
-  return (std::abs(value) <= s_snapTolerance * a_dx) ? 0.0 : value;
-}
-
 Real
 PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
                                  const IntVect&  a_edgeIV,
                                  const int       a_dir,
                                  const Real      a_loValue,
-                                 const Real      a_hiValue,
                                  const RealVect& a_probLo,
                                  const Real      a_dx) noexcept
 {
@@ -151,7 +136,7 @@ PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
     RealVect x = lowPoint;
     x[a_dir] += a_dx * mid;
 
-    const Real value = PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
+    const Real value = a_function.value(x);
 
     if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(loValue)) {
       lo      = mid;
@@ -166,17 +151,60 @@ PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
     }
   }
 
-  Real root = 0.5 * (lo + hi);
+  return 0.5 * (lo + hi);
+}
 
-  // an endpoint exactly on the interface owns a crossing that lands close to it
-  if (a_loValue == 0.0 && root < s_rootSnap) {
-    root = 0.0;
-  }
-  else if (a_hiValue == 0.0 && root > 1.0 - s_rootSnap) {
-    root = 1.0;
+void
+PolyhedralGeometryShop::reconstructSurface(PolyhedralEB::CutCellSurface& a_surface,
+                                           const BaseIF&                 a_function,
+                                           const IntVect&                a_cell,
+                                           const RealVect&               a_probLo,
+                                           const Real                    a_dx) noexcept
+{
+  a_surface = PolyhedralEB::CutCellSurface();
+
+  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
+    RealVect x = a_probLo;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      x[d] += a_dx * static_cast<Real>(a_cell[d] + ((c >> d) & 1));
+    }
+
+    a_surface.m_corner[c] = a_function.value(x);
   }
 
-  return root;
+  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
+    int low  = -1;
+    int high = -1;
+
+    PolyhedralEB::detail::edgeCorners(e, low, high);
+
+    const Real loValue = a_surface.m_corner[low];
+    const Real hiValue = a_surface.m_corner[high];
+
+    if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
+      if (loValue == 0.0) {
+        a_surface.m_crossing[e] = 0.0;
+      }
+      else if (hiValue == 0.0) {
+        a_surface.m_crossing[e] = 1.0;
+      }
+      else {
+        const int dir = PolyhedralEB::detail::edgeDirection(e);
+
+        int offset[SpaceDim];
+        PolyhedralEB::detail::edgeOrigin(e, offset);
+
+        IntVect edgeIV = a_cell;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          edgeIV[d] += offset[d];
+        }
+
+        a_surface.m_crossing[e] = PolyhedralGeometryShop::edgeRoot(a_function, edgeIV, dir, loValue, a_probLo, a_dx);
+      }
+    }
+  }
 }
 
 void

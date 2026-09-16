@@ -13,6 +13,8 @@
 // Std includes
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
 
 // Chombo includes
 #include <BaseFab.H>
@@ -30,6 +32,7 @@
 #include <GeometryShop.H>
 #include <ComplementIF.H>
 #include <MayDay.H>
+#include <PolyGeom.H>
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
@@ -39,6 +42,8 @@
 #include <CD_Units.H>
 #include <CD_ScanShop.H>
 #include <CD_PolyhedralGeometryShop.H>
+#include <CD_CutCellBody.H>
+#include <CD_CutCellSurface.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
@@ -1155,6 +1160,242 @@ ComputationalGeometry::buildCoarserLevels()
 }
 
 void
+ComputationalGeometry::writeSurfaceSTL(const std::string& a_stem) const
+{
+  CH_TIME("ComputationalGeometry::writeSurfaceSTL");
+
+  const phase::which_phase phases[2]     = {phase::gas, phase::solid};
+  const std::string        phaseNames[2] = {"gas", "solid"};
+
+  for (int p = 0; p < 2; p++) {
+    if (this->getImplicitFunction(phases[p]).isNull()) {
+      continue;
+    }
+
+    Vector<Real> facets;
+
+    this->collectFacets(facets, phases[p]);
+
+    Vector<Vector<Real>> everyone;
+
+    gather(everyone, facets, 0);
+
+    if (procID() != 0) {
+      continue;
+    }
+
+    const std::string fileName = a_stem + "." + phaseNames[p] + ".stl";
+
+    std::ofstream out(fileName);
+
+    if (!out.good()) {
+      MayDay::Error("ComputationalGeometry::writeSurfaceSTL - could not open the file");
+    }
+
+    out << std::scientific << std::setprecision(17) << "solid " << phaseNames[p] << "\n";
+
+    for (int rank = 0; rank < everyone.size(); rank++) {
+      const Vector<Real>& rankFacets = everyone[rank];
+
+      for (int i = 0; i + 9 <= rankFacets.size(); i += 9) {
+        const RealVect a(D_DECL(rankFacets[i + 0], rankFacets[i + 1], rankFacets[i + 2]));
+        const RealVect b(D_DECL(rankFacets[i + 3], rankFacets[i + 4], rankFacets[i + 5]));
+        const RealVect c(D_DECL(rankFacets[i + 6], rankFacets[i + 7], rankFacets[i + 8]));
+
+        RealVect n = PolyGeom::cross(b - a, c - a);
+
+        if (n.vectorLength() > 0.0) {
+          n /= n.vectorLength();
+        }
+
+        out << "  facet normal";
+
+        for (int d = 0; d < 3; d++) {
+          out << " " << ((d < SpaceDim) ? n[d] : 0.0);
+        }
+
+        out << "\n    outer loop\n";
+
+        for (int v = 0; v < 3; v++) {
+          out << "      vertex";
+
+          for (int d = 0; d < 3; d++) {
+            out << " " << ((d < SpaceDim) ? rankFacets[i + 3 * v + d] : 0.0);
+          }
+
+          out << "\n";
+        }
+
+        out << "    endloop\n  endfacet\n";
+      }
+    }
+
+    out << "endsolid " << phaseNames[p] << "\n";
+  }
+}
+
+void
+ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::collectFacets");
+
+  using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellSurface;
+
+  const BaseIF& f = *(this->getImplicitFunction(a_phase));
+
+  const Vector<Vector<GeometryService::InOut>>& types = this->types(a_phase);
+
+  for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
+    const Real dx     = m_dx[lvl];
+    const Box& domain = m_domains[lvl].domainBox();
+
+    // The cells the next finer level carries, on this level's index space. A cell among them is written from
+    // the finer level; a cell next to one of them is on the level boundary and has that face restricted.
+    TreeIntVectSet covered;
+
+    if (lvl < m_stopLevel) {
+      for (int j = 0; j < m_boxes[lvl + 1].size(); j++) {
+        covered |= coarsen(m_boxes[lvl + 1][j], 2);
+      }
+    }
+
+    for (int i = procID(); i < m_boxes[lvl].size(); i += numProc()) {
+      if (types[lvl][i] != GeometryService::Irregular) {
+        continue;
+      }
+
+      for (BoxIterator bit(m_boxes[lvl][i]); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        if (covered.contains(iv)) {
+          continue;
+        }
+
+        CutCellSurface surface;
+
+        PolyhedralGeometryShop::reconstructSurface(surface, f, iv, m_probLo, dx);
+
+        if (CutCellBody::classify(surface) != CutCellBody::Kind::Cut) {
+          continue;
+        }
+
+        CutCellBody body;
+
+        if (!body.define(surface)) {
+          pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl << " did not close"
+                 << endl;
+
+          MayDay::Error("ComputationalGeometry::collectFacets - a cut cell's body did not close");
+        }
+
+#if CH_SPACEDIM == 3
+        // A face shared with a cell the finer level carries is described at the finer level's resolution. The
+        // children are this cell's own refinement, reconstructed from the implicit function at the finer
+        // spacing; their faces on the shared plane coincide, edge for edge and root for root, with those of the
+        // finer cells across it.
+        bool restricted = false;
+
+        CutCellSurface children[CutCellSurface::s_numCorners];
+        bool           haveChildren = false;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (int side = 0; side < 2; side++) {
+            const IntVect neighbour = iv + (2 * side - 1) * BASISV(dir);
+
+            if (!domain.contains(neighbour) || !covered.contains(neighbour)) {
+              continue;
+            }
+
+            if (!haveChildren) {
+              for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+                IntVect child = 2 * iv;
+
+                for (int d = 0; d < SpaceDim; d++) {
+                  child[d] += (c >> d) & 1;
+                }
+
+                PolyhedralGeometryShop::reconstructSurface(children[c], f, child, m_probLo, 0.5 * dx);
+              }
+
+              haveChildren = true;
+            }
+
+            // A coarse edge of this face whose ends agree, but whose two finer halves each carry a crossing,
+            // is a chord this cell cannot represent: two crossings on one edge is a multi-valued coarse cell.
+            for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+              int low  = -1;
+              int high = -1;
+
+              PolyhedralEB::detail::edgeCorners(e, low, high);
+
+              const bool onFace = (((low >> dir) & 1) == side) && (((high >> dir) & 1) == side);
+
+              if (!onFace ||
+                  PolyhedralEB::isFluid(surface.m_corner[low]) != PolyhedralEB::isFluid(surface.m_corner[high])) {
+                continue;
+              }
+
+              const int edgeDir = PolyhedralEB::detail::edgeDirection(e);
+
+              int offset[SpaceDim];
+              PolyhedralEB::detail::edgeOrigin(e, offset);
+
+              int crossings = 0;
+
+              for (int half = 0; half < 2; half++) {
+                int which = 0;
+
+                for (int d = 0; d < SpaceDim; d++) {
+                  which |= ((d == edgeDir) ? half : offset[d]) << d;
+                }
+
+                if (children[which].m_crossing[e] != CutCellSurface::s_noCrossing) {
+                  crossings++;
+                }
+              }
+
+              if (crossings == 2) {
+                pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
+                       << " has two crossings on an edge of its face " << dir << "/" << side << endl;
+
+                MayDay::Error(
+                  "ComputationalGeometry::collectFacets - a coarse edge on a level boundary is crossed twice");
+              }
+            }
+
+            if (!body.restrictFace(children, dir, side)) {
+              pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
+                     << " could not take face " << dir << "/" << side << " from the finer level" << endl;
+
+              MayDay::Error("ComputationalGeometry::collectFacets - a face could not be restricted");
+            }
+
+            restricted = true;
+          }
+        }
+
+        if (restricted && !body.closeInterface()) {
+          pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
+                 << " did not close after its faces were restricted" << endl;
+
+          MayDay::Error("ComputationalGeometry::collectFacets - a restricted cell's interface did not close");
+        }
+#endif
+
+        RealVect centre = m_probLo;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          centre[d] += dx * (static_cast<Real>(iv[d]) + 0.5);
+        }
+
+        body.appendInterfaceFacets(a_facets, centre, dx);
+      }
+    }
+  }
+}
+
+void
 ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                         const ProblemDomain& a_finestDomain,
                                         const RealVect&      a_probLo,
@@ -1162,23 +1403,11 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
-  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
-  if (m_generator == Generator::PolyhedralShop) {
-    auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionGas,
-                                            0,
-                                            a_finestDx,
-                                            a_probLo,
-                                            a_finestDomain,
-                                            m_scanDomain,
-                                            m_maxGhostEB,
-                                            s_thresh,
-                                            s_strictGeometry);
-
-    shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
-
-    a_geoserver = static_cast<GeometryService*>(shop);
-  }
-  else if (m_generator == Generator::ScanShop) {
+  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. For now the polyhedral
+  // generator hands the index space to ScanShop as well: the polyhedral mesh is built on the grids makeGrids
+  // made and written out by writeSurfaceSTL, so that its seams can be looked at without the index space in
+  // the picture. The shop's moment machinery is untouched and plugs back in on those grids later.
+  if (m_generator == Generator::ScanShop || m_generator == Generator::PolyhedralShop) {
     auto* scanShop = new ScanShop(*m_implicitFunctionGas,
                                   0,
                                   a_finestDx,
@@ -1211,23 +1440,9 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
     a_geoserver = nullptr;
   }
   else {
-    // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
-    if (m_generator == Generator::PolyhedralShop) {
-      auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionSolid,
-                                              0,
-                                              a_finestDx,
-                                              a_probLo,
-                                              a_finestDomain,
-                                              m_scanDomain,
-                                              m_maxGhostEB,
-                                              s_thresh,
-                                              s_strictGeometry);
-
-      shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
-
-      a_geoserver = static_cast<GeometryService*>(shop);
-    }
-    else if (m_generator == Generator::ScanShop) {
+    // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. The polyhedral
+    // generator hands the index space to ScanShop for now; see buildGasGeometry.
+    if (m_generator == Generator::ScanShop || m_generator == Generator::PolyhedralShop) {
       auto* scanShop = new ScanShop(*m_implicitFunctionSolid,
                                     0,
                                     a_finestDx,

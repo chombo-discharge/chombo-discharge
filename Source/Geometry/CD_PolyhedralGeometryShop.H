@@ -110,30 +110,29 @@ public:
             const DataIndex&     a_di) const override;
 
   /**
-   * @brief Whether a cut body holds too little solid to be a cut cell.
-   * @details The counterpart, on the fluid side, of dropping a body whose fluid volume is below the
-   *          threshold: a body with neither solid volume nor boundary area is a regular cell. A cell whose
-   *          interface lies in one of its faces, wholly or in part, has no solid volume either but does
-   *          have boundary area, and is not dust.
-   * @param[in] a_body      Body of the cell.
-   * @param[in] a_threshold Volume-fraction threshold; nothing is dust at zero.
-   * @return True if the cell should be treated as regular.
+   * @brief Reconstruct one cell's surface from an implicit function alone.
+   * @details The corner values are the function at the cell's corners and every edge whose ends disagree
+   *          gets its crossing by the same bisection the generator uses, so a cell reconstructed here is
+   *          the cell the generator would build.
+   * @param[out] a_surface  Corner values and edge crossings, in the cell's own frame.
+   * @param[in]  a_function Implicit function.
+   * @param[in]  a_cell     Cell to reconstruct.
+   * @param[in]  a_probLo   Lower-left corner of the domain.
+   * @param[in]  a_dx       Grid spacing of the level the cell belongs to.
    */
-  static bool
-  isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept;
+  static void
+  reconstructSurface(PolyhedralEB::CutCellSurface& a_surface,
+                     const BaseIF&                 a_function,
+                     const IntVect&                a_cell,
+                     const RealVect&               a_probLo,
+                     const Real                    a_dx) noexcept;
 
   /**
    * @brief Bisect one cell edge for the crossing on it.
-   * @details An endpoint at exactly zero is not taken to be the crossing: the function may be zero along
-   *          a stretch of the edge (a face of the geometry lying in the edge's plane), and the crossing
-   *          is where it leaves that stretch. The bisection walks through zeros, which the fluid
-   *          predicate reads as solid, and a root that lands within s_snapTolerance of an endpoint that
-   *          is exactly zero is put exactly on it.
    * @param[in] a_function Implicit function.
    * @param[in] a_edgeIV   Node at the low end of the edge.
    * @param[in] a_dir      Direction the edge runs in.
    * @param[in] a_loValue  Implicit function at the low end.
-   * @param[in] a_hiValue  Implicit function at the high end.
    * @param[in] a_probLo   Lower-left corner of the domain.
    * @param[in] a_dx       Grid spacing.
    * @return Position along the edge, in [0,1].
@@ -143,40 +142,8 @@ public:
            const IntVect&  a_edgeIV,
            const int       a_dir,
            const Real      a_loValue,
-           const Real      a_hiValue,
            const RealVect& a_probLo,
            const Real      a_dx) noexcept;
-
-  /**
-   * @brief Fraction of a cell width within which an implicit-function value is read as exactly zero.
-   */
-  static constexpr Real s_snapTolerance = 1.0E-12;
-
-  /**
-   * @brief Distance along an edge, from an endpoint that is exactly zero, within which a root is put on it.
-   * @details A surface tangent to a node reads as zero for a stretch either side of it under the value
-   *          snap, of length about sqrt(2 R tol / dx) for a radius of curvature R -- a few parts in 1e6 of
-   *          an edge for any R that is not itself below the cell width. A root that close to a corner the
-   *          surface passes through is that stretch's end, not a second crossing; a genuine second
-   *          crossing within 1e-4 of a cell width of the first would be a feature no cell resolves.
-   */
-  static constexpr Real s_rootSnap = 1.0E-4;
-
-  /**
-   * @brief Read the implicit function at a point, with a value within s_snapTolerance of a cell width of
-   *        zero read as exactly zero.
-   * @details A face of the geometry lying in a node plane evaluates to zero there only up to round-off:
-   *          the same face comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring
-   *          nodes, and cells on either side of it would then be classified by which of those they were
-   *          handed. Reading everything within a fixed fraction of the cell width of zero as zero puts
-   *          every such node on one side by rule, in the corner values and in the bisection alike.
-   * @param[in] a_function Implicit function.
-   * @param[in] a_point    Point to evaluate at.
-   * @param[in] a_dx       Grid spacing that sets the scale.
-   * @return The value, or exactly zero.
-   */
-  static Real
-  snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
 
 protected:
   /**
