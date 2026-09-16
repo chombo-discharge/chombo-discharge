@@ -888,6 +888,39 @@ regular/covered symbolically" and "take the BVH one step further" give identical
 merely does not materialise the boxes. One lookup serves both roles, and whichever PR needs it should
 implement it once.
 
+**Levels above the stop domain: transient, rebuilt per regrid.** `max_amr_depth` becomes
+`max_eb_depth`, and `max_sim_depth > max_eb_depth` will be allowed, so this is a real case, for #733 or
+#734. Not the removed machinery: `EBIndexSpace::extendLevel`/`EBISLevel::extendTo` (`8cae394`, removed
+in `f50929b`) grew an existing level to cover more cells and pulled the parents in recursively -- a level
+that is a moving target across regrids. Instead:
+
+1. Builder: for each simulation level finer than the stop domain, the layout is the simulation's grids
+   grown by the ghost width -- no tiles, curvature or decimation; the simulation's nesting is what the
+   level needs. Each box is classified by the ancestor rule (the BVH over the deepest existing level):
+   inherit regular/covered, irregular if the ancestor is an irregular leaf. An `addLevel(domain, grids)`
+   that runs step 3's classification without step 2.
+2. Index space: a new finest `EBISLevel` for that domain through the standard generator constructor --
+   `makeGrids` returns the builder's list, `InsideOutside` its tags, `fillGraph` on irregular boxes cuts
+   the leaf's stored polyhedra (#732's fill-from-parent). Prepended to the index space.
+3. Next regrid: the transient levels are dropped and rebuilt over the new grids. Nothing is extended in
+   place. The cost is cutting the polyhedra for the fine cut cells the simulation uses, which it needs
+   anyway; the carried-wider buffer (`ca890af9e`) was an optimisation of this rebuild and can return if
+   the re-cutting shows in profiles.
+
+Consequences: above the stop domain the geometry *is* the stop level's polyhedra -- a fine cell is cut
+from its ancestor, not reconstructed from the implicit function -- so there is no seam between the stop
+level and a transient level and the multichord trap has nothing to catch there; finer levels add
+resolution to the solution, not to the surface, and `max_eb_depth` is the knob where that is not
+acceptable. Both phases get transient levels over the same simulation grids, each classified by its own
+ancestor rule; the two-phase invariant holds without tiles because the layout is shared by construction.
+
+What it needs: from Chombo, a way for `EBIndexSpace` to prepend a finer level and drop it again -- it
+can only build coarser (`buildNextLevel`) and truncate (`resetLevels`), and `m_nlevels`,
+`m_domainList` and `EBISLayout::setMaxRefinementRatio` assume the finest level is fixed at define time.
+From the shop, answering `makeGrids`/`InsideOutside`/`fillGraph` for a domain its own `m_domains` never
+listed, i.e. consulting the builder by domain. From #732, the stop level's leaves keeping their surfaces
+(`m_surfaces`), which is the store everything above is cut from.
+
 ### Step 6 -- what is handed over, and to whom
 
 - To the shop (#732): per phase, per level, the final list and tags. `makeGrids` load-balances it;
