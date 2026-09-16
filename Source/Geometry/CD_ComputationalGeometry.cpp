@@ -1510,11 +1510,25 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
-  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. For now the polyhedral
-  // generator hands the index space to ScanShop as well: the polyhedral mesh is built on the grids makeGrids
-  // made and written out by writeSurfaceSTL, so that its seams can be looked at without the index space in
-  // the picture. The shop's moment machinery is untouched and plugs back in on those grids later.
-  if (m_generator == Generator::ScanShop || m_generator == Generator::PolyhedralShop) {
+  // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. The polyhedral generator
+  // computes its moments over the full grids ScanShop builds; the grids makeGrids made are not yet what the
+  // index space is generated over.
+  if (m_generator == Generator::PolyhedralShop) {
+    auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionGas,
+                                            0,
+                                            a_finestDx,
+                                            a_probLo,
+                                            a_finestDomain,
+                                            m_scanDomain,
+                                            m_maxGhostEB,
+                                            s_thresh,
+                                            s_strictGeometry);
+
+    shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
+
+    a_geoserver = static_cast<GeometryService*>(shop);
+  }
+  else if (m_generator == Generator::ScanShop) {
     auto* scanShop = new ScanShop(*m_implicitFunctionGas,
                                   0,
                                   a_finestDx,
@@ -1547,9 +1561,23 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
     a_geoserver = nullptr;
   }
   else {
-    // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. The polyhedral
-    // generator hands the index space to ScanShop for now; see buildGasGeometry.
-    if (m_generator == Generator::ScanShop || m_generator == Generator::PolyhedralShop) {
+    // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here.
+    if (m_generator == Generator::PolyhedralShop) {
+      auto* shop = new PolyhedralGeometryShop(*m_implicitFunctionSolid,
+                                              0,
+                                              a_finestDx,
+                                              a_probLo,
+                                              a_finestDomain,
+                                              m_scanDomain,
+                                              m_maxGhostEB,
+                                              s_thresh,
+                                              s_strictGeometry);
+
+      shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
+
+      a_geoserver = static_cast<GeometryService*>(shop);
+    }
+    else if (m_generator == Generator::ScanShop) {
       auto* scanShop = new ScanShop(*m_implicitFunctionSolid,
                                     0,
                                     a_finestDx,

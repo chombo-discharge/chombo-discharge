@@ -1428,12 +1428,12 @@ Driver::setupGeometryOnly()
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
+
+      this->makeGeometryGrids(scanDomain);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
     }
-
-    this->makeGeometryGrids(scanDomain);
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();
@@ -1542,12 +1542,12 @@ Driver::setupFresh(const int a_initialRegrids)
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
+
+      this->makeGeometryGrids(scanDomain);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
     }
-
-    this->makeGeometryGrids(scanDomain);
   }
   else if (m_geometryGeneration == "chombo") {
     if (m_ebisMemoryLoadBalance) {
@@ -1685,12 +1685,12 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel]);
+
+      this->makeGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
     }
     else {
       m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
     }
-
-    this->makeGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
   }
   else if (m_geometryGeneration == "chombo") {
     m_computationalGeometry->useChomboShop();
