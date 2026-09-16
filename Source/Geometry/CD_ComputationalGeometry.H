@@ -395,9 +395,16 @@ protected:
    *
    *   The loop always runs to m_stopLevel: once no box splits, the curvature test has nothing to do, but the
    *   boxes that are regular or covered in both phases still refine whole onto every remaining level.
+   *
+   * The links from each box to its children are handed back for classifyTiles to descend by; they describe
+   * the lists as the upward pass leaves them and are stale once decimateBoxes has rewritten a level.
+   *
+   * @param[out] a_firstChild  Per level and box, the index on the next level of the first child, or -1 for a leaf.
+   * @param[out] a_numChildren Per level and box, the number of children: one for a whole refinement, the number
+   *                           of pieces for a split, zero for a leaf.
    */
   void
-  buildFinerLevels();
+  buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vector<Vector<int>>& a_numChildren);
 
   /**
    * @brief Classify a list of boxes in both phases, the work shared between the ranks.
@@ -505,16 +512,69 @@ protected:
    *         per phase: classifyBox(t, lvl, phase) -- a carried tile is generated from the implicit function at
    *                    its own level, so that is the consistent answer
    *
-   * Nothing is cut here; the hosts are what decimateBoxes reads.
+   * Nothing is cut here; the hosts are what decimateBoxes reads. The box a tile lies in is found by descending
+   * the child links from the start level, where the box containing a point is lattice arithmetic.
    *
+   * @param[in]  a_firstChild     Child links from buildFinerLevels.
+   * @param[in]  a_numChildren    Child counts from buildFinerLevels.
    * @param[out] a_gasTileTypes   Gas-phase classification of each tile, indexed [level][tile].
    * @param[out] a_solidTileTypes Solid-phase classification of each tile, indexed [level][tile].
    * @param[out] a_tileHosts      Index of the box each tile lies in, or -1, indexed [level][tile].
    */
   void
-  classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+  classifyTiles(const Vector<Vector<int>>&              a_firstChild,
+                const Vector<Vector<int>>&              a_numChildren,
+                Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                 Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
                 Vector<Vector<int>>&                    a_tileHosts) const;
+
+  /**
+   * @brief Index of the box of a whole level that contains a point.
+   * @details A whole level is a domainSplit of its domain to m_maxBlockSize, so the box holding a point is
+   * found from the point's position on that lattice; the table maps lattice cells to box indices.
+   * @param[in] a_level Level, at or below the start level.
+   * @return One box index per lattice cell, in lexicographic order of the lattice.
+   */
+  Vector<int>
+  latticeTable(const int a_level) const;
+
+  /**
+   * @brief Look a point up in a lattice table.
+   * @param[in] a_table Table from latticeTable.
+   * @param[in] a_level Level the table was made for.
+   * @param[in] a_point Cell on that level.
+   * @return Index of the box containing the cell.
+   */
+  int
+  latticeLookup(const Vector<int>& a_table, const int a_level, const IntVect& a_point) const;
+
+  /**
+   * @brief Key of the super-tile a cell lies in, for finding tiles.
+   * @param[in] a_cell Cell on some level.
+   * @return Packed super-tile coordinates, 21 bits per direction.
+   */
+  long long
+  superTileKey(const IntVect& a_cell) const noexcept;
+
+  /**
+   * @brief Tiles of a level intersecting a box, found through their super-tile keys.
+   * @details The tiles of a level are indexed by the key of the super-tile they lie in, so the tiles meeting a
+   * box are found by looking up the keys of the super-tiles the box touches.
+   * @param[in] a_level  Level, above the start level.
+   * @param[in] a_order  Tile indices of the level sorted by super-tile key, from sortTilesByKey.
+   * @param[in] a_box    Box on that level.
+   * @return Indices into m_tiles[a_level] of the tiles that intersect the box.
+   */
+  Vector<int>
+  tilesMeeting(const int a_level, const Vector<int>& a_order, const Box& a_box) const;
+
+  /**
+   * @brief Tile indices of a level sorted by super-tile key.
+   * @param[in] a_level Level, above the start level.
+   * @return The indices.
+   */
+  Vector<int>
+  sortTilesByKey(const int a_level) const;
 
   /**
    * @brief Step 4: cut every hit box down to what the tiles left of it, and replace the lists on the tiled

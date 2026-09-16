@@ -11,6 +11,7 @@
  */
 
 // Std includes
+#include <algorithm>
 #include <cmath>
 
 // Chombo includes
@@ -18,6 +19,7 @@
 #include <BoxIterator.H>
 #include <BRMeshRefine.H>
 #include <IntVectSet.H>
+#include <TreeIntVectSet.H>
 #include <SPMD.H>
 #include <MFIndexSpace.H>
 #include <IntersectionIF.H>
@@ -387,15 +389,18 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //   5. The levels coarser than the start level, whole and classified box by box as ScanShop builds them; then,
   //      from the finest level down, a box containing a box irregular in a phase is irregular in that phase
   //      (buildCoarserLevels).
+  Vector<Vector<int>> firstChild(numLevels);
+  Vector<Vector<int>> numChildren(numLevels);
+
   this->buildStartLevel();
-  this->buildFinerLevels();
+  this->buildFinerLevels(firstChild, numChildren);
   this->makeTiles();
 
   Vector<Vector<GeometryService::InOut>> gasTileTypes(numLevels);
   Vector<Vector<GeometryService::InOut>> solidTileTypes(numLevels);
   Vector<Vector<int>>                    tileHosts(numLevels);
 
-  this->classifyTiles(gasTileTypes, solidTileTypes, tileHosts);
+  this->classifyTiles(firstChild, numChildren, gasTileTypes, solidTileTypes, tileHosts);
   this->decimateBoxes(gasTileTypes, solidTileTypes, tileHosts);
   this->buildCoarserLevels();
 }
@@ -464,7 +469,7 @@ ComputationalGeometry::buildStartLevel()
 }
 
 void
-ComputationalGeometry::buildFinerLevels()
+ComputationalGeometry::buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vector<Vector<int>>& a_numChildren)
 {
   CH_TIME("ComputationalGeometry::buildFinerLevels");
 
@@ -477,10 +482,15 @@ ComputationalGeometry::buildFinerLevels()
     const Vector<GeometryService::InOut>& gasTypes   = m_gasTypes[lvl];
     const Vector<GeometryService::InOut>& solidTypes = m_solidTypes[lvl];
 
-    // A box regular or covered in both phases refines whole, keeping both tags. These go in first so that a
-    // parent's refinement sits at the parent's position among the whole refinements on the next level.
+    a_firstChild[lvl].resize(boxes.size(), -1);
+    a_numChildren[lvl].resize(boxes.size(), 0);
+
+    // A box regular or covered in both phases refines whole, keeping both tags.
     for (int i = 0; i < boxes.size(); i++) {
       if (!isIrregular(gasTypes[i]) && !isIrregular(solidTypes[i])) {
+        a_firstChild[lvl][i]  = m_boxes[lvl + 1].size();
+        a_numChildren[lvl][i] = 1;
+
         m_boxes[lvl + 1].push_back(refine(boxes[i], 2));
         m_gasTypes[lvl + 1].push_back(gasTypes[i]);
         m_solidTypes[lvl + 1].push_back(solidTypes[i]);
@@ -499,6 +509,9 @@ ComputationalGeometry::buildFinerLevels()
         Vector<Box> split;
 
         domainSplit(refine(boxes[i], 2), split, m_maxBlockSize, m_minBlockSize);
+
+        a_firstChild[lvl][i]  = m_boxes[lvl + 1].size() + pieces.size();
+        a_numChildren[lvl][i] = split.size();
 
         pieces.append(split);
       }
@@ -798,14 +811,225 @@ ComputationalGeometry::makeTiles()
   }
 }
 
+Vector<int>
+ComputationalGeometry::latticeTable(const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::latticeTable");
+
+  const Box& domain = m_domains[a_level].domainBox();
+
+  IntVect dims;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    dims[dir] = (domain.size(dir) + m_maxBlockSize - 1) / m_maxBlockSize;
+  }
+
+  Vector<int> table(dims.product(), -1);
+
+  for (int i = 0; i < m_boxes[a_level].size(); i++) {
+    const int cell = this->latticeLookup(Vector<int>(), a_level, m_boxes[a_level][i].smallEnd());
+
+    table[cell] = i;
+  }
+
+  for (int i = 0; i < table.size(); i++) {
+    if (table[i] < 0) {
+      MayDay::Error("ComputationalGeometry::latticeTable - a whole level does not cover its domain");
+    }
+  }
+
+  return table;
+}
+
+int
+ComputationalGeometry::latticeLookup(const Vector<int>& a_table, const int a_level, const IntVect& a_point) const
+{
+  // Lexicographic linear index of the lattice cell holding the point. With an empty table the cell index itself
+  // is returned, which is how latticeTable fills the table in the first place.
+  const Box& domain = m_domains[a_level].domainBox();
+
+  int index  = 0;
+  int stride = 1;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const int cells = (domain.size(dir) + m_maxBlockSize - 1) / m_maxBlockSize;
+    const int cell  = (a_point[dir] - domain.smallEnd(dir)) / m_maxBlockSize;
+
+    index += cell * stride;
+    stride *= cells;
+  }
+
+  return (a_table.size() == 0) ? index : a_table[index];
+}
+
+long long
+ComputationalGeometry::superTileKey(const IntVect& a_cell) const noexcept
+{
+  // Super-tile coordinates, packed 21 bits per direction, as TiledMeshRefine packs its own keys. Cells are
+  // never negative in a domain that starts at the origin.
+  long long key = 0;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const long long coord = static_cast<long long>(a_cell[dir]) / m_maxBlockSize;
+
+    key |= (coord & ((1LL << 21) - 1)) << (21 * dir);
+  }
+
+  return key;
+}
+
+Vector<int>
+ComputationalGeometry::sortTilesByKey(const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::sortTilesByKey");
+
+  const Vector<Box>& tiles = m_tiles[a_level];
+
+  Vector<int> order(tiles.size());
+
+  for (int i = 0; i < tiles.size(); i++) {
+    order[i] = i;
+  }
+
+  std::sort(order.stdVector().begin(), order.stdVector().end(), [&](const int a, const int b) {
+    return this->superTileKey(tiles[a].smallEnd()) < this->superTileKey(tiles[b].smallEnd());
+  });
+
+  return order;
+}
+
+Vector<int>
+ComputationalGeometry::tilesMeeting(const int a_level, const Vector<int>& a_order, const Box& a_box) const
+{
+  // A tile lies inside one super-tile, so the tiles meeting a box are among those keyed by the super-tiles the
+  // box touches: each such key is found by binary search in the sorted order and its run scanned.
+  const Vector<Box>& tiles = m_tiles[a_level];
+
+  Vector<int> found;
+
+  const Box superTiles = coarsen(a_box, m_maxBlockSize);
+
+  for (BoxIterator bit(superTiles); bit.ok(); ++bit) {
+    const long long key = this->superTileKey(bit() * m_maxBlockSize);
+
+    auto keyLess = [&](const int a_tile, const long long a_key) -> bool {
+      return this->superTileKey(tiles[a_tile].smallEnd()) < a_key;
+    };
+
+    const std::vector<int>& order = a_order.constStdVector();
+
+    for (auto it = std::lower_bound(order.begin(), order.end(), key, keyLess); it != order.end(); ++it) {
+      if (this->superTileKey(tiles[*it].smallEnd()) != key) {
+        break;
+      }
+
+      if (tiles[*it].intersectsNotEmpty(a_box)) {
+        found.push_back(*it);
+      }
+    }
+  }
+
+  return found;
+}
+
 void
-ComputationalGeometry::classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_firstChild,
+                                     const Vector<Vector<int>>&              a_numChildren,
+                                     Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                                      Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
                                      Vector<Vector<int>>&                    a_tileHosts) const
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
 
-  // Step 3. Waits for the containing-box lookup; see the header for the pseudocode.
+  constexpr int regular   = 1;
+  constexpr int covered   = 2;
+  constexpr int irregular = 3;
+
+  auto encode = [&](const GeometryService::InOut a_type) -> int {
+    return (a_type == GeometryService::Regular) ? regular : (a_type == GeometryService::Covered) ? covered : irregular;
+  };
+
+  auto decode = [&](const int a_code) -> GeometryService::InOut {
+    if (a_code == regular) {
+      return GeometryService::Regular;
+    }
+    else if (a_code == covered) {
+      return GeometryService::Covered;
+    }
+    else if (a_code == irregular) {
+      return GeometryService::Irregular;
+    }
+
+    MayDay::Error("ComputationalGeometry::classifyTiles - a tile was classified by no rank or by several");
+
+    return GeometryService::Irregular;
+  };
+
+  const Vector<int> startTable = this->latticeTable(m_startLevel);
+
+  for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+    const Vector<Box>& tiles = m_tiles[lvl];
+
+    a_tileHosts[lvl].resize(tiles.size(), -1);
+
+    // The box a tile lies in: the start-level box under it is lattice arithmetic, and from there the child
+    // links descend one level at a time, picking the child that contains the tile's coarsening. Running out of
+    // children before the tile's level is the hole.
+    for (int t = 0; t < tiles.size(); t++) {
+      const IntVect startCell = coarsen(tiles[t], 1 << (lvl - m_startLevel)).smallEnd();
+
+      int host = this->latticeLookup(startTable, m_startLevel, startCell);
+
+      for (int k = m_startLevel; k < lvl && host >= 0; k++) {
+        const int first = a_firstChild[k][host];
+        const int num   = a_numChildren[k][host];
+
+        const Box target = coarsen(tiles[t], 1 << (lvl - k - 1));
+
+        host = -1;
+
+        for (int c = first; c < first + num; c++) {
+          if (m_boxes[k + 1][c].contains(target)) {
+            host = c;
+
+            break;
+          }
+        }
+      }
+
+      a_tileHosts[lvl][t] = host;
+    }
+
+    // Per phase, a tile inherits from a regular or covered host and is otherwise classified by the implicit
+    // function at its own level: inside an irregular host because the host is conservative, in a hole because a
+    // carried tile is generated at its level. Shared between the ranks by tile and assembled with one all-reduce.
+    Vector<int> codes(2 * tiles.size(), 0);
+
+    for (int t = procID(); t < tiles.size(); t += numProc()) {
+      const int host = a_tileHosts[lvl][t];
+
+      const phase::which_phase phases[2] = {phase::gas, phase::solid};
+
+      for (int p = 0; p < 2; p++) {
+        const GeometryService::InOut hostType = (host >= 0) ? this->types(phases[p])[lvl][host]
+                                                            : GeometryService::Irregular;
+
+        codes[2 * t + p] = (hostType == GeometryService::Irregular)
+                             ? encode(this->classifyBox(tiles[t], lvl, phases[p]))
+                             : encode(hostType);
+      }
+    }
+
+    ParallelOps::sum(codes);
+
+    a_gasTileTypes[lvl].resize(tiles.size());
+    a_solidTileTypes[lvl].resize(tiles.size());
+
+    for (int t = 0; t < tiles.size(); t++) {
+      a_gasTileTypes[lvl][t]   = decode(codes[2 * t]);
+      a_solidTileTypes[lvl][t] = decode(codes[2 * t + 1]);
+    }
+  }
 }
 
 void
@@ -815,7 +1039,64 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
 {
   CH_TIME("ComputationalGeometry::decimateBoxes");
 
-  // Step 4. Waits for step 3; see the header for the pseudocode.
+  for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+    const Vector<Box>&                    oldBoxes      = m_boxes[lvl];
+    const Vector<GeometryService::InOut>& oldGasTypes   = m_gasTypes[lvl];
+    const Vector<GeometryService::InOut>& oldSolidTypes = m_solidTypes[lvl];
+    const Vector<Box>&                    tiles         = m_tiles[lvl];
+
+    // Which tiles each box hosts.
+    Vector<Vector<int>> hosted(oldBoxes.size());
+
+    for (int t = 0; t < tiles.size(); t++) {
+      if (a_tileHosts[lvl][t] >= 0) {
+        hosted[a_tileHosts[lvl][t]].push_back(t);
+      }
+    }
+
+    // The tiles come first, with their own classifications.
+    Vector<Box>                    newBoxes      = tiles;
+    Vector<GeometryService::InOut> newGasTypes   = a_gasTileTypes[lvl];
+    Vector<GeometryService::InOut> newSolidTypes = a_solidTileTypes[lvl];
+
+    for (int i = 0; i < oldBoxes.size(); i++) {
+      const bool irregular = (oldGasTypes[i] == GeometryService::Irregular) ||
+                             (oldSolidTypes[i] == GeometryService::Irregular);
+
+      if (hosted[i].size() == 0) {
+        // Untouched: kept as it is.
+        newBoxes.push_back(oldBoxes[i]);
+        newGasTypes.push_back(oldGasTypes[i]);
+        newSolidTypes.push_back(oldSolidTypes[i]);
+      }
+      else if (irregular) {
+        // A box irregular in some phase is a super-tile the tiles cover in full; the tiles replace it.
+        continue;
+      }
+      else {
+        // A regular or covered box loses the tiles inside it. Done in tile coordinates, where the box and every
+        // tile are whole cells, with TreeIntVectSet: one node for the box, a descent per tile, and one box per
+        // remaining full node. Correct and octree-graded; not tight, and replaceable here.
+        TreeIntVectSet remainder(coarsen(oldBoxes[i], m_minBlockSize));
+
+        for (int j = 0; j < hosted[i].size(); j++) {
+          remainder -= coarsen(tiles[hosted[i][j]], m_minBlockSize);
+        }
+
+        const Vector<Box> pieces = remainder.createBoxes();
+
+        for (int j = 0; j < pieces.size(); j++) {
+          newBoxes.push_back(refine(pieces[j], m_minBlockSize));
+          newGasTypes.push_back(oldGasTypes[i]);
+          newSolidTypes.push_back(oldSolidTypes[i]);
+        }
+      }
+    }
+
+    m_boxes[lvl]      = newBoxes;
+    m_gasTypes[lvl]   = newGasTypes;
+    m_solidTypes[lvl] = newSolidTypes;
+  }
 }
 
 void
@@ -832,8 +1113,45 @@ ComputationalGeometry::buildCoarserLevels()
     this->classifyBoxes(m_boxes[lvl], lvl, m_gasTypes[lvl], m_solidTypes[lvl]);
   }
 
-  // The push-down -- a box containing a box irregular in a phase is irregular in that phase -- waits for the
-  // containing-box lookup; see the header for the pseudocode.
+  // The push-down: a box containing a box that is irregular in a phase is irregular in that phase, from the
+  // finest level down. Above the start level the container of an irregular tile's coarsening is among the tiles
+  // of the level below, by nesting; at and below the start level the levels are whole and the container is
+  // lattice arithmetic. A coarsened tile may straddle two tiles, and then both are marked.
+  const phase::which_phase phases[2] = {phase::gas, phase::solid};
+
+  for (int lvl = m_stopLevel - 1; lvl >= 0; lvl--) {
+    const Vector<int> order = (lvl > m_startLevel) ? this->sortTilesByKey(lvl) : Vector<int>();
+    const Vector<int> table = (lvl <= m_startLevel) ? this->latticeTable(lvl) : Vector<int>();
+
+    for (const phase::which_phase& curPhase : phases) {
+      const Vector<GeometryService::InOut>& fineTypes = this->types(curPhase)[lvl + 1];
+      Vector<GeometryService::InOut>&       coarTypes = this->types(curPhase)[lvl];
+
+      for (int i = 0; i < m_boxes[lvl + 1].size(); i++) {
+        if (fineTypes[i] != GeometryService::Irregular) {
+          continue;
+        }
+
+        const Box coarsened = coarsen(m_boxes[lvl + 1][i], 2);
+
+        if (lvl > m_startLevel) {
+          const Vector<int> containers = this->tilesMeeting(lvl, order, coarsened);
+
+          if (containers.size() == 0) {
+            MayDay::Error("ComputationalGeometry::buildCoarserLevels - an irregular tile has no tile beneath it");
+          }
+
+          // The tiles come first in a decimated level's list, so a tile index is its index in m_boxes.
+          for (int j = 0; j < containers.size(); j++) {
+            coarTypes[containers[j]] = GeometryService::Irregular;
+          }
+        }
+        else {
+          coarTypes[this->latticeLookup(table, lvl, coarsened.smallEnd())] = GeometryService::Irregular;
+        }
+      }
+    }
+  }
 }
 
 void
