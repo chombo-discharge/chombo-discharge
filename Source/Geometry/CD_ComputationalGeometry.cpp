@@ -10,6 +10,9 @@
  * @author Robert Marskar
  */
 
+// Std includes
+#include <cmath>
+
 // Chombo includes
 #include <MFIndexSpace.H>
 #include <IntersectionIF.H>
@@ -249,14 +252,14 @@ ComputationalGeometry::buildImplicitFunctions()
 }
 
 void
-ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
+ComputationalGeometry::makeGrids(const ProblemDomain& a_scanDomain,
                                  const RealVect&      a_probLo,
-                                 const Real           a_startDx,
+                                 const Real           a_finestDx,
+                                 const Real           a_refineAngle,
                                  const int            a_maxEbDepth,
                                  const int            a_minBlockSize,
                                  const int            a_maxBlockSize,
-                                 const int            a_maxGhostEB,
-                                 const Real           a_refineAngle)
+                                 const int            a_maxGhostEB)
 {
   CH_TIME("ComputationalGeometry::makeGrids");
 
@@ -271,14 +274,14 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   m_maxGhostEB   = a_maxGhostEB;
   m_refineAngle  = a_refineAngle;
 
-  // Every level is a factor-two refinement of the start domain.
+  // Every level is a factor-two refinement of the scan domain, and the finest one has the finest spacing.
   const int numLevels = 1 + m_maxEbDepth;
 
   m_gridDomains.resize(numLevels);
   m_gridDx.resize(numLevels);
 
-  m_gridDomains[0] = a_startDomain;
-  m_gridDx[0]      = a_startDx;
+  m_gridDomains[0] = a_scanDomain;
+  m_gridDx[0]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
 
   for (int lvl = 1; lvl < numLevels; lvl++) {
     m_gridDomains[lvl] = refine(m_gridDomains[lvl - 1], 2);

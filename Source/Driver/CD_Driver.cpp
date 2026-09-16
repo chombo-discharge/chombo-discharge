@@ -1487,37 +1487,35 @@ Driver::setupGeometryOnly()
 }
 
 void
-Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
+Driver::makeGeometryGrids(const ProblemDomain& a_scanDomain)
 {
   CH_TIME("Driver::makeGeometryGrids");
   if (m_verbosity > 5) {
     pout() << "Driver::makeGeometryGrids" << endl;
   }
 
-  // The finest domain is a factor-two refinement of the start domain some number of times; that number is the
-  // depth the grids may reach, and it also gives the start domain's grid spacing from the finest one.
+  // The finest domain is a factor-two refinement of the scan domain some number of times; that number is the
+  // depth the grids may reach.
   const ProblemDomain& finestDomain = m_amr->getFinestDomain();
 
-  ProblemDomain curDomain  = a_startDomain;
+  ProblemDomain curDomain  = a_scanDomain;
   int           maxEbDepth = 0;
-  Real          startDx    = m_amr->getFinestDx();
 
   while (curDomain.domainBox().size(0) < finestDomain.domainBox().size(0)) {
     curDomain.refine(2);
     maxEbDepth++;
-    startDx *= 2.0;
   }
 
   CH_assert(curDomain == finestDomain);
 
-  m_computationalGeometry->makeGrids(a_startDomain,
+  m_computationalGeometry->makeGrids(a_scanDomain,
                                      m_amr->getProbLo(),
-                                     startDx,
+                                     m_amr->getFinestDx(),
+                                     m_refineAngle,
                                      maxEbDepth,
                                      m_amr->getMinBlockSize(),
                                      m_amr->getMaxBlockSize(),
-                                     m_amr->getNumberOfEbGhostCells(),
-                                     m_refineAngle);
+                                     m_amr->getNumberOfEbGhostCells());
 }
 
 void
