@@ -738,97 +738,136 @@ the *simulation* go finer than this here". Level 4 can be a hole there only beca
 So the regrid PR must clip the physics tags to `T_l`, and the builder hands Driver `T_l` as the
 coverage for both phases, not per-phase sets.
 
-## The mesh builder in `ComputationalGeometry`: the algorithm
+## The mesh builder in `ComputationalGeometry`: the consolidated plan
 
-Built before any `EBIndexSpace` exists, on the implicit functions alone; the shops later consume its
-box lists. The boxes and their classifications persist as members, per phase and per level, because
-they are the product: the shop's `makeGrids`/`InsideOutside` read them, Driver's coverage reads `T`,
-and the irregular set will be shown as a simulation grid for inspection later.
+Built before any `EBIndexSpace` exists, on the implicit functions alone. Its product is box lists
+with classifications, per phase and per level, kept as members: the shops read them through
+`makeGrids`/`InsideOutside`, Driver reads the tiles as its coverage, and the irregular set will be
+shown as a simulation grid for inspection later. All level indices here are AMR-indexed, coarsest
+first; the record quotes EBIS code elsewhere with the opposite convention.
 
-**Inputs.** Coarsest domain and refinement ratios (2 throughout); the start level Driver hands in;
-the EBIS box size `maxGridSize`; the simulation's `min_block_size`/`max_block_size` as the tile and
-super-tile sizes; `m_maxGhostEB`; `refine_angles`; the two implicit functions.
+### Inputs
 
-**State.** Per phase `p`, per level `l`: `Vector<Box>` of regular, covered and irregular boxes.
-Per level: `T_l` as `Vector<Box>`. After decimation, per phase per level: the final box list and a
-parallel tag list, which is what the shop is given. Nothing is a `DisjointBoxLayout` until the shop
-load-balances it.
+- coarsest domain, refinement ratio 2 throughout;
+- the start level, from Driver: the finest level built whole;
+- `max_eb_depth`, the finest level the upward pass may reach whatever the curvature says (today's
+  `max_amr_depth`, renamed in the calls because the terminology may change);
+- `maxGridSize` (the EBIS box size) and the simulation's `min_block_size`/`max_block_size` (tile and
+  super-tile); `maxGridSize` must be a multiple of `max_block_size`;
+- `m_maxGhostEB`; `refine_angles`; the two implicit functions.
 
-**Step 0 -- levels at and below the start level.** `domainSplit` of the whole domain to `maxGridSize`,
-every box classified. This is `ScanShop::buildCoarseLevel`. Classification is
-`ScanShop::isRegular`/`isCovered` (`CD_ScanShopImplem.H` lines 43-100): cell-centre values on the
-box grown by `m_maxGhostEB`, regular iff every value `< -halfDiagonal`, covered iff every value
-`> halfDiagonal`, with the scan skip that assumes the implicit function is signed distance. Nothing
-new is needed there beyond making it callable on an implicit function rather than through a shop.
+### State, per phase `p` and per level `l`
 
-**Step 1 -- upward, per phase.** From level `l` to `l+1`, for each box at `l`:
+`Vector<Box>` regular, covered, irregular. Per level, common to both phases: `T_l`. After decimation,
+per phase per level: the final box list with a parallel tag list. Nothing is a `DisjointBoxLayout`
+until a shop load-balances it. The lists persist for the life of the object.
 
-- regular or covered: `refine(box, 2)`, pushed whole with the same tag; no scan, no split. Exactly
-  `buildFinerLevels`.
-- irregular: the **box-level curvature test** with early exit. Build the node-value fab of the box
-  grown by one cell (`(M+3)^D` implicit-function evaluations, shared by every cell of the box). A cell
-  is cut iff its `2^D` corner values differ in sign; its normal is the gradient of the corner values --
-  the trilinear interpolant's gradient at the centre, no further evaluations. For each cut cell compare
-  its normal with those of its cut neighbours inside the grown box; the first pair whose angle exceeds
-  `refine_angles` ends the scan: the box is **split** -- `refine(box, 2)`, `domainSplit` to
-  `maxGridSize`, each piece classified into `R`, `C` or `I` at `l+1` -- and the scan moves on. A box
-  no pair in fails is a **leaf**: nothing is pushed to `l+1` beneath it, which is the hole. A
-  multi-valued cell (two disjoint cut regions in one cell, visible as more than two sign changes on the
-  cell's edge cycle) always splits, as Driver's tagger always tags it.
-- stop when no irregular box split, or `l+1` is the finest domain.
+### Step 0 -- the start level and below
 
-The per-cell neighbour comparison is what `refine_angles` means today (`Driver::getGeometryTags`,
-`CD_Driver.cpp` lines 296-346, compares each cut cell's normal to its cut neighbours within
-`min(2, ghost)` and tags when the angle exceeds the threshold). The normal there is the EBIS normal
-from the reconstructed cell; here it is the corner-gradient. The numbers differ slightly, the meaning
--- a per-cell normal jump -- does not, and it halves per level on a smooth surface, so the test
-converges.
+`domainSplit` of the whole domain to `maxGridSize`; every box classified by cell-centre values on the
+box grown by `m_maxGhostEB`: regular iff every value `< -halfDiagonal`, covered iff every value
+`> halfDiagonal`, irregular otherwise, with the scan skip that assumes signed distance
+(`ScanShop::isRegular`/`isCovered`, `CD_ScanShopImplem.H` lines 43-100, made callable on an implicit
+function). Every level at or below the start level is whole in both phases; no hole exists there.
 
-Work is distributed as ScanShop distributes it: each rank classifies a share of the boxes, the box
-lists are gathered and every rank holds all of them, in a deterministic order. What is stored per
-level is `R`, `C`, `I` for the phase; the hole is their complement above the start level.
+### Step 1 -- upward, per phase, to `max_eb_depth`
 
-**Step 2 -- the tiles, once.** `tags_l = I_l^gas ∪ I_l^solid` for every `l` above the start level.
-`TiledMeshRefine` with the start-level domain as its coarsest, refinement ratio 2, tile size
-`min_block_size`, super-tile `max_block_size`; tags on level `l-1` produce tiles on `l`, so each
-`I_l` box goes in as `coarsen(box, 2)` (or through a box-tag entry: `nestFrom`'s `addNest` lambda is
-that primitive). Its level 0 is the start level, already whole, and is discarded as `AmrMesh` discards
-it. The nesting buffer is one tile, which is `≥ m_maxGhostEB` when `min_block_size ≥ 2 · ghost`.
-Output `T_l` is disjoint, tile-aligned, rank-identical. This is the downward sweep: `regrid` runs
-finest to coarsest and injects the buffer level by level.
+From level `l` to `l+1`, for each box at `l`:
 
-**Step 3 -- the walk, per phase.** BVH over `R_l^p ∪ C_l^p ∪ I_l^p` (replicated, so every rank builds
-the same tree) and BVH over `T_l`; the dual walk (`EBGeometry`'s `TreeBVH`, half-open AABBs from
-`{smallEnd, bigEnd + 1}` so the strict test is `intersectsNotEmpty`). Under the constraint that
-`maxGridSize` is a multiple of `max_block_size`, a tile meets at most one box, so the walk records:
+- **regular or covered:** `refine(box, 2)`, pushed whole with the same tag. No scan, no split. This
+  is what guarantees that nothing beneath a regular or covered box is ever a hole.
+- **irregular:** the box-level curvature test, early exit. Cut cells do not exist at this point and
+  are not looked for; the test runs on the implicit function. Over the cells of the box grown by one
+  cell, take the cells in the band `|f(x)| ≤ √D · dx` at the cell centre (the scan skip prunes the
+  rest), evaluate the normal there by central differences of `f` (no implicit function in the tree
+  implements `BaseIF::derivative`; the base throws), and compare each band cell's normal with those of
+  its band neighbours. The first pair whose angle exceeds `refine_angles` ends the scan: the box
+  **splits** -- `refine(box, 2)`, `domainSplit` to `maxGridSize`, each piece classified as in step 0
+  -- and the scan moves to the next box. A box no pair in fails is a **leaf**: nothing is pushed
+  beneath it, which is the hole above it.
+- stop when no box split, or `l+1 == max_eb_depth`.
 
-- for each tile: the box it lies in and that box's tag, or that it lies in a hole;
-- for each regular or covered box: the tiles inside it.
+Across a sharp edge the angle is the dihedral angle at every `dx` and never shrinks, so edges refine
+to `max_eb_depth`. That is intended (it is where the multichord seam lives) and it is what
+`refine_angles` does today off EBIS normals; `max_eb_depth` bounds the depth, `refine_angles` does
+not on a geometry with edges. A difference across a kink of a min/max composite averages the two
+faces, which reads as a jump against either neighbour: the same behaviour from the other side.
 
-Tag per tile: Irregular in an `I^p` box; inherited in `R^p`/`C^p`; **classified geometrically** in a
-hole, by step 0's test on the grown tile, and added to `I_l^p` if it comes out cut so that the
-irregular set is complete for the shop and for inspection.
+Work is distributed as ScanShop distributes it: each rank classifies a share of the boxes, the lists
+are gathered and every rank holds all of them in a deterministic order.
 
-**Step 4 -- decimation, per phase, last.** For each regular or covered box with tiles inside it,
-remainder `= box \ tiles`, tagged as the box was. First implementation: `TreeIntVectSet` in tile
-coordinates (`define(box)` one node, `-=` per tile, `createBoxes`), correct and octree-graded, not
-tight. The tightness question is deferred; the recorded intersections are the interface any packer
-would consume, so replacing this step touches nothing else. The final per-level, per-phase list is
-`T_l` with its tags, the remainders with theirs, and every untouched box.
+### Step 2 -- the tiles, once, after both phases have finished step 1
 
-**Step 5 -- hand-over.** The shop's `makeGrids(level)` returns the phase's final list load-balanced;
-`InsideOutside` returns the recorded tag. `fillGraph` runs on Irregular tiles only. Driver's
-`regridAmrOntoGeometry` takes `T_l` as the coverage for both phases. Both of those are #732's and the
-regrid PR's; the builder's product is the lists.
+`tags_l = I_l^gas ∪ I_l^solid` for every level above the start level. One `TiledMeshRefine` with the
+start-level domain as its coarsest, ratio 2, tile `min_block_size`, super-tile `max_block_size`; each
+irregular box enters as `coarsen(box, 2)` on the level below (or through a box-tag entry: `nestFrom`'s
+`addNest` lambda is that primitive). Its level 0 is the start level, already whole, and is discarded
+as `AmrMesh` discards it. The buffer is one tile per level, `≥ m_maxGhostEB` when
+`min_block_size ≥ 2 · ghost`. Output `T_l`: disjoint, tile-aligned, identical on every rank. This is
+the downward sweep; `regrid` descends internally and injects the buffer level by level.
 
-**Constraints the algorithm places on the inputs.** `maxGridSize` a multiple of `max_block_size`;
-`min_block_size ≥ 2 · m_maxGhostEB`; the scan skip's signed-distance assumption, already made by
-ScanShop; the start level is whole in both phases.
+No collar is added beyond the union. The simulation's ghost cells may reach past `T` into a hole;
+answering for those cells is the index space's job (below), not the builder's.
 
-**What is not yet decided.** Whether steps 3-4 run replicated on every rank (deterministic, no
-communication, `O(N log N)` per rank) or distributed by regular/covered box and gathered; whether the
-hole-tile classification in step 3 needs the tile's neighbours (it does not for the tag; it would for
-a curvature test, which is not run there); the packer.
+### Step 3 -- the walk, per phase
+
+BVH over the phase's `R_l ∪ C_l ∪ I_l` and BVH over `T_l` (`EBGeometry`'s `TreeBVH`, half-open
+AABBs `{smallEnd, bigEnd + 1}` so the strict test equals `intersectsNotEmpty`); dual walk. With
+`maxGridSize` a multiple of `max_block_size`, a tile meets at most one box. Every tile at level `l`
+lies in exactly one of three places, and the walk records which:
+
+1. **inside an irregular box** of this phase at `l`: tag Irregular;
+2. **inside a regular or covered box** of this phase at `l`: tag inherited, and the tile is appended
+   to that box's list of intersecting tiles;
+3. **inside the refinement of a leaf** of this phase at `l-1` -- a hole: no box to inherit from, so
+   the tile is classified by step 0's test on the grown tile. Its parent is irregular, so any of the
+   three answers can come out.
+
+Case 3 arises within a single phase as well as across phases: the buffer from `T_{l+1}` reaches into
+the refinement of a leaf at `l-1` whenever a box next to that leaf split twice. There is no fourth
+place, because `T` is nested and every level at or below the start level is whole. Every tile's
+answer is appended to the phase's `R`, `C` or `I` list at `l`, so each box the shop is handed has a
+tag.
+
+### Step 4 -- decimation, per phase, last
+
+For each regular or covered box with a non-empty tile list, remainder `= box \ tiles`, tagged as the
+box was. First implementation: `TreeIntVectSet` in tile coordinates (`define(box)` one node, `-=` per
+tile, `createBoxes`), correct, octree-graded, not tight. The tile lists recorded in step 3 are the
+interface any packer consumes, so replacing this step touches nothing else. The final list at `l`
+for the phase is `T_l` with its tags, the remainders, and every box no tile touched.
+
+### Step 5 -- what is handed over, and to whom
+
+- To the shop (#732): per phase, per level, the final list and tags. `makeGrids` load-balances it;
+  `InsideOutside` returns the recorded tag; `fillGraph` runs on Irregular boxes only.
+- To Driver (the regrid PR): `T_l` as the coverage for both phases, and the physics tags clipped to
+  it.
+- To the index space (#732): the contract the fill-from-parent path relies on when a simulation box's
+  ghost region, or a later regrid, reaches an uncarried cell:
+  1. a hole exists only above an **irregular leaf of the same phase**; nothing beneath a regular or
+     covered box is ever a hole, and the start level and below are whole, so a hole cell's parent
+     chain is irregular down to a generated level;
+  2. the leaf is generated and its surfaces stored, so the hole is filled by cutting them, at a
+     resolution bounded by `max_eb_depth`;
+  3. what the builder guarantees is the lists above; what it does not guarantee is that `T` covers
+     the simulation's ghosts. To check in #732: that the fill path is wired to
+     `EBISLayoutImplem::define`'s copy for a partial region (a ghost ring), not only to whole-level
+     construction (`3ffd27464` cuts a level).
+
+### Constraints on the inputs
+
+`maxGridSize` a multiple of `max_block_size`; `min_block_size ≥ 2 · m_maxGhostEB`; the start level
+whole in both phases; the signed-distance assumption behind the scan skip, already made by ScanShop.
+
+### Left open
+
+Whether steps 3-4 run replicated on every rank (deterministic, no communication, `O(N log N)` per
+rank) or distributed by box and gathered; which ranks tag which boxes for step 2's gather once the
+lists are replicated (`gatherSuperTiles` is correct with duplicates, but every rank tagging every box
+multiplies the gather by `nprocs`; partition the replicated list by index); the finite-difference
+step relative to `dx`; what an empty level's list means to the shop (a phase whose deepest tile is at
+`l` still answers `makeGrids` down to the finest domain); the packer.
 
 ## Claimed but not established
 
