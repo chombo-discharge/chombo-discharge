@@ -146,17 +146,17 @@ public:
   /**
    * @brief Build the grids the index space is generated over, per phase and per level.
    * @details The grids are built before any index space exists, from the implicit functions alone. Level 0 is
-   * the scan domain, built whole; every finer level is a factor-two refinement of it, up to a_maxEbDepth levels,
+   * the start domain, built whole; every finer level is a factor-two refinement of it, up to a_maxEbDepth levels,
    * the last of which has spacing a_finestDx. Every box made here is at most a_maxBlockSize wide and lies on
    * the a_maxBlockSize lattice, so the cut-cell grids of both phases are unions of the same super-tiles. The
    * result, per phase and per level, is a box list with a classification for every box, read through
    * getGrids/getGridTypes; the cut-cell tiles common to both phases are read through getTiles. Without an
    * implicit function a phase is one regular box on every level.
-   * @param[in] a_scanDomain   Coarsest domain built here, level 0. Built whole in both phases.
+   * @param[in] a_startDomain   Coarsest domain built here, level 0. Built whole in both phases.
    * @param[in] a_probLo       Lower-left corner of the domain.
-   * @param[in] a_finestDx     Grid spacing on the finest level, a_maxEbDepth refinements above a_scanDomain.
+   * @param[in] a_finestDx     Grid spacing on the finest level, a_maxEbDepth refinements above a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
-   * @param[in] a_maxEbDepth   Number of factor-two levels above a_scanDomain that may be built.
+   * @param[in] a_maxEbDepth   Number of factor-two levels above a_startDomain that may be built.
    * @param[in] a_minBlockSize Tile size in cells: the finest granularity of the cut-cell grids, and the nesting
    *                           buffer between levels. Must be at least twice a_maxGhostEB.
    * @param[in] a_maxBlockSize Super-tile size in cells: the size every box made here is split to. A multiple of
@@ -164,7 +164,7 @@ public:
    * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified.
    */
   virtual void
-  makeGrids(const ProblemDomain& a_scanDomain,
+  makeGrids(const ProblemDomain& a_startDomain,
             const RealVect&      a_probLo,
             const Real           a_finestDx,
             const Real           a_refineAngle,
@@ -174,7 +174,7 @@ public:
             const int            a_maxGhostEB);
 
   /**
-   * @brief Number of levels makeGrids built, level 0 being the scan domain.
+   * @brief Number of levels makeGrids built, level 0 being the start domain.
    * @return Number of levels; zero before makeGrids has run.
    */
   int
@@ -183,7 +183,7 @@ public:
   /**
    * @brief Final grids of one phase on one level, after decimation.
    * @param[in] a_phase Phase.
-   * @param[in] a_level Level, 0 being the scan domain.
+   * @param[in] a_level Level, 0 being the start domain.
    * @return Boxes of the level, parallel to getGridTypes.
    */
   const Vector<Box>&
@@ -192,7 +192,7 @@ public:
   /**
    * @brief Classification of each box in getGrids.
    * @param[in] a_phase Phase.
-   * @param[in] a_level Level, 0 being the scan domain.
+   * @param[in] a_level Level, 0 being the start domain.
    * @return One classification per box, parallel to getGrids.
    */
   const Vector<GeometryService::InOut>&
@@ -203,7 +203,7 @@ public:
    * @details These are the regular, covered and irregular boxes as the upward pass left them; the irregular
    * ones are what the tiles are made from, and what will be shown as a simulation grid for inspection.
    * @param[in] a_phase Phase.
-   * @param[in] a_level Level, 0 being the scan domain.
+   * @param[in] a_level Level, 0 being the start domain.
    * @param[in] a_type  Classification to select.
    * @return The boxes with that classification.
    */
@@ -213,7 +213,7 @@ public:
   /**
    * @brief The properly nested cut-cell tiles on one level, common to both phases.
    * @details This is the coverage the simulation regrids onto.
-   * @param[in] a_level Level, 0 being the scan domain.
+   * @param[in] a_level Level, 0 being the start domain.
    * @return Tiles of the level.
    */
   const Vector<Box>&
@@ -319,7 +319,7 @@ protected:
   buildImplicitFunctions();
 
   /**
-   * @brief Step 0: build and classify the scan level of one phase.
+   * @brief Step 0: build and classify the start level of one phase.
    * @details Pseudocode:
    *
    *   boxes = domainSplit(m_gridDomains[0], m_maxBlockSize)
@@ -333,7 +333,7 @@ protected:
   buildStartLevel(const phase::which_phase a_phase);
 
   /**
-   * @brief Step 1: the upward pass of one phase, from the scan level to m_maxEbDepth.
+   * @brief Step 1: the upward pass of one phase, from the start level to m_maxEbDepth.
    * @details Pseudocode:
    *
    *   for lvl = 0 .. m_maxEbDepth - 1:
@@ -454,7 +454,7 @@ protected:
   decimateBoxes(const phase::which_phase a_phase);
 
   /**
-   * @brief Domains of the levels makeGrids builds, level 0 being the scan domain.
+   * @brief Domains of the levels makeGrids builds, level 0 being the start domain.
    */
   Vector<ProblemDomain> m_gridDomains;
 
@@ -469,7 +469,7 @@ protected:
   RealVect m_gridProbLo;
 
   /**
-   * @brief Number of levels above the scan domain that makeGrids may build.
+   * @brief Number of levels above the start domain that makeGrids may build.
    */
   int m_maxEbDepth;
 

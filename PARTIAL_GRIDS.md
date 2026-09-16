@@ -751,7 +751,7 @@ first; the record quotes EBIS code elsewhere with the opposite convention.
 - coarsest domain, its grid spacing, and `probLo` -- the implicit functions are evaluated at physical
   points, so the builder needs the resolution, not only the index space; refinement ratio 2
   throughout;
-- the scan domain, from Driver (ScanShop's word for it): the finest level built whole, level 0 here;
+- the start domain, from Driver (the domain ScanShop calls the scan level): the finest level built whole, level 0 here;
 - `max_eb_depth`, the finest level the upward pass may reach whatever the curvature says (today's
   `max_amr_depth`, renamed in the calls because the terminology may change);
 - the simulation's `min_block_size`/`max_block_size`: tile and super-tile for the tiler, and also the
@@ -767,13 +767,13 @@ first; the record quotes EBIS code elsewhere with the opposite convention.
 per phase per level: the final box list with a parallel tag list. Nothing is a `DisjointBoxLayout`
 until a shop load-balances it. The lists persist for the life of the object.
 
-### Step 0 -- the scan level and below
+### Step 0 -- the start level and below
 
 `domainSplit` of the whole domain to `max_block_size`; every box classified by cell-centre values on the
 box grown by `m_maxGhostEB`: regular iff every value `< -halfDiagonal`, covered iff every value
 `> halfDiagonal`, irregular otherwise, with the scan skip that assumes signed distance
 (`ScanShop::isRegular`/`isCovered`, `CD_ScanShopImplem.H` lines 43-100, made callable on an implicit
-function). Every level at or below the scan level is whole in both phases; no hole exists there.
+function). Every level at or below the start level is whole in both phases; no hole exists there.
 
 ### Step 1 -- upward, per phase, to `max_eb_depth`
 
@@ -803,11 +803,11 @@ are gathered and every rank holds all of them in a deterministic order.
 
 ### Step 2 -- the tiles, once, after both phases have finished step 1
 
-`tags_l = I_l^gas ∪ I_l^solid` for every level above the scan level. One `TiledMeshRefine` with the
+`tags_l = I_l^gas ∪ I_l^solid` for every level above the start level. One `TiledMeshRefine` with the
 start-level domain as its coarsest, ratio 2, tile `min_block_size`, super-tile `max_block_size`; each
 irregular box is a super-tile already, so it enters exactly, as `coarsen(box, 2)` on the level below
 or through a box-tag entry (`nestFrom`'s `addNest` lambda is that primitive). Its level 0 is the
-scan level, already whole, and is discarded
+start level, already whole, and is discarded
 as `AmrMesh` discards it. The buffer is one tile per level, `≥ m_maxGhostEB` when
 `min_block_size ≥ 2 · ghost`. Output `T_l`: disjoint, tile-aligned, identical on every rank. This is
 the downward sweep; `regrid` descends internally and injects the buffer level by level.
@@ -832,7 +832,7 @@ lies in exactly one of three places, and the walk records which:
 
 Case 3 arises within a single phase as well as across phases: the buffer from `T_{l+1}` reaches into
 the refinement of a leaf at `l-1` whenever a box next to that leaf split twice. There is no fourth
-place, because `T` is nested and every level at or below the scan level is whole. Every tile's
+place, because `T` is nested and every level at or below the start level is whole. Every tile's
 answer is appended to the phase's `R`, `C` or `I` list at `l`, so each box the shop is handed has a
 tag.
 
@@ -853,7 +853,7 @@ for the phase is `T_l` with its tags, the remainders, and every box no tile touc
 - To the index space (#732): the contract the fill-from-parent path relies on when a simulation box's
   ghost region, or a later regrid, reaches an uncarried cell:
   1. a hole exists only above an **irregular leaf of the same phase**; nothing beneath a regular or
-     covered box is ever a hole, and the scan level and below are whole, so a hole cell's parent
+     covered box is ever a hole, and the start level and below are whole, so a hole cell's parent
      chain is irregular down to a generated level;
   2. the leaf is generated and its surfaces stored, so the hole is filled by cutting them, at a
      resolution bounded by `max_eb_depth`;
@@ -864,7 +864,7 @@ for the phase is `T_l` with its tags, the remainders, and every box no tile touc
 
 ### Constraints on the inputs
 
-`min_block_size ≥ 2 · m_maxGhostEB`; the scan level whole in both phases; the signed-distance
+`min_block_size ≥ 2 · m_maxGhostEB`; the start level whole in both phases; the signed-distance
 assumption behind the scan skip, already made by ScanShop.
 
 ### Left open

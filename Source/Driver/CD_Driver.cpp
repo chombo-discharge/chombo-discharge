@@ -1487,18 +1487,18 @@ Driver::setupGeometryOnly()
 }
 
 void
-Driver::makeGeometryGrids(const ProblemDomain& a_scanDomain)
+Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
 {
   CH_TIME("Driver::makeGeometryGrids");
   if (m_verbosity > 5) {
     pout() << "Driver::makeGeometryGrids" << endl;
   }
 
-  // The finest domain is a factor-two refinement of the scan domain some number of times; that number is the
+  // The finest domain is a factor-two refinement of the start domain some number of times; that number is the
   // depth the grids may reach.
   const ProblemDomain& finestDomain = m_amr->getFinestDomain();
 
-  ProblemDomain curDomain  = a_scanDomain;
+  ProblemDomain curDomain  = a_startDomain;
   int           maxEbDepth = 0;
 
   while (curDomain.domainBox().size(0) < finestDomain.domainBox().size(0)) {
@@ -1508,7 +1508,7 @@ Driver::makeGeometryGrids(const ProblemDomain& a_scanDomain)
 
   CH_assert(curDomain == finestDomain);
 
-  m_computationalGeometry->makeGrids(a_scanDomain,
+  m_computationalGeometry->makeGrids(a_startDomain,
                                      m_amr->getProbLo(),
                                      m_amr->getFinestDx(),
                                      m_refineAngle,

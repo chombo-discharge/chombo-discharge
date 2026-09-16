@@ -252,7 +252,7 @@ ComputationalGeometry::buildImplicitFunctions()
 }
 
 void
-ComputationalGeometry::makeGrids(const ProblemDomain& a_scanDomain,
+ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const RealVect&      a_probLo,
                                  const Real           a_finestDx,
                                  const Real           a_refineAngle,
@@ -274,13 +274,13 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_scanDomain,
   m_maxGhostEB   = a_maxGhostEB;
   m_refineAngle  = a_refineAngle;
 
-  // Every level is a factor-two refinement of the scan domain, and the finest one has the finest spacing.
+  // Every level is a factor-two refinement of the start domain, and the finest one has the finest spacing.
   const int numLevels = 1 + m_maxEbDepth;
 
   m_gridDomains.resize(numLevels);
   m_gridDx.resize(numLevels);
 
-  m_gridDomains[0] = a_scanDomain;
+  m_gridDomains[0] = a_startDomain;
   m_gridDx[0]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
 
   for (int lvl = 1; lvl < numLevels; lvl++) {
