@@ -639,6 +639,40 @@ carried *region*" is decided by construction rather than by audit: the tiles are
 tiles carry honest tags, and nothing downstream is asked to tolerate a half-and-half box. It stays in
 the list below only as the audit of what downstream assumes, which is still unperformed.
 
+**Corrections and the open item (packing the remainder).**
+
+- Step 1 should be the dual walk after all, not a point query per tile: the dual walk is
+  `O(output + depth)` because neighbouring tiles share the descent, `|T| · log N` does not. `T_l` comes
+  out of `makeBoxesFromTiles` in sorted-key order, so its BVH is a build over an already coherent list.
+- Steps 2-3 are the decimation. What is not settled is how tightly the remainder `B \ hits` is packed.
+  The remainder is Regular/Covered, so tightness is box *count* (one `int` per box on the wire, one
+  entry per box in every layout loop), not storage.
+- `TreeIntVectSet::createBoxes` is not tight. It splits only at midpoints: `B` minus a one-super-tile
+  slab on one face is ideally one box, the octree gives about `2^(D-1)` boxes per level of depth
+  (`~4 · depth` in 3D, ~40 boxes for a `B` ten super-tiles deep). Graded, exact, but paying `O(depth)`
+  boxes for a shape that needs one.
+- Tight means splitting at an empty slab before splitting at the middle. That is the Berger-Rigoutsos
+  rule `packTiles` already implements (`CD_TiledMeshRefine.cpp` line 420 ff: emit when the node is
+  fully tagged and under the cap, else cut at a zero-signature slab nearest the middle, else at the
+  strongest inflection, else at the midpoint). It runs on an explicit tile list, which the complement
+  of the hits inside a large `B` cannot be -- enumerating it is `O(volume of B)`.
+- The rule does not need the set explicit; it needs signatures and two predicates. Along an axis the
+  complement's signature is `slab area − hit signature`; a node is fully complement iff it contains no
+  hit; fully hit iff its hit count equals its volume. All three come from the hit boxes alone (each hit
+  is a box of tiles, so its slab contribution is a range, `O(1)` per slab per box). BR on that implicit
+  complement is `packTiles` with a different oracle: `O(hits · log)` per recursion level, never touches
+  the volume of `B`, one box for the bulk when the hits form a slab, and a tightly packed layer where
+  they do not.
+- The cheap partial answer -- peel `B \ minBox(hits)` as at most `2D` exact slabs, then enumerate the
+  complement inside `minBox(hits)` -- works when the hit layer is thin and fails when the surface
+  crosses `B` corner to corner (`minBox(hits) ≈ B`). The recursion is needed for that case, which is
+  the implicit-BR above.
+- Hits per `B`: a big regular box next to the surface is hit along the faces that face it, so hits
+  scale with `B`'s face area in tiles, and the remainder layer can leave `O(hits)` small boxes where
+  the layer is bumpy. Chombo's `MergeBoxesOnLines` (`BoxTools/MergeBoxesOnLines.H`) merges a box list
+  along one direction as a post-pass. Whether that layer is acceptable, or the tiles should be coarsened
+  to super-tiles for the purposes of decimation to keep the layer flat, is the user's call.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
