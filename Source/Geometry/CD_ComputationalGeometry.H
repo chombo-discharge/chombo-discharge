@@ -96,6 +96,17 @@ public:
   setGeometrySurfaceFile(const std::string& a_fileName) noexcept;
 
   /**
+   * @brief The generator that built one phase's index space.
+   * @details Null when the geometry was not built, or was built by something other than the
+   *          polyhedral generator. It is kept alive for as long as the index space it built, so a
+   *          cell can be reconstructed from it long after generation.
+   * @param[in] a_phase Phase to ask about.
+   * @return The generator, or null.
+   */
+  const RefCountedPtr<GeometryService>&
+  getGeometryGenerator(const phase::which_phase a_phase) const noexcept;
+
+  /**
    * @brief Generate the geometry with PolyhedralGeometryShop.
    * @details Same topology as the chombo-discharge generator, but the moments are exact
    * integrals of an explicitly reconstructed surface rather than quadratures of the implicit

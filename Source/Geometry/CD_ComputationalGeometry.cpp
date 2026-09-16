@@ -69,6 +69,14 @@ ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
   m_scanDomain = a_beginDomain;
 }
 
+const RefCountedPtr<GeometryService>&
+ComputationalGeometry::getGeometryGenerator(const phase::which_phase a_phase) const noexcept
+{
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
+  return m_geoservers[a_phase];
+}
+
 void
 ComputationalGeometry::setGeometrySurfaceFile(const std::string& a_fileName) noexcept
 {
@@ -233,18 +241,6 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
                                  useDistributedData,
                                  a_nCellMax,
                                  a_maxCoarsen);
-
-  // the surface is collected cell by cell as the levels are filled, and cannot be written until
-  // every level has been, because a cell is only left out once the level below it has been seen
-  if (!m_geometrySurfaceFile.empty()) {
-    for (int i = 0; i < geoServices.size(); i++) {
-      const auto* shop = dynamic_cast<const PolyhedralGeometryShop*>(geoServices[i]);
-
-      if (shop != nullptr) {
-        shop->flushSurfaceSTL();
-      }
-    }
-  }
 }
 
 Real
@@ -713,10 +709,6 @@ ComputationalGeometry::buildGasGeometry(RefCountedPtr<GeometryService>& a_geoser
     shop->setCoverage(m_coverageRegions, m_coverageDomain, m_coverageBuffer);
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
 
-    if (!m_geometrySurfaceFile.empty()) {
-      shop->setSurfaceFileName(m_geometrySurfaceFile + ".gas.stl");
-    }
-
     a_geoserver = RefCountedPtr<GeometryService>(static_cast<GeometryService*>(shop));
   }
   else if (m_generator == Generator::ScanShop) {
@@ -771,10 +763,6 @@ ComputationalGeometry::buildSolidGeometry(RefCountedPtr<GeometryService>& a_geos
 
       shop->setCoverage(m_coverageRegions, m_coverageDomain, m_coverageBuffer);
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
-
-      if (!m_geometrySurfaceFile.empty()) {
-        shop->setSurfaceFileName(m_geometrySurfaceFile + ".solid.stl");
-      }
 
       a_geoserver = RefCountedPtr<GeometryService>(static_cast<GeometryService*>(shop));
     }

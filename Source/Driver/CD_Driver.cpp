@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 // Chombo includes
 #include <EBArith.H>
@@ -28,6 +29,7 @@
 
 // Our includes
 #include <CD_Driver.H>
+#include <CD_PolyhedralGeometryShop.H>
 #include <CD_Random.H>
 #include <CD_VofUtils.H>
 #include <CD_DataOps.H>
@@ -1563,12 +1565,11 @@ Driver::regridAmrOntoGeometry(const int a_lmin, const int a_hardcap)
     pout() << "Driver::regridAmrOntoGeometry(int, int)" << endl;
   }
 
-  // Where the pre-pass ran, the index space was carried only over the boxes it produced, so the
-  // grids are taken from those boxes rather than clustered again from the tags. An independent
-  // clustering of the same tags comes out nearly the same, and the cells where it differs are
-  // cells whose embedded boundary data was never generated: the operators that read across a
-  // refinement boundary ask a coarse cell which fine cells lie under it, and a cell the index
-  // space does not carry a finer level over holds no record of that.
+  // Where the pre-pass ran, the grids are the boxes it produced. They are not the boxes the index
+  // space is generated over, and must not be: retainBox reaches a ghost width past them so that a
+  // box's ghost cells have geometry in them, and grids that reached as far would have ghost cells
+  // the index space never carried. An unfilled graph reads as regular fluid rather than as missing,
+  // so that loss would not announce itself.
   const Vector<Vector<Box>>& coverageRegions = m_computationalGeometry->getCoverageRegions();
 
   if (coverageRegions.size() > 0) {
@@ -1577,6 +1578,8 @@ Driver::regridAmrOntoGeometry(const int a_lmin, const int a_hardcap)
   else {
     m_amr->regridAmr(m_geomTags, a_lmin, a_hardcap);
   }
+
+  this->writeGeometrySurface();
 }
 
 void
@@ -2397,6 +2400,8 @@ Driver::writeGeometry()
   snprintf(suffix, sizeof(suffix), ".geometry.%dd.hdf5", SpaceDim);
   string fname = prefix + suffix;
 
+  this->checkGridsAgainstIndexSpace(m_amr->getGrids(m_realm));
+
 #ifdef CH_USE_HDF5
   DischargeIO::writeEBHDF5(fname,
                            names,
@@ -2411,6 +2416,220 @@ Driver::writeGeometry()
                            1 + m_amr->getFinestLevel(),
                            m_numPlotGhost);
 #endif
+}
+
+void
+Driver::checkGridsAgainstIndexSpace(const Vector<DisjointBoxLayout>& a_grids) const
+{
+  CH_TIME("Driver::checkGridsAgainstIndexSpace(Vector<DisjointBoxLayout>)");
+
+  // The surface is written from these grids and the moments are read from the index space, so the
+  // two have to describe the same cells. They are built from the same boxes, but only where the
+  // pre-pass ran: everywhere else the index space carries every level in full and the simulation
+  // does not, and the two are expected to differ.
+  if (m_computationalGeometry->getCoverageRegions().size() == 0) {
+    return;
+  }
+
+  const RefCountedPtr<EBIndexSpace>& ebis = m_computationalGeometry->getMfIndexSpace()->getEBIndexSpace(phase::gas);
+
+  for (int lvl = 0; lvl < a_grids.size(); lvl++) {
+    const ProblemDomain&     domain    = m_amr->getDomains()[lvl];
+    const DisjointBoxLayout& ebisGrids = ebis->getGrids(domain);
+
+    IntVectSet fromGrids;
+    IntVectSet fromIndexSpace;
+
+    for (int i = 0; i < a_grids[lvl].boxArray().size(); i++) {
+      fromGrids |= a_grids[lvl].boxArray()[i];
+    }
+
+    for (int i = 0; i < ebisGrids.boxArray().size(); i++) {
+      fromIndexSpace |= ebisGrids.boxArray()[i];
+    }
+
+    // The index space is wider than the grids on purpose, so the test is containment rather than
+    // equality, and it is the grids grown by the ghost width that have to be contained: an unfilled
+    // graph reads as regular fluid, so a ghost cell the index space never carried is silently wrong
+    // rather than missing.
+    IntVectSet grown;
+
+    for (int i = 0; i < a_grids[lvl].boxArray().size(); i++) {
+      Box box = a_grids[lvl].boxArray()[i];
+      box.grow(m_amr->getNumberOfEbGhostCells());
+      box &= domain.domainBox();
+
+      grown |= box;
+    }
+
+    grown -= fromIndexSpace;
+
+    if (grown.numPts() > 0) {
+      std::ostringstream message;
+
+      message << "Driver::checkGridsAgainstIndexSpace - on level " << lvl << ", " << grown.numPts()
+              << " cells of the grids grown by the " << m_amr->getNumberOfEbGhostCells()
+              << " ghost cells the geometry needs lie outside what the index space carries";
+
+      MayDay::Error(message.str().c_str());
+    }
+  }
+}
+
+void
+Driver::writeGeometrySurface() const
+{
+  CH_TIME("Driver::writeGeometrySurface()");
+  if (m_verbosity > 3) {
+    pout() << "Driver::writeGeometrySurface()" << endl;
+  }
+
+  if (m_geometrySurfaceFile.empty()) {
+    return;
+  }
+
+  const Vector<int>& refRat = m_amr->getRefinementRatios();
+
+  for (int iphase = 0; iphase < 2; iphase++) {
+    const phase::which_phase              which     = (iphase == 0) ? phase::gas : phase::solid;
+    const RefCountedPtr<GeometryService>& generator = m_computationalGeometry->getGeometryGenerator(which);
+
+    if (generator.isNull()) {
+      continue;
+    }
+
+    const auto* shop = dynamic_cast<const PolyhedralGeometryShop*>(&(*generator));
+
+    if (shop == nullptr) {
+      continue;
+    }
+
+    // The surface is taken from the grids the simulation runs on, cell by cell, so that what is
+    // written is what the discretisation sees: valid cells only, and for a cell that a finer level
+    // also covers, the finer level's description rather than this one's.
+    Vector<Vector<Real>> facets(1 + m_amr->getFinestLevel());
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, which)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+
+      IntVectSet covered;
+
+      if (lvl < m_amr->getFinestLevel()) {
+        const DisjointBoxLayout& finer = m_amr->getGrids(m_realm)[lvl + 1];
+
+        for (int i = 0; i < finer.boxArray().size(); i++) {
+          covered |= coarsen(finer.boxArray()[i], refRat[lvl]);
+        }
+      }
+
+      const int nbox = dit.size();
+
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        IntVectSet irreg = ebisl[din].getIrregIVS(dbl[din]);
+
+        irreg -= covered;
+
+        for (IVSIterator ivsIt(irreg); ivsIt.ok(); ++ivsIt) {
+          shop->interfaceFacets(facets[lvl], ivsIt(), m_amr->getProbLo(), m_amr->getDx()[lvl]);
+        }
+      }
+    }
+
+    this->writeSurfaceSTL(facets, m_geometrySurfaceFile + ((which == phase::gas) ? ".gas.stl" : ".solid.stl"));
+  }
+}
+
+void
+Driver::writeSurfaceSTL(const Vector<Vector<Real>>& a_facets, const std::string& a_fileName) const
+{
+  CH_TIME("Driver::writeSurfaceSTL(Vector<Vector<Real> >, string)");
+
+  std::string stem = a_fileName;
+
+  if (stem.size() > 4 && stem.compare(stem.size() - 4, 4, ".stl") == 0) {
+    stem.resize(stem.size() - 4);
+  }
+
+  std::ofstream composite;
+
+  if (procID() == 0) {
+    composite.open(a_fileName);
+    composite << std::scientific << std::setprecision(17) << "solid interface\n";
+  }
+
+  for (int lvl = 0; lvl < a_facets.size(); lvl++) {
+    Vector<Vector<Real>> everyone;
+    Vector<Real>         mine = a_facets[lvl];
+
+    gather(everyone, mine, 0);
+
+    if (procID() != 0) {
+      continue;
+    }
+
+    long long here = 0;
+
+    for (int rank = 0; rank < everyone.size(); rank++) {
+      here += everyone[rank].size() / (3 * SpaceDim);
+    }
+
+    std::ofstream level;
+
+    if (here > 0) {
+      std::ostringstream name;
+      name << stem << ".level" << lvl << ".stl";
+
+      level.open(name.str());
+      level << std::scientific << std::setprecision(17) << "solid interface\n";
+    }
+
+    for (int rank = 0; rank < everyone.size(); rank++) {
+      const Vector<Real>& f = everyone[rank];
+
+      for (int i = 0; i + 3 * SpaceDim <= f.size(); i += 3 * SpaceDim) {
+        std::ostringstream facet;
+
+        facet << "  facet normal 0 0 0\n    outer loop\n";
+
+        for (int v = 0; v < 3; v++) {
+          facet << "      vertex";
+
+          for (int d = 0; d < SpaceDim; d++) {
+            facet << " " << f[i + SpaceDim * v + d];
+          }
+
+          facet << "\n";
+        }
+
+        facet << "    endloop\n  endfacet\n";
+
+        if (composite.is_open()) {
+          composite << facet.str();
+        }
+
+        if (level.is_open()) {
+          level << facet.str();
+        }
+      }
+    }
+
+    if (level.is_open()) {
+      level << "endsolid interface\n";
+      level.close();
+    }
+
+    pout() << "SURFACE " << a_fileName << " level " << lvl << " dx " << m_amr->getDx()[lvl] << " triangles " << here
+           << endl;
+  }
+
+  if (composite.is_open()) {
+    composite << "endsolid interface\n";
+    composite.close();
+  }
 }
 
 void
