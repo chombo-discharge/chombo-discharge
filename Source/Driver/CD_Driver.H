@@ -541,9 +541,9 @@ protected:
 
   /**
    * @brief Build the grids the index space is generated over, from the start domain to the finest domain.
-   * @details Hands ComputationalGeometry::makeGrids the start domain as its level 0, the number of factor-two
-   * levels between it and the finest AMR domain as the depth, and the simulation's block sizes, EB ghost count
-   * and refinement angle. Runs before the geometry is built, since the generators read the grids it makes.
+   * @details Hands ComputationalGeometry::makeGrids the start domain, the finest AMR domain as the stop domain,
+   * and the simulation's block sizes, EB ghost count and refinement angle. Runs before the geometry is built,
+   * since the generators read the grids it makes.
    * @param[in] a_startDomain Coarsest domain built whole; the same domain the scan-based generators begin on.
    */
   void

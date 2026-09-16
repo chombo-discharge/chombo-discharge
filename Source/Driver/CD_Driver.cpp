@@ -1494,25 +1494,11 @@ Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
     pout() << "Driver::makeGeometryGrids" << endl;
   }
 
-  // The finest domain is a factor-two refinement of the start domain some number of times; that number is the
-  // depth the grids may reach.
-  const ProblemDomain& finestDomain = m_amr->getFinestDomain();
-
-  ProblemDomain curDomain  = a_startDomain;
-  int           maxEbDepth = 0;
-
-  while (curDomain.domainBox().size(0) < finestDomain.domainBox().size(0)) {
-    curDomain.refine(2);
-    maxEbDepth++;
-  }
-
-  CH_assert(curDomain == finestDomain);
-
   m_computationalGeometry->makeGrids(a_startDomain,
+                                     m_amr->getFinestDomain(),
                                      m_amr->getProbLo(),
                                      m_amr->getFinestDx(),
                                      m_refineAngle,
-                                     maxEbDepth,
                                      m_amr->getMinBlockSize(),
                                      m_amr->getMaxBlockSize(),
                                      m_amr->getNumberOfEbGhostCells());

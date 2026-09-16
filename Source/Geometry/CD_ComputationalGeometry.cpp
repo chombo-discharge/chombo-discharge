@@ -39,7 +39,7 @@ ComputationalGeometry::ComputationalGeometry()
     m_refineAngle(0.0),
     m_maxGhostEB(0),
     m_startLevel(0),
-    m_maxEbDepth(0),
+    m_stopLevel(0),
     m_minBlockSize(0),
     m_maxBlockSize(0)
 {
@@ -255,10 +255,10 @@ ComputationalGeometry::buildImplicitFunctions()
 
 void
 ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
+                                 const ProblemDomain& a_stopDomain,
                                  const RealVect&      a_probLo,
                                  const Real           a_finestDx,
                                  const Real           a_refineAngle,
-                                 const int            a_maxEbDepth,
                                  const int            a_minBlockSize,
                                  const int            a_maxBlockSize,
                                  const int            a_maxGhostEB)
@@ -275,9 +275,6 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   }
   if (a_refineAngle < 0.0) {
     MayDay::Error("ComputationalGeometry::makeGrids - the refinement angle must not be negative");
-  }
-  if (a_maxEbDepth < 0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - the depth must not be negative");
   }
   if (a_maxGhostEB < 0) {
     MayDay::Error("ComputationalGeometry::makeGrids - the ghost width must not be negative");
@@ -304,37 +301,42 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   }
 
   m_probLo       = a_probLo;
-  m_maxEbDepth   = a_maxEbDepth;
   m_minBlockSize = a_minBlockSize;
   m_maxBlockSize = a_maxBlockSize;
   m_maxGhostEB   = a_maxGhostEB;
   m_refineAngle  = a_refineAngle;
 
   // The levels are every factor-two coarsening of the start domain down to the coarsest domain that can still be
-  // coarsened by two, the start domain itself, and m_maxEbDepth refinements above it, the last of which has the
-  // finest spacing. Level 0 is the coarsest domain.
+  // coarsened by two, the start domain itself, and every factor-two refinement of it up to the stop domain.
+  // Level 0 is the coarsest domain.
   m_startLevel = 0;
 
   for (ProblemDomain coarDomain = a_startDomain; coarDomain.domainBox().coarsenable(2); coarDomain.coarsen(2)) {
     m_startLevel++;
   }
 
-  const int numLevels = m_startLevel + 1 + m_maxEbDepth;
+  m_stopLevel = m_startLevel;
+
+  for (ProblemDomain fineDomain = a_startDomain; fineDomain.domainBox().size(0) < a_stopDomain.domainBox().size(0);
+       fineDomain.refine(2)) {
+    m_stopLevel++;
+  }
+
+  if (refine(a_startDomain, static_cast<int>(std::pow(2, m_stopLevel - m_startLevel))) != a_stopDomain) {
+    MayDay::Error("ComputationalGeometry::makeGrids - the stop domain is not a refinement by two of the start domain");
+  }
+
+  const int numLevels = 1 + m_stopLevel;
 
   m_domains.resize(numLevels);
   m_dx.resize(numLevels);
 
-  m_domains[m_startLevel] = a_startDomain;
-  m_dx[m_startLevel]      = a_finestDx * std::pow(2.0, m_maxEbDepth);
+  m_domains[m_stopLevel] = a_stopDomain;
+  m_dx[m_stopLevel]      = a_finestDx;
 
-  for (int lvl = m_startLevel - 1; lvl >= 0; lvl--) {
+  for (int lvl = m_stopLevel - 1; lvl >= 0; lvl--) {
     m_domains[lvl] = coarsen(m_domains[lvl + 1], 2);
     m_dx[lvl]      = 2.0 * m_dx[lvl + 1];
-  }
-
-  for (int lvl = m_startLevel + 1; lvl < numLevels; lvl++) {
-    m_domains[lvl] = refine(m_domains[lvl - 1], 2);
-    m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
   }
 
   m_tiles.resize(numLevels);
@@ -351,7 +353,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   //
   //   0. Start level, per phase: domainSplit the whole domain and classify every box regular, covered or
   //      irregular (buildStartLevel, classifyBox).
-  //   1. Upward, per phase, to the finest level: a regular or covered box refines whole with its tag. An
+  //   1. Upward, per phase, to the stop domain: a regular or covered box refines whole with its tag. An
   //      irregular box is split into classified pieces if the implicit function's normal turns by more than
   //      m_refineAngle between neighbouring cells near the surface; otherwise it is a leaf and nothing is built
   //      above it (buildFinerLevels, exceedsCurvature).

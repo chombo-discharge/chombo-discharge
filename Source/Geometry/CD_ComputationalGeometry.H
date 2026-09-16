@@ -147,25 +147,25 @@ public:
    * @brief Build the grids the index space is generated over.
    * @details Built before any index space exists, from the implicit functions alone. The start domain is built
    * whole, as is every coarser domain down to the coarsest that can still be coarsened by two; above it the
-   * levels are factor-two refinements, a_maxEbDepth of them, the last with spacing a_finestDx. Levels are indexed
-   * from the coarsest domain; getLevel finds the index of a domain. Every box lies on the a_maxBlockSize lattice,
-   * so the cut-cell grids of both phases are unions of the same super-tiles. Without an implicit function a phase
-   * is one regular box on every level.
+   * levels are factor-two refinements up to and including the stop domain, which has spacing a_finestDx. Levels
+   * are indexed from the coarsest domain; getLevel finds the index of a domain. Every box lies on the
+   * a_maxBlockSize lattice, so the cut-cell grids of both phases are unions of the same super-tiles. Without an
+   * implicit function a phase is one regular box on every level.
    * @param[in] a_startDomain  Domain the upward pass starts from.
+   * @param[in] a_stopDomain   Finest domain built; a factor-two refinement of a_startDomain some number of times.
    * @param[in] a_probLo       Lower-left corner of the domain.
-   * @param[in] a_finestDx     Grid spacing on the finest level.
+   * @param[in] a_finestDx     Grid spacing on a_stopDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
-   * @param[in] a_maxEbDepth   Number of levels above a_startDomain.
    * @param[in] a_minBlockSize Tile size in cells. At least twice a_maxGhostEB.
    * @param[in] a_maxBlockSize Super-tile size in cells. A multiple of a_minBlockSize.
    * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified.
    */
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
+            const ProblemDomain& a_stopDomain,
             const RealVect&      a_probLo,
             const Real           a_finestDx,
             const Real           a_refineAngle,
-            const int            a_maxEbDepth,
             const int            a_minBlockSize,
             const int            a_maxBlockSize,
             const int            a_maxGhostEB);
@@ -302,9 +302,9 @@ protected:
   int m_startLevel;
 
   /**
-   * @brief Number of levels above the start domain.
+   * @brief Level of the stop domain, the finest level.
    */
-  int m_maxEbDepth;
+  int m_stopLevel;
 
   /**
    * @brief Tile size, in cells.
@@ -404,7 +404,7 @@ protected:
    * @brief Step 1: the upward pass of one phase, from the start level to the finest level.
    * @details Pseudocode:
    *
-   *   for lvl = m_startLevel .. m_startLevel + m_maxEbDepth - 1:
+   *   for lvl = m_startLevel .. m_stopLevel - 1:
    *     for each regular or covered box on lvl (this rank's share):
    *       append refine(box, 2) to the same list on lvl + 1                -- never a hole beneath these
    *     for each irregular box on lvl (this rank's share):
@@ -465,7 +465,7 @@ protected:
    * @brief Step 2: tile the union of both phases' irregular boxes into one properly nested set per level.
    * @details Runs once, after both phases have finished the upward pass. Pseudocode:
    *
-   *   for lvl = m_startLevel + 1 .. m_startLevel + m_maxEbDepth:
+   *   for lvl = m_startLevel + 1 .. m_stopLevel:
    *     tags[lvl - 1] = union over phases of the irregular boxes on lvl, coarsened by two
    *                     -- TiledMeshRefine takes tags on the level below the one it tiles
    *   TiledMeshRefine(m_domains[m_startLevel], ratio 2, m_minBlockSize, m_maxBlockSize).regrid(tiles, tags)
@@ -484,7 +484,7 @@ protected:
    * @brief Step 3: place every tile of every level in this phase's boxes and classify it.
    * @details Pseudocode:
    *
-   *   for lvl = m_startLevel + 1 .. m_startLevel + m_maxEbDepth:
+   *   for lvl = m_startLevel + 1 .. m_stopLevel:
    *     walk the BVH over the phase's boxes on lvl against the BVH over m_tiles[lvl]
    *     for each tile t (every box is a super-tile or a whole refinement of one, so t meets at most one box):
    *       if t lies in an irregular box:            a_tileTypes[lvl][t] = Irregular,  a_tileHosts[lvl][t] = -1
@@ -507,7 +507,7 @@ protected:
    * phase's lists on the tiled levels with the result.
    * @details Pseudocode:
    *
-   *   for lvl = m_startLevel + 1 .. m_startLevel + m_maxEbDepth:
+   *   for lvl = m_startLevel + 1 .. m_stopLevel:
    *     irregular on lvl = the tiles typed Irregular                       -- the tiles cover every irregular box
    *     for regular and for covered:
    *       new list = the tiles typed so
@@ -540,7 +540,7 @@ protected:
    *       -- no block factor: these levels are not tiled and the coarsest may be smaller than a tile
    *     gather onto every rank, in a fixed order
    *
-   *   for lvl = finest - 1 down to 0, per phase:
+   *   for lvl = m_stopLevel - 1 down to 0, per phase:
    *     for each irregular box b on lvl + 1:
    *       move the box on lvl containing coarsen(b, 2) from the regular or covered list to the irregular one
    *       -- exactly one box contains it: every box is a whole super-tile, a whole refinement of one, or a union

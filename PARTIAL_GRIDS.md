@@ -752,8 +752,9 @@ first; the record quotes EBIS code elsewhere with the opposite convention.
   points, so the builder needs the resolution, not only the index space; refinement ratio 2
   throughout;
 - the start domain, from Driver (the domain ScanShop calls the scan level): the finest level built whole, level 0 here;
-- `max_eb_depth`, the finest level the upward pass may reach whatever the curvature says (today's
-  `max_amr_depth`, renamed in the calls because the terminology may change);
+- the stop domain, the finest level the upward pass may reach whatever the curvature says. A domain rather
+  than a depth: `max_amr_depth` counts from AMR level 0 and a depth counted from the start domain would read
+  the same way, so two domains say it without a convention;
 - the simulation's `min_block_size`/`max_block_size`: tile and super-tile for the tiler, and also the
   size every box the upward pass makes is split to. The EBIS `maxGridSize` does not enter: ScanShop
   used it for the start-level split and for splitting a refined irregular box, and using
@@ -775,7 +776,7 @@ box grown by `m_maxGhostEB`: regular iff every value `< -halfDiagonal`, covered 
 (`ScanShop::isRegular`/`isCovered`, `CD_ScanShopImplem.H` lines 43-100, made callable on an implicit
 function). Every level at or below the start level is whole in both phases; no hole exists there.
 
-### Step 1 -- upward, per phase, to `max_eb_depth`
+### Step 1 -- upward, per phase, to `the stop domain`
 
 From level `l` to `l+1`, for each box at `l`:
 
@@ -790,11 +791,11 @@ From level `l` to `l+1`, for each box at `l`:
   **splits** -- `refine(box, 2)`, `domainSplit` to `max_block_size`, each piece classified as in step 0
   -- and the scan moves to the next box. A box no pair in fails is a **leaf**: nothing is pushed
   beneath it, which is the hole above it.
-- stop when no box split, or `l+1 == max_eb_depth`.
+- stop when no box split, or `l+1 == the stop domain`.
 
 Across a sharp edge the angle is the dihedral angle at every `dx` and never shrinks, so edges refine
-to `max_eb_depth`. That is intended (it is where the multichord seam lives) and it is what
-`refine_angles` does today off EBIS normals; `max_eb_depth` bounds the depth, `refine_angles` does
+to `the stop domain`. That is intended (it is where the multichord seam lives) and it is what
+`refine_angles` does today off EBIS normals; `the stop domain` bounds the depth, `refine_angles` does
 not on a geometry with edges. A difference across a kink of a min/max composite averages the two
 faces, which reads as a jump against either neighbour: the same behaviour from the other side.
 
@@ -872,7 +873,7 @@ of this level by nesting. Runs after decimation, because the push-down reads the
      covered box is ever a hole, and the start level and below are whole, so a hole cell's parent
      chain is irregular down to a generated level;
   2. the leaf is generated and its surfaces stored, so the hole is filled by cutting them, at a
-     resolution bounded by `max_eb_depth`;
+     resolution bounded by `the stop domain`;
   3. what the builder guarantees is the lists above; what it does not guarantee is that `T` covers
      the simulation's ghosts. To check in #732: that the fill path is wired to
      `EBISLayoutImplem::define`'s copy for a partial region (a ghost ring), not only to whole-level
