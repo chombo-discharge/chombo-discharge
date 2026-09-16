@@ -1424,7 +1424,28 @@ ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_
               }
             }
 
-            if (!body.restrictFace(children, dir, side)) {
+            // restrictFace takes the children on this face in quadrant order: quadrant q's bits fill the
+            // directions other than dir, and dir takes the side.
+            CutCellSurface faceChildren[1 << (SpaceDim - 1)];
+
+            for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
+              int which = 0;
+              int bit   = 0;
+
+              for (int d = 0; d < SpaceDim; d++) {
+                if (d == dir) {
+                  which |= side << d;
+                }
+                else {
+                  which |= ((q >> bit) & 1) << d;
+                  bit++;
+                }
+              }
+
+              faceChildren[q] = children[which];
+            }
+
+            if (!body.restrictFace(faceChildren, dir, side)) {
               pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
                      << " could not take face " << dir << "/" << side << " from the finer level" << endl;
 
@@ -1438,6 +1459,38 @@ ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_
         if (restricted && !body.closeInterface()) {
           pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
                  << " did not close after its faces were restricted" << endl;
+
+          pout() << std::setprecision(17) << "  corners:";
+
+          for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+            pout() << " " << surface.m_corner[c];
+          }
+
+          pout() << endl << "  crossings:";
+
+          for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+            pout() << " " << surface.m_crossing[e];
+          }
+
+          pout() << endl;
+
+          for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+            pout() << "  child " << c << " corners:";
+
+            for (int k = 0; k < CutCellSurface::s_numCorners; k++) {
+              pout() << " " << children[c].m_corner[k];
+            }
+
+            pout() << " crossings:";
+
+            for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+              pout() << " " << children[c].m_crossing[e];
+            }
+
+            pout() << endl;
+          }
+
+          body.printPolygons(pout());
 
           MayDay::Error("ComputationalGeometry::collectFacets - a restricted cell's interface did not close");
         }

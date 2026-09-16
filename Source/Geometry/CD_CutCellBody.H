@@ -180,6 +180,13 @@ public:
                         const RealVect& a_probLo,
                         const Real      a_dx) const noexcept;
 
+  /**
+   * @brief Print every polygon this body holds, in the cell's own frame, for inspection.
+   * @param[in,out] a_out Stream to print to.
+   */
+  void
+  printPolygons(std::ostream& a_out) const noexcept;
+
 #if CH_SPACEDIM == 3
   /**
    * @brief Replace one face's chord with the chords of the children that cover it.
@@ -209,6 +216,32 @@ public:
 #endif
 
   /**
+   * @brief How many polygons this body holds.
+   * @return Number of polygons.
+   */
+  inline int
+  numPolygons() const noexcept
+  {
+    return m_numPolygons;
+  }
+
+  /**
+   * @brief Largest number of vertices any of this body's polygons holds.
+   * @return Vertex count of the widest polygon.
+   */
+  inline int
+  widestPolygon() const noexcept
+  {
+    int widest = 0;
+
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      widest = std::max(widest, m_polygon[ip].m_numVertices);
+    }
+
+    return widest;
+  }
+
+  /**
    * @brief Residual in the identity the moments must satisfy among themselves.
    * @details The divergence theorem applied to a constant field, which holds for any closed
    * body whether or not its interface patch is planar. This is also the relation PolyGeom uses
@@ -233,8 +266,20 @@ protected:
 
   /**
    * @brief Largest number of vertices one of those polygons can carry.
+   * @details Fourteen was enough for a face carrying a single chord, where the widest polygon
+   * measured across four geometries held ten. A face that carries the chords of the cells on the
+   * other side of a seam instead of one of its own needs thirteen, measured over 16,640 cut faces,
+   * which leaves a single vertex of headroom -- not a margin. Twenty restores one.
+   *
+   * Raising this costs memory on every body, since a body holds s_maxPolygons of them and the
+   * vertex arrays dominate: a polygon goes from 456 to 648 bytes and a body from about 9.4 kB to
+   * 13.3 kB. Bodies are transient, built per cut and dropped, so that is paid per thread during a
+   * refinement rather than per cell of the index space.
+   *
+   * Lowering it is what does damage. Sixteen and eight refused between 156 and 5,226 cells per
+   * geometry and lost conservation to 1.8e-2, which is why these two numbers are what they are.
    */
-  static constexpr int s_maxVertices = 14;
+  static constexpr int s_maxVertices = 20;
 
   /**
    * @brief Distance by which a crossing is held off an edge's endpoints.
