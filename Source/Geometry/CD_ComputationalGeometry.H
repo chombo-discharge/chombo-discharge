@@ -153,15 +153,15 @@ public:
    * levels are factor-two refinements up to and including the stop domain. Levels are
    * indexed from the coarsest domain; getLevel finds the index of a domain. There is one box hierarchy for both
    * phases, built from both implicit functions together, and every box carries one classification per phase.
-   * Without any implicit function every level is one regular box.
+   * Without any implicit function every level is one regular box. The tile and super-tile sizes are the
+   * class's own, ComputationalGeometry.min_block_size and ComputationalGeometry.max_block_size, read in the
+   * constructor.
    * @param[in] a_startDomain  Domain the upward pass starts from.
    * @param[in] a_stopDomain   Finest domain built; a factor-two refinement of a_startDomain some number of times.
    * @param[in] a_probLo       Lower-left corner of the domain.
    * @param[in] a_startDx      Grid spacing on a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
-   * @param[in] a_minBlockSize Tile size in cells. At least twice a_maxGhostEB.
-   * @param[in] a_maxBlockSize Super-tile size in cells. A multiple of a_minBlockSize.
-   * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified.
+   * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified. At most half the tile size.
    */
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
@@ -169,8 +169,6 @@ public:
             const RealVect&      a_probLo,
             const Real           a_startDx,
             const Real           a_refineAngle,
-            const int            a_minBlockSize,
-            const int            a_maxBlockSize,
             const int            a_maxGhostEB);
 
   /**
@@ -353,12 +351,13 @@ protected:
   int m_stopLevel;
 
   /**
-   * @brief Tile size, in cells.
+   * @brief Tile size, in cells. ComputationalGeometry.min_block_size, 8 when not given.
    */
   int m_minBlockSize;
 
   /**
    * @brief Super-tile size, in cells; the size every box makeGrids makes is split to.
+   * ComputationalGeometry.max_block_size, 8 when not given.
    */
   int m_maxBlockSize;
 

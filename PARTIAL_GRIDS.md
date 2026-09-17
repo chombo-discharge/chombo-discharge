@@ -755,8 +755,12 @@ first; the record quotes EBIS code elsewhere with the opposite convention.
 - the stop domain, the finest level the upward pass may reach whatever the curvature says. A domain rather
   than a depth: `max_amr_depth` counts from AMR level 0 and a depth counted from the start domain would read
   the same way, so two domains say it without a convention;
-- the simulation's `min_block_size`/`max_block_size`: tile and super-tile for the tiler, and also the
-  size every box the upward pass makes is split to. The EBIS `maxGridSize` does not enter: ScanShop
+- the geometry's own `ComputationalGeometry.min_block_size`/`max_block_size` (optional inputs, both 8
+  when not given; read in the constructor): tile and super-tile for the tiler, and also the size every
+  box the upward pass makes is split to. They are deliberately separate from the simulation's
+  `AmrMesh` block sizes: curvature refinement follows the surface, and the refined footprint on a
+  flat face next to a curved feature is the parent box plus one nesting tile, so a small tile keeps it
+  close to the feature while the simulation may use a larger one. The EBIS `maxGridSize` does not enter: ScanShop
   used it for the start-level split and for splitting a refined irregular box, and using
   `max_block_size` for both puts every box the builder makes on the super-tile lattice, so the union
   in step 2 is exact in tile units and a tile lies in exactly one box by construction;

@@ -1503,8 +1503,6 @@ Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
                                      m_amr->getProbLo(),
                                      startDx,
                                      m_refineAngle,
-                                     m_amr->getMinBlockSize(),
-                                     m_amr->getMaxBlockSize(),
                                      m_amr->getNumberOfEbGhostCells());
 }
 
