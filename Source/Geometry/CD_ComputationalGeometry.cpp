@@ -13,8 +13,6 @@
 // Std includes
 #include <algorithm>
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 
 // Chombo includes
 #include <BaseFab.H>
@@ -32,8 +30,6 @@
 #include <GeometryShop.H>
 #include <ComplementIF.H>
 #include <MayDay.H>
-#include <ParmParse.H>
-#include <PolyGeom.H>
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
@@ -43,8 +39,6 @@
 #include <CD_Units.H>
 #include <CD_ScanShop.H>
 #include <CD_PolyhedralGeometryShop.H>
-#include <CD_CutCellBody.H>
-#include <CD_CutCellSurface.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
@@ -411,19 +405,6 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->buildCoarserLevels();
 
   this->reportGrids();
-
-  // The polyhedral surface on these grids, for inspection. A hidden option of the polyhedral generator.
-  if (m_generator == Generator::PolyhedralShop) {
-    ParmParse pp("PolyhedralShop");
-
-    bool writeSTL = false;
-
-    pp.query("write_stl", writeSTL);
-
-    if (writeSTL) {
-      this->writeSurfaceSTL();
-    }
-  }
 }
 
 int
@@ -463,6 +444,30 @@ ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
   }
 
   return boxes;
+}
+
+const Vector<Box>&
+ComputationalGeometry::getBoxes(const int a_level) const noexcept
+{
+  return m_boxes[a_level];
+}
+
+const Vector<GeometryService::InOut>&
+ComputationalGeometry::getTypes(const phase::which_phase a_phase, const int a_level) const noexcept
+{
+  return this->types(a_phase)[a_level];
+}
+
+const ProblemDomain&
+ComputationalGeometry::getDomain(const int a_level) const noexcept
+{
+  return m_domains[a_level];
+}
+
+Real
+ComputationalGeometry::getDx(const int a_level) const noexcept
+{
+  return m_dx[a_level];
 }
 
 Vector<Vector<GeometryService::InOut>>&
@@ -1176,111 +1181,6 @@ ComputationalGeometry::buildCoarserLevels()
 }
 
 void
-ComputationalGeometry::writeSurfaceSTL() const
-{
-  CH_TIME("ComputationalGeometry::writeSurfaceSTL");
-
-  const phase::which_phase phases[2]     = {phase::gas, phase::solid};
-  const std::string        phaseNames[2] = {"gas", "solid"};
-
-  for (int p = 0; p < 2; p++) {
-    if (this->getImplicitFunction(phases[p]).isNull()) {
-      continue;
-    }
-
-    Vector<Real> composite;
-
-    for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
-      Vector<Real> levelFacets;
-
-      this->collectFacets(levelFacets, phases[p], lvl);
-
-      this->writeSTL("surface_mesh_" + phaseNames[p] + ".level" + std::to_string(lvl) + ".stl",
-                     phaseNames[p] + "_level" + std::to_string(lvl),
-                     levelFacets);
-
-      composite.append(levelFacets);
-    }
-
-    this->writeSTL("surface_mesh_" + phaseNames[p] + ".stl", phaseNames[p], composite);
-  }
-
-  // The boxes themselves, one file per level, for reading the surface against the grids it was built on.
-  if (procID() == 0) {
-    for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
-      std::ofstream out("surface_mesh_boxes.level" + std::to_string(lvl) + ".txt");
-
-      for (int i = 0; i < m_boxes[lvl].size(); i++) {
-        out << m_boxes[lvl][i].smallEnd() << " " << m_boxes[lvl][i].bigEnd() << " gas " << m_gasTypes[lvl][i]
-            << " solid " << m_solidTypes[lvl][i] << "\n";
-      }
-    }
-  }
-}
-
-void
-ComputationalGeometry::writeSTL(const std::string&  a_fileName,
-                                const std::string&  a_name,
-                                const Vector<Real>& a_facets) const
-{
-  CH_TIME("ComputationalGeometry::writeSTL");
-
-  Vector<Vector<Real>> everyone;
-
-  gather(everyone, a_facets, 0);
-
-  if (procID() != 0) {
-    return;
-  }
-
-  std::ofstream out(a_fileName);
-
-  if (!out.good()) {
-    MayDay::Error("ComputationalGeometry::writeSTL - could not open the file");
-  }
-
-  out << std::scientific << std::setprecision(17) << "solid " << a_name << "\n";
-
-  for (int rank = 0; rank < everyone.size(); rank++) {
-    const Vector<Real>& rankFacets = everyone[rank];
-
-    for (int i = 0; i + 9 <= rankFacets.size(); i += 9) {
-      const RealVect a(D_DECL(rankFacets[i + 0], rankFacets[i + 1], rankFacets[i + 2]));
-      const RealVect b(D_DECL(rankFacets[i + 3], rankFacets[i + 4], rankFacets[i + 5]));
-      const RealVect c(D_DECL(rankFacets[i + 6], rankFacets[i + 7], rankFacets[i + 8]));
-
-      RealVect n = PolyGeom::cross(b - a, c - a);
-
-      if (n.vectorLength() > 0.0) {
-        n /= n.vectorLength();
-      }
-
-      out << "  facet normal";
-
-      for (int d = 0; d < 3; d++) {
-        out << " " << ((d < SpaceDim) ? n[d] : 0.0);
-      }
-
-      out << "\n    outer loop\n";
-
-      for (int v = 0; v < 3; v++) {
-        out << "      vertex";
-
-        for (int d = 0; d < 3; d++) {
-          out << " " << ((d < SpaceDim) ? rankFacets[i + 3 * v + d] : 0.0);
-        }
-
-        out << "\n";
-      }
-
-      out << "    endloop\n  endfacet\n";
-    }
-  }
-
-  out << "endsolid " << a_name << "\n";
-}
-
-void
 ComputationalGeometry::reportGrids() const
 {
   CH_TIME("ComputationalGeometry::reportGrids");
@@ -1302,217 +1202,6 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular] << endl;
-  }
-}
-
-void
-ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase, const int a_level) const
-{
-  CH_TIME("ComputationalGeometry::collectFacets");
-
-  using PolyhedralEB::CutCellBody;
-  using PolyhedralEB::CutCellSurface;
-
-  const BaseIF& f = *(this->getImplicitFunction(a_phase));
-
-  const Vector<Vector<GeometryService::InOut>>& types = this->types(a_phase);
-
-  {
-    const int  lvl    = a_level;
-    const Real dx     = m_dx[lvl];
-    const Box& domain = m_domains[lvl].domainBox();
-
-    // The cells the next finer level carries, on this level's index space. A cell among them is written from
-    // the finer level; a cell next to one of them is on the level boundary and has that face restricted.
-    TreeIntVectSet covered;
-
-    if (lvl < m_stopLevel) {
-      for (int j = 0; j < m_boxes[lvl + 1].size(); j++) {
-        covered |= coarsen(m_boxes[lvl + 1][j], 2);
-      }
-    }
-
-    for (int i = procID(); i < m_boxes[lvl].size(); i += numProc()) {
-      if (types[lvl][i] != GeometryService::Irregular) {
-        continue;
-      }
-
-      for (BoxIterator bit(m_boxes[lvl][i]); bit.ok(); ++bit) {
-        const IntVect iv = bit();
-
-        if (covered.contains(iv)) {
-          continue;
-        }
-
-        CutCellSurface surface;
-
-        PolyhedralGeometryShop::reconstructSurface(surface, f, iv, m_probLo, dx);
-
-        const CutCellBody::Kind kind = CutCellBody::classify(surface);
-
-        if (kind != CutCellBody::Kind::Cut) {
-          continue;
-        }
-
-        CutCellBody body;
-
-        if (!body.define(surface)) {
-          pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl << " did not close"
-                 << endl;
-
-          MayDay::Error("ComputationalGeometry::collectFacets - a cut cell's body did not close");
-        }
-
-#if CH_SPACEDIM == 3
-        // A face shared with a cell the finer level carries is described at the finer level's resolution. The
-        // children are this cell's own refinement, reconstructed from the implicit function at the finer
-        // spacing; their faces on the shared plane coincide, edge for edge and root for root, with those of the
-        // finer cells across it.
-        bool restricted = false;
-
-        CutCellSurface children[CutCellSurface::s_numCorners];
-        bool           haveChildren = false;
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          for (int side = 0; side < 2; side++) {
-            const IntVect neighbour = iv + (2 * side - 1) * BASISV(dir);
-
-            if (!domain.contains(neighbour) || !covered.contains(neighbour)) {
-              continue;
-            }
-
-            if (!haveChildren) {
-              for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
-                IntVect child = 2 * iv;
-
-                for (int d = 0; d < SpaceDim; d++) {
-                  child[d] += (c >> d) & 1;
-                }
-
-                PolyhedralGeometryShop::reconstructSurface(children[c], f, child, m_probLo, 0.5 * dx);
-              }
-
-              haveChildren = true;
-            }
-
-            // A coarse edge of this face whose ends agree, but whose two finer halves each carry a crossing,
-            // is a chord this cell cannot represent: two crossings on one edge is a multi-valued coarse cell.
-            for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
-              int low  = -1;
-              int high = -1;
-
-              PolyhedralEB::detail::edgeCorners(e, low, high);
-
-              const bool onFace = (((low >> dir) & 1) == side) && (((high >> dir) & 1) == side);
-
-              if (!onFace ||
-                  PolyhedralEB::isFluid(surface.m_corner[low]) != PolyhedralEB::isFluid(surface.m_corner[high])) {
-                continue;
-              }
-
-              const int edgeDir = PolyhedralEB::detail::edgeDirection(e);
-
-              int offset[SpaceDim];
-              PolyhedralEB::detail::edgeOrigin(e, offset);
-
-              int crossings = 0;
-
-              for (int half = 0; half < 2; half++) {
-                int which = 0;
-
-                for (int d = 0; d < SpaceDim; d++) {
-                  which |= ((d == edgeDir) ? half : offset[d]) << d;
-                }
-
-                if (children[which].m_crossing[e] != CutCellSurface::s_noCrossing) {
-                  crossings++;
-                }
-              }
-
-              if (crossings == 2) {
-                pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
-                       << " has two crossings on an edge of its face " << dir << "/" << side << endl;
-
-                MayDay::Error(
-                  "ComputationalGeometry::collectFacets - a coarse edge on a level boundary is crossed twice");
-              }
-            }
-
-            // restrictFace takes the children on this face in quadrant order: quadrant q's bits fill the
-            // directions other than dir, and dir takes the side.
-            CutCellSurface faceChildren[1 << (SpaceDim - 1)];
-
-            for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
-              int which = 0;
-              int bit   = 0;
-
-              for (int d = 0; d < SpaceDim; d++) {
-                if (d == dir) {
-                  which |= side << d;
-                }
-                else {
-                  which |= ((q >> bit) & 1) << d;
-                  bit++;
-                }
-              }
-
-              faceChildren[q] = children[which];
-            }
-
-            if (!body.restrictFace(faceChildren, dir, side)) {
-              pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
-                     << " could not take face " << dir << "/" << side << " from the finer level" << endl;
-
-              MayDay::Error("ComputationalGeometry::collectFacets - a face could not be restricted");
-            }
-
-            restricted = true;
-          }
-        }
-
-        if (restricted && !body.closeInterface()) {
-          pout() << "ComputationalGeometry::collectFacets - cell " << iv << " on level " << lvl
-                 << " did not close after its faces were restricted" << endl;
-
-          pout() << std::setprecision(17) << "  corners:";
-
-          for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
-            pout() << " " << surface.m_corner[c];
-          }
-
-          pout() << endl << "  crossings:";
-
-          for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
-            pout() << " " << surface.m_crossing[e];
-          }
-
-          pout() << endl;
-
-          for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
-            pout() << "  child " << c << " corners:";
-
-            for (int k = 0; k < CutCellSurface::s_numCorners; k++) {
-              pout() << " " << children[c].m_corner[k];
-            }
-
-            pout() << " crossings:";
-
-            for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
-              pout() << " " << children[c].m_crossing[e];
-            }
-
-            pout() << endl;
-          }
-
-          body.printPolygons(pout());
-
-          MayDay::Error("ComputationalGeometry::collectFacets - a restricted cell's interface did not close");
-        }
-#endif
-
-        body.appendInterfaceFacets(a_facets, iv, m_probLo, dx);
-      }
-    }
   }
 }
 
@@ -1539,6 +1228,8 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                             s_strictGeometry);
 
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
+    shop->setGrids(*this, phase::gas);
+    shop->verifySurface();
 
     a_geoserver = static_cast<GeometryService*>(shop);
   }
@@ -1588,6 +1279,8 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                               s_strictGeometry);
 
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
+      shop->setGrids(*this, phase::solid);
+      shop->verifySurface();
 
       a_geoserver = static_cast<GeometryService*>(shop);
     }

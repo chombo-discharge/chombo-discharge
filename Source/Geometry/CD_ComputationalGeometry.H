@@ -199,20 +199,37 @@ public:
   getBoxes(const phase::which_phase a_phase, const int a_level, const GeometryService::InOut a_type) const noexcept;
 
   /**
-   * @brief Write the embedded boundary reconstructed on the grids makeGrids built, one STL per phase.
-   * @details Every cut cell of every irregular box is reconstructed from the implicit function at its own
-   * level, and its interface triangles are written from the finest level that carries it. Where a cut cell
-   * borders a region the next finer level carries, the shared face is restricted to the finer level's chords
-   * before the interface is closed, so the surface meets across the level boundary. The files are
-   * surface_mesh_gas.stl and surface_mesh_solid.stl, with each level's contribution also written on its own
-   * as surface_mesh_gas.level<n>.stl and likewise for the solid; a phase without an implicit function writes
-   * nothing.
-   * Three dimensions only; the interface of a two-dimensional cell is a segment, not a triangle. Collective:
-   * every rank reconstructs its share of the boxes and rank 0 writes. Run by makeGrids under the polyhedral
-   * generator when PolyhedralShop.write_stl is set.
+   * @brief Every box on a level, both phases' boxes being the same.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @return The boxes.
    */
-  void
-  writeSurfaceSTL() const;
+  const Vector<Box>&
+  getBoxes(const int a_level) const noexcept;
+
+  /**
+   * @brief Classification of every box on a level for a phase, parallel to getBoxes(level).
+   * @param[in] a_phase Phase.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @return One classification per box.
+   */
+  const Vector<GeometryService::InOut>&
+  getTypes(const phase::which_phase a_phase, const int a_level) const noexcept;
+
+  /**
+   * @brief Domain of a level.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @return The domain.
+   */
+  const ProblemDomain&
+  getDomain(const int a_level) const noexcept;
+
+  /**
+   * @brief Grid spacing of a level.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @return The spacing.
+   */
+  Real
+  getDx(const int a_level) const noexcept;
 
   /**
    * @brief Build geometries and the MFIndexSpace.
@@ -364,28 +381,6 @@ protected:
    * @brief Solid-phase classification of each box in m_boxes, parallel to it.
    */
   Vector<Vector<GeometryService::InOut>> m_solidTypes;
-
-  /**
-   * @brief Interface triangles of one phase, from this rank's share of the boxes, nine reals per triangle.
-   * @details Per level, the cells the next finer level carries are skipped, and a cut cell with such a cell
-   * across one of its faces has that face restricted to the finer cells' chords (restrictFace) and its
-   * interface rebuilt (closeInterface). A coarse edge that carries no crossing while both finer edges under
-   * it do is a multi-valued coarse cell in disguise and stops the run, as does a body that will not close.
-   * @param[out] a_facets Triangle coordinates, appended to.
-   * @param[in]  a_phase  Phase.
-   * @param[in]  a_level  Level to collect from.
-   */
-  void
-  collectFacets(Vector<Real>& a_facets, const phase::which_phase a_phase, const int a_level) const;
-
-  /**
-   * @brief Write triangles gathered from every rank as one STL file.
-   * @param[in] a_fileName File to write.
-   * @param[in] a_name     Solid name inside the file.
-   * @param[in] a_facets   This rank's triangles, nine reals each.
-   */
-  void
-  writeSTL(const std::string& a_fileName, const std::string& a_name, const Vector<Real>& a_facets) const;
 
   /**
    * @brief Report the boxes and tiles of every level to pout.

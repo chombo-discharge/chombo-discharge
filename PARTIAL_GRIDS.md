@@ -1192,6 +1192,31 @@ Still not fixed: the ulp-level seam mismatch (a child's vertex mapped through th
 versus its own; would need the coarse body to carry that vertex in a form that maps bitwise as the fine
 cell maps it), and the blend near-tangency above.
 
+**Reorganised, and checked by construction** (later the same day). `ComputationalGeometry` only builds the
+grids; `PolyhedralGeometryShop` is told which grids and phase it serves (`setGrids`) and, in
+`verifySurface`, reconstructs the polyhedra over them, runs `sanityCheck`, and writes the STLs when
+`PolyhedralShop.write_stl` is set. `sanityCheck` (on by default, `PolyhedralShop.sanity_check`) states the
+invariant the whole surface pass rests on: every polyhedron has a neighbour across every edge of its
+interface unless that edge lies on the domain boundary, so every interior edge of the triangulation is used
+exactly twice. Vertices are welded at `1e-8` of the finest spacing, triangles that collapse under the weld
+are ignored, the triangles are gathered on rank 0, the edges sorted, and an interior edge used once or more
+than twice is reported with its position and stops the run.
+
+Two more things it found: a surface **tangent to a node** (the stem cylinder at `(±0.0075, 0.04, 0)`) leaves
+the node exactly zero and, under the value snap, a plateau of length `√(2R·tol/dx)` either side of it, so
+the bisection produced a `3.5e-9`-wide sliver of "solid" shared by four cells. A root that lands within
+`1e-4` of an edge from a zero corner is now put on the corner (`s_rootSnap`; a genuine second crossing that
+close would be a feature no cell resolves), which collapses the sliver, and a body with neither solid
+volume nor boundary area is a regular cell (`isDust`, applied by the graph and the writer alike; the
+in-plane interface, whole or partial, keeps its area and is not dust). And the multichord trap now also
+covers a coarse edge that *has* a crossing: the half the children put their crossing in must be the half
+the coarse crossing lies in.
+
+Result on the aligned wheel with `refine_angles = 15`, `wheel_smooth = 4E-3`: 281464 triangles, 0 open, 0
+over-used, both phases; the original example likewise. With `wheel_smooth = 1E-3` the blend grazes the node
+line `(y = 0.0717, z = 0.0075)` within `1e-8`, crosses it three times in `1e-9`, and the check stops the
+run with 16 open edges -- a feature thinner than the cell that the curvature test does not see.
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
