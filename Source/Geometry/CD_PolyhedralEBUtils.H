@@ -24,11 +24,15 @@ namespace PolyhedralEB {
 
 /**
  * @brief Which side of the interface a value lies on.
- * @details One predicate for corners and crossings alike, matching the sign test in
- * GeometryShop::insideOutsideFromNodes. The side is read off the sign bit, so a node at
- * negative zero is fluid and one at positive zero is solid.
+ * @details One predicate for corners and crossings alike: negative is fluid, and anything else,
+ * an exact zero of either sign included, is solid. GeometryShop reads an exact zero by its sign
+ * bit, which a negated distance function turns over, and then rescues the regular cell that
+ * leaves beside a covered one by looking at its neighbour. A cell here is classified from its own
+ * corners alone, so the zero has to fall on one side by rule: on the solid side, so that a fluid
+ * cell whose face lies in the interface is cut with that face as its interface, and the cell on
+ * the other side is covered.
  * @param[in] a_value Implicit function value.
- * @return True if the value is on the fluid side.
+ * @return True on the fluid side.
  */
 inline bool
 isFluid(const Real a_value) noexcept;
@@ -195,6 +199,25 @@ crossingLoops(const CutCellSurface& a_surface,
               int                   a_loop[CutCellSurface::s_numEdges],
               int                   a_start[CutCellSurface::s_numEdges + 1]) noexcept;
 #endif
+/**
+ * @brief Distance within which two vertices are taken to be the same one.
+ * @details A vertex where two polygons meet is computed once along each polygon's own edge, and
+ * the two answers agree to about a part in a thousand billion rather than bit for bit. Loops are
+ * stitched by matching one segment's end to the next one's start, so the match is made at that
+ * distance and not exactly. Far below any edge that carries area -- a cell is one unit across in
+ * this frame -- and far above the disagreement two computations of the same point produce.
+ */
+constexpr Real s_weldTolerance = 1.0E-10;
+
+/**
+ * @brief Whether two positions are the same vertex.
+ * @param[in] a_a First position.
+ * @param[in] a_b Second position.
+ * @return True if they lie within s_weldTolerance of one another.
+ */
+inline bool
+sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept;
+
 } // namespace detail
 } // namespace PolyhedralEB
 

@@ -77,44 +77,14 @@ public:
 
   /**
    * @brief How the cell relates to the interface, from the corner values alone.
-   * @details Follows GeometryShop::insideOutsideFromNodes: the cell is cut as soon as two
-   * corners disagree in sign, with exact zeros compared through copysign so that a corner at
-   * negative zero counts as fluid. A face lying exactly in the interface therefore leaves the
-   * cell regular with that face covered, rather than cut.
+   * @details The cell is cut as soon as two corners disagree under isFluid, regular if every corner
+   * is fluid and covered otherwise. An exact zero is solid, so a cell whose face lies in the
+   * interface is cut from the fluid side, full, with that face as its interface.
    * @param[in] a_surface Corner values in the cell's own frame.
    * @return Regular, Covered or Cut.
    */
   static Kind
   classify(const CutCellSurface& a_surface) noexcept;
-
-  /**
-   * @brief Whether one side of the interface is present only as exact zeros.
-   * @details A facet lying in a node plane leaves every corner on one side at exactly zero. The
-   * signs then disagree and the corner test reads the cell as cut, but a side represented only
-   * by exact zeros encloses nothing.
-   * @param[in] a_surface   Corner values in the cell's own frame.
-   * @param[in] a_fluidSide Which side to test.
-   * @return True if that side is present and every one of its corners is exactly zero.
-   */
-  static bool
-  touchesOnly(const CutCellSurface& a_surface, const bool a_fluidSide) noexcept;
-
-  /**
-   * @brief Whether the interface lies exactly in one of the cell's faces.
-   * @details A cell the interface only grazes is full, and classify calls it regular for that
-   * reason, but the face the interface lies in is closed: the fluid ends there. Such a cell is
-   * not a regular cell, whose every face is open by definition, and it has to carry a body
-   * saying so. Leaving it regular has the cut cell across that face read the face from the
-   * interface, find nothing of it open, and drop its side of a face the full cell keeps.
-   *
-   * Only meaningful for a cell classify has called regular: the test is that every corner of
-   * some face is on the solid side, which in such a cell means those corners are on the
-   * interface.
-   * @param[in] a_surface Corner values in the cell's own frame.
-   * @return True if some face has all of its corners on the interface.
-   */
-  static bool
-  interfaceLiesInFace(const CutCellSurface& a_surface) noexcept;
 
   /**
    * @brief Volume fraction.

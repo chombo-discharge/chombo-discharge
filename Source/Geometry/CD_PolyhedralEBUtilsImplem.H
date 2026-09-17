@@ -28,7 +28,7 @@ namespace PolyhedralEB {
 inline bool
 isFluid(const Real a_value) noexcept
 {
-  return std::copysign(1.0, a_value) < 0.0;
+  return a_value < 0.0;
 }
 
 namespace detail {
@@ -406,6 +406,12 @@ crossingLoops(const CutCellSurface& a_surface,
   return numLoops;
 }
 #endif
+
+inline bool
+sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept
+{
+  return (a_a - a_b).vectorLength() <= s_weldTolerance;
+}
 
 } // namespace detail
 } // namespace PolyhedralEB

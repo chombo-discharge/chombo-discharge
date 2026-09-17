@@ -68,7 +68,7 @@ PolyhedralGeometryShop::fillNodeValues(BaseFab<Real>&  a_nodeValues,
       x[d] += a_dx * static_cast<Real>(iv[d]);
     }
 
-    a_nodeValues(iv, 0) = m_baseIF->value(x);
+    a_nodeValues(iv, 0) = PolyhedralGeometryShop::snappedValue(*m_baseIF, x, a_dx);
   }
 }
 
@@ -77,6 +77,7 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
                                      const IntVect&  a_cell,
                                      const int       a_edge,
                                      const Real      a_lo,
+                                     const Real      a_hi,
                                      const RealVect& a_probLo,
                                      const Real&     a_dx) const
 {
@@ -102,23 +103,55 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
   // bisection between the two endpoints. The endpoints are taken from the shared node values
   // and the edge is addressed by its own index, so every cell reaching this edge hands the
   // solver the same interval and gets the same root back
+  const Real root = PolyhedralGeometryShop::edgeRoot(*m_baseIF, edgeIV, dir, a_lo, a_hi, a_probLo, a_dx);
+
+  if (a_intercept[dir].box().contains(edgeIV)) {
+    a_intercept[dir](edgeIV, 0) = root;
+  }
+
+  return root;
+}
+
+bool
+PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept
+{
+  return (a_threshold > 0.0) && (1.0 - a_body.volumeFraction() < a_threshold) && (a_body.boundaryArea() < a_threshold);
+}
+
+Real
+PolyhedralGeometryShop::snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept
+{
+  const Real value = a_function.value(a_point);
+
+  return (std::abs(value) <= s_snapTolerance * a_dx) ? 0.0 : value;
+}
+
+Real
+PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
+                                 const IntVect&  a_edgeIV,
+                                 const int       a_dir,
+                                 const Real      a_loValue,
+                                 const Real      a_hiValue,
+                                 const RealVect& a_probLo,
+                                 const Real      a_dx) noexcept
+{
   RealVect lowPoint = a_probLo;
 
   for (int d = 0; d < SpaceDim; d++) {
-    lowPoint[d] += a_dx * static_cast<Real>(edgeIV[d]);
+    lowPoint[d] += a_dx * static_cast<Real>(a_edgeIV[d]);
   }
 
   Real lo      = 0.0;
   Real hi      = 1.0;
-  Real loValue = a_lo;
+  Real loValue = a_loValue;
 
   for (int iter = 0; iter < 100; iter++) {
     const Real mid = 0.5 * (lo + hi);
 
     RealVect x = lowPoint;
-    x[dir] += a_dx * mid;
+    x[a_dir] += a_dx * mid;
 
-    const Real value = m_baseIF->value(x);
+    const Real value = PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
 
     if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(loValue)) {
       lo      = mid;
@@ -133,10 +166,14 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
     }
   }
 
-  const Real root = 0.5 * (lo + hi);
+  Real root = 0.5 * (lo + hi);
 
-  if (a_intercept[dir].box().contains(edgeIV)) {
-    a_intercept[dir](edgeIV, 0) = root;
+  // an endpoint exactly on the interface owns a crossing that lands close to it
+  if (a_loValue == 0.0 && root < s_rootSnap) {
+    root = 0.0;
+  }
+  else if (a_hiValue == 0.0 && root > 1.0 - s_rootSnap) {
+    root = 1.0;
   }
 
   return root;
@@ -183,19 +220,11 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[S
     const Real hiValue = a_surface.m_corner[high];
 
     // an edge carries a crossing exactly when its two ends disagree under the one predicate the
-    // corners are classified by, so the number of crossings on a face counts sign changes
+    // corners are classified by, so the number of crossings on a face counts sign changes. A corner
+    // at exactly zero is not by itself the crossing: the function may be zero along part of the
+    // edge, and edgeRoot finds where it stops being so
     if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
-      // a corner at exactly zero is on the interface, so the crossing is that corner rather
-      // than a root to be searched for
-      if (loValue == 0.0) {
-        a_surface.m_crossing[e] = 0.0;
-      }
-      else if (hiValue == 0.0) {
-        a_surface.m_crossing[e] = 1.0;
-      }
-      else {
-        a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, a_probLo, a_dx);
-      }
+      a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, hiValue, a_probLo, a_dx);
     }
   }
 }
@@ -305,20 +334,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       break;
     }
     case PolyhedralEB::CutCellBody::Kind::Regular: {
-      // A cell the interface only grazes is full, which is why it is classified regular, but the
-      // face the interface lies in is closed. A regular cell has every face open, so this one is
-      // given a body instead: leaving it regular has the cut cell across that face read the face
-      // from the interface, find nothing of it open, and drop its side of a face this cell keeps.
-      if (PolyhedralEB::CutCellBody::interfaceLiesInFace(surface)) {
-        a_regIrregCovered(iv, 0) = 0;
-
-        if (a_validRegion.contains(iv)) {
-          irregularCells |= iv;
-        }
-      }
-      else {
-        a_regIrregCovered(iv, 0) = 1;
-      }
+      a_regIrregCovered(iv, 0) = 1;
 
       break;
     }
@@ -402,6 +418,13 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
       droppedCells |= iv;
 
       a_regIrregCovered(iv, 0) = -1;
+
+      continue;
+    }
+
+    // the mirror image: a body with next to no solid in it is a regular cell
+    if (PolyhedralGeometryShop::isDust(body, m_volumeThreshold)) {
+      a_regIrregCovered(iv, 0) = 1;
 
       continue;
     }
