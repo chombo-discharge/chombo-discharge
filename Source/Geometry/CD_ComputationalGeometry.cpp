@@ -40,6 +40,7 @@
 #include <CD_Units.H>
 #include <CD_ScanShop.H>
 #include <CD_PolyhedralGeometryShop.H>
+#include <CD_CutCellBody.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
@@ -742,21 +743,23 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
     return SplitReason::None;
   }
 
-  // Normals are taken on the cells near the zero set, one cell beyond the box so that a pair across the box
-  // boundary is seen from both sides, by central differences of the implicit function. The first pair of
-  // neighbouring band cells whose normals differ by more than the refinement angle decides.
+  // Normals are those of the interface polygons the polyhedral shop builds on this level, in the cut cells of the
+  // box and one cell beyond it so that a pair across the box boundary is seen from both sides. They come from the
+  // edge roots alone, so they depend only on the zero set: the implicit function is not a distance function
+  // inside a body built by CSG, and the gradient there carries the kinks and medial shells of the construction,
+  // which are not features of the surface. A cell whose centre is further from the zero set than half a cell
+  // diagonal cannot be cut and is skipped on one evaluation.
   const BaseIF& f = *implicitFunction;
 
   const Real dx    = m_dx[a_level];
-  const Real band  = dx * std::sqrt(static_cast<Real>(SpaceDim));
-  const Real h     = 0.5 * dx;
+  const Real reach = 0.5 * dx * std::sqrt(static_cast<Real>(SpaceDim));
   const Box  valid = a_box & m_domains[a_level].domainBox();
   const Box  grown = grow(a_box, 1) & m_domains[a_level].domainBox();
 
   BaseFab<Real> normal(grown, SpaceDim);
-  BaseFab<int>  inBand(grown, 1);
+  BaseFab<int>  isCut(grown, 1);
 
-  inBand.setVal(0);
+  isCut.setVal(0);
 
   for (BoxIterator bit(grown); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -767,29 +770,33 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
       x[dir] += dx * (static_cast<Real>(iv[dir]) + 0.5);
     }
 
-    if (std::abs(f.value(x)) <= band) {
-      RealVect n = RealVect::Zero;
+    if (std::abs(f.value(x)) > reach) {
+      continue;
+    }
+
+    PolyhedralEB::CutCellSurface surface;
+
+    PolyhedralGeometryShop::reconstructSurface(surface, f, iv, m_probLo, dx);
+
+    if (PolyhedralEB::CutCellBody::classify(surface) != PolyhedralEB::CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    // A body that does not close has no normal to compare; the shop reports such a cell itself when it builds
+    // the level.
+    PolyhedralEB::CutCellBody body;
+
+    if (!body.define(surface)) {
+      continue;
+    }
+
+    const RealVect n = body.normal();
+
+    if (n.vectorLength() > 0.0) {
+      isCut(iv, 0) = 1;
 
       for (int dir = 0; dir < SpaceDim; dir++) {
-        RealVect xHi = x;
-        RealVect xLo = x;
-
-        xHi[dir] += h;
-        xLo[dir] -= h;
-
-        n[dir] = f.value(xHi) - f.value(xLo);
-      }
-
-      const Real length = n.vectorLength();
-
-      if (length > 0.0) {
-        n /= length;
-
-        inBand(iv, 0) = 1;
-
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          normal(iv, dir) = n[dir];
-        }
+        normal(iv, dir) = n[dir];
       }
     }
   }
@@ -801,7 +808,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   for (BoxIterator bit(valid); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
-    if (inBand(iv, 0) == 0) {
+    if (isCut(iv, 0) == 0) {
       continue;
     }
 
@@ -810,7 +817,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
     for (BoxIterator nit(neighbours); nit.ok(); ++nit) {
       const IntVect jv = nit();
 
-      if (jv == iv || inBand(jv, 0) == 0) {
+      if (jv == iv || isCut(jv, 0) == 0) {
         continue;
       }
 
@@ -822,8 +829,8 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
 
       if (dot < cosThreshold) {
         // a pair inside the box is the box's own doing and decides at once; a pair reaching into the ring
-        // is recorded and would decide only if the whole box turned out to have no pair of its own, so that
-        // the report says what the box would have done without its neighbours
+        // is recorded and decides only if the whole box turns out to have no pair of its own, so that the
+        // report attributes the split to the box itself whenever it can
         if (valid.contains(jv)) {
           return (dot < 0.0) ? SplitReason::Medial : SplitReason::Interior;
         }
@@ -833,12 +840,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
     }
   }
 
-  // Temporarily, a pair reaching into the ring does not split the box: only its own pairs do. The ring is
-  // still scanned so the report keeps counting what it would have split.
-  if (ring != SplitReason::None) {
-    return SplitReason::None;
-  }
-
+  // No pair of its own: a pair reaching into the ring decides.
   return ring;
 }
 

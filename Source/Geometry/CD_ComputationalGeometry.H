@@ -545,17 +545,21 @@ protected:
   };
 
   /**
-   * @brief Whether the implicit function's normal turns by more than m_refineAngle inside a box.
-   * @details Cut cells do not exist at this point and are not looked for; the test runs on the implicit
-   * function in the band of cells near its zero set. A phase without an implicit function never asks for a
-   * split. Pseudocode:
+   * @brief Whether the interface turns by more than m_refineAngle between neighbouring cut cells of a box.
+   * @details No index space exists at this point; the cut cells are reconstructed from the implicit function
+   * on the level, as the polyhedral shop reconstructs them, and the normal of each is that of its interface
+   * polygon. That normal depends on the edge roots alone, so it is a property of the zero set: the implicit
+   * function's gradient is not used, because inside a body built by CSG the function is not a distance and
+   * its gradient carries the kinks and medial shells of the construction. A phase without an implicit function
+   * never asks for a split. Pseudocode:
    *
    *   grown = grow(box, 1) & domain
-   *   for each cell centre x in grown with |f(x)| <= sqrt(SpaceDim) * dx
-   *     n(x) = central difference of f at x, normalised
-   *   for each such cell in the box and each of its neighbours in the band:
-   *     if angle(n(cell), n(neighbour)) > m_refineAngle: return true      -- early exit
-   *   return false
+   *   for each cell in grown with |f(centre)| <= half the cell diagonal        -- else it cannot be cut
+   *     reconstruct the cell; if it is cut and closes, n(cell) = polygon normal
+   *   for each cut cell in the box and each cut neighbour in its 3^D block:
+   *     angle > m_refineAngle: Interior if the neighbour is in the box, Ring if in the grown ring;
+   *     normals facing (dot < 0): Medial
+   *   the first pair inside the box decides; a ring pair decides only if the box has none of its own
    *
    * Across a sharp edge the angle never shrinks with dx, so edges refine to the stop level. That is intended.
    *
