@@ -1473,8 +1473,13 @@ Driver::setupGeometryOnly()
     this->writeMemoryUsage();
   }
 
-  // Regrid using geometric tags only.
-  m_amr->regridAmr(m_geomTags, 0);
+  // Regrid using geometric tags only, or onto the grids the geometry was built over.
+  if (m_geometryGeneration == "polyhedral") {
+    m_amr->regridAmr(this->getGeometryGrids(), 0);
+  }
+  else {
+    m_amr->regridAmr(m_geomTags, 0);
+  }
 
   if (m_verbosity > 0) {
     this->gridReport();
@@ -1504,6 +1509,29 @@ Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
                                      startDx,
                                      m_refineAngle,
                                      m_amr->getNumberOfEbGhostCells());
+}
+
+Vector<Vector<Box>>
+Driver::getGeometryGrids() const
+{
+  CH_TIME("Driver::getGeometryGrids");
+  if (m_verbosity > 5) {
+    pout() << "Driver::getGeometryGrids" << endl;
+  }
+
+  const Vector<ProblemDomain>& domains = m_amr->getDomains();
+
+  Vector<Vector<Box>> boxes(1 + m_amr->getMaxAmrDepth());
+
+  for (int lvl = 1; lvl < boxes.size(); lvl++) {
+    const int geometryLevel = m_computationalGeometry->getLevel(domains[lvl]);
+
+    if (geometryLevel >= 0) {
+      boxes[lvl] = m_computationalGeometry->getTiles(geometryLevel);
+    }
+  }
+
+  return boxes;
 }
 
 void
@@ -1587,7 +1615,12 @@ Driver::setupFresh(const int a_initialRegrids)
   // base level and upwards, so no hardcap on the permitted grids.
   const int lmin    = 0;
   const int hardcap = -1;
-  m_amr->regridAmr(m_geomTags, lmin, hardcap);
+  if (m_geometryGeneration == "polyhedral") {
+    m_amr->regridAmr(this->getGeometryGrids(), lmin);
+  }
+  else {
+    m_amr->regridAmr(m_geomTags, lmin, hardcap);
+  }
   const int lmax = m_amr->getFinestLevel();
 
   // Allocate internal storage

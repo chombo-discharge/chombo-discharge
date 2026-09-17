@@ -542,12 +542,22 @@ protected:
   /**
    * @brief Build the grids the index space is generated over, from the start domain to the finest domain.
    * @details Hands ComputationalGeometry::makeGrids the start domain and its spacing, the finest AMR domain as
-   * the stop domain, and the simulation's block sizes, EB ghost count and refinement angle. Runs before the geometry is
+   * the stop domain, and the simulation's EB ghost count and refinement angle. Runs before the geometry is
    * built, since the generators read the grids it makes.
    * @param[in] a_startDomain Coarsest domain built whole; the same domain the scan-based generators begin on.
    */
   void
   makeGeometryGrids(const ProblemDomain& a_startDomain);
+
+  /**
+   * @brief The grids ComputationalGeometry::makeGrids built, per AMR level.
+   * @details Level lvl holds the geometry's tiles on the AMR domain of that level, found through
+   * ComputationalGeometry::getLevel; level 0 is left empty, AmrMesh always splits the coarsest domain itself. The
+   * levels the geometry did not reach are empty, and AmrMesh stops at the first empty level.
+   * @return Boxes per AMR level, 1 + max_amr_depth entries.
+   */
+  Vector<Vector<Box>>
+  getGeometryGrids() const;
 
   /**
    * @brief Setup function for fresh (non-restart) simulations.

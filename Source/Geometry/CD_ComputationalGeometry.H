@@ -205,6 +205,15 @@ public:
   getBoxes(const int a_level) const noexcept;
 
   /**
+   * @brief The tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is
+   *        what a simulation grid on the level is made of. Empty on the start level and below, which are whole.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @return The tiles.
+   */
+  const Vector<Box>&
+  getTiles(const int a_level) const noexcept;
+
+  /**
    * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair
    *        reaching into the ring outside it, 3 two surfaces facing each other across the band.
    * @param[in]  a_level   Level, 0 being the coarsest.

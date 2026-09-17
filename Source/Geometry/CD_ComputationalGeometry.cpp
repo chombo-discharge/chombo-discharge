@@ -462,6 +462,12 @@ ComputationalGeometry::getBoxes(const int a_level) const noexcept
 }
 
 const Vector<Box>&
+ComputationalGeometry::getTiles(const int a_level) const noexcept
+{
+  return m_tiles[a_level];
+}
+
+const Vector<Box>&
 ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept
 {
   a_reasons = m_splitReasons[a_level];
