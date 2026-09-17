@@ -1204,6 +1204,18 @@ ComputationalGeometry::writeSurfaceSTL() const
 
     this->writeSTL("surface_mesh_" + phaseNames[p] + ".stl", phaseNames[p], composite);
   }
+
+  // The boxes themselves, one file per level, for reading the surface against the grids it was built on.
+  if (procID() == 0) {
+    for (int lvl = 0; lvl <= m_stopLevel; lvl++) {
+      std::ofstream out("surface_mesh_boxes.level" + std::to_string(lvl) + ".txt");
+
+      for (int i = 0; i < m_boxes[lvl].size(); i++) {
+        out << m_boxes[lvl][i].smallEnd() << " " << m_boxes[lvl][i].bigEnd() << " gas " << m_gasTypes[lvl][i]
+            << " solid " << m_solidTypes[lvl][i] << "\n";
+      }
+    }
+  }
 }
 
 void
@@ -1337,47 +1349,6 @@ ComputationalGeometry::collectFacets(Vector<Real>& a_facets, const phase::which_
         PolyhedralGeometryShop::reconstructSurface(surface, f, iv, m_probLo, dx);
 
         const CutCellBody::Kind kind = CutCellBody::classify(surface);
-
-        // A face whose corners are all exactly zero lies in the interface, and the cell on its fluid side is
-        // regular with that face covered rather than cut: the right body for the moments, but one that holds
-        // no interface polygon. The interface is that face, and it is written from the fluid side.
-        if (kind == CutCellBody::Kind::Regular) {
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            for (int side = 0; side < 2; side++) {
-              int faceCorner[1 << (SpaceDim - 1)];
-
-              PolyhedralEB::detail::faceCorners(dir, side, faceCorner);
-
-              bool allZero = true;
-
-              for (int k = 0; k < (1 << (SpaceDim - 1)); k++) {
-                allZero = allZero && (surface.m_corner[faceCorner[k]] == 0.0);
-              }
-
-              if (!allZero) {
-                continue;
-              }
-
-#if CH_SPACEDIM == 3
-              // Two triangles over the face, wound so that the normal points out of the fluid. faceCorners
-              // hands the corners back in circuit order, so the fan from the first corner is two triangles.
-              const int order[2][3] = {{0, 1, 2}, {0, 2, 3}};
-
-              for (int t = 0; t < 2; t++) {
-                for (int k = 0; k < 3; k++) {
-                  const int corner = faceCorner[side == 1 ? order[t][k] : order[t][2 - k]];
-
-                  for (int d = 0; d < SpaceDim; d++) {
-                    a_facets.push_back(m_probLo[d] + dx * (static_cast<Real>(iv[d]) + ((corner >> d) & 1)));
-                  }
-                }
-              }
-#endif
-            }
-          }
-
-          continue;
-        }
 
         if (kind != CutCellBody::Kind::Cut) {
           continue;

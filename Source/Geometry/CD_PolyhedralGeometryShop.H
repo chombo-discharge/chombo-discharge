@@ -129,10 +129,16 @@ public:
 
   /**
    * @brief Bisect one cell edge for the crossing on it.
+   * @details An endpoint at exactly zero is not taken to be the crossing: the function may be zero along
+   *          a stretch of the edge (a face of the geometry lying in the edge's plane), and the crossing
+   *          is where it leaves that stretch. The bisection walks through zeros, which the fluid
+   *          predicate reads as solid, and a root that lands within s_snapTolerance of an endpoint that
+   *          is exactly zero is put exactly on it.
    * @param[in] a_function Implicit function.
    * @param[in] a_edgeIV   Node at the low end of the edge.
    * @param[in] a_dir      Direction the edge runs in.
    * @param[in] a_loValue  Implicit function at the low end.
+   * @param[in] a_hiValue  Implicit function at the high end.
    * @param[in] a_probLo   Lower-left corner of the domain.
    * @param[in] a_dx       Grid spacing.
    * @return Position along the edge, in [0,1].
@@ -142,8 +148,32 @@ public:
            const IntVect&  a_edgeIV,
            const int       a_dir,
            const Real      a_loValue,
+           const Real      a_hiValue,
            const RealVect& a_probLo,
            const Real      a_dx) noexcept;
+
+  /**
+   * @brief Distance from an endpoint that is exactly zero within which a root is put on that endpoint.
+   * @details The bisection stops at 1e-15 and a root converging onto an endpoint ends about that far
+   *          from it; a genuine crossing this close to a corner is indistinguishable from the corner.
+   */
+  static constexpr Real s_snapTolerance = 1.0E-12;
+
+  /**
+   * @brief Read the implicit function at a point, with a value within s_snapTolerance of a cell width of
+   *        zero read as exactly zero.
+   * @details A face of the geometry lying in a node plane evaluates to zero there only up to round-off:
+   *          the same face comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring
+   *          nodes, and cells on either side of it would then be classified by which of those they were
+   *          handed. Reading everything within a fixed fraction of the cell width of zero as zero puts
+   *          every such node on one side by rule, in the corner values and in the bisection alike.
+   * @param[in] a_function Implicit function.
+   * @param[in] a_point    Point to evaluate at.
+   * @param[in] a_dx       Grid spacing that sets the scale.
+   * @return The value, or exactly zero.
+   */
+  static Real
+  snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
 
 protected:
   /**

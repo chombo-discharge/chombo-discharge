@@ -490,20 +490,34 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
       // a chord vertex on the boundary between two children is a vertex of the cells on the other
       // side of the seam, and dropping it would leave their two segments meeting the middle of one
       // of ours: watertight, but not a shared edge. The children sit at plus and minus a quarter, so
-      // their boundaries in the face are at exactly zero. Only chord vertices are kept: a vertex on
-      // the face's own boundary has to go, or the edge it splits no longer matches the neighbouring
-      // face's whole one and closeInterface reads the face boundary as open.
+      // their boundaries in the face are at exactly zero. A vertex on the face's own boundary is
+      // kept only if the face across that boundary is covered: then the edge is an interface edge
+      // and the finer cells share it. Otherwise it has to go, or the edge it splits no longer
+      // matches the neighbouring face's whole one and closeInterface reads the boundary as open.
+      const int faceDir = a_in[0].m_face / 2;
+
       bool onChildBoundary = false;
-      bool onFaceBoundary  = false;
+      bool onSharedFace    = false;
 
       for (int d = 0; d < SpaceDim; d++) {
-        if (d != a_in[0].m_face / 2) {
-          onChildBoundary = onChildBoundary || (std::abs(here[d]) <= detail::s_weldTolerance);
-          onFaceBoundary  = onFaceBoundary || (std::abs(std::abs(here[d]) - 0.5) <= detail::s_weldTolerance);
+        if (d == faceDir) {
+          continue;
+        }
+
+        onChildBoundary = onChildBoundary || (std::abs(here[d]) <= detail::s_weldTolerance);
+
+        for (int side = 0; side < 2; side++) {
+          if (std::abs(here[d] - (-0.5 + static_cast<Real>(side))) <= detail::s_weldTolerance) {
+            const int across = 2 * d + side;
+
+            for (int ip = 0; ip < m_numPolygons; ip++) {
+              onSharedFace = onSharedFace || (m_polygon[ip].m_face == across);
+            }
+          }
         }
       }
 
-      if (straight && !(onChildBoundary && !onFaceBoundary)) {
+      if (straight && !(onChildBoundary && !onSharedFace)) {
         continue;
       }
 
@@ -784,9 +798,15 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
     }
 
     // the interface is already fanned, but a polygon carrying more than three vertices is fanned
-    // again here rather than left for the reader to triangulate
+    // again here rather than left for the reader to triangulate. A triangle without area is not
+    // written: a surface tangent to a cell edge leaves the cells beside it an interface that is
+    // that edge and nothing more, and its fan is a set of degenerate triangles carrying no moment
     for (int v = 1; v + 1 < p.m_numVertices; v++) {
       const RealVect* corner[3] = {&p.m_vertex[0], &p.m_vertex[v], &p.m_vertex[v + 1]};
+
+      if (PolyGeom::cross(*corner[1] - *corner[0], *corner[2] - *corner[0]).vectorLength() <= s_nullArea) {
+        continue;
+      }
 
       for (int k = 0; k < 3; k++) {
         for (int d = 0; d < SpaceDim; d++) {

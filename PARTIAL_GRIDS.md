@@ -1161,9 +1161,36 @@ tube meeting that plane tangentially. Two things follow from the zero-corner con
   coincident with another edge to `1e-10`: 510 pairs one ulp apart across seams (a child's vertex mapped
   through the coarse cell's frame versus its own), 58 T-junctions.
 
-Not fixed and not pursued now: the partially coincident face (a #730 matter, and one `GeometryShop` shares),
-and the ulp-level seam mismatch (would need the coarse body to carry a child vertex in a form that maps
-bitwise as the fine cell maps it).
+**Fixed, by making the convention deterministic** (2026-09-17). The rule now: a cell whose fluid volume is
+the whole cell but one of whose faces lies in the interface is *cut*, with that face as its interface (as
+`GeometryShop::fixRegularCellsNextToCovered` makes it, `κ = 1` with the covered face as the boundary); the
+cell on the solid side is covered. Four changes carry it, all in #730's machinery and stacked here for now:
+
+1. `isFluid(v)` is `v < 0`: an exact zero is solid whatever its sign bit. `GeometryShop` reads the sign
+   bit and later rescues the regular-next-to-covered cell by looking at its neighbour; a polyhedral cell is
+   classified from its own corners, so the zero has to fall on one side by rule. `classify` is one predicate
+   over the corners; `touchesOnly` and `interfaceLiesInFace` are gone, and the shop's special branch for a
+   regular cell with a face in the interface with them.
+2. Bisection walks through zeros. The short-circuit "corner exactly zero, so the crossing is the corner"
+   misplaced the boundary of a zero *plateau* -- the function is zero along the covered part of an edge
+   lying in the plane and turns over only at the rim. A root within `1e-12` of an endpoint that is
+   exactly zero is put exactly on it (`edgeRoot` takes both endpoint values).
+3. Values within `1e-12 · dx` of zero are read as exactly zero, at the corners and at every bisection
+   sample (`PolyhedralGeometryShop::snappedValue`). Without this the same flat face came back as `+0`, `−0`
+   and `−1e-19` at neighbouring nodes and adjacent cells took different branches -- the ragged plateau.
+4. In `mergeCoplanar`'s collinear pass, a child-boundary vertex on the face's own boundary is kept when the
+   face across that boundary is covered: the edge is then an interface edge the finer cells share, not a
+   face-face edge the neighbouring face carries whole.
+
+Measured on the aligned wheel (`wheel_extra_thickness = 3E-3`, depth 3, 45°, 16 ranks): 269424 gas
+triangles, the same surface the perturbed geometry gives; open interior edges 3468 → 16 after welding at
+`1e-13` (7542 before welding, the one-ulp seam pairs). The 16 sit where the stem-wheel smooth-union blend
+runs within `1e-8` of the node line `(y = 0.07, z = ±0.0075)` -- a near-tangency of the blend against the
+grid, at `1e-7` triangle areas -- and 24 edges there are over-used. Not chased.
+
+Still not fixed: the ulp-level seam mismatch (a child's vertex mapped through the coarse cell's frame
+versus its own; would need the coarse body to carry that vertex in a form that maps bitwise as the fine
+cell maps it), and the blend near-tangency above.
 
 ## Claimed but not established
 
