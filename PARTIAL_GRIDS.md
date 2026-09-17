@@ -1139,6 +1139,32 @@ what the tree answers for.
   `classify` and `ancestor` public, is the plan; the shop then calls them through the reference it already
   needs to the builder.
 
+## A face lying in a node plane
+
+Found on ProfiledSurface with `wheel_extra_thickness = 3E-3`, which puts the wheel's flat faces at
+`x = ±2.5 mm` -- a node plane of levels 5, 6 and 7 (`51 · dx_5`) but not of level 4 -- with the rim's torus
+tube meeting that plane tangentially. Two things follow from the zero-corner convention
+(`CutCellBody::classify`, following `GeometryShop::insideOutsideFromNodes`):
+
+- A face whose four corners are exactly zero makes the fluid cell **regular with that face covered**. Right
+  for the moments (`defineDegenerate` gives it boundary area one, the face as its EB) but the cell holds no
+  interface polygon, so the surface writer skipped it and whole flat faces were missing on the levels where
+  the plane is a node plane, present on the level where it is not. The writer now emits such a face as two
+  triangles from the fluid side.
+- A fluid cell whose face has **some** corners at zero -- the solid touching it over part of the face, as at
+  the tangent contact -- is regular with a fully open face. There is no polygon for the part that is
+  interface, and no aperture consistent with the cut neighbour across it. That is not a writer problem; it
+  is the convention failing on a partially coincident face, and the moments there are wrong in the same
+  way. It shows in the STL as open edges with no counterpart. Grid-aligned geometry is the cause, and
+  the example's own dielectric box is perturbed by `1.23e-7` for exactly this reason; with
+  `wheel_extra_thickness = 3.0123E-3` the same run goes from 3468 open interior edges to 568, all of them
+  coincident with another edge to `1e-10`: 510 pairs one ulp apart across seams (a child's vertex mapped
+  through the coarse cell's frame versus its own), 58 T-junctions.
+
+Not fixed and not pursued now: the partially coincident face (a #730 matter, and one `GeometryShop` shares),
+and the ulp-level seam mismatch (would need the coarse body to carry a child vertex in a form that maps
+bitwise as the fine cell maps it).
+
 ## Claimed but not established
 
 - That dropping covered regions is harmless in practice. A run on ProfiledSurface leaves 982776
