@@ -356,6 +356,9 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   m_tiles.resize(numLevels);
   m_boxes.resize(numLevels);
+  m_splitCounts.resize(numLevels, Vector<int>(6, 0));
+  m_splitBoxes.resize(numLevels);
+  m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
   m_solidTypes.resize(numLevels);
 
@@ -452,6 +455,14 @@ ComputationalGeometry::getBoxes(const int a_level) const noexcept
   return m_boxes[a_level];
 }
 
+const Vector<Box>&
+ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept
+{
+  a_reasons = m_splitReasons[a_level];
+
+  return m_splitBoxes[a_level];
+}
+
 const Vector<GeometryService::InOut>&
 ComputationalGeometry::getTypes(const phase::which_phase a_phase, const int a_level) const noexcept
 {
@@ -527,6 +538,15 @@ ComputationalGeometry::buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vecto
     // such phase; otherwise it is a leaf and nothing is built above it. The pieces of every box that splits are
     // classified together so that the work is shared once per level rather than once per box.
     const Vector<int> flags = this->splitFlags(boxes, lvl, gasTypes, solidTypes);
+
+    for (int i = 0; i < boxes.size(); i++) {
+      m_splitCounts[lvl][flags[i]]++;
+
+      if (flags[i] != 0) {
+        m_splitBoxes[lvl].push_back(boxes[i]);
+        m_splitReasons[lvl].push_back(flags[i]);
+      }
+    }
 
     Vector<Box> pieces;
 
@@ -627,20 +647,21 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
 {
   CH_TIME("ComputationalGeometry::splitFlags");
 
+  // The flag carries the reason, so the report can say why a level refined where it did.
   Vector<int> flags(a_boxes.size(), 0);
 
   for (int i = procID(); i < a_boxes.size(); i += numProc()) {
-    bool split = false;
+    SplitReason reason = SplitReason::None;
 
     if (a_gasTypes[i] == GeometryService::Irregular) {
-      split = split || this->exceedsCurvature(a_boxes[i], a_level, phase::gas);
+      reason = this->exceedsCurvature(a_boxes[i], a_level, phase::gas);
     }
 
-    if (a_solidTypes[i] == GeometryService::Irregular) {
-      split = split || this->exceedsCurvature(a_boxes[i], a_level, phase::solid);
+    if (reason == SplitReason::None && a_solidTypes[i] == GeometryService::Irregular) {
+      reason = this->exceedsCurvature(a_boxes[i], a_level, phase::solid);
     }
 
-    flags[i] = split ? 1 : 0;
+    flags[i] = static_cast<int>(reason);
   }
 
   ParallelOps::sum(flags);
@@ -698,7 +719,7 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
   return anySolid ? GeometryService::Covered : GeometryService::Regular;
 }
 
-bool
+ComputationalGeometry::SplitReason
 ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::exceedsCurvature");
@@ -706,7 +727,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
 
   if (implicitFunction.isNull()) {
-    return false;
+    return SplitReason::None;
   }
 
   // Normals are taken on the cells near the zero set, one cell beyond the box so that a pair across the box
@@ -763,6 +784,8 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
 
   const Real cosThreshold = std::cos(m_refineAngle * Units::pi / 180.0);
 
+  SplitReason ring = SplitReason::None;
+
   for (BoxIterator bit(valid); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
@@ -786,12 +809,25 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
       }
 
       if (dot < cosThreshold) {
-        return true;
+        // a pair inside the box is the box's own doing and decides at once; a pair reaching into the ring
+        // is recorded and would decide only if the whole box turned out to have no pair of its own, so that
+        // the report says what the box would have done without its neighbours
+        if (valid.contains(jv)) {
+          return (dot < 0.0) ? SplitReason::Medial : SplitReason::Interior;
+        }
+
+        ring = (dot < 0.0) ? SplitReason::Medial : ((ring == SplitReason::None) ? SplitReason::Ring : ring);
       }
     }
   }
 
-  return false;
+  // Temporarily, a pair reaching into the ring does not split the box: only its own pairs do. The ring is
+  // still scanned so the report keeps counting what it would have split.
+  if (ring != SplitReason::None) {
+    return SplitReason::None;
+  }
+
+  return ring;
 }
 
 void
@@ -1071,13 +1107,21 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
     const Vector<GeometryService::InOut>& oldSolidTypes = m_solidTypes[lvl];
     const Vector<Box>&                    tiles         = m_tiles[lvl];
 
-    // Which tiles each box hosts.
+    // Which tiles each box hosts, and for the report how many tiles are there because a box was irregular
+    // and how many because nesting put them there.
     Vector<Vector<int>> hosted(oldBoxes.size());
 
     for (int t = 0; t < tiles.size(); t++) {
-      if (a_tileHosts[lvl][t] >= 0) {
-        hosted[a_tileHosts[lvl][t]].push_back(t);
+      const int host = a_tileHosts[lvl][t];
+
+      if (host >= 0) {
+        hosted[host].push_back(t);
       }
+
+      const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
+                                          oldSolidTypes[host] == GeometryService::Irregular);
+
+      m_splitCounts[lvl][tagged ? 4 : 5]++;
     }
 
     // The tiles come first, with their own classifications.
@@ -1201,7 +1245,10 @@ ComputationalGeometry::reportGrids() const
            << m_boxes[lvl].size() << ", tiles " << m_tiles[lvl].size() << "; gas regular/covered/irregular "
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
-           << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular] << endl;
+           << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
+           << "; split interior/ring/medial " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2] << "/"
+           << m_splitCounts[lvl][3] << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting "
+           << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5] << endl;
   }
 }
 

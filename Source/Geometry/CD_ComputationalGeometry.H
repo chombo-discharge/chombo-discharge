@@ -207,6 +207,16 @@ public:
   getBoxes(const int a_level) const noexcept;
 
   /**
+   * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair
+   *        reaching into the ring outside it, 3 two surfaces facing each other across the band.
+   * @param[in]  a_level   Level, 0 being the coarsest.
+   * @param[out] a_reasons One reason per box, parallel to the returned boxes.
+   * @return The boxes.
+   */
+  const Vector<Box>&
+  getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept;
+
+  /**
    * @brief Classification of every box on a level for a phase, parallel to getBoxes(level).
    * @param[in] a_phase Phase.
    * @param[in] a_level Level, 0 being the coarsest.
@@ -373,6 +383,22 @@ protected:
   Vector<Vector<Box>> m_boxes;
 
   /**
+   * @brief Per level, the number of boxes that split for each SplitReason, and per level the number of tiles
+   *        that lie in an irregular box (tagged) versus elsewhere (nesting), for the report.
+   */
+  Vector<Vector<int>> m_splitCounts;
+
+  /**
+   * @brief Per level, the boxes that split in the upward pass, and why (SplitReason as an integer), parallel.
+   */
+  Vector<Vector<Box>> m_splitBoxes;
+
+  /**
+   * @brief Per level, the reason each box in m_splitBoxes split.
+   */
+  Vector<Vector<int>> m_splitReasons;
+
+  /**
    * @brief Gas-phase classification of each box in m_boxes, parallel to it.
    */
   Vector<Vector<GeometryService::InOut>> m_gasTypes;
@@ -499,6 +525,18 @@ protected:
   classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Why a box split, for the report: no split, a pair inside the box, a pair reaching into the ring
+   *        one cell outside it, or a pair whose normals face each other (two surfaces closer than the band).
+   */
+  enum class SplitReason
+  {
+    None,
+    Interior,
+    Ring,
+    Medial
+  };
+
+  /**
    * @brief Whether the implicit function's normal turns by more than m_refineAngle inside a box.
    * @details Cut cells do not exist at this point and are not looked for; the test runs on the implicit
    * function in the band of cells near its zero set. A phase without an implicit function never asks for a
@@ -518,7 +556,7 @@ protected:
    * @param[in] a_phase Phase whose implicit function is asked.
    * @return True if the box must be split.
    */
-  bool
+  SplitReason
   exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**

@@ -120,6 +120,17 @@ PolyhedralGeometryShop::verifySurface() const
           out << boxes[i].smallEnd() << " " << boxes[i].bigEnd() << " gas " << gasTypes[i] << " solid " << solidTypes[i]
               << "\n";
         }
+
+        // and the boxes that split on this level, with why
+        std::ofstream splits("surface_mesh_splits.level" + std::to_string(lvl) + ".txt");
+
+        Vector<int> reasons;
+
+        const Vector<Box>& splitBoxes = m_grids->getSplitBoxes(lvl, reasons);
+
+        for (int i = 0; i < splitBoxes.size(); i++) {
+          splits << splitBoxes[i].smallEnd() << " " << splitBoxes[i].bigEnd() << " reason " << reasons[i] << "\n";
+        }
       }
     }
   }
