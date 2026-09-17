@@ -58,7 +58,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_sanityCheck     = true;
 
   // Hidden options, as ScanShop keeps its own.
-  ParmParse pp("PolyhedralShop");
+  ParmParse pp("PolyhedralGeometryShop");
 
   pp.query("write_stl", m_writeSTL);
   pp.query("sanity_check", m_sanityCheck);

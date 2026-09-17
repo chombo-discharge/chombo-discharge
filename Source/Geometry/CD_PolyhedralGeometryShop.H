@@ -128,7 +128,7 @@ public:
    * @details Every cut cell of every irregular box is reconstructed at its own level, cells the next finer
    *          level carries are skipped, and a face shared with such a cell is restricted to the finer
    *          chords and the interface closed. The interface triangles of every level are then checked by
-   *          sanityCheck, and written as one STL per level and one composite when PolyhedralShop.write_stl
+   *          sanityCheck, and written as one STL per level and one composite when PolyhedralGeometryShop.write_stl
    *          is set. Collective; every rank reconstructs its share of the boxes. Requires setGrids.
    */
   void
@@ -141,7 +141,7 @@ public:
    *          are welded at s_weldSpacing times the finest spacing before edges are matched, which is far above
    *          the round-off two cells produce for one shared vertex and far below any geometry. Gathers the
    *          triangles onto rank 0, where an interior edge used once or more than twice is reported with its
-   *          position and stops the run. Switched by PolyhedralShop.sanity_check, on by default.
+   *          position and stops the run. Switched by PolyhedralGeometryShop.sanity_check, on by default.
    * @param[in] a_facets This rank's interface triangles, nine reals each.
    */
   void
@@ -251,12 +251,12 @@ protected:
   phase::which_phase m_phase;
 
   /**
-   * @brief Whether verifySurface writes the surface as STL. PolyhedralShop.write_stl, off by default.
+   * @brief Whether verifySurface writes the surface as STL. PolyhedralGeometryShop.write_stl, off by default.
    */
   bool m_writeSTL;
 
   /**
-   * @brief Whether verifySurface runs sanityCheck. PolyhedralShop.sanity_check, on by default.
+   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, on by default.
    */
   bool m_sanityCheck;
 
