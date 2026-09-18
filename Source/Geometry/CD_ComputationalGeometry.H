@@ -205,13 +205,13 @@ public:
   getBoxes(const int a_level) const noexcept;
 
   /**
-   * @brief The tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is
-   *        what a simulation grid on the level is made of. Empty on the start level and below, which are whole.
+   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which
+   *        is what a simulation grid on the level is made of. Empty on the start level and below, which are whole.
    * @param[in] a_level Level, 0 being the coarsest.
-   * @return The tiles.
+   * @return The cut tiles.
    */
   const Vector<Box>&
-  getTiles(const int a_level) const noexcept;
+  getCutTiles(const int a_level) const noexcept;
 
   /**
    * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair
@@ -383,7 +383,7 @@ protected:
   /**
    * @brief Cut-cell tiles per level, common to both phases.
    */
-  Vector<Vector<Box>> m_tiles;
+  Vector<Vector<Box>> m_cutTiles;
 
   /**
    * @brief Boxes per level, common to both phases.
@@ -579,7 +579,7 @@ protected:
    *     tags[lvl - 1] = every box on lvl irregular in some phase, coarsened by two
    *                     -- TiledMeshRefine takes tags on the level below the one it tiles
    *   TiledMeshRefine(m_domains[m_startLevel], ratio 2, m_minBlockSize, m_maxBlockSize).regrid(tiles, tags)
-   *   m_tiles[lvl] = tiles[lvl - m_startLevel] for lvl > m_startLevel; the start level and below are whole and
+   *   m_cutTiles[lvl] = tiles[lvl - m_startLevel] for lvl > m_startLevel; the start level and below are whole and
    *   are not tiled
    *
    * Every box is a super-tile already, so the tags are exact in tile units. The nesting buffer is one tile per
@@ -655,7 +655,7 @@ protected:
    * @param[in] a_level  Level, above the start level.
    * @param[in] a_order  Tile indices of the level sorted by super-tile key, from sortTilesByKey.
    * @param[in] a_box    Box on that level.
-   * @return Indices into m_tiles[a_level] of the tiles that intersect the box.
+   * @return Indices into m_cutTiles[a_level] of the tiles that intersect the box.
    */
   Vector<int>
   tilesMeeting(const int a_level, const Vector<int>& a_order, const Box& a_box) const;

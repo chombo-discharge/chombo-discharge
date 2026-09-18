@@ -361,7 +361,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
   }
 
-  m_tiles.resize(numLevels);
+  m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
   m_splitCounts.resize(numLevels, Vector<int>(6, 0));
   m_splitBoxes.resize(numLevels);
@@ -463,9 +463,9 @@ ComputationalGeometry::getBoxes(const int a_level) const noexcept
 }
 
 const Vector<Box>&
-ComputationalGeometry::getTiles(const int a_level) const noexcept
+ComputationalGeometry::getCutTiles(const int a_level) const noexcept
 {
-  return m_tiles[a_level];
+  return m_cutTiles[a_level];
 }
 
 const Vector<Box>&
@@ -884,7 +884,7 @@ ComputationalGeometry::makeTiles()
 
   // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
   for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
-    m_tiles[lvl] = tiles[lvl - m_startLevel];
+    m_cutTiles[lvl] = tiles[lvl - m_startLevel];
   }
 }
 
@@ -960,7 +960,7 @@ ComputationalGeometry::sortTilesByKey(const int a_level) const
 {
   CH_TIME("ComputationalGeometry::sortTilesByKey");
 
-  const Vector<Box>& tiles = m_tiles[a_level];
+  const Vector<Box>& tiles = m_cutTiles[a_level];
 
   Vector<int> order(tiles.size());
 
@@ -980,7 +980,7 @@ ComputationalGeometry::tilesMeeting(const int a_level, const Vector<int>& a_orde
 {
   // A tile lies inside one super-tile, so the tiles meeting a box are among those keyed by the super-tiles the
   // box touches: each such key is found by binary search in the sorted order and its run scanned.
-  const Vector<Box>& tiles = m_tiles[a_level];
+  const Vector<Box>& tiles = m_cutTiles[a_level];
 
   Vector<int> found;
 
@@ -1045,7 +1045,7 @@ ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_f
   const Vector<int> startTable = this->latticeTable(m_startLevel);
 
   for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
-    const Vector<Box>& tiles = m_tiles[lvl];
+    const Vector<Box>& tiles = m_cutTiles[lvl];
 
     a_tileHosts[lvl].resize(tiles.size(), -1);
 
@@ -1120,7 +1120,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
     const Vector<Box>&                    oldBoxes      = m_boxes[lvl];
     const Vector<GeometryService::InOut>& oldGasTypes   = m_gasTypes[lvl];
     const Vector<GeometryService::InOut>& oldSolidTypes = m_solidTypes[lvl];
-    const Vector<Box>&                    tiles         = m_tiles[lvl];
+    const Vector<Box>&                    tiles         = m_cutTiles[lvl];
 
     // Which tiles each box hosts, and for the report how many tiles are there because a box was irregular
     // and how many because nesting put them there.
@@ -1257,7 +1257,7 @@ ComputationalGeometry::reportGrids() const
     }
 
     pout() << "  level " << lvl << " domain " << m_domains[lvl].domainBox().size() << " dx " << m_dx[lvl] << ": boxes "
-           << m_boxes[lvl].size() << ", tiles " << m_tiles[lvl].size() << "; gas regular/covered/irregular "
+           << m_boxes[lvl].size() << ", tiles " << m_cutTiles[lvl].size() << "; gas regular/covered/irregular "
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]

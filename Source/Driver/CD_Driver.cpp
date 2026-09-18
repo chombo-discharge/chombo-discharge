@@ -1499,12 +1499,15 @@ Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
     pout() << "Driver::makeGeometryGrids" << endl;
   }
 
-  // The start domain may be coarser than the coarsest AMR level, so its spacing is taken from the finest one.
-  const ProblemDomain& finestDomain = m_amr->getFinestDomain();
-  const Real startDx = m_amr->getFinestDx() * (finestDomain.domainBox().size(0) / a_startDomain.domainBox().size(0));
+  // The stop domain is the deepest level the geometry is resolved on. The start domain may be coarser than the
+  // coarsest AMR level, so its spacing is scaled off the stop domain's.
+  const int            stopLevel  = m_amr->getMaxAmrDepth();
+  const ProblemDomain& stopDomain = m_amr->getDomains()[stopLevel];
+  const Real           stopDx     = m_amr->getDx()[stopLevel];
+  const Real           startDx    = stopDx * (stopDomain.domainBox().size(0) / a_startDomain.domainBox().size(0));
 
   m_computationalGeometry->makeGrids(a_startDomain,
-                                     finestDomain,
+                                     stopDomain,
                                      m_amr->getProbLo(),
                                      startDx,
                                      m_refineAngle,
@@ -1527,7 +1530,7 @@ Driver::getGeometryGrids() const
     const int geometryLevel = m_computationalGeometry->getLevel(domains[lvl]);
 
     if (geometryLevel >= 0) {
-      boxes[lvl] = m_computationalGeometry->getTiles(geometryLevel);
+      boxes[lvl] = m_computationalGeometry->getCutTiles(geometryLevel);
     }
   }
 
