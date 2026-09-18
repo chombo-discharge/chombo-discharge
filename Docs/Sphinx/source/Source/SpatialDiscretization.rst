@@ -200,6 +200,54 @@ However, implicit functions like :math:`d\left(\mathbf{x}\right) = R^2 - \mathbf
    Other options are ``ScanShop.box_sorting = morton`` and ``ScanShop.box_sorting = std``.
    The default behavior is to use a Morton space-filling curve for organizing the cut-cell patches among the ranks. 
 
+Polyhedral moments
+^^^^^^^^^^^^^^^^^^
+
+The two approaches above concern *where* cut-cells are located.
+A separate question is what the discrete moments of a cut-cell actually are, and ``chombo-discharge`` offers a second answer to it, selected by
+
+.. code-block:: text
+
+   Driver.geometry_generation = polyhedral
+
+``Chombo`` computes the moments of a cut-cell by integrating the implicit function over the cell, which makes the face apertures third-order accurate.
+It never forms a surface: the moments are the primary object, and there is no geometry behind them from which they could be recomputed.
+The polyhedral method instead reconstructs a surface explicitly and *defines* the moments to be its integrals.
+
+The surface is built from two sets of values that no cell owns alone.
+The implicit function is evaluated at the cell corners, which the :math:`2^D` cells meeting at a node share, and the parameter at which it changes sign is found on each cell edge, which the four cells meeting along it share.
+Two neighbouring cells therefore reconstruct the same surface bit for bit rather than to within a tolerance, which is what makes a face aperture agree when it is computed from either side.
+From these, each cell face contributes the fluid part of that face, closed off by a straight chord between its crossings, and the interface contributes triangles spanning the loop those crossings form.
+Together they bound a closed polyhedron, and the volume fraction, the centroids, the apertures and the boundary area are exact integrals of it.
+
+The price is the chord.
+Where ``Chombo`` integrates the arc the interface really follows, this integrates the straight line between its endpoints, so the apertures drop from third order to second on curved geometry.
+Two cases are unaffected: a planar interface, where the chord *is* the interface, and two dimensions, where the interface inside a cut-cell genuinely is the straight line between its two crossings and nothing is being approximated at all.
+
+What is gained is that the moments are the moments of a body, and so they satisfy the relations that are applied to them.
+The divergence theorem on a constant field,
+
+.. math::
+   :nowrap:
+
+   \begin{equation}
+   \sum_{d}\left(\alpha_{d,\text{hi}} - \alpha_{d,\text{lo}}\right)\mathbf{e}_d = a_B\mathbf{n},
+   \end{equation}
+
+holds to rounding for every cut-cell rather than approximately, which matters because it is the relation ``PolyGeom`` uses to derive the boundary area and normal from the apertures.
+More importantly for what this is intended to support, the eight cells of a subdivided body sum back to the body they came from exactly, so refinement of a single cut-cell becomes a partition rather than a reconstruction.
+
+Everything else is deliberately left alone.
+The cell classification, the graph, and the treatment of regular cells bordering a covered one are ``Chombo``'s, so a run with ``polyhedral`` produces the same cut-cell topology as one without it; only the moments differ.
+A cell whose reconstructed polyhedron fails to close aborts the run rather than being silently approximated.
+No geometry tested so far has produced one, and while the generator is being developed a cell it cannot close is an edge case worth seeing rather than one worth approximating around.
+There is deliberately no input-file option for this, so that relaxing it is an edit to ``ComputationalGeometry`` rather than something a run can do by accident.
+
+.. note::
+
+   Output from ``polyhedral`` is not comparable with output from the other methods on curved geometry, by design.
+   Benchmark files must be regenerated rather than compared across the switch.
+
 .. _Chap:MeshGeneration:
 
 Mesh generation
