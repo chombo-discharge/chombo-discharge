@@ -13,6 +13,9 @@
 #ifndef CD_POLYHEDRALGEOMETRYSHOP_H
 #define CD_POLYHEDRALGEOMETRYSHOP_H
 
+// Std includes
+#include <string>
+
 // Chombo includes
 #include <BaseFab.H>
 #include <IntVectSet.H>
@@ -21,7 +24,10 @@
 #include <CD_ScanShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_CutCellSurface.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
+
+class ComputationalGeometry;
 
 /**
  * @brief Geometry generation whose moments are exact integrals of an explicit surface.
@@ -110,6 +116,38 @@ public:
             const DataIndex&     a_di) const override;
 
   /**
+   * @brief Say which grids the polyhedra are built over, and which phase this generator serves on them.
+   * @param[in] a_grids Builder holding the boxes and their classifications per level.
+   * @param[in] a_phase Phase whose classifications and implicit function this generator uses.
+   */
+  void
+  setGrids(const ComputationalGeometry& a_grids, const phase::which_phase a_phase) noexcept;
+
+  /**
+   * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
+   * @details Every cut cell of every irregular box is reconstructed at its own level, cells the next finer
+   *          level carries are skipped, and a face shared with such a cell is restricted to the finer
+   *          chords and the interface closed. The interface triangles of every level are then checked by
+   *          sanityCheck, and written as one STL per level and one composite when PolyhedralGeometryShop.write_stl
+   *          is set. Collective; every rank reconstructs its share of the boxes. Requires setGrids.
+   */
+  void
+  verifySurface() const;
+
+  /**
+   * @brief Check that the interface triangles form a surface that is closed except on the domain boundary.
+   * @details Every polyhedron has a neighbour across each edge of its interface unless that edge lies on the
+   *          domain boundary, so every interior edge of the triangulation must be used exactly twice. Vertices
+   *          are welded at s_weldSpacing times the finest spacing before edges are matched, which is far above
+   *          the round-off two cells produce for one shared vertex and far below any geometry. Gathers the
+   *          triangles onto rank 0, where an interior edge used once or more than twice is reported with its
+   *          position and stops the run. Switched by PolyhedralGeometryShop.sanity_check, on by default.
+   * @param[in] a_facets This rank's interface triangles, nine reals each.
+   */
+  void
+  sanityCheck(const Vector<Real>& a_facets) const;
+
+  /**
    * @brief Whether a cut body holds too little solid to be a cut cell.
    * @details The counterpart, on the fluid side, of dropping a body whose fluid volume is below the
    *          threshold: a body with neither solid volume nor boundary area is a regular cell. A cell whose
@@ -121,6 +159,91 @@ public:
    */
   static bool
   isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept;
+
+  /**
+   * @brief Evaluate the implicit function at every node of a region.
+   * @details One evaluation per node rather than per cell corner, since the cells meeting at a
+   * node share it and must agree on its value. Values are read through snappedValue.
+   * @param[in]  a_function   Implicit function
+   * @param[out] a_nodeValues Node-centred values over a_region
+   * @param[in]  a_region     Cell-centred region whose nodes are wanted
+   * @param[in]  a_probLo     Lower-left corner of computational domain
+   * @param[in]  a_dx         Grid resolution
+   */
+  static void
+  fillNodeValues(const BaseIF&   a_function,
+                 BaseFab<Real>&  a_nodeValues,
+                 const Box&      a_region,
+                 const RealVect& a_probLo,
+                 const Real&     a_dx);
+
+  /**
+   * @brief Size the edge-crossing cache for a region and mark every edge as not yet bisected.
+   * @details One fab per direction, over the edges of the region's cells, addressed by the node at
+   * the low end of the edge as edgeCrossing addresses them.
+   * @param[out] a_intercept Edge-centred cache, one fab per direction
+   * @param[in]  a_region    Cell-centred region whose edges are wanted
+   */
+  static void
+  defineIntercepts(BaseFab<Real> a_intercept[SpaceDim], const Box& a_region);
+
+  /**
+   * @brief Find where the implicit function changes sign along a cell edge.
+   * @details Bisection between the two endpoints, looked up in a cache first. Every cut edge is
+   * reached from both of its adjoining faces and from each neighbouring cell, always with the
+   * same endpoints, so the root is found once and reused. That is what makes two cells agree on
+   * a shared aperture bit for bit.
+   * @param[in]     a_function  Implicit function
+   * @param[in,out] a_intercept Edge-centred cache, one component per direction
+   * @param[in]     a_cell      Cell the edge is being read from
+   * @param[in]     a_edge      Edge index within the cell
+   * @param[in]     a_lo        Implicit function at the edge's low corner
+   * @param[in]     a_hi        Implicit function at the edge's high corner
+   * @param[in]     a_probLo    Lower-left corner of computational domain
+   * @param[in]     a_dx        Grid resolution
+   * @return Position along the edge, parameterised from its low corner.
+   */
+  static Real
+  edgeCrossing(const BaseIF&   a_function,
+               BaseFab<Real>   a_intercept[SpaceDim],
+               const IntVect&  a_cell,
+               const int       a_edge,
+               const Real      a_lo,
+               const Real      a_hi,
+               const RealVect& a_probLo,
+               const Real&     a_dx);
+
+  /**
+   * @brief Read one cell's corner values off the node values.
+   * @details Corner c of the cell is the node offset by ((c >> d) & 1) in each direction d.
+   * @param[out] a_surface    Surface whose corners are filled. Its crossings are left alone.
+   * @param[in]  a_nodeValues Node-centred implicit function values
+   * @param[in]  a_cell       The cell
+   */
+  static void
+  fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_nodeValues, const IntVect& a_cell);
+
+  /**
+   * @brief Gather the corner values and edge crossings one cell's surface is built from.
+   * @details The corners come from the shared node values and every edge whose ends disagree gets
+   * its crossing through the shared cache, so every caller that reconstructs a cell -- the graph,
+   * the surface pass and the grid builder's curvature test -- builds the same cell.
+   * @param[in]     a_function   Implicit function
+   * @param[in,out] a_intercept  Edge-centred crossing cache
+   * @param[out]    a_surface    The values the cell's body is reconstructed from
+   * @param[in]     a_nodeValues Node-centred implicit function values
+   * @param[in]     a_cell       The cell
+   * @param[in]     a_probLo     Lower-left corner of computational domain
+   * @param[in]     a_dx         Grid resolution
+   */
+  static void
+  buildSurface(const BaseIF&                 a_function,
+               BaseFab<Real>                 a_intercept[SpaceDim],
+               PolyhedralEB::CutCellSurface& a_surface,
+               const BaseFab<Real>&          a_nodeValues,
+               const IntVect&                a_cell,
+               const RealVect&               a_probLo,
+               const Real&                   a_dx);
 
   /**
    * @brief Bisect one cell edge for the crossing on it.
@@ -180,6 +303,53 @@ public:
 
 protected:
   /**
+   * @brief Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck.
+   */
+  static constexpr Real s_weldSpacing = 1.0E-8;
+
+  /**
+   * @brief Grids the polyhedra are built over, or null before setGrids.
+   */
+  const ComputationalGeometry* m_grids;
+
+  /**
+   * @brief Phase this generator serves on those grids.
+   */
+  phase::which_phase m_phase;
+
+  /**
+   * @brief Whether verifySurface writes the surface as STL. PolyhedralGeometryShop.write_stl, off by default.
+   */
+  bool m_writeSTL;
+
+  /**
+   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, on by default.
+   */
+  bool m_sanityCheck;
+
+  /**
+   * @brief Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.
+   * @details Cells the next finer level carries are skipped. A cut cell with such a cell across one of its
+   *          faces has that face restricted to the finer cells' chords (restrictFace) and its interface
+   *          rebuilt (closeInterface). A coarse edge that carries no crossing while both finer edges under
+   *          it do is a multi-valued coarse cell in disguise and stops the run, as does a body that will not
+   *          close.
+   * @param[out] a_facets Triangle coordinates, appended to.
+   * @param[in]  a_level  Level to collect from.
+   */
+  void
+  collectFacets(Vector<Real>& a_facets, const int a_level) const;
+
+  /**
+   * @brief Write triangles gathered from every rank as one STL file.
+   * @param[in] a_fileName File to write.
+   * @param[in] a_name     Solid name inside the file.
+   * @param[in] a_facets   This rank's triangles, nine reals each.
+   */
+  void
+  writeSTL(const std::string& a_fileName, const std::string& a_name, const Vector<Real>& a_facets) const;
+
+  /**
    * @brief Residual above which the stored moments and the ones PolyGeom recomputes disagree.
    */
   static constexpr Real s_divergenceTolerance = 1.0E-9;
@@ -193,69 +363,6 @@ protected:
    * @brief Volume fraction below which a cut cell carries no fluid worth keeping.
    */
   Real m_volumeThreshold;
-
-  /**
-   * @brief Evaluate the implicit function at every node of a region.
-   * @details One evaluation per node rather than per cell corner, since the cells meeting at a
-   * node share it and must agree on its value.
-   * @param[out] a_nodeValues Node-centred values over a_region
-   * @param[in]  a_region     Cell-centred region whose nodes are wanted
-   * @param[in]  a_probLo     Lower-left corner of computational domain
-   * @param[in]  a_dx         Grid resolution
-   */
-  void
-  fillNodeValues(BaseFab<Real>& a_nodeValues, const Box& a_region, const RealVect& a_probLo, const Real& a_dx) const;
-
-  /**
-   * @brief Find where the implicit function changes sign along a cell edge.
-   * @details Bisection between the two endpoints, looked up in a cache first. Every cut edge is
-   * reached from both of its adjoining faces and from each neighbouring cell, always with the
-   * same endpoints, so the root is found once and reused. That is what makes two cells agree on
-   * a shared aperture bit for bit.
-   * @param[in,out] a_intercept Edge-centred cache, one component per direction
-   * @param[in]     a_cell      Cell the edge is being read from
-   * @param[in]     a_edge      Edge index within the cell
-   * @param[in]     a_lo        Implicit function at the edge's low corner
-   * @param[in]     a_hi        Implicit function at the edge's high corner
-   * @param[in]     a_probLo    Lower-left corner of computational domain
-   * @param[in]     a_dx        Grid resolution
-   * @return Position along the edge, parameterised from its low corner.
-   */
-  Real
-  edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
-               const IntVect&  a_cell,
-               const int       a_edge,
-               const Real      a_lo,
-               const Real      a_hi,
-               const RealVect& a_probLo,
-               const Real&     a_dx) const;
-
-  /**
-   * @brief Read one cell's corner values off the node values.
-   * @details Corner c of the cell is the node offset by ((c >> d) & 1) in each direction d.
-   * @param[out] a_surface    Surface whose corners are filled. Its crossings are left alone.
-   * @param[in]  a_nodeValues Node-centred implicit function values
-   * @param[in]  a_cell       The cell
-   */
-  void
-  fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_nodeValues, const IntVect& a_cell) const;
-
-  /**
-   * @brief Gather the corner values and edge crossings one cell's surface is built from.
-   * @param[in,out] a_intercept  Edge-centred crossing cache
-   * @param[out]    a_surface    The values the cell's body is reconstructed from
-   * @param[in]     a_nodeValues Node-centred implicit function values
-   * @param[in]     a_cell       The cell
-   * @param[in]     a_probLo     Lower-left corner of computational domain
-   * @param[in]     a_dx         Grid resolution
-   */
-  void
-  buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
-               PolyhedralEB::CutCellSurface& a_surface,
-               const BaseFab<Real>&          a_nodeValues,
-               const IntVect&                a_cell,
-               const RealVect&               a_probLo,
-               const Real&                   a_dx) const;
 
   /**
    * @brief Write a cut cell's node from its body.

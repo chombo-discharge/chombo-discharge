@@ -1428,6 +1428,8 @@ Driver::setupGeometryOnly()
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
+
+      this->buildGeometryGrids(scanDomain);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
@@ -1471,8 +1473,13 @@ Driver::setupGeometryOnly()
     this->writeMemoryUsage();
   }
 
-  // Regrid using geometric tags only.
-  m_amr->regridAmr(m_geomTags, 0);
+  // Regrid using geometric tags only, or onto the grids the geometry was built over.
+  if (m_geometryGeneration == "polyhedral") {
+    m_amr->regridAmr(this->getGeometryGrids(), 0);
+  }
+  else {
+    m_amr->regridAmr(m_geomTags, 0);
+  }
 
   if (m_verbosity > 0) {
     this->gridReport();
@@ -1482,6 +1489,52 @@ Driver::setupGeometryOnly()
   if (m_plotInterval > 0) {
     this->writeGeometry(); // Write geometry only
   }
+}
+
+void
+Driver::buildGeometryGrids(const ProblemDomain& a_startDomain)
+{
+  CH_TIME("Driver::buildGeometryGrids");
+  if (m_verbosity > 5) {
+    pout() << "Driver::buildGeometryGrids" << endl;
+  }
+
+  // The stop domain is the deepest level the geometry is resolved on. The start domain may be coarser than the
+  // coarsest AMR level, so its spacing is scaled off the stop domain's.
+  const int            stopLevel  = m_amr->getMaxAmrDepth();
+  const ProblemDomain& stopDomain = m_amr->getDomains()[stopLevel];
+  const Real           stopDx     = m_amr->getDx()[stopLevel];
+  const Real           startDx    = stopDx * (stopDomain.domainBox().size(0) / a_startDomain.domainBox().size(0));
+
+  m_computationalGeometry->makeGrids(a_startDomain,
+                                     stopDomain,
+                                     m_amr->getProbLo(),
+                                     startDx,
+                                     m_refineAngle,
+                                     m_amr->getNumberOfEbGhostCells());
+}
+
+Vector<Vector<Box>>
+Driver::getGeometryGrids() const
+{
+  CH_TIME("Driver::getGeometryGrids");
+  if (m_verbosity > 5) {
+    pout() << "Driver::getGeometryGrids" << endl;
+  }
+
+  const Vector<ProblemDomain>& domains = m_amr->getDomains();
+
+  Vector<Vector<Box>> boxes(1 + m_amr->getMaxAmrDepth());
+
+  for (int lvl = 1; lvl < boxes.size(); lvl++) {
+    const int geometryLevel = m_computationalGeometry->getLevel(domains[lvl]);
+
+    if (geometryLevel >= 0) {
+      boxes[lvl] = m_computationalGeometry->getCutTiles(geometryLevel);
+    }
+  }
+
+  return boxes;
 }
 
 void
@@ -1518,6 +1571,8 @@ Driver::setupFresh(const int a_initialRegrids)
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
+
+      this->buildGeometryGrids(scanDomain);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
@@ -1563,7 +1618,12 @@ Driver::setupFresh(const int a_initialRegrids)
   // base level and upwards, so no hardcap on the permitted grids.
   const int lmin    = 0;
   const int hardcap = -1;
-  m_amr->regridAmr(m_geomTags, lmin, hardcap);
+  if (m_geometryGeneration == "polyhedral") {
+    m_amr->regridAmr(this->getGeometryGrids(), lmin);
+  }
+  else {
+    m_amr->regridAmr(m_geomTags, lmin, hardcap);
+  }
   const int lmax = m_amr->getFinestLevel();
 
   // Allocate internal storage
@@ -1659,6 +1719,8 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
 
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel]);
+
+      this->buildGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
     }
     else {
       m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);

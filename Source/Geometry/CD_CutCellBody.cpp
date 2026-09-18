@@ -15,6 +15,7 @@
 
 // Chombo includes
 #include <CH_assert.H>
+#include <PolyGeom.H>
 
 // Our includes
 #include <CD_CutCellBody.H>
@@ -322,6 +323,497 @@ CutCellBody::defineDegenerate(const CutCellSurface& a_surface, const Kind a_kind
     }
   }
 }
+
+#if CH_SPACEDIM == 3
+bool
+CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out, const int a_maxOut, int& a_numOut)
+  const noexcept
+{
+  a_numOut = 0;
+
+  // A seam face that the body covers completely carries no polygon, and that is an answer, not a
+  // failure. It happens wherever a face of the geometry lands on a cell face: the crossings sit on
+  // the face's own edges, faceWalk returns slivers of no area, and everything below cancels them
+  // against each other. Refusing here would drop the cell back to a single chord, which is the
+  // crack the multichord exists to remove.
+  Real inputArea = 0.0;
+
+  for (int ip = 0; ip < a_num; ip++) {
+    RealVect twice = RealVect::Zero;
+
+    for (int i = 0; i < a_in[ip].m_numVertices; i++) {
+      const RealVect& a = a_in[ip].m_vertex[i];
+      const RealVect& b = a_in[ip].m_vertex[(i + 1) % a_in[ip].m_numVertices];
+
+      twice += PolyGeom::cross(a, b);
+    }
+
+    inputArea += 0.5 * twice.vectorLength();
+  }
+
+  // the face is one unit square in these coordinates, so this is a sliver a weld tolerance wide
+  if (inputArea <= PolyhedralEB::detail::s_weldTolerance) {
+    return true;
+  }
+
+  RealVect from[4 * s_maxVertices];
+  RealVect to[4 * s_maxVertices];
+
+  int numEdges = 0;
+
+  for (int ip = 0; ip < a_num; ip++) {
+    for (int i = 0; i < a_in[ip].m_numVertices; i++) {
+      const RealVect& a = a_in[ip].m_vertex[i];
+      const RealVect& b = a_in[ip].m_vertex[(i + 1) % a_in[ip].m_numVertices];
+
+      if (detail::sameVertex(a, b)) {
+        continue;
+      }
+
+      bool interior = false;
+
+      for (int jp = 0; jp < a_num && !interior; jp++) {
+        if (jp == ip) {
+          continue;
+        }
+
+        for (int j = 0; j < a_in[jp].m_numVertices && !interior; j++) {
+          const RealVect& c = a_in[jp].m_vertex[j];
+          const RealVect& d = a_in[jp].m_vertex[(j + 1) % a_in[jp].m_numVertices];
+
+          interior = detail::sameVertex(a, d) && detail::sameVertex(b, c);
+        }
+      }
+
+      if (!interior) {
+        if (numEdges >= 4 * s_maxVertices) {
+          return false;
+        }
+
+        from[numEdges] = a;
+        to[numEdges]   = b;
+        numEdges++;
+      }
+    }
+  }
+
+  if (numEdges < 3) {
+    return false;
+  }
+
+  bool used[4 * s_maxVertices] = {false};
+
+  // The union need not be one connected region. A cube's edge grazing the corner of a quadrant
+  // leaves a sliver detached from the main patch, and a face is allowed to carry a polygon for
+  // each: accumulateMoments sums over polygons, so nothing has to be joined that geometry has
+  // separated. Refusing here instead would throw away exactly the cells the multichord is for.
+  for (int seed = 0; seed < numEdges; seed++) {
+    if (used[seed]) {
+      continue;
+    }
+
+    RealVect walk[4 * s_maxVertices];
+
+    int numWalk = 0;
+
+    used[seed]      = true;
+    walk[numWalk++] = from[seed];
+
+    RealVect       current = to[seed];
+    const RealVect end     = from[seed];
+
+    bool closed = false;
+
+    for (int guard = 0; guard <= numEdges && !closed; guard++) {
+      if (detail::sameVertex(current, end)) {
+        closed = true;
+
+        break;
+      }
+
+      int next = -1;
+
+      for (int j = 0; j < numEdges && next < 0; j++) {
+        if (!used[j] && detail::sameVertex(from[j], current)) {
+          next = j;
+        }
+      }
+
+      if (next < 0 || numWalk >= 4 * s_maxVertices) {
+        return false;
+      }
+
+      used[next]      = true;
+      walk[numWalk++] = current;
+      current         = to[next];
+    }
+
+    if (!closed) {
+      return false;
+    }
+
+    if (a_numOut >= a_maxOut) {
+      return false;
+    }
+
+    // drop vertices that sit on the straight line between their neighbours
+    Polygon& out = a_out[a_numOut];
+
+    out.m_numVertices = 0;
+    out.m_face        = a_in[0].m_face;
+
+    for (int i = 0; i < numWalk; i++) {
+      const RealVect& prev = walk[(i + numWalk - 1) % numWalk];
+      const RealVect& here = walk[i];
+      const RealVect& next = walk[(i + 1) % numWalk];
+
+      const RealVect back  = here - prev;
+      const RealVect ahead = next - here;
+
+      const Real backLength  = back.vectorLength();
+      const Real aheadLength = ahead.vectorLength();
+
+      bool straight = false;
+
+      if (backLength > 0.0 && aheadLength > 0.0) {
+        const RealVect unit = back / backLength;
+
+        const Real along = ahead.dotProduct(unit);
+
+        straight = (along > 0.0) && ((ahead - along * unit).vectorLength() <= 1.0E-11 * aheadLength);
+      }
+
+      // a chord vertex on the boundary between two children is a vertex of the cells on the other
+      // side of the seam, and dropping it would leave their two segments meeting the middle of one
+      // of ours: watertight, but not a shared edge. The children sit at plus and minus a quarter, so
+      // their boundaries in the face are at exactly zero. A vertex on the face's own boundary is
+      // kept only if the face across that boundary is covered: then the edge is an interface edge
+      // and the finer cells share it. Otherwise it has to go, or the edge it splits no longer
+      // matches the neighbouring face's whole one and closeInterface reads the boundary as open.
+      const int faceDir = a_in[0].m_face / 2;
+
+      bool onChildBoundary = false;
+      bool onSharedFace    = false;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (d == faceDir) {
+          continue;
+        }
+
+        onChildBoundary = onChildBoundary || (std::abs(here[d]) <= detail::s_weldTolerance);
+
+        for (int side = 0; side < 2; side++) {
+          if (std::abs(here[d] - (-0.5 + static_cast<Real>(side))) <= detail::s_weldTolerance) {
+            const int across = 2 * d + side;
+
+            for (int ip = 0; ip < m_numPolygons; ip++) {
+              onSharedFace = onSharedFace || (m_polygon[ip].m_face == across);
+            }
+          }
+        }
+      }
+
+      if (straight && !(onChildBoundary && !onSharedFace)) {
+        continue;
+      }
+
+      if (out.m_numVertices >= s_maxVertices) {
+        return false;
+      }
+
+      out.m_vertexEdge[out.m_numVertices]  = -1;
+      out.m_segmentFace[out.m_numVertices] = a_in[0].m_face;
+      out.m_vertex[out.m_numVertices++]    = here;
+    }
+
+    // a loop that collapses under the collinear pass enclosed nothing
+    if (out.m_numVertices >= 3) {
+      a_numOut++;
+    }
+  }
+
+  if (a_numOut == 0) {
+    return false;
+  }
+
+  return true;
+}
+
+bool
+CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept
+{
+  const int face = 2 * a_dir + a_side;
+
+  // this face's chord goes, and so does the interface, which was built to meet it
+  int kept = 0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    if (m_polygon[ip].m_face != face && m_polygon[ip].m_face >= 0) {
+      m_polygon[kept++] = m_polygon[ip];
+    }
+  }
+
+  m_numPolygons = kept;
+
+  Polygon sub[4 * (1 << (SpaceDim - 1))];
+
+  int numSub = 0;
+
+  for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
+    // the child of this cell that covers quadrant q of the face
+    int which = 0;
+    int bit   = 0;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      if (d == a_dir) {
+        which |= a_side << d;
+      }
+      else {
+        which |= ((q >> bit) & 1) << d;
+        bit++;
+      }
+    }
+
+    RealVect origin;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      origin[d] = -0.25 + 0.5 * static_cast<Real>((which >> d) & 1);
+    }
+
+    Polygon walked[2];
+
+    const int numWalked = this->faceWalk(a_dir, a_side, a_children[q], walked);
+
+    if (numWalked < 0) {
+      return false;
+    }
+
+    for (int n = 0; n < numWalked; n++) {
+      if (numSub >= 4 * (1 << (SpaceDim - 1))) {
+        return false;
+      }
+
+      Polygon& to = sub[numSub];
+
+      to = walked[n];
+
+      for (int iv = 0; iv < to.m_numVertices; iv++) {
+        to.m_vertex[iv] = origin + 0.5 * walked[n].m_vertex[iv];
+      }
+
+      numSub++;
+    }
+  }
+
+  // one polygon for the face, not one per child
+  if (numSub > 0) {
+    Polygon merged[1 << (SpaceDim - 1)];
+
+    int numMerged = 0;
+
+    if (!this->mergeCoplanar(sub, numSub, merged, 1 << (SpaceDim - 1), numMerged)) {
+      return false;
+    }
+
+    for (int n = 0; n < numMerged; n++) {
+      if (m_numPolygons >= s_maxPolygons) {
+        return false;
+      }
+
+      m_polygon[m_numPolygons++] = merged[n];
+    }
+  }
+
+  return true;
+}
+
+bool
+CutCellBody::closeInterface() noexcept
+{
+
+  RealVect from[s_maxPolygons * s_maxVertices];
+  RealVect to[s_maxPolygons * s_maxVertices];
+
+  int numOpen = 0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& p = m_polygon[ip];
+
+    for (int i = 0; i < p.m_numVertices; i++) {
+      const RealVect& a = p.m_vertex[i];
+      const RealVect& b = p.m_vertex[(i + 1) % p.m_numVertices];
+
+      if (detail::sameVertex(a, b)) {
+        continue;
+      }
+
+      bool shared = false;
+
+      for (int jp = 0; jp < m_numPolygons && !shared; jp++) {
+        if (jp == ip) {
+          continue;
+        }
+
+        const Polygon& q = m_polygon[jp];
+
+        for (int j = 0; j < q.m_numVertices && !shared; j++) {
+          const RealVect& c = q.m_vertex[j];
+          const RealVect& d = q.m_vertex[(j + 1) % q.m_numVertices];
+
+          shared = detail::sameVertex(a, d) && detail::sameVertex(b, c);
+        }
+      }
+
+      if (!shared) {
+        from[numOpen] = b;
+        to[numOpen]   = a;
+        numOpen++;
+      }
+    }
+  }
+
+  if (numOpen == 0) {
+    return true;
+  }
+
+  bool used[s_maxPolygons * s_maxVertices] = {false};
+
+  for (int s0 = 0; s0 < numOpen; s0++) {
+    if (used[s0]) {
+      continue;
+    }
+
+    used[s0] = true;
+
+    RealVect loop[s_maxVertices];
+
+    int numLoop = 0;
+
+    loop[numLoop++] = from[s0];
+
+    RealVect       current = to[s0];
+    const RealVect end     = from[s0];
+
+    bool closed = false;
+
+    for (int guard = 0; guard <= numOpen && !closed; guard++) {
+      if (detail::sameVertex(current, end)) {
+        closed = true;
+
+        break;
+      }
+
+      int next = -1;
+
+      for (int j = 0; j < numOpen && next < 0; j++) {
+        if (!used[j] && detail::sameVertex(from[j], current)) {
+          next = j;
+        }
+      }
+
+      if (next < 0 || numLoop >= s_maxVertices) {
+        break;
+      }
+
+      used[next] = true;
+
+      loop[numLoop++] = current;
+      current         = to[next];
+    }
+
+    if (!closed || numLoop < 3) {
+      return false;
+    }
+
+    RealVect apex = RealVect::Zero;
+
+    for (int i = 0; i < numLoop; i++) {
+      apex += loop[i];
+    }
+
+    apex /= static_cast<Real>(numLoop);
+
+    for (int i = 0; i < numLoop; i++) {
+      if (m_numPolygons >= s_maxPolygons) {
+        return false;
+      }
+
+      Polygon& t = m_polygon[m_numPolygons];
+
+      t.m_numVertices = 3;
+      t.m_face        = -1;
+
+      t.m_vertex[0] = apex;
+      t.m_vertex[1] = loop[i];
+      t.m_vertex[2] = loop[(i + 1) % numLoop];
+
+      for (int k = 0; k < 3; k++) {
+        t.m_vertexEdge[k]  = -1;
+        t.m_segmentFace[k] = -1;
+      }
+
+      m_numPolygons++;
+    }
+  }
+
+  return true;
+}
+
+void
+CutCellBody::printPolygons(std::ostream& a_out) const noexcept
+{
+  a_out << "polygons " << m_numPolygons << std::endl;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& p = m_polygon[ip];
+
+    a_out << "  polygon " << ip << " face " << p.m_face << " vertices " << p.m_numVertices << ":";
+
+    for (int i = 0; i < p.m_numVertices; i++) {
+      a_out << " (" << p.m_vertex[i][0] << "," << p.m_vertex[i][1] << "," << p.m_vertex[i][2] << ")";
+    }
+
+    a_out << std::endl;
+  }
+}
+
+void
+CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
+                                   const IntVect&  a_cell,
+                                   const RealVect& a_probLo,
+                                   const Real      a_dx) const noexcept
+{
+  // a body that is not cut holds no interface polygon, so the loop appends nothing for it
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& p = m_polygon[ip];
+
+    if (p.m_face >= 0 || p.m_numVertices < 3) {
+      continue;
+    }
+
+    // the interface is already fanned, but a polygon carrying more than three vertices is fanned
+    // again here rather than left for the reader to triangulate. A triangle without area is not
+    // written: a surface tangent to a cell edge leaves the cells beside it an interface that is
+    // that edge and nothing more, and its fan is a set of degenerate triangles carrying no moment
+    for (int v = 1; v + 1 < p.m_numVertices; v++) {
+      const RealVect* corner[3] = {&p.m_vertex[0], &p.m_vertex[v], &p.m_vertex[v + 1]};
+
+      if (PolyGeom::cross(*corner[1] - *corner[0], *corner[2] - *corner[0]).vectorLength() <= s_nullArea) {
+        continue;
+      }
+
+      for (int k = 0; k < 3; k++) {
+        for (int d = 0; d < SpaceDim; d++) {
+          // a face vertex sits at local 0.5 exactly, so this is an integer times the spacing from
+          // either side of the face; a shared edge crossing has the same local offset in both cells
+          a_facets.push_back(a_probLo[d] + a_dx * (static_cast<Real>(a_cell[d]) + ((*corner[k])[d] + 0.5)));
+        }
+      }
+    }
+  }
+}
+
+#endif
 
 void
 CutCellBody::accumulateMoments() noexcept

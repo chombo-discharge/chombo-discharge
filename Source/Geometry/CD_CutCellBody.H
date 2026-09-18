@@ -161,6 +161,86 @@ public:
   Real
   closureResidual() const noexcept;
 
+#if CH_SPACEDIM == 3
+  /**
+   * @brief Append this body's interface, as triangles in physical coordinates.
+   * @details The interface is the embedded boundary inside this cell: the polygons the body holds
+   *          that belong to no cell face. Each is written as a fan of triangles, nine reals per
+   *          triangle, so that the result can be gathered across ranks and written as one surface.
+   *          Nothing is appended by a body that is not cut. Coordinates are formed from the cell
+   *          index rather than the cell centre, so that a vertex two cells share -- a point on
+   *          their common face, or a crossing on a common edge -- is the same double from both.
+   * @param[in,out] a_facets Coordinates to append to.
+   * @param[in]     a_cell   Index of this cell.
+   * @param[in]     a_probLo Lower-left corner of the domain.
+   * @param[in]     a_dx     Grid spacing of the level this cell belongs to.
+   */
+  void
+  appendInterfaceFacets(Vector<Real>&   a_facets,
+                        const IntVect&  a_cell,
+                        const RealVect& a_probLo,
+                        const Real      a_dx) const noexcept;
+
+  /**
+   * @brief Print every polygon this body holds, in the cell's own frame, for inspection.
+   * @param[in,out] a_out Stream to print to.
+   */
+  void
+  printPolygons(std::ostream& a_out) const noexcept;
+
+  /**
+   * @brief Replace one face's chord with the chords of the children that cover it.
+   * @details The face is described at the resolution of the level below rather than this cell's,
+   *          which is what makes it agree with cells on the other side of a refinement boundary.
+   *          The interface is dropped with it, since it was built to meet the chord being replaced;
+   *          call closeInterface once every face that needs restricting has been.
+   * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
+   * @param[in] a_dir      Direction of the face.
+   * @param[in] a_side     Side of the cell the face is on.
+   * @return True if the children's chords merged into a face this body can hold.
+   */
+  bool
+  restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept;
+
+  /**
+   * @brief Rebuild the interface from the face polygons this body holds.
+   * @details Every face-polygon edge that no other face polygon carries in reverse bounds the
+   *          interface, and walking those edges gives its loops. Used instead of the crossing loops
+   *          once a face has been restricted, since a restricted face has vertices that are not
+   *          crossings of this cell's edges at all.
+   * @return True if every loop closed and the result fitted in the body's storage.
+   */
+  bool
+  closeInterface() noexcept;
+
+#endif
+
+  /**
+   * @brief How many polygons this body holds.
+   * @return Number of polygons.
+   */
+  inline int
+  numPolygons() const noexcept
+  {
+    return m_numPolygons;
+  }
+
+  /**
+   * @brief Largest number of vertices any of this body's polygons holds.
+   * @return Vertex count of the widest polygon.
+   */
+  inline int
+  widestPolygon() const noexcept
+  {
+    int widest = 0;
+
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      widest = std::max(widest, m_polygon[ip].m_numVertices);
+    }
+
+    return widest;
+  }
+
   /**
    * @brief Residual in the identity the moments must satisfy among themselves.
    * @details The divergence theorem applied to a constant field, which holds for any closed
@@ -186,8 +266,20 @@ protected:
 
   /**
    * @brief Largest number of vertices one of those polygons can carry.
+   * @details Fourteen was enough for a face carrying a single chord, where the widest polygon
+   * measured across four geometries held ten. A face that carries the chords of the cells on the
+   * other side of a seam instead of one of its own needs thirteen, measured over 16,640 cut faces,
+   * which leaves a single vertex of headroom -- not a margin. Twenty restores one.
+   *
+   * Raising this costs memory on every body, since a body holds s_maxPolygons of them and the
+   * vertex arrays dominate: a polygon goes from 456 to 648 bytes and a body from about 9.4 kB to
+   * 13.3 kB. Bodies are transient, built per cut and dropped, so that is paid per thread during a
+   * refinement rather than per cell of the index space.
+   *
+   * Lowering it is what does damage. Sixteen and eight refused between 156 and 5,226 cells per
+   * geometry and lost conservation to 1.8e-2, which is why these two numbers are what they are.
    */
-  static constexpr int s_maxVertices = 14;
+  static constexpr int s_maxVertices = 20;
 
   /**
    * @brief Distance by which a crossing is held off an edge's endpoints.
@@ -261,6 +353,23 @@ protected:
   defineCut(const CutCellSurface& a_surface) noexcept;
 
 #if CH_SPACEDIM == 3
+  /**
+   * @brief Merge coplanar polygons into the boundary of their union.
+   * @details An edge shared by two of them is interior, so cancelling every edge that appears
+   *          reversed among the others leaves the union's boundary, and walking what remains gives
+   *          it in order. Collinear vertices are then dropped, which is what lets a sub-face's edge
+   *          along a cell edge compare equal to the coarse face's edge beside it. The union need
+   *          not be connected, and a union of no area is an answer rather than a failure.
+   * @param[in]  a_in      Polygons to merge, all in one plane.
+   * @param[in]  a_num     How many.
+   * @param[out] a_out     The union's boundary, one polygon per connected piece.
+   * @param[in]  a_maxOut  How many pieces the caller can hold.
+   * @param[out] a_numOut  How many pieces were written.
+   * @return True if the union was walked and fitted.
+   */
+  bool
+  mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out, const int a_maxOut, int& a_numOut) const noexcept;
+
   /**
    * @brief The fluid part of one cell face, as outward-oriented polygons.
    * @details Walks the face's circuit of corners and edges, keeping fluid corners and inserting
