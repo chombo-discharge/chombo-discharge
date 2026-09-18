@@ -747,15 +747,19 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   // box and one cell beyond it so that a pair across the box boundary is seen from both sides. They come from the
   // edge roots alone, so they depend only on the zero set: the implicit function is not a distance function
   // inside a body built by CSG, and the gradient there carries the kinks and medial shells of the construction,
-  // which are not features of the surface. A cell whose centre is further from the zero set than half a cell
-  // diagonal cannot be cut and is skipped on one evaluation; the margin is a whole diagonal, since a function
-  // built with a smooth union grows faster than the distance and would otherwise hide a cut cell at the edge.
+  // which are not features of the surface. The node values are evaluated once per node and each crossed edge is
+  // bisected once, shared by the cells around it, as the shop does when it builds the graph.
   const BaseIF& f = *implicitFunction;
 
   const Real dx    = m_dx[a_level];
-  const Real reach = dx * std::sqrt(static_cast<Real>(SpaceDim));
   const Box  valid = a_box & m_domains[a_level].domainBox();
   const Box  grown = grow(a_box, 1) & m_domains[a_level].domainBox();
+
+  BaseFab<Real> nodeValues;
+  BaseFab<Real> intercept[SpaceDim];
+
+  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
+  PolyhedralGeometryShop::defineIntercepts(intercept, grown);
 
   BaseFab<Real> normal(grown, SpaceDim);
   BaseFab<int>  isCut(grown, 1);
@@ -765,19 +769,9 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   for (BoxIterator bit(grown); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
-    RealVect x = m_probLo;
-
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      x[dir] += dx * (static_cast<Real>(iv[dir]) + 0.5);
-    }
-
-    if (std::abs(f.value(x)) > reach) {
-      continue;
-    }
-
     PolyhedralEB::CutCellSurface surface;
 
-    PolyhedralGeometryShop::reconstructSurface(surface, f, iv, m_probLo, dx);
+    PolyhedralGeometryShop::buildSurface(f, intercept, surface, nodeValues, iv, m_probLo, dx);
 
     if (PolyhedralEB::CutCellBody::classify(surface) != PolyhedralEB::CutCellBody::Kind::Cut) {
       continue;

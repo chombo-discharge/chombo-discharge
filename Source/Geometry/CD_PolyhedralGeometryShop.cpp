@@ -184,6 +184,13 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
         continue;
       }
 
+      // node values once per node and each crossed edge bisected once, shared by the cells of the box
+      BaseFab<Real> nodeValues;
+      BaseFab<Real> intercept[SpaceDim];
+
+      PolyhedralGeometryShop::fillNodeValues(f, nodeValues, boxes[i], m_probLo, dx);
+      PolyhedralGeometryShop::defineIntercepts(intercept, boxes[i]);
+
       for (BoxIterator bit(boxes[i]); bit.ok(); ++bit) {
         const IntVect iv = bit();
 
@@ -193,7 +200,7 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 
         CutCellSurface surface;
 
-        PolyhedralGeometryShop::reconstructSurface(surface, f, iv, m_probLo, dx);
+        PolyhedralGeometryShop::buildSurface(f, intercept, surface, nodeValues, iv, m_probLo, dx);
 
         const CutCellBody::Kind kind = CutCellBody::classify(surface);
 
@@ -239,6 +246,15 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
             }
 
             if (!haveChildren) {
+              // the children share their nodes and edges among themselves at the finer spacing
+              const Box fineBox = refine(Box(iv, iv), 2);
+
+              BaseFab<Real> fineNodeValues;
+              BaseFab<Real> fineIntercept[SpaceDim];
+
+              PolyhedralGeometryShop::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
+              PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
+
               for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
                 IntVect child = 2 * iv;
 
@@ -246,7 +262,13 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
                   child[d] += (c >> d) & 1;
                 }
 
-                PolyhedralGeometryShop::reconstructSurface(children[c], f, child, m_probLo, 0.5 * dx);
+                PolyhedralGeometryShop::buildSurface(f,
+                                                     fineIntercept,
+                                                     children[c],
+                                                     fineNodeValues,
+                                                     child,
+                                                     m_probLo,
+                                                     0.5 * dx);
               }
 
               haveChildren = true;
@@ -592,12 +614,12 @@ PolyhedralGeometryShop::sanityCheck(const Vector<Real>& a_facets) const
 
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
 {}
-
 void
-PolyhedralGeometryShop::fillNodeValues(BaseFab<Real>&  a_nodeValues,
+PolyhedralGeometryShop::fillNodeValues(const BaseIF&   a_function,
+                                       BaseFab<Real>&  a_nodeValues,
                                        const Box&      a_region,
                                        const RealVect& a_probLo,
-                                       const Real&     a_dx) const
+                                       const Real&     a_dx)
 {
   CH_assert(a_dx > 0.0);
 
@@ -615,18 +637,32 @@ PolyhedralGeometryShop::fillNodeValues(BaseFab<Real>&  a_nodeValues,
       x[d] += a_dx * static_cast<Real>(iv[d]);
     }
 
-    a_nodeValues(iv, 0) = PolyhedralGeometryShop::snappedValue(*m_baseIF, x, a_dx);
+    a_nodeValues(iv, 0) = PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
+  }
+}
+
+void
+PolyhedralGeometryShop::defineIntercepts(BaseFab<Real> a_intercept[SpaceDim], const Box& a_region)
+{
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    Box edgeBox = a_region;
+    edgeBox.surroundingNodes();
+    edgeBox.enclosedCells(dir);
+
+    a_intercept[dir].define(edgeBox, 1);
+    a_intercept[dir].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
   }
 }
 
 Real
-PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
+PolyhedralGeometryShop::edgeCrossing(const BaseIF&   a_function,
+                                     BaseFab<Real>   a_intercept[SpaceDim],
                                      const IntVect&  a_cell,
                                      const int       a_edge,
                                      const Real      a_lo,
                                      const Real      a_hi,
                                      const RealVect& a_probLo,
-                                     const Real&     a_dx) const
+                                     const Real&     a_dx)
 {
   CH_assert(a_dx > 0.0);
 
@@ -650,7 +686,7 @@ PolyhedralGeometryShop::edgeCrossing(BaseFab<Real>   a_intercept[SpaceDim],
   // bisection between the two endpoints. The endpoints are taken from the shared node values
   // and the edge is addressed by its own index, so every cell reaching this edge hands the
   // solver the same interval and gets the same root back
-  const Real root = PolyhedralGeometryShop::edgeRoot(*m_baseIF, edgeIV, dir, a_lo, a_hi, a_probLo, a_dx);
+  const Real root = PolyhedralGeometryShop::edgeRoot(a_function, edgeIV, dir, a_lo, a_hi, a_probLo, a_dx);
 
   if (a_intercept[dir].box().contains(edgeIV)) {
     a_intercept[dir](edgeIV, 0) = root;
@@ -725,57 +761,10 @@ PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
 
   return root;
 }
-
-void
-PolyhedralGeometryShop::reconstructSurface(PolyhedralEB::CutCellSurface& a_surface,
-                                           const BaseIF&                 a_function,
-                                           const IntVect&                a_cell,
-                                           const RealVect&               a_probLo,
-                                           const Real                    a_dx) noexcept
-{
-  a_surface = PolyhedralEB::CutCellSurface();
-
-  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
-    RealVect x = a_probLo;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      x[d] += a_dx * static_cast<Real>(a_cell[d] + ((c >> d) & 1));
-    }
-
-    a_surface.m_corner[c] = PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
-  }
-
-  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
-    int low  = -1;
-    int high = -1;
-
-    PolyhedralEB::detail::edgeCorners(e, low, high);
-
-    const Real loValue = a_surface.m_corner[low];
-    const Real hiValue = a_surface.m_corner[high];
-
-    if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
-      const int dir = PolyhedralEB::detail::edgeDirection(e);
-
-      int offset[SpaceDim];
-      PolyhedralEB::detail::edgeOrigin(e, offset);
-
-      IntVect edgeIV = a_cell;
-
-      for (int d = 0; d < SpaceDim; d++) {
-        edgeIV[d] += offset[d];
-      }
-
-      a_surface
-        .m_crossing[e] = PolyhedralGeometryShop::edgeRoot(a_function, edgeIV, dir, loValue, hiValue, a_probLo, a_dx);
-    }
-  }
-}
-
 void
 PolyhedralGeometryShop::fillCorners(PolyhedralEB::CutCellSurface& a_surface,
                                     const BaseFab<Real>&          a_nodeValues,
-                                    const IntVect&                a_cell) const
+                                    const IntVect&                a_cell)
 {
   for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
     IntVect node = a_cell;
@@ -789,16 +778,17 @@ PolyhedralGeometryShop::fillCorners(PolyhedralEB::CutCellSurface& a_surface,
 }
 
 void
-PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
+PolyhedralGeometryShop::buildSurface(const BaseIF&                 a_function,
+                                     BaseFab<Real>                 a_intercept[SpaceDim],
                                      PolyhedralEB::CutCellSurface& a_surface,
                                      const BaseFab<Real>&          a_nodeValues,
                                      const IntVect&                a_cell,
                                      const RealVect&               a_probLo,
-                                     const Real&                   a_dx) const
+                                     const Real&                   a_dx)
 {
   a_surface = PolyhedralEB::CutCellSurface();
 
-  this->fillCorners(a_surface, a_nodeValues, a_cell);
+  PolyhedralGeometryShop::fillCorners(a_surface, a_nodeValues, a_cell);
 
   for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
     int low  = -1;
@@ -817,7 +807,14 @@ PolyhedralGeometryShop::buildSurface(BaseFab<Real>                 a_intercept[S
     // at exactly zero is not by itself the crossing: the function may be zero along part of the
     // edge, and edgeRoot finds where it stops being so
     if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
-      a_surface.m_crossing[e] = this->edgeCrossing(a_intercept, a_cell, e, loValue, hiValue, a_probLo, a_dx);
+      a_surface.m_crossing[e] = PolyhedralGeometryShop::edgeCrossing(a_function,
+                                                                     a_intercept,
+                                                                     a_cell,
+                                                                     e,
+                                                                     loValue,
+                                                                     hiValue,
+                                                                     a_probLo,
+                                                                     a_dx);
     }
   }
 }
@@ -910,7 +907,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   a_nodes.resize(0);
 
   BaseFab<Real> nodeValues;
-  this->fillNodeValues(nodeValues, a_ghostRegion, a_probLo, a_dx);
+  PolyhedralGeometryShop::fillNodeValues(*m_baseIF, nodeValues, a_ghostRegion, a_probLo, a_dx);
 
   IntVectSet irregularCells;
 
@@ -918,7 +915,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = bit();
 
     PolyhedralEB::CutCellSurface surface;
-    this->fillCorners(surface, nodeValues, iv);
+    PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
 
     switch (PolyhedralEB::CutCellBody::classify(surface)) {
     case PolyhedralEB::CutCellBody::Kind::Covered: {
@@ -972,16 +969,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
   BaseFab<Real> intercept[SpaceDim];
 
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    Box edgeBox = a_validRegion;
-    edgeBox.grow(1);
-    edgeBox &= a_ghostRegion;
-    edgeBox.surroundingNodes();
-    edgeBox.enclosedCells(dir);
-
-    intercept[dir].define(edgeBox, 1);
-    intercept[dir].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
-  }
+  PolyhedralGeometryShop::defineIntercepts(intercept, grow(a_validRegion, 1) & a_ghostRegion);
 
   IntVectSet droppedCells;
 
@@ -989,7 +977,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = ivsIt();
 
     PolyhedralEB::CutCellSurface surface;
-    this->buildSurface(intercept, surface, nodeValues, iv, a_probLo, a_dx);
+    PolyhedralGeometryShop::buildSurface(*m_baseIF, intercept, surface, nodeValues, iv, a_probLo, a_dx);
 
     PolyhedralEB::CutCellBody body;
 
