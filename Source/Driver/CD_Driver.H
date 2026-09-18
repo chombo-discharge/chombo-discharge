@@ -547,7 +547,7 @@ protected:
    * @param[in] a_startDomain Coarsest domain built whole; the same domain the scan-based generators begin on.
    */
   void
-  makeGeometryGrids(const ProblemDomain& a_startDomain);
+  buildGeometryGrids(const ProblemDomain& a_startDomain);
 
   /**
    * @brief The grids ComputationalGeometry::makeGrids built, per AMR level.

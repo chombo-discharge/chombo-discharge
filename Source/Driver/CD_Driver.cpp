@@ -1429,7 +1429,7 @@ Driver::setupGeometryOnly()
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
 
-      this->makeGeometryGrids(scanDomain);
+      this->buildGeometryGrids(scanDomain);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
@@ -1492,11 +1492,11 @@ Driver::setupGeometryOnly()
 }
 
 void
-Driver::makeGeometryGrids(const ProblemDomain& a_startDomain)
+Driver::buildGeometryGrids(const ProblemDomain& a_startDomain)
 {
-  CH_TIME("Driver::makeGeometryGrids");
+  CH_TIME("Driver::buildGeometryGrids");
   if (m_verbosity > 5) {
-    pout() << "Driver::makeGeometryGrids" << endl;
+    pout() << "Driver::buildGeometryGrids" << endl;
   }
 
   // The stop domain is the deepest level the geometry is resolved on. The start domain may be coarser than the
@@ -1572,7 +1572,7 @@ Driver::setupFresh(const int a_initialRegrids)
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(scanDomain);
 
-      this->makeGeometryGrids(scanDomain);
+      this->buildGeometryGrids(scanDomain);
     }
     else {
       m_computationalGeometry->useScanShop(scanDomain);
@@ -1720,7 +1720,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restart
     if (m_geometryGeneration == "polyhedral") {
       m_computationalGeometry->usePolyhedralShop(m_amr->getDomains()[m_geoScanLevel]);
 
-      this->makeGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
+      this->buildGeometryGrids(m_amr->getDomains()[m_geoScanLevel]);
     }
     else {
       m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
