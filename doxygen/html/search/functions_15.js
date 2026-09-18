@@ -6,5 +6,7 @@ var searchData=
   ['vectorlength2_3',['vectorlength2',['../classDataOps.html#a40d81c992688edcf1f0cafaad36a130d',1,'DataOps::vectorLength2(EBAMRCellData &amp;a_lhs, const EBAMRCellData &amp;a_rhs, const EBAMRCellData &amp;a_notCovered, const Vector&lt; RefCountedPtr&lt; LayoutData&lt; VoFIterator &gt; &gt; &gt; &amp;a_vofIter)'],['../classDataOps.html#a8705f051315f205683abe7d65c4eb02e',1,'DataOps::vectorLength2(LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const LevelData&lt; EBCellFAB &gt; &amp;a_notCovered, LayoutData&lt; VoFIterator &gt; &amp;a_vofIter)'],['../classDataOps.html#aae5ac6f0a1e2cd87976cc9e2d8901699',1,'DataOps::vectorLength2(EBCellFAB &amp;a_lhs, const EBCellFAB &amp;a_rhs, const EBCellFAB &amp;a_notCovered, const Box &amp;box, VoFIterator &amp;a_vofIter)']]],
   ['vessel_4',['Vessel',['../classVessel.html#a31aa5296ad9d5975a5624f316085d165',1,'Vessel']]],
   ['vofutils_5',['VofUtils',['../classVofUtils.html#ad4b8086d18d809bdc238eaf79446b5bd',1,'VofUtils']]],
-  ['volumescale_6',['volumeScale',['../classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de',1,'DataOps']]]
+  ['volumecentroid_6',['volumeCentroid',['../classPolyhedralEB_1_1CutCellBody.html#a7a721c78f54661dc00b7fa0f17d900bd',1,'PolyhedralEB::CutCellBody']]],
+  ['volumefraction_7',['volumeFraction',['../classPolyhedralEB_1_1CutCellBody.html#ae3af4e249b4ac99a6f32591758f9dc55',1,'PolyhedralEB::CutCellBody']]],
+  ['volumescale_8',['volumeScale',['../classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de',1,'DataOps']]]
 ];

@@ -29,6 +29,8 @@ var searchData=
   ['coarseinterpquadcf_26',['CoarseInterpQuadCF',['../classCoarseInterpQuadCF.html',1,'']]],
   ['coaxialcable_27',['CoaxialCable',['../classCoaxialCable.html',1,'']]],
   ['computationalgeometry_28',['ComputationalGeometry',['../classComputationalGeometry.html',1,'']]],
-  ['cylinder_29',['Cylinder',['../classCylinder.html',1,'']]],
-  ['cylindersdf_30',['CylinderSdf',['../classCylinderSdf.html',1,'']]]
+  ['cutcellbody_29',['CutCellBody',['../classPolyhedralEB_1_1CutCellBody.html',1,'PolyhedralEB']]],
+  ['cutcellsurface_30',['CutCellSurface',['../classPolyhedralEB_1_1CutCellSurface.html',1,'PolyhedralEB']]],
+  ['cylinder_31',['Cylinder',['../classCylinder.html',1,'']]],
+  ['cylindersdf_32',['CylinderSdf',['../classCylinderSdf.html',1,'']]]
 ];

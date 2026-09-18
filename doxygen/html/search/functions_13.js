@@ -32,11 +32,12 @@ var searchData=
   ['triangle_29',['triangle',['../classTriangle.html#a0f093a9ca61eee61760dafd8e269fac1',1,'Triangle::Triangle(const std::array&lt; Vec3, 3 &gt; &amp;a_vertexPositions) noexcept'],['../classTriangle.html#a62339258b54e0c593025feb8155e663e',1,'Triangle::Triangle() noexcept']]],
   ['trianglecollection_30',['trianglecollection',['../classTriangleCollection.html#aad2a0f2a00836af4b857d68b45a5f14a',1,'TriangleCollection::TriangleCollection() noexcept'],['../classTriangleCollection.html#af84389532d447a554080062ccecc4b81',1,'TriangleCollection::TriangleCollection(const std::vector&lt; std::shared_ptr&lt; Triangle &gt; &gt; &amp;a_triangles) noexcept'],['../classTriangleCollection.html#a088c5283f0b816083fc42c1a5ab31d98',1,'TriangleCollection::TriangleCollection(const std::string &amp;a_filename, const std::string &amp;a_vertexDataIdentifier)']]],
   ['trim_31',['trim',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aa1bc831ecea5281f88eff69464a998b8',1,'Physics::CdrPlasma::CdrPlasmaJSON::trim()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#af103279c2021cb8471188081dd67de55',1,'Physics::ItoKMC::ItoKMCJSON::trim()']]],
-  ['truncate_32',['truncate',['../classLookupTable1D.html#a747444f05fda9f783855ae2ae385e3f9',1,'LookupTable1D']]],
-  ['turnoffcfinterp_33',['turnOffCFInterp',['../classEBHelmholtzOp.html#aa48cbf089cbe718bc2e0cf12041f5a6b',1,'EBHelmholtzOp']]],
-  ['turnoffcoarsening_34',['turnOffCoarsening',['../classEBHelmholtzOp.html#a369711725d619cca18ed5f15c0a43a0f',1,'EBHelmholtzOp']]],
-  ['turnoffexchange_35',['turnOffExchange',['../classEBHelmholtzOp.html#a5d53b6c0821c782c9ea8eb5e7681ce28',1,'EBHelmholtzOp']]],
-  ['turnoncfinterp_36',['turnOnCFInterp',['../classEBHelmholtzOp.html#a12d12353fb23d282ce5dc66ca01c7c47',1,'EBHelmholtzOp']]],
-  ['turnoncoarsening_37',['turnOnCoarsening',['../classEBHelmholtzOp.html#ad1421c86a5022532413b4320ccade732',1,'EBHelmholtzOp']]],
-  ['turnonexchange_38',['turnOnExchange',['../classEBHelmholtzOp.html#ab901979aec1589777f2eebec85f7992e',1,'EBHelmholtzOp']]]
+  ['trueboundaryarea_32',['trueBoundaryArea',['../classPolyhedralEB_1_1CutCellBody.html#a7fa7cf9b94fc1aef868c2c7f5f59cf8e',1,'PolyhedralEB::CutCellBody']]],
+  ['truncate_33',['truncate',['../classLookupTable1D.html#a747444f05fda9f783855ae2ae385e3f9',1,'LookupTable1D']]],
+  ['turnoffcfinterp_34',['turnOffCFInterp',['../classEBHelmholtzOp.html#aa48cbf089cbe718bc2e0cf12041f5a6b',1,'EBHelmholtzOp']]],
+  ['turnoffcoarsening_35',['turnOffCoarsening',['../classEBHelmholtzOp.html#a369711725d619cca18ed5f15c0a43a0f',1,'EBHelmholtzOp']]],
+  ['turnoffexchange_36',['turnOffExchange',['../classEBHelmholtzOp.html#a5d53b6c0821c782c9ea8eb5e7681ce28',1,'EBHelmholtzOp']]],
+  ['turnoncfinterp_37',['turnOnCFInterp',['../classEBHelmholtzOp.html#a12d12353fb23d282ce5dc66ca01c7c47',1,'EBHelmholtzOp']]],
+  ['turnoncoarsening_38',['turnOnCoarsening',['../classEBHelmholtzOp.html#ad1421c86a5022532413b4320ccade732',1,'EBHelmholtzOp']]],
+  ['turnonexchange_39',['turnOnExchange',['../classEBHelmholtzOp.html#ab901979aec1589777f2eebec85f7992e',1,'EBHelmholtzOp']]]
 ];

@@ -27,7 +27,9 @@ var searchData=
   ['petscdof_24',['PetscDOF',['../structPetscDOF.html',1,'']]],
   ['phaserealm_25',['PhaseRealm',['../classPhaseRealm.html',1,'']]],
   ['photon_26',['Photon',['../structPhoton.html',1,'']]],
-  ['polygonrodif_27',['PolygonRodIF',['../classPolygonRodIF.html',1,'']]],
-  ['profilecylinderif_28',['ProfileCylinderIF',['../classProfileCylinderIF.html',1,'']]],
-  ['profileplaneif_29',['ProfilePlaneIF',['../classProfilePlaneIF.html',1,'']]]
+  ['polygon_27',['Polygon',['../structPolyhedralEB_1_1CutCellBody_1_1Polygon.html',1,'PolyhedralEB::CutCellBody']]],
+  ['polygonrodif_28',['PolygonRodIF',['../classPolygonRodIF.html',1,'']]],
+  ['polyhedralgeometryshop_29',['PolyhedralGeometryShop',['../classPolyhedralGeometryShop.html',1,'']]],
+  ['profilecylinderif_30',['ProfileCylinderIF',['../classProfileCylinderIF.html',1,'']]],
+  ['profileplaneif_31',['ProfilePlaneIF',['../classProfilePlaneIF.html',1,'']]]
 ];

@@ -1,0 +1,9 @@
+<map id="PolyhedralGeometryShop" name="PolyhedralGeometryShop">
+<area shape="rect" id="Node000001" title="Geometry generation whose moments are exact integrals of an explicit surface." alt="" coords="27,168,215,193"/>
+<area shape="rect" id="Node000002" href="$classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves." alt="" coords="78,93,163,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,133,123,168,118,168,118,133"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,124,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="82,41,115,91,111,94,77,44"/>
+<area shape="rect" id="Node000004" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="148,5,208,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="165,44,131,94,126,91,160,41"/>
+</map>

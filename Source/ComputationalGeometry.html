@@ -167,44 +167,44 @@ Several pre-defined geometries are included in <code class="file docutils litera
 <div class="literal-block-wrapper docutils container" id="id1">
 <span id="computationalgeometrymembers"></span><div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">List of all data member of the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> base class. Highlighted members must be instantiated by the user in order to create a new geometry.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * @brief Threshold for Vof computation</span>
+<span class="cm"> */</span>
+<span class="hll"><span class="k">constexpr</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">s_thresh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.</span><span class="n">E</span><span class="mi">-15</span><span class="p">;</span>
+</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief Whether a cut cell whose body will not close stops the run.</span>
+<span class="cm"> * @details Loud by choice while the polyhedral generator is being developed: a cell it cannot</span>
+<span class="cm"> * close is an edge case worth seeing rather than one worth approximating around. No geometry</span>
+<span class="cm"> * tested has produced one. Not exposed as an option, so that turning it off is a deliberate</span>
+<span class="cm"> * edit rather than something an input file can do by accident.</span>
+<span class="cm"> */</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">s_strictGeometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Multifluid index spaces</span>
+<span class="cm"> */</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">MultiFluidIndexSpace</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_multifluidIndexSpace</span><span class="p">;</span>
+
+<span class="cm">/**</span>
 <span class="cm"> * @brief Background permittivity</span>
 <span class="cm"> */</span>
-<span class="hll"><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
-</span>
-<span class="cm">/**</span>
-<span class="cm"> * @brief True if we use the chombo-discharge geometry generation utility.</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
+<span class="hll">
+</span><span class="cm">/**</span>
+<span class="cm"> * @brief Which generator to build the geometry with.</span>
+<span class="cm"> * @details Each enumerator names the class that the geometry is generated with.</span>
 <span class="cm"> */</span>
-<span class="kt">bool</span><span class="w"> </span><span class="n">m_useScanShop</span><span class="p">;</span>
+<span class="hll"><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Generator</span>
+</span><span class="p">{</span>
+<span class="w">  </span><span class="n">GeometryShop</span><span class="p">,</span>
+<span class="w">  </span><span class="n">ScanShop</span><span class="p">,</span>
+<span class="w">  </span><span class="n">PolyhedralShop</span>
+<span class="p">};</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * @brief Grid level where we begin using ScanShop</span>
+<span class="cm"> * @brief Generator selected by the user.</span>
 <span class="cm"> */</span>
-<span class="n">ProblemDomain</span><span class="w"> </span><span class="n">m_scanDomain</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief Maximum number of ghost cells that we will ever need</span>
-<span class="cm"> */</span>
-<span class="kt">int</span><span class="w"> </span><span class="n">m_maxGhostEB</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief List of dielectrics</span>
-<span class="cm"> */</span>
-<span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span>
-</span>
-<span class="cm">/**</span>
-<span class="cm"> * @brief List of electrodes</span>
-<span class="cm"> */</span>
-<span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span>
-</span>
-<span class="cm">/**</span>
-<span class="cm"> * @brief The gas-phase implicit function (i.e. outside electrodes and dielectrics).</span>
-<span class="cm"> */</span>
-<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionGas</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief The solid-phase implicit function (i.e. the inside of the dielectrics).</span>
-<span class="cm"> */</span>
-<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionSolid</span><span class="p">;</span>
+<span class="n">Generator</span><span class="w"> </span><span class="n">m_generator</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>

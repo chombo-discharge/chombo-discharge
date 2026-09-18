@@ -14,5 +14,6 @@ var searchData=
   ['physics_3a_3ageometry_11',['Geometry',['../namespacePhysics_1_1Geometry.html',1,'Physics']]],
   ['physics_3a_3aradiativetransfer_12',['RadiativeTransfer',['../namespacePhysics_1_1RadiativeTransfer.html',1,'Physics']]],
   ['physics_3a_3atracerparticle_13',['TracerParticle',['../namespacePhysics_1_1TracerParticle.html',1,'Physics']]],
-  ['polyutils_14',['PolyUtils',['../namespacePolyUtils.html',1,'']]]
+  ['polyhedraleb_3a_3adetail_14',['detail',['../namespacePolyhedralEB_1_1detail.html',1,'PolyhedralEB']]],
+  ['polyutils_15',['PolyUtils',['../namespacePolyUtils.html',1,'']]]
 ];

@@ -12,6 +12,7 @@ var searchData=
   ['updatereactionrates_9',['updatereactionrates',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a12a370f24d9e421357c28631595be4b4',1,'Physics::ItoKMC::ItoKMCPhysics::updateReactionRates()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4e3309066e93b4e53d7eacd98e2becfe',1,'Physics::ItoKMC::ItoKMCJSON::updateReactionRates()']]],
   ['upwind_10',['upwind',['../classCdrCTU.html#a0354dc596336d973c1abb8b2b326ad62',1,'CdrCTU']]],
   ['usechomboshop_11',['useChomboShop',['../classComputationalGeometry.html#a39698e3e356d6c6546253998e68112e3',1,'ComputationalGeometry']]],
-  ['usescanshop_12',['useScanShop',['../classComputationalGeometry.html#a36b52e3f1ca2a169bfcb92af1ad98b5e',1,'ComputationalGeometry']]],
-  ['useskrylov_13',['usesKrylov',['../structEllipticSolverChain_1_1Settings.html#a39b3855e73b3ea76ac52e5449d789f85',1,'EllipticSolverChain::Settings']]]
+  ['usepolyhedralshop_12',['usePolyhedralShop',['../classComputationalGeometry.html#a41425a7b9a260e4aa0899120021e29ca',1,'ComputationalGeometry']]],
+  ['usescanshop_13',['useScanShop',['../classComputationalGeometry.html#a36b52e3f1ca2a169bfcb92af1ad98b5e',1,'ComputationalGeometry']]],
+  ['useskrylov_14',['usesKrylov',['../structEllipticSolverChain_1_1Settings.html#a39b3855e73b3ea76ac52e5449d789f85',1,'EllipticSolverChain::Settings']]]
 ];

@@ -1,10 +1,15 @@
 <map id="Source/Geometry/CD_ScanShop.H" name="Source/Geometry/CD_ScanShop.H">
-<area shape="rect" id="Node000001" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="335,5,493,45"/>
-<area shape="rect" id="Node000002" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="5,93,220,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="335,52,179,96,178,91,334,47"/>
-<area shape="rect" id="Node000003" href="$CD__ScanShop_8cpp.html" title="Implementation of CD_ScanShop.H." alt="" coords="244,93,403,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="386,57,345,95,342,91,382,53"/>
-<area shape="rect" id="Node000004" href="$CD__ScanShopImplem_8H.html" title="Implementation of CD_ScanShop.H." alt="" coords="427,93,585,133"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="438,53,480,91,476,95,434,57"/>
-<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="482,86,440,48,444,44,486,82"/>
+<area shape="rect" id="Node000001" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="384,5,543,45"/>
+<area shape="rect" id="Node000002" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="5,181,220,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="370,38,304,46,236,58,178,75,156,85,141,95,127,115,119,138,114,182,109,181,114,136,123,112,137,91,154,80,176,70,235,53,303,41,370,32"/>
+<area shape="rect" id="Node000003" href="$CD__PolyhedralGeometryShop_8H.html" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="151,93,360,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="406,53,302,96,300,91,404,48"/>
+<area shape="rect" id="Node000005" href="$CD__ScanShop_8cpp.html" title="Implementation of CD_ScanShop.H." alt="" coords="384,93,543,133"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="466,59,466,93,461,93,461,59"/>
+<area shape="rect" id="Node000006" href="$CD__ScanShopImplem_8H.html" title="Implementation of CD_ScanShop.H." alt="" coords="567,93,725,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="509,49,600,91,597,96,507,54"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="214,143,145,184,143,179,211,138"/>
+<area shape="rect" id="Node000004" href="$CD__PolyhedralGeometryShop_8cpp.html" title="Implementation of CD_PolyhedralGeometryShop.H." alt="" coords="244,181,467,221"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="290,140,335,179,331,183,286,144"/>
+<area shape="poly" id="edge7_Node000006_Node000001" title=" " alt="" coords="600,90,510,48,512,43,603,85"/>
 </map>

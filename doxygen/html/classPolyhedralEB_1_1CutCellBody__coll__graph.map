@@ -1,0 +1,5 @@
+<map id="PolyhedralEB::CutCellBody" name="PolyhedralEB::CutCellBody">
+<area shape="rect" id="Node000001" title="The closed polyhedron bounding the fluid in one cut cell, and its moments." alt="" coords="5,108,201,133"/>
+<area shape="rect" id="Node000002" href="$structPolyhedralEB_1_1CutCellBody_1_1Polygon.html" title="One polygon of the body, in the cell&#39;s own frame." alt="" coords="5,5,201,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,59,106,108,101,108,101,59"/>
+</map>
