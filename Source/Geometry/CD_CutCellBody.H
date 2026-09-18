@@ -161,6 +161,7 @@ public:
   Real
   closureResidual() const noexcept;
 
+#if CH_SPACEDIM == 3
   /**
    * @brief Append this body's interface, as triangles in physical coordinates.
    * @details The interface is the embedded boundary inside this cell: the polygons the body holds
@@ -187,7 +188,6 @@ public:
   void
   printPolygons(std::ostream& a_out) const noexcept;
 
-#if CH_SPACEDIM == 3
   /**
    * @brief Replace one face's chord with the chords of the children that cover it.
    * @details The face is described at the resolution of the level below rather than this cell's,

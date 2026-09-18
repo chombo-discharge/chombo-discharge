@@ -748,11 +748,12 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   // edge roots alone, so they depend only on the zero set: the implicit function is not a distance function
   // inside a body built by CSG, and the gradient there carries the kinks and medial shells of the construction,
   // which are not features of the surface. A cell whose centre is further from the zero set than half a cell
-  // diagonal cannot be cut and is skipped on one evaluation.
+  // diagonal cannot be cut and is skipped on one evaluation; the margin is a whole diagonal, since a function
+  // built with a smooth union grows faster than the distance and would otherwise hide a cut cell at the edge.
   const BaseIF& f = *implicitFunction;
 
   const Real dx    = m_dx[a_level];
-  const Real reach = 0.5 * dx * std::sqrt(static_cast<Real>(SpaceDim));
+  const Real reach = dx * std::sqrt(static_cast<Real>(SpaceDim));
   const Box  valid = a_box & m_domains[a_level].domainBox();
   const Box  grown = grow(a_box, 1) & m_domains[a_level].domainBox();
 

@@ -80,6 +80,12 @@ PolyhedralGeometryShop::verifySurface() const
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
   }
 
+  // The surface pass is three-dimensional: the seam restriction and the facets are written for polygons, and
+  // in two dimensions the interface of a cell is one chord, which is checked by the graph as it is built.
+  if (SpaceDim != 3) {
+    return;
+  }
+
   if (!m_sanityCheck && !m_writeSTL) {
     return;
   }
@@ -374,9 +380,9 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 
           MayDay::Error("PolyhedralGeometryShop::collectFacets - a restricted cell's interface did not close");
         }
-#endif
 
         body.appendInterfaceFacets(a_facets, iv, m_probLo, dx);
+#endif
       }
     }
   }

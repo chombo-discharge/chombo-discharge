@@ -398,7 +398,6 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
   }
 
   if (numEdges < 3) {
-
     return false;
   }
 
@@ -441,7 +440,6 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
       }
 
       if (next < 0 || numWalk >= 4 * s_maxVertices) {
-
         return false;
       }
 
@@ -451,12 +449,10 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
     }
 
     if (!closed) {
-
       return false;
     }
 
     if (a_numOut >= a_maxOut) {
-
       return false;
     }
 
@@ -522,7 +518,6 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
       }
 
       if (out.m_numVertices >= s_maxVertices) {
-
         return false;
       }
 
@@ -538,7 +533,6 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
   }
 
   if (a_numOut == 0) {
-
     return false;
   }
 

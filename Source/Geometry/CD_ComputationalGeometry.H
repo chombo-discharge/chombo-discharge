@@ -554,7 +554,7 @@ protected:
    * never asks for a split. Pseudocode:
    *
    *   grown = grow(box, 1) & domain
-   *   for each cell in grown with |f(centre)| <= half the cell diagonal        -- else it cannot be cut
+   *   for each cell in grown with |f(centre)| <= a cell diagonal   -- twice the bound a cut cell can reach
    *     reconstruct the cell; if it is cut and closes, n(cell) = polygon normal
    *   for each cut cell in the box and each cut neighbour in its 3^D block:
    *     angle > m_refineAngle: Interior if the neighbour is in the box, Ring if in the grown ring;
