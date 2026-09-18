@@ -37,6 +37,7 @@
 #include <CD_NewIntersectionIF.H>
 #include <CD_ParallelOps.H>
 #include <CD_TiledMeshRefine.H>
+#include <CD_Timer.H>
 #include <CD_Units.H>
 #include <CD_ScanShop.H>
 #include <CD_PolyhedralGeometryShop.H>
@@ -402,19 +403,39 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   Vector<Vector<int>> firstChild(numLevels);
   Vector<Vector<int>> numChildren(numLevels);
 
+  Timer timer("ComputationalGeometry::makeGrids");
+
+  timer.startEvent("Start level");
   this->buildStartLevel();
+  timer.stopEvent("Start level");
+
+  timer.startEvent("Upward pass");
   this->buildFinerLevels(firstChild, numChildren);
+  timer.stopEvent("Upward pass");
+
+  timer.startEvent("Tiles");
   this->makeTiles();
+  timer.stopEvent("Tiles");
 
   Vector<Vector<GeometryService::InOut>> gasTileTypes(numLevels);
   Vector<Vector<GeometryService::InOut>> solidTileTypes(numLevels);
   Vector<Vector<int>>                    tileHosts(numLevels);
 
+  timer.startEvent("Classify tiles");
   this->classifyTiles(firstChild, numChildren, gasTileTypes, solidTileTypes, tileHosts);
+  timer.stopEvent("Classify tiles");
+
+  timer.startEvent("Decimate boxes");
   this->decimateBoxes(gasTileTypes, solidTileTypes, tileHosts);
+  timer.stopEvent("Decimate boxes");
+
+  timer.startEvent("Coarser levels");
   this->buildCoarserLevels();
+  timer.stopEvent("Coarser levels");
 
   this->reportGrids();
+
+  timer.eventReport(pout(), false);
 }
 
 int

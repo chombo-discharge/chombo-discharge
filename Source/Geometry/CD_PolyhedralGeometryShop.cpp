@@ -34,6 +34,7 @@
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_ComputationalGeometry.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
@@ -92,6 +93,8 @@ PolyhedralGeometryShop::verifySurface() const
 
   const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
 
+  Timer timer("PolyhedralGeometryShop::verifySurface (" + phaseName + ")");
+
   const int numLevels = m_grids->getNumGridLevels();
 
   Vector<Real> composite;
@@ -99,7 +102,9 @@ PolyhedralGeometryShop::verifySurface() const
   for (int lvl = 0; lvl < numLevels; lvl++) {
     Vector<Real> levelFacets;
 
+    timer.startEvent("Build polyhedra, level " + std::to_string(lvl));
     this->collectFacets(levelFacets, lvl);
+    timer.stopEvent("Build polyhedra, level " + std::to_string(lvl));
 
     if (m_writeSTL) {
       this->writeSTL("surface_mesh_" + phaseName + ".level" + std::to_string(lvl) + ".stl",
@@ -111,7 +116,9 @@ PolyhedralGeometryShop::verifySurface() const
   }
 
   if (m_writeSTL) {
+    timer.startEvent("Write STL");
     this->writeSTL("surface_mesh_" + phaseName + ".stl", phaseName, composite);
+    timer.stopEvent("Write STL");
 
     // The boxes themselves, one file per level, for reading the surface against the grids it was built on.
     if (procID() == 0) {
@@ -142,8 +149,12 @@ PolyhedralGeometryShop::verifySurface() const
   }
 
   if (m_sanityCheck) {
+    timer.startEvent("Sanity check");
     this->sanityCheck(composite);
+    timer.stopEvent("Sanity check");
   }
+
+  timer.eventReport(pout(), false);
 }
 
 void
