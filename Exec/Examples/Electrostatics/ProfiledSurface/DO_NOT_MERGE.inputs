@@ -46,7 +46,7 @@ Driver.do_init_load_balance         = false                ## If true, load bala
 Driver.start_time                   = 0                    ## Start time (fresh simulations only)
 Driver.stop_time                    = 1.0                  ## Stop time
 Driver.max_steps                    = 0                    ## Maximum number of steps
-Driver.geometry_only                = true                 ## Special option that ONLY plots the geometry
+Driver.geometry_only                = false                ## Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance     = false                ## Use memory as loads for EBIS generation
 Driver.output_dt                    = -1.0                 ## Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                 = false                ## Write MPI memory report
@@ -81,7 +81,7 @@ FieldSolverGMG.kappa_source          = true                    ## Volume weighte
 FieldSolverGMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
 FieldSolverGMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
-FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverGMG.solver                       = bicgstab     ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
@@ -160,8 +160,8 @@ FieldStepper.init_sigma       = 0.0           ## Surface charge density
 FieldStepper.rho_center       = 0 0.0 5E-3    ## Space charge blob center
 FieldStepper.rho_radius       = 1.E-3         ## Space charge blob radius
 
-PolyhedralGeometryShop.sanity_check      = false
-PolyhedralGeometryShop.write_stl         = true
+PolyhedralGeometryShop.sanity_check      = true
+PolyhedralGeometryShop.write_stl         = false
 DischargeIO.use_prob_lo                  = true
 ComputationalGeometry.min_block_size     = 8
 ComputationalGeometry.max_block_size     = 8
