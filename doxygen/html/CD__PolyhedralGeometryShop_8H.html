@@ -88,11 +88,13 @@ $(function() {
 
 <p>Declaration of a geometry generator whose moments are integrals of a stored surface.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;BaseFab.H&gt;</code><br />
+<div class="textblock"><code>#include &lt;string&gt;</code><br />
+<code>#include &lt;BaseFab.H&gt;</code><br />
 <code>#include &lt;IntVectSet.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ScanShop_8H_source.html">CD_ScanShop.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__CutCellBody_8H_source.html">CD_CutCellBody.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__CutCellSurface_8H_source.html">CD_CutCellSurface.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__MultiFluidIndexSpace_8H_source.html">CD_MultiFluidIndexSpace.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -100,93 +102,105 @@ Include dependency graph for CD_PolyhedralGeometryShop.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__PolyhedralGeometryShop_8H__incl.png" border="0" usemap="#aSource_2Geometry_2CD__PolyhedralGeometryShop_8H" alt=""/></div>
 <map name="aSource_2Geometry_2CD__PolyhedralGeometryShop_8H" id="aSource_2Geometry_2CD__PolyhedralGeometryShop_8H">
-<area shape="rect" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="739,5,948,45"/>
-<area shape="rect" title=" " alt="" coords="47,93,138,119"/>
-<area shape="poly" title=" " alt="" coords="739,36,476,58,316,75,152,96,151,91,315,69,476,53,738,31"/>
-<area shape="rect" title=" " alt="" coords="163,93,265,119"/>
-<area shape="poly" title=" " alt="" coords="739,41,529,65,285,96,280,97,279,91,284,91,528,59,738,35"/>
-<area shape="rect" href="CD__ScanShop_8H.html" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="781,167,906,192"/>
-<area shape="poly" title=" " alt="" coords="846,46,846,153,841,153,841,46"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="912,387,1097,412"/>
-<area shape="poly" title=" " alt="" coords="739,37,605,53,532,66,463,81,401,100,351,122,318,149,309,163,306,178,306,254,310,283,321,303,340,320,366,336,407,353,464,367,606,385,761,393,898,396,898,401,761,399,605,390,463,372,406,358,363,341,336,324,317,307,305,284,301,254,301,178,304,161,314,145,348,118,399,95,461,76,531,60,604,48,738,32"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1366,387,1545,412"/>
-<area shape="poly" title=" " alt="" coords="948,24,1286,31,1497,39,1712,53,1912,72,2078,98,2143,114,2192,132,2224,153,2232,165,2235,178,2235,254,2233,283,2224,305,2207,324,2183,341,2149,353,2090,363,1922,379,1728,390,1559,397,1559,392,1728,385,1921,374,2089,357,2147,347,2181,336,2204,320,2219,303,2227,282,2230,254,2230,178,2227,167,2220,157,2190,137,2141,119,2077,103,1911,77,1712,58,1497,45,1285,36,948,30"/>
-<area shape="rect" href="CD__CutCellBody_8H.html" title="Declaration of a closed polyhedron bounding the fluid in one cut cell." alt="" coords="1503,93,1643,119"/>
-<area shape="poly" title=" " alt="" coords="949,35,1489,93,1489,98,948,41"/>
-<area shape="rect" href="CD__CutCellSurface_8H.html" title="Declaration of the data a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="1376,240,1535,265"/>
-<area shape="poly" title=" " alt="" coords="895,43,1413,233,1411,238,894,48"/>
-<area shape="rect" title=" " alt="" coords="687,240,821,265"/>
-<area shape="poly" title=" " alt="" coords="831,194,781,233,778,229,827,190"/>
-<area shape="rect" title=" " alt="" coords="341,240,490,265"/>
-<area shape="poly" title=" " alt="" coords="781,194,498,240,497,235,780,188"/>
-<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="565,240,663,265"/>
-<area shape="poly" title=" " alt="" coords="807,195,665,238,664,233,806,189"/>
-<area shape="poly" title=" " alt="" coords="781,191,673,210,613,225,554,242,528,254,503,268,453,284,404,297,385,304,375,312,373,323,381,337,405,349,451,360,588,377,751,387,898,393,898,398,750,392,588,382,451,365,404,354,378,341,367,324,370,310,383,299,402,292,452,279,501,263,526,250,552,238,611,220,672,205,780,186"/>
-<area shape="poly" title=" " alt="" coords="894,190,1070,236,1178,270,1286,311,1422,378,1420,383,1284,316,1176,275,1068,241,893,195"/>
-<area shape="rect" href="CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="1093,313,1226,339"/>
-<area shape="poly" title=" " alt="" coords="893,190,960,209,1032,238,1089,270,1136,303,1133,307,1086,274,1030,242,959,214,892,195"/>
-<area shape="rect" href="CD__ScanShopImplem_8H.html" title="Implementation of CD_ScanShop.H." alt="" coords="845,240,1020,265"/>
-<area shape="poly" title=" " alt="" coords="853,190,902,230,898,234,849,194"/>
-<area shape="rect" title=" " alt="" coords="639,313,706,339"/>
-<area shape="poly" title=" " alt="" coords="626,264,657,301,653,305,622,267"/>
-<area shape="rect" title=" " alt="" coords="391,313,442,339"/>
-<area shape="poly" title=" " alt="" coords="583,268,456,314,454,309,581,263"/>
-<area shape="rect" title=" " alt="" coords="467,313,521,339"/>
-<area shape="poly" title=" " alt="" coords="596,268,527,308,524,304,593,263"/>
-<area shape="rect" title=" " alt="" coords="546,313,615,339"/>
-<area shape="poly" title=" " alt="" coords="611,267,594,302,589,300,606,265"/>
-<area shape="poly" title=" " alt="" coords="634,263,696,298,776,336,857,362,933,381,932,386,855,367,774,341,693,303,631,268"/>
-<area shape="poly" title=" " alt="" coords="647,263,768,311,794,325,820,336,922,355,1065,370,1352,390,1352,396,1064,376,922,360,819,341,792,330,766,316,645,268"/>
-<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="115,313,265,339"/>
-<area shape="poly" title=" " alt="" coords="565,264,265,314,264,308,564,259"/>
-<area shape="poly" title=" " alt="" coords="265,311,551,263,552,268,266,316"/>
-<area shape="poly" title=" " alt="" coords="266,334,285,336,621,366,898,388,898,393,620,372,284,341,265,339"/>
-<area shape="poly" title=" " alt="" coords="266,329,379,336,1352,390,1352,395,379,341,265,335"/>
-<area shape="rect" title=" " alt="" coords="202,387,277,412"/>
-<area shape="poly" title=" " alt="" coords="200,337,226,374,221,377,196,341"/>
-<area shape="rect" title=" " alt="" coords="301,387,381,412"/>
-<area shape="poly" title=" " alt="" coords="215,336,305,378,302,383,213,341"/>
-<area shape="rect" title=" " alt="" coords="5,387,79,412"/>
-<area shape="poly" title=" " alt="" coords="167,341,80,383,77,378,165,336"/>
-<area shape="rect" title=" " alt="" coords="103,387,178,412"/>
-<area shape="poly" title=" " alt="" coords="184,341,159,377,154,374,180,337"/>
-<area shape="poly" title=" " alt="" coords="1136,341,1043,383,1041,378,1133,336"/>
-<area shape="poly" title=" " alt="" coords="1208,336,1395,381,1394,386,1206,341"/>
-<area shape="poly" title=" " alt="" coords="923,242,874,202,877,198,927,238"/>
-<area shape="poly" title=" " alt="" coords="941,265,995,373,990,375,936,267"/>
-<area shape="poly" title=" " alt="" coords="1019,263,1125,282,1239,311,1268,323,1296,336,1411,380,1409,385,1294,341,1266,328,1237,316,1124,287,1018,268"/>
-<area shape="rect" title=" " alt="" coords="831,313,917,339"/>
-<area shape="poly" title=" " alt="" coords="925,267,894,305,890,301,921,264"/>
-<area shape="poly" title=" " alt="" coords="1503,120,1404,142,1283,179,1220,205,1158,236,1099,272,1047,315,1026,344,1013,374,1008,372,1021,341,1043,311,1096,268,1155,231,1217,200,1281,174,1402,137,1502,115"/>
-<area shape="poly" title=" " alt="" coords="1643,108,1823,126,1928,142,2028,164,2112,194,2144,212,2169,233,2185,256,2189,282,2181,310,2158,341,2128,356,2073,368,1912,385,1724,395,1558,399,1558,394,1724,390,1912,380,2072,363,2126,351,2155,337,2176,308,2184,281,2180,258,2165,236,2141,217,2109,199,2026,169,1927,147,1823,131,1642,114"/>
-<area shape="rect" title=" " alt="" coords="1634,313,1727,339"/>
-<area shape="poly" title=" " alt="" coords="1578,119,1586,152,1600,191,1633,251,1666,301,1662,304,1629,254,1596,193,1581,153,1573,120"/>
-<area shape="rect" title=" " alt="" coords="1610,167,1703,192"/>
-<area shape="poly" title=" " alt="" coords="1588,117,1634,155,1631,160,1584,121"/>
-<area shape="poly" title=" " alt="" coords="1565,121,1475,231,1471,228,1561,117"/>
-<area shape="rect" href="CD__PolyhedralEBUtils_8H.html" title="Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from." alt="" coords="1727,167,1906,192"/>
-<area shape="poly" title=" " alt="" coords="1613,116,1765,160,1763,165,1611,121"/>
-<area shape="poly" title=" " alt="" coords="1376,263,1212,283,1135,297,1082,316,1063,328,1047,344,1021,376,1017,373,1043,340,1060,324,1079,311,1134,292,1211,277,1375,258"/>
-<area shape="poly" title=" " alt="" coords="1499,263,1531,275,1560,292,1577,313,1579,326,1574,340,1548,367,1516,384,1514,380,1545,362,1569,337,1573,326,1572,315,1556,296,1529,280,1497,268"/>
-<area shape="poly" title=" " alt="" coords="1492,263,1632,307,1630,312,1491,268"/>
-<area shape="rect" href="CD__CutCellSurfaceImplem_8H.html" title="Implementation of CD_CutCellSurface.H." alt="" coords="1351,313,1559,339"/>
-<area shape="poly" title=" " alt="" coords="1451,266,1449,300,1444,300,1446,266"/>
-<area shape="poly" title=" " alt="" coords="1383,341,1091,387,1090,382,1383,336"/>
-<area shape="poly" title=" " alt="" coords="1458,339,1458,373,1453,373,1453,339"/>
-<area shape="poly" title=" " alt="" coords="1460,313,1461,279,1467,279,1465,313"/>
-<area shape="poly" title=" " alt="" coords="1818,193,1811,224,1797,265,1775,307,1759,325,1741,341,1706,353,1647,364,1478,380,1283,391,1111,398,1111,393,1283,386,1478,375,1646,359,1705,348,1738,336,1755,322,1770,304,1792,262,1806,222,1812,192"/>
-<area shape="poly" title=" " alt="" coords="1821,192,1822,222,1820,262,1809,304,1799,324,1785,341,1769,352,1748,361,1691,377,1625,387,1559,394,1558,389,1624,382,1690,371,1746,356,1767,347,1782,337,1795,321,1804,302,1815,261,1817,222,1815,192"/>
-<area shape="poly" title=" " alt="" coords="1803,194,1748,242,1698,304,1694,300,1744,238,1799,190"/>
-<area shape="poly" title=" " alt="" coords="1759,195,1527,240,1526,235,1758,189"/>
-<area shape="rect" href="CD__PolyhedralEBUtilsImplem_8H.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="1872,240,2100,265"/>
-<area shape="poly" title=" " alt="" coords="1838,190,1940,232,1938,237,1836,194"/>
-<area shape="poly" title=" " alt="" coords="1966,268,1888,305,1837,325,1784,341,1727,352,1652,362,1469,378,1111,397,1111,391,1469,372,1651,356,1726,347,1783,336,1835,320,1886,301,1964,263"/>
-<area shape="poly" title=" " alt="" coords="1978,268,1941,305,1915,325,1886,341,1826,359,1741,373,1559,393,1558,388,1740,368,1824,353,1884,336,1912,320,1937,301,1974,264"/>
-<area shape="poly" title=" " alt="" coords="1964,242,1862,199,1864,194,1966,237"/>
-<area shape="rect" title=" " alt="" coords="1955,313,2017,339"/>
-<area shape="poly" title=" " alt="" coords="1989,266,1989,300,1983,300,1983,266"/>
-<area shape="rect" title=" " alt="" coords="2041,313,2144,339"/>
-<area shape="poly" title=" " alt="" coords="2005,263,2065,303,2062,308,2002,268"/>
+<area shape="rect" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="615,5,825,45"/>
+<area shape="rect" title=" " alt="" coords="124,93,183,119"/>
+<area shape="poly" title=" " alt="" coords="616,38,424,60,312,76,197,96,196,91,311,70,424,54,615,33"/>
+<area shape="rect" title=" " alt="" coords="207,93,297,119"/>
+<area shape="poly" title=" " alt="" coords="616,45,311,96,311,90,615,40"/>
+<area shape="rect" title=" " alt="" coords="322,93,425,119"/>
+<area shape="poly" title=" " alt="" coords="638,48,438,93,437,88,636,43"/>
+<area shape="rect" href="CD__ScanShop_8H.html" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="657,167,783,192"/>
+<area shape="poly" title=" " alt="" coords="723,46,723,153,717,153,717,46"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1041,387,1226,412"/>
+<area shape="poly" title=" " alt="" coords="664,48,500,105,292,181,108,257,45,290,13,315,8,326,13,337,26,343,54,349,146,360,430,377,758,388,1027,394,1027,399,758,393,429,382,146,365,53,354,24,348,9,341,3,326,9,312,42,285,105,252,290,176,498,100,663,43"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1336,387,1515,412"/>
+<area shape="poly" title=" " alt="" coords="825,27,1276,42,1879,71,2166,91,2406,115,2500,129,2572,143,2617,159,2630,168,2635,177,2635,254,2632,283,2624,306,2608,324,2584,341,2560,351,2523,359,2418,373,2281,384,2122,391,1793,399,1528,401,1528,396,1793,394,2122,386,2280,379,2418,368,2522,354,2558,346,2581,336,2604,320,2619,303,2627,282,2629,254,2630,179,2626,171,2615,164,2570,148,2499,134,2406,120,2166,96,1878,76,1276,47,825,32"/>
+<area shape="rect" href="CD__CutCellBody_8H.html" title="Declaration of a closed polyhedron bounding the fluid in one cut cell." alt="" coords="1967,93,2107,119"/>
+<area shape="poly" title=" " alt="" coords="825,30,1954,97,1953,102,825,36"/>
+<area shape="rect" href="CD__CutCellSurface_8H.html" title="Declaration of the data a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="1809,240,1967,265"/>
+<area shape="poly" title=" " alt="" coords="818,43,1816,235,1815,240,817,48"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1204,240,1407,265"/>
+<area shape="poly" title=" " alt="" coords="770,43,1264,233,1262,238,768,48"/>
+<area shape="rect" title=" " alt="" coords="601,240,735,265"/>
+<area shape="poly" title=" " alt="" coords="714,194,687,230,683,227,709,191"/>
+<area shape="rect" title=" " alt="" coords="1068,313,1217,339"/>
+<area shape="poly" title=" " alt="" coords="784,179,842,184,911,194,982,211,1051,238,1094,268,1127,301,1123,305,1091,272,1048,242,981,216,910,199,842,189,783,184"/>
+<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="479,240,577,265"/>
+<area shape="poly" title=" " alt="" coords="690,195,573,237,572,232,688,190"/>
+<area shape="poly" title=" " alt="" coords="728,191,745,221,771,261,807,302,850,336,892,358,937,373,1027,390,1026,396,936,378,890,362,847,341,803,306,767,264,740,223,723,193"/>
+<area shape="poly" title=" " alt="" coords="747,190,1007,311,1031,325,1057,336,1125,355,1194,369,1323,387,1322,393,1193,374,1123,360,1055,341,1029,330,1004,316,744,195"/>
+<area shape="rect" href="CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="860,313,993,339"/>
+<area shape="poly" title=" " alt="" coords="738,190,900,303,897,307,735,194"/>
+<area shape="rect" href="CD__ScanShopImplem_8H.html" title="Implementation of CD_ScanShop.H." alt="" coords="245,240,419,265"/>
+<area shape="poly" title=" " alt="" coords="658,194,402,240,401,235,657,188"/>
+<area shape="rect" title=" " alt="" coords="369,313,436,339"/>
+<area shape="poly" title=" " alt="" coords="509,268,437,309,434,304,507,263"/>
+<area shape="rect" title=" " alt="" coords="511,313,561,339"/>
+<area shape="poly" title=" " alt="" coords="532,265,536,300,531,300,527,266"/>
+<area shape="rect" title=" " alt="" coords="586,313,641,339"/>
+<area shape="poly" title=" " alt="" coords="544,263,591,302,587,307,540,267"/>
+<area shape="rect" title=" " alt="" coords="665,313,735,339"/>
+<area shape="poly" title=" " alt="" coords="557,263,661,306,658,310,555,268"/>
+<area shape="poly" title=" " alt="" coords="520,267,508,283,498,302,494,321,501,337,525,349,572,360,712,377,877,387,1027,393,1027,398,877,393,711,382,571,366,523,354,497,340,489,321,493,300,503,280,515,264"/>
+<area shape="poly" title=" " alt="" coords="571,263,849,336,976,356,1104,371,1323,390,1322,395,1103,377,975,361,848,341,569,268"/>
+<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="143,313,294,339"/>
+<area shape="poly" title=" " alt="" coords="479,266,275,313,274,308,478,261"/>
+<area shape="poly" title=" " alt="" coords="275,311,471,266,473,271,276,316"/>
+<area shape="poly" title=" " alt="" coords="294,334,314,336,707,368,1027,389,1027,395,707,374,313,341,294,339"/>
+<area shape="poly" title=" " alt="" coords="294,334,314,336,573,355,776,365,979,372,1239,384,1322,389,1322,394,1239,389,978,377,776,370,573,360,313,341,294,339"/>
+<area shape="rect" title=" " alt="" coords="231,387,305,412"/>
+<area shape="poly" title=" " alt="" coords="229,337,255,374,250,377,225,341"/>
+<area shape="rect" title=" " alt="" coords="329,387,409,412"/>
+<area shape="poly" title=" " alt="" coords="244,336,333,378,331,383,242,341"/>
+<area shape="rect" title=" " alt="" coords="34,387,107,412"/>
+<area shape="poly" title=" " alt="" coords="196,341,108,383,106,378,194,336"/>
+<area shape="rect" title=" " alt="" coords="132,387,207,412"/>
+<area shape="poly" title=" " alt="" coords="213,341,187,377,183,374,208,337"/>
+<area shape="poly" title=" " alt="" coords="961,336,1088,380,1086,385,959,341"/>
+<area shape="poly" title=" " alt="" coords="994,334,1332,382,1331,387,993,339"/>
+<area shape="poly" title=" " alt="" coords="401,237,651,192,652,197,402,243"/>
+<area shape="poly" title=" " alt="" coords="245,261,179,268,113,278,58,294,37,304,24,315,19,326,23,337,36,343,64,349,155,360,436,376,760,388,1027,394,1027,399,760,393,435,382,155,365,63,354,35,348,20,341,13,326,19,312,34,299,56,289,112,273,179,262,244,256"/>
+<area shape="poly" title=" " alt="" coords="334,265,339,302,346,321,359,337,380,347,414,355,514,368,644,376,790,381,1239,384,1322,389,1322,394,1239,389,790,386,644,382,514,374,413,361,378,352,356,341,342,324,334,303,329,266"/>
+<area shape="rect" title=" " alt="" coords="33,313,119,339"/>
+<area shape="poly" title=" " alt="" coords="292,268,131,312,130,307,290,263"/>
+<area shape="poly" title=" " alt="" coords="2017,121,1799,242,1638,341,1563,359,1459,373,1240,394,1239,388,1459,368,1562,353,1636,336,1796,238,2015,116"/>
+<area shape="poly" title=" " alt="" coords="2108,111,2270,133,2362,152,2449,176,2522,205,2550,223,2571,243,2584,264,2586,288,2578,313,2558,341,2543,348,2513,354,2419,365,2131,382,1799,393,1529,399,1528,394,1799,388,2131,377,2419,360,2513,349,2541,343,2554,337,2574,311,2581,287,2579,266,2567,246,2547,227,2519,210,2447,181,2361,157,2269,139,2107,116"/>
+<area shape="rect" title=" " alt="" coords="2033,313,2127,339"/>
+<area shape="poly" title=" " alt="" coords="2042,119,2078,299,2073,300,2037,120"/>
+<area shape="rect" title=" " alt="" coords="2277,167,2371,192"/>
+<area shape="poly" title=" " alt="" coords="2084,116,2265,161,2264,166,2083,121"/>
+<area shape="poly" title=" " alt="" coords="2027,121,1912,232,1908,229,2023,117"/>
+<area shape="rect" href="CD__PolyhedralEBUtils_8H.html" title="Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from." alt="" coords="2075,167,2253,192"/>
+<area shape="poly" title=" " alt="" coords="2059,116,2133,157,2130,162,2057,121"/>
+<area shape="poly" title=" " alt="" coords="1859,268,1740,316,1712,330,1682,341,1598,357,1482,371,1240,393,1240,388,1481,366,1597,352,1681,336,1709,325,1738,311,1857,263"/>
+<area shape="poly" title=" " alt="" coords="1915,263,1941,278,1966,296,1979,317,1979,329,1973,341,1951,353,1911,363,1796,379,1657,390,1529,397,1529,391,1657,384,1795,373,1910,357,1949,348,1969,337,1974,328,1974,319,1962,300,1938,282,1913,268"/>
+<area shape="poly" title=" " alt="" coords="1920,263,2037,306,2035,311,1918,268"/>
+<area shape="rect" href="CD__CutCellSurfaceImplem_8H.html" title="Implementation of CD_CutCellSurface.H." alt="" coords="1751,313,1959,339"/>
+<area shape="poly" title=" " alt="" coords="1878,267,1860,301,1855,299,1873,264"/>
+<area shape="poly" title=" " alt="" coords="1751,340,1240,390,1240,385,1750,335"/>
+<area shape="poly" title=" " alt="" coords="1786,341,1509,387,1508,382,1785,336"/>
+<area shape="poly" title=" " alt="" coords="1865,312,1883,277,1888,280,1869,314"/>
+<area shape="poly" title=" " alt="" coords="2169,192,2173,222,2173,262,2164,305,2155,324,2140,341,2121,352,2089,361,1996,374,1875,382,1740,386,1324,389,1240,394,1240,389,1324,384,1740,381,1875,377,1996,368,2088,355,2119,347,2137,337,2150,321,2159,303,2168,262,2168,222,2164,192"/>
+<area shape="poly" title=" " alt="" coords="2173,191,2187,220,2200,260,2202,303,2196,323,2185,341,2172,349,2151,357,2090,370,2009,380,1914,388,1708,397,1529,400,1529,395,1708,391,1913,382,2008,375,2090,365,2150,352,2169,345,2181,337,2192,321,2197,302,2194,261,2182,222,2168,193"/>
+<area shape="poly" title=" " alt="" coords="2160,194,2096,303,2091,300,2155,191"/>
+<area shape="poly" title=" " alt="" coords="2120,195,1947,239,1945,234,2119,189"/>
+<area shape="rect" href="CD__PolyhedralEBUtilsImplem_8H.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="2271,240,2499,265"/>
+<area shape="poly" title=" " alt="" coords="2194,189,2331,233,2329,239,2192,195"/>
+<area shape="poly" title=" " alt="" coords="2366,268,2288,306,2237,326,2183,341,2101,355,1997,365,1755,377,1513,383,1324,389,1240,394,1240,389,1324,384,1513,378,1755,372,1997,360,2100,350,2182,336,2235,321,2286,301,2364,263"/>
+<area shape="poly" title=" " alt="" coords="2378,267,2341,305,2315,325,2285,341,2222,359,2138,374,2038,384,1930,392,1711,400,1529,401,1529,396,1711,394,1930,386,2038,379,2137,368,2221,354,2283,336,2312,321,2337,301,2374,263"/>
+<area shape="poly" title=" " alt="" coords="2356,242,2219,198,2220,193,2357,237"/>
+<area shape="rect" title=" " alt="" coords="2354,313,2417,339"/>
+<area shape="poly" title=" " alt="" coords="2388,266,2388,300,2383,300,2383,266"/>
+<area shape="rect" title=" " alt="" coords="2441,313,2543,339"/>
+<area shape="poly" title=" " alt="" coords="2404,263,2465,303,2462,308,2401,268"/>
+<area shape="poly" title=" " alt="" coords="1280,268,1183,310,1181,305,1278,263"/>
+<area shape="poly" title=" " alt="" coords="1299,267,1271,302,1231,341,1169,382,1166,378,1228,337,1267,298,1295,264"/>
+<area shape="poly" title=" " alt="" coords="1309,265,1315,300,1323,319,1333,337,1357,361,1386,378,1383,383,1354,365,1329,340,1318,321,1310,301,1304,266"/>
+<area shape="poly" title=" " alt="" coords="1407,260,1971,311,2020,316,2019,321,1971,316,1407,265"/>
+<area shape="rect" title=" " alt="" coords="1343,313,1471,339"/>
+<area shape="poly" title=" " alt="" coords="1323,263,1381,303,1377,307,1320,268"/>
+<area shape="rect" title=" " alt="" coords="1495,313,1625,339"/>
+<area shape="poly" title=" " alt="" coords="1347,263,1507,307,1505,312,1346,268"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">

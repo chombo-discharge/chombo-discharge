@@ -109,13 +109,15 @@ Collaboration diagram for PolyhedralGeometryShop:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPolyhedralGeometryShop__coll__graph.png" border="0" usemap="#aPolyhedralGeometryShop_coll__map" alt="Collaboration graph"/></div>
 <map name="aPolyhedralGeometryShop_coll__map" id="aPolyhedralGeometryShop_coll__map">
-<area shape="rect" title="Geometry generation whose moments are exact integrals of an explicit surface." alt="" coords="27,168,215,193"/>
+<area shape="rect" title="Geometry generation whose moments are exact integrals of an explicit surface." alt="" coords="105,181,293,207"/>
 <area shape="rect" href="classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves." alt="" coords="78,93,163,119"/>
-<area shape="poly" title=" " alt="" coords="123,133,123,168,118,168,118,133"/>
+<area shape="poly" title=" " alt="" coords="142,127,190,179,186,183,138,131"/>
 <area shape="rect" title=" " alt="" coords="5,5,124,31"/>
 <area shape="poly" title=" " alt="" coords="82,41,115,91,111,94,77,44"/>
 <area shape="rect" href="classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="148,5,208,31"/>
 <area shape="poly" title=" " alt="" coords="165,44,131,94,126,91,160,41"/>
+<area shape="rect" href="classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="188,93,371,119"/>
+<area shape="poly" title=" " alt="" coords="261,131,212,183,209,179,257,127"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -143,6 +145,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abdb2194b77ed8b491058e00234027cd4" id="r_abdb2194b77ed8b491058e00234027cd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#abdb2194b77ed8b491058e00234027cd4">fillGraph</a> (BaseFab&lt; int &gt; &amp;a_regIrregCovered, Vector&lt; IrregNode &gt; &amp;a_nodes, const Box &amp;a_validRegion, const Box &amp;a_ghostRegion, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real &amp;a_dx, const DataIndex &amp;a_di) const override</td></tr>
 <tr class="memdesc:abdb2194b77ed8b491058e00234027cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the graph and the nodes for one box.  <br /></td></tr>
 <tr class="separator:abdb2194b77ed8b491058e00234027cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e68def5389b118cf349078728c335cf" id="r_a2e68def5389b118cf349078728c335cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a2e68def5389b118cf349078728c335cf">setGrids</a> (const <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &amp;a_compGeom, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) noexcept</td></tr>
+<tr class="memdesc:a2e68def5389b118cf349078728c335cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Say which grids the polyhedra are built over, and which phase this generator serves on them.  <br /></td></tr>
+<tr class="separator:a2e68def5389b118cf349078728c335cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a640d3ad0695303b0de01f8eb3c544eb8" id="r_a640d3ad0695303b0de01f8eb3c544eb8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a640d3ad0695303b0de01f8eb3c544eb8">verifySurface</a> () const</td></tr>
+<tr class="memdesc:a640d3ad0695303b0de01f8eb3c544eb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the polyhedra over the grids, check that they form a surface, and write it if asked.  <br /></td></tr>
+<tr class="separator:a640d3ad0695303b0de01f8eb3c544eb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26f74c6d2ce7d8f60e6293335a6f2360" id="r_a26f74c6d2ce7d8f60e6293335a6f2360"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a26f74c6d2ce7d8f60e6293335a6f2360">sanityCheck</a> (const Vector&lt; Real &gt; &amp;a_facets) const</td></tr>
+<tr class="memdesc:a26f74c6d2ce7d8f60e6293335a6f2360"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that the interface triangles form a surface that is closed except on the domain boundary.  <br /></td></tr>
+<tr class="separator:a26f74c6d2ce7d8f60e6293335a6f2360"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classScanShop"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classScanShop')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classScanShop.html">ScanShop</a></td></tr>
 <tr class="memitem:acbb51cf0dbbb601f9c29d0be2c4a92c9 inherit pub_methods_classScanShop" id="r_acbb51cf0dbbb601f9c29d0be2c4a92c9"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>ScanShop</b> ()=delete</td></tr>
@@ -189,6 +200,21 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a938e5be85deb7a79ed791f708338ca1b" id="r_a938e5be85deb7a79ed791f708338ca1b"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a938e5be85deb7a79ed791f708338ca1b">isDust</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const Real a_threshold) noexcept</td></tr>
 <tr class="memdesc:a938e5be85deb7a79ed791f708338ca1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cut body holds too little solid to be a cut cell.  <br /></td></tr>
 <tr class="separator:a938e5be85deb7a79ed791f708338ca1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb522eb98ae4af13a8008e323ba79bdf" id="r_afb522eb98ae4af13a8008e323ba79bdf"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#afb522eb98ae4af13a8008e323ba79bdf">fillNodeValues</a> (const BaseIF &amp;a_function, BaseFab&lt; Real &gt; &amp;a_nodeValues, const Box &amp;a_region, const RealVect &amp;a_probLo, const Real &amp;a_dx)</td></tr>
+<tr class="memdesc:afb522eb98ae4af13a8008e323ba79bdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the implicit function at every node of a region.  <br /></td></tr>
+<tr class="separator:afb522eb98ae4af13a8008e323ba79bdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad327afbb9e5f6f9eac4192888f6d93bb" id="r_ad327afbb9e5f6f9eac4192888f6d93bb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ad327afbb9e5f6f9eac4192888f6d93bb">defineIntercepts</a> (BaseFab&lt; Real &gt; a_intercept[SpaceDim], const Box &amp;a_region)</td></tr>
+<tr class="memdesc:ad327afbb9e5f6f9eac4192888f6d93bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size the edge-crossing cache for a region and mark every edge as not yet bisected.  <br /></td></tr>
+<tr class="separator:ad327afbb9e5f6f9eac4192888f6d93bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87c39cfb73c84c49e1a3909dd2d9b229" id="r_a87c39cfb73c84c49e1a3909dd2d9b229"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a87c39cfb73c84c49e1a3909dd2d9b229">edgeCrossing</a> (const BaseIF &amp;a_function, BaseFab&lt; Real &gt; a_intercept[SpaceDim], const IntVect &amp;a_cell, const int a_edge, const Real a_lo, const Real a_hi, const RealVect &amp;a_probLo, const Real &amp;a_dx)</td></tr>
+<tr class="memdesc:a87c39cfb73c84c49e1a3909dd2d9b229"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find where the implicit function changes sign along a cell edge.  <br /></td></tr>
+<tr class="separator:a87c39cfb73c84c49e1a3909dd2d9b229"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a569f4030989ac6974766968ebb31d3d7" id="r_a569f4030989ac6974766968ebb31d3d7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a569f4030989ac6974766968ebb31d3d7">fillCorners</a> (<a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const BaseFab&lt; Real &gt; &amp;a_nodeValues, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a569f4030989ac6974766968ebb31d3d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read one cell's corner values off the node values.  <br /></td></tr>
+<tr class="separator:a569f4030989ac6974766968ebb31d3d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebae4746293565213b5f47f04f11ff82" id="r_aebae4746293565213b5f47f04f11ff82"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#aebae4746293565213b5f47f04f11ff82">buildSurface</a> (const BaseIF &amp;a_function, BaseFab&lt; Real &gt; a_intercept[SpaceDim], <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const BaseFab&lt; Real &gt; &amp;a_nodeValues, const IntVect &amp;a_cell, const RealVect &amp;a_probLo, const Real &amp;a_dx)</td></tr>
+<tr class="memdesc:aebae4746293565213b5f47f04f11ff82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather the corner values and edge crossings one cell's surface is built from.  <br /></td></tr>
+<tr class="separator:aebae4746293565213b5f47f04f11ff82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b127ed35c8c95a84ab7201557c2da37" id="r_a7b127ed35c8c95a84ab7201557c2da37"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a7b127ed35c8c95a84ab7201557c2da37">edgeRoot</a> (const BaseIF &amp;a_function, const IntVect &amp;a_edgeIV, const int a_dir, const Real a_loValue, const Real a_hiValue, const RealVect &amp;a_probLo, const Real a_dx) noexcept</td></tr>
 <tr class="memdesc:a7b127ed35c8c95a84ab7201557c2da37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bisect one cell edge for the crossing on it.  <br /></td></tr>
 <tr class="separator:a7b127ed35c8c95a84ab7201557c2da37"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,18 +234,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_sn
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a34ddfd2ba8db181a9cfbdd84a8202d57" id="r_a34ddfd2ba8db181a9cfbdd84a8202d57"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a34ddfd2ba8db181a9cfbdd84a8202d57">fillNodeValues</a> (BaseFab&lt; Real &gt; &amp;a_nodeValues, const Box &amp;a_region, const RealVect &amp;a_probLo, const Real &amp;a_dx) const</td></tr>
-<tr class="memdesc:a34ddfd2ba8db181a9cfbdd84a8202d57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the implicit function at every node of a region.  <br /></td></tr>
-<tr class="separator:a34ddfd2ba8db181a9cfbdd84a8202d57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a2ca46fe33a1006f6a6f4c4b3db4fce" id="r_a8a2ca46fe33a1006f6a6f4c4b3db4fce"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a8a2ca46fe33a1006f6a6f4c4b3db4fce">edgeCrossing</a> (BaseFab&lt; Real &gt; a_intercept[SpaceDim], const IntVect &amp;a_cell, const int a_edge, const Real a_lo, const Real a_hi, const RealVect &amp;a_probLo, const Real &amp;a_dx) const</td></tr>
-<tr class="memdesc:a8a2ca46fe33a1006f6a6f4c4b3db4fce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find where the implicit function changes sign along a cell edge.  <br /></td></tr>
-<tr class="separator:a8a2ca46fe33a1006f6a6f4c4b3db4fce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab416315b0ae3348ed99e30a6958fccd6" id="r_ab416315b0ae3348ed99e30a6958fccd6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ab416315b0ae3348ed99e30a6958fccd6">fillCorners</a> (<a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const BaseFab&lt; Real &gt; &amp;a_nodeValues, const IntVect &amp;a_cell) const</td></tr>
-<tr class="memdesc:ab416315b0ae3348ed99e30a6958fccd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read one cell's corner values off the node values.  <br /></td></tr>
-<tr class="separator:ab416315b0ae3348ed99e30a6958fccd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add674e4faffa6a49ff7752c8649a42ac" id="r_add674e4faffa6a49ff7752c8649a42ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#add674e4faffa6a49ff7752c8649a42ac">buildSurface</a> (BaseFab&lt; Real &gt; a_intercept[SpaceDim], <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const BaseFab&lt; Real &gt; &amp;a_nodeValues, const IntVect &amp;a_cell, const RealVect &amp;a_probLo, const Real &amp;a_dx) const</td></tr>
-<tr class="memdesc:add674e4faffa6a49ff7752c8649a42ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather the corner values and edge crossings one cell's surface is built from.  <br /></td></tr>
-<tr class="separator:add674e4faffa6a49ff7752c8649a42ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1de13df1588f73359bfaf72d8265655f" id="r_a1de13df1588f73359bfaf72d8265655f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a1de13df1588f73359bfaf72d8265655f">collectFacets</a> (Vector&lt; Real &gt; &amp;a_facets, const int a_level) const</td></tr>
+<tr class="memdesc:a1de13df1588f73359bfaf72d8265655f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.  <br /></td></tr>
+<tr class="separator:a1de13df1588f73359bfaf72d8265655f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdcdec8a8eb1f8ed6c4e55aaaf6c0659" id="r_acdcdec8a8eb1f8ed6c4e55aaaf6c0659"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#acdcdec8a8eb1f8ed6c4e55aaaf6c0659">writeSTL</a> (const std::string &amp;a_fileName, const std::string &amp;a_name, const Vector&lt; Real &gt; &amp;a_facets) const</td></tr>
+<tr class="memdesc:acdcdec8a8eb1f8ed6c4e55aaaf6c0659"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write triangles gathered from every rank as one STL file.  <br /></td></tr>
+<tr class="separator:acdcdec8a8eb1f8ed6c4e55aaaf6c0659"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addf8815b2e8122b7b41511c7a26216f2" id="r_addf8815b2e8122b7b41511c7a26216f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#addf8815b2e8122b7b41511c7a26216f2">fillNode</a> (IrregNode &amp;a_node, const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const BaseFab&lt; int &gt; &amp;a_regIrregCovered, const IntVect &amp;a_cell, const ProblemDomain &amp;a_domain) const</td></tr>
 <tr class="memdesc:addf8815b2e8122b7b41511c7a26216f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a cut cell's node from its body.  <br /></td></tr>
 <tr class="separator:addf8815b2e8122b7b41511c7a26216f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -251,6 +271,26 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:abf1c98807086a8e803c940993b22d9a3" id="r_abf1c98807086a8e803c940993b22d9a3"><td class="memItemLeft" align="right" valign="top"><a id="abf1c98807086a8e803c940993b22d9a3" name="abf1c98807086a8e803c940993b22d9a3"></a>
+const <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>m_compGeom</b></td></tr>
+<tr class="memdesc:abf1c98807086a8e803c940993b22d9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The geometry whose grids the polyhedra are built over, or null before setGrids. <br /></td></tr>
+<tr class="separator:abf1c98807086a8e803c940993b22d9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af933a1366a16909c903b6e595213afdc" id="r_af933a1366a16909c903b6e595213afdc"><td class="memItemLeft" align="right" valign="top"><a id="af933a1366a16909c903b6e595213afdc" name="af933a1366a16909c903b6e595213afdc"></a>
+<a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
+<tr class="memdesc:af933a1366a16909c903b6e595213afdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase this generator serves on those grids. <br /></td></tr>
+<tr class="separator:af933a1366a16909c903b6e595213afdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78295103664700b3d7d135a3ccb8b50d" id="r_a78295103664700b3d7d135a3ccb8b50d"><td class="memItemLeft" align="right" valign="top"><a id="a78295103664700b3d7d135a3ccb8b50d" name="a78295103664700b3d7d135a3ccb8b50d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_writeSTL</b></td></tr>
+<tr class="memdesc:a78295103664700b3d7d135a3ccb8b50d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface writes the surface as STL. PolyhedralGeometryShop.write_stl, off by default. <br /></td></tr>
+<tr class="separator:a78295103664700b3d7d135a3ccb8b50d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9e08c97356bbd64d8882020ddd56e9d" id="r_ae9e08c97356bbd64d8882020ddd56e9d"><td class="memItemLeft" align="right" valign="top"><a id="ae9e08c97356bbd64d8882020ddd56e9d" name="ae9e08c97356bbd64d8882020ddd56e9d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_sanityCheck</b></td></tr>
+<tr class="memdesc:ae9e08c97356bbd64d8882020ddd56e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, on by default. <br /></td></tr>
+<tr class="separator:ae9e08c97356bbd64d8882020ddd56e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad773afb8a229a0a228143d386ea91c1d" id="r_ad773afb8a229a0a228143d386ea91c1d"><td class="memItemLeft" align="right" valign="top"><a id="ad773afb8a229a0a228143d386ea91c1d" name="ad773afb8a229a0a228143d386ea91c1d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></tr>
+<tr class="memdesc:ad773afb8a229a0a228143d386ea91c1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface reports its timings. PolyhedralGeometryShop.profile, off by default. <br /></td></tr>
+<tr class="separator:ad773afb8a229a0a228143d386ea91c1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd4ff1d070203368623010eedbbe466d" id="r_acd4ff1d070203368623010eedbbe466d"><td class="memItemLeft" align="right" valign="top"><a id="acd4ff1d070203368623010eedbbe466d" name="acd4ff1d070203368623010eedbbe466d"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_strict</b></td></tr>
 <tr class="memdesc:acd4ff1d070203368623010eedbbe466d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a declined cell aborts the run rather than falling back. <br /></td></tr>
@@ -321,6 +361,10 @@ std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
+<tr class="memitem:ae28b9f8a13755f2de22dd2ee6170f23e" id="r_ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memItemLeft" align="right" valign="top"><a id="ae28b9f8a13755f2de22dd2ee6170f23e" name="ae28b9f8a13755f2de22dd2ee6170f23e"></a>
+static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_weldSpacing</b> = 1.0E-8</td></tr>
+<tr class="memdesc:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck. <br /></td></tr>
+<tr class="separator:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7f99bd2911b3a37fbc730bad6b4467e" id="r_aa7f99bd2911b3a37fbc730bad6b4467e"><td class="memItemLeft" align="right" valign="top"><a id="aa7f99bd2911b3a37fbc730bad6b4467e" name="aa7f99bd2911b3a37fbc730bad6b4467e"></a>
 static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_divergenceTolerance</b> = 1.0E-9</td></tr>
 <tr class="memdesc:aa7f99bd2911b3a37fbc730bad6b4467e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Residual above which the stored moments and the ones PolyGeom recomputes disagree. <br /></td></tr>
@@ -419,8 +463,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="add674e4faffa6a49ff7752c8649a42ac" name="add674e4faffa6a49ff7752c8649a42ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#add674e4faffa6a49ff7752c8649a42ac">&#9670;&#160;</a></span>buildSurface()</h2>
+<a id="aebae4746293565213b5f47f04f11ff82" name="aebae4746293565213b5f47f04f11ff82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebae4746293565213b5f47f04f11ff82">&#9670;&#160;</a></span>buildSurface()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -431,6 +475,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td class="memname">void PolyhedralGeometryShop::buildSurface </td>
           <td>(</td>
+          <td class="paramtype">const BaseIF &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">BaseFab&lt; Real &gt;&#160;</td>
           <td class="paramname"><em>a_intercept</em>[SpaceDim], </td>
         </tr>
@@ -467,19 +517,20 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Gather the corner values and edge crossings one cell's surface is built from. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>The corners come from the shared node values and every edge whose ends disagree gets its crossing through the shared cache, so every caller that reconstructs a cell &ndash; the graph, the surface pass and the grid builder's curvature test &ndash; builds the same cell. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_intercept</td><td>Edge-centred crossing cache </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_surface</td><td>The values the cell's body is reconstructed from </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_nodeValues</td><td>Node-centred implicit function values </td></tr>
@@ -492,8 +543,98 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a8a2ca46fe33a1006f6a6f4c4b3db4fce" name="a8a2ca46fe33a1006f6a6f4c4b3db4fce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a2ca46fe33a1006f6a6f4c4b3db4fce">&#9670;&#160;</a></span>edgeCrossing()</h2>
+<a id="a1de13df1588f73359bfaf72d8265655f" name="a1de13df1588f73359bfaf72d8265655f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1de13df1588f73359bfaf72d8265655f">&#9670;&#160;</a></span>collectFacets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::collectFacets </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_facets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each. </p>
+<p>Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface). A coarse edge that carries no crossing while both finer edges under it do is a multi-valued coarse cell in disguise and stops the run, as does a body that will not close. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_facets</td><td><a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> coordinates, appended to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level to collect from. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad327afbb9e5f6f9eac4192888f6d93bb" name="ad327afbb9e5f6f9eac4192888f6d93bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad327afbb9e5f6f9eac4192888f6d93bb">&#9670;&#160;</a></span>defineIntercepts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::defineIntercepts </td>
+          <td>(</td>
+          <td class="paramtype">BaseFab&lt; Real &gt;&#160;</td>
+          <td class="paramname"><em>a_intercept</em>[SpaceDim], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_region</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Size the edge-crossing cache for a region and mark every edge as not yet bisected. </p>
+<p>One fab per direction, over the edges of the region's cells, addressed by the node at the low end of the edge as edgeCrossing addresses them. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_intercept</td><td>Edge-centred cache, one fab per direction </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cell-centred region whose edges are wanted </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a87c39cfb73c84c49e1a3909dd2d9b229" name="a87c39cfb73c84c49e1a3909dd2d9b229"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87c39cfb73c84c49e1a3909dd2d9b229">&#9670;&#160;</a></span>edgeCrossing()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -504,6 +645,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td class="memname">Real PolyhedralGeometryShop::edgeCrossing </td>
           <td>(</td>
+          <td class="paramtype">const BaseIF &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">BaseFab&lt; Real &gt;&#160;</td>
           <td class="paramname"><em>a_intercept</em>[SpaceDim], </td>
         </tr>
@@ -546,12 +693,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -559,6 +706,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 <p>Find where the implicit function changes sign along a cell edge. </p>
 <p>Bisection between the two endpoints, looked up in a cache first. Every cut edge is reached from both of its adjoining faces and from each neighbouring cell, always with the same endpoints, so the root is found once and reused. That is what makes two cells agree on a shared aperture bit for bit. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_intercept</td><td>Edge-centred cache, one component per direction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>Cell the edge is being read from </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_edge</td><td>Edge index within the cell </td></tr>
@@ -654,8 +802,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="ab416315b0ae3348ed99e30a6958fccd6" name="ab416315b0ae3348ed99e30a6958fccd6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab416315b0ae3348ed99e30a6958fccd6">&#9670;&#160;</a></span>fillCorners()</h2>
+<a id="a569f4030989ac6974766968ebb31d3d7" name="a569f4030989ac6974766968ebb31d3d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a569f4030989ac6974766968ebb31d3d7">&#9670;&#160;</a></span>fillCorners()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -684,12 +832,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -859,8 +1007,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a34ddfd2ba8db181a9cfbdd84a8202d57" name="a34ddfd2ba8db181a9cfbdd84a8202d57"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a34ddfd2ba8db181a9cfbdd84a8202d57">&#9670;&#160;</a></span>fillNodeValues()</h2>
+<a id="afb522eb98ae4af13a8008e323ba79bdf" name="afb522eb98ae4af13a8008e323ba79bdf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb522eb98ae4af13a8008e323ba79bdf">&#9670;&#160;</a></span>fillNodeValues()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -871,6 +1019,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td class="memname">void PolyhedralGeometryShop::fillNodeValues </td>
           <td>(</td>
+          <td class="paramtype">const BaseIF &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">BaseFab&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_nodeValues</em>, </td>
         </tr>
@@ -895,19 +1049,20 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Evaluate the implicit function at every node of a region. </p>
-<p>One evaluation per node rather than per cell corner, since the cells meeting at a node share it and must agree on its value. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>One evaluation per node rather than per cell corner, since the cells meeting at a node share it and must agree on its value. Values are read through snappedValue. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_nodeValues</td><td>Node-centred values over a_region </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cell-centred region whose nodes are wanted </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of computational domain </td></tr>
@@ -964,6 +1119,77 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="a26f74c6d2ce7d8f60e6293335a6f2360" name="a26f74c6d2ce7d8f60e6293335a6f2360"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26f74c6d2ce7d8f60e6293335a6f2360">&#9670;&#160;</a></span>sanityCheck()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::sanityCheck </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_facets</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check that the interface triangles form a surface that is closed except on the domain boundary. </p>
+<p>Every polyhedron has a neighbour across each edge of its interface unless that edge lies on the domain boundary, so every interior edge of the triangulation must be used exactly twice. Vertices are welded at s_weldSpacing times the finest spacing before edges are matched, which is far above the round-off two cells produce for one shared vertex and far below any geometry. Gathers the triangles onto rank 0, where an interior edge used once or more than twice is reported with its position and stops the run. Switched by PolyhedralGeometryShop.sanity_check, on by default. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>This rank's interface triangles, nine reals each. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2e68def5389b118cf349078728c335cf" name="a2e68def5389b118cf349078728c335cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e68def5389b118cf349078728c335cf">&#9670;&#160;</a></span>setGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::setGrids </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_compGeom</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Say which grids the polyhedra are built over, and which phase this generator serves on them. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_compGeom</td><td>Builder holding the boxes and their classifications per level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase whose classifications and implicit function this generator uses. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a713b02ec62348d8c5de17e730c81a348" name="a713b02ec62348d8c5de17e730c81a348"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a713b02ec62348d8c5de17e730c81a348">&#9670;&#160;</a></span>snappedValue()</h2>
 
@@ -1014,6 +1240,78 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value, or exactly zero. </dd></dl>
+
+</div>
+</div>
+<a id="a640d3ad0695303b0de01f8eb3c544eb8" name="a640d3ad0695303b0de01f8eb3c544eb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a640d3ad0695303b0de01f8eb3c544eb8">&#9670;&#160;</a></span>verifySurface()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::verifySurface </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Build the polyhedra over the grids, check that they form a surface, and write it if asked. </p>
+<p>Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level carries are skipped, and a face shared with such a cell is restricted to the finer chords and the interface closed. The interface triangles of every level are then checked by sanityCheck, and written as one STL per level and one composite when PolyhedralGeometryShop.write_stl is set. Collective; every rank reconstructs its share of the boxes. Requires setGrids. </p>
+
+</div>
+</div>
+<a id="acdcdec8a8eb1f8ed6c4e55aaaf6c0659" name="acdcdec8a8eb1f8ed6c4e55aaaf6c0659"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdcdec8a8eb1f8ed6c4e55aaaf6c0659">&#9670;&#160;</a></span>writeSTL()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::writeSTL </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_fileName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_facets</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write triangles gathered from every rank as one STL file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File to write. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Solid name inside the file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>This rank's triangles, nine reals each. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

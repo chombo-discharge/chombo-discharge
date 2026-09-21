@@ -25,12 +25,13 @@ var searchData=
   ['s_5ftransverse_22',['s_transverse',['../namespacePolyhedralEB_1_1detail.html#a3ccb786adfc09b1453a0f59b0424d8d8',1,'PolyhedralEB::detail']]],
   ['s_5fvalue_23',['s_value',['../structdetail_1_1SumSizeof_3_01std_1_1tuple_3_01Ts_8_8_8_01_4_01_4.html#a2478ba2a8e4231c4227e97b8a746fc57',1,'detail::SumSizeof&lt; std::tuple&lt; Ts... &gt; &gt;::s_value'],['../structdetail_1_1AllTriviallyCopyable_3_01std_1_1tuple_3_01Ts_8_8_8_01_4_01_4.html#aa65be65a3e74e24a824be177b9a44d22',1,'detail::AllTriviallyCopyable&lt; std::tuple&lt; Ts... &gt; &gt;::s_value']]],
   ['s_5fweightcol_24',['s_weightCol',['../classParticleSoA.html#a0b1425829b23f6c99a69ec24d20a4c65',1,'ParticleSoA']]],
-  ['s_5fweldtolerance_25',['s_weldTolerance',['../namespacePolyhedralEB_1_1detail.html#a7d7b6c6fdfa2205ea5d50202a444c0df',1,'PolyhedralEB::detail']]],
-  ['scratch_26',['scratch',['../structItoParticle.html#a37b7d18008006114dd18ff9d8020060d',1,'ItoParticle']]],
-  ['scratch_5fx_27',['scratch_x',['../structItoParticle.html#a9c5a7e6256b8d83c295f1bf3fea70339',1,'ItoParticle']]],
-  ['scratch_5fy_28',['scratch_y',['../structItoParticle.html#ac863ced85fcb703f3fa45b1a82815ef4',1,'ItoParticle']]],
-  ['scratch_5fz_29',['scratch_z',['../structItoParticle.html#ada630493e16ac46fd67f4d3303e456e1',1,'ItoParticle']]],
-  ['secondid_30',['secondID',['../structParticleManagement_1_1detail_1_1NNMergeResult.html#a38fcc65395bc31e4409a2938c72f4c52',1,'ParticleManagement::detail::NNMergeResult']]],
-  ['solvers_31',['solvers',['../structEllipticSolverChain_1_1Settings.html#a2a73ad95fe0c257f99fbfddc91259e98',1,'EllipticSolverChain::Settings']]],
-  ['source_32',['source',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html#aaf9f2eb60459a95945a0935f70b53b70',1,'ParticleManagement::detail::NNMergeProposal']]]
+  ['s_5fweldspacing_25',['s_weldSpacing',['../classPolyhedralGeometryShop.html#ae28b9f8a13755f2de22dd2ee6170f23e',1,'PolyhedralGeometryShop']]],
+  ['s_5fweldtolerance_26',['s_weldTolerance',['../namespacePolyhedralEB_1_1detail.html#a7d7b6c6fdfa2205ea5d50202a444c0df',1,'PolyhedralEB::detail']]],
+  ['scratch_27',['scratch',['../structItoParticle.html#a37b7d18008006114dd18ff9d8020060d',1,'ItoParticle']]],
+  ['scratch_5fx_28',['scratch_x',['../structItoParticle.html#a9c5a7e6256b8d83c295f1bf3fea70339',1,'ItoParticle']]],
+  ['scratch_5fy_29',['scratch_y',['../structItoParticle.html#ac863ced85fcb703f3fa45b1a82815ef4',1,'ItoParticle']]],
+  ['scratch_5fz_30',['scratch_z',['../structItoParticle.html#ada630493e16ac46fd67f4d3303e456e1',1,'ItoParticle']]],
+  ['secondid_31',['secondID',['../structParticleManagement_1_1detail_1_1NNMergeResult.html#a38fcc65395bc31e4409a2938c72f4c52',1,'ParticleManagement::detail::NNMergeResult']]],
+  ['solvers_32',['solvers',['../structEllipticSolverChain_1_1Settings.html#a2a73ad95fe0c257f99fbfddc91259e98',1,'EllipticSolverChain::Settings']]],
+  ['source_33',['source',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html#aaf9f2eb60459a95945a0935f70b53b70',1,'ParticleManagement::detail::NNMergeProposal']]]
 ];

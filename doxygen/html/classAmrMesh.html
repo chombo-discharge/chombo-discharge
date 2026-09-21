@@ -506,6 +506,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memitem:a9a8897dc00f6ac738080aba2ec29ad7a" id="r_a9a8897dc00f6ac738080aba2ec29ad7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a9a8897dc00f6ac738080aba2ec29ad7a">regridAmr</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
 <tr class="memdesc:a9a8897dc00f6ac738080aba2ec29ad7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid AMR. This versions generates the grids and Realms, but not the operator.  <br /></td></tr>
 <tr class="separator:a9a8897dc00f6ac738080aba2ec29ad7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1b09b50021e75430449ea2679c4b2f2" id="r_ab1b09b50021e75430449ea2679c4b2f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab1b09b50021e75430449ea2679c4b2f2">regridAmr</a> (const Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
+<tr class="memdesc:ab1b09b50021e75430449ea2679c4b2f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than generated.  <br /></td></tr>
+<tr class="separator:ab1b09b50021e75430449ea2679c4b2f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94ed201d01ee2d7256b7d5599a5721e5" id="r_a94ed201d01ee2d7256b7d5599a5721e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a94ed201d01ee2d7256b7d5599a5721e5">regridRealm</a> (const std::string &amp;a_realm, const Vector&lt; Vector&lt; int &gt; &gt; &amp;a_procs, const Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
 <tr class="memdesc:a94ed201d01ee2d7256b7d5599a5721e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm.  <br /></td></tr>
 <tr class="separator:a94ed201d01ee2d7256b7d5599a5721e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -727,6 +730,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>defineRealms</b> ()</
 <tr class="memitem:a69e4f0db7383a8a926a9bcb59defb67e" id="r_a69e4f0db7383a8a926a9bcb59defb67e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e">buildGrids</a> (const Vector&lt; IntVectSet &gt; &amp;a_tags, const int a_lmin, const int a_hardcap=-1)</td></tr>
 <tr class="memdesc:a69e4f0db7383a8a926a9bcb59defb67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids.  <br /></td></tr>
 <tr class="separator:a69e4f0db7383a8a926a9bcb59defb67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa39b0efcbb152eeb690f5ac96c86ab6f" id="r_aa39b0efcbb152eeb690f5ac96c86ab6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aa39b0efcbb152eeb690f5ac96c86ab6f">buildGrids</a> (const Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
+<tr class="memdesc:aa39b0efcbb152eeb690f5ac96c86ab6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build new internal AMR grids from given boxes.  <br /></td></tr>
+<tr class="separator:aa39b0efcbb152eeb690f5ac96c86ab6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab280a996a9b56dec364cea5276dab6a" id="r_aab280a996a9b56dec364cea5276dab6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aab280a996a9b56dec364cea5276dab6a">defineGrids</a> (Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const int a_lmin)</td></tr>
+<tr class="memdesc:aab280a996a9b56dec364cea5276dab6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance new boxes and define m_grids from them, for levels a_lmin through m_finestLevel.  <br /></td></tr>
+<tr class="separator:aab280a996a9b56dec364cea5276dab6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d384fb87bd71ccdc5ee53673685ce48" id="r_a7d384fb87bd71ccdc5ee53673685ce48"><td class="memItemLeft" align="right" valign="top"><a id="a7d384fb87bd71ccdc5ee53673685ce48" name="a7d384fb87bd71ccdc5ee53673685ce48"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>buildCopiers</b> ()</td></tr>
 <tr class="memdesc:a7d384fb87bd71ccdc5ee53673685ce48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build copiers for copying between realms. <br /></td></tr>
@@ -2807,7 +2816,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a69e4f0db7383a8a926a9bcb59defb67e" name="a69e4f0db7383a8a926a9bcb59defb67e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a69e4f0db7383a8a926a9bcb59defb67e">&#9670;&#160;</a></span>buildGrids()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a69e4f0db7383a8a926a9bcb59defb67e">&#9670;&#160;</a></span>buildGrids() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2856,6 +2865,51 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <p>This will call the specified grid generation method and fill m_grids with the new grids. </p>
+
+</div>
+</div>
+<a id="aa39b0efcbb152eeb690f5ac96c86ab6f" name="aa39b0efcbb152eeb690f5ac96c86ab6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa39b0efcbb152eeb690f5ac96c86ab6f">&#9670;&#160;</a></span>buildGrids() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::buildGrids </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Vector&lt; Box &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build new internal AMR grids from given boxes. </p>
+<p>Sets m_finestLevel from the boxes and fills m_grids with them, load balanced as the generated grids are. See regridAmr(Vector&lt;Vector&lt;Box&gt;&gt;, int) for the meaning of a_boxes. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Boxes per level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level which changes. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -3781,6 +3835,51 @@ template&lt;typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be deleted. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aab280a996a9b56dec364cea5276dab6a" name="aab280a996a9b56dec364cea5276dab6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab280a996a9b56dec364cea5276dab6a">&#9670;&#160;</a></span>defineGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::defineGrids </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; Vector&lt; Box &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Load balance new boxes and define m_grids from them, for levels a_lmin through m_finestLevel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_boxes</td><td>Boxes per level, up to at least m_finestLevel; sorted in place. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level which changes; grids below it are kept. </td></tr>
   </table>
   </dd>
 </dl>
@@ -8320,7 +8419,7 @@ Run-time errors will occur if the mask or realm do not exist. </dd></dl>
 </div>
 </div>
 <a id="a9a8897dc00f6ac738080aba2ec29ad7a" name="a9a8897dc00f6ac738080aba2ec29ad7a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a8897dc00f6ac738080aba2ec29ad7a">&#9670;&#160;</a></span>regridAmr()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a8897dc00f6ac738080aba2ec29ad7a">&#9670;&#160;</a></span>regridAmr() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -8357,6 +8456,43 @@ Run-time errors will occur if the mask or realm do not exist. </dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_tags</td><td>Cell tags which will generate the grid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level allowed to change. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_hardcap</td><td>Grid generation hardcap. If &lt; 0 there are no limitations to grid depth. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab1b09b50021e75430449ea2679c4b2f2" name="ab1b09b50021e75430449ea2679c4b2f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1b09b50021e75430449ea2679c4b2f2">&#9670;&#160;</a></span>regridAmr() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::regridAmr </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Vector&lt; Box &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than generated. </p>
+<p>a_boxes[lvl] are the boxes on level lvl; level 0 is ignored and always the domain split of the coarsest domain. The finest level is the last level with boxes, capped by the AMR and simulation depths. The boxes must be disjoint on each level and properly nested; nothing here checks that. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Boxes per level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level allowed to change. </td></tr>
   </table>
   </dd>
 </dl>

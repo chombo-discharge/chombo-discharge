@@ -182,6 +182,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>gridReport</b> ()</td
 <tr class="memitem:a9b71898d8e6985fbdbaaa763644bc23a" id="r_a9b71898d8e6985fbdbaaa763644bc23a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a9b71898d8e6985fbdbaaa763644bc23a">setCellTagger</a> (const RefCountedPtr&lt; <a class="el" href="classCellTagger.html">CellTagger</a> &gt; &amp;a_cellTagger)</td></tr>
 <tr class="memdesc:a9b71898d8e6985fbdbaaa763644bc23a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the cell tagger.  <br /></td></tr>
 <tr class="separator:a9b71898d8e6985fbdbaaa763644bc23a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10aab744fca239068645ce1f3dfc86f4" id="r_a10aab744fca239068645ce1f3dfc86f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a10aab744fca239068645ce1f3dfc86f4">buildGeometryGrids</a> (const ProblemDomain &amp;a_startDomain)</td></tr>
+<tr class="memdesc:a10aab744fca239068645ce1f3dfc86f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grids the index space is generated over, from the start domain to the finest domain.  <br /></td></tr>
+<tr class="separator:a10aab744fca239068645ce1f3dfc86f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5dde2c781e9ab4664d4a423ef9c0faba" id="r_a5dde2c781e9ab4664d4a423ef9c0faba"><td class="memItemLeft" align="right" valign="top">Vector&lt; Vector&lt; Box &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a5dde2c781e9ab4664d4a423ef9c0faba">getGeometryGrids</a> () const</td></tr>
+<tr class="memdesc:a5dde2c781e9ab4664d4a423ef9c0faba"><td class="mdescLeft">&#160;</td><td class="mdescRight">The grids <a class="el" href="classComputationalGeometry.html#a04a16d705cfb9c23315df1f48de28f6a" title="Build the grids the index space is generated over.">ComputationalGeometry::makeGrids</a> built, per AMR level.  <br /></td></tr>
+<tr class="separator:a5dde2c781e9ab4664d4a423ef9c0faba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3200bfb2c8b2811bba7589afd877ef3a" id="r_a3200bfb2c8b2811bba7589afd877ef3a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDriver.html#a3200bfb2c8b2811bba7589afd877ef3a">setupFresh</a> (const int a_initialRegrids)</td></tr>
 <tr class="memdesc:a3200bfb2c8b2811bba7589afd877ef3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function for fresh (non-restart) simulations.  <br /></td></tr>
 <tr class="separator:a3200bfb2c8b2811bba7589afd877ef3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -545,6 +551,40 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotLevelset</b></t
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a10aab744fca239068645ce1f3dfc86f4" name="a10aab744fca239068645ce1f3dfc86f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10aab744fca239068645ce1f3dfc86f4">&#9670;&#160;</a></span>buildGeometryGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Driver::buildGeometryGrids </td>
+          <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_startDomain</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the grids the index space is generated over, from the start domain to the finest domain. </p>
+<p>Hands <a class="el" href="classComputationalGeometry.html#a04a16d705cfb9c23315df1f48de28f6a" title="Build the grids the index space is generated over.">ComputationalGeometry::makeGrids</a> the start domain and its spacing, the domain on level max_amr_depth as the stop domain, and the simulation's EB ghost count and refinement angle. Runs before the geometry is built, since the generators read the grids it makes. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_startDomain</td><td>Coarsest domain built whole; the same domain the scan-based generators begin on. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a0c822e790df55582389fc5c4a814e8d7" name="a0c822e790df55582389fc5c4a814e8d7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0c822e790df55582389fc5c4a814e8d7">&#9670;&#160;</a></span>cacheTags()</h2>
 
@@ -794,6 +834,34 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_plotLevelset</b></t
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Finest AMR level with at least one tagged cell. </dd></dl>
+
+</div>
+</div>
+<a id="a5dde2c781e9ab4664d4a423ef9c0faba" name="a5dde2c781e9ab4664d4a423ef9c0faba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5dde2c781e9ab4664d4a423ef9c0faba">&#9670;&#160;</a></span>getGeometryGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; Vector&lt; Box &gt; &gt; Driver::getGeometryGrids </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The grids <a class="el" href="classComputationalGeometry.html#a04a16d705cfb9c23315df1f48de28f6a" title="Build the grids the index space is generated over.">ComputationalGeometry::makeGrids</a> built, per AMR level. </p>
+<p>Level lvl holds the geometry's cut tiles on the AMR domain of that level, found through <a class="el" href="classComputationalGeometry.html#a35f3b9a6288e94f027ce7f96e5bd69fd" title="Level of a domain among the levels makeGrids built.">ComputationalGeometry::getLevel</a>, or the whole domain split as <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> splits its coarsest level when that domain is at or below the geometry's start level (Driver.geometry_scan_level above zero). Level 0 is left empty, <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> always splits the coarsest domain itself. The levels the geometry did not reach are empty, and <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> stops at the first empty level. </p><dl class="section return"><dt>Returns</dt><dd>Boxes per AMR level, 1 + max_amr_depth entries. </dd></dl>
 
 </div>
 </div>

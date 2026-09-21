@@ -165,12 +165,12 @@ The default implementation is an empty geometry, i.e., a geometry without any so
 Several pre-defined geometries are included in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Geometries</span></code>.</p>
 <p>Making a non-empty <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class requires that you inherit from <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> and instantiate the class members specified in <a class="reference internal" href="#computationalgeometrymembers"><span class="std std-numref">Listing 2</span></a>.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
-<span id="computationalgeometrymembers"></span><div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">List of all data member of the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> base class. Highlighted members must be instantiated by the user in order to create a new geometry.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<span id="computationalgeometrymembers"></span><div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">Data members of the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> base class that describe the geometry. Highlighted members must be instantiated by the user in order to create a new geometry.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
 <span class="cm"> * @brief Threshold for Vof computation</span>
 <span class="cm"> */</span>
-<span class="hll"><span class="k">constexpr</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">s_thresh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.</span><span class="n">E</span><span class="mi">-15</span><span class="p">;</span>
-</span>
+<span class="k">constexpr</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">s_thresh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.</span><span class="n">E</span><span class="mi">-15</span><span class="p">;</span>
+
 <span class="cm">/**</span>
 <span class="cm"> * @brief Whether a cut cell whose body will not close stops the run.</span>
 <span class="cm"> * @details Loud by choice while the polyhedral generator is being developed: a cell it cannot</span>
@@ -181,21 +181,11 @@ Several pre-defined geometries are included in <code class="file docutils litera
 <span class="k">constexpr</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">s_strictGeometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * @brief Multifluid index spaces</span>
-<span class="cm"> */</span>
-<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">MultiFluidIndexSpace</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_multifluidIndexSpace</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * @brief Background permittivity</span>
-<span class="cm"> */</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
-<span class="hll">
-</span><span class="cm">/**</span>
 <span class="cm"> * @brief Which generator to build the geometry with.</span>
 <span class="cm"> * @details Each enumerator names the class that the geometry is generated with.</span>
 <span class="cm"> */</span>
-<span class="hll"><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Generator</span>
-</span><span class="p">{</span>
+<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Generator</span>
+<span class="p">{</span>
 <span class="w">  </span><span class="n">GeometryShop</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ScanShop</span><span class="p">,</span>
 <span class="w">  </span><span class="n">PolyhedralShop</span>
@@ -205,7 +195,47 @@ Several pre-defined geometries are included in <code class="file docutils litera
 <span class="cm"> * @brief Generator selected by the user.</span>
 <span class="cm"> */</span>
 <span class="n">Generator</span><span class="w"> </span><span class="n">m_generator</span><span class="p">;</span>
-</pre></div>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Multifluid index spaces</span>
+<span class="cm"> */</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">MultiFluidIndexSpace</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_multifluidIndexSpace</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief The gas-phase implicit function (i.e. outside electrodes and dielectrics).</span>
+<span class="cm"> */</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionGas</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief The solid-phase implicit function (i.e. the inside of the dielectrics).</span>
+<span class="cm"> */</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionSolid</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief List of dielectrics</span>
+<span class="cm"> */</span>
+<span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span>
+</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief List of electrodes</span>
+<span class="cm"> */</span>
+<span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span>
+</span>
+<span class="cm">/**</span>
+<span class="cm"> * @brief Grid level where we begin using ScanShop</span>
+<span class="cm"> */</span>
+<span class="n">ProblemDomain</span><span class="w"> </span><span class="n">m_scanDomain</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Lower-left corner of the domain.</span>
+<span class="cm"> */</span>
+<span class="n">RealVect</span><span class="w"> </span><span class="n">m_probLo</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * @brief Background permittivity</span>
+<span class="cm"> */</span>
+<span class="hll"><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
+</span></pre></div>
 </div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">m_eps0</span></code> is the <em>relative gas permittivity</em> (which is virtually always 1), <code class="docutils literal notranslate"><span class="pre">m_electrodes</span></code> are the electrodes for the geometry and <code class="docutils literal notranslate"><span class="pre">m_dielectrics</span></code> are the dielectrics for the geometry.
