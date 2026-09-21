@@ -24,6 +24,7 @@
 #include <CD_ScanShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_CutCellSurface.H>
+#include <CD_PolyhedralEBGraph.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
 
@@ -122,6 +123,24 @@ public:
    */
   void
   setGrids(const ComputationalGeometry& a_compGeom, const phase::which_phase a_phase) noexcept;
+
+  /**
+   * @brief Build the graph of every tiled level: the cut cells, their surfaces, and what every face opens onto.
+   * @details One PolyhedralEBGraph per level above the geometry's start level, over that level's cut tiles, each
+   * defined from this phase's implicit function and then linked to the level above it so that the coarse side of
+   * every level boundary knows which of its cells and faces the finer level describes. The levels at and below
+   * the start level carry no graph. Collective. Requires setGrids.
+   */
+  void
+  buildGraphs();
+
+  /**
+   * @brief The graph of a level, undefined at and below the start level and before buildGraphs.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The graph.
+   */
+  const PolyhedralEBGraph&
+  getGraph(const int a_level) const noexcept;
 
   /**
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
@@ -308,6 +327,11 @@ protected:
    * @brief The geometry whose grids the polyhedra are built over, or null before setGrids.
    */
   const ComputationalGeometry* m_compGeom;
+
+  /**
+   * @brief Graph of every level, indexed as the geometry indexes its levels; undefined where a level has no tiles.
+   */
+  Vector<RefCountedPtr<PolyhedralEBGraph>> m_graphs;
 
   /**
    * @brief Phase this generator serves on those grids.

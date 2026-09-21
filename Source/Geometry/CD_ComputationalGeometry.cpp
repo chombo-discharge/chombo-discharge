@@ -1450,6 +1450,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
     shop->setGrids(*this, phase::gas);
+    shop->buildGraphs();
     shop->verifySurface();
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -1504,6 +1505,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
 
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
       shop->setGrids(*this, phase::solid);
+      shop->buildGraphs();
       shop->verifySurface();
 
       a_geoserver = static_cast<GeometryService*>(shop);

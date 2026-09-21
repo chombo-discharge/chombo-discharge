@@ -67,6 +67,27 @@ public:
   hasCrossing(const int a_edge) const noexcept;
 
   /**
+   * @brief Number of bytes the surface occupies in a linear buffer, as Chombo's containers ask of their payload.
+   * @return sizeof the crossings and the corners together.
+   */
+  inline int
+  linearSize() const noexcept;
+
+  /**
+   * @brief Write the surface into a linear buffer, as Chombo's containers ask of their payload.
+   * @param[out] a_buffer Buffer of at least linearSize() bytes.
+   */
+  inline void
+  linearOut(void* a_buffer) const noexcept;
+
+  /**
+   * @brief Read the surface from a linear buffer written by linearOut.
+   * @param[in] a_buffer Buffer written by linearOut.
+   */
+  inline void
+  linearIn(const void* a_buffer) noexcept;
+
+  /**
    * @brief Position along an edge where the implicit function changes sign.
    * @details Parameterised from the edge's low corner, so that both cells sharing the edge read
    * the same value. Only meaningful where hasCrossing is true.

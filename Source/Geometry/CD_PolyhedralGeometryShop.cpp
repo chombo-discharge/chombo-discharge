@@ -75,6 +75,67 @@ PolyhedralGeometryShop::setGrids(const ComputationalGeometry& a_compGeom, const 
 }
 
 void
+PolyhedralGeometryShop::buildGraphs()
+{
+  CH_TIME("PolyhedralGeometryShop::buildGraphs");
+
+  if (m_compGeom == nullptr) {
+    MayDay::Error("PolyhedralGeometryShop::buildGraphs - setGrids has not been called");
+  }
+
+  const int numLevels  = m_compGeom->getNumGridLevels();
+  const int startLevel = m_compGeom->getStartLevel();
+
+  m_graphs.resize(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    m_graphs[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
+  }
+
+  Timer timer("PolyhedralGeometryShop::buildGraphs (" + std::string((m_phase == phase::gas) ? "gas" : "solid") + ")");
+
+  // Each tiled level on its own, from this phase's implicit function.
+  for (int lvl = startLevel + 1; lvl < numLevels; lvl++) {
+    const Vector<Box>& tiles = m_compGeom->getCutTiles(lvl);
+
+    if (tiles.size() == 0) {
+      continue;
+    }
+
+    timer.startEvent("Define level " + std::to_string(lvl));
+    m_graphs[lvl]->define(*m_baseIF,
+                          tiles,
+                          m_compGeom->getDomain(lvl),
+                          m_probLo,
+                          m_compGeom->getDx(lvl),
+                          m_ebGhost,
+                          m_volumeThreshold);
+    timer.stopEvent("Define level " + std::to_string(lvl));
+  }
+
+  // Then every level to the one above it, so the coarse side of each level boundary knows the fine side.
+  for (int lvl = startLevel + 1; lvl + 1 < numLevels; lvl++) {
+    if (!m_graphs[lvl]->isDefined() || !m_graphs[lvl + 1]->isDefined()) {
+      continue;
+    }
+
+    timer.startEvent("Link levels " + std::to_string(lvl) + "/" + std::to_string(lvl + 1));
+    PolyhedralEBGraph::link(*m_graphs[lvl], *m_graphs[lvl + 1]);
+    timer.stopEvent("Link levels " + std::to_string(lvl) + "/" + std::to_string(lvl + 1));
+  }
+
+  if (m_profile) {
+    timer.eventReport(pout(), false);
+  }
+}
+
+const PolyhedralEBGraph&
+PolyhedralGeometryShop::getGraph(const int a_level) const noexcept
+{
+  return *m_graphs[a_level];
+}
+
+void
 PolyhedralGeometryShop::verifySurface() const
 {
   CH_TIME("PolyhedralGeometryShop::verifySurface");

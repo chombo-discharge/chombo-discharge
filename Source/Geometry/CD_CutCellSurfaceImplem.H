@@ -13,6 +13,9 @@
 #ifndef CD_CUTCELLSURFACEIMPLEM_H
 #define CD_CUTCELLSURFACEIMPLEM_H
 
+// Std includes
+#include <cstring>
+
 // Our includes
 #include <CD_CutCellSurface.H>
 #include <CD_NamespaceHeader.H>
@@ -34,6 +37,30 @@ inline bool
 CutCellSurface::hasCrossing(const int a_edge) const noexcept
 {
   return m_crossing[a_edge] != s_noCrossing;
+}
+
+inline int
+CutCellSurface::linearSize() const noexcept
+{
+  return static_cast<int>(sizeof(m_crossing) + sizeof(m_corner));
+}
+
+inline void
+CutCellSurface::linearOut(void* a_buffer) const noexcept
+{
+  char* buffer = static_cast<char*>(a_buffer);
+
+  std::memcpy(buffer, m_crossing, sizeof(m_crossing));
+  std::memcpy(buffer + sizeof(m_crossing), m_corner, sizeof(m_corner));
+}
+
+inline void
+CutCellSurface::linearIn(const void* a_buffer) noexcept
+{
+  const char* buffer = static_cast<const char*>(a_buffer);
+
+  std::memcpy(m_crossing, buffer, sizeof(m_crossing));
+  std::memcpy(m_corner, buffer + sizeof(m_crossing), sizeof(m_corner));
 }
 
 } // namespace PolyhedralEB
