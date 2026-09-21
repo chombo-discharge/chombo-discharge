@@ -876,10 +876,42 @@ PolyhedralGeometryShop::testGraphCopy() const
 
   timer.stopEvent("Copy onto octants");
 
+  // linked to one another as the originals were, which is what sets the refined masks and the seam faces
+  timer.startEvent("Link the copies");
+
+  for (int lvl = 0; lvl + 1 < copies.size(); lvl++) {
+    if (copies[lvl]->isDefined() && copies[lvl + 1]->isDefined()) {
+      PolyhedralEBGraph::link(*copies[lvl], *copies[lvl + 1]);
+    }
+  }
+
+  timer.stopEvent("Link the copies");
+
   // the copies must be a closed surface, and copied back they must be the originals
   timer.startEvent("Check the copies");
   this->sanityCheck(copies);
   timer.stopEvent("Check the copies");
+
+  // back onto the original layouts, linked again, and compared level by level
+  Vector<RefCountedPtr<PolyhedralEBGraph>> back(m_graphs.size());
+
+  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
+    back[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
+
+    if (!m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    timer.startEvent("Copy back, level " + std::to_string(lvl));
+    back[lvl]->define(*copies[lvl], m_graphs[lvl]->getGrids(), *m_baseIF);
+    timer.stopEvent("Copy back, level " + std::to_string(lvl));
+  }
+
+  for (int lvl = 0; lvl + 1 < back.size(); lvl++) {
+    if (back[lvl]->isDefined() && back[lvl + 1]->isDefined()) {
+      PolyhedralEBGraph::link(*back[lvl], *back[lvl + 1]);
+    }
+  }
 
   for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
     const PolyhedralEBGraph& graph = *m_graphs[lvl];
@@ -888,14 +920,8 @@ PolyhedralGeometryShop::testGraphCopy() const
       continue;
     }
 
-    PolyhedralEBGraph back;
-
-    timer.startEvent("Copy back, level " + std::to_string(lvl));
-    back.define(*copies[lvl], graph.getGrids(), *m_baseIF);
-    timer.stopEvent("Copy back, level " + std::to_string(lvl));
-
     timer.startEvent("Compare, level " + std::to_string(lvl));
-    const bool same = back.equals(graph);
+    const bool same = back[lvl]->equals(graph);
     timer.stopEvent("Compare, level " + std::to_string(lvl));
 
     if (!same) {

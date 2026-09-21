@@ -343,10 +343,13 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
 
   a_source.m_cellStates.copyTo(Interval(0, 0), m_cellStates, Interval(0, 0), copier);
   a_source.m_faceStates.copyTo(Interval(0, 2 * SpaceDim - 1), m_faceStates, Interval(0, 2 * SpaceDim - 1), copier);
-  a_source.m_refined.copyTo(Interval(0, 0), m_refined, Interval(0, 0), copier);
 
   m_cellStates.exchange();
-  m_refined.exchange();
+
+  // The refined mask is not copied: it reaches into ghost cells no tile of this level carries, which an
+  // exchange cannot fill, and it is derived from the finer level in any case. The copy is linked to its finer
+  // level afterwards, as the original was, which sets the mask and the faces the finer level describes; a face
+  // state copied as finer stays finer, since link only ever marks faces.
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box box = m_grids[dit()];

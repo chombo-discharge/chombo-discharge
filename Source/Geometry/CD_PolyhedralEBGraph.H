@@ -124,10 +124,11 @@ public:
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
-   * @details The other graph's cell states, face states, refined mask and surfaces are copied onto the new
-   * layout's valid cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries
-   * are classified from the implicit function by their corners, as define classifies them. The new layout must
-   * cover the same cells as the other graph's, since the surfaces of the cut cells come from it alone.
+   * @details The other graph's cell states, face states and surfaces are copied onto the new layout's valid
+   * cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified
+   * from the implicit function by their corners, as define classifies them. The new layout must cover the same
+   * cells as the other graph's, since the surfaces of the cut cells come from it alone. The refined mask is not
+   * copied: it is the finer level's to set, so link the copy to its finer level afterwards as the original was.
    * Collective.
    * @param[in] a_source   Graph to copy from.
    * @param[in] a_grids    Layout to copy onto, covering the same cells as a_source's.
