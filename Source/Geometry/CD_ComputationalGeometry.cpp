@@ -1005,6 +1005,11 @@ ComputationalGeometry::latticeTable(const int a_level) const
     pout() << "ComputationalGeometry::latticeTable" << endl;
   }
 
+  // Every box of a whole level starts on the m_maxBlockSize lattice whether or not the domain is a multiple of
+  // it: Chombo's domainSplit chops through breakBoxes, which cuts a box at smallEnd + maxBoxSize and recurses,
+  // so a short remainder is always the last box in a direction and never the first; with a block factor the
+  // domain is coarsened by it first, and makeGrids requires m_maxBlockSize to be a multiple of m_minBlockSize.
+  // The checks below therefore guard a property of domainSplit rather than one this class establishes.
   const Box& domain = m_domains[a_level].domainBox();
 
   IntVect dims;
