@@ -863,11 +863,15 @@ PolyhedralGeometryShop::testGraphCopy() const
       ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
     }
 
+    timer.startEvent("Octant layout, level " + std::to_string(lvl));
     DisjointBoxLayout shuffled(pieces, ranks, graph.getDomain());
 
     shuffled.close();
+    timer.stopEvent("Octant layout, level " + std::to_string(lvl));
 
+    timer.startEvent("Copy, level " + std::to_string(lvl));
     copies[lvl]->define(graph, shuffled, *m_baseIF);
+    timer.stopEvent("Copy, level " + std::to_string(lvl));
   }
 
   timer.stopEvent("Copy onto octants");
