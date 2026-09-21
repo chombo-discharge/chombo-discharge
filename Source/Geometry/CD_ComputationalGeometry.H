@@ -228,7 +228,8 @@ public:
 
   /**
    * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what
-   * a simulation grid on the level is made of. Empty on the start level and below, which are whole.
+   * a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below
+   * it.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The cut tiles.
    */

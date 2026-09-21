@@ -94,8 +94,8 @@ PolyhedralGeometryShop::buildGraphs()
 
   Timer timer("PolyhedralGeometryShop::buildGraphs (" + std::string((m_phase == phase::gas) ? "gas" : "solid") + ")");
 
-  // Each tiled level on its own, from this phase's implicit function.
-  for (int lvl = startLevel + 1; lvl < numLevels; lvl++) {
+  // Each level with cut tiles on its own, from this phase's implicit function.
+  for (int lvl = startLevel; lvl < numLevels; lvl++) {
     const Vector<Box>& tiles = m_compGeom->getCutTiles(lvl);
 
     if (tiles.size() == 0) {
@@ -114,7 +114,7 @@ PolyhedralGeometryShop::buildGraphs()
   }
 
   // Then every level to the one above it, so the coarse side of each level boundary knows the fine side.
-  for (int lvl = startLevel + 1; lvl + 1 < numLevels; lvl++) {
+  for (int lvl = startLevel; lvl + 1 < numLevels; lvl++) {
     if (!m_graphs[lvl]->isDefined() || !m_graphs[lvl + 1]->isDefined()) {
       continue;
     }
@@ -230,59 +230,41 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
 
+  // The levels below the start level have no graph and no cut cell of their own to write: the start level covers
+  // them whole.
+  if (a_level >= m_graphs.size() || !m_graphs[a_level]->isDefined()) {
+    return;
+  }
+
   const BaseIF& f = *m_baseIF;
 
-  const ComputationalGeometry& compGeom = *m_compGeom;
+  const PolyhedralEBGraph& graph = *m_graphs[a_level];
 
   {
     const int  lvl    = a_level;
-    const int  finest = compGeom.getNumGridLevels() - 1;
-    const Real dx     = compGeom.getDx(lvl);
-    const Box& domain = compGeom.getDomain(lvl).domainBox();
+    const Real dx     = graph.getDx();
+    const Box& domain = graph.getDomain().domainBox();
 
-    const Vector<Box>&                    boxes = compGeom.getBoxes(lvl);
-    const Vector<GeometryService::InOut>& types = compGeom.getTypes(m_phase, lvl);
+    const DisjointBoxLayout&                 grids    = graph.getGrids();
+    const LayoutData<IntVectSet>&            cutCells = graph.getCutCells();
+    const LevelData<IVSFAB<CutCellSurface>>& surfaces = graph.getSurfaces();
+    const LevelData<BaseFab<int>>&           refined  = graph.getRefinedMask();
 
-    // The cells the next finer level carries, on this level's index space. A cell among them is written from
-    // the finer level; a cell next to one of them is on the level boundary and has that face restricted.
-    TreeIntVectSet covered;
+    // Every cut cell of this rank's tiles that the finer level does not carry, from the surface the graph holds.
+    // A face onto a cell the finer level carries is on the level boundary and is restricted.
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const IntVectSet&             cut        = cutCells[dit()];
+      const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
+      const BaseFab<int>&           refinedFab = refined[dit()];
 
-    if (lvl < finest) {
-      const Vector<Box>& finerBoxes = compGeom.getBoxes(lvl + 1);
+      for (IVSIterator ivsit(cut); ivsit.ok(); ++ivsit) {
+        const IntVect iv = ivsit();
 
-      for (int j = 0; j < finerBoxes.size(); j++) {
-        covered |= coarsen(finerBoxes[j], 2);
-      }
-    }
-
-    for (int i = procID(); i < boxes.size(); i += numProc()) {
-      if (types[i] != GeometryService::Irregular) {
-        continue;
-      }
-
-      // node values once per node and each crossed edge bisected once, shared by the cells of the box
-      BaseFab<Real> nodeValues;
-      BaseFab<Real> intercept[SpaceDim];
-
-      PolyhedralGeometryShop::fillNodeValues(f, nodeValues, boxes[i], m_probLo, dx);
-      PolyhedralGeometryShop::defineIntercepts(intercept, boxes[i]);
-
-      for (BoxIterator bit(boxes[i]); bit.ok(); ++bit) {
-        const IntVect iv = bit();
-
-        if (covered.contains(iv)) {
+        if (refinedFab(iv, 0) != 0) {
           continue;
         }
 
-        CutCellSurface surface;
-
-        PolyhedralGeometryShop::buildSurface(f, intercept, surface, nodeValues, iv, m_probLo, dx);
-
-        const CutCellBody::Kind kind = CutCellBody::classify(surface);
-
-        if (kind != CutCellBody::Kind::Cut) {
-          continue;
-        }
+        const CutCellSurface& surface = stored(iv, 0);
 
         CutCellBody body;
 
@@ -291,16 +273,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
                  << endl;
 
           MayDay::Error("PolyhedralGeometryShop::collectFacets - a cut cell's body did not close");
-        }
-
-        // the same thresholds the graph applies: too little fluid is a covered cell, too little solid a
-        // regular one, and neither has a surface to write
-        if (m_volumeThreshold > 0.0 && body.volumeFraction() < m_volumeThreshold) {
-          continue;
-        }
-
-        if (PolyhedralGeometryShop::isDust(body, m_volumeThreshold)) {
-          continue;
         }
 
 #if CH_SPACEDIM == 3
@@ -317,7 +289,7 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
           for (int side = 0; side < 2; side++) {
             const IntVect neighbour = iv + (2 * side - 1) * BASISV(dir);
 
-            if (!domain.contains(neighbour) || !covered.contains(neighbour)) {
+            if (!domain.contains(neighbour) || refinedFab(neighbour, 0) == 0) {
               continue;
             }
 

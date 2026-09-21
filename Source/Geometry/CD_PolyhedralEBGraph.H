@@ -184,7 +184,8 @@ public:
   getFaceStates() const noexcept;
 
   /**
-   * @brief Whether the finer level carries a cell, one where it does; all zero until link has run.
+   * @brief Whether the finer level carries a cell, one where it does, with one ghost cell; all zero until link has
+   * run.
    * @return One component per cell.
    */
   const LevelData<BaseFab<int>>&

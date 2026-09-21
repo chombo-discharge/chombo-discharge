@@ -86,7 +86,7 @@ PolyhedralEBGraph::defineGrids(const Vector<Box>& a_cutTiles)
   m_cutCells.define(m_grids);
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
-  m_refined.define(m_grids, 1, IntVect::Zero);
+  m_refined.define(m_grids, 1, IntVect::Unit);
 }
 
 void
@@ -335,10 +335,11 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
     BaseFab<int>& refined = a_coarse.m_refined[dit()];
     BaseFab<int>& faces   = a_coarse.m_faceStates[dit()];
 
+    // the mask keeps one ghost cell, so a box knows whether its neighbours' cells are refined as well
+    refined.copy(marker, grow(box, 1) & domainBox);
+
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
-
-      refined(iv, 0) = marker(iv, 0);
 
       if (marker(iv, 0) != 0) {
         continue;

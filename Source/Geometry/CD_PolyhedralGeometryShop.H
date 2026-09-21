@@ -126,16 +126,16 @@ public:
 
   /**
    * @brief Build the graph of every tiled level: the cut cells, their surfaces, and what every face opens onto.
-   * @details One PolyhedralEBGraph per level above the geometry's start level, over that level's cut tiles, each
+   * @details One PolyhedralEBGraph per level from the geometry's start level up, over that level's cut tiles, each
    * defined from this phase's implicit function and then linked to the level above it so that the coarse side of
-   * every level boundary knows which of its cells and faces the finer level describes. The levels at and below
-   * the start level carry no graph. Collective. Requires setGrids.
+   * every level boundary knows which of its cells and faces the finer level describes. The levels below the start
+   * level carry no graph. Collective. Requires setGrids.
    */
   void
   buildGraphs();
 
   /**
-   * @brief The graph of a level, undefined at and below the start level and before buildGraphs.
+   * @brief The graph of a level, undefined below the start level and before buildGraphs.
    * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
    * @return The graph.
    */

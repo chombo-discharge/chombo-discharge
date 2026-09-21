@@ -496,6 +496,16 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->buildCoarserLevels();
   timer.stopEvent("Coarser levels");
 
+  // The start level is whole and not tiled, but its boxes irregular in either phase are its cut tiles all the
+  // same: super-tiles by construction, and where the level's cut cells are. Taken after the push-down, which can
+  // make a start-level box irregular for what the tiles above it hold.
+  for (int i = 0; i < m_boxes[m_startLevel].size(); i++) {
+    if (m_gasTypes[m_startLevel][i] == GeometryService::Irregular ||
+        m_solidTypes[m_startLevel][i] == GeometryService::Irregular) {
+      m_cutTiles[m_startLevel].push_back(m_boxes[m_startLevel][i]);
+    }
+  }
+
   if (m_profile) {
     this->reportGrids();
 
