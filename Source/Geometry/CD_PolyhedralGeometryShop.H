@@ -167,6 +167,16 @@ public:
   sanityCheck() const;
 
   /**
+   * @brief Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, run
+   *        sanityCheck over the copies, copy them back onto the original layouts and require equality bit for bit.
+   * @details A stand-in, until the index space is generated over the graphs, for what a consumer on another
+   * layout does: take the graph's data through a Copier and read it there. Switched by
+   * PolyhedralGeometryShop.test_copy. Collective. Requires buildGraphs.
+   */
+  void
+  testGraphCopy() const;
+
+  /**
    * @brief Whether a cut body holds too little solid to be a cut cell.
    * @details The counterpart, on the fluid side, of dropping a body whose fluid volume is below the threshold: a body
    * with neither solid volume nor boundary area is a regular cell. A cell whose interface lies in one of its
@@ -354,6 +364,12 @@ protected:
   bool m_profile;
 
   /**
+   * @brief Whether verifySurface copies every graph onto a shuffled octant layout and checks it there as well.
+   * PolyhedralGeometryShop.test_copy, off by default.
+   */
+  bool m_testCopy;
+
+  /**
    * @brief Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.
    * @details Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has
    * that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface).
@@ -364,6 +380,13 @@ protected:
    */
   void
   collectFacets(Vector<Real>& a_facets, const int a_level) const;
+
+  /**
+   * @brief The closure check over a given set of graphs, one per level as m_graphs holds them.
+   * @param[in] a_graphs Graphs, undefined entries skipped.
+   */
+  void
+  sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const;
 
 #if CH_SPACEDIM == 3
   /**

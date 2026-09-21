@@ -20,6 +20,7 @@
 #include <vector>
 
 // Chombo includes
+#include <BRMeshRefine.H>
 #include <BoxIterator.H>
 #include <CH_assert.H>
 #include <IntVectSet.H>
@@ -59,6 +60,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_writeSTL        = false;
   m_sanityCheck     = true;
   m_profile         = false;
+  m_testCopy        = false;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
@@ -66,6 +68,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   pp.query("write_stl", m_writeSTL);
   pp.query("sanity_check", m_sanityCheck);
   pp.query("profile", m_profile);
+  pp.query("test_copy", m_testCopy);
 }
 
 void
@@ -151,7 +154,7 @@ PolyhedralGeometryShop::verifySurface() const
     return;
   }
 
-  if (!m_sanityCheck && !m_writeSTL) {
+  if (!m_sanityCheck && !m_writeSTL && !m_testCopy) {
     return;
   }
 
@@ -165,6 +168,12 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Sanity check");
     this->sanityCheck();
     timer.stopEvent("Sanity check");
+  }
+
+  if (m_testCopy) {
+    timer.startEvent("Copy test");
+    this->testGraphCopy();
+    timer.stopEvent("Copy test");
   }
 
   if (m_writeSTL) {
@@ -538,6 +547,14 @@ PolyhedralGeometryShop::sanityCheck() const
 {
   CH_TIME("PolyhedralGeometryShop::sanityCheck");
 
+  this->sanityCheck(m_graphs);
+}
+
+void
+PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const
+{
+  CH_TIME("PolyhedralGeometryShop::sanityCheck(graphs)");
+
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
 
@@ -554,8 +571,8 @@ PolyhedralGeometryShop::sanityCheck() const
   // Vertices are welded onto a lattice a small fraction of the finest spacing wide.
   int finest = -1;
 
-  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
-    if (m_graphs[lvl]->isDefined()) {
+  for (int lvl = 0; lvl < a_graphs.size(); lvl++) {
+    if (a_graphs[lvl]->isDefined()) {
       finest = lvl;
     }
   }
@@ -564,7 +581,7 @@ PolyhedralGeometryShop::sanityCheck() const
     return;
   }
 
-  const Real spacing = s_weldSpacing * m_graphs[finest]->getDx();
+  const Real spacing = s_weldSpacing * a_graphs[finest]->getDx();
 
   auto weld = [&](const Real* a_x) -> std::array<long long, 3> {
     std::array<long long, 3> key = {0, 0, 0};
@@ -604,8 +621,8 @@ PolyhedralGeometryShop::sanityCheck() const
     }
   };
 
-  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
-    const PolyhedralEBGraph& graph = *m_graphs[lvl];
+  for (int lvl = 0; lvl < a_graphs.size(); lvl++) {
+    const PolyhedralEBGraph& graph = *a_graphs[lvl];
 
     if (!graph.isDefined()) {
       continue;
@@ -798,6 +815,101 @@ PolyhedralGeometryShop::sanityCheck() const
 
   if (totalOpen > 0 || totalOverused > 0) {
     MayDay::Error("PolyhedralGeometryShop::sanityCheck - the interface is not closed away from the domain boundary");
+  }
+}
+
+void
+PolyhedralGeometryShop::testGraphCopy() const
+{
+  CH_TIME("PolyhedralGeometryShop::testGraphCopy");
+
+  Timer timer("PolyhedralGeometryShop::testGraphCopy");
+
+  Vector<RefCountedPtr<PolyhedralEBGraph>> copies(m_graphs.size());
+
+  timer.startEvent("Copy onto octants");
+
+  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
+    copies[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
+
+    const PolyhedralEBGraph& graph = *m_graphs[lvl];
+
+    if (!graph.isDefined()) {
+      continue;
+    }
+
+    // Every tile of the level split into its octants, the pieces given ranks that walk the rank list with a
+    // stride coprime to its length so that a tile's pieces land on different ranks and no rank keeps what it
+    // had. The layout covers the same cells as the graph's, which is what the copy needs.
+    const DisjointBoxLayout& grids = graph.getGrids();
+
+    Vector<Box> pieces;
+
+    for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
+      const Box tile = grids[lit()];
+
+      Vector<Box> split;
+
+      domainSplit(tile, split, std::max(1, tile.shortside() / 2), 1);
+
+      pieces.append(split);
+    }
+
+    const int stride = (numProc() > 1) ? (numProc() / 2 + 1) : 1;
+
+    Vector<int> ranks(pieces.size());
+
+    for (int i = 0; i < pieces.size(); i++) {
+      ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
+    }
+
+    DisjointBoxLayout shuffled(pieces, ranks, graph.getDomain());
+
+    shuffled.close();
+
+    copies[lvl]->define(graph, shuffled, *m_baseIF);
+  }
+
+  timer.stopEvent("Copy onto octants");
+
+  // the copies must be a closed surface, and copied back they must be the originals
+  timer.startEvent("Check the copies");
+  this->sanityCheck(copies);
+  timer.stopEvent("Check the copies");
+
+  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
+    const PolyhedralEBGraph& graph = *m_graphs[lvl];
+
+    if (!graph.isDefined()) {
+      continue;
+    }
+
+    PolyhedralEBGraph back;
+
+    timer.startEvent("Copy back, level " + std::to_string(lvl));
+    back.define(*copies[lvl], graph.getGrids(), *m_baseIF);
+    timer.stopEvent("Copy back, level " + std::to_string(lvl));
+
+    timer.startEvent("Compare, level " + std::to_string(lvl));
+    const bool same = back.equals(graph);
+    timer.stopEvent("Compare, level " + std::to_string(lvl));
+
+    if (!same) {
+      pout() << "PolyhedralGeometryShop::testGraphCopy - level " << lvl << " differs after a copy there and back"
+             << endl;
+
+      MayDay::Error("PolyhedralGeometryShop::testGraphCopy - the graph did not survive a copy");
+    }
+  }
+
+  if (procID() == 0) {
+    pout() << "PolyhedralGeometryShop::testGraphCopy - every graph is closed on a shuffled octant layout and is "
+              "unchanged by a copy there and back"
+           << endl;
+  }
+
+  if (m_profile) {
+    timer.eventReport(pout(), false);
   }
 }
 

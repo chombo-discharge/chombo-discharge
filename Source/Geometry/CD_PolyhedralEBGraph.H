@@ -123,6 +123,30 @@ public:
          const Real           a_volumeThreshold);
 
   /**
+   * @brief Build the graph of a level over a given layout, from another graph of the same level.
+   * @details The other graph's cell states, face states, refined mask and surfaces are copied onto the new
+   * layout's valid cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries
+   * are classified from the implicit function by their corners, as define classifies them. The new layout must
+   * cover the same cells as the other graph's, since the surfaces of the cut cells come from it alone.
+   * Collective.
+   * @param[in] a_source   Graph to copy from.
+   * @param[in] a_grids    Layout to copy onto, covering the same cells as a_source's.
+   * @param[in] a_function Implicit function of the phase, for the ghost cells no tile carries.
+   */
+  virtual void
+  define(const PolyhedralEBGraph& a_source, const DisjointBoxLayout& a_grids, const BaseIF& a_function);
+
+  /**
+   * @brief Whether another graph over the same layout holds the same cells, faces, mask and surfaces, bit for bit.
+   * @details Compares valid and ghost cells alike, on every rank; the answer is reduced so that every rank gets
+   * the same one. Collective.
+   * @param[in] a_other Graph over the same layout.
+   * @return True if nothing differs.
+   */
+  bool
+  equals(const PolyhedralEBGraph& a_other) const;
+
+  /**
    * @brief Mark, on the coarse level, the cells the fine level carries and the faces that open onto them.
    * @details The fine tiles are coarsened onto the coarse layout the way Realm builds its valid-cell mask: a
    * marker on the coarsened fine layout is copied onto the coarse layout and its ghost cells. A coarse cell the
@@ -260,6 +284,23 @@ protected:
    */
   void
   defineGrids(const Vector<Box>& a_cutTiles);
+
+  /**
+   * @brief Allocate the per-cell containers over m_grids: the cut-cell sets, the cell states, the face states and
+   *        the refined mask. The surfaces wait for the sets.
+   */
+  void
+  defineData();
+
+  /**
+   * @brief Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells
+   *        some tile carries into each box's cut-cell set.
+   * @details The cells another tile carries are expected to hold that tile's state already, by exchange.
+   * @param[in] a_function Implicit function.
+   * @param[in] a_carried  The marker from markCarried.
+   */
+  void
+  defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<int>>& a_carried);
 
   /**
    * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another

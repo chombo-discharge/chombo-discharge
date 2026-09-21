@@ -21,6 +21,7 @@
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_LoadBalancing.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 PolyhedralEBGraph::PolyhedralEBGraph()
@@ -89,6 +90,14 @@ PolyhedralEBGraph::defineGrids(const Vector<Box>& a_cutTiles)
   m_grids.define(a_cutTiles, ranks, m_domain);
   m_grids.close();
 
+  this->defineData();
+}
+
+void
+PolyhedralEBGraph::defineData()
+{
+  CH_TIME("PolyhedralEBGraph::defineData");
+
   m_cutCells.define(m_grids);
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
@@ -105,15 +114,12 @@ PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
 
-  const Box& domainBox = m_domain.domainBox();
-
   // The surfaces of a box's cut cells are kept in the order a BoxIterator meets the cells, and moved into the
   // level container once every box's cut-cell set is known; the container is defined over those sets.
   LayoutData<Vector<CutCellSurface>> kept(m_grids);
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box box   = m_grids[dit()];
-    const Box grown = grow(box, m_numGhost) & domainBox;
+    const Box box = m_grids[dit()];
 
     BaseFab<int>& states = m_cellStates[dit()];
     BaseFab<int>& faces  = m_faceStates[dit()];
@@ -121,53 +127,26 @@ PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
 
     Vector<CutCellSurface>& surfaces = kept[dit()];
 
-    // Ghost cells outside the domain have no cell to describe; they are regular so that nothing reads them as a
+    // Ghost cells are filled afterwards: by exchange where another tile carries them, from the function where
+    // none does. Until then, and outside the domain for good, they are regular so that nothing reads them as a
     // boundary of the fluid.
     states.setVal(s_regular);
     faces.setVal(s_faceClosed);
 
     m_refined[dit()].setVal(0);
 
-    // Node values once per node and each crossed edge bisected once, shared by the cells of the region, as the
+    // Node values once per node and each crossed edge bisected once, shared by the cells of the box, as the
     // generator does when it builds a box.
     BaseFab<Real> nodeValues;
     BaseFab<Real> intercept[SpaceDim];
 
-    PolyhedralGeometryShop::fillNodeValues(a_function, nodeValues, grown, m_probLo, m_dx);
-    PolyhedralGeometryShop::defineIntercepts(intercept, grown);
+    PolyhedralGeometryShop::fillNodeValues(a_function, nodeValues, box, m_probLo, m_dx);
+    PolyhedralGeometryShop::defineIntercepts(intercept, box);
 
-    // A ghost cell is classified from its corners alone, with no crossing bisected and no body built: a cell
-    // another tile carries is overwritten with that tile's exact state by the exchange below, and a cell no tile
-    // carries is regular or covered by construction, which the corners decide. The valid cells get the full
-    // reconstruction, since their bodies decide the thresholds and the apertures.
-    for (BoxIterator bit(grown); bit.ok(); ++bit) {
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
       CutCellSurface surface;
-
-      if (!box.contains(iv)) {
-        PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
-
-        switch (CutCellBody::classify(surface)) {
-        case CutCellBody::Kind::Covered: {
-          states(iv, 0) = s_covered;
-
-          break;
-        }
-        case CutCellBody::Kind::Cut: {
-          states(iv, 0) = s_cut;
-
-          break;
-        }
-        default: {
-          states(iv, 0) = s_regular;
-
-          break;
-        }
-        }
-
-        continue;
-      }
 
       PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
 
@@ -225,28 +204,11 @@ PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
     }
   }
 
-  // ghost cells another tile carries take that tile's state
+  // ghost cells another tile carries take that tile's state, the rest are classified from the function, and the
+  // ghost cut cells enter the sets
   m_cellStates.exchange();
 
-  // The surfaces are kept with ghost cells, so that a box holds its neighbours' cut cells' surfaces as well: each
-  // box's set takes in the ghost cells that are cut and that some tile carries, which is exactly the set the
-  // owning tiles hold in that region, and the exchange fills them.
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box grown = grow(m_grids[dit()], m_numGhost) & domainBox;
-
-    const BaseFab<int>& states  = m_cellStates[dit()];
-    const BaseFab<int>& carried = a_carried[dit()];
-
-    IntVectSet& cut = m_cutCells[dit()];
-
-    for (BoxIterator bit(grown); bit.ok(); ++bit) {
-      const IntVect iv = bit();
-
-      if (!m_grids[dit()].contains(iv) && states(iv, 0) == s_cut && carried(iv, 0) != 0) {
-        cut |= iv;
-      }
-    }
-  }
+  this->defineGhostCells(a_function, a_carried);
 
   m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_cutCells));
 
@@ -271,6 +233,206 @@ PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
   }
 
   m_surfaces.exchange();
+}
+
+void
+PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<int>>& a_carried)
+{
+  CH_TIME("PolyhedralEBGraph::defineGhostCells");
+
+  using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellSurface;
+
+  const Box& domainBox = m_domain.domainBox();
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box box   = m_grids[dit()];
+    const Box grown = grow(box, m_numGhost) & domainBox;
+
+    BaseFab<int>&       states  = m_cellStates[dit()];
+    const BaseFab<int>& carried = a_carried[dit()];
+
+    IntVectSet& cut = m_cutCells[dit()];
+
+    // A ghost cell no tile carries is regular or covered by construction, and its corners say which. Node values
+    // are evaluated only if there is such a cell in the region.
+    bool anyUncarried = false;
+
+    for (BoxIterator bit(grown); bit.ok(); ++bit) {
+      anyUncarried = anyUncarried || (!box.contains(bit()) && carried(bit(), 0) == 0);
+    }
+
+    BaseFab<Real> nodeValues;
+
+    if (anyUncarried) {
+      PolyhedralGeometryShop::fillNodeValues(a_function, nodeValues, grown, m_probLo, m_dx);
+    }
+
+    for (BoxIterator bit(grown); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (box.contains(iv)) {
+        continue;
+      }
+
+      if (carried(iv, 0) == 0) {
+        CutCellSurface surface;
+
+        PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
+
+        switch (CutCellBody::classify(surface)) {
+        case CutCellBody::Kind::Covered: {
+          states(iv, 0) = s_covered;
+
+          break;
+        }
+        case CutCellBody::Kind::Cut: {
+          states(iv, 0) = s_cut;
+
+          break;
+        }
+        default: {
+          states(iv, 0) = s_regular;
+
+          break;
+        }
+        }
+      }
+      else if (states(iv, 0) == s_cut) {
+        // The surfaces are kept with ghost cells, so that a box holds its neighbours' cut cells' surfaces as
+        // well: each box's set takes in the ghost cells that are cut and that some tile carries, which is exactly
+        // the set the owning tiles hold in that region, and an exchange fills them.
+        cut |= iv;
+      }
+    }
+  }
+}
+
+void
+PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLayout& a_grids, const BaseIF& a_function)
+{
+  CH_TIME("PolyhedralEBGraph::define(copy)");
+
+  using PolyhedralEB::CutCellSurface;
+
+  if (!a_source.isDefined()) {
+    MayDay::Error("PolyhedralEBGraph::define - the source graph is not defined");
+  }
+
+  m_domain   = a_source.m_domain;
+  m_probLo   = a_source.m_probLo;
+  m_dx       = a_source.m_dx;
+  m_numGhost = a_source.m_numGhost;
+  m_grids    = a_grids;
+
+  this->defineData();
+
+  LevelData<BaseFab<int>> carried;
+
+  this->markCarried(carried);
+
+  // Valid cells by copy, ghost cells by exchange; the states of the ghost cells no tile carries from the
+  // function, and the cut-cell sets from the states, before the surfaces have a container to land in.
+  const Copier copier(a_source.m_grids, m_grids, m_domain);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    m_cellStates[dit()].setVal(s_regular);
+    m_faceStates[dit()].setVal(s_faceClosed);
+    m_refined[dit()].setVal(0);
+  }
+
+  a_source.m_cellStates.copyTo(Interval(0, 0), m_cellStates, Interval(0, 0), copier);
+  a_source.m_faceStates.copyTo(Interval(0, 2 * SpaceDim - 1), m_faceStates, Interval(0, 2 * SpaceDim - 1), copier);
+  a_source.m_refined.copyTo(Interval(0, 0), m_refined, Interval(0, 0), copier);
+
+  m_cellStates.exchange();
+  m_refined.exchange();
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box box = m_grids[dit()];
+
+    const BaseFab<int>& states = m_cellStates[dit()];
+
+    IntVectSet& cut = m_cutCells[dit()];
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      if (states(bit(), 0) == s_cut) {
+        cut |= bit();
+      }
+    }
+  }
+
+  this->defineGhostCells(a_function, carried);
+
+  m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_cutCells));
+
+  a_source.m_surfaces.copyTo(Interval(0, 0), m_surfaces, Interval(0, 0), copier);
+
+  m_surfaces.exchange();
+
+  m_isDefined = true;
+}
+
+bool
+PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
+{
+  CH_TIME("PolyhedralEBGraph::equals");
+
+  using PolyhedralEB::CutCellSurface;
+
+  if (!m_isDefined || !a_other.m_isDefined || !(m_grids == a_other.m_grids)) {
+    MayDay::Error("PolyhedralEBGraph::equals - both graphs must be defined over the same layout");
+  }
+
+  int same = 1;
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const BaseFab<int>& states      = m_cellStates[dit()];
+    const BaseFab<int>& otherStates = a_other.m_cellStates[dit()];
+    const BaseFab<int>& faces       = m_faceStates[dit()];
+    const BaseFab<int>& otherFaces  = a_other.m_faceStates[dit()];
+    const BaseFab<int>& refined     = m_refined[dit()];
+    const BaseFab<int>& otherRef    = a_other.m_refined[dit()];
+
+    for (BoxIterator bit(states.box() & m_domain.domainBox()); bit.ok(); ++bit) {
+      same = same && (states(bit(), 0) == otherStates(bit(), 0));
+    }
+
+    for (BoxIterator bit(faces.box()); bit.ok(); ++bit) {
+      for (int comp = 0; comp < 2 * SpaceDim; comp++) {
+        same = same && (faces(bit(), comp) == otherFaces(bit(), comp));
+      }
+    }
+
+    for (BoxIterator bit(refined.box() & m_domain.domainBox()); bit.ok(); ++bit) {
+      same = same && (refined(bit(), 0) == otherRef(bit(), 0));
+    }
+
+    const IntVectSet& cut      = m_cutCells[dit()];
+    const IntVectSet& otherCut = a_other.m_cutCells[dit()];
+
+    same = same && (cut == otherCut);
+
+    if (same) {
+      const IVSFAB<CutCellSurface>& surfaces      = m_surfaces[dit()];
+      const IVSFAB<CutCellSurface>& otherSurfaces = a_other.m_surfaces[dit()];
+
+      for (IVSIterator ivsit(cut); ivsit.ok(); ++ivsit) {
+        const CutCellSurface& a = surfaces(ivsit(), 0);
+        const CutCellSurface& b = otherSurfaces(ivsit(), 0);
+
+        for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+          same = same && (a.m_crossing[e] == b.m_crossing[e]);
+        }
+
+        for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+          same = same && (a.m_corner[c] == b.m_corner[c]);
+        }
+      }
+    }
+  }
+
+  return ParallelOps::min(same) == 1;
 }
 
 void
