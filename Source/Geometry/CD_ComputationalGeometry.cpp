@@ -54,7 +54,8 @@ ComputationalGeometry::ComputationalGeometry()
     m_startLevel(0),
     m_stopLevel(0),
     m_minBlockSize(8),
-    m_maxBlockSize(8)
+    m_maxBlockSize(8),
+    m_profile(false)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -67,6 +68,7 @@ ComputationalGeometry::ComputationalGeometry()
   // to it.
   pp.query("min_block_size", m_minBlockSize);
   pp.query("max_block_size", m_maxBlockSize);
+  pp.query("profile", m_profile);
 
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
@@ -433,9 +435,11 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->buildCoarserLevels();
   timer.stopEvent("Coarser levels");
 
-  this->reportGrids();
+  if (m_profile) {
+    this->reportGrids();
 
-  timer.eventReport(pout(), false);
+    timer.eventReport(pout(), false);
+  }
 }
 
 int

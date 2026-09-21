@@ -371,6 +371,12 @@ protected:
   int m_maxBlockSize;
 
   /**
+   * @brief Whether makeGrids reports its levels and its timings to pout. ComputationalGeometry.profile, off by
+   * default.
+   */
+  bool m_profile;
+
+  /**
    * @brief Domains of the levels makeGrids builds, coarsest first.
    */
   Vector<ProblemDomain> m_domains;
