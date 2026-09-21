@@ -254,19 +254,16 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
 
     IntVectSet& cut = m_cutCells[dit()];
 
-    // A ghost cell no tile carries is regular or covered by construction, and its corners say which. Node values
-    // are evaluated only if there is such a cell in the region.
-    bool anyUncarried = false;
+    // A ghost cell no tile carries is regular or covered by construction, and its corners say which. Such cells
+    // are a shell on the outside of the tiled region, so the function is evaluated at a node only when a cell
+    // that needs it comes by, and each node once.
+    Box nodeBox = grown;
+    nodeBox.surroundingNodes();
 
-    for (BoxIterator bit(grown); bit.ok(); ++bit) {
-      anyUncarried = anyUncarried || (!box.contains(bit()) && carried(bit(), 0) == 0);
-    }
+    BaseFab<Real> nodeValues(nodeBox, 1);
+    BaseFab<int>  nodeKnown(nodeBox, 1);
 
-    BaseFab<Real> nodeValues;
-
-    if (anyUncarried) {
-      PolyhedralGeometryShop::fillNodeValues(a_function, nodeValues, grown, m_probLo, m_dx);
-    }
+    nodeKnown.setVal(0);
 
     for (BoxIterator bit(grown); bit.ok(); ++bit) {
       const IntVect iv = bit();
@@ -278,7 +275,26 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
       if (carried(iv, 0) == 0) {
         CutCellSurface surface;
 
-        PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
+        for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+          IntVect node = iv;
+
+          for (int d = 0; d < SpaceDim; d++) {
+            node[d] += (c >> d) & 1;
+          }
+
+          if (nodeKnown(node, 0) == 0) {
+            RealVect x = m_probLo;
+
+            for (int d = 0; d < SpaceDim; d++) {
+              x[d] += m_dx * static_cast<Real>(node[d]);
+            }
+
+            nodeValues(node, 0) = PolyhedralGeometryShop::snappedValue(a_function, x, m_dx);
+            nodeKnown(node, 0)  = 1;
+          }
+
+          surface.m_corner[c] = nodeValues(node, 0);
+        }
 
         switch (CutCellBody::classify(surface)) {
         case CutCellBody::Kind::Covered: {
