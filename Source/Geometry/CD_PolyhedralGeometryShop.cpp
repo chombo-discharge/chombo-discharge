@@ -53,7 +53,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
 
   m_strict          = a_strict;
   m_volumeThreshold = a_thrshdVoF;
-  m_grids           = nullptr;
+  m_compGeom        = nullptr;
   m_phase           = phase::gas;
   m_writeSTL        = false;
   m_sanityCheck     = true;
@@ -66,10 +66,10 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
 }
 
 void
-PolyhedralGeometryShop::setGrids(const ComputationalGeometry& a_grids, const phase::which_phase a_phase) noexcept
+PolyhedralGeometryShop::setGrids(const ComputationalGeometry& a_compGeom, const phase::which_phase a_phase) noexcept
 {
-  m_grids = &a_grids;
-  m_phase = a_phase;
+  m_compGeom = &a_compGeom;
+  m_phase    = a_phase;
 }
 
 void
@@ -77,7 +77,7 @@ PolyhedralGeometryShop::verifySurface() const
 {
   CH_TIME("PolyhedralGeometryShop::verifySurface");
 
-  if (m_grids == nullptr) {
+  if (m_compGeom == nullptr) {
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
   }
 
@@ -95,7 +95,7 @@ PolyhedralGeometryShop::verifySurface() const
 
   Timer timer("PolyhedralGeometryShop::verifySurface (" + phaseName + ")");
 
-  const int numLevels = m_grids->getNumGridLevels();
+  const int numLevels = m_compGeom->getNumGridLevels();
 
   Vector<Real> composite;
 
@@ -125,9 +125,9 @@ PolyhedralGeometryShop::verifySurface() const
       for (int lvl = 0; lvl < numLevels; lvl++) {
         std::ofstream out("surface_mesh_boxes.level" + std::to_string(lvl) + ".txt");
 
-        const Vector<Box>&                    boxes      = m_grids->getBoxes(lvl);
-        const Vector<GeometryService::InOut>& gasTypes   = m_grids->getTypes(phase::gas, lvl);
-        const Vector<GeometryService::InOut>& solidTypes = m_grids->getTypes(phase::solid, lvl);
+        const Vector<Box>&                    boxes      = m_compGeom->getBoxes(lvl);
+        const Vector<GeometryService::InOut>& gasTypes   = m_compGeom->getTypes(phase::gas, lvl);
+        const Vector<GeometryService::InOut>& solidTypes = m_compGeom->getTypes(phase::solid, lvl);
 
         for (int i = 0; i < boxes.size(); i++) {
           out << boxes[i].smallEnd() << " " << boxes[i].bigEnd() << " gas " << gasTypes[i] << " solid " << solidTypes[i]
@@ -139,7 +139,7 @@ PolyhedralGeometryShop::verifySurface() const
 
         Vector<int> reasons;
 
-        const Vector<Box>& splitBoxes = m_grids->getSplitBoxes(lvl, reasons);
+        const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
 
         for (int i = 0; i < splitBoxes.size(); i++) {
           splits << splitBoxes[i].smallEnd() << " " << splitBoxes[i].bigEnd() << " reason " << reasons[i] << "\n";
@@ -167,23 +167,23 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 
   const BaseIF& f = *m_baseIF;
 
-  const ComputationalGeometry& grids = *m_grids;
+  const ComputationalGeometry& compGeom = *m_compGeom;
 
   {
     const int  lvl    = a_level;
-    const int  finest = grids.getNumGridLevels() - 1;
-    const Real dx     = grids.getDx(lvl);
-    const Box& domain = grids.getDomain(lvl).domainBox();
+    const int  finest = compGeom.getNumGridLevels() - 1;
+    const Real dx     = compGeom.getDx(lvl);
+    const Box& domain = compGeom.getDomain(lvl).domainBox();
 
-    const Vector<Box>&                    boxes = grids.getBoxes(lvl);
-    const Vector<GeometryService::InOut>& types = grids.getTypes(m_phase, lvl);
+    const Vector<Box>&                    boxes = compGeom.getBoxes(lvl);
+    const Vector<GeometryService::InOut>& types = compGeom.getTypes(m_phase, lvl);
 
     // The cells the next finer level carries, on this level's index space. A cell among them is written from
     // the finer level; a cell next to one of them is on the level boundary and has that face restricted.
     TreeIntVectSet covered;
 
     if (lvl < finest) {
-      const Vector<Box>& finerBoxes = grids.getBoxes(lvl + 1);
+      const Vector<Box>& finerBoxes = compGeom.getBoxes(lvl + 1);
 
       for (int j = 0; j < finerBoxes.size(); j++) {
         covered |= coarsen(finerBoxes[j], 2);
@@ -498,16 +498,16 @@ PolyhedralGeometryShop::sanityCheck(const Vector<Real>& a_facets) const
 
   // Vertices are welded onto a lattice a small fraction of the finest spacing wide, and an edge is the
   // ordered pair of its two welded vertices. Sorting the edges then puts the uses of one edge together.
-  const int  finest  = m_grids->getNumGridLevels() - 1;
-  const Real spacing = s_weldSpacing * m_grids->getDx(finest);
+  const int  finest  = m_compGeom->getNumGridLevels() - 1;
+  const Real spacing = s_weldSpacing * m_compGeom->getDx(finest);
 
-  const Box&     finestBox = m_grids->getDomain(finest).domainBox();
+  const Box&     finestBox = m_compGeom->getDomain(finest).domainBox();
   const RealVect probLo    = m_probLo;
 
   RealVect probHi = m_probLo;
 
   for (int d = 0; d < SpaceDim; d++) {
-    probHi[d] += m_grids->getDx(finest) * static_cast<Real>(finestBox.size(d));
+    probHi[d] += m_compGeom->getDx(finest) * static_cast<Real>(finestBox.size(d));
   }
 
   auto weld = [&](const Real* a_x) -> std::array<long long, 3> {
