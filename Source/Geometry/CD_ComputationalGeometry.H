@@ -179,6 +179,13 @@ public:
   getNumGridLevels() const noexcept;
 
   /**
+   * @brief Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.
+   * @return The start level, 0 being the coarsest.
+   */
+  int
+  getStartLevel() const noexcept;
+
+  /**
    * @brief Level of a domain among the levels makeGrids built.
    * @param[in] a_domain Domain to look up.
    * @return Its level, 0 being the coarsest, or -1 if there is no such level.
@@ -526,14 +533,16 @@ protected:
 
   /**
    * @brief Classify a box of one phase on one level as regular, covered or irregular.
-   * @details ScanShop::isRegular/isCovered on the implicit function directly; a phase without an implicit
-   * function is regular everywhere. Pseudocode:
+   * @details A box is irregular if some cell of it, grown by the ghost width, is cut in the sense the polyhedral
+   * shop reconstructs cut cells: its corner values disagree under isFluid. That is exact whatever the implicit
+   * function does away from its zero set, where ScanShop's cell-centre test against half a diagonal assumes a
+   * distance function and a smooth union grows faster than one. A phase without an implicit function is regular
+   * everywhere. Pseudocode:
    *
    *   grown = grow(box, m_maxGhostEB) & domain
-   *   halfDiagonal = 0.5 * dx * sqrt(SpaceDim)
-   *   regular = every cell centre in grown has f(x) < -halfDiagonal
-   *   covered = every cell centre in grown has f(x) >  halfDiagonal
-   *   return Regular, Covered, or Irregular if neither
+   *   node values over grown, once per node
+   *   Irregular as soon as two nodes disagree under isFluid -- some cell of grown is cut
+   *   otherwise Regular if every node is fluid, Covered if every node is solid
    *
    * @param[in] a_box   Box to classify.
    * @param[in] a_level Level the box lives on.

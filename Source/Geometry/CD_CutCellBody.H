@@ -192,7 +192,8 @@ public:
    * @details The face is described at the resolution of the level below rather than this cell's, which is what makes it
    * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
    * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
-   * been.
+   * been. The moments are not recomputed: they stay those of the body as defined, since a restricted body is a
+   * surface to write rather than a cell to take moments from.
    * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
    * @param[in] a_dir      Direction of the face.
    * @param[in] a_side     Side of the cell the face is on.

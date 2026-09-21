@@ -16,6 +16,7 @@
 #include <sstream>
 
 // Chombo includes
+#include <BRMeshRefine.H>
 #include <EBArith.H>
 #include <PolyGeom.H>
 #include <EBAlias.H>
@@ -1526,10 +1527,22 @@ Driver::getGeometryGrids() const
 
   Vector<Vector<Box>> boxes(1 + m_amr->getMaxAmrDepth());
 
+  // An AMR level at or below the geometry's start level is whole, since the geometry builds those levels whole
+  // and has no cut tiles there; it is split as AmrMesh splits its coarsest level. Above the start level the
+  // grid is the cut tiles. A level the geometry did not build is left empty, and AmrMesh stops there.
+  const int startLevel = m_computationalGeometry->getStartLevel();
+
   for (int lvl = 1; lvl < boxes.size(); lvl++) {
     const int geometryLevel = m_computationalGeometry->getLevel(domains[lvl]);
 
-    if (geometryLevel >= 0) {
+    if (geometryLevel < 0) {
+      continue;
+    }
+
+    if (geometryLevel <= startLevel) {
+      domainSplit(domains[lvl], boxes[lvl], m_amr->getMaxBlockSize(), m_amr->getMinBlockSize());
+    }
+    else {
       boxes[lvl] = m_computationalGeometry->getCutTiles(geometryLevel);
     }
   }

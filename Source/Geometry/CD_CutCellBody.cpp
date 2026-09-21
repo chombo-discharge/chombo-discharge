@@ -543,6 +543,10 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
 bool
 CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept
 {
+  CH_assert(a_children != nullptr);
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
   const int face = 2 * a_dir + a_side;
 
   // this face's chord goes, and so does the interface, which was built to meet it

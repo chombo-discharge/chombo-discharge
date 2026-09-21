@@ -361,6 +361,9 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   if (m_minBlockSize <= 0) {
     MayDay::Error("ComputationalGeometry::makeGrids - ComputationalGeometry.min_block_size must be positive");
   }
+  if (m_maxBlockSize <= 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - ComputationalGeometry.max_block_size must be positive");
+  }
   if (m_maxBlockSize % m_minBlockSize != 0) {
     MayDay::Error(
       "ComputationalGeometry::makeGrids - ComputationalGeometry.max_block_size must be a multiple of min_block_size");
@@ -504,6 +507,12 @@ int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
   return m_domains.size();
+}
+
+int
+ComputationalGeometry::getStartLevel() const noexcept
+{
+  return m_startLevel;
 }
 
 int
@@ -791,40 +800,41 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
     return GeometryService::Regular;
   }
 
-  // ScanShop::isRegular/isCovered on the implicit function. A cell centre within half a cell diagonal of the
-  // zero set may belong to a cut cell, and one such cell makes the box irregular. Otherwise every centre is on
-  // one side, and that side is the classification; both sides without a cell in between is not possible for a
-  // continuous function and is reported rather than resolved.
+  // The box is irregular if some cell of it, grown by the ghost width, is cut as the polyhedral shop reads cut:
+  // its corner values disagree under isFluid. Two nodes of the grown region that disagree are joined by a path
+  // of adjacent nodes along which some adjacent pair disagrees, and adjacent nodes are corners of one cell of
+  // the region, so one node of each kind is the test. Node values are what the shop reconstructs from, so this
+  // is exact for what it builds, whatever the function does away from its zero set.
   const BaseIF& f = *implicitFunction;
 
-  const Real dx           = m_dx[a_level];
-  const Real halfDiagonal = 0.5 * dx * std::sqrt(static_cast<Real>(SpaceDim));
-  const Box  grown        = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
+  const Real dx    = m_dx[a_level];
+  const Box  grown = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
+
+  Box nodeBox = grown;
+  nodeBox.surroundingNodes();
 
   bool anyFluid = false;
   bool anySolid = false;
 
-  for (BoxIterator bit(grown); bit.ok(); ++bit) {
+  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
     RealVect x = m_probLo;
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      x[dir] += dx * (static_cast<Real>(iv[dir]) + 0.5);
+      x[dir] += dx * static_cast<Real>(iv[dir]);
     }
 
-    const Real value = f.value(x);
+    if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, dx))) {
+      anyFluid = true;
+    }
+    else {
+      anySolid = true;
+    }
 
-    if (std::abs(value) <= halfDiagonal) {
+    if (anyFluid && anySolid) {
       return GeometryService::Irregular;
     }
-
-    anyFluid = anyFluid || (value < 0.0);
-    anySolid = anySolid || (value > 0.0);
-  }
-
-  if (anyFluid && anySolid) {
-    MayDay::Error("ComputationalGeometry::classifyBox - a box holds fluid and solid but no cell near the surface");
   }
 
   return anySolid ? GeometryService::Covered : GeometryService::Regular;
@@ -923,7 +933,8 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
         dot += normal(iv, dir) * normal(jv, dir);
       }
 
-      if (dot < cosThreshold) {
+      // facing normals split whatever the threshold, so they are tested ahead of it
+      if (dot < 0.0 || dot < cosThreshold) {
         // a pair inside the box is the box's own doing and decides at once; a pair reaching into the ring
         // is recorded and decides only if the whole box turns out to have no pair of its own, so that the
         // report attributes the split to the box itself whenever it can
@@ -1006,6 +1017,10 @@ ComputationalGeometry::latticeTable(const int a_level) const
 
   for (int i = 0; i < m_boxes[a_level].size(); i++) {
     const int cell = this->latticeLookup(Vector<int>(), a_level, m_boxes[a_level][i].smallEnd());
+
+    if (table[cell] >= 0) {
+      MayDay::Error("ComputationalGeometry::latticeTable - two boxes of a whole level start in one lattice cell");
+    }
 
     table[cell] = i;
   }

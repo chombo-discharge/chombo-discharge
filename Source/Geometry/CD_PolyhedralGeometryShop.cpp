@@ -524,16 +524,24 @@ PolyhedralGeometryShop::sanityCheck(const Vector<Real>& a_facets) const
     return key;
   };
 
-  auto onDomainBoundary = [&](const std::array<long long, 3>& a_key) -> bool {
+  // The planes of the domain boundary a welded vertex lies in, one bit per plane: 2 * d for the low face in
+  // direction d and 2 * d + 1 for the high one. An edge is on the boundary when its two ends share a plane.
+  auto boundaryPlanes = [&](const std::array<long long, 3>& a_key) -> int {
+    int planes = 0;
+
     for (int d = 0; d < SpaceDim; d++) {
       const long long hi = std::llround((probHi[d] - probLo[d]) / spacing);
 
-      if (a_key[d] == 0 || a_key[d] == hi) {
-        return true;
+      if (a_key[d] == 0) {
+        planes |= 1 << (2 * d);
+      }
+
+      if (a_key[d] == hi) {
+        planes |= 1 << (2 * d + 1);
       }
     }
 
-    return false;
+    return planes;
   };
 
   // One entry per triangle edge: the two welded vertices in a fixed order.
@@ -586,7 +594,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<Real>& a_facets) const
       const std::array<long long, 3> a = {edges[i][0], edges[i][1], edges[i][2]};
       const std::array<long long, 3> b = {edges[i][3], edges[i][4], edges[i][5]};
 
-      const bool boundary = onDomainBoundary(a) && onDomainBoundary(b);
+      const bool boundary = (boundaryPlanes(a) & boundaryPlanes(b)) != 0;
 
       if (!boundary) {
         if (uses == 1) {

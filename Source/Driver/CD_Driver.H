@@ -551,9 +551,11 @@ protected:
 
   /**
    * @brief The grids ComputationalGeometry::makeGrids built, per AMR level.
-   * @details Level lvl holds the geometry's tiles on the AMR domain of that level, found through
-   * ComputationalGeometry::getLevel; level 0 is left empty, AmrMesh always splits the coarsest domain itself. The
-   * levels the geometry did not reach are empty, and AmrMesh stops at the first empty level.
+   * @details Level lvl holds the geometry's cut tiles on the AMR domain of that level, found through
+   * ComputationalGeometry::getLevel, or the whole domain split as AmrMesh splits its coarsest level when that domain
+   * is at or below the geometry's start level (Driver.geometry_scan_level above zero). Level 0 is left empty, AmrMesh
+   * always splits the coarsest domain itself. The levels the geometry did not reach are empty, and AmrMesh stops at
+   * the first empty level.
    * @return Boxes per AMR level, 1 + max_amr_depth entries.
    */
   Vector<Vector<Box>>
