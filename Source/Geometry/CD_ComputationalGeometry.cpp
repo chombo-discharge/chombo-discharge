@@ -878,10 +878,6 @@ ComputationalGeometry::makeTiles()
   // TiledMeshRefine tiles level k from tags on level k - 1 and takes the start domain as its level 0, so a box
   // irregular in either phase on builder level lvl enters, coarsened by two, as a tag for tiler level
   // lvl - m_startLevel. Tags are rank-local and the tiler gathers them, so each rank tags only its share.
-  Timer timer("ComputationalGeometry::makeTiles");
-
-  timer.startEvent("Tag boxes");
-
   Vector<IntVectSet> tags(numAbove);
 
   for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
@@ -894,8 +890,6 @@ ComputationalGeometry::makeTiles()
     }
   }
 
-  timer.stopEvent("Tag boxes");
-
   const Vector<int> refRatios(1 + numAbove, 2);
 
   TiledMeshRefine tiler(m_domains[m_startLevel],
@@ -905,17 +899,11 @@ ComputationalGeometry::makeTiles()
 
   Vector<Vector<Box>> tiles;
 
-  timer.startEvent("TiledMeshRefine::regrid");
   const int finestTiled = tiler.regrid(tiles, tags);
-  timer.stopEvent("TiledMeshRefine::regrid");
 
   // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
   for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
     m_cutTiles[lvl] = tiles[lvl - m_startLevel];
-  }
-
-  if (m_profile) {
-    timer.eventReport(pout(), false);
   }
 }
 
