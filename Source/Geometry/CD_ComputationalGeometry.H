@@ -377,6 +377,12 @@ protected:
   bool m_profile;
 
   /**
+   * @brief Verbosity; above 5 every member function announces itself in pout. ComputationalGeometry.verbosity, 0
+   * when not given.
+   */
+  int m_verbosity;
+
+  /**
    * @brief Domains of the levels makeGrids builds, coarsest first.
    */
   Vector<ProblemDomain> m_domains;

@@ -55,13 +55,20 @@ ComputationalGeometry::ComputationalGeometry()
     m_stopLevel(0),
     m_minBlockSize(8),
     m_maxBlockSize(8),
-    m_profile(false)
+    m_profile(false),
+    m_verbosity(0)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
   // Default parameters.
 
   ParmParse pp("ComputationalGeometry");
+
+  pp.query("verbosity", m_verbosity);
+
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
+  }
 
   // The tile and super-tile the grids are built with are the geometry's own, separate from the simulation's
   // block sizes: curvature refinement follows the surface, and a small tile keeps the refined footprint close
@@ -81,12 +88,18 @@ ComputationalGeometry::ComputationalGeometry()
 ComputationalGeometry::~ComputationalGeometry()
 {
   CH_TIME("ComputationalGeometry::~ComputationalGeometry()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::~ComputationalGeometry()" << endl;
+  }
 }
 
 void
 ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::useScanShop(ProblemDomain)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::useScanShop(ProblemDomain)" << endl;
+  }
 
   // TLDR: If you called this function you signal that ComputationalGeometry will use ScanShop for geometry generation.
 
@@ -98,6 +111,9 @@ void
 ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::usePolyhedralShop(ProblemDomain)" << endl;
+  }
 
   m_generator  = Generator::PolyhedralShop;
   m_scanDomain = a_beginDomain;
@@ -107,6 +123,9 @@ void
 ComputationalGeometry::useChomboShop()
 {
   CH_TIME("ComputationalGeometry::useChomboShop()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::useChomboShop()" << endl;
+  }
 
   // TLDR: If you called this function you signal that ComputationalGeometry will use Chombo's GeometryShop for geometry
   // generation.
@@ -118,6 +137,9 @@ const Vector<Dielectric>&
 ComputationalGeometry::getDielectrics() const
 {
   CH_TIME("ComputationalGeometry::getDielectrics()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getDielectrics()" << endl;
+  }
 
   return (m_dielectrics);
 }
@@ -126,6 +148,9 @@ const Vector<Electrode>&
 ComputationalGeometry::getElectrodes() const
 {
   CH_TIME("ComputationalGeometry::getElectrodes()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getElectrodes()" << endl;
+  }
 
   return (m_electrodes);
 }
@@ -134,6 +159,9 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getGasImplicitFunction() const
 {
   CH_TIME("ComputationalGeometry::getGasImplicitFunction()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getGasImplicitFunction()" << endl;
+  }
 
   return (m_implicitFunctionGas);
 }
@@ -142,6 +170,9 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getSolidImplicitFunction() const
 {
   CH_TIME("ComputationalGeometry::getSolidImplicitFunction()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getSolidImplicitFunction()" << endl;
+  }
 
   return (m_implicitFunctionSolid);
 }
@@ -150,6 +181,9 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getImplicitFunction(phase::which_phase)" << endl;
+  }
 
   return (a_phase == phase::gas) ? m_implicitFunctionGas : m_implicitFunctionSolid;
 }
@@ -158,6 +192,9 @@ Real
 ComputationalGeometry::getGasPermittivity() const
 {
   CH_TIME("ComputationalGeometry::getGasPermittivity()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getGasPermittivity()" << endl;
+  }
 
   return (m_eps0);
 }
@@ -166,6 +203,9 @@ const RefCountedPtr<MultiFluidIndexSpace>&
 ComputationalGeometry::getMfIndexSpace() const
 {
   CH_TIME("ComputationalGeometry::getMfIndexSpace()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::getMfIndexSpace()" << endl;
+  }
 
   return (m_multifluidIndexSpace);
 }
@@ -174,6 +214,9 @@ void
 ComputationalGeometry::setDielectrics(const Vector<Dielectric>& a_dielectrics)
 {
   CH_TIME("ComputationalGeometry::setDielectrics(Vector<Dielectric>)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::setDielectrics(Vector<Dielectric>)" << endl;
+  }
 
   m_dielectrics = a_dielectrics;
 }
@@ -182,6 +225,9 @@ void
 ComputationalGeometry::setElectrodes(const Vector<Electrode>& a_electrodes)
 {
   CH_TIME("ComputationalGeometry::setElectrodes(Vector<Electrode>)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::setElectrodes(Vector<Electrode>)" << endl;
+  }
 
   m_electrodes = a_electrodes;
 }
@@ -190,6 +236,9 @@ void
 ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 {
   CH_TIME("ComputationalGeometry::setGasPermittivity(Real)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::setGasPermittivity(Real)" << endl;
+  }
 
   m_eps0 = a_eps0;
 }
@@ -203,6 +252,9 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
                                        const int            a_maxCoarsen)
 {
   CH_TIME("ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)" << endl;
+  }
 
   // Set the default maximum number of EB ghosts that we will ever use. This is needed because ScanShop will look
   // through grown grid patches when it determines if a grid patch is irregular or not.
@@ -239,6 +291,9 @@ void
 ComputationalGeometry::buildImplicitFunctions()
 {
   CH_TIME("ComputationalGeometry::buildImplicitFunctions()");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildImplicitFunctions()" << endl;
+  }
 
   Vector<BaseIF*> dielectricParts;
   Vector<BaseIF*> electrodeParts;
@@ -285,6 +340,9 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const int            a_maxGhostEB)
 {
   CH_TIME("ComputationalGeometry::makeGrids");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::makeGrids" << endl;
+  }
 
   // Preconditions. Hard aborts rather than assertions: a violation here produces grids the index space would
   // serve silently wrong, and the cost of the check is nothing.
@@ -535,6 +593,9 @@ void
 ComputationalGeometry::buildStartLevel()
 {
   CH_TIME("ComputationalGeometry::buildStartLevel");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildStartLevel" << endl;
+  }
 
   // The start domain decomposes into whole tiles (checked in makeGrids), so the block factor is the tile: every
   // box is a whole number of tiles, and at most a super-tile wide.
@@ -547,6 +608,9 @@ void
 ComputationalGeometry::buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vector<Vector<int>>& a_numChildren)
 {
   CH_TIME("ComputationalGeometry::buildFinerLevels");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildFinerLevels" << endl;
+  }
 
   auto isIrregular = [](const GeometryService::InOut a_type) -> bool {
     return a_type == GeometryService::Irregular;
@@ -619,6 +683,9 @@ ComputationalGeometry::classifyBoxes(const Vector<Box>&              a_boxes,
                                      Vector<GeometryService::InOut>& a_solidTypes) const
 {
   CH_TIME("ComputationalGeometry::classifyBoxes");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::classifyBoxes" << endl;
+  }
 
   // The classifications travel as integers so that one all-reduce assembles them: a rank writes only the
   // entries it owns and leaves the rest at zero, and the sum is the union. Two entries per box, gas then solid.
@@ -684,6 +751,9 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
                                   const Vector<GeometryService::InOut>& a_solidTypes) const
 {
   CH_TIME("ComputationalGeometry::splitFlags");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::splitFlags" << endl;
+  }
 
   // The flag carries the reason, so the report can say why a level refined where it did.
   Vector<int> flags(a_boxes.size(), 0);
@@ -711,6 +781,9 @@ GeometryService::InOut
 ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::classifyBox");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::classifyBox" << endl;
+  }
 
   const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
 
@@ -761,6 +834,9 @@ ComputationalGeometry::SplitReason
 ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::exceedsCurvature");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::exceedsCurvature" << endl;
+  }
 
   const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
 
@@ -868,6 +944,9 @@ void
 ComputationalGeometry::makeTiles()
 {
   CH_TIME("ComputationalGeometry::makeTiles");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::makeTiles" << endl;
+  }
 
   const int numAbove = m_stopLevel - m_startLevel;
 
@@ -911,6 +990,9 @@ Vector<int>
 ComputationalGeometry::latticeTable(const int a_level) const
 {
   CH_TIME("ComputationalGeometry::latticeTable");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::latticeTable" << endl;
+  }
 
   const Box& domain = m_domains[a_level].domainBox();
 
@@ -978,6 +1060,9 @@ Vector<int>
 ComputationalGeometry::sortTilesByKey(const int a_level) const
 {
   CH_TIME("ComputationalGeometry::sortTilesByKey");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::sortTilesByKey" << endl;
+  }
 
   const Vector<Box>& tiles = m_cutTiles[a_level];
 
@@ -1036,6 +1121,9 @@ ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_f
                                      Vector<Vector<int>>&                    a_tileHosts) const
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::classifyTiles" << endl;
+  }
 
   constexpr int regular   = 1;
   constexpr int covered   = 2;
@@ -1134,6 +1222,9 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
                                      const Vector<Vector<int>>&                    a_tileHosts)
 {
   CH_TIME("ComputationalGeometry::decimateBoxes");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::decimateBoxes" << endl;
+  }
 
   for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
     const Vector<Box>&                    oldBoxes      = m_boxes[lvl];
@@ -1227,6 +1318,9 @@ void
 ComputationalGeometry::buildCoarserLevels()
 {
   CH_TIME("ComputationalGeometry::buildCoarserLevels");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildCoarserLevels" << endl;
+  }
 
   // The levels coarser than the start domain are built as ScanShop builds them: whole, each box classified on
   // its own, in both phases. No block factor, since these levels are not tiled and the coarsest may be smaller
@@ -1282,6 +1376,9 @@ void
 ComputationalGeometry::reportGrids() const
 {
   CH_TIME("ComputationalGeometry::reportGrids");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::reportGrids" << endl;
+  }
 
   pout() << "ComputationalGeometry::makeGrids - levels " << m_domains.size() << ", start level " << m_startLevel
          << ", stop level " << m_stopLevel << endl;
@@ -1313,6 +1410,9 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                         const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)" << endl;
+  }
 
   // Build the EBIS geometry. Use ScanShop, the polyhedral generator, or Chombo here. The polyhedral generator
   // computes its moments over the full grids ScanShop builds; the grids makeGrids made are not yet what the
@@ -1361,6 +1461,9 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                           const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");
+  if (m_verbosity > 5) {
+    pout() << "ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)" << endl;
+  }
 
   // There is no solid phase without dielectrics.
   if (m_implicitFunctionSolid.isNull()) {
