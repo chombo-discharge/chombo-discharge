@@ -1141,21 +1141,38 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
     const Vector<GeometryService::InOut>& oldSolidTypes = m_solidTypes[lvl];
     const Vector<Box>&                    tiles         = m_cutTiles[lvl];
 
-    // Which tiles each box hosts, and for the report how many tiles are there because a box was irregular
-    // and how many because nesting put them there.
-    Vector<Vector<int>> hosted(oldBoxes.size());
+    // Which tiles each box hosts, as two flat arrays: hostedStart[i] .. hostedStart[i + 1] index into
+    // hostedTiles for box i, filled by a counting sort over the tiles so that no box owns an allocation. For
+    // the report, how many tiles are there because a box was irregular and how many because nesting put them
+    // there.
+    Vector<int> hostedStart(oldBoxes.size() + 1, 0);
+    Vector<int> hostedTiles(tiles.size(), -1);
 
     for (int t = 0; t < tiles.size(); t++) {
       const int host = a_tileHosts[lvl][t];
 
       if (host >= 0) {
-        hosted[host].push_back(t);
+        hostedStart[host + 1]++;
       }
 
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
       m_splitCounts[lvl][tagged ? 4 : 5]++;
+    }
+
+    for (int i = 0; i < oldBoxes.size(); i++) {
+      hostedStart[i + 1] += hostedStart[i];
+    }
+
+    Vector<int> hostedNext = hostedStart;
+
+    for (int t = 0; t < tiles.size(); t++) {
+      const int host = a_tileHosts[lvl][t];
+
+      if (host >= 0) {
+        hostedTiles[hostedNext[host]++] = t;
+      }
     }
 
     // The tiles come first, with their own classifications.
@@ -1167,7 +1184,10 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool irregular = (oldGasTypes[i] == GeometryService::Irregular) ||
                              (oldSolidTypes[i] == GeometryService::Irregular);
 
-      if (hosted[i].size() == 0) {
+      const int firstHosted = hostedStart[i];
+      const int numHosted   = hostedStart[i + 1] - hostedStart[i];
+
+      if (numHosted == 0) {
         // Untouched: kept as it is.
         newBoxes.push_back(oldBoxes[i]);
         newGasTypes.push_back(oldGasTypes[i]);
@@ -1183,8 +1203,8 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
         // remaining full node. Correct and octree-graded; not tight, and replaceable here.
         TreeIntVectSet remainder(coarsen(oldBoxes[i], m_minBlockSize));
 
-        for (int j = 0; j < hosted[i].size(); j++) {
-          remainder -= coarsen(tiles[hosted[i][j]], m_minBlockSize);
+        for (int j = firstHosted; j < firstHosted + numHosted; j++) {
+          remainder -= coarsen(tiles[hostedTiles[j]], m_minBlockSize);
         }
 
         const Vector<Box> pieces = remainder.createBoxes();
