@@ -823,123 +823,133 @@ PolyhedralGeometryShop::testGraphCopy() const
 {
   CH_TIME("PolyhedralGeometryShop::testGraphCopy");
 
-  Timer timer("PolyhedralGeometryShop::testGraphCopy");
+  // Twice: once onto the tiles split into octants, once onto the tiles as they are; the ranks are shuffled both
+  // times, so the second copy moves every box between ranks without changing any box.
+  for (int split = 1; split >= 0; split--) {
+    const std::string what = (split == 1) ? "octants" : "same tiles";
 
-  Vector<RefCountedPtr<PolyhedralEBGraph>> copies(m_graphs.size());
+    Timer timer("PolyhedralGeometryShop::testGraphCopy (" + what + ")");
 
-  timer.startEvent("Copy onto octants");
+    Vector<RefCountedPtr<PolyhedralEBGraph>> copies(m_graphs.size());
 
-  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
-    copies[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
+    timer.startEvent("Copy onto " + what);
 
-    const PolyhedralEBGraph& graph = *m_graphs[lvl];
+    for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
+      copies[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
 
-    if (!graph.isDefined()) {
-      continue;
+      const PolyhedralEBGraph& graph = *m_graphs[lvl];
+
+      if (!graph.isDefined()) {
+        continue;
+      }
+
+      // The pieces are given ranks that walk the rank list with a stride coprime to its length, so that a tile's
+      // pieces land on different ranks and no rank keeps what it had. The layout covers the same cells as the
+      // graph's, which is what the copy needs.
+      const DisjointBoxLayout& grids = graph.getGrids();
+
+      Vector<Box> pieces;
+
+      for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
+        const Box tile = grids[lit()];
+
+        if (split == 1) {
+          Vector<Box> children;
+
+          domainSplit(tile, children, std::max(1, tile.shortside() / 2), 1);
+
+          pieces.append(children);
+        }
+        else {
+          pieces.push_back(tile);
+        }
+      }
+
+      const int stride = (numProc() > 1) ? (numProc() / 2 + 1) : 1;
+
+      Vector<int> ranks(pieces.size());
+
+      for (int i = 0; i < pieces.size(); i++) {
+        ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
+      }
+
+      timer.startEvent("Layout, level " + std::to_string(lvl));
+      DisjointBoxLayout shuffled(pieces, ranks, graph.getDomain());
+
+      shuffled.close();
+      timer.stopEvent("Layout, level " + std::to_string(lvl));
+
+      timer.startEvent("Copy, level " + std::to_string(lvl));
+      copies[lvl]->define(graph, shuffled, *m_baseIF);
+      timer.stopEvent("Copy, level " + std::to_string(lvl));
     }
 
-    // Every tile of the level split into its octants, the pieces given ranks that walk the rank list with a
-    // stride coprime to its length so that a tile's pieces land on different ranks and no rank keeps what it
-    // had. The layout covers the same cells as the graph's, which is what the copy needs.
-    const DisjointBoxLayout& grids = graph.getGrids();
+    timer.stopEvent("Copy onto " + what);
 
-    Vector<Box> pieces;
+    // linked to one another as the originals were, which is what sets the refined masks and the seam faces
+    timer.startEvent("Link the copies");
 
-    for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
-      const Box tile = grids[lit()];
-
-      Vector<Box> split;
-
-      domainSplit(tile, split, std::max(1, tile.shortside() / 2), 1);
-
-      pieces.append(split);
+    for (int lvl = 0; lvl + 1 < copies.size(); lvl++) {
+      if (copies[lvl]->isDefined() && copies[lvl + 1]->isDefined()) {
+        PolyhedralEBGraph::link(*copies[lvl], *copies[lvl + 1]);
+      }
     }
 
-    const int stride = (numProc() > 1) ? (numProc() / 2 + 1) : 1;
+    timer.stopEvent("Link the copies");
 
-    Vector<int> ranks(pieces.size());
+    // the copies must be a closed surface, and copied back they must be the originals
+    timer.startEvent("Check the copies");
+    this->sanityCheck(copies);
+    timer.stopEvent("Check the copies");
 
-    for (int i = 0; i < pieces.size(); i++) {
-      ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
+    // back onto the original layouts, linked again, and compared level by level
+    Vector<RefCountedPtr<PolyhedralEBGraph>> back(m_graphs.size());
+
+    for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
+      back[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
+
+      if (!m_graphs[lvl]->isDefined()) {
+        continue;
+      }
+
+      timer.startEvent("Copy back, level " + std::to_string(lvl));
+      back[lvl]->define(*copies[lvl], m_graphs[lvl]->getGrids(), *m_baseIF);
+      timer.stopEvent("Copy back, level " + std::to_string(lvl));
     }
 
-    timer.startEvent("Octant layout, level " + std::to_string(lvl));
-    DisjointBoxLayout shuffled(pieces, ranks, graph.getDomain());
-
-    shuffled.close();
-    timer.stopEvent("Octant layout, level " + std::to_string(lvl));
-
-    timer.startEvent("Copy, level " + std::to_string(lvl));
-    copies[lvl]->define(graph, shuffled, *m_baseIF);
-    timer.stopEvent("Copy, level " + std::to_string(lvl));
-  }
-
-  timer.stopEvent("Copy onto octants");
-
-  // linked to one another as the originals were, which is what sets the refined masks and the seam faces
-  timer.startEvent("Link the copies");
-
-  for (int lvl = 0; lvl + 1 < copies.size(); lvl++) {
-    if (copies[lvl]->isDefined() && copies[lvl + 1]->isDefined()) {
-      PolyhedralEBGraph::link(*copies[lvl], *copies[lvl + 1]);
-    }
-  }
-
-  timer.stopEvent("Link the copies");
-
-  // the copies must be a closed surface, and copied back they must be the originals
-  timer.startEvent("Check the copies");
-  this->sanityCheck(copies);
-  timer.stopEvent("Check the copies");
-
-  // back onto the original layouts, linked again, and compared level by level
-  Vector<RefCountedPtr<PolyhedralEBGraph>> back(m_graphs.size());
-
-  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
-    back[lvl] = RefCountedPtr<PolyhedralEBGraph>(new PolyhedralEBGraph());
-
-    if (!m_graphs[lvl]->isDefined()) {
-      continue;
+    for (int lvl = 0; lvl + 1 < back.size(); lvl++) {
+      if (back[lvl]->isDefined() && back[lvl + 1]->isDefined()) {
+        PolyhedralEBGraph::link(*back[lvl], *back[lvl + 1]);
+      }
     }
 
-    timer.startEvent("Copy back, level " + std::to_string(lvl));
-    back[lvl]->define(*copies[lvl], m_graphs[lvl]->getGrids(), *m_baseIF);
-    timer.stopEvent("Copy back, level " + std::to_string(lvl));
-  }
+    for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
+      const PolyhedralEBGraph& graph = *m_graphs[lvl];
 
-  for (int lvl = 0; lvl + 1 < back.size(); lvl++) {
-    if (back[lvl]->isDefined() && back[lvl + 1]->isDefined()) {
-      PolyhedralEBGraph::link(*back[lvl], *back[lvl + 1]);
+      if (!graph.isDefined()) {
+        continue;
+      }
+
+      timer.startEvent("Compare, level " + std::to_string(lvl));
+      const bool same = back[lvl]->equals(graph);
+      timer.stopEvent("Compare, level " + std::to_string(lvl));
+
+      if (!same) {
+        pout() << "PolyhedralGeometryShop::testGraphCopy - level " << lvl << " differs after a copy onto " << what
+               << " and back" << endl;
+
+        MayDay::Error("PolyhedralGeometryShop::testGraphCopy - the graph did not survive a copy");
+      }
     }
-  }
 
-  for (int lvl = 0; lvl < m_graphs.size(); lvl++) {
-    const PolyhedralEBGraph& graph = *m_graphs[lvl];
-
-    if (!graph.isDefined()) {
-      continue;
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::testGraphCopy - every graph is closed on a shuffled layout of " << what
+             << " and is unchanged by a copy there and back" << endl;
     }
 
-    timer.startEvent("Compare, level " + std::to_string(lvl));
-    const bool same = back[lvl]->equals(graph);
-    timer.stopEvent("Compare, level " + std::to_string(lvl));
-
-    if (!same) {
-      pout() << "PolyhedralGeometryShop::testGraphCopy - level " << lvl << " differs after a copy there and back"
-             << endl;
-
-      MayDay::Error("PolyhedralGeometryShop::testGraphCopy - the graph did not survive a copy");
+    if (m_profile) {
+      timer.eventReport(pout(), false);
     }
-  }
-
-  if (procID() == 0) {
-    pout() << "PolyhedralGeometryShop::testGraphCopy - every graph is closed on a shuffled octant layout and is "
-              "unchanged by a copy there and back"
-           << endl;
-  }
-
-  if (m_profile) {
-    timer.eventReport(pout(), false);
   }
 }
 
