@@ -406,7 +406,7 @@ protected:
   defineBody(PolyhedralEB::CutCellBody&                  a_body,
              const PolyhedralEBGraph&                    a_graph,
              const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-             const BaseFab<int>&                         a_refined,
+             const BaseFab<signed char>&                 a_refined,
              const IntVect&                              a_cell) const;
 #endif
 

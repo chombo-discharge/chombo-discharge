@@ -61,7 +61,7 @@ PolyhedralEBGraph::define(const BaseIF&        a_function,
   this->defineGrids(a_cutTiles);
 
   // one on every cell some tile of this level carries, zero elsewhere, with one ghost cell
-  LevelData<BaseFab<int>> carried;
+  LevelData<BaseFab<signed char>> carried;
 
   this->markCarried(carried);
 
@@ -105,9 +105,9 @@ PolyhedralEBGraph::defineData()
 }
 
 void
-PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
-                               const Real                     a_volumeThreshold,
-                               const LevelData<BaseFab<int>>& a_carried)
+PolyhedralEBGraph::defineCells(const BaseIF&                          a_function,
+                               const Real                             a_volumeThreshold,
+                               const LevelData<BaseFab<signed char>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineCells");
 
@@ -121,9 +121,9 @@ PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box box = m_grids[dit()];
 
-    BaseFab<int>& states = m_cellStates[dit()];
-    BaseFab<int>& faces  = m_faceStates[dit()];
-    IntVectSet&   cut    = m_cutCells[dit()];
+    BaseFab<signed char>& states = m_cellStates[dit()];
+    BaseFab<signed char>& faces  = m_faceStates[dit()];
+    IntVectSet&           cut    = m_cutCells[dit()];
 
     Vector<CutCellSurface>& surfaces = kept[dit()];
 
@@ -236,7 +236,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
 }
 
 void
-PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<int>>& a_carried)
+PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineGhostCells");
 
@@ -249,8 +249,8 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
     const Box box   = m_grids[dit()];
     const Box grown = grow(box, m_numGhost) & domainBox;
 
-    BaseFab<int>&       states  = m_cellStates[dit()];
-    const BaseFab<int>& carried = a_carried[dit()];
+    BaseFab<signed char>&       states  = m_cellStates[dit()];
+    const BaseFab<signed char>& carried = a_carried[dit()];
 
     IntVectSet& cut = m_cutCells[dit()];
 
@@ -260,8 +260,8 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
     Box nodeBox = grown;
     nodeBox.surroundingNodes();
 
-    BaseFab<Real> nodeValues(nodeBox, 1);
-    BaseFab<int>  nodeKnown(nodeBox, 1);
+    BaseFab<Real>        nodeValues(nodeBox, 1);
+    BaseFab<signed char> nodeKnown(nodeBox, 1);
 
     nodeKnown.setVal(0);
 
@@ -343,7 +343,7 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
 
   this->defineData();
 
-  LevelData<BaseFab<int>> carried;
+  LevelData<BaseFab<signed char>> carried;
 
   this->markCarried(carried);
 
@@ -370,7 +370,7 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box box = m_grids[dit()];
 
-    const BaseFab<int>& states = m_cellStates[dit()];
+    const BaseFab<signed char>& states = m_cellStates[dit()];
 
     IntVectSet& cut = m_cutCells[dit()];
 
@@ -406,12 +406,12 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
   int same = 1;
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const BaseFab<int>& states      = m_cellStates[dit()];
-    const BaseFab<int>& otherStates = a_other.m_cellStates[dit()];
-    const BaseFab<int>& faces       = m_faceStates[dit()];
-    const BaseFab<int>& otherFaces  = a_other.m_faceStates[dit()];
-    const BaseFab<int>& refined     = m_refined[dit()];
-    const BaseFab<int>& otherRef    = a_other.m_refined[dit()];
+    const BaseFab<signed char>& states      = m_cellStates[dit()];
+    const BaseFab<signed char>& otherStates = a_other.m_cellStates[dit()];
+    const BaseFab<signed char>& faces       = m_faceStates[dit()];
+    const BaseFab<signed char>& otherFaces  = a_other.m_faceStates[dit()];
+    const BaseFab<signed char>& refined     = m_refined[dit()];
+    const BaseFab<signed char>& otherRef    = a_other.m_refined[dit()];
 
     for (BoxIterator bit(states.box() & m_domain.domainBox()); bit.ok(); ++bit) {
       same = same && (states(bit(), 0) == otherStates(bit(), 0));
@@ -455,7 +455,7 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
 }
 
 void
-PolyhedralEBGraph::markCarried(LevelData<BaseFab<int>>& a_carried) const
+PolyhedralEBGraph::markCarried(LevelData<BaseFab<signed char>>& a_carried) const
 {
   CH_TIME("PolyhedralEBGraph::markCarried");
 
@@ -472,17 +472,17 @@ PolyhedralEBGraph::markCarried(LevelData<BaseFab<int>>& a_carried) const
 }
 
 void
-PolyhedralEBGraph::defineOuterFaces(const LevelData<BaseFab<int>>& a_carried)
+PolyhedralEBGraph::defineOuterFaces(const LevelData<BaseFab<signed char>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineOuterFaces");
 
   const Box& domainBox = m_domain.domainBox();
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box           box    = m_grids[dit()];
-    const BaseFab<int>& marker = a_carried[dit()];
+    const Box                   box    = m_grids[dit()];
+    const BaseFab<signed char>& marker = a_carried[dit()];
 
-    BaseFab<int>& faces = m_faceStates[dit()];
+    BaseFab<signed char>& faces = m_faceStates[dit()];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
@@ -529,8 +529,8 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
 
   coarsen(coarsenedFine, a_fine.m_grids, 2);
 
-  LevelData<BaseFab<int>> fineMarker(coarsenedFine, 1, IntVect::Zero);
-  LevelData<BaseFab<int>> coarMarker(a_coarse.m_grids, 1, 2 * IntVect::Unit);
+  LevelData<BaseFab<signed char>> fineMarker(coarsenedFine, 1, IntVect::Zero);
+  LevelData<BaseFab<signed char>> coarMarker(a_coarse.m_grids, 1, 2 * IntVect::Unit);
 
   for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
     fineMarker[dit()].setVal(1);
@@ -545,11 +545,11 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
   fineMarker.copyTo(Interval(0, 0), coarMarker, Interval(0, 0), copier);
 
   for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
-    const Box           box    = a_coarse.m_grids[dit()];
-    const BaseFab<int>& marker = coarMarker[dit()];
+    const Box                   box    = a_coarse.m_grids[dit()];
+    const BaseFab<signed char>& marker = coarMarker[dit()];
 
-    BaseFab<int>& refined = a_coarse.m_refined[dit()];
-    BaseFab<int>& faces   = a_coarse.m_faceStates[dit()];
+    BaseFab<signed char>& refined = a_coarse.m_refined[dit()];
+    BaseFab<signed char>& faces   = a_coarse.m_faceStates[dit()];
 
     // the mask keeps two ghost cells, so a box knows whether its neighbours' cells are refined, and their
     // neighbours' in turn, which is what rebuilding a neighbour's body on a level boundary asks
@@ -612,19 +612,19 @@ PolyhedralEBGraph::getCutCells() const noexcept
   return m_cutCells;
 }
 
-const LevelData<BaseFab<int>>&
+const LevelData<BaseFab<signed char>>&
 PolyhedralEBGraph::getCellStates() const noexcept
 {
   return m_cellStates;
 }
 
-const LevelData<BaseFab<int>>&
+const LevelData<BaseFab<signed char>>&
 PolyhedralEBGraph::getFaceStates() const noexcept
 {
   return m_faceStates;
 }
 
-const LevelData<BaseFab<int>>&
+const LevelData<BaseFab<signed char>>&
 PolyhedralEBGraph::getRefinedMask() const noexcept
 {
   return m_refined;

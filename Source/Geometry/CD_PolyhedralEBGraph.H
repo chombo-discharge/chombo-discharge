@@ -195,17 +195,18 @@ public:
   getCutCells() const noexcept;
 
   /**
-   * @brief The state of every cell, s_covered, s_cut or s_regular, with ghost cells filled from the geometry.
+   * @brief The state of every cell, s_covered, s_cut or s_regular, with ghost cells filled from the geometry. A
+   *        signed char per cell, which is what the three values need.
    * @return One component per cell.
    */
-  const LevelData<BaseFab<int>>&
+  const LevelData<BaseFab<signed char>>&
   getCellStates() const noexcept;
 
   /**
    * @brief The state of every face of every cell, one of the s_face constants; component 2 * dir + side.
    * @return 2 * SpaceDim components per cell.
    */
-  const LevelData<BaseFab<int>>&
+  const LevelData<BaseFab<signed char>>&
   getFaceStates() const noexcept;
 
   /**
@@ -213,7 +214,7 @@ public:
    * run.
    * @return One component per cell.
    */
-  const LevelData<BaseFab<int>>&
+  const LevelData<BaseFab<signed char>>&
   getRefinedMask() const noexcept;
 
   /**
@@ -262,17 +263,17 @@ protected:
   /**
    * @brief State of every cell, with ghost cells.
    */
-  LevelData<BaseFab<int>> m_cellStates;
+  LevelData<BaseFab<signed char>> m_cellStates;
 
   /**
    * @brief State of every face of every cell, component 2 * dir + side.
    */
-  LevelData<BaseFab<int>> m_faceStates;
+  LevelData<BaseFab<signed char>> m_faceStates;
 
   /**
    * @brief One where the finer level carries the cell.
    */
-  LevelData<BaseFab<int>> m_refined;
+  LevelData<BaseFab<signed char>> m_refined;
 
   /**
    * @brief Surface of every cut cell.
@@ -301,7 +302,7 @@ protected:
    * @param[in] a_carried  The marker from markCarried.
    */
   void
-  defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<int>>& a_carried);
+  defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
    * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another
@@ -309,7 +310,7 @@ protected:
    * @param[out] a_carried The marker, defined here over the layout with the cell states' ghost width.
    */
   void
-  markCarried(LevelData<BaseFab<int>>& a_carried) const;
+  markCarried(LevelData<BaseFab<signed char>>& a_carried) const;
 
   /**
    * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces
@@ -319,14 +320,14 @@ protected:
    * @param[in] a_carried         The marker from markCarried.
    */
   void
-  defineCells(const BaseIF& a_function, const Real a_volumeThreshold, const LevelData<BaseFab<int>>& a_carried);
+  defineCells(const BaseIF& a_function, const Real a_volumeThreshold, const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
    * @brief Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.
    * @param[in] a_carried The marker from markCarried.
    */
   void
-  defineOuterFaces(const LevelData<BaseFab<int>>& a_carried);
+  defineOuterFaces(const LevelData<BaseFab<signed char>>& a_carried);
 };
 
 #include <CD_NamespaceFooter.H>

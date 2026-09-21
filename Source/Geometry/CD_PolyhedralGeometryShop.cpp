@@ -252,14 +252,14 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
   const DisjointBoxLayout&                 grids    = graph.getGrids();
   const LayoutData<IntVectSet>&            cutCells = graph.getCutCells();
   const LevelData<IVSFAB<CutCellSurface>>& surfaces = graph.getSurfaces();
-  const LevelData<BaseFab<int>>&           refined  = graph.getRefinedMask();
+  const LevelData<BaseFab<signed char>>&   refined  = graph.getRefinedMask();
 
   // Every cut cell of this rank's tiles that the finer level does not carry.
   for (DataIterator dit(grids); dit.ok(); ++dit) {
     const Box                     box        = grids[dit()];
     const IntVectSet&             cut        = cutCells[dit()];
     const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
-    const BaseFab<int>&           refinedFab = refined[dit()];
+    const BaseFab<signed char>&   refinedFab = refined[dit()];
 
     for (IVSIterator ivsit(cut); ivsit.ok(); ++ivsit) {
       const IntVect iv = ivsit();
@@ -283,7 +283,7 @@ void
 PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a_body,
                                    const PolyhedralEBGraph&                    a_graph,
                                    const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-                                   const BaseFab<int>&                         a_refined,
+                                   const BaseFab<signed char>&                 a_refined,
                                    const IntVect&                              a_cell) const
 {
   CH_TIME("PolyhedralGeometryShop::defineBody");
@@ -634,8 +634,8 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const DisjointBoxLayout&                 grids      = graph.getGrids();
     const LayoutData<IntVectSet>&            cutCells   = graph.getCutCells();
     const LevelData<IVSFAB<CutCellSurface>>& surfaces   = graph.getSurfaces();
-    const LevelData<BaseFab<int>>&           refined    = graph.getRefinedMask();
-    const LevelData<BaseFab<int>>&           faceStates = graph.getFaceStates();
+    const LevelData<BaseFab<signed char>>&   refined    = graph.getRefinedMask();
+    const LevelData<BaseFab<signed char>>&   faceStates = graph.getFaceStates();
 
     // the lattice coordinate of a face plane of a cell of this level, for reading which plane an edge lies in
     auto planeKey = [&](const int a_cellCoordinate, const int a_dir, const int a_side) -> long long {
@@ -647,8 +647,8 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
       const Box                     grown      = grow(box, 1) & domain;
       const IntVectSet&             cut        = cutCells[dit()];
       const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
-      const BaseFab<int>&           refinedFab = refined[dit()];
-      const BaseFab<int>&           faces      = faceStates[dit()];
+      const BaseFab<signed char>&   refinedFab = refined[dit()];
+      const BaseFab<signed char>&   faces      = faceStates[dit()];
 
       // The interface triangles of every cut cell of the box and its one-cell ring that this level writes, built
       // once each and reached through a cell-indexed table.
