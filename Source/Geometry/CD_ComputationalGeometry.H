@@ -205,8 +205,8 @@ public:
   getBoxes(const int a_level) const noexcept;
 
   /**
-   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which
-   *        is what a simulation grid on the level is made of. Empty on the start level and below, which are whole.
+   * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what
+   * a simulation grid on the level is made of. Empty on the start level and below, which are whole.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The cut tiles.
    */
@@ -214,8 +214,8 @@ public:
   getCutTiles(const int a_level) const noexcept;
 
   /**
-   * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair
-   *        reaching into the ring outside it, 3 two surfaces facing each other across the band.
+   * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair reaching
+   * into the ring outside it, 3 two surfaces facing each other across the band.
    * @param[in]  a_level   Level, 0 being the coarsest.
    * @param[out] a_reasons One reason per box, parallel to the returned boxes.
    * @return The boxes.
@@ -391,8 +391,8 @@ protected:
   Vector<Vector<Box>> m_boxes;
 
   /**
-   * @brief Per level, the number of boxes that split for each SplitReason, and per level the number of tiles
-   *        that lie in an irregular box (tagged) versus elsewhere (nesting), for the report.
+   * @brief Per level, the number of boxes that split for each SplitReason, and per level the number of tiles that lie
+   * in an irregular box (tagged) versus elsewhere (nesting), for the report.
    */
   Vector<Vector<int>> m_splitCounts;
 
@@ -533,8 +533,8 @@ protected:
   classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
-   * @brief Why a box split, for the report: no split, a pair inside the box, a pair reaching into the ring
-   *        one cell outside it, or a pair whose normals face each other (two surfaces closer than the band).
+   * @brief Why a box split, for the report: no split, a pair inside the box, a pair reaching into the ring one cell
+   * outside it, or a pair whose normals face each other (two surfaces closer than the band).
    */
   enum class SplitReason
   {

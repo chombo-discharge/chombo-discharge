@@ -1585,8 +1585,8 @@ public:
   regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /**
-   * @brief Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather
-   *        than generated.
+   * @brief Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than
+   * generated.
    * @details a_boxes[lvl] are the boxes on level lvl; level 0 is ignored and always the domain split of the
    * coarsest domain. The finest level is the last level with boxes, capped by the AMR and simulation depths. The
    * boxes must be disjoint on each level and properly nested; nothing here checks that.

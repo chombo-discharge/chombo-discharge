@@ -325,6 +325,11 @@ protected:
   bool m_sanityCheck;
 
   /**
+   * @brief Whether verifySurface reports its timings. PolyhedralGeometryShop.profile, off by default.
+   */
+  bool m_profile;
+
+  /**
    * @brief Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.
    * @details Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has
    * that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface).

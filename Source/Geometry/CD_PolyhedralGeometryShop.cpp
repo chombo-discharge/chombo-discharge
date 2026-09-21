@@ -57,12 +57,14 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_phase           = phase::gas;
   m_writeSTL        = false;
   m_sanityCheck     = true;
+  m_profile         = false;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
 
   pp.query("write_stl", m_writeSTL);
   pp.query("sanity_check", m_sanityCheck);
+  pp.query("profile", m_profile);
 }
 
 void
@@ -154,7 +156,9 @@ PolyhedralGeometryShop::verifySurface() const
     timer.stopEvent("Sanity check");
   }
 
-  timer.eventReport(pout(), false);
+  if (m_profile) {
+    timer.eventReport(pout(), false);
+  }
 }
 
 void

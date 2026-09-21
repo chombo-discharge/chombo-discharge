@@ -164,12 +164,11 @@ public:
 #if CH_SPACEDIM == 3
   /**
    * @brief Append this body's interface, as triangles in physical coordinates.
-   * @details The interface is the embedded boundary inside this cell: the polygons the body holds
-   *          that belong to no cell face. Each is written as a fan of triangles, nine reals per
-   *          triangle, so that the result can be gathered across ranks and written as one surface.
-   *          Nothing is appended by a body that is not cut. Coordinates are formed from the cell
-   *          index rather than the cell centre, so that a vertex two cells share -- a point on
-   *          their common face, or a crossing on a common edge -- is the same double from both.
+   * @details The interface is the embedded boundary inside this cell: the polygons the body holds that belong to no
+   * cell face. Each is written as a fan of triangles, nine reals per triangle, so that the result can be
+   * gathered across ranks and written as one surface. Nothing is appended by a body that is not cut.
+   * Coordinates are formed from the cell index rather than the cell centre, so that a vertex two cells share
+   * -- a point on their common face, or a crossing on a common edge -- is the same double from both.
    * @param[in,out] a_facets Coordinates to append to.
    * @param[in]     a_cell   Index of this cell.
    * @param[in]     a_probLo Lower-left corner of the domain.
@@ -190,10 +189,10 @@ public:
 
   /**
    * @brief Replace one face's chord with the chords of the children that cover it.
-   * @details The face is described at the resolution of the level below rather than this cell's,
-   *          which is what makes it agree with cells on the other side of a refinement boundary.
-   *          The interface is dropped with it, since it was built to meet the chord being replaced;
-   *          call closeInterface once every face that needs restricting has been.
+   * @details The face is described at the resolution of the level below rather than this cell's, which is what makes it
+   * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
+   * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
+   * been.
    * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
    * @param[in] a_dir      Direction of the face.
    * @param[in] a_side     Side of the cell the face is on.
@@ -204,10 +203,9 @@ public:
 
   /**
    * @brief Rebuild the interface from the face polygons this body holds.
-   * @details Every face-polygon edge that no other face polygon carries in reverse bounds the
-   *          interface, and walking those edges gives its loops. Used instead of the crossing loops
-   *          once a face has been restricted, since a restricted face has vertices that are not
-   *          crossings of this cell's edges at all.
+   * @details Every face-polygon edge that no other face polygon carries in reverse bounds the interface, and walking
+   * those edges gives its loops. Used instead of the crossing loops once a face has been restricted, since a
+   * restricted face has vertices that are not crossings of this cell's edges at all.
    * @return True if every loop closed and the result fitted in the body's storage.
    */
   bool
@@ -343,11 +341,10 @@ protected:
 #if CH_SPACEDIM == 3
   /**
    * @brief Merge coplanar polygons into the boundary of their union.
-   * @details An edge shared by two of them is interior, so cancelling every edge that appears
-   *          reversed among the others leaves the union's boundary, and walking what remains gives
-   *          it in order. Collinear vertices are then dropped, which is what lets a sub-face's edge
-   *          along a cell edge compare equal to the coarse face's edge beside it. The union need
-   *          not be connected, and a union of no area is an answer rather than a failure.
+   * @details An edge shared by two of them is interior, so cancelling every edge that appears reversed among the others
+   * leaves the union's boundary, and walking what remains gives it in order. Collinear vertices are then
+   * dropped, which is what lets a sub-face's edge along a cell edge compare equal to the coarse face's edge
+   * beside it. The union need not be connected, and a union of no area is an answer rather than a failure.
    * @param[in]  a_in      Polygons to merge, all in one plane.
    * @param[in]  a_num     How many.
    * @param[out] a_out     The union's boundary, one polygon per connected piece.
