@@ -20,9 +20,9 @@ Making a non-empty ``ComputationalGeometry`` class requires that you inherit fro
 .. _ComputationalGeometryMembers:		    
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :language: c++
-   :caption: List of all data member of the ``ComputationalGeometry`` base class. Highlighted members must be instantiated by the user in order to create a new geometry.
-   :lines: 166-204
-   :emphasize-lines: 4, 24, 29	   
+   :caption: Data members of the ``ComputationalGeometry`` base class that describe the geometry. Highlighted members must be instantiated by the user in order to create a new geometry.
+   :lines: 279-347
+   :emphasize-lines: 49, 54, 69
    :dedent: 2
 
 Here, ``m_eps0`` is the *relative gas permittivity* (which is virtually always 1), ``m_electrodes`` are the electrodes for the geometry and ``m_dielectrics`` are the dielectrics for the geometry.
@@ -120,7 +120,7 @@ It is possible to retrieve the implicit functions for the electrodes and dielect
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :caption: Member functions for retrieving the defined electrodes and dielectrics. 
    :language: c++
-   :lines: 51-63
+   :lines: 55-67
    :dedent: 2
 
 Obtaining the implicit functions for each part can be useful when determining which object is closest to some physical location :math:`\mathbf{x}`.

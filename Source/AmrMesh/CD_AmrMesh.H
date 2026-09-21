@@ -1585,6 +1585,18 @@ public:
   regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /**
+   * @brief Regrid AMR onto given grids. As the tag version, but the boxes of every level are handed in rather than
+   * generated.
+   * @details a_boxes[lvl] are the boxes on level lvl; level 0 is ignored and always the domain split of the
+   * coarsest domain. The finest level is the last level with boxes, capped by the AMR and simulation depths. The
+   * boxes must be disjoint on each level and properly nested; nothing here checks that.
+   * @param[in] a_boxes Boxes per level.
+   * @param[in] a_lmin  Coarsest grid level allowed to change.
+   */
+  void
+  regridAmr(const Vector<Vector<Box>>& a_boxes, const int a_lmin);
+
+  /**
    * @brief Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm.
    * @param[in] a_realm Realm name
    * @param[in] a_procs Processor IDs
@@ -2452,6 +2464,24 @@ protected:
    */
   void
   buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+
+  /**
+   * @brief Build new internal AMR grids from given boxes.
+   * @details Sets m_finestLevel from the boxes and fills m_grids with them, load balanced as the generated grids
+   * are. See regridAmr(Vector<Vector<Box>>, int) for the meaning of a_boxes.
+   * @param[in] a_boxes Boxes per level.
+   * @param[in] a_lmin  Coarsest grid level which changes.
+   */
+  void
+  buildGrids(const Vector<Vector<Box>>& a_boxes, const int a_lmin);
+
+  /**
+   * @brief Load balance new boxes and define m_grids from them, for levels a_lmin through m_finestLevel.
+   * @param[in,out] a_boxes Boxes per level, up to at least m_finestLevel; sorted in place.
+   * @param[in]     a_lmin  Coarsest grid level which changes; grids below it are kept.
+   */
+  void
+  defineGrids(Vector<Vector<Box>>& a_boxes, const int a_lmin);
 
   /**
    * @brief Build copiers for copying between realms
