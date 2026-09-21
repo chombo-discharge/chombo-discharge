@@ -11,6 +11,7 @@
  */
 
 // Std includes
+#include <algorithm>
 #include <cmath>
 
 // Chombo includes
@@ -814,6 +815,24 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
 }
 
 #endif
+
+int
+CutCellBody::numPolygons() const noexcept
+{
+  return m_numPolygons;
+}
+
+int
+CutCellBody::widestPolygon() const noexcept
+{
+  int widest = 0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    widest = std::max(widest, m_polygon[ip].m_numVertices);
+  }
+
+  return widest;
+}
 
 void
 CutCellBody::accumulateMoments() noexcept

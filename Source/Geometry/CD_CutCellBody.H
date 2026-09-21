@@ -219,27 +219,15 @@ public:
    * @brief How many polygons this body holds.
    * @return Number of polygons.
    */
-  inline int
-  numPolygons() const noexcept
-  {
-    return m_numPolygons;
-  }
+  int
+  numPolygons() const noexcept;
 
   /**
    * @brief Largest number of vertices any of this body's polygons holds.
    * @return Vertex count of the widest polygon.
    */
-  inline int
-  widestPolygon() const noexcept
-  {
-    int widest = 0;
-
-    for (int ip = 0; ip < m_numPolygons; ip++) {
-      widest = std::max(widest, m_polygon[ip].m_numVertices);
-    }
-
-    return widest;
-  }
+  int
+  widestPolygon() const noexcept;
 
   /**
    * @brief Residual in the identity the moments must satisfy among themselves.
