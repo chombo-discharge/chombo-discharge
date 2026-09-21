@@ -509,6 +509,56 @@ ComputationalGeometry::getNumGridLevels() const noexcept
   return m_domains.size();
 }
 
+GeometryService::InOut
+ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::classify");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::classify" << endl;
+  }
+
+  if (a_level < 0 || a_level >= m_boxes.size()) {
+    MayDay::Error("ComputationalGeometry::classify - no such level");
+  }
+  if (a_box.isEmpty() || !m_domains[a_level].domainBox().contains(a_box)) {
+    MayDay::Error("ComputationalGeometry::classify - the box is empty or not inside the level's domain");
+  }
+
+  const Vector<Box>&                    boxes = m_boxes[a_level];
+  const Vector<GeometryService::InOut>& types = this->types(a_phase)[a_level];
+
+  bool anyRegular = false;
+  bool anyCovered = false;
+
+  for (int i = 0; i < boxes.size(); i++) {
+    if (!boxes[i].intersectsNotEmpty(a_box)) {
+      continue;
+    }
+
+    switch (types[i]) {
+    case GeometryService::Regular: {
+      anyRegular = true;
+
+      break;
+    }
+    case GeometryService::Covered: {
+      anyCovered = true;
+
+      break;
+    }
+    default: {
+      return GeometryService::Irregular;
+    }
+    }
+  }
+
+  if (anyRegular && anyCovered) {
+    return GeometryService::Irregular;
+  }
+
+  return anyCovered ? GeometryService::Covered : GeometryService::Regular;
+}
+
 int
 ComputationalGeometry::getStartLevel() const noexcept
 {
