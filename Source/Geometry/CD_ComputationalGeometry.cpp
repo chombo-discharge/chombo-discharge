@@ -56,7 +56,7 @@ ComputationalGeometry::ComputationalGeometry()
     m_minBlockSize(8),
     m_maxBlockSize(8),
     m_profile(false),
-    m_verbosity(0)
+    m_verbose(false)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
@@ -64,9 +64,9 @@ ComputationalGeometry::ComputationalGeometry()
 
   ParmParse pp("ComputationalGeometry");
 
-  pp.query("verbosity", m_verbosity);
+  pp.query("verbose", m_verbose);
 
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
   }
 
@@ -88,7 +88,7 @@ ComputationalGeometry::ComputationalGeometry()
 ComputationalGeometry::~ComputationalGeometry()
 {
   CH_TIME("ComputationalGeometry::~ComputationalGeometry()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::~ComputationalGeometry()" << endl;
   }
 }
@@ -97,7 +97,7 @@ void
 ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::useScanShop(ProblemDomain)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::useScanShop(ProblemDomain)" << endl;
   }
 
@@ -111,7 +111,7 @@ void
 ComputationalGeometry::usePolyhedralShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::usePolyhedralShop(ProblemDomain)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::usePolyhedralShop(ProblemDomain)" << endl;
   }
 
@@ -123,7 +123,7 @@ void
 ComputationalGeometry::useChomboShop()
 {
   CH_TIME("ComputationalGeometry::useChomboShop()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::useChomboShop()" << endl;
   }
 
@@ -137,7 +137,7 @@ const Vector<Dielectric>&
 ComputationalGeometry::getDielectrics() const
 {
   CH_TIME("ComputationalGeometry::getDielectrics()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getDielectrics()" << endl;
   }
 
@@ -148,7 +148,7 @@ const Vector<Electrode>&
 ComputationalGeometry::getElectrodes() const
 {
   CH_TIME("ComputationalGeometry::getElectrodes()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getElectrodes()" << endl;
   }
 
@@ -159,7 +159,7 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getGasImplicitFunction() const
 {
   CH_TIME("ComputationalGeometry::getGasImplicitFunction()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getGasImplicitFunction()" << endl;
   }
 
@@ -170,7 +170,7 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getSolidImplicitFunction() const
 {
   CH_TIME("ComputationalGeometry::getSolidImplicitFunction()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getSolidImplicitFunction()" << endl;
   }
 
@@ -181,7 +181,7 @@ const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getImplicitFunction(phase::which_phase)" << endl;
   }
 
@@ -192,7 +192,7 @@ Real
 ComputationalGeometry::getGasPermittivity() const
 {
   CH_TIME("ComputationalGeometry::getGasPermittivity()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getGasPermittivity()" << endl;
   }
 
@@ -203,7 +203,7 @@ const RefCountedPtr<MultiFluidIndexSpace>&
 ComputationalGeometry::getMfIndexSpace() const
 {
   CH_TIME("ComputationalGeometry::getMfIndexSpace()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::getMfIndexSpace()" << endl;
   }
 
@@ -214,7 +214,7 @@ void
 ComputationalGeometry::setDielectrics(const Vector<Dielectric>& a_dielectrics)
 {
   CH_TIME("ComputationalGeometry::setDielectrics(Vector<Dielectric>)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::setDielectrics(Vector<Dielectric>)" << endl;
   }
 
@@ -225,7 +225,7 @@ void
 ComputationalGeometry::setElectrodes(const Vector<Electrode>& a_electrodes)
 {
   CH_TIME("ComputationalGeometry::setElectrodes(Vector<Electrode>)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::setElectrodes(Vector<Electrode>)" << endl;
   }
 
@@ -236,7 +236,7 @@ void
 ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 {
   CH_TIME("ComputationalGeometry::setGasPermittivity(Real)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::setGasPermittivity(Real)" << endl;
   }
 
@@ -252,7 +252,7 @@ ComputationalGeometry::buildGeometries(const ProblemDomain& a_finestDomain,
                                        const int            a_maxCoarsen)
 {
   CH_TIME("ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)" << endl;
   }
 
@@ -291,7 +291,7 @@ void
 ComputationalGeometry::buildImplicitFunctions()
 {
   CH_TIME("ComputationalGeometry::buildImplicitFunctions()");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildImplicitFunctions()" << endl;
   }
 
@@ -340,7 +340,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const int            a_maxGhostEB)
 {
   CH_TIME("ComputationalGeometry::makeGrids");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::makeGrids" << endl;
   }
 
@@ -593,7 +593,7 @@ void
 ComputationalGeometry::buildStartLevel()
 {
   CH_TIME("ComputationalGeometry::buildStartLevel");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildStartLevel" << endl;
   }
 
@@ -608,7 +608,7 @@ void
 ComputationalGeometry::buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vector<Vector<int>>& a_numChildren)
 {
   CH_TIME("ComputationalGeometry::buildFinerLevels");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildFinerLevels" << endl;
   }
 
@@ -683,7 +683,7 @@ ComputationalGeometry::classifyBoxes(const Vector<Box>&              a_boxes,
                                      Vector<GeometryService::InOut>& a_solidTypes) const
 {
   CH_TIME("ComputationalGeometry::classifyBoxes");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::classifyBoxes" << endl;
   }
 
@@ -751,7 +751,7 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
                                   const Vector<GeometryService::InOut>& a_solidTypes) const
 {
   CH_TIME("ComputationalGeometry::splitFlags");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::splitFlags" << endl;
   }
 
@@ -781,7 +781,7 @@ GeometryService::InOut
 ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::classifyBox");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::classifyBox" << endl;
   }
 
@@ -834,7 +834,7 @@ ComputationalGeometry::SplitReason
 ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::exceedsCurvature");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::exceedsCurvature" << endl;
   }
 
@@ -944,7 +944,7 @@ void
 ComputationalGeometry::makeTiles()
 {
   CH_TIME("ComputationalGeometry::makeTiles");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::makeTiles" << endl;
   }
 
@@ -990,7 +990,7 @@ Vector<int>
 ComputationalGeometry::latticeTable(const int a_level) const
 {
   CH_TIME("ComputationalGeometry::latticeTable");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::latticeTable" << endl;
   }
 
@@ -1060,7 +1060,7 @@ Vector<int>
 ComputationalGeometry::sortTilesByKey(const int a_level) const
 {
   CH_TIME("ComputationalGeometry::sortTilesByKey");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::sortTilesByKey" << endl;
   }
 
@@ -1121,7 +1121,7 @@ ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_f
                                      Vector<Vector<int>>&                    a_tileHosts) const
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::classifyTiles" << endl;
   }
 
@@ -1222,7 +1222,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
                                      const Vector<Vector<int>>&                    a_tileHosts)
 {
   CH_TIME("ComputationalGeometry::decimateBoxes");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::decimateBoxes" << endl;
   }
 
@@ -1318,7 +1318,7 @@ void
 ComputationalGeometry::buildCoarserLevels()
 {
   CH_TIME("ComputationalGeometry::buildCoarserLevels");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildCoarserLevels" << endl;
   }
 
@@ -1376,7 +1376,7 @@ void
 ComputationalGeometry::reportGrids() const
 {
   CH_TIME("ComputationalGeometry::reportGrids");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::reportGrids" << endl;
   }
 
@@ -1410,7 +1410,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
                                         const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)" << endl;
   }
 
@@ -1461,7 +1461,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
                                           const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");
-  if (m_verbosity > 5) {
+  if (m_verbose) {
     pout() << "ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)" << endl;
   }
 
