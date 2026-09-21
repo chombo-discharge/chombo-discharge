@@ -58,8 +58,14 @@ PolyhedralEBGraph::define(const BaseIF&        a_function,
   m_numGhost = a_numGhost;
 
   this->defineGrids(a_cutTiles);
-  this->defineCells(a_function, a_volumeThreshold);
-  this->defineOuterFaces();
+
+  // one on every cell some tile of this level carries, zero elsewhere, with one ghost cell
+  LevelData<BaseFab<int>> carried;
+
+  this->markCarried(carried);
+
+  this->defineCells(a_function, a_volumeThreshold, carried);
+  this->defineOuterFaces(carried);
 
   m_isDefined = true;
 }
@@ -86,11 +92,13 @@ PolyhedralEBGraph::defineGrids(const Vector<Box>& a_cutTiles)
   m_cutCells.define(m_grids);
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
-  m_refined.define(m_grids, 1, IntVect::Unit);
+  m_refined.define(m_grids, 1, 2 * IntVect::Unit);
 }
 
 void
-PolyhedralEBGraph::defineCells(const BaseIF& a_function, const Real a_volumeThreshold)
+PolyhedralEBGraph::defineCells(const BaseIF&                  a_function,
+                               const Real                     a_volumeThreshold,
+                               const LevelData<BaseFab<int>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineCells");
 
@@ -220,7 +228,27 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const Real a_volumeThre
   // ghost cells another tile carries take that tile's state
   m_cellStates.exchange();
 
-  m_surfaces.define(m_grids, 1, IntVect::Zero, IVSFABFactory<CutCellSurface>(m_cutCells));
+  // The surfaces are kept with ghost cells, so that a box holds its neighbours' cut cells' surfaces as well: each
+  // box's set takes in the ghost cells that are cut and that some tile carries, which is exactly the set the
+  // owning tiles hold in that region, and the exchange fills them.
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box grown = grow(m_grids[dit()], m_numGhost) & domainBox;
+
+    const BaseFab<int>& states  = m_cellStates[dit()];
+    const BaseFab<int>& carried = a_carried[dit()];
+
+    IntVectSet& cut = m_cutCells[dit()];
+
+    for (BoxIterator bit(grown); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (!m_grids[dit()].contains(iv) && states(iv, 0) == s_cut && carried(iv, 0) != 0) {
+        cut |= iv;
+      }
+    }
+  }
+
+  m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_cutCells));
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box         box      = m_grids[dit()];
@@ -241,30 +269,37 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const Real a_volumeThre
 
     CH_assert(next == surfaces.size());
   }
+
+  m_surfaces.exchange();
 }
 
 void
-PolyhedralEBGraph::defineOuterFaces()
+PolyhedralEBGraph::markCarried(LevelData<BaseFab<int>>& a_carried) const
+{
+  CH_TIME("PolyhedralEBGraph::markCarried");
+
+  // One in the valid cells, zero in the ghost cells, and an exchange fills the ghost cells another tile covers. A
+  // ghost cell the exchange leaves at zero is carried by no tile of this level.
+  a_carried.define(m_grids, 1, m_numGhost * IntVect::Unit);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    a_carried[dit()].setVal(0);
+    a_carried[dit()].setVal(1, m_grids[dit()], 0);
+  }
+
+  a_carried.exchange();
+}
+
+void
+PolyhedralEBGraph::defineOuterFaces(const LevelData<BaseFab<int>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineOuterFaces");
 
   const Box& domainBox = m_domain.domainBox();
 
-  // A marker that is one on every cell a tile of this level carries and zero elsewhere: one in the valid cells,
-  // zero in the ghost cells, and an exchange fills the ghost cells another tile covers. A ghost cell the exchange
-  // leaves at zero is carried by no tile of this level.
-  LevelData<BaseFab<int>> carried(m_grids, 1, IntVect::Unit);
-
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    carried[dit()].setVal(0);
-    carried[dit()].setVal(1, m_grids[dit()], 0);
-  }
-
-  carried.exchange();
-
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box           box    = m_grids[dit()];
-    const BaseFab<int>& marker = carried[dit()];
+    const BaseFab<int>& marker = a_carried[dit()];
 
     BaseFab<int>& faces = m_faceStates[dit()];
 
@@ -314,7 +349,7 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
   coarsen(coarsenedFine, a_fine.m_grids, 2);
 
   LevelData<BaseFab<int>> fineMarker(coarsenedFine, 1, IntVect::Zero);
-  LevelData<BaseFab<int>> coarMarker(a_coarse.m_grids, 1, IntVect::Unit);
+  LevelData<BaseFab<int>> coarMarker(a_coarse.m_grids, 1, 2 * IntVect::Unit);
 
   for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
     fineMarker[dit()].setVal(1);
@@ -324,7 +359,7 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
     coarMarker[dit()].setVal(0);
   }
 
-  const Copier copier(coarsenedFine, a_coarse.m_grids, a_coarse.m_domain, IntVect::Unit);
+  const Copier copier(coarsenedFine, a_coarse.m_grids, a_coarse.m_domain, 2 * IntVect::Unit);
 
   fineMarker.copyTo(Interval(0, 0), coarMarker, Interval(0, 0), copier);
 
@@ -335,8 +370,9 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
     BaseFab<int>& refined = a_coarse.m_refined[dit()];
     BaseFab<int>& faces   = a_coarse.m_faceStates[dit()];
 
-    // the mask keeps one ghost cell, so a box knows whether its neighbours' cells are refined as well
-    refined.copy(marker, grow(box, 1) & domainBox);
+    // the mask keeps two ghost cells, so a box knows whether its neighbours' cells are refined, and their
+    // neighbours' in turn, which is what rebuilding a neighbour's body on a level boundary asks
+    refined.copy(marker, grow(box, 2) & domainBox);
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();

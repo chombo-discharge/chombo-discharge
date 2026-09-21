@@ -163,7 +163,7 @@ public:
   getGrids() const noexcept;
 
   /**
-   * @brief The cut cells of every box.
+   * @brief The cut cells of every box, its own and those of its ghost region that some tile carries.
    * @return One set per box.
    */
   const LayoutData<IntVectSet>&
@@ -184,7 +184,7 @@ public:
   getFaceStates() const noexcept;
 
   /**
-   * @brief Whether the finer level carries a cell, one where it does, with one ghost cell; all zero until link has
+   * @brief Whether the finer level carries a cell, one where it does, with two ghost cells; all zero until link has
    * run.
    * @return One component per cell.
    */
@@ -192,8 +192,8 @@ public:
   getRefinedMask() const noexcept;
 
   /**
-   * @brief The surface every cut cell is reconstructed from.
-   * @return One surface per cut cell.
+   * @brief The surface every cut cell is reconstructed from, in the box's own cells and in its ghost cells.
+   * @return One surface per cut cell of every box's set.
    */
   const LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&
   getSurfaces() const noexcept;
@@ -262,19 +262,29 @@ protected:
   defineGrids(const Vector<Box>& a_cutTiles);
 
   /**
-   * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces,
-   *        and set the face states the apertures decide.
-   * @param[in] a_function        Implicit function.
-   * @param[in] a_volumeThreshold Volume-fraction threshold.
+   * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another
+   *        tile covers, zero elsewhere.
+   * @param[out] a_carried The marker, defined here over the layout with the cell states' ghost width.
    */
   void
-  defineCells(const BaseIF& a_function, const Real a_volumeThreshold);
+  markCarried(LevelData<BaseFab<int>>& a_carried) const;
+
+  /**
+   * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces
+   *        with ghost cells, and set the face states the apertures decide.
+   * @param[in] a_function        Implicit function.
+   * @param[in] a_volumeThreshold Volume-fraction threshold.
+   * @param[in] a_carried         The marker from markCarried.
+   */
+  void
+  defineCells(const BaseIF& a_function, const Real a_volumeThreshold, const LevelData<BaseFab<int>>& a_carried);
 
   /**
    * @brief Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.
+   * @param[in] a_carried The marker from markCarried.
    */
   void
-  defineOuterFaces();
+  defineOuterFaces(const LevelData<BaseFab<int>>& a_carried);
 };
 
 #include <CD_NamespaceFooter.H>
