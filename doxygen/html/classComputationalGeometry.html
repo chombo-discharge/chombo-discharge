@@ -77,9 +77,12 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-types">Protected Types</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classComputationalGeometry-members.html">List of all members</a>  </div>
@@ -142,6 +145,21 @@ Inheritance diagram for ComputationalGeometry:</div>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:ae8deff95870b5717a2c7d3c0010e4868" id="r_ae8deff95870b5717a2c7d3c0010e4868"><td class="memItemLeft" align="right" valign="top"><a id="ae8deff95870b5717a2c7d3c0010e4868" name="ae8deff95870b5717a2c7d3c0010e4868"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Vec3</b> = EBGeometry::Vec3T&lt; Real &gt;</td></tr>
+<tr class="memdesc:ae8deff95870b5717a2c7d3c0010e4868"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coordinate of a bounding volume of the spatial index. <br /></td></tr>
+<tr class="separator:ae8deff95870b5717a2c7d3c0010e4868"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aceb58f01ea346562d544e2183d2223e0" id="r_aceb58f01ea346562d544e2183d2223e0"><td class="memItemLeft" align="right" valign="top"><a id="aceb58f01ea346562d544e2183d2223e0" name="aceb58f01ea346562d544e2183d2223e0"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>BV</b> = EBGeometry::BoundingVolumes::AABBT&lt; Real &gt;</td></tr>
+<tr class="memdesc:aceb58f01ea346562d544e2183d2223e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bounding volume of the spatial index over the boxes of a level. <br /></td></tr>
+<tr class="separator:aceb58f01ea346562d544e2183d2223e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5faab96c144a5b01b0b1e7361956c66" id="r_ac5faab96c144a5b01b0b1e7361956c66"><td class="memItemLeft" align="right" valign="top"><a id="ac5faab96c144a5b01b0b1e7361956c66" name="ac5faab96c144a5b01b0b1e7361956c66"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>BoxTree</b> = EBGeometry::BVH::PackedBVH&lt; Real, int, <a class="el" href="classComputationalGeometry.html#af0ca155efadab242a7de241c3b09a08a">K</a>, EBGeometry::BVH::ValueStorage&lt; int &gt; &gt;</td></tr>
+<tr class="memdesc:ac5faab96c144a5b01b0b1e7361956c66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Spatial index over the boxes of one level. The primitives are the boxes' indices into that level's list, stored by value, and every bounding volume is the box itself in index space, so a query answers with candidates that the exact box test then filters. <br /></td></tr>
+<tr class="separator:ac5faab96c144a5b01b0b1e7361956c66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae960550a219bf0425348e68c7cabe604" id="r_ae960550a219bf0425348e68c7cabe604"><td class="memItemLeft" align="right" valign="top"><a id="ae960550a219bf0425348e68c7cabe604" name="ae960550a219bf0425348e68c7cabe604"></a>
@@ -201,6 +219,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memitem:a640e3245c84120f86bac89cafeb67e28" id="r_a640e3245c84120f86bac89cafeb67e28"><td class="memItemLeft" align="right" valign="top">GeometryService::InOut&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a640e3245c84120f86bac89cafeb67e28">classify</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a640e3245c84120f86bac89cafeb67e28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify a box on a level from the grids makeGrids built.  <br /></td></tr>
 <tr class="separator:a640e3245c84120f86bac89cafeb67e28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab738bfe91a6d4bbc984553ea5fb2e686" id="r_ab738bfe91a6d4bbc984553ea5fb2e686"><td class="memItemLeft" align="right" valign="top">GeometryService::InOut&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#ab738bfe91a6d4bbc984553ea5fb2e686">classify</a> (const Box &amp;a_box, const ProblemDomain &amp;a_domain, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:ab738bfe91a6d4bbc984553ea5fb2e686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify a box on any domain at or finer than a level makeGrids built.  <br /></td></tr>
+<tr class="separator:ab738bfe91a6d4bbc984553ea5fb2e686"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a606f5124e0705bab3923480e17ee95" id="r_a2a606f5124e0705bab3923480e17ee95"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a2a606f5124e0705bab3923480e17ee95">getStartLevel</a> () const noexcept</td></tr>
 <tr class="memdesc:a2a606f5124e0705bab3923480e17ee95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.  <br /></td></tr>
 <tr class="separator:a2a606f5124e0705bab3923480e17ee95"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,6 +252,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memitem:a01a9788004e72269e1b6a1421090bd0d" id="r_a01a9788004e72269e1b6a1421090bd0d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a01a9788004e72269e1b6a1421090bd0d">buildGeometries</a> (const ProblemDomain &amp;a_finestDomain, const RealVect &amp;a_probLo, const Real a_finestDx, const int a_nCellMax, const int a_maxGhostEB, const int a_maxCoarsen=-1)</td></tr>
 <tr class="memdesc:a01a9788004e72269e1b6a1421090bd0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build geometries and the MFIndexSpace.  <br /></td></tr>
 <tr class="separator:a01a9788004e72269e1b6a1421090bd0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:af0ca155efadab242a7de241c3b09a08a" id="r_af0ca155efadab242a7de241c3b09a08a"><td class="memItemLeft" align="right" valign="top"><a id="af0ca155efadab242a7de241c3b09a08a" name="af0ca155efadab242a7de241c3b09a08a"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>K</b> = 4</td></tr>
+<tr class="memdesc:af0ca155efadab242a7de241c3b09a08a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Branching factor of the spatial index over the boxes of a level. <br /></td></tr>
+<tr class="separator:af0ca155efadab242a7de241c3b09a08a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -287,21 +315,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memitem:a8c2a72c6af119d05133f0df7cea930e2" id="r_a8c2a72c6af119d05133f0df7cea930e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a8c2a72c6af119d05133f0df7cea930e2">classifyTiles</a> (const Vector&lt; Vector&lt; int &gt; &gt; &amp;a_firstChild, const Vector&lt; Vector&lt; int &gt; &gt; &amp;a_numChildren, Vector&lt; Vector&lt; GeometryService::InOut &gt; &gt; &amp;a_gasTileTypes, Vector&lt; Vector&lt; GeometryService::InOut &gt; &gt; &amp;a_solidTileTypes, Vector&lt; Vector&lt; int &gt; &gt; &amp;a_tileHosts) const</td></tr>
 <tr class="memdesc:a8c2a72c6af119d05133f0df7cea930e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step 3: place every tile of every level in the boxes and classify it in both phases.  <br /></td></tr>
 <tr class="separator:a8c2a72c6af119d05133f0df7cea930e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7de4871821340459b9689163cc3140c5" id="r_a7de4871821340459b9689163cc3140c5"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a7de4871821340459b9689163cc3140c5">latticeTable</a> (const int a_level) const</td></tr>
-<tr class="memdesc:a7de4871821340459b9689163cc3140c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the box of a whole level that contains a point.  <br /></td></tr>
-<tr class="separator:a7de4871821340459b9689163cc3140c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d6e03a04688337b74c27abdcf1c3b3a" id="r_a7d6e03a04688337b74c27abdcf1c3b3a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a7d6e03a04688337b74c27abdcf1c3b3a">latticeLookup</a> (const Vector&lt; int &gt; &amp;a_table, const int a_level, const IntVect &amp;a_point) const</td></tr>
-<tr class="memdesc:a7d6e03a04688337b74c27abdcf1c3b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look a point up in a lattice table.  <br /></td></tr>
-<tr class="separator:a7d6e03a04688337b74c27abdcf1c3b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab63000a1b3ec6d9183f387cd390fad56" id="r_ab63000a1b3ec6d9183f387cd390fad56"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#ab63000a1b3ec6d9183f387cd390fad56">superTileKey</a> (const IntVect &amp;a_cell) const noexcept</td></tr>
-<tr class="memdesc:ab63000a1b3ec6d9183f387cd390fad56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key of the super-tile a cell lies in, for finding tiles.  <br /></td></tr>
-<tr class="separator:ab63000a1b3ec6d9183f387cd390fad56"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c11c200289b4ae2af2d689a44ad34bc" id="r_a8c11c200289b4ae2af2d689a44ad34bc"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a8c11c200289b4ae2af2d689a44ad34bc">tilesMeeting</a> (const int a_level, const Vector&lt; int &gt; &amp;a_order, const Box &amp;a_box) const</td></tr>
-<tr class="memdesc:a8c11c200289b4ae2af2d689a44ad34bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tiles of a level intersecting a box, found through their super-tile keys.  <br /></td></tr>
-<tr class="separator:a8c11c200289b4ae2af2d689a44ad34bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e90937319b812c805eaaedfbb36e8e6" id="r_a4e90937319b812c805eaaedfbb36e8e6"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a4e90937319b812c805eaaedfbb36e8e6">sortTilesByKey</a> (const int a_level) const</td></tr>
-<tr class="memdesc:a4e90937319b812c805eaaedfbb36e8e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tile indices of a level sorted by super-tile key.  <br /></td></tr>
-<tr class="separator:a4e90937319b812c805eaaedfbb36e8e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32f6514239713043ad1956941a616828" id="r_a32f6514239713043ad1956941a616828"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a32f6514239713043ad1956941a616828">buildBoxTrees</a> ()</td></tr>
+<tr class="memdesc:a32f6514239713043ad1956941a616828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the spatial index over the boxes of every level.  <br /></td></tr>
+<tr class="separator:a32f6514239713043ad1956941a616828"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a8c8a9f62e2c87b1ebbd519b77bbe62" id="r_a0a8c8a9f62e2c87b1ebbd519b77bbe62"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">BoxTree</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a0a8c8a9f62e2c87b1ebbd519b77bbe62">buildTree</a> (const Vector&lt; Box &gt; &amp;a_boxes) const</td></tr>
+<tr class="memdesc:a0a8c8a9f62e2c87b1ebbd519b77bbe62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build one spatial index over a list of boxes.  <br /></td></tr>
+<tr class="separator:a0a8c8a9f62e2c87b1ebbd519b77bbe62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a317de2bde27e10eb5293f97aa3335417" id="r_a317de2bde27e10eb5293f97aa3335417"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a317de2bde27e10eb5293f97aa3335417">buildTileTrees</a> ()</td></tr>
+<tr class="memdesc:a317de2bde27e10eb5293f97aa3335417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the spatial index over the cut tiles of every level.  <br /></td></tr>
+<tr class="separator:a317de2bde27e10eb5293f97aa3335417"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98fc11e9fc5941bc160a43760da8b982" id="r_a98fc11e9fc5941bc160a43760da8b982"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a98fc11e9fc5941bc160a43760da8b982">buildBoxTree</a> (const int a_level)</td></tr>
+<tr class="memdesc:a98fc11e9fc5941bc160a43760da8b982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the spatial index over the boxes of one level.  <br /></td></tr>
+<tr class="separator:a98fc11e9fc5941bc160a43760da8b982"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc572554b8a402e289ba962afb6765ab" id="r_afc572554b8a402e289ba962afb6765ab"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#afc572554b8a402e289ba962afb6765ab">boxesMeeting</a> (const int a_level, const Box &amp;a_box) const</td></tr>
+<tr class="memdesc:afc572554b8a402e289ba962afb6765ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boxes of a level that intersect a box.  <br /></td></tr>
+<tr class="separator:afc572554b8a402e289ba962afb6765ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20d52b06abd4690f1c72c97896adce55" id="r_a20d52b06abd4690f1c72c97896adce55"><td class="memItemLeft" align="right" valign="top">Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a20d52b06abd4690f1c72c97896adce55">tilesMeeting</a> (const int a_level, const Box &amp;a_box) const</td></tr>
+<tr class="memdesc:a20d52b06abd4690f1c72c97896adce55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut tiles of a level that intersect a box.  <br /></td></tr>
+<tr class="separator:a20d52b06abd4690f1c72c97896adce55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1a66f4aec23b30eacb350056da9a626" id="r_af1a66f4aec23b30eacb350056da9a626"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#af1a66f4aec23b30eacb350056da9a626">containingBox</a> (const int a_level, const IntVect &amp;a_cell) const</td></tr>
+<tr class="memdesc:af1a66f4aec23b30eacb350056da9a626"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the box of a level that contains a cell, which one box does on a level that is whole.  <br /></td></tr>
+<tr class="separator:af1a66f4aec23b30eacb350056da9a626"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a413c116760d6f4a4a15d65d0c8b50188" id="r_a413c116760d6f4a4a15d65d0c8b50188"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a413c116760d6f4a4a15d65d0c8b50188">decimateBoxes</a> (const Vector&lt; Vector&lt; GeometryService::InOut &gt; &gt; &amp;a_gasTileTypes, const Vector&lt; Vector&lt; GeometryService::InOut &gt; &gt; &amp;a_solidTileTypes, const Vector&lt; Vector&lt; int &gt; &gt; &amp;a_tileHosts)</td></tr>
 <tr class="memdesc:a413c116760d6f4a4a15d65d0c8b50188"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step 4: cut every hit box down to what the tiles left of it, and replace the lists on the tiled levels with the result.  <br /></td></tr>
 <tr class="separator:a413c116760d6f4a4a15d65d0c8b50188"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -314,6 +348,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memitem:a51f7fcdeb1c6337ece3e050a531b7bee" id="r_a51f7fcdeb1c6337ece3e050a531b7bee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a51f7fcdeb1c6337ece3e050a531b7bee">buildSolidGeometry</a> (GeometryService *&amp;a_geoserver, const ProblemDomain &amp;a_finestDomain, const RealVect &amp;a_probLo, const Real a_finestDx)</td></tr>
 <tr class="memdesc:a51f7fcdeb1c6337ece3e050a531b7bee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics.  <br /></td></tr>
 <tr class="separator:a51f7fcdeb1c6337ece3e050a531b7bee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a88f4afb1c236dbf2991fa023096eef7e" id="r_a88f4afb1c236dbf2991fa023096eef7e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classComputationalGeometry.html#aceb58f01ea346562d544e2183d2223e0">BV</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a88f4afb1c236dbf2991fa023096eef7e">boundingVolume</a> (const Box &amp;a_box) noexcept</td></tr>
+<tr class="memdesc:a88f4afb1c236dbf2991fa023096eef7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The bounding volume of a box in index space, its cells taken as the unit cubes they are.  <br /></td></tr>
+<tr class="separator:a88f4afb1c236dbf2991fa023096eef7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d9106ab6e09c0a23147348d8412170" id="r_a30d9106ab6e09c0a23147348d8412170"><td class="memItemLeft" align="right" valign="top">static Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a30d9106ab6e09c0a23147348d8412170">meeting</a> (const std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">BoxTree</a> &gt; &amp;a_tree, const Vector&lt; Box &gt; &amp;a_boxes, const Box &amp;a_box)</td></tr>
+<tr class="memdesc:a30d9106ab6e09c0a23147348d8412170"><td class="mdescLeft">&#160;</td><td class="mdescRight">The boxes of a list that intersect a box, through the list's spatial index.  <br /></td></tr>
+<tr class="separator:a30d9106ab6e09c0a23147348d8412170"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -401,6 +444,14 @@ Vector&lt; Vector&lt; Box &gt; &gt;&#160;</td><td class="memItemRight" valign="b
 Vector&lt; Vector&lt; Box &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_boxes</b></td></tr>
 <tr class="memdesc:ab437e6bdb6be6f075076e0ab281b5818"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boxes per level, common to both phases. <br /></td></tr>
 <tr class="separator:ab437e6bdb6be6f075076e0ab281b5818"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a107bd05ee6c412738b6a3c6200630162" id="r_a107bd05ee6c412738b6a3c6200630162"><td class="memItemLeft" align="right" valign="top"><a id="a107bd05ee6c412738b6a3c6200630162" name="a107bd05ee6c412738b6a3c6200630162"></a>
+Vector&lt; std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">BoxTree</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_boxTrees</b></td></tr>
+<tr class="memdesc:a107bd05ee6c412738b6a3c6200630162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Spatial index over the boxes of every level, one tree per level, holding the boxes' indices into m_boxes. Null on a level with no boxes, and on every level until buildBoxTrees has run. <br /></td></tr>
+<tr class="separator:a107bd05ee6c412738b6a3c6200630162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a224f500660df6d50cc097f4cd4006ee0" id="r_a224f500660df6d50cc097f4cd4006ee0"><td class="memItemLeft" align="right" valign="top"><a id="a224f500660df6d50cc097f4cd4006ee0" name="a224f500660df6d50cc097f4cd4006ee0"></a>
+Vector&lt; std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">BoxTree</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_tileTrees</b></td></tr>
+<tr class="memdesc:a224f500660df6d50cc097f4cd4006ee0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Spatial index over the cut tiles of every level, one tree per level, holding the tiles' indices into m_cutTiles. Null on a level with no tiles, and on every level until buildTileTrees has run. <br /></td></tr>
+<tr class="separator:a224f500660df6d50cc097f4cd4006ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbc8057d3a3f0e5a18fc358a6e99c2b0" id="r_adbc8057d3a3f0e5a18fc358a6e99c2b0"><td class="memItemLeft" align="right" valign="top"><a id="adbc8057d3a3f0e5a18fc358a6e99c2b0" name="adbc8057d3a3f0e5a18fc358a6e99c2b0"></a>
 Vector&lt; Vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_splitCounts</b></td></tr>
 <tr class="memdesc:adbc8057d3a3f0e5a18fc358a6e99c2b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per level, the number of boxes that split for each SplitReason, and per level the number of tiles that lie in an irregular box (tagged) versus elsewhere (nesting), for the report. <br /></td></tr>
@@ -431,6 +482,10 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 <tr class="memitem:a6e7609964c13df5375d4f288f2fec9b3" id="r_a6e7609964c13df5375d4f288f2fec9b3"><td class="memItemLeft" align="right" valign="top">static constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a6e7609964c13df5375d4f288f2fec9b3">s_strictGeometry</a> = true</td></tr>
 <tr class="memdesc:a6e7609964c13df5375d4f288f2fec9b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cut cell whose body will not close stops the run.  <br /></td></tr>
 <tr class="separator:a6e7609964c13df5375d4f288f2fec9b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac440cca6ea45428a6d365ca6abfc765e" id="r_ac440cca6ea45428a6d365ca6abfc765e"><td class="memItemLeft" align="right" valign="top"><a id="ac440cca6ea45428a6d365ca6abfc765e" name="ac440cca6ea45428a6d365ca6abfc765e"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_treeLeafSize</b> = 8</td></tr>
+<tr class="memdesc:ac440cca6ea45428a6d365ca6abfc765e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boxes per leaf the spatial index over a level's boxes is built with. <br /></td></tr>
+<tr class="separator:ac440cca6ea45428a6d365ca6abfc765e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class for geometries. </p>
@@ -462,6 +517,149 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a88f4afb1c236dbf2991fa023096eef7e" name="a88f4afb1c236dbf2991fa023096eef7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88f4afb1c236dbf2991fa023096eef7e">&#9670;&#160;</a></span>boundingVolume()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classComputationalGeometry.html#aceb58f01ea346562d544e2183d2223e0">ComputationalGeometry::BV</a> ComputationalGeometry::boundingVolume </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The bounding volume of a box in index space, its cells taken as the unit cubes they are. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>The box. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Its bounds, [smallEnd, bigEnd + 1]. </dd></dl>
+
+</div>
+</div>
+<a id="afc572554b8a402e289ba962afb6765ab" name="afc572554b8a402e289ba962afb6765ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc572554b8a402e289ba962afb6765ab">&#9670;&#160;</a></span>boxesMeeting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; int &gt; ComputationalGeometry::boxesMeeting </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Boxes of a level that intersect a box. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, 0 being the coarsest. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box on that level. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Indices into m_boxes[a_level] of the boxes that intersect it, each once and in increasing order. </dd></dl>
+
+</div>
+</div>
+<a id="a98fc11e9fc5941bc160a43760da8b982" name="a98fc11e9fc5941bc160a43760da8b982"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98fc11e9fc5941bc160a43760da8b982">&#9670;&#160;</a></span>buildBoxTree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::buildBoxTree </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the spatial index over the boxes of one level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, 0 being the coarsest. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a32f6514239713043ad1956941a616828" name="a32f6514239713043ad1956941a616828"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32f6514239713043ad1956941a616828">&#9670;&#160;</a></span>buildBoxTrees()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::buildBoxTrees </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the spatial index over the boxes of every level. </p>
+<p>One tree per level over that level's boxes, built once the box lists are final. The primitives are the boxes' indices into the level's list and every bounding volume is the box itself, so a query returns the boxes whose bounds meet it and the caller applies the exact test. </p>
+
+</div>
+</div>
 <a id="a631f8640271e42fd1b9ab0ba96302e51" name="a631f8640271e42fd1b9ab0ba96302e51"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a631f8640271e42fd1b9ab0ba96302e51">&#9670;&#160;</a></span>buildCoarserLevels()</h2>
 
@@ -791,8 +989,71 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 
 </div>
 </div>
+<a id="a317de2bde27e10eb5293f97aa3335417" name="a317de2bde27e10eb5293f97aa3335417"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a317de2bde27e10eb5293f97aa3335417">&#9670;&#160;</a></span>buildTileTrees()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::buildTileTrees </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the spatial index over the cut tiles of every level. </p>
+<p>One tree per level over that level's tiles, as buildBoxTrees indexes its boxes. Built once the tiles exist, which is before the boxes are decimated. </p>
+
+</div>
+</div>
+<a id="a0a8c8a9f62e2c87b1ebbd519b77bbe62" name="a0a8c8a9f62e2c87b1ebbd519b77bbe62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a8c8a9f62e2c87b1ebbd519b77bbe62">&#9670;&#160;</a></span>buildTree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">ComputationalGeometry::BoxTree</a> &gt; ComputationalGeometry::buildTree </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build one spatial index over a list of boxes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>The boxes. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The tree, holding the boxes' indices into the list, or null if the list is empty. </dd></dl>
+
+</div>
+</div>
 <a id="a640e3245c84120f86bac89cafeb67e28" name="a640e3245c84120f86bac89cafeb67e28"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a640e3245c84120f86bac89cafeb67e28">&#9670;&#160;</a></span>classify()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a640e3245c84120f86bac89cafeb67e28">&#9670;&#160;</a></span>classify() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -824,10 +1085,55 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 </div><div class="memdoc">
 
 <p>Classify a box on a level from the grids makeGrids built. </p>
-<p>Every level is a partition of its domain into boxes, each classified per phase, so the box is regular if every box of the level it meets is regular in the phase, covered if every one is covered, and irregular otherwise &ndash; including when it meets both a regular and a covered box, since the surface must then lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves are the polyhedral graph's. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Every level is a partition of its domain into boxes, each classified per phase, so the box is regular if every box of the level it meets is regular in the phase, covered if every one is covered, and irregular otherwise &ndash; including when it meets both a regular and a covered box, since the surface must then lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves are the polyhedral graph's. A level the geometry built no boxes on &ndash; everything below it a leaf, so nothing refined that far &ndash; is answered by the level below it, coarsening as the domain overload does. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to classify, on the level's index space. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, 0 being the coarsest. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Regular, covered or irregular. </dd></dl>
+
+</div>
+</div>
+<a id="ab738bfe91a6d4bbc984553ea5fb2e686" name="ab738bfe91a6d4bbc984553ea5fb2e686"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab738bfe91a6d4bbc984553ea5fb2e686">&#9670;&#160;</a></span>classify() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">GeometryService::InOut ComputationalGeometry::classify </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Classify a box on any domain at or finer than a level makeGrids built. </p>
+<p>On a stored domain this is classify on that level. On a domain finer than every stored level &ndash; a simulation level above the stop domain, which the geometry does not describe &ndash; the box is coarsened onto the finest stored level and classified there: the coarsening of a box is met by every box the box itself would meet, so a regular or covered answer holds at the finer spacing, and irregular is the conservative answer it always is. The domain must be a refinement by powers of two of a stored one. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to classify, on a_domain's index space. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain the box lives on. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
   </table>
   </dd>
@@ -1016,6 +1322,52 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="af1a66f4aec23b30eacb350056da9a626" name="af1a66f4aec23b30eacb350056da9a626"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1a66f4aec23b30eacb350056da9a626">&#9670;&#160;</a></span>containingBox()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ComputationalGeometry::containingBox </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Index of the box of a level that contains a cell, which one box does on a level that is whole. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, at or below the start level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>Cell on that level. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Its box. A cell held by no box or by several stops the run, since the level is then not whole. </dd></dl>
 
 </div>
 </div>
@@ -1652,94 +2004,6 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 
 </div>
 </div>
-<a id="a7d6e03a04688337b74c27abdcf1c3b3a" name="a7d6e03a04688337b74c27abdcf1c3b3a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d6e03a04688337b74c27abdcf1c3b3a">&#9670;&#160;</a></span>latticeLookup()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int ComputationalGeometry::latticeLookup </td>
-          <td>(</td>
-          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_table</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_level</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const IntVect &amp;&#160;</td>
-          <td class="paramname"><em>a_point</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Look a point up in a lattice table. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_table</td><td>Table from latticeTable. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level the table was made for. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_point</td><td>Cell on that level. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Index of the box containing the cell. </dd></dl>
-
-</div>
-</div>
-<a id="a7de4871821340459b9689163cc3140c5" name="a7de4871821340459b9689163cc3140c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7de4871821340459b9689163cc3140c5">&#9670;&#160;</a></span>latticeTable()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; int &gt; ComputationalGeometry::latticeTable </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_level</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Index of the box of a whole level that contains a point. </p>
-<p>A whole level is a domainSplit of its domain to m_maxBlockSize, so the box holding a point is found from the point's position on that lattice; the table maps lattice cells to box indices. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, at or below the start level. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>One box index per lattice cell, in lexicographic order of the lattice. </dd></dl>
-
-</div>
-</div>
 <a id="a04a16d705cfb9c23315df1f48de28f6a" name="a04a16d705cfb9c23315df1f48de28f6a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a04a16d705cfb9c23315df1f48de28f6a">&#9670;&#160;</a></span>makeGrids()</h2>
 
@@ -1843,6 +2107,59 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 
 </div>
 </div>
+<a id="a30d9106ab6e09c0a23147348d8412170" name="a30d9106ab6e09c0a23147348d8412170"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30d9106ab6e09c0a23147348d8412170">&#9670;&#160;</a></span>meeting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; int &gt; ComputationalGeometry::meeting </td>
+          <td>(</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">BoxTree</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_tree</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The boxes of a list that intersect a box, through the list's spatial index. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tree</td><td>Index over the list, which may be null. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>The list. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to intersect with. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Indices into the list, each once and in increasing index order. Empty if the tree is null. </dd></dl>
+
+</div>
+</div>
 <a id="aaef5378dc9e98be715ae56b872dd2fc0" name="aaef5378dc9e98be715ae56b872dd2fc0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaef5378dc9e98be715ae56b872dd2fc0">&#9670;&#160;</a></span>setDielectrics()</h2>
 
@@ -1921,41 +2238,6 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 
 </div>
 </div>
-<a id="a4e90937319b812c805eaaedfbb36e8e6" name="a4e90937319b812c805eaaedfbb36e8e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e90937319b812c805eaaedfbb36e8e6">&#9670;&#160;</a></span>sortTilesByKey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; int &gt; ComputationalGeometry::sortTilesByKey </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_level</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Tile indices of a level sorted by super-tile key. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, above the start level. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The indices. </dd></dl>
-
-</div>
-</div>
 <a id="a62b2b1dd155f8d1094168c5046bb1aa5" name="a62b2b1dd155f8d1094168c5046bb1aa5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a62b2b1dd155f8d1094168c5046bb1aa5">&#9670;&#160;</a></span>splitFlags()</h2>
 
@@ -2016,43 +2298,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 
 </div>
 </div>
-<a id="ab63000a1b3ec6d9183f387cd390fad56" name="ab63000a1b3ec6d9183f387cd390fad56"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab63000a1b3ec6d9183f387cd390fad56">&#9670;&#160;</a></span>superTileKey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">long long ComputationalGeometry::superTileKey </td>
-          <td>(</td>
-          <td class="paramtype">const IntVect &amp;&#160;</td>
-          <td class="paramname"><em>a_cell</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Key of the super-tile a cell lies in, for finding tiles. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>Cell on some level. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Packed super-tile coordinates, 21 bits per direction. </dd></dl>
-
-</div>
-</div>
-<a id="a8c11c200289b4ae2af2d689a44ad34bc" name="a8c11c200289b4ae2af2d689a44ad34bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c11c200289b4ae2af2d689a44ad34bc">&#9670;&#160;</a></span>tilesMeeting()</h2>
+<a id="a20d52b06abd4690f1c72c97896adce55" name="a20d52b06abd4690f1c72c97896adce55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20d52b06abd4690f1c72c97896adce55">&#9670;&#160;</a></span>tilesMeeting()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2065,12 +2312,6 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
           <td>(</td>
           <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_level</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_order</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -2091,16 +2332,15 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 </table>
 </div><div class="memdoc">
 
-<p>Tiles of a level intersecting a box, found through their super-tile keys. </p>
-<p>The tiles of a level are indexed by the key of the super-tile they lie in, so the tiles meeting a box are found by looking up the keys of the super-tiles the box touches. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Cut tiles of a level that intersect a box. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, above the start level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Tile indices of the level sorted by super-tile key, from sortTilesByKey. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box on that level. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Indices into m_cutTiles[a_level] of the tiles that intersect the box. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Indices into m_cutTiles[a_level] of the tiles that intersect it, each once and in increasing order. </dd></dl>
 
 </div>
 </div>

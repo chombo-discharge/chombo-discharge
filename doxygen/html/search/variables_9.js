@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['k_0',['k',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray::K'],['../classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011',1,'TriangleCollection::K']]],
+  ['k_0',['k',['../classComputationalGeometry.html#af0ca155efadab242a7de241c3b09a08a',1,'ComputationalGeometry::K'],['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray::K'],['../classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011',1,'TriangleCollection::K']]],
   ['k1_5fx_1',['k1_x',['../structTracerParticle.html#a706f1b28b376e6bda0846dd3ababca0b',1,'TracerParticle']]],
   ['k1_5fy_2',['k1_y',['../structTracerParticle.html#afa6fd9528e0a1d469546c5f592579281',1,'TracerParticle']]],
   ['k1_5fz_3',['k1_z',['../structTracerParticle.html#a8649b2936bf2fd4f999d4bd933ea1cb7',1,'TracerParticle']]],

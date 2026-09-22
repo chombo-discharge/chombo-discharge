@@ -5,5 +5,6 @@ var searchData=
   ['bcoefptr_2',['bcoefptr',['../classMFHelmholtzSaturationChargeJumpBCFactory.html#add6f1774cceafac27095e61ed0c7a453',1,'MFHelmholtzSaturationChargeJumpBCFactory::BcoefPtr'],['../classMFHelmholtzJumpBC.html#a61156d11a5b573946d13dd03f82e03d9',1,'MFHelmholtzJumpBC::BcoefPtr'],['../classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05',1,'MFHelmholtzJumpBCFactory::BcoefPtr']]],
   ['binaryparticlereconcile_3',['BinaryParticleReconcile',['../namespaceParticleManagement.html#a355c356fabec1650406a887b59c2068f',1,'ParticleManagement']]],
   ['boxids_4',['BoxIDs',['../classLevelTiles.html#adbfa720456d7a7a78206e3f5f2d4decf',1,'LevelTiles']]],
-  ['bv_5',['BV',['../classTriangleCollection.html#a0ff4c4a67cc7f532d28dacca0801a250',1,'TriangleCollection']]]
+  ['boxtree_5',['BoxTree',['../classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66',1,'ComputationalGeometry']]],
+  ['bv_6',['bv',['../classComputationalGeometry.html#aceb58f01ea346562d544e2183d2223e0',1,'ComputationalGeometry::BV'],['../classTriangleCollection.html#a0ff4c4a67cc7f532d28dacca0801a250',1,'TriangleCollection::BV']]]
 ];
