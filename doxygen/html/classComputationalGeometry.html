@@ -198,6 +198,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memitem:a205e78c7378834da34336adc02e0009b" id="r_a205e78c7378834da34336adc02e0009b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a205e78c7378834da34336adc02e0009b">getNumGridLevels</a> () const noexcept</td></tr>
 <tr class="memdesc:a205e78c7378834da34336adc02e0009b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of levels makeGrids built.  <br /></td></tr>
 <tr class="separator:a205e78c7378834da34336adc02e0009b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a640e3245c84120f86bac89cafeb67e28" id="r_a640e3245c84120f86bac89cafeb67e28"><td class="memItemLeft" align="right" valign="top">GeometryService::InOut&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a640e3245c84120f86bac89cafeb67e28">classify</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a640e3245c84120f86bac89cafeb67e28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify a box on a level from the grids makeGrids built.  <br /></td></tr>
+<tr class="separator:a640e3245c84120f86bac89cafeb67e28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a606f5124e0705bab3923480e17ee95" id="r_a2a606f5124e0705bab3923480e17ee95"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a2a606f5124e0705bab3923480e17ee95">getStartLevel</a> () const noexcept</td></tr>
 <tr class="memdesc:a2a606f5124e0705bab3923480e17ee95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.  <br /></td></tr>
 <tr class="separator:a2a606f5124e0705bab3923480e17ee95"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,7 +214,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memdesc:aaaa2d8ddb68dd20d127ebf89b9abccfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Every box on a level, both phases' boxes being the same.  <br /></td></tr>
 <tr class="separator:aaaa2d8ddb68dd20d127ebf89b9abccfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada0c8496f0c73dcf94ab705963a4751c" id="r_ada0c8496f0c73dcf94ab705963a4751c"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Box &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#ada0c8496f0c73dcf94ab705963a4751c">getCutTiles</a> (const int a_level) const noexcept</td></tr>
-<tr class="memdesc:ada0c8496f0c73dcf94ab705963a4751c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what a simulation grid on the level is made of. Empty on the start level and below, which are whole.  <br /></td></tr>
+<tr class="memdesc:ada0c8496f0c73dcf94ab705963a4751c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below it.  <br /></td></tr>
 <tr class="separator:ada0c8496f0c73dcf94ab705963a4751c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a693a88e5ad23af37773a6baf1a39ced4" id="r_a693a88e5ad23af37773a6baf1a39ced4"><td class="memItemLeft" align="right" valign="top">const Vector&lt; Box &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a693a88e5ad23af37773a6baf1a39ced4">getSplitBoxes</a> (const int a_level, Vector&lt; int &gt; &amp;a_reasons) const noexcept</td></tr>
 <tr class="memdesc:a693a88e5ad23af37773a6baf1a39ced4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair reaching into the ring outside it, 3 two surfaces facing each other across the band.  <br /></td></tr>
@@ -788,6 +791,51 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 
 </div>
 </div>
+<a id="a640e3245c84120f86bac89cafeb67e28" name="a640e3245c84120f86bac89cafeb67e28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a640e3245c84120f86bac89cafeb67e28">&#9670;&#160;</a></span>classify()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">GeometryService::InOut ComputationalGeometry::classify </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Classify a box on a level from the grids makeGrids built. </p>
+<p>Every level is a partition of its domain into boxes, each classified per phase, so the box is regular if every box of the level it meets is regular in the phase, covered if every one is covered, and irregular otherwise &ndash; including when it meets both a regular and a covered box, since the surface must then lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves are the polyhedral graph's. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to classify, on the level's index space. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, 0 being the coarsest. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Regular, covered or irregular. </dd></dl>
+
+</div>
+</div>
 <a id="acb52039188e8deedc8ae5a2edf4e896e" name="acb52039188e8deedc8ae5a2edf4e896e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acb52039188e8deedc8ae5a2edf4e896e">&#9670;&#160;</a></span>classifyBox()</h2>
 
@@ -1193,7 +1241,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 </table>
 </div><div class="memdoc">
 
-<p>The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what a simulation grid on the level is made of. Empty on the start level and below, which are whole. </p>
+<p>The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below it. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, 0 being the coarsest. </td></tr>

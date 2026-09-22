@@ -107,6 +107,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a44c7207525baefcefff50d650c92584d" id="r_a44c7207525baefcefff50d650c92584d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">hasCrossing</a> (const int a_edge) const noexcept</td></tr>
 <tr class="memdesc:a44c7207525baefcefff50d650c92584d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the edge carries a crossing.  <br /></td></tr>
 <tr class="separator:a44c7207525baefcefff50d650c92584d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a305c90b4f20ac3ac2d547d48e85bc66a" id="r_a305c90b4f20ac3ac2d547d48e85bc66a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a305c90b4f20ac3ac2d547d48e85bc66a">linearSize</a> () const noexcept</td></tr>
+<tr class="memdesc:a305c90b4f20ac3ac2d547d48e85bc66a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of bytes the surface occupies in a linear buffer, as Chombo's containers ask of their payload.  <br /></td></tr>
+<tr class="separator:a305c90b4f20ac3ac2d547d48e85bc66a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4008ffa9a2afcf3e9cf778d966d3101" id="r_af4008ffa9a2afcf3e9cf778d966d3101"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#af4008ffa9a2afcf3e9cf778d966d3101">linearOut</a> (void *a_buffer) const noexcept</td></tr>
+<tr class="memdesc:af4008ffa9a2afcf3e9cf778d966d3101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the surface into a linear buffer, as Chombo's containers ask of their payload.  <br /></td></tr>
+<tr class="separator:af4008ffa9a2afcf3e9cf778d966d3101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15a26795a15b24b3d04ed6bb2eda67e2" id="r_a15a26795a15b24b3d04ed6bb2eda67e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a15a26795a15b24b3d04ed6bb2eda67e2">linearIn</a> (const void *a_buffer) noexcept</td></tr>
+<tr class="memdesc:a15a26795a15b24b3d04ed6bb2eda67e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the surface from a linear buffer written by linearOut.  <br /></td></tr>
+<tr class="separator:a15a26795a15b24b3d04ed6bb2eda67e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -135,7 +144,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_no
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The values a cut cell's embedded boundary is reconstructed from. </p>
-<p>Holds the implicit function at the cell's corners and the parameter along each cell edge where it changes sign, both in the cell's own [-1/2, 1/2]^SpaceDim frame. Neither value belongs to the cell alone: a corner is shared by the 2^SpaceDim cells meeting there and an edge by the four cells meeting along it, so two neighbouring cells reconstruct the same surface bit for bit rather than to within a tolerance. That is what makes a face aperture agree when it is computed from either side. </p>
+<p>Holds the implicit function at the cell's corners and the parameter along each cell edge where it changes sign, both in the cell's own [-1/2, 1/2]^SpaceDim frame. Neither value belongs to the cell alone: a corner is shared by the 2^SpaceDim cells meeting there and an edge by the four cells meeting along it, so two neighbouring cells reconstruct the same surface bit for bit rather than to within a tolerance. That is what makes a face aperture agree when it is computed from either side.</p>
+<p>That agreement is between cells of one level. A cell's chords are straight at its own spacing, so on a face shared with cells of a finer level they are not what that level describes the face with, and the polyhedron this surface alone reconstructs is the level-local one. Which faces those are is not the surface's to know: it is recorded by the cut-cell connectivity of the level, and <a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a861a3b247f5c6618ddc2af3285e99465" title="Replace one face&#39;s chord with the chords of the children that cover it.">CutCellBody::restrictFace</a> replaces such a face with the chords of the children covering it. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a44c7207525baefcefff50d650c92584d" name="a44c7207525baefcefff50d650c92584d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a44c7207525baefcefff50d650c92584d">&#9670;&#160;</a></span>hasCrossing()</h2>
@@ -169,6 +179,102 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_no
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the implicit function changes sign along the edge. </dd></dl>
+
+</div>
+</div>
+<a id="a15a26795a15b24b3d04ed6bb2eda67e2" name="a15a26795a15b24b3d04ed6bb2eda67e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15a26795a15b24b3d04ed6bb2eda67e2">&#9670;&#160;</a></span>linearIn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEB::CutCellSurface::linearIn </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>a_buffer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read the surface from a linear buffer written by linearOut. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Buffer written by linearOut. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af4008ffa9a2afcf3e9cf778d966d3101" name="af4008ffa9a2afcf3e9cf778d966d3101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4008ffa9a2afcf3e9cf778d966d3101">&#9670;&#160;</a></span>linearOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEB::CutCellSurface::linearOut </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>a_buffer</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the surface into a linear buffer, as Chombo's containers ask of their payload. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_buffer</td><td>Buffer of at least <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a305c90b4f20ac3ac2d547d48e85bc66a" title="Number of bytes the surface occupies in a linear buffer, as Chombo&#39;s containers ask of their payload.">linearSize()</a> bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a305c90b4f20ac3ac2d547d48e85bc66a" name="a305c90b4f20ac3ac2d547d48e85bc66a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a305c90b4f20ac3ac2d547d48e85bc66a">&#9670;&#160;</a></span>linearSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralEB::CutCellSurface::linearSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of bytes the surface occupies in a linear buffer, as Chombo's containers ask of their payload. </p>
+<dl class="section return"><dt>Returns</dt><dd>sizeof the crossings and the corners together. </dd></dl>
 
 </div>
 </div>

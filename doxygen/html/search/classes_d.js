@@ -29,7 +29,8 @@ var searchData=
   ['photon_26',['Photon',['../structPhoton.html',1,'']]],
   ['polygon_27',['Polygon',['../structPolyhedralEB_1_1CutCellBody_1_1Polygon.html',1,'PolyhedralEB::CutCellBody']]],
   ['polygonrodif_28',['PolygonRodIF',['../classPolygonRodIF.html',1,'']]],
-  ['polyhedralgeometryshop_29',['PolyhedralGeometryShop',['../classPolyhedralGeometryShop.html',1,'']]],
-  ['profilecylinderif_30',['ProfileCylinderIF',['../classProfileCylinderIF.html',1,'']]],
-  ['profileplaneif_31',['ProfilePlaneIF',['../classProfilePlaneIF.html',1,'']]]
+  ['polyhedralebgraph_29',['PolyhedralEBGraph',['../classPolyhedralEBGraph.html',1,'']]],
+  ['polyhedralgeometryshop_30',['PolyhedralGeometryShop',['../classPolyhedralGeometryShop.html',1,'']]],
+  ['profilecylinderif_31',['ProfileCylinderIF',['../classProfileCylinderIF.html',1,'']]],
+  ['profileplaneif_32',['ProfilePlaneIF',['../classProfilePlaneIF.html',1,'']]]
 ];
