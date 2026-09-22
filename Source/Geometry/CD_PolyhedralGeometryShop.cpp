@@ -624,42 +624,93 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     return;
   }
 
-  const Real spacing = s_weldSpacing * a_graphs[finest]->getDx();
+  // Two vertices are the same vertex when they are closer than this. Within a level the cells compute a shared
+  // vertex from the same nodes and the same edge, so they agree bit for bit; across a level boundary the finer
+  // cells behind a face are rebuilt at the finer spacing and agree only to round-off, about 1e-12 of a cell.
+  // The distance is what decides, not a lattice: two points on either side of a lattice wall are as close as any
+  // other pair, and quantising them apart is how a check of this kind reports a hole that is not there.
+  const Real tolerance = s_weldSpacing * a_graphs[finest]->getDx();
 
-  auto weld = [&](const Real* a_x) -> std::array<long long, 3> {
-    std::array<long long, 3> key = {0, 0, 0};
+  using Edge = std::array<int, 2>;
 
-    for (int d = 0; d < SpaceDim; d++) {
-      key[d] = std::llround((a_x[d] - m_probLo[d]) / spacing);
+  // The vertices of a neighbourhood's triangles, merged by proximity, and the triangles as vertex numbers.
+  std::vector<Real> points;
+  std::vector<int>  order;
+  std::vector<int>  vertexOf;
+  std::vector<Real> vertexPoint;
+
+  auto identify = [&]() -> void {
+    const int numPoints = static_cast<int>(points.size() / 3);
+
+    vertexOf.assign(numPoints, -1);
+
+    order.resize(numPoints);
+
+    for (int i = 0; i < numPoints; i++) {
+      order[i] = i;
     }
 
-    return key;
-  };
+    std::sort(order.begin(), order.end(), [&](const int a, const int b) -> bool {
+      return points[3 * a] < points[3 * b];
+    });
 
-  using Edge = std::array<long long, 6>;
+    int numVertices = 0;
 
-  auto edgesOf = [&](const Vector<Real>& a_facets, std::vector<Edge>& a_edges) -> void {
-    for (int i = 0; i + 9 <= a_facets.size(); i += 9) {
-      std::array<long long, 3> v[3];
+    vertexPoint.clear();
 
-      for (int k = 0; k < 3; k++) {
-        v[k] = weld(&a_facets[i + 3 * k]);
+    for (int k = 0; k < numPoints; k++) {
+      const int i = order[k];
+
+      // Everything within the tolerance in the first coordinate is adjacent in this order, so the scan back over
+      // that window meets every candidate.
+      for (int l = k - 1; l >= 0 && points[3 * i] - points[3 * order[l]] <= tolerance; l--) {
+        const int j = order[l];
+
+        bool same = true;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          same = same && (std::abs(points[3 * i + d] - points[3 * j + d]) <= tolerance);
+        }
+
+        if (same) {
+          vertexOf[i] = vertexOf[j];
+
+          break;
+        }
       }
 
-      // a triangle two of whose vertices weld together has collapsed to a line and bounds nothing
+      if (vertexOf[i] < 0) {
+        vertexOf[i] = numVertices++;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          vertexPoint.push_back(points[3 * i + d]);
+        }
+      }
+    }
+  };
+
+  auto appendPoints = [&](const Vector<Real>& a_facets) -> void {
+    for (int i = 0; i < a_facets.size(); i++) {
+      points.push_back(a_facets[i]);
+    }
+  };
+
+  // The triangles of one facet list, as vertex numbers, from the identification above. The facet list must be one
+  // of those appendPoints was given, and a_offset its first point.
+  auto edgesOf = [&](const int a_offset, const int a_numFacets, std::vector<Edge>& a_edges) -> void {
+    for (int t = 0; t < a_numFacets; t++) {
+      const int v[3] = {vertexOf[a_offset + 3 * t], vertexOf[a_offset + 3 * t + 1], vertexOf[a_offset + 3 * t + 2]};
+
+      // a triangle two of whose vertices are the same vertex has collapsed to a line and bounds nothing
       if (v[0] == v[1] || v[1] == v[2] || v[2] == v[0]) {
         continue;
       }
 
       for (int k = 0; k < 3; k++) {
-        std::array<long long, 3> p = v[k];
-        std::array<long long, 3> q = v[(k + 1) % 3];
+        const int p = std::min(v[k], v[(k + 1) % 3]);
+        const int q = std::max(v[k], v[(k + 1) % 3]);
 
-        if (q < p) {
-          std::swap(p, q);
-        }
-
-        a_edges.push_back({p[0], p[1], p[2], q[0], q[1], q[2]});
+        a_edges.push_back({p, q});
       }
     }
   };
@@ -680,9 +731,11 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const LevelData<BaseFab<signed char>>&   refined    = graph.getRefinedMask();
     const LevelData<BaseFab<signed char>>&   faceStates = graph.getFaceStates();
 
-    // the lattice coordinate of a face plane of a cell of this level, for reading which plane an edge lies in
-    auto planeKey = [&](const int a_cellCoordinate, const int a_side) -> long long {
-      return std::llround(dx * static_cast<Real>(a_cellCoordinate + a_side) / spacing);
+    // whether a vertex lies in a face plane of a cell of this level, for reading which plane an edge lies in
+    auto inPlane = [&](const int a_vertex, const int a_cellCoordinate, const int a_dir, const int a_side) -> bool {
+      const Real plane = m_probLo[a_dir] + dx * static_cast<Real>(a_cellCoordinate + a_side);
+
+      return std::abs(vertexPoint[SpaceDim * a_vertex + a_dir] - plane) <= tolerance;
     };
 
     for (DataIterator dit(grids); dit.ok(); ++dit) {
@@ -726,15 +779,26 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
           continue;
         }
 
-        // the edges of this cell's interface, and every edge in the neighbourhood
-        std::vector<Edge> own;
-        std::vector<Edge> around;
+        // The triangles of this cell and of everything in its neighbourhood, gathered before any of them is
+        // matched, since a vertex is identified against every other vertex of the neighbourhood at once.
+        points.clear();
 
-        edgesOf(facets[table(iv, 0)], own);
+        std::vector<int> ownOffsets;
+        std::vector<int> ownCounts;
+        std::vector<int> aroundOffsets;
+        std::vector<int> aroundCounts;
+
+        ownOffsets.push_back(0);
+        ownCounts.push_back(facets[table(iv, 0)].size() / 9);
+
+        appendPoints(facets[table(iv, 0)]);
 
         for (BoxIterator nit(grow(Box(iv, iv), 1) & grown); nit.ok(); ++nit) {
           if (table(nit(), 0) >= 0) {
-            edgesOf(facets[table(nit(), 0)], around);
+            aroundOffsets.push_back(static_cast<int>(points.size() / 3));
+            aroundCounts.push_back(facets[table(nit(), 0)].size() / 9);
+
+            appendPoints(facets[table(nit(), 0)]);
           }
         }
 
@@ -776,13 +840,40 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 continue;
               }
 
+              // The finer level classifies with the volume threshold and the dust rule, and a cell those rules
+              // turn into a regular or a covered one writes no surface there. A reconstruction that kept it would
+              // hold triangles the level itself does not have, and every edge of them would be reported open.
+              if (m_volumeThreshold > 0.0 && fineBody.volumeFraction() < m_volumeThreshold) {
+                continue;
+              }
+
+              if (PolyhedralGeometryShop::isDust(fineBody, m_volumeThreshold)) {
+                continue;
+              }
+
               Vector<Real> fineFacets;
 
               fineBody.appendInterfaceFacets(fineFacets, fit(), m_probLo, 0.5 * dx);
 
-              edgesOf(fineFacets, around);
+              aroundOffsets.push_back(static_cast<int>(points.size() / 3));
+              aroundCounts.push_back(fineFacets.size() / 9);
+
+              appendPoints(fineFacets);
             }
           }
+        }
+
+        identify();
+
+        std::vector<Edge> own;
+        std::vector<Edge> around;
+
+        for (size_t i = 0; i < ownOffsets.size(); i++) {
+          edgesOf(ownOffsets[i], ownCounts[i], own);
+        }
+
+        for (size_t i = 0; i < aroundOffsets.size(); i++) {
+          edgesOf(aroundOffsets[i], aroundCounts[i], around);
         }
 
         std::sort(around.begin(), around.end());
@@ -800,9 +891,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 continue;
               }
 
-              const long long plane = planeKey(iv[dir], side);
-
-              exempt = (edge[dir] == plane) && (edge[3 + dir] == plane);
+              exempt = inPlane(edge[0], iv[dir], dir, side) && inPlane(edge[1], iv[dir], dir, side);
             }
           }
 
@@ -829,13 +918,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                    << ": edge used " << uses << " times:";
 
             for (int d = 0; d < SpaceDim; d++) {
-              pout() << " " << m_probLo[d] + spacing * static_cast<Real>(edge[d]);
+              pout() << " " << vertexPoint[SpaceDim * edge[0] + d];
             }
 
             pout() << " ->";
 
             for (int d = 0; d < SpaceDim; d++) {
-              pout() << " " << m_probLo[d] + spacing * static_cast<Real>(edge[3 + d]);
+              pout() << " " << vertexPoint[SpaceDim * edge[1] + d];
             }
 
             pout() << endl;

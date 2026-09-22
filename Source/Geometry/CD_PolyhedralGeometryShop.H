@@ -332,7 +332,7 @@ protected:
   /**
    * @brief Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck.
    */
-  static constexpr Real s_weldSpacing = 1.0E-8;
+  static constexpr Real s_weldSpacing = 1.0E-10;
 
   /**
    * @brief The geometry whose grids the polyhedra are built over, or null before setGrids.
