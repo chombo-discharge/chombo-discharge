@@ -14,7 +14,11 @@
 #define CD_COMPUTATIONALGEOMETRY_H
 
 // Std includes
+#include <memory>
 #include <string>
+
+// EBGeometry includes
+#include <EBGeometry.hpp>
 
 // Chombo includes
 #include <BaseIF.H>
@@ -42,6 +46,28 @@
 class ComputationalGeometry
 {
 public:
+  /**
+   * @brief Branching factor of the spatial index over the boxes of a level.
+   */
+  static constexpr int K = 4;
+
+  /**
+   * @brief Coordinate of a bounding volume of the spatial index.
+   */
+  using Vec3 = EBGeometry::Vec3T<Real>;
+
+  /**
+   * @brief Bounding volume of the spatial index over the boxes of a level.
+   */
+  using BV = EBGeometry::BoundingVolumes::AABBT<Real>;
+
+  /**
+   * @brief Spatial index over the boxes of one level. The primitives are the boxes' indices into that level's
+   * list, stored by value, and every bounding volume is the box itself in index space, so a query answers with
+   * candidates that the exact box test then filters.
+   */
+  using BoxTree = EBGeometry::BVH::PackedBVH<Real, int, K, EBGeometry::BVH::ValueStorage<int>>;
+
   /**
    * @brief Constructor. Sets a blank geometry.
    */
@@ -184,7 +210,8 @@ public:
    * regular if every box of the level it meets is regular in the phase, covered if every one is covered, and
    * irregular otherwise -- including when it meets both a regular and a covered box, since the surface must then
    * lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves
-   * are the polyhedral graph's.
+   * are the polyhedral graph's. A level the geometry built no boxes on -- everything below it a leaf, so nothing
+   * refined that far -- is answered by the level below it, coarsening as the domain overload does.
    * @param[in] a_box   Box to classify, on the level's index space.
    * @param[in] a_level Level, 0 being the coarsest.
    * @param[in] a_phase Phase.
@@ -192,6 +219,21 @@ public:
    */
   GeometryService::InOut
   classify(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Classify a box on any domain at or finer than a level makeGrids built.
+   * @details On a stored domain this is classify on that level. On a domain finer than every stored level -- a
+   * simulation level above the stop domain, which the geometry does not describe -- the box is coarsened onto the
+   * finest stored level and classified there: the coarsening of a box is met by every box the box itself would
+   * meet, so a regular or covered answer holds at the finer spacing, and irregular is the conservative answer it
+   * always is. The domain must be a refinement by powers of two of a stored one.
+   * @param[in] a_box    Box to classify, on a_domain's index space.
+   * @param[in] a_domain Domain the box lives on.
+   * @param[in] a_phase  Phase.
+   * @return Regular, covered or irregular.
+   */
+  GeometryService::InOut
+  classify(const Box& a_box, const ProblemDomain& a_domain, const phase::which_phase a_phase) const;
 
   /**
    * @brief Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.
@@ -423,6 +465,18 @@ protected:
    * @brief Boxes per level, common to both phases.
    */
   Vector<Vector<Box>> m_boxes;
+
+  /**
+   * @brief Spatial index over the boxes of every level, one tree per level, holding the boxes' indices into
+   * m_boxes. Null on a level with no boxes, and on every level until buildBoxTrees has run.
+   */
+  Vector<std::shared_ptr<BoxTree>> m_boxTrees;
+
+  /**
+   * @brief Spatial index over the cut tiles of every level, one tree per level, holding the tiles' indices into
+   * m_cutTiles. Null on a level with no tiles, and on every level until buildTileTrees has run.
+   */
+  Vector<std::shared_ptr<BoxTree>> m_tileTrees;
 
   /**
    * @brief Per level, the number of boxes that split for each SplitReason, and per level the number of tiles that lie
@@ -657,52 +711,86 @@ protected:
                 Vector<Vector<int>>&                    a_tileHosts) const;
 
   /**
-   * @brief Index of the box of a whole level that contains a point.
-   * @details A whole level is a domainSplit of its domain to m_maxBlockSize, so the box holding a point is
-   * found from the point's position on that lattice; the table maps lattice cells to box indices.
-   * @param[in] a_level Level, at or below the start level.
-   * @return One box index per lattice cell, in lexicographic order of the lattice.
+   * @brief Boxes per leaf the spatial index over a level's boxes is built with.
    */
-  Vector<int>
-  latticeTable(const int a_level) const;
+  static constexpr int s_treeLeafSize = 8;
 
   /**
-   * @brief Look a point up in a lattice table.
-   * @param[in] a_table Table from latticeTable.
-   * @param[in] a_level Level the table was made for.
-   * @param[in] a_point Cell on that level.
-   * @return Index of the box containing the cell.
+   * @brief The bounding volume of a box in index space, its cells taken as the unit cubes they are.
+   * @param[in] a_box The box.
+   * @return Its bounds, [smallEnd, bigEnd + 1].
+   */
+  static BV
+  boundingVolume(const Box& a_box) noexcept;
+
+  /**
+   * @brief Build the spatial index over the boxes of every level.
+   * @details One tree per level over that level's boxes, built once the box lists are final. The primitives are
+   * the boxes' indices into the level's list and every bounding volume is the box itself, so a query returns the
+   * boxes whose bounds meet it and the caller applies the exact test.
+   */
+  void
+  buildBoxTrees();
+
+  /**
+   * @brief Build one spatial index over a list of boxes.
+   * @param[in] a_boxes The boxes.
+   * @return The tree, holding the boxes' indices into the list, or null if the list is empty.
+   */
+  std::shared_ptr<BoxTree>
+  buildTree(const Vector<Box>& a_boxes) const;
+
+  /**
+   * @brief The boxes of a list that intersect a box, through the list's spatial index.
+   * @param[in] a_tree  Index over the list, which may be null.
+   * @param[in] a_boxes The list.
+   * @param[in] a_box   Box to intersect with.
+   * @return Indices into the list, each once and in increasing index order. Empty if the tree is null.
+   */
+  static Vector<int>
+  meeting(const std::shared_ptr<BoxTree>& a_tree, const Vector<Box>& a_boxes, const Box& a_box);
+
+  /**
+   * @brief Build the spatial index over the cut tiles of every level.
+   * @details One tree per level over that level's tiles, as buildBoxTrees indexes its boxes. Built once the
+   * tiles exist, which is before the boxes are decimated.
+   */
+  void
+  buildTileTrees();
+
+  /**
+   * @brief Build the spatial index over the boxes of one level.
+   * @param[in] a_level Level, 0 being the coarsest.
+   */
+  void
+  buildBoxTree(const int a_level);
+
+  /**
+   * @brief Boxes of a level that intersect a box.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @param[in] a_box   Box on that level.
+   * @return Indices into m_boxes[a_level] of the boxes that intersect it, each once and in increasing order.
+   */
+  Vector<int>
+  boxesMeeting(const int a_level, const Box& a_box) const;
+
+  /**
+   * @brief Cut tiles of a level that intersect a box.
+   * @param[in] a_level Level, above the start level.
+   * @param[in] a_box   Box on that level.
+   * @return Indices into m_cutTiles[a_level] of the tiles that intersect it, each once and in increasing order.
+   */
+  Vector<int>
+  tilesMeeting(const int a_level, const Box& a_box) const;
+
+  /**
+   * @brief Index of the box of a level that contains a cell, which one box does on a level that is whole.
+   * @param[in] a_level Level, at or below the start level.
+   * @param[in] a_cell  Cell on that level.
+   * @return Its box. A cell held by no box or by several stops the run, since the level is then not whole.
    */
   int
-  latticeLookup(const Vector<int>& a_table, const int a_level, const IntVect& a_point) const;
-
-  /**
-   * @brief Key of the super-tile a cell lies in, for finding tiles.
-   * @param[in] a_cell Cell on some level.
-   * @return Packed super-tile coordinates, 21 bits per direction.
-   */
-  long long
-  superTileKey(const IntVect& a_cell) const noexcept;
-
-  /**
-   * @brief Tiles of a level intersecting a box, found through their super-tile keys.
-   * @details The tiles of a level are indexed by the key of the super-tile they lie in, so the tiles meeting a
-   * box are found by looking up the keys of the super-tiles the box touches.
-   * @param[in] a_level  Level, above the start level.
-   * @param[in] a_order  Tile indices of the level sorted by super-tile key, from sortTilesByKey.
-   * @param[in] a_box    Box on that level.
-   * @return Indices into m_cutTiles[a_level] of the tiles that intersect the box.
-   */
-  Vector<int>
-  tilesMeeting(const int a_level, const Vector<int>& a_order, const Box& a_box) const;
-
-  /**
-   * @brief Tile indices of a level sorted by super-tile key.
-   * @param[in] a_level Level, above the start level.
-   * @return The indices.
-   */
-  Vector<int>
-  sortTilesByKey(const int a_level) const;
+  containingBox(const int a_level, const IntVect& a_cell) const;
 
   /**
    * @brief Step 4: cut every hit box down to what the tiles left of it, and replace the lists on the tiled
