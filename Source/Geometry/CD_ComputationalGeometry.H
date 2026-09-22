@@ -210,7 +210,8 @@ public:
    * regular if every box of the level it meets is regular in the phase, covered if every one is covered, and
    * irregular otherwise -- including when it meets both a regular and a covered box, since the surface must then
    * lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves
-   * are the polyhedral graph's.
+   * are the polyhedral graph's. A level the geometry built no boxes on -- everything below it a leaf, so nothing
+   * refined that far -- is answered by the level below it, coarsening as the domain overload does.
    * @param[in] a_box   Box to classify, on the level's index space.
    * @param[in] a_level Level, 0 being the coarsest.
    * @param[in] a_phase Phase.
@@ -744,7 +745,7 @@ protected:
    * @param[in] a_tree  Index over the list, which may be null.
    * @param[in] a_boxes The list.
    * @param[in] a_box   Box to intersect with.
-   * @return Indices into the list, in no particular order. Empty if the tree is null.
+   * @return Indices into the list, each once and in increasing index order. Empty if the tree is null.
    */
   static Vector<int>
   meeting(const std::shared_ptr<BoxTree>& a_tree, const Vector<Box>& a_boxes, const Box& a_box);
@@ -768,7 +769,7 @@ protected:
    * @brief Boxes of a level that intersect a box.
    * @param[in] a_level Level, 0 being the coarsest.
    * @param[in] a_box   Box on that level.
-   * @return Indices into m_boxes[a_level] of the boxes that intersect it, in no particular order.
+   * @return Indices into m_boxes[a_level] of the boxes that intersect it, each once and in increasing order.
    */
   Vector<int>
   boxesMeeting(const int a_level, const Box& a_box) const;
@@ -777,7 +778,7 @@ protected:
    * @brief Cut tiles of a level that intersect a box.
    * @param[in] a_level Level, above the start level.
    * @param[in] a_box   Box on that level.
-   * @return Indices into m_cutTiles[a_level] of the tiles that intersect it, in no particular order.
+   * @return Indices into m_cutTiles[a_level] of the tiles that intersect it, each once and in increasing order.
    */
   Vector<int>
   tilesMeeting(const int a_level, const Box& a_box) const;

@@ -545,8 +545,19 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
   const Vector<Box>&                    boxes = m_boxes[a_level];
   const Vector<GeometryService::InOut>& types = this->types(a_phase)[a_level];
 
-  if (m_boxTrees.size() <= a_level || !m_boxTrees[a_level]) {
-    MayDay::Error("ComputationalGeometry::classify - the level has no spatial index, makeGrids has not run");
+  // A level with no boxes is not described here at all: nothing refined that far because everything below it is
+  // a leaf, and the level below holds what there is to say -- including that the surface is in there, which an
+  // empty list on its own would not say. A level with boxes and no index is one makeGrids has not finished with.
+  if (boxes.size() == 0) {
+    if (a_level == 0) {
+      MayDay::Error("ComputationalGeometry::classify - the coarsest level has no boxes");
+    }
+
+    return this->classify(coarsen(a_box, 2), a_level - 1, a_phase);
+  }
+
+  if (a_level >= m_boxTrees.size() || !m_boxTrees[a_level]) {
+    MayDay::Error("ComputationalGeometry::classify - the level's boxes are not indexed");
   }
 
   bool anyRegular = false;
