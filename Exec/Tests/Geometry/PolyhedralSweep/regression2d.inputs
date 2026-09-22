@@ -1,0 +1,29 @@
+# ====================================================================================================
+# PolyhedralSweep class options
+# ====================================================================================================
+PolyhedralSweep.shapes           = cube cylinder             ## Shapes to sweep; in 2D a square and a circle
+PolyhedralSweep.n_cells          = 32                        ## Cells across the coarsest domain
+PolyhedralSweep.depth            = 2                         ## Levels above the coarsest domain
+PolyhedralSweep.refine_angle     = 15.                       ## Angle between normals above which a box splits
+PolyhedralSweep.max_ghost_eb     = 2                         ## Ghost cells a box is grown by when classified
+PolyhedralSweep.prob_lo          = -1. -1.                   ## Lower-left corner
+PolyhedralSweep.prob_hi          = 1.  1.                    ## Upper-right corner
+PolyhedralSweep.shifts           = 0. 0.125 0.25 0.5 0.75    ## Shifts along the diagonal, in finest cells
+PolyhedralSweep.angles           = 0. 7. 15. 30. 45.         ## Turns about the domain centre, in degrees
+
+# ====================================================================================================
+# ComputationalGeometry class options
+# ====================================================================================================
+ComputationalGeometry.min_block_size     = 8        ## Tile size the geometry grids are built with
+ComputationalGeometry.max_block_size     = 8        ## Largest box the geometry grids are built with
+ComputationalGeometry.profile            = false    ## Report the grid-building timings
+ComputationalGeometry.verbose            = false    ## Announce every member function
+
+# ====================================================================================================
+# PolyhedralGeometryShop class options
+# ====================================================================================================
+PolyhedralGeometryShop.sanity_check     = true     ## Check that the surface is closed
+PolyhedralGeometryShop.write_stl        = false    ## Write the surface as STL
+PolyhedralGeometryShop.profile          = false    ## Report the surface-pass timings
+PolyhedralGeometryShop.test_copy        = false    ## Copy every graph onto another layout and back
+PolyhedralGeometryShop.verbose          = false    ## Announce every member function
