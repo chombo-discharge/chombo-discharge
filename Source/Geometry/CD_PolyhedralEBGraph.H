@@ -127,7 +127,8 @@ public:
    * @details The other graph's cell states, face states and surfaces are copied onto the new layout's valid
    * cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified
    * from the implicit function by their corners, as define classifies them. The new layout must cover the same
-   * cells as the other graph's, since the surfaces of the cut cells come from it alone. The refined mask is not
+   * cells as the other graph's, since the surfaces of the cut cells come from it alone; a layout of another cell
+   * count stops the run. The refined mask is not
    * copied: it is the finer level's to set, so link the copy to its finer level afterwards as the original was.
    * Collective.
    * @param[in] a_source   Graph to copy from.
@@ -196,7 +197,8 @@ public:
 
   /**
    * @brief The state of every cell, s_covered, s_cut or s_regular, with ghost cells filled from the geometry. A
-   *        signed char per cell, which is what the three values need.
+   *        signed char per cell, which is what the three values need. A ghost cell no tile carries is classified
+   *        from its corners alone and has no surface even when cut; the face onto it is s_faceCoarser.
    * @return One component per cell.
    */
   const LevelData<BaseFab<signed char>>&

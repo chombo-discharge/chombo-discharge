@@ -263,7 +263,9 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
 
     IntVectSet& cut = m_cutCells[dit()];
 
-    // A ghost cell no tile carries is regular or covered by construction, and its corners say which. Such cells
+    // A ghost cell no tile carries is classified from its corners alone: regular or covered where the tiles end
+    // because the surface does, and possibly cut where they end because the coarser level describes the cells
+    // beyond -- such a cell has no surface here, and the face onto it says to ask the coarser level. The cells
     // are a shell on the outside of the tiled region, so the function is evaluated at a node only when a cell
     // that needs it comes by, and each node once.
     Box nodeBox = grown;
@@ -342,6 +344,23 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
 
   if (!a_source.isDefined()) {
     MayDay::Error("PolyhedralEBGraph::define - the source graph is not defined");
+  }
+
+  // The layouts are global, so the coverage is checked by cell count: a layout that covers other cells would
+  // leave cut cells without surfaces, and outer faces pointing the wrong way.
+  long long numCells       = 0;
+  long long numSourceCells = 0;
+
+  for (LayoutIterator lit = a_grids.layoutIterator(); lit.ok(); ++lit) {
+    numCells += a_grids[lit()].numPts();
+  }
+
+  for (LayoutIterator lit = a_source.m_grids.layoutIterator(); lit.ok(); ++lit) {
+    numSourceCells += a_source.m_grids[lit()].numPts();
+  }
+
+  if (numCells != numSourceCells) {
+    MayDay::Error("PolyhedralEBGraph::define - the layout does not cover the cells of the source graph");
   }
 
   m_domain   = a_source.m_domain;

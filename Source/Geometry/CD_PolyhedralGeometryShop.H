@@ -135,7 +135,7 @@ public:
   buildGraphs();
 
   /**
-   * @brief The graph of a level, undefined below the start level and before buildGraphs.
+   * @brief The graph of a level, undefined below the start level. Stops the run before buildGraphs.
    * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
    * @return The graph.
    */
@@ -365,8 +365,7 @@ protected:
   bool m_profile;
 
   /**
-   * @brief Whether verifySurface copies every graph onto a shuffled octant layout and checks it there as well.
-   * PolyhedralGeometryShop.test_copy, off by default.
+   * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
    */
   bool m_testCopy;
 

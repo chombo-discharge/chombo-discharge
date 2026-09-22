@@ -16,6 +16,7 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <numeric>
 #include <sstream>
 #include <vector>
 
@@ -134,6 +135,10 @@ PolyhedralGeometryShop::buildGraphs()
 const PolyhedralEBGraph&
 PolyhedralGeometryShop::getGraph(const int a_level) const noexcept
 {
+  if (a_level < 0 || a_level >= m_graphs.size()) {
+    MayDay::Error("PolyhedralGeometryShop::getGraph - no such level, or buildGraphs has not run");
+  }
+
   return *m_graphs[a_level];
 }
 
@@ -638,7 +643,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const LevelData<BaseFab<signed char>>&   faceStates = graph.getFaceStates();
 
     // the lattice coordinate of a face plane of a cell of this level, for reading which plane an edge lies in
-    auto planeKey = [&](const int a_cellCoordinate, const int a_dir, const int a_side) -> long long {
+    auto planeKey = [&](const int a_cellCoordinate, const int a_side) -> long long {
       return std::llround(dx * static_cast<Real>(a_cellCoordinate + a_side) / spacing);
     };
 
@@ -757,7 +762,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 continue;
               }
 
-              const long long plane = planeKey(iv[dir], dir, side);
+              const long long plane = planeKey(iv[dir], side);
 
               exempt = (edge[dir] == plane) && (edge[3 + dir] == plane);
             }
@@ -865,7 +870,11 @@ PolyhedralGeometryShop::testGraphCopy() const
         }
       }
 
-      const int stride = (numProc() > 1) ? (numProc() / 2 + 1) : 1;
+      int stride = numProc() / 2 + 1;
+
+      while (std::gcd(stride, numProc()) != 1) {
+        stride++;
+      }
 
       Vector<int> ranks(pieces.size());
 
