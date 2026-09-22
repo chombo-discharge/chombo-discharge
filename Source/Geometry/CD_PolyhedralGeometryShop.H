@@ -370,6 +370,12 @@ protected:
   bool m_testCopy;
 
   /**
+   * @brief Whether the member functions that run once per level or per phase announce themselves in pout.
+   * PolyhedralGeometryShop.verbose, off by default. The functions that run per cell never announce themselves.
+   */
+  bool m_verbose;
+
+  /**
    * @brief Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.
    * @details Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has
    * that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface).

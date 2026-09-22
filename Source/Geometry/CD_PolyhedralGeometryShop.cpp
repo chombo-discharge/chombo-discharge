@@ -62,6 +62,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_sanityCheck     = true;
   m_profile         = false;
   m_testCopy        = false;
+  m_verbose         = false;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
@@ -70,11 +71,20 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   pp.query("sanity_check", m_sanityCheck);
   pp.query("profile", m_profile);
   pp.query("test_copy", m_testCopy);
+  pp.query("verbose", m_verbose);
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::PolyhedralGeometryShop()" << endl;
+  }
 }
 
 void
 PolyhedralGeometryShop::setGrids(const ComputationalGeometry& a_compGeom, const phase::which_phase a_phase) noexcept
 {
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::setGrids" << endl;
+  }
+
   m_compGeom = &a_compGeom;
   m_phase    = a_phase;
 }
@@ -83,6 +93,10 @@ void
 PolyhedralGeometryShop::buildGraphs()
 {
   CH_TIME("PolyhedralGeometryShop::buildGraphs");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::buildGraphs" << endl;
+  }
 
   if (m_compGeom == nullptr) {
     MayDay::Error("PolyhedralGeometryShop::buildGraphs - setGrids has not been called");
@@ -135,6 +149,10 @@ PolyhedralGeometryShop::buildGraphs()
 const PolyhedralEBGraph&
 PolyhedralGeometryShop::getGraph(const int a_level) const noexcept
 {
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::getGraph" << endl;
+  }
+
   if (a_level < 0 || a_level >= m_graphs.size()) {
     MayDay::Error("PolyhedralGeometryShop::getGraph - no such level, or buildGraphs has not run");
   }
@@ -146,6 +164,10 @@ void
 PolyhedralGeometryShop::verifySurface() const
 {
   CH_TIME("PolyhedralGeometryShop::verifySurface");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::verifySurface" << endl;
+  }
 
   if (m_compGeom == nullptr) {
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
@@ -237,6 +259,10 @@ void
 PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level) const
 {
   CH_TIME("PolyhedralGeometryShop::collectFacets");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::collectFacets" << endl;
+  }
 
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
@@ -492,6 +518,10 @@ PolyhedralGeometryShop::writeSTL(const std::string&  a_fileName,
 {
   CH_TIME("PolyhedralGeometryShop::writeSTL");
 
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::writeSTL - writing " << a_fileName << endl;
+  }
+
   Vector<Vector<Real>> everyone;
 
   gather(everyone, a_facets, 0);
@@ -552,6 +582,10 @@ PolyhedralGeometryShop::sanityCheck() const
 {
   CH_TIME("PolyhedralGeometryShop::sanityCheck");
 
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::sanityCheck" << endl;
+  }
+
   this->sanityCheck(m_graphs);
 }
 
@@ -559,6 +593,10 @@ void
 PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const
 {
   CH_TIME("PolyhedralGeometryShop::sanityCheck(graphs)");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::sanityCheck(graphs)" << endl;
+  }
 
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
@@ -827,6 +865,10 @@ void
 PolyhedralGeometryShop::testGraphCopy() const
 {
   CH_TIME("PolyhedralGeometryShop::testGraphCopy");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testGraphCopy" << endl;
+  }
 
   // Twice: once onto the tiles split into octants, once onto the tiles as they are; the ranks are shuffled both
   // times, so the second copy moves every box between ranks without changing any box.
