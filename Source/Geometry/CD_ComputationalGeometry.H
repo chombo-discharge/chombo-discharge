@@ -472,6 +472,12 @@ protected:
   Vector<std::shared_ptr<BoxTree>> m_boxTrees;
 
   /**
+   * @brief Spatial index over the cut tiles of every level, one tree per level, holding the tiles' indices into
+   * m_cutTiles. Null on a level with no tiles, and on every level until buildTileTrees has run.
+   */
+  Vector<std::shared_ptr<BoxTree>> m_tileTrees;
+
+  /**
    * @brief Per level, the number of boxes that split for each SplitReason, and per level the number of tiles that lie
    * in an irregular box (tagged) versus elsewhere (nesting), for the report.
    */
@@ -713,8 +719,8 @@ protected:
    * @param[in] a_box The box.
    * @return Its bounds, [smallEnd, bigEnd + 1].
    */
-  BV
-  boundingVolume(const Box& a_box) const noexcept;
+  static BV
+  boundingVolume(const Box& a_box) noexcept;
 
   /**
    * @brief Build the spatial index over the boxes of every level.
@@ -726,52 +732,64 @@ protected:
   buildBoxTrees();
 
   /**
-   * @brief Index of the box of a whole level that contains a point.
-   * @details A whole level is a domainSplit of its domain to m_maxBlockSize, so the box holding a point is
-   * found from the point's position on that lattice; the table maps lattice cells to box indices.
-   * @param[in] a_level Level, at or below the start level.
-   * @return One box index per lattice cell, in lexicographic order of the lattice.
+   * @brief Build one spatial index over a list of boxes.
+   * @param[in] a_boxes The boxes.
+   * @return The tree, holding the boxes' indices into the list, or null if the list is empty.
    */
-  Vector<int>
-  latticeTable(const int a_level) const;
+  std::shared_ptr<BoxTree>
+  buildTree(const Vector<Box>& a_boxes) const;
 
   /**
-   * @brief Look a point up in a lattice table.
-   * @param[in] a_table Table from latticeTable.
-   * @param[in] a_level Level the table was made for.
-   * @param[in] a_point Cell on that level.
-   * @return Index of the box containing the cell.
+   * @brief The boxes of a list that intersect a box, through the list's spatial index.
+   * @param[in] a_tree  Index over the list, which may be null.
+   * @param[in] a_boxes The list.
+   * @param[in] a_box   Box to intersect with.
+   * @return Indices into the list, in no particular order. Empty if the tree is null.
+   */
+  static Vector<int>
+  meeting(const std::shared_ptr<BoxTree>& a_tree, const Vector<Box>& a_boxes, const Box& a_box);
+
+  /**
+   * @brief Build the spatial index over the cut tiles of every level.
+   * @details One tree per level over that level's tiles, as buildBoxTrees indexes its boxes. Built once the
+   * tiles exist, which is before the boxes are decimated.
+   */
+  void
+  buildTileTrees();
+
+  /**
+   * @brief Build the spatial index over the boxes of one level.
+   * @param[in] a_level Level, 0 being the coarsest.
+   */
+  void
+  buildBoxTree(const int a_level);
+
+  /**
+   * @brief Boxes of a level that intersect a box.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @param[in] a_box   Box on that level.
+   * @return Indices into m_boxes[a_level] of the boxes that intersect it, in no particular order.
+   */
+  Vector<int>
+  boxesMeeting(const int a_level, const Box& a_box) const;
+
+  /**
+   * @brief Cut tiles of a level that intersect a box.
+   * @param[in] a_level Level, above the start level.
+   * @param[in] a_box   Box on that level.
+   * @return Indices into m_cutTiles[a_level] of the tiles that intersect it, in no particular order.
+   */
+  Vector<int>
+  tilesMeeting(const int a_level, const Box& a_box) const;
+
+  /**
+   * @brief Index of the box of a level that contains a cell, which one box does on a level that is whole.
+   * @param[in] a_level Level, at or below the start level.
+   * @param[in] a_cell  Cell on that level.
+   * @return Its box. A cell held by no box or by several stops the run, since the level is then not whole.
    */
   int
-  latticeLookup(const Vector<int>& a_table, const int a_level, const IntVect& a_point) const;
-
-  /**
-   * @brief Key of the super-tile a cell lies in, for finding tiles.
-   * @param[in] a_cell Cell on some level.
-   * @return Packed super-tile coordinates, 21 bits per direction.
-   */
-  long long
-  superTileKey(const IntVect& a_cell) const noexcept;
-
-  /**
-   * @brief Tiles of a level intersecting a box, found through their super-tile keys.
-   * @details The tiles of a level are indexed by the key of the super-tile they lie in, so the tiles meeting a
-   * box are found by looking up the keys of the super-tiles the box touches.
-   * @param[in] a_level  Level, above the start level.
-   * @param[in] a_order  Tile indices of the level sorted by super-tile key, from sortTilesByKey.
-   * @param[in] a_box    Box on that level.
-   * @return Indices into m_cutTiles[a_level] of the tiles that intersect the box.
-   */
-  Vector<int>
-  tilesMeeting(const int a_level, const Vector<int>& a_order, const Box& a_box) const;
-
-  /**
-   * @brief Tile indices of a level sorted by super-tile key.
-   * @param[in] a_level Level, above the start level.
-   * @return The indices.
-   */
-  Vector<int>
-  sortTilesByKey(const int a_level) const;
+  containingBox(const int a_level, const IntVect& a_cell) const;
 
   /**
    * @brief Step 4: cut every hit box down to what the tiles left of it, and replace the lists on the tiled

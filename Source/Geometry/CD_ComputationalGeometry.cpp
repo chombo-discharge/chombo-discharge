@@ -472,6 +472,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   timer.startEvent("Start level");
   this->buildStartLevel();
+  this->buildBoxTree(m_startLevel);
   timer.stopEvent("Start level");
 
   timer.startEvent("Upward pass");
@@ -480,6 +481,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   timer.startEvent("Tiles");
   this->makeTiles();
+  this->buildTileTrees();
   timer.stopEvent("Tiles");
 
   Vector<Vector<GeometryService::InOut>> gasTileTypes(numLevels);
@@ -1134,7 +1136,7 @@ ComputationalGeometry::makeTiles()
 }
 
 ComputationalGeometry::BV
-ComputationalGeometry::boundingVolume(const Box& a_box) const noexcept
+ComputationalGeometry::boundingVolume(const Box& a_box) noexcept
 {
   // A cell is the unit cube whose corners are its nodes, so a box spans [smallEnd, bigEnd + 1] in index space.
   // The bounding volumes are three-dimensional whatever SpaceDim is, and two of them overlap only where they do
@@ -1151,6 +1153,19 @@ ComputationalGeometry::boundingVolume(const Box& a_box) const noexcept
 }
 
 void
+ComputationalGeometry::buildBoxTree(const int a_level)
+{
+  CH_TIME("ComputationalGeometry::buildBoxTree");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::buildBoxTree" << endl;
+  }
+
+  m_boxTrees.resize(m_boxes.size());
+
+  m_boxTrees[a_level] = this->buildTree(m_boxes[a_level]);
+}
+
+void
 ComputationalGeometry::buildBoxTrees()
 {
   CH_TIME("ComputationalGeometry::buildBoxTrees");
@@ -1161,160 +1176,113 @@ ComputationalGeometry::buildBoxTrees()
   m_boxTrees.resize(m_boxes.size());
 
   for (int lvl = 0; lvl < m_boxes.size(); lvl++) {
-    const Vector<Box>& boxes = m_boxes[lvl];
-
-    if (boxes.size() == 0) {
-      m_boxTrees[lvl] = nullptr;
-
-      continue;
-    }
-
-    std::vector<std::pair<int, BV>> primitives;
-
-    primitives.reserve(boxes.size());
-
-    for (int i = 0; i < boxes.size(); i++) {
-      primitives.emplace_back(i, this->boundingVolume(boxes[i]));
-    }
-
-    m_boxTrees[lvl] = std::make_shared<BoxTree>(std::move(primitives), s_treeLeafSize);
+    m_boxTrees[lvl] = this->buildTree(m_boxes[lvl]);
   }
 }
 
-Vector<int>
-ComputationalGeometry::latticeTable(const int a_level) const
+void
+ComputationalGeometry::buildTileTrees()
 {
-  CH_TIME("ComputationalGeometry::latticeTable");
+  CH_TIME("ComputationalGeometry::buildTileTrees");
   if (m_verbose) {
-    pout() << "ComputationalGeometry::latticeTable" << endl;
+    pout() << "ComputationalGeometry::buildTileTrees" << endl;
   }
 
-  // Every box of a whole level starts on the m_maxBlockSize lattice whether or not the domain is a multiple of
-  // it: Chombo's domainSplit chops through breakBoxes, which cuts a box at smallEnd + maxBoxSize and recurses,
-  // so a short remainder is always the last box in a direction and never the first; with a block factor the
-  // domain is coarsened by it first, and makeGrids requires m_maxBlockSize to be a multiple of m_minBlockSize.
-  // The checks below therefore guard a property of domainSplit rather than one this class establishes.
-  const Box& domain = m_domains[a_level].domainBox();
+  m_tileTrees.resize(m_cutTiles.size());
 
-  IntVect dims;
+  for (int lvl = 0; lvl < m_cutTiles.size(); lvl++) {
+    m_tileTrees[lvl] = this->buildTree(m_cutTiles[lvl]);
+  }
+}
 
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    dims[dir] = (domain.size(dir) + m_maxBlockSize - 1) / m_maxBlockSize;
+std::shared_ptr<ComputationalGeometry::BoxTree>
+ComputationalGeometry::buildTree(const Vector<Box>& a_boxes) const
+{
+  if (a_boxes.size() == 0) {
+    return nullptr;
   }
 
-  Vector<int> table(dims.product(), -1);
+  std::vector<std::pair<int, BV>> primitives;
 
-  for (int i = 0; i < m_boxes[a_level].size(); i++) {
-    const int cell = this->latticeLookup(Vector<int>(), a_level, m_boxes[a_level][i].smallEnd());
+  primitives.reserve(a_boxes.size());
 
-    if (table[cell] >= 0) {
-      MayDay::Error("ComputationalGeometry::latticeTable - two boxes of a whole level start in one lattice cell");
+  for (int i = 0; i < a_boxes.size(); i++) {
+    primitives.emplace_back(i, ComputationalGeometry::boundingVolume(a_boxes[i]));
+  }
+
+  return std::make_shared<BoxTree>(std::move(primitives), s_treeLeafSize);
+}
+
+Vector<int>
+ComputationalGeometry::meeting(const std::shared_ptr<BoxTree>& a_tree, const Vector<Box>& a_boxes, const Box& a_box)
+{
+  Vector<int> found;
+
+  if (!a_tree) {
+    return found;
+  }
+
+  using Node = BoxTree::Node;
+
+  const BV query = ComputationalGeometry::boundingVolume(a_box);
+
+  EBGeometry::BVH::NodeKeyFactory<Node, bool> nodeKey = [&query](const Node& a_node) noexcept -> bool {
+    return a_node.m_bv.intersects(query);
+  };
+
+  EBGeometry::BVH::PrunePredicate<Node, bool> prune = [](const Node& /*a_node*/, const bool& a_meets) noexcept -> bool {
+    return a_meets;
+  };
+
+  EBGeometry::BVH::PackedChildOrderer<bool, K> orderer =
+    [](std::array<std::pair<uint32_t, bool>, K>& /*a_children*/) noexcept -> void {
+  };
+
+  EBGeometry::BVH::PackedLeafEvaluator<int, EBGeometry::BVH::ValueStorage<int>> evaluate =
+    [&](const std::vector<int>& a_indices, size_t a_offset, size_t a_count) noexcept -> void {
+    for (size_t i = a_offset; i < a_offset + a_count; i++) {
+      if (a_boxes[a_indices[i]].intersectsNotEmpty(a_box)) {
+        found.push_back(a_indices[i]);
+      }
     }
+  };
 
-    table[cell] = i;
-  }
+  a_tree->traverse(evaluate, prune, orderer, nodeKey);
 
-  for (int i = 0; i < table.size(); i++) {
-    if (table[i] < 0) {
-      MayDay::Error("ComputationalGeometry::latticeTable - a whole level does not cover its domain");
-    }
-  }
+  // The tree pads its K-ary nodes by repeating a child, so a leaf can be entered more than once and a box be
+  // found more than once; the caller is answered with each box once, in increasing index order.
+  std::vector<int>& hits = found.stdVector();
 
-  return table;
+  std::sort(hits.begin(), hits.end());
+
+  hits.erase(std::unique(hits.begin(), hits.end()), hits.end());
+
+  return found;
+}
+
+Vector<int>
+ComputationalGeometry::boxesMeeting(const int a_level, const Box& a_box) const
+{
+  return ComputationalGeometry::meeting(m_boxTrees[a_level], m_boxes[a_level], a_box);
+}
+
+Vector<int>
+ComputationalGeometry::tilesMeeting(const int a_level, const Box& a_box) const
+{
+  return ComputationalGeometry::meeting(m_tileTrees[a_level], m_cutTiles[a_level], a_box);
 }
 
 int
-ComputationalGeometry::latticeLookup(const Vector<int>& a_table, const int a_level, const IntVect& a_point) const
+ComputationalGeometry::containingBox(const int a_level, const IntVect& a_cell) const
 {
-  // Lexicographic linear index of the lattice cell holding the point. With an empty table the cell index itself
-  // is returned, which is how latticeTable fills the table in the first place.
-  const Box& domain = m_domains[a_level].domainBox();
+  const Vector<int> hits = this->boxesMeeting(a_level, Box(a_cell, a_cell));
 
-  int index  = 0;
-  int stride = 1;
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    const int cells = (domain.size(dir) + m_maxBlockSize - 1) / m_maxBlockSize;
-    const int cell  = (a_point[dir] - domain.smallEnd(dir)) / m_maxBlockSize;
-
-    index += cell * stride;
-    stride *= cells;
+  // A whole level is a partition of its domain, so exactly one box holds the cell.
+  if (hits.size() != 1) {
+    MayDay::Error("ComputationalGeometry::containingBox - a cell of a whole level lies in no box or in several");
   }
 
-  return (a_table.size() == 0) ? index : a_table[index];
-}
-
-long long
-ComputationalGeometry::superTileKey(const IntVect& a_cell) const noexcept
-{
-  // Super-tile coordinates, packed 21 bits per direction, as TiledMeshRefine packs its own keys. Cells are
-  // never negative in a domain that starts at the origin.
-  long long key = 0;
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    const long long coord = static_cast<long long>(a_cell[dir]) / m_maxBlockSize;
-
-    key |= (coord & ((1LL << 21) - 1)) << (21 * dir);
-  }
-
-  return key;
-}
-
-Vector<int>
-ComputationalGeometry::sortTilesByKey(const int a_level) const
-{
-  CH_TIME("ComputationalGeometry::sortTilesByKey");
-  if (m_verbose) {
-    pout() << "ComputationalGeometry::sortTilesByKey" << endl;
-  }
-
-  const Vector<Box>& tiles = m_cutTiles[a_level];
-
-  Vector<int> order(tiles.size());
-
-  for (int i = 0; i < tiles.size(); i++) {
-    order[i] = i;
-  }
-
-  std::sort(order.stdVector().begin(), order.stdVector().end(), [&](const int a, const int b) {
-    return this->superTileKey(tiles[a].smallEnd()) < this->superTileKey(tiles[b].smallEnd());
-  });
-
-  return order;
-}
-
-Vector<int>
-ComputationalGeometry::tilesMeeting(const int a_level, const Vector<int>& a_order, const Box& a_box) const
-{
-  // A tile lies inside one super-tile, so the tiles meeting a box are among those keyed by the super-tiles the
-  // box touches: each such key is found by binary search in the sorted order and its run scanned.
-  const Vector<Box>& tiles = m_cutTiles[a_level];
-
-  Vector<int> found;
-
-  const Box superTiles = coarsen(a_box, m_maxBlockSize);
-
-  for (BoxIterator bit(superTiles); bit.ok(); ++bit) {
-    const long long key = this->superTileKey(bit() * m_maxBlockSize);
-
-    auto keyLess = [&](const int a_tile, const long long a_key) -> bool {
-      return this->superTileKey(tiles[a_tile].smallEnd()) < a_key;
-    };
-
-    const std::vector<int>& order = a_order.constStdVector();
-
-    for (auto it = std::lower_bound(order.begin(), order.end(), key, keyLess); it != order.end(); ++it) {
-      if (this->superTileKey(tiles[*it].smallEnd()) != key) {
-        break;
-      }
-
-      if (tiles[*it].intersectsNotEmpty(a_box)) {
-        found.push_back(*it);
-      }
-    }
-  }
-
-  return found;
+  return hits[0];
 }
 
 void
@@ -1353,20 +1321,18 @@ ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_f
     return GeometryService::Irregular;
   };
 
-  const Vector<int> startTable = this->latticeTable(m_startLevel);
-
   for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
     const Vector<Box>& tiles = m_cutTiles[lvl];
 
     a_tileHosts[lvl].resize(tiles.size(), -1);
 
-    // The box a tile lies in: the start-level box under it is lattice arithmetic, and from there the child
-    // links descend one level at a time, picking the child that contains the tile's coarsening. Running out of
-    // children before the tile's level is the hole.
+    // The box a tile lies in: the start-level box under it is the one holding its coarsening's first cell, and
+    // from there the child links descend one level at a time, picking the child that contains the tile's
+    // coarsening. Running out of children before the tile's level is the hole.
     for (int t = 0; t < tiles.size(); t++) {
       const IntVect startCell = coarsen(tiles[t], 1 << (lvl - m_startLevel)).smallEnd();
 
-      int host = this->latticeLookup(startTable, m_startLevel, startCell);
+      int host = this->containingBox(m_startLevel, startCell);
 
       for (int k = m_startLevel; k < lvl && host >= 0; k++) {
         const int first = a_firstChild[k][host];
@@ -1533,6 +1499,8 @@ ComputationalGeometry::buildCoarserLevels()
     domainSplit(m_domains[lvl], m_boxes[lvl], m_maxBlockSize);
 
     this->classifyBoxes(m_boxes[lvl], lvl, m_gasTypes[lvl], m_solidTypes[lvl]);
+
+    this->buildBoxTree(lvl);
   }
 
   // The push-down: a box containing a box that is irregular in a phase is irregular in that phase, from the
@@ -1542,9 +1510,6 @@ ComputationalGeometry::buildCoarserLevels()
   const phase::which_phase phases[2] = {phase::gas, phase::solid};
 
   for (int lvl = m_stopLevel - 1; lvl >= 0; lvl--) {
-    const Vector<int> order = (lvl > m_startLevel) ? this->sortTilesByKey(lvl) : Vector<int>();
-    const Vector<int> table = (lvl <= m_startLevel) ? this->latticeTable(lvl) : Vector<int>();
-
     for (const phase::which_phase& curPhase : phases) {
       const Vector<GeometryService::InOut>& fineTypes = this->types(curPhase)[lvl + 1];
       Vector<GeometryService::InOut>&       coarTypes = this->types(curPhase)[lvl];
@@ -1557,7 +1522,7 @@ ComputationalGeometry::buildCoarserLevels()
         const Box coarsened = coarsen(m_boxes[lvl + 1][i], 2);
 
         if (lvl > m_startLevel) {
-          const Vector<int> containers = this->tilesMeeting(lvl, order, coarsened);
+          const Vector<int> containers = this->tilesMeeting(lvl, coarsened);
 
           if (containers.size() == 0) {
             MayDay::Error("ComputationalGeometry::buildCoarserLevels - an irregular tile has no tile beneath it");
@@ -1569,7 +1534,7 @@ ComputationalGeometry::buildCoarserLevels()
           }
         }
         else {
-          coarTypes[this->latticeLookup(table, lvl, coarsened.smallEnd())] = GeometryService::Irregular;
+          coarTypes[this->containingBox(lvl, coarsened.smallEnd())] = GeometryService::Irregular;
         }
       }
     }
