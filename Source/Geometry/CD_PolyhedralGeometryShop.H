@@ -167,9 +167,9 @@ public:
   sanityCheck() const;
 
   /**
-   * @brief Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and
-   *        then onto the tiles themselves with the ranks shuffled; run sanityCheck over the copies each time, copy
-   *        them back onto the original layouts and require equality bit for bit.
+   * @brief Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and then
+   * onto the tiles themselves with the ranks shuffled; run sanityCheck over the copies each time, copy them back onto
+   * the original layouts and require equality bit for bit.
    * @details A stand-in, until the index space is generated over the graphs, for what a consumer on another
    * layout does: take the graph's data through a Copier and read it there. Switched by
    * PolyhedralGeometryShop.test_copy. Collective. Requires buildGraphs.

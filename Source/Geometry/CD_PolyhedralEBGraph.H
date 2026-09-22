@@ -124,13 +124,12 @@ public:
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
-   * @details The other graph's cell states, face states and surfaces are copied onto the new layout's valid
-   * cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified
-   * from the implicit function by their corners, as define classifies them. The new layout must cover the same
-   * cells as the other graph's, since the surfaces of the cut cells come from it alone; a layout of another cell
-   * count stops the run. The refined mask is not
-   * copied: it is the finer level's to set, so link the copy to its finer level afterwards as the original was.
-   * Collective.
+   * @details The other graph's cell states, face states and surfaces are copied onto the new layout's valid cells, and
+   * exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified from the implicit
+   * function by their corners, as define classifies them. The new layout must cover the same cells as the other
+   * graph's, since the surfaces of the cut cells come from it alone; a layout of another cell count stops the run. The
+   * refined mask is not copied: it is the finer level's to set, so link the copy to its finer level afterwards as the
+   * original was. Collective.
    * @param[in] a_source   Graph to copy from.
    * @param[in] a_grids    Layout to copy onto, covering the same cells as a_source's.
    * @param[in] a_function Implicit function of the phase, for the ghost cells no tile carries.
@@ -196,9 +195,9 @@ public:
   getCutCells() const noexcept;
 
   /**
-   * @brief The state of every cell, s_covered, s_cut or s_regular, with ghost cells filled from the geometry. A
-   *        signed char per cell, which is what the three values need. A ghost cell no tile carries is classified
-   *        from its corners alone and has no surface even when cut; the face onto it is s_faceCoarser.
+   * @brief The state of every cell, s_covered, s_cut or s_regular, with ghost cells filled from the geometry. A signed
+   * char per cell, which is what the three values need. A ghost cell no tile carries is classified from its corners
+   * alone and has no surface even when cut; the face onto it is s_faceCoarser.
    * @return One component per cell.
    */
   const LevelData<BaseFab<signed char>>&
@@ -290,15 +289,15 @@ protected:
   defineGrids(const Vector<Box>& a_cutTiles);
 
   /**
-   * @brief Allocate the per-cell containers over m_grids: the cut-cell sets, the cell states, the face states and
-   *        the refined mask. The surfaces wait for the sets.
+   * @brief Allocate the per-cell containers over m_grids: the cut-cell sets, the cell states, the face states and the
+   * refined mask. The surfaces wait for the sets.
    */
   void
   defineData();
 
   /**
-   * @brief Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells
-   *        some tile carries into each box's cut-cell set.
+   * @brief Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells some
+   * tile carries into each box's cut-cell set.
    * @details The cells another tile carries are expected to hold that tile's state already, by exchange.
    * @param[in] a_function Implicit function.
    * @param[in] a_carried  The marker from markCarried.
@@ -307,16 +306,16 @@ protected:
   defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
-   * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another
-   *        tile covers, zero elsewhere.
+   * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile
+   * covers, zero elsewhere.
    * @param[out] a_carried The marker, defined here over the layout with the cell states' ghost width.
    */
   void
   markCarried(LevelData<BaseFab<signed char>>& a_carried) const;
 
   /**
-   * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces
-   *        with ghost cells, and set the face states the apertures decide.
+   * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with
+   * ghost cells, and set the face states the apertures decide.
    * @param[in] a_function        Implicit function.
    * @param[in] a_volumeThreshold Volume-fraction threshold.
    * @param[in] a_carried         The marker from markCarried.
