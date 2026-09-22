@@ -1263,12 +1263,22 @@ ComputationalGeometry::meeting(const std::shared_ptr<BoxTree>& a_tree, const Vec
 Vector<int>
 ComputationalGeometry::boxesMeeting(const int a_level, const Box& a_box) const
 {
+  // A level with no boxes has no tree and nothing to meet; a level with boxes and no tree was not indexed.
+  if (a_level < 0 || a_level >= m_boxTrees.size() || (!m_boxTrees[a_level] && m_boxes[a_level].size() > 0)) {
+    MayDay::Error("ComputationalGeometry::boxesMeeting - the level's boxes are not indexed");
+  }
+
   return ComputationalGeometry::meeting(m_boxTrees[a_level], m_boxes[a_level], a_box);
 }
 
 Vector<int>
 ComputationalGeometry::tilesMeeting(const int a_level, const Box& a_box) const
 {
+  // As boxesMeeting: no tiles is an empty answer, tiles without a tree is a level that was not indexed.
+  if (a_level < 0 || a_level >= m_tileTrees.size() || (!m_tileTrees[a_level] && m_cutTiles[a_level].size() > 0)) {
+    MayDay::Error("ComputationalGeometry::tilesMeeting - the level's tiles are not indexed");
+  }
+
   return ComputationalGeometry::meeting(m_tileTrees[a_level], m_cutTiles[a_level], a_box);
 }
 
@@ -1481,6 +1491,13 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
     m_boxes[lvl]      = newBoxes;
     m_gasTypes[lvl]   = newGasTypes;
     m_solidTypes[lvl] = newSolidTypes;
+
+    // The level's index held the boxes that were just replaced, and its primitives are indices into the list
+    // that is gone. It is dropped rather than rebuilt here: makeGrids indexes every level once the lists are
+    // final, and until then a query on this level meets the null check rather than the old list.
+    if (lvl < m_boxTrees.size()) {
+      m_boxTrees[lvl] = nullptr;
+    }
   }
 }
 
