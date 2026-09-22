@@ -443,6 +443,8 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
       m_solidTypes[lvl].push_back(GeometryService::Regular);
     }
 
+    this->buildBoxTrees();
+
     return;
   }
 
@@ -506,6 +508,10 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     }
   }
 
+  timer.startEvent("Index the boxes");
+  this->buildBoxTrees();
+  timer.stopEvent("Index the boxes");
+
   if (m_profile) {
     this->reportGrids();
 
@@ -537,36 +543,106 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
   const Vector<Box>&                    boxes = m_boxes[a_level];
   const Vector<GeometryService::InOut>& types = this->types(a_phase)[a_level];
 
-  bool anyRegular = false;
-  bool anyCovered = false;
-
-  for (int i = 0; i < boxes.size(); i++) {
-    if (!boxes[i].intersectsNotEmpty(a_box)) {
-      continue;
-    }
-
-    switch (types[i]) {
-    case GeometryService::Regular: {
-      anyRegular = true;
-
-      break;
-    }
-    case GeometryService::Covered: {
-      anyCovered = true;
-
-      break;
-    }
-    default: {
-      return GeometryService::Irregular;
-    }
-    }
+  if (m_boxTrees.size() <= a_level || !m_boxTrees[a_level]) {
+    MayDay::Error("ComputationalGeometry::classify - the level has no spatial index, makeGrids has not run");
   }
 
-  if (anyRegular && anyCovered) {
+  bool anyRegular = false;
+  bool anyCovered = false;
+  bool decided    = false;
+
+  // The query box as a bounding volume, its cells taken as the unit cubes they are. A node is entered if its
+  // bounds meet it; the exact box test then filters the candidates, which a touching node can produce.
+  const BV query = this->boundingVolume(a_box);
+
+  using Node = BoxTree::Node;
+
+  EBGeometry::BVH::NodeKeyFactory<Node, bool> nodeKey = [&query](const Node& a_node) noexcept -> bool {
+    return a_node.m_bv.intersects(query);
+  };
+
+  EBGeometry::BVH::PrunePredicate<Node, bool> prune = [&decided](const Node& /*a_node*/,
+                                                                 const bool& a_meets) noexcept -> bool {
+    return a_meets && !decided;
+  };
+
+  EBGeometry::BVH::PackedChildOrderer<bool, K> orderer =
+    [](std::array<std::pair<uint32_t, bool>, K>& /*a_children*/) noexcept -> void {
+  };
+
+  EBGeometry::BVH::PackedLeafEvaluator<int, EBGeometry::BVH::ValueStorage<int>> evaluate =
+    [&](const std::vector<int>& a_indices, size_t a_offset, size_t a_count) noexcept -> void {
+    for (size_t i = a_offset; i < a_offset + a_count && !decided; i++) {
+      const int index = a_indices[i];
+
+      if (!boxes[index].intersectsNotEmpty(a_box)) {
+        continue;
+      }
+
+      switch (types[index]) {
+      case GeometryService::Regular: {
+        anyRegular = true;
+
+        break;
+      }
+      case GeometryService::Covered: {
+        anyCovered = true;
+
+        break;
+      }
+      default: {
+        decided = true;
+
+        break;
+      }
+      }
+
+      // a box that meets both a regular and a covered box has the surface between them
+      decided = decided || (anyRegular && anyCovered);
+    }
+  };
+
+  m_boxTrees[a_level]->traverse(evaluate, prune, orderer, nodeKey);
+
+  if (decided) {
     return GeometryService::Irregular;
   }
 
   return anyCovered ? GeometryService::Covered : GeometryService::Regular;
+}
+
+GeometryService::InOut
+ComputationalGeometry::classify(const Box& a_box, const ProblemDomain& a_domain, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::classify(ProblemDomain)");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::classify(ProblemDomain)" << endl;
+  }
+
+  const int level = this->getLevel(a_domain);
+
+  if (level >= 0) {
+    return this->classify(a_box, level, a_phase);
+  }
+
+  // Finer than every stored level: the finest one answers for the box coarsened onto it. Its domain must be a
+  // refinement by two of the stored domain, or the two index spaces do not line up.
+  const int finest = m_domains.size() - 1;
+
+  const Box& fineBox = a_domain.domainBox();
+  const Box& coarBox = m_domains[finest].domainBox();
+
+  int ratio = 1;
+
+  while (ratio * coarBox.size(0) < fineBox.size(0)) {
+    ratio *= 2;
+  }
+
+  if (refine(m_domains[finest], ratio) != a_domain) {
+    MayDay::Error("ComputationalGeometry::classify - the domain is not a refinement by two of a stored one");
+  }
+
+  return this->classify(coarsen(a_box, ratio), finest, a_phase);
 }
 
 int
@@ -1054,6 +1130,54 @@ ComputationalGeometry::makeTiles()
   // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
   for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
     m_cutTiles[lvl] = tiles[lvl - m_startLevel];
+  }
+}
+
+ComputationalGeometry::BV
+ComputationalGeometry::boundingVolume(const Box& a_box) const noexcept
+{
+  // A cell is the unit cube whose corners are its nodes, so a box spans [smallEnd, bigEnd + 1] in index space.
+  // The bounding volumes are three-dimensional whatever SpaceDim is, and two of them overlap only where they do
+  // so on every axis, so in two dimensions the third axis is given the unit thickness a cell has there too.
+  Vec3 lo = Vec3(0.0, 0.0, 0.0);
+  Vec3 hi = Vec3(1.0, 1.0, 1.0);
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    lo[dir] = static_cast<Real>(a_box.smallEnd(dir));
+    hi[dir] = static_cast<Real>(a_box.bigEnd(dir) + 1);
+  }
+
+  return BV(lo, hi);
+}
+
+void
+ComputationalGeometry::buildBoxTrees()
+{
+  CH_TIME("ComputationalGeometry::buildBoxTrees");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::buildBoxTrees" << endl;
+  }
+
+  m_boxTrees.resize(m_boxes.size());
+
+  for (int lvl = 0; lvl < m_boxes.size(); lvl++) {
+    const Vector<Box>& boxes = m_boxes[lvl];
+
+    if (boxes.size() == 0) {
+      m_boxTrees[lvl] = nullptr;
+
+      continue;
+    }
+
+    std::vector<std::pair<int, BV>> primitives;
+
+    primitives.reserve(boxes.size());
+
+    for (int i = 0; i < boxes.size(); i++) {
+      primitives.emplace_back(i, this->boundingVolume(boxes[i]));
+    }
+
+    m_boxTrees[lvl] = std::make_shared<BoxTree>(std::move(primitives), s_treeLeafSize);
   }
 }
 

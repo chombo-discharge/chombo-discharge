@@ -14,7 +14,11 @@
 #define CD_COMPUTATIONALGEOMETRY_H
 
 // Std includes
+#include <memory>
 #include <string>
+
+// EBGeometry includes
+#include <EBGeometry.hpp>
 
 // Chombo includes
 #include <BaseIF.H>
@@ -42,6 +46,28 @@
 class ComputationalGeometry
 {
 public:
+  /**
+   * @brief Branching factor of the spatial index over the boxes of a level.
+   */
+  static constexpr int K = 4;
+
+  /**
+   * @brief Coordinate of a bounding volume of the spatial index.
+   */
+  using Vec3 = EBGeometry::Vec3T<Real>;
+
+  /**
+   * @brief Bounding volume of the spatial index over the boxes of a level.
+   */
+  using BV = EBGeometry::BoundingVolumes::AABBT<Real>;
+
+  /**
+   * @brief Spatial index over the boxes of one level. The primitives are the boxes' indices into that level's
+   * list, stored by value, and every bounding volume is the box itself in index space, so a query answers with
+   * candidates that the exact box test then filters.
+   */
+  using BoxTree = EBGeometry::BVH::PackedBVH<Real, int, K, EBGeometry::BVH::ValueStorage<int>>;
+
   /**
    * @brief Constructor. Sets a blank geometry.
    */
@@ -192,6 +218,21 @@ public:
    */
   GeometryService::InOut
   classify(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Classify a box on any domain at or finer than a level makeGrids built.
+   * @details On a stored domain this is classify on that level. On a domain finer than every stored level -- a
+   * simulation level above the stop domain, which the geometry does not describe -- the box is coarsened onto the
+   * finest stored level and classified there: the coarsening of a box is met by every box the box itself would
+   * meet, so a regular or covered answer holds at the finer spacing, and irregular is the conservative answer it
+   * always is. The domain must be a refinement by powers of two of a stored one.
+   * @param[in] a_box    Box to classify, on a_domain's index space.
+   * @param[in] a_domain Domain the box lives on.
+   * @param[in] a_phase  Phase.
+   * @return Regular, covered or irregular.
+   */
+  GeometryService::InOut
+  classify(const Box& a_box, const ProblemDomain& a_domain, const phase::which_phase a_phase) const;
 
   /**
    * @brief Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.
@@ -425,6 +466,12 @@ protected:
   Vector<Vector<Box>> m_boxes;
 
   /**
+   * @brief Spatial index over the boxes of every level, one tree per level, holding the boxes' indices into
+   * m_boxes. Null on a level with no boxes, and on every level until buildBoxTrees has run.
+   */
+  Vector<std::shared_ptr<BoxTree>> m_boxTrees;
+
+  /**
    * @brief Per level, the number of boxes that split for each SplitReason, and per level the number of tiles that lie
    * in an irregular box (tagged) versus elsewhere (nesting), for the report.
    */
@@ -655,6 +702,28 @@ protected:
                 Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                 Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
                 Vector<Vector<int>>&                    a_tileHosts) const;
+
+  /**
+   * @brief Boxes per leaf the spatial index over a level's boxes is built with.
+   */
+  static constexpr int s_treeLeafSize = 8;
+
+  /**
+   * @brief The bounding volume of a box in index space, its cells taken as the unit cubes they are.
+   * @param[in] a_box The box.
+   * @return Its bounds, [smallEnd, bigEnd + 1].
+   */
+  BV
+  boundingVolume(const Box& a_box) const noexcept;
+
+  /**
+   * @brief Build the spatial index over the boxes of every level.
+   * @details One tree per level over that level's boxes, built once the box lists are final. The primitives are
+   * the boxes' indices into the level's list and every bounding volume is the box itself, so a query returns the
+   * boxes whose bounds meet it and the caller applies the exact test.
+   */
+  void
+  buildBoxTrees();
 
   /**
    * @brief Index of the box of a whole level that contains a point.
