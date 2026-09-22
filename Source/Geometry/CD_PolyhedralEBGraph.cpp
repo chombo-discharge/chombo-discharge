@@ -102,6 +102,15 @@ PolyhedralEBGraph::defineData()
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
   m_refined.define(m_grids, 1, 2 * IntVect::Unit);
+
+  // Each box's cut-cell set is a bitmap over the box and its ghost ring, which is where its cells come from: a
+  // set that starts empty would be a tree, several kilobytes for a few hundred scattered cells, and the surface
+  // container keeps a copy of it.
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box grown = grow(m_grids[dit()], m_numGhost) & m_domain.domainBox();
+
+    m_cutCells[dit()] = IntVectSet(DenseIntVectSet(grown, false));
+  }
 }
 
 void

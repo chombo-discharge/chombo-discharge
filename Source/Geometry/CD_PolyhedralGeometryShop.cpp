@@ -261,10 +261,12 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
     const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
     const BaseFab<signed char>&   refinedFab = refined[dit()];
 
-    for (IVSIterator ivsit(cut); ivsit.ok(); ++ivsit) {
-      const IntVect iv = ivsit();
+    // in the order a BoxIterator meets the cells, so that the surface's order does not depend on how the set
+    // happens to be stored
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
 
-      if (!box.contains(iv) || refinedFab(iv, 0) != 0) {
+      if (!cut.contains(iv) || refinedFab(iv, 0) != 0) {
         continue;
       }
 
@@ -658,10 +660,10 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
       Vector<Vector<Real>> facets;
 
-      for (IVSIterator ivsit(cut); ivsit.ok(); ++ivsit) {
-        const IntVect iv = ivsit();
+      for (BoxIterator cit(grown); cit.ok(); ++cit) {
+        const IntVect iv = cit();
 
-        if (!grown.contains(iv) || refinedFab(iv, 0) != 0) {
+        if (!cut.contains(iv) || refinedFab(iv, 0) != 0) {
           continue;
         }
 
