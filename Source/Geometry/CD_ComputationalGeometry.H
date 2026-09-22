@@ -179,6 +179,21 @@ public:
   getNumGridLevels() const noexcept;
 
   /**
+   * @brief Classify a box on a level from the grids makeGrids built.
+   * @details Every level is a partition of its domain into boxes, each classified per phase, so the box is
+   * regular if every box of the level it meets is regular in the phase, covered if every one is covered, and
+   * irregular otherwise -- including when it meets both a regular and a covered box, since the surface must then
+   * lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves
+   * are the polyhedral graph's.
+   * @param[in] a_box   Box to classify, on the level's index space.
+   * @param[in] a_level Level, 0 being the coarsest.
+   * @param[in] a_phase Phase.
+   * @return Regular, covered or irregular.
+   */
+  GeometryService::InOut
+  classify(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
    * @brief Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.
    * @return The start level, 0 being the coarsest.
    */
@@ -213,7 +228,8 @@ public:
 
   /**
    * @brief The cut tiles on a level: the boxes of the level that carry cut cells or nest the level above, which is what
-   * a simulation grid on the level is made of. Empty on the start level and below, which are whole.
+   * a simulation grid on the level is made of. On the start level, its boxes irregular in either phase; empty below
+   * it.
    * @param[in] a_level Level, 0 being the coarsest.
    * @return The cut tiles.
    */

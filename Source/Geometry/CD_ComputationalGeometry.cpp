@@ -496,6 +496,16 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   this->buildCoarserLevels();
   timer.stopEvent("Coarser levels");
 
+  // The start level is whole and not tiled, but its boxes irregular in either phase are its cut tiles all the
+  // same: super-tiles by construction, and where the level's cut cells are. Taken after the push-down, which can
+  // make a start-level box irregular for what the tiles above it hold.
+  for (int i = 0; i < m_boxes[m_startLevel].size(); i++) {
+    if (m_gasTypes[m_startLevel][i] == GeometryService::Irregular ||
+        m_solidTypes[m_startLevel][i] == GeometryService::Irregular) {
+      m_cutTiles[m_startLevel].push_back(m_boxes[m_startLevel][i]);
+    }
+  }
+
   if (m_profile) {
     this->reportGrids();
 
@@ -507,6 +517,56 @@ int
 ComputationalGeometry::getNumGridLevels() const noexcept
 {
   return m_domains.size();
+}
+
+GeometryService::InOut
+ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::classify");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::classify" << endl;
+  }
+
+  if (a_level < 0 || a_level >= m_boxes.size()) {
+    MayDay::Error("ComputationalGeometry::classify - no such level");
+  }
+  if (a_box.isEmpty() || !m_domains[a_level].domainBox().contains(a_box)) {
+    MayDay::Error("ComputationalGeometry::classify - the box is empty or not inside the level's domain");
+  }
+
+  const Vector<Box>&                    boxes = m_boxes[a_level];
+  const Vector<GeometryService::InOut>& types = this->types(a_phase)[a_level];
+
+  bool anyRegular = false;
+  bool anyCovered = false;
+
+  for (int i = 0; i < boxes.size(); i++) {
+    if (!boxes[i].intersectsNotEmpty(a_box)) {
+      continue;
+    }
+
+    switch (types[i]) {
+    case GeometryService::Regular: {
+      anyRegular = true;
+
+      break;
+    }
+    case GeometryService::Covered: {
+      anyCovered = true;
+
+      break;
+    }
+    default: {
+      return GeometryService::Irregular;
+    }
+    }
+  }
+
+  if (anyRegular && anyCovered) {
+    return GeometryService::Irregular;
+  }
+
+  return anyCovered ? GeometryService::Covered : GeometryService::Regular;
 }
 
 int
@@ -1450,6 +1510,7 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
 
     shop->setProfileFileName("PolyhedralShopReportGasPhase.dat");
     shop->setGrids(*this, phase::gas);
+    shop->buildGraphs();
     shop->verifySurface();
 
     a_geoserver = static_cast<GeometryService*>(shop);
@@ -1504,6 +1565,7 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
 
       shop->setProfileFileName("PolyhedralShopReportSolidPhase.dat");
       shop->setGrids(*this, phase::solid);
+      shop->buildGraphs();
       shop->verifySurface();
 
       a_geoserver = static_cast<GeometryService*>(shop);

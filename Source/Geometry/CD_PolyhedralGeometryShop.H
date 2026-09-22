@@ -24,6 +24,7 @@
 #include <CD_ScanShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_CutCellSurface.H>
+#include <CD_PolyhedralEBGraph.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
 
@@ -124,6 +125,24 @@ public:
   setGrids(const ComputationalGeometry& a_compGeom, const phase::which_phase a_phase) noexcept;
 
   /**
+   * @brief Build the graph of every tiled level: the cut cells, their surfaces, and what every face opens onto.
+   * @details One PolyhedralEBGraph per level from the geometry's start level up, over that level's cut tiles, each
+   * defined from this phase's implicit function with one ghost cell and then linked to the level above it so that
+   * the coarse side of every level boundary knows which of its cells and faces the finer level describes. The levels
+   * below the start level carry no graph. Collective. Requires setGrids.
+   */
+  void
+  buildGraphs();
+
+  /**
+   * @brief The graph of a level, undefined below the start level. Stops the run before buildGraphs.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The graph.
+   */
+  const PolyhedralEBGraph&
+  getGraph(const int a_level) const noexcept;
+
+  /**
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
    * @details Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level
    * carries are skipped, and a face shared with such a cell is restricted to the finer chords and the
@@ -136,16 +155,27 @@ public:
 
   /**
    * @brief Check that the interface triangles form a surface that is closed except on the domain boundary.
-   * @details Every polyhedron has a neighbour across each edge of its interface unless that edge lies on the domain
-   * boundary, so every interior edge of the triangulation must be used exactly twice. Vertices are welded at
-   * s_weldSpacing times the finest spacing before edges are matched, which is far above the round-off two
-   * cells produce for one shared vertex and far below any geometry. Gathers the triangles onto rank 0, where
-   * an interior edge used once or more than twice is reported with its position and stops the run. Switched by
-   * PolyhedralGeometryShop.sanity_check, on by default.
-   * @param[in] a_facets This rank's interface triangles, nine reals each.
+   * @details A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be
+   * used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own
+   * level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a
+   * face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and
+   * an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells,
+   * vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the
+   * run. Switched by PolyhedralGeometryShop.sanity_check, on by default. Requires buildGraphs.
    */
   void
-  sanityCheck(const Vector<Real>& a_facets) const;
+  sanityCheck() const;
+
+  /**
+   * @brief Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and then
+   * onto the tiles themselves with the ranks shuffled; run sanityCheck over the copies each time, copy them back onto
+   * the original layouts and require equality bit for bit.
+   * @details A stand-in, until the index space is generated over the graphs, for what a consumer on another
+   * layout does: take the graph's data through a Copier and read it there. Switched by
+   * PolyhedralGeometryShop.test_copy. Collective. Requires buildGraphs.
+   */
+  void
+  testGraphCopy() const;
 
   /**
    * @brief Whether a cut body holds too little solid to be a cut cell.
@@ -310,6 +340,11 @@ protected:
   const ComputationalGeometry* m_compGeom;
 
   /**
+   * @brief Graph of every level, indexed as the geometry indexes its levels; undefined where a level has no tiles.
+   */
+  Vector<RefCountedPtr<PolyhedralEBGraph>> m_graphs;
+
+  /**
    * @brief Phase this generator serves on those grids.
    */
   phase::which_phase m_phase;
@@ -330,6 +365,17 @@ protected:
   bool m_profile;
 
   /**
+   * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
+   */
+  bool m_testCopy;
+
+  /**
+   * @brief Whether the member functions that run once per level or per phase announce themselves in pout.
+   * PolyhedralGeometryShop.verbose, off by default. The functions that run per cell never announce themselves.
+   */
+  bool m_verbose;
+
+  /**
    * @brief Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.
    * @details Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has
    * that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface).
@@ -340,6 +386,34 @@ protected:
    */
   void
   collectFacets(Vector<Real>& a_facets, const int a_level) const;
+
+  /**
+   * @brief The closure check over a given set of graphs, one per level as m_graphs holds them.
+   * @param[in] a_graphs Graphs, undefined entries skipped.
+   */
+  void
+  sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const;
+
+#if CH_SPACEDIM == 3
+  /**
+   * @brief Build the body of a cut cell of a graph, restricted on every face the finer level describes.
+   * @details The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the
+   * chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the
+   * check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again
+   * afterwards. A body that will not close, a face that cannot be restricted or a doubly crossed edge stops the run.
+   * @param[out] a_body     The body.
+   * @param[in]  a_graph    Graph of the cell's level.
+   * @param[in]  a_surfaces Surfaces of the cell's box, from the graph.
+   * @param[in]  a_refined  Refined mask of the cell's box, from the graph.
+   * @param[in]  a_cell     The cell.
+   */
+  void
+  defineBody(PolyhedralEB::CutCellBody&                  a_body,
+             const PolyhedralEBGraph&                    a_graph,
+             const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
+             const BaseFab<signed char>&                 a_refined,
+             const IntVect&                              a_cell) const;
+#endif
 
   /**
    * @brief Write triangles gathered from every rank as one STL file.
