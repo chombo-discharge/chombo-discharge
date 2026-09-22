@@ -184,7 +184,7 @@ public:
    * regular if every box of the level it meets is regular in the phase, covered if every one is covered, and
    * irregular otherwise -- including when it meets both a regular and a covered box, since the surface must then
    * lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves
-   * are the polyhedral graph's. A linear pass over the level's boxes for now; a spatial index replaces it.
+   * are the polyhedral graph's.
    * @param[in] a_box   Box to classify, on the level's index space.
    * @param[in] a_level Level, 0 being the coarsest.
    * @param[in] a_phase Phase.
