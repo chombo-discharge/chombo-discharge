@@ -29,6 +29,13 @@ namespace PolyhedralEB {
  * edge by the four cells meeting along it, so two neighbouring cells reconstruct the same
  * surface bit for bit rather than to within a tolerance. That is what makes a face aperture
  * agree when it is computed from either side.
+ *
+ * That agreement is between cells of one level. A cell's chords are straight at its own
+ * spacing, so on a face shared with cells of a finer level they are not what that level
+ * describes the face with, and the polyhedron this surface alone reconstructs is the
+ * level-local one. Which faces those are is not the surface's to know: it is recorded by the
+ * cut-cell connectivity of the level, and CutCellBody::restrictFace replaces such a face with
+ * the chords of the children covering it.
  */
 class CutCellSurface
 {
