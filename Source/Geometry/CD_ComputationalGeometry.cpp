@@ -427,7 +427,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
-  m_splitCounts.resize(numLevels, Vector<int>(6, 0));
+  m_splitCounts.resize(numLevels, Vector<int>(7, 0));
   m_splitBoxes.resize(numLevels);
   m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
@@ -927,6 +927,20 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
       reason = this->exceedsCurvature(a_boxes[i], a_level, phase::solid);
     }
 
+    // A box the curvature leaves alone is a leaf, and a leaf is what the level above describes the other side
+    // of. One that holds an edge crossed twice at the finer spacing cannot describe its own face there, so it
+    // is refined until the crossing is resolved.
+    if (reason == SplitReason::None) {
+      const bool doubled = (a_gasTypes[i] == GeometryService::Irregular &&
+                            this->doublyCrossedEdge(a_boxes[i], a_level, phase::gas)) ||
+                           (a_solidTypes[i] == GeometryService::Irregular &&
+                            this->doublyCrossedEdge(a_boxes[i], a_level, phase::solid));
+
+      if (doubled) {
+        reason = SplitReason::DoubleCrossing;
+      }
+    }
+
     flags[i] = static_cast<int>(reason);
   }
 
@@ -987,6 +1001,71 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
   }
 
   return anySolid ? GeometryService::Covered : GeometryService::Regular;
+}
+
+bool
+ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::doublyCrossedEdge");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::doublyCrossedEdge" << endl;
+  }
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
+
+  if (implicitFunction.isNull()) {
+    return false;
+  }
+
+  const BaseIF& f = *implicitFunction;
+
+  const Real dx     = m_dx[a_level];
+  const Real fineDx = 0.5 * dx;
+  const Box  valid  = a_box & m_domains[a_level].domainBox();
+
+  // The node values of this level, as the cells of the box are built from, and the midpoint of every edge
+  // between two of them, which is a node of the level above. The midpoint is snapped at the finer spacing,
+  // since that is the spacing the level above would classify it at.
+  BaseFab<Real> nodeValues;
+
+  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, valid, m_probLo, dx);
+
+  const Box& nodeBox = nodeValues.box();
+
+  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const IntVect jv = iv + BASISV(dir);
+
+      if (!nodeBox.contains(jv)) {
+        continue;
+      }
+
+      const bool loFluid = PolyhedralEB::isFluid(nodeValues(iv, 0));
+      const bool hiFluid = PolyhedralEB::isFluid(nodeValues(jv, 0));
+
+      // An edge whose ends disagree carries one crossing at this level and one at the next, in the half its
+      // own crossing lies in. Only ends that agree can hide a pair.
+      if (loFluid != hiFluid) {
+        continue;
+      }
+
+      RealVect x = m_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += dx * static_cast<Real>(iv[d]);
+      }
+
+      x[dir] += 0.5 * dx;
+
+      if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, fineDx)) != loFluid) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 ComputationalGeometry::SplitReason
@@ -1440,7 +1519,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
-      m_splitCounts[lvl][tagged ? 4 : 5]++;
+      m_splitCounts[lvl][tagged ? 5 : 6]++;
     }
 
     for (int i = 0; i < oldBoxes.size(); i++) {
@@ -1594,9 +1673,9 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2] << "/"
-           << m_splitCounts[lvl][3] << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting "
-           << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5] << endl;
+           << "; split interior/ring/medial/doubled " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2] << "/"
+           << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << " (leaves " << m_splitCounts[lvl][0]
+           << "); tiles tagged/nesting " << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << endl;
   }
 }
 

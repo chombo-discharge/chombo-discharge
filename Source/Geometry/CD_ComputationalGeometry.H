@@ -631,7 +631,8 @@ protected:
     None,
     Interior,
     Ring,
-    Medial
+    Medial,
+    DoubleCrossing
   };
 
   /**
@@ -660,6 +661,22 @@ protected:
    */
   SplitReason
   exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Whether a cell edge of a box is crossed twice by the surface at the spacing of the level above it.
+   * @details The three nodes of an edge at the finer spacing are its two ends and its midpoint. Ends that agree
+   * under isFluid with a midpoint that disagrees are a surface that enters and leaves through the edge: the edge
+   * carries no crossing at this level and one in each half at the next, so a cell holding it cannot describe its
+   * own face once the level above describes the other side of it. Such a box is refined until the crossing is
+   * resolved, which is what makes the coarse side of a seam representable; a feature the finest level still does
+   * not resolve is left to it, since nothing finer describes it.
+   * @param[in] a_box   Box to test.
+   * @param[in] a_level Level the box is on.
+   * @param[in] a_phase Phase whose implicit function is tested.
+   * @return True if some cell edge of the box is crossed twice at the finer spacing.
+   */
+  bool
+  doublyCrossedEdge(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
    * @brief Step 2: tile the boxes that are irregular in either phase into one properly nested set per level.
