@@ -87,6 +87,9 @@ buildShape(const Pose& a_pose, const RealVect& a_centre, const Real a_size, cons
                  centre,
                  RealVect(BASISV((a_pose.shape == "cylinder") ? 0 : SpaceDim - 1)));
 
+  // TransformIF holds a copy of what it was given
+  delete shape;
+
   return RefCountedPtr<BaseIF>(static_cast<BaseIF*>(turned));
 }
 
@@ -208,6 +211,10 @@ main(int argc, char* argv[])
   for (int dir = 0; dir < SpaceDim; dir++) {
     lo[dir] = probLo[dir];
     hi[dir] = probHi[dir];
+  }
+
+  if (shapes.size() == 0 || angles.size() == 0 || shifts.size() == 0) {
+    MayDay::Error("PolyhedralSweep - the sweep has no poses to check");
   }
 
   Timer timer("PolyhedralSweep");
