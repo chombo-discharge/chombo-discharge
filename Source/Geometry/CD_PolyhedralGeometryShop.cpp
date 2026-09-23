@@ -173,12 +173,6 @@ PolyhedralGeometryShop::verifySurface() const
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
   }
 
-  // The surface pass is three-dimensional: the seam restriction and the facets are written for polygons, and
-  // in two dimensions the interface of a cell is one chord, which is checked by the graph as it is built.
-  if (SpaceDim != 3) {
-    return;
-  }
-
   if (!m_sanityCheck && !m_writeSTL && !m_testCopy) {
     return;
   }
@@ -201,6 +195,10 @@ PolyhedralGeometryShop::verifySurface() const
     timer.stopEvent("Copy test");
   }
 
+  // The surface itself is written in three dimensions only: the facets are polygons, and in two dimensions the
+  // interface of a cell is one chord, which the graph checks as it builds it. What sanityCheck says about cells
+  // that share a face holds in both dimensions, and so does the copy test.
+#if CH_SPACEDIM == 3
   if (m_writeSTL) {
     Vector<Real> composite;
 
@@ -249,6 +247,8 @@ PolyhedralGeometryShop::verifySurface() const
       }
     }
   }
+
+#endif
 
   if (m_profile) {
     timer.eventReport(pout(), false);
@@ -606,7 +606,64 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
   long long numOpen     = 0;
   long long numOverused = 0;
+  long long numTouching = 0;
   int       numReported = 0;
+
+  // A regular cell and a covered one cannot share a face: the four nodes of that face belong to both, and they
+  // would have to be fluid for one cell and solid for the other. The classification is corner-based, so this holds
+  // by construction inside a level -- and the test is here because it is what the edge of the tiled region has to
+  // honour as well, where the cells beyond the tiles are classified from their own corners rather than carried:
+  // a covered cell at the edge of a tile with a regular cell across from it would need an interface between them
+  // that neither cell holds. Cheap, exact and dimension-independent, so it runs on every graph.
+  for (int lvl = 0; lvl < a_graphs.size(); lvl++) {
+    const PolyhedralEBGraph& graph = *a_graphs[lvl];
+
+    if (!graph.isDefined()) {
+      continue;
+    }
+
+    const Box& domainBox = graph.getDomain().domainBox();
+
+    const DisjointBoxLayout&               grids  = graph.getGrids();
+    const LevelData<BaseFab<signed char>>& states = graph.getCellStates();
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const Box box = grids[dit()];
+
+      const BaseFab<signed char>& state = states[dit()];
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (int side = 0; side < 2; side++) {
+            const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
+
+            if (!domainBox.contains(jv) || !state.box().contains(jv)) {
+              continue;
+            }
+
+            const bool touching = (state(iv, 0) == PolyhedralEBGraph::s_regular &&
+                                   state(jv, 0) == PolyhedralEBGraph::s_covered) ||
+                                  (state(iv, 0) == PolyhedralEBGraph::s_covered &&
+                                   state(jv, 0) == PolyhedralEBGraph::s_regular);
+
+            if (touching) {
+              numTouching++;
+
+              if (numReported < 10) {
+                pout() << "PolyhedralGeometryShop::sanityCheck - level " << lvl << " cell " << iv << " is "
+                       << static_cast<int>(state(iv, 0)) << " and its neighbour " << jv << " is "
+                       << static_cast<int>(state(jv, 0)) << ", with no cut cell between them" << endl;
+
+                numReported++;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
 #if CH_SPACEDIM == 3
   // A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used
@@ -944,10 +1001,16 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
   const long long totalOpen     = ParallelOps::sum(numOpen);
   const long long totalOverused = ParallelOps::sum(numOverused);
+  const long long totalTouching = ParallelOps::sum(numTouching);
 
   if (procID() == 0) {
     pout() << "PolyhedralGeometryShop::sanityCheck - " << totalOpen << " interior edges open, " << totalOverused
-           << " interior edges used more than twice" << endl;
+           << " interior edges used more than twice, " << totalTouching << " regular cells against a covered one"
+           << endl;
+  }
+
+  if (totalTouching > 0) {
+    MayDay::Error("PolyhedralGeometryShop::sanityCheck - a regular cell shares a face with a covered one");
   }
 
   if (totalOpen > 0 || totalOverused > 0) {

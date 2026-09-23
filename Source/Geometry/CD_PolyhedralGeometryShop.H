@@ -161,7 +161,12 @@ public:
    * face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and
    * an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells,
    * vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the
-   * run. Switched by PolyhedralGeometryShop.sanity_check, on by default. Requires buildGraphs.
+   * run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face
+   * belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a
+   * classification that disagrees with itself, and there would be no cut cell to carry the interface between
+   * them. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which
+   * is where the edge of the tiled region meets what no tile carries. Switched by
+   * PolyhedralGeometryShop.sanity_check, on by default. Requires buildGraphs.
    */
   void
   sanityCheck() const;
