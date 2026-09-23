@@ -633,6 +633,100 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
 }
 
 bool
+CutCellBody::faceIsWhole(const int a_dir, const int a_side) const noexcept
+{
+  const int face = 2 * a_dir + a_side;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    if (m_polygon[ip].m_face != face) {
+      continue;
+    }
+
+    for (int iv = 0; iv < m_polygon[ip].m_numVertices; iv++) {
+      if (m_polygon[ip].m_vertexEdge[iv] >= 0) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+bool
+CutCellBody::faceIsEmpty(const int a_dir, const int a_side) const noexcept
+{
+  const int face = 2 * a_dir + a_side;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    if (m_polygon[ip].m_face == face) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool
+CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
+  const int face = 2 * a_dir + a_side;
+
+  // this face's polygon goes, and so does the interface, which was built to meet its chord
+  int kept = 0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    if (m_polygon[ip].m_face != face && m_polygon[ip].m_face >= 0) {
+      m_polygon[kept++] = m_polygon[ip];
+    }
+  }
+
+  m_numPolygons = kept;
+
+  // A neighbour that holds no solid says the whole face is open; one that holds no fluid leaves it closed, and
+  // then the face has no polygon at all.
+  if (a_neighbourIsFluid) {
+    if (m_numPolygons >= s_maxPolygons) {
+      return false;
+    }
+
+    int faceCorner[1 << (SpaceDim - 1)];
+
+    detail::faceCorners(a_dir, a_side, faceCorner);
+
+    Polygon& polygon = m_polygon[m_numPolygons];
+
+    polygon               = Polygon();
+    polygon.m_numVertices = 0;
+    polygon.m_face        = face;
+
+    for (int i = 0; i < (1 << (SpaceDim - 1)); i++) {
+      polygon.m_vertexEdge[polygon.m_numVertices] = -1;
+      polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(faceCorner[i]);
+    }
+
+    this->orientOutward(polygon, a_dir, a_side);
+
+    m_numPolygons++;
+  }
+
+  if (!this->closeInterface()) {
+    return false;
+  }
+
+  this->accumulateMoments();
+
+  const bool closed  = this->closureResidual() <= 1.0E-9;
+  const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+  return closed && inRange;
+}
+
+bool
 CutCellBody::closeInterface() noexcept
 {
 
