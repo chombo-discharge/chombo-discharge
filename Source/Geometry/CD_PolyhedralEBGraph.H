@@ -101,17 +101,17 @@ public:
   /**
    * @brief Build the graph of one level over its cut tiles.
    * @details Load balances the tiles by cell count, reconstructs every cell of every tile and its ghost region
-   * from the implicit function, classifies it as the polyhedral generator does (including the volume threshold
-   * and the dust rule), keeps the surface of every cut cell, and sets the face states this level can know by
-   * itself: closed or open from the apertures, open onto the domain boundary, and open onto a cell no tile of
-   * this level carries. Collective.
+   * from the implicit function, classifies it as the polyhedral generator does, keeping every cell that holds
+   * anything -- a body with nothing in it is a regular cell, and nothing else is discarded, since a cell's
+   * interface is what closes the surface against its neighbours -- keeps the surface of every cut cell, and sets the
+   * face states this level can know by itself: closed or open from the apertures, open onto the domain boundary, and
+   * open onto a cell no tile of this level carries. Collective.
    * @param[in] a_function        Implicit function of the phase.
    * @param[in] a_cutTiles        The level's cut tiles, identical on every rank.
    * @param[in] a_domain          Domain of the level.
    * @param[in] a_probLo          Lower-left corner of the domain.
    * @param[in] a_dx              Grid spacing of the level.
    * @param[in] a_numGhost        Ghost cells the cell states are kept for.
-   * @param[in] a_volumeThreshold Volume fraction below which a cut cell is covered, and the dust rule's threshold.
    */
   virtual void
   define(const BaseIF&        a_function,
@@ -119,8 +119,7 @@ public:
          const ProblemDomain& a_domain,
          const RealVect&      a_probLo,
          const Real           a_dx,
-         const int            a_numGhost,
-         const Real           a_volumeThreshold);
+         const int            a_numGhost);
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
@@ -316,12 +315,11 @@ protected:
   /**
    * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with
    * ghost cells, and set the face states the apertures decide.
-   * @param[in] a_function        Implicit function.
-   * @param[in] a_volumeThreshold Volume-fraction threshold.
-   * @param[in] a_carried         The marker from markCarried.
+   * @param[in] a_function Implicit function.
+   * @param[in] a_carried  The marker from markCarried.
    */
   void
-  defineCells(const BaseIF& a_function, const Real a_volumeThreshold, const LevelData<BaseFab<signed char>>& a_carried);
+  defineCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
    * @brief Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.

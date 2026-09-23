@@ -41,8 +41,7 @@ PolyhedralEBGraph::define(const BaseIF&        a_function,
                           const ProblemDomain& a_domain,
                           const RealVect&      a_probLo,
                           const Real           a_dx,
-                          const int            a_numGhost,
-                          const Real           a_volumeThreshold)
+                          const int            a_numGhost)
 {
   CH_TIME("PolyhedralEBGraph::define");
 
@@ -65,7 +64,7 @@ PolyhedralEBGraph::define(const BaseIF&        a_function,
 
   this->markCarried(carried);
 
-  this->defineCells(a_function, a_volumeThreshold, carried);
+  this->defineCells(a_function, carried);
   this->defineOuterFaces(carried);
 
   m_isDefined = true;
@@ -114,9 +113,7 @@ PolyhedralEBGraph::defineData()
 }
 
 void
-PolyhedralEBGraph::defineCells(const BaseIF&                          a_function,
-                               const Real                             a_volumeThreshold,
-                               const LevelData<BaseFab<signed char>>& a_carried)
+PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineCells");
 
@@ -175,11 +172,12 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
           MayDay::Error("PolyhedralEBGraph::defineCells - a cut cell's body did not close");
         }
 
-        // the generator's rules: too little fluid is a covered cell, and a body with nothing in it a regular one
-        if (a_volumeThreshold > 0.0 && body.volumeFraction() < a_volumeThreshold) {
-          state = s_covered;
-        }
-        else if (PolyhedralGeometryShop::isDust(body)) {
+        // A body with nothing in it is a regular cell. Nothing else is discarded: a cell's interface is what
+        // closes the surface against its neighbours, so a cell dropped for holding little would leave a hole
+        // exactly the size of what it held, and no repair on the neighbours' faces can put it back. The volume
+        // threshold that keeps such cells out of the index space is applied where the index space is built,
+        // which is where its reason -- a solver that would rather not see a cell of no volume -- applies.
+        if (PolyhedralGeometryShop::isDust(body)) {
           state = s_regular;
         }
         else {

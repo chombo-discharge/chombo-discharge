@@ -603,6 +603,13 @@ protected:
 
   /**
    * @brief Classify a box of one phase on one level as regular, covered or irregular.
+   * @details A box whose nodes all agree can still have the surface passing through it between them, and such a
+   * box is irregular: the level above would see crossings this one cannot, and a cell of it left on the coarse
+   * side of a level boundary could not describe its own face there. The test is skipped where it cannot fire --
+   * on the finest level, which nothing finer describes, and where the nearest node value exceeds a cell width,
+   * since a midpoint can only disagree with two agreeing ends if the surface comes within half a cell of the
+   * edge. That last reading of the implicit function as a distance is the one the scan-based pruning already
+   * makes, and an implicit function that is not one must be used with the same caution there as here.
    * @details A box is irregular if some cell of it, grown by the ghost width, is cut in the sense the polyhedral
    * shop reconstructs cut cells: its corner values disagree under isFluid. That is exact whatever the implicit
    * function does away from its zero set, where ScanShop's cell-centre test against half a diagonal assumes a
@@ -612,6 +619,9 @@ protected:
    *   grown = grow(box, m_maxGhostEB) & domain
    *   node values over grown, once per node
    *   Irregular as soon as two nodes disagree under isFluid -- some cell of grown is cut
+   *   otherwise, below the stop level and within a cell of the surface:
+   *     Irregular if the midpoint of some edge disagrees with its two agreeing ends -- the surface enters
+   *     and leaves between the nodes, which the level above would see and this one cannot represent
    *   otherwise Regular if every node is fluid, Covered if every node is solid
    *
    * @param[in] a_box   Box to classify.
@@ -733,6 +743,11 @@ protected:
   static constexpr int s_treeLeafSize = 8;
 
   /**
+   * @brief How many times the tiles may be built again for the cells the level above would cross twice.
+   */
+  static constexpr int s_maxTilePasses = 8;
+
+  /**
    * @brief The bounding volume of a box in index space, its cells taken as the unit cubes they are.
    * @param[in] a_box The box.
    * @return Its bounds, [smallEnd, bigEnd + 1].
@@ -766,6 +781,23 @@ protected:
    */
   static Vector<int>
   meeting(const std::shared_ptr<BoxTree>& a_tree, const Vector<Box>& a_boxes, const Box& a_box);
+
+  /**
+   * @brief Tag the cells on the coarse side of a level boundary that the level above it would cross twice.
+   * @details A cell whose edge carries no crossing while each of its halves carries one describes a surface that
+   * enters and leaves through that edge. Nothing is wrong with it until the level above describes the other side
+   * of that face: the coarse chord then has no crossing to match the two the children have, and the two
+   * descriptions cannot be reconciled. Such a cell is tagged so that the level above covers it too.
+   *
+   * Only the cells on the coarse side of a level boundary are examined -- a cell whose neighbours are all at its
+   * own level takes its chords from the same nodes they do, and a cell the level above already covers is not on
+   * the coarse side of anything. That is a shell around the tiled region rather than its volume, so the test is
+   * cheap however deep the levels go.
+   * @param[in,out] a_tags Tags, in the tiler's levels; cells are added to them.
+   * @return True if any cell was tagged, so that the tiles must be built again.
+   */
+  bool
+  tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const;
 
   /**
    * @brief Build the spatial index over the cut tiles of every level.

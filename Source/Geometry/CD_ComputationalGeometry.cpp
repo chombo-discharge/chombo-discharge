@@ -12,6 +12,7 @@
 
 // Std includes
 #include <algorithm>
+#include <limits>
 #include <cmath>
 
 // Chombo includes
@@ -976,8 +977,12 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
   Box nodeBox = grown;
   nodeBox.surroundingNodes();
 
+  // The node values are kept: a box whose nodes all agree is decided by what lies between them, below.
+  BaseFab<Real> nodeValues(nodeBox, 1);
+
   bool anyFluid = false;
   bool anySolid = false;
+  Real closest  = std::numeric_limits<Real>::max();
 
   for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -988,15 +993,62 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
       x[dir] += dx * static_cast<Real>(iv[dir]);
     }
 
-    if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, dx))) {
+    const Real value = PolyhedralGeometryShop::snappedValue(f, x, dx);
+
+    nodeValues(iv, 0) = value;
+
+    closest = std::min(closest, std::abs(value));
+
+    if (PolyhedralEB::isFluid(value)) {
       anyFluid = true;
     }
     else {
       anySolid = true;
     }
+  }
 
-    if (anyFluid && anySolid) {
-      return GeometryService::Irregular;
+  if (anyFluid && anySolid) {
+    return GeometryService::Irregular;
+  }
+
+  // Every node agrees, and the cells are regular or covered as far as their corners can tell. The surface can
+  // still pass through the box between the nodes, entering and leaving through one edge, and a box like that is
+  // not regular: the level above it would see the crossings this level cannot, and a cell of it left on the
+  // coarse side of a level boundary could not describe its own face. Such a box is irregular, so that it is
+  // tagged, tiled and refined like any other, and the level above resolves what this one cannot represent.
+  //
+  // The finest level is left alone: nothing finer describes it, so the answer would cost tiles and buy nothing.
+  // Away from the surface nothing is evaluated at all: a midpoint can only disagree with two agreeing ends if
+  // the surface comes within half a cell of the edge, so a box whose nearest node value exceeds a cell width is
+  // done -- the same reading of the implicit function as a distance that the scan-based pruning already makes.
+  if (a_level >= m_stopLevel || closest > dx) {
+    return anySolid ? GeometryService::Covered : GeometryService::Regular;
+  }
+
+  const Real fineDx = 0.5 * dx;
+
+  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const IntVect jv = iv + BASISV(dir);
+
+      if (!nodeBox.contains(jv)) {
+        continue;
+      }
+
+      RealVect x = m_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += dx * static_cast<Real>(iv[d]);
+      }
+
+      x[dir] += fineDx;
+
+      // the midpoint is a node of the level above, and is read at that level's spacing
+      if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, fineDx)) != anyFluid) {
+        return GeometryService::Irregular;
+      }
     }
   }
 
@@ -1215,14 +1267,117 @@ ComputationalGeometry::makeTiles()
                         m_minBlockSize * IntVect::Unit,
                         m_maxBlockSize * IntVect::Unit);
 
-  Vector<Vector<Box>> tiles;
+  // The tiles are built, then read back: a cell left on the coarse side of a level boundary whose edge the level
+  // above crosses twice is tagged, and the tiles are built again. The pass has to come after the tiles exist
+  // rather than before, because the tiled region is not a function of the box classification alone -- the tiler
+  // nests, and nesting puts tiles above boxes that never refined, which is exactly where such a cell hides. Each
+  // pass only adds tags, so the region grows and the loop ends; in practice one further pass finds nothing.
+  for (int pass = 0; pass <= s_maxTilePasses; pass++) {
+    Vector<Vector<Box>> tiles;
 
-  const int finestTiled = tiler.regrid(tiles, tags);
+    const int finestTiled = tiler.regrid(tiles, tags);
 
-  // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
-  for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
-    m_cutTiles[lvl] = tiles[lvl - m_startLevel];
+    for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+      m_cutTiles[lvl].clear();
+    }
+
+    // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
+    for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
+      m_cutTiles[lvl] = tiles[lvl - m_startLevel];
+    }
+
+    this->buildTileTrees();
+
+    if (!this->tagUnresolvedSeams(tags)) {
+      return;
+    }
+
+    if (m_verbose && procID() == 0) {
+      pout() << "ComputationalGeometry::makeTiles - tiling again for the cells the level above would cross twice"
+             << endl;
+    }
   }
+
+  MayDay::Error("ComputationalGeometry::makeTiles - the tiles never resolved every doubly crossed edge");
+}
+
+bool
+ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
+{
+  CH_TIME("ComputationalGeometry::tagUnresolvedSeams");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::tagUnresolvedSeams" << endl;
+  }
+
+  const phase::which_phase phases[2] = {phase::gas, phase::solid};
+
+  long long numTagged = 0;
+
+  for (int lvl = m_startLevel; lvl < m_stopLevel; lvl++) {
+    // On the start level every box is a candidate, since the level is whole; above it the tiles are what the
+    // graph holds and the rest of the level is not described there at all.
+    const Vector<Box>& coarse = (lvl == m_startLevel) ? m_boxes[lvl] : m_cutTiles[lvl];
+
+    const Box& domainBox = m_domains[lvl].domainBox();
+
+    IntVectSet& levelTags = a_tags[lvl - m_startLevel];
+
+    for (int i = procID(); i < coarse.size(); i += numProc()) {
+      const Box box   = coarse[i];
+      const Box grown = grow(box, 1) & domainBox;
+
+      // What the level above covers here, read off its tiles through their index.
+      BaseFab<bool> refined(grown, 1);
+
+      refined.setVal(false);
+
+      const Vector<int> hits = this->tilesMeeting(lvl + 1, refine(grown, 2));
+
+      for (int h = 0; h < hits.size(); h++) {
+        const Box covered = coarsen(m_cutTiles[lvl + 1][hits[h]], 2) & grown;
+
+        if (!covered.isEmpty()) {
+          refined.setVal(true, covered, 0);
+        }
+      }
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        if (refined(iv, 0)) {
+          continue;
+        }
+
+        // only the coarse side of a level boundary: a cell whose neighbours are all at its own level describes
+        // its faces with the same nodes they do
+        bool onSeam = false;
+
+        for (int dir = 0; dir < SpaceDim && !onSeam; dir++) {
+          for (int side = 0; side < 2 && !onSeam; side++) {
+            const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
+
+            onSeam = grown.contains(jv) && refined(jv, 0);
+          }
+        }
+
+        if (!onSeam) {
+          continue;
+        }
+
+        for (const phase::which_phase& curPhase : phases) {
+          if (this->doublyCrossedEdge(Box(iv, iv), lvl, curPhase)) {
+            levelTags |= iv;
+
+            numTagged++;
+
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return ParallelOps::sum(numTagged) > 0;
 }
 
 ComputationalGeometry::BV

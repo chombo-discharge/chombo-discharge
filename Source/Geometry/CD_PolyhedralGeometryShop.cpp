@@ -125,8 +125,7 @@ PolyhedralGeometryShop::buildGraphs()
     // neighbours' surfaces; a consumer wanting a wider ring of cell states fills it from the geometry's
     // classification, which is the answer outside the tiles in any case.
     timer.startEvent("Define level " + std::to_string(lvl));
-    m_graphs[lvl]
-      ->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, m_volumeThreshold);
+    m_graphs[lvl]->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1);
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
