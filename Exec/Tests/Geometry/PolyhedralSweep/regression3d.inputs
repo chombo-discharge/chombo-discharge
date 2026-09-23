@@ -8,6 +8,8 @@ PolyhedralSweep.refine_angle     = 15.                       ## Angle between no
 PolyhedralSweep.max_ghost_eb     = 2                         ## Ghost cells a box is grown by when classified
 PolyhedralSweep.prob_lo          = -1. -1. -1.               ## Lower-left corner
 PolyhedralSweep.prob_hi          = 1.  1.  1.                ## Upper-right corner
+PolyhedralSweep.sizes            = 8.                        ## Half-widths, in cells of the finest level
+PolyhedralSweep.axis             = 0. 0. 1.                  ## Axis the shapes are turned about
 PolyhedralSweep.shifts           = 0. 0.125 0.25 0.5 0.75    ## Shifts along the diagonal, in finest cells
 PolyhedralSweep.angles           = 0. 7. 15. 30. 45.         ## Turns about the domain centre, in degrees
 

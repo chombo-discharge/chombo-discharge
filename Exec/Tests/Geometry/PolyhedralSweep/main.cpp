@@ -33,11 +33,12 @@
 using namespace ChomboDischarge;
 
 /**
- * @brief One pose of one shape: which shape, how far it is shifted, and how far it is turned.
+ * @brief One pose of one shape: which shape, how large it is, how far it is shifted, and how far it is turned.
  */
 struct Pose
 {
   std::string shape;
+  Real        size;
   Real        shift;
   Real        angle;
 };
@@ -51,41 +52,41 @@ struct Pose
  * interiors as the sweep runs.
  * @param[in] a_pose   The pose.
  * @param[in] a_centre Centre of the domain.
- * @param[in] a_size   Half-width of the shape.
+ * @param[in] a_axis   Axis the shape is turned about, through the domain's centre.
  * @param[in] a_dx     Grid spacing of the finest level.
  * @return The implicit function, fluid outside the shape.
  */
 RefCountedPtr<BaseIF>
-buildShape(const Pose& a_pose, const RealVect& a_centre, const Real a_size, const Real a_dx)
+buildShape(const Pose& a_pose, const RealVect& a_centre, const RealVect& a_axis, const Real a_dx)
 {
   const RealVect centre = a_centre + a_pose.shift * a_dx * RealVect::Unit;
+
+  // The size is in cells of the finest level, so that a sweep over it walks a face, an edge and a corner of the
+  // shape across whole cells rather than across some fraction of the domain.
+  const Real size = a_pose.size * a_dx;
 
   BaseIF* shape = nullptr;
 
   if (a_pose.shape == "cube") {
-    shape = new BoxSdf(centre - a_size * RealVect::Unit, centre + a_size * RealVect::Unit, false);
+    shape = new BoxSdf(centre - size * RealVect::Unit, centre + size * RealVect::Unit, false);
   }
   else if (a_pose.shape == "cylinder") {
 #if CH_SPACEDIM == 3
-    shape = new CylinderSdf(centre - a_size * RealVect(BASISV(2)),
-                            centre + a_size * RealVect(BASISV(2)),
-                            a_size,
-                            false);
+    shape = new CylinderSdf(centre - size * RealVect(BASISV(2)), centre + size * RealVect(BASISV(2)), size, false);
 #else
-    shape = new SphereSdf(centre, a_size, false);
+    shape = new SphereSdf(centre, size, false);
 #endif
   }
   else {
     MayDay::Error("PolyhedralSweep - unknown shape, expected cube or cylinder");
   }
 
-  // The turn is about the domain's centre. A cylinder turned about its own axis is the cylinder again, so it is
-  // turned about the first direction instead, which tilts the axis out of the grid.
+  // The turn is about the domain's centre, around the axis the sweep names: a coordinate direction leaves one set
+  // of faces aligned with the grid, while the body diagonal leaves nothing aligned with anything, which is the
+  // orientation that puts a corner of the cube in a general position inside a cell.
   auto* turned = new TransformIF(*shape);
 
-  turned->rotate(a_pose.angle * M_PI / 180.0,
-                 centre,
-                 RealVect(BASISV((a_pose.shape == "cylinder") ? 0 : SpaceDim - 1)));
+  turned->rotate(a_pose.angle * M_PI / 180.0, centre, a_axis);
 
   // TransformIF holds a copy of what it was given
   delete shape;
@@ -100,6 +101,7 @@ buildShape(const Pose& a_pose, const RealVect& a_centre, const Real a_size, cons
  * described at the coarse level. Every failure stops the run from inside the generator, naming the level and the
  * cell; this reports the pose that was being built when it did.
  * @param[in] a_pose        The pose.
+ * @param[in] a_axis        Axis the shape is turned about.
  * @param[in] a_nCells      Cells across the coarsest domain.
  * @param[in] a_depth       Levels above the coarsest domain.
  * @param[in] a_refineAngle Angle between neighbouring normals above which a box is split, in degrees.
@@ -110,6 +112,7 @@ buildShape(const Pose& a_pose, const RealVect& a_centre, const Real a_size, cons
  */
 long long
 checkPose(const Pose&    a_pose,
+          const RealVect a_axis,
           const int      a_nCells,
           const int      a_depth,
           const Real     a_refineAngle,
@@ -126,7 +129,7 @@ checkPose(const Pose&    a_pose,
 
   const RealVect centre = 0.5 * (a_probLo + a_probHi);
 
-  RefCountedPtr<BaseIF> shape = buildShape(a_pose, centre, 0.25 * (a_probHi[0] - a_probLo[0]), fineDx);
+  RefCountedPtr<BaseIF> shape = buildShape(a_pose, centre, a_axis, fineDx);
 
   ComputationalGeometry compGeom;
 
@@ -188,6 +191,8 @@ main(int argc, char* argv[])
 
   Vector<Real>        shifts;
   Vector<Real>        angles;
+  Vector<Real>        sizes;
+  Vector<Real>        axis(SpaceDim, 0.0);
   Vector<std::string> shapes;
 
   Vector<Real> probLo(SpaceDim, 0.0);
@@ -204,6 +209,8 @@ main(int argc, char* argv[])
   pp.getarr("shifts", shifts, 0, pp.countval("shifts"));
   pp.getarr("angles", angles, 0, pp.countval("angles"));
   pp.getarr("shapes", shapes, 0, pp.countval("shapes"));
+  pp.getarr("sizes", sizes, 0, pp.countval("sizes"));
+  pp.getarr("axis", axis, 0, SpaceDim);
 
   RealVect lo = RealVect::Zero;
   RealVect hi = RealVect::Zero;
@@ -213,7 +220,17 @@ main(int argc, char* argv[])
     hi[dir] = probHi[dir];
   }
 
-  if (shapes.size() == 0 || angles.size() == 0 || shifts.size() == 0) {
+  RealVect turnAxis = RealVect::Zero;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    turnAxis[dir] = axis[dir];
+  }
+
+  if (turnAxis.vectorLength() <= 0.0) {
+    MayDay::Error("PolyhedralSweep - the axis the shapes are turned about is zero");
+  }
+
+  if (shapes.size() == 0 || angles.size() == 0 || shifts.size() == 0 || sizes.size() == 0) {
     MayDay::Error("PolyhedralSweep - the sweep has no poses to check");
   }
 
@@ -223,36 +240,40 @@ main(int argc, char* argv[])
 
   for (int s = 0; s < shapes.size(); s++) {
     for (int a = 0; a < angles.size(); a++) {
-      for (int t = 0; t < shifts.size(); t++) {
-        const Pose pose{shapes[s], shifts[t], angles[a]};
+      for (int z = 0; z < sizes.size(); z++) {
+        for (int t = 0; t < shifts.size(); t++) {
+          const Pose pose{shapes[s], sizes[z], shifts[t], angles[a]};
 
-        const std::string what = pose.shape + " turned " + std::to_string(pose.angle) + " degrees, shifted " +
-                                 std::to_string(pose.shift) + " cells";
+          const std::string what = pose.shape + " of half-width " + std::to_string(pose.size) + " cells, turned " +
+                                   std::to_string(pose.angle) + " degrees, shifted " + std::to_string(pose.shift) +
+                                   " cells";
 
-        // Announced before the pose is built, so that a generator that stops the run names the pose it stopped on.
-        if (procID() == 0) {
-          pout() << "PolyhedralSweep - " << what << endl;
-        }
+          // Announced before the pose is built, so that a generator that stops the run names the pose it stopped
+          // on.
+          if (procID() == 0) {
+            pout() << "PolyhedralSweep - " << what << endl;
+          }
 
-        timer.startEvent(pose.shape);
-        const long long numCutCells = checkPose(pose, nCells, depth, refineAngle, lo, hi, maxGhostEB);
-        timer.stopEvent(pose.shape);
+          timer.startEvent(pose.shape);
+          const long long numCutCells = checkPose(pose, turnAxis, nCells, depth, refineAngle, lo, hi, maxGhostEB);
+          timer.stopEvent(pose.shape);
 
-        if (numCutCells == 0) {
-          MayDay::Error("PolyhedralSweep - a pose produced no cut cells at all");
-        }
+          if (numCutCells == 0) {
+            MayDay::Error("PolyhedralSweep - a pose produced no cut cells at all");
+          }
 
-        // The closure check is three-dimensional -- a two-dimensional interface is one chord per cell, which the
-        // graph checks as it builds it -- so a two-dimensional pose is checked by the build alone.
-        if (procID() == 0) {
+          // The closure check is three-dimensional -- a two-dimensional interface is one chord per cell, which the
+          // graph checks as it builds it -- so a two-dimensional pose is checked by the build alone.
+          if (procID() == 0) {
 #if CH_SPACEDIM == 3
-          pout() << "PolyhedralSweep - " << what << ": " << numCutCells << " cut cells, surface closed" << endl;
+            pout() << "PolyhedralSweep - " << what << ": " << numCutCells << " cut cells, surface closed" << endl;
 #else
-          pout() << "PolyhedralSweep - " << what << ": " << numCutCells << " cut cells, graph built" << endl;
+            pout() << "PolyhedralSweep - " << what << ": " << numCutCells << " cut cells, graph built" << endl;
 #endif
-        }
+          }
 
-        numPoses++;
+          numPoses++;
+        }
       }
     }
   }
