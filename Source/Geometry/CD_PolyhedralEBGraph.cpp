@@ -175,11 +175,11 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
           MayDay::Error("PolyhedralEBGraph::defineCells - a cut cell's body did not close");
         }
 
-        // the generator's rules: too little fluid is a covered cell, too little solid a regular one
+        // the generator's rules: too little fluid is a covered cell, and a body with nothing in it a regular one
         if (a_volumeThreshold > 0.0 && body.volumeFraction() < a_volumeThreshold) {
           state = s_covered;
         }
-        else if (PolyhedralGeometryShop::isDust(body, a_volumeThreshold)) {
+        else if (PolyhedralGeometryShop::isDust(body)) {
           state = s_regular;
         }
         else {

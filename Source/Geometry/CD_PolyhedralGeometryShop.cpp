@@ -852,7 +852,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 continue;
               }
 
-              if (PolyhedralGeometryShop::isDust(fineBody, m_volumeThreshold)) {
+              if (PolyhedralGeometryShop::isDust(fineBody)) {
                 continue;
               }
 
@@ -1182,9 +1182,11 @@ PolyhedralGeometryShop::edgeCrossing(const BaseIF&   a_function,
 }
 
 bool
-PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept
+PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body) noexcept
 {
-  return (a_threshold > 0.0) && (1.0 - a_body.volumeFraction() < a_threshold) && (a_body.boundaryArea() < a_threshold);
+  // Exactly, not within a tolerance: a degenerate body has no polygon of positive area at all, so both of these
+  // are zero by construction rather than by luck.
+  return (1.0 - a_body.volumeFraction() <= 0.0) && (a_body.boundaryArea() <= 0.0);
 }
 
 Real
@@ -1490,7 +1492,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     }
 
     // the mirror image: a body with next to no solid in it is a regular cell
-    if (PolyhedralGeometryShop::isDust(body, m_volumeThreshold)) {
+    if (PolyhedralGeometryShop::isDust(body)) {
       a_regIrregCovered(iv, 0) = 1;
 
       continue;

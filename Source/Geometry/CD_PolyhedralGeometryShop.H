@@ -178,16 +178,19 @@ public:
   testGraphCopy() const;
 
   /**
-   * @brief Whether a cut body holds too little solid to be a cut cell.
-   * @details The counterpart, on the fluid side, of dropping a body whose fluid volume is below the threshold: a body
-   * with neither solid volume nor boundary area is a regular cell. A cell whose interface lies in one of its
-   * faces, wholly or in part, has no solid volume either but does have boundary area, and is not dust.
-   * @param[in] a_body      Body of the cell.
-   * @param[in] a_threshold Volume-fraction threshold; nothing is dust at zero.
+   * @brief Whether a cut body holds nothing at all and is therefore a regular cell.
+   * @details A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut
+   * from their corners while their bodies hold no solid and no interface whatsoever -- the reconstruction finds
+   * an empty polyhedron. Those cells are regular, and dropping them discards nothing, since there is no surface
+   * in them for a neighbour to meet. Emptiness is exact rather than thresholded: a body with any solid in it,
+   * however little, keeps its cell, because its interface is what closes the surface against its neighbours, and
+   * a rule that discarded it by size would leave a hole the size of what it discarded. A cell whose interface
+   * lies in one of its faces has no solid volume either, but it does have boundary area, and it is not dust.
+   * @param[in] a_body Body of the cell.
    * @return True if the cell should be treated as regular.
    */
   static bool
-  isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept;
+  isDust(const PolyhedralEB::CutCellBody& a_body) noexcept;
 
   /**
    * @brief Evaluate the implicit function at every node of a region.
