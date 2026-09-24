@@ -1094,12 +1094,22 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
         continue;
       }
 
-      const bool loFluid = PolyhedralEB::isFluid(nodeValues(iv, 0));
-      const bool hiFluid = PolyhedralEB::isFluid(nodeValues(jv, 0));
+      const Real loValue = nodeValues(iv, 0);
+      const Real hiValue = nodeValues(jv, 0);
 
-      // An edge whose ends disagree carries one crossing at this level and one at the next, in the half its
-      // own crossing lies in. Only ends that agree can hide a pair.
-      if (loFluid != hiFluid) {
+      const bool loZero = (loValue == 0.0);
+      const bool hiZero = (hiValue == 0.0);
+
+      const bool loFluid = PolyhedralEB::isFluid(loValue);
+      const bool hiFluid = PolyhedralEB::isFluid(hiValue);
+
+      // An edge whose ends disagree carries one crossing at this level and one at the next, in the half its own
+      // crossing lies in. Only ends that agree can hide a pair -- but an end that is exactly zero is on the
+      // surface, and which side of it that end belongs to is not decided at this spacing. The fluid rule breaks
+      // the tie toward solid, and an edge that reads fluid-solid-zero would read fluid-solid-fluid had the tie
+      // gone the other way, which is a pair. Such an end is therefore left open, and the ends count as agreeing
+      // if any reading of it makes them.
+      if (!loZero && !hiZero && loFluid != hiFluid) {
         continue;
       }
 
@@ -1111,7 +1121,20 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
 
       x[dir] += 0.5 * dx;
 
-      if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, fineDx)) != loFluid) {
+      const Real midValue = PolyhedralGeometryShop::snappedValue(f, x, fineDx);
+
+      if (midValue == 0.0) {
+        continue;
+      }
+
+      const bool midFluid = PolyhedralEB::isFluid(midValue);
+
+      // The ends are read as the midpoint's opposite wherever they are free to be, since that is the reading
+      // that hides a pair.
+      const bool loAgainst = loZero ? !midFluid : loFluid;
+      const bool hiAgainst = hiZero ? !midFluid : hiFluid;
+
+      if (loAgainst == hiAgainst && midFluid != loAgainst) {
         return true;
       }
     }

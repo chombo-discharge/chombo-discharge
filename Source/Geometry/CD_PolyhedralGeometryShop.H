@@ -321,13 +321,22 @@ public:
   static constexpr Real s_rootSnap = 1.0E-4;
 
   /**
+   * @brief Fraction of a cell width the implicit function is read at either side of a point, to tell a surface
+   * through the point from a zero no surface passes through.
+   * @details Large enough that a function of unit gradient reads well clear of s_snapTolerance beside the point, and
+   * small enough that the reading belongs to the point rather than to its neighbourhood.
+   */
+  static constexpr Real s_probeSpacing = 1.0E-6;
+
+  /**
    * @brief Read the implicit function at a point, with a value within s_snapTolerance of a cell width of
-   * zero read as exactly zero.
+   * zero read as exactly zero, and a zero that is a tangency read from beside the point instead.
    * @details A face of the geometry lying in a node plane evaluates to zero there only up to round-off: the same face
    * comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring nodes, and cells on either
    * side of it would then be classified by which of those they were handed. Reading everything within a fixed
    * fraction of the cell width of zero as zero puts every such node on one side by rule, in the corner values
-   * and in the bisection alike.
+   * and in the bisection alike. A zero that no surface passes through is then read through resolveTangency, so
+   * that nothing downstream sees it.
    * @param[in] a_function Implicit function.
    * @param[in] a_point    Point to evaluate at.
    * @param[in] a_dx       Grid spacing that sets the scale.
@@ -336,11 +345,33 @@ public:
   static Real
   snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
 
+  /**
+   * @brief Read the implicit function beside a point where it is zero, when no surface passes through the point.
+   * @details A composite function can be zero over a whole region that is not its surface: a difference of two bodies
+   * sharing a face evaluates to the maximum of zero and something negative over the whole of that face. Taken
+   * at face value such a zero is material by the fluid rule, and it invents an interface where the geometry
+   * has none and displaces the interfaces of whatever else the cell holds. It is told apart from a surface by
+   * the function's sign a probe spacing off the point, along each axis in turn. A surface through the point
+   * changes the sign across it along any axis the surface is not parallel to, and since a surface has a normal
+   * there is always such an axis, so one sign change is enough to leave the zero alone. The zero is read
+   * through only on the evidence of an axis whose two readings are both away from zero and of the same sign,
+   * which is what a function that touches zero without a surface being there looks like; the largest such
+   * reading stands in for the zero. One reading of zero is not evidence of anything -- it is the point's own
+   * zero again, which is what an axis along a face of the geometry returns, and what both axes along the
+   * faces meeting at a convex edge return.
+   * @param[in] a_function Implicit function.
+   * @param[in] a_point    Point the function is zero at.
+   * @param[in] a_dx       Grid spacing that sets the probe spacing.
+   * @return The reading beside the point, or exactly zero if a surface passes through it.
+   */
+  static Real
+  resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
+
 protected:
   /**
    * @brief Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck.
    */
-  static constexpr Real s_weldSpacing = 1.0E-10;
+  static constexpr Real s_weldSpacing = 1.0E-6;
 
   /**
    * @brief The geometry whose grids the polyhedra are built over, or null before setGrids.

@@ -12,6 +12,9 @@
 
 // Std includes
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iomanip>
 #include <array>
 #include <cmath>
 #include <fstream>
@@ -34,6 +37,7 @@
 
 // Our includes
 #include <CD_PolyhedralEBUtils.H>
+#include <CD_PolyUtils.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_ParallelOps.H>
@@ -329,7 +333,134 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
   const Real dx     = a_graph.getDx();
   const Box& domain = a_graph.getDomain().domainBox();
 
-  const CutCellSurface& surface = a_surfaces(a_cell, 0);
+  CutCellSurface surface = a_surfaces(a_cell, 0);
+
+  // Which of this cell's edges the finer level describes. An edge is shared by the cells that meet along it, and
+  // the crossing on it has to be one point for all of them: a cell that finds it by halving its own edge and a
+  // cell that finds it by halving the finer edge land on the same root only to the accuracy of the bisection,
+  // which is the square root of the machine epsilon where the surface grazes the edge rather than crossing it. So
+  // the question is asked of the edge and not of the cell -- if any cell meeting the edge is refined, every cell
+  // meeting it reads the crossing from the finer spacing -- and the four of them then agree by construction. This
+  // takes in the cell that meets the finer level along an edge alone, whose faces all lie at this level and which
+  // would otherwise never look at the finer spacing at all.
+  bool edgeRefined[CutCellSurface::s_numEdges];
+
+  bool anyEdgeRefined = false;
+
+  for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+    const int edgeDir = PolyhedralEB::detail::edgeDirection(e);
+
+    int offset[SpaceDim];
+    PolyhedralEB::detail::edgeOrigin(e, offset);
+
+    edgeRefined[e] = false;
+
+    for (int share = 0; share < (1 << (SpaceDim - 1)); share++) {
+      IntVect jv = a_cell;
+
+      int bit = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (d == edgeDir) {
+          continue;
+        }
+
+        if ((share >> bit) & 1) {
+          jv[d] += (offset[d] == 0) ? -1 : 1;
+        }
+
+        bit++;
+      }
+
+      if (domain.contains(jv) && a_refined.box().contains(jv) && a_refined(jv, 0) != 0) {
+        edgeRefined[e] = true;
+      }
+    }
+
+    anyEdgeRefined = anyEdgeRefined || edgeRefined[e];
+  }
+
+  // The children are this cell's own refinement, reconstructed from the implicit function at the finer spacing;
+  // their faces on a shared plane coincide, edge for edge and root for root, with those of the finer cells across
+  // it, and their edges on this cell's edges are the segments the finer level bisects.
+  CutCellSurface children[CutCellSurface::s_numCorners];
+
+  const bool haveChildren = anyEdgeRefined;
+
+  if (haveChildren) {
+    // the children share their nodes and edges among themselves at the finer spacing
+    const Box fineBox = refine(Box(a_cell, a_cell), 2);
+
+    BaseFab<Real> fineNodeValues;
+    BaseFab<Real> fineIntercept[SpaceDim];
+
+    PolyhedralGeometryShop::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
+    PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
+
+    for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+      IntVect child = 2 * a_cell;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        child[d] += (c >> d) & 1;
+      }
+
+      PolyhedralGeometryShop::buildSurface(f, fineIntercept, children[c], fineNodeValues, child, m_probLo, 0.5 * dx);
+    }
+
+    // Take the crossing on every edge the finer level describes from the half the finer level put it in, in this
+    // cell's own parameterisation. An edge the finer level crosses in both halves is a feature no single chord
+    // can carry; it keeps this level's crossing here and is reported where the face it belongs to is restricted.
+    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+      if (!edgeRefined[e]) {
+        continue;
+      }
+
+      const int edgeDir = PolyhedralEB::detail::edgeDirection(e);
+
+      int offset[SpaceDim];
+      PolyhedralEB::detail::edgeOrigin(e, offset);
+
+      // A surface carries a crossing on an edge exactly when its two ends disagree, and the body is built on that.
+      // The finer level can see a crossing on an edge this level's ends agree about -- the function leaves and
+      // re-enters on the way between them -- and that is a pair of crossings, which no single chord carries and
+      // which the tiler refines away. Taking the finer level's word for it here would write a crossing onto an
+      // edge that cannot hold one and hand the body a surface it cannot close.
+      int low  = -1;
+      int high = -1;
+
+      PolyhedralEB::detail::edgeCorners(e, low, high);
+
+      if (PolyhedralEB::isFluid(surface.m_corner[low]) == PolyhedralEB::isFluid(surface.m_corner[high])) {
+        surface.m_crossing[e] = CutCellSurface::s_noCrossing;
+
+        continue;
+      }
+
+      Real half[2] = {CutCellSurface::s_noCrossing, CutCellSurface::s_noCrossing};
+
+      for (int h = 0; h < 2; h++) {
+        int which = 0;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          which |= ((d == edgeDir) ? h : offset[d]) << d;
+        }
+
+        half[h] = children[which].m_crossing[e];
+      }
+
+      const bool lowCrossed  = half[0] != CutCellSurface::s_noCrossing;
+      const bool highCrossed = half[1] != CutCellSurface::s_noCrossing;
+
+      if (lowCrossed && !highCrossed) {
+        surface.m_crossing[e] = 0.5 * half[0];
+      }
+      else if (highCrossed && !lowCrossed) {
+        surface.m_crossing[e] = 0.5 * (1.0 + half[1]);
+      }
+
+      // Ends that disagree must carry a crossing; if the finer level found none, this level keeps its own.
+    }
+  }
 
   if (!a_body.define(surface)) {
     pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell << " did not close" << endl;
@@ -337,14 +468,8 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
     MayDay::Error("PolyhedralGeometryShop::defineBody - a cut cell's body did not close");
   }
 
-  // A face shared with a cell the finer level carries is described at the finer level's resolution. The
-  // children are this cell's own refinement, reconstructed from the implicit function at the finer spacing;
-  // their faces on the shared plane coincide, edge for edge and root for root, with those of the finer cells
-  // across it.
+  // A face shared with a cell the finer level carries is described at the finer level's resolution.
   bool restricted = false;
-
-  CutCellSurface children[CutCellSurface::s_numCorners];
-  bool           haveChildren = false;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (int side = 0; side < 2; side++) {
@@ -352,35 +477,6 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 
       if (!domain.contains(neighbour) || a_refined(neighbour, 0) == 0) {
         continue;
-      }
-
-      if (!haveChildren) {
-        // the children share their nodes and edges among themselves at the finer spacing
-        const Box fineBox = refine(Box(a_cell, a_cell), 2);
-
-        BaseFab<Real> fineNodeValues;
-        BaseFab<Real> fineIntercept[SpaceDim];
-
-        PolyhedralGeometryShop::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
-        PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
-
-        for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
-          IntVect child = 2 * a_cell;
-
-          for (int d = 0; d < SpaceDim; d++) {
-            child[d] += (c >> d) & 1;
-          }
-
-          PolyhedralGeometryShop::buildSurface(f,
-                                               fineIntercept,
-                                               children[c],
-                                               fineNodeValues,
-                                               child,
-                                               m_probLo,
-                                               0.5 * dx);
-        }
-
-        haveChildren = true;
       }
 
       // A coarse edge of this face whose ends agree, but whose two finer halves each carry a crossing, is a
@@ -687,8 +783,11 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
   // vertex from the same nodes and the same edge, so they agree bit for bit; across a level boundary the finer
   // cells behind a face are rebuilt at the finer spacing and agree only to round-off, about 1e-12 of a cell.
   // The distance is what decides, not a lattice: two points on either side of a lattice wall are as close as any
-  // other pair, and quantising them apart is how a check of this kind reports a hole that is not there.
-  const Real tolerance = s_weldSpacing * a_graphs[finest]->getDx();
+  // other pair, and quantising them apart is how a check of this kind reports a hole that is not there. It is
+  // the spacing of the level being checked that sets the scale, since that is the cell the round-off is a
+  // fraction of; measuring every level against the finest one asks the coarse levels to agree far closer than
+  // the arithmetic that built them can.
+  Real tolerance = s_weldSpacing * a_graphs[finest]->getDx();
 
   using Edge = std::array<int, 2>;
 
@@ -784,6 +883,8 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const Real dx     = graph.getDx();
     const Box& domain = graph.getDomain().domainBox();
 
+    tolerance = s_weldSpacing * dx;
+
     const DisjointBoxLayout&                 grids      = graph.getGrids();
     const LayoutData<IntVectSet>&            cutCells   = graph.getCutCells();
     const LevelData<IVSFAB<CutCellSurface>>& surfaces   = graph.getSurfaces();
@@ -863,14 +964,21 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
           }
         }
 
-        // behind a face the finer level describes, the finer cells across it, reconstructed at their spacing
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          for (int side = 0; side < 2; side++) {
-            if (faces(iv, 2 * dir + side) != PolyhedralEBGraph::s_faceFiner) {
+        // The finer cells around this one, reconstructed at their spacing. Every neighbour the finer level
+        // carries is taken, not only the six across a face: an interface edge that runs along a cell edge is
+        // shared by two facets whose cells meet along that edge alone, so the cell holding the other half of it
+        // can be a diagonal neighbour, and leaving those out reports an edge as open that is not.
+        {
+          Box neighbourhood(iv - IntVect::Unit, iv + IntVect::Unit);
+
+          neighbourhood &= domain;
+
+          for (BoxIterator nit2(neighbourhood); nit2.ok(); ++nit2) {
+            const IntVect neighbour = nit2();
+
+            if (neighbour == iv || !refinedFab.box().contains(neighbour) || refinedFab(neighbour, 0) == 0) {
               continue;
             }
-
-            const IntVect neighbour = iv + (2 * side - 1) * BASISV(dir);
 
             const Box fineBox = refine(Box(neighbour, neighbour), 2);
 
@@ -1256,7 +1364,49 @@ PolyhedralGeometryShop::snappedValue(const BaseIF& a_function, const RealVect& a
 {
   const Real value = a_function.value(a_point);
 
-  return (std::abs(value) <= s_snapTolerance * a_dx) ? 0.0 : value;
+  if (std::abs(value) > s_snapTolerance * a_dx) {
+    return value;
+  }
+
+  return PolyhedralGeometryShop::resolveTangency(a_function, a_point, a_dx);
+}
+
+Real
+PolyhedralGeometryShop::resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept
+{
+  const Real delta    = s_probeSpacing * a_dx;
+  const Real zeroBand = s_snapTolerance * a_dx;
+
+  Real probe[2 * SpaceDim];
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const RealVect e = BASISREALV(dir);
+
+    probe[2 * dir]     = a_function.value(a_point - delta * e);
+    probe[2 * dir + 1] = a_function.value(a_point + delta * e);
+  }
+
+  Real reading = 0.0;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const Real lo = probe[2 * dir];
+    const Real hi = probe[2 * dir + 1];
+
+    if ((lo < 0.0 && hi > 0.0) || (lo > 0.0 && hi < 0.0)) {
+      return 0.0;
+    }
+
+    if (std::abs(lo) > zeroBand && std::abs(hi) > zeroBand) {
+      if (std::abs(lo) > std::abs(reading)) {
+        reading = lo;
+      }
+      if (std::abs(hi) > std::abs(reading)) {
+        reading = hi;
+      }
+    }
+  }
+
+  return reading;
 }
 
 Real
@@ -1272,6 +1422,27 @@ PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
 
   for (int d = 0; d < SpaceDim; d++) {
     lowPoint[d] += a_dx * static_cast<Real>(a_edgeIV[d]);
+  }
+
+  // An edge whose ends are both away from zero and of opposite sign carries one plain root, and Brent's method
+  // brackets it in a handful of evaluations where bisection needs tens. An end that reads as exactly zero is a
+  // different problem: the function may be zero along a stretch of the edge, and the crossing is then where it
+  // leaves that stretch rather than where it reaches it. That is a step in the fluid predicate, which has no
+  // continuous root to interpolate, so those edges are walked by bisecting the predicate below.
+  if (a_loValue != 0.0 && a_hiValue != 0.0 && ((a_loValue < 0.0) != (a_hiValue < 0.0))) {
+    const auto alongEdge = [&](const Real a_t) -> Real {
+      RealVect x = lowPoint;
+
+      x[a_dir] += a_dx * a_t;
+
+      return PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
+    };
+
+    const Real brent = PolyUtils::brentSolve(0.0, 1.0, alongEdge);
+
+    if (brent >= 0.0 && brent <= 1.0) {
+      return brent;
+    }
   }
 
   Real lo      = 0.0;
