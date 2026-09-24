@@ -214,9 +214,9 @@ public:
 
   /**
    * @brief Split every polygon edge at the vertices of other polygons that lie on it.
-   * @details Restricting a face rebuilds it at the finer level's resolution, and snapping one replaces it
-   * outright, so an edge the face shares with a face that was left alone can be one segment on one side
-   * and several on the other, or carry a vertex on one side that the other has not got. The two sides then
+   * @details Restricting a face rebuilds it at the finer level's resolution, so an edge the face shares
+   * with a face that was left alone can be one segment on one side and several on the other, or carry a
+   * vertex on one side that the other has not got. The two sides then
    * compare unequal and closeInterface reads both as boundary, which puts a stretch of a cell face into
    * the interface and leaves the interface itself unclosed. Inserting each side's vertices into the other's
    * edge makes the two agree segment for segment; the inserted vertices lie on the edge they are inserted
@@ -225,44 +225,6 @@ public:
    */
   bool
   weldTJunctions() noexcept;
-
-  /**
-   * @brief Whether this body's polygon on one face covers the whole face.
-   * @details A face polygon whose vertices are all cell corners is the whole face, since a corner the interface
-   * cuts off would have put a crossing among them. Exact: no area is compared with anything.
-   * @param[in] a_dir  Direction of the face.
-   * @param[in] a_side Side of the cell the face is on.
-   * @return True if the face is entirely fluid.
-   */
-  bool
-  faceIsWhole(const int a_dir, const int a_side) const noexcept;
-
-  /**
-   * @brief Whether this body holds no fluid at all on one face.
-   * @param[in] a_dir  Direction of the face.
-   * @param[in] a_side Side of the cell the face is on.
-   * @return True if the face carries no fluid.
-   */
-  bool
-  faceIsEmpty(const int a_dir, const int a_side) const noexcept;
-
-  /**
-   * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
-   *        face loses become interface.
-   * @details The volume threshold and the dust rule classify a cell from its own body, so a cell they turn into a
-   * regular or a covered one leaves its neighbours describing a face it no longer agrees with: the neighbour's
-   * chord on the shared face ends against nothing, and the two sides read different apertures for it. The face
-   * takes the neighbour's answer -- the whole face, or none of it -- and the footprint it gives up becomes part of
-   * the interface, which lies in the plane of that face. The identity sum(alpha_hi - alpha_lo) = a_B*n survives
-   * it exactly, since the aperture and the boundary's area vector gain the same vector. The moments are
-   * recomputed, unlike restrictFace, because this body is one a cell takes its moments from.
-   * @param[in] a_dir               Direction of the face.
-   * @param[in] a_side              Side of the cell the face is on.
-   * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
-   * @return True if the body closed again and its volume stayed in range.
-   */
-  bool
-  snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept;
 
 #endif
 

@@ -977,12 +977,11 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
   Box nodeBox = grown;
   nodeBox.surroundingNodes();
 
-  // The node values are kept: a box whose nodes all agree is decided by what lies between them, below.
-  BaseFab<Real> nodeValues(nodeBox, 1);
-
   bool anyFluid = false;
   bool anySolid = false;
-  Real closest  = std::numeric_limits<Real>::max();
+
+  // How close the surface comes to the nodes, for the test below, which is reached only where every node agrees.
+  Real closest = std::numeric_limits<Real>::max();
 
   for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -995,8 +994,6 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
 
     const Real value = PolyhedralGeometryShop::snappedValue(f, x, dx);
 
-    nodeValues(iv, 0) = value;
-
     closest = std::min(closest, std::abs(value));
 
     if (PolyhedralEB::isFluid(value)) {
@@ -1005,10 +1002,10 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
     else {
       anySolid = true;
     }
-  }
 
-  if (anyFluid && anySolid) {
-    return GeometryService::Irregular;
+    if (anyFluid && anySolid) {
+      return GeometryService::Irregular;
+    }
   }
 
   // Every node agrees, and the cells are regular or covered as far as their corners can tell. The surface can
@@ -1371,8 +1368,12 @@ ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
           continue;
         }
 
-        // only the coarse side of a level boundary: a cell whose neighbours are all at its own level describes
-        // its faces with the same nodes they do
+        // Only the coarse side of a level boundary: a cell whose neighbours are all at its own level describes
+        // its faces with the same nodes they do. Face neighbours are the whole test, even though a doubly
+        // crossed edge is shared by the four cells meeting along it and one of those can meet the refined
+        // region along that edge alone. Of the other three, the two that share a face with the refined one are
+        // tested here, carry the same edge, and are therefore tagged; once they are refined the fourth has a
+        // refined face neighbour and is taken on the next pass, which is what the passes are for.
         bool onSeam = false;
 
         for (int dir = 0; dir < SpaceDim && !onSeam; dir++) {

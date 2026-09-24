@@ -258,7 +258,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
   const DisjointBoxLayout&                 grids    = graph.getGrids();
   const LayoutData<IntVectSet>&            cutCells = graph.getCutCells();
   const LevelData<IVSFAB<CutCellSurface>>& surfaces = graph.getSurfaces();
-  const LevelData<BaseFab<signed char>>&   states   = graph.getCellStates();
   const LevelData<BaseFab<signed char>>&   refined  = graph.getRefinedMask();
 
   // Every cut cell of this rank's tiles that the finer level does not carry.
@@ -266,7 +265,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
     const Box                     box        = grids[dit()];
     const IntVectSet&             cut        = cutCells[dit()];
     const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
-    const BaseFab<signed char>&   statesFab  = states[dit()];
     const BaseFab<signed char>&   refinedFab = refined[dit()];
 
     // in the order a BoxIterator meets the cells, so that the surface's order does not depend on how the set
@@ -280,7 +278,7 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 
       CutCellBody body;
 
-      this->defineBody(body, graph, stored, statesFab, refinedFab, iv);
+      this->defineBody(body, graph, stored, refinedFab, iv);
 
       body.appendInterfaceFacets(a_facets, iv, m_probLo, dx);
     }
@@ -293,7 +291,6 @@ void
 PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a_body,
                                    const PolyhedralEBGraph&                    a_graph,
                                    const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-                                   const BaseFab<signed char>&                 a_states,
                                    const BaseFab<signed char>&                 a_refined,
                                    const IntVect&                              a_cell) const
 {
@@ -1176,7 +1173,6 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const DisjointBoxLayout&                 grids      = graph.getGrids();
     const LayoutData<IntVectSet>&            cutCells   = graph.getCutCells();
     const LevelData<IVSFAB<CutCellSurface>>& surfaces   = graph.getSurfaces();
-    const LevelData<BaseFab<signed char>>&   states     = graph.getCellStates();
     const LevelData<BaseFab<signed char>>&   refined    = graph.getRefinedMask();
     const LevelData<BaseFab<signed char>>&   faceStates = graph.getFaceStates();
 
@@ -1192,7 +1188,6 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
       const Box                     grown      = grow(box, 1) & domain;
       const IntVectSet&             cut        = cutCells[dit()];
       const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
-      const BaseFab<signed char>&   statesFab  = states[dit()];
       const BaseFab<signed char>&   refinedFab = refined[dit()];
       const BaseFab<signed char>&   faces      = faceStates[dit()];
 
@@ -1213,7 +1208,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
         CutCellBody body;
 
-        this->defineBody(body, graph, stored, statesFab, refinedFab, iv);
+        this->defineBody(body, graph, stored, refinedFab, iv);
 
         table(iv, 0) = facets.size();
 
