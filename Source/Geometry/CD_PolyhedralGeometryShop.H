@@ -146,9 +146,10 @@ public:
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
    * @details Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level
    * carries are skipped, and a face shared with such a cell is restricted to the finer chords and the
-   * interface closed. The interface triangles of every level are then checked by sanityCheck, and written as
-   * one STL per level and one composite when PolyhedralGeometryShop.write_stl is set. Collective; every rank
-   * reconstructs its share of the boxes. Requires setGrids.
+   * interface closed. The interface triangles of every level are then checked by sanityCheck when
+   * PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh
+   * when PolyhedralGeometryShop.write_surface is set. Collective; every rank reconstructs its share of the boxes
+   * and writes its own share of the mesh. Requires setGrids.
    */
   void
   verifySurface() const;
@@ -166,7 +167,7 @@ public:
    * classification that disagrees with itself, and there would be no cut cell to carry the interface between
    * them. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which
    * is where the edge of the tiled region meets what no tile carries. Switched by
-   * PolyhedralGeometryShop.sanity_check, on by default. Requires buildGraphs.
+   * PolyhedralGeometryShop.sanity_check, off by default. Requires buildGraphs.
    */
   void
   sanityCheck() const;
@@ -389,12 +390,12 @@ protected:
   phase::which_phase m_phase;
 
   /**
-   * @brief Whether verifySurface writes the surface as STL. PolyhedralGeometryShop.write_stl, off by default.
+   * @brief Whether verifySurface writes the surface. PolyhedralGeometryShop.write_surface, off by default.
    */
-  bool m_writeSTL;
+  bool m_writeSurface;
 
   /**
-   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, on by default.
+   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, off by default.
    */
   bool m_sanityCheck;
 
@@ -460,13 +461,35 @@ protected:
 #endif
 
   /**
-   * @brief Write triangles gathered from every rank as one STL file.
-   * @param[in] a_fileName File to write.
-   * @param[in] a_name     Solid name inside the file.
-   * @param[in] a_facets   This rank's triangles, nine reals each.
+   * @brief Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.
+   * @details One group per level, holding the level's triangles as an indexed mesh -- the vertices once each and a
+   *          triple of indices per triangle -- rather than as a soup of coordinates, which is what a viewer wants
+   *          and what an XDMF description can point at. The boxes of the level and the boxes that split on it go
+   *          in the same group, so that the surface can be read against the grids it was built on without a second
+   *          file. Vertices are identified the way sanityCheck identifies them, by distance rather than on a
+   *          lattice, and the distance used is written alongside them. An XDMF description of the file is written
+   *          next to it. Collective: every rank sends its triangles to the master, which writes.
+   * @param[in] a_fileName File to write, without a suffix.
+   * @param[in] a_facets   This rank's triangles of each level, nine reals each.
    */
   void
-  writeSTL(const std::string& a_fileName, const std::string& a_name, const Vector<Real>& a_facets) const;
+  writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const;
+
+  /**
+   * @brief Identify the vertices of a triangle soup, giving each one once and each triangle three indices.
+   * @details Two positions closer than the tolerance are one vertex. They are found by sorting on the first
+   *          coordinate and scanning back over the window the tolerance allows, which is what makes this
+   *          linear-ish rather than quadratic.
+   * @param[in]  a_facets       Triangles, nine reals each.
+   * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
+   * @param[out] a_vertices     The vertices, three reals each.
+   * @param[out] a_connectivity Three vertex indices per triangle.
+   */
+  static void
+  indexFacets(const Vector<Real>& a_facets,
+              const Real          a_tolerance,
+              std::vector<Real>&  a_vertices,
+              std::vector<int>&   a_connectivity);
 
   /**
    * @brief Residual above which the stored moments and the ones PolyGeom recomputes disagree.

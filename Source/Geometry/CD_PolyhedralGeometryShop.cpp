@@ -21,7 +21,12 @@
 #include <iomanip>
 #include <numeric>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
+
+#ifdef CH_USE_HDF5
+#include <hdf5.h>
+#endif
 
 // Chombo includes
 #include <BRMeshRefine.H>
@@ -62,8 +67,8 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_volumeThreshold = a_thrshdVoF;
   m_compGeom        = nullptr;
   m_phase           = phase::gas;
-  m_writeSTL        = false;
-  m_sanityCheck     = true;
+  m_writeSurface    = false;
+  m_sanityCheck     = false;
   m_profile         = false;
   m_testCopy        = false;
   m_verbose         = false;
@@ -71,7 +76,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
 
-  pp.query("write_stl", m_writeSTL);
+  pp.query("write_surface", m_writeSurface);
   pp.query("sanity_check", m_sanityCheck);
   pp.query("profile", m_profile);
   pp.query("test_copy", m_testCopy);
@@ -176,7 +181,7 @@ PolyhedralGeometryShop::verifySurface() const
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
   }
 
-  if (!m_sanityCheck && !m_writeSTL && !m_testCopy) {
+  if (!m_sanityCheck && !m_writeSurface && !m_testCopy) {
     return;
   }
 
@@ -202,53 +207,18 @@ PolyhedralGeometryShop::verifySurface() const
   // interface of a cell is one chord, which the graph checks as it builds it. What sanityCheck says about cells
   // that share a face holds in both dimensions, and so does the copy test.
 #if CH_SPACEDIM == 3
-  if (m_writeSTL) {
-    Vector<Real> composite;
+  if (m_writeSurface) {
+    Vector<Vector<Real>> facets(numLevels);
 
     for (int lvl = 0; lvl < numLevels; lvl++) {
-      Vector<Real> levelFacets;
-
       timer.startEvent("Build polyhedra, level " + std::to_string(lvl));
-      this->collectFacets(levelFacets, lvl);
+      this->collectFacets(facets[lvl], lvl);
       timer.stopEvent("Build polyhedra, level " + std::to_string(lvl));
-
-      this->writeSTL("surface_mesh_" + phaseName + ".level" + std::to_string(lvl) + ".stl",
-                     phaseName + "_level" + std::to_string(lvl),
-                     levelFacets);
-
-      composite.append(levelFacets);
     }
 
-    timer.startEvent("Write STL");
-    this->writeSTL("surface_mesh_" + phaseName + ".stl", phaseName, composite);
-    timer.stopEvent("Write STL");
-
-    // The boxes themselves, one file per level, for reading the surface against the grids it was built on.
-    if (procID() == 0) {
-      for (int lvl = 0; lvl < numLevels; lvl++) {
-        std::ofstream out("surface_mesh_boxes.level" + std::to_string(lvl) + ".txt");
-
-        const Vector<Box>&                    boxes      = m_compGeom->getBoxes(lvl);
-        const Vector<GeometryService::InOut>& gasTypes   = m_compGeom->getTypes(phase::gas, lvl);
-        const Vector<GeometryService::InOut>& solidTypes = m_compGeom->getTypes(phase::solid, lvl);
-
-        for (int i = 0; i < boxes.size(); i++) {
-          out << boxes[i].smallEnd() << " " << boxes[i].bigEnd() << " gas " << gasTypes[i] << " solid " << solidTypes[i]
-              << "\n";
-        }
-
-        // and the boxes that split on this level, with why
-        std::ofstream splits("surface_mesh_splits.level" + std::to_string(lvl) + ".txt");
-
-        Vector<int> reasons;
-
-        const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
-
-        for (int i = 0; i < splitBoxes.size(); i++) {
-          splits << splitBoxes[i].smallEnd() << " " << splitBoxes[i].bigEnd() << " reason " << reasons[i] << "\n";
-        }
-      }
-    }
+    timer.startEvent("Write surface");
+    this->writeSurface("surface_mesh_" + phaseName, facets);
+    timer.stopEvent("Write surface");
   }
 
 #endif
@@ -610,69 +580,383 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 #endif
 
 void
-PolyhedralGeometryShop::writeSTL(const std::string&  a_fileName,
-                                 const std::string&  a_name,
-                                 const Vector<Real>& a_facets) const
+PolyhedralGeometryShop::indexFacets(const Vector<Real>& a_facets,
+                                    const Real          a_tolerance,
+                                    std::vector<Real>&  a_vertices,
+                                    std::vector<int>&   a_connectivity)
 {
-  CH_TIME("PolyhedralGeometryShop::writeSTL");
+  CH_TIME("PolyhedralGeometryShop::indexFacets");
+
+  const int numPoints = static_cast<int>(a_facets.size() / 3);
+
+  a_vertices.clear();
+  a_connectivity.assign(numPoints, -1);
+
+  // Two positions closer than the tolerance are one vertex. Candidates are found by the cell of a lattice of that
+  // spacing that a position falls in: anything within the tolerance of it lies in that cell or in one of the
+  // twenty-six around it, so those are the only cells to look in. The lattice narrows the search and nothing
+  // more -- every candidate it offers is still measured against, which is what keeps two positions on either
+  // side of a lattice wall from being told apart when they are a hair from one another.
+  //
+  // The cells are held under a mix of their three indices rather than under the indices themselves. A mix
+  // collides, and collisions cost nothing here: a cell that answers for two places offers candidates from both,
+  // and the distance test throws out the ones that do not belong.
+  std::unordered_map<long long, std::vector<int>> buckets;
+
+  buckets.reserve(2 * numPoints);
+
+  const auto cellOf = [&](const Real a_x) -> long long {
+    return static_cast<long long>(std::floor(a_x / a_tolerance));
+  };
+
+  const auto keyOf = [](const long long a_i, const long long a_j, const long long a_k) -> long long {
+    // three odd multipliers, so that neighbouring cells land far apart in the table
+    return a_i * 0x9E3779B97F4A7C15LL ^ a_j * 0xC2B2AE3D27D4EB4FLL ^ a_k * 0x165667B19E3779F9LL;
+  };
+
+  for (int i = 0; i < numPoints; i++) {
+    const Real x = a_facets[3 * i];
+    const Real y = a_facets[3 * i + 1];
+    const Real z = a_facets[3 * i + 2];
+
+    const long long ci = cellOf(x);
+    const long long cj = cellOf(y);
+    const long long ck = cellOf(z);
+
+    int found = -1;
+
+    for (int di = -1; di <= 1 && found < 0; di++) {
+      for (int dj = -1; dj <= 1 && found < 0; dj++) {
+        for (int dk = -1; dk <= 1 && found < 0; dk++) {
+          const auto bucket = buckets.find(keyOf(ci + di, cj + dj, ck + dk));
+
+          if (bucket == buckets.end()) {
+            continue;
+          }
+
+          for (const int candidate : bucket->second) {
+            if (std::abs(x - a_vertices[3 * candidate]) <= a_tolerance &&
+                std::abs(y - a_vertices[3 * candidate + 1]) <= a_tolerance &&
+                std::abs(z - a_vertices[3 * candidate + 2]) <= a_tolerance) {
+              found = candidate;
+
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (found < 0) {
+      found = static_cast<int>(a_vertices.size() / 3);
+
+      a_vertices.push_back(x);
+      a_vertices.push_back(y);
+      a_vertices.push_back(z);
+
+      buckets[keyOf(ci, cj, ck)].push_back(found);
+    }
+
+    a_connectivity[i] = found;
+  }
+}
+
+void
+PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const
+{
+  CH_TIME("PolyhedralGeometryShop::writeSurface");
 
   if (m_verbose) {
-    pout() << "PolyhedralGeometryShop::writeSTL - writing " << a_fileName << endl;
+    pout() << "PolyhedralGeometryShop::writeSurface - writing " << a_fileName << endl;
   }
 
-  Vector<Vector<Real>> everyone;
+#ifdef CH_USE_HDF5
+  const int numLevels = a_facets.size();
 
-  gather(everyone, a_facets, 0);
+  std::string directory = ".";
+  {
+    ParmParse pp("Driver");
 
-  if (procID() != 0) {
-    return;
+    pp.query("output_directory", directory);
   }
 
-  std::ofstream out(a_fileName);
+  const std::string stem = directory + "/geo/" + a_fileName;
 
-  if (!out.good()) {
-    MayDay::Error("PolyhedralGeometryShop::writeSTL - could not open the file");
+  // Every rank writes its own share of every dataset, so the file is opened for parallel access and the writes
+  // are collective. Vertices are identified within a rank and not across them: a vertex on the boundary between
+  // two ranks is written by both, which costs a little size and saves the communication a global identification
+  // would need. Nothing reading an indexed mesh requires otherwise.
+  hid_t access = H5Pcreate(H5P_FILE_ACCESS);
+
+#ifdef CH_MPI
+  H5Pset_fapl_mpio(access, Chombo_MPI::comm, MPI_INFO_NULL);
+#endif
+
+  const hid_t file = H5Fcreate((stem + ".h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access);
+
+  H5Pclose(access);
+
+  if (file < 0) {
+    MayDay::Error("PolyhedralGeometryShop::writeSurface - could not open the file");
   }
 
-  out << std::scientific << std::setprecision(17) << "solid " << a_name << "\n";
+  hid_t transfer = H5Pcreate(H5P_DATASET_XFER);
 
-  for (int rank = 0; rank < everyone.size(); rank++) {
-    const Vector<Real>& rankFacets = everyone[rank];
+#ifdef CH_MPI
+  // Creating the datasets is collective, writing into them is not. Every rank owns a contiguous stretch of each
+  // one and nothing else touches it, so there is nothing for a collective transfer to coordinate -- and asking
+  // for one is harmful here: a rank whose stretch is empty makes the library decide collective access is not
+  // possible for that write, which it then does independently while the others do not, and the next metadata
+  // call finds them out of step and blocks.
+  H5Pset_dxpl_mpio(transfer, H5FD_MPIO_INDEPENDENT);
+#endif
 
-    for (int i = 0; i + 9 <= rankFacets.size(); i += 9) {
-      const RealVect a(D_DECL(rankFacets[i + 0], rankFacets[i + 1], rankFacets[i + 2]));
-      const RealVect b(D_DECL(rankFacets[i + 3], rankFacets[i + 4], rankFacets[i + 5]));
-      const RealVect c(D_DECL(rankFacets[i + 6], rankFacets[i + 7], rankFacets[i + 8]));
+  const auto writeAttribute = [&](const hid_t        a_where,
+                                  const std::string& a_name,
+                                  const hid_t        a_type,
+                                  const hsize_t      a_count,
+                                  const void*        a_data) -> void {
+    const hid_t space     = (a_count == 1) ? H5Screate(H5S_SCALAR) : H5Screate_simple(1, &a_count, nullptr);
+    const hid_t attribute = H5Acreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT);
 
-      RealVect n = PolyGeom::cross(b - a, c - a);
+    H5Awrite(attribute, a_type, a_data);
+    H5Aclose(attribute);
+    H5Sclose(space);
+  };
 
-      if (n.vectorLength() > 0.0) {
-        n /= n.vectorLength();
-      }
+  // One dataset, sized by what every rank holds together, with this rank's rows written into its own stretch of
+  // it. A rank with nothing to write selects nothing and takes part in the call all the same, which is what
+  // collective access asks of it.
+  const auto writeSlab = [&](const hid_t        a_where,
+                             const std::string& a_name,
+                             const hid_t        a_type,
+                             const hsize_t      a_rows,
+                             const hsize_t      a_offset,
+                             const hsize_t      a_total,
+                             const hsize_t      a_columns,
+                             const void*        a_data) -> void {
+    if (a_total == 0) {
+      return;
+    }
 
-      out << "  facet normal";
+    const hsize_t dims[2] = {a_total, a_columns};
+    const hsize_t mine[2] = {a_rows, a_columns};
+    const hsize_t at[2]   = {a_offset, 0};
 
-      for (int d = 0; d < 3; d++) {
-        out << " " << ((d < SpaceDim) ? n[d] : 0.0);
-      }
+    const int rank = (a_columns > 1) ? 2 : 1;
 
-      out << "\n    outer loop\n";
+    const hid_t space   = H5Screate_simple(rank, dims, nullptr);
+    const hid_t dataset = H5Dcreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-      for (int v = 0; v < 3; v++) {
-        out << "      vertex";
+    // A rank with no rows describes that with the null dataspace and selects nothing in the file. It cannot
+    // describe it with a simple dataspace of zero extent, which is not one: the call fails, and a rank that
+    // fails on its way into a collective write leaves every other rank waiting in it.
+    const hid_t memory = (a_rows > 0) ? H5Screate_simple(rank, mine, nullptr) : H5Screate(H5S_NULL);
 
-        for (int d = 0; d < 3; d++) {
-          out << " " << ((d < SpaceDim) ? rankFacets[i + 3 * v + d] : 0.0);
+    if (a_rows > 0) {
+      H5Sselect_hyperslab(space, H5S_SELECT_SET, at, nullptr, mine, nullptr);
+    }
+    else {
+      H5Sselect_none(space);
+    }
+
+    H5Dwrite(dataset, a_type, memory, space, transfer, a_data);
+
+    H5Sclose(memory);
+    H5Dclose(dataset);
+    H5Sclose(space);
+  };
+
+  const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
+
+  double probLo[3] = {0.0, 0.0, 0.0};
+
+  for (int d = 0; d < SpaceDim; d++) {
+    probLo[d] = m_probLo[d];
+  }
+
+  writeAttribute(file, "probLo", H5T_NATIVE_DOUBLE, 3, probLo);
+  writeAttribute(file, "numLevels", H5T_NATIVE_INT, 1, &numLevels);
+
+  const hid_t nameType = H5Tcopy(H5T_C_S1);
+  H5Tset_size(nameType, phaseName.size());
+  writeAttribute(file, "phase", nameType, 1, phaseName.c_str());
+  H5Tclose(nameType);
+
+  std::vector<long long> totalTriangles(numLevels, 0);
+  std::vector<long long> totalVertices(numLevels, 0);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const std::string name = "level" + std::to_string(lvl);
+
+    const hid_t group = H5Gcreate2(file, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    const double dx        = m_compGeom->getDx(lvl);
+    const double tolerance = s_weldSpacing * dx;
+
+    writeAttribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &dx);
+    writeAttribute(group, "weldTolerance", H5T_NATIVE_DOUBLE, 1, &tolerance);
+
+    std::vector<Real> vertices;
+    std::vector<int>  connectivity;
+
+    PolyhedralGeometryShop::indexFacets(a_facets[lvl], tolerance, vertices, connectivity);
+
+    // A triangle two of whose vertices are the same vertex has collapsed to a line and bounds nothing.
+    int collapsed = 0;
+
+    {
+      std::vector<int> kept;
+
+      for (size_t i = 0; i + 3 <= connectivity.size(); i += 3) {
+        const int a = connectivity[i];
+        const int b = connectivity[i + 1];
+        const int c = connectivity[i + 2];
+
+        if (a == b || b == c || c == a) {
+          collapsed++;
+
+          continue;
         }
 
-        out << "\n";
+        kept.push_back(a);
+        kept.push_back(b);
+        kept.push_back(c);
       }
 
-      out << "    endloop\n  endfacet\n";
+      connectivity.swap(kept);
     }
+
+    const long long mineVertices  = vertices.size() / 3;
+    const long long mineTriangles = connectivity.size() / 3;
+
+    long long vertexOffset   = 0;
+    long long triangleOffset = 0;
+
+    totalVertices[lvl]  = mineVertices;
+    totalTriangles[lvl] = mineTriangles;
+
+#ifdef CH_MPI
+    MPI_Exscan(&mineVertices, &vertexOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+    MPI_Exscan(&mineTriangles, &triangleOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+
+    if (procID() == 0) {
+      vertexOffset   = 0;
+      triangleOffset = 0;
+    }
+
+    MPI_Allreduce(&mineVertices, &totalVertices[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+    MPI_Allreduce(&mineTriangles, &totalTriangles[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+    // This rank's vertices sit at vertexOffset in the file, so its triangles point there too.
+    for (size_t i = 0; i < connectivity.size(); i++) {
+      connectivity[i] += static_cast<int>(vertexOffset);
+    }
+
+    const int totalCollapsed = ParallelOps::sum(collapsed);
+
+    writeAttribute(group, "numCollapsed", H5T_NATIVE_INT, 1, &totalCollapsed);
+
+    writeSlab(group, "vertices", H5T_NATIVE_DOUBLE, mineVertices, vertexOffset, totalVertices[lvl], 3, vertices.data());
+    writeSlab(group,
+              "connectivity",
+              H5T_NATIVE_INT,
+              mineTriangles,
+              triangleOffset,
+              totalTriangles[lvl],
+              3,
+              connectivity.data());
+
+    // The boxes of the level and the boxes that split on it are the same on every rank, so the master writes them
+    // and the others take part with nothing selected.
+    const Vector<Box>&                    boxes      = m_compGeom->getBoxes(lvl);
+    const Vector<GeometryService::InOut>& gasTypes   = m_compGeom->getTypes(phase::gas, lvl);
+    const Vector<GeometryService::InOut>& solidTypes = m_compGeom->getTypes(phase::solid, lvl);
+
+    Vector<int> reasons;
+
+    const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
+
+    std::vector<int> corners;
+    std::vector<int> gasType;
+    std::vector<int> solidType;
+    std::vector<int> splitCorners;
+    std::vector<int> splitReason;
+
+    const auto appendBox = [](std::vector<int>& a_into, const Box& a_box) -> void {
+      for (int d = 0; d < SpaceDim; d++) {
+        a_into.push_back(a_box.smallEnd()[d]);
+      }
+      for (int d = 0; d < SpaceDim; d++) {
+        a_into.push_back(a_box.bigEnd()[d]);
+      }
+    };
+
+    if (procID() == 0) {
+      for (int i = 0; i < boxes.size(); i++) {
+        appendBox(corners, boxes[i]);
+
+        gasType.push_back(static_cast<int>(gasTypes[i]));
+        solidType.push_back(static_cast<int>(solidTypes[i]));
+      }
+
+      for (int i = 0; i < splitBoxes.size(); i++) {
+        appendBox(splitCorners, splitBoxes[i]);
+
+        splitReason.push_back(reasons[i]);
+      }
+    }
+
+    const hsize_t mineBoxes  = (procID() == 0) ? boxes.size() : 0;
+    const hsize_t mineSplits = (procID() == 0) ? splitBoxes.size() : 0;
+
+    writeSlab(group, "boxes", H5T_NATIVE_INT, mineBoxes, 0, boxes.size(), 2 * SpaceDim, corners.data());
+    writeSlab(group, "boxTypeGas", H5T_NATIVE_INT, mineBoxes, 0, boxes.size(), 1, gasType.data());
+    writeSlab(group, "boxTypeSolid", H5T_NATIVE_INT, mineBoxes, 0, boxes.size(), 1, solidType.data());
+    writeSlab(group, "splitBoxes", H5T_NATIVE_INT, mineSplits, 0, splitBoxes.size(), 2 * SpaceDim, splitCorners.data());
+    writeSlab(group, "splitReason", H5T_NATIVE_INT, mineSplits, 0, splitBoxes.size(), 1, splitReason.data());
+
+    H5Gclose(group);
   }
 
-  out << "endsolid " << a_name << "\n";
+  H5Pclose(transfer);
+  H5Fclose(file);
+
+  // A description a viewer can open, pointing at the datasets just written.
+  if (procID() == 0) {
+    std::ofstream xdmf(stem + ".xmf");
+
+    const std::string base = a_fileName + ".h5";
+
+    xdmf << "<?xml version=\"1.0\" ?>\n";
+    xdmf << "<Xdmf Version=\"3.0\">\n  <Domain>\n";
+    xdmf << "    <Grid Name=\"" << phaseName << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
+
+    for (int lvl = 0; lvl < numLevels; lvl++) {
+      if (totalTriangles[lvl] == 0) {
+        continue;
+      }
+
+      const std::string name = "level" + std::to_string(lvl);
+
+      xdmf << "      <Grid Name=\"" << name << "\" GridType=\"Uniform\">\n";
+      xdmf << "        <Topology TopologyType=\"Triangle\" NumberOfElements=\"" << totalTriangles[lvl] << "\">\n";
+      xdmf << "          <DataItem Dimensions=\"" << totalTriangles[lvl] << " 3\" NumberType=\"Int\" Format=\"HDF\">"
+           << base << ":/" << name << "/connectivity</DataItem>\n";
+      xdmf << "        </Topology>\n";
+      xdmf << "        <Geometry GeometryType=\"XYZ\">\n";
+      xdmf << "          <DataItem Dimensions=\"" << totalVertices[lvl]
+           << " 3\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << base << ":/" << name
+           << "/vertices</DataItem>\n";
+      xdmf << "        </Geometry>\n      </Grid>\n";
+    }
+
+    xdmf << "    </Grid>\n  </Domain>\n</Xdmf>\n";
+  }
+#else
+  MayDay::Warning("PolyhedralGeometryShop::writeSurface - built without HDF5, nothing written");
+#endif
 }
 
 void
