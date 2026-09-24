@@ -68,10 +68,14 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_compGeom        = nullptr;
   m_phase           = phase::gas;
   m_writeSurface    = false;
-  m_sanityCheck     = false;
-  m_profile         = false;
-  m_testCopy        = false;
-  m_verbose         = false;
+#ifndef NDEBUG
+  m_sanityCheck = true;
+#else
+  m_sanityCheck = false;
+#endif
+  m_profile  = false;
+  m_testCopy = false;
+  m_verbose  = false;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");

@@ -395,7 +395,10 @@ protected:
   bool m_writeSurface;
 
   /**
-   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, off by default.
+   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check.
+   * @details On by default in a build that keeps its assertions and off in one that does not, since the check
+   *          tells the generator nothing it uses and only reports. Either default can be overridden from the
+   *          inputs.
    */
   bool m_sanityCheck;
 
