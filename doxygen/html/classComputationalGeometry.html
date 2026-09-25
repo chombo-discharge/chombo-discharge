@@ -268,12 +268,16 @@ Protected Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a231e5922b728b2d6e90da05c0d4a4afa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which generator to build the geometry with.  <a href="classComputationalGeometry.html#a231e5922b728b2d6e90da05c0d4a4afa">More...</a><br /></td></tr>
 <tr class="separator:a231e5922b728b2d6e90da05c0d4a4afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a792936c26593c02ee047eb7e890e5486" id="r_a792936c26593c02ee047eb7e890e5486"><td class="memItemLeft" align="right" valign="top"><a id="a792936c26593c02ee047eb7e890e5486" name="a792936c26593c02ee047eb7e890e5486"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">SplitReason</a> { <b>None</b>
+<tr class="memitem:a792936c26593c02ee047eb7e890e5486" id="r_a792936c26593c02ee047eb7e890e5486"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">SplitReason</a> { <br />
+&#160;&#160;<b>None</b>
 , <b>Interior</b>
 , <b>Ring</b>
 , <b>Medial</b>
+, <br />
+&#160;&#160;<b>DoubleCrossing</b>
+<br />
  }</td></tr>
-<tr class="memdesc:a792936c26593c02ee047eb7e890e5486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a box split, for the report: no split, a pair inside the box, a pair reaching into the ring one cell outside it, or a pair whose normals face each other (two surfaces closer than the band). <br /></td></tr>
+<tr class="memdesc:a792936c26593c02ee047eb7e890e5486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), or an edge the level above would cross twice.  <a href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">More...</a><br /></td></tr>
 <tr class="separator:a792936c26593c02ee047eb7e890e5486"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
@@ -309,6 +313,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memitem:a9b358ae5520ec4f91d8c3c04d60b1e65" id="r_a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">SplitReason</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a9b358ae5520ec4f91d8c3c04d60b1e65">exceedsCurvature</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the interface turns by more than m_refineAngle between neighbouring cut cells of a box.  <br /></td></tr>
 <tr class="separator:a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a109774bb75d4e965056d3632166e539c" id="r_a109774bb75d4e965056d3632166e539c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a109774bb75d4e965056d3632166e539c">doublyCrossedEdge</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a109774bb75d4e965056d3632166e539c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cell edge of a box is crossed twice by the surface at the spacing of the level above it.  <br /></td></tr>
+<tr class="separator:a109774bb75d4e965056d3632166e539c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c71dd7dc30c7a4d1e9723b9e5e4ffe8" id="r_a3c71dd7dc30c7a4d1e9723b9e5e4ffe8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a3c71dd7dc30c7a4d1e9723b9e5e4ffe8">makeTiles</a> ()</td></tr>
 <tr class="memdesc:a3c71dd7dc30c7a4d1e9723b9e5e4ffe8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step 2: tile the boxes that are irregular in either phase into one properly nested set per level.  <br /></td></tr>
 <tr class="separator:a3c71dd7dc30c7a4d1e9723b9e5e4ffe8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -321,6 +328,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memitem:a0a8c8a9f62e2c87b1ebbd519b77bbe62" id="r_a0a8c8a9f62e2c87b1ebbd519b77bbe62"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classComputationalGeometry.html#ac5faab96c144a5b01b0b1e7361956c66">BoxTree</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a0a8c8a9f62e2c87b1ebbd519b77bbe62">buildTree</a> (const Vector&lt; Box &gt; &amp;a_boxes) const</td></tr>
 <tr class="memdesc:a0a8c8a9f62e2c87b1ebbd519b77bbe62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build one spatial index over a list of boxes.  <br /></td></tr>
 <tr class="separator:a0a8c8a9f62e2c87b1ebbd519b77bbe62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a032ee891ee437332cf29cf2efdb355bc" id="r_a032ee891ee437332cf29cf2efdb355bc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a032ee891ee437332cf29cf2efdb355bc">tagUnresolvedSeams</a> (Vector&lt; IntVectSet &gt; &amp;a_tags) const</td></tr>
+<tr class="memdesc:a032ee891ee437332cf29cf2efdb355bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag the cells on the coarse side of a level boundary that the level above it would cross twice.  <br /></td></tr>
+<tr class="separator:a032ee891ee437332cf29cf2efdb355bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a317de2bde27e10eb5293f97aa3335417" id="r_a317de2bde27e10eb5293f97aa3335417"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a317de2bde27e10eb5293f97aa3335417">buildTileTrees</a> ()</td></tr>
 <tr class="memdesc:a317de2bde27e10eb5293f97aa3335417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the spatial index over the cut tiles of every level.  <br /></td></tr>
 <tr class="separator:a317de2bde27e10eb5293f97aa3335417"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -486,6 +496,10 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_th
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_treeLeafSize</b> = 8</td></tr>
 <tr class="memdesc:ac440cca6ea45428a6d365ca6abfc765e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boxes per leaf the spatial index over a level's boxes is built with. <br /></td></tr>
 <tr class="separator:ac440cca6ea45428a6d365ca6abfc765e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae27feac38082d3d382b6f08e3d264ad4" id="r_ae27feac38082d3d382b6f08e3d264ad4"><td class="memItemLeft" align="right" valign="top"><a id="ae27feac38082d3d382b6f08e3d264ad4" name="ae27feac38082d3d382b6f08e3d264ad4"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_maxTilePasses</b> = 8</td></tr>
+<tr class="memdesc:ae27feac38082d3d382b6f08e3d264ad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most times the tiles are built: the first build, and one more for every pass that finds a cell the level above would cross twice. The run stops if they are all spent with such a cell still unresolved. <br /></td></tr>
+<tr class="separator:ae27feac38082d3d382b6f08e3d264ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class for geometries. </p>
@@ -513,6 +527,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_tre
 
 <p>Which generator to build the geometry with. </p>
 <p>Each enumerator names the class that the geometry is generated with. </p>
+
+</div>
+</div>
+<a id="a792936c26593c02ee047eb7e890e5486" name="a792936c26593c02ee047eb7e890e5486"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a792936c26593c02ee047eb7e890e5486">&#9670;&#160;</a></span>SplitReason</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">ComputationalGeometry::SplitReason</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), or an edge the level above would cross twice. </p>
+<p>Only None against anything else decides whether a box splits. Which of the four reasons it is, is recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it is a diagnostic rather than a part of the generator. </p>
 
 </div>
 </div>
@@ -1183,8 +1222,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_tre
 </div><div class="memdoc">
 
 <p>Classify a box of one phase on one level as regular, covered or irregular. </p>
-<p>A box is irregular if some cell of it, grown by the ghost width, is cut in the sense the polyhedral shop reconstructs cut cells: its corner values disagree under isFluid. That is exact whatever the implicit function does away from its zero set, where <a class="el" href="classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves.">ScanShop</a>'s cell-centre test against half a diagonal assumes a distance function and a smooth union grows faster than one. A phase without an implicit function is regular everywhere. Pseudocode:</p>
-<p>grown = grow(box, m_maxGhostEB) &amp; domain node values over grown, once per node Irregular as soon as two nodes disagree under isFluid &ndash; some cell of grown is cut otherwise Regular if every node is fluid, Covered if every node is solid</p>
+<p>The box is read at the nodes of grow(a_box, m_maxGhostEB) &amp; domain, which are the nodes the polyhedral shop reconstructs the cells of that region from. The rules are applied in this order:</p>
+<ul>
+<li>A phase carrying no implicit function is regular everywhere.</li>
+<li>Irregular as soon as two nodes disagree under isFluid, since some cell of the grown region is then cut in the sense the shop reconstructs cut cells. That is exact whatever the implicit function does away from its zero set, unlike <a class="el" href="classScanShop.html" title="Derived version of GeometryShop that load balances based on the cut cells themselves.">ScanShop</a>'s cell-centre test against half a diagonal, which assumes a distance function and is defeated by a smooth union growing faster than one.</li>
+<li>Regular or covered by the verdict every node shares, on the stop level or where the nearest node value exceeds a cell width. Nothing finer describes the stop level, so the rule below would cost tiles and buy nothing there; and a midpoint can only disagree with two agreeing ends if the surface comes within half a cell of the edge, so a cell width is a conservative distance at which to stop reading. Reading the implicit function as a distance here is what the scan-based pruning already does, and a function that is not one must be used with the same caution in both places.</li>
+<li>Irregular where the midpoint of some edge of the node lattice disagrees with its two agreeing ends. The surface then enters and leaves between the nodes, which the level above would see and this one cannot represent, and a cell of it left on the coarse side of a level boundary could not describe its own face there. The midpoint is a node of the level above and is read at that level's spacing, since that is the spacing its snap band is measured against.</li>
+<li>Regular if every node is fluid, covered if every node is solid.</li>
+</ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to classify. </td></tr>
@@ -1425,6 +1470,60 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_tre
 
 </div>
 </div>
+<a id="a109774bb75d4e965056d3632166e539c" name="a109774bb75d4e965056d3632166e539c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a109774bb75d4e965056d3632166e539c">&#9670;&#160;</a></span>doublyCrossedEdge()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ComputationalGeometry::doublyCrossedEdge </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether a cell edge of a box is crossed twice by the surface at the spacing of the level above it. </p>
+<p>The three nodes of an edge at the finer spacing are its two ends and its midpoint. Ends that agree under isFluid with a midpoint that disagrees are a surface that enters and leaves through the edge: the edge carries no crossing at this level and one in each half at the next, so a cell holding it cannot describe its own face once the level above describes the other side of it. Such a box is refined until the crossing is resolved, which is what makes the coarse side of a seam representable; a feature the finest level still does not resolve is left to it, since nothing finer describes it.</p>
+<p>An end that reads exactly zero is on the surface, and which side of it that end belongs to is not decided at this spacing. The fluid rule breaks the tie toward solid, so an edge reading fluid, solid, zero would read fluid, solid, fluid had the tie gone the other way, which is a pair. Such an end is therefore left open: the ends count as agreeing if any reading of them makes them, and a midpoint that is itself zero decides nothing and is skipped. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to test. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level the box is on. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase whose implicit function is tested. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if some cell edge of the box is crossed twice at the finer spacing. </dd></dl>
+
+</div>
+</div>
 <a id="a9b358ae5520ec4f91d8c3c04d60b1e65" name="a9b358ae5520ec4f91d8c3c04d60b1e65"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b358ae5520ec4f91d8c3c04d60b1e65">&#9670;&#160;</a></span>exceedsCurvature()</h2>
 
@@ -1477,7 +1576,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_tre
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True if the box must be split. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The reason the box must be split, or None if it need not be. </dd></dl>
 
 </div>
 </div>
@@ -2295,6 +2394,43 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_tre
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>One flag per box, parallel to a_boxes. </dd></dl>
+
+</div>
+</div>
+<a id="a032ee891ee437332cf29cf2efdb355bc" name="a032ee891ee437332cf29cf2efdb355bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a032ee891ee437332cf29cf2efdb355bc">&#9670;&#160;</a></span>tagUnresolvedSeams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ComputationalGeometry::tagUnresolvedSeams </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; IntVectSet &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_tags</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tag the cells on the coarse side of a level boundary that the level above it would cross twice. </p>
+<p>A cell whose edge carries no crossing while each of its halves carries one describes a surface that enters and leaves through that edge. Nothing is wrong with it until the level above describes the other side of that face: the coarse chord then has no crossing to match the two the children have, and the two descriptions cannot be reconciled. Such a cell is tagged so that the level above covers it too.</p>
+<p>Only the cells on the coarse side of a level boundary are examined &ndash; a cell whose neighbours are all at its own level takes its chords from the same nodes they do, and a cell the level above already covers is not on the coarse side of anything. That is a shell around the tiled region rather than its volume, so the test is cheap however deep the levels go.</p>
+<p>Face neighbours are the whole test, even though the four cells meeting along a doubly crossed edge can include one that meets the refined region along that edge alone. Of the other three, the two sharing a face with the refined one carry the same edge and are tagged on this pass, and once they are refined the fourth has a refined face neighbour and is taken on the next, which is what the repeated passes are for. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tags</td><td>Tags, in the tiler's levels; cells are added to them. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if any cell was tagged, so that the tiles must be built again. </dd></dl>
 
 </div>
 </div>

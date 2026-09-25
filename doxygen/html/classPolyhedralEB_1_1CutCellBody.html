@@ -175,6 +175,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a31a85e0f4c67cb8d4c9d46b356db8c87" id="r_a31a85e0f4c67cb8d4c9d46b356db8c87"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a31a85e0f4c67cb8d4c9d46b356db8c87">closeInterface</a> () noexcept</td></tr>
 <tr class="memdesc:a31a85e0f4c67cb8d4c9d46b356db8c87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild the interface from the face polygons this body holds.  <br /></td></tr>
 <tr class="separator:a31a85e0f4c67cb8d4c9d46b356db8c87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0098ac1bc81e34eff4fcb9502a633b8d" id="r_a0098ac1bc81e34eff4fcb9502a633b8d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a0098ac1bc81e34eff4fcb9502a633b8d">weldTJunctions</a> () noexcept</td></tr>
+<tr class="memdesc:a0098ac1bc81e34eff4fcb9502a633b8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split every polygon edge at the vertices of other polygons that lie on it.  <br /></td></tr>
+<tr class="separator:a0098ac1bc81e34eff4fcb9502a633b8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0a1b67bb2baa28d2f1b4bdd0cdbf164" id="r_aa0a1b67bb2baa28d2f1b4bdd0cdbf164"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#aa0a1b67bb2baa28d2f1b4bdd0cdbf164">numPolygons</a> () const noexcept</td></tr>
 <tr class="memdesc:aa0a1b67bb2baa28d2f1b4bdd0cdbf164"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many polygons this body holds.  <br /></td></tr>
 <tr class="separator:aa0a1b67bb2baa28d2f1b4bdd0cdbf164"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1157,6 +1160,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 <p>Volume fraction. </p>
 <dl class="section return"><dt>Returns</dt><dd>Fraction of the cell occupied by fluid. </dd></dl>
+
+</div>
+</div>
+<a id="a0098ac1bc81e34eff4fcb9502a633b8d" name="a0098ac1bc81e34eff4fcb9502a633b8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0098ac1bc81e34eff4fcb9502a633b8d">&#9670;&#160;</a></span>weldTJunctions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::weldTJunctions </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Split every polygon edge at the vertices of other polygons that lie on it. </p>
+<p>Restricting a face rebuilds it at the finer level's resolution, so an edge the face shares with a face that was left alone can be one segment on one side and several on the other, or carry a vertex on one side that the other has not got. The two sides then compare unequal and closeInterface reads both as boundary, which puts a stretch of a cell face into the interface and leaves the interface itself unclosed. Inserting each side's vertices into the other's edge makes the two agree segment for segment; the inserted vertices lie on the edge they are inserted into, so no polygon changes shape. </p><dl class="section return"><dt>Returns</dt><dd>False if a polygon would need more vertices than it can hold. </dd></dl>
 
 </div>
 </div>

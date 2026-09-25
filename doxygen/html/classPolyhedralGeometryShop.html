@@ -81,6 +81,7 @@ $(function() {
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classPolyhedralGeometryShop-members.html">List of all members</a>  </div>
@@ -206,9 +207,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a938e5be85deb7a79ed791f708338ca1b" id="r_a938e5be85deb7a79ed791f708338ca1b"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a938e5be85deb7a79ed791f708338ca1b">isDust</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const Real a_threshold) noexcept</td></tr>
-<tr class="memdesc:a938e5be85deb7a79ed791f708338ca1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cut body holds too little solid to be a cut cell.  <br /></td></tr>
-<tr class="separator:a938e5be85deb7a79ed791f708338ca1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bb46a15c80e4f7702b5c72de640a0e4" id="r_a6bb46a15c80e4f7702b5c72de640a0e4"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a6bb46a15c80e4f7702b5c72de640a0e4">isDust</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body) noexcept</td></tr>
+<tr class="memdesc:a6bb46a15c80e4f7702b5c72de640a0e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cut body holds nothing at all and is therefore a regular cell.  <br /></td></tr>
+<tr class="separator:a6bb46a15c80e4f7702b5c72de640a0e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb522eb98ae4af13a8008e323ba79bdf" id="r_afb522eb98ae4af13a8008e323ba79bdf"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#afb522eb98ae4af13a8008e323ba79bdf">fillNodeValues</a> (const BaseIF &amp;a_function, BaseFab&lt; Real &gt; &amp;a_nodeValues, const Box &amp;a_region, const RealVect &amp;a_probLo, const Real &amp;a_dx)</td></tr>
 <tr class="memdesc:afb522eb98ae4af13a8008e323ba79bdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the implicit function at every node of a region.  <br /></td></tr>
 <tr class="separator:afb522eb98ae4af13a8008e323ba79bdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -228,8 +229,11 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:a7b127ed35c8c95a84ab7201557c2da37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bisect one cell edge for the crossing on it.  <br /></td></tr>
 <tr class="separator:a7b127ed35c8c95a84ab7201557c2da37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a713b02ec62348d8c5de17e730c81a348" id="r_a713b02ec62348d8c5de17e730c81a348"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a713b02ec62348d8c5de17e730c81a348">snappedValue</a> (const BaseIF &amp;a_function, const RealVect &amp;a_point, const Real a_dx) noexcept</td></tr>
-<tr class="memdesc:a713b02ec62348d8c5de17e730c81a348"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the implicit function at a point, with a value within s_snapTolerance of a cell width of zero read as exactly zero.  <br /></td></tr>
+<tr class="memdesc:a713b02ec62348d8c5de17e730c81a348"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the implicit function at a point, with a value within s_snapTolerance of a cell width of zero read as exactly zero, and a zero that is a tangency read from beside the point instead.  <br /></td></tr>
 <tr class="separator:a713b02ec62348d8c5de17e730c81a348"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ea4bb0ccb1079c04d19e76575932cd6" id="r_a4ea4bb0ccb1079c04d19e76575932cd6"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a4ea4bb0ccb1079c04d19e76575932cd6">resolveTangency</a> (const BaseIF &amp;a_function, const RealVect &amp;a_point, const Real a_dx) noexcept</td></tr>
+<tr class="memdesc:a4ea4bb0ccb1079c04d19e76575932cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the implicit function beside a point where it is zero, when no surface passes through the point.  <br /></td></tr>
+<tr class="separator:a4ea4bb0ccb1079c04d19e76575932cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -240,6 +244,9 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_sn
 <tr class="memitem:a925bd3aa8c20a01aab98379cd03bf9a3" id="r_a925bd3aa8c20a01aab98379cd03bf9a3"><td class="memItemLeft" align="right" valign="top">static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a925bd3aa8c20a01aab98379cd03bf9a3">s_rootSnap</a> = 1.0E-4</td></tr>
 <tr class="memdesc:a925bd3aa8c20a01aab98379cd03bf9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance along an edge, from an endpoint that is exactly zero, within which a root is put on it.  <br /></td></tr>
 <tr class="separator:a925bd3aa8c20a01aab98379cd03bf9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6beead13cff2e6e7b7845bfa410783d5" id="r_a6beead13cff2e6e7b7845bfa410783d5"><td class="memItemLeft" align="right" valign="top">static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a6beead13cff2e6e7b7845bfa410783d5">s_probeSpacing</a> = 1.0E-6</td></tr>
+<tr class="memdesc:a6beead13cff2e6e7b7845bfa410783d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of a cell width the implicit function is read at either side of a point, to tell a surface through the point from a zero no surface passes through.  <br /></td></tr>
+<tr class="separator:a6beead13cff2e6e7b7845bfa410783d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -252,9 +259,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a0b6d835188df1e0dbe3bf1fa83015c55" id="r_a0b6d835188df1e0dbe3bf1fa83015c55"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a0b6d835188df1e0dbe3bf1fa83015c55">defineBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_graph, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces, const BaseFab&lt; signed char &gt; &amp;a_refined, const IntVect &amp;a_cell) const</td></tr>
 <tr class="memdesc:a0b6d835188df1e0dbe3bf1fa83015c55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of a cut cell of a graph, restricted on every face the finer level describes.  <br /></td></tr>
 <tr class="separator:a0b6d835188df1e0dbe3bf1fa83015c55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acdcdec8a8eb1f8ed6c4e55aaaf6c0659" id="r_acdcdec8a8eb1f8ed6c4e55aaaf6c0659"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#acdcdec8a8eb1f8ed6c4e55aaaf6c0659">writeSTL</a> (const std::string &amp;a_fileName, const std::string &amp;a_name, const Vector&lt; Real &gt; &amp;a_facets) const</td></tr>
-<tr class="memdesc:acdcdec8a8eb1f8ed6c4e55aaaf6c0659"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write triangles gathered from every rank as one STL file.  <br /></td></tr>
-<tr class="separator:acdcdec8a8eb1f8ed6c4e55aaaf6c0659"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a067d698aabb65331c2eb5b70eb4c1733" id="r_a067d698aabb65331c2eb5b70eb4c1733"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a067d698aabb65331c2eb5b70eb4c1733">writeSurface</a> (const std::string &amp;a_fileName, const Vector&lt; Vector&lt; Real &gt; &gt; &amp;a_facets) const</td></tr>
+<tr class="memdesc:a067d698aabb65331c2eb5b70eb4c1733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.  <br /></td></tr>
+<tr class="separator:a067d698aabb65331c2eb5b70eb4c1733"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addf8815b2e8122b7b41511c7a26216f2" id="r_addf8815b2e8122b7b41511c7a26216f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#addf8815b2e8122b7b41511c7a26216f2">fillNode</a> (IrregNode &amp;a_node, const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const BaseFab&lt; int &gt; &amp;a_regIrregCovered, const IntVect &amp;a_cell, const ProblemDomain &amp;a_domain) const</td></tr>
 <tr class="memdesc:addf8815b2e8122b7b41511c7a26216f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a cut cell's node from its body.  <br /></td></tr>
 <tr class="separator:addf8815b2e8122b7b41511c7a26216f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -284,6 +291,12 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:a85282632e1b5a6ba9878559cd5df983d inherit pro_methods_classScanShop"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the "box map" on a specified level.  <br /></td></tr>
 <tr class="separator:a85282632e1b5a6ba9878559cd5df983d inherit pro_methods_classScanShop"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a88664acff9f1f4f1501f3972a8acf3e9" id="r_a88664acff9f1f4f1501f3972a8acf3e9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a88664acff9f1f4f1501f3972a8acf3e9">indexFacets</a> (const Vector&lt; Real &gt; &amp;a_facets, const Real a_tolerance, std::vector&lt; Real &gt; &amp;a_vertices, std::vector&lt; int &gt; &amp;a_connectivity)</td></tr>
+<tr class="memdesc:a88664acff9f1f4f1501f3972a8acf3e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identify the vertices of a triangle soup, giving each one once and each triangle three indices.  <br /></td></tr>
+<tr class="separator:a88664acff9f1f4f1501f3972a8acf3e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:abf1c98807086a8e803c940993b22d9a3" id="r_abf1c98807086a8e803c940993b22d9a3"><td class="memItemLeft" align="right" valign="top"><a id="abf1c98807086a8e803c940993b22d9a3" name="abf1c98807086a8e803c940993b22d9a3"></a>
@@ -298,13 +311,12 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classPolyhedralEBGraph.html">Po
 <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase</b></td></tr>
 <tr class="memdesc:af933a1366a16909c903b6e595213afdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase this generator serves on those grids. <br /></td></tr>
 <tr class="separator:af933a1366a16909c903b6e595213afdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78295103664700b3d7d135a3ccb8b50d" id="r_a78295103664700b3d7d135a3ccb8b50d"><td class="memItemLeft" align="right" valign="top"><a id="a78295103664700b3d7d135a3ccb8b50d" name="a78295103664700b3d7d135a3ccb8b50d"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_writeSTL</b></td></tr>
-<tr class="memdesc:a78295103664700b3d7d135a3ccb8b50d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface writes the surface as STL. PolyhedralGeometryShop.write_stl, off by default. <br /></td></tr>
-<tr class="separator:a78295103664700b3d7d135a3ccb8b50d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9e08c97356bbd64d8882020ddd56e9d" id="r_ae9e08c97356bbd64d8882020ddd56e9d"><td class="memItemLeft" align="right" valign="top"><a id="ae9e08c97356bbd64d8882020ddd56e9d" name="ae9e08c97356bbd64d8882020ddd56e9d"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_sanityCheck</b></td></tr>
-<tr class="memdesc:ae9e08c97356bbd64d8882020ddd56e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, on by default. <br /></td></tr>
+<tr class="memitem:ab6533c15bcdc719d501ee8f5ebabb897" id="r_ab6533c15bcdc719d501ee8f5ebabb897"><td class="memItemLeft" align="right" valign="top"><a id="ab6533c15bcdc719d501ee8f5ebabb897" name="ab6533c15bcdc719d501ee8f5ebabb897"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_writeSurface</b></td></tr>
+<tr class="memdesc:ab6533c15bcdc719d501ee8f5ebabb897"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface writes the surface. PolyhedralGeometryShop.write_surface, off by default. <br /></td></tr>
+<tr class="separator:ab6533c15bcdc719d501ee8f5ebabb897"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9e08c97356bbd64d8882020ddd56e9d" id="r_ae9e08c97356bbd64d8882020ddd56e9d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ae9e08c97356bbd64d8882020ddd56e9d">m_sanityCheck</a></td></tr>
+<tr class="memdesc:ae9e08c97356bbd64d8882020ddd56e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check.  <br /></td></tr>
 <tr class="separator:ae9e08c97356bbd64d8882020ddd56e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad773afb8a229a0a228143d386ea91c1d" id="r_ad773afb8a229a0a228143d386ea91c1d"><td class="memItemLeft" align="right" valign="top"><a id="ad773afb8a229a0a228143d386ea91c1d" name="ad773afb8a229a0a228143d386ea91c1d"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></tr>
@@ -389,7 +401,7 @@ std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
 <tr class="memitem:ae28b9f8a13755f2de22dd2ee6170f23e" id="r_ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memItemLeft" align="right" valign="top"><a id="ae28b9f8a13755f2de22dd2ee6170f23e" name="ae28b9f8a13755f2de22dd2ee6170f23e"></a>
-static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_weldSpacing</b> = 1.0E-8</td></tr>
+static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_weldSpacing</b> = 1.0E-6</td></tr>
 <tr class="memdesc:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck. <br /></td></tr>
 <tr class="separator:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7f99bd2911b3a37fbc730bad6b4467e" id="r_aa7f99bd2911b3a37fbc730bad6b4467e"><td class="memItemLeft" align="right" valign="top"><a id="aa7f99bd2911b3a37fbc730bad6b4467e" name="aa7f99bd2911b3a37fbc730bad6b4467e"></a>
@@ -688,7 +700,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Build the body of a cut cell of a graph, restricted on every face the finer level describes. </p>
-<p>The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again afterwards. A body that will not close, a face that cannot be restricted or a doubly crossed edge stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again afterwards. A body that will not close, a face that cannot be restricted, or a doubly crossed edge stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_body</td><td>The body. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_graph</td><td>Graph of the cell's level. </td></tr>
@@ -1221,8 +1233,67 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a938e5be85deb7a79ed791f708338ca1b" name="a938e5be85deb7a79ed791f708338ca1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a938e5be85deb7a79ed791f708338ca1b">&#9670;&#160;</a></span>isDust()</h2>
+<a id="a88664acff9f1f4f1501f3972a8acf3e9" name="a88664acff9f1f4f1501f3972a8acf3e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88664acff9f1f4f1501f3972a8acf3e9">&#9670;&#160;</a></span>indexFacets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::indexFacets </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_facets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_tolerance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_vertices</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_connectivity</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Identify the vertices of a triangle soup, giving each one once and each triangle three indices. </p>
+<p>Two positions closer than the tolerance are one vertex. Candidates are taken from the lattice cell of the tolerance a position falls in and the twenty-six around it, which is what keeps this out of the quadratic scan a surface meeting the mesh squarely would otherwise provoke, with every candidate still measured against so that two positions either side of a lattice wall are not told apart. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>Triangles, nine reals each. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tolerance</td><td>Distance within which two positions are the same vertex. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_vertices</td><td>The vertices, three reals each. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_connectivity</td><td>Three vertex indices per triangle. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6bb46a15c80e4f7702b5c72de640a0e4" name="a6bb46a15c80e4f7702b5c72de640a0e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bb46a15c80e4f7702b5c72de640a0e4">&#9670;&#160;</a></span>isDust()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1234,13 +1305,54 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
           <td class="memname">bool PolyhedralGeometryShop::isDust </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_body</em>, </td>
+          <td class="paramname"><em>a_body</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether a cut body holds nothing at all and is therefore a regular cell. </p>
+<p>A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut from their corners while their bodies hold no solid and no interface whatsoever &ndash; the reconstruction finds an empty polyhedron. Those cells are regular, and dropping them discards nothing, since there is no surface in them for a neighbour to meet. Emptiness is exact rather than thresholded: a body with any solid in it, however little, keeps its cell, because its interface is what closes the surface against its neighbours, and a rule that discarded it by size would leave a hole the size of what it discarded. A cell whose interface lies in one of its faces has no solid volume either, but it does have boundary area, and it is not dust. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_body</td><td>Body of the cell. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the cell should be treated as regular. </dd></dl>
+
+</div>
+</div>
+<a id="a4ea4bb0ccb1079c04d19e76575932cd6" name="a4ea4bb0ccb1079c04d19e76575932cd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ea4bb0ccb1079c04d19e76575932cd6">&#9670;&#160;</a></span>resolveTangency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real PolyhedralGeometryShop::resolveTangency </td>
+          <td>(</td>
+          <td class="paramtype">const BaseIF &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_point</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_threshold</em>&#160;</td>
+          <td class="paramname"><em>a_dx</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1255,15 +1367,16 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </table>
 </div><div class="memdoc">
 
-<p>Whether a cut body holds too little solid to be a cut cell. </p>
-<p>The counterpart, on the fluid side, of dropping a body whose fluid volume is below the threshold: a body with neither solid volume nor boundary area is a regular cell. A cell whose interface lies in one of its faces, wholly or in part, has no solid volume either but does have boundary area, and is not dust. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Read the implicit function beside a point where it is zero, when no surface passes through the point. </p>
+<p>A composite function can be zero over a whole region that is not its surface: a difference of two bodies sharing a face evaluates to the maximum of zero and something negative over the whole of that face. Taken at face value such a zero is material by the fluid rule, and it invents an interface where the geometry has none and displaces the interfaces of whatever else the cell holds. It is told apart from a surface by the function's sign a probe spacing off the point, along each axis in turn. A surface through the point changes the sign across it along any axis the surface is not parallel to, and since a surface has a normal there is always such an axis, so one sign change is enough to leave the zero alone. The zero is read through only on the evidence of an axis whose two readings are both away from zero and of the same sign, which is what a function that touches zero without a surface being there looks like; the largest such reading stands in for the zero. One reading of zero is not evidence of anything &ndash; it is the point's own zero again, which is what an axis along a face of the geometry returns, and what both axes along the faces meeting at a convex edge return. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_body</td><td>Body of the cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_threshold</td><td>Volume-fraction threshold; nothing is dust at zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_point</td><td>Point the function is zero at. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing that sets the probe spacing. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True if the cell should be treated as regular. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The reading beside the point, or exactly zero if a surface passes through it. </dd></dl>
 
 </div>
 </div>
@@ -1283,7 +1396,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Check that the interface triangles form a surface that is closed except on the domain boundary. </p>
-<p>A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells, vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. Switched by PolyhedralGeometryShop.sanity_check, on by default. Requires buildGraphs. </p>
+<p>A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells, vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees with itself, and there would be no cut cell to carry the interface between them. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which is where the edge of the tiled region meets what no tile carries. Switched by PolyhedralGeometryShop.sanity_check, off by default. Requires buildGraphs. </p>
 
 </div>
 </div>
@@ -1406,8 +1519,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </table>
 </div><div class="memdoc">
 
-<p>Read the implicit function at a point, with a value within s_snapTolerance of a cell width of zero read as exactly zero. </p>
-<p>A face of the geometry lying in a node plane evaluates to zero there only up to round-off: the same face comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring nodes, and cells on either side of it would then be classified by which of those they were handed. Reading everything within a fixed fraction of the cell width of zero as zero puts every such node on one side by rule, in the corner values and in the bisection alike. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Read the implicit function at a point, with a value within s_snapTolerance of a cell width of zero read as exactly zero, and a zero that is a tangency read from beside the point instead. </p>
+<p>A face of the geometry lying in a node plane evaluates to zero there only up to round-off: the same face comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring nodes, and cells on either side of it would then be classified by which of those they were handed. Reading everything within a fixed fraction of the cell width of zero as zero puts every such node on one side by rule, in the corner values and in the bisection alike. A zero that no surface passes through is then read through resolveTangency, so that nothing downstream sees it. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_point</td><td>Point to evaluate at. </td></tr>
@@ -1455,12 +1568,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Build the polyhedra over the grids, check that they form a surface, and write it if asked. </p>
-<p>Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level carries are skipped, and a face shared with such a cell is restricted to the finer chords and the interface closed. The interface triangles of every level are then checked by sanityCheck, and written as one STL per level and one composite when PolyhedralGeometryShop.write_stl is set. Collective; every rank reconstructs its share of the boxes. Requires setGrids. </p>
+<p>Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level carries are skipped, and a face shared with such a cell is restricted to the finer chords and the interface closed. The interface triangles of every level are then checked by sanityCheck when PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh when PolyhedralGeometryShop.write_surface is set. Collective; every rank reconstructs its share of the boxes and writes its own share of the mesh. Requires setGrids. </p>
 
 </div>
 </div>
-<a id="acdcdec8a8eb1f8ed6c4e55aaaf6c0659" name="acdcdec8a8eb1f8ed6c4e55aaaf6c0659"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acdcdec8a8eb1f8ed6c4e55aaaf6c0659">&#9670;&#160;</a></span>writeSTL()</h2>
+<a id="a067d698aabb65331c2eb5b70eb4c1733" name="a067d698aabb65331c2eb5b70eb4c1733"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a067d698aabb65331c2eb5b70eb4c1733">&#9670;&#160;</a></span>writeSurface()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1469,7 +1582,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void PolyhedralGeometryShop::writeSTL </td>
+          <td class="memname">void PolyhedralGeometryShop::writeSurface </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>a_fileName</em>, </td>
@@ -1477,13 +1590,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>a_name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; Vector&lt; Real &gt; &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_facets</em>&#160;</td>
         </tr>
         <tr>
@@ -1499,12 +1606,11 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </table>
 </div><div class="memdoc">
 
-<p>Write triangles gathered from every rank as one STL file. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase. </p>
+<p>One group per level, holding the level's triangles as an indexed mesh &ndash; the vertices once each and a triple of indices per triangle &ndash; rather than as a soup of coordinates, which is what a viewer wants and what an XDMF description can point at. The boxes of the level and the boxes that split on it go in the same group, so that the surface can be read against the grids it was built on without a second file. The distance within which two positions are one vertex is written alongside them. An XDMF description of the file is written next to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary between two ranks is written by each, since vertices are identified within a rank and not across them. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File to write. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Solid name inside the file. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>This rank's triangles, nine reals each. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File to write, without a suffix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>This rank's triangles of each level, nine reals each. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1512,6 +1618,56 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="ae9e08c97356bbd64d8882020ddd56e9d" name="ae9e08c97356bbd64d8882020ddd56e9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9e08c97356bbd64d8882020ddd56e9d">&#9670;&#160;</a></span>m_sanityCheck</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralGeometryShop::m_sanityCheck</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check. </p>
+<p>On by default in a build that keeps its assertions and off in one that does not, since the check tells the generator nothing it uses and only reports. Either default can be overridden from the inputs. </p>
+
+</div>
+</div>
+<a id="a6beead13cff2e6e7b7845bfa410783d5" name="a6beead13cff2e6e7b7845bfa410783d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6beead13cff2e6e7b7845bfa410783d5">&#9670;&#160;</a></span>s_probeSpacing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr Real PolyhedralGeometryShop::s_probeSpacing = 1.0E-6</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fraction of a cell width the implicit function is read at either side of a point, to tell a surface through the point from a zero no surface passes through. </p>
+<p>Large enough that a function of unit gradient reads well clear of s_snapTolerance beside the point, and small enough that the reading belongs to the point rather than to its neighbourhood. </p>
+
+</div>
+</div>
 <a id="a925bd3aa8c20a01aab98379cd03bf9a3" name="a925bd3aa8c20a01aab98379cd03bf9a3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a925bd3aa8c20a01aab98379cd03bf9a3">&#9670;&#160;</a></span>s_rootSnap</h2>
 
