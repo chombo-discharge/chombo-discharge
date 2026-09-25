@@ -1292,7 +1292,7 @@ ComputationalGeometry::makeTiles()
   // rather than before, because the tiled region is not a function of the box classification alone -- the tiler
   // nests, and nesting puts tiles above boxes that never refined, which is exactly where such a cell hides. Each
   // pass only adds tags, so the region grows and the loop ends; in practice one further pass finds nothing.
-  for (int pass = 0; pass <= s_maxTilePasses; pass++) {
+  for (int pass = 0; pass < s_maxTilePasses; pass++) {
     Vector<Vector<Box>> tiles;
 
     const int finestTiled = tiler.regrid(tiles, tags);

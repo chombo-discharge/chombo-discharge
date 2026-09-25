@@ -565,7 +565,7 @@ protected:
    *
    * @param[out] a_firstChild  Per level and box, the index on the next level of the first child, or -1 for a leaf.
    * @param[out] a_numChildren Per level and box, the number of children: one for a whole refinement, the number
-   *                           of pieces for a split, zero for a leaf.
+   * of pieces for a split, zero for a leaf.
    */
   void
   buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vector<Vector<int>>& a_numChildren);
@@ -603,26 +603,26 @@ protected:
 
   /**
    * @brief Classify a box of one phase on one level as regular, covered or irregular.
-   * @details A box whose nodes all agree can still have the surface passing through it between them, and such a
-   * box is irregular: the level above would see crossings this one cannot, and a cell of it left on the coarse
-   * side of a level boundary could not describe its own face there. The test is skipped where it cannot fire --
-   * on the finest level, which nothing finer describes, and where the nearest node value exceeds a cell width,
-   * since a midpoint can only disagree with two agreeing ends if the surface comes within half a cell of the
-   * edge. That last reading of the implicit function as a distance is the one the scan-based pruning already
-   * makes, and an implicit function that is not one must be used with the same caution there as here.
-   * @details A box is irregular if some cell of it, grown by the ghost width, is cut in the sense the polyhedral
-   * shop reconstructs cut cells: its corner values disagree under isFluid. That is exact whatever the implicit
-   * function does away from its zero set, where ScanShop's cell-centre test against half a diagonal assumes a
-   * distance function and a smooth union grows faster than one. A phase without an implicit function is regular
-   * everywhere. Pseudocode:
+   * @details The box is read at the nodes of grow(a_box, m_maxGhostEB) & domain, which are the nodes the
+   * polyhedral shop reconstructs the cells of that region from. The rules are applied in this order:
    *
-   *   grown = grow(box, m_maxGhostEB) & domain
-   *   node values over grown, once per node
-   *   Irregular as soon as two nodes disagree under isFluid -- some cell of grown is cut
-   *   otherwise, below the stop level and within a cell of the surface:
-   *     Irregular if the midpoint of some edge disagrees with its two agreeing ends -- the surface enters
-   *     and leaves between the nodes, which the level above would see and this one cannot represent
-   *   otherwise Regular if every node is fluid, Covered if every node is solid
+   * - A phase carrying no implicit function is regular everywhere.
+   * - Irregular as soon as two nodes disagree under isFluid, since some cell of the grown region is then cut in
+   *   the sense the shop reconstructs cut cells. That is exact whatever the implicit function does away from its
+   *   zero set, unlike ScanShop's cell-centre test against half a diagonal, which assumes a distance function and
+   *   is defeated by a smooth union growing faster than one.
+   * - Regular or covered by the verdict every node shares, on the stop level or where the nearest node value
+   *   exceeds a cell width. Nothing finer describes the stop level, so the rule below would cost tiles and buy
+   *   nothing there; and a midpoint can only disagree with two agreeing ends if the surface comes within half a
+   *   cell of the edge, so a cell width is a conservative distance at which to stop reading. Reading the implicit
+   *   function as a distance here is what the scan-based pruning already does, and a function that is not one
+   *   must be used with the same caution in both places.
+   * - Irregular where the midpoint of some edge of the node lattice disagrees with its two agreeing ends. The
+   *   surface then enters and leaves between the nodes, which the level above would see and this one cannot
+   *   represent, and a cell of it left on the coarse side of a level boundary could not describe its own face
+   *   there. The midpoint is a node of the level above and is read at that level's spacing, since that is the
+   *   spacing its snap band is measured against.
+   * - Regular if every node is fluid, covered if every node is solid.
    *
    * @param[in] a_box   Box to classify.
    * @param[in] a_level Level the box lives on.
@@ -633,8 +633,12 @@ protected:
   classifyBox(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
-   * @brief Why a box split, for the report: no split, a pair inside the box, a pair reaching into the ring one cell
-   * outside it, or a pair whose normals face each other (two surfaces closer than the band).
+   * @brief Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair
+   * reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than
+   * the band), or an edge the level above would cross twice.
+   * @details Only None against anything else decides whether a box splits. Which of the four reasons it is, is
+   * recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it
+   * is a diagnostic rather than a part of the generator.
    */
   enum class SplitReason
   {
@@ -667,7 +671,7 @@ protected:
    * @param[in] a_box   Box to test.
    * @param[in] a_level Level the box lives on.
    * @param[in] a_phase Phase whose implicit function is asked.
-   * @return True if the box must be split.
+   * @return The reason the box must be split, or None if it need not be.
    */
   SplitReason
   exceedsCurvature(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
@@ -680,6 +684,12 @@ protected:
    * own face once the level above describes the other side of it. Such a box is refined until the crossing is
    * resolved, which is what makes the coarse side of a seam representable; a feature the finest level still does
    * not resolve is left to it, since nothing finer describes it.
+   *
+   * An end that reads exactly zero is on the surface, and which side of it that end belongs to is not decided at
+   * this spacing. The fluid rule breaks the tie toward solid, so an edge reading fluid, solid, zero would read
+   * fluid, solid, fluid had the tie gone the other way, which is a pair. Such an end is therefore left open: the
+   * ends count as agreeing if any reading of them makes them, and a midpoint that is itself zero decides nothing
+   * and is skipped.
    * @param[in] a_box   Box to test.
    * @param[in] a_level Level the box is on.
    * @param[in] a_phase Phase whose implicit function is tested.
@@ -743,7 +753,8 @@ protected:
   static constexpr int s_treeLeafSize = 8;
 
   /**
-   * @brief How many times the tiles may be built again for the cells the level above would cross twice.
+   * @brief Most times the tiles are built: the first build, and one more for every pass that finds a cell the
+   * level above would cross twice. The run stops if they are all spent with such a cell still unresolved.
    */
   static constexpr int s_maxTilePasses = 8;
 
@@ -793,6 +804,11 @@ protected:
    * own level takes its chords from the same nodes they do, and a cell the level above already covers is not on
    * the coarse side of anything. That is a shell around the tiled region rather than its volume, so the test is
    * cheap however deep the levels go.
+   *
+   * Face neighbours are the whole test, even though the four cells meeting along a doubly crossed edge can
+   * include one that meets the refined region along that edge alone. Of the other three, the two sharing a face
+   * with the refined one carry the same edge and are tagged on this pass, and once they are refined the fourth
+   * has a refined face neighbour and is taken on the next, which is what the repeated passes are for.
    * @param[in,out] a_tags Tags, in the tiler's levels; cells are added to them.
    * @return True if any cell was tagged, so that the tiles must be built again.
    */

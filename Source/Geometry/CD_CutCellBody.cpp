@@ -66,6 +66,7 @@ CutCellBody::orientOutward(Polygon& a_polygon, const int a_dir, const int a_side
 {
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
   CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(a_polygon.m_numVertices >= 3);
 
   RealVect outward = RealVect::Zero;
   outward[a_dir]   = (a_side == 0) ? -1.0 : 1.0;
@@ -91,6 +92,7 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
 {
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
   CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(a_out != nullptr);
 
   int faceEdge[4];
   int faceCorner[4];
@@ -330,6 +332,11 @@ bool
 CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out, const int a_maxOut, int& a_numOut)
   const noexcept
 {
+  CH_assert(a_in != nullptr);
+  CH_assert(a_out != nullptr);
+  CH_assert(a_num >= 0);
+  CH_assert(a_maxOut > 0);
+
   a_numOut = 0;
 
   // A seam face that the body covers completely carries no polygon, and that is an answer, not a
@@ -534,6 +541,7 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
   CH_assert(a_children != nullptr);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
   CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
   const int face = 2 * a_dir + a_side;
 
@@ -623,6 +631,8 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
 bool
 CutCellBody::weldTJunctions() noexcept
 {
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
   for (int ip = 0; ip < m_numPolygons; ip++) {
     Polygon& p = m_polygon[ip];
 
@@ -738,6 +748,8 @@ CutCellBody::weldTJunctions() noexcept
 bool
 CutCellBody::closeInterface() noexcept
 {
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
   if (!this->weldTJunctions()) {
     return false;
   }
@@ -776,6 +788,8 @@ CutCellBody::closeInterface() noexcept
       }
 
       if (!shared) {
+        CH_assert(numOpen < s_maxPolygons * s_maxVertices);
+
         from[numOpen] = b;
         to[numOpen]   = a;
         numOpen++;
@@ -894,6 +908,8 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
                                    const RealVect& a_probLo,
                                    const Real      a_dx) const noexcept
 {
+  CH_assert(a_dx > 0.0);
+
   // a body that is not cut holds no interface polygon, so the loop appends nothing for it
   for (int ip = 0; ip < m_numPolygons; ip++) {
     const Polygon& p = m_polygon[ip];
@@ -947,6 +963,8 @@ CutCellBody::widestPolygon() const noexcept
 void
 CutCellBody::accumulateMoments() noexcept
 {
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
   Real     faceArea[s_numFaces] = {0.0};
   RealVect faceMoment[s_numFaces];
 
@@ -1089,6 +1107,8 @@ CutCellBody::accumulateMoments() noexcept
 
   if (m_boundaryArea > 0.0) {
     m_normal = -boundaryVector / m_boundaryArea;
+
+    CH_assert(std::abs(m_normal.vectorLength() - 1.0) <= 1.0E-10);
   }
 }
 

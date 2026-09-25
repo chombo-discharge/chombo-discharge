@@ -397,8 +397,7 @@ protected:
   /**
    * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check.
    * @details On by default in a build that keeps its assertions and off in one that does not, since the check
-   *          tells the generator nothing it uses and only reports. Either default can be overridden from the
-   *          inputs.
+   * tells the generator nothing it uses and only reports. Either default can be overridden from the inputs.
    */
   bool m_sanityCheck;
 
@@ -462,12 +461,12 @@ protected:
   /**
    * @brief Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.
    * @details One group per level, holding the level's triangles as an indexed mesh -- the vertices once each and a
-   *          triple of indices per triangle -- rather than as a soup of coordinates, which is what a viewer wants
-   *          and what an XDMF description can point at. The boxes of the level and the boxes that split on it go
-   *          in the same group, so that the surface can be read against the grids it was built on without a second
-   *          file. Vertices are identified the way sanityCheck identifies them, by distance rather than on a
-   *          lattice, and the distance used is written alongside them. An XDMF description of the file is written
-   *          next to it. Collective: every rank sends its triangles to the master, which writes.
+   * triple of indices per triangle -- rather than as a soup of coordinates, which is what a viewer wants and what
+   * an XDMF description can point at. The boxes of the level and the boxes that split on it go in the same group,
+   * so that the surface can be read against the grids it was built on without a second file. The distance within
+   * which two positions are one vertex is written alongside them. An XDMF description of the file is written next
+   * to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary between two
+   * ranks is written by each, since vertices are identified within a rank and not across them.
    * @param[in] a_fileName File to write, without a suffix.
    * @param[in] a_facets   This rank's triangles of each level, nine reals each.
    */
@@ -476,9 +475,10 @@ protected:
 
   /**
    * @brief Identify the vertices of a triangle soup, giving each one once and each triangle three indices.
-   * @details Two positions closer than the tolerance are one vertex. They are found by sorting on the first
-   *          coordinate and scanning back over the window the tolerance allows, which is what makes this
-   *          linear-ish rather than quadratic.
+   * @details Two positions closer than the tolerance are one vertex. Candidates are taken from the lattice cell of
+   * the tolerance a position falls in and the twenty-six around it, which is what keeps this out of the quadratic
+   * scan a surface meeting the mesh squarely would otherwise provoke, with every candidate still measured against
+   * so that two positions either side of a lattice wall are not told apart.
    * @param[in]  a_facets       Triangles, nine reals each.
    * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
    * @param[out] a_vertices     The vertices, three reals each.
