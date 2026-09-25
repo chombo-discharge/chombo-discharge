@@ -17,6 +17,7 @@
 
 // Chombo includes
 #include <BaseFab.H>
+#include <CH_assert.H>
 #include <BoxIterator.H>
 #include <BRMeshRefine.H>
 #include <IntVectSet.H>
@@ -181,6 +182,8 @@ ComputationalGeometry::getSolidImplicitFunction() const
 const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const
 {
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
   if (m_verbose) {
     pout() << "ComputationalGeometry::getImplicitFunction(phase::which_phase)" << endl;
@@ -425,6 +428,9 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     m_domains[lvl] = refine(m_domains[lvl - 1], 2);
     m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
   }
+
+  CH_assert(m_startLevel >= 0 && m_startLevel <= m_stopLevel);
+  CH_assert(m_domains.size() == m_dx.size());
 
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
@@ -689,6 +695,8 @@ ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
   const Vector<Box>&                    levelBoxes = m_boxes[a_level];
   const Vector<GeometryService::InOut>& levelTypes = this->types(a_phase)[a_level];
 
+  CH_assert(levelBoxes.size() == levelTypes.size());
+
   for (int i = 0; i < levelBoxes.size(); i++) {
     if (levelTypes[i] == a_type) {
       boxes.push_back(levelBoxes[i]);
@@ -713,6 +721,8 @@ ComputationalGeometry::getCutTiles(const int a_level) const noexcept
 const Vector<Box>&
 ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept
 {
+  CH_assert(m_splitBoxes[a_level].size() == m_splitReasons[a_level].size());
+
   a_reasons = m_splitReasons[a_level];
 
   return m_splitBoxes[a_level];
@@ -739,12 +749,16 @@ ComputationalGeometry::getDx(const int a_level) const noexcept
 Vector<Vector<GeometryService::InOut>>&
 ComputationalGeometry::types(const phase::which_phase a_phase) noexcept
 {
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
   return (a_phase == phase::gas) ? m_gasTypes : m_solidTypes;
 }
 
 const Vector<Vector<GeometryService::InOut>>&
 ComputationalGeometry::types(const phase::which_phase a_phase) const noexcept
 {
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
   return (a_phase == phase::gas) ? m_gasTypes : m_solidTypes;
 }
 
@@ -915,6 +929,9 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
   }
 
   // The flag carries the reason, so the report can say why a level refined where it did.
+  CH_assert(a_gasTypes.size() == a_boxes.size());
+  CH_assert(a_solidTypes.size() == a_boxes.size());
+
   Vector<int> flags(a_boxes.size(), 0);
 
   for (int i = procID(); i < a_boxes.size(); i += numProc()) {
@@ -932,12 +949,13 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
     // of. One that holds an edge crossed twice at the finer spacing cannot describe its own face there, so it
     // is refined until the crossing is resolved.
     if (reason == SplitReason::None) {
-      const bool doubled = (a_gasTypes[i] == GeometryService::Irregular &&
-                            this->doublyCrossedEdge(a_boxes[i], a_level, phase::gas)) ||
-                           (a_solidTypes[i] == GeometryService::Irregular &&
-                            this->doublyCrossedEdge(a_boxes[i], a_level, phase::solid));
+      const bool gasDoubled = (a_gasTypes[i] == GeometryService::Irregular) &&
+                              this->doublyCrossedEdge(a_boxes[i], a_level, phase::gas);
 
-      if (doubled) {
+      const bool solidDoubled = (a_solidTypes[i] == GeometryService::Irregular) &&
+                                this->doublyCrossedEdge(a_boxes[i], a_level, phase::solid);
+
+      if (gasDoubled || solidDoubled) {
         reason = SplitReason::DoubleCrossing;
       }
     }
@@ -971,8 +989,10 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
   // is exact for what it builds, whatever the function does away from its zero set.
   const BaseIF& f = *implicitFunction;
 
-  const Real dx    = m_dx[a_level];
-  const Box  grown = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Box grown = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
 
   Box nodeBox = grown;
   nodeBox.surroundingNodes();
@@ -1068,7 +1088,9 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
 
   const BaseIF& f = *implicitFunction;
 
-  const Real dx     = m_dx[a_level];
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
   const Real fineDx = 0.5 * dx;
   const Box  valid  = a_box & m_domains[a_level].domainBox();
 
@@ -1162,9 +1184,11 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   // bisected once, shared by the cells around it, as the shop does when it builds the graph.
   const BaseIF& f = *implicitFunction;
 
-  const Real dx    = m_dx[a_level];
-  const Box  valid = a_box & m_domains[a_level].domainBox();
-  const Box  grown = grow(a_box, 1) & m_domains[a_level].domainBox();
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Box valid = a_box & m_domains[a_level].domainBox();
+  const Box grown = grow(a_box, 1) & m_domains[a_level].domainBox();
 
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
@@ -1407,6 +1431,8 @@ ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
 ComputationalGeometry::BV
 ComputationalGeometry::boundingVolume(const Box& a_box) noexcept
 {
+  CH_assert(!a_box.isEmpty());
+
   // A cell is the unit cube whose corners are its nodes, so a box spans [smallEnd, bigEnd + 1] in index space.
   // The bounding volumes are three-dimensional whatever SpaceDim is, and two of them overlap only where they do
   // so on every axis, so in two dimensions the third axis is given the unit thickness a cell has there too.
@@ -1680,6 +1706,12 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
     const Vector<GeometryService::InOut>& oldGasTypes   = m_gasTypes[lvl];
     const Vector<GeometryService::InOut>& oldSolidTypes = m_solidTypes[lvl];
     const Vector<Box>&                    tiles         = m_cutTiles[lvl];
+
+    CH_assert(oldGasTypes.size() == oldBoxes.size());
+    CH_assert(oldSolidTypes.size() == oldBoxes.size());
+    CH_assert(a_tileHosts[lvl].size() == tiles.size());
+    CH_assert(a_gasTileTypes[lvl].size() == tiles.size());
+    CH_assert(a_solidTileTypes[lvl].size() == tiles.size());
 
     // Which tiles each box hosts, as two flat arrays: hostedStart[i] .. hostedStart[i + 1] index into
     // hostedTiles for box i, filled by a counting sort over the tiles so that no box owns an allocation. For
