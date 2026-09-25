@@ -210,9 +210,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memitem:a14fac993fadbb22d52969cc2256a3c2f" id="r_a14fac993fadbb22d52969cc2256a3c2f"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; BaseIF &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a14fac993fadbb22d52969cc2256a3c2f">getImplicitFunction</a> (const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a14fac993fadbb22d52969cc2256a3c2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get implicit function for the specified phase.  <br /></td></tr>
 <tr class="separator:a14fac993fadbb22d52969cc2256a3c2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04a16d705cfb9c23315df1f48de28f6a" id="r_a04a16d705cfb9c23315df1f48de28f6a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a04a16d705cfb9c23315df1f48de28f6a">makeGrids</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const RealVect &amp;a_probLo, const Real a_startDx, const Real a_refineAngle, const int a_maxGhostEB)</td></tr>
-<tr class="memdesc:a04a16d705cfb9c23315df1f48de28f6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grids the index space is generated over.  <br /></td></tr>
-<tr class="separator:a04a16d705cfb9c23315df1f48de28f6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e158685c21420ce4df34df3e8b96828" id="r_a1e158685c21420ce4df34df3e8b96828"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a1e158685c21420ce4df34df3e8b96828">makeGrids</a> (const ProblemDomain &amp;a_startDomain, const ProblemDomain &amp;a_stopDomain, const RealVect &amp;a_probLo, const Real a_startDx, const Real a_refineAngle, const int a_maxGhostEB, const int a_minBlockSize, const int a_maxBlockSize)</td></tr>
+<tr class="memdesc:a1e158685c21420ce4df34df3e8b96828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the grids the index space is generated over.  <br /></td></tr>
+<tr class="separator:a1e158685c21420ce4df34df3e8b96828"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a205e78c7378834da34336adc02e0009b" id="r_a205e78c7378834da34336adc02e0009b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a205e78c7378834da34336adc02e0009b">getNumGridLevels</a> () const noexcept</td></tr>
 <tr class="memdesc:a205e78c7378834da34336adc02e0009b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of levels makeGrids built.  <br /></td></tr>
 <tr class="separator:a205e78c7378834da34336adc02e0009b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2103,8 +2103,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
-<a id="a04a16d705cfb9c23315df1f48de28f6a" name="a04a16d705cfb9c23315df1f48de28f6a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a04a16d705cfb9c23315df1f48de28f6a">&#9670;&#160;</a></span>makeGrids()</h2>
+<a id="a1e158685c21420ce4df34df3e8b96828" name="a1e158685c21420ce4df34df3e8b96828"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e158685c21420ce4df34df3e8b96828">&#9670;&#160;</a></span>makeGrids()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2146,7 +2146,19 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_maxGhostEB</em>&#160;</td>
+          <td class="paramname"><em>a_maxGhostEB</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_minBlockSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_maxBlockSize</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2170,6 +2182,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
     <tr><td class="paramdir">[in]</td><td class="paramname">a_startDx</td><td>Grid spacing on a_startDomain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refineAngle</td><td>Angle, in degrees, between neighbouring normals above which a box is split. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_maxGhostEB</td><td>Ghost cells a box is grown by when it is classified. At most half the tile size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_minBlockSize</td><td>Tile the grids are built with, from AmrMesh.eb_min_block_size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxBlockSize</td><td>Super-tile the boxes are cut to, a whole number of a_minBlockSize, from AmrMesh.eb_max_block_size. </td></tr>
   </table>
   </dd>
 </dl>

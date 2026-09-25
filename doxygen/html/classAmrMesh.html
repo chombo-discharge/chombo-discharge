@@ -556,6 +556,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memitem:aaee371b14070e14d0a7624b943ff2441" id="r_aaee371b14070e14d0a7624b943ff2441"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aaee371b14070e14d0a7624b943ff2441">getMaxEbisBoxSize</a> () const</td></tr>
 <tr class="memdesc:aaee371b14070e14d0a7624b943ff2441"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum box size for EBIS generation.  <br /></td></tr>
 <tr class="separator:aaee371b14070e14d0a7624b943ff2441"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6dc00ab1aebdc880e929425f0c1ba32" id="r_aa6dc00ab1aebdc880e929425f0c1ba32"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aa6dc00ab1aebdc880e929425f0c1ba32">getEbMinBlockSize</a> () const</td></tr>
+<tr class="memdesc:aa6dc00ab1aebdc880e929425f0c1ba32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the smallest box the geometry grids are tiled with.  <br /></td></tr>
+<tr class="separator:aa6dc00ab1aebdc880e929425f0c1ba32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab008fdda54aec96ad5bfb4f691fa685b" id="r_ab008fdda54aec96ad5bfb4f691fa685b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab008fdda54aec96ad5bfb4f691fa685b">getEbMaxBlockSize</a> () const</td></tr>
+<tr class="memdesc:ab008fdda54aec96ad5bfb4f691fa685b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the largest box the geometry grids are tiled with.  <br /></td></tr>
+<tr class="separator:ab008fdda54aec96ad5bfb4f691fa685b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9644428ada5f48e3fcdb512898cc1e62" id="r_a9644428ada5f48e3fcdb512898cc1e62"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a9644428ada5f48e3fcdb512898cc1e62">getNumberOfGhostCells</a> () const</td></tr>
 <tr class="memdesc:a9644428ada5f48e3fcdb512898cc1e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the default number of ghost cells.  <br /></td></tr>
 <tr class="separator:a9644428ada5f48e3fcdb512898cc1e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -783,6 +789,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMaxBlockSize</b>
 <tr class="memitem:add290a067d272d1e544cdedd2c54a896" id="r_add290a067d272d1e544cdedd2c54a896"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#add290a067d272d1e544cdedd2c54a896">parseMaxEbisBoxSize</a> ()</td></tr>
 <tr class="memdesc:add290a067d272d1e544cdedd2c54a896"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the maximum permitted box size.  <br /></td></tr>
 <tr class="separator:add290a067d272d1e544cdedd2c54a896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af34a7f50273850445d6b25bd3e832424" id="r_af34a7f50273850445d6b25bd3e832424"><td class="memItemLeft" align="right" valign="top"><a id="af34a7f50273850445d6b25bd3e832424" name="af34a7f50273850445d6b25bd3e832424"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>parseEbBlockSizes</b> ()</td></tr>
+<tr class="memdesc:af34a7f50273850445d6b25bd3e832424"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the tile and super-tile the geometry grids are built with. <br /></td></tr>
+<tr class="separator:af34a7f50273850445d6b25bd3e832424"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a741483026910d96c88ca396ea1c23810" id="r_a741483026910d96c88ca396ea1c23810"><td class="memItemLeft" align="right" valign="top"><a id="a741483026910d96c88ca396ea1c23810" name="a741483026910d96c88ca396ea1c23810"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>parseMinBlockSize</b> ()</td></tr>
 <tr class="memdesc:a741483026910d96c88ca396ea1c23810"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the B-R blocking factor. For tiled mesh refinement this parses the tile size. <br /></td></tr>
@@ -926,6 +936,14 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>m_bufferSizeBR</b></td
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_minBlockSize</b></td></tr>
 <tr class="memdesc:a5aaf8a6e213bc220f6e62946000deccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking factor. <br /></td></tr>
 <tr class="separator:a5aaf8a6e213bc220f6e62946000deccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7daa44351e83800232de3555d16a775" id="r_ae7daa44351e83800232de3555d16a775"><td class="memItemLeft" align="right" valign="top"><a id="ae7daa44351e83800232de3555d16a775" name="ae7daa44351e83800232de3555d16a775"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebMinBlockSize</b></td></tr>
+<tr class="memdesc:ae7daa44351e83800232de3555d16a775"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smallest box the geometry grids are tiled with. <br /></td></tr>
+<tr class="separator:ae7daa44351e83800232de3555d16a775"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a3c63e3923a1787cc9c816256dfa88b" id="r_a9a3c63e3923a1787cc9c816256dfa88b"><td class="memItemLeft" align="right" valign="top"><a id="a9a3c63e3923a1787cc9c816256dfa88b" name="a9a3c63e3923a1787cc9c816256dfa88b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebMaxBlockSize</b></td></tr>
+<tr class="memdesc:a9a3c63e3923a1787cc9c816256dfa88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest box the geometry grids are tiled with. <br /></td></tr>
+<tr class="separator:a9a3c63e3923a1787cc9c816256dfa88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78d5cb0ef5642c27c6c485b81652eaa1" id="r_a78d5cb0ef5642c27c6c485b81652eaa1"><td class="memItemLeft" align="right" valign="top"><a id="a78d5cb0ef5642c27c6c485b81652eaa1" name="a78d5cb0ef5642c27c6c485b81652eaa1"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_numEbGhostsCells</b></td></tr>
 <tr class="memdesc:a78d5cb0ef5642c27c6c485b81652eaa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of ghost cells to use for eb stuff. <br /></td></tr>
@@ -4585,6 +4603,46 @@ template&lt;typename P , typename Traits &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Coarsened-fine EBLevelGrids on all AMR levels </dd></dl>
+
+</div>
+</div>
+<a id="ab008fdda54aec96ad5bfb4f691fa685b" name="ab008fdda54aec96ad5bfb4f691fa685b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab008fdda54aec96ad5bfb4f691fa685b">&#9670;&#160;</a></span>getEbMaxBlockSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int AmrMesh::getEbMaxBlockSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the largest box the geometry grids are tiled with. </p>
+<p>The super-tile the geometry's boxes are cut to, a whole number of getEbMinBlockSize. </p><dl class="section return"><dt>Returns</dt><dd>Largest geometry grid box. </dd></dl>
+
+</div>
+</div>
+<a id="aa6dc00ab1aebdc880e929425f0c1ba32" name="aa6dc00ab1aebdc880e929425f0c1ba32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6dc00ab1aebdc880e929425f0c1ba32">&#9670;&#160;</a></span>getEbMinBlockSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int AmrMesh::getEbMinBlockSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the smallest box the geometry grids are tiled with. </p>
+<p>The tile <a class="el" href="classTiledMeshRefine.html" title="Class for generating AMR boxes using a tiling algorithm.">TiledMeshRefine</a> builds the geometry's grids from, which is not the simulation's blocking factor: curvature refinement follows the surface, and a smaller tile keeps the refined footprint close to it. </p><dl class="section return"><dt>Returns</dt><dd>Smallest geometry grid box. </dd></dl>
 
 </div>
 </div>
