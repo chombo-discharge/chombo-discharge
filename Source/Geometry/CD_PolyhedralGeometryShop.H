@@ -146,9 +146,10 @@ public:
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
    * @details Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level
    * carries are skipped, and a face shared with such a cell is restricted to the finer chords and the
-   * interface closed. The interface triangles of every level are then checked by sanityCheck, and written as
-   * one STL per level and one composite when PolyhedralGeometryShop.write_stl is set. Collective; every rank
-   * reconstructs its share of the boxes. Requires setGrids.
+   * interface closed. The interface triangles of every level are then checked by sanityCheck when
+   * PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh
+   * when PolyhedralGeometryShop.write_surface is set. Collective; every rank reconstructs its share of the boxes
+   * and writes its own share of the mesh. Requires setGrids.
    */
   void
   verifySurface() const;
@@ -161,7 +162,12 @@ public:
    * face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and
    * an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells,
    * vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the
-   * run. Switched by PolyhedralGeometryShop.sanity_check, on by default. Requires buildGraphs.
+   * run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face
+   * belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a
+   * classification that disagrees with itself, and there would be no cut cell to carry the interface between
+   * them. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which
+   * is where the edge of the tiled region meets what no tile carries. Switched by
+   * PolyhedralGeometryShop.sanity_check, off by default. Requires buildGraphs.
    */
   void
   sanityCheck() const;
@@ -178,16 +184,19 @@ public:
   testGraphCopy() const;
 
   /**
-   * @brief Whether a cut body holds too little solid to be a cut cell.
-   * @details The counterpart, on the fluid side, of dropping a body whose fluid volume is below the threshold: a body
-   * with neither solid volume nor boundary area is a regular cell. A cell whose interface lies in one of its
-   * faces, wholly or in part, has no solid volume either but does have boundary area, and is not dust.
-   * @param[in] a_body      Body of the cell.
-   * @param[in] a_threshold Volume-fraction threshold; nothing is dust at zero.
+   * @brief Whether a cut body holds nothing at all and is therefore a regular cell.
+   * @details A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut
+   * from their corners while their bodies hold no solid and no interface whatsoever -- the reconstruction finds
+   * an empty polyhedron. Those cells are regular, and dropping them discards nothing, since there is no surface
+   * in them for a neighbour to meet. Emptiness is exact rather than thresholded: a body with any solid in it,
+   * however little, keeps its cell, because its interface is what closes the surface against its neighbours, and
+   * a rule that discarded it by size would leave a hole the size of what it discarded. A cell whose interface
+   * lies in one of its faces has no solid volume either, but it does have boundary area, and it is not dust.
+   * @param[in] a_body Body of the cell.
    * @return True if the cell should be treated as regular.
    */
   static bool
-  isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept;
+  isDust(const PolyhedralEB::CutCellBody& a_body) noexcept;
 
   /**
    * @brief Evaluate the implicit function at every node of a region.
@@ -313,13 +322,22 @@ public:
   static constexpr Real s_rootSnap = 1.0E-4;
 
   /**
+   * @brief Fraction of a cell width the implicit function is read at either side of a point, to tell a surface
+   * through the point from a zero no surface passes through.
+   * @details Large enough that a function of unit gradient reads well clear of s_snapTolerance beside the point, and
+   * small enough that the reading belongs to the point rather than to its neighbourhood.
+   */
+  static constexpr Real s_probeSpacing = 1.0E-6;
+
+  /**
    * @brief Read the implicit function at a point, with a value within s_snapTolerance of a cell width of
-   * zero read as exactly zero.
+   * zero read as exactly zero, and a zero that is a tangency read from beside the point instead.
    * @details A face of the geometry lying in a node plane evaluates to zero there only up to round-off: the same face
    * comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring nodes, and cells on either
    * side of it would then be classified by which of those they were handed. Reading everything within a fixed
    * fraction of the cell width of zero as zero puts every such node on one side by rule, in the corner values
-   * and in the bisection alike.
+   * and in the bisection alike. A zero that no surface passes through is then read through resolveTangency, so
+   * that nothing downstream sees it.
    * @param[in] a_function Implicit function.
    * @param[in] a_point    Point to evaluate at.
    * @param[in] a_dx       Grid spacing that sets the scale.
@@ -328,11 +346,33 @@ public:
   static Real
   snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
 
+  /**
+   * @brief Read the implicit function beside a point where it is zero, when no surface passes through the point.
+   * @details A composite function can be zero over a whole region that is not its surface: a difference of two bodies
+   * sharing a face evaluates to the maximum of zero and something negative over the whole of that face. Taken
+   * at face value such a zero is material by the fluid rule, and it invents an interface where the geometry
+   * has none and displaces the interfaces of whatever else the cell holds. It is told apart from a surface by
+   * the function's sign a probe spacing off the point, along each axis in turn. A surface through the point
+   * changes the sign across it along any axis the surface is not parallel to, and since a surface has a normal
+   * there is always such an axis, so one sign change is enough to leave the zero alone. The zero is read
+   * through only on the evidence of an axis whose two readings are both away from zero and of the same sign,
+   * which is what a function that touches zero without a surface being there looks like; the largest such
+   * reading stands in for the zero. One reading of zero is not evidence of anything -- it is the point's own
+   * zero again, which is what an axis along a face of the geometry returns, and what both axes along the
+   * faces meeting at a convex edge return.
+   * @param[in] a_function Implicit function.
+   * @param[in] a_point    Point the function is zero at.
+   * @param[in] a_dx       Grid spacing that sets the probe spacing.
+   * @return The reading beside the point, or exactly zero if a surface passes through it.
+   */
+  static Real
+  resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
+
 protected:
   /**
    * @brief Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck.
    */
-  static constexpr Real s_weldSpacing = 1.0E-8;
+  static constexpr Real s_weldSpacing = 1.0E-6;
 
   /**
    * @brief The geometry whose grids the polyhedra are built over, or null before setGrids.
@@ -350,12 +390,14 @@ protected:
   phase::which_phase m_phase;
 
   /**
-   * @brief Whether verifySurface writes the surface as STL. PolyhedralGeometryShop.write_stl, off by default.
+   * @brief Whether verifySurface writes the surface. PolyhedralGeometryShop.write_surface, off by default.
    */
-  bool m_writeSTL;
+  bool m_writeSurface;
 
   /**
-   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check, on by default.
+   * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check.
+   * @details On by default in a build that keeps its assertions and off in one that does not, since the check
+   * tells the generator nothing it uses and only reports. Either default can be overridden from the inputs.
    */
   bool m_sanityCheck;
 
@@ -400,7 +442,8 @@ protected:
    * @details The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the
    * chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the
    * check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again
-   * afterwards. A body that will not close, a face that cannot be restricted or a doubly crossed edge stops the run.
+   * afterwards. A body that will not close, a face that cannot be restricted, or a doubly crossed edge stops the
+   * run.
    * @param[out] a_body     The body.
    * @param[in]  a_graph    Graph of the cell's level.
    * @param[in]  a_surfaces Surfaces of the cell's box, from the graph.
@@ -416,13 +459,36 @@ protected:
 #endif
 
   /**
-   * @brief Write triangles gathered from every rank as one STL file.
-   * @param[in] a_fileName File to write.
-   * @param[in] a_name     Solid name inside the file.
-   * @param[in] a_facets   This rank's triangles, nine reals each.
+   * @brief Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.
+   * @details One group per level, holding the level's triangles as an indexed mesh -- the vertices once each and a
+   * triple of indices per triangle -- rather than as a soup of coordinates, which is what a viewer wants and what
+   * an XDMF description can point at. The boxes of the level and the boxes that split on it go in the same group,
+   * so that the surface can be read against the grids it was built on without a second file. The distance within
+   * which two positions are one vertex is written alongside them. An XDMF description of the file is written next
+   * to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary between two
+   * ranks is written by each, since vertices are identified within a rank and not across them.
+   * @param[in] a_fileName File to write, without a suffix.
+   * @param[in] a_facets   This rank's triangles of each level, nine reals each.
    */
   void
-  writeSTL(const std::string& a_fileName, const std::string& a_name, const Vector<Real>& a_facets) const;
+  writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const;
+
+  /**
+   * @brief Identify the vertices of a triangle soup, giving each one once and each triangle three indices.
+   * @details Two positions closer than the tolerance are one vertex. Candidates are taken from the lattice cell of
+   * the tolerance a position falls in and the twenty-six around it, which is what keeps this out of the quadratic
+   * scan a surface meeting the mesh squarely would otherwise provoke, with every candidate still measured against
+   * so that two positions either side of a lattice wall are not told apart.
+   * @param[in]  a_facets       Triangles, nine reals each.
+   * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
+   * @param[out] a_vertices     The vertices, three reals each.
+   * @param[out] a_connectivity Three vertex indices per triangle.
+   */
+  static void
+  indexFacets(const Vector<Real>& a_facets,
+              const Real          a_tolerance,
+              std::vector<Real>&  a_vertices,
+              std::vector<int>&   a_connectivity);
 
   /**
    * @brief Residual above which the stored moments and the ones PolyGeom recomputes disagree.

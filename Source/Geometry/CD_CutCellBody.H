@@ -212,6 +212,20 @@ public:
   bool
   closeInterface() noexcept;
 
+  /**
+   * @brief Split every polygon edge at the vertices of other polygons that lie on it.
+   * @details Restricting a face rebuilds it at the finer level's resolution, so an edge the face shares
+   * with a face that was left alone can be one segment on one side and several on the other, or carry a
+   * vertex on one side that the other has not got. The two sides then
+   * compare unequal and closeInterface reads both as boundary, which puts a stretch of a cell face into
+   * the interface and leaves the interface itself unclosed. Inserting each side's vertices into the other's
+   * edge makes the two agree segment for segment; the inserted vertices lie on the edge they are inserted
+   * into, so no polygon changes shape.
+   * @return False if a polygon would need more vertices than it can hold.
+   */
+  bool
+  weldTJunctions() noexcept;
+
 #endif
 
   /**

@@ -12,13 +12,21 @@
 
 // Std includes
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iomanip>
 #include <array>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
+
+#ifdef CH_USE_HDF5
+#include <hdf5.h>
+#endif
 
 // Chombo includes
 #include <BRMeshRefine.H>
@@ -34,6 +42,7 @@
 
 // Our includes
 #include <CD_PolyhedralEBUtils.H>
+#include <CD_PolyUtils.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_ParallelOps.H>
@@ -58,16 +67,20 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_volumeThreshold = a_thrshdVoF;
   m_compGeom        = nullptr;
   m_phase           = phase::gas;
-  m_writeSTL        = false;
-  m_sanityCheck     = true;
-  m_profile         = false;
-  m_testCopy        = false;
-  m_verbose         = false;
+  m_writeSurface    = false;
+#ifndef NDEBUG
+  m_sanityCheck = true;
+#else
+  m_sanityCheck = false;
+#endif
+  m_profile  = false;
+  m_testCopy = false;
+  m_verbose  = false;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
 
-  pp.query("write_stl", m_writeSTL);
+  pp.query("write_surface", m_writeSurface);
   pp.query("sanity_check", m_sanityCheck);
   pp.query("profile", m_profile);
   pp.query("test_copy", m_testCopy);
@@ -125,8 +138,7 @@ PolyhedralGeometryShop::buildGraphs()
     // neighbours' surfaces; a consumer wanting a wider ring of cell states fills it from the geometry's
     // classification, which is the answer outside the tiles in any case.
     timer.startEvent("Define level " + std::to_string(lvl));
-    m_graphs[lvl]
-      ->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, m_volumeThreshold);
+    m_graphs[lvl]->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1);
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
@@ -173,13 +185,7 @@ PolyhedralGeometryShop::verifySurface() const
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
   }
 
-  // The surface pass is three-dimensional: the seam restriction and the facets are written for polygons, and
-  // in two dimensions the interface of a cell is one chord, which is checked by the graph as it is built.
-  if (SpaceDim != 3) {
-    return;
-  }
-
-  if (!m_sanityCheck && !m_writeSTL && !m_testCopy) {
+  if (!m_sanityCheck && !m_writeSurface && !m_testCopy) {
     return;
   }
 
@@ -201,54 +207,25 @@ PolyhedralGeometryShop::verifySurface() const
     timer.stopEvent("Copy test");
   }
 
-  if (m_writeSTL) {
-    Vector<Real> composite;
+  // The surface itself is written in three dimensions only: the facets are polygons, and in two dimensions the
+  // interface of a cell is one chord, which the graph checks as it builds it. What sanityCheck says about cells
+  // that share a face holds in both dimensions, and so does the copy test.
+#if CH_SPACEDIM == 3
+  if (m_writeSurface) {
+    Vector<Vector<Real>> facets(numLevels);
 
     for (int lvl = 0; lvl < numLevels; lvl++) {
-      Vector<Real> levelFacets;
-
       timer.startEvent("Build polyhedra, level " + std::to_string(lvl));
-      this->collectFacets(levelFacets, lvl);
+      this->collectFacets(facets[lvl], lvl);
       timer.stopEvent("Build polyhedra, level " + std::to_string(lvl));
-
-      this->writeSTL("surface_mesh_" + phaseName + ".level" + std::to_string(lvl) + ".stl",
-                     phaseName + "_level" + std::to_string(lvl),
-                     levelFacets);
-
-      composite.append(levelFacets);
     }
 
-    timer.startEvent("Write STL");
-    this->writeSTL("surface_mesh_" + phaseName + ".stl", phaseName, composite);
-    timer.stopEvent("Write STL");
-
-    // The boxes themselves, one file per level, for reading the surface against the grids it was built on.
-    if (procID() == 0) {
-      for (int lvl = 0; lvl < numLevels; lvl++) {
-        std::ofstream out("surface_mesh_boxes.level" + std::to_string(lvl) + ".txt");
-
-        const Vector<Box>&                    boxes      = m_compGeom->getBoxes(lvl);
-        const Vector<GeometryService::InOut>& gasTypes   = m_compGeom->getTypes(phase::gas, lvl);
-        const Vector<GeometryService::InOut>& solidTypes = m_compGeom->getTypes(phase::solid, lvl);
-
-        for (int i = 0; i < boxes.size(); i++) {
-          out << boxes[i].smallEnd() << " " << boxes[i].bigEnd() << " gas " << gasTypes[i] << " solid " << solidTypes[i]
-              << "\n";
-        }
-
-        // and the boxes that split on this level, with why
-        std::ofstream splits("surface_mesh_splits.level" + std::to_string(lvl) + ".txt");
-
-        Vector<int> reasons;
-
-        const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
-
-        for (int i = 0; i < splitBoxes.size(); i++) {
-          splits << splitBoxes[i].smallEnd() << " " << splitBoxes[i].bigEnd() << " reason " << reasons[i] << "\n";
-        }
-      }
-    }
+    timer.startEvent("Write surface");
+    this->writeSurface("surface_mesh_" + phaseName, facets);
+    timer.stopEvent("Write surface");
   }
+
+#endif
 
   if (m_profile) {
     timer.eventReport(pout(), false);
@@ -327,7 +304,134 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
   const Real dx     = a_graph.getDx();
   const Box& domain = a_graph.getDomain().domainBox();
 
-  const CutCellSurface& surface = a_surfaces(a_cell, 0);
+  CutCellSurface surface = a_surfaces(a_cell, 0);
+
+  // Which of this cell's edges the finer level describes. An edge is shared by the cells that meet along it, and
+  // the crossing on it has to be one point for all of them: a cell that finds it by halving its own edge and a
+  // cell that finds it by halving the finer edge land on the same root only to the accuracy of the bisection,
+  // which is the square root of the machine epsilon where the surface grazes the edge rather than crossing it. So
+  // the question is asked of the edge and not of the cell -- if any cell meeting the edge is refined, every cell
+  // meeting it reads the crossing from the finer spacing -- and the four of them then agree by construction. This
+  // takes in the cell that meets the finer level along an edge alone, whose faces all lie at this level and which
+  // would otherwise never look at the finer spacing at all.
+  bool edgeRefined[CutCellSurface::s_numEdges];
+
+  bool anyEdgeRefined = false;
+
+  for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+    const int edgeDir = PolyhedralEB::detail::edgeDirection(e);
+
+    int offset[SpaceDim];
+    PolyhedralEB::detail::edgeOrigin(e, offset);
+
+    edgeRefined[e] = false;
+
+    for (int share = 0; share < (1 << (SpaceDim - 1)); share++) {
+      IntVect jv = a_cell;
+
+      int bit = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        if (d == edgeDir) {
+          continue;
+        }
+
+        if ((share >> bit) & 1) {
+          jv[d] += (offset[d] == 0) ? -1 : 1;
+        }
+
+        bit++;
+      }
+
+      if (domain.contains(jv) && a_refined.box().contains(jv) && a_refined(jv, 0) != 0) {
+        edgeRefined[e] = true;
+      }
+    }
+
+    anyEdgeRefined = anyEdgeRefined || edgeRefined[e];
+  }
+
+  // The children are this cell's own refinement, reconstructed from the implicit function at the finer spacing;
+  // their faces on a shared plane coincide, edge for edge and root for root, with those of the finer cells across
+  // it, and their edges on this cell's edges are the segments the finer level bisects.
+  CutCellSurface children[CutCellSurface::s_numCorners];
+
+  const bool haveChildren = anyEdgeRefined;
+
+  if (haveChildren) {
+    // the children share their nodes and edges among themselves at the finer spacing
+    const Box fineBox = refine(Box(a_cell, a_cell), 2);
+
+    BaseFab<Real> fineNodeValues;
+    BaseFab<Real> fineIntercept[SpaceDim];
+
+    PolyhedralGeometryShop::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
+    PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
+
+    for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+      IntVect child = 2 * a_cell;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        child[d] += (c >> d) & 1;
+      }
+
+      PolyhedralGeometryShop::buildSurface(f, fineIntercept, children[c], fineNodeValues, child, m_probLo, 0.5 * dx);
+    }
+
+    // Take the crossing on every edge the finer level describes from the half the finer level put it in, in this
+    // cell's own parameterisation. An edge the finer level crosses in both halves is a feature no single chord
+    // can carry; it keeps this level's crossing here and is reported where the face it belongs to is restricted.
+    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+      if (!edgeRefined[e]) {
+        continue;
+      }
+
+      const int edgeDir = PolyhedralEB::detail::edgeDirection(e);
+
+      int offset[SpaceDim];
+      PolyhedralEB::detail::edgeOrigin(e, offset);
+
+      // A surface carries a crossing on an edge exactly when its two ends disagree, and the body is built on that.
+      // The finer level can see a crossing on an edge this level's ends agree about -- the function leaves and
+      // re-enters on the way between them -- and that is a pair of crossings, which no single chord carries and
+      // which the tiler refines away. Taking the finer level's word for it here would write a crossing onto an
+      // edge that cannot hold one and hand the body a surface it cannot close.
+      int low  = -1;
+      int high = -1;
+
+      PolyhedralEB::detail::edgeCorners(e, low, high);
+
+      if (PolyhedralEB::isFluid(surface.m_corner[low]) == PolyhedralEB::isFluid(surface.m_corner[high])) {
+        surface.m_crossing[e] = CutCellSurface::s_noCrossing;
+
+        continue;
+      }
+
+      Real half[2] = {CutCellSurface::s_noCrossing, CutCellSurface::s_noCrossing};
+
+      for (int h = 0; h < 2; h++) {
+        int which = 0;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          which |= ((d == edgeDir) ? h : offset[d]) << d;
+        }
+
+        half[h] = children[which].m_crossing[e];
+      }
+
+      const bool lowCrossed  = half[0] != CutCellSurface::s_noCrossing;
+      const bool highCrossed = half[1] != CutCellSurface::s_noCrossing;
+
+      if (lowCrossed && !highCrossed) {
+        surface.m_crossing[e] = 0.5 * half[0];
+      }
+      else if (highCrossed && !lowCrossed) {
+        surface.m_crossing[e] = 0.5 * (1.0 + half[1]);
+      }
+
+      // Ends that disagree must carry a crossing; if the finer level found none, this level keeps its own.
+    }
+  }
 
   if (!a_body.define(surface)) {
     pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell << " did not close" << endl;
@@ -335,14 +439,8 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
     MayDay::Error("PolyhedralGeometryShop::defineBody - a cut cell's body did not close");
   }
 
-  // A face shared with a cell the finer level carries is described at the finer level's resolution. The
-  // children are this cell's own refinement, reconstructed from the implicit function at the finer spacing;
-  // their faces on the shared plane coincide, edge for edge and root for root, with those of the finer cells
-  // across it.
+  // A face shared with a cell the finer level carries is described at the finer level's resolution.
   bool restricted = false;
-
-  CutCellSurface children[CutCellSurface::s_numCorners];
-  bool           haveChildren = false;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (int side = 0; side < 2; side++) {
@@ -350,35 +448,6 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 
       if (!domain.contains(neighbour) || a_refined(neighbour, 0) == 0) {
         continue;
-      }
-
-      if (!haveChildren) {
-        // the children share their nodes and edges among themselves at the finer spacing
-        const Box fineBox = refine(Box(a_cell, a_cell), 2);
-
-        BaseFab<Real> fineNodeValues;
-        BaseFab<Real> fineIntercept[SpaceDim];
-
-        PolyhedralGeometryShop::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
-        PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
-
-        for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
-          IntVect child = 2 * a_cell;
-
-          for (int d = 0; d < SpaceDim; d++) {
-            child[d] += (c >> d) & 1;
-          }
-
-          PolyhedralGeometryShop::buildSurface(f,
-                                               fineIntercept,
-                                               children[c],
-                                               fineNodeValues,
-                                               child,
-                                               m_probLo,
-                                               0.5 * dx);
-        }
-
-        haveChildren = true;
       }
 
       // A coarse edge of this face whose ends agree, but whose two finer halves each carry a crossing, is a
@@ -512,69 +581,383 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 #endif
 
 void
-PolyhedralGeometryShop::writeSTL(const std::string&  a_fileName,
-                                 const std::string&  a_name,
-                                 const Vector<Real>& a_facets) const
+PolyhedralGeometryShop::indexFacets(const Vector<Real>& a_facets,
+                                    const Real          a_tolerance,
+                                    std::vector<Real>&  a_vertices,
+                                    std::vector<int>&   a_connectivity)
 {
-  CH_TIME("PolyhedralGeometryShop::writeSTL");
+  CH_TIME("PolyhedralGeometryShop::indexFacets");
+
+  const int numPoints = static_cast<int>(a_facets.size() / 3);
+
+  a_vertices.clear();
+  a_connectivity.assign(numPoints, -1);
+
+  // Two positions closer than the tolerance are one vertex. Candidates are found by the cell of a lattice of that
+  // spacing that a position falls in: anything within the tolerance of it lies in that cell or in one of the
+  // twenty-six around it, so those are the only cells to look in. The lattice narrows the search and nothing
+  // more -- every candidate it offers is still measured against, which is what keeps two positions on either
+  // side of a lattice wall from being told apart when they are a hair from one another.
+  //
+  // The cells are held under a mix of their three indices rather than under the indices themselves. A mix
+  // collides, and collisions cost nothing here: a cell that answers for two places offers candidates from both,
+  // and the distance test throws out the ones that do not belong.
+  std::unordered_map<long long, std::vector<int>> buckets;
+
+  buckets.reserve(2 * numPoints);
+
+  const auto cellOf = [&](const Real a_x) -> long long {
+    return static_cast<long long>(std::floor(a_x / a_tolerance));
+  };
+
+  const auto keyOf = [](const long long a_i, const long long a_j, const long long a_k) -> long long {
+    // three odd multipliers, so that neighbouring cells land far apart in the table
+    return a_i * 0x9E3779B97F4A7C15LL ^ a_j * 0xC2B2AE3D27D4EB4FLL ^ a_k * 0x165667B19E3779F9LL;
+  };
+
+  for (int i = 0; i < numPoints; i++) {
+    const Real x = a_facets[3 * i];
+    const Real y = a_facets[3 * i + 1];
+    const Real z = a_facets[3 * i + 2];
+
+    const long long ci = cellOf(x);
+    const long long cj = cellOf(y);
+    const long long ck = cellOf(z);
+
+    int found = -1;
+
+    for (int di = -1; di <= 1 && found < 0; di++) {
+      for (int dj = -1; dj <= 1 && found < 0; dj++) {
+        for (int dk = -1; dk <= 1 && found < 0; dk++) {
+          const auto bucket = buckets.find(keyOf(ci + di, cj + dj, ck + dk));
+
+          if (bucket == buckets.end()) {
+            continue;
+          }
+
+          for (const int candidate : bucket->second) {
+            if (std::abs(x - a_vertices[3 * candidate]) <= a_tolerance &&
+                std::abs(y - a_vertices[3 * candidate + 1]) <= a_tolerance &&
+                std::abs(z - a_vertices[3 * candidate + 2]) <= a_tolerance) {
+              found = candidate;
+
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (found < 0) {
+      found = static_cast<int>(a_vertices.size() / 3);
+
+      a_vertices.push_back(x);
+      a_vertices.push_back(y);
+      a_vertices.push_back(z);
+
+      buckets[keyOf(ci, cj, ck)].push_back(found);
+    }
+
+    a_connectivity[i] = found;
+  }
+}
+
+void
+PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const
+{
+  CH_TIME("PolyhedralGeometryShop::writeSurface");
 
   if (m_verbose) {
-    pout() << "PolyhedralGeometryShop::writeSTL - writing " << a_fileName << endl;
+    pout() << "PolyhedralGeometryShop::writeSurface - writing " << a_fileName << endl;
   }
 
-  Vector<Vector<Real>> everyone;
+#ifdef CH_USE_HDF5
+  const int numLevels = a_facets.size();
 
-  gather(everyone, a_facets, 0);
+  std::string directory = ".";
+  {
+    ParmParse pp("Driver");
 
-  if (procID() != 0) {
-    return;
+    pp.query("output_directory", directory);
   }
 
-  std::ofstream out(a_fileName);
+  const std::string stem = directory + "/geo/" + a_fileName;
 
-  if (!out.good()) {
-    MayDay::Error("PolyhedralGeometryShop::writeSTL - could not open the file");
+  // Every rank writes its own share of every dataset, so the file is opened for parallel access and the writes
+  // are collective. Vertices are identified within a rank and not across them: a vertex on the boundary between
+  // two ranks is written by both, which costs a little size and saves the communication a global identification
+  // would need. Nothing reading an indexed mesh requires otherwise.
+  hid_t access = H5Pcreate(H5P_FILE_ACCESS);
+
+#ifdef CH_MPI
+  H5Pset_fapl_mpio(access, Chombo_MPI::comm, MPI_INFO_NULL);
+#endif
+
+  const hid_t file = H5Fcreate((stem + ".h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access);
+
+  H5Pclose(access);
+
+  if (file < 0) {
+    MayDay::Error("PolyhedralGeometryShop::writeSurface - could not open the file");
   }
 
-  out << std::scientific << std::setprecision(17) << "solid " << a_name << "\n";
+  hid_t transfer = H5Pcreate(H5P_DATASET_XFER);
 
-  for (int rank = 0; rank < everyone.size(); rank++) {
-    const Vector<Real>& rankFacets = everyone[rank];
+#ifdef CH_MPI
+  // Creating the datasets is collective, writing into them is not. Every rank owns a contiguous stretch of each
+  // one and nothing else touches it, so there is nothing for a collective transfer to coordinate -- and asking
+  // for one is harmful here: a rank whose stretch is empty makes the library decide collective access is not
+  // possible for that write, which it then does independently while the others do not, and the next metadata
+  // call finds them out of step and blocks.
+  H5Pset_dxpl_mpio(transfer, H5FD_MPIO_INDEPENDENT);
+#endif
 
-    for (int i = 0; i + 9 <= rankFacets.size(); i += 9) {
-      const RealVect a(D_DECL(rankFacets[i + 0], rankFacets[i + 1], rankFacets[i + 2]));
-      const RealVect b(D_DECL(rankFacets[i + 3], rankFacets[i + 4], rankFacets[i + 5]));
-      const RealVect c(D_DECL(rankFacets[i + 6], rankFacets[i + 7], rankFacets[i + 8]));
+  const auto writeAttribute = [&](const hid_t        a_where,
+                                  const std::string& a_name,
+                                  const hid_t        a_type,
+                                  const hsize_t      a_count,
+                                  const void*        a_data) -> void {
+    const hid_t space     = (a_count == 1) ? H5Screate(H5S_SCALAR) : H5Screate_simple(1, &a_count, nullptr);
+    const hid_t attribute = H5Acreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT);
 
-      RealVect n = PolyGeom::cross(b - a, c - a);
+    H5Awrite(attribute, a_type, a_data);
+    H5Aclose(attribute);
+    H5Sclose(space);
+  };
 
-      if (n.vectorLength() > 0.0) {
-        n /= n.vectorLength();
-      }
+  // One dataset, sized by what every rank holds together, with this rank's rows written into its own stretch of
+  // it. A rank with nothing to write selects nothing and takes part in the call all the same, which is what
+  // collective access asks of it.
+  const auto writeSlab = [&](const hid_t        a_where,
+                             const std::string& a_name,
+                             const hid_t        a_type,
+                             const hsize_t      a_rows,
+                             const hsize_t      a_offset,
+                             const hsize_t      a_total,
+                             const hsize_t      a_columns,
+                             const void*        a_data) -> void {
+    if (a_total == 0) {
+      return;
+    }
 
-      out << "  facet normal";
+    const hsize_t dims[2] = {a_total, a_columns};
+    const hsize_t mine[2] = {a_rows, a_columns};
+    const hsize_t at[2]   = {a_offset, 0};
 
-      for (int d = 0; d < 3; d++) {
-        out << " " << ((d < SpaceDim) ? n[d] : 0.0);
-      }
+    const int rank = (a_columns > 1) ? 2 : 1;
 
-      out << "\n    outer loop\n";
+    const hid_t space   = H5Screate_simple(rank, dims, nullptr);
+    const hid_t dataset = H5Dcreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-      for (int v = 0; v < 3; v++) {
-        out << "      vertex";
+    // A rank with no rows describes that with the null dataspace and selects nothing in the file. It cannot
+    // describe it with a simple dataspace of zero extent, which is not one: the call fails, and a rank that
+    // fails on its way into a collective write leaves every other rank waiting in it.
+    const hid_t memory = (a_rows > 0) ? H5Screate_simple(rank, mine, nullptr) : H5Screate(H5S_NULL);
 
-        for (int d = 0; d < 3; d++) {
-          out << " " << ((d < SpaceDim) ? rankFacets[i + 3 * v + d] : 0.0);
+    if (a_rows > 0) {
+      H5Sselect_hyperslab(space, H5S_SELECT_SET, at, nullptr, mine, nullptr);
+    }
+    else {
+      H5Sselect_none(space);
+    }
+
+    H5Dwrite(dataset, a_type, memory, space, transfer, a_data);
+
+    H5Sclose(memory);
+    H5Dclose(dataset);
+    H5Sclose(space);
+  };
+
+  const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
+
+  double probLo[3] = {0.0, 0.0, 0.0};
+
+  for (int d = 0; d < SpaceDim; d++) {
+    probLo[d] = m_probLo[d];
+  }
+
+  writeAttribute(file, "probLo", H5T_NATIVE_DOUBLE, 3, probLo);
+  writeAttribute(file, "numLevels", H5T_NATIVE_INT, 1, &numLevels);
+
+  const hid_t nameType = H5Tcopy(H5T_C_S1);
+  H5Tset_size(nameType, phaseName.size());
+  writeAttribute(file, "phase", nameType, 1, phaseName.c_str());
+  H5Tclose(nameType);
+
+  std::vector<long long> totalTriangles(numLevels, 0);
+  std::vector<long long> totalVertices(numLevels, 0);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const std::string name = "level" + std::to_string(lvl);
+
+    const hid_t group = H5Gcreate2(file, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    const double dx        = m_compGeom->getDx(lvl);
+    const double tolerance = s_weldSpacing * dx;
+
+    writeAttribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &dx);
+    writeAttribute(group, "weldTolerance", H5T_NATIVE_DOUBLE, 1, &tolerance);
+
+    std::vector<Real> vertices;
+    std::vector<int>  connectivity;
+
+    PolyhedralGeometryShop::indexFacets(a_facets[lvl], tolerance, vertices, connectivity);
+
+    // A triangle two of whose vertices are the same vertex has collapsed to a line and bounds nothing.
+    int collapsed = 0;
+
+    {
+      std::vector<int> kept;
+
+      for (size_t i = 0; i + 3 <= connectivity.size(); i += 3) {
+        const int a = connectivity[i];
+        const int b = connectivity[i + 1];
+        const int c = connectivity[i + 2];
+
+        if (a == b || b == c || c == a) {
+          collapsed++;
+
+          continue;
         }
 
-        out << "\n";
+        kept.push_back(a);
+        kept.push_back(b);
+        kept.push_back(c);
       }
 
-      out << "    endloop\n  endfacet\n";
+      connectivity.swap(kept);
     }
+
+    const long long mineVertices  = vertices.size() / 3;
+    const long long mineTriangles = connectivity.size() / 3;
+
+    long long vertexOffset   = 0;
+    long long triangleOffset = 0;
+
+    totalVertices[lvl]  = mineVertices;
+    totalTriangles[lvl] = mineTriangles;
+
+#ifdef CH_MPI
+    MPI_Exscan(&mineVertices, &vertexOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+    MPI_Exscan(&mineTriangles, &triangleOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+
+    if (procID() == 0) {
+      vertexOffset   = 0;
+      triangleOffset = 0;
+    }
+
+    MPI_Allreduce(&mineVertices, &totalVertices[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+    MPI_Allreduce(&mineTriangles, &totalTriangles[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+    // This rank's vertices sit at vertexOffset in the file, so its triangles point there too.
+    for (size_t i = 0; i < connectivity.size(); i++) {
+      connectivity[i] += static_cast<int>(vertexOffset);
+    }
+
+    const int totalCollapsed = ParallelOps::sum(collapsed);
+
+    writeAttribute(group, "numCollapsed", H5T_NATIVE_INT, 1, &totalCollapsed);
+
+    writeSlab(group, "vertices", H5T_NATIVE_DOUBLE, mineVertices, vertexOffset, totalVertices[lvl], 3, vertices.data());
+    writeSlab(group,
+              "connectivity",
+              H5T_NATIVE_INT,
+              mineTriangles,
+              triangleOffset,
+              totalTriangles[lvl],
+              3,
+              connectivity.data());
+
+    // The boxes of the level and the boxes that split on it are the same on every rank, so the master writes them
+    // and the others take part with nothing selected.
+    const Vector<Box>&                    boxes      = m_compGeom->getBoxes(lvl);
+    const Vector<GeometryService::InOut>& gasTypes   = m_compGeom->getTypes(phase::gas, lvl);
+    const Vector<GeometryService::InOut>& solidTypes = m_compGeom->getTypes(phase::solid, lvl);
+
+    Vector<int> reasons;
+
+    const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
+
+    std::vector<int> corners;
+    std::vector<int> gasType;
+    std::vector<int> solidType;
+    std::vector<int> splitCorners;
+    std::vector<int> splitReason;
+
+    const auto appendBox = [](std::vector<int>& a_into, const Box& a_box) -> void {
+      for (int d = 0; d < SpaceDim; d++) {
+        a_into.push_back(a_box.smallEnd()[d]);
+      }
+      for (int d = 0; d < SpaceDim; d++) {
+        a_into.push_back(a_box.bigEnd()[d]);
+      }
+    };
+
+    if (procID() == 0) {
+      for (int i = 0; i < boxes.size(); i++) {
+        appendBox(corners, boxes[i]);
+
+        gasType.push_back(static_cast<int>(gasTypes[i]));
+        solidType.push_back(static_cast<int>(solidTypes[i]));
+      }
+
+      for (int i = 0; i < splitBoxes.size(); i++) {
+        appendBox(splitCorners, splitBoxes[i]);
+
+        splitReason.push_back(reasons[i]);
+      }
+    }
+
+    const hsize_t mineBoxes  = (procID() == 0) ? boxes.size() : 0;
+    const hsize_t mineSplits = (procID() == 0) ? splitBoxes.size() : 0;
+
+    writeSlab(group, "boxes", H5T_NATIVE_INT, mineBoxes, 0, boxes.size(), 2 * SpaceDim, corners.data());
+    writeSlab(group, "boxTypeGas", H5T_NATIVE_INT, mineBoxes, 0, boxes.size(), 1, gasType.data());
+    writeSlab(group, "boxTypeSolid", H5T_NATIVE_INT, mineBoxes, 0, boxes.size(), 1, solidType.data());
+    writeSlab(group, "splitBoxes", H5T_NATIVE_INT, mineSplits, 0, splitBoxes.size(), 2 * SpaceDim, splitCorners.data());
+    writeSlab(group, "splitReason", H5T_NATIVE_INT, mineSplits, 0, splitBoxes.size(), 1, splitReason.data());
+
+    H5Gclose(group);
   }
 
-  out << "endsolid " << a_name << "\n";
+  H5Pclose(transfer);
+  H5Fclose(file);
+
+  // A description a viewer can open, pointing at the datasets just written.
+  if (procID() == 0) {
+    std::ofstream xdmf(stem + ".xmf");
+
+    const std::string base = a_fileName + ".h5";
+
+    xdmf << "<?xml version=\"1.0\" ?>\n";
+    xdmf << "<Xdmf Version=\"3.0\">\n  <Domain>\n";
+    xdmf << "    <Grid Name=\"" << phaseName << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
+
+    for (int lvl = 0; lvl < numLevels; lvl++) {
+      if (totalTriangles[lvl] == 0) {
+        continue;
+      }
+
+      const std::string name = "level" + std::to_string(lvl);
+
+      xdmf << "      <Grid Name=\"" << name << "\" GridType=\"Uniform\">\n";
+      xdmf << "        <Topology TopologyType=\"Triangle\" NumberOfElements=\"" << totalTriangles[lvl] << "\">\n";
+      xdmf << "          <DataItem Dimensions=\"" << totalTriangles[lvl] << " 3\" NumberType=\"Int\" Format=\"HDF\">"
+           << base << ":/" << name << "/connectivity</DataItem>\n";
+      xdmf << "        </Topology>\n";
+      xdmf << "        <Geometry GeometryType=\"XYZ\">\n";
+      xdmf << "          <DataItem Dimensions=\"" << totalVertices[lvl]
+           << " 3\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << base << ":/" << name
+           << "/vertices</DataItem>\n";
+      xdmf << "        </Geometry>\n      </Grid>\n";
+    }
+
+    xdmf << "    </Grid>\n  </Domain>\n</Xdmf>\n";
+  }
+#else
+  MayDay::Warning("PolyhedralGeometryShop::writeSurface - built without HDF5, nothing written");
+#endif
 }
 
 void
@@ -603,7 +986,64 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
   long long numOpen     = 0;
   long long numOverused = 0;
+  long long numTouching = 0;
   int       numReported = 0;
+
+  // A regular cell and a covered one cannot share a face: the four nodes of that face belong to both, and they
+  // would have to be fluid for one cell and solid for the other. The classification is corner-based, so this holds
+  // by construction inside a level -- and the test is here because it is what the edge of the tiled region has to
+  // honour as well, where the cells beyond the tiles are classified from their own corners rather than carried:
+  // a covered cell at the edge of a tile with a regular cell across from it would need an interface between them
+  // that neither cell holds. Cheap, exact and dimension-independent, so it runs on every graph.
+  for (int lvl = 0; lvl < a_graphs.size(); lvl++) {
+    const PolyhedralEBGraph& graph = *a_graphs[lvl];
+
+    if (!graph.isDefined()) {
+      continue;
+    }
+
+    const Box& domainBox = graph.getDomain().domainBox();
+
+    const DisjointBoxLayout&               grids  = graph.getGrids();
+    const LevelData<BaseFab<signed char>>& states = graph.getCellStates();
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const Box box = grids[dit()];
+
+      const BaseFab<signed char>& state = states[dit()];
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (int side = 0; side < 2; side++) {
+            const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
+
+            if (!domainBox.contains(jv) || !state.box().contains(jv)) {
+              continue;
+            }
+
+            const bool touching = (state(iv, 0) == PolyhedralEBGraph::s_regular &&
+                                   state(jv, 0) == PolyhedralEBGraph::s_covered) ||
+                                  (state(iv, 0) == PolyhedralEBGraph::s_covered &&
+                                   state(jv, 0) == PolyhedralEBGraph::s_regular);
+
+            if (touching) {
+              numTouching++;
+
+              if (numReported < 10) {
+                pout() << "PolyhedralGeometryShop::sanityCheck - level " << lvl << " cell " << iv << " is "
+                       << static_cast<int>(state(iv, 0)) << " and its neighbour " << jv << " is "
+                       << static_cast<int>(state(jv, 0)) << ", with no cut cell between them" << endl;
+
+                numReported++;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
 #if CH_SPACEDIM == 3
   // A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used
@@ -624,42 +1064,96 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     return;
   }
 
-  const Real spacing = s_weldSpacing * a_graphs[finest]->getDx();
+  // Two vertices are the same vertex when they are closer than this. Within a level the cells compute a shared
+  // vertex from the same nodes and the same edge, so they agree bit for bit; across a level boundary the finer
+  // cells behind a face are rebuilt at the finer spacing and agree only to round-off, about 1e-12 of a cell.
+  // The distance is what decides, not a lattice: two points on either side of a lattice wall are as close as any
+  // other pair, and quantising them apart is how a check of this kind reports a hole that is not there. It is
+  // the spacing of the level being checked that sets the scale, since that is the cell the round-off is a
+  // fraction of; measuring every level against the finest one asks the coarse levels to agree far closer than
+  // the arithmetic that built them can.
+  Real tolerance = s_weldSpacing * a_graphs[finest]->getDx();
 
-  auto weld = [&](const Real* a_x) -> std::array<long long, 3> {
-    std::array<long long, 3> key = {0, 0, 0};
+  using Edge = std::array<int, 2>;
 
-    for (int d = 0; d < SpaceDim; d++) {
-      key[d] = std::llround((a_x[d] - m_probLo[d]) / spacing);
+  // The vertices of a neighbourhood's triangles, merged by proximity, and the triangles as vertex numbers.
+  std::vector<Real> points;
+  std::vector<int>  order;
+  std::vector<int>  vertexOf;
+  std::vector<Real> vertexPoint;
+
+  auto identify = [&]() -> void {
+    const int numPoints = static_cast<int>(points.size() / 3);
+
+    vertexOf.assign(numPoints, -1);
+
+    order.resize(numPoints);
+
+    for (int i = 0; i < numPoints; i++) {
+      order[i] = i;
     }
 
-    return key;
-  };
+    std::sort(order.begin(), order.end(), [&](const int a, const int b) -> bool {
+      return points[3 * a] < points[3 * b];
+    });
 
-  using Edge = std::array<long long, 6>;
+    int numVertices = 0;
 
-  auto edgesOf = [&](const Vector<Real>& a_facets, std::vector<Edge>& a_edges) -> void {
-    for (int i = 0; i + 9 <= a_facets.size(); i += 9) {
-      std::array<long long, 3> v[3];
+    vertexPoint.clear();
 
-      for (int k = 0; k < 3; k++) {
-        v[k] = weld(&a_facets[i + 3 * k]);
+    for (int k = 0; k < numPoints; k++) {
+      const int i = order[k];
+
+      // Everything within the tolerance in the first coordinate is adjacent in this order, so the scan back over
+      // that window meets every candidate.
+      for (int l = k - 1; l >= 0 && points[3 * i] - points[3 * order[l]] <= tolerance; l--) {
+        const int j = order[l];
+
+        bool same = true;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          same = same && (std::abs(points[3 * i + d] - points[3 * j + d]) <= tolerance);
+        }
+
+        if (same) {
+          vertexOf[i] = vertexOf[j];
+
+          break;
+        }
       }
 
-      // a triangle two of whose vertices weld together has collapsed to a line and bounds nothing
+      if (vertexOf[i] < 0) {
+        vertexOf[i] = numVertices++;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          vertexPoint.push_back(points[3 * i + d]);
+        }
+      }
+    }
+  };
+
+  auto appendPoints = [&](const Vector<Real>& a_facets) -> void {
+    for (int i = 0; i < a_facets.size(); i++) {
+      points.push_back(a_facets[i]);
+    }
+  };
+
+  // The triangles of one facet list, as vertex numbers, from the identification above. The facet list must be one
+  // of those appendPoints was given, and a_offset its first point.
+  auto edgesOf = [&](const int a_offset, const int a_numFacets, std::vector<Edge>& a_edges) -> void {
+    for (int t = 0; t < a_numFacets; t++) {
+      const int v[3] = {vertexOf[a_offset + 3 * t], vertexOf[a_offset + 3 * t + 1], vertexOf[a_offset + 3 * t + 2]};
+
+      // a triangle two of whose vertices are the same vertex has collapsed to a line and bounds nothing
       if (v[0] == v[1] || v[1] == v[2] || v[2] == v[0]) {
         continue;
       }
 
       for (int k = 0; k < 3; k++) {
-        std::array<long long, 3> p = v[k];
-        std::array<long long, 3> q = v[(k + 1) % 3];
+        const int p = std::min(v[k], v[(k + 1) % 3]);
+        const int q = std::max(v[k], v[(k + 1) % 3]);
 
-        if (q < p) {
-          std::swap(p, q);
-        }
-
-        a_edges.push_back({p[0], p[1], p[2], q[0], q[1], q[2]});
+        a_edges.push_back({p, q});
       }
     }
   };
@@ -674,15 +1168,19 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const Real dx     = graph.getDx();
     const Box& domain = graph.getDomain().domainBox();
 
+    tolerance = s_weldSpacing * dx;
+
     const DisjointBoxLayout&                 grids      = graph.getGrids();
     const LayoutData<IntVectSet>&            cutCells   = graph.getCutCells();
     const LevelData<IVSFAB<CutCellSurface>>& surfaces   = graph.getSurfaces();
     const LevelData<BaseFab<signed char>>&   refined    = graph.getRefinedMask();
     const LevelData<BaseFab<signed char>>&   faceStates = graph.getFaceStates();
 
-    // the lattice coordinate of a face plane of a cell of this level, for reading which plane an edge lies in
-    auto planeKey = [&](const int a_cellCoordinate, const int a_side) -> long long {
-      return std::llround(dx * static_cast<Real>(a_cellCoordinate + a_side) / spacing);
+    // whether a vertex lies in a face plane of a cell of this level, for reading which plane an edge lies in
+    auto inPlane = [&](const int a_vertex, const int a_cellCoordinate, const int a_dir, const int a_side) -> bool {
+      const Real plane = m_probLo[a_dir] + dx * static_cast<Real>(a_cellCoordinate + a_side);
+
+      return std::abs(vertexPoint[SpaceDim * a_vertex + a_dir] - plane) <= tolerance;
     };
 
     for (DataIterator dit(grids); dit.ok(); ++dit) {
@@ -726,26 +1224,44 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
           continue;
         }
 
-        // the edges of this cell's interface, and every edge in the neighbourhood
-        std::vector<Edge> own;
-        std::vector<Edge> around;
+        // The triangles of this cell and of everything in its neighbourhood, gathered before any of them is
+        // matched, since a vertex is identified against every other vertex of the neighbourhood at once.
+        points.clear();
 
-        edgesOf(facets[table(iv, 0)], own);
+        std::vector<int> ownOffsets;
+        std::vector<int> ownCounts;
+        std::vector<int> aroundOffsets;
+        std::vector<int> aroundCounts;
+
+        ownOffsets.push_back(0);
+        ownCounts.push_back(facets[table(iv, 0)].size() / 9);
+
+        appendPoints(facets[table(iv, 0)]);
 
         for (BoxIterator nit(grow(Box(iv, iv), 1) & grown); nit.ok(); ++nit) {
           if (table(nit(), 0) >= 0) {
-            edgesOf(facets[table(nit(), 0)], around);
+            aroundOffsets.push_back(static_cast<int>(points.size() / 3));
+            aroundCounts.push_back(facets[table(nit(), 0)].size() / 9);
+
+            appendPoints(facets[table(nit(), 0)]);
           }
         }
 
-        // behind a face the finer level describes, the finer cells across it, reconstructed at their spacing
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          for (int side = 0; side < 2; side++) {
-            if (faces(iv, 2 * dir + side) != PolyhedralEBGraph::s_faceFiner) {
+        // The finer cells around this one, reconstructed at their spacing. Every neighbour the finer level
+        // carries is taken, not only the six across a face: an interface edge that runs along a cell edge is
+        // shared by two facets whose cells meet along that edge alone, so the cell holding the other half of it
+        // can be a diagonal neighbour, and leaving those out reports an edge as open that is not.
+        {
+          Box neighbourhood(iv - IntVect::Unit, iv + IntVect::Unit);
+
+          neighbourhood &= domain;
+
+          for (BoxIterator nit2(neighbourhood); nit2.ok(); ++nit2) {
+            const IntVect neighbour = nit2();
+
+            if (neighbour == iv || !refinedFab.box().contains(neighbour) || refinedFab(neighbour, 0) == 0) {
               continue;
             }
-
-            const IntVect neighbour = iv + (2 * side - 1) * BASISV(dir);
 
             const Box fineBox = refine(Box(neighbour, neighbour), 2);
 
@@ -776,13 +1292,40 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 continue;
               }
 
+              // The finer level classifies with the volume threshold and the dust rule, and a cell those rules
+              // turn into a regular or a covered one writes no surface there. A reconstruction that kept it would
+              // hold triangles the level itself does not have, and every edge of them would be reported open.
+              if (m_volumeThreshold > 0.0 && fineBody.volumeFraction() < m_volumeThreshold) {
+                continue;
+              }
+
+              if (PolyhedralGeometryShop::isDust(fineBody)) {
+                continue;
+              }
+
               Vector<Real> fineFacets;
 
               fineBody.appendInterfaceFacets(fineFacets, fit(), m_probLo, 0.5 * dx);
 
-              edgesOf(fineFacets, around);
+              aroundOffsets.push_back(static_cast<int>(points.size() / 3));
+              aroundCounts.push_back(fineFacets.size() / 9);
+
+              appendPoints(fineFacets);
             }
           }
+        }
+
+        identify();
+
+        std::vector<Edge> own;
+        std::vector<Edge> around;
+
+        for (size_t i = 0; i < ownOffsets.size(); i++) {
+          edgesOf(ownOffsets[i], ownCounts[i], own);
+        }
+
+        for (size_t i = 0; i < aroundOffsets.size(); i++) {
+          edgesOf(aroundOffsets[i], aroundCounts[i], around);
         }
 
         std::sort(around.begin(), around.end());
@@ -800,9 +1343,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 continue;
               }
 
-              const long long plane = planeKey(iv[dir], side);
-
-              exempt = (edge[dir] == plane) && (edge[3 + dir] == plane);
+              exempt = inPlane(edge[0], iv[dir], dir, side) && inPlane(edge[1], iv[dir], dir, side);
             }
           }
 
@@ -829,13 +1370,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                    << ": edge used " << uses << " times:";
 
             for (int d = 0; d < SpaceDim; d++) {
-              pout() << " " << m_probLo[d] + spacing * static_cast<Real>(edge[d]);
+              pout() << " " << vertexPoint[SpaceDim * edge[0] + d];
             }
 
             pout() << " ->";
 
             for (int d = 0; d < SpaceDim; d++) {
-              pout() << " " << m_probLo[d] + spacing * static_cast<Real>(edge[3 + d]);
+              pout() << " " << vertexPoint[SpaceDim * edge[1] + d];
             }
 
             pout() << endl;
@@ -850,10 +1391,16 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
   const long long totalOpen     = ParallelOps::sum(numOpen);
   const long long totalOverused = ParallelOps::sum(numOverused);
+  const long long totalTouching = ParallelOps::sum(numTouching);
 
   if (procID() == 0) {
     pout() << "PolyhedralGeometryShop::sanityCheck - " << totalOpen << " interior edges open, " << totalOverused
-           << " interior edges used more than twice" << endl;
+           << " interior edges used more than twice, " << totalTouching << " regular cells against a covered one"
+           << endl;
+  }
+
+  if (totalTouching > 0) {
+    MayDay::Error("PolyhedralGeometryShop::sanityCheck - a regular cell shares a face with a covered one");
   }
 
   if (totalOpen > 0 || totalOverused > 0) {
@@ -1088,9 +1635,11 @@ PolyhedralGeometryShop::edgeCrossing(const BaseIF&   a_function,
 }
 
 bool
-PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body, const Real a_threshold) noexcept
+PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body) noexcept
 {
-  return (a_threshold > 0.0) && (1.0 - a_body.volumeFraction() < a_threshold) && (a_body.boundaryArea() < a_threshold);
+  // Exactly, not within a tolerance: a degenerate body has no polygon of positive area at all, so both of these
+  // are zero by construction rather than by luck.
+  return (1.0 - a_body.volumeFraction() <= 0.0) && (a_body.boundaryArea() <= 0.0);
 }
 
 Real
@@ -1098,7 +1647,49 @@ PolyhedralGeometryShop::snappedValue(const BaseIF& a_function, const RealVect& a
 {
   const Real value = a_function.value(a_point);
 
-  return (std::abs(value) <= s_snapTolerance * a_dx) ? 0.0 : value;
+  if (std::abs(value) > s_snapTolerance * a_dx) {
+    return value;
+  }
+
+  return PolyhedralGeometryShop::resolveTangency(a_function, a_point, a_dx);
+}
+
+Real
+PolyhedralGeometryShop::resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept
+{
+  const Real delta    = s_probeSpacing * a_dx;
+  const Real zeroBand = s_snapTolerance * a_dx;
+
+  Real probe[2 * SpaceDim];
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const RealVect e = BASISREALV(dir);
+
+    probe[2 * dir]     = a_function.value(a_point - delta * e);
+    probe[2 * dir + 1] = a_function.value(a_point + delta * e);
+  }
+
+  Real reading = 0.0;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    const Real lo = probe[2 * dir];
+    const Real hi = probe[2 * dir + 1];
+
+    if ((lo < 0.0 && hi > 0.0) || (lo > 0.0 && hi < 0.0)) {
+      return 0.0;
+    }
+
+    if (std::abs(lo) > zeroBand && std::abs(hi) > zeroBand) {
+      if (std::abs(lo) > std::abs(reading)) {
+        reading = lo;
+      }
+      if (std::abs(hi) > std::abs(reading)) {
+        reading = hi;
+      }
+    }
+  }
+
+  return reading;
 }
 
 Real
@@ -1114,6 +1705,27 @@ PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
 
   for (int d = 0; d < SpaceDim; d++) {
     lowPoint[d] += a_dx * static_cast<Real>(a_edgeIV[d]);
+  }
+
+  // An edge whose ends are both away from zero and of opposite sign carries one plain root, and Brent's method
+  // brackets it in a handful of evaluations where bisection needs tens. An end that reads as exactly zero is a
+  // different problem: the function may be zero along a stretch of the edge, and the crossing is then where it
+  // leaves that stretch rather than where it reaches it. That is a step in the fluid predicate, which has no
+  // continuous root to interpolate, so those edges are walked by bisecting the predicate below.
+  if (a_loValue != 0.0 && a_hiValue != 0.0 && ((a_loValue < 0.0) != (a_hiValue < 0.0))) {
+    const auto alongEdge = [&](const Real a_t) -> Real {
+      RealVect x = lowPoint;
+
+      x[a_dir] += a_dx * a_t;
+
+      return PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
+    };
+
+    const Real brent = PolyUtils::brentSolve(0.0, 1.0, alongEdge);
+
+    if (brent >= 0.0 && brent <= 1.0) {
+      return brent;
+    }
   }
 
   Real lo      = 0.0;
@@ -1221,9 +1833,24 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
   CH_assert(a_regIrregCovered.box().contains(a_cell));
   CH_assert(a_regIrregCovered(a_cell, 0) == 0);
 
+  // A moment summed over the polyhedron's tetrahedra and polygons lands a rounding outside [0,1] where the cell
+  // is nearly full or nearly empty -- one unit in the last place over, on a nearly full cell -- and CutCellBody
+  // accepts that, because a sum of terms of either sign cannot be exact. The index space's contract is [0,1]
+  // exactly, and PolyGeom asserts on it, so this is where the rounding is taken out. The clamp absorbs a
+  // rounding and nothing more: a body genuinely outside the range stops the run here rather than being quietly
+  // brought inside it. Clamping is a function of the value alone, so two cells sharing a face, which compute
+  // that face's aperture from the same crossings, still agree on it exactly.
+  constexpr Real slack = 1.0E-12;
+
+  const auto clamp = [](const Real a_moment) -> Real {
+    return std::min(1.0, std::max(0.0, a_moment));
+  };
+
+  CH_assert(a_body.volumeFraction() >= -slack && a_body.volumeFraction() <= 1.0 + slack);
+
   a_node.m_cell          = a_cell;
   a_node.m_cellIndex     = 0;
-  a_node.m_volFrac       = a_body.volumeFraction();
+  a_node.m_volFrac       = clamp(a_body.volumeFraction());
   a_node.m_volCentroid   = a_body.volumeCentroid();
   a_node.m_bndryCentroid = a_body.boundaryCentroid();
 
@@ -1241,7 +1868,8 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
 
       // the face polygons are oriented outward before their areas are summed, so a net
       // aperture is never negative
-      CH_assert(a_body.areaFraction(dir, sit()) >= 0.0);
+      CH_assert(a_body.areaFraction(dir, sit()) >= -slack);
+      CH_assert(a_body.areaFraction(dir, sit()) <= 1.0 + slack);
 
       // the arcs are topology: they follow the covered set and the domain, not the moments, so
       // the graph is the one GeometryShop would have built
@@ -1265,7 +1893,7 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
       const bool faceIsOpen         = neighbourIsRegular || a_body.areaFraction(dir, sit()) > 0.0;
 
       if (arc.size() > 0 && faceIsOpen) {
-        areaFrac.resize(1, a_body.areaFraction(dir, sit()));
+        areaFrac.resize(1, clamp(a_body.areaFraction(dir, sit())));
         faceCentroid.resize(1, a_body.faceCentroid(dir, sit()));
       }
       else {
@@ -1396,7 +2024,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     }
 
     // the mirror image: a body with next to no solid in it is a regular cell
-    if (PolyhedralGeometryShop::isDust(body, m_volumeThreshold)) {
+    if (PolyhedralGeometryShop::isDust(body)) {
       a_regIrregCovered(iv, 0) = 1;
 
       continue;

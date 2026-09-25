@@ -12,10 +12,12 @@
 
 // Std includes
 #include <algorithm>
+#include <limits>
 #include <cmath>
 
 // Chombo includes
 #include <BaseFab.H>
+#include <CH_assert.H>
 #include <BoxIterator.H>
 #include <BRMeshRefine.H>
 #include <IntVectSet.H>
@@ -180,6 +182,8 @@ ComputationalGeometry::getSolidImplicitFunction() const
 const RefCountedPtr<BaseIF>&
 ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const
 {
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
   if (m_verbose) {
     pout() << "ComputationalGeometry::getImplicitFunction(phase::which_phase)" << endl;
@@ -425,9 +429,12 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     m_dx[lvl]      = 0.5 * m_dx[lvl - 1];
   }
 
+  CH_assert(m_startLevel >= 0 && m_startLevel <= m_stopLevel);
+  CH_assert(m_domains.size() == m_dx.size());
+
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
-  m_splitCounts.resize(numLevels, Vector<int>(6, 0));
+  m_splitCounts.resize(numLevels, Vector<int>(7, 0));
   m_splitBoxes.resize(numLevels);
   m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
@@ -688,6 +695,8 @@ ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
   const Vector<Box>&                    levelBoxes = m_boxes[a_level];
   const Vector<GeometryService::InOut>& levelTypes = this->types(a_phase)[a_level];
 
+  CH_assert(levelBoxes.size() == levelTypes.size());
+
   for (int i = 0; i < levelBoxes.size(); i++) {
     if (levelTypes[i] == a_type) {
       boxes.push_back(levelBoxes[i]);
@@ -712,6 +721,8 @@ ComputationalGeometry::getCutTiles(const int a_level) const noexcept
 const Vector<Box>&
 ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept
 {
+  CH_assert(m_splitBoxes[a_level].size() == m_splitReasons[a_level].size());
+
   a_reasons = m_splitReasons[a_level];
 
   return m_splitBoxes[a_level];
@@ -738,12 +749,16 @@ ComputationalGeometry::getDx(const int a_level) const noexcept
 Vector<Vector<GeometryService::InOut>>&
 ComputationalGeometry::types(const phase::which_phase a_phase) noexcept
 {
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
   return (a_phase == phase::gas) ? m_gasTypes : m_solidTypes;
 }
 
 const Vector<Vector<GeometryService::InOut>>&
 ComputationalGeometry::types(const phase::which_phase a_phase) const noexcept
 {
+  CH_assert(a_phase == phase::gas || a_phase == phase::solid);
+
   return (a_phase == phase::gas) ? m_gasTypes : m_solidTypes;
 }
 
@@ -914,6 +929,9 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
   }
 
   // The flag carries the reason, so the report can say why a level refined where it did.
+  CH_assert(a_gasTypes.size() == a_boxes.size());
+  CH_assert(a_solidTypes.size() == a_boxes.size());
+
   Vector<int> flags(a_boxes.size(), 0);
 
   for (int i = procID(); i < a_boxes.size(); i += numProc()) {
@@ -925,6 +943,21 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
 
     if (reason == SplitReason::None && a_solidTypes[i] == GeometryService::Irregular) {
       reason = this->exceedsCurvature(a_boxes[i], a_level, phase::solid);
+    }
+
+    // A box the curvature leaves alone is a leaf, and a leaf is what the level above describes the other side
+    // of. One that holds an edge crossed twice at the finer spacing cannot describe its own face there, so it
+    // is refined until the crossing is resolved.
+    if (reason == SplitReason::None) {
+      const bool gasDoubled = (a_gasTypes[i] == GeometryService::Irregular) &&
+                              this->doublyCrossedEdge(a_boxes[i], a_level, phase::gas);
+
+      const bool solidDoubled = (a_solidTypes[i] == GeometryService::Irregular) &&
+                                this->doublyCrossedEdge(a_boxes[i], a_level, phase::solid);
+
+      if (gasDoubled || solidDoubled) {
+        reason = SplitReason::DoubleCrossing;
+      }
     }
 
     flags[i] = static_cast<int>(reason);
@@ -956,14 +989,19 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
   // is exact for what it builds, whatever the function does away from its zero set.
   const BaseIF& f = *implicitFunction;
 
-  const Real dx    = m_dx[a_level];
-  const Box  grown = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Box grown = grow(a_box, m_maxGhostEB) & m_domains[a_level].domainBox();
 
   Box nodeBox = grown;
   nodeBox.surroundingNodes();
 
   bool anyFluid = false;
   bool anySolid = false;
+
+  // How close the surface comes to the nodes, for the test below, which is reached only where every node agrees.
+  Real closest = std::numeric_limits<Real>::max();
 
   for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -974,7 +1012,11 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
       x[dir] += dx * static_cast<Real>(iv[dir]);
     }
 
-    if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, dx))) {
+    const Real value = PolyhedralGeometryShop::snappedValue(f, x, dx);
+
+    closest = std::min(closest, std::abs(value));
+
+    if (PolyhedralEB::isFluid(value)) {
       anyFluid = true;
     }
     else {
@@ -986,7 +1028,138 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
     }
   }
 
+  // Every node agrees, and the cells are regular or covered as far as their corners can tell. The surface can
+  // still pass through the box between the nodes, entering and leaving through one edge, and a box like that is
+  // not regular: the level above it would see the crossings this level cannot, and a cell of it left on the
+  // coarse side of a level boundary could not describe its own face. Such a box is irregular, so that it is
+  // tagged, tiled and refined like any other, and the level above resolves what this one cannot represent.
+  //
+  // The finest level is left alone: nothing finer describes it, so the answer would cost tiles and buy nothing.
+  // Away from the surface nothing is evaluated at all: a midpoint can only disagree with two agreeing ends if
+  // the surface comes within half a cell of the edge, so a box whose nearest node value exceeds a cell width is
+  // done -- the same reading of the implicit function as a distance that the scan-based pruning already makes.
+  if (a_level >= m_stopLevel || closest > dx) {
+    return anySolid ? GeometryService::Covered : GeometryService::Regular;
+  }
+
+  const Real fineDx = 0.5 * dx;
+
+  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const IntVect jv = iv + BASISV(dir);
+
+      if (!nodeBox.contains(jv)) {
+        continue;
+      }
+
+      RealVect x = m_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += dx * static_cast<Real>(iv[d]);
+      }
+
+      x[dir] += fineDx;
+
+      // the midpoint is a node of the level above, and is read at that level's spacing
+      if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, fineDx)) != anyFluid) {
+        return GeometryService::Irregular;
+      }
+    }
+  }
+
   return anySolid ? GeometryService::Covered : GeometryService::Regular;
+}
+
+bool
+ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::doublyCrossedEdge");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::doublyCrossedEdge" << endl;
+  }
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
+
+  if (implicitFunction.isNull()) {
+    return false;
+  }
+
+  const BaseIF& f = *implicitFunction;
+
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Real fineDx = 0.5 * dx;
+  const Box  valid  = a_box & m_domains[a_level].domainBox();
+
+  // The node values of this level, as the cells of the box are built from, and the midpoint of every edge
+  // between two of them, which is a node of the level above. The midpoint is snapped at the finer spacing,
+  // since that is the spacing the level above would classify it at.
+  BaseFab<Real> nodeValues;
+
+  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, valid, m_probLo, dx);
+
+  const Box& nodeBox = nodeValues.box();
+
+  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const IntVect jv = iv + BASISV(dir);
+
+      if (!nodeBox.contains(jv)) {
+        continue;
+      }
+
+      const Real loValue = nodeValues(iv, 0);
+      const Real hiValue = nodeValues(jv, 0);
+
+      const bool loZero = (loValue == 0.0);
+      const bool hiZero = (hiValue == 0.0);
+
+      const bool loFluid = PolyhedralEB::isFluid(loValue);
+      const bool hiFluid = PolyhedralEB::isFluid(hiValue);
+
+      // An edge whose ends disagree carries one crossing at this level and one at the next, in the half its own
+      // crossing lies in. Only ends that agree can hide a pair -- but an end that is exactly zero is on the
+      // surface, and which side of it that end belongs to is not decided at this spacing. The fluid rule breaks
+      // the tie toward solid, and an edge that reads fluid-solid-zero would read fluid-solid-fluid had the tie
+      // gone the other way, which is a pair. Such an end is therefore left open, and the ends count as agreeing
+      // if any reading of it makes them.
+      if (!loZero && !hiZero && loFluid != hiFluid) {
+        continue;
+      }
+
+      RealVect x = m_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += dx * static_cast<Real>(iv[d]);
+      }
+
+      x[dir] += 0.5 * dx;
+
+      const Real midValue = PolyhedralGeometryShop::snappedValue(f, x, fineDx);
+
+      if (midValue == 0.0) {
+        continue;
+      }
+
+      const bool midFluid = PolyhedralEB::isFluid(midValue);
+
+      // The ends are read as the midpoint's opposite wherever they are free to be, since that is the reading
+      // that hides a pair.
+      const bool loAgainst = loZero ? !midFluid : loFluid;
+      const bool hiAgainst = hiZero ? !midFluid : hiFluid;
+
+      if (loAgainst == hiAgainst && midFluid != loAgainst) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 ComputationalGeometry::SplitReason
@@ -1011,9 +1184,11 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   // bisected once, shared by the cells around it, as the shop does when it builds the graph.
   const BaseIF& f = *implicitFunction;
 
-  const Real dx    = m_dx[a_level];
-  const Box  valid = a_box & m_domains[a_level].domainBox();
-  const Box  grown = grow(a_box, 1) & m_domains[a_level].domainBox();
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Box valid = a_box & m_domains[a_level].domainBox();
+  const Box grown = grow(a_box, 1) & m_domains[a_level].domainBox();
 
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
@@ -1136,19 +1311,128 @@ ComputationalGeometry::makeTiles()
                         m_minBlockSize * IntVect::Unit,
                         m_maxBlockSize * IntVect::Unit);
 
-  Vector<Vector<Box>> tiles;
+  // The tiles are built, then read back: a cell left on the coarse side of a level boundary whose edge the level
+  // above crosses twice is tagged, and the tiles are built again. The pass has to come after the tiles exist
+  // rather than before, because the tiled region is not a function of the box classification alone -- the tiler
+  // nests, and nesting puts tiles above boxes that never refined, which is exactly where such a cell hides. Each
+  // pass only adds tags, so the region grows and the loop ends; in practice one further pass finds nothing.
+  for (int pass = 0; pass < s_maxTilePasses; pass++) {
+    Vector<Vector<Box>> tiles;
 
-  const int finestTiled = tiler.regrid(tiles, tags);
+    const int finestTiled = tiler.regrid(tiles, tags);
 
-  // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
-  for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
-    m_cutTiles[lvl] = tiles[lvl - m_startLevel];
+    for (int lvl = m_startLevel + 1; lvl <= m_stopLevel; lvl++) {
+      m_cutTiles[lvl].clear();
+    }
+
+    // Tiler level 0 is the start domain, whole and not tiled, and is discarded as AmrMesh discards it.
+    for (int lvl = m_startLevel + 1; lvl <= m_startLevel + finestTiled; lvl++) {
+      m_cutTiles[lvl] = tiles[lvl - m_startLevel];
+    }
+
+    this->buildTileTrees();
+
+    if (!this->tagUnresolvedSeams(tags)) {
+      return;
+    }
+
+    if (m_verbose && procID() == 0) {
+      pout() << "ComputationalGeometry::makeTiles - tiling again for the cells the level above would cross twice"
+             << endl;
+    }
   }
+
+  MayDay::Error("ComputationalGeometry::makeTiles - the tiles never resolved every doubly crossed edge");
+}
+
+bool
+ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
+{
+  CH_TIME("ComputationalGeometry::tagUnresolvedSeams");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::tagUnresolvedSeams" << endl;
+  }
+
+  const phase::which_phase phases[2] = {phase::gas, phase::solid};
+
+  long long numTagged = 0;
+
+  for (int lvl = m_startLevel; lvl < m_stopLevel; lvl++) {
+    // On the start level every box is a candidate, since the level is whole; above it the tiles are what the
+    // graph holds and the rest of the level is not described there at all.
+    const Vector<Box>& coarse = (lvl == m_startLevel) ? m_boxes[lvl] : m_cutTiles[lvl];
+
+    const Box& domainBox = m_domains[lvl].domainBox();
+
+    IntVectSet& levelTags = a_tags[lvl - m_startLevel];
+
+    for (int i = procID(); i < coarse.size(); i += numProc()) {
+      const Box box   = coarse[i];
+      const Box grown = grow(box, 1) & domainBox;
+
+      // What the level above covers here, read off its tiles through their index.
+      BaseFab<bool> refined(grown, 1);
+
+      refined.setVal(false);
+
+      const Vector<int> hits = this->tilesMeeting(lvl + 1, refine(grown, 2));
+
+      for (int h = 0; h < hits.size(); h++) {
+        const Box covered = coarsen(m_cutTiles[lvl + 1][hits[h]], 2) & grown;
+
+        if (!covered.isEmpty()) {
+          refined.setVal(true, covered, 0);
+        }
+      }
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        if (refined(iv, 0)) {
+          continue;
+        }
+
+        // Only the coarse side of a level boundary: a cell whose neighbours are all at its own level describes
+        // its faces with the same nodes they do. Face neighbours are the whole test, even though a doubly
+        // crossed edge is shared by the four cells meeting along it and one of those can meet the refined
+        // region along that edge alone. Of the other three, the two that share a face with the refined one are
+        // tested here, carry the same edge, and are therefore tagged; once they are refined the fourth has a
+        // refined face neighbour and is taken on the next pass, which is what the passes are for.
+        bool onSeam = false;
+
+        for (int dir = 0; dir < SpaceDim && !onSeam; dir++) {
+          for (int side = 0; side < 2 && !onSeam; side++) {
+            const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
+
+            onSeam = grown.contains(jv) && refined(jv, 0);
+          }
+        }
+
+        if (!onSeam) {
+          continue;
+        }
+
+        for (const phase::which_phase& curPhase : phases) {
+          if (this->doublyCrossedEdge(Box(iv, iv), lvl, curPhase)) {
+            levelTags |= iv;
+
+            numTagged++;
+
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return ParallelOps::sum(numTagged) > 0;
 }
 
 ComputationalGeometry::BV
 ComputationalGeometry::boundingVolume(const Box& a_box) noexcept
 {
+  CH_assert(!a_box.isEmpty());
+
   // A cell is the unit cube whose corners are its nodes, so a box spans [smallEnd, bigEnd + 1] in index space.
   // The bounding volumes are three-dimensional whatever SpaceDim is, and two of them overlap only where they do
   // so on every axis, so in two dimensions the third axis is given the unit thickness a cell has there too.
@@ -1423,6 +1707,12 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
     const Vector<GeometryService::InOut>& oldSolidTypes = m_solidTypes[lvl];
     const Vector<Box>&                    tiles         = m_cutTiles[lvl];
 
+    CH_assert(oldGasTypes.size() == oldBoxes.size());
+    CH_assert(oldSolidTypes.size() == oldBoxes.size());
+    CH_assert(a_tileHosts[lvl].size() == tiles.size());
+    CH_assert(a_gasTileTypes[lvl].size() == tiles.size());
+    CH_assert(a_solidTileTypes[lvl].size() == tiles.size());
+
     // Which tiles each box hosts, as two flat arrays: hostedStart[i] .. hostedStart[i + 1] index into
     // hostedTiles for box i, filled by a counting sort over the tiles so that no box owns an allocation. For
     // the report, how many tiles are there because a box was irregular and how many because nesting put them
@@ -1440,7 +1730,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
-      m_splitCounts[lvl][tagged ? 4 : 5]++;
+      m_splitCounts[lvl][tagged ? 5 : 6]++;
     }
 
     for (int i = 0; i < oldBoxes.size(); i++) {
@@ -1594,9 +1884,9 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2] << "/"
-           << m_splitCounts[lvl][3] << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting "
-           << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5] << endl;
+           << "; split interior/ring/medial/doubled " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2] << "/"
+           << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << " (leaves " << m_splitCounts[lvl][0]
+           << "); tiles tagged/nesting " << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << endl;
   }
 }
 

@@ -451,7 +451,12 @@ ParallelOps::sum(Vector<Real>& a_data) noexcept
   CH_TIME("ParallelOps::sum(Real)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_CH_REAL,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -464,7 +469,12 @@ ParallelOps::sum(Vector<int>& a_data) noexcept
   CH_TIME("ParallelOps::sum(int)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_INT,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -477,7 +487,12 @@ ParallelOps::sum(Vector<long int>& a_data) noexcept
   CH_TIME("ParallelOps::sum(long int)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_LONG,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -490,7 +505,12 @@ ParallelOps::sum(Vector<long long int>& a_data) noexcept
   CH_TIME("ParallelOps::sum(long long int)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_LONG_LONG,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }

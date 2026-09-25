@@ -66,6 +66,7 @@ CutCellBody::orientOutward(Polygon& a_polygon, const int a_dir, const int a_side
 {
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
   CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(a_polygon.m_numVertices >= 3);
 
   RealVect outward = RealVect::Zero;
   outward[a_dir]   = (a_side == 0) ? -1.0 : 1.0;
@@ -91,6 +92,7 @@ CutCellBody::faceWalk(const int a_dir, const int a_side, const CutCellSurface& a
 {
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
   CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(a_out != nullptr);
 
   int faceEdge[4];
   int faceCorner[4];
@@ -330,6 +332,11 @@ bool
 CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out, const int a_maxOut, int& a_numOut)
   const noexcept
 {
+  CH_assert(a_in != nullptr);
+  CH_assert(a_out != nullptr);
+  CH_assert(a_num >= 0);
+  CH_assert(a_maxOut > 0);
+
   a_numOut = 0;
 
   // A seam face that the body covers completely carries no polygon, and that is an answer, not a
@@ -484,17 +491,15 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
         straight = (along > 0.0) && ((ahead - along * unit).vectorLength() <= 1.0E-11 * aheadLength);
       }
 
-      // a chord vertex on the boundary between two children is a vertex of the cells on the other
-      // side of the seam, and dropping it would leave their two segments meeting the middle of one
-      // of ours: watertight, but not a shared edge. The children sit at plus and minus a quarter, so
-      // their boundaries in the face are at exactly zero. A vertex on the face's own boundary is
-      // kept only if the face across that boundary is covered: then the edge is an interface edge
-      // and the finer cells share it. Otherwise it has to go, or the edge it splits no longer
-      // matches the neighbouring face's whole one and closeInterface reads the boundary as open.
+      // A chord vertex on the boundary between two children is a vertex of the cells on the other side of the
+      // seam, and dropping it would leave their two segments meeting the middle of one of ours: watertight, but
+      // not a shared edge. The children sit at plus and minus a quarter, so their boundaries in the face are at
+      // exactly zero. Such a vertex is kept even where it falls on a straight run, and even where it sits on the
+      // face's own boundary and so splits an edge that the neighbouring face carries whole -- weldTJunctions
+      // puts it into that face too before the interface is closed.
       const int faceDir = a_in[0].m_face / 2;
 
       bool onChildBoundary = false;
-      bool onSharedFace    = false;
 
       for (int d = 0; d < SpaceDim; d++) {
         if (d == faceDir) {
@@ -502,19 +507,9 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
         }
 
         onChildBoundary = onChildBoundary || (std::abs(here[d]) <= detail::s_weldTolerance);
-
-        for (int side = 0; side < 2; side++) {
-          if (std::abs(here[d] - (-0.5 + static_cast<Real>(side))) <= detail::s_weldTolerance) {
-            const int across = 2 * d + side;
-
-            for (int ip = 0; ip < m_numPolygons; ip++) {
-              onSharedFace = onSharedFace || (m_polygon[ip].m_face == across);
-            }
-          }
-        }
       }
 
-      if (straight && !(onChildBoundary && !onSharedFace)) {
+      if (straight && !onChildBoundary) {
         continue;
       }
 
@@ -546,6 +541,7 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
   CH_assert(a_children != nullptr);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
   CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
   const int face = 2 * a_dir + a_side;
 
@@ -633,8 +629,130 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
 }
 
 bool
+CutCellBody::weldTJunctions() noexcept
+{
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    Polygon& p = m_polygon[ip];
+
+    for (int i = 0; i < p.m_numVertices; i++) {
+      const RealVect a = p.m_vertex[i];
+      const RealVect b = p.m_vertex[(i + 1) % p.m_numVertices];
+
+      const RealVect along  = b - a;
+      const Real     length = along.vectorLength();
+
+      if (length <= detail::s_weldTolerance) {
+        continue;
+      }
+
+      // Every vertex of another polygon that lies on this edge, strictly between its ends.
+      RealVect inside[s_maxVertices];
+      Real     where[s_maxVertices];
+
+      int numInside = 0;
+
+      for (int jp = 0; jp < m_numPolygons; jp++) {
+        if (jp == ip) {
+          continue;
+        }
+
+        const Polygon& q = m_polygon[jp];
+
+        for (int j = 0; j < q.m_numVertices; j++) {
+          const RealVect& v = q.m_vertex[j];
+
+          if (detail::sameVertex(v, a) || detail::sameVertex(v, b)) {
+            continue;
+          }
+
+          const Real t = (v - a).dotProduct(along) / (length * length);
+
+          if (t <= 0.0 || t >= 1.0) {
+            continue;
+          }
+
+          if (((v - a) - t * along).vectorLength() > detail::s_weldTolerance) {
+            continue;
+          }
+
+          bool have = false;
+
+          for (int k = 0; k < numInside && !have; k++) {
+            have = detail::sameVertex(inside[k], v);
+          }
+
+          if (have) {
+            continue;
+          }
+
+          if (numInside >= s_maxVertices) {
+            return false;
+          }
+
+          inside[numInside] = v;
+          where[numInside]  = t;
+
+          numInside++;
+        }
+      }
+
+      if (numInside == 0) {
+        continue;
+      }
+
+      // in order along the edge, so that the split reads as one walk from a to b
+      for (int m = 1; m < numInside; m++) {
+        const RealVect v = inside[m];
+        const Real     t = where[m];
+
+        int n = m - 1;
+
+        while (n >= 0 && where[n] > t) {
+          inside[n + 1] = inside[n];
+          where[n + 1]  = where[n];
+
+          n--;
+        }
+
+        inside[n + 1] = v;
+        where[n + 1]  = t;
+      }
+
+      if (p.m_numVertices + numInside > s_maxVertices) {
+        return false;
+      }
+
+      for (int n = p.m_numVertices - 1; n > i; n--) {
+        p.m_vertex[n + numInside]      = p.m_vertex[n];
+        p.m_vertexEdge[n + numInside]  = p.m_vertexEdge[n];
+        p.m_segmentFace[n + numInside] = p.m_segmentFace[n];
+      }
+
+      for (int n = 0; n < numInside; n++) {
+        p.m_vertex[i + 1 + n]      = inside[n];
+        p.m_vertexEdge[i + 1 + n]  = -1;
+        p.m_segmentFace[i + 1 + n] = p.m_segmentFace[i];
+      }
+
+      p.m_numVertices += numInside;
+
+      i += numInside;
+    }
+  }
+
+  return true;
+}
+
+bool
 CutCellBody::closeInterface() noexcept
 {
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
+  if (!this->weldTJunctions()) {
+    return false;
+  }
 
   RealVect from[s_maxPolygons * s_maxVertices];
   RealVect to[s_maxPolygons * s_maxVertices];
@@ -670,6 +788,8 @@ CutCellBody::closeInterface() noexcept
       }
 
       if (!shared) {
+        CH_assert(numOpen < s_maxPolygons * s_maxVertices);
+
         from[numOpen] = b;
         to[numOpen]   = a;
         numOpen++;
@@ -788,6 +908,8 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
                                    const RealVect& a_probLo,
                                    const Real      a_dx) const noexcept
 {
+  CH_assert(a_dx > 0.0);
+
   // a body that is not cut holds no interface polygon, so the loop appends nothing for it
   for (int ip = 0; ip < m_numPolygons; ip++) {
     const Polygon& p = m_polygon[ip];
@@ -841,6 +963,8 @@ CutCellBody::widestPolygon() const noexcept
 void
 CutCellBody::accumulateMoments() noexcept
 {
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
   Real     faceArea[s_numFaces] = {0.0};
   RealVect faceMoment[s_numFaces];
 
@@ -983,6 +1107,8 @@ CutCellBody::accumulateMoments() noexcept
 
   if (m_boundaryArea > 0.0) {
     m_normal = -boundaryVector / m_boundaryArea;
+
+    CH_assert(std::abs(m_normal.vectorLength() - 1.0) <= 1.0E-10);
   }
 }
 
