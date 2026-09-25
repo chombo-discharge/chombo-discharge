@@ -188,6 +188,9 @@ public:
    * @param[in] a_startDx      Grid spacing on a_startDomain.
    * @param[in] a_refineAngle  Angle, in degrees, between neighbouring normals above which a box is split.
    * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified. At most half the tile size.
+   * @param[in] a_minBlockSize Tile the grids are built with, from AmrMesh.eb_min_block_size.
+   * @param[in] a_maxBlockSize Super-tile the boxes are cut to, a whole number of a_minBlockSize, from
+   *                           AmrMesh.eb_max_block_size.
    */
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
@@ -195,7 +198,9 @@ public:
             const RealVect&      a_probLo,
             const Real           a_startDx,
             const Real           a_refineAngle,
-            const int            a_maxGhostEB);
+            const int            a_maxGhostEB,
+            const int            a_minBlockSize,
+            const int            a_maxBlockSize);
 
   /**
    * @brief Number of levels makeGrids built.
