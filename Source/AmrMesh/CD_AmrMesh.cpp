@@ -974,6 +974,7 @@ AmrMesh::parseOptions()
   ;
   this->parseNumGhostCells();
   this->parseEbGhostCells();
+  this->parseEbBlockSizes();
   this->parseProbLoHiCorners();
   this->parseCellCentroidInterpolation();
   this->parseEBCentroidInterpolation();
@@ -2842,6 +2843,33 @@ AmrMesh::parseEbGhostCells()
 }
 
 void
+AmrMesh::parseEbBlockSizes()
+{
+  CH_TIME("AmrMesh::parseEbBlockSizes()");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::parseEbBlockSizes()" << endl;
+  }
+
+  ParmParse pp("AmrMesh");
+
+  pp.get("eb_min_block_size", m_ebMinBlockSize);
+  pp.get("eb_max_block_size", m_ebMaxBlockSize);
+
+  // What ComputationalGeometry::makeGrids needs of them, said here so that a bad input file stops before any
+  // geometry is built. That the tile is wide enough for the EB ghosts is checked there, where the ghost width
+  // the geometry is actually built with is known.
+  if (m_ebMinBlockSize <= 0) {
+    MayDay::Error("AmrMesh::parseEbBlockSizes -- 'eb_min_block_size' must be positive");
+  }
+  if (m_ebMaxBlockSize <= 0) {
+    MayDay::Error("AmrMesh::parseEbBlockSizes -- 'eb_max_block_size' must be positive");
+  }
+  if (m_ebMaxBlockSize % m_ebMinBlockSize != 0) {
+    MayDay::Error("AmrMesh::parseEbBlockSizes -- 'eb_max_block_size' must be a whole number of 'eb_min_block_size'");
+  }
+}
+
+void
 AmrMesh::parseNumGhostCells()
 {
   CH_TIME("AmrMesh::parseNumGhostCells()");
@@ -3170,6 +3198,28 @@ AmrMesh::getMaxSimulationDepth() const
   }
 
   return m_maxSimulationDepth;
+}
+
+int
+AmrMesh::getEbMinBlockSize() const
+{
+  CH_TIME("AmrMesh::getEbMinBlockSize()");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::getEbMinBlockSize()" << endl;
+  }
+
+  return m_ebMinBlockSize;
+}
+
+int
+AmrMesh::getEbMaxBlockSize() const
+{
+  CH_TIME("AmrMesh::getEbMaxBlockSize()");
+  if (m_verbosity > 5) {
+    pout() << "AmrMesh::getEbMaxBlockSize()" << endl;
+  }
+
+  return m_ebMaxBlockSize;
 }
 
 int

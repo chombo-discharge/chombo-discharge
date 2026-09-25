@@ -1717,6 +1717,23 @@ public:
   getMaxEbisBoxSize() const;
 
   /**
+   * @brief Get the smallest box the geometry grids are tiled with.
+   * @details The tile TiledMeshRefine builds the geometry's grids from, which is not the simulation's blocking
+   * factor: curvature refinement follows the surface, and a smaller tile keeps the refined footprint close to it.
+   * @return Smallest geometry grid box.
+   */
+  int
+  getEbMinBlockSize() const;
+
+  /**
+   * @brief Get the largest box the geometry grids are tiled with.
+   * @details The super-tile the geometry's boxes are cut to, a whole number of getEbMinBlockSize.
+   * @return Largest geometry grid box.
+   */
+  int
+  getEbMaxBlockSize() const;
+
+  /**
    * @brief Get the default number of ghost cells
    * @return Number of ghost cells
    */
@@ -2348,6 +2365,16 @@ protected:
   int m_minBlockSize;
 
   /**
+   * @brief Smallest box the geometry grids are tiled with
+   */
+  int m_ebMinBlockSize;
+
+  /**
+   * @brief Largest box the geometry grids are tiled with
+   */
+  int m_ebMaxBlockSize;
+
+  /**
    * @brief Number of ghost cells to use for eb stuff
    */
   int m_numEbGhostsCells;
@@ -2555,6 +2582,12 @@ protected:
    */
   void
   parseMaxEbisBoxSize();
+
+  /**
+   * @brief Parse the tile and super-tile the geometry grids are built with.
+   */
+  void
+  parseEbBlockSizes();
 
   /**
    * @brief Parse the B-R blocking factor. For tiled mesh refinement this parses the tile size.

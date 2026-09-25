@@ -1512,7 +1512,9 @@ Driver::buildGeometryGrids(const ProblemDomain& a_startDomain)
                                      m_amr->getProbLo(),
                                      startDx,
                                      m_refineAngle,
-                                     m_amr->getNumberOfEbGhostCells());
+                                     m_amr->getNumberOfEbGhostCells(),
+                                     m_amr->getEbMinBlockSize(),
+                                     m_amr->getEbMaxBlockSize());
 }
 
 Vector<Vector<Box>>

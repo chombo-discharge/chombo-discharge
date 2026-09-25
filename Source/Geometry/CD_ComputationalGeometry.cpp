@@ -55,8 +55,8 @@ ComputationalGeometry::ComputationalGeometry()
     m_maxGhostEB(0),
     m_startLevel(0),
     m_stopLevel(0),
-    m_minBlockSize(8),
-    m_maxBlockSize(8),
+    m_minBlockSize(0),
+    m_maxBlockSize(0),
     m_profile(false),
     m_verbose(false)
 {
@@ -72,11 +72,6 @@ ComputationalGeometry::ComputationalGeometry()
     pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
   }
 
-  // The tile and super-tile the grids are built with are the geometry's own, separate from the simulation's
-  // block sizes: curvature refinement follows the surface, and a small tile keeps the refined footprint close
-  // to it.
-  pp.query("min_block_size", m_minBlockSize);
-  pp.query("max_block_size", m_maxBlockSize);
   pp.query("profile", m_profile);
 
   m_electrodes.resize(0);
@@ -341,7 +336,9 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
                                  const RealVect&      a_probLo,
                                  const Real           a_startDx,
                                  const Real           a_refineAngle,
-                                 const int            a_maxGhostEB)
+                                 const int            a_maxGhostEB,
+                                 const int            a_minBlockSize,
+                                 const int            a_maxBlockSize)
 {
   CH_TIME("ComputationalGeometry::makeGrids");
   if (m_verbose) {
@@ -362,16 +359,19 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   if (a_maxGhostEB < 0) {
     MayDay::Error("ComputationalGeometry::makeGrids - the ghost width must not be negative");
   }
-  if (m_minBlockSize <= 0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - ComputationalGeometry.min_block_size must be positive");
+  if (a_minBlockSize <= 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - AmrMesh.eb_min_block_size must be positive");
   }
-  if (m_maxBlockSize <= 0) {
-    MayDay::Error("ComputationalGeometry::makeGrids - ComputationalGeometry.max_block_size must be positive");
+  if (a_maxBlockSize <= 0) {
+    MayDay::Error("ComputationalGeometry::makeGrids - AmrMesh.eb_max_block_size must be positive");
   }
-  if (m_maxBlockSize % m_minBlockSize != 0) {
+  if (a_maxBlockSize % a_minBlockSize != 0) {
     MayDay::Error(
-      "ComputationalGeometry::makeGrids - ComputationalGeometry.max_block_size must be a multiple of min_block_size");
+      "ComputationalGeometry::makeGrids - AmrMesh.eb_max_block_size must be a whole number of eb_min_block_size");
   }
+
+  m_minBlockSize = a_minBlockSize;
+  m_maxBlockSize = a_maxBlockSize;
 
   // The one-tile nesting buffer between levels has to cover the ghost cells.
   if (m_minBlockSize < 2 * a_maxGhostEB) {
