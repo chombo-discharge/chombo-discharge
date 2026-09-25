@@ -1833,9 +1833,24 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
   CH_assert(a_regIrregCovered.box().contains(a_cell));
   CH_assert(a_regIrregCovered(a_cell, 0) == 0);
 
+  // A moment summed over the polyhedron's tetrahedra and polygons lands a rounding outside [0,1] where the cell
+  // is nearly full or nearly empty -- one unit in the last place over, on a nearly full cell -- and CutCellBody
+  // accepts that, because a sum of terms of either sign cannot be exact. The index space's contract is [0,1]
+  // exactly, and PolyGeom asserts on it, so this is where the rounding is taken out. The clamp absorbs a
+  // rounding and nothing more: a body genuinely outside the range stops the run here rather than being quietly
+  // brought inside it. Clamping is a function of the value alone, so two cells sharing a face, which compute
+  // that face's aperture from the same crossings, still agree on it exactly.
+  constexpr Real slack = 1.0E-12;
+
+  const auto clamp = [](const Real a_moment) -> Real {
+    return std::min(1.0, std::max(0.0, a_moment));
+  };
+
+  CH_assert(a_body.volumeFraction() >= -slack && a_body.volumeFraction() <= 1.0 + slack);
+
   a_node.m_cell          = a_cell;
   a_node.m_cellIndex     = 0;
-  a_node.m_volFrac       = a_body.volumeFraction();
+  a_node.m_volFrac       = clamp(a_body.volumeFraction());
   a_node.m_volCentroid   = a_body.volumeCentroid();
   a_node.m_bndryCentroid = a_body.boundaryCentroid();
 
@@ -1853,7 +1868,8 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
 
       // the face polygons are oriented outward before their areas are summed, so a net
       // aperture is never negative
-      CH_assert(a_body.areaFraction(dir, sit()) >= 0.0);
+      CH_assert(a_body.areaFraction(dir, sit()) >= -slack);
+      CH_assert(a_body.areaFraction(dir, sit()) <= 1.0 + slack);
 
       // the arcs are topology: they follow the covered set and the domain, not the moments, so
       // the graph is the one GeometryShop would have built
@@ -1877,7 +1893,7 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
       const bool faceIsOpen         = neighbourIsRegular || a_body.areaFraction(dir, sit()) > 0.0;
 
       if (arc.size() > 0 && faceIsOpen) {
-        areaFrac.resize(1, a_body.areaFraction(dir, sit()));
+        areaFrac.resize(1, clamp(a_body.areaFraction(dir, sit())));
         faceCentroid.resize(1, a_body.faceCentroid(dir, sit()));
       }
       else {
