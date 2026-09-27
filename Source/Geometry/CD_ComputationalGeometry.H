@@ -415,6 +415,16 @@ protected:
   Real m_refineAngle;
 
   /**
+   * @brief Whether a box holding a twisted interface patch is split. ComputationalGeometry.refine_twist, on by
+   * default.
+   * @details Splitting such a box removes the cell that would otherwise be unable to refine single valued,
+   * which is the only remedy that improves the geometry rather than deleting part of it. It only reaches a
+   * saddle that has refinement left to give: one already at the stop level stays, and is the unresolved-cells
+   * rule's to deal with.
+   */
+  bool m_refineTwist;
+
+  /**
    * @brief Maximum number of ghost cells that we will ever need
    */
   int m_maxGhostEB;
@@ -651,8 +661,38 @@ protected:
     Interior,
     Ring,
     Medial,
-    DoubleCrossing
+    DoubleCrossing,
+    Twist
   };
+
+  /**
+   * @brief Whether any cut cell of the box holds an interface patch that is twisted about its own centre.
+   * @details Four crossings on the four edges of a cell that run in one direction are coplanar exactly when
+   * f00 + f11 equals f01 + f10; the difference is the twist, and the patch through them is then a saddle. A
+   * saddle is the one shape whose fluid can fall into more than one piece when the cell is cut for a
+   * refinement, which is a cell the polyhedral path cannot carry single valued.
+   *
+   * The test is the position of the patch's own saddle point. Outside the cell's square the patch rises or
+   * falls monotonically across the cell in at least one direction, and every sublevel set of such a patch is
+   * connected on every sub-rectangle -- so the cell is safe at every refinement ratio and is left alone.
+   * Inside, it is not, and the box is split. Refining quarters the twist a cell sees while the tilt that
+   * opposes it is unchanged, so the patch the level above holds is the same saddle seen from further away.
+   *
+   * This is deliberately separate from exceedsCurvature, which cannot answer it: that rule measures how much
+   * the surface turns, and a gentle saddle turns very little while still being a saddle. It is also blind to a
+   * loop that wraps a cell corner rather than crossing four parallel edges, which carries the same risk with no
+   * quad to test; such a cell is left to the unresolved-cells rule at the finest level.
+   *
+   * Cells are reconstructed from the implicit function on the level, as exceedsCurvature reconstructs them, so
+   * nothing is asked of an index space that does not yet exist. A phase without an implicit function never asks
+   * for a split.
+   * @param[in] a_box   Box to test.
+   * @param[in] a_level Level the box lives on.
+   * @param[in] a_phase Phase whose implicit function is asked.
+   * @return True if some cut cell of the box holds a patch whose saddle lies within it.
+   */
+  bool
+  hasTwistedPatch(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
    * @brief Whether the interface turns by more than m_refineAngle between neighbouring cut cells of a box.

@@ -64,9 +64,12 @@ ComputationalGeometry::ComputationalGeometry()
 
   // Default parameters.
 
+  m_refineTwist = true;
+
   ParmParse pp("ComputationalGeometry");
 
   pp.query("verbose", m_verbose);
+  pp.query("refine_twist", m_refineTwist);
 
   if (m_verbose) {
     pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
@@ -434,7 +437,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
 
   m_cutTiles.resize(numLevels);
   m_boxes.resize(numLevels);
-  m_splitCounts.resize(numLevels, Vector<int>(7, 0));
+  m_splitCounts.resize(numLevels, Vector<int>(8, 0));
   m_splitBoxes.resize(numLevels);
   m_splitReasons.resize(numLevels);
   m_gasTypes.resize(numLevels);
@@ -960,6 +963,22 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
       }
     }
 
+    // A box no other rule splits may still hold a twisted patch, which is the one shape whose fluid can fall
+    // into two pieces when the cell is cut for a refinement. The turning-angle rule does not see it: it measures
+    // how much the surface curves, and a gentle saddle barely curves at all while still being flat enough that
+    // nothing opposes the twist. Refining it gives the level above a patch with a quarter of the twist.
+    if (reason == SplitReason::None && m_refineTwist) {
+      const bool gasTwist = (a_gasTypes[i] == GeometryService::Irregular) &&
+                            this->hasTwistedPatch(a_boxes[i], a_level, phase::gas);
+
+      const bool solidTwist = (a_solidTypes[i] == GeometryService::Irregular) &&
+                              this->hasTwistedPatch(a_boxes[i], a_level, phase::solid);
+
+      if (gasTwist || solidTwist) {
+        reason = SplitReason::Twist;
+      }
+    }
+
     flags[i] = static_cast<int>(reason);
   }
 
@@ -1158,6 +1177,90 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
       }
     }
   }
+
+  return false;
+}
+
+bool
+ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
+{
+  CH_TIME("ComputationalGeometry::hasTwistedPatch");
+
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::hasTwistedPatch" << endl;
+  }
+
+#if CH_SPACEDIM == 3
+  using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellSurface;
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
+
+  if (implicitFunction.isNull()) {
+    return false;
+  }
+
+  const BaseIF& f = *implicitFunction;
+
+  const Real dx = m_dx[a_level];
+
+  const Box valid = a_box & m_domains[a_level].domainBox();
+  const Box grown = grow(a_box, 1) & m_domains[a_level].domainBox();
+
+  BaseFab<Real> nodeValues;
+  BaseFab<Real> intercept[SpaceDim];
+
+  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
+  PolyhedralGeometryShop::defineIntercepts(intercept, grown);
+
+  constexpr int  perDir = CutCellSurface::s_numEdges / SpaceDim;
+  constexpr Real tiny   = 1.0E-30;
+
+  for (BoxIterator bit(valid); bit.ok(); ++bit) {
+    CutCellSurface surface;
+
+    PolyhedralGeometryShop::buildSurface(f, intercept, surface, nodeValues, bit(), m_probLo, dx);
+
+    if (CutCellBody::classify(surface) != CutCellBody::Kind::Cut) {
+      continue;
+    }
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      const int base = dir * perDir;
+
+      bool all = true;
+
+      for (int k = 0; k < 4; k++) {
+        all = all && (surface.m_crossing[base + k] != CutCellSurface::s_noCrossing);
+      }
+
+      if (!all) {
+        continue;
+      }
+
+      const Real f00 = surface.m_crossing[base + 0];
+      const Real f10 = surface.m_crossing[base + 1];
+      const Real f01 = surface.m_crossing[base + 2];
+      const Real f11 = surface.m_crossing[base + 3];
+
+      const Real twist = f00 + f11 - f01 - f10;
+
+      if (std::abs(twist) <= tiny) {
+        continue;
+      }
+
+      // The saddle of the patch through the four crossings. Outside its own square the patch rises or falls
+      // monotonically across the cell in one direction, and no sub-box of it can hold two pieces of fluid at
+      // any refinement; inside, it can.
+      const Real saddleT0 = -(f01 - f00) / twist;
+      const Real saddleT1 = -(f10 - f00) / twist;
+
+      if (saddleT0 >= 0.0 && saddleT0 <= 1.0 && saddleT1 >= 0.0 && saddleT1 <= 1.0) {
+        return true;
+      }
+    }
+  }
+#endif
 
   return false;
 }
@@ -1730,7 +1833,7 @@ ComputationalGeometry::decimateBoxes(const Vector<Vector<GeometryService::InOut>
       const bool tagged = (host >= 0) && (oldGasTypes[host] == GeometryService::Irregular ||
                                           oldSolidTypes[host] == GeometryService::Irregular);
 
-      m_splitCounts[lvl][tagged ? 5 : 6]++;
+      m_splitCounts[lvl][tagged ? 6 : 7]++;
     }
 
     for (int i = 0; i < oldBoxes.size(); i++) {
@@ -1884,9 +1987,10 @@ ComputationalGeometry::reportGrids() const
            << gasCount[GeometryService::Regular] << "/" << gasCount[GeometryService::Covered] << "/"
            << gasCount[GeometryService::Irregular] << "; solid " << solidCount[GeometryService::Regular] << "/"
            << solidCount[GeometryService::Covered] << "/" << solidCount[GeometryService::Irregular]
-           << "; split interior/ring/medial/doubled " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2] << "/"
-           << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << " (leaves " << m_splitCounts[lvl][0]
-           << "); tiles tagged/nesting " << m_splitCounts[lvl][5] << "/" << m_splitCounts[lvl][6] << endl;
+           << "; split interior/ring/medial/doubled/twist " << m_splitCounts[lvl][1] << "/" << m_splitCounts[lvl][2]
+           << "/" << m_splitCounts[lvl][3] << "/" << m_splitCounts[lvl][4] << "/" << m_splitCounts[lvl][5]
+           << " (leaves " << m_splitCounts[lvl][0] << "); tiles tagged/nesting " << m_splitCounts[lvl][6] << "/"
+           << m_splitCounts[lvl][7] << endl;
   }
 }
 
