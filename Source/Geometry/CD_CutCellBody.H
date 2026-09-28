@@ -323,11 +323,11 @@ public:
    * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
    * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
    * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
-   * sheet, which is covered whatever its nodes read. The face
-   * takes the neighbour's answer -- the whole face, or none of it -- and the footprint it gives up becomes part of
-   * the interface, which lies in the plane of that face. The identity sum(alpha_hi - alpha_lo) = a_B*n survives
-   * it exactly, since the aperture and the boundary's area vector gain the same vector. The moments are
-   * recomputed, unlike restrictFace, because this body is one a cell takes its moments from.
+   * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
+   * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
+   * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
+   * gain the same vector. The moments are recomputed, unlike restrictFace, because this body is one a cell takes its
+   * moments from.
    * @param[in] a_dir               Direction of the face.
    * @param[in] a_side              Side of the cell the face is on.
    * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
@@ -524,11 +524,10 @@ protected:
    * that every child holds its fluid in one piece: a child that does not is reported by returning false before
    * anything is summed, because it is a fact about a parent whose interface is twisted rather than a fault to
    * stop on, and hasMultiValuedChildren asks exactly that. Then four things: the children's volumes add to this
-   * one's, the apertures of the children on a face of this cell add
-   * to that face's, the two children meeting at an interior face agree about it -- which is what lets those
-   * sums cancel, and what a cell cut from this one relies on to join its sibling -- and the children's
-   * interface area vectors add to this one's. Each child is also required to satisfy the divergence identity
-   * on its own, since a child that does not is not a body whatever it sums to.
+   * one's, the apertures of the children on a face of this cell add to that face's, the two children meeting at an
+   * interior face agree about it -- which is what lets those sums cancel, and what a cell cut from this one relies on
+   * to join its sibling -- and the children's interface area vectors add to this one's. Each child is also required
+   * to satisfy the divergence identity on its own, since a child that does not is not a body whatever it sums to.
    *
    * A quantity spanning fewer dimensions than the cell is counted once too often per dimension it does not
    * span, so volumes carry 2^-SpaceDim and areas 2^-(SpaceDim-1).
