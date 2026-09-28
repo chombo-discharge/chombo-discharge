@@ -108,12 +108,12 @@ public:
    * @brief Whether the fluid this body holds is one connected region.
    * @details Asked of the polygons rather than of the fluid: they bound a closed surface, so two polygons that
    * share an edge bound the same piece of fluid, and the fluid is in one piece exactly when walking that
-   * sharing reaches every polygon from any one of them. A cell of the geometries this generator is used on
-   * should never hold two pieces -- the interface is anchored to the cell's edges, so it cannot close on itself
-   * inside the cell and leave a cavity, and a cell the surface enters twice is refined until it does not. The
-   * question is asked anyway, because a body cut from a coarser one is a body this generator did not build from
-   * an implicit function, and because what opens onto a neighbouring cell is decided by which polygons bound
-   * which piece.
+   * sharing reaches every polygon from any one of them. A cell the graph builds should never hold two pieces --
+   * the interface is anchored to the cell's edges, so it cannot close on itself inside the cell and leave a
+   * cavity, and a cell the surface enters as more than one sheet is filled before any body is built. A body cut
+   * from a coarser one is different: it was not built from an implicit function, and a single-sheet parent
+   * whose interface is twisted can hand a child two pieces. That is what this is asked for, and it is also
+   * what decides which polygons bound which piece, and so what opens onto a neighbouring cell.
    * @return True if every polygon is reachable from any other by shared edges, or if the body holds none.
    */
   bool
@@ -149,8 +149,8 @@ public:
    * A vertex of a child is not a crossing of the child's own edges, so the provenance those carry is dropped;
    * closeInterface already handles polygons in that state, since a restricted face leaves them the same way.
    * @param[out] a_children The 2^SpaceDim bodies, in quadrant order.
-   * @return False if a child's fluid region is not connected, or if a child would need more polygons or
-   *         vertices than it can hold.
+   * @return False if a child's fluid region is not connected, if a child would need more polygons or vertices
+   * than it can hold, or if the children do not add back up to this body in every moment partitions checks.
    */
   bool
   subdivide(CutCellBody* a_children) const noexcept;
@@ -538,8 +538,11 @@ protected:
 
   /**
    * @brief Whether a set of children partitions this body, in every moment that has to add up.
-   * @details What subdivide has to deliver, checked rather than asserted so that a caller learns of it. Four
-   * things: the children's volumes add to this one's, the apertures of the children on a face of this cell add
+   * @details What subdivide has to deliver, checked rather than asserted so that a caller learns of it. First,
+   * that every child holds its fluid in one piece: a child that does not is reported by returning false before
+   * anything is summed, because it is a fact about a parent whose interface is twisted rather than a fault to
+   * stop on, and hasMultiValuedChildren asks exactly that. Then four things: the children's volumes add to this
+   * one's, the apertures of the children on a face of this cell add
    * to that face's, the two children meeting at an interior face agree about it -- which is what lets those
    * sums cancel, and what a cell cut from this one relies on to join its sibling -- and the children's
    * interface area vectors add to this one's. Each child is also required to satisfy the divergence identity

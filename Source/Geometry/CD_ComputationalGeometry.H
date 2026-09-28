@@ -650,8 +650,8 @@ protected:
   /**
    * @brief Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair
    * reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than
-   * the band), or an edge the level above would cross twice.
-   * @details Only None against anything else decides whether a box splits. Which of the four reasons it is, is
+   * the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle.
+   * @details Only None against anything else decides whether a box splits. Which of the five reasons it is, is
    * recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it
    * is a diagnostic rather than a part of the generator.
    */
@@ -675,8 +675,14 @@ protected:
    * The test is the position of the patch's own saddle point. Outside the cell's square the patch rises or
    * falls monotonically across the cell in at least one direction, and every sublevel set of such a patch is
    * connected on every sub-rectangle -- so the cell is safe at every refinement ratio and is left alone.
-   * Inside, it is not, and the box is split. Refining quarters the twist a cell sees while the tilt that
-   * opposes it is unchanged, so the patch the level above holds is the same saddle seen from further away.
+   * Inside, it is not, and the box is split. Measured in cell widths, the twist a cell sees scales with the
+   * spacing while the tilt that opposes it does not, so refining halves the one and leaves the other: the patch
+   * the level above holds is the same saddle seen from further away.
+   *
+   * A twist at or below 1e-8 counts as none. The crossings are solved to about 1e-10 of the edge, and a flat face
+   * aligned with the grid has its four crossings agree to the last bit, which leaves the twist and both slopes as
+   * rounding; the saddle's position is then one rounding error divided by another and falls inside the square as
+   * often as not. Without the floor, a flat surface is refined as though it were rough.
    *
    * This is deliberately separate from exceedsCurvature, which cannot answer it: that rule measures how much
    * the surface turns, and a gentle saddle turns very little while still being a saddle. It is also blind to a
