@@ -260,11 +260,12 @@ Such features resolve themselves once the mesh is fine enough to see them, so re
 
 A second case needs no filling.
 A cell holding a single sheet can still lose it when it is cut into finer cells: where the interface is twisted into a saddle, a child cell can hold its fluid in two pieces joined a cell away.
-The mesh generator refines a box holding such a saddle, which removes the problem wherever there is refinement left to give, and it is on by default:
+The mesh generator can refine a box holding such a saddle, which removes the problem wherever there is refinement left to give.
+It is off by default, since the intended treatment of such a cell is to merge its pieces into one without losing conservation (not yet implemented), and it is switched on with
 
 .. code-block:: text
 
-   ComputationalGeometry.refine_saddles = true    # Refine boxes holding a saddle-shaped interface.
+   ComputationalGeometry.refine_saddles = true    # Refine boxes holding a saddle-shaped interface. Off by default.
 
 Refinement does not remove a saddle at the finest level, since each refinement hands a smaller copy of it to one child.
 Whether any cell would still lose its single-valuedness when cut to a given ratio below the finest level can be checked with

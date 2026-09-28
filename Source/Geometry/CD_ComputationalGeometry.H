@@ -416,11 +416,13 @@ protected:
 
   /**
    * @brief Whether a box holding a saddle -- an interface patch twisted about its own centre -- is split.
-   * ComputationalGeometry.refine_saddles, optional, on by default; set it false to turn the refinement off.
-   * @details Splitting such a box removes the cell that would otherwise be unable to refine single valued,
-   * which is the only remedy that improves the geometry rather than deleting part of it. It only reaches a
-   * saddle that has refinement left to give: one already at the stop level stays, and is the unresolved-cells
-   * rule's to deal with.
+   * ComputationalGeometry.refine_saddles, optional, off by default; set it true to turn the refinement on.
+   * @details Splitting such a box removes the cell that would otherwise be unable to refine single valued, and it
+   * only reaches a saddle that has refinement left to give: one already at the stop level stays, and is the
+   * unresolved-cells rule's to deal with. It is off by default because that rule is to collapse such a cell's
+   * pieces into one body without losing conservation (PolyhedralGeometryShop::UnresolvedAction::Collapse, not yet
+   * wired), which makes a saddle something to repair rather than something to refine away; switching it on buys
+   * centroids that need no repair, at the price of more cells.
    */
   bool m_refineSaddles;
 

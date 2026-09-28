@@ -64,7 +64,7 @@ ComputationalGeometry::ComputationalGeometry()
 
   // Default parameters.
 
-  m_refineSaddles = true;
+  m_refineSaddles = false;
 
   ParmParse pp("ComputationalGeometry");
 
