@@ -64,12 +64,12 @@ ComputationalGeometry::ComputationalGeometry()
 
   // Default parameters.
 
-  m_refineTwist = true;
+  m_refineSaddles = true;
 
   ParmParse pp("ComputationalGeometry");
 
   pp.query("verbose", m_verbose);
-  pp.query("refine_twist", m_refineTwist);
+  pp.query("refine_saddles", m_refineSaddles);
 
   if (m_verbose) {
     pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
@@ -967,7 +967,7 @@ ComputationalGeometry::splitFlags(const Vector<Box>&                    a_boxes,
     // into two pieces when the cell is cut for a refinement. The turning-angle rule does not see it: it measures
     // how much the surface curves, and a gentle saddle barely curves at all while still being flat enough that
     // nothing opposes the twist. Refining it gives the level above a patch with a quarter of the twist.
-    if (reason == SplitReason::None && m_refineTwist) {
+    if (reason == SplitReason::None && m_refineSaddles) {
       const bool gasTwist = (a_gasTypes[i] == GeometryService::Irregular) &&
                             this->hasTwistedPatch(a_boxes[i], a_level, phase::gas);
 

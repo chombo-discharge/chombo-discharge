@@ -415,14 +415,14 @@ protected:
   Real m_refineAngle;
 
   /**
-   * @brief Whether a box holding a twisted interface patch is split. ComputationalGeometry.refine_twist, on by
-   * default.
+   * @brief Whether a box holding a saddle -- an interface patch twisted about its own centre -- is split.
+   * ComputationalGeometry.refine_saddles, optional, on by default; set it false to turn the refinement off.
    * @details Splitting such a box removes the cell that would otherwise be unable to refine single valued,
    * which is the only remedy that improves the geometry rather than deleting part of it. It only reaches a
    * saddle that has refinement left to give: one already at the stop level stays, and is the unresolved-cells
    * rule's to deal with.
    */
-  bool m_refineTwist;
+  bool m_refineSaddles;
 
   /**
    * @brief Maximum number of ghost cells that we will ever need
