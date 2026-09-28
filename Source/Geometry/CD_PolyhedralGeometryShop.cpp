@@ -1572,132 +1572,14 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
   }
 #endif
 
-  // Every cut cell of every level that the level itself describes, cut for a refinement and checked that the
-  // pieces add back up and that none of them holds fluid in more than one piece. Nothing downstream reads the
-  // result yet; this says whether they would be right to.
-  long long numSubdivision  = 0;
-  long long numCut          = 0;
-  long long numSplitParent  = 0;
-  long long numPlanar       = 0;
-  long long numMulti[3]     = {0, 0, 0};
-  long long numMultiSeam[3] = {0, 0, 0};
-
-  for (int lvl = 0; lvl < a_graphs.size(); lvl++) {
-    if (a_graphs[lvl].isNull() || !a_graphs[lvl]->isDefined()) {
-      continue;
-    }
-
-    const PolyhedralEBGraph& graph = *a_graphs[lvl];
-
-    const DisjointBoxLayout&                 grids    = graph.getGrids();
-    const LayoutData<IntVectSet>&            cutCells = graph.getCutCells();
-    const LevelData<IVSFAB<CutCellSurface>>& surfaces = graph.getSurfaces();
-    const LevelData<BaseFab<signed char>>&   refinedM = graph.getRefinedMask();
-    const LevelData<BaseFab<signed char>>&   statesM  = graph.getCellStates();
-
-    for (DataIterator dit(grids); dit.ok(); ++dit) {
-      const IntVectSet&             cut    = cutCells[dit()];
-      const IVSFAB<CutCellSurface>& stored = surfaces[dit()];
-      const BaseFab<signed char>&   refFab = refinedM[dit()];
-
-      for (IVSIterator ivsIt(cut); ivsIt.ok(); ++ivsIt) {
-        const IntVect iv = ivsIt();
-
-        // A cell the finer level carries is described up there; this level's reading of it is not what gets
-        // used, and it is not this level's to check.
-        if (refFab(iv, 0) != 0) {
-          continue;
-        }
-
-        // The body the consumers build, which on a refinement boundary is the one whose faces have been taken
-        // from the finer level. Its interface loop is longer than the unstitched one, so it is the body the
-        // multi-valued question has to be asked of -- asking the raw surface would answer for a cell that is
-        // not the one anybody uses. Two dimensions have no such body, since a face there is a single segment.
-        bool seam = false;
-
-        CutCellBody body;
-
-        bool stitched = false;
-
-#if CH_SPACEDIM == 3
-        for (int dir = 0; dir < SpaceDim && !seam; dir++) {
-          for (int side = 0; side < 2 && !seam; side++) {
-            const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
-
-            seam = refFab.box().contains(jv) && refFab(jv, 0) != 0;
-          }
-        }
-
-        if (seam) {
-          this->defineBody(body, graph, stored, statesM[dit()], refFab, iv);
-
-          stitched = true;
-        }
-#endif
-
-        if (!stitched && !body.define(stored(iv, 0))) {
-          continue;
-        }
-
-        CutCellBody children[1 << SpaceDim];
-
-        numCut++;
-
-        if (!body.isConnected()) {
-          numSplitParent++;
-        }
-
-        if (!body.subdivide(children)) {
-          numSubdivision++;
-        }
-
-        if (body.interfaceIsPlanar()) {
-          numPlanar++;
-        }
-        else {
-          // Asked at each ratio separately rather than once at the deepest, so the report says how far a cell
-          // can be refined before it stops being single valued, not merely that it cannot reach the deepest.
-          for (int k = 0; k < 3; k++) {
-            if (body.hasMultiValuedChildren(2 << k)) {
-              numMulti[k]++;
-
-              if (seam) {
-                numMultiSeam[k]++;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  const long long totalPlanar = ParallelOps::sum(numPlanar);
-  const long long totalMulti2 = ParallelOps::sum(numMulti[0]);
-  const long long totalMulti4 = ParallelOps::sum(numMulti[1]);
-  const long long totalMulti8 = ParallelOps::sum(numMulti[2]);
-  const long long seamMulti2  = ParallelOps::sum(numMultiSeam[0]);
-  const long long seamMulti4  = ParallelOps::sum(numMultiSeam[1]);
-  const long long seamMulti8  = ParallelOps::sum(numMultiSeam[2]);
-
-  const long long totalSubdivision = ParallelOps::sum(numSubdivision);
-  const long long totalCut         = ParallelOps::sum(numCut);
-  const long long totalSplitParent = ParallelOps::sum(numSplitParent);
-
   const long long totalOpen     = ParallelOps::sum(numOpen);
   const long long totalOverused = ParallelOps::sum(numOverused);
   const long long totalTouching = ParallelOps::sum(numTouching);
 
   if (procID() == 0) {
     pout() << "PolyhedralGeometryShop::sanityCheck - " << totalOpen << " interior edges open, " << totalOverused
-           << " interior edges used more than twice, " << totalTouching << " regular cells against a covered one, "
-           << totalSubdivision << " of " << totalCut << " cells that would not cut into the level above, "
-           << totalSplitParent << " holding fluid in more than one piece" << endl;
-
-    pout() << "PolyhedralGeometryShop::sanityCheck - " << totalPlanar << " of " << totalCut
-           << " cut cells have a planar interface and stay single valued at every refinement; of the rest, "
-           << totalMulti2 << " lose it at refinement 2, " << totalMulti4 << " by 4, " << totalMulti8
-           << " by 8 (of those, on a refinement boundary: " << seamMulti2 << "/" << seamMulti4 << "/" << seamMulti8
-           << ")" << endl;
+           << " interior edges used more than twice, " << totalTouching << " regular cells against a covered one"
+           << endl;
   }
 
   if (totalTouching > 0) {
