@@ -1213,8 +1213,15 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
   PolyhedralGeometryShop::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
   PolyhedralGeometryShop::defineIntercepts(intercept, grown);
 
-  constexpr int  perDir = CutCellSurface::s_numEdges / SpaceDim;
-  constexpr Real tiny   = 1.0E-30;
+  constexpr int perDir = CutCellSurface::s_numEdges / SpaceDim;
+
+  // The smallest twist that is a twist rather than rounding. The crossings are solved to about 1e-10 of the edge,
+  // so four of them combine to noise of a few times that, and a flat face aligned with the grid -- where the four
+  // crossings agree to the last bit -- comes out with a twist of one unit in the last place and slopes the same
+  // size. Dividing one rounding error by another then puts the saddle anywhere, inside the square as often as
+  // not, and a flat disk gets refined as though it were rough. Real saddles sit many orders of magnitude above
+  // this; one this small could in any case only split a child lying within a quarter of it of the octant plane.
+  constexpr Real twistFloor = 1.0E-8;
 
   for (BoxIterator bit(valid); bit.ok(); ++bit) {
     CutCellSurface surface;
@@ -1245,7 +1252,7 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
 
       const Real twist = f00 + f11 - f01 - f10;
 
-      if (std::abs(twist) <= tiny) {
+      if (std::abs(twist) <= twistFloor) {
         continue;
       }
 
