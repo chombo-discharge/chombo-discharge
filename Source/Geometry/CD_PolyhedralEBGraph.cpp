@@ -117,7 +117,7 @@ PolyhedralEBGraph::defineData()
   }
 }
 
-long long
+void
 PolyhedralEBGraph::findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
                                        const Box&           a_region,
                                        const Vector<Box>&   a_covered,
@@ -143,8 +143,6 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
       covered.setVal(true, overlap, 0);
     }
   }
-
-  long long numFilled = 0;
 
   // Only the combinatorics matter, so the crossings are placed at the middle of the edges that carry one rather
   // than being solved for: where an edge carries a crossing follows from its ends, and that is all the sheet
@@ -174,12 +172,8 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
 
     if (CutCellBody::numSheets(surface) > 1) {
       a_unresolved(iv, 0) = true;
-
-      numFilled++;
     }
   }
-
-  return numFilled;
 }
 
 void
@@ -229,7 +223,15 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
     // Which cells cannot be described at all, decided before any of them is classified.
     BaseFab<bool> unresolved(grown, 1);
 
-    numFilled += PolyhedralEBGraph::findUnresolvedCells(nodeValues, grown, m_covered, unresolved);
+    PolyhedralEBGraph::findUnresolvedCells(nodeValues, grown, m_covered, unresolved);
+
+    // Counted over the cells this box owns, not over the ring it also filled: neighbouring boxes reach into
+    // one another's ring, and a cell counted there would be reported once per box that reaches it.
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      if (unresolved(bit(), 0)) {
+        numFilled++;
+      }
+    }
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();

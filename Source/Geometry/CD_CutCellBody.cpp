@@ -65,88 +65,6 @@ CutCellBody::classify(const CutCellSurface& a_surface) noexcept
 }
 
 int
-CutCellBody::minimalSnap(const CutCellSurface& a_surface, bool a_solid[CutCellSurface::s_numCorners]) noexcept
-{
-  constexpr int numCorners = CutCellSurface::s_numCorners;
-
-  for (int c = 0; c < numCorners; c++) {
-    a_solid[c] = false;
-  }
-
-  if (CutCellBody::numSheets(a_surface) <= 1) {
-    return 0;
-  }
-
-  // The corners that can be turned, nearest the surface first: the value at a corner is how far the function is
-  // from zero there, so the smallest of them is the corner the surface already runs closest to.
-  int fluid[numCorners];
-  int numFluid = 0;
-
-  for (int c = 0; c < numCorners; c++) {
-    if (isFluid(a_surface.m_corner[c])) {
-      fluid[numFluid++] = c;
-    }
-  }
-
-  for (int i = 1; i < numFluid; i++) {
-    for (int j = i; j > 0 && std::abs(a_surface.m_corner[fluid[j]]) < std::abs(a_surface.m_corner[fluid[j - 1]]); j--) {
-      std::swap(fluid[j], fluid[j - 1]);
-    }
-  }
-
-  // Whether reading this set of corners as solid leaves one sheet. The crossings follow from the corners, and
-  // only whether an edge carries one matters here, so they are placed at the middle of the edges that have one.
-  const auto holdsOneSheet = [&](const int a_choice) -> bool {
-    CutCellSurface trial = a_surface;
-
-    for (int i = 0; i < numFluid; i++) {
-      if ((a_choice >> i) & 1) {
-        trial.m_corner[fluid[i]] = 0.0;
-      }
-    }
-
-    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
-      int low  = 0;
-      int high = 0;
-
-      detail::edgeCorners(e, low, high);
-
-      const bool crosses = isFluid(trial.m_corner[low]) != isFluid(trial.m_corner[high]);
-
-      trial.m_crossing[e] = crosses ? 0.5 : CutCellSurface::s_noCrossing;
-    }
-
-    return CutCellBody::numSheets(trial) <= 1;
-  };
-
-  // Every choice of a given size, the corners nearest the surface taken first: a choice is a subset of the
-  // sorted list, and the subsets are walked in order of size and then of how far in the list they reach.
-  for (int size = 1; size <= numFluid; size++) {
-    for (int choice = 0; choice < (1 << numFluid); choice++) {
-      int bits = 0;
-
-      for (int i = 0; i < numFluid; i++) {
-        bits += (choice >> i) & 1;
-      }
-
-      if (bits != size || !holdsOneSheet(choice)) {
-        continue;
-      }
-
-      for (int i = 0; i < numFluid; i++) {
-        if ((choice >> i) & 1) {
-          a_solid[fluid[i]] = true;
-        }
-      }
-
-      return size;
-    }
-  }
-
-  return 0;
-}
-
-int
 CutCellBody::numSheets(const CutCellSurface& a_surface) noexcept
 {
 #if CH_SPACEDIM == 2
@@ -1933,6 +1851,59 @@ CutCellBody::interfaceIsPlanar() const noexcept
 {
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
+#if CH_SPACEDIM == 2
+  // In two dimensions the fluid region is one polygon whose segments lie in different cell faces, and the
+  // interface is those segments belonging to none of them. They share a line exactly when every endpoint of
+  // every one of them lies on the line of the first, which is the two-dimensional reading of one plane.
+  if (m_numPolygons == 0) {
+    return true;
+  }
+
+  const Polygon& polygon = m_polygon[0];
+
+  int first = -1;
+
+  for (int i = 0; i < polygon.m_numVertices && first < 0; i++) {
+    if (polygon.m_segmentFace[i] < 0) {
+      first = i;
+    }
+  }
+
+  // A body with no interface is one the surface does not enter, whose fluid is the whole cell.
+  if (first < 0) {
+    return true;
+  }
+
+  const RealVect& base      = polygon.m_vertex[first];
+  const RealVect  direction = polygon.m_vertex[(first + 1) % polygon.m_numVertices] - base;
+
+  const Real length = direction.vectorLength();
+
+  // A first segment of no length gives no line to measure the others against, so nothing is claimed.
+  if (length <= s_edgeTolerance) {
+    return false;
+  }
+
+  const RealVect unit = direction / length;
+
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] >= 0) {
+      continue;
+    }
+
+    for (int k = 0; k < 2; k++) {
+      const RealVect& x = polygon.m_vertex[(i + k) % polygon.m_numVertices];
+
+      const RealVect offset = x - base;
+
+      if (std::abs(offset[0] * unit[1] - offset[1] * unit[0]) > s_edgeTolerance) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+#else
   int first = -1;
 
   for (int ip = 0; ip < m_numPolygons && first < 0; ip++) {
@@ -1974,6 +1945,7 @@ CutCellBody::interfaceIsPlanar() const noexcept
   }
 
   return true;
+#endif
 }
 
 bool

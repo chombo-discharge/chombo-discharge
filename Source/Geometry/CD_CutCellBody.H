@@ -92,26 +92,6 @@ public:
   classify(const CutCellSurface& a_surface) noexcept;
 
   /**
-   * @brief The fewest corners that must read solid for the cell to hold at most one sheet.
-   * @details Downstream holds one body and one interface to a cell, so a cell the surface enters as several
-   * sheets has to be brought back to one. The only move available is to read a corner as solid: snapping an
-   * edge's crossing onto a node puts the surface through that node, and a node on the surface is solid by the
-   * fluid rule, so a snap can turn a corner from fluid to solid and never the other way. Filling the cell is
-   * that move applied to every fluid corner at once, and it is the last resort rather than the rule -- it
-   * replaces a nearly exact answer with a staircase wherever the feature was in fact resolved.
-   *
-   * So the fewest corners are taken, and among sets of the same size the ones whose values sit closest to zero,
-   * since those are the corners the surface already passes nearest to and the snap moves them least. The search
-   * ends at every fluid corner, which leaves the cell covered and certainly holds one sheet or none, so it
-   * always returns an answer.
-   * @param[in]  a_surface Corner values and edge crossings in the cell's own frame.
-   * @param[out] a_solid   True for each corner that must read solid. All false if the cell already holds one.
-   * @return How many corners must be turned, zero if none need be.
-   */
-  static int
-  minimalSnap(const CutCellSurface& a_surface, bool a_solid[CutCellSurface::s_numCorners]) noexcept;
-
-  /**
    * @brief How many separate sheets of interface the surface enters the cell as.
    * @details The crossings of a cut cell close into cycles, and each cycle is spanned by its own patch. One
    * cycle is the ordinary case: one patch, and the fluid either side of it. More than one means the cell holds

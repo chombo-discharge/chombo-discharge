@@ -172,13 +172,17 @@ public:
    *
    * A cell the finer level carries is left alone: the feature is resolved up there, and this level's reading of
    * it is not the one that gets used. Only the combinatorics are read, so no root is solved for here.
+   *
+   * Nothing is counted here. The region a caller asks about reaches past the cells it owns, so that a cell can
+   * see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken
+   * here would report a cell near a box boundary once for every box that reaches it. The caller counts over the
+   * cells it owns.
    * @param[in]  a_nodeValues Node values of the region.
    * @param[in]  a_region     Cells to ask.
    * @param[in]  a_covered    Cells a finer level carries.
    * @param[out] a_unresolved True for each cell of the region that must be filled.
-   * @return How many cells must be filled.
    */
-  static long long
+  static void
   findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
                       const Box&           a_region,
                       const Vector<Box>&   a_covered,

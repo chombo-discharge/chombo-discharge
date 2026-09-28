@@ -1067,7 +1067,6 @@ PolyhedralGeometryShop::reportUnresolvedRefinement() const
       const IntVectSet&             cut        = cutCells[dit()];
       const IVSFAB<CutCellSurface>& stored     = surfaces[dit()];
       const BaseFab<signed char>&   refinedFab = refined[dit()];
-      const BaseFab<signed char>&   statesFab  = states[dit()];
 
       for (IVSIterator ivsIt(cut); ivsIt.ok(); ++ivsIt) {
         const IntVect iv = ivsIt();
@@ -1077,6 +1076,14 @@ PolyhedralGeometryShop::reportUnresolvedRefinement() const
           continue;
         }
 
+        CutCellBody body;
+
+        bool stitched = false;
+
+#if CH_SPACEDIM == 3
+        // On a refinement boundary the body the consumers build is the one whose faces were taken from the
+        // finer level, and stitching lengthens its interface loop. Two dimensions have no such body: a face
+        // there is a single segment and there is nothing to restrict.
         bool seam = false;
 
         for (int dir = 0; dir < SpaceDim && !seam; dir++) {
@@ -1087,12 +1094,14 @@ PolyhedralGeometryShop::reportUnresolvedRefinement() const
           }
         }
 
-        CutCellBody body;
-
         if (seam) {
-          this->defineBody(body, graph, stored, statesFab, refinedFab, iv);
+          this->defineBody(body, graph, stored, states[dit()], refinedFab, iv);
+
+          stitched = true;
         }
-        else if (!body.define(stored(iv, 0))) {
+#endif
+
+        if (!stitched && !body.define(stored(iv, 0))) {
           continue;
         }
 
@@ -1590,7 +1599,6 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
       const IntVectSet&             cut    = cutCells[dit()];
       const IVSFAB<CutCellSurface>& stored = surfaces[dit()];
       const BaseFab<signed char>&   refFab = refinedM[dit()];
-      const BaseFab<signed char>&   staFab = statesM[dit()];
 
       for (IVSIterator ivsIt(cut); ivsIt.ok(); ++ivsIt) {
         const IntVect iv = ivsIt();
@@ -1604,9 +1612,14 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
         // The body the consumers build, which on a refinement boundary is the one whose faces have been taken
         // from the finer level. Its interface loop is longer than the unstitched one, so it is the body the
         // multi-valued question has to be asked of -- asking the raw surface would answer for a cell that is
-        // not the one anybody uses.
+        // not the one anybody uses. Two dimensions have no such body, since a face there is a single segment.
         bool seam = false;
 
+        CutCellBody body;
+
+        bool stitched = false;
+
+#if CH_SPACEDIM == 3
         for (int dir = 0; dir < SpaceDim && !seam; dir++) {
           for (int side = 0; side < 2 && !seam; side++) {
             const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
@@ -1615,12 +1628,14 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
           }
         }
 
-        CutCellBody body;
-
         if (seam) {
-          this->defineBody(body, graph, stored, staFab, refFab, iv);
+          this->defineBody(body, graph, stored, statesM[dit()], refFab, iv);
+
+          stitched = true;
         }
-        else if (!body.define(stored(iv, 0))) {
+#endif
+
+        if (!stitched && !body.define(stored(iv, 0))) {
           continue;
         }
 
