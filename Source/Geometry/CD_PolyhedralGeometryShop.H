@@ -70,7 +70,34 @@ public:
     Cover,
 
     /**
-     * @brief Keep the pieces in one body, taking the moments from their sum and the centroids from the largest.
+     * @brief Keep the pieces in one body, taking every moment from their sum and moving only the volume centroid.
+     * @details For a cell whose own interface is one sheet but twisted into a saddle, where cutting it for a
+     * refinement leaves a child holding its fluid in two lobes. Such a saddle is resolved geometry: the lobes
+     * belong to one sheet, are joined one cell away through a sibling, and covering the cell would delete a
+     * feature the mesh resolves. Merging them asserts a shortcut of at most one cell inside the child, which the
+     * graph can carry; it is not a hole through a barrier, as merging the sheets of a genuinely multi-sheet cell
+     * would be, so those cells are still filled.
+     *
+     * Every moment is a linear sum over closed polyhedra, so the merged body's volume fraction, apertures, boundary
+     * area vector and boundary centroid are the exact sums of the lobes' and coarsen back to the parent exactly. The
+     * divergence identity holds for the union because it holds for each lobe. The scalar boundary area that makes
+     * that identity exact, the length of the summed area vector, reads below the area of the interface itself --
+     * by 2.6% at the median and 17% at worst over 85 two-lobed bodies from NoisePlane3d, RoughSphere3d and
+     * RodPerlinBox3d -- because the lobes do not face quite the same way; the interface's own area is kept beside
+     * it. Every centroid, being a weighted average of points in a convex cell or face, stays in that cell or face.
+     *
+     * Face centroids are left as the exact aperture-weighted first moment. A face both lobes open onto has two
+     * separate patches, and its centroid can land on the covered part between them, but that is the right point
+     * for what reads it: the flux stencils evaluate there as the quadrature point of the flux over the open area,
+     * which the first moment is whether or not that area is connected. Such faces only arise on the plane between
+     * two siblings, which vanishes on coarsening, and the ordinary path already makes them on any face whose corners
+     * alternate.
+     *
+     * The volume centroid is the one moment moved. It is kept where it lies in the fluid -- 35 of the 85 bodies --
+     * and otherwise replaced by the point of the fluid nearest to it, set a little inside the boundary it lands on.
+     * That breaks only the first moment across the level boundary, and by little: the parent's centroid moves by
+     * 3.7e-6 of its width at the median and 2.4e-4 at worst. Taking the centroid of the larger lobe instead is
+     * about ten times worse on every measure.
      */
     Collapse
   };
