@@ -83,8 +83,8 @@ public:
    *
    * A cell the surface enters as more than one sheet is still called cut here. Whether such a cell should be
    * filled instead -- see numSheets for why nothing it can hold describes the feature that put two sheets in
-   * it -- is a decision for whoever knows which level the cell is on, since on any level but the finest the
-   * answer is to refine rather than to fill.
+   * it -- is a decision for whoever knows whether a finer level carries the cell: one that does is left to it,
+   * and one that does not is filled, which is what PolyhedralEBGraph::findUnresolvedCells decides.
    * @param[in] a_surface Corner values in the cell's own frame.
    * @return Regular, Covered or Cut.
    */
@@ -317,31 +317,13 @@ public:
   closeBoundary(const int a_face) noexcept;
 
   /**
-   * @brief Whether this body's polygon on one face covers the whole face.
-   * @details A face polygon whose vertices are all cell corners is the whole face, since a corner the interface
-   * cuts off would have put a crossing among them. Exact: no area is compared with anything.
-   * @param[in] a_dir  Direction of the face.
-   * @param[in] a_side Side of the cell the face is on.
-   * @return True if the face is entirely fluid.
-   */
-  bool
-  faceIsWhole(const int a_dir, const int a_side) const noexcept;
-
-  /**
-   * @brief Whether this body holds no fluid at all on one face.
-   * @param[in] a_dir  Direction of the face.
-   * @param[in] a_side Side of the cell the face is on.
-   * @return True if the face carries no fluid.
-   */
-  bool
-  faceIsEmpty(const int a_dir, const int a_side) const noexcept;
-
-  /**
    * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
-   *        face loses become interface.
-   * @details The volume threshold and the dust rule classify a cell from its own body, so a cell they turn into a
-   * regular or a covered one leaves its neighbours describing a face it no longer agrees with: the neighbour's
-   * chord on the shared face ends against nothing, and the two sides read different apertures for it. The face
+   * face loses become interface.
+   * @details A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a
+   * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
+   * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
+   * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
+   * sheet, which is covered whatever its nodes read. The face
    * takes the neighbour's answer -- the whole face, or none of it -- and the footprint it gives up becomes part of
    * the interface, which lies in the plane of that face. The identity sum(alpha_hi - alpha_lo) = a_B*n survives
    * it exactly, since the aperture and the boundary's area vector gain the same vector. The moments are

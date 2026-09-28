@@ -112,8 +112,8 @@ public:
    * @param[in] a_probLo          Lower-left corner of the domain.
    * @param[in] a_dx              Grid spacing of the level.
    * @param[in] a_numGhost        Ghost cells the cell states are kept for.
-   * @param[in] a_covered         Cells of this level the finer level will carry, coarsened onto this level.
-   *                              A cell in them is described up there and is not snapped down here.
+   * @param[in] a_covered         Cells of this level the finer level will carry, coarsened onto this level. A cell
+   * in them is described up there and is not filled down here.
    */
   virtual void
   define(const BaseIF&        a_function,

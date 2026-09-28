@@ -190,7 +190,7 @@ public:
    * @param[in] a_maxGhostEB   Ghost cells a box is grown by when it is classified. At most half the tile size.
    * @param[in] a_minBlockSize Tile the grids are built with, from AmrMesh.eb_min_block_size.
    * @param[in] a_maxBlockSize Super-tile the boxes are cut to, a whole number of a_minBlockSize, from
-   *                           AmrMesh.eb_max_block_size.
+   * AmrMesh.eb_max_block_size.
    */
   virtual void
   makeGrids(const ProblemDomain& a_startDomain,
@@ -567,7 +567,8 @@ protected:
    *     for each box on lvl that is regular or covered in both phases:
    *       append refine(box, 2) on lvl + 1 with both tags                   -- never a hole beneath these
    *     for the boxes on lvl that are irregular in some phase:
-   *       flags = splitFlags(...): exceedsCurvature in any phase where the box is irregular
+   *       flags = splitFlags(...): exceedsCurvature, then doublyCrossedEdge, then hasTwistedPatch (if
+   *               m_refineSaddles), in any phase where the box is irregular
    *       for each box with a flag: pieces = domainSplit(refine(box, 2), m_maxBlockSize, m_minBlockSize)
    *       classifyBoxes(all pieces, lvl + 1) in both phases, append on lvl + 1
    *       a box without a flag is a leaf: nothing is appended, the region above it is a hole on lvl + 1

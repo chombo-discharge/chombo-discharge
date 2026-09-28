@@ -656,42 +656,6 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
 }
 
 bool
-CutCellBody::faceIsWhole(const int a_dir, const int a_side) const noexcept
-{
-  const int face = 2 * a_dir + a_side;
-
-  for (int ip = 0; ip < m_numPolygons; ip++) {
-    if (m_polygon[ip].m_face != face) {
-      continue;
-    }
-
-    for (int iv = 0; iv < m_polygon[ip].m_numVertices; iv++) {
-      if (m_polygon[ip].m_vertexEdge[iv] >= 0) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  return false;
-}
-
-bool
-CutCellBody::faceIsEmpty(const int a_dir, const int a_side) const noexcept
-{
-  const int face = 2 * a_dir + a_side;
-
-  for (int ip = 0; ip < m_numPolygons; ip++) {
-    if (m_polygon[ip].m_face == face) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool
 CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
 {
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
