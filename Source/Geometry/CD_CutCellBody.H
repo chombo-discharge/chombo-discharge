@@ -98,9 +98,17 @@ public:
    * cycle is the ordinary case: one patch, and the fluid either side of it. More than one means the cell holds
    * a feature thinner than itself -- a plate the nodes only see where it happens to swallow a corner, say --
    * and neither the corner values nor the crossings carry enough to say what that feature is. In two dimensions
-   * the crossings pair into chords and the count is half of them.
+   * the crossings pair into chords, one around each run of solid corners.
+   *
+   * A sheet whose solid side is nothing but corners at exactly zero is not counted. Such a corner lies on the
+   * surface, and the fluid rule calls it solid, so the edges leaving it for fluid corners carry crossings -- but
+   * every one of them lies on the corner itself, and the sheet they bound is a point, or a segment where two such
+   * corners share an edge: the surface touches the cell there and does not enter it. A surface tangent to a node
+   * plane along a line through nodes touches every cell along the line this way, often at two corners diagonal
+   * across a face, which read as two sheets and would have a cell that holds nothing but fluid filled.
    * @param[in] a_surface Corner values and edge crossings in the cell's own frame.
-   * @return Number of sheets, zero where the corners agree, or -1 where the crossings do not form cycles.
+   * @return Number of sheets that hold area, zero where the corners agree, or -1 where the crossings do not form
+   * cycles.
    */
   static int
   numSheets(const CutCellSurface& a_surface) noexcept;
@@ -286,13 +294,30 @@ public:
    * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
    * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
    * been, which is also what recomputes the moments.
-   * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
-   * @param[in] a_dir      Direction of the face.
-   * @param[in] a_side     Side of the cell the face is on.
+   *
+   * A quadrant marked closed contributes nothing: the finer cell across it was filled, so that part of the face opens
+   * onto nothing, and what the quadrant would have held becomes interface when the interface is closed, as a face
+   * closed through snapFace does.
+   * @param[in] a_children       Surfaces of the children covering this face, in quadrant order.
+   * @param[in] a_closedQuadrant One flag per quadrant, true where the quadrant is closed; null where none is.
+   * @param[in] a_dir            Direction of the face.
+   * @param[in] a_side           Side of the cell the face is on.
    * @return True if the children's chords merged into a face this body can hold.
    */
   bool
-  restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept;
+  restrictFace(const CutCellSurface* a_children,
+               const bool*           a_closedQuadrant,
+               const int             a_dir,
+               const int             a_side) noexcept;
+
+  /**
+   * @brief Make the body the whole cell: every face a polygon, and no interface.
+   * @details What a cell whose corners are all fluid holds, written as polygons rather than taken as a degenerate body,
+   * so that a face of it can be restricted to the finer level or closed onto a filled cell and the interface closed
+   * over what changed.
+   */
+  void
+  defineWhole() noexcept;
 
   /**
    * @brief Write one face's polygons, as this body holds them, into a set of face overrides.

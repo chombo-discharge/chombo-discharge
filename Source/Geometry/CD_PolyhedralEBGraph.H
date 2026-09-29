@@ -107,8 +107,9 @@ public:
    * from the implicit function, classifies it as the polyhedral generator does, keeping every cell that holds
    * anything -- a body with nothing in it is a regular cell, and nothing else is discarded, since a cell's
    * interface is what closes the surface against its neighbours -- keeps the surface of every cell whose corners
-   * disagree, cut or not, and sets the face states this level can know by itself: closed or open from the apertures,
-   * open onto the domain boundary, and open onto a cell no tile of this level carries. Collective.
+   * disagree, cut or not, and of every cell beside one the finer level carries, and sets the face states this level can
+   * know by itself: closed or open from the apertures, open onto the domain boundary, and open onto a cell no tile of
+   * this level carries. Collective.
    * @param[in] a_function        Implicit function of the phase.
    * @param[in] a_cutTiles        The level's cut tiles, identical on every rank.
    * @param[in] a_domain          Domain of the level.
@@ -270,9 +271,9 @@ public:
 
   /**
    * @brief The cells of every box that hold a surface: every cut cell of its set, and every cell, own or ghost, whose
-   * corners disagree though it was dropped as dust or filled.
+   * corners disagree though it was dropped as dust or filled, or that lies beside a cell the finer level carries.
    * @details A cell that is not cut keeps its surface because its crossings lie on edges other cells share, and the
-   * coarser level stitches from them.
+   * coarser level stitches from them; one beside the finer level keeps it because stitching may make it cut.
    * @return One set per box.
    */
   const LayoutData<IntVectSet>&
@@ -292,6 +293,26 @@ public:
    */
   LayoutData<PolyhedralEB::CutCellFaceOverrides>&
   getFaceOverrides() noexcept;
+
+  /**
+   * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile
+   * covers, zero elsewhere. Collective.
+   * @param[out] a_carried The marker, defined here over the layout with the cell states' ghost width.
+   */
+  void
+  markCarried(LevelData<BaseFab<signed char>>& a_carried) const;
+
+  /**
+   * @brief Make a regular or covered cell of a box, own or ghost, a cut cell of this level.
+   * @details For a cell on a refinement boundary whose face the finer level describes otherwise than its corners do: a
+   * regular cell whose face the finer level cuts or closes, or a covered one onto whose face the finer level opens. The
+   * cell becomes cut and enters the box's cut set, and every face of it onto a cell the finer level carries opens onto
+   * the finer level. Its surface is already kept, since every cell on a refinement boundary keeps one.
+   * @param[in] a_dit  Box index.
+   * @param[in] a_cell The cell, in the box or its ghost ring.
+   */
+  void
+  promoteToCut(const DataIndex& a_dit, const IntVect& a_cell);
 
   /**
    * @brief Mark the cells that hold a surface.
@@ -408,14 +429,6 @@ protected:
    */
   void
   defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
-
-  /**
-   * @brief Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile
-   * covers, zero elsewhere.
-   * @param[out] a_carried The marker, defined here over the layout with the cell states' ghost width.
-   */
-  void
-  markCarried(LevelData<BaseFab<signed char>>& a_carried) const;
 
   /**
    * @brief Set m_refined from m_covered, over every box and its ghost cells.

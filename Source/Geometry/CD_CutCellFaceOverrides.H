@@ -29,10 +29,11 @@ namespace PolyhedralEB {
  * @brief The faces of a box's cut cells that do not come from the cells' own chords.
  * @details A cut cell's body is built from its surface, and most of its faces are exactly what the surface's chords
  * give. Two kinds of face are not. A face onto a cell the finer level carries is described at the finer level's
- * resolution: the chord is replaced by the finer cells' chords, merged into the polygons stored here. A face onto a
- * covered cell the finer level does not carry is closed, and what it gave up becomes interface in the plane of that
- * face; such a face stores no polygon, only that it is closed. With these the body of every cut cell is a function of
- * its own surface and its own entries here, and needs nothing from its neighbours or from the finer level.
+ * resolution: the chord is replaced by the finer cells' chords, merged into the polygons stored here, less any
+ * quadrant across which the finer level filled a cell. A face onto a cell this level filled is closed, and what it gave
+ * up becomes interface in the plane of that face; such a face stores no polygon, only that it is closed. With these the
+ * body of every cut cell is a function of its own surface and its own entries here, and needs nothing from its
+ * neighbours or from the finer level.
  *
  * Stored compressed, in the order the faces are applied: the cells in increasing order, each with its faces, each
  * face with its polygons, each polygon with its vertices. A cell's restricted faces come before its closed ones,

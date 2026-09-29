@@ -344,15 +344,25 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 
 #if CH_SPACEDIM == 3
 bool
-PolyhedralGeometryShop::isFilled(const BaseFab<signed char>& a_states,
-                                 const BaseFab<signed char>& a_refined,
-                                 const IntVectSet&           a_withSurface,
-                                 const IntVect&              a_cell)
+PolyhedralGeometryShop::isFilled(const BaseFab<signed char>&                 a_states,
+                                 const BaseFab<signed char>&                 a_refined,
+                                 const IntVectSet&                           a_withSurface,
+                                 const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
+                                 const IntVect&                              a_cell)
 {
+  using PolyhedralEB::CutCellBody;
+
   // Covered, and yet its corners disagree: the graph filled it. A cell the finer level carries reads covered whenever
   // its corners do, but it is described up there, and a covered cell whose corners agree closes its faces already.
-  return a_states.box().contains(a_cell) && a_states(a_cell, 0) == PolyhedralEBGraph::s_covered &&
-         a_withSurface.contains(a_cell) && !(a_refined.box().contains(a_cell) && a_refined(a_cell, 0) != 0);
+  if (!a_states.box().contains(a_cell) || a_states(a_cell, 0) != PolyhedralEBGraph::s_covered) {
+    return false;
+  }
+
+  if (a_refined.box().contains(a_cell) && a_refined(a_cell, 0) != 0) {
+    return false;
+  }
+
+  return a_withSurface.contains(a_cell) && CutCellBody::classify(a_surfaces(a_cell, 0)) == CutCellBody::Kind::Cut;
 }
 
 bool
@@ -411,14 +421,14 @@ PolyhedralGeometryShop::edgesRefined(bool a_edgeRefined[PolyhedralEB::CutCellSur
   return anyEdgeRefined;
 }
 
-void
+int
 PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
                                    PolyhedralEB::CutCellSurface&       a_surface,
                                    const PolyhedralEB::CutCellSurface* a_children,
                                    const bool*                         a_edgeRefined,
-                                   const BaseFab<signed char>&         a_states,
+                                   const BaseFab<signed char>&         a_filled,
                                    const BaseFab<signed char>&         a_refined,
-                                   const IntVectSet&                   a_withSurface,
+                                   const BaseFab<signed char>*         a_fineFilled,
                                    const Box&                          a_domain,
                                    const IntVect&                      a_cell,
                                    PolyhedralEB::CutCellFaceOverrides* a_overrides)
@@ -429,6 +439,8 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
   using PolyhedralEB::CutCellSurface;
 
   const Box& domain = a_domain;
+
+  int numClosed = 0;
 
   if (a_children != nullptr) {
     // Take the crossing on every edge the finer level describes from the half the finer level put it in, in this
@@ -486,7 +498,12 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
     }
   }
 
-  if (!a_body.define(a_surface)) {
+  // A cell whose corners are all fluid holds the whole of itself, written as polygons so that a face of it can be
+  // restricted or closed.
+  if (CutCellBody::classify(a_surface) == CutCellBody::Kind::Regular) {
+    a_body.defineWhole();
+  }
+  else if (!a_body.define(a_surface)) {
     pout() << "PolyhedralGeometryShop::stitchBody - cell " << a_cell << " did not close" << endl;
 
     MayDay::Error("PolyhedralGeometryShop::stitchBody - a cut cell's body did not close");
@@ -564,6 +581,9 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
       // other than dir, and dir takes the side.
       CutCellSurface faceChildren[1 << (SpaceDim - 1)];
 
+      // A quadrant whose finer cell across the face was filled opens onto nothing.
+      bool closedQuadrant[1 << (SpaceDim - 1)];
+
       for (int q = 0; q < (1 << (SpaceDim - 1)); q++) {
         int which = 0;
         int bit   = 0;
@@ -579,9 +599,20 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
         }
 
         faceChildren[q] = a_children[which];
+
+        IntVect across = 2 * a_cell + (2 * side - 1) * BASISV(dir);
+
+        for (int d = 0; d < SpaceDim; d++) {
+          across[d] += (which >> d) & 1;
+        }
+
+        closedQuadrant[q] = a_fineFilled != nullptr && a_fineFilled->box().contains(across) &&
+                            (*a_fineFilled)(across, 0) != 0;
+
+        numClosed += closedQuadrant[q] ? 1 : 0;
       }
 
-      if (!a_body.restrictFace(faceChildren, dir, side)) {
+      if (!a_body.restrictFace(faceChildren, closedQuadrant, dir, side)) {
         pout() << "PolyhedralGeometryShop::stitchBody - cell " << a_cell << " could not take face " << dir << "/"
                << side << " from the finer level" << endl;
 
@@ -642,7 +673,7 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
     for (int side = 0; side < 2; side++) {
       const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
 
-      if (!PolyhedralGeometryShop::isFilled(a_states, a_refined, a_withSurface, other)) {
+      if (!a_filled.box().contains(other) || a_filled(other, 0) == 0) {
         continue;
       }
 
@@ -658,15 +689,16 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
       }
     }
   }
+
+  return numClosed;
 }
 
 void
 PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&          a_body,
                                                const PolyhedralEB::CutCellSurface& a_surface,
                                                const PolyhedralEBGraph&            a_graph,
-                                               const BaseFab<signed char>&         a_states,
+                                               const BaseFab<signed char>&         a_filled,
                                                const BaseFab<signed char>&         a_refined,
-                                               const IntVectSet&                   a_withSurface,
                                                const IntVect&                      a_cell) const
 {
   CH_TIME("PolyhedralGeometryShop::defineBodyFromFunction");
@@ -714,9 +746,9 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
                                      surface,
                                      anyEdgeRefined ? children : nullptr,
                                      edgeRefined,
-                                     a_states,
+                                     a_filled,
                                      a_refined,
-                                     a_withSurface,
+                                     nullptr,
                                      domain,
                                      a_cell,
                                      nullptr);
@@ -732,7 +764,12 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 
   using PolyhedralEB::CutCellFaceOverrides;
 
-  if (!a_body.define(a_surfaces(a_cell, 0))) {
+  const PolyhedralEB::CutCellSurface& surface = a_surfaces(a_cell, 0);
+
+  if (PolyhedralEB::CutCellBody::classify(surface) == PolyhedralEB::CutCellBody::Kind::Regular) {
+    a_body.defineWhole();
+  }
+  else if (!a_body.define(surface)) {
     pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell << " did not close" << endl;
 
     MayDay::Error("PolyhedralGeometryShop::defineBody - a cut cell's body did not close");
@@ -918,6 +955,61 @@ PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
 }
 
 void
+PolyhedralGeometryShop::copyFinerCells(const PolyhedralEBGraph&                         a_fine,
+                                       const DisjointBoxLayout&                         a_grids,
+                                       const int                                        a_ring,
+                                       LevelData<BaseFab<signed char>>&                 a_states,
+                                       LevelData<BaseFab<signed char>>&                 a_mask,
+                                       LayoutData<IntVectSet>&                          a_sets,
+                                       LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces)
+{
+  CH_TIME("PolyhedralGeometryShop::copyFinerCells");
+
+  using PolyhedralEB::CutCellSurface;
+
+  DisjointBoxLayout refinedGrids;
+
+  refine(refinedGrids, a_grids, 2);
+
+  const IntVect fineGhost = 2 * a_ring * IntVect::Unit;
+
+  const Copier copier(a_fine.getGrids(), refinedGrids, a_fine.getDomain(), fineGhost);
+
+  // The mask says which cells hold a surface, which the states cannot say for a cell that is not cut.
+  LevelData<BaseFab<signed char>> sourceMask;
+
+  a_fine.markSurfaces(sourceMask);
+
+  a_states.define(refinedGrids, 1, fineGhost);
+  a_mask.define(refinedGrids, 1, fineGhost);
+  a_sets.define(refinedGrids);
+
+  for (DataIterator dit(refinedGrids); dit.ok(); ++dit) {
+    a_states[dit()].setVal(s_absent);
+    a_mask[dit()].setVal(0);
+  }
+
+  a_fine.getCellStates().copyTo(Interval(0, 0), a_states, Interval(0, 0), copier);
+  sourceMask.copyTo(Interval(0, 0), a_mask, Interval(0, 0), copier);
+
+  for (DataIterator dit(refinedGrids); dit.ok(); ++dit) {
+    const BaseFab<signed char>& mask = a_mask[dit()];
+
+    a_sets[dit()] = IntVectSet(DenseIntVectSet(mask.box(), false));
+
+    for (BoxIterator bit(mask.box()); bit.ok(); ++bit) {
+      if (mask(bit(), 0) != 0) {
+        a_sets[dit()] |= bit();
+      }
+    }
+  }
+
+  a_surfaces.define(refinedGrids, 1, fineGhost, IVSFABFactory<CutCellSurface>(a_sets));
+
+  a_fine.getSurfaces().copyTo(Interval(0, 0), a_surfaces, Interval(0, 0), copier);
+}
+
+void
 PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph* a_fine) const
 {
   CH_TIME("PolyhedralGeometryShop::stitchLevel");
@@ -936,53 +1028,14 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
   const int numGhost = a_coarse.getCellStates().ghostVect()[0];
 
   // The finer level's states and surfaces over each box refined and a ring around it: the children of the box's cut
-  // cells and of its ghost ring, and the finer cells around their edges. The mask says which of them hold a surface,
-  // which the states cannot say for a cell that is not cut.
-  DisjointBoxLayout refinedGrids;
-
+  // cells and of its ghost ring, and the finer cells around their edges.
   LevelData<BaseFab<signed char>>   fineStates;
   LevelData<BaseFab<signed char>>   fineMask;
-  LevelData<IVSFAB<CutCellSurface>> fineSurfaces;
   LayoutData<IntVectSet>            fineSets;
+  LevelData<IVSFAB<CutCellSurface>> fineSurfaces;
 
   if (a_fine != nullptr) {
-    refine(refinedGrids, grids, 2);
-
-    const IntVect fineGhost = 2 * (numGhost + 1) * IntVect::Unit;
-
-    const Copier copier(a_fine->getGrids(), refinedGrids, a_fine->getDomain(), fineGhost);
-
-    LevelData<BaseFab<signed char>> sourceMask;
-
-    a_fine->markSurfaces(sourceMask);
-
-    fineStates.define(refinedGrids, 1, fineGhost);
-    fineMask.define(refinedGrids, 1, fineGhost);
-    fineSets.define(refinedGrids);
-
-    for (DataIterator dit(refinedGrids); dit.ok(); ++dit) {
-      fineStates[dit()].setVal(s_absent);
-      fineMask[dit()].setVal(0);
-    }
-
-    a_fine->getCellStates().copyTo(Interval(0, 0), fineStates, Interval(0, 0), copier);
-    sourceMask.copyTo(Interval(0, 0), fineMask, Interval(0, 0), copier);
-
-    for (DataIterator dit(refinedGrids); dit.ok(); ++dit) {
-      const BaseFab<signed char>& mask = fineMask[dit()];
-
-      fineSets[dit()] = IntVectSet(DenseIntVectSet(mask.box(), false));
-
-      for (BoxIterator bit(mask.box()); bit.ok(); ++bit) {
-        if (mask(bit(), 0) != 0) {
-          fineSets[dit()] |= bit();
-        }
-      }
-    }
-
-    fineSurfaces.define(refinedGrids, 1, fineGhost, IVSFABFactory<CutCellSurface>(fineSets));
-
-    a_fine->getSurfaces().copyTo(Interval(0, 0), fineSurfaces, Interval(0, 0), copier);
+    PolyhedralGeometryShop::copyFinerCells(*a_fine, grids, numGhost + 1, fineStates, fineMask, fineSets, fineSurfaces);
   }
 
   LevelData<IVSFAB<CutCellSurface>>& surfaces  = a_coarse.getSurfaces();
@@ -992,22 +1045,51 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
   const LevelData<BaseFab<signed char>>& states   = a_coarse.getCellStates();
   const LevelData<BaseFab<signed char>>& refined  = a_coarse.getRefinedMask();
 
-  long long numMismatched = 0;
-  int       numReported   = 0;
+  // Which cells the graph filled, decided by each box for its own cells and exchanged into the ghost cells and one
+  // cell beyond, so that a ghost cell at the edge of a box's ring sees a filled neighbour as the box owning it does.
+  LevelData<BaseFab<signed char>> filled(grids, 1, (numGhost + 1) * IntVect::Unit);
+
+  for (DataIterator dit(grids); dit.ok(); ++dit) {
+    const Box box = grids[dit()];
+
+    BaseFab<signed char>& filledFab = filled[dit()];
+
+    filledFab.setVal(0);
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      if (PolyhedralGeometryShop::isFilled(states[dit()],
+                                           refined[dit()],
+                                           a_coarse.getSurfaceCells()[dit()],
+                                           surfaces[dit()],
+                                           bit())) {
+        filledFab(bit(), 0) = 1;
+      }
+    }
+  }
+
+  filled.exchange();
+
+  long long numMismatched      = 0;
+  long long numTwiceCrossed    = 0;
+  long long numPromoted        = 0;
+  long long numClosedQuadrants = 0;
+  int       numReported        = 0;
 
   for (DataIterator dit(grids); dit.ok(); ++dit) {
     const IntVectSet&           cut         = cutCells[dit()];
     const IntVectSet&           withSurface = a_coarse.getSurfaceCells()[dit()];
     const BaseFab<signed char>& statesFab   = states[dit()];
     const BaseFab<signed char>& refinedFab  = refined[dit()];
+    const BaseFab<signed char>& filledFab   = filled[dit()];
 
     IVSFAB<CutCellSurface>& stored = surfaces[dit()];
     CutCellFaceOverrides&   faces  = overrides[dit()];
 
     faces.clear();
 
-    BaseFab<Real> fineNodes;
-    BaseFab<Real> fineCrossings[SpaceDim];
+    BaseFab<Real>        fineNodes;
+    BaseFab<Real>        fineCrossings[SpaceDim];
+    BaseFab<signed char> fineFilled;
 
     // a box the finer level does not reach needs nothing from it
     bool nearFiner = false;
@@ -1025,6 +1107,19 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
                                             fineStates[dit()],
                                             fineMask[dit()],
                                             fineSurfaces[dit()]);
+
+      // the finer cells the graph filled: covered, with corners that disagree
+      fineFilled.define(region, 1);
+      fineFilled.setVal(0);
+
+      for (BoxIterator bit(region); bit.ok(); ++bit) {
+        const IntVect fiv = bit();
+
+        if (fineStates[dit()](fiv, 0) == PolyhedralEBGraph::s_covered && fineMask[dit()](fiv, 0) != 0 &&
+            CutCellBody::classify(fineSurfaces[dit()](fiv, 0)) == CutCellBody::Kind::Cut) {
+          fineFilled(fiv, 0) = 1;
+        }
+      }
     }
 
     // The box's own cut cells and those of its ghost ring, in the order a BoxIterator meets them, which is the order
@@ -1032,8 +1127,95 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
     for (BoxIterator bit(statesFab.box() & domain); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
+      // A regular or covered cell beside the finer level keeps its surface, and is made cut where the finer level
+      // describes a face between them otherwise than the cell's corners do: a regular cell whose face the finer level
+      // cuts or closes -- a solid node on the face, or a quadrant across which the finer level filled a cell -- or a
+      // covered cell onto whose face it opens.
+      bool promoted = false;
+
       if (!cut.contains(iv)) {
-        continue;
+        const int state = statesFab(iv, 0);
+
+        if (!withSurface.contains(iv) || refinedFab(iv, 0) != 0 || fineFilled.box().isEmpty() ||
+            (state != PolyhedralEBGraph::s_regular && state != PolyhedralEBGraph::s_covered)) {
+          continue;
+        }
+
+        // a cell this level filled is covered with corners that disagree, and stays filled
+        if (CutCellBody::classify(stored(iv, 0)) == CutCellBody::Kind::Cut) {
+          continue;
+        }
+
+        const bool fluid = (state == PolyhedralEBGraph::s_regular);
+
+        for (int dir = 0; dir < SpaceDim && !promoted; dir++) {
+          for (int side = 0; side < 2 && !promoted; side++) {
+            const IntVect other = iv + (2 * side - 1) * BASISV(dir);
+
+            if (!domain.contains(other) || refinedFab(other, 0) == 0) {
+              continue;
+            }
+
+            const int t0 = (dir + 1) % SpaceDim;
+            const int t1 = (dir + 2) % SpaceDim;
+
+            // The node at the middle of the face belongs to this face alone. The nodes at the middles of its edges are
+            // shared with this level's cells along those edges, and one that disagrees with both ends of its edge is
+            // an edge the finer level crosses twice, which no cell of this level can take on by itself; it is counted
+            // and left.
+            for (int a = 0; a <= 2; a++) {
+              for (int b = 0; b <= 2; b++) {
+                if (a != 1 && b != 1) {
+                  continue;
+                }
+
+                IntVect node = 2 * iv;
+
+                node[dir] += 2 * side;
+                node[t0] += a;
+                node[t1] += b;
+
+                const Real value = fineNodes(node, 0);
+
+                if (std::isnan(value)) {
+                  MayDay::Error("PolyhedralGeometryShop::stitchLevel - a node on a seam face is unknown to the finer "
+                                "level");
+                }
+
+                if (PolyhedralEB::isFluid(value) == fluid) {
+                  continue;
+                }
+
+                if (a == 1 && b == 1) {
+                  promoted = true;
+                }
+                else if (grids[dit()].contains(iv)) {
+                  numTwiceCrossed++;
+                }
+              }
+            }
+
+            for (int q = 0; q < (1 << (SpaceDim - 1)) && fluid && !promoted; q++) {
+              IntVect across = 2 * iv + (2 * side - 1) * BASISV(dir);
+
+              across[dir] += side;
+              across[t0] += q & 1;
+              across[t1] += (q >> 1) & 1;
+
+              promoted = fineFilled(across, 0) != 0;
+            }
+          }
+        }
+
+        if (!promoted) {
+          continue;
+        }
+
+        a_coarse.promoteToCut(dit(), iv);
+
+        if (grids[dit()].contains(iv)) {
+          numPromoted++;
+        }
       }
 
       const CutCellSurface original = stored(iv, 0);
@@ -1052,7 +1234,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
         for (int side = 0; side < 2 && !ontoCovered; side++) {
           const IntVect other = iv + (2 * side - 1) * BASISV(dir);
 
-          ontoCovered = PolyhedralGeometryShop::isFilled(statesFab, refinedFab, withSurface, other);
+          ontoCovered = filledFab.box().contains(other) && filledFab(other, 0) != 0;
         }
       }
 
@@ -1083,36 +1265,51 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
 
       faces.beginCell(iv);
 
-      PolyhedralGeometryShop::stitchBody(body,
-                                         surface,
-                                         anyEdgeRefined ? children : nullptr,
-                                         edgeRefined,
-                                         statesFab,
-                                         refinedFab,
-                                         withSurface,
-                                         domain,
-                                         iv,
-                                         &faces);
+      const int numClosed = PolyhedralGeometryShop::stitchBody(body,
+                                                               surface,
+                                                               anyEdgeRefined ? children : nullptr,
+                                                               edgeRefined,
+                                                               filledFab,
+                                                               refinedFab,
+                                                               fineFilled.box().isEmpty() ? nullptr : &fineFilled,
+                                                               domain,
+                                                               iv,
+                                                               &faces);
 
       faces.endCell();
 
+      if (grids[dit()].contains(iv)) {
+        numClosedQuadrants += numClosed;
+      }
+
+      surface.m_role = (faces.find(iv) >= 0) ? CutCellSurface::s_overridden : CutCellSurface::s_native;
+
       stored(iv, 0) = surface;
 
-      // The stitched body must be the one the implicit function gives, and the one the stored data rebuilds.
+      // The stitched body must be the one the stored data rebuilds, and the one the implicit function gives wherever
+      // the function's children can say the same: they know nothing of the finer level's fills, so a cell made cut or a
+      // quadrant closed because of one has no counterpart there.
       if (m_sanityCheck) {
         CutCellBody fromFunction;
         CutCellBody fromStore;
 
-        this->defineBodyFromFunction(fromFunction, original, a_coarse, statesFab, refinedFab, withSurface, iv);
+        const bool comparable = !promoted && numClosed == 0;
+
+        if (comparable) {
+          this->defineBodyFromFunction(fromFunction, original, a_coarse, filledFab, refinedFab, iv);
+        }
 
         PolyhedralGeometryShop::defineBody(fromStore, stored, faces, iv);
 
-        if (!fromFunction.identical(body) || !fromStore.identical(body)) {
+        if ((comparable && !fromFunction.identical(body)) || !fromStore.identical(body)) {
           numMismatched++;
 
           if (numReported < 10) {
             pout() << "PolyhedralGeometryShop::stitchLevel - cell " << iv << ": the body stitched from the finer "
-                   << "level's cells " << (fromFunction.identical(body) ? "matches" : "differs from")
+                   << "level's cells "
+                   << (!comparable                    ? "has no counterpart in"
+                       : fromFunction.identical(body) ? "matches"
+                                                      : "differs from")
                    << " the one from the implicit function, and "
                    << (fromStore.identical(body) ? "matches" : "differs from")
                    << " the one rebuilt from the stored data" << endl;
@@ -1122,6 +1319,21 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
         }
       }
     }
+  }
+
+  const long long totalPromoted = ParallelOps::sum(numPromoted);
+  const long long totalClosed   = ParallelOps::sum(numClosedQuadrants);
+  const long long totalTwice    = ParallelOps::sum(numTwiceCrossed);
+
+  if (totalTwice > 0 && procID() == 0) {
+    pout() << "PolyhedralGeometryShop::stitchLevel - " << totalTwice << " seam face edges of regular or covered cells "
+           << "are crossed twice by the finer level and left as this level reads them" << endl;
+  }
+
+  if ((totalPromoted > 0 || totalClosed > 0) && procID() == 0) {
+    pout() << "PolyhedralGeometryShop::stitchLevel - made " << totalPromoted
+           << " cells beside the finer level cut, and "
+           << "closed " << totalClosed << " seam face quadrants onto filled finer cells" << endl;
   }
 
   if (m_sanityCheck && ParallelOps::sum(numMismatched) > 0) {
@@ -1663,11 +1875,16 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const LevelData<BaseFab<signed char>>& states  = graph.getCellStates();
     const LevelData<BaseFab<signed char>>& refined = graph.getRefinedMask();
 
+    LevelData<BaseFab<signed char>> carried;
+
+    graph.markCarried(carried);
+
     for (DataIterator dit(grids); dit.ok(); ++dit) {
       const Box box = grids[dit()];
 
       const BaseFab<signed char>& state      = states[dit()];
       const BaseFab<signed char>& refinedFab = refined[dit()];
+      const BaseFab<signed char>& carriedFab = carried[dit()];
 
       for (BoxIterator bit(box); bit.ok(); ++bit) {
         const IntVect iv = bit();
@@ -1683,6 +1900,12 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
             // A cell the finer level carries is classified here from its corners alone; whether it may sit beside
             // a covered cell is the finer level's to say.
             if (refinedFab(iv, 0) != 0 || refinedFab(jv, 0) != 0) {
+              continue;
+            }
+
+            // A cell no tile of this level carries is the coarser level's, classified here from its corners alone;
+            // the face onto it is the coarser level's to close, which stitching does from that side.
+            if (carriedFab(jv, 0) == 0) {
               continue;
             }
 
@@ -1840,6 +2063,33 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     const LevelData<BaseFab<signed char>>&   refined    = graph.getRefinedMask();
     const LevelData<BaseFab<signed char>>&   faceStates = graph.getFaceStates();
 
+    // The finer level's cells behind this level's boxes and two cells around them, and the finer cells around those,
+    // which is where a fine cell's faces onto a filled cell are decided.
+    LevelData<BaseFab<signed char>>   fineStates;
+    LevelData<BaseFab<signed char>>   fineMask;
+    LayoutData<IntVectSet>            fineSets;
+    LevelData<IVSFAB<CutCellSurface>> fineSurfaces;
+
+    Box fineDomain;
+
+    if (lvl + 1 < a_graphs.size() && a_graphs[lvl + 1]->isDefined()) {
+      PolyhedralGeometryShop::copyFinerCells(*a_graphs[lvl + 1],
+                                             grids,
+                                             3,
+                                             fineStates,
+                                             fineMask,
+                                             fineSets,
+                                             fineSurfaces);
+
+      fineDomain = a_graphs[lvl + 1]->getDomain().domainBox();
+    }
+
+    bool noRefinedEdge[CutCellSurface::s_numEdges];
+
+    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+      noRefinedEdge[e] = false;
+    }
+
     // whether a vertex lies in a face plane of a cell of this level, for reading which plane an edge lies in
     auto inPlane = [&](const int a_vertex, const int a_cellCoordinate, const int a_dir, const int a_side) -> bool {
       const Real plane = m_probLo[a_dir] + dx * static_cast<Real>(a_cellCoordinate + a_side);
@@ -1855,6 +2105,31 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
       const BaseFab<signed char>&   statesFab  = states[dit()];
       const BaseFab<signed char>&   refinedFab = refined[dit()];
       const BaseFab<signed char>&   faces      = faceStates[dit()];
+
+      // The finer cells a coarse cell here meets lie at the edge of the finer level's tiles, which no level above them
+      // reaches, so none of their edges is refined.
+      BaseFab<signed char> noneRefined;
+      BaseFab<signed char> fineFilledFab;
+
+      if (!fineDomain.isEmpty()) {
+        const Box fineRegion = fineStates[dit()].box();
+
+        noneRefined.define(fineRegion, 1);
+        noneRefined.setVal(0);
+
+        fineFilledFab.define(fineRegion, 1);
+        fineFilledFab.setVal(0);
+
+        for (BoxIterator fit(fineRegion & fineDomain); fit.ok(); ++fit) {
+          if (PolyhedralGeometryShop::isFilled(fineStates[dit()],
+                                               noneRefined,
+                                               fineSets[dit()],
+                                               fineSurfaces[dit()],
+                                               fit())) {
+            fineFilledFab(fit(), 0) = 1;
+          }
+        }
+      }
 
       // The interface triangles of every cut cell of the box and its one-cell ring that this level writes, built
       // once each and reached through a cell-indexed table.
@@ -1915,7 +2190,8 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
           }
         }
 
-        // The finer cells around this one, reconstructed at their spacing. Every neighbour the finer level
+        // The finer cells around this one, built from the finer level's stored cells as that level builds them, its
+        // fills and the faces closed onto them included. Every neighbour the finer level
         // carries is taken, not only the six across a face: an interface edge that runs along a cell edge is
         // shared by two facets whose cells meet along that edge alone, so the cell holding the other half of it
         // can be a diagonal neighbour, and leaving those out reports an edge as open that is not.
@@ -1933,43 +2209,29 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
             const Box fineBox = refine(Box(neighbour, neighbour), 2);
 
-            BaseFab<Real> fineNodeValues;
-            BaseFab<Real> fineIntercept[SpaceDim];
-
-            PolyhedralGeometryShop::fillNodeValues(*m_baseIF, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
-            PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
+            const BaseFab<signed char>&   fineStatesFab   = fineStates[dit()];
+            const IVSFAB<CutCellSurface>& fineSurfacesFab = fineSurfaces[dit()];
 
             for (BoxIterator fit(fineBox); fit.ok(); ++fit) {
-              CutCellSurface fineSurface;
+              const IntVect fiv = fit();
 
-              PolyhedralGeometryShop::buildSurface(*m_baseIF,
-                                                   fineIntercept,
-                                                   fineSurface,
-                                                   fineNodeValues,
-                                                   fit(),
-                                                   m_probLo,
-                                                   0.5 * dx);
-
-              if (CutCellBody::classify(fineSurface) != CutCellBody::Kind::Cut) {
+              if (fineStatesFab(fiv, 0) != PolyhedralEBGraph::s_cut) {
                 continue;
               }
 
-              CutCellBody fineBody;
+              CutCellSurface fineSurface = fineSurfacesFab(fiv, 0);
+              CutCellBody    fineBody;
 
-              if (!fineBody.define(fineSurface)) {
-                continue;
-              }
-
-              // The finer level classifies with the volume threshold and the dust rule, and a cell those rules
-              // turn into a regular or a covered one writes no surface there. A reconstruction that kept it would
-              // hold triangles the level itself does not have, and every edge of them would be reported open.
-              if (m_volumeThreshold > 0.0 && fineBody.volumeFraction() < m_volumeThreshold) {
-                continue;
-              }
-
-              if (PolyhedralGeometryShop::isDust(fineBody)) {
-                continue;
-              }
+              PolyhedralGeometryShop::stitchBody(fineBody,
+                                                 fineSurface,
+                                                 nullptr,
+                                                 noRefinedEdge,
+                                                 fineFilledFab,
+                                                 noneRefined,
+                                                 nullptr,
+                                                 fineDomain,
+                                                 fiv,
+                                                 nullptr);
 
               Vector<Real> fineFacets;
 

@@ -69,7 +69,7 @@ CutCellBody::numSheets(const CutCellSurface& a_surface) noexcept
 {
 #if CH_SPACEDIM == 2
   // Two dimensions: a cell's faces and its edges are the same four segments, and the crossings on them pair
-  // into chords, so half the crossings is the number of sheets.
+  // into chords, one around each run of solid corners met going round the cell.
   int numCrossings = 0;
 
   for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
@@ -78,12 +78,72 @@ CutCellBody::numSheets(const CutCellSurface& a_surface) noexcept
     }
   }
 
-  return (numCrossings % 2 == 0) ? numCrossings / 2 : -1;
+  if (numCrossings % 2 != 0) {
+    return -1;
+  }
+
+  if (numCrossings == 0) {
+    return 0;
+  }
+
+  constexpr int circuit[4] = {0, 1, 3, 2};
+
+  // start the walk at a fluid corner, so that every run of solid corners is met whole
+  int first = 0;
+
+  while (!isFluid(a_surface.m_corner[circuit[first]])) {
+    first++;
+  }
+
+  int  numSheets = 0;
+  bool inRun     = false;
+  bool allZero   = true;
+
+  for (int i = 1; i <= 4; i++) {
+    const Real value = a_surface.m_corner[circuit[(first + i) % 4]];
+
+    if (!isFluid(value)) {
+      allZero = (inRun ? allZero : true) && (value == 0.0);
+      inRun   = true;
+    }
+    else if (inRun) {
+      numSheets += allZero ? 0 : 1;
+      inRun = false;
+    }
+  }
+
+  return numSheets;
 #else
   int loop[CutCellSurface::s_numEdges];
   int start[CutCellSurface::s_numEdges + 1];
 
-  return detail::crossingLoops(a_surface, loop, start);
+  const int numLoops = detail::crossingLoops(a_surface, loop, start);
+
+  if (numLoops <= 0) {
+    return numLoops;
+  }
+
+  // A loop whose every edge has, for its solid end, a corner at exactly zero bounds nothing.
+  int numSheets = 0;
+
+  for (int l = 0; l < numLoops; l++) {
+    bool degenerate = true;
+
+    for (int k = start[l]; k < start[l + 1] && degenerate; k++) {
+      int low  = -1;
+      int high = -1;
+
+      detail::edgeCorners(loop[k], low, high);
+
+      const Real solidEnd = isFluid(a_surface.m_corner[low]) ? a_surface.m_corner[high] : a_surface.m_corner[low];
+
+      degenerate = (solidEnd == 0.0);
+    }
+
+    numSheets += degenerate ? 0 : 1;
+  }
+
+  return numSheets;
 #endif
 }
 
@@ -563,7 +623,10 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
 }
 
 bool
-CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept
+CutCellBody::restrictFace(const CutCellSurface* a_children,
+                          const bool*           a_closedQuadrant,
+                          const int             a_dir,
+                          const int             a_side) noexcept
 {
   CH_assert(a_children != nullptr);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
@@ -616,6 +679,10 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
       return false;
     }
 
+    if (a_closedQuadrant != nullptr && a_closedQuadrant[q]) {
+      continue;
+    }
+
     for (int n = 0; n < numWalked; n++) {
       if (numSub >= 4 * (1 << (SpaceDim - 1))) {
         return false;
@@ -653,6 +720,37 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
   }
 
   return true;
+}
+
+void
+CutCellBody::defineWhole() noexcept
+{
+  *this = CutCellBody();
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      int faceCorner[1 << (SpaceDim - 1)];
+
+      detail::faceCorners(dir, side, faceCorner);
+
+      Polygon& polygon = m_polygon[m_numPolygons];
+
+      polygon               = Polygon();
+      polygon.m_numVertices = 0;
+      polygon.m_face        = 2 * dir + side;
+
+      for (int i = 0; i < (1 << (SpaceDim - 1)); i++) {
+        polygon.m_vertexEdge[polygon.m_numVertices] = -1;
+        polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(faceCorner[i]);
+      }
+
+      this->orientOutward(polygon, dir, side);
+
+      m_numPolygons++;
+    }
+  }
+
+  this->accumulateMoments();
 }
 
 void

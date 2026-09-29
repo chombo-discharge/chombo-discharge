@@ -345,7 +345,21 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
       // The surface is kept wherever the corners disagree, whatever the cell became: a cell dropped as dust or
       // filled still has its crossings on edges its neighbours and the coarser level share, and those are data the
       // coarser level stitches from, never recomputed from the function.
-      if (state == s_cut || CutCellBody::classify(surface) == CutCellBody::Kind::Cut) {
+      //
+      // A cell beside one the finer level carries keeps its surface whatever it is: the finer level may describe the
+      // face between them otherwise than this cell's corners do, and the cell is then made cut when the level is
+      // stitched, from its surface.
+      bool besideFiner = false;
+
+      for (int dir = 0; dir < SpaceDim && !besideFiner; dir++) {
+        for (int side = 0; side < 2 && !besideFiner; side++) {
+          const IntVect other = iv + (2 * side - 1) * BASISV(dir);
+
+          besideFiner = m_domain.contains(other) && refined(other, 0) != 0;
+        }
+      }
+
+      if (state == s_cut || besideFiner || CutCellBody::classify(surface) == CutCellBody::Kind::Cut) {
         withSurface |= iv;
 
         surfaces.push_back(surface);
@@ -651,6 +665,8 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
         for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
           same = same && (a.m_corner[c] == b.m_corner[c]);
         }
+
+        same = same && (a.m_role == b.m_role);
       }
     }
   }
@@ -698,6 +714,39 @@ PolyhedralEBGraph::markSurfaces(LevelData<BaseFab<signed char>>& a_mask) const
   }
 
   a_mask.exchange();
+}
+
+void
+PolyhedralEBGraph::promoteToCut(const DataIndex& a_dit, const IntVect& a_cell)
+{
+  CH_TIME("PolyhedralEBGraph::promoteToCut");
+
+  BaseFab<signed char>&       states  = m_cellStates[a_dit];
+  BaseFab<signed char>&       faces   = m_faceStates[a_dit];
+  const BaseFab<signed char>& refined = m_refined[a_dit];
+
+  CH_assert(states(a_cell, 0) != s_cut);
+  CH_assert(refined(a_cell, 0) == 0);
+  CH_assert(m_surfaceCells[a_dit].contains(a_cell));
+
+  states(a_cell, 0) = s_cut;
+
+  m_cutCells[a_dit] |= a_cell;
+
+  // the face states are kept for the box's own cells only
+  if (!m_grids[a_dit].contains(a_cell)) {
+    return;
+  }
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
+
+      if (m_domain.contains(other) && refined(other, 0) != 0) {
+        faces(a_cell, 2 * dir + side) = s_faceFiner;
+      }
+    }
+  }
 }
 
 void
