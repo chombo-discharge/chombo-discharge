@@ -1837,6 +1837,31 @@ PolyhedralGeometryShop::sanityCheck() const
   }
 
   this->sanityCheck(m_graphs);
+
+  // Which level describes which cell, asked of every box this rank holds as it stands, coarsened onto the level
+  // below, refined onto the level above, and refined past the finest level.
+  const int numLevels = m_graphs.size();
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    const DisjointBoxLayout& grids = m_graphs[lvl]->getGrids();
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const Box box = grids[dit()];
+
+      m_compGeom->checkOwnedPieces(box, lvl);
+      m_compGeom->checkOwnedPieces(coarsen(box, 2), lvl - 1);
+      m_compGeom->checkOwnedPieces(refine(box, 2), lvl + 1);
+    }
+  }
+
+  if (procID() == 0) {
+    pout() << "PolyhedralGeometryShop::sanityCheck - the tiles partition the cells of every box among the levels "
+           << "that own them" << endl;
+  }
 }
 
 void

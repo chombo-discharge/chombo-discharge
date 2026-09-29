@@ -16,6 +16,8 @@
 // Std includes
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 // EBGeometry includes
 #include <EBGeometry.hpp>
@@ -239,6 +241,36 @@ public:
    */
   GeometryService::InOut
   classify(const Box& a_box, const ProblemDomain& a_domain, const phase::which_phase a_phase) const;
+
+  /**
+   * @brief Which level describes each part of a box, and through which of its cut tiles.
+   * @details A cell of a tiled level is owned by that level when one of the level's cut tiles holds it and none of the
+   * next level's does: the polyhedral graph of that level builds it, and no other level does. The owned cells of all
+   * levels partition the tiled region. For every tiled level this maps the box onto the level -- coarsened outward
+   * onto a coarser one, refined onto a finer one -- and returns the parts of it the level owns, tile by tile. A cell
+   * of the box that no tile of any level holds is in no piece; classify answers what it is.
+   *
+   * The box may live on a level finer than every stored one, which is then a refinement by two per level of the
+   * finest stored domain, and every piece comes from a coarser level.
+   * @param[out] a_pieces One list per stored level of (index into getCutTiles(level), region on that level) pairs:
+   * the tile, and a box of cells of the tile that the level owns and the mapped box meets. A tile the next level
+   * holds part of gives several. Empty on a level with no tiles, or that the box does not reach.
+   * @param[in]  a_box    Box on level a_level.
+   * @param[in]  a_level  Level of the box, 0 being the coarsest; past the finest stored level for a finer domain.
+   */
+  void
+  ownedPieces(std::vector<std::vector<std::pair<int, Box>>>& a_pieces, const Box& a_box, const int a_level) const;
+
+  /**
+   * @brief Check ownedPieces on a box against a cell-by-cell reading of the tiles.
+   * @details Every cell of every tiled level that the mapped box meets is looked up on its own: owned if a tile of
+   * the level holds it and no tile of the next level holds any of its children. The pieces must cover exactly the
+   * owned cells, each once. A disagreement is reported and stops the run.
+   * @param[in] a_box   Box on level a_level.
+   * @param[in] a_level Level of the box, as ownedPieces takes it.
+   */
+  void
+  checkOwnedPieces(const Box& a_box, const int a_level) const;
 
   /**
    * @brief Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.
