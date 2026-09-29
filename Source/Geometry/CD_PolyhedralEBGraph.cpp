@@ -11,6 +11,7 @@
  */
 
 // Std includes
+#include <algorithm>
 #include <iomanip>
 
 // Chombo includes
@@ -63,6 +64,7 @@ PolyhedralEBGraph::define(const BaseIF&        a_function,
   m_covered  = a_covered;
 
   this->defineGrids(a_cutTiles);
+  this->markRefined();
 
   // one on every cell some tile of this level carries, zero elsewhere, with one ghost cell
   LevelData<BaseFab<signed char>> carried;
@@ -105,7 +107,7 @@ PolyhedralEBGraph::defineData()
   m_cutCells.define(m_grids);
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
-  m_refined.define(m_grids, 1, 2 * IntVect::Unit);
+  m_refined.define(m_grids, 1, std::max(2, m_numGhost) * IntVect::Unit);
 
   // Each box's cut-cell set is a bitmap over the box and its ghost ring, which is where its cells come from: a
   // set that starts empty would be a tree, several kilobytes for a few hundred scattered cells, and the surface
@@ -205,7 +207,7 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
     states.setVal(s_regular);
     faces.setVal(s_faceClosed);
 
-    m_refined[dit()].setVal(0);
+    const BaseFab<signed char>& refined = m_refined[dit()];
 
     // Node values once per node and each crossed edge bisected once, shared by the cells of the box, as the
     // generator does when it builds a box.
@@ -237,6 +239,21 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
       const IntVect iv = bit();
 
       CutCellSurface surface;
+
+      // A cell the finer level carries is described there. It is classified from its corners so that its
+      // neighbours read a state for it, but no crossing is solved for, no body is built, and it is not a cut cell
+      // of this level; its faces stay closed, since what opens onto it is the finer level's to say.
+      if (refined(iv, 0) != 0) {
+        PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
+
+        const CutCellBody::Kind corners = CutCellBody::classify(surface);
+
+        states(iv, 0) = (corners == CutCellBody::Kind::Covered) ? s_covered
+                        : (corners == CutCellBody::Kind::Cut)   ? s_cut
+                                                                : s_regular;
+
+        continue;
+      }
 
       PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
 
@@ -378,6 +395,7 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
 
     BaseFab<signed char>&       states  = m_cellStates[dit()];
     const BaseFab<signed char>& carried = a_carried[dit()];
+    const BaseFab<signed char>& refined = m_refined[dit()];
 
     IntVectSet& cut = m_cutCells[dit()];
 
@@ -443,7 +461,7 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
         }
         }
       }
-      else if (states(iv, 0) == s_cut) {
+      else if (states(iv, 0) == s_cut && refined(iv, 0) == 0) {
         // The surfaces are kept with ghost cells, so that a box holds its neighbours' cut cells' surfaces as
         // well: each box's set takes in the ghost cells that are cut and that some tile carries, which is exactly
         // the set the owning tiles hold in that region, and an exchange fills them.
@@ -485,9 +503,11 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   m_probLo   = a_source.m_probLo;
   m_dx       = a_source.m_dx;
   m_numGhost = a_source.m_numGhost;
+  m_covered  = a_source.m_covered;
   m_grids    = a_grids;
 
   this->defineData();
+  this->markRefined();
 
   LevelData<BaseFab<signed char>> carried;
 
@@ -500,7 +520,6 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     m_cellStates[dit()].setVal(s_regular);
     m_faceStates[dit()].setVal(s_faceClosed);
-    m_refined[dit()].setVal(0);
   }
 
   a_source.m_cellStates.copyTo(Interval(0, 0), m_cellStates, Interval(0, 0), copier);
@@ -509,19 +528,19 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
   m_cellStates.exchange();
 
   // The refined mask is not copied: it reaches into ghost cells no tile of this level carries, which an
-  // exchange cannot fill, and it is derived from the finer level in any case. The copy is linked to its finer
-  // level afterwards, as the original was, which sets the mask and the faces the finer level describes; a face
-  // state copied as finer stays finer, since link only ever marks faces.
+  // exchange cannot fill, and it follows from the covered region, which the copy takes from the source and marks
+  // from above. A face state copied as finer stays finer, and linking the copy to its finer level checks the mask.
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box box = m_grids[dit()];
 
-    const BaseFab<signed char>& states = m_cellStates[dit()];
+    const BaseFab<signed char>& states  = m_cellStates[dit()];
+    const BaseFab<signed char>& refined = m_refined[dit()];
 
     IntVectSet& cut = m_cutCells[dit()];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
-      if (states(bit(), 0) == s_cut) {
+      if (states(bit(), 0) == s_cut && refined(bit(), 0) == 0) {
         cut |= bit();
       }
     }
@@ -618,6 +637,30 @@ PolyhedralEBGraph::markCarried(LevelData<BaseFab<signed char>>& a_carried) const
 }
 
 void
+PolyhedralEBGraph::markRefined()
+{
+  CH_TIME("PolyhedralEBGraph::markRefined");
+
+  // The covered region is the same list on every rank, so every box marks its own cells and ghost cells from it
+  // with no communication, including ghost cells no tile of this level carries.
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    BaseFab<signed char>& refined = m_refined[dit()];
+
+    refined.setVal(0);
+
+    const Box region = refined.box() & m_domain.domainBox();
+
+    for (int i = 0; i < m_covered.size(); i++) {
+      const Box overlap = m_covered[i] & region;
+
+      if (!overlap.isEmpty()) {
+        refined.setVal(1, overlap, 0);
+      }
+    }
+  }
+}
+
+void
 PolyhedralEBGraph::defineOuterFaces(const LevelData<BaseFab<signed char>>& a_carried)
 {
   CH_TIME("PolyhedralEBGraph::defineOuterFaces");
@@ -694,12 +737,21 @@ PolyhedralEBGraph::link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_
     const Box                   box    = a_coarse.m_grids[dit()];
     const BaseFab<signed char>& marker = coarMarker[dit()];
 
-    BaseFab<signed char>& refined = a_coarse.m_refined[dit()];
-    BaseFab<signed char>& faces   = a_coarse.m_faceStates[dit()];
+    const BaseFab<signed char>& refined = a_coarse.m_refined[dit()];
+    BaseFab<signed char>&       faces   = a_coarse.m_faceStates[dit()];
 
-    // the mask keeps two ghost cells, so a box knows whether its neighbours' cells are refined, and their
-    // neighbours' in turn, which is what rebuilding a neighbour's body on a level boundary asks
-    refined.copy(marker, grow(box, 2) & domainBox);
+    // The coarse level was told its covered region when it was defined, from the same tiles the fine level is
+    // built over, so the two must agree cell for cell -- over the box and the two ghost cells a neighbour's body on
+    // a level boundary reads. A disagreement means the levels were not built from one set of tiles.
+    for (BoxIterator bit(grow(box, 2) & domainBox); bit.ok(); ++bit) {
+      if ((refined(bit(), 0) != 0) != (marker(bit(), 0) != 0)) {
+        pout() << "PolyhedralEBGraph::link - cell " << bit() << " is " << ((refined(bit(), 0) != 0) ? "" : "not ")
+               << "in the coarse level's covered region but is " << ((marker(bit(), 0) != 0) ? "" : "not ")
+               << "under the fine level's tiles" << endl;
+
+        MayDay::Error("PolyhedralEBGraph::link - the coarse level's covered region disagrees with the fine tiles");
+      }
+    }
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();

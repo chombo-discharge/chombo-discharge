@@ -322,9 +322,12 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
-      if (!cut.contains(iv) || refinedFab(iv, 0) != 0) {
+      if (!cut.contains(iv)) {
         continue;
       }
+
+      // the graph builds no cut cell the finer level carries
+      CH_assert(refinedFab(iv, 0) == 0);
 
       CutCellBody body;
 
@@ -1071,10 +1074,8 @@ PolyhedralGeometryShop::reportUnresolvedRefinement() const
       for (IVSIterator ivsIt(cut); ivsIt.ok(); ++ivsIt) {
         const IntVect iv = ivsIt();
 
-        // A cell the finer level carries is described up there, and refining it is that level's business.
-        if (refinedFab(iv, 0) != 0) {
-          continue;
-        }
+        // A cell the finer level carries is described up there, and the graph builds no cut cell for it.
+        CH_assert(refinedFab(iv, 0) == 0);
 
         CutCellBody body;
 
@@ -1177,13 +1178,15 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
 
     const Box& domainBox = graph.getDomain().domainBox();
 
-    const DisjointBoxLayout&               grids  = graph.getGrids();
-    const LevelData<BaseFab<signed char>>& states = graph.getCellStates();
+    const DisjointBoxLayout&               grids   = graph.getGrids();
+    const LevelData<BaseFab<signed char>>& states  = graph.getCellStates();
+    const LevelData<BaseFab<signed char>>& refined = graph.getRefinedMask();
 
     for (DataIterator dit(grids); dit.ok(); ++dit) {
       const Box box = grids[dit()];
 
-      const BaseFab<signed char>& state = states[dit()];
+      const BaseFab<signed char>& state      = states[dit()];
+      const BaseFab<signed char>& refinedFab = refined[dit()];
 
       for (BoxIterator bit(box); bit.ok(); ++bit) {
         const IntVect iv = bit();
@@ -1193,6 +1196,12 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
             const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
 
             if (!domainBox.contains(jv) || !state.box().contains(jv)) {
+              continue;
+            }
+
+            // A cell the finer level carries is classified here from its corners alone; whether it may sit beside
+            // a covered cell is the finer level's to say.
+            if (refinedFab(iv, 0) != 0 || refinedFab(jv, 0) != 0) {
               continue;
             }
 
@@ -1377,9 +1386,12 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
       for (BoxIterator cit(grown); cit.ok(); ++cit) {
         const IntVect iv = cit();
 
-        if (!cut.contains(iv) || refinedFab(iv, 0) != 0) {
+        if (!cut.contains(iv)) {
           continue;
         }
+
+        // the graph builds no cut cell the finer level carries
+        CH_assert(refinedFab(iv, 0) == 0);
 
         CutCellBody body;
 

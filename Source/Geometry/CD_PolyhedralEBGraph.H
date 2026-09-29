@@ -150,11 +150,14 @@ public:
   equals(const PolyhedralEBGraph& a_other) const;
 
   /**
-   * @brief Mark, on the coarse level, the cells the fine level carries and the faces that open onto them.
+   * @brief Mark, on the coarse level, the faces that open onto cells the fine level carries.
    * @details The fine tiles are coarsened onto the coarse layout the way Realm builds its valid-cell mask: a
-   * marker on the coarsened fine layout is copied onto the coarse layout and its ghost cells. A coarse cell the
-   * marker reaches is refined; an open face of an unrefined coarse cell onto a refined neighbour is described by
-   * the fine level. The fine level's own faces onto the coarse level were set when it was defined. Collective.
+   * marker on the coarsened fine layout is copied onto the coarse layout and its ghost cells. An open face of an
+   * unrefined coarse cell onto a cell the marker reaches is described by the fine level. The coarse level already
+   * knows which of its cells are refined -- it was told when it was defined -- so the marker is checked against
+   * that rather than written over it, and a disagreement between the coarse level's covered region and the fine
+   * level's tiles stops the run. The fine level's own faces onto the coarse level were set when it was defined.
+   * Collective.
    * @param[in,out] a_coarse Graph of the coarser level.
    * @param[in]     a_fine   Graph of the finer level, a factor-two refinement of it.
    */
@@ -287,6 +290,9 @@ protected:
 
   /**
    * @brief Cells of this level the finer level carries, coarsened onto this level.
+   * @details Known before any cell is built, since the tiles are the geometry's and not the graph's. A cell in
+   * them is described by the finer level: this level classifies it from its corners but builds no surface or body
+   * for it, and it is not one of this level's cut cells.
    */
   Vector<Box> m_covered;
 
@@ -306,7 +312,9 @@ protected:
   LevelData<BaseFab<signed char>> m_faceStates;
 
   /**
-   * @brief One where the finer level carries the cell.
+   * @brief One where the finer level carries the cell, with at least two ghost cells.
+   * @details Set from m_covered when the graph is defined, before any cell is built, so that nothing on this
+   * level is built for a cell the finer level describes. link checks it against the finer level's tiles.
    */
   LevelData<BaseFab<signed char>> m_refined;
 
@@ -346,6 +354,12 @@ protected:
    */
   void
   markCarried(LevelData<BaseFab<signed char>>& a_carried) const;
+
+  /**
+   * @brief Set m_refined from m_covered, over every box and its ghost cells.
+   */
+  void
+  markRefined();
 
   /**
    * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with
