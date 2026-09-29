@@ -112,6 +112,8 @@ public:
    * @param[in] a_probLo          Lower-left corner of the domain.
    * @param[in] a_dx              Grid spacing of the level.
    * @param[in] a_numGhost        Ghost cells the cell states are kept for.
+   * @param[in] a_covered         Cells of this level the finer level will carry, coarsened onto this level. A cell
+   * in them is described up there and is not filled down here.
    */
   virtual void
   define(const BaseIF&        a_function,
@@ -119,7 +121,8 @@ public:
          const ProblemDomain& a_domain,
          const RealVect&      a_probLo,
          const Real           a_dx,
-         const int            a_numGhost);
+         const int            a_numGhost,
+         const Vector<Box>&   a_covered);
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
@@ -157,6 +160,33 @@ public:
    */
   static void
   link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_fine);
+
+  /**
+   * @brief Find the cells of a region that hold more than one sheet of interface.
+   * @details Downstream holds one body and one interface to a cell, so a cell the surface enters as several
+   * sheets cannot be described at all. Such a cell is filled rather than built, which is the only reading that
+   * stays single valued and keeps a barrier thinner than a cell a barrier instead of letting the fluid run
+   * through it. Filling is a classification and changes no value another level reads, so the children a coarse
+   * cell restricts against still agree with it about where every edge is crossed -- which is what a snap of the
+   * nodes themselves cannot promise.
+   *
+   * A cell the finer level carries is left alone: the feature is resolved up there, and this level's reading of
+   * it is not the one that gets used. Only the combinatorics are read, so no root is solved for here.
+   *
+   * Nothing is counted here. The region a caller asks about reaches past the cells it owns, so that a cell can
+   * see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken
+   * here would report a cell near a box boundary once for every box that reaches it. The caller counts over the
+   * cells it owns.
+   * @param[in]  a_nodeValues Node values of the region.
+   * @param[in]  a_region     Cells to ask.
+   * @param[in]  a_covered    Cells a finer level carries.
+   * @param[out] a_unresolved True for each cell of the region that must be filled.
+   */
+  static void
+  findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
+                      const Box&           a_region,
+                      const Vector<Box>&   a_covered,
+                      BaseFab<bool>&       a_unresolved);
 
   /**
    * @brief Whether define has run.
@@ -254,6 +284,11 @@ protected:
    * @brief Layout over the cut tiles.
    */
   DisjointBoxLayout m_grids;
+
+  /**
+   * @brief Cells of this level the finer level carries, coarsened onto this level.
+   */
+  Vector<Box> m_covered;
 
   /**
    * @brief Cut cells of every box.

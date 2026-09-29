@@ -76,15 +76,107 @@ public:
   define(const CutCellSurface& a_surface) noexcept;
 
   /**
-   * @brief How the cell relates to the interface, from the corner values alone.
+   * @brief How the cell relates to the interface.
    * @details The cell is cut as soon as two corners disagree under isFluid, regular if every corner
    * is fluid and covered otherwise. An exact zero is solid, so a cell whose face lies in the
    * interface is cut from the fluid side, full, with that face as its interface.
+   *
+   * A cell the surface enters as more than one sheet is still called cut here. Whether such a cell should be
+   * filled instead -- see numSheets for why nothing it can hold describes the feature that put two sheets in
+   * it -- is a decision for whoever knows whether a finer level carries the cell: one that does is left to it,
+   * and one that does not is filled, which is what PolyhedralEBGraph::findUnresolvedCells decides.
    * @param[in] a_surface Corner values in the cell's own frame.
    * @return Regular, Covered or Cut.
    */
   static Kind
   classify(const CutCellSurface& a_surface) noexcept;
+
+  /**
+   * @brief How many separate sheets of interface the surface enters the cell as.
+   * @details The crossings of a cut cell close into cycles, and each cycle is spanned by its own patch. One
+   * cycle is the ordinary case: one patch, and the fluid either side of it. More than one means the cell holds
+   * a feature thinner than itself -- a plate the nodes only see where it happens to swallow a corner, say --
+   * and neither the corner values nor the crossings carry enough to say what that feature is. In two dimensions
+   * the crossings pair into chords and the count is half of them.
+   * @param[in] a_surface Corner values and edge crossings in the cell's own frame.
+   * @return Number of sheets, zero where the corners agree, or -1 where the crossings do not form cycles.
+   */
+  static int
+  numSheets(const CutCellSurface& a_surface) noexcept;
+
+  /**
+   * @brief Whether the fluid this body holds is one connected region.
+   * @details Asked of the polygons rather than of the fluid: they bound a closed surface, so two polygons that
+   * share an edge bound the same piece of fluid, and the fluid is in one piece exactly when walking that
+   * sharing reaches every polygon from any one of them. A cell the graph builds should never hold two pieces --
+   * the interface is anchored to the cell's edges, so it cannot close on itself inside the cell and leave a
+   * cavity, and a cell the surface enters as more than one sheet is filled before any body is built. A body cut
+   * from a coarser one is different: it was not built from an implicit function, and a single-sheet parent
+   * whose interface is twisted can hand a child two pieces. That is what this is asked for, and it is also
+   * what decides which polygons bound which piece, and so what opens onto a neighbouring cell.
+   * @return True if every polygon is reachable from any other by shared edges, or if the body holds none.
+   */
+  bool
+  isConnected() const noexcept;
+
+  /**
+   * @brief Whether every polygon of the interface lies in one plane.
+   * @details A planar interface leaves the fluid the cell intersected with a half-space, which is convex. A
+   * convex region meets every axis-aligned box in a convex, and therefore connected, set -- so a body that
+   * answers true here has single-valued children at every refinement ratio, and their children in turn, without
+   * any of them being built. It is the one property that settles the question for all ratios at once:
+   * everything else is an interpolant of the same crossings and carries no such guarantee. A body whose
+   * interface is a single triangle is planar by construction, which is most of the cut cells of a smooth
+   * surface.
+   * @return True if the interface polygons share a plane, or if the body has no interface at all.
+   */
+  bool
+  interfaceIsPlanar() const noexcept;
+
+  /**
+   * @brief Cut this body into the bodies of the 2^SpaceDim cells one refinement finer that fill its cell.
+   * @details A genuine subdivision of the polyhedron, not a reconstruction of it at the finer spacing: each
+   * child is this body intersected with its own octant, so the children partition this body and their moments
+   * sum back to its own exactly rather than to within the curvature over the cell. That is what makes a cell
+   * cut from its parent join the parent's own description -- the two share the faces between them by
+   * construction, which two independent reconstructions of the same region do not.
+   *
+   * The children come back in quadrant order: bit d of a child's index is the side it lies on in direction d,
+   * zero low and one high, matching faceCorners and restrictFace. Each is expressed in its own cell's frame,
+   * so a length here is twice one there. A child that the fluid misses entirely comes back empty, which reads
+   * as covered; one the fluid fills comes back whole.
+   *
+   * A vertex of a child is not a crossing of the child's own edges, so the provenance those carry is dropped;
+   * closeInterface already handles polygons in that state, since a restricted face leaves them the same way.
+   * @param[out] a_children The 2^SpaceDim bodies, in quadrant order.
+   * @return False if a child's fluid region is not connected, if a child would need more polygons or vertices
+   * than it can hold, or if the children do not add back up to this body in every moment partitions checks.
+   */
+  bool
+  subdivide(CutCellBody* a_children) const noexcept;
+
+  /**
+   * @brief Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece.
+   * @details The single-valued property is not inherited: a body whose eight children are all single valued can
+   * still have a grandchild that is not, so asking one level down says nothing about two. This asks to the ratio
+   * the mesh will actually use, and it is the test to put in front of any cell that a finer grid may subdivide,
+   * whether or not the cell sits on a refinement boundary.
+   *
+   * A planar interface is answered from interfaceIsPlanar without building anything, since convexity settles
+   * every ratio. Otherwise the body is cut in halves repeatedly, log2(a_refRat) times, and every body produced
+   * on the way down is asked -- not only those at the final ratio. That is deliberate: the intermediate bodies
+   * are what a recursive subdivision would actually build, so one of them being multi-valued is a failure even
+   * when the cells the mesh ends up with are not. A direct a_refRat-way clip of this body is not the same
+   * computation, because each round re-expresses its children in their own frames and closes their interfaces
+   * there; when subdivide learns to clip by a ratio in one step, this should follow it.
+   *
+   * A body that cannot be cut at all -- one whose children would need more polygons or vertices than they can
+   * hold -- is not reported here. That is a separate failure, and subdivide already returns it.
+   * @param[in] a_refRat Refinement ratio to test, a power of two and at least two.
+   * @return True if any body produced on the way to that ratio holds fluid in more than one piece.
+   */
+  bool
+  hasMultiValuedChildren(const int a_refRat) const noexcept;
 
   /**
    * @brief Volume fraction.
@@ -213,6 +305,38 @@ public:
   closeInterface() noexcept;
 
   /**
+   * @brief Close the body over the edges no polygon carries in reverse, with a patch lying in a given face.
+   * @details What closeInterface does, with the face the patch belongs to given rather than assumed to be the
+   * interface: cutting the body with a plane leaves it open along that plane, and the patch closing it lies in
+   * a face of the cell rather than in the interface. A patch in a cell face is oriented by that face, since
+   * the edges bounding the opening do not say which way round it should be.
+   * @param[in] a_face Face the closing patch lies in, or -1 for the interface.
+   * @return True if every loop closed and the result fitted in the body's storage.
+   */
+  bool
+  closeBoundary(const int a_face) noexcept;
+
+  /**
+   * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
+   * face loses become interface.
+   * @details A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a
+   * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
+   * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
+   * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
+   * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
+   * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
+   * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
+   * gain the same vector. The moments are recomputed, unlike restrictFace, because this body is one a cell takes its
+   * moments from.
+   * @param[in] a_dir               Direction of the face.
+   * @param[in] a_side              Side of the cell the face is on.
+   * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
+   * @return True if the body closed again and its volume stayed in range.
+   */
+  bool
+  snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept;
+
+  /**
    * @brief Split every polygon edge at the vertices of other polygons that lie on it.
    * @details Restricting a face rebuilds it at the finer level's resolution, so an edge the face shares
    * with a face that was left alone can be one segment on one side and several on the other, or carry a
@@ -297,7 +421,6 @@ protected:
    * are culled rather than carried.
    */
   static constexpr Real s_nullArea = 1.0E-18;
-
   /**
    * @brief One polygon of the body, in the cell's own frame.
    */
@@ -394,6 +517,25 @@ protected:
   void
   orientOutward(Polygon& a_polygon, const int a_dir, const int a_side) const noexcept;
 #endif
+
+  /**
+   * @brief Whether a set of children partitions this body, in every moment that has to add up.
+   * @details What subdivide has to deliver, checked rather than asserted so that a caller learns of it. First,
+   * that every child holds its fluid in one piece: a child that does not is reported by returning false before
+   * anything is summed, because it is a fact about a parent whose interface is twisted rather than a fault to
+   * stop on, and hasMultiValuedChildren asks exactly that. Then four things: the children's volumes add to this
+   * one's, the apertures of the children on a face of this cell add to that face's, the two children meeting at an
+   * interior face agree about it -- which is what lets those sums cancel, and what a cell cut from this one relies on
+   * to join its sibling -- and the children's interface area vectors add to this one's. Each child is also required
+   * to satisfy the divergence identity on its own, since a child that does not is not a body whatever it sums to.
+   *
+   * A quantity spanning fewer dimensions than the cell is counted once too often per dimension it does not
+   * span, so volumes carry 2^-SpaceDim and areas 2^-(SpaceDim-1).
+   * @param[in] a_children The 2^SpaceDim bodies, in quadrant order.
+   * @return True if every sum returns this body's own moment to rounding.
+   */
+  bool
+  partitions(const CutCellBody* a_children) const noexcept;
 
   /**
    * @brief Take the moments of the assembled polygons.

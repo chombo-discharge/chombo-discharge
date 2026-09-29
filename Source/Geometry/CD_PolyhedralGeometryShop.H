@@ -50,6 +50,50 @@ class PolyhedralGeometryShop : public ScanShop
 {
 public:
   /**
+   * @brief What to do with a cell this generator cannot describe at the refinement the mesh will ask for.
+   * @details A cell whose fluid falls into more than one piece when it is cut for a refinement cannot be
+   * carried single valued at that ratio, and there is no reformulation of the interior that avoids it: the
+   * only representation guaranteed to keep every descendant single valued is a planar interface, and a planar
+   * interface cannot meet the face chords a cell shares with its neighbours. So the cell is a choice rather
+   * than a bug, and the choice belongs to whoever set up the run.
+   */
+  enum class UnresolvedAction
+  {
+    /**
+     * @brief Report the cells and carry on, leaving it to the user to raise the geometric resolution.
+     */
+    Warn,
+
+    /**
+     * @brief Turn the cell solid, so that neither it nor anything cut from it is ever multi valued.
+     */
+    Cover,
+
+    /**
+     * @brief Keep the pieces in one body, taking every moment from their sum and moving only the volume centroid.
+     * @details For a cell whose interface is one sheet twisted into a saddle, so that cutting it for a refinement
+     * leaves a child holding its fluid in two pieces. The pieces are joined a cell away, so the saddle is resolved
+     * geometry and is merged rather than covered. A cell holding more than one sheet is still filled.
+     *
+     * Conserved: the volume fraction, the apertures, the boundary area vector and the boundary centroid are the
+     * exact sums of the pieces', satisfy the divergence identity, and coarsen back to the parent exactly. Face
+     * centroids are left as the exact first moment of the open face, even where two patches put it on covered face
+     * between them, since the flux stencils read it as a quadrature point.
+     *
+     * Not conserved: the scalar boundary area, the length of the summed area vector, is smaller than the area of the
+     * interface itself when the pieces face different ways; the interface's own area is kept beside it. And the
+     * volume centroid, which is the one moment moved.
+     *
+     * The repair: the volume centroid is the exact first moment of the merged fluid, a weighted average of the
+     * pieces' centroids, and it can fall in the solid between them. Where it lies in the fluid it is kept. Where it
+     * does not, it is replaced by the nearest point of the fluid, moved slightly inside it. That point no longer
+     * sums back to the parent's first moment, so coarsening this body's centroid misses the parent's by the distance
+     * moved, weighted by this body's volume.
+     */
+    Collapse
+  };
+
+  /**
    * @brief Disallowed default constructor.
    */
   PolyhedralGeometryShop() = delete;
@@ -159,18 +203,37 @@ public:
    * @details A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be
    * used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own
    * level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a
-   * face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and
-   * an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells,
-   * vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the
-   * run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face
-   * belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a
-   * classification that disagrees with itself, and there would be no cut cell to carry the interface between
-   * them. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which
-   * is where the edge of the tiled region meets what no tile carries. Switched by
-   * PolyhedralGeometryShop.sanity_check, off by default. Requires buildGraphs.
+   * face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, an
+   * edge in a face the coarser level describes is checked from that side, and an edge in a face onto a cell the graph
+   * filled has no partner to meet, since that face is closed. Every rank checks its own cells, vertices are welded at
+   * s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. A regular cell
+   * sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and
+   * cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees
+   * with itself, and there would be no cut cell to carry the interface between them. A filled cell is covered whatever
+   * its nodes read, which is why the graph keeps a neighbour of one as a cut cell holding the whole of itself rather
+   * than a regular one; the test is what says it did. That test is dimension-independent and runs on every graph,
+   * including the cells beyond the tiles, which is where the edge of the tiled region meets what no tile carries.
+   * Switched by PolyhedralGeometryShop.sanity_check, on by default in a build that keeps its assertions. Requires
+   * buildGraphs.
    */
   void
   sanityCheck() const;
+
+  /**
+   * @brief Report the cells that cannot be cut for a refinement without falling into more than one piece.
+   * @details Asked of every cut cell the level itself describes, at the ratio m_maxRefinement names, and of the
+   * body the consumers build -- which on a refinement boundary is the one whose faces were taken from the finer
+   * level, since stitching lengthens the interface loop and it is that loop the question is about. A cell whose
+   * interface is planar is exempt without being cut, because its fluid is then convex and convexity survives
+   * every ratio.
+   *
+   * What happens to a failing cell is m_unresolvedAction's to decide. Only Warn is wired: the cells are named
+   * and the run continues, leaving it to whoever set it up to raise the geometric resolution. Runs regardless
+   * of m_sanityCheck, since it reports on the geometry the run will actually use rather than on this
+   * generator's own consistency. Requires buildGraphs.
+   */
+  void
+  reportUnresolvedRefinement() const;
 
   /**
    * @brief Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and then
@@ -407,6 +470,27 @@ protected:
   bool m_profile;
 
   /**
+   * @brief How far below the geometry's own grids a cell must stay single valued.
+   * PolyhedralGeometryShop.max_refinement, one -- that is, off -- by default.
+   * @details A power of two. One asks for nothing and skips the check entirely; two asks that the cells one
+   * refinement below the geometry grid are each a single piece of fluid, four that the cells two below are,
+   * and so on. The property is not inherited -- a cell whose children are all single valued can still have a
+   * grandchild that is not -- so this has to name the ratio the mesh will actually use rather than being
+   * derived from one level.
+   *
+   * Off by default because the test costs a subdivision of every cut cell whose interface is not planar, which
+   * is two to three times what building the geometry costs in the first place, and because nothing downstream
+   * reads a subdivided cell yet. It becomes worth its price once it does.
+   */
+  int m_maxRefinement;
+
+  /**
+   * @brief What becomes of a cell that fails that test. PolyhedralGeometryShop.unresolved_cells, warn by
+   * default.
+   */
+  UnresolvedAction m_unresolvedAction;
+
+  /**
    * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
    */
   bool m_testCopy;
@@ -442,11 +526,14 @@ protected:
    * @details The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the
    * chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the
    * check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again
-   * afterwards. A body that will not close, a face that cannot be restricted, or a doubly crossed edge stops the
-   * run.
+   * afterwards. A face onto a cell the graph filled is closed instead, through CutCellBody::snapFace, and the
+   * footprint it gives up becomes interface lying in the plane of that face, so the surface closes over the
+   * filled cell rather than ending against it. A body that will not close, a face that cannot be restricted or
+   * closed, or a doubly crossed edge stops the run.
    * @param[out] a_body     The body.
    * @param[in]  a_graph    Graph of the cell's level.
    * @param[in]  a_surfaces Surfaces of the cell's box, from the graph.
+   * @param[in]  a_states   Cell states of the cell's box, from the graph.
    * @param[in]  a_refined  Refined mask of the cell's box, from the graph.
    * @param[in]  a_cell     The cell.
    */
@@ -454,6 +541,7 @@ protected:
   defineBody(PolyhedralEB::CutCellBody&                  a_body,
              const PolyhedralEBGraph&                    a_graph,
              const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
+             const BaseFab<signed char>&                 a_states,
              const BaseFab<signed char>&                 a_refined,
              const IntVect&                              a_cell) const;
 #endif
