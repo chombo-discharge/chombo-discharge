@@ -52,6 +52,7 @@ ComputationalGeometry::ComputationalGeometry()
     m_probLo(RealVect::Zero),
     m_eps0(1.0),
     m_refineAngle(0.0),
+    m_refineSaddles(false),
     m_maxGhostEB(0),
     m_startLevel(0),
     m_stopLevel(0),
@@ -64,18 +65,15 @@ ComputationalGeometry::ComputationalGeometry()
 
   // Default parameters.
 
-  m_refineSaddles = false;
-
   ParmParse pp("ComputationalGeometry");
 
   pp.query("verbose", m_verbose);
   pp.query("refine_saddles", m_refineSaddles);
+  pp.query("profile", m_profile);
 
   if (m_verbose) {
     pout() << "ComputationalGeometry::ComputationalGeometry()" << endl;
   }
-
-  pp.query("profile", m_profile);
 
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
