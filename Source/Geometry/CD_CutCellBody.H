@@ -284,8 +284,7 @@ public:
    * @details The face is described at the resolution of the level below rather than this cell's, which is what makes it
    * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
    * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
-   * been. The moments are not recomputed: they stay those of the body as defined, since a restricted body is a
-   * surface to write rather than a cell to take moments from.
+   * been, which is also what recomputes the moments.
    * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
    * @param[in] a_dir      Direction of the face.
    * @param[in] a_side     Side of the cell the face is on.
@@ -298,7 +297,8 @@ public:
    * @brief Rebuild the interface from the face polygons this body holds.
    * @details Every face-polygon edge that no other face polygon carries in reverse bounds the interface, and walking
    * those edges gives its loops. Used instead of the crossing loops once a face has been restricted, since a
-   * restricted face has vertices that are not crossings of this cell's edges at all.
+   * restricted face has vertices that are not crossings of this cell's edges at all. The moments are recomputed
+   * from the closed body.
    * @return True if every loop closed and the result fitted in the body's storage.
    */
   bool
@@ -326,8 +326,7 @@ public:
    * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
    * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
    * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
-   * gain the same vector. The moments are recomputed, unlike restrictFace, because this body is one a cell takes its
-   * moments from.
+   * gain the same vector. The moments are recomputed, through closeInterface.
    * @param[in] a_dir               Direction of the face.
    * @param[in] a_side              Side of the cell the face is on.
    * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.

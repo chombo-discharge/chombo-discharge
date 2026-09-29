@@ -634,12 +634,17 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 
   // A face onto a cell the graph filled leads nowhere. It is closed rather than left reading an aperture the
   // neighbour no longer agrees with, and what it gives up becomes interface in the plane of that face, so the
-  // surface closes over the filled cell instead of ending against it.
+  // surface closes over the filled cell instead of ending against it. A refined neighbour reads covered whenever
+  // its corners do, but the finer level describes that face, which was restricted above and stays as restricted.
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (int side = 0; side < 2; side++) {
       const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
 
       if (!a_states.box().contains(other) || a_states(other, 0) != PolyhedralEBGraph::s_covered) {
+        continue;
+      }
+
+      if (a_refined.box().contains(other) && a_refined(other, 0) != 0) {
         continue;
       }
 

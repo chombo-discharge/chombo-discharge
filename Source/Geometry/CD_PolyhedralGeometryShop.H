@@ -526,10 +526,10 @@ protected:
    * @details The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the
    * chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the
    * check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again
-   * afterwards. A face onto a cell the graph filled is closed instead, through CutCellBody::snapFace, and the
-   * footprint it gives up becomes interface lying in the plane of that face, so the surface closes over the
-   * filled cell rather than ending against it. A body that will not close, a face that cannot be restricted or
-   * closed, or a doubly crossed edge stops the run.
+   * afterwards, which also recomputes the moments. A face onto a covered cell the finer level does not carry is
+   * closed instead, through CutCellBody::snapFace, and the footprint it gives up becomes interface lying in the
+   * plane of that face, so the surface closes over the covered cell rather than ending against it. A body that will not
+   * close, a face that cannot be restricted or closed, or a doubly crossed edge stops the run.
    * @param[out] a_body     The body.
    * @param[in]  a_graph    Graph of the cell's level.
    * @param[in]  a_surfaces Surfaces of the cell's box, from the graph.

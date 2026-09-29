@@ -705,8 +705,6 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
     return false;
   }
 
-  this->accumulateMoments();
-
   const bool closed  = this->closureResidual() <= 1.0E-9;
   const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
 
@@ -833,7 +831,13 @@ CutCellBody::weldTJunctions() noexcept
 bool
 CutCellBody::closeInterface() noexcept
 {
-  return this->closeBoundary(-1);
+  if (!this->closeBoundary(-1)) {
+    return false;
+  }
+
+  this->accumulateMoments();
+
+  return true;
 }
 
 bool
