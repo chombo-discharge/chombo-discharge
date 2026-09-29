@@ -237,8 +237,8 @@ The divergence theorem on a constant field,
 holds to rounding for every cut-cell rather than approximately, which matters because it is the relation ``PolyGeom`` uses to derive the boundary area and normal from the apertures.
 More importantly for what this is intended to support, the eight cells of a subdivided body sum back to the body they came from exactly, so refinement of a single cut-cell becomes a partition rather than a reconstruction.
 
-Everything else is deliberately left alone.
-The cell classification, the graph, and the treatment of regular cells bordering a covered one are ``Chombo``'s, so a run with ``polyhedral`` produces the same cut-cell topology as one without it; only the moments differ.
+Almost everything else is left as ``Chombo`` has it: the graph, and the classification of every cell the surface enters as a single sheet.
+The exception is a cell the surface enters as more than one sheet, described below, so a run with ``polyhedral`` has the same cut-cell topology as one without it except in those cells.
 A cell whose reconstructed polyhedron fails to close aborts the run rather than being silently approximated.
 No geometry tested so far has produced one, and while the generator is being developed a cell it cannot close is an edge case worth seeing rather than one worth approximating around.
 There is deliberately no input-file option for this, so that relaxing it is an edit to ``ComputationalGeometry`` rather than something a run can do by accident.
@@ -247,6 +247,36 @@ There is deliberately no input-file option for this, so that relaxing it is an e
 
    Output from ``polyhedral`` is not comparable with output from the other methods on curved geometry, by design.
    Benchmark files must be regenerated rather than compared across the switch.
+
+One sheet to a cell
+~~~~~~~~~~~~~~~~~~~
+
+A cut-cell is meant to hold one sheet of interface, and the fluid on one side of it.
+A feature thinner than a cell breaks that: a plate through the middle of a cell, or two wires passing through it, puts two sheets into one cell, and the corner values and edge crossings carry too little to say what the feature is.
+``Chombo`` makes such a cell a single volume covering two disconnected pieces of fluid, which lets fluid pass straight through a barrier that should stop it.
+The polyhedral method fills the cell instead, on any level where no finer level describes it, which keeps the cell single-valued and keeps the barrier a barrier.
+A regular neighbour of a filled cell is kept as a cut-cell holding the whole of itself, as ``Chombo`` does next to a covered cell.
+Such features resolve themselves once the mesh is fine enough to see them, so refinement is the remedy and filling is what happens where there is none left.
+
+A second case needs no filling.
+A cell holding a single sheet can still lose it when it is cut into finer cells: where the interface is twisted into a saddle, a child cell can hold its fluid in two pieces joined a cell away.
+The mesh generator can refine a box holding such a saddle, which removes the problem wherever there is refinement left to give.
+It is off by default, since the intended treatment of such a cell is to merge its pieces into one without losing conservation (not yet implemented), and it is switched on with
+
+.. code-block:: text
+
+   ComputationalGeometry.refine_saddles = true    # Refine boxes holding a saddle-shaped interface. Off by default.
+
+Refinement does not remove a saddle at the finest level, since each refinement hands a smaller copy of it to one child.
+Whether any cell would still lose its single-valuedness when cut to a given ratio below the finest level can be checked with
+
+.. code-block:: text
+
+   PolyhedralGeometryShop.max_refinement   = 2      # Ratio to check (2, 4 or 8). 1, the default, skips the check.
+   PolyhedralGeometryShop.unresolved_cells = warn   # What to do with a failing cell. Only 'warn' is implemented.
+
+which names the failing cells and asks for a higher geometric resolution.
+The check costs a subdivision of every cut-cell whose interface is not planar, typically two to three times the cost of building the geometry, which is why it is off by default.
 
 .. _Chap:MeshGeneration:
 

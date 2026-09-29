@@ -275,9 +275,10 @@ Protected Types</h2></td></tr>
 , <b>Medial</b>
 , <br />
 &#160;&#160;<b>DoubleCrossing</b>
+, <b>Twist</b>
 <br />
  }</td></tr>
-<tr class="memdesc:a792936c26593c02ee047eb7e890e5486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), or an edge the level above would cross twice.  <a href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">More...</a><br /></td></tr>
+<tr class="memdesc:a792936c26593c02ee047eb7e890e5486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle.  <a href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">More...</a><br /></td></tr>
 <tr class="separator:a792936c26593c02ee047eb7e890e5486"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
@@ -310,6 +311,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reportGrids</b> () co
 <tr class="memitem:acb52039188e8deedc8ae5a2edf4e896e" id="r_acb52039188e8deedc8ae5a2edf4e896e"><td class="memItemLeft" align="right" valign="top">GeometryService::InOut&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#acb52039188e8deedc8ae5a2edf4e896e">classifyBox</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:acb52039188e8deedc8ae5a2edf4e896e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify a box of one phase on one level as regular, covered or irregular.  <br /></td></tr>
 <tr class="separator:acb52039188e8deedc8ae5a2edf4e896e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a063577eaa5d317ff3790b53edc235bb2" id="r_a063577eaa5d317ff3790b53edc235bb2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a063577eaa5d317ff3790b53edc235bb2">hasTwistedPatch</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
+<tr class="memdesc:a063577eaa5d317ff3790b53edc235bb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether any cut cell of the box holds an interface patch that is twisted about its own centre.  <br /></td></tr>
+<tr class="separator:a063577eaa5d317ff3790b53edc235bb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b358ae5520ec4f91d8c3c04d60b1e65" id="r_a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classComputationalGeometry.html#a792936c26593c02ee047eb7e890e5486">SplitReason</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a9b358ae5520ec4f91d8c3c04d60b1e65">exceedsCurvature</a> (const Box &amp;a_box, const int a_level, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the interface turns by more than m_refineAngle between neighbouring cut cells of a box.  <br /></td></tr>
 <tr class="separator:a9b358ae5520ec4f91d8c3c04d60b1e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -410,6 +414,9 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_eps0</b></td></tr>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_refineAngle</b></td></tr>
 <tr class="memdesc:a643a812c854d443db798fcf07f30ec0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Angle, in degrees, between neighbouring normals above which an irregular box is split. <br /></td></tr>
 <tr class="separator:a643a812c854d443db798fcf07f30ec0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b36e72b31876252bfa7f1382a6d7c37" id="r_a3b36e72b31876252bfa7f1382a6d7c37"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a3b36e72b31876252bfa7f1382a6d7c37">m_refineSaddles</a></td></tr>
+<tr class="memdesc:a3b36e72b31876252bfa7f1382a6d7c37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a box holding a saddle &ndash; an interface patch twisted about its own centre &ndash; is split. ComputationalGeometry.refine_saddles, optional, off by default; set it true to turn the refinement on.  <br /></td></tr>
+<tr class="separator:a3b36e72b31876252bfa7f1382a6d7c37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82cf9e36c17278155e30405cef70d327" id="r_a82cf9e36c17278155e30405cef70d327"><td class="memItemLeft" align="right" valign="top"><a id="a82cf9e36c17278155e30405cef70d327" name="a82cf9e36c17278155e30405cef70d327"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxGhostEB</b></td></tr>
 <tr class="memdesc:a82cf9e36c17278155e30405cef70d327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of ghost cells that we will ever need. <br /></td></tr>
@@ -550,8 +557,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </table>
 </div><div class="memdoc">
 
-<p>Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), or an edge the level above would cross twice. </p>
-<p>Only None against anything else decides whether a box splits. Which of the four reasons it is, is recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it is a diagnostic rather than a part of the generator. </p>
+<p>Why a box split: not at all, a pair of cut cells inside the box turning too sharply, such a pair reaching into the ring one cell outside it, a pair whose normals face each other (two surfaces closer than the band), an edge the level above would cross twice, or a cut cell whose interface is twisted into a saddle. </p>
+<p>Only None against anything else decides whether a box splits. Which of the five reasons it is, is recorded for the split report and for the surface file, and is read by nothing that builds the mesh, so it is a diagnostic rather than a part of the generator. </p>
 
 </div>
 </div>
@@ -766,7 +773,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 <p>Step 1: the upward pass, from the start level to the stop level. </p>
 <p>Pseudocode:</p>
-<p>for lvl = m_startLevel .. m_stopLevel - 1: for each box on lvl that is regular or covered in both phases: append refine(box, 2) on lvl + 1 with both tags &ndash; never a hole beneath these for the boxes on lvl that are irregular in some phase: flags = splitFlags(...): exceedsCurvature in any phase where the box is irregular for each box with a flag: pieces = domainSplit(refine(box, 2), m_maxBlockSize, m_minBlockSize) classifyBoxes(all pieces, lvl + 1) in both phases, append on lvl + 1 a box without a flag is a leaf: nothing is appended, the region above it is a hole on lvl + 1</p>
+<p>for lvl = m_startLevel .. m_stopLevel - 1: for each box on lvl that is regular or covered in both phases: append refine(box, 2) on lvl + 1 with both tags &ndash; never a hole beneath these for the boxes on lvl that are irregular in some phase: flags = splitFlags(...): exceedsCurvature, then doublyCrossedEdge, then hasTwistedPatch (if m_refineSaddles), in any phase where the box is irregular for each box with a flag: pieces = domainSplit(refine(box, 2), m_maxBlockSize, m_minBlockSize) classifyBoxes(all pieces, lvl + 1) in both phases, append on lvl + 1 a box without a flag is a leaf: nothing is appended, the region above it is a hole on lvl + 1</p>
 <p>The loop always runs to m_stopLevel: once no box splits, the curvature test has nothing to do, but the boxes that are regular or covered in both phases still refine whole onto every remaining level.</p>
 <p>The links from each box to its children are handed back for classifyTiles to descend by; they describe the lists as the upward pass leaves them and are stale once decimateBoxes has rewritten a level.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -2103,6 +2110,63 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a063577eaa5d317ff3790b53edc235bb2" name="a063577eaa5d317ff3790b53edc235bb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a063577eaa5d317ff3790b53edc235bb2">&#9670;&#160;</a></span>hasTwistedPatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ComputationalGeometry::hasTwistedPatch </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether any cut cell of the box holds an interface patch that is twisted about its own centre. </p>
+<p>Four crossings on the four edges of a cell that run in one direction are coplanar exactly when f00 + f11 equals f01 + f10; the difference is the twist, and the patch through them is then a saddle. A saddle is the one shape whose fluid can fall into more than one piece when the cell is cut for a refinement, which is a cell the polyhedral path cannot carry single valued.</p>
+<p>The test is the position of the patch's own saddle point. Outside the cell's square the patch rises or falls monotonically across the cell in at least one direction, and every sublevel set of such a patch is connected on every sub-rectangle &ndash; so the cell is safe at every refinement ratio and is left alone. Inside, it is not, and the box is split. Measured in cell widths, the twist a cell sees scales with the spacing while the tilt that opposes it does not, so refining halves the one and leaves the other: the patch the level above holds is the same saddle seen from further away.</p>
+<p>A twist at or below 1e-8 counts as none. The crossings are solved to about 1e-10 of the edge, and a flat face aligned with the grid has its four crossings agree to the last bit, which leaves the twist and both slopes as rounding; the saddle's position is then one rounding error divided by another and falls inside the square as often as not. Without the floor, a flat surface is refined as though it were rough.</p>
+<p>This is deliberately separate from exceedsCurvature, which cannot answer it: that rule measures how much the surface turns, and a gentle saddle turns very little while still being a saddle. It is also blind to a loop that wraps a cell corner rather than crossing four parallel edges, which carries the same risk with no quad to test; such a cell is left to the unresolved-cells rule at the finest level.</p>
+<p>Cells are reconstructed from the implicit function on the level, as exceedsCurvature reconstructs them, so nothing is asked of an index space that does not yet exist. A phase without an implicit function never asks for a split. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box to test. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level the box lives on. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase whose implicit function is asked. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if some cut cell of the box holds a patch whose saddle lies within it. </dd></dl>
+
+</div>
+</div>
 <a id="a1e158685c21420ce4df34df3e8b96828" name="a1e158685c21420ce4df34df3e8b96828"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1e158685c21420ce4df34df3e8b96828">&#9670;&#160;</a></span>makeGrids()</h2>
 
@@ -2617,6 +2681,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a3b36e72b31876252bfa7f1382a6d7c37" name="a3b36e72b31876252bfa7f1382a6d7c37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b36e72b31876252bfa7f1382a6d7c37">&#9670;&#160;</a></span>m_refineSaddles</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ComputationalGeometry::m_refineSaddles</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether a box holding a saddle &ndash; an interface patch twisted about its own centre &ndash; is split. ComputationalGeometry.refine_saddles, optional, off by default; set it true to turn the refinement on. </p>
+<p>Splitting such a box removes the cell that would otherwise be unable to refine single valued, and it only reaches a saddle that has refinement left to give: one already at the stop level stays, and is the unresolved-cells rule's to deal with. It is off by default because that rule is to collapse such a cell's pieces into one body without losing conservation (<a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570a2b31634e3cfef1bfdd7d0d2cdfdc3f9d" title="Keep the pieces in one body, taking every moment from their sum and moving only the volume centroid.">PolyhedralGeometryShop::UnresolvedAction::Collapse</a>, not yet wired), which makes a saddle something to repair rather than something to refine away; switching it on buys centroids that need no repair, at the price of more cells. </p>
+
+</div>
+</div>
 <a id="a6e7609964c13df5375d4f288f2fec9b3" name="a6e7609964c13df5375d4f288f2fec9b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6e7609964c13df5375d4f288f2fec9b3">&#9670;&#160;</a></span>s_strictGeometry</h2>
 

@@ -77,6 +77,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
@@ -122,6 +123,15 @@ Collaboration diagram for PolyhedralGeometryShop:</div>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a437c3e25f06eca90f075da81ff80c570" id="r_a437c3e25f06eca90f075da81ff80c570"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570">UnresolvedAction</a> { <a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570a56525ae64d370c0b448ac0d60710ef17">Warn</a>
+, <a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570ac795dfff10a7c952f4c5438951e9ece9">Cover</a>
+, <a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570a2b31634e3cfef1bfdd7d0d2cdfdc3f9d">Collapse</a>
+ }</td></tr>
+<tr class="memdesc:a437c3e25f06eca90f075da81ff80c570"><td class="mdescLeft">&#160;</td><td class="mdescRight">What to do with a cell this generator cannot describe at the refinement the mesh will ask for.  <a href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570">More...</a><br /></td></tr>
+<tr class="separator:a437c3e25f06eca90f075da81ff80c570"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af0d66afd8a9d2d70af303e1507c08e16" id="r_af0d66afd8a9d2d70af303e1507c08e16"><td class="memItemLeft" align="right" valign="top"><a id="af0d66afd8a9d2d70af303e1507c08e16" name="af0d66afd8a9d2d70af303e1507c08e16"></a>
@@ -161,6 +171,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aea623f65293aa4568b042cad32df79d2" id="r_aea623f65293aa4568b042cad32df79d2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#aea623f65293aa4568b042cad32df79d2">sanityCheck</a> () const</td></tr>
 <tr class="memdesc:aea623f65293aa4568b042cad32df79d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that the interface triangles form a surface that is closed except on the domain boundary.  <br /></td></tr>
 <tr class="separator:aea623f65293aa4568b042cad32df79d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1c0efc683e3416080c368cda00af46a" id="r_af1c0efc683e3416080c368cda00af46a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#af1c0efc683e3416080c368cda00af46a">reportUnresolvedRefinement</a> () const</td></tr>
+<tr class="memdesc:af1c0efc683e3416080c368cda00af46a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report the cells that cannot be cut for a refinement without falling into more than one piece.  <br /></td></tr>
+<tr class="separator:af1c0efc683e3416080c368cda00af46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54331545244d3fc24872eb81e381faa9" id="r_a54331545244d3fc24872eb81e381faa9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a54331545244d3fc24872eb81e381faa9">testGraphCopy</a> () const</td></tr>
 <tr class="memdesc:a54331545244d3fc24872eb81e381faa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and then onto the tiles themselves with the ranks shuffled; run sanityCheck over the copies each time, copy them back onto the original layouts and require equality bit for bit.  <br /></td></tr>
 <tr class="separator:a54331545244d3fc24872eb81e381faa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,9 +269,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a98ccad291519cc023f504b4c812552b7" id="r_a98ccad291519cc023f504b4c812552b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a98ccad291519cc023f504b4c812552b7">sanityCheck</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &gt; &gt; &amp;a_graphs) const</td></tr>
 <tr class="memdesc:a98ccad291519cc023f504b4c812552b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The closure check over a given set of graphs, one per level as m_graphs holds them.  <br /></td></tr>
 <tr class="separator:a98ccad291519cc023f504b4c812552b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b6d835188df1e0dbe3bf1fa83015c55" id="r_a0b6d835188df1e0dbe3bf1fa83015c55"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a0b6d835188df1e0dbe3bf1fa83015c55">defineBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_graph, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces, const BaseFab&lt; signed char &gt; &amp;a_refined, const IntVect &amp;a_cell) const</td></tr>
-<tr class="memdesc:a0b6d835188df1e0dbe3bf1fa83015c55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of a cut cell of a graph, restricted on every face the finer level describes.  <br /></td></tr>
-<tr class="separator:a0b6d835188df1e0dbe3bf1fa83015c55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2b385bd4859af86fd87a8f7bbef29cd" id="r_ae2b385bd4859af86fd87a8f7bbef29cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ae2b385bd4859af86fd87a8f7bbef29cd">defineBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_graph, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces, const BaseFab&lt; signed char &gt; &amp;a_states, const BaseFab&lt; signed char &gt; &amp;a_refined, const IntVect &amp;a_cell) const</td></tr>
+<tr class="memdesc:ae2b385bd4859af86fd87a8f7bbef29cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of a cut cell of a graph, restricted on every face the finer level describes.  <br /></td></tr>
+<tr class="separator:ae2b385bd4859af86fd87a8f7bbef29cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a067d698aabb65331c2eb5b70eb4c1733" id="r_a067d698aabb65331c2eb5b70eb4c1733"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a067d698aabb65331c2eb5b70eb4c1733">writeSurface</a> (const std::string &amp;a_fileName, const Vector&lt; Vector&lt; Real &gt; &gt; &amp;a_facets) const</td></tr>
 <tr class="memdesc:a067d698aabb65331c2eb5b70eb4c1733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.  <br /></td></tr>
 <tr class="separator:a067d698aabb65331c2eb5b70eb4c1733"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -322,6 +335,13 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_writeSurface</b></t
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_profile</b></td></tr>
 <tr class="memdesc:ad773afb8a229a0a228143d386ea91c1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface reports its timings. PolyhedralGeometryShop.profile, off by default. <br /></td></tr>
 <tr class="separator:ad773afb8a229a0a228143d386ea91c1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fc25f5b2695c6607b3c6ff2a4dbc306" id="r_a3fc25f5b2695c6607b3c6ff2a4dbc306"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a3fc25f5b2695c6607b3c6ff2a4dbc306">m_maxRefinement</a></td></tr>
+<tr class="memdesc:a3fc25f5b2695c6607b3c6ff2a4dbc306"><td class="mdescLeft">&#160;</td><td class="mdescRight">How far below the geometry's own grids a cell must stay single valued. PolyhedralGeometryShop.max_refinement, one &ndash; that is, off &ndash; by default.  <br /></td></tr>
+<tr class="separator:a3fc25f5b2695c6607b3c6ff2a4dbc306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6811592317b142002a6bc468f7e626e5" id="r_a6811592317b142002a6bc468f7e626e5"><td class="memItemLeft" align="right" valign="top"><a id="a6811592317b142002a6bc468f7e626e5" name="a6811592317b142002a6bc468f7e626e5"></a>
+<a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570">UnresolvedAction</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_unresolvedAction</b></td></tr>
+<tr class="memdesc:a6811592317b142002a6bc468f7e626e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">What becomes of a cell that fails that test. PolyhedralGeometryShop.unresolved_cells, warn by default. <br /></td></tr>
+<tr class="separator:a6811592317b142002a6bc468f7e626e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a189f98f8fe636968427b5bd588426251" id="r_a189f98f8fe636968427b5bd588426251"><td class="memItemLeft" align="right" valign="top"><a id="a189f98f8fe636968427b5bd588426251" name="a189f98f8fe636968427b5bd588426251"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_testCopy</b></td></tr>
 <tr class="memdesc:a189f98f8fe636968427b5bd588426251"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default. <br /></td></tr>
@@ -414,7 +434,45 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 <p>Takes the same topology as GeometryShop &ndash; the same classification, the same graph and the same covered-cell fix-ups &ndash; and replaces only the quadrature. Where GeometryShop integrates the arc the interface really follows, this assembles the closed polyhedron whose faces are bounded by straight chords between the edge crossings and integrates that.</p>
 <p>The difference is deliberate and costs accuracy on curved geometry, where the apertures drop from third order to second. What it buys is that the moments are the moments of a body, so they satisfy the relations Chombo's own coarsening applies to them, and a subdivision of that body sums back to it exactly.</p>
 <p>Cells are declined rather than approximated when the assembled polygons do not close. That is fatal by default: it has never fired on any geometry tested, and a cell that trips it is an edge case worth seeing rather than absorbing. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a437c3e25f06eca90f075da81ff80c570" name="a437c3e25f06eca90f075da81ff80c570"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a437c3e25f06eca90f075da81ff80c570">&#9670;&#160;</a></span>UnresolvedAction</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570">PolyhedralGeometryShop::UnresolvedAction</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>What to do with a cell this generator cannot describe at the refinement the mesh will ask for. </p>
+<p>A cell whose fluid falls into more than one piece when it is cut for a refinement cannot be carried single valued at that ratio, and there is no reformulation of the interior that avoids it: the only representation guaranteed to keep every descendant single valued is a planar interface, and a planar interface cannot meet the face chords a cell shares with its neighbours. So the cell is a choice rather than a bug, and the choice belongs to whoever set up the run. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a437c3e25f06eca90f075da81ff80c570a56525ae64d370c0b448ac0d60710ef17" name="a437c3e25f06eca90f075da81ff80c570a56525ae64d370c0b448ac0d60710ef17"></a>Warn&#160;</td><td class="fielddoc"><p>Report the cells and carry on, leaving it to the user to raise the geometric resolution. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a437c3e25f06eca90f075da81ff80c570ac795dfff10a7c952f4c5438951e9ece9" name="a437c3e25f06eca90f075da81ff80c570ac795dfff10a7c952f4c5438951e9ece9"></a>Cover&#160;</td><td class="fielddoc"><p>Turn the cell solid, so that neither it nor anything cut from it is ever multi valued. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a437c3e25f06eca90f075da81ff80c570a2b31634e3cfef1bfdd7d0d2cdfdc3f9d" name="a437c3e25f06eca90f075da81ff80c570a2b31634e3cfef1bfdd7d0d2cdfdc3f9d"></a>Collapse&#160;</td><td class="fielddoc"><p>Keep the pieces in one body, taking every moment from their sum and moving only the volume centroid. </p>
+<p>For a cell whose interface is one sheet twisted into a saddle, so that cutting it for a refinement leaves a child holding its fluid in two pieces. The pieces are joined a cell away, so the saddle is resolved geometry and is merged rather than covered. A cell holding more than one sheet is still filled.</p>
+<p>Conserved: the volume fraction, the apertures, the boundary area vector and the boundary centroid are the exact sums of the pieces', satisfy the divergence identity, and coarsen back to the parent exactly. Face centroids are left as the exact first moment of the open face, even where two patches put it on covered face between them, since the flux stencils read it as a quadrature point.</p>
+<p>Not conserved: the scalar boundary area, the length of the summed area vector, is smaller than the area of the interface itself when the pieces face different ways; the interface's own area is kept beside it. And the volume centroid, which is the one moment moved.</p>
+<p>The repair: the volume centroid is the exact first moment of the merged fluid, a weighted average of the pieces' centroids, and it can fall in the solid between them. Where it lies in the fluid it is kept. Where it does not, it is replaced by the nearest point of the fluid, moved slightly inside it. That point no longer sums back to the parent's first moment, so coarsening this body's centroid misses the parent's by the distance moved, weighted by this body's volume. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af834da08f96678c389be9bbe2994c7e9" name="af834da08f96678c389be9bbe2994c7e9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af834da08f96678c389be9bbe2994c7e9">&#9670;&#160;</a></span>PolyhedralGeometryShop()</h2>
 
@@ -647,8 +705,8 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="a0b6d835188df1e0dbe3bf1fa83015c55" name="a0b6d835188df1e0dbe3bf1fa83015c55"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b6d835188df1e0dbe3bf1fa83015c55">&#9670;&#160;</a></span>defineBody()</h2>
+<a id="ae2b385bd4859af86fd87a8f7bbef29cd" name="ae2b385bd4859af86fd87a8f7bbef29cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2b385bd4859af86fd87a8f7bbef29cd">&#9670;&#160;</a></span>defineBody()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -678,6 +736,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_states</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_refined</em>, </td>
         </tr>
         <tr>
@@ -700,11 +764,12 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Build the body of a cut cell of a graph, restricted on every face the finer level describes. </p>
-<p>The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again afterwards. A body that will not close, a face that cannot be restricted, or a doubly crossed edge stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again afterwards. A face onto a cell the graph filled is closed instead, through CutCellBody::snapFace, and the footprint it gives up becomes interface lying in the plane of that face, so the surface closes over the filled cell rather than ending against it. A body that will not close, a face that cannot be restricted or closed, or a doubly crossed edge stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_body</td><td>The body. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_graph</td><td>Graph of the cell's level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaces</td><td>Surfaces of the cell's box, from the graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_states</td><td>Cell states of the cell's box, from the graph. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refined</td><td>Refined mask of the cell's box, from the graph. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
   </table>
@@ -1327,6 +1392,27 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="af1c0efc683e3416080c368cda00af46a" name="af1c0efc683e3416080c368cda00af46a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1c0efc683e3416080c368cda00af46a">&#9670;&#160;</a></span>reportUnresolvedRefinement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::reportUnresolvedRefinement </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Report the cells that cannot be cut for a refinement without falling into more than one piece. </p>
+<p>Asked of every cut cell the level itself describes, at the ratio m_maxRefinement names, and of the body the consumers build &ndash; which on a refinement boundary is the one whose faces were taken from the finer level, since stitching lengthens the interface loop and it is that loop the question is about. A cell whose interface is planar is exempt without being cut, because its fluid is then convex and convexity survives every ratio.</p>
+<p>What happens to a failing cell is m_unresolvedAction's to decide. Only Warn is wired: the cells are named and the run continues, leaving it to whoever set it up to raise the geometric resolution. Runs regardless of m_sanityCheck, since it reports on the geometry the run will actually use rather than on this generator's own consistency. Requires buildGraphs. </p>
+
+</div>
+</div>
 <a id="a4ea4bb0ccb1079c04d19e76575932cd6" name="a4ea4bb0ccb1079c04d19e76575932cd6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4ea4bb0ccb1079c04d19e76575932cd6">&#9670;&#160;</a></span>resolveTangency()</h2>
 
@@ -1396,7 +1482,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Check that the interface triangles form a surface that is closed except on the domain boundary. </p>
-<p>A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, and an edge in a face the coarser level describes is checked from that side. Every rank checks its own cells, vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees with itself, and there would be no cut cell to carry the interface between them. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which is where the edge of the tiled region meets what no tile carries. Switched by PolyhedralGeometryShop.sanity_check, off by default. Requires buildGraphs. </p>
+<p>A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, an edge in a face the coarser level describes is checked from that side, and an edge in a face onto a cell the graph filled has no partner to meet, since that face is closed. Every rank checks its own cells, vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees with itself, and there would be no cut cell to carry the interface between them. A filled cell is covered whatever its nodes read, which is why the graph keeps a neighbour of one as a cut cell holding the whole of itself rather than a regular one; the test is what says it did. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which is where the edge of the tiled region meets what no tile carries. Switched by PolyhedralGeometryShop.sanity_check, on by default in a build that keeps its assertions. Requires buildGraphs. </p>
 
 </div>
 </div>
@@ -1618,6 +1704,32 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a3fc25f5b2695c6607b3c6ff2a4dbc306" name="a3fc25f5b2695c6607b3c6ff2a4dbc306"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fc25f5b2695c6607b3c6ff2a4dbc306">&#9670;&#160;</a></span>m_maxRefinement</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralGeometryShop::m_maxRefinement</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How far below the geometry's own grids a cell must stay single valued. PolyhedralGeometryShop.max_refinement, one &ndash; that is, off &ndash; by default. </p>
+<p>A power of two. One asks for nothing and skips the check entirely; two asks that the cells one refinement below the geometry grid are each a single piece of fluid, four that the cells two below are, and so on. The property is not inherited &ndash; a cell whose children are all single valued can still have a grandchild that is not &ndash; so this has to name the ratio the mesh will actually use rather than being derived from one level.</p>
+<p>Off by default because the test costs a subdivision of every cut cell whose interface is not planar, which is two to three times what building the geometry costs in the first place, and because nothing downstream reads a subdivided cell yet. It becomes worth its price once it does. </p>
+
+</div>
+</div>
 <a id="ae9e08c97356bbd64d8882020ddd56e9d" name="ae9e08c97356bbd64d8882020ddd56e9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae9e08c97356bbd64d8882020ddd56e9d">&#9670;&#160;</a></span>m_sanityCheck</h2>
 

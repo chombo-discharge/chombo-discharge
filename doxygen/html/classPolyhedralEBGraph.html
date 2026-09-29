@@ -102,9 +102,9 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PolyhedralEBGraph</b> ()</td></tr>
 <tr class="memdesc:a454d2e1b2af1523c21f157d6d36f1949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a454d2e1b2af1523c21f157d6d36f1949"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab386066e559f1efb9036308ea781072c" id="r_ab386066e559f1efb9036308ea781072c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ab386066e559f1efb9036308ea781072c">define</a> (const BaseIF &amp;a_function, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost)</td></tr>
-<tr class="memdesc:ab386066e559f1efb9036308ea781072c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level over its cut tiles.  <br /></td></tr>
-<tr class="separator:ab386066e559f1efb9036308ea781072c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1d545763f8856487118225cbe1e06b7" id="r_ae1d545763f8856487118225cbe1e06b7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ae1d545763f8856487118225cbe1e06b7">define</a> (const BaseIF &amp;a_function, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost, const Vector&lt; Box &gt; &amp;a_covered)</td></tr>
+<tr class="memdesc:ae1d545763f8856487118225cbe1e06b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level over its cut tiles.  <br /></td></tr>
+<tr class="separator:ae1d545763f8856487118225cbe1e06b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a284af359802a73b084806c4d0aa970c1" id="r_a284af359802a73b084806c4d0aa970c1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a284af359802a73b084806c4d0aa970c1">define</a> (const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_source, const DisjointBoxLayout &amp;a_grids, const BaseIF &amp;a_function)</td></tr>
 <tr class="memdesc:a284af359802a73b084806c4d0aa970c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of a level over a given layout, from another graph of the same level.  <br /></td></tr>
 <tr class="separator:a284af359802a73b084806c4d0aa970c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,6 +144,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a9619701794b29e7f58dc27d1393f7ead" id="r_a9619701794b29e7f58dc27d1393f7ead"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a9619701794b29e7f58dc27d1393f7ead">link</a> (<a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_coarse, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_fine)</td></tr>
 <tr class="memdesc:a9619701794b29e7f58dc27d1393f7ead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark, on the coarse level, the cells the fine level carries and the faces that open onto them.  <br /></td></tr>
 <tr class="separator:a9619701794b29e7f58dc27d1393f7ead"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa296cdc0adcc16ab97b69850d7a472b" id="r_aaa296cdc0adcc16ab97b69850d7a472b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#aaa296cdc0adcc16ab97b69850d7a472b">findUnresolvedCells</a> (const BaseFab&lt; Real &gt; &amp;a_nodeValues, const Box &amp;a_region, const Vector&lt; Box &gt; &amp;a_covered, BaseFab&lt; bool &gt; &amp;a_unresolved)</td></tr>
+<tr class="memdesc:aaa296cdc0adcc16ab97b69850d7a472b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the cells of a region that hold more than one sheet of interface.  <br /></td></tr>
+<tr class="separator:aaa296cdc0adcc16ab97b69850d7a472b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -228,6 +231,10 @@ ProblemDomain&#160;</td><td class="memItemRight" valign="bottom"><b>m_domain</b>
 DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><b>m_grids</b></td></tr>
 <tr class="memdesc:afd0441297642860d8d4066fede988c9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Layout over the cut tiles. <br /></td></tr>
 <tr class="separator:afd0441297642860d8d4066fede988c9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae40b546cc32ed8386d65962f333b43d2" id="r_ae40b546cc32ed8386d65962f333b43d2"><td class="memItemLeft" align="right" valign="top"><a id="ae40b546cc32ed8386d65962f333b43d2" name="ae40b546cc32ed8386d65962f333b43d2"></a>
+Vector&lt; Box &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_covered</b></td></tr>
+<tr class="memdesc:ae40b546cc32ed8386d65962f333b43d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of this level the finer level carries, coarsened onto this level. <br /></td></tr>
+<tr class="separator:ae40b546cc32ed8386d65962f333b43d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57f6336a0f19b8994e34b0b43d8795ca" id="r_a57f6336a0f19b8994e34b0b43d8795ca"><td class="memItemLeft" align="right" valign="top"><a id="a57f6336a0f19b8994e34b0b43d8795ca" name="a57f6336a0f19b8994e34b0b43d8795ca"></a>
 LayoutData&lt; IntVectSet &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cutCells</b></td></tr>
 <tr class="memdesc:a57f6336a0f19b8994e34b0b43d8795ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut cells of every box. <br /></td></tr>
@@ -255,8 +262,8 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 <p>The graph covers the cut tiles only. A cell outside every tile is regular or covered, never cut, and which of the two is the geometry's box classification rather than the graph's business.</p>
 <p>Built in two steps: define makes one level from its implicit function and its tiles, and knows about the domain boundary and about faces that open onto no tile of its own level; link, given two adjacent levels, marks the coarse cells the fine level carries and the coarse faces that open onto them. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab386066e559f1efb9036308ea781072c" name="ab386066e559f1efb9036308ea781072c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab386066e559f1efb9036308ea781072c">&#9670;&#160;</a></span>define() <span class="overload">[1/2]</span></h2>
+<a id="ae1d545763f8856487118225cbe1e06b7" name="ae1d545763f8856487118225cbe1e06b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1d545763f8856487118225cbe1e06b7">&#9670;&#160;</a></span>define() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -298,7 +305,13 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numGhost</em>&#160;</td>
+          <td class="paramname"><em>a_numGhost</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_covered</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -322,6 +335,7 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing of the level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Ghost cells the cell states are kept for. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_covered</td><td>Cells of this level the finer level will carry, coarsened onto this level. A cell in them is described up there and is not filled down here. </td></tr>
   </table>
   </dd>
 </dl>
@@ -562,6 +576,67 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if nothing differs. </dd></dl>
+
+</div>
+</div>
+<a id="aaa296cdc0adcc16ab97b69850d7a472b" name="aaa296cdc0adcc16ab97b69850d7a472b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa296cdc0adcc16ab97b69850d7a472b">&#9670;&#160;</a></span>findUnresolvedCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::findUnresolvedCells </td>
+          <td>(</td>
+          <td class="paramtype">const BaseFab&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_nodeValues</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_region</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_covered</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BaseFab&lt; bool &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_unresolved</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find the cells of a region that hold more than one sheet of interface. </p>
+<p>Downstream holds one body and one interface to a cell, so a cell the surface enters as several sheets cannot be described at all. Such a cell is filled rather than built, which is the only reading that stays single valued and keeps a barrier thinner than a cell a barrier instead of letting the fluid run through it. Filling is a classification and changes no value another level reads, so the children a coarse cell restricts against still agree with it about where every edge is crossed &ndash; which is what a snap of the nodes themselves cannot promise.</p>
+<p>A cell the finer level carries is left alone: the feature is resolved up there, and this level's reading of it is not the one that gets used. Only the combinatorics are read, so no root is solved for here.</p>
+<p>Nothing is counted here. The region a caller asks about reaches past the cells it owns, so that a cell can see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken here would report a cell near a box boundary once for every box that reaches it. The caller counts over the cells it owns. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nodeValues</td><td>Node values of the region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cells to ask. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_covered</td><td>Cells a finer level carries. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_unresolved</td><td>True for each cell of the region that must be filled. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

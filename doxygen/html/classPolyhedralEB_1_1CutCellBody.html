@@ -136,6 +136,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0fe5c7e1e72fd67f95c609132a6eb0bd" id="r_a0fe5c7e1e72fd67f95c609132a6eb0bd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a0fe5c7e1e72fd67f95c609132a6eb0bd">define</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface) noexcept</td></tr>
 <tr class="memdesc:a0fe5c7e1e72fd67f95c609132a6eb0bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body from the values the surface is reconstructed from.  <br /></td></tr>
 <tr class="separator:a0fe5c7e1e72fd67f95c609132a6eb0bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91b8886361b3fc60c412ac98768d8464" id="r_a91b8886361b3fc60c412ac98768d8464"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a91b8886361b3fc60c412ac98768d8464">isConnected</a> () const noexcept</td></tr>
+<tr class="memdesc:a91b8886361b3fc60c412ac98768d8464"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the fluid this body holds is one connected region.  <br /></td></tr>
+<tr class="separator:a91b8886361b3fc60c412ac98768d8464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31a14df781f58810e75e6f4408234789" id="r_a31a14df781f58810e75e6f4408234789"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a31a14df781f58810e75e6f4408234789">interfaceIsPlanar</a> () const noexcept</td></tr>
+<tr class="memdesc:a31a14df781f58810e75e6f4408234789"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether every polygon of the interface lies in one plane.  <br /></td></tr>
+<tr class="separator:a31a14df781f58810e75e6f4408234789"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24fba9fc74a1d1d53bbb2ecde18a600e" id="r_a24fba9fc74a1d1d53bbb2ecde18a600e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a24fba9fc74a1d1d53bbb2ecde18a600e">subdivide</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">CutCellBody</a> *a_children) const noexcept</td></tr>
+<tr class="memdesc:a24fba9fc74a1d1d53bbb2ecde18a600e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut this body into the bodies of the 2^SpaceDim cells one refinement finer that fill its cell.  <br /></td></tr>
+<tr class="separator:a24fba9fc74a1d1d53bbb2ecde18a600e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07a7eb74a931e1d30dc1c78720c0b23e" id="r_a07a7eb74a931e1d30dc1c78720c0b23e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a07a7eb74a931e1d30dc1c78720c0b23e">hasMultiValuedChildren</a> (const int a_refRat) const noexcept</td></tr>
+<tr class="memdesc:a07a7eb74a931e1d30dc1c78720c0b23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece.  <br /></td></tr>
+<tr class="separator:a07a7eb74a931e1d30dc1c78720c0b23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3af4e249b4ac99a6f32591758f9dc55" id="r_ae3af4e249b4ac99a6f32591758f9dc55"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#ae3af4e249b4ac99a6f32591758f9dc55">volumeFraction</a> () const noexcept</td></tr>
 <tr class="memdesc:ae3af4e249b4ac99a6f32591758f9dc55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Volume fraction.  <br /></td></tr>
 <tr class="separator:ae3af4e249b4ac99a6f32591758f9dc55"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,6 +187,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a31a85e0f4c67cb8d4c9d46b356db8c87" id="r_a31a85e0f4c67cb8d4c9d46b356db8c87"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a31a85e0f4c67cb8d4c9d46b356db8c87">closeInterface</a> () noexcept</td></tr>
 <tr class="memdesc:a31a85e0f4c67cb8d4c9d46b356db8c87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild the interface from the face polygons this body holds.  <br /></td></tr>
 <tr class="separator:a31a85e0f4c67cb8d4c9d46b356db8c87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ecdad4c5c4d951d640b5338c4408334" id="r_a1ecdad4c5c4d951d640b5338c4408334"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a1ecdad4c5c4d951d640b5338c4408334">closeBoundary</a> (const int a_face) noexcept</td></tr>
+<tr class="memdesc:a1ecdad4c5c4d951d640b5338c4408334"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the body over the edges no polygon carries in reverse, with a patch lying in a given face.  <br /></td></tr>
+<tr class="separator:a1ecdad4c5c4d951d640b5338c4408334"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9882ff3097c6adc495ede9c152666270" id="r_a9882ff3097c6adc495ede9c152666270"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a9882ff3097c6adc495ede9c152666270">snapFace</a> (const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept</td></tr>
+<tr class="memdesc:a9882ff3097c6adc495ede9c152666270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the face loses become interface.  <br /></td></tr>
+<tr class="separator:a9882ff3097c6adc495ede9c152666270"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0098ac1bc81e34eff4fcb9502a633b8d" id="r_a0098ac1bc81e34eff4fcb9502a633b8d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a0098ac1bc81e34eff4fcb9502a633b8d">weldTJunctions</a> () noexcept</td></tr>
 <tr class="memdesc:a0098ac1bc81e34eff4fcb9502a633b8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split every polygon edge at the vertices of other polygons that lie on it.  <br /></td></tr>
 <tr class="separator:a0098ac1bc81e34eff4fcb9502a633b8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -191,8 +209,11 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a2402e2e25cd8a6eebaa2c60e9c922043" id="r_a2402e2e25cd8a6eebaa2c60e9c922043"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a8d9b00641021ab37a738427d130b7fda">Kind</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a2402e2e25cd8a6eebaa2c60e9c922043">classify</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface) noexcept</td></tr>
-<tr class="memdesc:a2402e2e25cd8a6eebaa2c60e9c922043"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the cell relates to the interface, from the corner values alone.  <br /></td></tr>
+<tr class="memdesc:a2402e2e25cd8a6eebaa2c60e9c922043"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the cell relates to the interface.  <br /></td></tr>
 <tr class="separator:a2402e2e25cd8a6eebaa2c60e9c922043"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69995c05ff5ee0c46918bf9158f3ae69" id="r_a69995c05ff5ee0c46918bf9158f3ae69"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a69995c05ff5ee0c46918bf9158f3ae69">numSheets</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;a_surface) noexcept</td></tr>
+<tr class="memdesc:a69995c05ff5ee0c46918bf9158f3ae69"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many separate sheets of interface the surface enters the cell as.  <br /></td></tr>
+<tr class="separator:a69995c05ff5ee0c46918bf9158f3ae69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -211,6 +232,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a618a304b301af28771ce75b002d36160" id="r_a618a304b301af28771ce75b002d36160"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a618a304b301af28771ce75b002d36160">orientOutward</a> (<a class="el" href="structPolyhedralEB_1_1CutCellBody_1_1Polygon.html">Polygon</a> &amp;a_polygon, const int a_dir, const int a_side) const noexcept</td></tr>
 <tr class="memdesc:a618a304b301af28771ce75b002d36160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reverse a face polygon if its area vector points into the fluid.  <br /></td></tr>
 <tr class="separator:a618a304b301af28771ce75b002d36160"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00c7c1a4d15d76bdcf43ca8550e8a255" id="r_a00c7c1a4d15d76bdcf43ca8550e8a255"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a00c7c1a4d15d76bdcf43ca8550e8a255">partitions</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">CutCellBody</a> *a_children) const noexcept</td></tr>
+<tr class="memdesc:a00c7c1a4d15d76bdcf43ca8550e8a255"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a set of children partitions this body, in every moment that has to add up.  <br /></td></tr>
+<tr class="separator:a00c7c1a4d15d76bdcf43ca8550e8a255"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1990616c12b246cc662672c47ddac6e8" id="r_a1990616c12b246cc662672c47ddac6e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a1990616c12b246cc662672c47ddac6e8">accumulateMoments</a> () noexcept</td></tr>
 <tr class="memdesc:a1990616c12b246cc662672c47ddac6e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Take the moments of the assembled polygons.  <br /></td></tr>
 <tr class="separator:a1990616c12b246cc662672c47ddac6e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -501,14 +525,50 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 </table>
 </div><div class="memdoc">
 
-<p>How the cell relates to the interface, from the corner values alone. </p>
-<p>The cell is cut as soon as two corners disagree under isFluid, regular if every corner is fluid and covered otherwise. An exact zero is solid, so a cell whose face lies in the interface is cut from the fluid side, full, with that face as its interface. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>How the cell relates to the interface. </p>
+<p>The cell is cut as soon as two corners disagree under isFluid, regular if every corner is fluid and covered otherwise. An exact zero is solid, so a cell whose face lies in the interface is cut from the fluid side, full, with that face as its interface.</p>
+<p>A cell the surface enters as more than one sheet is still called cut here. Whether such a cell should be filled instead &ndash; see numSheets for why nothing it can hold describes the feature that put two sheets in it &ndash; is a decision for whoever knows whether a finer level carries the cell: one that does is left to it, and one that does not is filled, which is what <a class="el" href="classPolyhedralEBGraph.html#aaa296cdc0adcc16ab97b69850d7a472b" title="Find the cells of a region that hold more than one sheet of interface.">PolyhedralEBGraph::findUnresolvedCells</a> decides. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_surface</td><td>Corner values in the cell's own frame. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Regular, Covered or Cut. </dd></dl>
+
+</div>
+</div>
+<a id="a1ecdad4c5c4d951d640b5338c4408334" name="a1ecdad4c5c4d951d640b5338c4408334"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ecdad4c5c4d951d640b5338c4408334">&#9670;&#160;</a></span>closeBoundary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::closeBoundary </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_face</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Close the body over the edges no polygon carries in reverse, with a patch lying in a given face. </p>
+<p>What closeInterface does, with the face the patch belongs to given rather than assumed to be the interface: cutting the body with a plane leaves it open along that plane, and the patch closing it lies in a face of the cell rather than in the interface. A patch in a cell face is oriented by that face, since the edges bounding the opening do not say which way round it should be. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_face</td><td>Face the closing patch lies in, or -1 for the interface. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if every loop closed and the result fitted in the body's storage. </dd></dl>
 
 </div>
 </div>
@@ -817,6 +877,99 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a07a7eb74a931e1d30dc1c78720c0b23e" name="a07a7eb74a931e1d30dc1c78720c0b23e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07a7eb74a931e1d30dc1c78720c0b23e">&#9670;&#160;</a></span>hasMultiValuedChildren()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::hasMultiValuedChildren </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_refRat</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether cutting this body for a refinement asks for a child whose fluid is in more than one piece. </p>
+<p>The single-valued property is not inherited: a body whose eight children are all single valued can still have a grandchild that is not, so asking one level down says nothing about two. This asks to the ratio the mesh will actually use, and it is the test to put in front of any cell that a finer grid may subdivide, whether or not the cell sits on a refinement boundary.</p>
+<p>A planar interface is answered from interfaceIsPlanar without building anything, since convexity settles every ratio. Otherwise the body is cut in halves repeatedly, log2(a_refRat) times, and every body produced on the way down is asked &ndash; not only those at the final ratio. That is deliberate: the intermediate bodies are what a recursive subdivision would actually build, so one of them being multi-valued is a failure even when the cells the mesh ends up with are not. A direct a_refRat-way clip of this body is not the same computation, because each round re-expresses its children in their own frames and closes their interfaces there; when subdivide learns to clip by a ratio in one step, this should follow it.</p>
+<p>A body that cannot be cut at all &ndash; one whose children would need more polygons or vertices than they can hold &ndash; is not reported here. That is a separate failure, and subdivide already returns it. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio to test, a power of two and at least two. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if any body produced on the way to that ratio holds fluid in more than one piece. </dd></dl>
+
+</div>
+</div>
+<a id="a31a14df781f58810e75e6f4408234789" name="a31a14df781f58810e75e6f4408234789"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31a14df781f58810e75e6f4408234789">&#9670;&#160;</a></span>interfaceIsPlanar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::interfaceIsPlanar </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether every polygon of the interface lies in one plane. </p>
+<p>A planar interface leaves the fluid the cell intersected with a half-space, which is convex. A convex region meets every axis-aligned box in a convex, and therefore connected, set &ndash; so a body that answers true here has single-valued children at every refinement ratio, and their children in turn, without any of them being built. It is the one property that settles the question for all ratios at once: everything else is an interpolant of the same crossings and carries no such guarantee. A body whose interface is a single triangle is planar by construction, which is most of the cut cells of a smooth surface. </p><dl class="section return"><dt>Returns</dt><dd>True if the interface polygons share a plane, or if the body has no interface at all. </dd></dl>
+
+</div>
+</div>
+<a id="a91b8886361b3fc60c412ac98768d8464" name="a91b8886361b3fc60c412ac98768d8464"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91b8886361b3fc60c412ac98768d8464">&#9670;&#160;</a></span>isConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::isConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the fluid this body holds is one connected region. </p>
+<p>Asked of the polygons rather than of the fluid: they bound a closed surface, so two polygons that share an edge bound the same piece of fluid, and the fluid is in one piece exactly when walking that sharing reaches every polygon from any one of them. A cell the graph builds should never hold two pieces &ndash; the interface is anchored to the cell's edges, so it cannot close on itself inside the cell and leave a cavity, and a cell the surface enters as more than one sheet is filled before any body is built. A body cut from a coarser one is different: it was not built from an implicit function, and a single-sheet parent whose interface is twisted can hand a child two pieces. That is what this is asked for, and it is also what decides which polygons bound which piece, and so what opens onto a neighbouring cell. </p><dl class="section return"><dt>Returns</dt><dd>True if every polygon is reachable from any other by shared edges, or if the body holds none. </dd></dl>
+
+</div>
+</div>
 <a id="a2b3a3f9598ca78a07cb0379fa064a54b" name="a2b3a3f9598ca78a07cb0379fa064a54b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2b3a3f9598ca78a07cb0379fa064a54b">&#9670;&#160;</a></span>mergeCoplanar()</h2>
 
@@ -940,6 +1093,41 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a69995c05ff5ee0c46918bf9158f3ae69" name="a69995c05ff5ee0c46918bf9158f3ae69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69995c05ff5ee0c46918bf9158f3ae69">&#9670;&#160;</a></span>numSheets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralEB::CutCellBody::numSheets </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_surface</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How many separate sheets of interface the surface enters the cell as. </p>
+<p>The crossings of a cut cell close into cycles, and each cycle is spanned by its own patch. One cycle is the ordinary case: one patch, and the fluid either side of it. More than one means the cell holds a feature thinner than itself &ndash; a plate the nodes only see where it happens to swallow a corner, say &ndash; and neither the corner values nor the crossings carry enough to say what that feature is. In two dimensions the crossings pair into chords and the count is half of them. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surface</td><td>Corner values and edge crossings in the cell's own frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of sheets, zero where the corners agree, or -1 where the crossings do not form cycles. </dd></dl>
+
+</div>
+</div>
 <a id="a618a304b301af28771ce75b002d36160" name="a618a304b301af28771ce75b002d36160"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a618a304b301af28771ce75b002d36160">&#9670;&#160;</a></span>orientOutward()</h2>
 
@@ -989,6 +1177,42 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a00c7c1a4d15d76bdcf43ca8550e8a255" name="a00c7c1a4d15d76bdcf43ca8550e8a255"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00c7c1a4d15d76bdcf43ca8550e8a255">&#9670;&#160;</a></span>partitions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::partitions </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">CutCellBody</a> *&#160;</td>
+          <td class="paramname"><em>a_children</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether a set of children partitions this body, in every moment that has to add up. </p>
+<p>What subdivide has to deliver, checked rather than asserted so that a caller learns of it. First, that every child holds its fluid in one piece: a child that does not is reported by returning false before anything is summed, because it is a fact about a parent whose interface is twisted rather than a fault to stop on, and hasMultiValuedChildren asks exactly that. Then four things: the children's volumes add to this one's, the apertures of the children on a face of this cell add to that face's, the two children meeting at an interior face agree about it &ndash; which is what lets those sums cancel, and what a cell cut from this one relies on to join its sibling &ndash; and the children's interface area vectors add to this one's. Each child is also required to satisfy the divergence identity on its own, since a child that does not is not a body whatever it sums to.</p>
+<p>A quantity spanning fewer dimensions than the cell is counted once too often per dimension it does not span, so volumes carry 2^-SpaceDim and areas 2^-(SpaceDim-1). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_children</td><td>The 2^SpaceDim bodies, in quadrant order. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if every sum returns this body's own moment to rounding. </dd></dl>
 
 </div>
 </div>
@@ -1076,6 +1300,96 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the children's chords merged into a face this body can hold. </dd></dl>
+
+</div>
+</div>
+<a id="a9882ff3097c6adc495ede9c152666270" name="a9882ff3097c6adc495ede9c152666270"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9882ff3097c6adc495ede9c152666270">&#9670;&#160;</a></span>snapFace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::snapFace </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_side</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_neighbourIsFluid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the face loses become interface. </p>
+<p>A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell into a regular or a covered one from its own body, and when the graph fills a cell holding more than one sheet, which is covered whatever its nodes read. The face takes the neighbour's answer &ndash; the whole face, or none of it &ndash; and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector gain the same vector. The moments are recomputed, unlike restrictFace, because this body is one a cell takes its moments from. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Direction of the face. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Side of the cell the face is on. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_neighbourIsFluid</td><td>True if the neighbour holds no solid, false if it holds no fluid. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the body closed again and its volume stayed in range. </dd></dl>
+
+</div>
+</div>
+<a id="a24fba9fc74a1d1d53bbb2ecde18a600e" name="a24fba9fc74a1d1d53bbb2ecde18a600e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24fba9fc74a1d1d53bbb2ecde18a600e">&#9670;&#160;</a></span>subdivide()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralEB::CutCellBody::subdivide </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html">CutCellBody</a> *&#160;</td>
+          <td class="paramname"><em>a_children</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cut this body into the bodies of the 2^SpaceDim cells one refinement finer that fill its cell. </p>
+<p>A genuine subdivision of the polyhedron, not a reconstruction of it at the finer spacing: each child is this body intersected with its own octant, so the children partition this body and their moments sum back to its own exactly rather than to within the curvature over the cell. That is what makes a cell cut from its parent join the parent's own description &ndash; the two share the faces between them by construction, which two independent reconstructions of the same region do not.</p>
+<p>The children come back in quadrant order: bit d of a child's index is the side it lies on in direction d, zero low and one high, matching faceCorners and restrictFace. Each is expressed in its own cell's frame, so a length here is twice one there. A child that the fluid misses entirely comes back empty, which reads as covered; one the fluid fills comes back whole.</p>
+<p>A vertex of a child is not a crossing of the child's own edges, so the provenance those carry is dropped; closeInterface already handles polygons in that state, since a restricted face leaves them the same way. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_children</td><td>The 2^SpaceDim bodies, in quadrant order. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>False if a child's fluid region is not connected, if a child would need more polygons or vertices than it can hold, or if the children do not add back up to this body in every moment partitions checks. </dd></dl>
 
 </div>
 </div>

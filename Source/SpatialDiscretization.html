@@ -79,7 +79,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#geometry-generation">Geometry generation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#chombo-approach"><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> approach</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#chombo-discharge-pruning"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> pruning</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#polyhedral-moments">Polyhedral moments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polyhedral-moments">Polyhedral moments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#one-sheet-to-a-cell">One sheet to a cell</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#mesh-generation">Mesh generation</a><ul>
@@ -344,8 +347,8 @@ The divergence theorem on a constant field,</p>
 \sum_{d}\left(\alpha_{d,\text{hi}} - \alpha_{d,\text{lo}}\right)\mathbf{e}_d = a_B\mathbf{n},
 \end{equation}</div><p>holds to rounding for every cut-cell rather than approximately, which matters because it is the relation <code class="docutils literal notranslate"><span class="pre">PolyGeom</span></code> uses to derive the boundary area and normal from the apertures.
 More importantly for what this is intended to support, the eight cells of a subdivided body sum back to the body they came from exactly, so refinement of a single cut-cell becomes a partition rather than a reconstruction.</p>
-<p>Everything else is deliberately left alone.
-The cell classification, the graph, and the treatment of regular cells bordering a covered one are <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>’s, so a run with <code class="docutils literal notranslate"><span class="pre">polyhedral</span></code> produces the same cut-cell topology as one without it; only the moments differ.
+<p>Almost everything else is left as <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> has it: the graph, and the classification of every cell the surface enters as a single sheet.
+The exception is a cell the surface enters as more than one sheet, described below, so a run with <code class="docutils literal notranslate"><span class="pre">polyhedral</span></code> has the same cut-cell topology as one without it except in those cells.
 A cell whose reconstructed polyhedron fails to close aborts the run rather than being silently approximated.
 No geometry tested so far has produced one, and while the generator is being developed a cell it cannot close is an edge case worth seeing rather than one worth approximating around.
 There is deliberately no input-file option for this, so that relaxing it is an edit to <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> rather than something a run can do by accident.</p>
@@ -354,6 +357,30 @@ There is deliberately no input-file option for this, so that relaxing it is an e
 <p>Output from <code class="docutils literal notranslate"><span class="pre">polyhedral</span></code> is not comparable with output from the other methods on curved geometry, by design.
 Benchmark files must be regenerated rather than compared across the switch.</p>
 </div>
+<section id="one-sheet-to-a-cell">
+<h4>One sheet to a cell<a class="headerlink" href="#one-sheet-to-a-cell" title="Permalink to this heading"></a></h4>
+<p>A cut-cell is meant to hold one sheet of interface, and the fluid on one side of it.
+A feature thinner than a cell breaks that: a plate through the middle of a cell, or two wires passing through it, puts two sheets into one cell, and the corner values and edge crossings carry too little to say what the feature is.
+<code class="docutils literal notranslate"><span class="pre">Chombo</span></code> makes such a cell a single volume covering two disconnected pieces of fluid, which lets fluid pass straight through a barrier that should stop it.
+The polyhedral method fills the cell instead, on any level where no finer level describes it, which keeps the cell single-valued and keeps the barrier a barrier.
+A regular neighbour of a filled cell is kept as a cut-cell holding the whole of itself, as <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> does next to a covered cell.
+Such features resolve themselves once the mesh is fine enough to see them, so refinement is the remedy and filling is what happens where there is none left.</p>
+<p>A second case needs no filling.
+A cell holding a single sheet can still lose it when it is cut into finer cells: where the interface is twisted into a saddle, a child cell can hold its fluid in two pieces joined a cell away.
+The mesh generator can refine a box holding such a saddle, which removes the problem wherever there is refinement left to give.
+It is off by default, since the intended treatment of such a cell is to merge its pieces into one without losing conservation (not yet implemented), and it is switched on with</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ComputationalGeometry.refine_saddles = true    # Refine boxes holding a saddle-shaped interface. Off by default.
+</pre></div>
+</div>
+<p>Refinement does not remove a saddle at the finest level, since each refinement hands a smaller copy of it to one child.
+Whether any cell would still lose its single-valuedness when cut to a given ratio below the finest level can be checked with</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>PolyhedralGeometryShop.max_refinement   = 2      # Ratio to check (2, 4 or 8). 1, the default, skips the check.
+PolyhedralGeometryShop.unresolved_cells = warn   # What to do with a failing cell. Only &#39;warn&#39; is implemented.
+</pre></div>
+</div>
+<p>which names the failing cells and asks for a higher geometric resolution.
+The check costs a subdivision of every cut-cell whose interface is not planar, typically two to three times the cost of building the geometry, which is why it is off by default.</p>
+</section>
 </section>
 </section>
 <section id="mesh-generation">

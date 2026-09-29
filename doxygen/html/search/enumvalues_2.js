@@ -13,6 +13,8 @@ var searchData=
   ['chargedmobileordiffusive_10',['ChargedMobileOrDiffusive',['../CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967af288475f483b5b5f39a0eadfef3137ed',1,'Physics::ItoKMC']]],
   ['circle_11',['circle',['../classRodPlaneProfile.html#a87efc0203dc631fd175a3462b9a0b57ba9b6ddeba5b33e577c07c35d8505c6072',1,'RodPlaneProfile']]],
   ['coarse_12',['Coarse',['../CD__ParticleSoA_8H.html#ad9d0c73e301514a9f3b3aa0c23d98b8fa1fb282a269a2bc94abc136c0511daa59',1,'CD_ParticleSoA.H']]],
-  ['container_13',['Container',['../namespaceParticleMemory.html#ad3c67520bd71e4a629cf449e4c28fbb1a0e7278cda02a9c0446dcc75a4df34eb2',1,'ParticleMemory']]],
-  ['count_14',['Count',['../namespaceParticleManagement.html#a491f066ceb697a56c145dc83187c668dae93f994f01c537c4e2f7d8528c3eb5e9',1,'ParticleManagement']]]
+  ['collapse_13',['Collapse',['../classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570a2b31634e3cfef1bfdd7d0d2cdfdc3f9d',1,'PolyhedralGeometryShop']]],
+  ['container_14',['Container',['../namespaceParticleMemory.html#ad3c67520bd71e4a629cf449e4c28fbb1a0e7278cda02a9c0446dcc75a4df34eb2',1,'ParticleMemory']]],
+  ['count_15',['Count',['../namespaceParticleManagement.html#a491f066ceb697a56c145dc83187c668dae93f994f01c537c4e2f7d8528c3eb5e9',1,'ParticleManagement']]],
+  ['cover_16',['Cover',['../classPolyhedralGeometryShop.html#a437c3e25f06eca90f075da81ff80c570ac795dfff10a7c952f4c5438951e9ece9',1,'PolyhedralGeometryShop']]]
 ];
