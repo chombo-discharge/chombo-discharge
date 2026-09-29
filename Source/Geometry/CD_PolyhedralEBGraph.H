@@ -25,6 +25,7 @@
 #include <RealVect.H>
 
 // Our includes
+#include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
 #include <CD_NamespaceHeader.H>
 
@@ -34,9 +35,11 @@
  * reconstructed from, and for every face of every cell what lies across it: nothing, a cell of this level, a cell
  * of the finer level, a cell of the coarser level, or the domain boundary. The surface is the source of everything
  * else about a cut cell -- its polyhedron and moments are rebuilt from it on demand -- and it regrids: a coarse
- * surface's corners are fine nodes and its crossings are the children's, and children are reconstructed from the
- * implicit function. A cell whose face lies across a level boundary is not described by its own surface alone:
- * the face is described by the level across it, which is what the face state records.
+ * surface's corners are fine nodes and its crossings are the children's. A cell whose face lies across a level
+ * boundary, or opens onto a covered cell, is not described by its own surface alone: PolyhedralGeometryShop
+ * stitches it once, from the stored cells of the level across, writes the crossings it takes from there into the
+ * surface and keeps the faces it changes as face overrides, so that the cell's body is rebuilt from its own surface
+ * and its own overrides with no call to the implicit function.
  *
  * The graph covers the cut tiles only. A cell outside every tile is regular or covered, never cut, and which of
  * the two is the geometry's box classification rather than the graph's business.
@@ -103,9 +106,9 @@ public:
    * @details Load balances the tiles by cell count, reconstructs every cell of every tile and its ghost region
    * from the implicit function, classifies it as the polyhedral generator does, keeping every cell that holds
    * anything -- a body with nothing in it is a regular cell, and nothing else is discarded, since a cell's
-   * interface is what closes the surface against its neighbours -- keeps the surface of every cut cell, and sets the
-   * face states this level can know by itself: closed or open from the apertures, open onto the domain boundary, and
-   * open onto a cell no tile of this level carries. Collective.
+   * interface is what closes the surface against its neighbours -- keeps the surface of every cell whose corners
+   * disagree, cut or not, and sets the face states this level can know by itself: closed or open from the apertures,
+   * open onto the domain boundary, and open onto a cell no tile of this level carries. Collective.
    * @param[in] a_function        Implicit function of the phase.
    * @param[in] a_cutTiles        The level's cut tiles, identical on every rank.
    * @param[in] a_domain          Domain of the level.
@@ -129,9 +132,9 @@ public:
    * @details The other graph's cell states, face states and surfaces are copied onto the new layout's valid cells, and
    * exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified from the implicit
    * function by their corners, as define classifies them. The new layout must cover the same cells as the other
-   * graph's, since the surfaces of the cut cells come from it alone; a layout of another cell count stops the run. The
-   * refined mask is not copied: it is the finer level's to set, so link the copy to its finer level afterwards as the
-   * original was. Collective.
+   * graph's, since the surfaces come from it alone; a layout of another cell count stops the run. The refined mask
+   * is not copied: it is the finer level's to set, so link the copy to its finer level afterwards as the original
+   * was. Nor are the face overrides, which are stitched afresh on the copy. Collective.
    * @param[in] a_source   Graph to copy from.
    * @param[in] a_grids    Layout to copy onto, covering the same cells as a_source's.
    * @param[in] a_function Implicit function of the phase, for the ghost cells no tile carries.
@@ -251,11 +254,53 @@ public:
   getRefinedMask() const noexcept;
 
   /**
-   * @brief The surface every cut cell is reconstructed from, in the box's own cells and in its ghost cells.
-   * @return One surface per cut cell of every box's set.
+   * @brief The surface every cell of the surface sets is reconstructed from, in the box's own cells and in its ghost
+   * cells. A stitched level's surfaces carry the crossings its refined edges take from the finer level.
+   * @return One surface per cell of every box's surface set.
    */
   const LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&
   getSurfaces() const noexcept;
+
+  /**
+   * @brief The surfaces, for the shop to write the crossings it takes from the finer level into.
+   * @return One surface per cell of every box's surface set.
+   */
+  LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&
+  getSurfaces() noexcept;
+
+  /**
+   * @brief The cells of every box that hold a surface: every cut cell of its set, and every cell, own or ghost, whose
+   * corners disagree though it was dropped as dust or filled.
+   * @details A cell that is not cut keeps its surface because its crossings lie on edges other cells share, and the
+   * coarser level stitches from them.
+   * @return One set per box.
+   */
+  const LayoutData<IntVectSet>&
+  getSurfaceCells() const noexcept;
+
+  /**
+   * @brief The faces of every box's cut cells, own and ghost, that their surfaces do not describe.
+   * @details Empty until PolyhedralGeometryShop has stitched the level.
+   * @return One set of overrides per box.
+   */
+  const LayoutData<PolyhedralEB::CutCellFaceOverrides>&
+  getFaceOverrides() const noexcept;
+
+  /**
+   * @brief The face overrides, for the shop to write.
+   * @return One set of overrides per box.
+   */
+  LayoutData<PolyhedralEB::CutCellFaceOverrides>&
+  getFaceOverrides() noexcept;
+
+  /**
+   * @brief Mark the cells that hold a surface.
+   * @details The cell states cannot say which cells that are not cut keep a surface, so a copy of the graph carries
+   * this mask across first. Ghost cells are marked from the tiles that own them. Collective.
+   * @param[out] a_mask One where a cell holds a surface, zero elsewhere, over the graph's layout and its ghost cells.
+   */
+  void
+  markSurfaces(LevelData<BaseFab<signed char>>& a_mask) const;
 
 protected:
   /**
@@ -319,9 +364,26 @@ protected:
   LevelData<BaseFab<signed char>> m_refined;
 
   /**
-   * @brief Surface of every cut cell.
+   * @brief Cells of every box that hold a surface.
+   */
+  LayoutData<IntVectSet> m_surfaceCells;
+
+  /**
+   * @brief Surface of every cell of m_surfaceCells.
    */
   LevelData<IVSFAB<PolyhedralEB::CutCellSurface>> m_surfaces;
+
+  /**
+   * @brief Faces of every box's cut cells that their surfaces do not describe.
+   */
+  LayoutData<PolyhedralEB::CutCellFaceOverrides> m_faceOverrides;
+
+  /**
+   * @brief Put into every box's surface set the ghost cells whose owning tile keeps a surface for them.
+   * @details Run once the valid cells' sets are complete and before the surfaces are exchanged. Collective.
+   */
+  void
+  addGhostSurfaceCells();
 
   /**
    * @brief Build the layout over the tiles, load balanced by cell count.

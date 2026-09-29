@@ -105,6 +105,8 @@ PolyhedralEBGraph::defineData()
   CH_TIME("PolyhedralEBGraph::defineData");
 
   m_cutCells.define(m_grids);
+  m_surfaceCells.define(m_grids);
+  m_faceOverrides.define(m_grids);
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
   m_refined.define(m_grids, 1, std::max(2, m_numGhost) * IntVect::Unit);
@@ -115,7 +117,8 @@ PolyhedralEBGraph::defineData()
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box grown = grow(m_grids[dit()], m_numGhost) & m_domain.domainBox();
 
-    m_cutCells[dit()] = IntVectSet(DenseIntVectSet(grown, false));
+    m_cutCells[dit()]     = IntVectSet(DenseIntVectSet(grown, false));
+    m_surfaceCells[dit()] = IntVectSet(DenseIntVectSet(grown, false));
   }
 }
 
@@ -198,6 +201,8 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
     BaseFab<signed char>& states = m_cellStates[dit()];
     BaseFab<signed char>& faces  = m_faceStates[dit()];
     IntVectSet&           cut    = m_cutCells[dit()];
+
+    IntVectSet& withSurface = m_surfaceCells[dit()];
 
     Vector<CutCellSurface>& surfaces = kept[dit()];
 
@@ -335,6 +340,13 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
       if (state == s_cut) {
         cut |= iv;
+      }
+
+      // The surface is kept wherever the corners disagree, whatever the cell became: a cell dropped as dust or
+      // filled still has its crossings on edges its neighbours and the coarser level share, and those are data the
+      // coarser level stitches from, never recomputed from the function.
+      if (state == s_cut || CutCellBody::classify(surface) == CutCellBody::Kind::Cut) {
+        withSurface |= iv;
 
         surfaces.push_back(surface);
       }
@@ -347,6 +359,8 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
   this->defineGhostCells(a_function, a_carried);
 
+  this->addGhostSurfaceCells();
+
   const long long totalFilled = ParallelOps::sum(numFilled);
 
   if (totalFilled > 0 && procID() == 0) {
@@ -354,12 +368,12 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
            << " cells holding a feature thinner than themselves" << endl;
   }
 
-  m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_cutCells));
+  m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_surfaceCells));
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    const Box         box      = m_grids[dit()];
-    const IntVectSet& cut      = m_cutCells[dit()];
-    const auto&       surfaces = kept[dit()];
+    const Box         box         = m_grids[dit()];
+    const IntVectSet& withSurface = m_surfaceCells[dit()];
+    const auto&       surfaces    = kept[dit()];
 
     IVSFAB<CutCellSurface>& stored = m_surfaces[dit()];
 
@@ -368,7 +382,7 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
-      if (cut.contains(iv)) {
+      if (withSurface.contains(iv)) {
         stored(iv, 0) = surfaces[next++];
       }
     }
@@ -527,6 +541,18 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
 
   m_cellStates.exchange();
 
+  // A valid cell holds a surface when the source's does, which the states cannot say for a cell that is not cut.
+  LevelData<BaseFab<signed char>> sourceMask;
+  LevelData<BaseFab<signed char>> mask(m_grids, 1, IntVect::Zero);
+
+  a_source.markSurfaces(sourceMask);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    mask[dit()].setVal(0);
+  }
+
+  sourceMask.copyTo(Interval(0, 0), mask, Interval(0, 0), copier);
+
   // The refined mask is not copied: it reaches into ghost cells no tile of this level carries, which an
   // exchange cannot fill, and it follows from the covered region, which the copy takes from the source and marks
   // from above. A face state copied as finer stays finer, and linking the copy to its finer level checks the mask.
@@ -536,19 +562,27 @@ PolyhedralEBGraph::define(const PolyhedralEBGraph& a_source, const DisjointBoxLa
 
     const BaseFab<signed char>& states  = m_cellStates[dit()];
     const BaseFab<signed char>& refined = m_refined[dit()];
+    const BaseFab<signed char>& marked  = mask[dit()];
 
-    IntVectSet& cut = m_cutCells[dit()];
+    IntVectSet& cut         = m_cutCells[dit()];
+    IntVectSet& withSurface = m_surfaceCells[dit()];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       if (states(bit(), 0) == s_cut && refined(bit(), 0) == 0) {
         cut |= bit();
+      }
+
+      if (marked(bit(), 0) != 0) {
+        withSurface |= bit();
       }
     }
   }
 
   this->defineGhostCells(a_function, carried);
 
-  m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_cutCells));
+  this->addGhostSurfaceCells();
+
+  m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_surfaceCells));
 
   a_source.m_surfaces.copyTo(Interval(0, 0), m_surfaces, Interval(0, 0), copier);
 
@@ -595,13 +629,18 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
     const IntVectSet& cut      = m_cutCells[dit()];
     const IntVectSet& otherCut = a_other.m_cutCells[dit()];
 
-    same = same && (cut == otherCut);
+    const IntVectSet& withSurface      = m_surfaceCells[dit()];
+    const IntVectSet& otherWithSurface = a_other.m_surfaceCells[dit()];
+
+    same = same && (cut == otherCut) && (withSurface == otherWithSurface);
+
+    same = same && m_faceOverrides[dit()].equals(a_other.m_faceOverrides[dit()]);
 
     if (same) {
       const IVSFAB<CutCellSurface>& surfaces      = m_surfaces[dit()];
       const IVSFAB<CutCellSurface>& otherSurfaces = a_other.m_surfaces[dit()];
 
-      for (IVSIterator ivsit(cut); ivsit.ok(); ++ivsit) {
+      for (IVSIterator ivsit(withSurface); ivsit.ok(); ++ivsit) {
         const CutCellSurface& a = surfaces(ivsit(), 0);
         const CutCellSurface& b = otherSurfaces(ivsit(), 0);
 
@@ -634,6 +673,57 @@ PolyhedralEBGraph::markCarried(LevelData<BaseFab<signed char>>& a_carried) const
   }
 
   a_carried.exchange();
+}
+
+void
+PolyhedralEBGraph::markSurfaces(LevelData<BaseFab<signed char>>& a_mask) const
+{
+  CH_TIME("PolyhedralEBGraph::markSurfaces");
+
+  a_mask.define(m_grids, 1, m_numGhost * IntVect::Unit);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box         box         = m_grids[dit()];
+    const IntVectSet& withSurface = m_surfaceCells[dit()];
+
+    BaseFab<signed char>& mask = a_mask[dit()];
+
+    mask.setVal(0);
+
+    for (IVSIterator ivsit(withSurface); ivsit.ok(); ++ivsit) {
+      if (box.contains(ivsit())) {
+        mask(ivsit(), 0) = 1;
+      }
+    }
+  }
+
+  a_mask.exchange();
+}
+
+void
+PolyhedralEBGraph::addGhostSurfaceCells()
+{
+  CH_TIME("PolyhedralEBGraph::addGhostSurfaceCells");
+
+  // A box's surface container is exchanged into from the tiles that own its ghost cells, and a region is exchanged
+  // cell for cell, so a ghost cell holds a surface exactly when the tile owning it does.
+  LevelData<BaseFab<signed char>> mask;
+
+  this->markSurfaces(mask);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box box = m_grids[dit()];
+
+    const BaseFab<signed char>& marked = mask[dit()];
+
+    IntVectSet& withSurface = m_surfaceCells[dit()];
+
+    for (BoxIterator bit(marked.box() & m_domain.domainBox()); bit.ok(); ++bit) {
+      if (!box.contains(bit()) && marked(bit(), 0) != 0) {
+        withSurface |= bit();
+      }
+    }
+  }
 }
 
 void
@@ -832,6 +922,30 @@ const LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&
 PolyhedralEBGraph::getSurfaces() const noexcept
 {
   return m_surfaces;
+}
+
+LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&
+PolyhedralEBGraph::getSurfaces() noexcept
+{
+  return m_surfaces;
+}
+
+const LayoutData<IntVectSet>&
+PolyhedralEBGraph::getSurfaceCells() const noexcept
+{
+  return m_surfaceCells;
+}
+
+const LayoutData<PolyhedralEB::CutCellFaceOverrides>&
+PolyhedralEBGraph::getFaceOverrides() const noexcept
+{
+  return m_faceOverrides;
+}
+
+LayoutData<PolyhedralEB::CutCellFaceOverrides>&
+PolyhedralEBGraph::getFaceOverrides() noexcept
+{
+  return m_faceOverrides;
 }
 
 #include <CD_NamespaceFooter.H>

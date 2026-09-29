@@ -18,6 +18,7 @@
 #include <LoHiSide.H>
 
 // Our includes
+#include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_NamespaceHeader.H>
@@ -294,6 +295,29 @@ public:
   restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept;
 
   /**
+   * @brief Write one face's polygons, as this body holds them, into a set of face overrides.
+   * @details Opens a face entry for the cell last begun and adds every polygon lying in that face. A face closed onto
+   * a covered cell is recorded with no polygon.
+   * @param[in]     a_face      Face index, 2 * dir + side.
+   * @param[in]     a_reason    CutCellFaceOverrides::s_finer or CutCellFaceOverrides::s_closed.
+   * @param[in,out] a_overrides The overrides, with the cell already begun.
+   */
+  void
+  recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const;
+
+  /**
+   * @brief Replace one face's polygons with a face entry's, and drop the interface.
+   * @details What restrictFace does, with the merged polygons read from the entry instead of walked from the children:
+   * the face's polygons and the interface go, and the entry's polygons are appended in the order they are stored.
+   * Call closeInterface once every face that needs replacing has been.
+   * @param[in] a_overrides The overrides.
+   * @param[in] a_entry     Face entry to take the polygons from.
+   * @return True if the polygons fitted in the body's storage.
+   */
+  bool
+  replaceFace(const CutCellFaceOverrides& a_overrides, const int a_entry) noexcept;
+
+  /**
    * @brief Rebuild the interface from the face polygons this body holds.
    * @details Every face-polygon edge that no other face polygon carries in reverse bounds the interface, and walking
    * those edges gives its loops. Used instead of the crossing loops once a face has been restricted, since a
@@ -376,6 +400,15 @@ public:
    */
   Real
   divergenceResidual() const noexcept;
+
+  /**
+   * @brief Whether another body holds the same polygons and the same moments, bit for bit.
+   * @details Compares every polygon's face, vertices and vertex edges in order, then every moment.
+   * @param[in] a_other The other body.
+   * @return True if nothing differs.
+   */
+  bool
+  identical(const CutCellBody& a_other) const noexcept;
 
 protected:
   /**

@@ -655,6 +655,75 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
   return true;
 }
 
+void
+CutCellBody::recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const
+{
+  CH_assert(a_face >= 0 && a_face < s_numFaces);
+
+  a_overrides.beginFace(a_face, a_reason);
+
+  if (a_reason == CutCellFaceOverrides::s_closed) {
+    return;
+  }
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& polygon = m_polygon[ip];
+
+    if (polygon.m_face == a_face) {
+      a_overrides.addPolygon(polygon.m_vertex, polygon.m_vertexEdge, polygon.m_numVertices);
+    }
+  }
+}
+
+bool
+CutCellBody::replaceFace(const CutCellFaceOverrides& a_overrides, const int a_entry) noexcept
+{
+  CH_assert(a_overrides.reason(a_entry) == CutCellFaceOverrides::s_finer);
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
+  const int face = a_overrides.face(a_entry);
+
+  // this face's chord goes, and so does the interface, which was built to meet it
+  int kept = 0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    if (m_polygon[ip].m_face != face && m_polygon[ip].m_face >= 0) {
+      m_polygon[kept++] = m_polygon[ip];
+    }
+  }
+
+  m_numPolygons = kept;
+
+  int polyBegin = 0;
+  int polyEnd   = 0;
+
+  a_overrides.polygons(a_entry, polyBegin, polyEnd);
+
+  for (int p = polyBegin; p < polyEnd; p++) {
+    int vertBegin = 0;
+    int vertEnd   = 0;
+
+    a_overrides.vertices(p, vertBegin, vertEnd);
+
+    if (m_numPolygons >= s_maxPolygons || vertEnd - vertBegin > s_maxVertices) {
+      return false;
+    }
+
+    Polygon& polygon = m_polygon[m_numPolygons++];
+
+    polygon.m_face        = face;
+    polygon.m_numVertices = vertEnd - vertBegin;
+
+    for (int v = vertBegin; v < vertEnd; v++) {
+      polygon.m_vertex[v - vertBegin]      = a_overrides.vertex(v);
+      polygon.m_vertexEdge[v - vertBegin]  = a_overrides.vertexEdge(v);
+      polygon.m_segmentFace[v - vertBegin] = -1;
+    }
+  }
+
+  return true;
+}
+
 bool
 CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
 {
@@ -2107,6 +2176,51 @@ CutCellBody::divergenceResidual() const noexcept
   RealVect residual = apertureVector - m_boundaryArea * m_normal;
 
   return residual.vectorLength();
+}
+
+bool
+CutCellBody::identical(const CutCellBody& a_other) const noexcept
+{
+  const auto sameVector = [](const RealVect& a_first, const RealVect& a_second) -> bool {
+    for (int d = 0; d < SpaceDim; d++) {
+      if (a_first[d] != a_second[d]) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  if (m_numPolygons != a_other.m_numPolygons) {
+    return false;
+  }
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& mine   = m_polygon[ip];
+    const Polygon& theirs = a_other.m_polygon[ip];
+
+    if (mine.m_face != theirs.m_face || mine.m_numVertices != theirs.m_numVertices) {
+      return false;
+    }
+
+    for (int iv = 0; iv < mine.m_numVertices; iv++) {
+      if (!sameVector(mine.m_vertex[iv], theirs.m_vertex[iv]) || mine.m_vertexEdge[iv] != theirs.m_vertexEdge[iv]) {
+        return false;
+      }
+    }
+  }
+
+  for (int face = 0; face < s_numFaces; face++) {
+    if (m_areaFraction[face] != a_other.m_areaFraction[face] ||
+        !sameVector(m_faceCentroid[face], a_other.m_faceCentroid[face])) {
+      return false;
+    }
+  }
+
+  return m_volumeFraction == a_other.m_volumeFraction && m_boundaryArea == a_other.m_boundaryArea &&
+         m_trueBoundaryArea == a_other.m_trueBoundaryArea && sameVector(m_volumeCentroid, a_other.m_volumeCentroid) &&
+         sameVector(m_normal, a_other.m_normal) && sameVector(m_boundaryCentroid, a_other.m_boundaryCentroid) &&
+         sameVector(m_closure, a_other.m_closure);
 }
 
 } // namespace PolyhedralEB

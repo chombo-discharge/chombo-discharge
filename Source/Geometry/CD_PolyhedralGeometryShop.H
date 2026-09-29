@@ -443,6 +443,11 @@ protected:
   const ComputationalGeometry* m_compGeom;
 
   /**
+   * @brief State of a cell of the finer level that the finer level does not hold, in a copy of its states.
+   */
+  static constexpr int s_absent = 2;
+
+  /**
    * @brief Graph of every level, indexed as the geometry indexes its levels; undefined where a level has no tiles.
    */
   Vector<RefCountedPtr<PolyhedralEBGraph>> m_graphs;
@@ -514,6 +519,14 @@ protected:
   collectFacets(Vector<Real>& a_facets, const int a_level) const;
 
   /**
+   * @brief Stitch every level of a set of graphs to the level above it, from the graphs alone.
+   * @details In two dimensions no face is stitched and every level's overrides stay empty. Collective.
+   * @param[in] a_graphs Graphs, one per level, linked to one another; undefined entries are skipped.
+   */
+  void
+  stitchGraphs(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const;
+
+  /**
    * @brief The closure check over a given set of graphs, one per level as m_graphs holds them.
    * @param[in] a_graphs Graphs, undefined entries skipped.
    */
@@ -522,28 +535,154 @@ protected:
 
 #if CH_SPACEDIM == 3
   /**
-   * @brief Build the body of a cut cell of a graph, restricted on every face the finer level describes.
-   * @details The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the
-   * chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the
-   * check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again
-   * afterwards, which also recomputes the moments. A face onto a covered cell the finer level does not carry is
-   * closed instead, through CutCellBody::snapFace, and the footprint it gives up becomes interface lying in the
-   * plane of that face, so the surface closes over the covered cell rather than ending against it. A body that will not
+   * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.
+   * @details The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners
+   * agree closes the face by its corners already, and a cell the finer level carries is described up there.
+   * @param[in] a_states      Cell states around the cell.
+   * @param[in] a_refined     Refined mask around the cell.
+   * @param[in] a_withSurface Cells around the cell that hold a surface.
+   * @param[in] a_cell        The cell.
+   * @return True if the cell was filled.
+   */
+  static bool
+  isFilled(const BaseFab<signed char>& a_states,
+           const BaseFab<signed char>& a_refined,
+           const IntVectSet&           a_withSurface,
+           const IntVect&              a_cell);
+
+  /**
+   * @brief Which of a cell's edges the finer level describes.
+   * @details An edge is shared by the cells that meet along it, and the crossing on it has to be one point for all of
+   * them, so the question is asked of the edge: it is refined if any cell meeting it is.
+   * @param[out] a_edgeRefined One flag per edge of the cell.
+   * @param[in]  a_refined     Refined mask around the cell.
+   * @param[in]  a_domain      Domain box of the cell's level.
+   * @param[in]  a_cell        The cell.
+   * @return True if any edge is refined.
+   */
+  static bool
+  edgesRefined(bool                        a_edgeRefined[PolyhedralEB::CutCellSurface::s_numEdges],
+               const BaseFab<signed char>& a_refined,
+               const Box&                  a_domain,
+               const IntVect&              a_cell);
+
+  /**
+   * @brief Stitch a cut cell's body to the finer level and to the covered cells around it.
+   * @details Every refined edge takes its crossing from the half the finer level put it in, which rewrites a_surface.
+   * The body is then defined from it, every face onto a refined neighbour is replaced by the chords of the children
+   * on that face, after the check that no coarse edge on it is crossed twice at the finer spacing, and the interface
+   * is closed again, which also recomputes the moments. A face onto a filled cell (see isFilled) is closed instead,
+   * through CutCellBody::snapFace, and the footprint it gives up becomes interface lying in the plane of that face.
+   * Every face so changed is recorded, in the order it was changed, when overrides are given. A body that will not
    * close, a face that cannot be restricted or closed, or a doubly crossed edge stops the run.
-   * @param[out] a_body     The body.
-   * @param[in]  a_graph    Graph of the cell's level.
-   * @param[in]  a_surfaces Surfaces of the cell's box, from the graph.
-   * @param[in]  a_states   Cell states of the cell's box, from the graph.
-   * @param[in]  a_refined  Refined mask of the cell's box, from the graph.
-   * @param[in]  a_cell     The cell.
+   * @param[out]    a_body        The body.
+   * @param[in,out] a_surface     The cell's surface; its refined edges' crossings are rewritten.
+   * @param[in]     a_children    The cell's eight children in corner order, which must be given when any edge is
+   * refined and describe at least the cell's refined faces and edges; null otherwise.
+   * @param[in]     a_edgeRefined Which edges are refined, from edgesRefined.
+   * @param[in]     a_states      Cell states around the cell.
+   * @param[in]     a_refined     Refined mask around the cell.
+   * @param[in]     a_withSurface Cells around the cell that hold a surface.
+   * @param[in]     a_domain      Domain box of the cell's level.
+   * @param[in]     a_cell        The cell.
+   * @param[in,out] a_overrides   Overrides to record the changed faces in, with the cell begun; null records nothing.
+   */
+  static void
+  stitchBody(PolyhedralEB::CutCellBody&          a_body,
+             PolyhedralEB::CutCellSurface&       a_surface,
+             const PolyhedralEB::CutCellSurface* a_children,
+             const bool*                         a_edgeRefined,
+             const BaseFab<signed char>&         a_states,
+             const BaseFab<signed char>&         a_refined,
+             const IntVectSet&                   a_withSurface,
+             const Box&                          a_domain,
+             const IntVect&                      a_cell,
+             PolyhedralEB::CutCellFaceOverrides* a_overrides);
+
+  /**
+   * @brief Stitch a cut cell's body with its children reconstructed from the implicit function.
+   * @details The reference the stitched graph is checked against under sanity_check: the same stitching as the stored
+   * faces were made with, from children built at the finer spacing from the function rather than from the finer
+   * level's stored surfaces. Nothing else calls the function to build a body.
+   * @param[out] a_body    The body.
+   * @param[in]  a_surface The cell's surface as the graph first built it.
+   * @param[in]  a_graph   Graph of the cell's level.
+   * @param[in]  a_states  Cell states around the cell.
+   * @param[in]  a_refined Refined mask around the cell.
+   * @param[in]  a_withSurface Cells around the cell that hold a surface.
+   * @param[in]  a_cell    The cell.
    */
   void
+  defineBodyFromFunction(PolyhedralEB::CutCellBody&          a_body,
+                         const PolyhedralEB::CutCellSurface& a_surface,
+                         const PolyhedralEBGraph&            a_graph,
+                         const BaseFab<signed char>&         a_states,
+                         const BaseFab<signed char>&         a_refined,
+                         const IntVectSet&                   a_withSurface,
+                         const IntVect&                      a_cell) const;
+
+  /**
+   * @brief Build the body of a cut cell of a stitched graph from its stored surface and face overrides.
+   * @details Defines the body from the surface, replaces every restricted face with its stored polygons, closes the
+   * interface over them, and closes every closed face, in the order they were recorded -- which rebuilds the body
+   * stitchBody made, bit for bit, from the cell's own data alone.
+   * @param[out] a_body      The body.
+   * @param[in]  a_surfaces  Surfaces of the cell's box, from the graph.
+   * @param[in]  a_overrides Face overrides of the cell's box, from the graph.
+   * @param[in]  a_cell      The cell.
+   */
+  static void
   defineBody(PolyhedralEB::CutCellBody&                  a_body,
-             const PolyhedralEBGraph&                    a_graph,
              const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-             const BaseFab<signed char>&                 a_states,
-             const BaseFab<signed char>&                 a_refined,
-             const IntVect&                              a_cell) const;
+             const PolyhedralEB::CutCellFaceOverrides&   a_overrides,
+             const IntVect&                              a_cell);
+
+  /**
+   * @brief Read the nodes and edges of a region of the finer level off its stored cells.
+   * @details A node or edge belongs to every cell around it, so it is written from each cell of the region that holds a
+   * surface, and two cells that disagree about one stop the run. A node that no such cell touches lies among cells
+   * whose corners agree, and takes their sign: minus one where they are regular, one where they are covered. An edge
+   * that no such cell touches carries no crossing. Cells the finer level does not hold write nothing.
+   * @param[out] a_nodes     Node values over the nodes of a_region.
+   * @param[out] a_crossings Crossings over the edges of a_region, addressed as defineIntercepts addresses them.
+   * @param[in]  a_region    Cells of the finer level.
+   * @param[in]  a_states    Cell states of the finer level over the region, s_absent where it holds none.
+   * @param[in]  a_mask      One where a cell holds a surface.
+   * @param[in]  a_surfaces  The surfaces.
+   */
+  static void
+  readFineCells(BaseFab<Real>&                              a_nodes,
+                BaseFab<Real>                               a_crossings[SpaceDim],
+                const Box&                                  a_region,
+                const BaseFab<signed char>&                 a_states,
+                const BaseFab<signed char>&                 a_mask,
+                const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces);
+
+  /**
+   * @brief One cell's surface, read off node values and edge crossings that are already known.
+   * @param[out] a_surface   The surface.
+   * @param[in]  a_nodes     Node values.
+   * @param[in]  a_crossings Edge crossings, addressed as defineIntercepts addresses them.
+   * @param[in]  a_cell      The cell.
+   */
+  static void
+  assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
+                  const BaseFab<Real>&          a_nodes,
+                  const BaseFab<Real>           a_crossings[SpaceDim],
+                  const IntVect&                a_cell);
+
+  /**
+   * @brief Stitch one level: take its refined edges' crossings and its seam faces from the finer level's stored cells,
+   * close its faces onto covered cells, write the crossings into its surfaces and the faces into its overrides.
+   * @details The finer level's cell states and surfaces over the refined coarse boxes and a ring around them are
+   * copied onto this level's layout refined, and every cut cell of every box and its ghost ring is stitched from them.
+   * Under sanity_check each body is also built from the implicit function and from the stored data, and all three must
+   * agree bit for bit. Collective.
+   * @param[in,out] a_coarse The level.
+   * @param[in]     a_fine   The finer level, or null where there is none.
+   */
+  void
+  stitchLevel(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph* a_fine) const;
 #endif
 
   /**
