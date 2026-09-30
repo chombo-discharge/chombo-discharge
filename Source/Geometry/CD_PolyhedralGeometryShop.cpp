@@ -268,6 +268,10 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Copy round trip");
     this->testCopyRoundTrip();
     timer.stopEvent("Copy round trip");
+
+    timer.startEvent("Copy bodies");
+    this->testCopyBodies();
+    timer.stopEvent("Copy bodies");
   }
 
   // The surface itself is written in three dimensions only: the facets are polygons, and in two dimensions the
@@ -1614,7 +1618,15 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
 
   // Sending: this rank's own graph boxes, and every destination box that could need one of them. A destination box
   // needs a tile's cells exactly when the tile, mapped onto the destination level and grown by the ghost width, meets
-  // it.
+  // it. A coarse destination box meets many of this rank's tiles, so its pieces are worked out once and kept.
+  std::vector<std::vector<char>>                                          known(numDest);
+  std::vector<std::vector<std::vector<std::vector<std::pair<int, Box>>>>> cache(numDest);
+
+  for (int i = 0; i < numDest; i++) {
+    known[i].assign(destBoxes[i].size(), 0);
+    cache[i].resize(destBoxes[i].size());
+  }
+
   for (int lvl = 0; lvl < numGeo; lvl++) {
     if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
       continue;
@@ -1649,13 +1661,19 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
         a_grids[i].intersecting(mapped, hits);
 
         for (int k = 0; k < hits.size(); k++) {
-          piecesOf(pieces, i, destBoxes[i][hits[k]]);
+          if (known[i][hits[k]] == 0) {
+            piecesOf(cache[i][hits[k]], i, destBoxes[i][hits[k]]);
 
-          if (lvl >= static_cast<int>(pieces.size())) {
+            known[i][hits[k]] = 1;
+          }
+
+          const std::vector<std::vector<std::pair<int, Box>>>& boxPieces = cache[i][hits[k]];
+
+          if (lvl >= static_cast<int>(boxPieces.size())) {
             continue;
           }
 
-          for (const std::pair<int, Box>& piece : pieces[lvl]) {
+          for (const std::pair<int, Box>& piece : boxPieces[lvl]) {
             if (piece.first == t) {
               a_sends[destRanks[i][hits[k]]].push_back(header(i, hits[k], lvl, t, piece.second));
             }
@@ -1810,33 +1828,12 @@ PolyhedralGeometryShop::testCopyPlan() const
 
   const int numLevels = m_compGeom->getNumGridLevels();
 
-  // The ranks walk the rank list with a stride coprime to its length, so that no rank holds what the graph put there.
-  int stride = numProc() / 2 + 1;
-
-  while (std::gcd(stride, numProc()) != 1) {
-    stride++;
-  }
-
-  const auto shuffled = [&](const Vector<Box>& a_boxes, const ProblemDomain& a_domain) -> DisjointBoxLayout {
-    Vector<int> ranks(a_boxes.size());
-
-    for (int i = 0; i < a_boxes.size(); i++) {
-      ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
-    }
-
-    DisjointBoxLayout layout(a_boxes, ranks, a_domain);
-
-    layout.close();
-
-    return layout;
-  };
-
   std::vector<DisjointBoxLayout> grids;
   std::vector<ProblemDomain>     domains;
 
   for (int lvl = 0; lvl < numLevels; lvl++) {
     domains.push_back(m_compGeom->getDomain(lvl));
-    grids.push_back(shuffled(m_compGeom->getBoxes(lvl), domains.back()));
+    grids.push_back(PolyhedralGeometryShop::shuffledLayout(m_compGeom->getBoxes(lvl), domains.back()));
   }
 
   const long long whole = this->checkCopyPlan(grids, domains, ghost);
@@ -1856,7 +1853,9 @@ PolyhedralGeometryShop::testCopyPlan() const
 
   const ProblemDomain finerDomain = refine(domains.back(), 2);
 
-  const long long past = this->checkCopyPlan({shuffled(finer, finerDomain)}, {finerDomain}, ghost);
+  const long long past = this->checkCopyPlan({PolyhedralGeometryShop::shuffledLayout(finer, finerDomain)},
+                                             {finerDomain},
+                                             ghost);
 
   if (procID() == 0) {
     pout() << "PolyhedralGeometryShop::testCopyPlan - senders and receivers agree on every piece: " << whole
@@ -2488,6 +2487,394 @@ PolyhedralGeometryShop::testCopyRoundTrip() const
     pout() << "PolyhedralGeometryShop::testCopyRoundTrip - " << totalCompared
            << " owned cells arrived as the graphs hold them, face overrides included" << endl;
   }
+}
+
+bool
+PolyhedralGeometryShop::sourceBody(PolyhedralEB::CutCellBody&  a_body,
+                                   const AMRPolyhedralEBGraph& a_graph,
+                                   const int                   a_level,
+                                   const DataIndex&            a_dit,
+                                   const int                   a_sourceLevel,
+                                   const IntVect&              a_cell)
+{
+  const BaseFab<signed char>& states = a_graph.getCellStates(a_level, a_sourceLevel)[a_dit];
+
+  if (!states.box().contains(a_cell) || states(a_cell, 0) != PolyhedralEBGraph::s_cut) {
+    return false;
+  }
+
+  const IVSFAB<PolyhedralEB::CutCellSurface>& surfaces = a_graph.getSurfaces(a_level, a_sourceLevel)[a_dit];
+
+#if CH_SPACEDIM == 3
+  PolyhedralGeometryShop::defineBody(a_body, surfaces, a_graph.getFaceOverrides(a_level, a_sourceLevel)[a_dit], a_cell);
+#else
+  if (!a_body.define(surfaces(a_cell, 0))) {
+    MayDay::Error("PolyhedralGeometryShop::sourceBody - a cut cell's body did not close");
+  }
+#endif
+
+  return true;
+}
+
+void
+PolyhedralGeometryShop::destinationBodies(std::vector<PolyhedralEB::CutCellBody>& a_bodies,
+                                          long long&                              a_numSplit,
+                                          const AMRPolyhedralEBGraph&             a_graph,
+                                          const int                               a_level,
+                                          const DataIndex&                        a_dit,
+                                          const IntVect&                          a_cell)
+{
+  using PolyhedralEB::CutCellBody;
+
+  a_bodies.clear();
+
+  const int geometryLevel = a_graph.getGeometryLevel(a_level);
+
+  CutCellBody body;
+
+  for (int lvl = 0; lvl < a_graph.getNumSourceLevels(); lvl++) {
+    if (a_graph.getCellStates(a_level, lvl)[a_dit].box().isEmpty()) {
+      continue;
+    }
+
+    if (lvl == geometryLevel) {
+      if (PolyhedralGeometryShop::sourceBody(body, a_graph, a_level, a_dit, lvl, a_cell)) {
+        a_bodies.push_back(body);
+      }
+    }
+    else if (lvl > geometryLevel) {
+      const Box children = refine(Box(a_cell, a_cell), 1 << (lvl - geometryLevel)) &
+                           a_graph.getCellStates(a_level, lvl)[a_dit].box();
+
+      for (BoxIterator bit(children); bit.ok(); ++bit) {
+        if (PolyhedralGeometryShop::sourceBody(body, a_graph, a_level, a_dit, lvl, bit())) {
+          a_bodies.push_back(body);
+        }
+      }
+    }
+    else {
+      const IntVect ancestor = coarsen(a_cell, 1 << (geometryLevel - lvl));
+
+      if (!PolyhedralGeometryShop::sourceBody(body, a_graph, a_level, a_dit, lvl, ancestor)) {
+        continue;
+      }
+
+      // down a level at a time, keeping the child on the way to this cell
+      CutCellBody children[1 << SpaceDim];
+
+      IntVect parent = ancestor;
+
+      for (int k = lvl + 1; k <= geometryLevel; k++) {
+        const IntVect child = coarsen(a_cell, 1 << (geometryLevel - k));
+
+        int which = 0;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          which |= (child[d] - 2 * parent[d]) << d;
+        }
+
+        if (!body.subdivide(children)) {
+          a_numSplit++;
+        }
+
+        body   = children[which];
+        parent = child;
+      }
+
+      a_bodies.push_back(body);
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::testCopyBodies() const
+{
+  CH_TIME("PolyhedralGeometryShop::testCopyBodies");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testCopyBodies" << endl;
+  }
+
+  using PolyhedralEB::CutCellBody;
+
+  int ghost = 0;
+
+  ParmParse("AmrMesh").get("eb_ghost", ghost);
+
+  const auto globalSum = [](const std::uint64_t a_value) -> std::uint64_t {
+    std::uint64_t sum = a_value;
+
+#ifdef CH_MPI
+    MPI_Allreduce(&a_value, &sum, 1, MPI_UINT64_T, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+    return sum;
+  };
+
+  // Every cut cell every level owns, as the graph builds it: its level, the cell, and the body's hash.
+  std::vector<int>           sourceLevels;
+  std::vector<IntVect>       sourceCells;
+  std::vector<std::uint64_t> sourceHashes;
+
+  for (int lvl = 0; lvl < static_cast<int>(m_graphs.size()); lvl++) {
+    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    const PolyhedralEBGraph& graph = *m_graphs[lvl];
+    const DisjointBoxLayout& grids = graph.getGrids();
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const BaseFab<signed char>& states   = graph.getCellStates()[dit()];
+      const BaseFab<signed char>& refined  = graph.getRefinedMask()[dit()];
+      const auto&                 surfaces = graph.getSurfaces()[dit()];
+
+      for (BoxIterator bit(grids[dit()]); bit.ok(); ++bit) {
+        if (refined(bit(), 0) != 0 || states(bit(), 0) != PolyhedralEBGraph::s_cut) {
+          continue;
+        }
+
+        CutCellBody body;
+
+#if CH_SPACEDIM == 3
+        PolyhedralGeometryShop::defineBody(body, surfaces, graph.getFaceOverrides()[dit()], bit());
+#else
+        body.define(surfaces(bit(), 0));
+#endif
+
+        sourceLevels.push_back(lvl);
+        sourceCells.push_back(bit());
+        sourceHashes.push_back(body.fingerprint());
+      }
+    }
+  }
+
+  // Every owned cell, as each destination rebuilds it, counted once.
+  const auto check = [&](const std::string&                    a_what,
+                         const std::vector<DisjointBoxLayout>& a_grids,
+                         const std::vector<ProblemDomain>&     a_domains) {
+    AMRPolyhedralEBGraph dest;
+
+    this->copyGraphs(dest, a_grids, a_domains, ghost);
+
+    const int numDest = static_cast<int>(a_grids.size());
+
+    std::vector<int> destLevels(numDest);
+
+    for (int i = 0; i < numDest; i++) {
+      destLevels[i] = dest.getGeometryLevel(i);
+    }
+
+    // What the destination should hold: every owned cell whose destination cell -- the one it lies in, from a finer
+    // level, or the one at its low corner, from a coarser one -- is a valid cell of some destination level. A
+    // destination need not cover the domain.
+    std::uint64_t sourceHash  = 0;
+    long long     sourceCount = 0;
+
+    for (std::size_t n = 0; n < sourceCells.size(); n++) {
+      for (int i = 0; i < numDest; i++) {
+        const int lvl = sourceLevels[n];
+
+        IntVect destCell = sourceCells[n];
+
+        if (lvl > destLevels[i]) {
+          destCell = coarsen(destCell, 1 << (lvl - destLevels[i]));
+        }
+        else if (lvl < destLevels[i]) {
+          destCell *= (1 << (destLevels[i] - lvl));
+        }
+
+        Vector<int> hits;
+
+        a_grids[i].intersecting(Box(destCell, destCell), hits);
+
+        if (hits.size() == 0) {
+          continue;
+        }
+
+        if (i + 1 < numDest) {
+          const int ratio = 1 << (destLevels[i + 1] - destLevels[i]);
+
+          a_grids[i + 1].intersecting(refine(Box(destCell, destCell), ratio), hits);
+
+          if (hits.size() > 0) {
+            continue;
+          }
+        }
+
+        sourceHash += sourceHashes[n];
+        sourceCount++;
+      }
+    }
+
+    sourceHash  = globalSum(sourceHash);
+    sourceCount = ParallelOps::sum(sourceCount);
+
+    std::uint64_t hash     = 0;
+    long long     count    = 0;
+    long long     numSplit = 0;
+
+    CutCellBody              body;
+    std::vector<CutCellBody> bodies;
+
+    for (int i = 0; i < numDest; i++) {
+      const int geometryLevel = dest.getGeometryLevel(i);
+      const int ratio         = (i + 1 < numDest) ? (1 << (dest.getGeometryLevel(i + 1) - geometryLevel)) : 1;
+
+      const Vector<Box> finerBoxes = (i + 1 < numDest) ? a_grids[i + 1].boxArray() : Vector<Box>();
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        IntVectSet valid;
+
+        PolyhedralGeometryShop::validRegion(valid,
+                                            a_grids[i][dit()],
+                                            a_domains[i],
+                                            (i + 1 < numDest) ? &a_grids[i + 1] : nullptr,
+                                            (i + 1 < numDest) ? &finerBoxes : nullptr,
+                                            ratio,
+                                            0);
+
+        // Walked from the cut cells each level brought, which are few, rather than from the destination cells, which
+        // on a coarse destination stand over millions of finer cells. Each is counted at its destination cell: the
+        // one it lies in from a finer level or its own level, the one at its low corner from a coarser one.
+        for (int lvl = 0; lvl < dest.getNumSourceLevels(); lvl++) {
+          const BaseFab<signed char>& states = dest.getCellStates(i, lvl)[dit()];
+
+          if (states.box().isEmpty()) {
+            continue;
+          }
+
+          const IntVectSet& withSurface = dest.getSurfaces(i, lvl)[dit()].getIVS();
+
+          for (IVSIterator ivsit(withSurface); ivsit.ok(); ++ivsit) {
+            const IntVect cell = ivsit();
+
+            if (states(cell, 0) != PolyhedralEBGraph::s_cut) {
+              continue;
+            }
+
+            IntVect destCell = cell;
+
+            if (lvl > geometryLevel) {
+              destCell = coarsen(cell, 1 << (lvl - geometryLevel));
+            }
+            else if (lvl < geometryLevel) {
+              destCell = cell * (1 << (geometryLevel - lvl));
+            }
+
+            if (!valid.contains(destCell)) {
+              continue;
+            }
+
+            PolyhedralGeometryShop::sourceBody(body, dest, i, dit(), lvl, cell);
+
+            hash += body.fingerprint();
+            count++;
+
+            // A coarser cut cell is subdivided down to the destination level once, every generation whole, which is
+            // where a child in more than one piece shows; destinationBodies is asked for the child at its low corner.
+            if (lvl < geometryLevel) {
+              std::vector<CutCellBody> generation(1, body);
+              std::vector<CutCellBody> next;
+
+              CutCellBody children[1 << SpaceDim];
+
+              for (int k = lvl; k < geometryLevel; k++) {
+                next.clear();
+
+                for (const CutCellBody& parent : generation) {
+                  if (!parent.subdivide(children)) {
+                    numSplit++;
+                  }
+
+                  next.insert(next.end(), children, children + (1 << SpaceDim));
+                }
+
+                generation.swap(next);
+              }
+
+              long long ignored = 0;
+
+              PolyhedralGeometryShop::destinationBodies(bodies, ignored, dest, i, dit(), destCell);
+
+              if (bodies.empty() || !bodies.back().identical(generation[0])) {
+                MayDay::Error(
+                  "PolyhedralGeometryShop::testCopyBodies - a subdivided child differs from its ancestor's");
+              }
+            }
+          }
+        }
+      }
+    }
+
+    hash     = globalSum(hash);
+    count    = ParallelOps::sum(count);
+    numSplit = ParallelOps::sum(numSplit);
+
+    if (hash != sourceHash || count != sourceCount) {
+      if (procID() == 0) {
+        pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": " << count << " bodies arrived of "
+               << sourceCount << ", and their hash is " << hash << " against " << sourceHash << endl;
+      }
+
+      MayDay::Error("PolyhedralGeometryShop::testCopyBodies - the bodies changed in the copy");
+    }
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": all " << count
+             << " bodies arrived bit for bit; " << numSplit << " subdivisions left a child in more than one piece"
+             << endl;
+    }
+  };
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  std::vector<DisjointBoxLayout> grids;
+  std::vector<ProblemDomain>     domains;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains.push_back(m_compGeom->getDomain(lvl));
+    grids.push_back(PolyhedralGeometryShop::shuffledLayout(m_compGeom->getBoxes(lvl), domains.back()));
+  }
+
+  check("the geometry's hierarchy", grids, domains);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    check("level " + std::to_string(lvl) + " alone", {grids[lvl]}, {domains[lvl]});
+  }
+
+  Vector<Box> finer = m_compGeom->getBoxes(numLevels - 1);
+
+  for (int i = 0; i < finer.size(); i++) {
+    finer[i].refine(2);
+  }
+
+  const ProblemDomain finerDomain = refine(domains.back(), 2);
+
+  check("a level past the finest", {PolyhedralGeometryShop::shuffledLayout(finer, finerDomain)}, {finerDomain});
+}
+
+DisjointBoxLayout
+PolyhedralGeometryShop::shuffledLayout(const Vector<Box>& a_boxes, const ProblemDomain& a_domain)
+{
+  // The ranks walk the rank list with a stride coprime to its length, so that no rank holds what the graph put there.
+  int stride = numProc() / 2 + 1;
+
+  while (std::gcd(stride, numProc()) != 1) {
+    stride++;
+  }
+
+  Vector<int> ranks(a_boxes.size());
+
+  for (int i = 0; i < a_boxes.size(); i++) {
+    ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
+  }
+
+  DisjointBoxLayout layout(a_boxes, ranks, a_domain);
+
+  layout.close();
+
+  return layout;
 }
 
 void

@@ -13,6 +13,7 @@
 // Std includes
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 
 // Chombo includes
 #include <CH_assert.H>
@@ -2319,6 +2320,48 @@ CutCellBody::identical(const CutCellBody& a_other) const noexcept
          m_trueBoundaryArea == a_other.m_trueBoundaryArea && sameVector(m_volumeCentroid, a_other.m_volumeCentroid) &&
          sameVector(m_normal, a_other.m_normal) && sameVector(m_boundaryCentroid, a_other.m_boundaryCentroid) &&
          sameVector(m_closure, a_other.m_closure);
+}
+
+std::uint64_t
+CutCellBody::fingerprint() const noexcept
+{
+  // FNV-1a over the bytes of every field identical compares, in the same order
+  std::uint64_t hash = 14695981039346656037ULL;
+
+  const auto mix = [&hash](const void* a_data, const std::size_t a_bytes) {
+    const unsigned char* bytes = static_cast<const unsigned char*>(a_data);
+
+    for (std::size_t i = 0; i < a_bytes; i++) {
+      hash ^= bytes[i];
+      hash *= 1099511628211ULL;
+    }
+  };
+
+  mix(&m_numPolygons, sizeof(int));
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& polygon = m_polygon[ip];
+
+    mix(&polygon.m_face, sizeof(int));
+    mix(&polygon.m_numVertices, sizeof(int));
+
+    for (int iv = 0; iv < polygon.m_numVertices; iv++) {
+      mix(&polygon.m_vertex[iv], sizeof(RealVect));
+      mix(&polygon.m_vertexEdge[iv], sizeof(int));
+    }
+  }
+
+  mix(m_areaFraction, sizeof(m_areaFraction));
+  mix(m_faceCentroid, sizeof(m_faceCentroid));
+  mix(&m_volumeFraction, sizeof(Real));
+  mix(&m_boundaryArea, sizeof(Real));
+  mix(&m_trueBoundaryArea, sizeof(Real));
+  mix(&m_volumeCentroid, sizeof(RealVect));
+  mix(&m_normal, sizeof(RealVect));
+  mix(&m_boundaryCentroid, sizeof(RealVect));
+  mix(&m_closure, sizeof(RealVect));
+
+  return hash;
 }
 
 } // namespace PolyhedralEB

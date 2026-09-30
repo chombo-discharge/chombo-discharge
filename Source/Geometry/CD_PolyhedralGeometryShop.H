@@ -361,6 +361,71 @@ public:
   testCopyRoundTrip() const;
 
   /**
+   * @brief Build the body of one cut cell of a geometry level, from what a destination box holds of that level.
+   * @param[out] a_body        The body.
+   * @param[in]  a_graph       The graph on the destination hierarchy.
+   * @param[in]  a_level       Destination level.
+   * @param[in]  a_dit         Destination box.
+   * @param[in]  a_sourceLevel Geometry level of the cell.
+   * @param[in]  a_cell        The cell, on that level.
+   * @return True if the box holds the cell and it is cut; false, with the body untouched, otherwise.
+   */
+  static bool
+  sourceBody(PolyhedralEB::CutCellBody&  a_body,
+             const AMRPolyhedralEBGraph& a_graph,
+             const int                   a_level,
+             const DataIndex&            a_dit,
+             const int                   a_sourceLevel,
+             const IntVect&              a_cell);
+
+  /**
+   * @brief The bodies a cell of a destination level is made of, from the geometry levels that own it.
+   * @details A cell owned at its own resolution is its own body. One owned by a finer level is the bodies of every cut
+   * cell under it, each in its own frame and none merged, so the surface they bound is the finer level's exactly. One
+   * owned by a coarser level is the cut ancestor subdivided down to the destination level, and the child that is this
+   * cell, in this cell's frame; a child whose fluid falls into more than one piece is kept, and counted. A cell no
+   * level owns, or owned by a level that holds no cut cell there, has no body.
+   * @param[out]    a_bodies        The bodies.
+   * @param[in,out] a_numSplit      Incremented for every subdivision on the way down that left a child whose fluid is
+   * in more than one piece, or whose children did not partition their parent.
+   * @param[in]     a_graph         The graph on the destination hierarchy.
+   * @param[in]     a_level         Destination level.
+   * @param[in]     a_dit           Destination box.
+   * @param[in]     a_cell          The cell, on the destination level.
+   */
+  static void
+  destinationBodies(std::vector<PolyhedralEB::CutCellBody>& a_bodies,
+                    long long&                              a_numSplit,
+                    const AMRPolyhedralEBGraph&             a_graph,
+                    const int                               a_level,
+                    const DataIndex&                        a_dit,
+                    const IntVect&                          a_cell);
+
+  /**
+   * @brief Require every cut cell's body to survive a copy bit for bit.
+   * @details Every cut cell every geometry level owns is built from the graph as it stands and hashed, bit for bit,
+   * and the hashes are summed over all ranks. Then the graphs are copied onto the geometry's own box hierarchy with the
+   * ranks shuffled, onto every level of it alone, and onto a level past the finest, and every valid cell of every
+   * destination -- ghost cells left out -- rebuilds the source bodies it stands for from what it received: its own,
+   * those of the finer cells under it, and, from the one destination cell at its low corner, a coarser ancestor's. Each
+   * owned cell is then counted exactly once, and the sums and counts must be the source's. Every coarser cut cell is
+   * also subdivided down to the destination level, and the child destinationBodies gives the destination cell at its
+   * low corner must be the one found there. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testCopyBodies() const;
+
+  /**
+   * @brief A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its
+   * length, so that no rank holds what a load balance would have given it. For the copy tests.
+   * @param[in] a_boxes  The boxes.
+   * @param[in] a_domain Their domain.
+   * @return The closed layout.
+   */
+  static DisjointBoxLayout
+  shuffledLayout(const Vector<Box>& a_boxes, const ProblemDomain& a_domain);
+
+  /**
    * @brief Whether a cut body holds nothing at all and is therefore a regular cell.
    * @details A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut
    * from their corners while their bodies hold no solid and no interface whatsoever -- the reconstruction finds

@@ -13,6 +13,9 @@
 #ifndef CD_CUTCELLBODY_H
 #define CD_CUTCELLBODY_H
 
+// Std includes
+#include <cstdint>
+
 // Chombo includes
 #include <RealVect.H>
 #include <LoHiSide.H>
@@ -434,6 +437,16 @@ public:
    */
   bool
   identical(const CutCellBody& a_other) const noexcept;
+
+  /**
+   * @brief A 64-bit hash of everything identical compares: every polygon's face, vertices and vertex edges in order,
+   * and every moment, bit for bit.
+   * @details Two identical bodies hash the same; a sum of hashes over many bodies is what tells two ranks, or two
+   * layouts, that they hold the same bodies without sending the bodies.
+   * @return The hash.
+   */
+  std::uint64_t
+  fingerprint() const noexcept;
 
 protected:
   /**
