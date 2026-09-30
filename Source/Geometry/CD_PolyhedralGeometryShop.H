@@ -15,6 +15,8 @@
 
 // Std includes
 #include <string>
+#include <utility>
+#include <vector>
 
 // Chombo includes
 #include <BaseFab.H>
@@ -24,6 +26,7 @@
 #include <CD_ScanShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_CutCellSurface.H>
+#include <CD_GraphCopyHeader.H>
 #include <CD_PolyhedralEBGraph.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
@@ -245,6 +248,90 @@ public:
    */
   void
   testGraphCopy() const;
+
+  /**
+   * @brief The geometry level a destination domain lives on.
+   * @details A stored domain's own level; a domain finer than every stored one is a refinement by two per level of
+   * the finest stored domain, and lives that many levels past it. Any other domain stops the run.
+   * @param[in] a_domain The domain.
+   * @return Its geometry level.
+   */
+  int
+  destinationLevel(const ProblemDomain& a_domain) const;
+
+  /**
+   * @brief The cells of a destination box a copy of the graph fills: the box grown by a ghost width, inside the
+   * domain, less what the next finer destination level covers.
+   * @param[out] a_valid  The cells.
+   * @param[in]  a_box    The destination box.
+   * @param[in]  a_domain Domain of the box's level.
+   * @param[in]  a_finer  Layout of the next finer destination level, or null where there is none.
+   * @param[in]  a_finerBoxes Its boxes, as boxArray gives them, or null where there is no finer level.
+   * @param[in]  a_ratio  Refinement ratio to that level.
+   * @param[in]  a_ghost  Ghost width the box is grown by.
+   */
+  static void
+  validRegion(IntVectSet&              a_valid,
+              const Box&               a_box,
+              const ProblemDomain&     a_domain,
+              const DisjointBoxLayout* a_finer,
+              const Vector<Box>*       a_finerBoxes,
+              const int                a_ratio,
+              const int                a_ghost);
+
+  /**
+   * @brief The pieces of the graph a destination region needs: what each tiled level owns of it, tile by tile, down to
+   * the cells whose footprint on the destination level lies in the region.
+   * @details A cell of a level at or finer than the destination's is kept if the destination cell it lies in is in the
+   * region; a cell of a coarser level if any destination cell it holds is.
+   * @param[out] a_pieces One list per geometry level of (index into the level's cut tiles, box on that level) pairs.
+   * @param[in]  a_valid  The region, on the destination level, from validRegion.
+   * @param[in]  a_level  Geometry level of the destination, from destinationLevel.
+   */
+  void
+  destinationPieces(std::vector<std::vector<std::pair<int, Box>>>& a_pieces,
+                    const IntVectSet&                              a_valid,
+                    const int                                      a_level) const;
+
+  /**
+   * @brief Plan a copy of the graph onto a destination hierarchy: every piece this rank sends, and every piece it
+   * receives.
+   * @details The receiver walks its own destination boxes and asks each one which pieces it needs. The sender walks
+   * its own graph boxes, finds the destination boxes that could need them through the destination layouts' own spatial
+   * index, and asks each of those the same question, keeping the pieces its box holds. Both answer from replicated
+   * data alone, so the two sides agree with no communication. Every header's counts are left at zero.
+   * @param[out] a_sends    Per destination rank, the pieces this rank sends there.
+   * @param[out] a_receives Per source rank, the pieces this rank receives from there.
+   * @param[in]  a_grids    Destination layout of every level, coarsest first.
+   * @param[in]  a_domains  Domain of every destination level.
+   * @param[in]  a_ghost    Ghost width every destination box is filled to.
+   */
+  void
+  planCopy(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
+           std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_receives,
+           const std::vector<DisjointBoxLayout>&                    a_grids,
+           const std::vector<ProblemDomain>&                        a_domains,
+           const int                                                a_ghost) const;
+
+  /**
+   * @brief Plan a copy onto a destination hierarchy, send every rank the headers it is to receive, and require them to
+   * be exactly the ones it planned to receive. Collective.
+   * @param[in] a_grids   Destination layout of every level, coarsest first.
+   * @param[in] a_domains Domain of every destination level.
+   * @param[in] a_ghost   Ghost width every destination box is filled to.
+   * @return Number of pieces planned, over all ranks.
+   */
+  long long
+  checkCopyPlan(const std::vector<DisjointBoxLayout>& a_grids,
+                const std::vector<ProblemDomain>&     a_domains,
+                const int                             a_ghost) const;
+
+  /**
+   * @brief Check the copy plan onto the geometry's own box hierarchy with the ranks shuffled, onto every level of it
+   * alone, and onto a level past the finest. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testCopyPlan() const;
 
   /**
    * @brief Whether a cut body holds nothing at all and is therefore a regular cell.

@@ -14,7 +14,9 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <iomanip>
+#include <limits>
 #include <array>
 #include <cmath>
 #include <fstream>
@@ -258,6 +260,10 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Copy test");
     this->testGraphCopy();
     timer.stopEvent("Copy test");
+
+    timer.startEvent("Copy plan test");
+    this->testCopyPlan();
+    timer.stopEvent("Copy plan test");
   }
 
   // The surface itself is written in three dimensions only: the facets are polygons, and in two dimensions the
@@ -1341,6 +1347,519 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
   }
 }
 #endif
+
+int
+PolyhedralGeometryShop::destinationLevel(const ProblemDomain& a_domain) const
+{
+  const int level = m_compGeom->getLevel(a_domain);
+
+  if (level >= 0) {
+    return level;
+  }
+
+  const int            finest       = m_compGeom->getNumGridLevels() - 1;
+  const ProblemDomain& finestDomain = m_compGeom->getDomain(finest);
+
+  int ratio = 1;
+  int lvl   = finest;
+
+  while (ratio * finestDomain.domainBox().size(0) < a_domain.domainBox().size(0)) {
+    ratio *= 2;
+    lvl++;
+  }
+
+  if (refine(finestDomain, ratio) != a_domain) {
+    MayDay::Error("PolyhedralGeometryShop::destinationLevel - the domain is neither stored nor a refinement by two "
+                  "of the finest stored one");
+  }
+
+  return lvl;
+}
+
+void
+PolyhedralGeometryShop::validRegion(IntVectSet&              a_valid,
+                                    const Box&               a_box,
+                                    const ProblemDomain&     a_domain,
+                                    const DisjointBoxLayout* a_finer,
+                                    const Vector<Box>*       a_finerBoxes,
+                                    const int                a_ratio,
+                                    const int                a_ghost)
+{
+  CH_TIME("PolyhedralGeometryShop::validRegion");
+
+  const Box grown = grow(a_box, a_ghost) & a_domain.domainBox();
+
+  a_valid = IntVectSet(DenseIntVectSet(grown, true));
+
+  if (a_finer == nullptr) {
+    return;
+  }
+
+  CH_assert(a_finerBoxes != nullptr);
+
+  Vector<int> hits;
+
+  a_finer->intersecting(refine(grown, a_ratio), hits);
+
+  for (int i = 0; i < hits.size(); i++) {
+    a_valid -= coarsen((*a_finerBoxes)[hits[i]], a_ratio);
+  }
+}
+
+void
+PolyhedralGeometryShop::destinationPieces(std::vector<std::vector<std::pair<int, Box>>>& a_pieces,
+                                          const IntVectSet&                              a_valid,
+                                          const int                                      a_level) const
+{
+  CH_TIME("PolyhedralGeometryShop::destinationPieces");
+
+  std::vector<std::vector<std::pair<int, Box>>> owned;
+
+  m_compGeom->ownedPieces(owned, a_valid.minBox(), a_level);
+
+  a_pieces.clear();
+  a_pieces.resize(owned.size());
+
+  for (int lvl = 0; lvl < static_cast<int>(owned.size()); lvl++) {
+    if (owned[lvl].empty()) {
+      continue;
+    }
+
+    // The region is compared with each piece on the destination level, where it lives: the piece's footprint there
+    // is the piece coarsened onto it from a finer level and refined onto it from a coarser one. Only the part of the
+    // region over a piece that it does not wholly contain is mapped onto the piece's level, so no more than a piece's
+    // worth of cells is ever mapped.
+    const int ratio = 1 << std::abs(lvl - a_level);
+
+    a_pieces[lvl].reserve(owned[lvl].size());
+
+    for (const std::pair<int, Box>& piece : owned[lvl]) {
+      Box footprint = piece.second;
+
+      if (lvl > a_level) {
+        footprint.coarsen(ratio);
+      }
+      else if (lvl < a_level) {
+        footprint.refine(ratio);
+      }
+
+      if (a_valid.contains(footprint)) {
+        a_pieces[lvl].push_back(piece);
+
+        continue;
+      }
+
+      // the cells of the piece lying in the region on a finer level, or holding any of it on a coarser one
+      IntVectSet kept = a_valid;
+
+      kept &= footprint;
+
+      if (lvl > a_level) {
+        kept.refine(ratio);
+      }
+      else if (lvl < a_level) {
+        kept.coarsen(ratio);
+      }
+
+      kept &= piece.second;
+
+      const Vector<Box> boxes = kept.boxes();
+
+      for (int i = 0; i < boxes.size(); i++) {
+        a_pieces[lvl].push_back(std::make_pair(piece.first, boxes[i]));
+      }
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_sends,
+                                 std::vector<std::vector<PolyhedralEB::GraphCopyHeader>>& a_receives,
+                                 const std::vector<DisjointBoxLayout>&                    a_grids,
+                                 const std::vector<ProblemDomain>&                        a_domains,
+                                 const int                                                a_ghost) const
+{
+  CH_TIME("PolyhedralGeometryShop::planCopy");
+
+  using PolyhedralEB::GraphCopyHeader;
+
+  CH_assert(a_grids.size() == a_domains.size());
+
+  const int numDest  = static_cast<int>(a_grids.size());
+  const int numGeo   = static_cast<int>(m_graphs.size());
+  const int numRanks = numProc();
+
+  a_sends.assign(numRanks, std::vector<GraphCopyHeader>());
+  a_receives.assign(numRanks, std::vector<GraphCopyHeader>());
+
+  // The destination levels on the geometry's levels, and the ratio from each to the next.
+  std::vector<int> destLevel(numDest);
+  std::vector<int> ratio(numDest, 1);
+
+  for (int i = 0; i < numDest; i++) {
+    destLevel[i] = this->destinationLevel(a_domains[i]);
+  }
+
+  for (int i = 0; i + 1 < numDest; i++) {
+    ratio[i] = 1 << (destLevel[i + 1] - destLevel[i]);
+  }
+
+  // the destination layouts' boxes and ranks, read once: each read copies the whole list
+  std::vector<Vector<Box>> destBoxes(numDest);
+  std::vector<Vector<int>> destRanks(numDest);
+
+  for (int i = 0; i < numDest; i++) {
+    destBoxes[i] = a_grids[i].boxArray();
+    destRanks[i] = a_grids[i].procIDs();
+  }
+
+  // Every tile of every level as a box of the level's graph layout: which box it is, and which rank holds it. The
+  // tiles are the layout's boxes, one for one, though not in the same order.
+  std::vector<std::vector<int>> tileBox(numGeo);
+  std::vector<std::vector<int>> tileRank(numGeo);
+  std::vector<std::vector<int>> boxTile(numGeo);
+
+  for (int lvl = 0; lvl < numGeo; lvl++) {
+    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    const Vector<Box>&       tiles  = m_compGeom->getCutTiles(lvl);
+    const DisjointBoxLayout& layout = m_graphs[lvl]->getGrids();
+    const Vector<Box>        boxes  = layout.boxArray();
+    const Vector<int>        ranks  = layout.procIDs();
+
+    tileBox[lvl].assign(tiles.size(), -1);
+    tileRank[lvl].assign(tiles.size(), -1);
+    boxTile[lvl].assign(boxes.size(), -1);
+
+    for (int t = 0; t < tiles.size(); t++) {
+      Vector<int> hits;
+
+      layout.intersecting(tiles[t], hits);
+
+      for (int h = 0; h < hits.size(); h++) {
+        if (boxes[hits[h]] == tiles[t]) {
+          tileBox[lvl][t]       = hits[h];
+          tileRank[lvl][t]      = ranks[hits[h]];
+          boxTile[lvl][hits[h]] = t;
+        }
+      }
+
+      if (tileBox[lvl][t] < 0) {
+        MayDay::Error("PolyhedralGeometryShop::planCopy - a cut tile is not a box of its level's graph");
+      }
+    }
+  }
+
+  const auto header = [&](const int a_dest, const int a_box, const int a_source, const int a_tile, const Box& a_region)
+    -> GraphCopyHeader {
+    GraphCopyHeader h;
+
+    h.m_destLevel     = a_dest;
+    h.m_destBox       = a_box;
+    h.m_sourceLevel   = a_source;
+    h.m_sourceBox     = tileBox[a_source][a_tile];
+    h.m_numSurfaces   = 0;
+    h.m_overrideBytes = 0;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      h.m_lo[d] = a_region.smallEnd(d);
+      h.m_hi[d] = a_region.bigEnd(d);
+    }
+
+    return h;
+  };
+
+  // The pieces a destination box needs, as both sides compute them.
+  const auto piecesOf =
+    [&](std::vector<std::vector<std::pair<int, Box>>>& a_pieces, const int a_dest, const Box& a_box) {
+      IntVectSet valid;
+
+      PolyhedralGeometryShop::validRegion(valid,
+                                          a_box,
+                                          a_domains[a_dest],
+                                          (a_dest + 1 < numDest) ? &a_grids[a_dest + 1] : nullptr,
+                                          (a_dest + 1 < numDest) ? &destBoxes[a_dest + 1] : nullptr,
+                                          ratio[a_dest],
+                                          a_ghost);
+
+      a_pieces.clear();
+
+      if (!valid.isEmpty()) {
+        this->destinationPieces(a_pieces, valid, destLevel[a_dest]);
+      }
+    };
+
+  std::vector<std::vector<std::pair<int, Box>>> pieces;
+
+  // Receiving: this rank's own destination boxes.
+  for (int i = 0; i < numDest; i++) {
+    for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+      const int b = static_cast<int>(a_grids[i].index(dit()));
+
+      piecesOf(pieces, i, a_grids[i][dit()]);
+
+      for (int lvl = 0; lvl < static_cast<int>(pieces.size()); lvl++) {
+        for (const std::pair<int, Box>& piece : pieces[lvl]) {
+          a_receives[tileRank[lvl][piece.first]].push_back(header(i, b, lvl, piece.first, piece.second));
+        }
+      }
+    }
+  }
+
+  // Sending: this rank's own graph boxes, and every destination box that could need one of them. A destination box
+  // needs a tile's cells exactly when the tile, mapped onto the destination level and grown by the ghost width, meets
+  // it.
+  for (int lvl = 0; lvl < numGeo; lvl++) {
+    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    const DisjointBoxLayout& layout = m_graphs[lvl]->getGrids();
+
+    for (DataIterator dit(layout); dit.ok(); ++dit) {
+      const int t = boxTile[lvl][layout.index(dit())];
+
+      CH_assert(t >= 0);
+
+      for (int i = 0; i < numDest; i++) {
+        Box mapped = layout[dit()];
+
+        if (destLevel[i] > lvl) {
+          mapped.refine(1 << (destLevel[i] - lvl));
+        }
+        else if (destLevel[i] < lvl) {
+          mapped.coarsen(1 << (lvl - destLevel[i]));
+        }
+
+        mapped.grow(a_ghost);
+        mapped &= a_domains[i].domainBox();
+
+        if (mapped.isEmpty()) {
+          continue;
+        }
+
+        Vector<int> hits;
+
+        a_grids[i].intersecting(mapped, hits);
+
+        for (int k = 0; k < hits.size(); k++) {
+          piecesOf(pieces, i, destBoxes[i][hits[k]]);
+
+          if (lvl >= static_cast<int>(pieces.size())) {
+            continue;
+          }
+
+          for (const std::pair<int, Box>& piece : pieces[lvl]) {
+            if (piece.first == t) {
+              a_sends[destRanks[i][hits[k]]].push_back(header(i, hits[k], lvl, t, piece.second));
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+long long
+PolyhedralGeometryShop::checkCopyPlan(const std::vector<DisjointBoxLayout>& a_grids,
+                                      const std::vector<ProblemDomain>&     a_domains,
+                                      const int                             a_ghost) const
+{
+  CH_TIME("PolyhedralGeometryShop::checkCopyPlan");
+
+  using PolyhedralEB::GraphCopyHeader;
+
+  std::vector<std::vector<GraphCopyHeader>> sends;
+  std::vector<std::vector<GraphCopyHeader>> receives;
+
+  this->planCopy(sends, receives, a_grids, a_domains, a_ghost);
+
+  const int numRanks = numProc();
+
+  // What each rank was sent, per source rank.
+  std::vector<std::vector<GraphCopyHeader>> arrived(numRanks);
+
+#ifdef CH_MPI
+  std::vector<int> sendCounts(numRanks);
+  std::vector<int> recvCounts(numRanks);
+  std::vector<int> sendDispl(numRanks, 0);
+  std::vector<int> recvDispl(numRanks, 0);
+
+  constexpr int bytes = static_cast<int>(sizeof(GraphCopyHeader));
+
+  for (int r = 0; r < numRanks; r++) {
+    sendCounts[r] = static_cast<int>(sends[r].size()) * bytes;
+  }
+
+  MPI_Alltoall(sendCounts.data(), 1, MPI_INT, recvCounts.data(), 1, MPI_INT, Chombo_MPI::comm);
+
+  long long sendTotal = 0;
+  long long recvTotal = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    sendDispl[r] = static_cast<int>(sendTotal);
+    recvDispl[r] = static_cast<int>(recvTotal);
+
+    sendTotal += sendCounts[r];
+    recvTotal += recvCounts[r];
+  }
+
+  if (sendTotal > std::numeric_limits<int>::max() || recvTotal > std::numeric_limits<int>::max()) {
+    MayDay::Abort("PolyhedralGeometryShop::checkCopyPlan - the headers exceed MPI's int limit");
+  }
+
+  std::vector<char> sendBuffer(sendTotal);
+  std::vector<char> recvBuffer(recvTotal);
+
+  for (int r = 0; r < numRanks; r++) {
+    if (!sends[r].empty()) {
+      std::memcpy(sendBuffer.data() + sendDispl[r], sends[r].data(), sendCounts[r]);
+    }
+  }
+
+  MPI_Alltoallv(sendBuffer.data(),
+                sendCounts.data(),
+                sendDispl.data(),
+                MPI_BYTE,
+                recvBuffer.data(),
+                recvCounts.data(),
+                recvDispl.data(),
+                MPI_BYTE,
+                Chombo_MPI::comm);
+
+  for (int r = 0; r < numRanks; r++) {
+    arrived[r].resize(recvCounts[r] / bytes);
+
+    if (recvCounts[r] > 0) {
+      std::memcpy(arrived[r].data(), recvBuffer.data() + recvDispl[r], recvCounts[r]);
+    }
+  }
+#else
+  arrived[0] = sends[0];
+#endif
+
+  // Order does not matter, only the set: both lists are sorted by every field before they are compared.
+  const auto key = [](const GraphCopyHeader& a_header) -> std::array<int, 4 + 2 * SpaceDim> {
+    std::array<int, 4 + 2 * SpaceDim> k;
+
+    k[0] = a_header.m_destLevel;
+    k[1] = a_header.m_destBox;
+    k[2] = a_header.m_sourceLevel;
+    k[3] = a_header.m_sourceBox;
+
+    for (int d = 0; d < SpaceDim; d++) {
+      k[4 + d]            = a_header.m_lo[d];
+      k[4 + SpaceDim + d] = a_header.m_hi[d];
+    }
+
+    return k;
+  };
+
+  const auto before = [&](const GraphCopyHeader& a_first, const GraphCopyHeader& a_second) -> bool {
+    return key(a_first) < key(a_second);
+  };
+
+  long long numPieces    = 0;
+  long long numDisagreed = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    std::sort(arrived[r].begin(), arrived[r].end(), before);
+    std::sort(receives[r].begin(), receives[r].end(), before);
+
+    numPieces += static_cast<long long>(receives[r].size());
+
+    bool same = arrived[r].size() == receives[r].size();
+
+    for (std::size_t i = 0; same && i < receives[r].size(); i++) {
+      same = key(arrived[r][i]) == key(receives[r][i]);
+    }
+
+    if (!same) {
+      numDisagreed++;
+
+      pout() << "PolyhedralGeometryShop::checkCopyPlan - rank " << r << " sent " << arrived[r].size()
+             << " pieces here, and " << receives[r].size() << " were expected from it" << endl;
+    }
+  }
+
+  if (ParallelOps::sum(numDisagreed) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::checkCopyPlan - the senders' and receivers' plans disagree");
+  }
+
+  return ParallelOps::sum(numPieces);
+}
+
+void
+PolyhedralGeometryShop::testCopyPlan() const
+{
+  CH_TIME("PolyhedralGeometryShop::testCopyPlan");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testCopyPlan" << endl;
+  }
+
+  int ghost = 0;
+
+  ParmParse("AmrMesh").get("eb_ghost", ghost);
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  // The ranks walk the rank list with a stride coprime to its length, so that no rank holds what the graph put there.
+  int stride = numProc() / 2 + 1;
+
+  while (std::gcd(stride, numProc()) != 1) {
+    stride++;
+  }
+
+  const auto shuffled = [&](const Vector<Box>& a_boxes, const ProblemDomain& a_domain) -> DisjointBoxLayout {
+    Vector<int> ranks(a_boxes.size());
+
+    for (int i = 0; i < a_boxes.size(); i++) {
+      ranks[i] = (numProc() > 1) ? static_cast<int>((static_cast<long>(i) * stride + 1) % numProc()) : 0;
+    }
+
+    DisjointBoxLayout layout(a_boxes, ranks, a_domain);
+
+    layout.close();
+
+    return layout;
+  };
+
+  std::vector<DisjointBoxLayout> grids;
+  std::vector<ProblemDomain>     domains;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains.push_back(m_compGeom->getDomain(lvl));
+    grids.push_back(shuffled(m_compGeom->getBoxes(lvl), domains.back()));
+  }
+
+  const long long whole = this->checkCopyPlan(grids, domains, ghost);
+
+  long long alone = 0;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    alone += this->checkCopyPlan({grids[lvl]}, {domains[lvl]}, ghost);
+  }
+
+  // past the finest level: the finest boxes refined, every piece from a coarser level
+  Vector<Box> finer = m_compGeom->getBoxes(numLevels - 1);
+
+  for (int i = 0; i < finer.size(); i++) {
+    finer[i].refine(2);
+  }
+
+  const ProblemDomain finerDomain = refine(domains.back(), 2);
+
+  const long long past = this->checkCopyPlan({shuffled(finer, finerDomain)}, {finerDomain}, ghost);
+
+  if (procID() == 0) {
+    pout() << "PolyhedralGeometryShop::testCopyPlan - senders and receivers agree on every piece: " << whole
+           << " onto the geometry's hierarchy, " << alone << " onto its levels one at a time, " << past
+           << " onto a level past the finest" << endl;
+  }
+}
 
 void
 PolyhedralGeometryShop::stitchGraphs(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const
