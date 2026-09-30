@@ -410,7 +410,15 @@ public:
    * those of the finer cells under it, and, from the one destination cell at its low corner, a coarser ancestor's. Each
    * owned cell is then counted exactly once, and the sums and counts must be the source's. Every coarser cut cell is
    * also subdivided down to the destination level, and the child destinationBodies gives the destination cell at its
-   * low corner must be the one found there. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   * low corner must be the one found there. The hierarchy is also copied with every box split into octants, which must
+   * change nothing.
+   *
+   * On every face between two valid cells owned by different levels, the two sides must read the same aperture to
+   * 1e-10: the claim that a subdivided stitched ancestor meets the finer cells beside it. Two dimensions have no
+   * stitching yet, so there the disagreement is reported but does not stop the run.
+   *
+   * All of it -- the copies and every body rebuilt from them -- runs with the shop's implicit function replaced by one
+   * that stops the run if it is evaluated. Collective. Switched by PolyhedralGeometryShop.test_copy.
    */
   void
   testCopyBodies() const;

@@ -51,6 +51,44 @@
 #include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
+namespace {
+
+/**
+ * @brief An implicit function that stops the run if it is ever evaluated.
+ * @details Put in place of the shop's own function while a test copies the graph and rebuilds bodies from the copy,
+ * which must be done from the graph's data alone.
+ */
+class AbortingIF : public BaseIF
+{
+public:
+  /**
+   * @brief Stop the run.
+   * @param[in] a_point Where the function was asked for.
+   * @return Nothing; it does not return.
+   */
+  Real
+  value(const RealVect& a_point) const override
+  {
+    pout() << "AbortingIF::value - evaluated at " << a_point << endl;
+
+    MayDay::Error("AbortingIF::value - the implicit function was evaluated where only the graph may be read");
+
+    return 0.0;
+  }
+
+  /**
+   * @brief A copy.
+   * @return A new aborting function.
+   */
+  BaseIF*
+  newImplicitFunction() const override
+  {
+    return new AbortingIF();
+  }
+};
+
+} // namespace
+
 PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                                                const int            a_verbosity,
                                                const Real           a_dx,
@@ -2655,6 +2693,13 @@ PolyhedralGeometryShop::testCopyBodies() const
                          const std::vector<ProblemDomain>&     a_domains) {
     AMRPolyhedralEBGraph dest;
 
+    // The copy and everything rebuilt from it are made with the shop's implicit function replaced by one that stops the
+    // run when evaluated: a test-only swap, which is why it reaches past the constness of the test.
+    const BaseIF* const saved = m_baseIF;
+    const AbortingIF    guard;
+
+    const_cast<PolyhedralGeometryShop*>(this)->m_baseIF = &guard;
+
     this->copyGraphs(dest, a_grids, a_domains, ghost);
 
     const int numDest = static_cast<int>(a_grids.size());
@@ -2820,9 +2865,193 @@ PolyhedralGeometryShop::testCopyBodies() const
       MayDay::Error("PolyhedralGeometryShop::testCopyBodies - the bodies changed in the copy");
     }
 
+    // Faces between cells owned by different levels: a subdivided child beside a cell of the destination's own level
+    // or a finer one, say. The two sides must read the same aperture on the face they share, up to the rounding in
+    // which the subdivision and the restriction reach the same polygon by different arithmetic.
+    const int numSource = dest.getNumSourceLevels();
+
+    const auto ownerOf = [&](const int a_dest, const DataIndex& a_din, const IntVect& a_cell) -> int {
+      const int destLevel = dest.getGeometryLevel(a_dest);
+
+      for (int lvl = 0; lvl < numSource; lvl++) {
+        const BaseFab<signed char>& states = dest.getCellStates(a_dest, lvl)[a_din];
+
+        if (states.box().isEmpty()) {
+          continue;
+        }
+
+        if (lvl == destLevel) {
+          if (states.box().contains(a_cell) && states(a_cell, 0) != s_absent) {
+            return lvl;
+          }
+        }
+        else if (lvl < destLevel) {
+          const IntVect ancestor = coarsen(a_cell, 1 << (destLevel - lvl));
+
+          if (states.box().contains(ancestor) && states(ancestor, 0) != s_absent) {
+            return lvl;
+          }
+        }
+        else {
+          // owned by a finer level only where every cell under it is; a cell split among levels is left out
+          const Box children = refine(Box(a_cell, a_cell), 1 << (lvl - destLevel));
+
+          if (!states.box().contains(children)) {
+            continue;
+          }
+
+          bool all = true;
+
+          for (BoxIterator bit(children); bit.ok() && all; ++bit) {
+            all = states(bit(), 0) != s_absent;
+          }
+
+          if (all) {
+            return lvl;
+          }
+        }
+      }
+
+      return -1;
+    };
+
+    const auto aperture = [&](const int        a_dest,
+                              const DataIndex& a_din,
+                              const IntVect&   a_cell,
+                              const int        a_owner,
+                              const int        a_dir,
+                              const int        a_side) -> Real {
+      const int            destLevel = dest.getGeometryLevel(a_dest);
+      const Side::LoHiSide side      = (a_side == 0) ? Side::Lo : Side::Hi;
+
+      const BaseFab<signed char>& states = dest.getCellStates(a_dest, a_owner)[a_din];
+
+      const auto own = [&](const IntVect& a_sourceCell) -> Real {
+        const int state = states(a_sourceCell, 0);
+
+        if (state == PolyhedralEBGraph::s_regular) {
+          return 1.0;
+        }
+        if (state == PolyhedralEBGraph::s_covered) {
+          return 0.0;
+        }
+
+        PolyhedralGeometryShop::sourceBody(body, dest, a_dest, a_din, a_owner, a_sourceCell);
+
+        return body.areaFraction(a_dir, side);
+      };
+
+      if (a_owner == destLevel) {
+        return own(a_cell);
+      }
+
+      if (a_owner < destLevel) {
+        const IntVect ancestor = coarsen(a_cell, 1 << (destLevel - a_owner));
+        const int     state    = states(ancestor, 0);
+
+        if (state != PolyhedralEBGraph::s_cut) {
+          return (state == PolyhedralEBGraph::s_regular) ? 1.0 : 0.0;
+        }
+
+        long long ignored = 0;
+
+        PolyhedralGeometryShop::destinationBodies(bodies, ignored, dest, a_dest, a_din, a_cell);
+
+        CH_assert(bodies.size() == 1);
+
+        return bodies[0].areaFraction(a_dir, side);
+      }
+
+      // the finer cells in the face's layer, their apertures on it averaged
+      const int r = 1 << (a_owner - destLevel);
+
+      Box layer = refine(Box(a_cell, a_cell), r);
+
+      layer.setSmall(a_dir, a_cell[a_dir] * r + ((a_side == 0) ? 0 : r - 1));
+      layer.setBig(a_dir, a_cell[a_dir] * r + ((a_side == 0) ? 0 : r - 1));
+
+      Real sum = 0.0;
+
+      for (BoxIterator bit(layer); bit.ok(); ++bit) {
+        sum += own(bit());
+      }
+
+      return sum / static_cast<Real>(layer.numPts());
+    };
+
+    Real      maxSeam     = 0.0;
+    long long numSeams    = 0;
+    long long numCutSeams = 0;
+
+    for (int i = 0; i < numDest; i++) {
+      const int ratio = (i + 1 < numDest) ? (1 << (dest.getGeometryLevel(i + 1) - dest.getGeometryLevel(i))) : 1;
+
+      const Vector<Box> finerBoxes = (i + 1 < numDest) ? a_grids[i + 1].boxArray() : Vector<Box>();
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        IntVectSet valid;
+
+        PolyhedralGeometryShop::validRegion(valid,
+                                            a_grids[i][dit()],
+                                            a_domains[i],
+                                            (i + 1 < numDest) ? &a_grids[i + 1] : nullptr,
+                                            (i + 1 < numDest) ? &finerBoxes : nullptr,
+                                            ratio,
+                                            0);
+
+        for (IVSIterator ivsit(valid); ivsit.ok(); ++ivsit) {
+          const IntVect iv    = ivsit();
+          const int     owner = ownerOf(i, dit(), iv);
+
+          if (owner < 0) {
+            continue;
+          }
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            const IntVect other      = iv + BASISV(dir);
+            const int     otherOwner = a_domains[i].contains(other) ? ownerOf(i, dit(), other) : -1;
+
+            if (otherOwner < 0 || otherOwner == owner) {
+              continue;
+            }
+
+            const Real mine   = aperture(i, dit(), iv, owner, dir, 1);
+            const Real theirs = aperture(i, dit(), other, otherOwner, dir, 0);
+
+            maxSeam = std::max(maxSeam, std::abs(mine - theirs));
+
+            numSeams++;
+
+            // a face a cut cell bounds, on either side, rather than one both sides call open or closed
+            if ((mine > 0.0 && mine < 1.0) || (theirs > 0.0 && theirs < 1.0)) {
+              numCutSeams++;
+            }
+          }
+        }
+      }
+    }
+
+    const_cast<PolyhedralGeometryShop*>(this)->m_baseIF = saved;
+
+    maxSeam     = ParallelOps::max(maxSeam);
+    numSeams    = ParallelOps::sum(numSeams);
+    numCutSeams = ParallelOps::sum(numCutSeams);
+
+    // Two dimensions have no stitching yet: a coarse cell beside the finer level keeps its own crossings there, and the
+    // two sides of a seam are not expected to agree. The disagreement is reported, and stops the run in three.
+    if (maxSeam > 1.0E-10 && SpaceDim == 3) {
+      if (procID() == 0) {
+        pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": the two sides of a face between "
+               << "levels differ by " << maxSeam << endl;
+      }
+
+      MayDay::Error("PolyhedralGeometryShop::testCopyBodies - two levels disagree about a face they share");
+    }
+
     if (procID() == 0) {
       pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": all " << count
-             << " bodies arrived bit for bit; " << numSplit << " subdivisions left a child in more than one piece"
+             << " bodies arrived bit for bit; " << numSplit << " subdivisions left a child in more than one piece; "
+             << numSeams << " faces between levels, " << numCutSeams << " of them partly open, agree to " << maxSeam
              << endl;
     }
   };
@@ -2838,6 +3067,27 @@ PolyhedralGeometryShop::testCopyBodies() const
   }
 
   check("the geometry's hierarchy", grids, domains);
+
+  // the same hierarchy with every box split into octants, which must make no difference to any body
+  std::vector<DisjointBoxLayout> octants;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
+
+    Vector<Box> pieces;
+
+    for (int i = 0; i < boxes.size(); i++) {
+      Vector<Box> children;
+
+      domainSplit(boxes[i], children, std::max(1, boxes[i].shortside() / 2), 1);
+
+      pieces.append(children);
+    }
+
+    octants.push_back(PolyhedralGeometryShop::shuffledLayout(pieces, domains[lvl]));
+  }
+
+  check("the geometry's hierarchy in octants", octants, domains);
 
   for (int lvl = 0; lvl < numLevels; lvl++) {
     check("level " + std::to_string(lvl) + " alone", {grids[lvl]}, {domains[lvl]});
