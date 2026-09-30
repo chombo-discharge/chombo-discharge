@@ -264,6 +264,10 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Copy plan test");
     this->testCopyPlan();
     timer.stopEvent("Copy plan test");
+
+    timer.startEvent("Copy round trip");
+    this->testCopyRoundTrip();
+    timer.stopEvent("Copy round trip");
   }
 
   // The surface itself is written in three dimensions only: the facets are polygons, and in two dimensions the
@@ -1858,6 +1862,631 @@ PolyhedralGeometryShop::testCopyPlan() const
     pout() << "PolyhedralGeometryShop::testCopyPlan - senders and receivers agree on every piece: " << whole
            << " onto the geometry's hierarchy, " << alone << " onto its levels one at a time, " << past
            << " onto a level past the finest" << endl;
+  }
+}
+
+void
+PolyhedralGeometryShop::exchangeBytes(const std::vector<std::vector<char>>& a_send,
+                                      std::vector<char>&                    a_recv,
+                                      std::vector<int>&                     a_offset,
+                                      std::vector<int>&                     a_count)
+{
+  CH_TIME("PolyhedralGeometryShop::exchangeBytes");
+
+  const int numRanks = numProc();
+  const int myRank   = procID();
+
+  CH_assert(static_cast<int>(a_send.size()) == numRanks);
+
+  a_offset.assign(numRanks, 0);
+  a_count.assign(numRanks, 0);
+
+#ifdef CH_MPI
+  std::vector<int> sendCounts(numRanks, 0);
+  std::vector<int> sendDispl(numRanks, 0);
+
+  long long sendTotal = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    if (r != myRank) {
+      sendTotal += static_cast<long long>(a_send[r].size());
+    }
+  }
+
+  if (sendTotal > std::numeric_limits<int>::max()) {
+    MayDay::Abort("PolyhedralGeometryShop::exchangeBytes - outbound bytes exceed MPI's int limit");
+  }
+
+  std::vector<char> sendBuffer(sendTotal);
+
+  long long sendAt = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    sendDispl[r] = static_cast<int>(sendAt);
+
+    if (r != myRank && !a_send[r].empty()) {
+      sendCounts[r] = static_cast<int>(a_send[r].size());
+
+      std::memcpy(sendBuffer.data() + sendAt, a_send[r].data(), a_send[r].size());
+
+      sendAt += static_cast<long long>(a_send[r].size());
+    }
+  }
+
+  MPI_Alltoall(sendCounts.data(), 1, MPI_INT, a_count.data(), 1, MPI_INT, Chombo_MPI::comm);
+
+  // what this rank sends itself goes straight into its place
+  a_count[myRank] = static_cast<int>(a_send[myRank].size());
+
+  long long recvTotal = 0;
+
+  for (int r = 0; r < numRanks; r++) {
+    a_offset[r] = static_cast<int>(recvTotal);
+
+    recvTotal += a_count[r];
+  }
+
+  if (recvTotal > std::numeric_limits<int>::max()) {
+    MayDay::Abort("PolyhedralGeometryShop::exchangeBytes - inbound bytes exceed MPI's int limit");
+  }
+
+  a_recv.assign(recvTotal, 0);
+
+  std::vector<int> recvCounts = a_count;
+
+  recvCounts[myRank] = 0;
+
+  MPI_Alltoallv(sendBuffer.data(),
+                sendCounts.data(),
+                sendDispl.data(),
+                MPI_BYTE,
+                a_recv.data(),
+                recvCounts.data(),
+                a_offset.data(),
+                MPI_BYTE,
+                Chombo_MPI::comm);
+
+  if (!a_send[myRank].empty()) {
+    std::memcpy(a_recv.data() + a_offset[myRank], a_send[myRank].data(), a_send[myRank].size());
+  }
+#else
+  a_recv      = a_send[myRank];
+  a_count[0]  = static_cast<int>(a_recv.size());
+  a_offset[0] = 0;
+#endif
+}
+
+void
+PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
+                                   const std::vector<DisjointBoxLayout>& a_grids,
+                                   const std::vector<ProblemDomain>&     a_domains,
+                                   const int                             a_ghost) const
+{
+  CH_TIME("PolyhedralGeometryShop::copyGraphs");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::copyGraphs" << endl;
+  }
+
+  using PolyhedralEB::CutCellFaceOverrides;
+  using PolyhedralEB::CutCellSurface;
+  using PolyhedralEB::GraphCopyHeader;
+
+  const int numDest  = static_cast<int>(a_grids.size());
+  const int numGeo   = static_cast<int>(m_graphs.size());
+  const int numRanks = numProc();
+
+  std::vector<std::vector<GraphCopyHeader>> sends;
+  std::vector<std::vector<GraphCopyHeader>> receives;
+
+  this->planCopy(sends, receives, a_grids, a_domains, a_ghost);
+
+  std::vector<int> geometryLevels(numDest);
+
+  for (int i = 0; i < numDest; i++) {
+    geometryLevels[i] = this->destinationLevel(a_domains[i]);
+  }
+
+  a_dest.define(a_grids, a_domains, geometryLevels, numGeo, a_ghost);
+
+  // This rank's destination boxes and graph boxes by their index in their layouts, which is how a header names them.
+  std::vector<std::vector<DataIndex>> destIndex(numDest);
+  std::vector<std::vector<DataIndex>> sourceIndex(numGeo);
+  std::vector<std::vector<bool>>      destMine(numDest);
+  std::vector<std::vector<bool>>      sourceMine(numGeo);
+
+  for (int i = 0; i < numDest; i++) {
+    destIndex[i].resize(a_grids[i].size());
+    destMine[i].assign(a_grids[i].size(), false);
+
+    for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+      const int b = static_cast<int>(a_grids[i].index(dit()));
+
+      destIndex[i][b] = dit();
+      destMine[i][b]  = true;
+    }
+  }
+
+  for (int lvl = 0; lvl < numGeo; lvl++) {
+    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    const DisjointBoxLayout& layout = m_graphs[lvl]->getGrids();
+
+    sourceIndex[lvl].resize(layout.size());
+    sourceMine[lvl].assign(layout.size(), false);
+
+    for (DataIterator dit(layout); dit.ok(); ++dit) {
+      const int s = static_cast<int>(layout.index(dit()));
+
+      sourceIndex[lvl][s] = dit();
+      sourceMine[lvl][s]  = true;
+    }
+  }
+
+  // Every destination box's states, per geometry level, over the cells its planned pieces span.
+  std::vector<std::vector<std::vector<Box>>> span(numDest, std::vector<std::vector<Box>>(numGeo));
+
+  for (int i = 0; i < numDest; i++) {
+    for (int lvl = 0; lvl < numGeo; lvl++) {
+      span[i][lvl].assign(a_grids[i].size(), Box());
+    }
+  }
+
+  for (int r = 0; r < numRanks; r++) {
+    for (const GraphCopyHeader& h : receives[r]) {
+      Box& b = span[h.m_destLevel][h.m_sourceLevel][h.m_destBox];
+
+      b = b.isEmpty() ? h.region() : minBox(b, h.region());
+    }
+  }
+
+  for (int i = 0; i < numDest; i++) {
+    for (int lvl = 0; lvl < numGeo; lvl++) {
+      LayoutData<BaseFab<signed char>>& states = a_dest.getCellStates(i, lvl);
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        const Box& b = span[i][lvl][a_grids[i].index(dit())];
+
+        if (!b.isEmpty()) {
+          states[dit()].define(b, 1);
+          states[dit()].setVal(s_absent);
+        }
+      }
+    }
+  }
+
+  const int surfaceSize = CutCellSurface().linearSize();
+
+  // Pass 1: states and surfaces. Per piece, its header, then a state and a has-surface flag per cell in the order a
+  // BoxIterator meets them, then the surfaces of the cells that hold one, in the same order.
+  std::vector<std::vector<char>> sendBytes(numRanks);
+
+  for (int r = 0; r < numRanks; r++) {
+    std::size_t bytes = 0;
+
+    for (GraphCopyHeader& h : sends[r]) {
+      const PolyhedralEBGraph& graph = *m_graphs[h.m_sourceLevel];
+      const DataIndex          din   = sourceIndex[h.m_sourceLevel][h.m_sourceBox];
+      const IntVectSet&        with  = graph.getSurfaceCells()[din];
+
+      CH_assert(sourceMine[h.m_sourceLevel][h.m_sourceBox]);
+
+      h.m_numSurfaces = 0;
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        h.m_numSurfaces += with.contains(bit()) ? 1 : 0;
+      }
+
+      bytes += sizeof(GraphCopyHeader) + 2 * h.region().numPts() + h.m_numSurfaces * surfaceSize;
+    }
+
+    sendBytes[r].resize(bytes);
+
+    char* p = sendBytes[r].data();
+
+    for (const GraphCopyHeader& h : sends[r]) {
+      const PolyhedralEBGraph&      graph    = *m_graphs[h.m_sourceLevel];
+      const DataIndex               din      = sourceIndex[h.m_sourceLevel][h.m_sourceBox];
+      const IntVectSet&             with     = graph.getSurfaceCells()[din];
+      const BaseFab<signed char>&   states   = graph.getCellStates()[din];
+      const IVSFAB<CutCellSurface>& surfaces = graph.getSurfaces()[din];
+
+      std::memcpy(p, &h, sizeof(GraphCopyHeader));
+
+      p += sizeof(GraphCopyHeader);
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        *p++ = states(bit(), 0);
+        *p++ = with.contains(bit()) ? 1 : 0;
+      }
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        if (with.contains(bit())) {
+          surfaces(bit(), 0).linearOut(p);
+
+          p += surfaceSize;
+        }
+      }
+    }
+
+    CH_assert(p == sendBytes[r].data() + sendBytes[r].size());
+  }
+
+  std::vector<char> recvBytes;
+  std::vector<int>  recvOffset;
+  std::vector<int>  recvCount;
+
+  PolyhedralGeometryShop::exchangeBytes(sendBytes, recvBytes, recvOffset, recvCount);
+
+  sendBytes.assign(numRanks, std::vector<char>());
+
+  // The surfaces as they arrive, per destination box and geometry level, until the box's surface set is known.
+  std::vector<std::vector<std::vector<std::vector<std::pair<IntVect, CutCellSurface>>>>> arrived(numDest);
+
+  for (int i = 0; i < numDest; i++) {
+    arrived[i].resize(numGeo);
+
+    for (int lvl = 0; lvl < numGeo; lvl++) {
+      arrived[i][lvl].resize(a_grids[i].size());
+    }
+  }
+
+  for (int r = 0; r < numRanks; r++) {
+    const char* p   = recvBytes.data() + recvOffset[r];
+    const char* end = p + recvCount[r];
+
+    std::size_t numPieces = 0;
+
+    while (p < end) {
+      GraphCopyHeader h;
+
+      std::memcpy(&h, p, sizeof(GraphCopyHeader));
+
+      p += sizeof(GraphCopyHeader);
+
+      if (h.m_destLevel < 0 || h.m_destLevel >= numDest || !destMine[h.m_destLevel][h.m_destBox]) {
+        MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece arrived for a box this rank does not hold");
+      }
+
+      const DataIndex din = destIndex[h.m_destLevel][h.m_destBox];
+
+      BaseFab<signed char>& states = a_dest.getCellStates(h.m_destLevel, h.m_sourceLevel)[din];
+
+      std::vector<IntVect> withSurface;
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        if (!states.box().contains(bit())) {
+          MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece arrived outside the cells it was planned for");
+        }
+
+        states(bit(), 0) = *p++;
+
+        if (*p++ != 0) {
+          withSurface.push_back(bit());
+        }
+      }
+
+      if (static_cast<int>(withSurface.size()) != h.m_numSurfaces) {
+        MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece's surfaces do not match its cells");
+      }
+
+      auto& list = arrived[h.m_destLevel][h.m_sourceLevel][h.m_destBox];
+
+      for (const IntVect& iv : withSurface) {
+        CutCellSurface surface;
+
+        surface.linearIn(p);
+
+        p += surfaceSize;
+
+        if (surface.m_role == CutCellSurface::s_invalid) {
+          MayDay::Error("PolyhedralGeometryShop::copyGraphs - a cell arrived with an invalid role");
+        }
+
+        list.push_back(std::make_pair(iv, surface));
+      }
+
+      numPieces++;
+    }
+
+    if (numPieces != receives[r].size()) {
+      pout() << "PolyhedralGeometryShop::copyGraphs - rank " << r << " sent " << numPieces << " pieces, and "
+             << receives[r].size() << " were planned" << endl;
+
+      MayDay::Error("PolyhedralGeometryShop::copyGraphs - the pieces that arrived are not the ones planned");
+    }
+  }
+
+  recvBytes.clear();
+
+  // The surface sets, and the surfaces in them.
+  for (int i = 0; i < numDest; i++) {
+    for (int lvl = 0; lvl < numGeo; lvl++) {
+      LayoutData<IVSFAB<CutCellSurface>>& surfaces = a_dest.getSurfaces(i, lvl);
+      LayoutData<BaseFab<signed char>>&   states   = a_dest.getCellStates(i, lvl);
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        auto& list = arrived[i][lvl][a_grids[i].index(dit())];
+
+        if (states[dit()].box().isEmpty()) {
+          continue;
+        }
+
+        IntVectSet cells(DenseIntVectSet(states[dit()].box(), false));
+
+        for (const auto& entry : list) {
+          cells |= entry.first;
+        }
+
+        surfaces[dit()].define(cells, 1);
+
+        for (const auto& entry : list) {
+          surfaces[dit()](entry.first, 0) = entry.second;
+        }
+
+        list.clear();
+        list.shrink_to_fit();
+      }
+    }
+  }
+
+  // Pass 2: face overrides. Per piece, its header, then the overrides of every overridden cell of it in the order a
+  // BoxIterator meets them; the receiver knows which cells those are from the surfaces it now holds.
+  for (int r = 0; r < numRanks; r++) {
+    std::size_t bytes = 0;
+
+    for (GraphCopyHeader& h : sends[r]) {
+      const PolyhedralEBGraph&      graph     = *m_graphs[h.m_sourceLevel];
+      const DataIndex               din       = sourceIndex[h.m_sourceLevel][h.m_sourceBox];
+      const IntVectSet&             with      = graph.getSurfaceCells()[din];
+      const IVSFAB<CutCellSurface>& surfaces  = graph.getSurfaces()[din];
+      const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[din];
+
+      h.m_overrideBytes = 0;
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        if (!with.contains(bit()) || surfaces(bit(), 0).m_role != CutCellSurface::s_overridden) {
+          continue;
+        }
+
+        const int entry = overrides.find(bit());
+
+        if (entry < 0) {
+          MayDay::Error("PolyhedralGeometryShop::copyGraphs - an overridden cell has no face overrides");
+        }
+
+        h.m_overrideBytes += overrides.linearSize(entry);
+      }
+
+      bytes += sizeof(GraphCopyHeader) + h.m_overrideBytes;
+    }
+
+    sendBytes[r].resize(bytes);
+
+    char* p = sendBytes[r].data();
+
+    for (const GraphCopyHeader& h : sends[r]) {
+      const PolyhedralEBGraph&      graph     = *m_graphs[h.m_sourceLevel];
+      const DataIndex               din       = sourceIndex[h.m_sourceLevel][h.m_sourceBox];
+      const IntVectSet&             with      = graph.getSurfaceCells()[din];
+      const IVSFAB<CutCellSurface>& surfaces  = graph.getSurfaces()[din];
+      const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[din];
+
+      std::memcpy(p, &h, sizeof(GraphCopyHeader));
+
+      p += sizeof(GraphCopyHeader);
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        if (!with.contains(bit()) || surfaces(bit(), 0).m_role != CutCellSurface::s_overridden) {
+          continue;
+        }
+
+        const int entry = overrides.find(bit());
+
+        overrides.linearOut(p, entry);
+
+        p += overrides.linearSize(entry);
+      }
+    }
+
+    CH_assert(p == sendBytes[r].data() + sendBytes[r].size());
+  }
+
+  PolyhedralGeometryShop::exchangeBytes(sendBytes, recvBytes, recvOffset, recvCount);
+
+  sendBytes.clear();
+
+  // Each box's overrides arrive a piece at a time, and are kept in cell order, so they are gathered first.
+  std::vector<std::vector<std::vector<std::vector<std::pair<IntVect, const char*>>>>> slices(numDest);
+
+  for (int i = 0; i < numDest; i++) {
+    slices[i].resize(numGeo);
+
+    for (int lvl = 0; lvl < numGeo; lvl++) {
+      slices[i][lvl].resize(a_grids[i].size());
+    }
+  }
+
+  for (int r = 0; r < numRanks; r++) {
+    const char* p   = recvBytes.data() + recvOffset[r];
+    const char* end = p + recvCount[r];
+
+    while (p < end) {
+      GraphCopyHeader h;
+
+      std::memcpy(&h, p, sizeof(GraphCopyHeader));
+
+      p += sizeof(GraphCopyHeader);
+
+      const DataIndex               din      = destIndex[h.m_destLevel][h.m_destBox];
+      const IVSFAB<CutCellSurface>& surfaces = a_dest.getSurfaces(h.m_destLevel, h.m_sourceLevel)[din];
+      const IntVectSet&             with     = surfaces.getIVS();
+
+      const char* start = p;
+
+      CutCellFaceOverrides reader;
+
+      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
+        if (!with.contains(bit()) || surfaces(bit(), 0).m_role != CutCellSurface::s_overridden) {
+          continue;
+        }
+
+        slices[h.m_destLevel][h.m_sourceLevel][h.m_destBox].push_back(std::make_pair(bit(), p));
+
+        // the slice's length is only known by reading it
+        reader.clear();
+
+        p += reader.linearIn(p, bit());
+      }
+
+      if (p - start != h.m_overrideBytes) {
+        MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece's face overrides do not match its cells");
+      }
+    }
+  }
+
+  for (int i = 0; i < numDest; i++) {
+    for (int lvl = 0; lvl < numGeo; lvl++) {
+      LayoutData<CutCellFaceOverrides>& overrides = a_dest.getFaceOverrides(i, lvl);
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        auto& list = slices[i][lvl][a_grids[i].index(dit())];
+
+        std::sort(
+          list.begin(),
+          list.end(),
+          [](const std::pair<IntVect, const char*>& a_first, const std::pair<IntVect, const char*>& a_second) -> bool {
+            return CutCellFaceOverrides::precedes(a_first.first, a_second.first);
+          });
+
+        overrides[dit()].clear();
+
+        for (const auto& entry : list) {
+          overrides[dit()].linearIn(entry.second, entry.first);
+        }
+      }
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::testCopyRoundTrip() const
+{
+  CH_TIME("PolyhedralGeometryShop::testCopyRoundTrip");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testCopyRoundTrip" << endl;
+  }
+
+  using PolyhedralEB::CutCellFaceOverrides;
+  using PolyhedralEB::CutCellSurface;
+
+  int ghost = 0;
+
+  ParmParse("AmrMesh").get("eb_ghost", ghost);
+
+  long long numCompared = 0;
+  long long numDiffered = 0;
+
+  for (int lvl = 0; lvl < static_cast<int>(m_graphs.size()); lvl++) {
+    if (m_graphs[lvl].isNull() || !m_graphs[lvl]->isDefined()) {
+      continue;
+    }
+
+    const PolyhedralEBGraph& graph = *m_graphs[lvl];
+    const DisjointBoxLayout& grids = graph.getGrids();
+
+    AMRPolyhedralEBGraph dest;
+
+    this->copyGraphs(dest, {grids}, {graph.getDomain()}, ghost);
+
+    const LayoutData<BaseFab<signed char>>&   destStates    = dest.getCellStates(0, lvl);
+    const LayoutData<IVSFAB<CutCellSurface>>& destSurfaces  = dest.getSurfaces(0, lvl);
+    const LayoutData<CutCellFaceOverrides>&   destOverrides = dest.getFaceOverrides(0, lvl);
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const Box box = grids[dit()];
+
+      const BaseFab<signed char>&   states    = graph.getCellStates()[dit()];
+      const BaseFab<signed char>&   refined   = graph.getRefinedMask()[dit()];
+      const IntVectSet&             with      = graph.getSurfaceCells()[dit()];
+      const IVSFAB<CutCellSurface>& surfaces  = graph.getSurfaces()[dit()];
+      const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[dit()];
+
+      const BaseFab<signed char>&   copiedStates    = destStates[dit()];
+      const IVSFAB<CutCellSurface>& copiedSurfaces  = destSurfaces[dit()];
+      const CutCellFaceOverrides&   copiedOverrides = destOverrides[dit()];
+
+      std::vector<char> mine;
+      std::vector<char> theirs;
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        // a cell the finer level owns arrives from there
+        if (refined(iv, 0) != 0) {
+          continue;
+        }
+
+        numCompared++;
+
+        bool same = copiedStates.box().contains(iv) && copiedStates(iv, 0) == states(iv, 0);
+
+        const bool hasSurface = with.contains(iv);
+
+        same = same && (copiedSurfaces.getIVS().contains(iv) == hasSurface);
+
+        if (same && hasSurface) {
+          const CutCellSurface& a = surfaces(iv, 0);
+          const CutCellSurface& b = copiedSurfaces(iv, 0);
+
+          mine.resize(a.linearSize());
+          theirs.resize(b.linearSize());
+
+          a.linearOut(mine.data());
+          b.linearOut(theirs.data());
+
+          same = (mine == theirs);
+        }
+
+        const int entry       = overrides.find(iv);
+        const int copiedEntry = copiedOverrides.find(iv);
+
+        same = same && ((entry < 0) == (copiedEntry < 0));
+
+        if (same && entry >= 0) {
+          mine.resize(overrides.linearSize(entry));
+          theirs.resize(copiedOverrides.linearSize(copiedEntry));
+
+          overrides.linearOut(mine.data(), entry);
+          copiedOverrides.linearOut(theirs.data(), copiedEntry);
+
+          same = (mine == theirs);
+        }
+
+        if (!same) {
+          if (numDiffered < 10) {
+            pout() << "PolyhedralGeometryShop::testCopyRoundTrip - level " << lvl << " cell " << iv
+                   << " did not arrive as the graph holds it" << endl;
+          }
+
+          numDiffered++;
+        }
+      }
+    }
+  }
+
+  if (ParallelOps::sum(numDiffered) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::testCopyRoundTrip - a copied cell differs from the graph's");
+  }
+
+  const long long totalCompared = ParallelOps::sum(numCompared);
+
+  if (procID() == 0) {
+    pout() << "PolyhedralGeometryShop::testCopyRoundTrip - " << totalCompared
+           << " owned cells arrived as the graphs hold them, face overrides included" << endl;
   }
 }
 

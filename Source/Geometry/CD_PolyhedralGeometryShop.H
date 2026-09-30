@@ -23,6 +23,7 @@
 #include <IntVectSet.H>
 
 // Our includes
+#include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_ScanShop.H>
 #include <CD_CutCellBody.H>
 #include <CD_CutCellSurface.H>
@@ -334,6 +335,32 @@ public:
   testCopyPlan() const;
 
   /**
+   * @brief Copy the graphs onto a destination hierarchy.
+   * @details Plans the copy, allocates every destination box's states over the cells its pieces span, and sends the
+   * pieces in two passes. The first carries every cell's state and the surface of every cell that holds one, its role
+   * included; the second carries the face overrides of every cell whose surface is overridden, which the receiver
+   * knows from the first. Nothing on either side evaluates the implicit function. A piece that arrives unplanned, a
+   * cell whose role is invalid, and an overridden cell without overrides all stop the run. Collective.
+   * @param[out] a_dest    The graph on the destination hierarchy.
+   * @param[in]  a_grids   Destination layout of every level, coarsest first.
+   * @param[in]  a_domains Domain of every destination level.
+   * @param[in]  a_ghost   Ghost width every destination box is filled to.
+   */
+  void
+  copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
+             const std::vector<DisjointBoxLayout>& a_grids,
+             const std::vector<ProblemDomain>&     a_domains,
+             const int                             a_ghost) const;
+
+  /**
+   * @brief Copy every graph onto its own layout as a destination level of its own, and require every cell the level
+   * owns to arrive as the graph holds it, bit for bit: state, surface, role and face overrides. Collective. Switched by
+   * PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testCopyRoundTrip() const;
+
+  /**
    * @brief Whether a cut body holds nothing at all and is therefore a regular cell.
    * @details A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut
    * from their corners while their bodies hold no solid and no interface whatsoever -- the reconstruction finds
@@ -533,6 +560,21 @@ protected:
    * @brief State of a cell of the finer level that the finer level does not hold, in a copy of its states.
    */
   static constexpr int s_absent = 2;
+
+  /**
+   * @brief Trade byte buffers among all ranks: counts first, then the payloads, into one flat buffer.
+   * @details What this rank sends itself is copied rather than sent. Byte totals that do not fit in an int, which is
+   * what MPI counts are, stop the run in every build. Collective.
+   * @param[in]  a_send   Per destination rank, the bytes this rank sends there.
+   * @param[out] a_recv   Everything this rank received, source rank after source rank.
+   * @param[out] a_offset Per source rank, where its bytes begin in a_recv.
+   * @param[out] a_count  Per source rank, how many bytes it sent.
+   */
+  static void
+  exchangeBytes(const std::vector<std::vector<char>>& a_send,
+                std::vector<char>&                    a_recv,
+                std::vector<int>&                     a_offset,
+                std::vector<int>&                     a_count);
 
   /**
    * @brief Graph of every level, indexed as the geometry indexes its levels; undefined where a level has no tiles.

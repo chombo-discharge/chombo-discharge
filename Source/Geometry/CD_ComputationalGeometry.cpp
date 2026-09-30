@@ -518,6 +518,8 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     }
   }
 
+  m_tileTrees[m_startLevel] = this->buildTree(m_cutTiles[m_startLevel]);
+
   timer.startEvent("Index the boxes");
   this->buildBoxTrees();
   timer.stopEvent("Index the boxes");
@@ -678,7 +680,7 @@ ComputationalGeometry::ownedPieces(std::vector<std::vector<std::pair<int, Box>>>
   a_pieces.clear();
   a_pieces.resize(numLevels);
 
-  for (int lvl = m_startLevel + 1; lvl < numLevels; lvl++) {
+  for (int lvl = m_startLevel; lvl < numLevels; lvl++) {
     if (m_cutTiles[lvl].size() == 0) {
       continue;
     }
@@ -748,7 +750,7 @@ ComputationalGeometry::checkOwnedPieces(const Box& a_box, const int a_level) con
 
   const int numLevels = m_domains.size();
 
-  for (int lvl = m_startLevel + 1; lvl < numLevels; lvl++) {
+  for (int lvl = m_startLevel; lvl < numLevels; lvl++) {
     Box region = a_box;
 
     if (lvl < a_level) {

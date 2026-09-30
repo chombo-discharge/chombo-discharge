@@ -12,6 +12,7 @@
 
 // Std includes
 #include <algorithm>
+#include <cstring>
 
 // Chombo includes
 #include <CH_assert.H>
@@ -185,6 +186,111 @@ CutCellFaceOverrides::equals(const CutCellFaceOverrides& a_other) const noexcept
   }
 
   return true;
+}
+
+int
+CutCellFaceOverrides::linearSize(const int a_index) const noexcept
+{
+  CH_assert(a_index >= 0 && a_index < this->numCells());
+
+  // the face count, then per face its index, reason and polygon count, then per polygon its vertex count
+  int size = static_cast<int>(sizeof(int));
+
+  for (int f = m_cellFaces[a_index]; f < m_cellFaces[a_index + 1]; f++) {
+    size += 3 * static_cast<int>(sizeof(int));
+
+    for (int p = m_facePolygons[f]; p < m_facePolygons[f + 1]; p++) {
+      const int numVertices = m_polygonVertices[p + 1] - m_polygonVertices[p];
+
+      size += static_cast<int>(sizeof(int)) + numVertices * static_cast<int>(sizeof(RealVect) + sizeof(int));
+    }
+  }
+
+  return size;
+}
+
+void
+CutCellFaceOverrides::linearOut(void* a_buffer, const int a_index) const noexcept
+{
+  CH_assert(a_index >= 0 && a_index < this->numCells());
+
+  char* p = static_cast<char*>(a_buffer);
+
+  const auto put = [&p](const void* a_data, const std::size_t a_bytes) {
+    std::memcpy(p, a_data, a_bytes);
+
+    p += a_bytes;
+  };
+
+  const int numFaces = m_cellFaces[a_index + 1] - m_cellFaces[a_index];
+
+  put(&numFaces, sizeof(int));
+
+  for (int f = m_cellFaces[a_index]; f < m_cellFaces[a_index + 1]; f++) {
+    const int numPolygons = m_facePolygons[f + 1] - m_facePolygons[f];
+
+    put(&m_face[f], sizeof(int));
+    put(&m_reason[f], sizeof(int));
+    put(&numPolygons, sizeof(int));
+
+    for (int poly = m_facePolygons[f]; poly < m_facePolygons[f + 1]; poly++) {
+      const int first       = m_polygonVertices[poly];
+      const int numVertices = m_polygonVertices[poly + 1] - first;
+
+      put(&numVertices, sizeof(int));
+      put(&m_vertices[first], numVertices * sizeof(RealVect));
+      put(&m_vertexEdges[first], numVertices * sizeof(int));
+    }
+  }
+}
+
+int
+CutCellFaceOverrides::linearIn(const void* a_buffer, const IntVect& a_cell)
+{
+  const char* p = static_cast<const char*>(a_buffer);
+
+  const auto get = [&p](void* a_data, const std::size_t a_bytes) {
+    std::memcpy(a_data, p, a_bytes);
+
+    p += a_bytes;
+  };
+
+  this->beginCell(a_cell);
+
+  int numFaces = 0;
+
+  get(&numFaces, sizeof(int));
+
+  std::vector<RealVect> vertices;
+  std::vector<int>      vertexEdges;
+
+  for (int f = 0; f < numFaces; f++) {
+    int face        = -1;
+    int reason      = -1;
+    int numPolygons = 0;
+
+    get(&face, sizeof(int));
+    get(&reason, sizeof(int));
+    get(&numPolygons, sizeof(int));
+
+    this->beginFace(face, reason);
+
+    for (int poly = 0; poly < numPolygons; poly++) {
+      int numVertices = 0;
+
+      get(&numVertices, sizeof(int));
+
+      vertices.resize(numVertices);
+      vertexEdges.resize(numVertices);
+
+      get(vertices.data(), numVertices * sizeof(RealVect));
+      get(vertexEdges.data(), numVertices * sizeof(int));
+
+      this->addPolygon(vertices.data(), vertexEdges.data(), numVertices);
+    }
+  }
+
+  return static_cast<int>(p - static_cast<const char*>(a_buffer));
 }
 
 bool

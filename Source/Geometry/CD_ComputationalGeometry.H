@@ -927,7 +927,7 @@ protected:
 
   /**
    * @brief Cut tiles of a level that intersect a box.
-   * @param[in] a_level Level, above the start level.
+   * @param[in] a_level Level, at or above the start level.
    * @param[in] a_box   Box on that level.
    * @return Indices into m_cutTiles[a_level] of the tiles that intersect it, each once and in increasing order.
    */

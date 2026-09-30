@@ -183,6 +183,42 @@ public:
   vertexEdge(const int a_vertex) const noexcept;
 
   /**
+   * @brief Bytes one cell's entries occupy in a linear buffer.
+   * @param[in] a_index Index among the cells.
+   * @return The size linearOut writes.
+   */
+  int
+  linearSize(const int a_index) const noexcept;
+
+  /**
+   * @brief Write one cell's entries into a linear buffer: its faces, each with its polygons, each with its vertices.
+   * The cell itself is not written; whoever reads the buffer knows which cell it is for.
+   * @param[out] a_buffer Buffer of at least linearSize(a_index) bytes.
+   * @param[in]  a_index  Index among the cells.
+   */
+  void
+  linearOut(void* a_buffer, const int a_index) const noexcept;
+
+  /**
+   * @brief Read one cell's entries from a buffer written by linearOut, and add them for a cell.
+   * @details As beginCell, cells are added in increasing order, each once.
+   * @param[in] a_buffer Buffer written by linearOut.
+   * @param[in] a_cell   The cell the entries are for.
+   * @return Bytes read.
+   */
+  int
+  linearIn(const void* a_buffer, const IntVect& a_cell);
+
+  /**
+   * @brief Whether one cell comes before another in the order the cells are kept in.
+   * @param[in] a_first  One cell.
+   * @param[in] a_second The other.
+   * @return True if a_first is kept first.
+   */
+  static bool
+  precedes(const IntVect& a_first, const IntVect& a_second) noexcept;
+
+  /**
    * @brief Whether two sets of entries are the same, bit for bit.
    * @param[in] a_other The other set.
    * @return True if nothing differs.
@@ -191,15 +227,6 @@ public:
   equals(const CutCellFaceOverrides& a_other) const noexcept;
 
 protected:
-  /**
-   * @brief Whether one cell comes before another in BoxIterator order.
-   * @param[in] a_first  One cell.
-   * @param[in] a_second The other.
-   * @return True if a_first is met first.
-   */
-  static bool
-  precedes(const IntVect& a_first, const IntVect& a_second) noexcept;
-
   /**
    * @brief The cells with entries, in increasing order.
    */
