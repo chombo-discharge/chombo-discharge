@@ -314,26 +314,6 @@ public:
                const int             a_side) noexcept;
 
   /**
-   * @brief Make the body the whole cell: every face a polygon, and no interface.
-   * @details What a cell whose corners are all fluid holds, written as polygons rather than taken as a degenerate body,
-   * so that a face of it can be restricted to the finer level or closed onto a filled cell and the interface closed
-   * over what changed.
-   */
-  void
-  defineWhole() noexcept;
-
-  /**
-   * @brief Write one face's polygons, as this body holds them, into a set of face overrides.
-   * @details Opens a face entry for the cell last begun and adds every polygon lying in that face. A face closed onto
-   * a covered cell is recorded with no polygon.
-   * @param[in]     a_face      Face index, 2 * dir + side.
-   * @param[in]     a_reason    CutCellFaceOverrides::s_finer or CutCellFaceOverrides::s_closed.
-   * @param[in,out] a_overrides The overrides, with the cell already begun.
-   */
-  void
-  recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const;
-
-  /**
    * @brief Replace one face's polygons with a face entry's, and drop the interface.
    * @details What restrictFace does, with the merged polygons read from the entry instead of walked from the children:
    * the face's polygons and the interface go, and the entry's polygons are appended in the order they are stored.
@@ -369,25 +349,6 @@ public:
   closeBoundary(const int a_face) noexcept;
 
   /**
-   * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
-   * face loses become interface.
-   * @details A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a
-   * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
-   * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
-   * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
-   * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
-   * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
-   * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
-   * gain the same vector. The moments are recomputed, through closeInterface.
-   * @param[in] a_dir               Direction of the face.
-   * @param[in] a_side              Side of the cell the face is on.
-   * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
-   * @return True if the body closed again and its volume stayed in range.
-   */
-  bool
-  snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept;
-
-  /**
    * @brief Split every polygon edge at the vertices of other polygons that lie on it.
    * @details Restricting a face rebuilds it at the finer level's resolution, so an edge the face shares
    * with a face that was left alone can be one segment on one side and several on the other, or carry a
@@ -400,6 +361,63 @@ public:
    */
   bool
   weldTJunctions() noexcept;
+
+#endif
+
+  /**
+   * @brief Make the body the whole cell: every face a polygon, and no interface.
+   * @details What a cell whose corners are all fluid holds, written as polygons rather than taken as a degenerate body,
+   * so that a face of it can be restricted to the finer level or closed onto a filled cell and the interface closed
+   * over what changed.
+   */
+  void
+  defineWhole() noexcept;
+
+  /**
+   * @brief Write one face's polygons, as this body holds them, into a set of face overrides.
+   * @details Opens a face entry for the cell last begun and adds every polygon lying in that face. A face closed onto
+   * a covered cell is recorded with no polygon.
+   * @param[in]     a_face      Face index, 2 * dir + side.
+   * @param[in]     a_reason    CutCellFaceOverrides::s_finer or CutCellFaceOverrides::s_closed.
+   * @param[in,out] a_overrides The overrides, with the cell already begun.
+   */
+  void
+  recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const;
+
+  /**
+   * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
+   * face loses become interface.
+   * @details A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a
+   * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
+   * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
+   * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
+   * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
+   * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
+   * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
+   * gain the same vector. The moments are recomputed. In two dimensions only closing is done: the face's stretch of the
+   * polygon becomes interface lying in the face.
+   * @param[in] a_dir               Direction of the face.
+   * @param[in] a_side              Side of the cell the face is on.
+   * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
+   * @return True if the body closed again and its volume stayed in range.
+   */
+  bool
+  snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept;
+
+#if CH_SPACEDIM == 2
+  /**
+   * @brief Close one half of a face, and let what that half held become interface.
+   * @details Two dimensions only, where a face is a segment and a face on a refinement boundary is covered by two
+   * finer faces, one each side of its midpoint. Where the finer cell across one of them was filled, that half of the
+   * face opens onto nothing: the polygon's stretch of the face is split at the midpoint and the part in that half
+   * becomes interface lying in the face, as snapFace does for a whole face. The moments are recomputed.
+   * @param[in] a_dir  Direction of the face.
+   * @param[in] a_side Side of the cell the face is on.
+   * @param[in] a_half Which half: 0 below the face's midpoint along the other direction, 1 above it.
+   * @return True if the polygon had room for the vertex at the midpoint and the body still closes.
+   */
+  bool
+  closeHalfFace(const int a_dir, const int a_side, const int a_half) noexcept;
 
 #endif
 

@@ -414,8 +414,7 @@ public:
    * change nothing.
    *
    * On every face between two valid cells owned by different levels, the two sides must read the same aperture to
-   * 1e-10: the claim that a subdivided stitched ancestor meets the finer cells beside it. Two dimensions have no
-   * stitching yet, so there the disagreement is reported but does not stop the run.
+   * 1e-10: the claim that a subdivided stitched ancestor meets the finer cells beside it.
    *
    * All of it -- the copies and every body rebuilt from them -- runs with the shop's implicit function replaced by one
    * that stops the run if it is evaluated. Collective. Switched by PolyhedralGeometryShop.test_copy.
@@ -735,7 +734,6 @@ protected:
   void
   sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const;
 
-#if CH_SPACEDIM == 3
   /**
    * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.
    * @details The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners
@@ -916,7 +914,6 @@ protected:
    */
   void
   stitchLevel(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph* a_fine) const;
-#endif
 
   /**
    * @brief Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.

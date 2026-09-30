@@ -1233,6 +1233,145 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
 
 #endif
 
+#if CH_SPACEDIM == 2
+void
+CutCellBody::defineWhole() noexcept
+{
+  *this = CutCellBody();
+
+  // the four corners counter-clockwise, and the face each segment leaving one of them lies in
+  constexpr int ringCorner[4] = {0, 1, 3, 2};
+  constexpr int ringFace[4]   = {2, 1, 3, 0};
+
+  Polygon& polygon = m_polygon[0];
+
+  polygon.m_numVertices = 4;
+  polygon.m_face        = -1;
+
+  for (int i = 0; i < 4; i++) {
+    polygon.m_vertex[i]      = detail::cornerPosition(ringCorner[i]);
+    polygon.m_vertexEdge[i]  = -1;
+    polygon.m_segmentFace[i] = ringFace[i];
+  }
+
+  m_numPolygons = 1;
+
+  this->accumulateMoments();
+}
+
+void
+CutCellBody::recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const
+{
+  CH_assert(a_face >= 0 && a_face < s_numFaces);
+
+  // a face in two dimensions is changed in place, and what changed it is all there is to record
+  a_overrides.beginFace(a_face, a_reason);
+}
+
+bool
+CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(m_numPolygons == 1);
+
+  // Only closing: a face onto a cell that holds no fluid keeps its stretch of the polygon, which becomes interface
+  // lying in the face.
+  if (a_neighbourIsFluid) {
+    return false;
+  }
+
+  const int face = 2 * a_dir + a_side;
+
+  Polygon& polygon = m_polygon[0];
+
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] == face) {
+      polygon.m_segmentFace[i] = -1;
+    }
+  }
+
+  this->accumulateMoments();
+
+  const bool closed  = this->closureResidual() <= 1.0E-9;
+  const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+  return closed && inRange;
+}
+
+bool
+CutCellBody::closeHalfFace(const int a_dir, const int a_side, const int a_half) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(a_half == 0 || a_half == 1);
+  CH_assert(m_numPolygons == 1);
+
+  const int face    = 2 * a_dir + a_side;
+  const int tangent = 1 - a_dir;
+
+  Polygon& polygon = m_polygon[0];
+
+  // a stretch of the face that runs past the midpoint is split there, so that each half is its own segments
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] != face) {
+      continue;
+    }
+
+    const RealVect a = polygon.m_vertex[i];
+    const RealVect b = polygon.m_vertex[(i + 1) % polygon.m_numVertices];
+
+    if (!((a[tangent] < 0.0 && b[tangent] > 0.0) || (a[tangent] > 0.0 && b[tangent] < 0.0))) {
+      continue;
+    }
+
+    if (polygon.m_numVertices >= s_maxVertices) {
+      return false;
+    }
+
+    for (int k = polygon.m_numVertices; k > i + 1; k--) {
+      polygon.m_vertex[k]      = polygon.m_vertex[k - 1];
+      polygon.m_vertexEdge[k]  = polygon.m_vertexEdge[k - 1];
+      polygon.m_segmentFace[k] = polygon.m_segmentFace[k - 1];
+    }
+
+    RealVect midpoint = a;
+
+    midpoint[tangent] = 0.0;
+
+    polygon.m_vertex[i + 1]      = midpoint;
+    polygon.m_vertexEdge[i + 1]  = -1;
+    polygon.m_segmentFace[i + 1] = face;
+
+    polygon.m_numVertices++;
+
+    i++;
+  }
+
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] != face) {
+      continue;
+    }
+
+    const RealVect& a = polygon.m_vertex[i];
+    const RealVect& b = polygon.m_vertex[(i + 1) % polygon.m_numVertices];
+
+    const Real middle = 0.5 * (a[tangent] + b[tangent]);
+
+    if ((a_half == 0 && middle < 0.0) || (a_half == 1 && middle > 0.0)) {
+      polygon.m_segmentFace[i] = -1;
+    }
+  }
+
+  this->accumulateMoments();
+
+  const bool closed  = this->closureResidual() <= 1.0E-9;
+  const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+  return closed && inRange;
+}
+#endif
+
 int
 CutCellBody::numPolygons() const noexcept
 {

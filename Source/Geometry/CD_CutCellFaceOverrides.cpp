@@ -56,7 +56,7 @@ CutCellFaceOverrides::beginFace(const int a_face, const int a_reason)
 {
   CH_assert(!m_cells.empty());
   CH_assert(a_face >= 0 && a_face < 2 * SpaceDim);
-  CH_assert(a_reason == s_finer || a_reason == s_closed);
+  CH_assert(a_reason >= s_finer && a_reason <= s_closedHighHalf);
 
   m_face.push_back(a_face);
   m_reason.push_back(a_reason);

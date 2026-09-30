@@ -35,6 +35,10 @@ namespace PolyhedralEB {
  * body of every cut cell is a function of its own surface and its own entries here, and needs nothing from its
  * neighbours or from the finer level.
  *
+ * In two dimensions a face is a segment, and the finer level's description of it is its crossing, which the surface
+ * already carries. What is left to store is which half of a face on a refinement boundary is closed, where the finer
+ * cell across it was filled, and which faces are closed onto a filled cell; no polygon is stored.
+ *
  * Stored compressed, in the order the faces are applied: the cells in increasing order, each with its faces, each
  * face with its polygons, each polygon with its vertices. A cell's restricted faces come before its closed ones,
  * and each kind in increasing face order, which is the order a body applies them in. Cells are ordered as a
@@ -52,6 +56,17 @@ public:
    * @brief Why a face is overridden: closed onto a covered cell.
    */
   static constexpr int s_closed = 1;
+
+  /**
+   * @brief Why a face is overridden, in two dimensions: the half of it below its midpoint is closed, the finer cell
+   * across that half having been filled.
+   */
+  static constexpr int s_closedLowHalf = 2;
+
+  /**
+   * @brief Why a face is overridden, in two dimensions: the half of it above its midpoint is closed.
+   */
+  static constexpr int s_closedHighHalf = 3;
 
   /**
    * @brief Constructor. Holds no cell.
@@ -80,7 +95,7 @@ public:
   /**
    * @brief Open a face of the cell last begun.
    * @param[in] a_face   Face index, 2 * dir + side.
-   * @param[in] a_reason s_finer or s_closed.
+   * @param[in] a_reason s_finer, s_closed, s_closedLowHalf or s_closedHighHalf.
    */
   void
   beginFace(const int a_face, const int a_reason);
@@ -143,7 +158,7 @@ public:
   /**
    * @brief Why a face entry overrides its face.
    * @param[in] a_face Face entry.
-   * @return s_finer or s_closed.
+   * @return s_finer, s_closed, s_closedLowHalf or s_closedHighHalf.
    */
   int
   reason(const int a_face) const noexcept;

@@ -394,7 +394,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 #endif
 }
 
-#if CH_SPACEDIM == 3
 bool
 PolyhedralGeometryShop::isFilled(const BaseFab<signed char>&                 a_states,
                                  const BaseFab<signed char>&                 a_refined,
@@ -562,7 +561,9 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
   }
 
   // A face shared with a cell the finer level carries is described at the finer level's resolution.
+#if CH_SPACEDIM == 3
   bool restricted = false;
+#endif
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (int side = 0; side < 2; side++) {
@@ -664,6 +665,7 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
         numClosed += closedQuadrant[q] ? 1 : 0;
       }
 
+#if CH_SPACEDIM == 3
       if (!a_body.restrictFace(faceChildren, closedQuadrant, dir, side)) {
         pout() << "PolyhedralGeometryShop::stitchBody - cell " << a_cell << " could not take face " << dir << "/"
                << side << " from the finer level" << endl;
@@ -676,9 +678,33 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
       }
 
       restricted = true;
+#else
+      // A face in two dimensions is a segment, and the crossings taken from the finer level above already put its
+      // ends where the finer faces put theirs. What is left is a half across which the finer cell was filled.
+      for (int q = 0; q < 2; q++) {
+        if (!closedQuadrant[q]) {
+          continue;
+        }
+
+        if (!a_body.closeHalfFace(dir, side, q)) {
+          pout() << "PolyhedralGeometryShop::stitchBody - cell " << a_cell << " could not close half " << q
+                 << " of face " << dir << "/" << side << " onto a filled finer cell" << endl;
+
+          MayDay::Error("PolyhedralGeometryShop::stitchBody - half a face could not be closed");
+        }
+
+        if (a_overrides != nullptr) {
+          a_body.recordFace(2 * dir + side,
+                            (q == 0) ? PolyhedralEB::CutCellFaceOverrides::s_closedLowHalf
+                                     : PolyhedralEB::CutCellFaceOverrides::s_closedHighHalf,
+                            *a_overrides);
+        }
+      }
+#endif
     }
   }
 
+#if CH_SPACEDIM == 3
   if (restricted && !a_body.closeInterface()) {
     pout() << "PolyhedralGeometryShop::stitchBody - cell " << a_cell << " did not close after its faces were restricted"
            << endl;
@@ -717,6 +743,7 @@ PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
 
     MayDay::Error("PolyhedralGeometryShop::stitchBody - a restricted cell's interface did not close");
   }
+#endif
 
   // A face onto a cell the graph filled leads nowhere. It is closed rather than left reading an aperture the
   // neighbour no longer agrees with, and what it gives up becomes interface in the plane of that face, so the
@@ -839,7 +866,9 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
   a_overrides.faces(entry, faceBegin, faceEnd);
 
   // The faces go on in the order they were recorded: every restricted face, the interface closed over them, then
-  // every closed face. That is the order stitchBody applies them in, so the body comes out bit for bit the same.
+  // every closed face. That is the order stitchBody applies them in, so the body comes out bit for bit the same. In
+  // two dimensions a restricted face is a closed half, and nothing needs closing over it.
+#if CH_SPACEDIM == 3
   bool restricted = false;
 
   for (int f = faceBegin; f < faceEnd; f++) {
@@ -859,6 +888,22 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 
     MayDay::Error("PolyhedralGeometryShop::defineBody - a cell did not close over its stored faces");
   }
+#else
+  for (int f = faceBegin; f < faceEnd; f++) {
+    const int reason = a_overrides.reason(f);
+
+    if (reason != CutCellFaceOverrides::s_closedLowHalf && reason != CutCellFaceOverrides::s_closedHighHalf) {
+      continue;
+    }
+
+    const int face = a_overrides.face(f);
+    const int half = (reason == CutCellFaceOverrides::s_closedLowHalf) ? 0 : 1;
+
+    if (!a_body.closeHalfFace(face / 2, face % 2, half)) {
+      MayDay::Error("PolyhedralGeometryShop::defineBody - a stored half face could not be closed");
+    }
+  }
+#endif
 
   for (int f = faceBegin; f < faceEnd; f++) {
     if (a_overrides.reason(f) != CutCellFaceOverrides::s_closed) {
@@ -1208,16 +1253,21 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
               continue;
             }
 
-            const int t0 = (dir + 1) % SpaceDim;
-            const int t1 = (dir + 2) % SpaceDim;
+            // the face's directions: one in two dimensions, where the face is a segment, two in three
+            const int t0   = (dir + 1) % SpaceDim;
+            const int t1   = (SpaceDim == 3) ? (dir + 2) % SpaceDim : -1;
+            const int bMax = (SpaceDim == 3) ? 2 : 0;
 
-            // The node at the middle of the face belongs to this face alone. The nodes at the middles of its edges are
-            // shared with this level's cells along those edges, and one that disagrees with both ends of its edge is
-            // an edge the finer level crosses twice, which no cell of this level can take on by itself; it is counted
-            // and left.
+            // The node at the middle of a face in three dimensions belongs to that face alone. The nodes at the middles
+            // of its edges are shared with this level's cells along those edges, and one that disagrees with both ends
+            // of its edge is an edge the finer level crosses twice, which no cell of this level can take on by itself;
+            // it is counted and left. In two dimensions the face is an edge, and its middle node is that kind of node.
             for (int a = 0; a <= 2; a++) {
-              for (int b = 0; b <= 2; b++) {
-                if (a != 1 && b != 1) {
+              for (int b = 0; b <= bMax; b++) {
+                const bool middleOfFace = (SpaceDim == 3) && a == 1 && b == 1;
+                const bool middleOfEdge = (SpaceDim == 3) ? ((a == 1) != (b == 1)) : (a == 1);
+
+                if (!middleOfFace && !middleOfEdge) {
                   continue;
                 }
 
@@ -1225,7 +1275,10 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
 
                 node[dir] += 2 * side;
                 node[t0] += a;
-                node[t1] += b;
+
+                if (t1 >= 0) {
+                  node[t1] += b;
+                }
 
                 const Real value = fineNodes(node, 0);
 
@@ -1238,7 +1291,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
                   continue;
                 }
 
-                if (a == 1 && b == 1) {
+                if (middleOfFace) {
                   promoted = true;
                 }
                 else if (grids[dit()].contains(iv)) {
@@ -1252,7 +1305,10 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
 
               across[dir] += side;
               across[t0] += q & 1;
-              across[t1] += (q >> 1) & 1;
+
+              if (t1 >= 0) {
+                across[t1] += (q >> 1) & 1;
+              }
 
               promoted = fineFilled(across, 0) != 0;
             }
@@ -1392,7 +1448,6 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
     MayDay::Error("PolyhedralGeometryShop::stitchLevel - a stitched body differs from its reference");
   }
 }
-#endif
 
 int
 PolyhedralGeometryShop::destinationLevel(const ProblemDomain& a_domain) const
@@ -2543,13 +2598,7 @@ PolyhedralGeometryShop::sourceBody(PolyhedralEB::CutCellBody&  a_body,
 
   const IVSFAB<PolyhedralEB::CutCellSurface>& surfaces = a_graph.getSurfaces(a_level, a_sourceLevel)[a_dit];
 
-#if CH_SPACEDIM == 3
   PolyhedralGeometryShop::defineBody(a_body, surfaces, a_graph.getFaceOverrides(a_level, a_sourceLevel)[a_dit], a_cell);
-#else
-  if (!a_body.define(surfaces(a_cell, 0))) {
-    MayDay::Error("PolyhedralGeometryShop::sourceBody - a cut cell's body did not close");
-  }
-#endif
 
   return true;
 }
@@ -2674,11 +2723,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 
         CutCellBody body;
 
-#if CH_SPACEDIM == 3
         PolyhedralGeometryShop::defineBody(body, surfaces, graph.getFaceOverrides()[dit()], bit());
-#else
-        body.define(surfaces(bit(), 0));
-#endif
 
         sourceLevels.push_back(lvl);
         sourceCells.push_back(bit());
@@ -3037,9 +3082,7 @@ PolyhedralGeometryShop::testCopyBodies() const
     numSeams    = ParallelOps::sum(numSeams);
     numCutSeams = ParallelOps::sum(numCutSeams);
 
-    // Two dimensions have no stitching yet: a coarse cell beside the finer level keeps its own crossings there, and the
-    // two sides of a seam are not expected to agree. The disagreement is reported, and stops the run in three.
-    if (maxSeam > 1.0E-10 && SpaceDim == 3) {
+    if (maxSeam > 1.0E-10) {
       if (procID() == 0) {
         pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": the two sides of a face between "
                << "levels differ by " << maxSeam << endl;
@@ -3132,7 +3175,6 @@ PolyhedralGeometryShop::stitchGraphs(const Vector<RefCountedPtr<PolyhedralEBGrap
 {
   CH_TIME("PolyhedralGeometryShop::stitchGraphs");
 
-#if CH_SPACEDIM == 3
   // Coarsest first, so that each level reads the surfaces of the level above as that level built them: the cells a
   // coarser level reads lie at the edge of the finer tiles, which no level above them reaches.
   for (int lvl = 0; lvl < a_graphs.size(); lvl++) {
@@ -3144,7 +3186,6 @@ PolyhedralGeometryShop::stitchGraphs(const Vector<RefCountedPtr<PolyhedralEBGrap
 
     this->stitchLevel(*a_graphs[lvl], haveFiner ? &(*a_graphs[lvl + 1]) : nullptr);
   }
-#endif
 }
 
 void
@@ -3573,16 +3614,8 @@ PolyhedralGeometryShop::reportUnresolvedRefinement() const
 
         CutCellBody body;
 
-#if CH_SPACEDIM == 3
-        // The body the consumers build: on a refinement boundary its faces are the finer level's, and stitching
-        // lengthens its interface loop.
+        // The body the consumers build: on a refinement boundary its faces are the finer level's.
         PolyhedralGeometryShop::defineBody(body, stored, overrides[dit()], iv);
-#else
-        // Two dimensions have no stitched body: a face there is a single segment and there is nothing to restrict.
-        if (!body.define(stored(iv, 0))) {
-          continue;
-        }
-#endif
 
         if (!body.hasMultiValuedChildren(m_maxRefinement)) {
           continue;
