@@ -2198,7 +2198,8 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
       const IVSFAB<CutCellSurface>& surfaces  = graph.getSurfaces()[din];
       const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[din];
 
-      h.m_overrideBytes = 0;
+      // counted wide, so that a piece too large for the header's int stops the run instead of wrapping
+      long long pieceBytes = 0;
 
       for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
         if (!with.contains(bit()) || surfaces(bit(), 0).m_role != CutCellSurface::s_overridden) {
@@ -2211,8 +2212,14 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
           MayDay::Error("PolyhedralGeometryShop::copyGraphs - an overridden cell has no face overrides");
         }
 
-        h.m_overrideBytes += overrides.linearSize(entry);
+        pieceBytes += overrides.linearSize(entry);
       }
+
+      if (pieceBytes > std::numeric_limits<int>::max()) {
+        MayDay::Abort("PolyhedralGeometryShop::copyGraphs - a piece's face overrides exceed the header's int limit");
+      }
+
+      h.m_overrideBytes = static_cast<int>(pieceBytes);
 
       bytes += sizeof(GraphCopyHeader) + h.m_overrideBytes;
     }

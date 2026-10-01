@@ -13,6 +13,9 @@
 #ifndef CD_GRAPHCOPYHEADER_H
 #define CD_GRAPHCOPYHEADER_H
 
+// Std includes
+#include <type_traits>
+
 // Chombo includes
 #include <Box.H>
 
@@ -80,6 +83,9 @@ struct GraphCopyHeader
     return Box(IntVect(D_DECL(m_lo[0], m_lo[1], m_lo[2])), IntVect(D_DECL(m_hi[0], m_hi[1], m_hi[2])));
   }
 };
+
+// The header travels between ranks as raw bytes.
+static_assert(std::is_trivially_copyable<GraphCopyHeader>::value, "GraphCopyHeader must be trivially copyable");
 
 } // namespace PolyhedralEB
 
