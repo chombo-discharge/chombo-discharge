@@ -336,8 +336,8 @@ public:
 
   /**
    * @brief Copy the graphs onto a destination hierarchy.
-   * @details Plans the copy, allocates every destination box's states over the cells its pieces span, and sends the
-   * pieces in two passes. The first carries every cell's state and the surface of every cell that holds one, its role
+   * @details Plans the copy and sends the pieces in two passes, each destination box keeping exactly the pieces it
+   * receives. The first carries every cell's state and the surface of every cell that holds one, its role
    * included; the second carries the face overrides of every cell whose surface is overridden, which the receiver
    * knows from the first. Nothing on either side evaluates the implicit function. A piece that arrives unplanned, a
    * cell whose role is invalid, and an overridden cell without overrides all stop the run. Collective.

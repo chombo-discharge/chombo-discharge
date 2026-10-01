@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <numeric>
 #include <sstream>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -841,80 +842,11 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 {
   CH_TIME("PolyhedralGeometryShop::defineBody");
 
-  using PolyhedralEB::CutCellFaceOverrides;
-
-  const PolyhedralEB::CutCellSurface& surface = a_surfaces(a_cell, 0);
-
-  if (PolyhedralEB::CutCellBody::classify(surface) == PolyhedralEB::CutCellBody::Kind::Regular) {
-    a_body.defineWhole();
-  }
-  else if (!a_body.define(surface)) {
-    pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell << " did not close" << endl;
+  if (!a_body.define(a_surfaces(a_cell, 0), a_overrides, a_cell)) {
+    pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell
+           << " did not close over its surface and stored faces" << endl;
 
     MayDay::Error("PolyhedralGeometryShop::defineBody - a cut cell's body did not close");
-  }
-
-  const int entry = a_overrides.find(a_cell);
-
-  if (entry < 0) {
-    return;
-  }
-
-  int faceBegin = 0;
-  int faceEnd   = 0;
-
-  a_overrides.faces(entry, faceBegin, faceEnd);
-
-  // The faces go on in the order they were recorded: every restricted face, the interface closed over them, then
-  // every closed face. That is the order stitchBody applies them in, so the body comes out bit for bit the same. In
-  // two dimensions a restricted face is a closed half, and nothing needs closing over it.
-#if CH_SPACEDIM == 3
-  bool restricted = false;
-
-  for (int f = faceBegin; f < faceEnd; f++) {
-    if (a_overrides.reason(f) != CutCellFaceOverrides::s_finer) {
-      continue;
-    }
-
-    if (!a_body.replaceFace(a_overrides, f)) {
-      MayDay::Error("PolyhedralGeometryShop::defineBody - a stored face does not fit the body");
-    }
-
-    restricted = true;
-  }
-
-  if (restricted && !a_body.closeInterface()) {
-    pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell << " did not close over its stored faces" << endl;
-
-    MayDay::Error("PolyhedralGeometryShop::defineBody - a cell did not close over its stored faces");
-  }
-#else
-  for (int f = faceBegin; f < faceEnd; f++) {
-    const int reason = a_overrides.reason(f);
-
-    if (reason != CutCellFaceOverrides::s_closedLowHalf && reason != CutCellFaceOverrides::s_closedHighHalf) {
-      continue;
-    }
-
-    const int face = a_overrides.face(f);
-    const int half = (reason == CutCellFaceOverrides::s_closedLowHalf) ? 0 : 1;
-
-    if (!a_body.closeHalfFace(face / 2, face % 2, half)) {
-      MayDay::Error("PolyhedralGeometryShop::defineBody - a stored half face could not be closed");
-    }
-  }
-#endif
-
-  for (int f = faceBegin; f < faceEnd; f++) {
-    if (a_overrides.reason(f) != CutCellFaceOverrides::s_closed) {
-      continue;
-    }
-
-    const int face = a_overrides.face(f);
-
-    if (!a_body.snapFace(face / 2, face % 2, false)) {
-      MayDay::Error("PolyhedralGeometryShop::defineBody - a stored closed face could not be closed");
-    }
   }
 }
 
@@ -2117,38 +2049,6 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
     }
   }
 
-  // Every destination box's states, per geometry level, over the cells its planned pieces span.
-  std::vector<std::vector<std::vector<Box>>> span(numDest, std::vector<std::vector<Box>>(numGeo));
-
-  for (int i = 0; i < numDest; i++) {
-    for (int lvl = 0; lvl < numGeo; lvl++) {
-      span[i][lvl].assign(a_grids[i].size(), Box());
-    }
-  }
-
-  for (int r = 0; r < numRanks; r++) {
-    for (const GraphCopyHeader& h : receives[r]) {
-      Box& b = span[h.m_destLevel][h.m_sourceLevel][h.m_destBox];
-
-      b = b.isEmpty() ? h.region() : minBox(b, h.region());
-    }
-  }
-
-  for (int i = 0; i < numDest; i++) {
-    for (int lvl = 0; lvl < numGeo; lvl++) {
-      LayoutData<BaseFab<signed char>>& states = a_dest.getCellStates(i, lvl);
-
-      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
-        const Box& b = span[i][lvl][a_grids[i].index(dit())];
-
-        if (!b.isEmpty()) {
-          states[dit()].define(b, 1);
-          states[dit()].setVal(s_absent);
-        }
-      }
-    }
-  }
-
   const int surfaceSize = CutCellSurface().linearSize();
 
   // Pass 1: states and surfaces. Per piece, its header, then a state and a has-surface flag per cell in the order a
@@ -2214,16 +2114,8 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
 
   sendBytes.assign(numRanks, std::vector<char>());
 
-  // The surfaces as they arrive, per destination box and geometry level, until the box's surface set is known.
-  std::vector<std::vector<std::vector<std::vector<std::pair<IntVect, CutCellSurface>>>>> arrived(numDest);
-
-  for (int i = 0; i < numDest; i++) {
-    arrived[i].resize(numGeo);
-
-    for (int lvl = 0; lvl < numGeo; lvl++) {
-      arrived[i][lvl].resize(a_grids[i].size());
-    }
-  }
+  // Every piece goes into its destination box as it arrives: its states as one block, its surfaces one by one.
+  std::vector<signed char> pieceStates;
 
   for (int r = 0; r < numRanks; r++) {
     const char* p   = recvBytes.data() + recvOffset[r];
@@ -2242,29 +2134,28 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
         MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece arrived for a box this rank does not hold");
       }
 
-      const DataIndex din = destIndex[h.m_destLevel][h.m_destBox];
+      const DataIndex din    = destIndex[h.m_destLevel][h.m_destBox];
+      const Box       region = h.region();
 
-      BaseFab<signed char>& states = a_dest.getCellStates(h.m_destLevel, h.m_sourceLevel)[din];
+      pieceStates.resize(region.numPts());
 
       std::vector<IntVect> withSurface;
 
-      for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
-        if (!states.box().contains(bit())) {
-          MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece arrived outside the cells it was planned for");
-        }
+      long n = 0;
 
-        states(bit(), 0) = *p++;
+      for (BoxIterator bit(region); bit.ok(); ++bit) {
+        pieceStates[n++] = *p++;
 
         if (*p++ != 0) {
           withSurface.push_back(bit());
         }
       }
 
+      a_dest.addPiece(h.m_destLevel, din, h.m_sourceLevel, region, pieceStates.data());
+
       if (static_cast<int>(withSurface.size()) != h.m_numSurfaces) {
         MayDay::Error("PolyhedralGeometryShop::copyGraphs - a piece's surfaces do not match its cells");
       }
-
-      auto& list = arrived[h.m_destLevel][h.m_sourceLevel][h.m_destBox];
 
       for (const IntVect& iv : withSurface) {
         CutCellSurface surface;
@@ -2277,7 +2168,7 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
           MayDay::Error("PolyhedralGeometryShop::copyGraphs - a cell arrived with an invalid role");
         }
 
-        list.push_back(std::make_pair(iv, surface));
+        a_dest.addSurface(h.m_destLevel, din, h.m_sourceLevel, iv, surface);
       }
 
       numPieces++;
@@ -2293,36 +2184,7 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
 
   recvBytes.clear();
 
-  // The surface sets, and the surfaces in them.
-  for (int i = 0; i < numDest; i++) {
-    for (int lvl = 0; lvl < numGeo; lvl++) {
-      LayoutData<IVSFAB<CutCellSurface>>& surfaces = a_dest.getSurfaces(i, lvl);
-      LayoutData<BaseFab<signed char>>&   states   = a_dest.getCellStates(i, lvl);
-
-      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
-        auto& list = arrived[i][lvl][a_grids[i].index(dit())];
-
-        if (states[dit()].box().isEmpty()) {
-          continue;
-        }
-
-        IntVectSet cells(DenseIntVectSet(states[dit()].box(), false));
-
-        for (const auto& entry : list) {
-          cells |= entry.first;
-        }
-
-        surfaces[dit()].define(cells, 1);
-
-        for (const auto& entry : list) {
-          surfaces[dit()](entry.first, 0) = entry.second;
-        }
-
-        list.clear();
-        list.shrink_to_fit();
-      }
-    }
-  }
+  a_dest.finish();
 
   // Pass 2: face overrides. Per piece, its header, then the overrides of every overridden cell of it in the order a
   // BoxIterator meets them; the receiver knows which cells those are from the surfaces it now holds.
@@ -2412,16 +2274,16 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
 
       p += sizeof(GraphCopyHeader);
 
-      const DataIndex               din      = destIndex[h.m_destLevel][h.m_destBox];
-      const IVSFAB<CutCellSurface>& surfaces = a_dest.getSurfaces(h.m_destLevel, h.m_sourceLevel)[din];
-      const IntVectSet&             with     = surfaces.getIVS();
+      const DataIndex din = destIndex[h.m_destLevel][h.m_destBox];
 
       const char* start = p;
 
       CutCellFaceOverrides reader;
 
       for (BoxIterator bit(h.region()); bit.ok(); ++bit) {
-        if (!with.contains(bit()) || surfaces(bit(), 0).m_role != CutCellSurface::s_overridden) {
+        const CutCellSurface* surface = a_dest.getSourceSurface(h.m_destLevel, din, h.m_sourceLevel, bit());
+
+        if (surface == nullptr || surface->m_role != CutCellSurface::s_overridden) {
           continue;
         }
 
@@ -2441,10 +2303,10 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
 
   for (int i = 0; i < numDest; i++) {
     for (int lvl = 0; lvl < numGeo; lvl++) {
-      LayoutData<CutCellFaceOverrides>& overrides = a_dest.getFaceOverrides(i, lvl);
-
       for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
         auto& list = slices[i][lvl][a_grids[i].index(dit())];
+
+        CutCellFaceOverrides& overrides = a_dest.getFaceOverrides(i, dit(), lvl);
 
         std::sort(
           list.begin(),
@@ -2453,10 +2315,10 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
             return CutCellFaceOverrides::precedes(a_first.first, a_second.first);
           });
 
-        overrides[dit()].clear();
+        overrides.clear();
 
         for (const auto& entry : list) {
-          overrides[dit()].linearIn(entry.second, entry.first);
+          overrides.linearIn(entry.second, entry.first);
         }
       }
     }
@@ -2494,10 +2356,6 @@ PolyhedralGeometryShop::testCopyRoundTrip() const
 
     this->copyGraphs(dest, {grids}, {graph.getDomain()}, ghost);
 
-    const LayoutData<BaseFab<signed char>>&   destStates    = dest.getCellStates(0, lvl);
-    const LayoutData<IVSFAB<CutCellSurface>>& destSurfaces  = dest.getSurfaces(0, lvl);
-    const LayoutData<CutCellFaceOverrides>&   destOverrides = dest.getFaceOverrides(0, lvl);
-
     for (DataIterator dit(grids); dit.ok(); ++dit) {
       const Box box = grids[dit()];
 
@@ -2507,9 +2365,7 @@ PolyhedralGeometryShop::testCopyRoundTrip() const
       const IVSFAB<CutCellSurface>& surfaces  = graph.getSurfaces()[dit()];
       const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[dit()];
 
-      const BaseFab<signed char>&   copiedStates    = destStates[dit()];
-      const IVSFAB<CutCellSurface>& copiedSurfaces  = destSurfaces[dit()];
-      const CutCellFaceOverrides&   copiedOverrides = destOverrides[dit()];
+      const CutCellFaceOverrides& copiedOverrides = dest.getFaceOverrides(0, dit(), lvl);
 
       std::vector<char> mine;
       std::vector<char> theirs;
@@ -2524,15 +2380,16 @@ PolyhedralGeometryShop::testCopyRoundTrip() const
 
         numCompared++;
 
-        bool same = copiedStates.box().contains(iv) && copiedStates(iv, 0) == states(iv, 0);
+        bool same = dest.getSourceState(0, dit(), lvl, iv) == states(iv, 0);
 
-        const bool hasSurface = with.contains(iv);
+        const bool            hasSurface = with.contains(iv);
+        const CutCellSurface* copied     = dest.getSourceSurface(0, dit(), lvl, iv);
 
-        same = same && (copiedSurfaces.getIVS().contains(iv) == hasSurface);
+        same = same && ((copied != nullptr) == hasSurface);
 
         if (same && hasSurface) {
           const CutCellSurface& a = surfaces(iv, 0);
-          const CutCellSurface& b = copiedSurfaces(iv, 0);
+          const CutCellSurface& b = *copied;
 
           mine.resize(a.linearSize());
           theirs.resize(b.linearSize());
@@ -2590,15 +2447,15 @@ PolyhedralGeometryShop::sourceBody(PolyhedralEB::CutCellBody&  a_body,
                                    const int                   a_sourceLevel,
                                    const IntVect&              a_cell)
 {
-  const BaseFab<signed char>& states = a_graph.getCellStates(a_level, a_sourceLevel)[a_dit];
-
-  if (!states.box().contains(a_cell) || states(a_cell, 0) != PolyhedralEBGraph::s_cut) {
+  if (a_graph.getSourceState(a_level, a_dit, a_sourceLevel, a_cell) != PolyhedralEBGraph::s_cut) {
     return false;
   }
 
-  const IVSFAB<PolyhedralEB::CutCellSurface>& surfaces = a_graph.getSurfaces(a_level, a_sourceLevel)[a_dit];
+  const PolyhedralEB::CutCellSurface* surface = a_graph.getSourceSurface(a_level, a_dit, a_sourceLevel, a_cell);
 
-  PolyhedralGeometryShop::defineBody(a_body, surfaces, a_graph.getFaceOverrides(a_level, a_sourceLevel)[a_dit], a_cell);
+  if (surface == nullptr || !a_body.define(*surface, a_graph.getFaceOverrides(a_level, a_dit, a_sourceLevel), a_cell)) {
+    MayDay::Error("PolyhedralGeometryShop::sourceBody - a cut cell's body could not be built");
+  }
 
   return true;
 }
@@ -2612,64 +2469,46 @@ PolyhedralGeometryShop::destinationBodies(std::vector<PolyhedralEB::CutCellBody>
                                           const IntVect&                          a_cell)
 {
   using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellDescription;
 
   a_bodies.clear();
 
   const int geometryLevel = a_graph.getGeometryLevel(a_level);
 
+  // what a consumer is handed for the cell, built as a consumer builds it
+  std::vector<CutCellDescription> cells;
+
+  a_graph.getCutCells(cells, a_level, a_dit, a_cell);
+
   CutCellBody body;
+  CutCellBody children[1 << SpaceDim];
 
-  for (int lvl = 0; lvl < a_graph.getNumSourceLevels(); lvl++) {
-    if (a_graph.getCellStates(a_level, lvl)[a_dit].box().isEmpty()) {
-      continue;
+  for (const CutCellDescription& cell : cells) {
+    if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
+      MayDay::Error("PolyhedralGeometryShop::destinationBodies - a cut cell's body could not be built");
     }
 
-    if (lvl == geometryLevel) {
-      if (PolyhedralGeometryShop::sourceBody(body, a_graph, a_level, a_dit, lvl, a_cell)) {
-        a_bodies.push_back(body);
+    // a coarser cell is cut down a level at a time, keeping the child on the way to this cell
+    IntVect parent = cell.m_cell;
+
+    for (int k = cell.m_level + 1; k <= geometryLevel; k++) {
+      const IntVect child = coarsen(a_cell, 1 << (geometryLevel - k));
+
+      int which = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        which |= (child[d] - 2 * parent[d]) << d;
       }
+
+      if (!body.subdivide(children)) {
+        a_numSplit++;
+      }
+
+      body   = children[which];
+      parent = child;
     }
-    else if (lvl > geometryLevel) {
-      const Box children = refine(Box(a_cell, a_cell), 1 << (lvl - geometryLevel)) &
-                           a_graph.getCellStates(a_level, lvl)[a_dit].box();
 
-      for (BoxIterator bit(children); bit.ok(); ++bit) {
-        if (PolyhedralGeometryShop::sourceBody(body, a_graph, a_level, a_dit, lvl, bit())) {
-          a_bodies.push_back(body);
-        }
-      }
-    }
-    else {
-      const IntVect ancestor = coarsen(a_cell, 1 << (geometryLevel - lvl));
-
-      if (!PolyhedralGeometryShop::sourceBody(body, a_graph, a_level, a_dit, lvl, ancestor)) {
-        continue;
-      }
-
-      // down a level at a time, keeping the child on the way to this cell
-      CutCellBody children[1 << SpaceDim];
-
-      IntVect parent = ancestor;
-
-      for (int k = lvl + 1; k <= geometryLevel; k++) {
-        const IntVect child = coarsen(a_cell, 1 << (geometryLevel - k));
-
-        int which = 0;
-
-        for (int d = 0; d < SpaceDim; d++) {
-          which |= (child[d] - 2 * parent[d]) << d;
-        }
-
-        if (!body.subdivide(children)) {
-          a_numSplit++;
-        }
-
-        body   = children[which];
-        parent = child;
-      }
-
-      a_bodies.push_back(body);
-    }
+    a_bodies.push_back(body);
   }
 }
 
@@ -2807,6 +2646,8 @@ PolyhedralGeometryShop::testCopyBodies() const
     CutCellBody              body;
     std::vector<CutCellBody> bodies;
 
+    std::vector<PolyhedralEB::CutCellDescription> described;
+
     for (int i = 0; i < numDest; i++) {
       const int geometryLevel = dest.getGeometryLevel(i);
       const int ratio         = (i + 1 < numDest) ? (1 << (dest.getGeometryLevel(i + 1) - geometryLevel)) : 1;
@@ -2827,19 +2668,11 @@ PolyhedralGeometryShop::testCopyBodies() const
         // Walked from the cut cells each level brought, which are few, rather than from the destination cells, which
         // on a coarse destination stand over millions of finer cells. Each is counted at its destination cell: the
         // one it lies in from a finer level or its own level, the one at its low corner from a coarser one.
+        std::vector<std::tuple<IntVect, int, IntVect, std::uint64_t>> toCheck;
+
         for (int lvl = 0; lvl < dest.getNumSourceLevels(); lvl++) {
-          const BaseFab<signed char>& states = dest.getCellStates(i, lvl)[dit()];
-
-          if (states.box().isEmpty()) {
-            continue;
-          }
-
-          const IntVectSet& withSurface = dest.getSurfaces(i, lvl)[dit()].getIVS();
-
-          for (IVSIterator ivsit(withSurface); ivsit.ok(); ++ivsit) {
-            const IntVect cell = ivsit();
-
-            if (states(cell, 0) != PolyhedralEBGraph::s_cut) {
+          for (const IntVect& cell : dest.getSurfaceCells(i, dit(), lvl)) {
+            if (dest.getSourceState(i, dit(), lvl, cell) != PolyhedralEBGraph::s_cut) {
               continue;
             }
 
@@ -2860,6 +2693,9 @@ PolyhedralGeometryShop::testCopyBodies() const
 
             hash += body.fingerprint();
             count++;
+
+            // what a consumer asking the destination cell is handed must include this cell, built the same
+            toCheck.emplace_back(destCell, lvl, cell, body.fingerprint());
 
             // A coarser cut cell is subdivided down to the destination level once, every generation whole, which is
             // where a child in more than one piece shows; destinationBodies is asked for the child at its low corner.
@@ -2894,6 +2730,35 @@ PolyhedralGeometryShop::testCopyBodies() const
             }
           }
         }
+
+        // Asked once per destination cell, as a consumer asks: every cell counted there must be among what the cell
+        // hands out, and build the body it was counted with.
+        std::sort(toCheck.begin(), toCheck.end(), [](const auto& a_first, const auto& a_second) -> bool {
+          return PolyhedralEB::CutCellFaceOverrides::precedes(std::get<0>(a_first), std::get<0>(a_second));
+        });
+
+        for (std::size_t n = 0; n < toCheck.size(); n++) {
+          const IntVect& destCell = std::get<0>(toCheck[n]);
+
+          if (n == 0 || std::get<0>(toCheck[n - 1]) != destCell) {
+            dest.getCutCells(described, i, dit(), destCell);
+          }
+
+          bool found = false;
+
+          for (const PolyhedralEB::CutCellDescription& d : described) {
+            if (d.m_level == std::get<1>(toCheck[n]) && d.m_cell == std::get<2>(toCheck[n])) {
+              CutCellBody rebuilt;
+
+              found = rebuilt.define(d.m_surface, d.m_overrides, d.m_cell) &&
+                      rebuilt.fingerprint() == std::get<3>(toCheck[n]);
+            }
+          }
+
+          if (!found) {
+            MayDay::Error("PolyhedralGeometryShop::testCopyBodies - getCutCells does not hand out a copied cell");
+          }
+        }
       }
     }
 
@@ -2918,22 +2783,22 @@ PolyhedralGeometryShop::testCopyBodies() const
     const auto ownerOf = [&](const int a_dest, const DataIndex& a_din, const IntVect& a_cell) -> int {
       const int destLevel = dest.getGeometryLevel(a_dest);
 
-      for (int lvl = 0; lvl < numSource; lvl++) {
-        const BaseFab<signed char>& states = dest.getCellStates(a_dest, lvl)[a_din];
+      constexpr int unowned = AMRPolyhedralEBGraph::s_unowned;
 
-        if (states.box().isEmpty()) {
+      for (int lvl = 0; lvl < numSource; lvl++) {
+        if (dest.getPieces(a_dest, a_din, lvl).empty()) {
           continue;
         }
 
         if (lvl == destLevel) {
-          if (states.box().contains(a_cell) && states(a_cell, 0) != s_absent) {
+          if (dest.getSourceState(a_dest, a_din, lvl, a_cell) != unowned) {
             return lvl;
           }
         }
         else if (lvl < destLevel) {
           const IntVect ancestor = coarsen(a_cell, 1 << (destLevel - lvl));
 
-          if (states.box().contains(ancestor) && states(ancestor, 0) != s_absent) {
+          if (dest.getSourceState(a_dest, a_din, lvl, ancestor) != unowned) {
             return lvl;
           }
         }
@@ -2941,14 +2806,10 @@ PolyhedralGeometryShop::testCopyBodies() const
           // owned by a finer level only where every cell under it is; a cell split among levels is left out
           const Box children = refine(Box(a_cell, a_cell), 1 << (lvl - destLevel));
 
-          if (!states.box().contains(children)) {
-            continue;
-          }
-
           bool all = true;
 
           for (BoxIterator bit(children); bit.ok() && all; ++bit) {
-            all = states(bit(), 0) != s_absent;
+            all = dest.getSourceState(a_dest, a_din, lvl, bit()) != unowned;
           }
 
           if (all) {
@@ -2969,10 +2830,8 @@ PolyhedralGeometryShop::testCopyBodies() const
       const int            destLevel = dest.getGeometryLevel(a_dest);
       const Side::LoHiSide side      = (a_side == 0) ? Side::Lo : Side::Hi;
 
-      const BaseFab<signed char>& states = dest.getCellStates(a_dest, a_owner)[a_din];
-
       const auto own = [&](const IntVect& a_sourceCell) -> Real {
-        const int state = states(a_sourceCell, 0);
+        const int state = dest.getSourceState(a_dest, a_din, a_owner, a_sourceCell);
 
         if (state == PolyhedralEBGraph::s_regular) {
           return 1.0;
@@ -2992,7 +2851,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 
       if (a_owner < destLevel) {
         const IntVect ancestor = coarsen(a_cell, 1 << (destLevel - a_owner));
-        const int     state    = states(ancestor, 0);
+        const int     state    = dest.getSourceState(a_dest, a_din, a_owner, ancestor);
 
         if (state != PolyhedralEBGraph::s_cut) {
           return (state == PolyhedralEBGraph::s_regular) ? 1.0 : 0.0;

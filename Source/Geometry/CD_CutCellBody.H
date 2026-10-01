@@ -80,6 +80,21 @@ public:
   define(const CutCellSurface& a_surface) noexcept;
 
   /**
+   * @brief Build the body of a cut cell from its surface and its face overrides, as the polyhedral graph stores them.
+   * @details The body is defined from the surface -- as the whole cell where every corner is fluid -- and the cell's
+   * face overrides are applied in the order they were recorded: in three dimensions every face restricted to the finer
+   * level, the interface closed over them, then every closed face; in two, every closed half, then every closed face.
+   * That is the order the graph's stitching made them in, so the body comes out as the graph builds it, bit for bit.
+   * A cell with no entry in the overrides is its surface's body.
+   * @param[in] a_surface   The cell's surface.
+   * @param[in] a_overrides Face overrides holding the cell's entry, if it has one.
+   * @param[in] a_cell      The cell, as the overrides know it.
+   * @return True if every step closed.
+   */
+  bool
+  define(const CutCellSurface& a_surface, const CutCellFaceOverrides& a_overrides, const IntVect& a_cell) noexcept;
+
+  /**
    * @brief How the cell relates to the interface.
    * @details The cell is cut as soon as two corners disagree under isFluid, regular if every corner
    * is fluid and covered otherwise. An exact zero is solid, so a cell whose face lies in the

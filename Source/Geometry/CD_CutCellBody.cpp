@@ -1792,6 +1792,78 @@ CutCellBody::define(const CutCellSurface& a_surface) noexcept
   return closed && inRange;
 }
 
+bool
+CutCellBody::define(const CutCellSurface&       a_surface,
+                    const CutCellFaceOverrides& a_overrides,
+                    const IntVect&              a_cell) noexcept
+{
+  if (CutCellBody::classify(a_surface) == Kind::Regular) {
+    this->defineWhole();
+  }
+  else if (!this->define(a_surface)) {
+    return false;
+  }
+
+  const int entry = a_overrides.find(a_cell);
+
+  if (entry < 0) {
+    return true;
+  }
+
+  int faceBegin = 0;
+  int faceEnd   = 0;
+
+  a_overrides.faces(entry, faceBegin, faceEnd);
+
+#if CH_SPACEDIM == 3
+  bool restricted = false;
+
+  for (int f = faceBegin; f < faceEnd; f++) {
+    if (a_overrides.reason(f) != CutCellFaceOverrides::s_finer) {
+      continue;
+    }
+
+    if (!this->replaceFace(a_overrides, f)) {
+      return false;
+    }
+
+    restricted = true;
+  }
+
+  if (restricted && !this->closeInterface()) {
+    return false;
+  }
+#else
+  for (int f = faceBegin; f < faceEnd; f++) {
+    const int reason = a_overrides.reason(f);
+
+    if (reason != CutCellFaceOverrides::s_closedLowHalf && reason != CutCellFaceOverrides::s_closedHighHalf) {
+      continue;
+    }
+
+    const int face = a_overrides.face(f);
+
+    if (!this->closeHalfFace(face / 2, face % 2, (reason == CutCellFaceOverrides::s_closedLowHalf) ? 0 : 1)) {
+      return false;
+    }
+  }
+#endif
+
+  for (int f = faceBegin; f < faceEnd; f++) {
+    if (a_overrides.reason(f) != CutCellFaceOverrides::s_closed) {
+      continue;
+    }
+
+    const int face = a_overrides.face(f);
+
+    if (!this->snapFace(face / 2, face % 2, false)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 #if CH_SPACEDIM == 3
 bool
 CutCellBody::subdivide(CutCellBody* a_children) const noexcept

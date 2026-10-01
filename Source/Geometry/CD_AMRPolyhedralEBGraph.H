@@ -17,14 +17,13 @@
 #include <vector>
 
 // Chombo includes
-#include <BaseFab.H>
 #include <DisjointBoxLayout.H>
-#include <IVSFAB.H>
 #include <LayoutData.H>
 #include <ProblemDomain.H>
 #include <RefCountedPtr.H>
 
 // Our includes
+#include <CD_CutCellDescription.H>
 #include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
 #include <CD_NamespaceHeader.H>
@@ -34,19 +33,23 @@
  * included, described by the geometry level that owns it.
  * @details The geometry's graph lives on its own levels and its own tiles. A consumer lives on its own hierarchy --
  * one DisjointBoxLayout per level, each box filled to a ghost width, less what the next finer level covers -- and a
- * cell of it may be owned by the geometry level at its own resolution, by a finer one, or by a coarser one. This holds,
- * for every box of every destination level and every geometry level that owns part of it, the data that level's cells
- * are rebuilt from: their states, their surfaces and their face overrides, as that level stores them and in its index
- * space. Nothing here is recomputed from the implicit function; PolyhedralGeometryShop::copyGraphs fills it from the
- * graphs alone, and a body is rebuilt from it by PolyhedralGeometryShop::defineBody exactly as on the graph itself.
+ * cell of it may be owned by the geometry level at its own resolution, by a finer one, or by a coarser one. Each box
+ * keeps the part of the graph that intersects it and nothing else: per geometry level, the pieces it received -- boxes
+ * of cells one tile of that level owns, with their states -- and the surfaces and face overrides of the cells among
+ * them that hold any. Nothing here is recomputed from the implicit function; PolyhedralGeometryShop::copyGraphs fills
+ * it from the graphs alone.
  *
- * The data of a (destination level, geometry level) pair is kept per destination box, over the box of cells of the
- * geometry level that the destination box's pieces span. A cell there that no piece brought reads
- * PolyhedralGeometryShop::s_absent.
+ * A consumer asks a destination cell for the cut cells that intersect it, getCutCells, each as a CutCellDescription
+ * from which CutCellBody::define builds its polyhedron, and asks getState what a cell with none is.
  */
 class AMRPolyhedralEBGraph
 {
 public:
+  /**
+   * @brief State of a destination cell, or of a geometry cell, that no geometry level owns here.
+   */
+  static constexpr int s_unowned = 2;
+
   /**
    * @brief Constructor. Holds nothing until define.
    */
@@ -58,8 +61,7 @@ public:
   virtual ~AMRPolyhedralEBGraph() noexcept;
 
   /**
-   * @brief Set the destination hierarchy and allocate an empty set of containers for every pair of destination and
-   * geometry level.
+   * @brief Set the destination hierarchy, holding nothing of the graph yet.
    * @param[in] a_grids           Destination layout of every level, coarsest first.
    * @param[in] a_domains         Domain of every destination level.
    * @param[in] a_geometryLevels  Geometry level of every destination level.
@@ -126,60 +128,139 @@ public:
   getGeometryLevel(const int a_level) const noexcept;
 
   /**
-   * @brief Cell states of the cells a geometry level owns in every box of a destination level, in the geometry
-   * level's index space; s_absent where it owns none.
-   * @param[in] a_level       Destination level.
-   * @param[in] a_sourceLevel Geometry level.
-   * @return One fab per destination box, empty where the geometry level owns nothing of it.
+   * @brief The cut cells of the geometry that intersect a cell of a destination box, each with everything its
+   * polyhedron is built from.
+   * @details A cell the geometry owns at the destination's resolution is its own cut cell; one owned by a finer level
+   * is intersected by every cut cell of that level under it; one owned by a coarser level is intersected by the cut
+   * ancestor, whose polyhedron the consumer subdivides down to the cell. Each comes with its face overrides. A cell
+   * none of whose owners is cut gives none; getState says what it is.
+   * @param[out] a_cells The cut cells, appended to an emptied list.
+   * @param[in]  a_level Destination level.
+   * @param[in]  a_dit   Destination box.
+   * @param[in]  a_cell  The cell, on the destination level, in the box or its ghost cells.
    */
-  LayoutData<BaseFab<signed char>>&
-  getCellStates(const int a_level, const int a_sourceLevel) noexcept;
+  void
+  getCutCells(std::vector<PolyhedralEB::CutCellDescription>& a_cells,
+              const int                                      a_level,
+              const DataIndex&                               a_dit,
+              const IntVect&                                 a_cell) const;
 
   /**
-   * @brief Cell states, read only.
-   * @param[in] a_level       Destination level.
-   * @param[in] a_sourceLevel Geometry level.
-   * @return One fab per destination box.
+   * @brief What a cell of a destination box is: cut if any geometry cell owning part of it is, regular or covered if
+   * all of them are, and s_unowned if no geometry level owns any of it here.
+   * @param[in] a_level Destination level.
+   * @param[in] a_dit   Destination box.
+   * @param[in] a_cell  The cell, on the destination level.
+   * @return PolyhedralEBGraph::s_cut, s_regular or s_covered, or s_unowned.
    */
-  const LayoutData<BaseFab<signed char>>&
-  getCellStates(const int a_level, const int a_sourceLevel) const noexcept;
+  int
+  getState(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const;
 
   /**
-   * @brief Surfaces of the cells that hold one, of those a geometry level owns in every box of a destination level.
+   * @brief The pieces a destination box holds of a geometry level: boxes of cells, each owned by one of its tiles.
    * @param[in] a_level       Destination level.
+   * @param[in] a_dit         Destination box.
    * @param[in] a_sourceLevel Geometry level.
-   * @return One set of surfaces per destination box.
+   * @return The pieces, in the geometry level's index space.
    */
-  LayoutData<IVSFAB<PolyhedralEB::CutCellSurface>>&
-  getSurfaces(const int a_level, const int a_sourceLevel) noexcept;
+  const std::vector<Box>&
+  getPieces(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) const noexcept;
 
   /**
-   * @brief Surfaces, read only.
+   * @brief The state of a geometry cell, as a destination box holds it.
    * @param[in] a_level       Destination level.
-   * @param[in] a_sourceLevel Geometry level.
-   * @return One set of surfaces per destination box.
+   * @param[in] a_dit         Destination box.
+   * @param[in] a_sourceLevel Geometry level of the cell.
+   * @param[in] a_sourceCell  The cell, on that level.
+   * @return Its state, or s_unowned if the box holds no piece with it.
    */
-  const LayoutData<IVSFAB<PolyhedralEB::CutCellSurface>>&
-  getSurfaces(const int a_level, const int a_sourceLevel) const noexcept;
+  int
+  getSourceState(const int a_level, const DataIndex& a_dit, const int a_sourceLevel, const IntVect& a_sourceCell) const;
 
   /**
-   * @brief Face overrides of the cells whose surfaces are overridden, of those a geometry level owns in every box of
-   * a destination level.
+   * @brief The geometry cells of a level that a destination box holds a surface for, in increasing order.
    * @param[in] a_level       Destination level.
+   * @param[in] a_dit         Destination box.
    * @param[in] a_sourceLevel Geometry level.
-   * @return One set of overrides per destination box.
+   * @return The cells.
    */
-  LayoutData<PolyhedralEB::CutCellFaceOverrides>&
-  getFaceOverrides(const int a_level, const int a_sourceLevel) noexcept;
+  const std::vector<IntVect>&
+  getSurfaceCells(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) const noexcept;
 
   /**
-   * @brief Face overrides, read only.
+   * @brief The surface of a geometry cell, as a destination box holds it.
    * @param[in] a_level       Destination level.
-   * @param[in] a_sourceLevel Geometry level.
-   * @return One set of overrides per destination box.
+   * @param[in] a_dit         Destination box.
+   * @param[in] a_sourceLevel Geometry level of the cell.
+   * @param[in] a_sourceCell  The cell, on that level.
+   * @return The surface, or null if the box holds none for the cell.
    */
-  const LayoutData<PolyhedralEB::CutCellFaceOverrides>&
-  getFaceOverrides(const int a_level, const int a_sourceLevel) const noexcept;
+  const PolyhedralEB::CutCellSurface*
+  getSourceSurface(const int        a_level,
+                   const DataIndex& a_dit,
+                   const int        a_sourceLevel,
+                   const IntVect&   a_sourceCell) const;
+
+  /**
+   * @brief The face overrides of a geometry level's cells, as a destination box holds them.
+   * @param[in] a_level       Destination level.
+   * @param[in] a_dit         Destination box.
+   * @param[in] a_sourceLevel Geometry level.
+   * @return The overrides, keyed by cells of that level.
+   */
+  const PolyhedralEB::CutCellFaceOverrides&
+  getFaceOverrides(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) const noexcept;
+
+  /**
+   * @brief Add a piece to a destination box.
+   * @param[in] a_level       Destination level.
+   * @param[in] a_dit         Destination box.
+   * @param[in] a_sourceLevel Geometry level of the piece.
+   * @param[in] a_region      The piece, on that level.
+   * @param[in] a_states      Its cells' states, in the order a BoxIterator meets them.
+   */
+  void
+  addPiece(const int          a_level,
+           const DataIndex&   a_dit,
+           const int          a_sourceLevel,
+           const Box&         a_region,
+           const signed char* a_states);
+
+  /**
+   * @brief Add the surface of a geometry cell to a destination box. Surfaces may come in any order; finish puts them in
+   * order before any is read.
+   * @param[in] a_level       Destination level.
+   * @param[in] a_dit         Destination box.
+   * @param[in] a_sourceLevel Geometry level of the cell.
+   * @param[in] a_sourceCell  The cell, on that level.
+   * @param[in] a_surface     Its surface.
+   */
+  void
+  addSurface(const int                           a_level,
+             const DataIndex&                    a_dit,
+             const int                           a_sourceLevel,
+             const IntVect&                      a_sourceCell,
+             const PolyhedralEB::CutCellSurface& a_surface);
+
+  /**
+   * @brief Put every box's surfaces in cell order and index its pieces, after the last addPiece and addSurface and
+   * before anything is read.
+   * @details The index is a coarse grid over each box's pieces, of bins as wide as its widest piece, each listing the
+   * pieces that reach it: a cell is found among the few pieces of its bin rather than among all of a box's pieces,
+   * which a coarse destination box gathering a finer level's tiles has many of.
+   */
+  void
+  finish();
+
+  /**
+   * @brief The face overrides of a geometry level's cells in a destination box, to be filled.
+   * @param[in] a_level       Destination level.
+   * @param[in] a_dit         Destination box.
+   * @param[in] a_sourceLevel Geometry level.
+   * @return The overrides.
+   */
+  PolyhedralEB::CutCellFaceOverrides&
+  getFaceOverrides(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) noexcept;
 
 protected:
   /**
@@ -213,19 +294,85 @@ protected:
   std::vector<int> m_geometryLevels;
 
   /**
-   * @brief Cell states, per destination level and geometry level.
+   * @brief The pieces of every box, per destination level and geometry level.
    */
-  std::vector<std::vector<RefCountedPtr<LayoutData<BaseFab<signed char>>>>> m_cellStates;
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<Box>>>>> m_pieces;
 
   /**
-   * @brief Surfaces, per destination level and geometry level.
+   * @brief Where each piece's states begin in m_states, and one past the last piece's end.
    */
-  std::vector<std::vector<RefCountedPtr<LayoutData<IVSFAB<PolyhedralEB::CutCellSurface>>>>> m_surfaces;
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<int>>>>> m_pieceOffsets;
 
   /**
-   * @brief Face overrides, per destination level and geometry level.
+   * @brief The pieces' states, one piece after another, each in the order a BoxIterator meets its cells.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<signed char>>>>> m_states;
+
+  /**
+   * @brief The cells that hold a surface, in increasing order once finish has run.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<IntVect>>>>> m_surfaceCells;
+
+  /**
+   * @brief Their surfaces, in the same order.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<PolyhedralEB::CutCellSurface>>>>> m_surfaces;
+
+  /**
+   * @brief The face overrides of the cells whose surfaces are overridden.
    */
   std::vector<std::vector<RefCountedPtr<LayoutData<PolyhedralEB::CutCellFaceOverrides>>>> m_faceOverrides;
+
+  /**
+   * @brief Width of the bins each box's pieces are indexed by.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<int>>>> m_binSize;
+
+  /**
+   * @brief The bins of each box's index, on the geometry level coarsened by the bin width.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<Box>>>> m_binBox;
+
+  /**
+   * @brief Where each bin's pieces begin in m_binPieces, the bins in the order a BoxIterator meets them, and one past
+   * the last bin's end.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<int>>>>> m_binOffsets;
+
+  /**
+   * @brief The pieces that reach each bin, one bin after another.
+   */
+  std::vector<std::vector<RefCountedPtr<LayoutData<std::vector<int>>>>> m_binPieces;
+
+  /**
+   * @brief The pieces of a box that may meet a region: those of the bins the region reaches, each once.
+   * @param[out] a_pieces      Indices into the box's pieces.
+   * @param[in]  a_level       Destination level.
+   * @param[in]  a_dit         Destination box.
+   * @param[in]  a_sourceLevel Geometry level.
+   * @param[in]  a_region      Region on that level.
+   */
+  void
+  piecesNear(std::vector<int>& a_pieces,
+             const int         a_level,
+             const DataIndex&  a_dit,
+             const int         a_sourceLevel,
+             const Box&        a_region) const;
+
+  /**
+   * @brief Append the description of a cut geometry cell this box holds.
+   * @param[out] a_cells       Descriptions to append to.
+   * @param[in]  a_level       Destination level.
+   * @param[in]  a_dit         Destination box.
+   * @param[in]  a_sourceLevel Geometry level of the cell.
+   * @param[in]  a_sourceCell  The cell, on that level.
+   */
+  void
+  describe(std::vector<PolyhedralEB::CutCellDescription>& a_cells,
+           const int                                      a_level,
+           const DataIndex&                               a_dit,
+           const int                                      a_sourceLevel,
+           const IntVect&                                 a_sourceCell) const;
 };
 
 #include <CD_NamespaceFooter.H>
