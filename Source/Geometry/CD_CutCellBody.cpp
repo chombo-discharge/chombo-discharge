@@ -1039,7 +1039,16 @@ CutCellBody::closeBoundary(const int a_face) noexcept
   RealVect from[s_maxPolygons * s_maxVertices];
   RealVect to[s_maxPolygons * s_maxVertices];
 
-  int numOpen = 0;
+  // Every edge, and which polygon it belongs to. An edge is closed by one edge of another polygon running the other
+  // way, and each edge closes at most one: a hole in a face covered by interface lying in the face uses the
+  // hole's edges three times once the body is cut through it -- the face, the hole and the interface -- and one of
+  // them stays open, as the boundary the cut has to close.
+  RealVect edgeFrom[s_maxPolygons * s_maxVertices];
+  RealVect edgeTo[s_maxPolygons * s_maxVertices];
+  int      edgeOwner[s_maxPolygons * s_maxVertices];
+  bool     matched[s_maxPolygons * s_maxVertices];
+
+  int numEdges = 0;
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
     const Polygon& p = m_polygon[ip];
@@ -1052,30 +1061,31 @@ CutCellBody::closeBoundary(const int a_face) noexcept
         continue;
       }
 
-      bool shared = false;
+      CH_assert(numEdges < s_maxPolygons * s_maxVertices);
 
-      for (int jp = 0; jp < m_numPolygons && !shared; jp++) {
-        if (jp == ip) {
-          continue;
-        }
+      edgeFrom[numEdges]  = a;
+      edgeTo[numEdges]    = b;
+      edgeOwner[numEdges] = ip;
+      matched[numEdges]   = false;
+      numEdges++;
+    }
+  }
 
-        const Polygon& q = m_polygon[jp];
+  int numOpen = 0;
 
-        for (int j = 0; j < q.m_numVertices && !shared; j++) {
-          const RealVect& c = q.m_vertex[j];
-          const RealVect& d = q.m_vertex[(j + 1) % q.m_numVertices];
-
-          shared = detail::sameVertex(a, d) && detail::sameVertex(b, c);
-        }
+  for (int e = 0; e < numEdges; e++) {
+    for (int f = e + 1; f < numEdges && !matched[e]; f++) {
+      if (!matched[f] && edgeOwner[f] != edgeOwner[e] && detail::sameVertex(edgeFrom[e], edgeTo[f]) &&
+          detail::sameVertex(edgeTo[e], edgeFrom[f])) {
+        matched[e] = true;
+        matched[f] = true;
       }
+    }
 
-      if (!shared) {
-        CH_assert(numOpen < s_maxPolygons * s_maxVertices);
-
-        from[numOpen] = b;
-        to[numOpen]   = a;
-        numOpen++;
-      }
+    if (!matched[e]) {
+      from[numOpen] = edgeTo[e];
+      to[numOpen]   = edgeFrom[e];
+      numOpen++;
     }
   }
 
