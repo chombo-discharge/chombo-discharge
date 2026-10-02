@@ -1259,6 +1259,42 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
   }
 }
 
+#else
+void
+CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
+                                   const IntVect&  a_cell,
+                                   const RealVect& a_probLo,
+                                   const Real      a_dx) const noexcept
+{
+  CH_assert(a_dx > 0.0);
+
+  // the segments of the polygon that lie in no cell face, each as its two ends, with a third coordinate of zero
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& p = m_polygon[ip];
+
+    for (int i = 0; i < p.m_numVertices; i++) {
+      if (p.m_segmentFace[i] >= 0) {
+        continue;
+      }
+
+      const RealVect& a = p.m_vertex[i];
+      const RealVect& b = p.m_vertex[(i + 1) % p.m_numVertices];
+
+      if (detail::sameVertex(a, b)) {
+        continue;
+      }
+
+      for (const RealVect* end : {&a, &b}) {
+        for (int d = 0; d < SpaceDim; d++) {
+          a_facets.push_back(a_probLo[d] + a_dx * (static_cast<Real>(a_cell[d]) + ((*end)[d] + 0.5)));
+        }
+
+        a_facets.push_back(0.0);
+      }
+    }
+  }
+}
+
 #endif
 
 #if CH_SPACEDIM == 2

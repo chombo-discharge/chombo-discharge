@@ -659,6 +659,11 @@ public:
 
 protected:
   /**
+   * @brief Vertices of one element of the written surface: a triangle in three dimensions, a segment in two.
+   */
+  static constexpr int s_elementVertices = SpaceDim;
+
+  /**
    * @brief Fraction of a level's grid spacing within which two vertices are the same vertex, in sanityCheck and in
    * the written surface.
    * @details Cells of one level compute a shared vertex from the same nodes and edge and agree bit for bit, and cells
@@ -753,12 +758,13 @@ protected:
   bool m_verbose;
 
   /**
-   * @brief Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.
+   * @brief Interface triangles of one level, or segments in two dimensions, from this rank's share of its irregular
+   * boxes, three reals per vertex.
    * @details Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has
    * that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface).
    * A coarse edge that carries no crossing while both finer edges under it do is a multi-valued coarse cell in
    * disguise and stops the run, as does a body that will not close.
-   * @param[out] a_facets Triangle coordinates, appended to.
+   * @param[out] a_facets Element coordinates, appended to.
    * @param[in]  a_level  Level to collect from.
    */
   void
@@ -952,15 +958,15 @@ protected:
 
   /**
    * @brief Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.
-   * @details One group per level, holding the level's triangles as an indexed mesh -- the vertices once each and a
-   * triple of indices per triangle -- rather than as a soup of coordinates, which is what a viewer wants and what
-   * an XDMF description can point at. The boxes of the level and the boxes that split on it go in the same group,
-   * so that the surface can be read against the grids it was built on without a second file. The distance within
-   * which two positions are one vertex is written alongside them. An XDMF description of the file is written next
-   * to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary between two
-   * ranks is written by each, since vertices are identified within a rank and not across them.
+   * @details One group per level, holding the level's triangles, or segments in two dimensions, as an indexed mesh --
+   * the vertices once each and s_elementVertices indices per element -- rather than as a soup of coordinates, which is
+   * what a viewer wants and what an XDMF description can point at. The boxes of the level and the boxes that split on
+   * it go in the same group, so that the surface can be read against the grids it was built on without a second file.
+   * The distance within which two positions are one vertex is written alongside them. An XDMF description of the file
+   * is written next to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary
+   * between two ranks is written by each, since vertices are identified within a rank and not across them.
    * @param[in] a_fileName File to write, without a suffix.
-   * @param[in] a_facets   This rank's triangles of each level, nine reals each.
+   * @param[in] a_facets   This rank's elements of each level, three reals per vertex.
    */
   void
   writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const;

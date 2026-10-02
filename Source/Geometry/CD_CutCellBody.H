@@ -280,11 +280,12 @@ public:
   Real
   closureResidual() const noexcept;
 
-#if CH_SPACEDIM == 3
   /**
-   * @brief Append this body's interface, as triangles in physical coordinates.
+   * @brief Append this body's interface, as triangles in three dimensions and segments in two, in physical
+   * coordinates.
    * @details The interface is the embedded boundary inside this cell: the polygons the body holds that belong to no
-   * cell face. Each is written as a fan of triangles, nine reals per triangle, so that the result can be
+   * cell face in three dimensions, written as fans of triangles, and the segments of its polygon that lie in no
+   * cell face in two. Every point is three reals, the third zero in two dimensions, so that the result can be
    * gathered across ranks and written as one surface. Nothing is appended by a body that is not cut.
    * Coordinates are formed from the cell index rather than the cell centre, so that a vertex two cells share
    * -- a point on their common face, or a crossing on a common edge -- is the same double from both.
@@ -298,6 +299,8 @@ public:
                         const IntVect&  a_cell,
                         const RealVect& a_probLo,
                         const Real      a_dx) const noexcept;
+
+#if CH_SPACEDIM == 3
 
   /**
    * @brief Print every polygon this body holds, in the cell's own frame, for inspection.

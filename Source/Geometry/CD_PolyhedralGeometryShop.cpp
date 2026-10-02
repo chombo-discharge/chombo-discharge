@@ -355,10 +355,7 @@ PolyhedralGeometryShop::verifySurface() const
     timer.stopEvent("Copy bodies");
   }
 
-  // The surface itself is written in three dimensions only: the facets are polygons, and in two dimensions the
-  // interface of a cell is one chord, which the graph checks as it builds it. What sanityCheck says about cells
-  // that share a face holds in both dimensions, and so does the copy test.
-#if CH_SPACEDIM == 3
+  // The surface: triangles in three dimensions, the chords of the cut cells in two.
   if (m_writeSurface) {
     Vector<Vector<Real>> facets(numLevels);
 
@@ -372,8 +369,6 @@ PolyhedralGeometryShop::verifySurface() const
     this->writeSurface("surface_mesh_" + phaseName, facets);
     timer.stopEvent("Write surface");
   }
-
-#endif
 
   if (m_profile) {
     timer.eventReport(pout(), false);
@@ -398,7 +393,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
     return;
   }
 
-#if CH_SPACEDIM == 3
   const PolyhedralEBGraph& graph = *m_graphs[a_level];
 
   const Real dx = graph.getDx();
@@ -434,7 +428,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
       body.appendInterfaceFacets(a_facets, iv, m_probLo, dx);
     }
   }
-#endif
 }
 
 bool
@@ -3389,7 +3382,7 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
   writeAttribute(file, "phase", nameType, 1, phaseName.c_str());
   H5Tclose(nameType);
 
-  std::vector<long long> totalTriangles(numLevels, 0);
+  std::vector<long long> totalElements(numLevels, 0);
   std::vector<long long> totalVertices(numLevels, 0);
 
   for (int lvl = 0; lvl < numLevels; lvl++) {
@@ -3408,54 +3401,59 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
 
     PolyhedralGeometryShop::indexFacets(a_facets[lvl], tolerance, vertices, connectivity);
 
-    // A triangle two of whose vertices are the same vertex has collapsed to a line and bounds nothing.
+    // An element two of whose vertices are the same vertex has collapsed, a triangle to a line or a segment to a
+    // point, and bounds nothing.
     int collapsed = 0;
 
     {
       std::vector<int> kept;
 
-      for (size_t i = 0; i + 3 <= connectivity.size(); i += 3) {
-        const int a = connectivity[i];
-        const int b = connectivity[i + 1];
-        const int c = connectivity[i + 2];
+      for (size_t i = 0; i + s_elementVertices <= connectivity.size(); i += s_elementVertices) {
+        bool degenerate = false;
 
-        if (a == b || b == c || c == a) {
+        for (int j = 0; j < s_elementVertices; j++) {
+          for (int k = j + 1; k < s_elementVertices; k++) {
+            degenerate = degenerate || (connectivity[i + j] == connectivity[i + k]);
+          }
+        }
+
+        if (degenerate) {
           collapsed++;
 
           continue;
         }
 
-        kept.push_back(a);
-        kept.push_back(b);
-        kept.push_back(c);
+        for (int j = 0; j < s_elementVertices; j++) {
+          kept.push_back(connectivity[i + j]);
+        }
       }
 
       connectivity.swap(kept);
     }
 
-    const long long mineVertices  = vertices.size() / 3;
-    const long long mineTriangles = connectivity.size() / 3;
+    const long long mineVertices = vertices.size() / 3;
+    const long long mineElements = connectivity.size() / s_elementVertices;
 
-    long long vertexOffset   = 0;
-    long long triangleOffset = 0;
+    long long vertexOffset  = 0;
+    long long elementOffset = 0;
 
-    totalVertices[lvl]  = mineVertices;
-    totalTriangles[lvl] = mineTriangles;
+    totalVertices[lvl] = mineVertices;
+    totalElements[lvl] = mineElements;
 
 #ifdef CH_MPI
     MPI_Exscan(&mineVertices, &vertexOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-    MPI_Exscan(&mineTriangles, &triangleOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+    MPI_Exscan(&mineElements, &elementOffset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
 
     if (procID() == 0) {
-      vertexOffset   = 0;
-      triangleOffset = 0;
+      vertexOffset  = 0;
+      elementOffset = 0;
     }
 
     MPI_Allreduce(&mineVertices, &totalVertices[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-    MPI_Allreduce(&mineTriangles, &totalTriangles[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+    MPI_Allreduce(&mineElements, &totalElements[lvl], 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
 #endif
 
-    // This rank's vertices sit at vertexOffset in the file, so its triangles point there too.
+    // This rank's vertices sit at vertexOffset in the file, so its elements point there too.
     for (size_t i = 0; i < connectivity.size(); i++) {
       connectivity[i] += static_cast<int>(vertexOffset);
     }
@@ -3468,10 +3466,10 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
     writeSlab(group,
               "connectivity",
               H5T_NATIVE_INT,
-              mineTriangles,
-              triangleOffset,
-              totalTriangles[lvl],
-              3,
+              mineElements,
+              elementOffset,
+              totalElements[lvl],
+              s_elementVertices,
               connectivity.data());
 
     // The boxes of the level and the boxes that split on it are the same on every rank, so the master writes them
@@ -3540,16 +3538,17 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
     xdmf << "    <Grid Name=\"" << phaseName << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
 
     for (int lvl = 0; lvl < numLevels; lvl++) {
-      if (totalTriangles[lvl] == 0) {
+      if (totalElements[lvl] == 0) {
         continue;
       }
 
       const std::string name = "level" + std::to_string(lvl);
 
       xdmf << "      <Grid Name=\"" << name << "\" GridType=\"Uniform\">\n";
-      xdmf << "        <Topology TopologyType=\"Triangle\" NumberOfElements=\"" << totalTriangles[lvl] << "\">\n";
-      xdmf << "          <DataItem Dimensions=\"" << totalTriangles[lvl] << " 3\" NumberType=\"Int\" Format=\"HDF\">"
-           << base << ":/" << name << "/connectivity</DataItem>\n";
+      xdmf << "        <Topology TopologyType=\"" << ((SpaceDim == 3) ? "Triangle" : "Polyline")
+           << "\" NodesPerElement=\"" << s_elementVertices << "\" NumberOfElements=\"" << totalElements[lvl] << "\">\n";
+      xdmf << "          <DataItem Dimensions=\"" << totalElements[lvl] << " " << s_elementVertices
+           << "\" NumberType=\"Int\" Format=\"HDF\">" << base << ":/" << name << "/connectivity</DataItem>\n";
       xdmf << "        </Topology>\n";
       xdmf << "        <Geometry GeometryType=\"XYZ\">\n";
       xdmf << "          <DataItem Dimensions=\"" << totalVertices[lvl]
