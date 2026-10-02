@@ -56,7 +56,7 @@ allocate(std::vector<std::vector<RefCountedPtr<LayoutData<T>>>>& a_data,
  * @return The position.
  */
 long
-positionIn(const Box& a_box, const IntVect& a_cell)
+linearIndex(const Box& a_box, const IntVect& a_cell)
 {
   long position = 0;
   long stride   = 1;
@@ -315,13 +315,13 @@ AMRPolyhedralEBGraph::getSourceState(const int        a_level,
     return s_unowned;
   }
 
-  const long b = positionIn(binBox, bin);
+  const long b = linearIndex(binBox, bin);
 
   for (int k = binOffsets[b]; k < binOffsets[b + 1]; k++) {
     const int p = binPieces[k];
 
     if (pieces[p].contains(a_sourceCell)) {
-      return states[offsets[p] + positionIn(pieces[p], a_sourceCell)];
+      return states[offsets[p] + linearIndex(pieces[p], a_sourceCell)];
     }
   }
 
@@ -417,7 +417,7 @@ AMRPolyhedralEBGraph::piecesNear(std::vector<int>& a_pieces,
   const Box bins = coarsen(a_region, binSize) & binBox;
 
   for (BoxIterator bit(bins); bit.ok(); ++bit) {
-    const long b = positionIn(binBox, bit());
+    const long b = linearIndex(binBox, bit());
 
     for (int k = binOffsets[b]; k < binOffsets[b + 1]; k++) {
       a_pieces.push_back(binPieces[k]);
@@ -497,7 +497,7 @@ AMRPolyhedralEBGraph::finish()
 
         for (const Box& piece : pieces) {
           for (BoxIterator bit(coarsen(piece, binSize)); bit.ok(); ++bit) {
-            counts[positionIn(binBox, bit())]++;
+            counts[linearIndex(binBox, bit())]++;
           }
         }
 
@@ -513,7 +513,7 @@ AMRPolyhedralEBGraph::finish()
 
         for (std::size_t p = 0; p < pieces.size(); p++) {
           for (BoxIterator bit(coarsen(pieces[p], binSize)); bit.ok(); ++bit) {
-            binPieces[fill[positionIn(binBox, bit())]++] = static_cast<int>(p);
+            binPieces[fill[linearIndex(binBox, bit())]++] = static_cast<int>(p);
           }
         }
       }
