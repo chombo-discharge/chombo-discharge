@@ -229,6 +229,44 @@ PolyhedralGeometryShop::buildGraphs()
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
+  // Then the fluid no regular cell reaches, on any level, is filled: anchoring spreads through each level and across
+  // each level boundary until it stops everywhere.
+  timer.startEvent("Fill sealed cells");
+
+  for (int lvl = startLevel; lvl < numLevels; lvl++) {
+    if (m_graphs[lvl]->isDefined() && (lvl == startLevel || !m_graphs[lvl - 1]->isDefined())) {
+      m_graphs[lvl]->anchorUncarriedCells();
+    }
+  }
+
+  while (true) {
+    long long numNew = 0;
+
+    for (int lvl = startLevel; lvl < numLevels; lvl++) {
+      if (m_graphs[lvl]->isDefined()) {
+        numNew += m_graphs[lvl]->spreadAnchors();
+      }
+    }
+
+    for (int lvl = startLevel; lvl + 1 < numLevels; lvl++) {
+      if (m_graphs[lvl]->isDefined() && m_graphs[lvl + 1]->isDefined()) {
+        numNew += PolyhedralEBGraph::anchorAcrossLevels(*m_graphs[lvl], *m_graphs[lvl + 1]);
+      }
+    }
+
+    if (numNew == 0) {
+      break;
+    }
+  }
+
+  for (int lvl = startLevel; lvl < numLevels; lvl++) {
+    if (m_graphs[lvl]->isDefined()) {
+      m_graphs[lvl]->fillSealedCells();
+    }
+  }
+
+  timer.stopEvent("Fill sealed cells");
+
   // Then every level to the one above it, so the coarse side of each level boundary knows the fine side.
   for (int lvl = startLevel; lvl + 1 < numLevels; lvl++) {
     if (!m_graphs[lvl]->isDefined() || !m_graphs[lvl + 1]->isDefined()) {

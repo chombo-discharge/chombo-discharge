@@ -500,7 +500,7 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
   this->defineGhostCells(a_function, a_carried);
 
-  const long long totalSealed = this->fillSealedCells(a_carried);
+  this->beginAnchoring(a_carried);
 
   this->addGhostSurfaceCells();
 
@@ -509,11 +509,6 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
   if (totalFilled > 0 && procID() == 0) {
     pout() << "PolyhedralEBGraph::defineCells - filled " << totalFilled
            << " cells holding a feature thinner than themselves" << endl;
-  }
-
-  if (totalSealed > 0 && procID() == 0) {
-    pout() << "PolyhedralEBGraph::defineCells - filled " << totalSealed << " cells whose fluid reaches no regular cell"
-           << endl;
   }
 
   m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_surfaceCells));
@@ -541,22 +536,20 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
   m_surfaces.exchange();
 }
 
-long long
-PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carried)
+void
+PolyhedralEBGraph::beginAnchoring(const LevelData<BaseFab<signed char>>& a_carried)
 {
-  CH_TIME("PolyhedralEBGraph::fillSealedCells");
+  CH_TIME("PolyhedralEBGraph::beginAnchoring");
 
   const Box& domainBox = m_domain.domainBox();
 
-  LevelData<BaseFab<signed char>> anchored(m_grids, 1, m_numGhost * IntVect::Unit);
+  m_anchored.define(m_grids, 2, m_numGhost * IntVect::Unit);
 
-  // The anchors. A ghost cell some tile carries is that tile's to say and arrives with the exchange; one no tile
-  // carries belongs to the coarser level, which is fluid wherever the cell is not covered.
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box box   = m_grids[dit()];
     const Box grown = grow(box, m_numGhost) & domainBox;
 
-    BaseFab<signed char>&       anchor  = anchored[dit()];
+    BaseFab<signed char>&       anchor  = m_anchored[dit()];
     const BaseFab<signed char>& states  = m_cellStates[dit()];
     const BaseFab<signed char>& carried = a_carried[dit()];
     const BaseFab<signed char>& refined = m_refined[dit()];
@@ -567,31 +560,50 @@ PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carr
       const IntVect iv = bit();
 
       if (box.contains(iv)) {
-        anchor(iv, 0) = (states(iv, 0) == s_regular || refined(iv, 0) != 0) ? 1 : 0;
+        anchor(iv, 0) = (states(iv, 0) == s_regular && refined(iv, 0) == 0) ? 1 : 0;
       }
       else if (carried(iv, 0) == 0) {
-        anchor(iv, 0) = (states(iv, 0) != s_covered) ? 1 : 0;
+        // a ghost cell some tile carries arrives with the exchange
+        if (states(iv, 0) == s_regular) {
+          anchor(iv, 0) = 1;
+        }
+        else if (states(iv, 0) == s_cut && refined(iv, 0) == 0) {
+          anchor(iv, 1) = 1;
+        }
       }
     }
   }
+}
 
-  // Anchoring spreads through the open faces of each box until it stops, and across boxes by the exchange; a round
-  // that anchors nothing new anywhere ends it.
+long long
+PolyhedralEBGraph::spreadAnchors()
+{
+  CH_TIME("PolyhedralEBGraph::spreadAnchors");
+
+  const Box& domainBox = m_domain.domainBox();
+
   std::vector<IntVect> front;
 
+  long long totalNew = 0;
+
   while (true) {
-    anchored.exchange();
+    m_anchored.exchange();
 
     long long numNew = 0;
 
     for (DataIterator dit(m_grids); dit.ok(); ++dit) {
       const Box box = m_grids[dit()];
 
-      BaseFab<signed char>&       anchor = anchored[dit()];
-      const BaseFab<signed char>& states = m_cellStates[dit()];
-      const BaseFab<signed char>& faces  = m_faceStates[dit()];
+      BaseFab<signed char>&       anchor  = m_anchored[dit()];
+      const BaseFab<signed char>& states  = m_cellStates[dit()];
+      const BaseFab<signed char>& faces   = m_faceStates[dit()];
+      const BaseFab<signed char>& refined = m_refined[dit()];
 
-      // a valid cell that is not yet anchored, with an open face onto an anchored cell, starts the sweep
+      // a cut cell of this box that anchoring can still pass into
+      auto passable = [&](const IntVect& a_cell) -> bool {
+        return box.contains(a_cell) && anchor(a_cell, 0) == 0 && states(a_cell, 0) == s_cut && refined(a_cell, 0) == 0;
+      };
+
       auto reaches = [&](const IntVect& a_cell) -> bool {
         for (int dir = 0; dir < SpaceDim; dir++) {
           for (int side = 0; side < 2; side++) {
@@ -610,12 +622,10 @@ PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carr
       front.clear();
 
       for (BoxIterator bit(box); bit.ok(); ++bit) {
-        const IntVect iv = bit();
+        if (passable(bit()) && reaches(bit())) {
+          anchor(bit(), 0) = 1;
 
-        if (anchor(iv, 0) == 0 && states(iv, 0) == s_cut && reaches(iv)) {
-          anchor(iv, 0) = 1;
-
-          front.push_back(iv);
+          front.push_back(bit());
 
           numNew++;
         }
@@ -630,11 +640,7 @@ PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carr
           for (int side = 0; side < 2; side++) {
             const IntVect other = iv + (2 * side - 1) * BASISV(dir);
 
-            if (faces(iv, 2 * dir + side) != s_faceSameLevel || !box.contains(other)) {
-              continue;
-            }
-
-            if (anchor(other, 0) == 0 && states(other, 0) == s_cut) {
+            if (faces(iv, 2 * dir + side) == s_faceSameLevel && passable(other)) {
               anchor(other, 0) = 1;
 
               front.push_back(other);
@@ -646,28 +652,155 @@ PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carr
       }
     }
 
-    if (ParallelOps::sum(numNew) == 0) {
+    numNew = ParallelOps::sum(numNew);
+
+    if (numNew == 0) {
       break;
+    }
+
+    totalNew += numNew;
+  }
+
+  return totalNew;
+}
+
+long long
+PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBGraph& a_fine)
+{
+  CH_TIME("PolyhedralEBGraph::anchorAcrossLevels");
+
+  if (refine(a_coarse.m_domain, 2) != a_fine.m_domain) {
+    MayDay::Error("PolyhedralEBGraph::anchorAcrossLevels - the fine domain is not the coarse domain refined by two");
+  }
+
+  long long numNew = 0;
+
+  DisjointBoxLayout coarsenedFine;
+
+  coarsen(coarsenedFine, a_fine.m_grids, 2);
+
+  // Up: a coarse cell the fine level carries is anchored when any of its children is.
+  {
+    LevelData<BaseFab<signed char>> children(coarsenedFine, 1, IntVect::Zero);
+    LevelData<BaseFab<signed char>> onCoarse(a_coarse.m_grids, 1, a_coarse.m_numGhost * IntVect::Unit);
+
+    for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
+      BaseFab<signed char>&       up     = children[dit()];
+      const BaseFab<signed char>& anchor = a_fine.m_anchored[dit()];
+
+      up.setVal(0);
+
+      for (BoxIterator bit(coarsenedFine[dit()]); bit.ok(); ++bit) {
+        for (BoxIterator fit(refine(Box(bit(), bit()), 2)); fit.ok(); ++fit) {
+          if (anchor(fit(), 0) != 0) {
+            up(bit(), 0) = 1;
+          }
+        }
+      }
+    }
+
+    for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
+      onCoarse[dit()].setVal(0);
+    }
+
+    const Copier copier(coarsenedFine, a_coarse.m_grids, a_coarse.m_domain, a_coarse.m_numGhost * IntVect::Unit);
+
+    children.copyTo(Interval(0, 0), onCoarse, Interval(0, 0), copier);
+
+    const Box& domainBox = a_coarse.m_domain.domainBox();
+
+    for (DataIterator dit(a_coarse.m_grids); dit.ok(); ++dit) {
+      const Box grown = grow(a_coarse.m_grids[dit()], a_coarse.m_numGhost) & domainBox;
+
+      BaseFab<signed char>&       anchor  = a_coarse.m_anchored[dit()];
+      const BaseFab<signed char>& up      = onCoarse[dit()];
+      const BaseFab<signed char>& refined = a_coarse.m_refined[dit()];
+
+      for (BoxIterator bit(grown); bit.ok(); ++bit) {
+        if (refined(bit(), 0) != 0 && up(bit(), 0) != 0 && anchor(bit(), 0) == 0) {
+          anchor(bit(), 0) = 1;
+
+          numNew++;
+        }
+      }
     }
   }
 
-  // What anchoring never reached is filled: covered, with every face closed, and out of the cut cells. Its surface
-  // stays, as a filled cell's does.
+  // Down: a cut ghost cell of the fine level that the coarse level describes is anchored when the coarse cell over
+  // it is, and when the coarse level holds nothing there.
+  {
+    LevelData<BaseFab<signed char>> parents(coarsenedFine, 1, IntVect::Unit);
+
+    for (DataIterator dit(coarsenedFine); dit.ok(); ++dit) {
+      parents[dit()].setVal(1);
+    }
+
+    const Copier copier(a_coarse.m_grids, coarsenedFine, a_coarse.m_domain, IntVect::Unit);
+
+    a_coarse.m_anchored.copyTo(Interval(0, 0), parents, Interval(0, 0), copier);
+
+    const Box& domainBox = a_fine.m_domain.domainBox();
+
+    for (DataIterator dit(a_fine.m_grids); dit.ok(); ++dit) {
+      const Box grown = grow(a_fine.m_grids[dit()], a_fine.m_numGhost) & domainBox;
+
+      BaseFab<signed char>&       anchor = a_fine.m_anchored[dit()];
+      const BaseFab<signed char>& parent = parents[dit()];
+
+      for (BoxIterator bit(grown); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        if (anchor(iv, 1) != 0 && anchor(iv, 0) == 0 && parent(coarsen(iv, 2), 0) != 0) {
+          anchor(iv, 0) = 1;
+
+          numNew++;
+        }
+      }
+    }
+  }
+
+  return ParallelOps::sum(numNew);
+}
+
+void
+PolyhedralEBGraph::anchorUncarriedCells()
+{
+  CH_TIME("PolyhedralEBGraph::anchorUncarriedCells");
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    BaseFab<signed char>& anchor = m_anchored[dit()];
+
+    for (BoxIterator bit(anchor.box()); bit.ok(); ++bit) {
+      if (anchor(bit(), 1) != 0) {
+        anchor(bit(), 0) = 1;
+      }
+    }
+  }
+}
+
+long long
+PolyhedralEBGraph::fillSealedCells()
+{
+  CH_TIME("PolyhedralEBGraph::fillSealedCells");
+
+  const Box& domainBox = m_domain.domainBox();
+
   long long numSealed = 0;
 
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     const Box box = m_grids[dit()];
 
-    const BaseFab<signed char>& anchor = anchored[dit()];
-    BaseFab<signed char>&       states = m_cellStates[dit()];
-    BaseFab<signed char>&       faces  = m_faceStates[dit()];
+    const BaseFab<signed char>& anchor  = m_anchored[dit()];
+    const BaseFab<signed char>& refined = m_refined[dit()];
+    BaseFab<signed char>&       states  = m_cellStates[dit()];
+    BaseFab<signed char>&       faces   = m_faceStates[dit()];
 
     IntVectSet& cut = m_cutCells[dit()];
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
-      if (states(iv, 0) != s_cut || anchor(iv, 0) != 0) {
+      if (states(iv, 0) != s_cut || refined(iv, 0) != 0 || anchor(iv, 0) != 0) {
         continue;
       }
 
@@ -682,6 +815,8 @@ PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carr
       numSealed++;
     }
   }
+
+  m_anchored.clear();
 
   const long long totalSealed = ParallelOps::sum(numSealed);
 
@@ -702,6 +837,11 @@ PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carr
           cut -= bit();
         }
       }
+    }
+
+    if (procID() == 0) {
+      pout() << "PolyhedralEBGraph::fillSealedCells - filled " << totalSealed
+             << " cells whose fluid reaches no regular cell" << endl;
     }
   }
 

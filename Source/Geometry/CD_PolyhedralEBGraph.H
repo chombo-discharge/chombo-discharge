@@ -169,6 +169,47 @@ public:
   link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_fine);
 
   /**
+   * @brief Spread anchoring through the open faces of this level until it stops.
+   * @details Filling a cell closes the faces onto it, and fluid that reached the rest of the fluid only through such
+   * faces is left sealed off: beside a filled gap thinner than a cell, the slivers at the gap's corners are joined
+   * to one another and to nothing else. No stencil fits in fluid that holds no regular cell, so such fluid is
+   * filled. A cut cell is anchored when an open face joins it to an anchored cell; the spread runs box by box with
+   * an exchange in between until no box anchors anything new. A face on the domain boundary anchors nothing, and a
+   * cell the finer level carries passes nothing through itself: what it holds is the finer level's. Collective.
+   * @return Number of cells anchored, over all ranks.
+   */
+  long long
+  spreadAnchors();
+
+  /**
+   * @brief Carry anchoring across a level boundary, both ways.
+   * @details A coarse cell the fine level carries is anchored when any of its children is, and a cut ghost cell of
+   * the fine level that the coarse level describes is anchored when the coarse cell over it is. Where the coarse
+   * level holds nothing over such a ghost cell, the ghost cell is anchored. Collective.
+   * @param[in,out] a_coarse Graph of the coarser level.
+   * @param[in,out] a_fine   Graph of the finer level, a factor-two refinement of it.
+   * @return Number of cells newly anchored, over all ranks.
+   */
+  static long long
+  anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBGraph& a_fine);
+
+  /**
+   * @brief Anchor every cut ghost cell no tile carries, for a level with no coarser graph to answer for them.
+   */
+  void
+  anchorUncarriedCells();
+
+  /**
+   * @brief Fill every cut cell anchoring did not reach, and let go of the anchoring.
+   * @details The cell becomes covered with every face closed and leaves the cut cells; its surface stays, as a
+   * filled cell's does. A sealed region has no open face onto anchored fluid, so filling it changes no face of a
+   * cell that stays. Run once spreadAnchors and anchorAcrossLevels have settled on every level. Collective.
+   * @return Number of cells filled, over all ranks.
+   */
+  long long
+  fillSealedCells();
+
+  /**
    * @brief Find the cells of a region that one body cannot describe, or that are mostly a gap of fluid.
    * @details A cell the surface enters as more than one sheet holds more than one piece of fluid or more than one
    * piece of solid. Two pieces of fluid -- a plate between them -- are more than one body can hold, and the cell is
@@ -398,6 +439,12 @@ protected:
   LevelData<BaseFab<signed char>> m_refined;
 
   /**
+   * @brief Anchoring, from beginAnchoring until fillSealedCells: one where a cell's fluid reaches a regular cell, and
+   * in a second component one on the cut ghost cells no tile carries, which the coarser level answers for.
+   */
+  LevelData<BaseFab<signed char>> m_anchored;
+
+  /**
    * @brief Cells of every box that hold a surface.
    */
   LayoutData<IntVectSet> m_surfaceCells;
@@ -444,19 +491,15 @@ protected:
   defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
-   * @brief Fill every cut cell whose fluid reaches no regular cell through open faces.
-   * @details Filling a cell closes the faces onto it, and fluid that reached the rest of the fluid only through such
-   * faces is left sealed off: beside a filled gap thinner than a cell, the slivers at the gap's corners are joined
-   * to one another and to nothing else. No stencil fits in fluid that holds no regular cell, so such fluid is
-   * filled as well. Fluid is anchored by a regular cell, by a cell the finer level carries, and by a ghost cell no
-   * tile carries, which the coarser level describes; anchoring then spreads through open faces, box by box with an
-   * exchange in between, until it settles everywhere. A face on the domain boundary anchors nothing. A sealed
-   * region has no open face onto anchored fluid, so filling it changes no face of a cell that stays. Collective.
+   * @brief Record which cells anchor fluid before any of it is spread, for fillSealedCells.
+   * @details Regular cells anchor. A cell the finer level carries anchors when the finer level's fluid in it does,
+   * and a cut ghost cell no tile carries -- the coarser level describes it -- when the coarser level's fluid there
+   * does; both start unanchored and are told by anchorAcrossLevels. A regular ghost cell no tile carries anchors, a
+   * covered one does not.
    * @param[in] a_carried The marker from markCarried.
-   * @return Number of cells filled, over all ranks.
    */
-  long long
-  fillSealedCells(const LevelData<BaseFab<signed char>>& a_carried);
+  void
+  beginAnchoring(const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
    * @brief Set m_refined from m_covered, over every box and its ghost cells.
