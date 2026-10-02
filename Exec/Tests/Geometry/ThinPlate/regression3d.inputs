@@ -84,3 +84,4 @@ Driver.refine_dielectrics           = -1                   ## Refine dielectric 
 ThinPlate.normal        = 1 1 0       ## Plate normal, 45 degrees about z
 ThinPlate.thickness     = 0.015625    ## Half a cell at 64^3 over [-1,1] (dx = 0.03125)
 ThinPlate.offset        = 0.0         ## Signed distance of the plate's mid-plane from the origin
+ThinPlate.invert        = false       ## Swap gas and solid, making the plate a gap of gas through solid
