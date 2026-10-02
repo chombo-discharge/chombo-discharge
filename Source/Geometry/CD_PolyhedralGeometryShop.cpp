@@ -4681,8 +4681,8 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   BaseFab<Real> nodeValues;
   PolyhedralGeometryShop::fillNodeValues(*m_baseIF, nodeValues, a_ghostRegion, a_probLo, a_dx);
 
-  // The same reading the graph takes: a cell holding a feature thinner than half of itself cannot be described by
-  // one body, so it is filled rather than built. Decided for the whole region before any cell is classified. Nothing is
+  // The same reading the graph takes: a cell one body cannot describe, or that is mostly a gap of fluid, is filled
+  // rather than built. Decided for the whole region before any cell is classified. Nothing is
   // carried above this level -- it is the finest the index space is generated on, the coarser ones being coarsened from
   // it -- so no cell is spared for being resolved elsewhere.
   BaseFab<bool> unresolved(a_ghostRegion, 1);

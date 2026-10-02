@@ -261,12 +261,10 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
     return numPieces;
   };
 
-  const Real halfDx = 0.5 * a_dx;
+  // the crossings a body is built from, bisected once per edge for the cells that need a body here
+  BaseFab<Real> intercept[SpaceDim];
 
-  const Box children(IntVect::Zero, IntVect::Unit);
-  const Box halfNodes(IntVect::Zero, 2 * IntVect::Unit);
-
-  BaseFab<Real> halfValues(halfNodes, 1);
+  PolyhedralGeometryShop::defineIntercepts(intercept, a_region);
 
   for (BoxIterator bit(a_region); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -291,45 +289,19 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
       continue;
     }
 
-    // One piece of fluid in more than one sheet means more than one piece of solid, and the corners alone cannot
-    // say whether that is a feature thinner than the cell -- a gap of fluid between two solid lobes -- or pieces
-    // that merely sit apart in it, such as two solid tips at opposite corners of a face. The
-    // cell is cut in two along every direction and the function read at the new nodes: a feature thinner than
-    // half the cell leaves some half-cell in more than one sheet as well, and the cell is filled; otherwise every
-    // piece is resolved at half the cell, and the cell is kept as one body with several sheets of interface. The
-    // corners keep the values the cell already has, so the half-cells agree with it where they meet its nodes.
-    for (BoxIterator nit(halfNodes); nit.ok(); ++nit) {
-      const IntVect half = nit();
+    // One piece of fluid in more than one sheet means more than one piece of solid, which is either a gap of fluid
+    // between two solid lobes or solid pieces that merely sit apart in a cell of fluid, such as two tips at opposite
+    // corners of a face. The two have the same topology and the same corners, and a pattern that repeats at every
+    // scale -- a surface lying in a node plane -- looks the same in every subcell too. What tells them apart is which
+    // phase is the thin one: the cell is filled when its fluid is the smaller part of it, erring toward blocking a
+    // gap, and kept, as one body with several sheets of interface, when the fluid fills most of it. A body that
+    // cannot be built is filled.
+    CutCellBody body;
 
-      bool atCorner = true;
+    PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
 
-      for (int d = 0; d < SpaceDim; d++) {
-        atCorner = atCorner && (half[d] != 1);
-      }
-
-      if (atCorner) {
-        halfValues(half, 0) = a_nodeValues(iv + half / 2, 0);
-      }
-      else {
-        RealVect x = a_probLo;
-
-        for (int d = 0; d < SpaceDim; d++) {
-          x[d] += halfDx * static_cast<Real>(2 * iv[d] + half[d]);
-        }
-
-        halfValues(half, 0) = PolyhedralGeometryShop::snappedValue(a_function, x, halfDx);
-      }
-    }
-
-    for (BoxIterator cit(children); cit.ok() && !a_unresolved(iv, 0); ++cit) {
-      CutCellSurface child;
-
-      PolyhedralGeometryShop::fillCorners(child, halfValues, cit());
-      PolyhedralGeometryShop::decideFaces(a_function, child, 2 * iv + cit(), a_probLo, halfDx);
-
-      if (sheetsOf(child) > 1) {
-        a_unresolved(iv, 0) = true;
-      }
+    if (!body.define(surface) || body.volumeFraction() < 0.5) {
+      a_unresolved(iv, 0) = true;
     }
   }
 }
@@ -415,11 +387,12 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
       PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
 
-      // A cell holding a feature thinner than half of itself cannot be described by one body: read from the
-      // nodes, a plate through the middle comes out as two slivers hugging opposite edges, and the fluid runs
-      // straight through a barrier that should stop it. The cell is filled, which is the only reading that stays
-      // single valued and keeps the barrier a barrier, and it errs toward blocking rather than leaking. A cell
-      // whose several sheets are each resolved at half the cell is built as one body holding all of them. Unlike
+      // A cell whose fluid falls into two pieces cannot be described by one body: read from the nodes, a plate
+      // through the middle comes out as two slivers hugging opposite edges, and the fluid runs straight through a
+      // barrier that should stop it. The cell is filled, which is the only reading that stays single valued and
+      // keeps the barrier a barrier, and it errs toward blocking rather than leaking; so is a cell that is mostly a
+      // gap of fluid between solid pieces. A cell of one piece of fluid that fills most of it is built as one body
+      // holding all of its sheets. Unlike
       // moving a node, this changes no value another level reads, so the children a coarse cell restricts against
       // still agree with it about every edge.
       const CutCellBody::Kind kind = unresolved(iv, 0) ? CutCellBody::Kind::Covered : CutCellBody::classify(surface);

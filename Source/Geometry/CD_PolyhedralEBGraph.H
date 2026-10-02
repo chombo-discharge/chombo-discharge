@@ -169,17 +169,18 @@ public:
   link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_fine);
 
   /**
-   * @brief Find the cells of a region that hold a feature thinner than half of themselves.
+   * @brief Find the cells of a region that one body cannot describe, or that are mostly a gap of fluid.
    * @details A cell the surface enters as more than one sheet holds more than one piece of fluid or more than one
    * piece of solid. Two pieces of fluid -- a plate between them -- are more than one body can hold, and the cell is
    * filled, which is the only reading that stays single valued and keeps a barrier a barrier instead of letting
    * the fluid run through it. One piece of fluid with several pieces of solid is either a gap of fluid thinner than
    * the cell between two solid lobes, or pieces that merely sit apart in it, such as two solid tips at opposite
-   * corners of a face, and the corners alone cannot tell the two apart. The cell is then cut in two along every
-   * direction and the function read at the new nodes. If some half-cell is entered by more than one sheet as well,
-   * the gap is thinner than half the cell and the cell is filled, erring toward blocking. Otherwise every piece is
-   * resolved at half the cell, and the cell is kept, as one body with several sheets of interface. Fluid pieces are
-   * counted the way the body joins them: across a face by its saddle, never through the interior. Filling is a
+   * corners of a face. The two share their topology and their corners, and a pattern that repeats at every scale --
+   * a surface lying in a node plane -- looks the same in every subcell as well, so it is the volume that decides:
+   * the cell's body is built from its crossings, and the cell is filled when the fluid is the smaller part of it,
+   * erring toward blocking a gap, and kept, as one body with several sheets of interface, when the fluid fills
+   * most of it. Fluid pieces are counted the way the body joins them: across a face by its face decision, never
+   * through the interior. Filling is a
    * classification and changes no value another level reads, so the children a coarse cell restricts against still
    * agree with it about where every edge is crossed -- which is what a snap of the nodes themselves cannot promise.
    *
@@ -190,7 +191,7 @@ public:
    * see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken
    * here would report a cell near a box boundary once for every box that reaches it. The caller counts over the
    * cells it owns.
-   * @param[in]  a_function   Implicit function, read at the nodes of the half-cells.
+   * @param[in]  a_function   Implicit function, read at face centres and along the edges of multi-sheet cells.
    * @param[in]  a_nodeValues Node values of the region.
    * @param[in]  a_region     Cells to ask.
    * @param[in]  a_covered    Cells a finer level carries.
