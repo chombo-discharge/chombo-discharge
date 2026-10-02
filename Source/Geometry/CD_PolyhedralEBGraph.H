@@ -118,15 +118,18 @@ public:
    * @param[in] a_numGhost        Ghost cells the cell states are kept for.
    * @param[in] a_covered         Cells of this level the finer level will carry, coarsened onto this level. A cell
    * in them is described up there and is not filled down here.
+   * @param[in] a_coarser         Graph of the coarser level, already defined, or null where there is none. A face onto
+   * a cell it filled is closed here, and a cell with such a face is kept cut, as beside a cell this level fills.
    */
   virtual void
-  define(const BaseIF&        a_function,
-         const Vector<Box>&   a_cutTiles,
-         const ProblemDomain& a_domain,
-         const RealVect&      a_probLo,
-         const Real           a_dx,
-         const int            a_numGhost,
-         const Vector<Box>&   a_covered);
+  define(const BaseIF&            a_function,
+         const Vector<Box>&       a_cutTiles,
+         const ProblemDomain&     a_domain,
+         const RealVect&          a_probLo,
+         const Real               a_dx,
+         const int                a_numGhost,
+         const Vector<Box>&       a_covered,
+         const PolyhedralEBGraph* a_coarser);
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
@@ -357,6 +360,20 @@ public:
   markCarried(LevelData<BaseFab<signed char>>& a_carried) const;
 
   /**
+   * @brief Mark the cells of this level, valid and ghost, that lie under a cell the coarser level filled.
+   * @details Such a cell is never carried here, since the coarser level fills no cell this level describes, so the
+   * marker lands on ghost cells the coarser level answers for. A face of this level onto one of them opens onto
+   * nothing and has to be closed from this side. Collective.
+   * @param[out] a_filled  The marker, defined here over the layout with a_ghost ghost cells.
+   * @param[in]  a_coarser Graph of the coarser level, a factor two coarser.
+   * @param[in]  a_ghost   Ghost cells of the marker.
+   */
+  void
+  markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
+                    const PolyhedralEBGraph&         a_coarser,
+                    const int                        a_ghost) const;
+
+  /**
    * @brief Make a regular or covered cell of a box, own or ghost, a cut cell of this level.
    * @details For a cell on a refinement boundary whose face the finer level describes otherwise than its corners do: a
    * regular cell whose face the finer level cuts or closes, or a covered one onto whose face the finer level opens. The
@@ -510,11 +527,15 @@ protected:
   /**
    * @brief Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with
    * ghost cells, and set the face states the apertures decide.
-   * @param[in] a_function Implicit function.
-   * @param[in] a_carried  The marker from markCarried.
+   * @param[in] a_function      Implicit function.
+   * @param[in] a_carried       The marker from markCarried.
+   * @param[in] a_coarserFilled The marker from markCoarserFilled, with one ghost cell, or null where there is no
+   * coarser level.
    */
   void
-  defineCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
+  defineCells(const BaseIF&                          a_function,
+              const LevelData<BaseFab<signed char>>& a_carried,
+              const LevelData<BaseFab<signed char>>* a_coarserFilled);
 
   /**
    * @brief Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.

@@ -225,7 +225,11 @@ PolyhedralGeometryShop::buildGraphs()
       }
     }
 
-    m_graphs[lvl]->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, covered);
+    const PolyhedralEBGraph* coarser = (lvl > startLevel && m_graphs[lvl - 1]->isDefined()) ? &(*m_graphs[lvl - 1])
+                                                                                            : nullptr;
+
+    m_graphs[lvl]
+      ->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, covered, coarser);
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
@@ -914,7 +918,7 @@ PolyhedralGeometryShop::readFineCells(BaseFab<Real>&                            
   PolyhedralGeometryShop::defineIntercepts(a_crossings, a_region);
 
   a_fluidJoined.define(a_region, 1);
-  a_fluidJoined.setVal(0);
+  a_fluidJoined.setVal(-1);
 
   // Every cell that holds a surface writes its corners and its crossings. The nodes and edges it shares were written
   // from the same values by every cell that built them, so a disagreement is a graph that contradicts itself.
@@ -1012,7 +1016,61 @@ PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
 
   PolyhedralGeometryShop::fillCorners(a_surface, a_nodes, a_cell);
 
-  a_surface.m_fluidJoined = a_fluidJoined(a_cell, 0);
+  // A face's decision belongs to the face, and is known from whichever cell beside it holds a surface: a child of an
+  // unrefined coarse cell holds none, but the finer cell across its face may. A face neither side knows falls back on
+  // the bilinear saddle of its corners.
+  auto known = [&](const IntVect& a_iv) -> bool {
+    return a_fluidJoined.box().contains(a_iv) && a_fluidJoined(a_iv, 0) >= 0;
+  };
+
+  a_surface.m_fluidJoined = 0;
+
+#if CH_SPACEDIM == 3
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      int faceCorner[4];
+
+      PolyhedralEB::detail::faceCorners(dir, side, faceCorner);
+
+      const Real f00 = a_surface.m_corner[faceCorner[0]];
+      const Real f10 = a_surface.m_corner[faceCorner[1]];
+      const Real f11 = a_surface.m_corner[faceCorner[2]];
+      const Real f01 = a_surface.m_corner[faceCorner[3]];
+
+      const bool alternating = PolyhedralEB::isFluid(f00) == PolyhedralEB::isFluid(f11) &&
+                               PolyhedralEB::isFluid(f10) == PolyhedralEB::isFluid(f01) &&
+                               PolyhedralEB::isFluid(f00) != PolyhedralEB::isFluid(f10);
+
+      if (!alternating) {
+        continue;
+      }
+
+      const IntVect across = a_cell + (2 * side - 1) * BASISV(dir);
+
+      bool joined = false;
+
+      if (known(a_cell)) {
+        joined = ((a_fluidJoined(a_cell, 0) >> (2 * dir + side)) & 1) != 0;
+      }
+      else if (known(across)) {
+        joined = ((a_fluidJoined(across, 0) >> (2 * dir + 1 - side)) & 1) != 0;
+      }
+      else {
+        const Real den = f00 + f11 - f10 - f01;
+
+        joined = PolyhedralEB::isFluid((std::abs(den) > 0.0) ? (f00 * f11 - f10 * f01) / den : (f00 + f11));
+      }
+
+      if (joined) {
+        a_surface.m_fluidJoined |= 1 << (2 * dir + side);
+      }
+    }
+  }
+#else
+  if (known(a_cell)) {
+    a_surface.m_fluidJoined = a_fluidJoined(a_cell, 0);
+  }
+#endif
 
   for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
     const int dir = PolyhedralEB::detail::edgeDirection(e);
@@ -1086,7 +1144,9 @@ PolyhedralGeometryShop::copyFinerCells(const PolyhedralEBGraph&                 
 }
 
 void
-PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph* a_fine) const
+PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
+                                    const PolyhedralEBGraph* a_fine,
+                                    const PolyhedralEBGraph* a_coarser) const
 {
   CH_TIME("PolyhedralGeometryShop::stitchLevel");
 
@@ -1144,6 +1204,24 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
   }
 
   filled.exchange();
+
+  // and the cells the coarser level filled beside this level's tiles, which only the coarser level knows
+  if (a_coarser != nullptr) {
+    LevelData<BaseFab<signed char>> coarserFilled;
+
+    a_coarse.markCoarserFilled(coarserFilled, *a_coarser, numGhost + 1);
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      BaseFab<signed char>&       filledFab = filled[dit()];
+      const BaseFab<signed char>& coarseFab = coarserFilled[dit()];
+
+      for (BoxIterator bit(filledFab.box() & domain); bit.ok(); ++bit) {
+        if (coarseFab(bit(), 0) != 0) {
+          filledFab(bit(), 0) = 1;
+        }
+      }
+    }
+  }
 
   long long numMismatched      = 0;
   long long numTwiceCrossed    = 0;
@@ -3099,7 +3177,11 @@ PolyhedralGeometryShop::stitchGraphs(const Vector<RefCountedPtr<PolyhedralEBGrap
 
     const bool haveFiner = lvl + 1 < a_graphs.size() && !a_graphs[lvl + 1].isNull() && a_graphs[lvl + 1]->isDefined();
 
-    this->stitchLevel(*a_graphs[lvl], haveFiner ? &(*a_graphs[lvl + 1]) : nullptr);
+    const bool haveCoarser = lvl > 0 && !a_graphs[lvl - 1].isNull() && a_graphs[lvl - 1]->isDefined();
+
+    this->stitchLevel(*a_graphs[lvl],
+                      haveFiner ? &(*a_graphs[lvl + 1]) : nullptr,
+                      haveCoarser ? &(*a_graphs[lvl - 1]) : nullptr);
   }
 }
 
@@ -3612,6 +3694,7 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
   long long numOpen     = 0;
   long long numOverused = 0;
   long long numTouching = 0;
+  long long numOntoFill = 0;
   int       numReported = 0;
 
   // A regular cell and a covered one cannot share a face: the four nodes of that face belong to both, and they
@@ -3679,6 +3762,66 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
                 pout() << "PolyhedralGeometryShop::sanityCheck - level " << lvl << " cell " << iv << " is "
                        << static_cast<int>(state(iv, 0)) << " and its neighbour " << jv << " is "
                        << static_cast<int>(state(jv, 0)) << ", with no cut cell between them" << endl;
+
+                numReported++;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // A face onto a cell the coarser level filled opens onto nothing, and only this level can close it: the closure check
+  // below leaves faces the coarser level describes to that level, which has no fluid there to meet them with.
+  for (int lvl = 1; lvl < a_graphs.size(); lvl++) {
+    if (!a_graphs[lvl]->isDefined() || !a_graphs[lvl - 1]->isDefined()) {
+      continue;
+    }
+
+    const PolyhedralEBGraph& graph = *a_graphs[lvl];
+
+    LevelData<BaseFab<signed char>> coarserFilled;
+
+    graph.markCoarserFilled(coarserFilled, *a_graphs[lvl - 1], 1);
+
+    const DisjointBoxLayout& grids = graph.getGrids();
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const BaseFab<signed char>& state  = graph.getCellStates()[dit()];
+      const BaseFab<signed char>& filled = coarserFilled[dit()];
+
+      for (BoxIterator bit(grids[dit()]); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        // a cell the finer level carries is described up there
+        if (state(iv, 0) == PolyhedralEBGraph::s_covered || graph.getRefinedMask()[dit()](iv, 0) != 0) {
+          continue;
+        }
+
+        CutCellBody body;
+
+        if (state(iv, 0) == PolyhedralEBGraph::s_cut) {
+          PolyhedralGeometryShop::defineBody(body, graph.getSurfaces()[dit()], graph.getFaceOverrides()[dit()], iv);
+        }
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (int side = 0; side < 2; side++) {
+            const IntVect jv = iv + (2 * side - 1) * BASISV(dir);
+
+            if (!filled.box().contains(jv) || filled(jv, 0) == 0) {
+              continue;
+            }
+
+            const bool open = (state(iv, 0) == PolyhedralEBGraph::s_regular) ||
+                              body.areaFraction(dir, (side == 0) ? Side::Lo : Side::Hi) > 0.0;
+
+            if (open) {
+              numOntoFill++;
+
+              if (numReported < 10) {
+                pout() << "PolyhedralGeometryShop::sanityCheck - level " << lvl << " cell " << iv << " opens onto "
+                       << jv << ", which the coarser level filled" << endl;
 
                 numReported++;
               }
@@ -4088,15 +4231,20 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
   const long long totalOpen     = ParallelOps::sum(numOpen);
   const long long totalOverused = ParallelOps::sum(numOverused);
   const long long totalTouching = ParallelOps::sum(numTouching);
+  const long long totalOntoFill = ParallelOps::sum(numOntoFill);
 
   if (procID() == 0) {
     pout() << "PolyhedralGeometryShop::sanityCheck - " << totalOpen << " interior edges open, " << totalOverused
-           << " interior edges used more than twice, " << totalTouching << " regular cells against a covered one"
-           << endl;
+           << " interior edges used more than twice, " << totalTouching << " regular cells against a covered one, "
+           << totalOntoFill << " faces open onto a coarser filled cell" << endl;
   }
 
   if (totalTouching > 0) {
     MayDay::Error("PolyhedralGeometryShop::sanityCheck - a regular cell shares a face with a covered one");
+  }
+
+  if (totalOntoFill > 0) {
+    MayDay::Error("PolyhedralGeometryShop::sanityCheck - a face opens onto a cell the coarser level filled");
   }
 
   if (totalOpen > 0 || totalOverused > 0) {

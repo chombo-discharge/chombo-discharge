@@ -40,13 +40,14 @@ PolyhedralEBGraph::~PolyhedralEBGraph()
 }
 
 void
-PolyhedralEBGraph::define(const BaseIF&        a_function,
-                          const Vector<Box>&   a_cutTiles,
-                          const ProblemDomain& a_domain,
-                          const RealVect&      a_probLo,
-                          const Real           a_dx,
-                          const int            a_numGhost,
-                          const Vector<Box>&   a_covered)
+PolyhedralEBGraph::define(const BaseIF&            a_function,
+                          const Vector<Box>&       a_cutTiles,
+                          const ProblemDomain&     a_domain,
+                          const RealVect&          a_probLo,
+                          const Real               a_dx,
+                          const int                a_numGhost,
+                          const Vector<Box>&       a_covered,
+                          const PolyhedralEBGraph* a_coarser)
 {
   CH_TIME("PolyhedralEBGraph::define");
 
@@ -71,7 +72,14 @@ PolyhedralEBGraph::define(const BaseIF&        a_function,
 
   this->markCarried(carried);
 
-  this->defineCells(a_function, carried);
+  // what the coarser level filled beside this level's tiles, which closes the faces onto it
+  LevelData<BaseFab<signed char>> coarserFilled;
+
+  if (a_coarser != nullptr) {
+    this->markCoarserFilled(coarserFilled, *a_coarser, 1);
+  }
+
+  this->defineCells(a_function, carried, (a_coarser != nullptr) ? &coarserFilled : nullptr);
   this->defineOuterFaces(carried);
 
   m_isDefined = true;
@@ -307,7 +315,9 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
 }
 
 void
-PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried)
+PolyhedralEBGraph::defineCells(const BaseIF&                          a_function,
+                               const LevelData<BaseFab<signed char>>& a_carried,
+                               const LevelData<BaseFab<signed char>>* a_coarserFilled)
 {
   CH_TIME("PolyhedralEBGraph::defineCells");
 
@@ -330,6 +340,16 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
     IntVectSet& withSurface = m_surfaceCells[dit()];
 
     Vector<CutCellSurface>& surfaces = kept[dit()];
+
+    // a neighbour filled on this level, or a cell the coarser level filled
+    auto filledNeighbour = [&](const IntVect& a_other, const BaseFab<bool>& a_unresolved) -> bool {
+      if (a_unresolved.box().contains(a_other) && a_unresolved(a_other, 0)) {
+        return true;
+      }
+
+      return a_coarserFilled != nullptr && (*a_coarserFilled)[dit()].box().contains(a_other) &&
+             (*a_coarserFilled)[dit()](a_other, 0) != 0;
+    };
 
     // Ghost cells are filled afterwards: by exchange where another tile carries them, from the function where
     // none does. Until then, and outside the domain for good, they are regular so that nothing reads them as a
@@ -409,7 +429,7 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
         for (int side = 0; side < 2 && !nextToFilled; side++) {
           const IntVect other = iv + (2 * side - 1) * BASISV(dir);
 
-          nextToFilled = unresolved.box().contains(other) && unresolved(other, 0);
+          nextToFilled = filledNeighbour(other, unresolved);
         }
       }
 
@@ -449,7 +469,7 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
           const IntVect other = iv + (2 * side - 1) * BASISV(dir);
 
-          const bool ontoFilled = unresolved.box().contains(other) && unresolved(other, 0);
+          const bool ontoFilled = filledNeighbour(other, unresolved);
 
           if (ontoFilled) {
             open = false;
@@ -1114,6 +1134,69 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
   }
 
   return ParallelOps::min(same) == 1;
+}
+
+void
+PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
+                                     const PolyhedralEBGraph&         a_coarser,
+                                     const int                        a_ghost) const
+{
+  CH_TIME("PolyhedralEBGraph::markCoarserFilled");
+
+  if (refine(a_coarser.m_domain, 2) != m_domain) {
+    MayDay::Error("PolyhedralEBGraph::markCoarserFilled - this domain is not the coarser domain refined by two");
+  }
+
+  // the coarser level's filled cells, on its own layout
+  LevelData<BaseFab<signed char>> coarseFilled(a_coarser.m_grids, 1, IntVect::Zero);
+
+  for (DataIterator dit(a_coarser.m_grids); dit.ok(); ++dit) {
+    BaseFab<signed char>& filled = coarseFilled[dit()];
+
+    filled.setVal(0);
+
+    for (BoxIterator bit(a_coarser.m_grids[dit()]); bit.ok(); ++bit) {
+      if (PolyhedralGeometryShop::isFilled(a_coarser.m_cellStates[dit()],
+                                           a_coarser.m_refined[dit()],
+                                           a_coarser.m_surfaceCells[dit()],
+                                           a_coarser.m_surfaces[dit()],
+                                           bit())) {
+        filled(bit(), 0) = 1;
+      }
+    }
+  }
+
+  // copied onto this layout coarsened, with a ring wide enough to sit under this level's ghost cells
+  DisjointBoxLayout coarsened;
+
+  coarsen(coarsened, m_grids, 2);
+
+  const int coarseGhost = (a_ghost + 1) / 2;
+
+  LevelData<BaseFab<signed char>> under(coarsened, 1, coarseGhost * IntVect::Unit);
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    under[dit()].setVal(0);
+  }
+
+  const Copier copier(a_coarser.m_grids, coarsened, a_coarser.m_domain, coarseGhost * IntVect::Unit);
+
+  coarseFilled.copyTo(Interval(0, 0), under, Interval(0, 0), copier);
+
+  const Box& domainBox = m_domain.domainBox();
+
+  a_filled.define(m_grids, 1, a_ghost * IntVect::Unit);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    BaseFab<signed char>&       filled = a_filled[dit()];
+    const BaseFab<signed char>& coarse = under[dit()];
+
+    filled.setVal(0);
+
+    for (BoxIterator bit(grow(m_grids[dit()], a_ghost) & domainBox); bit.ok(); ++bit) {
+      filled(bit(), 0) = coarse(coarsen(bit(), 2), 0);
+    }
+  }
 }
 
 void

@@ -639,6 +639,24 @@ public:
   static Real
   resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
 
+  /**
+   * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.
+   * @details The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners
+   * agree closes the face by its corners already, and a cell the finer level carries is described up there.
+   * @param[in] a_states      Cell states around the cell.
+   * @param[in] a_refined     Refined mask around the cell.
+   * @param[in] a_withSurface Cells around the cell that hold a surface.
+   * @param[in] a_surfaces    Their surfaces.
+   * @param[in] a_cell        The cell.
+   * @return True if the cell was filled.
+   */
+  static bool
+  isFilled(const BaseFab<signed char>&                 a_states,
+           const BaseFab<signed char>&                 a_refined,
+           const IntVectSet&                           a_withSurface,
+           const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
+           const IntVect&                              a_cell);
+
 protected:
   /**
    * @brief Fraction of a level's grid spacing within which two vertices are the same vertex, in sanityCheck and in
@@ -762,24 +780,6 @@ protected:
   sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph>>& a_graphs) const;
 
   /**
-   * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.
-   * @details The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners
-   * agree closes the face by its corners already, and a cell the finer level carries is described up there.
-   * @param[in] a_states      Cell states around the cell.
-   * @param[in] a_refined     Refined mask around the cell.
-   * @param[in] a_withSurface Cells around the cell that hold a surface.
-   * @param[in] a_surfaces    Their surfaces.
-   * @param[in] a_cell        The cell.
-   * @return True if the cell was filled.
-   */
-  static bool
-  isFilled(const BaseFab<signed char>&                 a_states,
-           const BaseFab<signed char>&                 a_refined,
-           const IntVectSet&                           a_withSurface,
-           const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-           const IntVect&                              a_cell);
-
-  /**
    * @brief Which of a cell's edges the finer level describes.
    * @details An edge is shared by the cells that meet along it, and the crossing on it has to be one point for all of
    * them, so the question is asked of the edge: it is refined if any cell meeting it is.
@@ -876,7 +876,7 @@ protected:
    * that no such cell touches carries no crossing. Cells the finer level does not hold write nothing.
    * @param[out] a_nodes       Node values over the nodes of a_region.
    * @param[out] a_crossings   Crossings over the edges of a_region, addressed as defineIntercepts addresses them.
-   * @param[out] a_fluidJoined Face decisions of each cell of a_region that holds a surface, zero elsewhere.
+   * @param[out] a_fluidJoined Face decisions of each cell of a_region that holds a surface, minus one elsewhere.
    * @param[in]  a_region      Cells of the finer level.
    * @param[in]  a_states      Cell states of the finer level over the region, s_absent where it holds none.
    * @param[in]  a_mask        One where a cell holds a surface.
@@ -893,6 +893,8 @@ protected:
 
   /**
    * @brief One cell's surface, read off node values, edge crossings and face decisions that are already known.
+   * @details A face's decision is taken from the cell itself where it holds a surface, else from the cell across the
+   * face, else from the bilinear saddle of the face's corners.
    * @param[out] a_surface     The surface.
    * @param[in]  a_nodes       Node values.
    * @param[in]  a_crossings   Edge crossings, addressed as defineIntercepts addresses them.
@@ -940,11 +942,13 @@ protected:
    * is an edge the finer level crosses twice, which is counted and reported rather than acted on. Every stitched
    * surface carries its role. Under sanity_check each body is also built from the stored data, and from the implicit
    * function where its children can say the same, and they must agree bit for bit. Collective.
-   * @param[in,out] a_coarse The level.
-   * @param[in]     a_fine   The finer level, or null where there is none.
+   * A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
+   * @param[in,out] a_coarse  The level.
+   * @param[in]     a_fine    The finer level, or null where there is none.
+   * @param[in]     a_coarser The coarser level, or null where there is none.
    */
   void
-  stitchLevel(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph* a_fine) const;
+  stitchLevel(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph* a_fine, const PolyhedralEBGraph* a_coarser) const;
 
   /**
    * @brief Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.
