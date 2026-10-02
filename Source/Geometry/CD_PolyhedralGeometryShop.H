@@ -210,7 +210,7 @@ public:
    * face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, an
    * edge in a face the coarser level describes is checked from that side, and an edge in a face onto a cell the graph
    * filled has no partner to meet, since that face is closed. Every rank checks its own cells, vertices are welded at
-   * s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. A regular cell
+   * s_weldSpacing times the level's spacing, the counts are summed, and a violation stops the run. A regular cell
    * sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and
    * cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees
    * with itself, and there would be no cut cell to carry the interface between them. A filled cell is covered whatever
@@ -619,9 +619,14 @@ public:
 
 protected:
   /**
-   * @brief Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck.
+   * @brief Fraction of a level's grid spacing within which two vertices are the same vertex, in sanityCheck and in
+   * the written surface.
+   * @details Cells of one level compute a shared vertex from the same nodes and edge and agree bit for bit, and cells
+   * rebuilt across a level boundary agree to about 1e-12 of a cell, so the radius sits just above that. A larger one
+   * welds the distinct vertices of a feature thinner than it into one, and the check then reports its edges as used
+   * more than twice.
    */
-  static constexpr Real s_weldSpacing = 1.0E-6;
+  static constexpr Real s_weldSpacing = 1.0E-10;
 
   /**
    * @brief The geometry whose grids the polyhedra are built over, or null before setGrids.
