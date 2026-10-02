@@ -619,6 +619,15 @@ PolyhedralEBGraph::spreadAnchors()
       const BaseFab<signed char>& faces   = m_faceStates[dit()];
       const BaseFab<signed char>& refined = m_refined[dit()];
 
+      // A face is open unless it is closed or lies on the domain boundary. By the time anchoring runs, an open face
+      // onto a cell no tile of this level carries reads as a face onto the coarser level, and it joins the fluid
+      // as much as any other.
+      auto open = [&](const IntVect& a_cell, const int a_face) -> bool {
+        const int state = faces(a_cell, a_face);
+
+        return state != s_faceClosed && state != s_faceBoundary;
+      };
+
       // a cut cell of this box that anchoring can still pass into
       auto passable = [&](const IntVect& a_cell) -> bool {
         return box.contains(a_cell) && anchor(a_cell, 0) == 0 && states(a_cell, 0) == s_cut && refined(a_cell, 0) == 0;
@@ -629,8 +638,7 @@ PolyhedralEBGraph::spreadAnchors()
           for (int side = 0; side < 2; side++) {
             const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
 
-            if (faces(a_cell, 2 * dir + side) == s_faceSameLevel && domainBox.contains(other) &&
-                anchor(other, 0) != 0) {
+            if (open(a_cell, 2 * dir + side) && domainBox.contains(other) && anchor(other, 0) != 0) {
               return true;
             }
           }
@@ -660,7 +668,7 @@ PolyhedralEBGraph::spreadAnchors()
           for (int side = 0; side < 2; side++) {
             const IntVect other = iv + (2 * side - 1) * BASISV(dir);
 
-            if (faces(iv, 2 * dir + side) == s_faceSameLevel && passable(other)) {
+            if (open(iv, 2 * dir + side) && passable(other)) {
               anchor(other, 0) = 1;
 
               front.push_back(other);
