@@ -500,6 +500,8 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
   this->defineGhostCells(a_function, a_carried);
 
+  const long long totalSealed = this->fillSealedCells(a_carried);
+
   this->addGhostSurfaceCells();
 
   const long long totalFilled = ParallelOps::sum(numFilled);
@@ -507,6 +509,11 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
   if (totalFilled > 0 && procID() == 0) {
     pout() << "PolyhedralEBGraph::defineCells - filled " << totalFilled
            << " cells holding a feature thinner than themselves" << endl;
+  }
+
+  if (totalSealed > 0 && procID() == 0) {
+    pout() << "PolyhedralEBGraph::defineCells - filled " << totalSealed << " cells whose fluid reaches no regular cell"
+           << endl;
   }
 
   m_surfaces.define(m_grids, 1, m_numGhost * IntVect::Unit, IVSFABFactory<CutCellSurface>(m_surfaceCells));
@@ -532,6 +539,173 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
   }
 
   m_surfaces.exchange();
+}
+
+long long
+PolyhedralEBGraph::fillSealedCells(const LevelData<BaseFab<signed char>>& a_carried)
+{
+  CH_TIME("PolyhedralEBGraph::fillSealedCells");
+
+  const Box& domainBox = m_domain.domainBox();
+
+  LevelData<BaseFab<signed char>> anchored(m_grids, 1, m_numGhost * IntVect::Unit);
+
+  // The anchors. A ghost cell some tile carries is that tile's to say and arrives with the exchange; one no tile
+  // carries belongs to the coarser level, which is fluid wherever the cell is not covered.
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box box   = m_grids[dit()];
+    const Box grown = grow(box, m_numGhost) & domainBox;
+
+    BaseFab<signed char>&       anchor  = anchored[dit()];
+    const BaseFab<signed char>& states  = m_cellStates[dit()];
+    const BaseFab<signed char>& carried = a_carried[dit()];
+    const BaseFab<signed char>& refined = m_refined[dit()];
+
+    anchor.setVal(0);
+
+    for (BoxIterator bit(grown); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (box.contains(iv)) {
+        anchor(iv, 0) = (states(iv, 0) == s_regular || refined(iv, 0) != 0) ? 1 : 0;
+      }
+      else if (carried(iv, 0) == 0) {
+        anchor(iv, 0) = (states(iv, 0) != s_covered) ? 1 : 0;
+      }
+    }
+  }
+
+  // Anchoring spreads through the open faces of each box until it stops, and across boxes by the exchange; a round
+  // that anchors nothing new anywhere ends it.
+  std::vector<IntVect> front;
+
+  while (true) {
+    anchored.exchange();
+
+    long long numNew = 0;
+
+    for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+      const Box box = m_grids[dit()];
+
+      BaseFab<signed char>&       anchor = anchored[dit()];
+      const BaseFab<signed char>& states = m_cellStates[dit()];
+      const BaseFab<signed char>& faces  = m_faceStates[dit()];
+
+      // a valid cell that is not yet anchored, with an open face onto an anchored cell, starts the sweep
+      auto reaches = [&](const IntVect& a_cell) -> bool {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (int side = 0; side < 2; side++) {
+            const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
+
+            if (faces(a_cell, 2 * dir + side) == s_faceSameLevel && domainBox.contains(other) &&
+                anchor(other, 0) != 0) {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      };
+
+      front.clear();
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const IntVect iv = bit();
+
+        if (anchor(iv, 0) == 0 && states(iv, 0) == s_cut && reaches(iv)) {
+          anchor(iv, 0) = 1;
+
+          front.push_back(iv);
+
+          numNew++;
+        }
+      }
+
+      while (!front.empty()) {
+        const IntVect iv = front.back();
+
+        front.pop_back();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (int side = 0; side < 2; side++) {
+            const IntVect other = iv + (2 * side - 1) * BASISV(dir);
+
+            if (faces(iv, 2 * dir + side) != s_faceSameLevel || !box.contains(other)) {
+              continue;
+            }
+
+            if (anchor(other, 0) == 0 && states(other, 0) == s_cut) {
+              anchor(other, 0) = 1;
+
+              front.push_back(other);
+
+              numNew++;
+            }
+          }
+        }
+      }
+    }
+
+    if (ParallelOps::sum(numNew) == 0) {
+      break;
+    }
+  }
+
+  // What anchoring never reached is filled: covered, with every face closed, and out of the cut cells. Its surface
+  // stays, as a filled cell's does.
+  long long numSealed = 0;
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    const Box box = m_grids[dit()];
+
+    const BaseFab<signed char>& anchor = anchored[dit()];
+    BaseFab<signed char>&       states = m_cellStates[dit()];
+    BaseFab<signed char>&       faces  = m_faceStates[dit()];
+
+    IntVectSet& cut = m_cutCells[dit()];
+
+    for (BoxIterator bit(box); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      if (states(iv, 0) != s_cut || anchor(iv, 0) != 0) {
+        continue;
+      }
+
+      states(iv, 0) = s_covered;
+
+      for (int face = 0; face < 2 * SpaceDim; face++) {
+        faces(iv, face) = s_faceClosed;
+      }
+
+      cut -= iv;
+
+      numSealed++;
+    }
+  }
+
+  const long long totalSealed = ParallelOps::sum(numSealed);
+
+  // the ghost cells take the new states, and a ghost cut cell that was filled leaves the sets
+  if (totalSealed > 0) {
+    m_cellStates.exchange();
+
+    for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+      const Box box   = m_grids[dit()];
+      const Box grown = grow(box, m_numGhost) & domainBox;
+
+      const BaseFab<signed char>& states = m_cellStates[dit()];
+
+      IntVectSet& cut = m_cutCells[dit()];
+
+      for (BoxIterator bit(grown); bit.ok(); ++bit) {
+        if (!box.contains(bit()) && cut.contains(bit()) && states(bit(), 0) != s_cut) {
+          cut -= bit();
+        }
+      }
+    }
+  }
+
+  return totalSealed;
 }
 
 void

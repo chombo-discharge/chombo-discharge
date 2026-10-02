@@ -444,6 +444,21 @@ protected:
   defineGhostCells(const BaseIF& a_function, const LevelData<BaseFab<signed char>>& a_carried);
 
   /**
+   * @brief Fill every cut cell whose fluid reaches no regular cell through open faces.
+   * @details Filling a cell closes the faces onto it, and fluid that reached the rest of the fluid only through such
+   * faces is left sealed off: beside a filled gap thinner than a cell, the slivers at the gap's corners are joined
+   * to one another and to nothing else. No stencil fits in fluid that holds no regular cell, so such fluid is
+   * filled as well. Fluid is anchored by a regular cell, by a cell the finer level carries, and by a ghost cell no
+   * tile carries, which the coarser level describes; anchoring then spreads through open faces, box by box with an
+   * exchange in between, until it settles everywhere. A face on the domain boundary anchors nothing. A sealed
+   * region has no open face onto anchored fluid, so filling it changes no face of a cell that stays. Collective.
+   * @param[in] a_carried The marker from markCarried.
+   * @return Number of cells filled, over all ranks.
+   */
+  long long
+  fillSealedCells(const LevelData<BaseFab<signed char>>& a_carried);
+
+  /**
    * @brief Set m_refined from m_covered, over every box and its ghost cells.
    */
   void
