@@ -714,6 +714,11 @@ protected:
   bool m_writeSurface;
 
   /**
+   * @brief Whether verifySurface writes the graph as a skeleton. PolyhedralGeometryShop.write_graph, off by default.
+   */
+  bool m_writeGraph;
+
+  /**
    * @brief Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check.
    * @details On by default in a build that keeps its assertions and off in one that does not, since the check
    * tells the generator nothing it uses and only reports. Either default can be overridden from the inputs.
@@ -970,6 +975,21 @@ protected:
    */
   void
   writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const;
+
+  /**
+   * @brief Write the graph as a skeleton a viewer can draw: a point per cell, a line from it to every open face.
+   * @details One group per level. A node is written for every cell of the level's tiles that holds fluid or was
+   * filled, and the finer level does not carry: at the fluid's centroid in a cut cell, at the centre otherwise. It
+   * carries the volume fraction, whether the cell is cut, why it was filled (PolyhedralEBGraph::s_notFilled and the
+   * rest), the role of its surface, its number of sheets and its rank. An edge is written from a node to the centroid
+   * of each of its open faces, so that the edges of two neighbours meet in the face between them and a face onto
+   * another level or the domain boundary ends in a half; it carries the aperture, the face state and whether the
+   * stitch rewrote the face. An XDMF description is written next to the file, with the nodes as points and the edges
+   * as segments. Collective.
+   * @param[in] a_fileName File to write, without a suffix.
+   */
+  void
+  writeGraph(const std::string& a_fileName) const;
 
   /**
    * @brief Identify the vertices of a triangle soup, giving each one once and each triangle three indices.

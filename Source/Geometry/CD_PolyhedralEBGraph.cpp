@@ -118,6 +118,11 @@ PolyhedralEBGraph::defineData()
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
   m_refined.define(m_grids, 1, std::max(2, m_numGhost) * IntVect::Unit);
+  m_fillReasons.define(m_grids, 1, IntVect::Zero);
+
+  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
+    m_fillReasons[dit()].setVal(s_notFilled);
+  }
 
   // Each box's cut-cell set is a bitmap over the box and its ghost ring, which is where its cells come from: a
   // set that starts empty would be a tree, several kilobytes for a few hundred scattered cells, and the surface
@@ -131,20 +136,20 @@ PolyhedralEBGraph::defineData()
 }
 
 void
-PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
-                                       const BaseFab<Real>& a_nodeValues,
-                                       const Box&           a_region,
-                                       const Vector<Box>&   a_covered,
-                                       const RealVect&      a_probLo,
-                                       const Real           a_dx,
-                                       BaseFab<bool>&       a_unresolved)
+PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
+                                       const BaseFab<Real>&  a_nodeValues,
+                                       const Box&            a_region,
+                                       const Vector<Box>&    a_covered,
+                                       const RealVect&       a_probLo,
+                                       const Real            a_dx,
+                                       BaseFab<signed char>& a_unresolved)
 {
   CH_TIME("PolyhedralEBGraph::findUnresolvedCells");
 
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
 
-  a_unresolved.setVal(false);
+  a_unresolved.setVal(s_notFilled);
 
   // What the finer level carries here. Such a cell is described up there, so whatever this level makes of it is
   // not what gets used, and filling it would coarsen a feature the mesh has already resolved.
@@ -292,7 +297,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
 
     // Two pieces of fluid are two cells' worth of fluid, which one body cannot hold however well each is resolved.
     if (fluidPiecesOf(surface) > 1) {
-      a_unresolved(iv, 0) = true;
+      a_unresolved(iv, 0) = s_filledPieces;
 
       continue;
     }
@@ -309,7 +314,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
     PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
 
     if (!body.define(surface) || body.volumeFraction() < 0.5) {
-      a_unresolved(iv, 0) = true;
+      a_unresolved(iv, 0) = s_filledGap;
     }
   }
 }
@@ -342,8 +347,8 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     Vector<CutCellSurface>& surfaces = kept[dit()];
 
     // a neighbour filled on this level, or a cell the coarser level filled
-    auto filledNeighbour = [&](const IntVect& a_other, const BaseFab<bool>& a_unresolved) -> bool {
-      if (a_unresolved.box().contains(a_other) && a_unresolved(a_other, 0)) {
+    auto filledNeighbour = [&](const IntVect& a_other, const BaseFab<signed char>& a_unresolved) -> bool {
+      if (a_unresolved.box().contains(a_other) && a_unresolved(a_other, 0) != s_notFilled) {
         return true;
       }
 
@@ -373,14 +378,18 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     PolyhedralGeometryShop::defineIntercepts(intercept, box);
 
     // Which cells cannot be described at all, decided before any of them is classified.
-    BaseFab<bool> unresolved(grown, 1);
+    BaseFab<signed char> unresolved(grown, 1);
 
     PolyhedralEBGraph::findUnresolvedCells(a_function, nodeValues, grown, m_covered, m_probLo, m_dx, unresolved);
 
     // Counted over the cells this box owns, not over the ring it also filled: neighbouring boxes reach into
     // one another's ring, and a cell counted there would be reported once per box that reaches it.
+    BaseFab<signed char>& reasons = m_fillReasons[dit()];
+
     for (BoxIterator bit(box); bit.ok(); ++bit) {
-      if (unresolved(bit(), 0)) {
+      reasons(bit(), 0) = unresolved(bit(), 0);
+
+      if (unresolved(bit(), 0) != s_notFilled) {
         numFilled++;
       }
     }
@@ -415,7 +424,8 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
       // holding all of its sheets. Unlike
       // moving a node, this changes no value another level reads, so the children a coarse cell restricts against
       // still agree with it about every edge.
-      const CutCellBody::Kind kind = unresolved(iv, 0) ? CutCellBody::Kind::Covered : CutCellBody::classify(surface);
+      const CutCellBody::Kind kind = (unresolved(iv, 0) != s_notFilled) ? CutCellBody::Kind::Covered
+                                                                        : CutCellBody::classify(surface);
 
       // A cell filled next door leaves this one with a face onto nothing. A cell whose corners make it regular
       // is then not regular at all: it is full, but that face is closed and the fluid it used to open onto is
@@ -833,6 +843,8 @@ PolyhedralEBGraph::fillSealedCells()
       }
 
       states(iv, 0) = s_covered;
+
+      m_fillReasons[dit()](iv, 0) = s_filledSealed;
 
       for (int face = 0; face < 2 * SpaceDim; face++) {
         faces(iv, face) = s_faceClosed;
@@ -1498,6 +1510,12 @@ const LevelData<BaseFab<signed char>>&
 PolyhedralEBGraph::getRefinedMask() const noexcept
 {
   return m_refined;
+}
+
+const LevelData<BaseFab<signed char>>&
+PolyhedralEBGraph::getFillReasons() const noexcept
+{
+  return m_fillReasons;
 }
 
 const LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&

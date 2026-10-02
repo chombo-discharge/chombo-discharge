@@ -92,6 +92,26 @@ public:
   static constexpr int s_faceBoundary = 4;
 
   /**
+   * @brief Why a cell was filled: it was not.
+   */
+  static constexpr int s_notFilled = 0;
+
+  /**
+   * @brief Why a cell was filled: its fluid falls into more than one piece, which one body cannot hold.
+   */
+  static constexpr int s_filledPieces = 1;
+
+  /**
+   * @brief Why a cell was filled: its one piece of fluid is the smaller part of it, a gap between pieces of solid.
+   */
+  static constexpr int s_filledGap = 2;
+
+  /**
+   * @brief Why a cell was filled: its fluid reaches no regular cell.
+   */
+  static constexpr int s_filledSealed = 3;
+
+  /**
    * @brief Constructor. Leaves the graph undefined.
    */
   PolyhedralEBGraph();
@@ -241,16 +261,17 @@ public:
    * @param[in]  a_covered    Cells a finer level carries.
    * @param[in]  a_probLo     Lower-left corner of the domain.
    * @param[in]  a_dx         Grid spacing.
-   * @param[out] a_unresolved True for each cell of the region that must be filled.
+   * @param[out] a_unresolved For each cell of the region, why it must be filled -- s_filledPieces or s_filledGap -- or
+   * s_notFilled.
    */
   static void
-  findUnresolvedCells(const BaseIF&        a_function,
-                      const BaseFab<Real>& a_nodeValues,
-                      const Box&           a_region,
-                      const Vector<Box>&   a_covered,
-                      const RealVect&      a_probLo,
-                      const Real           a_dx,
-                      BaseFab<bool>&       a_unresolved);
+  findUnresolvedCells(const BaseIF&         a_function,
+                      const BaseFab<Real>&  a_nodeValues,
+                      const Box&            a_region,
+                      const Vector<Box>&    a_covered,
+                      const RealVect&       a_probLo,
+                      const Real            a_dx,
+                      BaseFab<signed char>& a_unresolved);
 
   /**
    * @brief Whether define has run.
@@ -310,6 +331,14 @@ public:
    */
   const LevelData<BaseFab<signed char>>&
   getRefinedMask() const noexcept;
+
+  /**
+   * @brief Why each valid cell was filled: s_notFilled, s_filledPieces, s_filledGap or s_filledSealed. Kept by the
+   * graph that defined the cells, not by a copy of it.
+   * @return One component per cell, no ghost cells.
+   */
+  const LevelData<BaseFab<signed char>>&
+  getFillReasons() const noexcept;
 
   /**
    * @brief The surface every cell of the surface sets is reconstructed from, in the box's own cells and in its ghost
@@ -454,6 +483,11 @@ protected:
    * level is built for a cell the finer level describes. link checks it against the finer level's tiles.
    */
   LevelData<BaseFab<signed char>> m_refined;
+
+  /**
+   * @brief Why each valid cell was filled, for inspection.
+   */
+  LevelData<BaseFab<signed char>> m_fillReasons;
 
   /**
    * @brief Anchoring, from beginAnchoring until fillSealedCells: one where a cell's fluid reaches a regular cell, and

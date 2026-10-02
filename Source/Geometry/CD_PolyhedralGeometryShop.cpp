@@ -88,6 +88,108 @@ public:
   }
 };
 
+#ifdef CH_USE_HDF5
+/**
+ * @brief Write one attribute, a scalar or a short array.
+ * @param[in] a_where Group or file to attach it to.
+ * @param[in] a_name  Name of the attribute.
+ * @param[in] a_type  HDF5 type of its elements.
+ * @param[in] a_count Number of elements, one for a scalar.
+ * @param[in] a_data  The elements.
+ */
+void
+writeH5Attribute(const hid_t        a_where,
+                 const std::string& a_name,
+                 const hid_t        a_type,
+                 const hsize_t      a_count,
+                 const void*        a_data)
+{
+  const hid_t space     = (a_count == 1) ? H5Screate(H5S_SCALAR) : H5Screate_simple(1, &a_count, nullptr);
+  const hid_t attribute = H5Acreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT);
+
+  H5Awrite(attribute, a_type, a_data);
+  H5Aclose(attribute);
+  H5Sclose(space);
+}
+
+/**
+ * @brief Write one dataset, sized by what every rank holds together, with this rank's rows in its own stretch.
+ * @details A rank with nothing to write selects nothing and takes part in the call all the same. It describes that
+ * with the null dataspace: a simple dataspace of zero extent is not one, the call fails, and a rank that fails on its
+ * way into a collective write leaves every other rank waiting in it.
+ * @param[in] a_where    Group or file to put it in.
+ * @param[in] a_name     Name of the dataset.
+ * @param[in] a_type     HDF5 type of its elements.
+ * @param[in] a_rows     Rows this rank writes.
+ * @param[in] a_offset   Row this rank's stretch starts at.
+ * @param[in] a_total    Rows over all ranks; nothing is written when there are none.
+ * @param[in] a_columns  Columns per row; one makes the dataset one-dimensional.
+ * @param[in] a_data     This rank's rows.
+ * @param[in] a_transfer Transfer property list.
+ */
+void
+writeH5Slab(const hid_t        a_where,
+            const std::string& a_name,
+            const hid_t        a_type,
+            const hsize_t      a_rows,
+            const hsize_t      a_offset,
+            const hsize_t      a_total,
+            const hsize_t      a_columns,
+            const void*        a_data,
+            const hid_t        a_transfer)
+{
+  if (a_total == 0) {
+    return;
+  }
+
+  const hsize_t dims[2] = {a_total, a_columns};
+  const hsize_t mine[2] = {a_rows, a_columns};
+  const hsize_t at[2]   = {a_offset, 0};
+
+  const int rank = (a_columns > 1) ? 2 : 1;
+
+  const hid_t space   = H5Screate_simple(rank, dims, nullptr);
+  const hid_t dataset = H5Dcreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  const hid_t memory  = (a_rows > 0) ? H5Screate_simple(rank, mine, nullptr) : H5Screate(H5S_NULL);
+
+  if (a_rows > 0) {
+    H5Sselect_hyperslab(space, H5S_SELECT_SET, at, nullptr, mine, nullptr);
+  }
+  else {
+    H5Sselect_none(space);
+  }
+
+  H5Dwrite(dataset, a_type, memory, space, a_transfer, a_data);
+
+  H5Sclose(memory);
+  H5Dclose(dataset);
+  H5Sclose(space);
+}
+#endif
+
+/**
+ * @brief Where this rank's rows start among every rank's, and how many there are in all.
+ * @param[in]  a_mine   Rows this rank holds.
+ * @param[out] a_offset Rows the ranks before this one hold.
+ * @param[out] a_total  Rows every rank holds together.
+ */
+void
+rankOffset(const long long a_mine, long long& a_offset, long long& a_total)
+{
+  a_offset = 0;
+  a_total  = a_mine;
+
+#ifdef CH_MPI
+  MPI_Exscan(&a_mine, &a_offset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+
+  if (procID() == 0) {
+    a_offset = 0;
+  }
+
+  MPI_Allreduce(&a_mine, &a_total, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+}
+
 } // namespace
 
 PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
@@ -109,6 +211,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_compGeom        = nullptr;
   m_phase           = phase::gas;
   m_writeSurface    = false;
+  m_writeGraph      = false;
 #ifndef NDEBUG
   m_sanityCheck = true;
 #else
@@ -124,6 +227,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   ParmParse pp("PolyhedralGeometryShop");
 
   pp.query("write_surface", m_writeSurface);
+  pp.query("write_graph", m_writeGraph);
   pp.query("sanity_check", m_sanityCheck);
   pp.query("profile", m_profile);
   pp.query("test_copy", m_testCopy);
@@ -321,7 +425,7 @@ PolyhedralGeometryShop::verifySurface() const
     MayDay::Error("PolyhedralGeometryShop::verifySurface - setGrids has not been called");
   }
 
-  if (!m_sanityCheck && !m_writeSurface && !m_testCopy) {
+  if (!m_sanityCheck && !m_writeSurface && !m_writeGraph && !m_testCopy) {
     return;
   }
 
@@ -368,6 +472,12 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Write surface");
     this->writeSurface("surface_mesh_" + phaseName, facets);
     timer.stopEvent("Write surface");
+  }
+
+  if (m_writeGraph) {
+    timer.startEvent("Write graph");
+    this->writeGraph("graph_" + phaseName);
+    timer.stopEvent("Write graph");
   }
 
   if (m_profile) {
@@ -3179,6 +3289,339 @@ PolyhedralGeometryShop::stitchGraphs(const Vector<RefCountedPtr<PolyhedralEBGrap
 }
 
 void
+PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
+{
+  CH_TIME("PolyhedralGeometryShop::writeGraph");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::writeGraph - writing " << a_fileName << endl;
+  }
+
+#ifdef CH_USE_HDF5
+  using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellFaceOverrides;
+  using PolyhedralEB::CutCellSurface;
+
+  // what a node is, as the file says it
+  constexpr int nodeRegular = 0;
+  constexpr int nodeCut     = 1;
+
+  const int numLevels = m_graphs.size();
+
+  std::string directory = ".";
+  {
+    ParmParse pp("Driver");
+
+    pp.query("output_directory", directory);
+  }
+
+  const std::string stem = directory + "/geo/" + a_fileName;
+
+  hid_t access = H5Pcreate(H5P_FILE_ACCESS);
+
+#ifdef CH_MPI
+  H5Pset_fapl_mpio(access, Chombo_MPI::comm, MPI_INFO_NULL);
+#endif
+
+  const hid_t file = H5Fcreate((stem + ".h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, access);
+
+  H5Pclose(access);
+
+  if (file < 0) {
+    MayDay::Error("PolyhedralGeometryShop::writeGraph - could not open the file");
+  }
+
+  hid_t transfer = H5Pcreate(H5P_DATASET_XFER);
+
+#ifdef CH_MPI
+  H5Pset_dxpl_mpio(transfer, H5FD_MPIO_INDEPENDENT);
+#endif
+
+  std::vector<long long> totalNodes(numLevels, 0);
+  std::vector<long long> totalEdges(numLevels, 0);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const std::string name  = "level" + std::to_string(lvl);
+    const hid_t       group = H5Gcreate2(file, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    // A node per cell of this rank's tiles that holds fluid or was filled, at the fluid's centroid; an edge from it
+    // to the centroid of every open face, so that two neighbours' edges meet in the face between them.
+    std::vector<double> nodePosition;
+    std::vector<double> nodeKappa;
+    std::vector<int>    nodeState;
+    std::vector<int>    nodeFilled;
+    std::vector<int>    nodeRole;
+    std::vector<int>    nodeSheets;
+    std::vector<int>    nodeRank;
+
+    std::vector<double> edgePosition;
+    std::vector<double> edgeAperture;
+    std::vector<int>    edgeFace;
+    std::vector<int>    edgeOverridden;
+
+    const auto push = [](std::vector<double>& a_into, const RealVect& a_x) -> void {
+      for (int d = 0; d < SpaceDim; d++) {
+        a_into.push_back(a_x[d]);
+      }
+
+      for (int d = SpaceDim; d < 3; d++) {
+        a_into.push_back(0.0);
+      }
+    };
+
+    if (m_graphs[lvl]->isDefined()) {
+      const PolyhedralEBGraph& graph = *m_graphs[lvl];
+
+      const Real dx = graph.getDx();
+
+      const DisjointBoxLayout& grids = graph.getGrids();
+
+      for (DataIterator dit(grids); dit.ok(); ++dit) {
+        const BaseFab<signed char>&   states      = graph.getCellStates()[dit()];
+        const BaseFab<signed char>&   faces       = graph.getFaceStates()[dit()];
+        const BaseFab<signed char>&   refined     = graph.getRefinedMask()[dit()];
+        const BaseFab<signed char>&   reasons     = graph.getFillReasons()[dit()];
+        const IntVectSet&             withSurface = graph.getSurfaceCells()[dit()];
+        const IVSFAB<CutCellSurface>& stored      = graph.getSurfaces()[dit()];
+        const CutCellFaceOverrides&   overrides   = graph.getFaceOverrides()[dit()];
+
+        for (BoxIterator bit(grids[dit()]); bit.ok(); ++bit) {
+          const IntVect iv = bit();
+
+          const int state  = states(iv, 0);
+          const int reason = reasons(iv, 0);
+
+          if (refined(iv, 0) != 0 ||
+              (state == PolyhedralEBGraph::s_covered && reason == PolyhedralEBGraph::s_notFilled)) {
+            continue;
+          }
+
+          RealVect centre = m_probLo;
+
+          for (int d = 0; d < SpaceDim; d++) {
+            centre[d] += dx * (static_cast<Real>(iv[d]) + 0.5);
+          }
+
+          CutCellBody body;
+
+          const bool cut = (state == PolyhedralEBGraph::s_cut);
+
+          if (cut) {
+            PolyhedralGeometryShop::defineBody(body, stored, overrides, iv);
+          }
+
+          push(nodePosition, cut ? centre + dx * body.volumeCentroid() : centre);
+
+          nodeKappa.push_back(cut ? body.volumeFraction() : (state == PolyhedralEBGraph::s_regular ? 1.0 : 0.0));
+          nodeState.push_back(cut ? nodeCut : nodeRegular);
+          nodeFilled.push_back(reason);
+          nodeRole.push_back(withSurface.contains(iv) ? stored(iv, 0).m_role : CutCellSurface::s_native);
+          nodeSheets.push_back(withSurface.contains(iv) ? CutCellBody::numSheets(stored(iv, 0)) : 0);
+          nodeRank.push_back(procID());
+
+          if (state == PolyhedralEBGraph::s_covered) {
+            continue;
+          }
+
+          // the faces the stitch rewrote
+          bool overridden[2 * SpaceDim] = {false};
+
+          const int entry = overrides.find(iv);
+
+          if (entry >= 0) {
+            int begin = 0;
+            int end   = 0;
+
+            overrides.faces(entry, begin, end);
+
+            for (int f = begin; f < end; f++) {
+              overridden[overrides.face(f)] = true;
+            }
+          }
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            for (int side = 0; side < 2; side++) {
+              const int face = 2 * dir + side;
+
+              const Side::LoHiSide hiLo     = (side == 0) ? Side::Lo : Side::Hi;
+              const Real           aperture = cut ? body.areaFraction(dir, hiLo) : 1.0;
+
+              if (faces(iv, face) == PolyhedralEBGraph::s_faceClosed || aperture <= 0.0) {
+                continue;
+              }
+
+              RealVect at = centre + dx * (static_cast<Real>(side) - 0.5) * BASISREALV(dir);
+
+              if (cut) {
+                at += dx * body.faceCentroid(dir, hiLo);
+              }
+
+              push(edgePosition, cut ? centre + dx * body.volumeCentroid() : centre);
+              push(edgePosition, at);
+
+              edgeAperture.push_back(aperture);
+              edgeFace.push_back(faces(iv, face));
+              edgeOverridden.push_back(overridden[face] ? 1 : 0);
+            }
+          }
+        }
+      }
+
+      const double levelDx = dx;
+
+      writeH5Attribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &levelDx);
+    }
+
+    const long long mineNodes = nodeState.size();
+    const long long mineEdges = edgeAperture.size();
+
+    long long nodeOffset = 0;
+    long long edgeOffset = 0;
+
+    rankOffset(mineNodes, nodeOffset, totalNodes[lvl]);
+    rankOffset(mineEdges, edgeOffset, totalEdges[lvl]);
+
+    // a node is its own element, and an edge's two vertices are written one after the other
+    std::vector<long long> nodeConnectivity(mineNodes);
+    std::vector<long long> edgeConnectivity(2 * mineEdges);
+
+    std::iota(nodeConnectivity.begin(), nodeConnectivity.end(), nodeOffset);
+    std::iota(edgeConnectivity.begin(), edgeConnectivity.end(), 2 * edgeOffset);
+
+    const hsize_t myNodes   = mineNodes;
+    const hsize_t myEdges   = mineEdges;
+    const hsize_t nodeStart = nodeOffset;
+    const hsize_t edgeStart = edgeOffset;
+    const hsize_t nodeCount = totalNodes[lvl];
+    const hsize_t edgeCount = totalEdges[lvl];
+
+    writeH5Slab(group,
+                "nodePositions",
+                H5T_NATIVE_DOUBLE,
+                myNodes,
+                nodeStart,
+                nodeCount,
+                3,
+                nodePosition.data(),
+                transfer);
+    writeH5Slab(group,
+                "nodeConnectivity",
+                H5T_NATIVE_LLONG,
+                myNodes,
+                nodeStart,
+                nodeCount,
+                1,
+                nodeConnectivity.data(),
+                transfer);
+    writeH5Slab(group, "kappa", H5T_NATIVE_DOUBLE, myNodes, nodeStart, nodeCount, 1, nodeKappa.data(), transfer);
+    writeH5Slab(group, "cut", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeState.data(), transfer);
+    writeH5Slab(group, "filled", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeFilled.data(), transfer);
+    writeH5Slab(group, "role", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRole.data(), transfer);
+    writeH5Slab(group, "sheets", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeSheets.data(), transfer);
+    writeH5Slab(group, "rank", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRank.data(), transfer);
+
+    writeH5Slab(group,
+                "edgePositions",
+                H5T_NATIVE_DOUBLE,
+                2 * myEdges,
+                2 * edgeStart,
+                2 * edgeCount,
+                3,
+                edgePosition.data(),
+                transfer);
+    writeH5Slab(group,
+                "edgeConnectivity",
+                H5T_NATIVE_LLONG,
+                myEdges,
+                edgeStart,
+                edgeCount,
+                2,
+                edgeConnectivity.data(),
+                transfer);
+    writeH5Slab(group, "aperture", H5T_NATIVE_DOUBLE, myEdges, edgeStart, edgeCount, 1, edgeAperture.data(), transfer);
+    writeH5Slab(group, "faceState", H5T_NATIVE_INT, myEdges, edgeStart, edgeCount, 1, edgeFace.data(), transfer);
+    writeH5Slab(group, "overridden", H5T_NATIVE_INT, myEdges, edgeStart, edgeCount, 1, edgeOverridden.data(), transfer);
+
+    H5Gclose(group);
+  }
+
+  H5Pclose(transfer);
+  H5Fclose(file);
+
+  // A description a viewer can open: the nodes of each level as points, the edges as line segments.
+  if (procID() == 0) {
+    std::ofstream xdmf(stem + ".xmf");
+
+    const std::string base = a_fileName + ".h5";
+
+    const auto attribute = [&](const std::string& a_level,
+                               const std::string& a_name,
+                               const long long    a_count,
+                               const std::string& a_type) -> void {
+      xdmf << "        <Attribute Name=\"" << a_name << "\" AttributeType=\"Scalar\" Center=\"Cell\">\n";
+      xdmf << "          <DataItem Dimensions=\"" << a_count << "\" NumberType=\"" << a_type << "\" Precision=\""
+           << ((a_type == "Float") ? 8 : 4) << "\" Format=\"HDF\">" << base << ":/" << a_level << "/" << a_name
+           << "</DataItem>\n";
+      xdmf << "        </Attribute>\n";
+    };
+
+    xdmf << "<?xml version=\"1.0\" ?>\n";
+    xdmf << "<Xdmf Version=\"3.0\">\n  <Domain>\n";
+
+    for (const std::string kind : {"nodes", "edges"}) {
+      xdmf << "    <Grid Name=\"" << kind << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
+
+      for (int lvl = 0; lvl < numLevels; lvl++) {
+        const bool      nodes = (kind == "nodes");
+        const long long count = nodes ? totalNodes[lvl] : totalEdges[lvl];
+
+        if (count == 0) {
+          continue;
+        }
+
+        const std::string name = "level" + std::to_string(lvl);
+
+        xdmf << "      <Grid Name=\"" << name << "\" GridType=\"Uniform\">\n";
+        xdmf << "        <Topology TopologyType=\"" << (nodes ? "Polyvertex" : "Polyline") << "\" NodesPerElement=\""
+             << (nodes ? 1 : 2) << "\" NumberOfElements=\"" << count << "\">\n";
+        xdmf << "          <DataItem Dimensions=\"" << count << (nodes ? "" : " 2")
+             << "\" NumberType=\"Int\" Precision=\"8\" Format=\"HDF\">" << base << ":/" << name << "/"
+             << (nodes ? "nodeConnectivity" : "edgeConnectivity") << "</DataItem>\n";
+        xdmf << "        </Topology>\n";
+        xdmf << "        <Geometry GeometryType=\"XYZ\">\n";
+        xdmf << "          <DataItem Dimensions=\"" << (nodes ? count : 2 * count)
+             << " 3\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << base << ":/" << name << "/"
+             << (nodes ? "nodePositions" : "edgePositions") << "</DataItem>\n";
+        xdmf << "        </Geometry>\n";
+
+        if (nodes) {
+          attribute(name, "kappa", count, "Float");
+          attribute(name, "cut", count, "Int");
+          attribute(name, "filled", count, "Int");
+          attribute(name, "role", count, "Int");
+          attribute(name, "sheets", count, "Int");
+          attribute(name, "rank", count, "Int");
+        }
+        else {
+          attribute(name, "aperture", count, "Float");
+          attribute(name, "faceState", count, "Int");
+          attribute(name, "overridden", count, "Int");
+        }
+
+        xdmf << "      </Grid>\n";
+      }
+
+      xdmf << "    </Grid>\n";
+    }
+
+    xdmf << "  </Domain>\n</Xdmf>\n";
+  }
+#else
+  MayDay::Warning("PolyhedralGeometryShop::writeGraph - HDF5 is off, so the graph is not written");
+#endif
+}
+
+void
 PolyhedralGeometryShop::indexFacets(const Vector<Real>& a_facets,
                                     const Real          a_tolerance,
                                     std::vector<Real>&  a_vertices,
@@ -3310,22 +3753,8 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
   H5Pset_dxpl_mpio(transfer, H5FD_MPIO_INDEPENDENT);
 #endif
 
-  const auto writeAttribute = [&](const hid_t        a_where,
-                                  const std::string& a_name,
-                                  const hid_t        a_type,
-                                  const hsize_t      a_count,
-                                  const void*        a_data) -> void {
-    const hid_t space     = (a_count == 1) ? H5Screate(H5S_SCALAR) : H5Screate_simple(1, &a_count, nullptr);
-    const hid_t attribute = H5Acreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT);
+  const auto writeAttribute = writeH5Attribute;
 
-    H5Awrite(attribute, a_type, a_data);
-    H5Aclose(attribute);
-    H5Sclose(space);
-  };
-
-  // One dataset, sized by what every rank holds together, with this rank's rows written into its own stretch of
-  // it. A rank with nothing to write selects nothing and takes part in the call all the same, which is what
-  // collective access asks of it.
   const auto writeSlab = [&](const hid_t        a_where,
                              const std::string& a_name,
                              const hid_t        a_type,
@@ -3334,36 +3763,7 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
                              const hsize_t      a_total,
                              const hsize_t      a_columns,
                              const void*        a_data) -> void {
-    if (a_total == 0) {
-      return;
-    }
-
-    const hsize_t dims[2] = {a_total, a_columns};
-    const hsize_t mine[2] = {a_rows, a_columns};
-    const hsize_t at[2]   = {a_offset, 0};
-
-    const int rank = (a_columns > 1) ? 2 : 1;
-
-    const hid_t space   = H5Screate_simple(rank, dims, nullptr);
-    const hid_t dataset = H5Dcreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    // A rank with no rows describes that with the null dataspace and selects nothing in the file. It cannot
-    // describe it with a simple dataspace of zero extent, which is not one: the call fails, and a rank that
-    // fails on its way into a collective write leaves every other rank waiting in it.
-    const hid_t memory = (a_rows > 0) ? H5Screate_simple(rank, mine, nullptr) : H5Screate(H5S_NULL);
-
-    if (a_rows > 0) {
-      H5Sselect_hyperslab(space, H5S_SELECT_SET, at, nullptr, mine, nullptr);
-    }
-    else {
-      H5Sselect_none(space);
-    }
-
-    H5Dwrite(dataset, a_type, memory, space, transfer, a_data);
-
-    H5Sclose(memory);
-    H5Dclose(dataset);
-    H5Sclose(space);
+    writeH5Slab(a_where, a_name, a_type, a_rows, a_offset, a_total, a_columns, a_data, transfer);
   };
 
   const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
@@ -4870,7 +5270,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   // rather than built. Decided for the whole region before any cell is classified. Nothing is
   // carried above this level -- it is the finest the index space is generated on, the coarser ones being coarsened from
   // it -- so no cell is spared for being resolved elsewhere.
-  BaseFab<bool> unresolved(a_ghostRegion, 1);
+  BaseFab<signed char> unresolved(a_ghostRegion, 1);
 
   PolyhedralEBGraph::findUnresolvedCells(*m_baseIF,
                                          nodeValues,
@@ -4888,7 +5288,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     PolyhedralEB::CutCellSurface surface;
     PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
 
-    if (unresolved(iv, 0)) {
+    if (unresolved(iv, 0) != PolyhedralEBGraph::s_notFilled) {
       a_regIrregCovered(iv, 0) = -1;
 
       continue;
