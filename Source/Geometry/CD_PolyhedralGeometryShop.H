@@ -977,15 +977,14 @@ protected:
   writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const;
 
   /**
-   * @brief Write the graph as a skeleton a viewer can draw: a point per cell, a line from it to every open face.
-   * @details One group per level. A node is written for every cell of the level's tiles that holds fluid or was
-   * filled, and the finer level does not carry: at the fluid's centroid in a cut cell, at the centre otherwise. It
-   * carries the volume fraction, whether the cell is cut, why it was filled (PolyhedralEBGraph::s_notFilled and the
-   * rest), the role of its surface, its number of sheets and its rank. An edge is written from a node to the centroid
-   * of each of its open faces, so that the edges of two neighbours meet in the face between them and a face onto
-   * another level or the domain boundary ends in a half; it carries the aperture, the face state and whether the
-   * stitch rewrote the face. An XDMF description is written next to the file, with the nodes as points and the edges
-   * as segments. Collective.
+   * @brief Write the cut cells' connectivity as a skeleton a viewer can draw: a point per cut cell, a line from it to
+   * every open face.
+   * @details One group per level. A node is written for every cut cell of the level's tiles, at its fluid's centroid,
+   * with its volume fraction, the role of its surface, its number of sheets and its rank. An edge is written from a
+   * node to the centroid of each of its open faces, so that the edges of two neighbouring cut cells meet in the face
+   * between them, and a face onto a regular cell, another level or the domain boundary ends in a half; it carries the
+   * aperture, the face state and whether the stitch rewrote the face. An XDMF description is written next to the
+   * file, with the nodes as points and the edges as segments. Collective.
    * @param[in] a_fileName File to write, without a suffix.
    */
   void

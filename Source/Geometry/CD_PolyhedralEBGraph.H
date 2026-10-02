@@ -107,11 +107,6 @@ public:
   static constexpr int s_filledGap = 2;
 
   /**
-   * @brief Why a cell was filled: its fluid reaches no regular cell.
-   */
-  static constexpr int s_filledSealed = 3;
-
-  /**
    * @brief Constructor. Leaves the graph undefined.
    */
   PolyhedralEBGraph();
@@ -333,14 +328,6 @@ public:
   getRefinedMask() const noexcept;
 
   /**
-   * @brief Why each valid cell was filled: s_notFilled, s_filledPieces, s_filledGap or s_filledSealed. Kept by the
-   * graph that defined the cells, not by a copy of it.
-   * @return One component per cell, no ghost cells.
-   */
-  const LevelData<BaseFab<signed char>>&
-  getFillReasons() const noexcept;
-
-  /**
    * @brief The surface every cell of the surface sets is reconstructed from, in the box's own cells and in its ghost
    * cells. A stitched level's surfaces carry the crossings its refined edges take from the finer level.
    * @return One surface per cell of every box's surface set.
@@ -483,11 +470,6 @@ protected:
    * level is built for a cell the finer level describes. link checks it against the finer level's tiles.
    */
   LevelData<BaseFab<signed char>> m_refined;
-
-  /**
-   * @brief Why each valid cell was filled, for inspection.
-   */
-  LevelData<BaseFab<signed char>> m_fillReasons;
 
   /**
    * @brief Anchoring, from beginAnchoring until fillSealedCells: one where a cell's fluid reaches a regular cell, and

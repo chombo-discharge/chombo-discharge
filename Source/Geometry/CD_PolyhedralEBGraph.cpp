@@ -118,11 +118,6 @@ PolyhedralEBGraph::defineData()
   m_cellStates.define(m_grids, 1, m_numGhost * IntVect::Unit);
   m_faceStates.define(m_grids, 2 * SpaceDim, IntVect::Zero);
   m_refined.define(m_grids, 1, std::max(2, m_numGhost) * IntVect::Unit);
-  m_fillReasons.define(m_grids, 1, IntVect::Zero);
-
-  for (DataIterator dit(m_grids); dit.ok(); ++dit) {
-    m_fillReasons[dit()].setVal(s_notFilled);
-  }
 
   // Each box's cut-cell set is a bitmap over the box and its ghost ring, which is where its cells come from: a
   // set that starts empty would be a tree, several kilobytes for a few hundred scattered cells, and the surface
@@ -384,11 +379,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
 
     // Counted over the cells this box owns, not over the ring it also filled: neighbouring boxes reach into
     // one another's ring, and a cell counted there would be reported once per box that reaches it.
-    BaseFab<signed char>& reasons = m_fillReasons[dit()];
-
     for (BoxIterator bit(box); bit.ok(); ++bit) {
-      reasons(bit(), 0) = unresolved(bit(), 0);
-
       if (unresolved(bit(), 0) != s_notFilled) {
         numFilled++;
       }
@@ -843,8 +834,6 @@ PolyhedralEBGraph::fillSealedCells()
       }
 
       states(iv, 0) = s_covered;
-
-      m_fillReasons[dit()](iv, 0) = s_filledSealed;
 
       for (int face = 0; face < 2 * SpaceDim; face++) {
         faces(iv, face) = s_faceClosed;
@@ -1510,12 +1499,6 @@ const LevelData<BaseFab<signed char>>&
 PolyhedralEBGraph::getRefinedMask() const noexcept
 {
   return m_refined;
-}
-
-const LevelData<BaseFab<signed char>>&
-PolyhedralEBGraph::getFillReasons() const noexcept
-{
-  return m_fillReasons;
 }
 
 const LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>&

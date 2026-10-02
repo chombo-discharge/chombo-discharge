@@ -3302,10 +3302,6 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
   using PolyhedralEB::CutCellFaceOverrides;
   using PolyhedralEB::CutCellSurface;
 
-  // what a node is, as the file says it
-  constexpr int nodeRegular = 0;
-  constexpr int nodeCut     = 1;
-
   const int numLevels = m_graphs.size();
 
   std::string directory = ".";
@@ -3344,12 +3340,11 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     const std::string name  = "level" + std::to_string(lvl);
     const hid_t       group = H5Gcreate2(file, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    // A node per cell of this rank's tiles that holds fluid or was filled, at the fluid's centroid; an edge from it
-    // to the centroid of every open face, so that two neighbours' edges meet in the face between them.
+    // A node per cut cell of this rank's tiles, at the fluid's centroid; an edge from it to the centroid of every open
+    // face, so that two neighbouring cut cells' edges meet in the face between them, and a face onto a regular cell,
+    // another level or the domain boundary ends in a half.
     std::vector<double> nodePosition;
     std::vector<double> nodeKappa;
-    std::vector<int>    nodeState;
-    std::vector<int>    nodeFilled;
     std::vector<int>    nodeRole;
     std::vector<int>    nodeSheets;
     std::vector<int>    nodeRank;
@@ -3377,22 +3372,16 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
       const DisjointBoxLayout& grids = graph.getGrids();
 
       for (DataIterator dit(grids); dit.ok(); ++dit) {
-        const BaseFab<signed char>&   states      = graph.getCellStates()[dit()];
-        const BaseFab<signed char>&   faces       = graph.getFaceStates()[dit()];
-        const BaseFab<signed char>&   refined     = graph.getRefinedMask()[dit()];
-        const BaseFab<signed char>&   reasons     = graph.getFillReasons()[dit()];
-        const IntVectSet&             withSurface = graph.getSurfaceCells()[dit()];
-        const IVSFAB<CutCellSurface>& stored      = graph.getSurfaces()[dit()];
-        const CutCellFaceOverrides&   overrides   = graph.getFaceOverrides()[dit()];
+        const BaseFab<signed char>&   states    = graph.getCellStates()[dit()];
+        const BaseFab<signed char>&   faces     = graph.getFaceStates()[dit()];
+        const BaseFab<signed char>&   refined   = graph.getRefinedMask()[dit()];
+        const IVSFAB<CutCellSurface>& stored    = graph.getSurfaces()[dit()];
+        const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[dit()];
 
         for (BoxIterator bit(grids[dit()]); bit.ok(); ++bit) {
           const IntVect iv = bit();
 
-          const int state  = states(iv, 0);
-          const int reason = reasons(iv, 0);
-
-          if (refined(iv, 0) != 0 ||
-              (state == PolyhedralEBGraph::s_covered && reason == PolyhedralEBGraph::s_notFilled)) {
+          if (refined(iv, 0) != 0 || states(iv, 0) != PolyhedralEBGraph::s_cut) {
             continue;
           }
 
@@ -3404,24 +3393,16 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 
           CutCellBody body;
 
-          const bool cut = (state == PolyhedralEBGraph::s_cut);
+          PolyhedralGeometryShop::defineBody(body, stored, overrides, iv);
 
-          if (cut) {
-            PolyhedralGeometryShop::defineBody(body, stored, overrides, iv);
-          }
+          const RealVect node = centre + dx * body.volumeCentroid();
 
-          push(nodePosition, cut ? centre + dx * body.volumeCentroid() : centre);
+          push(nodePosition, node);
 
-          nodeKappa.push_back(cut ? body.volumeFraction() : (state == PolyhedralEBGraph::s_regular ? 1.0 : 0.0));
-          nodeState.push_back(cut ? nodeCut : nodeRegular);
-          nodeFilled.push_back(reason);
-          nodeRole.push_back(withSurface.contains(iv) ? stored(iv, 0).m_role : CutCellSurface::s_native);
-          nodeSheets.push_back(withSurface.contains(iv) ? CutCellBody::numSheets(stored(iv, 0)) : 0);
+          nodeKappa.push_back(body.volumeFraction());
+          nodeRole.push_back(stored(iv, 0).m_role);
+          nodeSheets.push_back(CutCellBody::numSheets(stored(iv, 0)));
           nodeRank.push_back(procID());
-
-          if (state == PolyhedralEBGraph::s_covered) {
-            continue;
-          }
 
           // the faces the stitch rewrote
           bool overridden[2 * SpaceDim] = {false};
@@ -3444,19 +3425,16 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
               const int face = 2 * dir + side;
 
               const Side::LoHiSide hiLo     = (side == 0) ? Side::Lo : Side::Hi;
-              const Real           aperture = cut ? body.areaFraction(dir, hiLo) : 1.0;
+              const Real           aperture = body.areaFraction(dir, hiLo);
 
               if (faces(iv, face) == PolyhedralEBGraph::s_faceClosed || aperture <= 0.0) {
                 continue;
               }
 
-              RealVect at = centre + dx * (static_cast<Real>(side) - 0.5) * BASISREALV(dir);
+              const RealVect at = centre + dx * (static_cast<Real>(side) - 0.5) * BASISREALV(dir) +
+                                  dx * body.faceCentroid(dir, hiLo);
 
-              if (cut) {
-                at += dx * body.faceCentroid(dir, hiLo);
-              }
-
-              push(edgePosition, cut ? centre + dx * body.volumeCentroid() : centre);
+              push(edgePosition, node);
               push(edgePosition, at);
 
               edgeAperture.push_back(aperture);
@@ -3472,7 +3450,7 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
       writeH5Attribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &levelDx);
     }
 
-    const long long mineNodes = nodeState.size();
+    const long long mineNodes = nodeKappa.size();
     const long long mineEdges = edgeAperture.size();
 
     long long nodeOffset = 0;
@@ -3514,8 +3492,6 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
                 nodeConnectivity.data(),
                 transfer);
     writeH5Slab(group, "kappa", H5T_NATIVE_DOUBLE, myNodes, nodeStart, nodeCount, 1, nodeKappa.data(), transfer);
-    writeH5Slab(group, "cut", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeState.data(), transfer);
-    writeH5Slab(group, "filled", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeFilled.data(), transfer);
     writeH5Slab(group, "role", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRole.data(), transfer);
     writeH5Slab(group, "sheets", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeSheets.data(), transfer);
     writeH5Slab(group, "rank", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRank.data(), transfer);
@@ -3596,8 +3572,6 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 
         if (nodes) {
           attribute(name, "kappa", count, "Float");
-          attribute(name, "cut", count, "Int");
-          attribute(name, "filled", count, "Int");
           attribute(name, "role", count, "Int");
           attribute(name, "sheets", count, "Int");
           attribute(name, "rank", count, "Int");
