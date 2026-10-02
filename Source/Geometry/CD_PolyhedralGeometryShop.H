@@ -532,6 +532,28 @@ public:
                const Real&                   a_dx);
 
   /**
+   * @brief Decide, for every face of a cell whose corners alternate in sign, whether its fluid corners or its solid
+   * ones meet across it.
+   * @details Four alternating corners admit both readings, and the bilinear interpolant of the corners picks the one
+   * its saddle falls on, which for a feature thinner than the face is the wrong one: the large values at two corners
+   * outweigh the small ones of a thin plate at the other two, and the chords pierce the plate. The implicit function
+   * at the centre of the face is read instead, with the value snap of a grid twice as fine, so that it is the very
+   * node a finer level holds there. Every cell sharing the face reads the same point. A centre that reads exactly
+   * zero falls back to the bilinear saddle. In two dimensions the face is the cell itself.
+   * @param[in]     a_function Implicit function.
+   * @param[in,out] a_surface  Surface whose corners are filled; its face decisions are set.
+   * @param[in]     a_cell     The cell.
+   * @param[in]     a_probLo   Lower-left corner of the domain.
+   * @param[in]     a_dx       Grid spacing.
+   */
+  static void
+  decideFaces(const BaseIF&                 a_function,
+              PolyhedralEB::CutCellSurface& a_surface,
+              const IntVect&                a_cell,
+              const RealVect&               a_probLo,
+              const Real                    a_dx) noexcept;
+
+  /**
    * @brief Bisect one cell edge for the crossing on it.
    * @details An endpoint at exactly zero is not taken to be the crossing: the function may be zero along a stretch of
    * the edge (a face of the geometry lying in the edge's plane), and the crossing is where it leaves that
@@ -852,32 +874,36 @@ protected:
    * surface, and two cells that disagree about one stop the run. A node that no such cell touches lies among cells
    * whose corners agree, and takes their sign: minus one where they are regular, one where they are covered. An edge
    * that no such cell touches carries no crossing. Cells the finer level does not hold write nothing.
-   * @param[out] a_nodes     Node values over the nodes of a_region.
-   * @param[out] a_crossings Crossings over the edges of a_region, addressed as defineIntercepts addresses them.
-   * @param[in]  a_region    Cells of the finer level.
-   * @param[in]  a_states    Cell states of the finer level over the region, s_absent where it holds none.
-   * @param[in]  a_mask      One where a cell holds a surface.
-   * @param[in]  a_surfaces  The surfaces.
+   * @param[out] a_nodes       Node values over the nodes of a_region.
+   * @param[out] a_crossings   Crossings over the edges of a_region, addressed as defineIntercepts addresses them.
+   * @param[out] a_fluidJoined Face decisions of each cell of a_region that holds a surface, zero elsewhere.
+   * @param[in]  a_region      Cells of the finer level.
+   * @param[in]  a_states      Cell states of the finer level over the region, s_absent where it holds none.
+   * @param[in]  a_mask        One where a cell holds a surface.
+   * @param[in]  a_surfaces    The surfaces.
    */
   static void
   readFineCells(BaseFab<Real>&                              a_nodes,
                 BaseFab<Real>                               a_crossings[SpaceDim],
+                BaseFab<int>&                               a_fluidJoined,
                 const Box&                                  a_region,
                 const BaseFab<signed char>&                 a_states,
                 const BaseFab<signed char>&                 a_mask,
                 const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces);
 
   /**
-   * @brief One cell's surface, read off node values and edge crossings that are already known.
-   * @param[out] a_surface   The surface.
-   * @param[in]  a_nodes     Node values.
-   * @param[in]  a_crossings Edge crossings, addressed as defineIntercepts addresses them.
-   * @param[in]  a_cell      The cell.
+   * @brief One cell's surface, read off node values, edge crossings and face decisions that are already known.
+   * @param[out] a_surface     The surface.
+   * @param[in]  a_nodes       Node values.
+   * @param[in]  a_crossings   Edge crossings, addressed as defineIntercepts addresses them.
+   * @param[in]  a_fluidJoined Face decisions per cell.
+   * @param[in]  a_cell        The cell.
    */
   static void
   assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
                   const BaseFab<Real>&          a_nodes,
                   const BaseFab<Real>           a_crossings[SpaceDim],
+                  const BaseFab<int>&           a_fluidJoined,
                   const IntVect&                a_cell);
 
   /**

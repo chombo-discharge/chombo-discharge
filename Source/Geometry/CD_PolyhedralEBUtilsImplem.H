@@ -286,14 +286,10 @@ facePairs(const int a_dir, const int a_side, const CutCellSurface& a_surface, in
   }
 
   const Real f00 = a_surface.m_corner[faceCorner[0]];
-  const Real f10 = a_surface.m_corner[faceCorner[1]];
-  const Real f11 = a_surface.m_corner[faceCorner[2]];
-  const Real f01 = a_surface.m_corner[faceCorner[3]];
 
-  const Real den    = f00 + f11 - f10 - f01;
-  const Real saddle = (std::abs(den) > 0.0) ? (f00 * f11 - f10 * f01) / den : (f00 + f11);
+  const bool fluidJoined = ((a_surface.m_fluidJoined >> (2 * a_dir + a_side)) & 1) != 0;
 
-  if (isFluid(saddle) == isFluid(f00)) {
+  if (fluidJoined == isFluid(f00)) {
     a_pair[0][0] = faceEdge[0]; // chords cut off face corners 1 and 3
     a_pair[0][1] = faceEdge[1];
     a_pair[1][0] = faceEdge[2];

@@ -853,6 +853,7 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
 void
 PolyhedralGeometryShop::readFineCells(BaseFab<Real>&                              a_nodes,
                                       BaseFab<Real>                               a_crossings[SpaceDim],
+                                      BaseFab<int>&                               a_fluidJoined,
                                       const Box&                                  a_region,
                                       const BaseFab<signed char>&                 a_states,
                                       const BaseFab<signed char>&                 a_mask,
@@ -874,6 +875,9 @@ PolyhedralGeometryShop::readFineCells(BaseFab<Real>&                            
 
   PolyhedralGeometryShop::defineIntercepts(a_crossings, a_region);
 
+  a_fluidJoined.define(a_region, 1);
+  a_fluidJoined.setVal(0);
+
   // Every cell that holds a surface writes its corners and its crossings. The nodes and edges it shares were written
   // from the same values by every cell that built them, so a disagreement is a graph that contradicts itself.
   for (BoxIterator bit(a_region); bit.ok(); ++bit) {
@@ -884,6 +888,8 @@ PolyhedralGeometryShop::readFineCells(BaseFab<Real>&                            
     }
 
     const CutCellSurface& surface = a_surfaces(iv, 0);
+
+    a_fluidJoined(iv, 0) = surface.m_fluidJoined;
 
     for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
       IntVect node = iv;
@@ -959,6 +965,7 @@ void
 PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
                                         const BaseFab<Real>&          a_nodes,
                                         const BaseFab<Real>           a_crossings[SpaceDim],
+                                        const BaseFab<int>&           a_fluidJoined,
                                         const IntVect&                a_cell)
 {
   using PolyhedralEB::CutCellSurface;
@@ -966,6 +973,8 @@ PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
   a_surface = CutCellSurface();
 
   PolyhedralGeometryShop::fillCorners(a_surface, a_nodes, a_cell);
+
+  a_surface.m_fluidJoined = a_fluidJoined(a_cell, 0);
 
   for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
     const int dir = PolyhedralEB::detail::edgeDirection(e);
@@ -1118,6 +1127,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
 
     BaseFab<Real>        fineNodes;
     BaseFab<Real>        fineCrossings[SpaceDim];
+    BaseFab<int>         fineJoined;
     BaseFab<signed char> fineFilled;
 
     // a box the finer level does not reach needs nothing from it
@@ -1132,6 +1142,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
 
       PolyhedralGeometryShop::readFineCells(fineNodes,
                                             fineCrossings,
+                                            fineJoined,
                                             region,
                                             fineStates[dit()],
                                             fineMask[dit()],
@@ -1297,7 +1308,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph& a_coarse, const Polyhedra
             child[d] += (c >> d) & 1;
           }
 
-          PolyhedralGeometryShop::assembleSurface(children[c], fineNodes, fineCrossings, child);
+          PolyhedralGeometryShop::assembleSurface(children[c], fineNodes, fineCrossings, fineJoined, child);
         }
       }
 
@@ -4473,6 +4484,95 @@ PolyhedralGeometryShop::buildSurface(const BaseIF&                 a_function,
                                                                      a_dx);
     }
   }
+
+  PolyhedralGeometryShop::decideFaces(a_function, a_surface, a_cell, a_probLo, a_dx);
+}
+
+void
+PolyhedralGeometryShop::decideFaces(const BaseIF&                 a_function,
+                                    PolyhedralEB::CutCellSurface& a_surface,
+                                    const IntVect&                a_cell,
+                                    const RealVect&               a_probLo,
+                                    const Real                    a_dx) noexcept
+{
+  using PolyhedralEB::isFluid;
+
+  a_surface.m_fluidJoined = 0;
+
+  // which way one face goes, from its four corners in circuit order and its centre
+  auto fluidJoined = [&](const Real      a_f00,
+                         const Real      a_f10,
+                         const Real      a_f11,
+                         const Real      a_f01,
+                         const RealVect& a_centre,
+                         bool&           a_alternating) -> bool {
+    a_alternating = isFluid(a_f00) == isFluid(a_f11) && isFluid(a_f10) == isFluid(a_f01) &&
+                    isFluid(a_f00) != isFluid(a_f10);
+
+    if (!a_alternating) {
+      return false;
+    }
+
+    const Real value = PolyhedralGeometryShop::snappedValue(a_function, a_centre, 0.5 * a_dx);
+
+    if (value != 0.0) {
+      return isFluid(value);
+    }
+
+    const Real den = a_f00 + a_f11 - a_f10 - a_f01;
+
+    return isFluid((std::abs(den) > 0.0) ? (a_f00 * a_f11 - a_f10 * a_f01) / den : (a_f00 + a_f11));
+  };
+
+#if CH_SPACEDIM == 3
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      int faceCorner[4];
+
+      PolyhedralEB::detail::faceCorners(dir, side, faceCorner);
+
+      RealVect centre = a_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        const Real offset = (d == dir) ? static_cast<Real>(side) : 0.5;
+
+        centre[d] += a_dx * (static_cast<Real>(a_cell[d]) + offset);
+      }
+
+      bool alternating = false;
+
+      const bool joined = fluidJoined(a_surface.m_corner[faceCorner[0]],
+                                      a_surface.m_corner[faceCorner[1]],
+                                      a_surface.m_corner[faceCorner[2]],
+                                      a_surface.m_corner[faceCorner[3]],
+                                      centre,
+                                      alternating);
+
+      if (alternating && joined) {
+        a_surface.m_fluidJoined |= 1 << (2 * dir + side);
+      }
+    }
+  }
+#else
+  RealVect centre = a_probLo;
+
+  for (int d = 0; d < SpaceDim; d++) {
+    centre[d] += a_dx * (static_cast<Real>(a_cell[d]) + 0.5);
+  }
+
+  bool alternating = false;
+
+  const bool joined = fluidJoined(a_surface.m_corner[0],
+                                  a_surface.m_corner[1],
+                                  a_surface.m_corner[3],
+                                  a_surface.m_corner[2],
+                                  centre,
+                                  alternating);
+
+  if (alternating && joined) {
+    a_surface.m_fluidJoined = 1;
+  }
+#endif
 }
 
 void
@@ -4581,13 +4681,19 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   BaseFab<Real> nodeValues;
   PolyhedralGeometryShop::fillNodeValues(*m_baseIF, nodeValues, a_ghostRegion, a_probLo, a_dx);
 
-  // The same reading the graph takes: a cell the surface enters as more than one sheet cannot be described by
-  // one body and one interface, so it is filled rather than built. Decided for the whole region before any cell
-  // is classified. Nothing is carried above this level -- it is the finest the index space is generated on, the
-  // coarser ones being coarsened from it -- so no cell is spared for being resolved elsewhere.
+  // The same reading the graph takes: a cell holding a feature thinner than half of itself cannot be described by
+  // one body, so it is filled rather than built. Decided for the whole region before any cell is classified. Nothing is
+  // carried above this level -- it is the finest the index space is generated on, the coarser ones being coarsened from
+  // it -- so no cell is spared for being resolved elsewhere.
   BaseFab<bool> unresolved(a_ghostRegion, 1);
 
-  PolyhedralEBGraph::findUnresolvedCells(nodeValues, a_ghostRegion, Vector<Box>(), unresolved);
+  PolyhedralEBGraph::findUnresolvedCells(*m_baseIF,
+                                         nodeValues,
+                                         a_ghostRegion,
+                                         Vector<Box>(),
+                                         a_probLo,
+                                         a_dx,
+                                         unresolved);
 
   IntVectSet irregularCells;
 

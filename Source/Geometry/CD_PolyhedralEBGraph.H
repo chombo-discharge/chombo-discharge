@@ -169,13 +169,19 @@ public:
   link(PolyhedralEBGraph& a_coarse, const PolyhedralEBGraph& a_fine);
 
   /**
-   * @brief Find the cells of a region that hold more than one sheet of interface.
-   * @details Downstream holds one body and one interface to a cell, so a cell the surface enters as several
-   * sheets cannot be described at all. Such a cell is filled rather than built, which is the only reading that
-   * stays single valued and keeps a barrier thinner than a cell a barrier instead of letting the fluid run
-   * through it. Filling is a classification and changes no value another level reads, so the children a coarse
-   * cell restricts against still agree with it about where every edge is crossed -- which is what a snap of the
-   * nodes themselves cannot promise.
+   * @brief Find the cells of a region that hold a feature thinner than half of themselves.
+   * @details A cell the surface enters as more than one sheet holds more than one piece of fluid or more than one
+   * piece of solid. Two pieces of fluid -- a plate between them -- are more than one body can hold, and the cell is
+   * filled, which is the only reading that stays single valued and keeps a barrier a barrier instead of letting
+   * the fluid run through it. One piece of fluid with several pieces of solid is either a gap of fluid thinner than
+   * the cell between two solid lobes, or pieces that merely sit apart in it, such as two solid tips at opposite
+   * corners of a face, and the corners alone cannot tell the two apart. The cell is then cut in two along every
+   * direction and the function read at the new nodes. If some half-cell is entered by more than one sheet as well,
+   * the gap is thinner than half the cell and the cell is filled, erring toward blocking. Otherwise every piece is
+   * resolved at half the cell, and the cell is kept, as one body with several sheets of interface. Fluid pieces are
+   * counted the way the body joins them: across a face by its saddle, never through the interior. Filling is a
+   * classification and changes no value another level reads, so the children a coarse cell restricts against still
+   * agree with it about where every edge is crossed -- which is what a snap of the nodes themselves cannot promise.
    *
    * A cell the finer level carries is left alone: the feature is resolved up there, and this level's reading of
    * it is not the one that gets used. Only the combinatorics are read, so no root is solved for here.
@@ -184,15 +190,21 @@ public:
    * see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken
    * here would report a cell near a box boundary once for every box that reaches it. The caller counts over the
    * cells it owns.
+   * @param[in]  a_function   Implicit function, read at the nodes of the half-cells.
    * @param[in]  a_nodeValues Node values of the region.
    * @param[in]  a_region     Cells to ask.
    * @param[in]  a_covered    Cells a finer level carries.
+   * @param[in]  a_probLo     Lower-left corner of the domain.
+   * @param[in]  a_dx         Grid spacing.
    * @param[out] a_unresolved True for each cell of the region that must be filled.
    */
   static void
-  findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
+  findUnresolvedCells(const BaseIF&        a_function,
+                      const BaseFab<Real>& a_nodeValues,
                       const Box&           a_region,
                       const Vector<Box>&   a_covered,
+                      const RealVect&      a_probLo,
+                      const Real           a_dx,
                       BaseFab<bool>&       a_unresolved);
 
   /**

@@ -73,7 +73,8 @@ public:
   static constexpr int s_invalid = 2;
 
   /**
-   * @brief Constructor. Leaves every edge without a crossing, every corner at zero, and the role native.
+   * @brief Constructor. Leaves every edge without a crossing, every corner at zero, no face joining its fluid
+   * corners, and the role native.
    */
   CutCellSurface() noexcept;
 
@@ -92,7 +93,7 @@ public:
 
   /**
    * @brief Number of bytes the surface occupies in a linear buffer, as Chombo's containers ask of their payload.
-   * @return sizeof the crossings, the corners and the role together.
+   * @return sizeof the crossings, the corners, the face decisions and the role together.
    */
   inline int
   linearSize() const noexcept;
@@ -123,6 +124,15 @@ public:
    * ((c >> d) & 1) in direction d.
    */
   Real m_corner[s_numCorners];
+
+  /**
+   * @brief Which faces join their fluid corners, one bit per face whose corners alternate in sign.
+   * @details Bit 2 * dir + side in three dimensions, bit 0 for the cell itself in two. Four alternating corners
+   * cannot say whether the face's two fluid corners or its two solid ones meet across it; the implicit function
+   * at the centre of the face does, and is read where the surface is built, so that every cell sharing the face
+   * pairs its chords alike and a receiver of the surface never evaluates the function.
+   */
+  int m_fluidJoined;
 
   /**
    * @brief How the cell's body is built from this surface: s_native, s_overridden or s_invalid.

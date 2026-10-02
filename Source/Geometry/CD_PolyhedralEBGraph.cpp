@@ -123,9 +123,12 @@ PolyhedralEBGraph::defineData()
 }
 
 void
-PolyhedralEBGraph::findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
+PolyhedralEBGraph::findUnresolvedCells(const BaseIF&        a_function,
+                                       const BaseFab<Real>& a_nodeValues,
                                        const Box&           a_region,
                                        const Vector<Box>&   a_covered,
+                                       const RealVect&      a_probLo,
+                                       const Real           a_dx,
                                        BaseFab<bool>&       a_unresolved)
 {
   CH_TIME("PolyhedralEBGraph::findUnresolvedCells");
@@ -152,6 +155,119 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
   // Only the combinatorics matter, so the crossings are placed at the middle of the edges that carry one rather
   // than being solved for: where an edge carries a crossing follows from its ends, and that is all the sheet
   // count reads.
+  // The sheets a set of corner values makes, with the crossings placed at the middle of the edges that carry one.
+  auto sheetsOf = [](CutCellSurface& a_surface) -> int {
+    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+      int low  = 0;
+      int high = 0;
+
+      PolyhedralEB::detail::edgeCorners(e, low, high);
+
+      const bool crosses = PolyhedralEB::isFluid(a_surface.m_corner[low]) !=
+                           PolyhedralEB::isFluid(a_surface.m_corner[high]);
+
+      a_surface.m_crossing[e] = crosses ? 0.5 : CutCellSurface::s_noCrossing;
+    }
+
+    return CutCellBody::numSheets(a_surface);
+  };
+
+  // The pieces of fluid a surface makes, joined the way the body joins them: two fluid corners are one piece if an
+  // edge runs between them, or if they are opposite corners of a face that joins its fluid corners. The
+  // interior is never tunnelled through, so a pair of fluid corners at the ends of a body diagonal stays apart.
+  auto fluidPiecesOf = [](const CutCellSurface& a_surface) -> int {
+    int root[CutCellSurface::s_numCorners];
+
+    for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+      root[c] = c;
+    }
+
+    auto find = [&root](int a_corner) -> int {
+      while (root[a_corner] != a_corner) {
+        a_corner = root[a_corner];
+      }
+
+      return a_corner;
+    };
+
+    auto join = [&](const int a_first, const int a_second) -> void {
+      root[find(a_first)] = find(a_second);
+    };
+
+    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
+      int low  = 0;
+      int high = 0;
+
+      PolyhedralEB::detail::edgeCorners(e, low, high);
+
+      if (PolyhedralEB::isFluid(a_surface.m_corner[low]) && PolyhedralEB::isFluid(a_surface.m_corner[high])) {
+        join(low, high);
+      }
+    }
+
+    for (int d1 = 0; d1 < SpaceDim; d1++) {
+      for (int d2 = d1 + 1; d2 < SpaceDim; d2++) {
+        for (int base = 0; base < CutCellSurface::s_numCorners; base++) {
+          if (((base >> d1) & 1) != 0 || ((base >> d2) & 1) != 0) {
+            continue;
+          }
+
+          const int c00 = base;
+          const int c10 = base | (1 << d1);
+          const int c11 = base | (1 << d1) | (1 << d2);
+          const int c01 = base | (1 << d2);
+
+          const Real f00 = a_surface.m_corner[c00];
+          const Real f10 = a_surface.m_corner[c10];
+          const Real f11 = a_surface.m_corner[c11];
+          const Real f01 = a_surface.m_corner[c01];
+
+          const bool alternating = PolyhedralEB::isFluid(f00) == PolyhedralEB::isFluid(f11) &&
+                                   PolyhedralEB::isFluid(f10) == PolyhedralEB::isFluid(f01) &&
+                                   PolyhedralEB::isFluid(f00) != PolyhedralEB::isFluid(f10);
+
+          if (!alternating) {
+            continue;
+          }
+
+          // the face decision the body pairs its chords by
+#if CH_SPACEDIM == 3
+          const int normal = SpaceDim - d1 - d2;
+          const int bit    = 2 * normal + ((base >> normal) & 1);
+#else
+          const int bit = 0;
+#endif
+
+          if (((a_surface.m_fluidJoined >> bit) & 1) != 0) {
+            if (PolyhedralEB::isFluid(f00)) {
+              join(c00, c11);
+            }
+            else {
+              join(c10, c01);
+            }
+          }
+        }
+      }
+    }
+
+    int numPieces = 0;
+
+    for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
+      if (PolyhedralEB::isFluid(a_surface.m_corner[c]) && find(c) == c) {
+        numPieces++;
+      }
+    }
+
+    return numPieces;
+  };
+
+  const Real halfDx = 0.5 * a_dx;
+
+  const Box children(IntVect::Zero, IntVect::Unit);
+  const Box halfNodes(IntVect::Zero, 2 * IntVect::Unit);
+
+  BaseFab<Real> halfValues(halfNodes, 1);
+
   for (BoxIterator bit(a_region); bit.ok(); ++bit) {
     const IntVect iv = bit();
 
@@ -162,21 +278,58 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseFab<Real>& a_nodeValues,
     CutCellSurface surface;
 
     PolyhedralGeometryShop::fillCorners(surface, a_nodeValues, iv);
+    PolyhedralGeometryShop::decideFaces(a_function, surface, iv, a_probLo, a_dx);
 
-    for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
-      int low  = 0;
-      int high = 0;
-
-      PolyhedralEB::detail::edgeCorners(e, low, high);
-
-      const bool crosses = PolyhedralEB::isFluid(surface.m_corner[low]) !=
-                           PolyhedralEB::isFluid(surface.m_corner[high]);
-
-      surface.m_crossing[e] = crosses ? 0.5 : CutCellSurface::s_noCrossing;
+    if (sheetsOf(surface) <= 1) {
+      continue;
     }
 
-    if (CutCellBody::numSheets(surface) > 1) {
+    // Two pieces of fluid are two cells' worth of fluid, which one body cannot hold however well each is resolved.
+    if (fluidPiecesOf(surface) > 1) {
       a_unresolved(iv, 0) = true;
+
+      continue;
+    }
+
+    // One piece of fluid in more than one sheet means more than one piece of solid, and the corners alone cannot
+    // say whether that is a feature thinner than the cell -- a gap of fluid between two solid lobes -- or pieces
+    // that merely sit apart in it, such as two solid tips at opposite corners of a face. The
+    // cell is cut in two along every direction and the function read at the new nodes: a feature thinner than
+    // half the cell leaves some half-cell in more than one sheet as well, and the cell is filled; otherwise every
+    // piece is resolved at half the cell, and the cell is kept as one body with several sheets of interface. The
+    // corners keep the values the cell already has, so the half-cells agree with it where they meet its nodes.
+    for (BoxIterator nit(halfNodes); nit.ok(); ++nit) {
+      const IntVect half = nit();
+
+      bool atCorner = true;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        atCorner = atCorner && (half[d] != 1);
+      }
+
+      if (atCorner) {
+        halfValues(half, 0) = a_nodeValues(iv + half / 2, 0);
+      }
+      else {
+        RealVect x = a_probLo;
+
+        for (int d = 0; d < SpaceDim; d++) {
+          x[d] += halfDx * static_cast<Real>(2 * iv[d] + half[d]);
+        }
+
+        halfValues(half, 0) = PolyhedralGeometryShop::snappedValue(a_function, x, halfDx);
+      }
+    }
+
+    for (BoxIterator cit(children); cit.ok() && !a_unresolved(iv, 0); ++cit) {
+      CutCellSurface child;
+
+      PolyhedralGeometryShop::fillCorners(child, halfValues, cit());
+      PolyhedralGeometryShop::decideFaces(a_function, child, 2 * iv + cit(), a_probLo, halfDx);
+
+      if (sheetsOf(child) > 1) {
+        a_unresolved(iv, 0) = true;
+      }
     }
   }
 }
@@ -230,7 +383,7 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
     // Which cells cannot be described at all, decided before any of them is classified.
     BaseFab<bool> unresolved(grown, 1);
 
-    PolyhedralEBGraph::findUnresolvedCells(nodeValues, grown, m_covered, unresolved);
+    PolyhedralEBGraph::findUnresolvedCells(a_function, nodeValues, grown, m_covered, m_probLo, m_dx, unresolved);
 
     // Counted over the cells this box owns, not over the ring it also filled: neighbouring boxes reach into
     // one another's ring, and a cell counted there would be reported once per box that reaches it.
@@ -262,12 +415,13 @@ PolyhedralEBGraph::defineCells(const BaseIF& a_function, const LevelData<BaseFab
 
       PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
 
-      // A cell the surface enters as more than one sheet holds a feature thinner than itself, and one body and
-      // one interface cannot describe it: read from the nodes, a plate through the middle comes out as two
-      // slivers hugging opposite edges, and the fluid runs straight through a barrier that should stop it. The
-      // cell is filled, which is the only reading that stays single valued and keeps the barrier a barrier, and
-      // it errs toward blocking rather than leaking. Unlike moving a node, this changes no value another level
-      // reads, so the children a coarse cell restricts against still agree with it about every edge.
+      // A cell holding a feature thinner than half of itself cannot be described by one body: read from the
+      // nodes, a plate through the middle comes out as two slivers hugging opposite edges, and the fluid runs
+      // straight through a barrier that should stop it. The cell is filled, which is the only reading that stays
+      // single valued and keeps the barrier a barrier, and it errs toward blocking rather than leaking. A cell
+      // whose several sheets are each resolved at half the cell is built as one body holding all of them. Unlike
+      // moving a node, this changes no value another level reads, so the children a coarse cell restricts against
+      // still agree with it about every edge.
       const CutCellBody::Kind kind = unresolved(iv, 0) ? CutCellBody::Kind::Covered : CutCellBody::classify(surface);
 
       // A cell filled next door leaves this one with a face onto nothing. A cell whose corners make it regular
@@ -666,6 +820,7 @@ PolyhedralEBGraph::equals(const PolyhedralEBGraph& a_other) const
           same = same && (a.m_corner[c] == b.m_corner[c]);
         }
 
+        same = same && (a.m_fluidJoined == b.m_fluidJoined);
         same = same && (a.m_role == b.m_role);
       }
     }
