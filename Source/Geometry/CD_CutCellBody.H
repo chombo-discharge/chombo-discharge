@@ -409,8 +409,9 @@ public:
    * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
    * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
    * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
-   * gain the same vector. The moments are recomputed. In two dimensions only closing is done: the face's stretch of the
-   * polygon becomes interface lying in the face.
+   * gain the same vector. The moments are recomputed. Closing keeps the rest of the body as it is and relabels the
+   * face's polygon as interface lying in the face; opening, three dimensions only, rebuilds the interface to meet
+   * the whole face. In two dimensions the face's stretch of the polygon becomes interface lying in the face.
    * @param[in] a_dir               Direction of the face.
    * @param[in] a_side              Side of the cell the face is on.
    * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.

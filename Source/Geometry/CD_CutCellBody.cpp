@@ -831,7 +831,26 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
 
   const int face = 2 * a_dir + a_side;
 
-  // this face's polygon goes, and so does the interface, which was built to meet its chord
+  // Closing: the face's polygon is already exactly the boundary the fluid needs there, so it stays and becomes
+  // interface lying in the face, and nothing else changes. Rebuilding the interface instead would cap every loop
+  // left open with a flat patch, which collapses a body whose remaining faces leave two loops -- a sliver closed
+  // on two sides keeps only its two end faces, and their caps lie on top of them.
+  if (!a_neighbourIsFluid) {
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      if (m_polygon[ip].m_face == face) {
+        m_polygon[ip].m_face = -1;
+      }
+    }
+
+    this->accumulateMoments();
+
+    const bool closed  = this->closureResidual() <= 1.0E-9;
+    const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+    return closed && inRange;
+  }
+
+  // Opening: this face's polygon goes, and so does the interface, which was built to meet its chord
   int kept = 0;
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
@@ -842,9 +861,8 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
 
   m_numPolygons = kept;
 
-  // A neighbour that holds no solid says the whole face is open; one that holds no fluid leaves it closed, and
-  // then the face has no polygon at all.
-  if (a_neighbourIsFluid) {
+  // A neighbour that holds no solid says the whole face is open.
+  {
     if (m_numPolygons >= s_maxPolygons) {
       return false;
     }
