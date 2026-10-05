@@ -664,6 +664,21 @@ protected:
   static constexpr int s_elementVertices = SpaceDim;
 
   /**
+   * @brief Kind of a node of the written graph: a cut cell, at its fluid's centroid.
+   */
+  static constexpr int s_cellNode = 0;
+
+  /**
+   * @brief Kind of a node of the written graph: an open face of a cut cell, at the centroid of its open part.
+   */
+  static constexpr int s_faceNode = 1;
+
+  /**
+   * @brief What a field of the written graph reads on a node of the kind it does not belong to.
+   */
+  static constexpr int s_noValue = -1;
+
+  /**
    * @brief Fraction of a level's grid spacing within which two vertices are the same vertex, in sanityCheck and in
    * the written surface.
    * @details Cells of one level compute a shared vertex from the same nodes and edge and agree bit for bit, and cells
@@ -977,15 +992,19 @@ protected:
   writeSurface(const std::string& a_fileName, const Vector<Vector<Real>>& a_facets) const;
 
   /**
-   * @brief Write the cut cells' connectivity as a skeleton a viewer can draw: a point per cut cell, a line from it to
-   * every open face.
-   * @details One group per level. A node is written for every cut cell of the level's tiles, at its fluid's centroid,
-   * with its volume fraction, the role of its surface, its number of sheets and its rank. An edge is written from a
-   * node to the centroid of each of its open faces, so that the edges of two neighbouring cut cells meet in the face
-   * between them, and a face onto a regular cell, another level or the domain boundary ends in a half; it carries the
-   * aperture, the face state and whether the stitch rewrote the face. Two XDMF descriptions are written next to
-   * the file, <file>_nodes.xmf with the nodes as points and <file>_edges.xmf with the edges as segments, since a
-   * reader may take only the first grid of a file. Collective.
+   * @brief Write the cut cells' connectivity as a skeleton a viewer can draw: a point per cut cell and per open face of
+   * one, and a line from each cut cell to each of its open faces.
+   * @details One group per level. A cell node is written for every cut cell of the level's tiles, at its fluid's
+   * centroid, with its volume fraction, the role of its surface, its number of sheets and its rank. A face node is
+   * written for every open face of one, at the centroid of the face's open part, with its aperture, its face state
+   * and whether the stitch rewrote it; a face two cut cells of the level share is written once, by the cell on its low
+   * side, on whichever rank holds it. The two kinds share one point mesh, told apart by a field
+   * holding s_cellNode or s_faceNode, and a field reads s_noValue on the kind it does not belong to. An edge is written
+   * from a cell node to the centroid of each of its open faces, so that the edges of two neighbouring cut cells meet in
+   * the face between them, and a face onto a regular cell, another level or the domain boundary ends in a half; it
+   * carries the face's fields too. Two XDMF descriptions are written next to the file, <file>_nodes.xmf with the
+   * nodes as points and <file>_edges.xmf with the edges as segments, since a reader may take only the first grid of
+   * a file.
    * @param[in] a_fileName File to write, without a suffix.
    */
   void

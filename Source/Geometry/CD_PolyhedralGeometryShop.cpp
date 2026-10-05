@@ -3340,14 +3340,19 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     const std::string name  = "level" + std::to_string(lvl);
     const hid_t       group = H5Gcreate2(file, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    // A node per cut cell of this rank's tiles, at the fluid's centroid; an edge from it to the centroid of every open
-    // face, so that two neighbouring cut cells' edges meet in the face between them, and a face onto a regular cell,
-    // another level or the domain boundary ends in a half.
+    // A node per cut cell of this rank's tiles, at the fluid's centroid, and a node per open face of one, at the
+    // centroid of its open part; an edge from a cell's node to the node of each of its open faces, so that two
+    // neighbouring cut cells' edges meet in the face between them, and a face onto a regular cell, another level or
+    // the domain boundary ends in a half. A field that belongs to the other kind of node reads s_noValue.
     std::vector<double> nodePosition;
+    std::vector<int>    nodeKind;
     std::vector<double> nodeKappa;
     std::vector<int>    nodeRole;
     std::vector<int>    nodeSheets;
     std::vector<int>    nodeRank;
+    std::vector<double> nodeAperture;
+    std::vector<int>    nodeFace;
+    std::vector<int>    nodeOverridden;
 
     std::vector<double> edgePosition;
     std::vector<double> edgeAperture;
@@ -3375,6 +3380,7 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
         const BaseFab<signed char>&   states    = graph.getCellStates()[dit()];
         const BaseFab<signed char>&   faces     = graph.getFaceStates()[dit()];
         const BaseFab<signed char>&   refined   = graph.getRefinedMask()[dit()];
+        const IntVectSet&             cut       = graph.getCutCells()[dit()];
         const IVSFAB<CutCellSurface>& stored    = graph.getSurfaces()[dit()];
         const CutCellFaceOverrides&   overrides = graph.getFaceOverrides()[dit()];
 
@@ -3399,10 +3405,14 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 
           push(nodePosition, node);
 
+          nodeKind.push_back(s_cellNode);
           nodeKappa.push_back(body.volumeFraction());
           nodeRole.push_back(stored(iv, 0).m_role);
           nodeSheets.push_back(CutCellBody::numSheets(stored(iv, 0)));
           nodeRank.push_back(procID());
+          nodeAperture.push_back(s_noValue);
+          nodeFace.push_back(s_noValue);
+          nodeOverridden.push_back(s_noValue);
 
           // the faces the stitch rewrote
           bool overridden[2 * SpaceDim] = {false};
@@ -3440,6 +3450,25 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
               edgeAperture.push_back(aperture);
               edgeFace.push_back(faces(iv, face));
               edgeOverridden.push_back(overridden[face] ? 1 : 0);
+
+              // A face two cut cells of this level share is written once, by the cell on its low side; a face onto
+              // anything else is written by the one cut cell it bounds.
+              const IntVect across = iv + (2 * side - 1) * BASISV(dir);
+
+              if (side == 0 && cut.contains(across)) {
+                continue;
+              }
+
+              push(nodePosition, at);
+
+              nodeKind.push_back(s_faceNode);
+              nodeKappa.push_back(s_noValue);
+              nodeRole.push_back(s_noValue);
+              nodeSheets.push_back(s_noValue);
+              nodeRank.push_back(procID());
+              nodeAperture.push_back(aperture);
+              nodeFace.push_back(faces(iv, face));
+              nodeOverridden.push_back(overridden[face] ? 1 : 0);
             }
           }
         }
@@ -3495,6 +3524,26 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     writeH5Slab(group, "role", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRole.data(), transfer);
     writeH5Slab(group, "sheets", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeSheets.data(), transfer);
     writeH5Slab(group, "rank", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRank.data(), transfer);
+    writeH5Slab(group, "kind", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeKind.data(), transfer);
+    writeH5Slab(group,
+                "nodeAperture",
+                H5T_NATIVE_DOUBLE,
+                myNodes,
+                nodeStart,
+                nodeCount,
+                1,
+                nodeAperture.data(),
+                transfer);
+    writeH5Slab(group, "nodeFaceState", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeFace.data(), transfer);
+    writeH5Slab(group,
+                "nodeOverridden",
+                H5T_NATIVE_INT,
+                myNodes,
+                nodeStart,
+                nodeCount,
+                1,
+                nodeOverridden.data(),
+                transfer);
 
     writeH5Slab(group,
                 "edgePositions",
@@ -3537,11 +3586,12 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 
       const auto attribute = [&](const std::string& a_level,
                                  const std::string& a_name,
+                                 const std::string& a_dataset,
                                  const long long    a_count,
                                  const std::string& a_type) -> void {
         xdmf << "        <Attribute Name=\"" << a_name << "\" AttributeType=\"Scalar\" Center=\"Cell\">\n";
         xdmf << "          <DataItem Dimensions=\"" << a_count << "\" NumberType=\"" << a_type << "\" Precision=\""
-             << ((a_type == "Float") ? 8 : 4) << "\" Format=\"HDF\">" << base << ":/" << a_level << "/" << a_name
+             << ((a_type == "Float") ? 8 : 4) << "\" Format=\"HDF\">" << base << ":/" << a_level << "/" << a_dataset
              << "</DataItem>\n";
         xdmf << "        </Attribute>\n";
       };
@@ -3573,15 +3623,19 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
         xdmf << "        </Geometry>\n";
 
         if (nodes) {
-          attribute(name, "kappa", count, "Float");
-          attribute(name, "role", count, "Int");
-          attribute(name, "sheets", count, "Int");
-          attribute(name, "rank", count, "Int");
+          attribute(name, "kind", "kind", count, "Int");
+          attribute(name, "kappa", "kappa", count, "Float");
+          attribute(name, "role", "role", count, "Int");
+          attribute(name, "sheets", "sheets", count, "Int");
+          attribute(name, "rank", "rank", count, "Int");
+          attribute(name, "aperture", "nodeAperture", count, "Float");
+          attribute(name, "faceState", "nodeFaceState", count, "Int");
+          attribute(name, "overridden", "nodeOverridden", count, "Int");
         }
         else {
-          attribute(name, "aperture", count, "Float");
-          attribute(name, "faceState", count, "Int");
-          attribute(name, "overridden", count, "Int");
+          attribute(name, "aperture", "aperture", count, "Float");
+          attribute(name, "faceState", "faceState", count, "Int");
+          attribute(name, "overridden", "overridden", count, "Int");
         }
 
         xdmf << "      </Grid>\n";
