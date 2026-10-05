@@ -1002,9 +1002,9 @@ protected:
    * holding s_cellNode or s_faceNode, and a field reads s_noValue on the kind it does not belong to. An edge is written
    * from a cell node to the centroid of each of its open faces, so that the edges of two neighbouring cut cells meet in
    * the face between them, and a face onto a regular cell, another level or the domain boundary ends in a half; it
-   * carries the face's fields too. Two XDMF descriptions are written next to the file, <file>_nodes.xmf with the
-   * nodes as points and <file>_edges.xmf with the edges as segments, since a reader may take only the first grid of
-   * a file.
+   * carries the face's fields too. Two XDMF descriptions are written next to the file, a_fileName followed by
+   * _nodes.xmf with the nodes as points and a_fileName followed by _edges.xmf with the edges as segments, since a
+   * reader may take only the first grid of a file.
    * @param[in] a_fileName File to write, without a suffix.
    */
   void
