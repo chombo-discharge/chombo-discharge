@@ -3524,31 +3524,33 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
   H5Pclose(transfer);
   H5Fclose(file);
 
-  // A description a viewer can open: the nodes of each level as points, the edges as line segments.
+  // Descriptions a viewer can open, one for the nodes of each level as points and one for the edges as line segments:
+  // a reader such as VisIt's takes only the first grid of a file, so the two go in files of their own, both pointing
+  // at the same data.
   if (procID() == 0) {
-    std::ofstream xdmf(stem + ".xmf");
-
     const std::string base = a_fileName + ".h5";
 
-    const auto attribute = [&](const std::string& a_level,
-                               const std::string& a_name,
-                               const long long    a_count,
-                               const std::string& a_type) -> void {
-      xdmf << "        <Attribute Name=\"" << a_name << "\" AttributeType=\"Scalar\" Center=\"Cell\">\n";
-      xdmf << "          <DataItem Dimensions=\"" << a_count << "\" NumberType=\"" << a_type << "\" Precision=\""
-           << ((a_type == "Float") ? 8 : 4) << "\" Format=\"HDF\">" << base << ":/" << a_level << "/" << a_name
-           << "</DataItem>\n";
-      xdmf << "        </Attribute>\n";
-    };
-
-    xdmf << "<?xml version=\"1.0\" ?>\n";
-    xdmf << "<Xdmf Version=\"3.0\">\n  <Domain>\n";
-
     for (const std::string kind : {"nodes", "edges"}) {
+      const bool nodes = (kind == "nodes");
+
+      std::ofstream xdmf(stem + "_" + kind + ".xmf");
+
+      const auto attribute = [&](const std::string& a_level,
+                                 const std::string& a_name,
+                                 const long long    a_count,
+                                 const std::string& a_type) -> void {
+        xdmf << "        <Attribute Name=\"" << a_name << "\" AttributeType=\"Scalar\" Center=\"Cell\">\n";
+        xdmf << "          <DataItem Dimensions=\"" << a_count << "\" NumberType=\"" << a_type << "\" Precision=\""
+             << ((a_type == "Float") ? 8 : 4) << "\" Format=\"HDF\">" << base << ":/" << a_level << "/" << a_name
+             << "</DataItem>\n";
+        xdmf << "        </Attribute>\n";
+      };
+
+      xdmf << "<?xml version=\"1.0\" ?>\n";
+      xdmf << "<Xdmf Version=\"3.0\">\n  <Domain>\n";
       xdmf << "    <Grid Name=\"" << kind << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
 
       for (int lvl = 0; lvl < numLevels; lvl++) {
-        const bool      nodes = (kind == "nodes");
         const long long count = nodes ? totalNodes[lvl] : totalEdges[lvl];
 
         if (count == 0) {
@@ -3586,9 +3588,8 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
       }
 
       xdmf << "    </Grid>\n";
+      xdmf << "  </Domain>\n</Xdmf>\n";
     }
-
-    xdmf << "  </Domain>\n</Xdmf>\n";
   }
 #else
   MayDay::Warning("PolyhedralGeometryShop::writeGraph - HDF5 is off, so the graph is not written");

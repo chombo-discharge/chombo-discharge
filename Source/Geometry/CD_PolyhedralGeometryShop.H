@@ -983,8 +983,9 @@ protected:
    * with its volume fraction, the role of its surface, its number of sheets and its rank. An edge is written from a
    * node to the centroid of each of its open faces, so that the edges of two neighbouring cut cells meet in the face
    * between them, and a face onto a regular cell, another level or the domain boundary ends in a half; it carries the
-   * aperture, the face state and whether the stitch rewrote the face. An XDMF description is written next to the
-   * file, with the nodes as points and the edges as segments. Collective.
+   * aperture, the face state and whether the stitch rewrote the face. Two XDMF descriptions are written next to
+   * the file, <file>_nodes.xmf with the nodes as points and <file>_edges.xmf with the edges as segments, since a
+   * reader may take only the first grid of a file. Collective.
    * @param[in] a_fileName File to write, without a suffix.
    */
   void
