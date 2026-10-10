@@ -177,6 +177,32 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a54331545244d3fc24872eb81e381faa9" id="r_a54331545244d3fc24872eb81e381faa9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a54331545244d3fc24872eb81e381faa9">testGraphCopy</a> () const</td></tr>
 <tr class="memdesc:a54331545244d3fc24872eb81e381faa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy every graph onto a layout that splits each of its tiles into octants with the ranks shuffled, and then onto the tiles themselves with the ranks shuffled; run sanityCheck over the copies each time, copy them back onto the original layouts and require equality bit for bit.  <br /></td></tr>
 <tr class="separator:a54331545244d3fc24872eb81e381faa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b4e9b7c5c3b2c4d692393e75e335919" id="r_a7b4e9b7c5c3b2c4d692393e75e335919"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a7b4e9b7c5c3b2c4d692393e75e335919">destinationLevel</a> (const ProblemDomain &amp;a_domain) const</td></tr>
+<tr class="memdesc:a7b4e9b7c5c3b2c4d692393e75e335919"><td class="mdescLeft">&#160;</td><td class="mdescRight">The geometry level a destination domain lives on.  <br /></td></tr>
+<tr class="separator:a7b4e9b7c5c3b2c4d692393e75e335919"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa53f451d4aa864af604abd4da1cc5616" id="r_aa53f451d4aa864af604abd4da1cc5616"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#aa53f451d4aa864af604abd4da1cc5616">destinationPieces</a> (std::vector&lt; std::vector&lt; std::pair&lt; int, Box &gt; &gt; &gt; &amp;a_pieces, const IntVectSet &amp;a_valid, const int a_level) const</td></tr>
+<tr class="memdesc:aa53f451d4aa864af604abd4da1cc5616"><td class="mdescLeft">&#160;</td><td class="mdescRight">The pieces of the graph a destination region needs: what each tiled level owns of it, tile by tile, down to the cells whose footprint on the destination level lies in the region.  <br /></td></tr>
+<tr class="separator:aa53f451d4aa864af604abd4da1cc5616"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7af3163a612e80886d3530ad7ef6c155" id="r_a7af3163a612e80886d3530ad7ef6c155"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a7af3163a612e80886d3530ad7ef6c155">planCopy</a> (std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;a_sends, std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;a_receives, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
+<tr class="memdesc:a7af3163a612e80886d3530ad7ef6c155"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plan a copy of the graph onto a destination hierarchy: every piece this rank sends, and every piece it receives.  <br /></td></tr>
+<tr class="separator:a7af3163a612e80886d3530ad7ef6c155"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58b4ebdbd161513ee81323fefa2908ea" id="r_a58b4ebdbd161513ee81323fefa2908ea"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a58b4ebdbd161513ee81323fefa2908ea">checkCopyPlan</a> (const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
+<tr class="memdesc:a58b4ebdbd161513ee81323fefa2908ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plan a copy onto a destination hierarchy, send every rank the headers it is to receive, and require them to be exactly the ones it planned to receive. Collective.  <br /></td></tr>
+<tr class="separator:a58b4ebdbd161513ee81323fefa2908ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ead6aba9cf9d7dbf6b84d6fe9136e7c" id="r_a4ead6aba9cf9d7dbf6b84d6fe9136e7c"><td class="memItemLeft" align="right" valign="top"><a id="a4ead6aba9cf9d7dbf6b84d6fe9136e7c" name="a4ead6aba9cf9d7dbf6b84d6fe9136e7c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>testCopyPlan</b> () const</td></tr>
+<tr class="memdesc:a4ead6aba9cf9d7dbf6b84d6fe9136e7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check the copy plan onto the geometry's own box hierarchy with the ranks shuffled, onto every level of it alone, and onto a level past the finest. Collective. Switched by PolyhedralGeometryShop.test_copy. <br /></td></tr>
+<tr class="separator:a4ead6aba9cf9d7dbf6b84d6fe9136e7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a758f475503d8ef970fbde2f9877422a4" id="r_a758f475503d8ef970fbde2f9877422a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a758f475503d8ef970fbde2f9877422a4">copyGraphs</a> (<a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_dest, const std::vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const std::vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_ghost) const</td></tr>
+<tr class="memdesc:a758f475503d8ef970fbde2f9877422a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the graphs onto a destination hierarchy.  <br /></td></tr>
+<tr class="separator:a758f475503d8ef970fbde2f9877422a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b3da91c8781204c58f6bc3e4548a736" id="r_a2b3da91c8781204c58f6bc3e4548a736"><td class="memItemLeft" align="right" valign="top"><a id="a2b3da91c8781204c58f6bc3e4548a736" name="a2b3da91c8781204c58f6bc3e4548a736"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>testCopyRoundTrip</b> () const</td></tr>
+<tr class="memdesc:a2b3da91c8781204c58f6bc3e4548a736"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy every graph onto its own layout as a destination level of its own, and require every cell the level owns to arrive as the graph holds it, bit for bit: state, surface, role and face overrides. Collective. Switched by PolyhedralGeometryShop.test_copy. <br /></td></tr>
+<tr class="separator:a2b3da91c8781204c58f6bc3e4548a736"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2bdac0f67a3c473d9be09f2a09855a4" id="r_ad2bdac0f67a3c473d9be09f2a09855a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ad2bdac0f67a3c473d9be09f2a09855a4">testCopyBodies</a> () const</td></tr>
+<tr class="memdesc:ad2bdac0f67a3c473d9be09f2a09855a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Require every cut cell's body to survive a copy bit for bit.  <br /></td></tr>
+<tr class="separator:ad2bdac0f67a3c473d9be09f2a09855a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classScanShop"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classScanShop')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classScanShop.html">ScanShop</a></td></tr>
 <tr class="memitem:acbb51cf0dbbb601f9c29d0be2c4a92c9 inherit pub_methods_classScanShop" id="r_acbb51cf0dbbb601f9c29d0be2c4a92c9"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>ScanShop</b> ()=delete</td></tr>
@@ -220,6 +246,18 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ab90593ee7ec3f905ce8663d03b566874" id="r_ab90593ee7ec3f905ce8663d03b566874"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ab90593ee7ec3f905ce8663d03b566874">validRegion</a> (IntVectSet &amp;a_valid, const Box &amp;a_box, const ProblemDomain &amp;a_domain, const DisjointBoxLayout *a_finer, const Vector&lt; Box &gt; *a_finerBoxes, const int a_ratio, const int a_ghost)</td></tr>
+<tr class="memdesc:ab90593ee7ec3f905ce8663d03b566874"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cells of a destination box a copy of the graph fills: the box grown by a ghost width, inside the domain, less what the next finer destination level covers.  <br /></td></tr>
+<tr class="separator:ab90593ee7ec3f905ce8663d03b566874"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a938552f2609dcd22e661157dd5a552ca" id="r_a938552f2609dcd22e661157dd5a552ca"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a938552f2609dcd22e661157dd5a552ca">sourceBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_graph, const int a_level, const DataIndex &amp;a_dit, const int a_sourceLevel, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a938552f2609dcd22e661157dd5a552ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of one cut cell of a geometry level, from what a destination box holds of that level.  <br /></td></tr>
+<tr class="separator:a938552f2609dcd22e661157dd5a552ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb30686a9f5812f7be1d6797763312c4" id="r_aeb30686a9f5812f7be1d6797763312c4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#aeb30686a9f5812f7be1d6797763312c4">destinationBodies</a> (std::vector&lt; <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &gt; &amp;a_bodies, long long &amp;a_numSplit, const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;a_graph, const int a_level, const DataIndex &amp;a_dit, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:aeb30686a9f5812f7be1d6797763312c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The bodies a cell of a destination level is made of, from the geometry levels that own it.  <br /></td></tr>
+<tr class="separator:aeb30686a9f5812f7be1d6797763312c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3bb4ffb56facc95db0d4f5f7b9facd0" id="r_ab3bb4ffb56facc95db0d4f5f7b9facd0"><td class="memItemLeft" align="right" valign="top">static DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ab3bb4ffb56facc95db0d4f5f7b9facd0">shuffledLayout</a> (const Vector&lt; Box &gt; &amp;a_boxes, const ProblemDomain &amp;a_domain)</td></tr>
+<tr class="memdesc:ab3bb4ffb56facc95db0d4f5f7b9facd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its length, so that no rank holds what a load balance would have given it. For the copy tests.  <br /></td></tr>
+<tr class="separator:ab3bb4ffb56facc95db0d4f5f7b9facd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6bb46a15c80e4f7702b5c72de640a0e4" id="r_a6bb46a15c80e4f7702b5c72de640a0e4"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a6bb46a15c80e4f7702b5c72de640a0e4">isDust</a> (const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body) noexcept</td></tr>
 <tr class="memdesc:a6bb46a15c80e4f7702b5c72de640a0e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a cut body holds nothing at all and is therefore a regular cell.  <br /></td></tr>
 <tr class="separator:a6bb46a15c80e4f7702b5c72de640a0e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -238,6 +276,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:aebae4746293565213b5f47f04f11ff82" id="r_aebae4746293565213b5f47f04f11ff82"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#aebae4746293565213b5f47f04f11ff82">buildSurface</a> (const BaseIF &amp;a_function, BaseFab&lt; Real &gt; a_intercept[SpaceDim], <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const BaseFab&lt; Real &gt; &amp;a_nodeValues, const IntVect &amp;a_cell, const RealVect &amp;a_probLo, const Real &amp;a_dx)</td></tr>
 <tr class="memdesc:aebae4746293565213b5f47f04f11ff82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather the corner values and edge crossings one cell's surface is built from.  <br /></td></tr>
 <tr class="separator:aebae4746293565213b5f47f04f11ff82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a741a8cce1196a9544396b5cb672fc677" id="r_a741a8cce1196a9544396b5cb672fc677"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a741a8cce1196a9544396b5cb672fc677">decideFaces</a> (const BaseIF &amp;a_function, <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const IntVect &amp;a_cell, const RealVect &amp;a_probLo, const Real a_dx) noexcept</td></tr>
+<tr class="memdesc:a741a8cce1196a9544396b5cb672fc677"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decide, for every face of a cell whose corners alternate in sign, whether its fluid corners or its solid ones meet across it.  <br /></td></tr>
+<tr class="separator:a741a8cce1196a9544396b5cb672fc677"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b127ed35c8c95a84ab7201557c2da37" id="r_a7b127ed35c8c95a84ab7201557c2da37"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a7b127ed35c8c95a84ab7201557c2da37">edgeRoot</a> (const BaseIF &amp;a_function, const IntVect &amp;a_edgeIV, const int a_dir, const Real a_loValue, const Real a_hiValue, const RealVect &amp;a_probLo, const Real a_dx) noexcept</td></tr>
 <tr class="memdesc:a7b127ed35c8c95a84ab7201557c2da37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bisect one cell edge for the crossing on it.  <br /></td></tr>
 <tr class="separator:a7b127ed35c8c95a84ab7201557c2da37"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -247,6 +288,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4ea4bb0ccb1079c04d19e76575932cd6" id="r_a4ea4bb0ccb1079c04d19e76575932cd6"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a4ea4bb0ccb1079c04d19e76575932cd6">resolveTangency</a> (const BaseIF &amp;a_function, const RealVect &amp;a_point, const Real a_dx) noexcept</td></tr>
 <tr class="memdesc:a4ea4bb0ccb1079c04d19e76575932cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the implicit function beside a point where it is zero, when no surface passes through the point.  <br /></td></tr>
 <tr class="separator:a4ea4bb0ccb1079c04d19e76575932cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f70ed057779194c2072a8c3dcddcf91" id="r_a7f70ed057779194c2072a8c3dcddcf91"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a7f70ed057779194c2072a8c3dcddcf91">isFilled</a> (const BaseFab&lt; signed char &gt; &amp;a_states, const BaseFab&lt; signed char &gt; &amp;a_refined, const IntVectSet &amp;a_withSurface, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a7f70ed057779194c2072a8c3dcddcf91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.  <br /></td></tr>
+<tr class="separator:a7f70ed057779194c2072a8c3dcddcf91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -264,17 +308,26 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_sn
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a1de13df1588f73359bfaf72d8265655f" id="r_a1de13df1588f73359bfaf72d8265655f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a1de13df1588f73359bfaf72d8265655f">collectFacets</a> (Vector&lt; Real &gt; &amp;a_facets, const int a_level) const</td></tr>
-<tr class="memdesc:a1de13df1588f73359bfaf72d8265655f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each.  <br /></td></tr>
+<tr class="memdesc:a1de13df1588f73359bfaf72d8265655f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface triangles of one level, or segments in two dimensions, from this rank's share of its irregular boxes, three reals per vertex.  <br /></td></tr>
 <tr class="separator:a1de13df1588f73359bfaf72d8265655f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6c48b7bc9745b9cbfbb5deffddbffc0" id="r_ab6c48b7bc9745b9cbfbb5deffddbffc0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ab6c48b7bc9745b9cbfbb5deffddbffc0">stitchGraphs</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &gt; &gt; &amp;a_graphs) const</td></tr>
+<tr class="memdesc:ab6c48b7bc9745b9cbfbb5deffddbffc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stitch every level of a set of graphs to the level above it, from the graphs alone.  <br /></td></tr>
+<tr class="separator:ab6c48b7bc9745b9cbfbb5deffddbffc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98ccad291519cc023f504b4c812552b7" id="r_a98ccad291519cc023f504b4c812552b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a98ccad291519cc023f504b4c812552b7">sanityCheck</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &gt; &gt; &amp;a_graphs) const</td></tr>
 <tr class="memdesc:a98ccad291519cc023f504b4c812552b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The closure check over a given set of graphs, one per level as m_graphs holds them.  <br /></td></tr>
 <tr class="separator:a98ccad291519cc023f504b4c812552b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2b385bd4859af86fd87a8f7bbef29cd" id="r_ae2b385bd4859af86fd87a8f7bbef29cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ae2b385bd4859af86fd87a8f7bbef29cd">defineBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_graph, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces, const BaseFab&lt; signed char &gt; &amp;a_states, const BaseFab&lt; signed char &gt; &amp;a_refined, const IntVect &amp;a_cell) const</td></tr>
-<tr class="memdesc:ae2b385bd4859af86fd87a8f7bbef29cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of a cut cell of a graph, restricted on every face the finer level describes.  <br /></td></tr>
-<tr class="separator:ae2b385bd4859af86fd87a8f7bbef29cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae082df83c4c78fe53c5f11959f8de49f" id="r_ae082df83c4c78fe53c5f11959f8de49f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ae082df83c4c78fe53c5f11959f8de49f">defineBodyFromFunction</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_graph, const BaseFab&lt; signed char &gt; &amp;a_filled, const BaseFab&lt; signed char &gt; &amp;a_refined, const IntVect &amp;a_cell) const</td></tr>
+<tr class="memdesc:ae082df83c4c78fe53c5f11959f8de49f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stitch a cut cell's body with its children reconstructed from the implicit function.  <br /></td></tr>
+<tr class="separator:ae082df83c4c78fe53c5f11959f8de49f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd4649d4f8ea3d8d81d0a5c94e22c7fa" id="r_abd4649d4f8ea3d8d81d0a5c94e22c7fa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#abd4649d4f8ea3d8d81d0a5c94e22c7fa">stitchLevel</a> (<a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_coarse, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *a_fine, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *a_coarser) const</td></tr>
+<tr class="memdesc:abd4649d4f8ea3d8d81d0a5c94e22c7fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stitch one level: take its refined edges' crossings and its seam faces from the finer level's stored cells, close its faces onto filled cells, write the crossings into its surfaces and the faces into its overrides.  <br /></td></tr>
+<tr class="separator:abd4649d4f8ea3d8d81d0a5c94e22c7fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a067d698aabb65331c2eb5b70eb4c1733" id="r_a067d698aabb65331c2eb5b70eb4c1733"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a067d698aabb65331c2eb5b70eb4c1733">writeSurface</a> (const std::string &amp;a_fileName, const Vector&lt; Vector&lt; Real &gt; &gt; &amp;a_facets) const</td></tr>
 <tr class="memdesc:a067d698aabb65331c2eb5b70eb4c1733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase.  <br /></td></tr>
 <tr class="separator:a067d698aabb65331c2eb5b70eb4c1733"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7ef84764d4af6cf61d688aab14a9fde" id="r_aa7ef84764d4af6cf61d688aab14a9fde"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#aa7ef84764d4af6cf61d688aab14a9fde">writeGraph</a> (const std::string &amp;a_fileName) const</td></tr>
+<tr class="memdesc:aa7ef84764d4af6cf61d688aab14a9fde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the cut cells' connectivity as a skeleton a viewer can draw: a point per cut cell and per open face of one, and a line from each cut cell to each of its open faces.  <br /></td></tr>
+<tr class="separator:aa7ef84764d4af6cf61d688aab14a9fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addf8815b2e8122b7b41511c7a26216f2" id="r_addf8815b2e8122b7b41511c7a26216f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#addf8815b2e8122b7b41511c7a26216f2">fillNode</a> (IrregNode &amp;a_node, const <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const BaseFab&lt; int &gt; &amp;a_regIrregCovered, const IntVect &amp;a_cell, const ProblemDomain &amp;a_domain) const</td></tr>
 <tr class="memdesc:addf8815b2e8122b7b41511c7a26216f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a cut cell's node from its body.  <br /></td></tr>
 <tr class="separator:addf8815b2e8122b7b41511c7a26216f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -306,6 +359,27 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
 Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a3c7b381f763dd82c9edf125d030fa2da" id="r_a3c7b381f763dd82c9edf125d030fa2da"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a3c7b381f763dd82c9edf125d030fa2da">exchangeBytes</a> (const std::vector&lt; std::vector&lt; char &gt; &gt; &amp;a_send, std::vector&lt; char &gt; &amp;a_recv, std::vector&lt; int &gt; &amp;a_offset, std::vector&lt; int &gt; &amp;a_count)</td></tr>
+<tr class="memdesc:a3c7b381f763dd82c9edf125d030fa2da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trade byte buffers among all ranks: counts first, then the payloads, into one flat buffer.  <br /></td></tr>
+<tr class="separator:a3c7b381f763dd82c9edf125d030fa2da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69553227cfd07e48eba646a249c4e17a" id="r_a69553227cfd07e48eba646a249c4e17a"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a69553227cfd07e48eba646a249c4e17a">edgesRefined</a> (bool a_edgeRefined[<a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">PolyhedralEB::CutCellSurface::s_numEdges</a>], const BaseFab&lt; signed char &gt; &amp;a_refined, const Box &amp;a_domain, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a69553227cfd07e48eba646a249c4e17a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which of a cell's edges the finer level describes.  <br /></td></tr>
+<tr class="separator:a69553227cfd07e48eba646a249c4e17a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e9f682d71007a0dbf6a1e26cd703272" id="r_a9e9f682d71007a0dbf6a1e26cd703272"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a9e9f682d71007a0dbf6a1e26cd703272">stitchBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> *a_children, const bool *a_edgeRefined, const BaseFab&lt; signed char &gt; &amp;a_filled, const BaseFab&lt; signed char &gt; &amp;a_refined, const BaseFab&lt; signed char &gt; *a_fineFilled, const Box &amp;a_domain, const IntVect &amp;a_cell, <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> *a_overrides)</td></tr>
+<tr class="memdesc:a9e9f682d71007a0dbf6a1e26cd703272"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stitch a cut cell's body to the finer level and to the covered cells around it.  <br /></td></tr>
+<tr class="separator:a9e9f682d71007a0dbf6a1e26cd703272"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6605cb44efa908181900291a0a06176e" id="r_a6605cb44efa908181900291a0a06176e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a6605cb44efa908181900291a0a06176e">defineBody</a> (<a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;a_body, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces, const <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &amp;a_overrides, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a6605cb44efa908181900291a0a06176e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the body of a cut cell of a stitched graph from its stored surface and face overrides.  <br /></td></tr>
+<tr class="separator:a6605cb44efa908181900291a0a06176e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73cb17581985e31d17ed1bb1427a0c17" id="r_a73cb17581985e31d17ed1bb1427a0c17"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a73cb17581985e31d17ed1bb1427a0c17">readFineCells</a> (BaseFab&lt; Real &gt; &amp;a_nodes, BaseFab&lt; Real &gt; a_crossings[SpaceDim], BaseFab&lt; int &gt; &amp;a_fluidJoined, const Box &amp;a_region, const BaseFab&lt; signed char &gt; &amp;a_states, const BaseFab&lt; signed char &gt; &amp;a_mask, const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;a_surfaces)</td></tr>
+<tr class="memdesc:a73cb17581985e31d17ed1bb1427a0c17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the nodes and edges of a region of the finer level off its stored cells.  <br /></td></tr>
+<tr class="separator:a73cb17581985e31d17ed1bb1427a0c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a189465e7f0e5c28c52a0d1e6b2defae3" id="r_a189465e7f0e5c28c52a0d1e6b2defae3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a189465e7f0e5c28c52a0d1e6b2defae3">assembleSurface</a> (<a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;a_surface, const BaseFab&lt; Real &gt; &amp;a_nodes, const BaseFab&lt; Real &gt; a_crossings[SpaceDim], const BaseFab&lt; int &gt; &amp;a_fluidJoined, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a189465e7f0e5c28c52a0d1e6b2defae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">One cell's surface, read off node values, edge crossings and face decisions that are already known.  <br /></td></tr>
+<tr class="separator:a189465e7f0e5c28c52a0d1e6b2defae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e6796c208574ecb054aadb5b8bdccf1" id="r_a9e6796c208574ecb054aadb5b8bdccf1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a9e6796c208574ecb054aadb5b8bdccf1">copyFinerCells</a> (const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_fine, const DisjointBoxLayout &amp;a_grids, const int a_ring, LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_states, LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_mask, LayoutData&lt; IntVectSet &gt; &amp;a_sets, LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp;a_surfaces)</td></tr>
+<tr class="memdesc:a9e6796c208574ecb054aadb5b8bdccf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy a finer level's cells onto a coarser level's layout refined, with a ring around every box.  <br /></td></tr>
+<tr class="separator:a9e6796c208574ecb054aadb5b8bdccf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88664acff9f1f4f1501f3972a8acf3e9" id="r_a88664acff9f1f4f1501f3972a8acf3e9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#a88664acff9f1f4f1501f3972a8acf3e9">indexFacets</a> (const Vector&lt; Real &gt; &amp;a_facets, const Real a_tolerance, std::vector&lt; Real &gt; &amp;a_vertices, std::vector&lt; int &gt; &amp;a_connectivity)</td></tr>
 <tr class="memdesc:a88664acff9f1f4f1501f3972a8acf3e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identify the vertices of a triangle soup, giving each one once and each triangle three indices.  <br /></td></tr>
 <tr class="separator:a88664acff9f1f4f1501f3972a8acf3e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -328,6 +402,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classPolyhedralEBGraph.html">Po
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_writeSurface</b></td></tr>
 <tr class="memdesc:ab6533c15bcdc719d501ee8f5ebabb897"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface writes the surface. PolyhedralGeometryShop.write_surface, off by default. <br /></td></tr>
 <tr class="separator:ab6533c15bcdc719d501ee8f5ebabb897"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21a0dd5266f9f551d6f77ab690ebc497" id="r_a21a0dd5266f9f551d6f77ab690ebc497"><td class="memItemLeft" align="right" valign="top"><a id="a21a0dd5266f9f551d6f77ab690ebc497" name="a21a0dd5266f9f551d6f77ab690ebc497"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_writeGraph</b></td></tr>
+<tr class="memdesc:a21a0dd5266f9f551d6f77ab690ebc497"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface writes the graph as a skeleton. PolyhedralGeometryShop.write_graph, off by default. <br /></td></tr>
+<tr class="separator:a21a0dd5266f9f551d6f77ab690ebc497"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9e08c97356bbd64d8882020ddd56e9d" id="r_ae9e08c97356bbd64d8882020ddd56e9d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ae9e08c97356bbd64d8882020ddd56e9d">m_sanityCheck</a></td></tr>
 <tr class="memdesc:ae9e08c97356bbd64d8882020ddd56e9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether verifySurface runs sanityCheck. PolyhedralGeometryShop.sanity_check.  <br /></td></tr>
 <tr class="separator:ae9e08c97356bbd64d8882020ddd56e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -420,10 +498,29 @@ std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
-<tr class="memitem:ae28b9f8a13755f2de22dd2ee6170f23e" id="r_ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memItemLeft" align="right" valign="top"><a id="ae28b9f8a13755f2de22dd2ee6170f23e" name="ae28b9f8a13755f2de22dd2ee6170f23e"></a>
-static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_weldSpacing</b> = 1.0E-6</td></tr>
-<tr class="memdesc:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of the finest grid spacing within which two vertices are the same vertex in sanityCheck. <br /></td></tr>
+<tr class="memitem:a0354a7e748f41a111158c7d4c2b2ac73" id="r_a0354a7e748f41a111158c7d4c2b2ac73"><td class="memItemLeft" align="right" valign="top"><a id="a0354a7e748f41a111158c7d4c2b2ac73" name="a0354a7e748f41a111158c7d4c2b2ac73"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_elementVertices</b> = SpaceDim</td></tr>
+<tr class="memdesc:a0354a7e748f41a111158c7d4c2b2ac73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertices of one element of the written surface: a triangle in three dimensions, a segment in two. <br /></td></tr>
+<tr class="separator:a0354a7e748f41a111158c7d4c2b2ac73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab58138a5bd4f9a9dcbc697615bfedc48" id="r_ab58138a5bd4f9a9dcbc697615bfedc48"><td class="memItemLeft" align="right" valign="top"><a id="ab58138a5bd4f9a9dcbc697615bfedc48" name="ab58138a5bd4f9a9dcbc697615bfedc48"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_cellNode</b> = 0</td></tr>
+<tr class="memdesc:ab58138a5bd4f9a9dcbc697615bfedc48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kind of a node of the written graph: a cut cell, at its fluid's centroid. <br /></td></tr>
+<tr class="separator:ab58138a5bd4f9a9dcbc697615bfedc48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e308eb926f64f097c70a6be990e0d62" id="r_a9e308eb926f64f097c70a6be990e0d62"><td class="memItemLeft" align="right" valign="top"><a id="a9e308eb926f64f097c70a6be990e0d62" name="a9e308eb926f64f097c70a6be990e0d62"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_faceNode</b> = 1</td></tr>
+<tr class="memdesc:a9e308eb926f64f097c70a6be990e0d62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kind of a node of the written graph: an open face of a cut cell, at the centroid of its open part. <br /></td></tr>
+<tr class="separator:a9e308eb926f64f097c70a6be990e0d62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d7de3471624ee2beab3fe49b30670f9" id="r_a5d7de3471624ee2beab3fe49b30670f9"><td class="memItemLeft" align="right" valign="top"><a id="a5d7de3471624ee2beab3fe49b30670f9" name="a5d7de3471624ee2beab3fe49b30670f9"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_noValue</b> = -1</td></tr>
+<tr class="memdesc:a5d7de3471624ee2beab3fe49b30670f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">What a field of the written graph reads on a node of the kind it does not belong to. <br /></td></tr>
+<tr class="separator:a5d7de3471624ee2beab3fe49b30670f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae28b9f8a13755f2de22dd2ee6170f23e" id="r_ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memItemLeft" align="right" valign="top">static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralGeometryShop.html#ae28b9f8a13755f2de22dd2ee6170f23e">s_weldSpacing</a> = 1.0E-10</td></tr>
+<tr class="memdesc:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of a level's grid spacing within which two vertices are the same vertex, in sanityCheck and in the written surface.  <br /></td></tr>
 <tr class="separator:ae28b9f8a13755f2de22dd2ee6170f23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74b4f1860af8317bfe686caf89967293" id="r_a74b4f1860af8317bfe686caf89967293"><td class="memItemLeft" align="right" valign="top"><a id="a74b4f1860af8317bfe686caf89967293" name="a74b4f1860af8317bfe686caf89967293"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_absent</b> = 2</td></tr>
+<tr class="memdesc:a74b4f1860af8317bfe686caf89967293"><td class="mdescLeft">&#160;</td><td class="mdescRight">State of a cell of the finer level that the finer level does not hold, in a copy of its states. <br /></td></tr>
+<tr class="separator:a74b4f1860af8317bfe686caf89967293"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7f99bd2911b3a37fbc730bad6b4467e" id="r_aa7f99bd2911b3a37fbc730bad6b4467e"><td class="memItemLeft" align="right" valign="top"><a id="aa7f99bd2911b3a37fbc730bad6b4467e" name="aa7f99bd2911b3a37fbc730bad6b4467e"></a>
 static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_divergenceTolerance</b> = 1.0E-9</td></tr>
 <tr class="memdesc:aa7f99bd2911b3a37fbc730bad6b4467e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Residual above which the stored moments and the ones PolyGeom recomputes disagree. <br /></td></tr>
@@ -560,6 +657,72 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a189465e7f0e5c28c52a0d1e6b2defae3" name="a189465e7f0e5c28c52a0d1e6b2defae3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a189465e7f0e5c28c52a0d1e6b2defae3">&#9670;&#160;</a></span>assembleSurface()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::assembleSurface </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_surface</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_nodes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; Real &gt;&#160;</td>
+          <td class="paramname"><em>a_crossings</em>[SpaceDim], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_fluidJoined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>One cell's surface, read off node values, edge crossings and face decisions that are already known. </p>
+<p>A face's decision is taken from the cell itself where it holds a surface, else from the cell across the face, else from the bilinear saddle of the face's corners. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_surface</td><td>The surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_nodes</td><td>Node values. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_crossings</td><td>Edge crossings, addressed as defineIntercepts addresses them. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fluidJoined</td><td>Face decisions per cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="abcae0790e16f515e7bede96de641a368" name="abcae0790e16f515e7bede96de641a368"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abcae0790e16f515e7bede96de641a368">&#9670;&#160;</a></span>buildGraphs()</h2>
 
@@ -660,6 +823,51 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="a58b4ebdbd161513ee81323fefa2908ea" name="a58b4ebdbd161513ee81323fefa2908ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58b4ebdbd161513ee81323fefa2908ea">&#9670;&#160;</a></span>checkCopyPlan()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long PolyhedralGeometryShop::checkCopyPlan </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_grids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; ProblemDomain &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_domains</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Plan a copy onto a destination hierarchy, send every rank the headers it is to receive, and require them to be exactly the ones it planned to receive. Collective. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Domain of every destination level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width every destination box is filled to. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of pieces planned, over all ranks. </dd></dl>
+
+</div>
+</div>
 <a id="a1de13df1588f73359bfaf72d8265655f" name="a1de13df1588f73359bfaf72d8265655f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1de13df1588f73359bfaf72d8265655f">&#9670;&#160;</a></span>collectFacets()</h2>
 
@@ -694,10 +902,10 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </table>
 </div><div class="memdoc">
 
-<p>Interface triangles of one level, from this rank's share of its irregular boxes, nine reals each. </p>
+<p>Interface triangles of one level, or segments in two dimensions, from this rank's share of its irregular boxes, three reals per vertex. </p>
 <p>Cells the next finer level carries are skipped. A cut cell with such a cell across one of its faces has that face restricted to the finer cells' chords (restrictFace) and its interface rebuilt (closeInterface). A coarse edge that carries no crossing while both finer edges under it do is a multi-valued coarse cell in disguise and stops the run, as does a body that will not close. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_facets</td><td><a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> coordinates, appended to. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_facets</td><td>Element coordinates, appended to. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level to collect from. </td></tr>
   </table>
   </dd>
@@ -705,8 +913,205 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
-<a id="ae2b385bd4859af86fd87a8f7bbef29cd" name="ae2b385bd4859af86fd87a8f7bbef29cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae2b385bd4859af86fd87a8f7bbef29cd">&#9670;&#160;</a></span>defineBody()</h2>
+<a id="a9e6796c208574ecb054aadb5b8bdccf1" name="a9e6796c208574ecb054aadb5b8bdccf1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e6796c208574ecb054aadb5b8bdccf1">&#9670;&#160;</a></span>copyFinerCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::copyFinerCells </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout &amp;&#160;</td>
+          <td class="paramname"><em>a_grids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ring</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_states</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LayoutData&lt; IntVectSet &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_sets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_surfaces</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy a finer level's cells onto a coarser level's layout refined, with a ring around every box. </p>
+<p>The cell states, a mask of the cells that hold a surface, the sets of those cells and their surfaces &ndash; everything a cell of the finer level is rebuilt from, apart from faces it restricts to a level above it. Cells the finer level does not hold read s_absent. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fine</td><td>The finer level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>The coarser level's layout. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ring</td><td>Width of the ring around every box, in cells of the coarser level. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_states</td><td>Cell states. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_mask</td><td>One where a cell holds a surface. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_sets</td><td>The cells that hold a surface, per box. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_surfaces</td><td>Their surfaces. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a758f475503d8ef970fbde2f9877422a4" name="a758f475503d8ef970fbde2f9877422a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a758f475503d8ef970fbde2f9877422a4">&#9670;&#160;</a></span>copyGraphs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::copyGraphs </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_dest</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_grids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; ProblemDomain &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_domains</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the graphs onto a destination hierarchy. </p>
+<p>Plans the copy and sends the pieces in two passes, each destination box keeping exactly the pieces it receives. The first carries every cell's state and the surface of every cell that holds one, its role included; the second carries the face overrides of every cell whose surface is overridden, which the receiver knows from the first. Nothing on either side evaluates the implicit function. A piece that arrives unplanned, a cell whose role is invalid, and an overridden cell without overrides all stop the run. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_dest</td><td>The graph on the destination hierarchy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Domain of every destination level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width every destination box is filled to. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a741a8cce1196a9544396b5cb672fc677" name="a741a8cce1196a9544396b5cb672fc677"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a741a8cce1196a9544396b5cb672fc677">&#9670;&#160;</a></span>decideFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::decideFaces </td>
+          <td>(</td>
+          <td class="paramtype">const BaseIF &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_surface</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Decide, for every face of a cell whose corners alternate in sign, whether its fluid corners or its solid ones meet across it. </p>
+<p>Four alternating corners admit both readings, and the bilinear interpolant of the corners picks the one its saddle falls on, which for a feature thinner than the face is the wrong one: the large values at two corners outweigh the small ones of a thin plate at the other two, and the chords pierce the plate. The implicit function at the centre of the face is read instead, with the value snap of a grid twice as fine, so that it is the very node a finer level holds there. Every cell sharing the face reads the same point. A centre that reads exactly zero falls back to the bilinear saddle. In two dimensions the face is the cell itself. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surface</td><td>Surface whose corners are filled; its face decisions are set. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6605cb44efa908181900291a0a06176e" name="a6605cb44efa908181900291a0a06176e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6605cb44efa908181900291a0a06176e">&#9670;&#160;</a></span>defineBody()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -723,20 +1128,79 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_graph</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_surfaces</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_overrides</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the body of a cut cell of a stitched graph from its stored surface and face overrides. </p>
+<p>Defines the body from the surface, replaces every restricted face with its stored polygons, closes the interface over them, and closes every closed face, in the order they were recorded &ndash; which rebuilds the body stitchBody made, bit for bit, from the cell's own data alone. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_body</td><td>The body. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaces</td><td>Surfaces of the cell's box, from the graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_overrides</td><td>Face overrides of the cell's box, from the graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae082df83c4c78fe53c5f11959f8de49f" name="ae082df83c4c78fe53c5f11959f8de49f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae082df83c4c78fe53c5f11959f8de49f">&#9670;&#160;</a></span>defineBodyFromFunction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::defineBodyFromFunction </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_body</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_surface</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_graph</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_states</em>, </td>
+          <td class="paramname"><em>a_filled</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -763,14 +1227,14 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </table>
 </div><div class="memdoc">
 
-<p>Build the body of a cut cell of a graph, restricted on every face the finer level describes. </p>
-<p>The body is defined from the cell's surface, and every face onto a refined neighbour is replaced by the chords of the cell's own children, reconstructed from the implicit function at the finer spacing, after the check that no coarse edge on that face is crossed twice at the finer spacing; the interface is closed again afterwards. A face onto a cell the graph filled is closed instead, through CutCellBody::snapFace, and the footprint it gives up becomes interface lying in the plane of that face, so the surface closes over the filled cell rather than ending against it. A body that will not close, a face that cannot be restricted or closed, or a doubly crossed edge stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Stitch a cut cell's body with its children reconstructed from the implicit function. </p>
+<p>The reference the stitched graph is checked against under sanity_check: the same stitching as the stored faces were made with, from children built at the finer spacing from the function rather than from the finer level's stored surfaces. Nothing else calls the function to build a body. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_body</td><td>The body. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surface</td><td>The cell's surface as the graph first built it. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_graph</td><td>Graph of the cell's level. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaces</td><td>Surfaces of the cell's box, from the graph. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_states</td><td>Cell states of the cell's box, from the graph. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_refined</td><td>Refined mask of the cell's box, from the graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_filled</td><td>One where a cell around the cell was filled, from isFilled. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refined</td><td>Refined mask around the cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
   </table>
   </dd>
@@ -817,6 +1281,150 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_intercept</td><td>Edge-centred cache, one fab per direction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cell-centred region whose edges are wanted </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aeb30686a9f5812f7be1d6797763312c4" name="aeb30686a9f5812f7be1d6797763312c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb30686a9f5812f7be1d6797763312c4">&#9670;&#160;</a></span>destinationBodies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::destinationBodies </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_bodies</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">long long &amp;&#160;</td>
+          <td class="paramname"><em>a_numSplit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_graph</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The bodies a cell of a destination level is made of, from the geometry levels that own it. </p>
+<p>A cell owned at its own resolution is its own body. One owned by a finer level is the bodies of every cut cell under it, each in its own frame and none merged, so the surface they bound is the finer level's exactly. One owned by a coarser level is the cut ancestor subdivided down to the destination level, and the child that is this cell, in this cell's frame; a child whose fluid falls into more than one piece is kept, and counted. A cell no level owns, or owned by a level that holds no cut cell there, has no body. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_bodies</td><td>The bodies. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_numSplit</td><td>Incremented for every subdivision on the way down that left a child whose fluid is in more than one piece, or whose children did not partition their parent. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_graph</td><td>The graph on the destination hierarchy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Destination level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Destination box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell, on the destination level. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7b4e9b7c5c3b2c4d692393e75e335919" name="a7b4e9b7c5c3b2c4d692393e75e335919"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b4e9b7c5c3b2c4d692393e75e335919">&#9670;&#160;</a></span>destinationLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralGeometryShop::destinationLevel </td>
+          <td>(</td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The geometry level a destination domain lives on. </p>
+<p>A stored domain's own level; a domain finer than every stored one is a refinement by two per level of the finest stored domain, and lives that many levels past it. Any other domain stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>The domain. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Its geometry level. </dd></dl>
+
+</div>
+</div>
+<a id="aa53f451d4aa864af604abd4da1cc5616" name="aa53f451d4aa864af604abd4da1cc5616"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa53f451d4aa864af604abd4da1cc5616">&#9670;&#160;</a></span>destinationPieces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::destinationPieces </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; std::pair&lt; int, Box &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_pieces</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVectSet &amp;&#160;</td>
+          <td class="paramname"><em>a_valid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The pieces of the graph a destination region needs: what each tiled level owns of it, tile by tile, down to the cells whose footprint on the destination level lies in the region. </p>
+<p>A cell of a level at or finer than the destination's is kept if the destination cell it lies in is in the region; a cell of a coarser level if any destination cell it holds is. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_pieces</td><td>One list per geometry level of (index into the level's cut tiles, box on that level) pairs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_valid</td><td>The region, on the destination level, from validRegion. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Geometry level of the destination, from destinationLevel. </td></tr>
   </table>
   </dd>
 </dl>
@@ -989,6 +1597,125 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Position along the edge, in [0,1]. </dd></dl>
+
+</div>
+</div>
+<a id="a69553227cfd07e48eba646a249c4e17a" name="a69553227cfd07e48eba646a249c4e17a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69553227cfd07e48eba646a249c4e17a">&#9670;&#160;</a></span>edgesRefined()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralGeometryShop::edgesRefined </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>a_edgeRefined</em>[PolyhedralEB::CutCellSurface::s_numEdges], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_refined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Which of a cell's edges the finer level describes. </p>
+<p>An edge is shared by the cells that meet along it, and the crossing on it has to be one point for all of them, so the question is asked of the edge: it is refined if any cell meeting it is. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_edgeRefined</td><td>One flag per edge of the cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refined</td><td>Refined mask around the cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain box of the cell's level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if any edge is refined. </dd></dl>
+
+</div>
+</div>
+<a id="a3c7b381f763dd82c9edf125d030fa2da" name="a3c7b381f763dd82c9edf125d030fa2da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c7b381f763dd82c9edf125d030fa2da">&#9670;&#160;</a></span>exchangeBytes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::exchangeBytes </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; char &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_send</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_recv</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_count</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Trade byte buffers among all ranks: counts first, then the payloads, into one flat buffer. </p>
+<p>What this rank sends itself is copied rather than sent. Byte totals that do not fit in an int, which is what MPI counts are, stop the run in every build. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_send</td><td>Per destination rank, the bytes this rank sends there. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_recv</td><td>Everything this rank received, source rank after source rank. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_offset</td><td>Per source rank, where its bytes begin in a_recv. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_count</td><td>Per source rank, how many bytes it sent. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1392,6 +2119,211 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="a7f70ed057779194c2072a8c3dcddcf91" name="a7f70ed057779194c2072a8c3dcddcf91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f70ed057779194c2072a8c3dcddcf91">&#9670;&#160;</a></span>isFilled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralGeometryShop::isFilled </td>
+          <td>(</td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_states</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_refined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVectSet &amp;&#160;</td>
+          <td class="paramname"><em>a_withSurface</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_surfaces</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level. </p>
+<p>The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners agree closes the face by its corners already, and a cell the finer level carries is described up there. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_states</td><td>Cell states around the cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refined</td><td>Refined mask around the cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_withSurface</td><td>Cells around the cell that hold a surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaces</td><td>Their surfaces. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the cell was filled. </dd></dl>
+
+</div>
+</div>
+<a id="a7af3163a612e80886d3530ad7ef6c155" name="a7af3163a612e80886d3530ad7ef6c155"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7af3163a612e80886d3530ad7ef6c155">&#9670;&#160;</a></span>planCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::planCopy </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_sends</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; <a class="el" href="structPolyhedralEB_1_1GraphCopyHeader.html">PolyhedralEB::GraphCopyHeader</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_receives</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_grids</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; ProblemDomain &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_domains</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Plan a copy of the graph onto a destination hierarchy: every piece this rank sends, and every piece it receives. </p>
+<p>The receiver walks its own destination boxes and asks each one which pieces it needs. The sender walks its own graph boxes, finds the destination boxes that could need them through the destination layouts' own spatial index, and asks each of those the same question, keeping the pieces its box holds. Both answer from replicated data alone, so the two sides agree with no communication. Every header's counts are left at zero. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_sends</td><td>Per destination rank, the pieces this rank sends there. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_receives</td><td>Per source rank, the pieces this rank receives from there. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Destination layout of every level, coarsest first. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>Domain of every destination level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width every destination box is filled to. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a73cb17581985e31d17ed1bb1427a0c17" name="a73cb17581985e31d17ed1bb1427a0c17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73cb17581985e31d17ed1bb1427a0c17">&#9670;&#160;</a></span>readFineCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::readFineCells </td>
+          <td>(</td>
+          <td class="paramtype">BaseFab&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_nodes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BaseFab&lt; Real &gt;&#160;</td>
+          <td class="paramname"><em>a_crossings</em>[SpaceDim], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BaseFab&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_fluidJoined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_region</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_states</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_surfaces</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read the nodes and edges of a region of the finer level off its stored cells. </p>
+<p>A node or edge belongs to every cell around it, so it is written from each cell of the region that holds a surface, and two cells that disagree about one stop the run. A node that no such cell touches lies among cells whose corners agree, and takes their sign: minus one where they are regular, one where they are covered. An edge that no such cell touches carries no crossing. Cells the finer level does not hold write nothing. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_nodes</td><td>Node values over the nodes of a_region. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_crossings</td><td>Crossings over the edges of a_region, addressed as defineIntercepts addresses them. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_fluidJoined</td><td>Face decisions of each cell of a_region that holds a surface, minus one elsewhere. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cells of the finer level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_states</td><td>Cell states of the finer level over the region, s_absent where it holds none. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_mask</td><td>One where a cell holds a surface. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_surfaces</td><td>The surfaces. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="af1c0efc683e3416080c368cda00af46a" name="af1c0efc683e3416080c368cda00af46a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af1c0efc683e3416080c368cda00af46a">&#9670;&#160;</a></span>reportUnresolvedRefinement()</h2>
 
@@ -1482,7 +2414,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Check that the interface triangles form a surface that is closed except on the domain boundary. </p>
-<p>A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, an edge in a face the coarser level describes is checked from that side, and an edge in a face onto a cell the graph filled has no partner to meet, since that face is closed. Every rank checks its own cells, vertices are welded at s_weldSpacing times the finest spacing, the counts are summed, and a violation stops the run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees with itself, and there would be no cut cell to carry the interface between them. A filled cell is covered whatever its nodes read, which is why the graph keeps a neighbour of one as a cut cell holding the whole of itself rather than a regular one; the test is what says it did. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which is where the edge of the tiled region meets what no tile carries. Switched by PolyhedralGeometryShop.sanity_check, on by default in a build that keeps its assertions. Requires buildGraphs. </p>
+<p>A triangle edge can be shared only by cells that touch, so every edge of a cell's interface must be used exactly twice among the interface triangles of the cell and of its 3^D neighbourhood: on the cell's own level through the ghost surfaces the graph holds, and across a level boundary through the finer cells behind a face the finer level describes, reconstructed for the purpose. An edge in the domain boundary is used once, an edge in a face the coarser level describes is checked from that side, and an edge in a face onto a cell the graph filled has no partner to meet, since that face is closed. Every rank checks its own cells, vertices are welded at s_weldSpacing times the level's spacing, the counts are summed, and a violation stops the run. A regular cell sharing a face with a covered one stops the run as well: the four nodes of that face belong to both cells and cannot be fluid for one and solid for the other, so the pair can only come from a classification that disagrees with itself, and there would be no cut cell to carry the interface between them. A filled cell is covered whatever its nodes read, which is why the graph keeps a neighbour of one as a cut cell holding the whole of itself rather than a regular one; the test is what says it did. That test is dimension-independent and runs on every graph, including the cells beyond the tiles, which is where the edge of the tiled region meets what no tile carries. Switched by PolyhedralGeometryShop.sanity_check, on by default in a build that keeps its assertions. Requires buildGraphs. </p>
 
 </div>
 </div>
@@ -1565,6 +2497,52 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="ab3bb4ffb56facc95db0d4f5f7b9facd0" name="ab3bb4ffb56facc95db0d4f5f7b9facd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3bb4ffb56facc95db0d4f5f7b9facd0">&#9670;&#160;</a></span>shuffledLayout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">DisjointBoxLayout PolyhedralGeometryShop::shuffledLayout </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its length, so that no rank holds what a load balance would have given it. For the copy tests. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>The boxes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Their domain. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The closed layout. </dd></dl>
+
+</div>
+</div>
 <a id="a713b02ec62348d8c5de17e730c81a348" name="a713b02ec62348d8c5de17e730c81a348"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a713b02ec62348d8c5de17e730c81a348">&#9670;&#160;</a></span>snappedValue()</h2>
 
@@ -1618,6 +2596,290 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="a938552f2609dcd22e661157dd5a552ca" name="a938552f2609dcd22e661157dd5a552ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a938552f2609dcd22e661157dd5a552ca">&#9670;&#160;</a></span>sourceBody()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PolyhedralGeometryShop::sourceBody </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_body</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classAMRPolyhedralEBGraph.html">AMRPolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_graph</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_sourceLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the body of one cut cell of a geometry level, from what a destination box holds of that level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_body</td><td>The body. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_graph</td><td>The graph on the destination hierarchy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Destination level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Destination box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sourceLevel</td><td>Geometry level of the cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell, on that level. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the box holds the cell and it is cut; false, with the body untouched, otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a9e9f682d71007a0dbf6a1e26cd703272" name="a9e9f682d71007a0dbf6a1e26cd703272"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e9f682d71007a0dbf6a1e26cd703272">&#9670;&#160;</a></span>stitchBody()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralGeometryShop::stitchBody </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellBody.html">PolyhedralEB::CutCellBody</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_body</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_surface</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> *&#160;</td>
+          <td class="paramname"><em>a_children</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool *&#160;</td>
+          <td class="paramname"><em>a_edgeRefined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_filled</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_refined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; signed char &gt; *&#160;</td>
+          <td class="paramname"><em>a_fineFilled</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> *&#160;</td>
+          <td class="paramname"><em>a_overrides</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stitch a cut cell's body to the finer level and to the covered cells around it. </p>
+<p>Every refined edge takes its crossing from the half the finer level put it in, which rewrites a_surface. The body is then defined from it &ndash; as the whole cell where every corner is fluid &ndash; every face onto a refined neighbour is replaced by the chords of the children on that face, after the check that no coarse edge on it is crossed twice at the finer spacing, and the interface is closed again, which also recomputes the moments. A face onto a filled cell (a_filled) is closed instead, through CutCellBody::snapFace, and the footprint it gives up becomes interface lying in the plane of that face. Every face so changed is recorded, in the order it was changed, when overrides are given. A body that will not close, a face that cannot be restricted or closed, or a doubly crossed edge stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_body</td><td>The body. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_surface</td><td>The cell's surface; its refined edges' crossings are rewritten. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_children</td><td>The cell's eight children in corner order, which must be given when any edge is refined and describe at least the cell's refined faces and edges; null otherwise. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_edgeRefined</td><td>Which edges are refined, from edgesRefined. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_filled</td><td>One where a cell around the cell was filled, from isFilled. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refined</td><td>Refined mask around the cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineFilled</td><td>One where a cell of the finer level was filled, over the finer cells across the cell's faces; a quadrant of a restricted face whose finer cell was filled is closed. Null where nothing is known of the finer level's fills. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain box of the cell's level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_overrides</td><td>Overrides to record the changed faces in, with the cell begun; null records nothing. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of quadrants closed onto filled finer cells. </dd></dl>
+
+</div>
+</div>
+<a id="ab6c48b7bc9745b9cbfbb5deffddbffc0" name="ab6c48b7bc9745b9cbfbb5deffddbffc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6c48b7bc9745b9cbfbb5deffddbffc0">&#9670;&#160;</a></span>stitchGraphs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::stitchGraphs </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_graphs</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stitch every level of a set of graphs to the level above it, from the graphs alone. </p>
+<p>In two dimensions no face is stitched and every level's overrides stay empty. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_graphs</td><td>Graphs, one per level, linked to one another; undefined entries are skipped. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abd4649d4f8ea3d8d81d0a5c94e22c7fa" name="abd4649d4f8ea3d8d81d0a5c94e22c7fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd4649d4f8ea3d8d81d0a5c94e22c7fa">&#9670;&#160;</a></span>stitchLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::stitchLevel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_coarse</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *&#160;</td>
+          <td class="paramname"><em>a_fine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *&#160;</td>
+          <td class="paramname"><em>a_coarser</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stitch one level: take its refined edges' crossings and its seam faces from the finer level's stored cells, close its faces onto filled cells, write the crossings into its surfaces and the faces into its overrides. </p>
+<p>The finer level's cell states and surfaces over the refined coarse boxes and a ring around them are copied onto this level's layout refined, and every cut cell of every box and its ghost ring is stitched from them. A quadrant of a seam face across which the finer level filled a cell is closed. A regular or covered cell beside the finer level is made cut where the finer level describes the face between them otherwise than the cell's corners do &ndash; the node at the middle of the face on the other side, or a filled cell across a quadrant of a regular one &ndash; and stitched like any other; a node at the middle of such a face's edge that disagrees with the edge's ends is an edge the finer level crosses twice, which is counted and reported rather than acted on. Every stitched surface carries its role. Under sanity_check each body is also built from the stored data, and from the implicit function where its children can say the same, and they must agree bit for bit. Collective. A face onto a cell the coarser level filled is closed like a face onto a cell this level filled. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarse</td><td>The level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fine</td><td>The finer level, or null where there is none. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarser</td><td>The coarser level, or null where there is none. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad2bdac0f67a3c473d9be09f2a09855a4" name="ad2bdac0f67a3c473d9be09f2a09855a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2bdac0f67a3c473d9be09f2a09855a4">&#9670;&#160;</a></span>testCopyBodies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::testCopyBodies </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Require every cut cell's body to survive a copy bit for bit. </p>
+<p>Every cut cell every geometry level owns is built from the graph as it stands and hashed, bit for bit, and the hashes are summed over all ranks. Then the graphs are copied onto the geometry's own box hierarchy with the ranks shuffled, onto every level of it alone, and onto a level past the finest, and every valid cell of every destination &ndash; ghost cells left out &ndash; rebuilds the source bodies it stands for from what it received: its own, those of the finer cells under it, and, from the one destination cell at its low corner, a coarser ancestor's. Each owned cell is then counted exactly once, and the sums and counts must be the source's. Every coarser cut cell is also subdivided down to the destination level, and the child destinationBodies gives the destination cell at its low corner must be the one found there. The hierarchy is also copied with every box split into octants, which must change nothing.</p>
+<p>On every face between two valid cells owned by different levels, the two sides must read the same aperture to 1e-10: the claim that a subdivided stitched ancestor meets the finer cells beside it.</p>
+<p>All of it &ndash; the copies and every body rebuilt from them &ndash; runs with the shop's implicit function replaced by one that stops the run if it is evaluated. Collective. Switched by PolyhedralGeometryShop.test_copy. </p>
+
+</div>
+</div>
 <a id="a54331545244d3fc24872eb81e381faa9" name="a54331545244d3fc24872eb81e381faa9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a54331545244d3fc24872eb81e381faa9">&#9670;&#160;</a></span>testGraphCopy()</h2>
 
@@ -1638,6 +2900,86 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 </div>
 </div>
+<a id="ab90593ee7ec3f905ce8663d03b566874" name="ab90593ee7ec3f905ce8663d03b566874"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab90593ee7ec3f905ce8663d03b566874">&#9670;&#160;</a></span>validRegion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::validRegion </td>
+          <td>(</td>
+          <td class="paramtype">IntVectSet &amp;&#160;</td>
+          <td class="paramname"><em>a_valid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DisjointBoxLayout *&#160;</td>
+          <td class="paramname"><em>a_finer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; *&#160;</td>
+          <td class="paramname"><em>a_finerBoxes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ratio</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The cells of a destination box a copy of the graph fills: the box grown by a ghost width, inside the domain, less what the next finer destination level covers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_valid</td><td>The cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>The destination box. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain of the box's level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finer</td><td>Layout of the next finer destination level, or null where there is none. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_finerBoxes</td><td>Its boxes, as boxArray gives them, or null where there is no finer level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ratio</td><td>Refinement ratio to that level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost width the box is grown by. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a640d3ad0695303b0de01f8eb3c544eb8" name="a640d3ad0695303b0de01f8eb3c544eb8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a640d3ad0695303b0de01f8eb3c544eb8">&#9670;&#160;</a></span>verifySurface()</h2>
 
@@ -1655,6 +2997,40 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 <p>Build the polyhedra over the grids, check that they form a surface, and write it if asked. </p>
 <p>Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level carries are skipped, and a face shared with such a cell is restricted to the finer chords and the interface closed. The interface triangles of every level are then checked by sanityCheck when PolyhedralGeometryShop.sanity_check is set, and written to the geometry directory as an indexed surface mesh when PolyhedralGeometryShop.write_surface is set. Collective; every rank reconstructs its share of the boxes and writes its own share of the mesh. Requires setGrids. </p>
+
+</div>
+</div>
+<a id="aa7ef84764d4af6cf61d688aab14a9fde" name="aa7ef84764d4af6cf61d688aab14a9fde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7ef84764d4af6cf61d688aab14a9fde">&#9670;&#160;</a></span>writeGraph()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralGeometryShop::writeGraph </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_fileName</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the cut cells' connectivity as a skeleton a viewer can draw: a point per cut cell and per open face of one, and a line from each cut cell to each of its open faces. </p>
+<p>One group per level. A cell node is written for every cut cell of the level's tiles, at its fluid's centroid, with its volume fraction, the role of its surface, its number of sheets and its rank. A face node is written for every open face of one, at the centroid of the face's open part, with its aperture, its face state and whether the stitch rewrote it; a face two cut cells of the level share is written once, by the cell on its low side, on whichever rank holds it. The two kinds share one point mesh, told apart by a field holding s_cellNode or s_faceNode, and a field reads s_noValue on the kind it does not belong to. An edge is written from a cell node to the centroid of each of its open faces, so that the edges of two neighbouring cut cells meet in the face between them, and a face onto a regular cell, another level or the domain boundary ends in a half; it carries the face's fields too. Two XDMF descriptions are written next to the file, a_fileName followed by _nodes.xmf with the nodes as points and a_fileName followed by _edges.xmf with the edges as segments, since a reader may take only the first grid of a file. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File to write, without a suffix. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1693,10 +3069,10 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 </div><div class="memdoc">
 
 <p>Write the surface, the boxes it was built over and the boxes that split, as one HDF5 file per phase. </p>
-<p>One group per level, holding the level's triangles as an indexed mesh &ndash; the vertices once each and a triple of indices per triangle &ndash; rather than as a soup of coordinates, which is what a viewer wants and what an XDMF description can point at. The boxes of the level and the boxes that split on it go in the same group, so that the surface can be read against the grids it was built on without a second file. The distance within which two positions are one vertex is written alongside them. An XDMF description of the file is written next to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary between two ranks is written by each, since vertices are identified within a rank and not across them. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>One group per level, holding the level's triangles, or segments in two dimensions, as an indexed mesh &ndash; the vertices once each and s_elementVertices indices per element &ndash; rather than as a soup of coordinates, which is what a viewer wants and what an XDMF description can point at. The boxes of the level and the boxes that split on it go in the same group, so that the surface can be read against the grids it was built on without a second file. The distance within which two positions are one vertex is written alongside them. An XDMF description of the file is written next to it. Collective: every rank writes its own stretch of every dataset, so a vertex on a boundary between two ranks is written by each, since vertices are identified within a rank and not across them. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fileName</td><td>File to write, without a suffix. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>This rank's triangles of each level, nine reals each. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_facets</td><td>This rank's elements of each level, three reals per vertex. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1802,6 +3178,31 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_di
 
 <p>Distance along an edge, from an endpoint that is exactly zero, within which a root is put on it. </p>
 <p>A surface tangent to a node reads as zero for a stretch either side of it under the value snap, of length about sqrt(2 R tol / dx) for a radius of curvature R &ndash; a few parts in 1e6 of an edge for any R that is not itself below the cell width. A root that close to a corner the surface passes through is that stretch's end, not a second crossing; a genuine second crossing within 1e-4 of a cell width of the first would be a feature no cell resolves. </p>
+
+</div>
+</div>
+<a id="ae28b9f8a13755f2de22dd2ee6170f23e" name="ae28b9f8a13755f2de22dd2ee6170f23e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae28b9f8a13755f2de22dd2ee6170f23e">&#9670;&#160;</a></span>s_weldSpacing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr Real PolyhedralGeometryShop::s_weldSpacing = 1.0E-10</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fraction of a level's grid spacing within which two vertices are the same vertex, in sanityCheck and in the written surface. </p>
+<p>Cells of one level compute a shared vertex from the same nodes and edge and agree bit for bit, and cells rebuilt across a level boundary agree to about 1e-12 of a cell, so the radius sits just above that. A larger one welds the distinct vertices of a feature thinner than it into one, and the check then reports its edges as used more than twice. </p>
 
 </div>
 </div>

@@ -98,7 +98,7 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:adb94be9e96ae1d416272150b7defcdef" id="r_adb94be9e96ae1d416272150b7defcdef"><td class="memItemLeft" align="right" valign="top"><a id="adb94be9e96ae1d416272150b7defcdef" name="adb94be9e96ae1d416272150b7defcdef"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>CutCellSurface</b> () noexcept</td></tr>
-<tr class="memdesc:adb94be9e96ae1d416272150b7defcdef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Leaves every edge without a crossing and every corner at zero. <br /></td></tr>
+<tr class="memdesc:adb94be9e96ae1d416272150b7defcdef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Leaves every edge without a crossing, every corner at zero, no face joining its fluid corners, and the role native. <br /></td></tr>
 <tr class="separator:adb94be9e96ae1d416272150b7defcdef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75144e41f2ff27dc96b4c3b8e7c9d37b" id="r_a75144e41f2ff27dc96b4c3b8e7c9d37b"><td class="memItemLeft" align="right" valign="top"><a id="a75144e41f2ff27dc96b4c3b8e7c9d37b" name="a75144e41f2ff27dc96b4c3b8e7c9d37b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~CutCellSurface</b> () noexcept=default</td></tr>
@@ -126,6 +126,13 @@ Public Attributes</h2></td></tr>
 Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_corner</b> [<a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#ac89922e72169089510019bce6a853561">s_numCorners</a>]</td></tr>
 <tr class="memdesc:a7428d8d0b97160992a9911ec64f8b04b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit function at the cell corners, ordered so that corner c has offset ((c &gt;&gt; d) &amp; 1) in direction d. <br /></td></tr>
 <tr class="separator:a7428d8d0b97160992a9911ec64f8b04b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91f8844f5c554641624da5c7ee18896e" id="r_a91f8844f5c554641624da5c7ee18896e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a91f8844f5c554641624da5c7ee18896e">m_fluidJoined</a></td></tr>
+<tr class="memdesc:a91f8844f5c554641624da5c7ee18896e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which faces join their fluid corners, one bit per face whose corners alternate in sign.  <br /></td></tr>
+<tr class="separator:a91f8844f5c554641624da5c7ee18896e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fa1bab3190d5e3a225043aa19c2ecfd" id="r_a4fa1bab3190d5e3a225043aa19c2ecfd"><td class="memItemLeft" align="right" valign="top"><a id="a4fa1bab3190d5e3a225043aa19c2ecfd" name="a4fa1bab3190d5e3a225043aa19c2ecfd"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_role</b></td></tr>
+<tr class="memdesc:a4fa1bab3190d5e3a225043aa19c2ecfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the cell's body is built from this surface: s_native, s_overridden or s_invalid. <br /></td></tr>
+<tr class="separator:a4fa1bab3190d5e3a225043aa19c2ecfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -141,11 +148,23 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_num
 static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_noCrossing</b> = -1.0</td></tr>
 <tr class="memdesc:ab9f5f93559dce66fddc4eeef7458743b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marks an edge whose endpoints lie on the same side of the interface. <br /></td></tr>
 <tr class="separator:ab9f5f93559dce66fddc4eeef7458743b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a152822cc163430a92744360e6c2db739" id="r_a152822cc163430a92744360e6c2db739"><td class="memItemLeft" align="right" valign="top"><a id="a152822cc163430a92744360e6c2db739" name="a152822cc163430a92744360e6c2db739"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_native</b> = 0</td></tr>
+<tr class="memdesc:a152822cc163430a92744360e6c2db739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Role of a stored surface: the cell's body is built from the surface alone. <br /></td></tr>
+<tr class="separator:a152822cc163430a92744360e6c2db739"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1de181859f373def5dd79ed90db3fae2" id="r_a1de181859f373def5dd79ed90db3fae2"><td class="memItemLeft" align="right" valign="top"><a id="a1de181859f373def5dd79ed90db3fae2" name="a1de181859f373def5dd79ed90db3fae2"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_overridden</b> = 1</td></tr>
+<tr class="memdesc:a1de181859f373def5dd79ed90db3fae2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Role of a stored surface: some faces of the cell's body are the cell's face overrides rather than its own chords. <br /></td></tr>
+<tr class="separator:a1de181859f373def5dd79ed90db3fae2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c1523506cb5ea875a47f9a259c2fbbd" id="r_a4c1523506cb5ea875a47f9a259c2fbbd"><td class="memItemLeft" align="right" valign="top"><a id="a4c1523506cb5ea875a47f9a259c2fbbd" name="a4c1523506cb5ea875a47f9a259c2fbbd"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_invalid</b> = 2</td></tr>
+<tr class="memdesc:a4c1523506cb5ea875a47f9a259c2fbbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Role of a surface: the cell is covered by a finer grid. Never stored or copied; a receiver that finds it has been handed a cell it should not describe. <br /></td></tr>
+<tr class="separator:a4c1523506cb5ea875a47f9a259c2fbbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The values a cut cell's embedded boundary is reconstructed from. </p>
 <p>Holds the implicit function at the cell's corners and the parameter along each cell edge where it changes sign, both in the cell's own [-1/2, 1/2]^SpaceDim frame. Neither value belongs to the cell alone: a corner is shared by the 2^SpaceDim cells meeting there and an edge by the four cells meeting along it, so two neighbouring cells reconstruct the same surface bit for bit rather than to within a tolerance. That is what makes a face aperture agree when it is computed from either side.</p>
-<p>That agreement is between cells of one level. A cell's chords are straight at its own spacing, so on a face shared with cells of a finer level they are not what that level describes the face with, and the polyhedron this surface alone reconstructs is the level-local one. Which faces those are is not the surface's to know: it is recorded by the cut-cell connectivity of the level, and <a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a861a3b247f5c6618ddc2af3285e99465" title="Replace one face&#39;s chord with the chords of the children that cover it.">CutCellBody::restrictFace</a> replaces such a face with the chords of the children covering it. </p>
+<p>That agreement is between cells of one level. A cell's chords are straight at its own spacing, so on a face shared with cells of a finer level they are not what that level describes the face with, and the polyhedron this surface alone reconstructs is the level-local one. Which faces those are is not the surface's to know: it is recorded by the cut-cell connectivity of the level, and <a class="el" href="classPolyhedralEB_1_1CutCellBody.html#a2cfcbc32b0a5b56aad324be329babe53" title="Replace one face&#39;s chord with the chords of the children that cover it.">CutCellBody::restrictFace</a> replaces such a face with the chords of the children covering it. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a44c7207525baefcefff50d650c92584d" name="a44c7207525baefcefff50d650c92584d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a44c7207525baefcefff50d650c92584d">&#9670;&#160;</a></span>hasCrossing()</h2>
@@ -274,7 +293,7 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_no
 </div><div class="memdoc">
 
 <p>Number of bytes the surface occupies in a linear buffer, as Chombo's containers ask of their payload. </p>
-<dl class="section return"><dt>Returns</dt><dd>sizeof the crossings and the corners together. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>sizeof the crossings, the corners, the face decisions and the role together. </dd></dl>
 
 </div>
 </div>
@@ -293,6 +312,23 @@ static constexpr Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_no
 
 <p>Position along an edge where the implicit function changes sign. </p>
 <p>Parameterised from the edge's low corner, so that both cells sharing the edge read the same value. Only meaningful where hasCrossing is true. </p>
+
+</div>
+</div>
+<a id="a91f8844f5c554641624da5c7ee18896e" name="a91f8844f5c554641624da5c7ee18896e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91f8844f5c554641624da5c7ee18896e">&#9670;&#160;</a></span>m_fluidJoined</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int PolyhedralEB::CutCellSurface::m_fluidJoined</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Which faces join their fluid corners, one bit per face whose corners alternate in sign. </p>
+<p>Bit 2 * dir + side in three dimensions, bit 0 for the cell itself in two. Four alternating corners cannot say whether the face's two fluid corners or its two solid ones meet across it; the implicit function at the centre of the face does, and is read where the surface is built, so that every cell sharing the face pairs its chords alike and a receiver of the surface never evaluates the function. </p>
 
 </div>
 </div>

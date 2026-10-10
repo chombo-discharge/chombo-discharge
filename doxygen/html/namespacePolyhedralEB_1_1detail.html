@@ -612,7 +612,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>The chords on a cell face, each an unordered pair of edge indices. </p>
-<p>A face with two crossings carries one chord. A face whose corners alternate fluid and solid carries four crossings and there are two ways to join them; the bilinear interpolant of the four corner values decides it. The saddle shares its side with exactly one of the two diagonals: that diagonal meets through the middle, and the other is the pair the chords cut off. Both cells adjoining the face hold the same four values, so they cannot disagree. With four crossings each chord joins two consecutive edges of the face circuit. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>A face with two crossings carries one chord. A face whose corners alternate fluid and solid carries four crossings and there are two ways to join them; the surface's face decision (<a class="el" href="classPolyhedralEB_1_1CutCellSurface.html#a91f8844f5c554641624da5c7ee18896e" title="Which faces join their fluid corners, one bit per face whose corners alternate in sign.">CutCellSurface::m_fluidJoined</a>, read from the implicit function at the centre of the face) says which diagonal meets through the middle, and the other is the pair the chords cut off. Both cells adjoining the face read the same point, so they cannot disagree. With four crossings each chord joins two consecutive edges of the face circuit. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction of the face normal. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>0 for the low face in that direction, 1 for the high face. </td></tr>

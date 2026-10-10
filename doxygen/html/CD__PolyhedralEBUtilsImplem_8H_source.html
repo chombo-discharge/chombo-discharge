@@ -391,148 +391,144 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>  }</div>
 <div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
 <div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>  <span class="keyword">const</span> Real f00 = a_surface.m_corner[faceCorner[0]];</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>  <span class="keyword">const</span> Real f10 = a_surface.m_corner[faceCorner[1]];</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>  <span class="keyword">const</span> Real f11 = a_surface.m_corner[faceCorner[2]];</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  <span class="keyword">const</span> Real f01 = a_surface.m_corner[faceCorner[3]];</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>  <span class="keyword">const</span> Real den    = f00 + f11 - f10 - f01;</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>  <span class="keyword">const</span> Real saddle = (std::abs(den) &gt; 0.0) ? (f00 * f11 - f10 * f01) / den : (f00 + f11);</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="CD__PolyhedralEBUtils_8H.html#aad079a5833eba60d33bf7a1f98a36f84">isFluid</a>(saddle) == <a class="code hl_function" href="CD__PolyhedralEBUtils_8H.html#aad079a5833eba60d33bf7a1f98a36f84">isFluid</a>(f00)) {</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    a_pair[0][0] = faceEdge[0]; <span class="comment">// chords cut off face corners 1 and 3</span></div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    a_pair[0][1] = faceEdge[1];</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    a_pair[1][0] = faceEdge[2];</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    a_pair[1][1] = faceEdge[3];</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>  }</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>  <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    a_pair[0][0] = faceEdge[3]; <span class="comment">// chords cut off face corners 0 and 2</span></div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    a_pair[0][1] = faceEdge[0];</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    a_pair[1][0] = faceEdge[1];</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    a_pair[1][1] = faceEdge[2];</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>  }</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>  <span class="keywordflow">return</span> 2;</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>}</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> fluidJoined = ((a_surface.m_fluidJoined &gt;&gt; (2 * a_dir + a_side)) &amp; 1) != 0;</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>  <span class="keywordflow">if</span> (fluidJoined == <a class="code hl_function" href="CD__PolyhedralEBUtils_8H.html#aad079a5833eba60d33bf7a1f98a36f84">isFluid</a>(f00)) {</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    a_pair[0][0] = faceEdge[0]; <span class="comment">// chords cut off face corners 1 and 3</span></div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    a_pair[0][1] = faceEdge[1];</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    a_pair[1][0] = faceEdge[2];</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    a_pair[1][1] = faceEdge[3];</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>  }</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>  <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    a_pair[0][0] = faceEdge[3]; <span class="comment">// chords cut off face corners 0 and 2</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    a_pair[0][1] = faceEdge[0];</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    a_pair[1][0] = faceEdge[1];</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    a_pair[1][1] = faceEdge[2];</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>  }</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  <span class="keywordflow">return</span> 2;</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>}</div>
 </div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="keyword">inline</span> <span class="keywordtype">int</span></div>
-<div class="foldopen" id="foldopen00313" data-start="{" data-end="}">
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno"><a class="line" href="namespacePolyhedralEB_1_1detail.html#aef7a3c06dadf6cac5b89c30400f34d48">  313</a></span><a class="code hl_function" href="namespacePolyhedralEB_1_1detail.html#aef7a3c06dadf6cac5b89c30400f34d48">crossingLoops</a>(<span class="keyword">const</span> <a class="code hl_class" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a>&amp; a_surface,</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>              <span class="keywordtype">int</span>                   a_loop[<a class="code hl_variable" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">CutCellSurface::s_numEdges</a>],</div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>              <span class="keywordtype">int</span>                   a_start[<a class="code hl_variable" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">CutCellSurface::s_numEdges</a> + 1]) noexcept</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>{</div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>  <span class="keyword">constexpr</span> <span class="keywordtype">int</span> numEdges = <a class="code hl_variable" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">CutCellSurface::s_numEdges</a>;</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>  <span class="keywordtype">int</span> adjacent[numEdges][2];</div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>  <span class="keywordtype">int</span> degree[numEdges] = {0};</div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span> </div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> d = 0; d &lt; SpaceDim; d++) {</div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> side = 0; side &lt; 2; side++) {</div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>      <span class="keywordtype">int</span>       pair[2][2];</div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> numPairs = <a class="code hl_function" href="namespacePolyhedralEB_1_1detail.html#a6ba05ef9fe1afc5d3a05d74e02f69528">facePairs</a>(d, side, a_surface, pair);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="keyword">inline</span> <span class="keywordtype">int</span></div>
+<div class="foldopen" id="foldopen00309" data-start="{" data-end="}">
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno"><a class="line" href="namespacePolyhedralEB_1_1detail.html#aef7a3c06dadf6cac5b89c30400f34d48">  309</a></span><a class="code hl_function" href="namespacePolyhedralEB_1_1detail.html#aef7a3c06dadf6cac5b89c30400f34d48">crossingLoops</a>(<span class="keyword">const</span> <a class="code hl_class" href="classPolyhedralEB_1_1CutCellSurface.html">CutCellSurface</a>&amp; a_surface,</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>              <span class="keywordtype">int</span>                   a_loop[<a class="code hl_variable" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">CutCellSurface::s_numEdges</a>],</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>              <span class="keywordtype">int</span>                   a_start[<a class="code hl_variable" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">CutCellSurface::s_numEdges</a> + 1]) noexcept</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>{</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>  <span class="keyword">constexpr</span> <span class="keywordtype">int</span> numEdges = <a class="code hl_variable" href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">CutCellSurface::s_numEdges</a>;</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>  <span class="keywordtype">int</span> adjacent[numEdges][2];</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>  <span class="keywordtype">int</span> degree[numEdges] = {0};</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> d = 0; d &lt; SpaceDim; d++) {</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> side = 0; side &lt; 2; side++) {</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>      <span class="keywordtype">int</span>       pair[2][2];</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> numPairs = <a class="code hl_function" href="namespacePolyhedralEB_1_1detail.html#a6ba05ef9fe1afc5d3a05d74e02f69528">facePairs</a>(d, side, a_surface, pair);</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>      <span class="keywordflow">if</span> (numPairs &lt; 0) {</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>      }</div>
 <div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>      <span class="keywordflow">if</span> (numPairs &lt; 0) {</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>      }</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; numPairs; k++) {</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> x = pair[k][0];</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> y = pair[k][1];</div>
 <div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span> </div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; numPairs; k++) {</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> x = pair[k][0];</div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> y = pair[k][1];</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        <span class="keywordflow">if</span> (degree[x] &gt; 1 || degree[y] &gt; 1) {</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>          <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        }</div>
 <div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>        <span class="keywordflow">if</span> (degree[x] &gt; 1 || degree[y] &gt; 1) {</div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>          <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>        }</div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        adjacent[x][degree[x]++] = y;</div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>        adjacent[y][degree[y]++] = x;</div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>      }</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    }</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>  }</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>  <span class="keywordtype">int</span> numCrossings = 0;</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>        adjacent[x][degree[x]++] = y;</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>        adjacent[y][degree[y]++] = x;</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>      }</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>    }</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>  }</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>  <span class="keywordtype">int</span> numCrossings = 0;</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span> </div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> e = 0; e &lt; numEdges; e++) {</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    <span class="keywordflow">if</span> (a_surface.<a class="code hl_function" href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">hasCrossing</a>(e)) {</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>      numCrossings++;</div>
 <div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span> </div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> e = 0; e &lt; numEdges; e++) {</div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    <span class="keywordflow">if</span> (a_surface.<a class="code hl_function" href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">hasCrossing</a>(e)) {</div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>      numCrossings++;</div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span> </div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>      <span class="keywordflow">if</span> (degree[e] != 2) {</div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>      }</div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>    }</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>      <span class="keywordflow">if</span> (degree[e] != 2) {</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>      }</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    }</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>  }</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>  <span class="keywordflow">if</span> (numCrossings &lt; 3) {</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>    <span class="keywordflow">return</span> -1;</div>
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>  }</div>
 <div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  <span class="keywordflow">if</span> (numCrossings &lt; 3) {</div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>    <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>  }</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  <span class="keywordtype">bool</span> used[numEdges] = {<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>  <span class="keywordtype">int</span>  numLoops       = 0;</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>  <span class="keywordtype">int</span>  put            = 0;</div>
 <div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>  <span class="keywordtype">bool</span> used[numEdges] = {<span class="keyword">false</span>};</div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  <span class="keywordtype">int</span>  numLoops       = 0;</div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>  <span class="keywordtype">int</span>  put            = 0;</div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span> </div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>  a_start[0] = 0;</div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> e = 0; e &lt; numEdges; e++) {</div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>    <span class="keywordflow">if</span> (!a_surface.<a class="code hl_function" href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">hasCrossing</a>(e) || used[e]) {</div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>      <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    }</div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> begin = put;</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span> </div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keywordtype">int</span> previous = -1;</div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>    <span class="keywordtype">int</span> current  = e;</div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>      CH_assert(put &lt; numEdges);</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>      used[current] = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>      a_loop[put++] = current;</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> next = (adjacent[current][0] != previous) ? adjacent[current][0] : adjacent[current][1];</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>  a_start[0] = 0;</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span> </div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> e = 0; e &lt; numEdges; e++) {</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>    <span class="keywordflow">if</span> (!a_surface.<a class="code hl_function" href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">hasCrossing</a>(e) || used[e]) {</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>    }</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span> </div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> begin = put;</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span> </div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    <span class="keywordtype">int</span> previous = -1;</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    <span class="keywordtype">int</span> current  = e;</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>      CH_assert(put &lt; numEdges);</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>      used[current] = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>      a_loop[put++] = current;</div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span> </div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> next = (adjacent[current][0] != previous) ? adjacent[current][0] : adjacent[current][1];</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span> </div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>      <span class="keywordflow">if</span> (next == e) {</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>      }</div>
 <div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>      <span class="keywordflow">if</span> (next == e) {</div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>      <span class="keywordflow">if</span> (used[next] || put &gt; numEdges) {</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        <span class="keywordflow">return</span> -1;</div>
 <div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>      }</div>
 <div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>      <span class="keywordflow">if</span> (used[next] || put &gt; numEdges) {</div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>      }</div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>      previous = current;</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>      current  = next;</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>    }</div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>      previous = current;</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>      current  = next;</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    <span class="keywordflow">if</span> (put - begin &lt; 3) {</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>      <span class="keywordflow">return</span> -1;</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    }</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    <span class="keywordflow">if</span> (put - begin &lt; 3) {</div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>      <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>    }</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span> </div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>    CH_assert(numLoops &lt; numEdges);</div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>    a_start[++numLoops] = put;</div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  }</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    CH_assert(numLoops &lt; numEdges);</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span> </div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>    a_start[++numLoops] = put;</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>  }</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span> </div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>  <span class="keywordflow">return</span> numLoops;</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>}</div>
+</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span> </div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>  <span class="keywordflow">return</span> numLoops;</div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>}</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span><span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="foldopen" id="foldopen00407" data-start="{" data-end="}">
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno"><a class="line" href="namespacePolyhedralEB_1_1detail.html#a77aa6f76ed228ce23792df37c7f51b07">  407</a></span><a class="code hl_function" href="namespacePolyhedralEB_1_1detail.html#a77aa6f76ed228ce23792df37c7f51b07">sameVertex</a>(<span class="keyword">const</span> RealVect&amp; a_a, <span class="keyword">const</span> RealVect&amp; a_b) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>{</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>  <span class="keywordflow">return</span> (a_a - a_b).vectorLength() &lt;= <a class="code hl_variable" href="namespacePolyhedralEB_1_1detail.html#a7d7b6c6fdfa2205ea5d50202a444c0df">s_weldTolerance</a>;</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>}</div>
 </div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span> </div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span><span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
-<div class="foldopen" id="foldopen00411" data-start="{" data-end="}">
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno"><a class="line" href="namespacePolyhedralEB_1_1detail.html#a77aa6f76ed228ce23792df37c7f51b07">  411</a></span><a class="code hl_function" href="namespacePolyhedralEB_1_1detail.html#a77aa6f76ed228ce23792df37c7f51b07">sameVertex</a>(<span class="keyword">const</span> RealVect&amp; a_a, <span class="keyword">const</span> RealVect&amp; a_b) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>{</div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>  <span class="keywordflow">return</span> (a_a - a_b).vectorLength() &lt;= <a class="code hl_variable" href="namespacePolyhedralEB_1_1detail.html#a7d7b6c6fdfa2205ea5d50202a444c0df">s_weldTolerance</a>;</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>}</div>
-</div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span> </div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>} <span class="comment">// namespace detail</span></div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>} <span class="comment">// namespace PolyhedralEB</span></div>
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
-<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
-<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span> </div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>} <span class="comment">// namespace detail</span></div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>} <span class="comment">// namespace PolyhedralEB</span></div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span> </div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__PolyhedralEBUtils_8H_html"><div class="ttname"><a href="CD__PolyhedralEBUtils_8H.html">CD_PolyhedralEBUtils.H</a></div><div class="ttdoc">Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from.</div></div>
 <div class="ttc" id="aCD__PolyhedralEBUtils_8H_html_aad079a5833eba60d33bf7a1f98a36f84"><div class="ttname"><a href="CD__PolyhedralEBUtils_8H.html#aad079a5833eba60d33bf7a1f98a36f84">PolyhedralEB::isFluid</a></div><div class="ttdeci">bool isFluid(const Real a_value) noexcept</div><div class="ttdoc">Which side of the interface a value lies on.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:29</div></div>
 <div class="ttc" id="aclassPolyhedralEB_1_1CutCellSurface_html"><div class="ttname"><a href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a></div><div class="ttdoc">The values a cut cell's embedded boundary is reconstructed from.</div><div class="ttdef"><b>Definition</b> CD_CutCellSurface.H:41</div></div>
-<div class="ttc" id="aclassPolyhedralEB_1_1CutCellSurface_html_a44c7207525baefcefff50d650c92584d"><div class="ttname"><a href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">PolyhedralEB::CutCellSurface::hasCrossing</a></div><div class="ttdeci">bool hasCrossing(const int a_edge) const noexcept</div><div class="ttdoc">Whether the edge carries a crossing.</div><div class="ttdef"><b>Definition</b> CD_CutCellSurfaceImplem.H:37</div></div>
+<div class="ttc" id="aclassPolyhedralEB_1_1CutCellSurface_html_a44c7207525baefcefff50d650c92584d"><div class="ttname"><a href="classPolyhedralEB_1_1CutCellSurface.html#a44c7207525baefcefff50d650c92584d">PolyhedralEB::CutCellSurface::hasCrossing</a></div><div class="ttdeci">bool hasCrossing(const int a_edge) const noexcept</div><div class="ttdoc">Whether the edge carries a crossing.</div><div class="ttdef"><b>Definition</b> CD_CutCellSurfaceImplem.H:40</div></div>
 <div class="ttc" id="aclassPolyhedralEB_1_1CutCellSurface_html_a9b4a4cc50578d72e09ad161b82e97209"><div class="ttname"><a href="classPolyhedralEB_1_1CutCellSurface.html#a9b4a4cc50578d72e09ad161b82e97209">PolyhedralEB::CutCellSurface::s_numEdges</a></div><div class="ttdeci">static constexpr int s_numEdges</div><div class="ttdoc">Number of cell edges a crossing can sit on.</div><div class="ttdef"><b>Definition</b> CD_CutCellSurface.H:46</div></div>
 <div class="ttc" id="aclassPolyhedralEB_1_1CutCellSurface_html_ac89922e72169089510019bce6a853561"><div class="ttname"><a href="classPolyhedralEB_1_1CutCellSurface.html#ac89922e72169089510019bce6a853561">PolyhedralEB::CutCellSurface::s_numCorners</a></div><div class="ttdeci">static constexpr int s_numCorners</div><div class="ttdoc">Number of cell corners.</div><div class="ttdef"><b>Definition</b> CD_CutCellSurface.H:51</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a1abc6df593dfd804c563d529f4f26dfc"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a1abc6df593dfd804c563d529f4f26dfc">PolyhedralEB::detail::edgeOrigin</a></div><div class="ttdeci">void edgeOrigin(const int a_edge, int a_offset[SpaceDim]) noexcept</div><div class="ttdoc">Corner offsets of a cell edge's low end.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:45</div></div>
@@ -540,7 +536,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a3ccb786adfc09b1453a0f59b0424d8d8"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a3ccb786adfc09b1453a0f59b0424d8d8">PolyhedralEB::detail::s_transverse</a></div><div class="ttdeci">constexpr int s_transverse[3][2]</div><div class="ttdoc">The two directions transverse to each coordinate direction, in increasing order.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtils.H:59</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a60c21e8a0cb93d0e82de73685870e73c"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a60c21e8a0cb93d0e82de73685870e73c">PolyhedralEB::detail::faceEdges</a></div><div class="ttdeci">void faceEdges(const int a_dir, const int a_side, int a_edge[4]) noexcept</div><div class="ttdoc">The edges of a cell face, edge i joining face corners i and i+1.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:175</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a6ba05ef9fe1afc5d3a05d74e02f69528"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a6ba05ef9fe1afc5d3a05d74e02f69528">PolyhedralEB::detail::facePairs</a></div><div class="ttdeci">int facePairs(const int a_dir, const int a_side, const CutCellSurface &amp;a_surface, int a_pair[2][2]) noexcept</div><div class="ttdoc">The chords on a cell face, each an unordered pair of edge indices.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:253</div></div>
-<div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a77aa6f76ed228ce23792df37c7f51b07"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a77aa6f76ed228ce23792df37c7f51b07">PolyhedralEB::detail::sameVertex</a></div><div class="ttdeci">bool sameVertex(const RealVect &amp;a_a, const RealVect &amp;a_b) noexcept</div><div class="ttdoc">Whether two positions are the same vertex.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:411</div></div>
+<div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a77aa6f76ed228ce23792df37c7f51b07"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a77aa6f76ed228ce23792df37c7f51b07">PolyhedralEB::detail::sameVertex</a></div><div class="ttdeci">bool sameVertex(const RealVect &amp;a_a, const RealVect &amp;a_b) noexcept</div><div class="ttdoc">Whether two positions are the same vertex.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:407</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a7d65cac10fe7be95505d2944475f47ee"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a7d65cac10fe7be95505d2944475f47ee">PolyhedralEB::detail::cornerPosition</a></div><div class="ttdeci">RealVect cornerPosition(const int a_corner) noexcept</div><div class="ttdoc">Position of a cell corner in the cell's own frame.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:86</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a7d7b6c6fdfa2205ea5d50202a444c0df"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a7d7b6c6fdfa2205ea5d50202a444c0df">PolyhedralEB::detail::s_weldTolerance</a></div><div class="ttdeci">constexpr Real s_weldTolerance</div><div class="ttdoc">Distance within which two vertices are taken to be the same one.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtils.H:210</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_a80726f65bf1d4a58de6e8475b2c2b581"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#a80726f65bf1d4a58de6e8475b2c2b581">PolyhedralEB::detail::edgeDirection</a></div><div class="ttdeci">int edgeDirection(const int a_edge) noexcept</div><div class="ttdoc">Direction a cell edge runs along.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:37</div></div>
@@ -548,7 +544,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_aad97c615a8764c56c5f6821a2352b7fb"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#aad97c615a8764c56c5f6821a2352b7fb">PolyhedralEB::detail::faceCorners</a></div><div class="ttdeci">void faceCorners(const int a_dir, const int a_side, int a_corner[1&lt;&lt;(SpaceDim - 1)]) noexcept</div><div class="ttdoc">The corners of a cell face, in circuit order around the face.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:100</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_ad75a017e692ddf4e1884b97772dba1d7"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#ad75a017e692ddf4e1884b97772dba1d7">PolyhedralEB::detail::edgeIndex</a></div><div class="ttdeci">int edgeIndex(const int a_dir, const int a_offset[SpaceDim]) noexcept</div><div class="ttdoc">Index of the edge running along a_dir whose low corner has the given offsets.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:124</div></div>
 <div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_ade6c74cb5e605fb66c93bbd3e6165314"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#ade6c74cb5e605fb66c93bbd3e6165314">PolyhedralEB::detail::crossingPosition</a></div><div class="ttdeci">RealVect crossingPosition(const CutCellSurface &amp;a_surface, const int a_edge, const Real a_tolerance) noexcept</div><div class="ttdoc">Position of an edge crossing in the cell's own frame.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:140</div></div>
-<div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_aef7a3c06dadf6cac5b89c30400f34d48"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#aef7a3c06dadf6cac5b89c30400f34d48">PolyhedralEB::detail::crossingLoops</a></div><div class="ttdeci">int crossingLoops(const CutCellSurface &amp;a_surface, int a_loop[CutCellSurface::s_numEdges], int a_start[CutCellSurface::s_numEdges+1]) noexcept</div><div class="ttdoc">Order the crossings into closed loops, or fail if they do not form clean cycles.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:313</div></div>
+<div class="ttc" id="anamespacePolyhedralEB_1_1detail_html_aef7a3c06dadf6cac5b89c30400f34d48"><div class="ttname"><a href="namespacePolyhedralEB_1_1detail.html#aef7a3c06dadf6cac5b89c30400f34d48">PolyhedralEB::detail::crossingLoops</a></div><div class="ttdeci">int crossingLoops(const CutCellSurface &amp;a_surface, int a_loop[CutCellSurface::s_numEdges], int a_start[CutCellSurface::s_numEdges+1]) noexcept</div><div class="ttdoc">Order the crossings into closed loops, or fail if they do not form clean cycles.</div><div class="ttdef"><b>Definition</b> CD_PolyhedralEBUtilsImplem.H:309</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

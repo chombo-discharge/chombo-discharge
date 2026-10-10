@@ -30,7 +30,9 @@ var searchData=
   ['coaxialcable_27',['CoaxialCable',['../classCoaxialCable.html',1,'']]],
   ['computationalgeometry_28',['ComputationalGeometry',['../classComputationalGeometry.html',1,'']]],
   ['cutcellbody_29',['CutCellBody',['../classPolyhedralEB_1_1CutCellBody.html',1,'PolyhedralEB']]],
-  ['cutcellsurface_30',['CutCellSurface',['../classPolyhedralEB_1_1CutCellSurface.html',1,'PolyhedralEB']]],
-  ['cylinder_31',['Cylinder',['../classCylinder.html',1,'']]],
-  ['cylindersdf_32',['CylinderSdf',['../classCylinderSdf.html',1,'']]]
+  ['cutcelldescription_30',['CutCellDescription',['../structPolyhedralEB_1_1CutCellDescription.html',1,'PolyhedralEB']]],
+  ['cutcellfaceoverrides_31',['CutCellFaceOverrides',['../classPolyhedralEB_1_1CutCellFaceOverrides.html',1,'PolyhedralEB']]],
+  ['cutcellsurface_32',['CutCellSurface',['../classPolyhedralEB_1_1CutCellSurface.html',1,'PolyhedralEB']]],
+  ['cylinder_33',['Cylinder',['../classCylinder.html',1,'']]],
+  ['cylindersdf_34',['CylinderSdf',['../classCylinderSdf.html',1,'']]]
 ];

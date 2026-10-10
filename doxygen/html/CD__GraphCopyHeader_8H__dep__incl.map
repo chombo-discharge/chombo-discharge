@@ -1,0 +1,11 @@
+<map id="Source/Geometry/CD_GraphCopyHeader.H" name="Source/Geometry/CD_GraphCopyHeader.H">
+<area shape="rect" id="Node000001" title="Declaration of the record that opens every piece of a polyhedral graph sent to another layout." alt="" coords="255,5,416,45"/>
+<area shape="rect" id="Node000002" href="$CD__PolyhedralGeometryShop_8H.html" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="231,93,440,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="338,59,338,93,333,93,333,59"/>
+<area shape="rect" id="Node000003" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="5,181,220,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="275,141,162,184,160,179,273,136"/>
+<area shape="rect" id="Node000004" href="$CD__PolyhedralEBGraph_8cpp.html" title="Implementation of CD_PolyhedralEBGraph.H." alt="" coords="245,181,426,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="338,147,338,181,333,181,333,147"/>
+<area shape="rect" id="Node000005" href="$CD__PolyhedralGeometryShop_8cpp.html" title="Implementation of CD_PolyhedralGeometryShop.H." alt="" coords="451,181,673,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="399,136,513,179,511,184,397,141"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="PolyhedralEB::CutCellDescription" name="PolyhedralEB::CutCellDescription">
+<area shape="rect" id="Node000001" title="Everything one cut cell of the polyhedral geometry is built from, and which cell it is." alt="" coords="106,108,343,133"/>
+<area shape="rect" id="Node000002" href="$classPolyhedralEB_1_1CutCellSurface.html" title="The values a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="5,13,217,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,45,212,106,209,110,134,49"/>
+<area shape="rect" id="Node000003" href="$classPolyhedralEB_1_1CutCellFaceOverrides.html" title="The faces of a box&#39;s cut cells that do not come from the cells&#39; own chords." alt="" coords="242,5,434,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="306,56,241,110,237,106,303,52"/>
+</map>

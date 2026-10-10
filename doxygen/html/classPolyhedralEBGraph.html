@@ -102,15 +102,25 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PolyhedralEBGraph</b> ()</td></tr>
 <tr class="memdesc:a454d2e1b2af1523c21f157d6d36f1949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:a454d2e1b2af1523c21f157d6d36f1949"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1d545763f8856487118225cbe1e06b7" id="r_ae1d545763f8856487118225cbe1e06b7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ae1d545763f8856487118225cbe1e06b7">define</a> (const BaseIF &amp;a_function, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost, const Vector&lt; Box &gt; &amp;a_covered)</td></tr>
-<tr class="memdesc:ae1d545763f8856487118225cbe1e06b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level over its cut tiles.  <br /></td></tr>
-<tr class="separator:ae1d545763f8856487118225cbe1e06b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2725d694b891cb1672aa45665c078032" id="r_a2725d694b891cb1672aa45665c078032"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a2725d694b891cb1672aa45665c078032">define</a> (const BaseIF &amp;a_function, const Vector&lt; Box &gt; &amp;a_cutTiles, const ProblemDomain &amp;a_domain, const RealVect &amp;a_probLo, const Real a_dx, const int a_numGhost, const Vector&lt; Box &gt; &amp;a_covered, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *a_coarser)</td></tr>
+<tr class="memdesc:a2725d694b891cb1672aa45665c078032"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of one level over its cut tiles.  <br /></td></tr>
+<tr class="separator:a2725d694b891cb1672aa45665c078032"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a284af359802a73b084806c4d0aa970c1" id="r_a284af359802a73b084806c4d0aa970c1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a284af359802a73b084806c4d0aa970c1">define</a> (const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_source, const DisjointBoxLayout &amp;a_grids, const BaseIF &amp;a_function)</td></tr>
 <tr class="memdesc:a284af359802a73b084806c4d0aa970c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the graph of a level over a given layout, from another graph of the same level.  <br /></td></tr>
 <tr class="separator:a284af359802a73b084806c4d0aa970c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6cef05c900f0d5c65e241a92c1e8bda7" id="r_a6cef05c900f0d5c65e241a92c1e8bda7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a6cef05c900f0d5c65e241a92c1e8bda7">equals</a> (const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_other) const</td></tr>
 <tr class="memdesc:a6cef05c900f0d5c65e241a92c1e8bda7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether another graph over the same layout holds the same cells, faces, mask and surfaces, bit for bit.  <br /></td></tr>
 <tr class="separator:a6cef05c900f0d5c65e241a92c1e8bda7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfe212ae21a26f9e0de48b8c1764ef4a" id="r_acfe212ae21a26f9e0de48b8c1764ef4a"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#acfe212ae21a26f9e0de48b8c1764ef4a">spreadAnchors</a> ()</td></tr>
+<tr class="memdesc:acfe212ae21a26f9e0de48b8c1764ef4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Spread anchoring through the open faces of this level until it stops.  <br /></td></tr>
+<tr class="separator:acfe212ae21a26f9e0de48b8c1764ef4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9890ab981bc66b3cbf3801ba4b62a4fe" id="r_a9890ab981bc66b3cbf3801ba4b62a4fe"><td class="memItemLeft" align="right" valign="top"><a id="a9890ab981bc66b3cbf3801ba4b62a4fe" name="a9890ab981bc66b3cbf3801ba4b62a4fe"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>anchorUncarriedCells</b> ()</td></tr>
+<tr class="memdesc:a9890ab981bc66b3cbf3801ba4b62a4fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anchor every cut ghost cell no tile carries, for a level with no coarser graph to answer for them. <br /></td></tr>
+<tr class="separator:a9890ab981bc66b3cbf3801ba4b62a4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb2b1fd64bd078c7a9f817b016c2808f" id="r_acb2b1fd64bd078c7a9f817b016c2808f"><td class="memItemLeft" align="right" valign="top">long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#acb2b1fd64bd078c7a9f817b016c2808f">fillSealedCells</a> ()</td></tr>
+<tr class="memdesc:acb2b1fd64bd078c7a9f817b016c2808f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill every cut cell anchoring did not reach, and let go of the anchoring.  <br /></td></tr>
+<tr class="separator:acb2b1fd64bd078c7a9f817b016c2808f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a167ee5128833597bb7af0836618bd061" id="r_a167ee5128833597bb7af0836618bd061"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a167ee5128833597bb7af0836618bd061">isDefined</a> () const noexcept</td></tr>
 <tr class="memdesc:a167ee5128833597bb7af0836618bd061"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether define has run.  <br /></td></tr>
 <tr class="separator:a167ee5128833597bb7af0836618bd061"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,17 +146,44 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PolyhedralEBGraph
 <tr class="memdesc:a2d612d0d06d0b5cdf1f043330d2a36a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the finer level carries a cell, one where it does, with two ghost cells; all zero until link has run.  <br /></td></tr>
 <tr class="separator:a2d612d0d06d0b5cdf1f043330d2a36a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4ad42771b294d7690436567f5168750" id="r_ad4ad42771b294d7690436567f5168750"><td class="memItemLeft" align="right" valign="top">const LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ad4ad42771b294d7690436567f5168750">getSurfaces</a> () const noexcept</td></tr>
-<tr class="memdesc:ad4ad42771b294d7690436567f5168750"><td class="mdescLeft">&#160;</td><td class="mdescRight">The surface every cut cell is reconstructed from, in the box's own cells and in its ghost cells.  <br /></td></tr>
+<tr class="memdesc:ad4ad42771b294d7690436567f5168750"><td class="mdescLeft">&#160;</td><td class="mdescRight">The surface every cell of the surface sets is reconstructed from, in the box's own cells and in its ghost cells. A stitched level's surfaces carry the crossings its refined edges take from the finer level.  <br /></td></tr>
 <tr class="separator:ad4ad42771b294d7690436567f5168750"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c" id="r_a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c"><td class="memItemLeft" align="right" valign="top">LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c">getSurfaces</a> () noexcept</td></tr>
+<tr class="memdesc:a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The surfaces, for the shop to write the crossings it takes from the finer level into.  <br /></td></tr>
+<tr class="separator:a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7ab30bbf13f8a7ca17285f57ccfc12c" id="r_ad7ab30bbf13f8a7ca17285f57ccfc12c"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; IntVectSet &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ad7ab30bbf13f8a7ca17285f57ccfc12c">getSurfaceCells</a> () const noexcept</td></tr>
+<tr class="memdesc:ad7ab30bbf13f8a7ca17285f57ccfc12c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cells of every box that hold a surface: every cut cell of its set, and every cell, own or ghost, whose corners disagree though it was dropped as dust or filled, or that lies beside a cell the finer level carries.  <br /></td></tr>
+<tr class="separator:ad7ab30bbf13f8a7ca17285f57ccfc12c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38f836671109b08c80e6482fe0a29bb3" id="r_a38f836671109b08c80e6482fe0a29bb3"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a38f836671109b08c80e6482fe0a29bb3">getFaceOverrides</a> () const noexcept</td></tr>
+<tr class="memdesc:a38f836671109b08c80e6482fe0a29bb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The faces of every box's cut cells, own and ghost, that their surfaces do not describe.  <br /></td></tr>
+<tr class="separator:a38f836671109b08c80e6482fe0a29bb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9d955fa04f4bd3a904239cec2876c18" id="r_aa9d955fa04f4bd3a904239cec2876c18"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#aa9d955fa04f4bd3a904239cec2876c18">getFaceOverrides</a> () noexcept</td></tr>
+<tr class="memdesc:aa9d955fa04f4bd3a904239cec2876c18"><td class="mdescLeft">&#160;</td><td class="mdescRight">The face overrides, for the shop to write.  <br /></td></tr>
+<tr class="separator:aa9d955fa04f4bd3a904239cec2876c18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d8cde2743235ddbe1a5006ea41eeec1" id="r_a5d8cde2743235ddbe1a5006ea41eeec1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a5d8cde2743235ddbe1a5006ea41eeec1">markCarried</a> (LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried) const</td></tr>
+<tr class="memdesc:a5d8cde2743235ddbe1a5006ea41eeec1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile covers, zero elsewhere. Collective.  <br /></td></tr>
+<tr class="separator:a5d8cde2743235ddbe1a5006ea41eeec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e58bc9e09068d26ad3ce5251b82736" id="r_a80e58bc9e09068d26ad3ce5251b82736"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a80e58bc9e09068d26ad3ce5251b82736">markCoarserFilled</a> (LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_filled, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_coarser, const int a_ghost) const</td></tr>
+<tr class="memdesc:a80e58bc9e09068d26ad3ce5251b82736"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the cells of this level, valid and ghost, that lie under a cell the coarser level filled.  <br /></td></tr>
+<tr class="separator:a80e58bc9e09068d26ad3ce5251b82736"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82c0cbfac0779f7ac4410b7c5eab6dc7" id="r_a82c0cbfac0779f7ac4410b7c5eab6dc7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a82c0cbfac0779f7ac4410b7c5eab6dc7">promoteToCut</a> (const DataIndex &amp;a_dit, const IntVect &amp;a_cell)</td></tr>
+<tr class="memdesc:a82c0cbfac0779f7ac4410b7c5eab6dc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a regular or covered cell of a box, own or ghost, a cut cell of this level.  <br /></td></tr>
+<tr class="separator:a82c0cbfac0779f7ac4410b7c5eab6dc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4883ff4d3a316b1a08a57eb07af87196" id="r_a4883ff4d3a316b1a08a57eb07af87196"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a4883ff4d3a316b1a08a57eb07af87196">markSurfaces</a> (LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_mask) const</td></tr>
+<tr class="memdesc:a4883ff4d3a316b1a08a57eb07af87196"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the cells that hold a surface.  <br /></td></tr>
+<tr class="separator:a4883ff4d3a316b1a08a57eb07af87196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a9619701794b29e7f58dc27d1393f7ead" id="r_a9619701794b29e7f58dc27d1393f7ead"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a9619701794b29e7f58dc27d1393f7ead">link</a> (<a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_coarse, const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_fine)</td></tr>
-<tr class="memdesc:a9619701794b29e7f58dc27d1393f7ead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark, on the coarse level, the cells the fine level carries and the faces that open onto them.  <br /></td></tr>
+<tr class="memdesc:a9619701794b29e7f58dc27d1393f7ead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark, on the coarse level, the faces that open onto cells the fine level carries.  <br /></td></tr>
 <tr class="separator:a9619701794b29e7f58dc27d1393f7ead"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa296cdc0adcc16ab97b69850d7a472b" id="r_aaa296cdc0adcc16ab97b69850d7a472b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#aaa296cdc0adcc16ab97b69850d7a472b">findUnresolvedCells</a> (const BaseFab&lt; Real &gt; &amp;a_nodeValues, const Box &amp;a_region, const Vector&lt; Box &gt; &amp;a_covered, BaseFab&lt; bool &gt; &amp;a_unresolved)</td></tr>
-<tr class="memdesc:aaa296cdc0adcc16ab97b69850d7a472b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the cells of a region that hold more than one sheet of interface.  <br /></td></tr>
-<tr class="separator:aaa296cdc0adcc16ab97b69850d7a472b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7184d9c38ab8540bc9dcea6431307065" id="r_a7184d9c38ab8540bc9dcea6431307065"><td class="memItemLeft" align="right" valign="top">static long long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a7184d9c38ab8540bc9dcea6431307065">anchorAcrossLevels</a> (<a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_coarse, <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;a_fine)</td></tr>
+<tr class="memdesc:a7184d9c38ab8540bc9dcea6431307065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Carry anchoring across a level boundary, both ways.  <br /></td></tr>
+<tr class="separator:a7184d9c38ab8540bc9dcea6431307065"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0269d255f160037cc1cbf49b0bae50f" id="r_ab0269d255f160037cc1cbf49b0bae50f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ab0269d255f160037cc1cbf49b0bae50f">findUnresolvedCells</a> (const BaseIF &amp;a_function, const BaseFab&lt; Real &gt; &amp;a_nodeValues, const Box &amp;a_region, const Vector&lt; Box &gt; &amp;a_covered, const RealVect &amp;a_probLo, const Real a_dx, BaseFab&lt; signed char &gt; &amp;a_unresolved)</td></tr>
+<tr class="memdesc:ab0269d255f160037cc1cbf49b0bae50f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the cells of a region that one body cannot describe, or that are mostly a gap of fluid.  <br /></td></tr>
+<tr class="separator:ab0269d255f160037cc1cbf49b0bae50f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -182,9 +219,24 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_fac
 static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_faceBoundary</b> = 4</td></tr>
 <tr class="memdesc:abfcdc3f6d206f06931e3d565cd64c2e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face states: the face lies in the domain boundary and is open. <br /></td></tr>
 <tr class="separator:abfcdc3f6d206f06931e3d565cd64c2e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad14c31b9205a2765ee00d6e97fa2fd2e" id="r_ad14c31b9205a2765ee00d6e97fa2fd2e"><td class="memItemLeft" align="right" valign="top"><a id="ad14c31b9205a2765ee00d6e97fa2fd2e" name="ad14c31b9205a2765ee00d6e97fa2fd2e"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_notFilled</b> = 0</td></tr>
+<tr class="memdesc:ad14c31b9205a2765ee00d6e97fa2fd2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a cell was filled: it was not. <br /></td></tr>
+<tr class="separator:ad14c31b9205a2765ee00d6e97fa2fd2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2828e2b868fac774c37fa38ec323ba5b" id="r_a2828e2b868fac774c37fa38ec323ba5b"><td class="memItemLeft" align="right" valign="top"><a id="a2828e2b868fac774c37fa38ec323ba5b" name="a2828e2b868fac774c37fa38ec323ba5b"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_filledPieces</b> = 1</td></tr>
+<tr class="memdesc:a2828e2b868fac774c37fa38ec323ba5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a cell was filled: its fluid falls into more than one piece, which one body cannot hold. <br /></td></tr>
+<tr class="separator:a2828e2b868fac774c37fa38ec323ba5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a527bab50635427e7b384f0e2d561a" id="r_a83a527bab50635427e7b384f0e2d561a"><td class="memItemLeft" align="right" valign="top"><a id="a83a527bab50635427e7b384f0e2d561a" name="a83a527bab50635427e7b384f0e2d561a"></a>
+static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_filledGap</b> = 2</td></tr>
+<tr class="memdesc:a83a527bab50635427e7b384f0e2d561a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Why a cell was filled: its one piece of fluid is the smaller part of it, a gap between pieces of solid. <br /></td></tr>
+<tr class="separator:a83a527bab50635427e7b384f0e2d561a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:a09eb9f1b9eb8979ef65dc0233df64ee2" id="r_a09eb9f1b9eb8979ef65dc0233df64ee2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a09eb9f1b9eb8979ef65dc0233df64ee2">addGhostSurfaceCells</a> ()</td></tr>
+<tr class="memdesc:a09eb9f1b9eb8979ef65dc0233df64ee2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put into every box's surface set the ghost cells whose owning tile keeps a surface for them.  <br /></td></tr>
+<tr class="separator:a09eb9f1b9eb8979ef65dc0233df64ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1a11e380b504b868c6c830a3c65b3c9" id="r_ab1a11e380b504b868c6c830a3c65b3c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ab1a11e380b504b868c6c830a3c65b3c9">defineGrids</a> (const Vector&lt; Box &gt; &amp;a_cutTiles)</td></tr>
 <tr class="memdesc:ab1a11e380b504b868c6c830a3c65b3c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the layout over the tiles, load balanced by cell count.  <br /></td></tr>
 <tr class="separator:ab1a11e380b504b868c6c830a3c65b3c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,12 +247,16 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>defineData</b> ()</td
 <tr class="memitem:a562bf685a14e4a2d51ead94a1b794419" id="r_a562bf685a14e4a2d51ead94a1b794419"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a562bf685a14e4a2d51ead94a1b794419">defineGhostCells</a> (const BaseIF &amp;a_function, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
 <tr class="memdesc:a562bf685a14e4a2d51ead94a1b794419"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify the ghost cells no tile of this level carries from their corners, and take the ghost cut cells some tile carries into each box's cut-cell set.  <br /></td></tr>
 <tr class="separator:a562bf685a14e4a2d51ead94a1b794419"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d8cde2743235ddbe1a5006ea41eeec1" id="r_a5d8cde2743235ddbe1a5006ea41eeec1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a5d8cde2743235ddbe1a5006ea41eeec1">markCarried</a> (LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried) const</td></tr>
-<tr class="memdesc:a5d8cde2743235ddbe1a5006ea41eeec1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile covers, zero elsewhere.  <br /></td></tr>
-<tr class="separator:a5d8cde2743235ddbe1a5006ea41eeec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2130e93893616700b6d0ff94a374161f" id="r_a2130e93893616700b6d0ff94a374161f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a2130e93893616700b6d0ff94a374161f">defineCells</a> (const BaseIF &amp;a_function, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
-<tr class="memdesc:a2130e93893616700b6d0ff94a374161f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with ghost cells, and set the face states the apertures decide.  <br /></td></tr>
-<tr class="separator:a2130e93893616700b6d0ff94a374161f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a010b12e1f50b6d34fdd8d3ec34d2dc1f" id="r_a010b12e1f50b6d34fdd8d3ec34d2dc1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a010b12e1f50b6d34fdd8d3ec34d2dc1f">beginAnchoring</a> (const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
+<tr class="memdesc:a010b12e1f50b6d34fdd8d3ec34d2dc1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record which cells anchor fluid before any of it is spread, for fillSealedCells.  <br /></td></tr>
+<tr class="separator:a010b12e1f50b6d34fdd8d3ec34d2dc1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95fe13cfcf23608b5a48c2dfeeb8f015" id="r_a95fe13cfcf23608b5a48c2dfeeb8f015"><td class="memItemLeft" align="right" valign="top"><a id="a95fe13cfcf23608b5a48c2dfeeb8f015" name="a95fe13cfcf23608b5a48c2dfeeb8f015"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>markRefined</b> ()</td></tr>
+<tr class="memdesc:a95fe13cfcf23608b5a48c2dfeeb8f015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set m_refined from m_covered, over every box and its ghost cells. <br /></td></tr>
+<tr class="separator:a95fe13cfcf23608b5a48c2dfeeb8f015"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10f81c0ecee44aa2e97729ae6ba3426e" id="r_a10f81c0ecee44aa2e97729ae6ba3426e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a10f81c0ecee44aa2e97729ae6ba3426e">defineCells</a> (const BaseIF &amp;a_function, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried, const LevelData&lt; BaseFab&lt; signed char &gt; &gt; *a_coarserFilled)</td></tr>
+<tr class="memdesc:a10f81c0ecee44aa2e97729ae6ba3426e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconstruct and classify every cell of every box and its ghost region, keep the cut cells' surfaces with ghost cells, and set the face states the apertures decide.  <br /></td></tr>
+<tr class="separator:a10f81c0ecee44aa2e97729ae6ba3426e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18b3b33398922a3a64a8be5672d99335" id="r_a18b3b33398922a3a64a8be5672d99335"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#a18b3b33398922a3a64a8be5672d99335">defineOuterFaces</a> (const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;a_carried)</td></tr>
 <tr class="memdesc:a18b3b33398922a3a64a8be5672d99335"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.  <br /></td></tr>
 <tr class="separator:a18b3b33398922a3a64a8be5672d99335"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,9 +287,8 @@ ProblemDomain&#160;</td><td class="memItemRight" valign="bottom"><b>m_domain</b>
 DisjointBoxLayout&#160;</td><td class="memItemRight" valign="bottom"><b>m_grids</b></td></tr>
 <tr class="memdesc:afd0441297642860d8d4066fede988c9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Layout over the cut tiles. <br /></td></tr>
 <tr class="separator:afd0441297642860d8d4066fede988c9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae40b546cc32ed8386d65962f333b43d2" id="r_ae40b546cc32ed8386d65962f333b43d2"><td class="memItemLeft" align="right" valign="top"><a id="ae40b546cc32ed8386d65962f333b43d2" name="ae40b546cc32ed8386d65962f333b43d2"></a>
-Vector&lt; Box &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_covered</b></td></tr>
-<tr class="memdesc:ae40b546cc32ed8386d65962f333b43d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of this level the finer level carries, coarsened onto this level. <br /></td></tr>
+<tr class="memitem:ae40b546cc32ed8386d65962f333b43d2" id="r_ae40b546cc32ed8386d65962f333b43d2"><td class="memItemLeft" align="right" valign="top">Vector&lt; Box &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ae40b546cc32ed8386d65962f333b43d2">m_covered</a></td></tr>
+<tr class="memdesc:ae40b546cc32ed8386d65962f333b43d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of this level the finer level carries, coarsened onto this level.  <br /></td></tr>
 <tr class="separator:ae40b546cc32ed8386d65962f333b43d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57f6336a0f19b8994e34b0b43d8795ca" id="r_a57f6336a0f19b8994e34b0b43d8795ca"><td class="memItemLeft" align="right" valign="top"><a id="a57f6336a0f19b8994e34b0b43d8795ca" name="a57f6336a0f19b8994e34b0b43d8795ca"></a>
 LayoutData&lt; IntVectSet &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_cutCells</b></td></tr>
@@ -247,23 +302,142 @@ LevelData&lt; BaseFab&lt; signed char &gt; &gt;&#160;</td><td class="memItemRigh
 LevelData&lt; BaseFab&lt; signed char &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_faceStates</b></td></tr>
 <tr class="memdesc:ada467d4e98efa8c01445f79db4bd8c01"><td class="mdescLeft">&#160;</td><td class="mdescRight">State of every face of every cell, component 2 * dir + side. <br /></td></tr>
 <tr class="separator:ada467d4e98efa8c01445f79db4bd8c01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2369ca6680dcbee417a0e8505b03a62" id="r_ad2369ca6680dcbee417a0e8505b03a62"><td class="memItemLeft" align="right" valign="top"><a id="ad2369ca6680dcbee417a0e8505b03a62" name="ad2369ca6680dcbee417a0e8505b03a62"></a>
-LevelData&lt; BaseFab&lt; signed char &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_refined</b></td></tr>
-<tr class="memdesc:ad2369ca6680dcbee417a0e8505b03a62"><td class="mdescLeft">&#160;</td><td class="mdescRight">One where the finer level carries the cell. <br /></td></tr>
+<tr class="memitem:ad2369ca6680dcbee417a0e8505b03a62" id="r_ad2369ca6680dcbee417a0e8505b03a62"><td class="memItemLeft" align="right" valign="top">LevelData&lt; BaseFab&lt; signed char &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPolyhedralEBGraph.html#ad2369ca6680dcbee417a0e8505b03a62">m_refined</a></td></tr>
+<tr class="memdesc:ad2369ca6680dcbee417a0e8505b03a62"><td class="mdescLeft">&#160;</td><td class="mdescRight">One where the finer level carries the cell, with at least two ghost cells.  <br /></td></tr>
 <tr class="separator:ad2369ca6680dcbee417a0e8505b03a62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47efe43b0b95f13180c1de1f8004b9a1" id="r_a47efe43b0b95f13180c1de1f8004b9a1"><td class="memItemLeft" align="right" valign="top"><a id="a47efe43b0b95f13180c1de1f8004b9a1" name="a47efe43b0b95f13180c1de1f8004b9a1"></a>
+LevelData&lt; BaseFab&lt; signed char &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_anchored</b></td></tr>
+<tr class="memdesc:a47efe43b0b95f13180c1de1f8004b9a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anchoring, from beginAnchoring until fillSealedCells: one where a cell's fluid reaches a regular cell, and in a second component one on the cut ghost cells no tile carries, which the coarser level answers for. <br /></td></tr>
+<tr class="separator:a47efe43b0b95f13180c1de1f8004b9a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abeeae1febd2c2f04e7f93786cde7d597" id="r_abeeae1febd2c2f04e7f93786cde7d597"><td class="memItemLeft" align="right" valign="top"><a id="abeeae1febd2c2f04e7f93786cde7d597" name="abeeae1febd2c2f04e7f93786cde7d597"></a>
+LayoutData&lt; IntVectSet &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaceCells</b></td></tr>
+<tr class="memdesc:abeeae1febd2c2f04e7f93786cde7d597"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cells of every box that hold a surface. <br /></td></tr>
+<tr class="separator:abeeae1febd2c2f04e7f93786cde7d597"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96aa60955c040ec72959c0110599224d" id="r_a96aa60955c040ec72959c0110599224d"><td class="memItemLeft" align="right" valign="top"><a id="a96aa60955c040ec72959c0110599224d" name="a96aa60955c040ec72959c0110599224d"></a>
 LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_surfaces</b></td></tr>
-<tr class="memdesc:a96aa60955c040ec72959c0110599224d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface of every cut cell. <br /></td></tr>
+<tr class="memdesc:a96aa60955c040ec72959c0110599224d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface of every cell of m_surfaceCells. <br /></td></tr>
 <tr class="separator:a96aa60955c040ec72959c0110599224d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d8a2e5e0076a5ff7510ecbb80c4ab71" id="r_a9d8a2e5e0076a5ff7510ecbb80c4ab71"><td class="memItemLeft" align="right" valign="top"><a id="a9d8a2e5e0076a5ff7510ecbb80c4ab71" name="a9d8a2e5e0076a5ff7510ecbb80c4ab71"></a>
+LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_faceOverrides</b></td></tr>
+<tr class="memdesc:a9d8a2e5e0076a5ff7510ecbb80c4ab71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Faces of every box's cut cells that their surfaces do not describe. <br /></td></tr>
+<tr class="separator:a9d8a2e5e0076a5ff7510ecbb80c4ab71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The cut cells of one level of the polyhedral geometry, and what they connect to. </p>
-<p>Holds, over the level's cut tiles, the classification of every cell, the surface every cut cell is reconstructed from, and for every face of every cell what lies across it: nothing, a cell of this level, a cell of the finer level, a cell of the coarser level, or the domain boundary. The surface is the source of everything else about a cut cell &ndash; its polyhedron and moments are rebuilt from it on demand &ndash; and it regrids: a coarse surface's corners are fine nodes and its crossings are the children's, and children are reconstructed from the implicit function. A cell whose face lies across a level boundary is not described by its own surface alone: the face is described by the level across it, which is what the face state records.</p>
+<p>Holds, over the level's cut tiles, the classification of every cell, the surface every cut cell is reconstructed from, and for every face of every cell what lies across it: nothing, a cell of this level, a cell of the finer level, a cell of the coarser level, or the domain boundary. The surface is the source of everything else about a cut cell &ndash; its polyhedron and moments are rebuilt from it on demand &ndash; and it regrids: a coarse surface's corners are fine nodes and its crossings are the children's. A cell whose face lies across a level boundary, or opens onto a covered cell, is not described by its own surface alone: <a class="el" href="classPolyhedralGeometryShop.html" title="Geometry generation whose moments are exact integrals of an explicit surface.">PolyhedralGeometryShop</a> stitches it once, from the stored cells of the level across, writes the crossings it takes from there into the surface and keeps the faces it changes as face overrides, so that the cell's body is rebuilt from its own surface and its own overrides with no call to the implicit function.</p>
 <p>The graph covers the cut tiles only. A cell outside every tile is regular or covered, never cut, and which of the two is the geometry's box classification rather than the graph's business.</p>
 <p>Built in two steps: define makes one level from its implicit function and its tiles, and knows about the domain boundary and about faces that open onto no tile of its own level; link, given two adjacent levels, marks the coarse cells the fine level carries and the coarse faces that open onto them. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae1d545763f8856487118225cbe1e06b7" name="ae1d545763f8856487118225cbe1e06b7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae1d545763f8856487118225cbe1e06b7">&#9670;&#160;</a></span>define() <span class="overload">[1/2]</span></h2>
+<a id="a09eb9f1b9eb8979ef65dc0233df64ee2" name="a09eb9f1b9eb8979ef65dc0233df64ee2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09eb9f1b9eb8979ef65dc0233df64ee2">&#9670;&#160;</a></span>addGhostSurfaceCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::addGhostSurfaceCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put into every box's surface set the ghost cells whose owning tile keeps a surface for them. </p>
+<p>Run once the valid cells' sets are complete and before the surfaces are exchanged. Collective. </p>
+
+</div>
+</div>
+<a id="a7184d9c38ab8540bc9dcea6431307065" name="a7184d9c38ab8540bc9dcea6431307065"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7184d9c38ab8540bc9dcea6431307065">&#9670;&#160;</a></span>anchorAcrossLevels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long PolyhedralEBGraph::anchorAcrossLevels </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_coarse</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fine</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Carry anchoring across a level boundary, both ways. </p>
+<p>A coarse cell the fine level carries is anchored when any of its children is, and a cut ghost cell of the fine level that the coarse level describes is anchored when the coarse cell over it is. Where the coarse level holds nothing over such a ghost cell, the ghost cell is anchored. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarse</td><td>Graph of the coarser level. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_fine</td><td>Graph of the finer level, a factor-two refinement of it. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of cells newly anchored, over all ranks. </dd></dl>
+
+</div>
+</div>
+<a id="a010b12e1f50b6d34fdd8d3ec34d2dc1f" name="a010b12e1f50b6d34fdd8d3ec34d2dc1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a010b12e1f50b6d34fdd8d3ec34d2dc1f">&#9670;&#160;</a></span>beginAnchoring()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::beginAnchoring </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_carried</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Record which cells anchor fluid before any of it is spread, for fillSealedCells. </p>
+<p>Regular cells anchor. A cell the finer level carries anchors when the finer level's fluid in it does, and a cut ghost cell no tile carries &ndash; the coarser level describes it &ndash; when the coarser level's fluid there does; both start unanchored and are told by anchorAcrossLevels. A regular ghost cell no tile carries anchors, a covered one does not. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_carried</td><td>The marker from markCarried. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2725d694b891cb1672aa45665c078032" name="a2725d694b891cb1672aa45665c078032"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2725d694b891cb1672aa45665c078032">&#9670;&#160;</a></span>define() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -311,7 +485,13 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_covered</em>&#160;</td>
+          <td class="paramname"><em>a_covered</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> *&#160;</td>
+          <td class="paramname"><em>a_coarser</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -327,7 +507,7 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 </div><div class="memdoc">
 
 <p>Build the graph of one level over its cut tiles. </p>
-<p>Load balances the tiles by cell count, reconstructs every cell of every tile and its ghost region from the implicit function, classifies it as the polyhedral generator does, keeping every cell that holds anything &ndash; a body with nothing in it is a regular cell, and nothing else is discarded, since a cell's interface is what closes the surface against its neighbours &ndash; keeps the surface of every cut cell, and sets the face states this level can know by itself: closed or open from the apertures, open onto the domain boundary, and open onto a cell no tile of this level carries. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Load balances the tiles by cell count, reconstructs every cell of every tile and its ghost region from the implicit function, classifies it as the polyhedral generator does, keeping every cell that holds anything &ndash; a body with nothing in it is a regular cell, and nothing else is discarded, since a cell's interface is what closes the surface against its neighbours &ndash; keeps the surface of every cell whose corners disagree, cut or not, and of every cell beside one the finer level carries, and sets the face states this level can know by itself: closed or open from the apertures, open onto the domain boundary, and open onto a cell no tile of this level carries. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function of the phase. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cutTiles</td><td>The level's cut tiles, identical on every rank. </td></tr>
@@ -336,6 +516,7 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing of the level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Ghost cells the cell states are kept for. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_covered</td><td>Cells of this level the finer level will carry, coarsened onto this level. A cell in them is described up there and is not filled down here. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarser</td><td>Graph of the coarser level, already defined, or null where there is none. A face onto a cell it filled is closed here, and a cell with such a face is kept cut, as beside a cell this level fills. </td></tr>
   </table>
   </dd>
 </dl>
@@ -383,7 +564,7 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 </div><div class="memdoc">
 
 <p>Build the graph of a level over a given layout, from another graph of the same level. </p>
-<p>The other graph's cell states, face states and surfaces are copied onto the new layout's valid cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified from the implicit function by their corners, as define classifies them. The new layout must cover the same cells as the other graph's, since the surfaces of the cut cells come from it alone; a layout of another cell count stops the run. The refined mask is not copied: it is the finer level's to set, so link the copy to its finer level afterwards as the original was. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The other graph's cell states, face states and surfaces are copied onto the new layout's valid cells, and exchanged into its ghost cells; the ghost cells no tile of the new layout carries are classified from the implicit function by their corners, as define classifies them. The new layout must cover the same cells as the other graph's, since the surfaces come from it alone; a layout of another cell count stops the run. The refined mask is not copied: it is the finer level's to set, so link the copy to its finer level afterwards as the original was. Nor are the face overrides, which are stitched afresh on the copy. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Graph to copy from. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_grids</td><td>Layout to copy onto, covering the same cells as a_source's. </td></tr>
@@ -394,8 +575,8 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 
 </div>
 </div>
-<a id="a2130e93893616700b6d0ff94a374161f" name="a2130e93893616700b6d0ff94a374161f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2130e93893616700b6d0ff94a374161f">&#9670;&#160;</a></span>defineCells()</h2>
+<a id="a10f81c0ecee44aa2e97729ae6ba3426e" name="a10f81c0ecee44aa2e97729ae6ba3426e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10f81c0ecee44aa2e97729ae6ba3426e">&#9670;&#160;</a></span>defineCells()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -413,7 +594,13 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_carried</em>&#160;</td>
+          <td class="paramname"><em>a_carried</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; BaseFab&lt; signed char &gt; &gt; *&#160;</td>
+          <td class="paramname"><em>a_coarserFilled</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -433,6 +620,7 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_carried</td><td>The marker from markCarried. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarserFilled</td><td>The marker from markCoarserFilled, with one ghost cell, or null where there is no coarser level. </td></tr>
   </table>
   </dd>
 </dl>
@@ -579,8 +767,28 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 
 </div>
 </div>
-<a id="aaa296cdc0adcc16ab97b69850d7a472b" name="aaa296cdc0adcc16ab97b69850d7a472b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa296cdc0adcc16ab97b69850d7a472b">&#9670;&#160;</a></span>findUnresolvedCells()</h2>
+<a id="acb2b1fd64bd078c7a9f817b016c2808f" name="acb2b1fd64bd078c7a9f817b016c2808f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb2b1fd64bd078c7a9f817b016c2808f">&#9670;&#160;</a></span>fillSealedCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long PolyhedralEBGraph::fillSealedCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fill every cut cell anchoring did not reach, and let go of the anchoring. </p>
+<p>The cell becomes covered with every face closed and leaves the cut cells; its surface stays, as a filled cell's does. A sealed region has no open face onto anchored fluid, so filling it changes no face of a cell that stays. Run once spreadAnchors and anchorAcrossLevels have settled on every level. Collective. </p><dl class="section return"><dt>Returns</dt><dd>Number of cells filled, over all ranks. </dd></dl>
+
+</div>
+</div>
+<a id="ab0269d255f160037cc1cbf49b0bae50f" name="ab0269d255f160037cc1cbf49b0bae50f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0269d255f160037cc1cbf49b0bae50f">&#9670;&#160;</a></span>findUnresolvedCells()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -591,6 +799,12 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
         <tr>
           <td class="memname">void PolyhedralEBGraph::findUnresolvedCells </td>
           <td>(</td>
+          <td class="paramtype">const BaseIF &amp;&#160;</td>
+          <td class="paramname"><em>a_function</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const BaseFab&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_nodeValues</em>, </td>
         </tr>
@@ -609,7 +823,19 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">BaseFab&lt; bool &gt; &amp;&#160;</td>
+          <td class="paramtype">const RealVect &amp;&#160;</td>
+          <td class="paramname"><em>a_probLo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BaseFab&lt; signed char &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_unresolved</em>&#160;</td>
         </tr>
         <tr>
@@ -625,15 +851,18 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 </table>
 </div><div class="memdoc">
 
-<p>Find the cells of a region that hold more than one sheet of interface. </p>
-<p>Downstream holds one body and one interface to a cell, so a cell the surface enters as several sheets cannot be described at all. Such a cell is filled rather than built, which is the only reading that stays single valued and keeps a barrier thinner than a cell a barrier instead of letting the fluid run through it. Filling is a classification and changes no value another level reads, so the children a coarse cell restricts against still agree with it about where every edge is crossed &ndash; which is what a snap of the nodes themselves cannot promise.</p>
+<p>Find the cells of a region that one body cannot describe, or that are mostly a gap of fluid. </p>
+<p>A cell the surface enters as more than one sheet holds more than one piece of fluid or more than one piece of solid. Two pieces of fluid &ndash; a plate between them &ndash; are more than one body can hold, and the cell is filled, which is the only reading that stays single valued and keeps a barrier a barrier instead of letting the fluid run through it. One piece of fluid with several pieces of solid is either a gap of fluid thinner than the cell between two solid lobes, or pieces that merely sit apart in it, such as two solid tips at opposite corners of a face. The two share their topology and their corners, and a pattern that repeats at every scale &ndash; a surface lying in a node plane &ndash; looks the same in every subcell as well, so it is the volume that decides: the cell's body is built from its crossings, and the cell is filled when the fluid is the smaller part of it, erring toward blocking a gap, and kept, as one body with several sheets of interface, when the fluid fills most of it. Fluid pieces are counted the way the body joins them: across a face by its face decision, never through the interior. Filling is a classification and changes no value another level reads, so the children a coarse cell restricts against still agree with it about where every edge is crossed &ndash; which is what a snap of the nodes themselves cannot promise.</p>
 <p>A cell the finer level carries is left alone: the feature is resolved up there, and this level's reading of it is not the one that gets used. Only the combinatorics are read, so no root is solved for here.</p>
 <p>Nothing is counted here. The region a caller asks about reaches past the cells it owns, so that a cell can see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken here would report a cell near a box boundary once for every box that reaches it. The caller counts over the cells it owns. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_function</td><td>Implicit function, read at face centres and along the edges of multi-sheet cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_nodeValues</td><td>Node values of the region. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_region</td><td>Cells to ask. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_covered</td><td>Cells a finer level carries. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_unresolved</td><td>True for each cell of the region that must be filled. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid spacing. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_unresolved</td><td>For each cell of the region, why it must be filled &ndash; s_filledPieces or s_filledGap &ndash; or s_notFilled. </td></tr>
   </table>
   </dd>
 </dl>
@@ -752,6 +981,62 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 
 </div>
 </div>
+<a id="a38f836671109b08c80e6482fe0a29bb3" name="a38f836671109b08c80e6482fe0a29bb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38f836671109b08c80e6482fe0a29bb3">&#9670;&#160;</a></span>getFaceOverrides() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &gt; &amp; PolyhedralEBGraph::getFaceOverrides </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The faces of every box's cut cells, own and ghost, that their surfaces do not describe. </p>
+<p>Empty until <a class="el" href="classPolyhedralGeometryShop.html" title="Geometry generation whose moments are exact integrals of an explicit surface.">PolyhedralGeometryShop</a> has stitched the level. </p><dl class="section return"><dt>Returns</dt><dd>One set of overrides per box. </dd></dl>
+
+</div>
+</div>
+<a id="aa9d955fa04f4bd3a904239cec2876c18" name="aa9d955fa04f4bd3a904239cec2876c18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9d955fa04f4bd3a904239cec2876c18">&#9670;&#160;</a></span>getFaceOverrides() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LayoutData&lt; <a class="el" href="classPolyhedralEB_1_1CutCellFaceOverrides.html">PolyhedralEB::CutCellFaceOverrides</a> &gt; &amp; PolyhedralEBGraph::getFaceOverrides </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The face overrides, for the shop to write. </p>
+<dl class="section return"><dt>Returns</dt><dd>One set of overrides per box. </dd></dl>
+
+</div>
+</div>
 <a id="aad13aeaab4a065758eb2aba2480f4685" name="aad13aeaab4a065758eb2aba2480f4685"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad13aeaab4a065758eb2aba2480f4685">&#9670;&#160;</a></span>getFaceStates()</h2>
 
@@ -836,8 +1121,36 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 
 </div>
 </div>
+<a id="ad7ab30bbf13f8a7ca17285f57ccfc12c" name="ad7ab30bbf13f8a7ca17285f57ccfc12c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7ab30bbf13f8a7ca17285f57ccfc12c">&#9670;&#160;</a></span>getSurfaceCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const LayoutData&lt; IntVectSet &gt; &amp; PolyhedralEBGraph::getSurfaceCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The cells of every box that hold a surface: every cut cell of its set, and every cell, own or ghost, whose corners disagree though it was dropped as dust or filled, or that lies beside a cell the finer level carries. </p>
+<p>A cell that is not cut keeps its surface because its crossings lie on edges other cells share, and the coarser level stitches from them; one beside the finer level keeps it because stitching may make it cut. </p><dl class="section return"><dt>Returns</dt><dd>One set per box. </dd></dl>
+
+</div>
+</div>
 <a id="ad4ad42771b294d7690436567f5168750" name="ad4ad42771b294d7690436567f5168750"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4ad42771b294d7690436567f5168750">&#9670;&#160;</a></span>getSurfaces()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4ad42771b294d7690436567f5168750">&#9670;&#160;</a></span>getSurfaces() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -859,8 +1172,36 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 </table>
 </div><div class="memdoc">
 
-<p>The surface every cut cell is reconstructed from, in the box's own cells and in its ghost cells. </p>
-<dl class="section return"><dt>Returns</dt><dd>One surface per cut cell of every box's set. </dd></dl>
+<p>The surface every cell of the surface sets is reconstructed from, in the box's own cells and in its ghost cells. A stitched level's surfaces carry the crossings its refined edges take from the finer level. </p>
+<dl class="section return"><dt>Returns</dt><dd>One surface per cell of every box's surface set. </dd></dl>
+
+</div>
+</div>
+<a id="a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c" name="a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e2b2e6f5c8cf0c0ff8e3df66ef85a8c">&#9670;&#160;</a></span>getSurfaces() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface.html">PolyhedralEB::CutCellSurface</a> &gt; &gt; &amp; PolyhedralEBGraph::getSurfaces </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The surfaces, for the shop to write the crossings it takes from the finer level into. </p>
+<dl class="section return"><dt>Returns</dt><dd>One surface per cell of every box's surface set. </dd></dl>
 
 </div>
 </div>
@@ -926,8 +1267,8 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 </table>
 </div><div class="memdoc">
 
-<p>Mark, on the coarse level, the cells the fine level carries and the faces that open onto them. </p>
-<p>The fine tiles are coarsened onto the coarse layout the way <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> builds its valid-cell mask: a marker on the coarsened fine layout is copied onto the coarse layout and its ghost cells. A coarse cell the marker reaches is refined; an open face of an unrefined coarse cell onto a refined neighbour is described by the fine level. The fine level's own faces onto the coarse level were set when it was defined. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Mark, on the coarse level, the faces that open onto cells the fine level carries. </p>
+<p>The fine tiles are coarsened onto the coarse layout the way <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> builds its valid-cell mask: a marker on the coarsened fine layout is copied onto the coarse layout and its ghost cells. An open face of an unrefined coarse cell onto a cell the marker reaches is described by the fine level. The coarse level already knows which of its cells are refined &ndash; it was told when it was defined &ndash; so the marker is checked against that rather than written over it, and a disagreement between the coarse level's covered region and the fine level's tiles stops the run. The fine level's own faces onto the coarse level were set when it was defined. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarse</td><td>Graph of the coarser level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fine</td><td>Graph of the finer level, a factor-two refinement of it. </td></tr>
@@ -942,9 +1283,6 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void PolyhedralEBGraph::markCarried </td>
@@ -954,6 +1292,159 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
           <td> const</td>
         </tr>
       </table>
+</div><div class="memdoc">
+
+<p>Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile covers, zero elsewhere. Collective. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_carried</td><td>The marker, defined here over the layout with the cell states' ghost width. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a80e58bc9e09068d26ad3ce5251b82736" name="a80e58bc9e09068d26ad3ce5251b82736"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80e58bc9e09068d26ad3ce5251b82736">&#9670;&#160;</a></span>markCoarserFilled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::markCoarserFilled </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_filled</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPolyhedralEBGraph.html">PolyhedralEBGraph</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_coarser</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_ghost</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Mark the cells of this level, valid and ghost, that lie under a cell the coarser level filled. </p>
+<p>Such a cell is never carried here, since the coarser level fills no cell this level describes, so the marker lands on ghost cells the coarser level answers for. A face of this level onto one of them opens onto nothing and has to be closed from this side. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_filled</td><td>The marker, defined here over the layout with a_ghost ghost cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarser</td><td>Graph of the coarser level, a factor two coarser. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ghost</td><td>Ghost cells of the marker. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4883ff4d3a316b1a08a57eb07af87196" name="a4883ff4d3a316b1a08a57eb07af87196"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4883ff4d3a316b1a08a57eb07af87196">&#9670;&#160;</a></span>markSurfaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::markSurfaces </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; BaseFab&lt; signed char &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mask</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Mark the cells that hold a surface. </p>
+<p>The cell states cannot say which cells that are not cut keep a surface, so a copy of the graph carries this mask across first. Ghost cells are marked from the tiles that own them. Collective. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_mask</td><td>One where a cell holds a surface, zero elsewhere, over the graph's layout and its ghost cells. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a82c0cbfac0779f7ac4410b7c5eab6dc7" name="a82c0cbfac0779f7ac4410b7c5eab6dc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82c0cbfac0779f7ac4410b7c5eab6dc7">&#9670;&#160;</a></span>promoteToCut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PolyhedralEBGraph::promoteToCut </td>
+          <td>(</td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_dit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IntVect &amp;&#160;</td>
+          <td class="paramname"><em>a_cell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Make a regular or covered cell of a box, own or ghost, a cut cell of this level. </p>
+<p>For a cell on a refinement boundary whose face the finer level describes otherwise than its corners do: a regular cell whose face the finer level cuts or closes, or a covered one onto whose face the finer level opens. The cell becomes cut and enters the box's cut set, and every face of it onto a cell the finer level carries opens onto the finer level. Its surface is already kept, since every cell on a refinement boundary keeps one. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Box index. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cell</td><td>The cell, in the box or its ghost ring. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="acfe212ae21a26f9e0de48b8c1764ef4a" name="acfe212ae21a26f9e0de48b8c1764ef4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfe212ae21a26f9e0de48b8c1764ef4a">&#9670;&#160;</a></span>spreadAnchors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long PolyhedralEBGraph::spreadAnchors </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Spread anchoring through the open faces of this level until it stops. </p>
+<p>Filling a cell closes the faces onto it, and fluid that reached the rest of the fluid only through such faces is left sealed off: beside a filled gap thinner than a cell, the slivers at the gap's corners are joined to one another and to nothing else. No stencil fits in fluid that holds no regular cell, so such fluid is filled. A cut cell is anchored when an open face joins it to an anchored cell; the spread runs box by box with an exchange in between until no box anchors anything new. A face on the domain boundary anchors nothing, and a cell the finer level carries passes nothing through itself: what it holds is the finer level's. Collective. </p><dl class="section return"><dt>Returns</dt><dd>Number of cells anchored, over all ranks. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ae40b546cc32ed8386d65962f333b43d2" name="ae40b546cc32ed8386d65962f333b43d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae40b546cc32ed8386d65962f333b43d2">&#9670;&#160;</a></span>m_covered</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt;Box&gt; PolyhedralEBGraph::m_covered</td>
+        </tr>
+      </table>
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">protected</span></span>  </td>
@@ -961,13 +1452,33 @@ LevelData&lt; IVSFAB&lt; <a class="el" href="classPolyhedralEB_1_1CutCellSurface
 </table>
 </div><div class="memdoc">
 
-<p>Mark the cells some tile of this level carries: one in every valid cell and in every ghost cell another tile covers, zero elsewhere. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_carried</td><td>The marker, defined here over the layout with the cell states' ghost width. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Cells of this level the finer level carries, coarsened onto this level. </p>
+<p>Known before any cell is built, since the tiles are the geometry's and not the graph's. A cell in them is described by the finer level: this level classifies it from its corners but builds no surface or body for it, and it is not one of this level's cut cells. </p>
+
+</div>
+</div>
+<a id="ad2369ca6680dcbee417a0e8505b03a62" name="ad2369ca6680dcbee417a0e8505b03a62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2369ca6680dcbee417a0e8505b03a62">&#9670;&#160;</a></span>m_refined</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LevelData&lt;BaseFab&lt;signed char&gt; &gt; PolyhedralEBGraph::m_refined</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>One where the finer level carries the cell, with at least two ghost cells. </p>
+<p>Set from m_covered when the graph is defined, before any cell is built, so that nothing on this level is built for a cell the finer level describes. link checks it against the finer level's tiles. </p>
 
 </div>
 </div>

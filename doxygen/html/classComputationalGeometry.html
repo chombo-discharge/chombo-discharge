@@ -222,6 +222,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>useChomboShop</b> ()<
 <tr class="memitem:ab738bfe91a6d4bbc984553ea5fb2e686" id="r_ab738bfe91a6d4bbc984553ea5fb2e686"><td class="memItemLeft" align="right" valign="top">GeometryService::InOut&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#ab738bfe91a6d4bbc984553ea5fb2e686">classify</a> (const Box &amp;a_box, const ProblemDomain &amp;a_domain, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:ab738bfe91a6d4bbc984553ea5fb2e686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classify a box on any domain at or finer than a level makeGrids built.  <br /></td></tr>
 <tr class="separator:ab738bfe91a6d4bbc984553ea5fb2e686"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85fafe83304c78a100658d9d498e472a" id="r_a85fafe83304c78a100658d9d498e472a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a85fafe83304c78a100658d9d498e472a">ownedPieces</a> (std::vector&lt; std::vector&lt; std::pair&lt; int, Box &gt; &gt; &gt; &amp;a_pieces, const Box &amp;a_box, const int a_level) const</td></tr>
+<tr class="memdesc:a85fafe83304c78a100658d9d498e472a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which level describes each part of a box, and through which of its cut tiles.  <br /></td></tr>
+<tr class="separator:a85fafe83304c78a100658d9d498e472a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0b8f7a25b626d09dcaa44f5c2847fca" id="r_aa0b8f7a25b626d09dcaa44f5c2847fca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#aa0b8f7a25b626d09dcaa44f5c2847fca">checkOwnedPieces</a> (const Box &amp;a_box, const int a_level) const</td></tr>
+<tr class="memdesc:aa0b8f7a25b626d09dcaa44f5c2847fca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check ownedPieces on a box against a cell-by-cell reading of the tiles.  <br /></td></tr>
+<tr class="separator:aa0b8f7a25b626d09dcaa44f5c2847fca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a606f5124e0705bab3923480e17ee95" id="r_a2a606f5124e0705bab3923480e17ee95"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComputationalGeometry.html#a2a606f5124e0705bab3923480e17ee95">getStartLevel</a> () const noexcept</td></tr>
 <tr class="memdesc:a2a606f5124e0705bab3923480e17ee95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level of the start domain. Every level at or below it is whole; the cut tiles begin above it.  <br /></td></tr>
 <tr class="separator:a2a606f5124e0705bab3923480e17ee95"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1095,6 +1101,43 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The tree, holding the boxes' indices into the list, or null if the list is empty. </dd></dl>
+
+</div>
+</div>
+<a id="aa0b8f7a25b626d09dcaa44f5c2847fca" name="aa0b8f7a25b626d09dcaa44f5c2847fca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0b8f7a25b626d09dcaa44f5c2847fca">&#9670;&#160;</a></span>checkOwnedPieces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::checkOwnedPieces </td>
+          <td>(</td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check ownedPieces on a box against a cell-by-cell reading of the tiles. </p>
+<p>Every cell of every tiled level that the mapped box meets is looked up on its own: owned if a tile of the level holds it and no tile of the next level holds any of its children. The pieces must cover exactly the owned cells, each once. A disagreement is reported and stops the run. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box on level a_level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level of the box, as ownedPieces takes it. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2337,6 +2380,51 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 
 </div>
 </div>
+<a id="a85fafe83304c78a100658d9d498e472a" name="a85fafe83304c78a100658d9d498e472a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85fafe83304c78a100658d9d498e472a">&#9670;&#160;</a></span>ownedPieces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ComputationalGeometry::ownedPieces </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; std::pair&lt; int, Box &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_pieces</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;&#160;</td>
+          <td class="paramname"><em>a_box</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_level</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Which level describes each part of a box, and through which of its cut tiles. </p>
+<p>A cell of a tiled level is owned by that level when one of the level's cut tiles holds it and none of the next level's does: the polyhedral graph of that level builds it, and no other level does. The owned cells of all levels partition the tiled region. For every tiled level this maps the box onto the level &ndash; coarsened outward onto a coarser one, refined onto a finer one &ndash; and returns the parts of it the level owns, tile by tile. A cell of the box that no tile of any level holds is in no piece; classify answers what it is.</p>
+<p>The box may live on a level finer than every stored one, which is then a refinement by two per level of the finest stored domain, and every piece comes from a coarser level. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_pieces</td><td>One list per stored level of (index into getCutTiles(level), region on that level) pairs: the tile, and a box of cells of the tile that the level owns and the mapped box meets. A tile the next level holds part of gives several. Empty on a level with no tiles, or that the box does not reach. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box on level a_level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level of the box, 0 being the coarsest; past the finest stored level for a finer domain. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="aaef5378dc9e98be715ae56b872dd2fc0" name="aaef5378dc9e98be715ae56b872dd2fc0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaef5378dc9e98be715ae56b872dd2fc0">&#9670;&#160;</a></span>setDielectrics()</h2>
 
@@ -2549,7 +2637,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>s_max
 <p>Cut tiles of a level that intersect a box. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, above the start level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Level, at or above the start level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Box on that level. </td></tr>
   </table>
   </dd>
