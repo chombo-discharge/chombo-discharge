@@ -1,11 +1,11 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner               = -1 -1 -1       ## Low corner of problem domain
-AmrMesh.hi_corner               = 1  1  1        ## High corner of problem domain
+AmrMesh.lo_corner               = -1 -1          ## Low corner of problem domain
+AmrMesh.hi_corner               = 1  1           ## High corner of problem domain
 AmrMesh.verbosity               = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain         = 64 64 64       ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth           = 0              ## Maximum amr depth
+AmrMesh.coarsest_domain         = 64 64          ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 2              ## Maximum amr depth
 AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
 AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
 AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
@@ -36,7 +36,7 @@ AmrMesh.mirror_min_denom        = 1.E-4          ## Mirror deposition: refuse (J
 # DRIVER OPTIONS
 # ====================================================================================================
 Driver.verbosity                    = 2                    ## Engine verbosity
-Driver.geometry_generation          = polyhedral           ## Grid generation method
+Driver.geometry_generation          = polyhedral           ## Grid generation method, 'chombo-discharge', 'chombo' or 'polyhedral'
 Driver.geometry_scan_level          = 0                    ## Geometry scan level for chombo-discharge geometry generator
 Driver.plot_interval                = 10                   ## Plot interval
 Driver.checkpoint_interval          = 10                   ## Checkpoint interval
@@ -48,7 +48,7 @@ Driver.do_init_load_balance         = false                ## If true, load bala
 Driver.start_time                   = 0                    ## Start time (fresh simulations only)
 Driver.stop_time                    = 1.0                  ## Stop time
 Driver.max_steps                    = 0                    ## Maximum number of steps
-Driver.geometry_only                = true                 ## Only plot the geometry
+Driver.geometry_only                = true                 ## Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance     = false                ## Use memory as loads for EBIS generation
 Driver.output_dt                    = -1.0                 ## Output interval (values <= 0 enforces step-based output)
 Driver.write_memory                 = false                ## Write MPI memory report
@@ -81,7 +81,14 @@ Driver.refine_dielectrics           = -1                   ## Refine dielectric 
 # ====================================================================================================
 # ThinPlate class options
 # ====================================================================================================
-ThinPlate.normal        = 1 1 0       ## Plate normal, 45 degrees about z
-ThinPlate.thickness     = 0.015625    ## Half a cell at 64^3 over [-1,1] (dx = 0.03125)
-ThinPlate.offset        = 0.0         ## Signed distance of the plate's mid-plane from the origin
-ThinPlate.invert        = false       ## Swap gas and solid, making the plate a gap of gas through solid
+ThinPlate.normal        = 1 1      ## Plate normal, 45 degrees
+ThinPlate.thickness     = 0.004    ## Thinner than the finest cell's diagonal, so filled there
+ThinPlate.offset        = 0.09     ## Puts filled finest cells against coarse cells across a seam
+ThinPlate.invert        = false    ## Swap gas and solid, making the plate a gap of gas through solid
+
+# ====================================================================================================
+# PolyhedralGeometryShop class options
+# ====================================================================================================
+PolyhedralGeometryShop.sanity_check      = true     ## Check the surface is closed, on every level and across every seam
+PolyhedralGeometryShop.test_copy         = true     ## Copy the graphs onto other layouts, and require every body unchanged
+PolyhedralGeometryShop.write_surface     = false    ## Write the interface triangles for inspection

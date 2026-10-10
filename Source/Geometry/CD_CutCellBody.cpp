@@ -13,6 +13,7 @@
 // Std includes
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 
 // Chombo includes
 #include <CH_assert.H>
@@ -69,7 +70,7 @@ CutCellBody::numSheets(const CutCellSurface& a_surface) noexcept
 {
 #if CH_SPACEDIM == 2
   // Two dimensions: a cell's faces and its edges are the same four segments, and the crossings on them pair
-  // into chords, so half the crossings is the number of sheets.
+  // into chords, one around each run of solid corners met going round the cell.
   int numCrossings = 0;
 
   for (int e = 0; e < CutCellSurface::s_numEdges; e++) {
@@ -78,12 +79,72 @@ CutCellBody::numSheets(const CutCellSurface& a_surface) noexcept
     }
   }
 
-  return (numCrossings % 2 == 0) ? numCrossings / 2 : -1;
+  if (numCrossings % 2 != 0) {
+    return -1;
+  }
+
+  if (numCrossings == 0) {
+    return 0;
+  }
+
+  constexpr int circuit[4] = {0, 1, 3, 2};
+
+  // start the walk at a fluid corner, so that every run of solid corners is met whole
+  int first = 0;
+
+  while (!isFluid(a_surface.m_corner[circuit[first]])) {
+    first++;
+  }
+
+  int  numSheets = 0;
+  bool inRun     = false;
+  bool allZero   = true;
+
+  for (int i = 1; i <= 4; i++) {
+    const Real value = a_surface.m_corner[circuit[(first + i) % 4]];
+
+    if (!isFluid(value)) {
+      allZero = (inRun ? allZero : true) && (value == 0.0);
+      inRun   = true;
+    }
+    else if (inRun) {
+      numSheets += allZero ? 0 : 1;
+      inRun = false;
+    }
+  }
+
+  return numSheets;
 #else
   int loop[CutCellSurface::s_numEdges];
   int start[CutCellSurface::s_numEdges + 1];
 
-  return detail::crossingLoops(a_surface, loop, start);
+  const int numLoops = detail::crossingLoops(a_surface, loop, start);
+
+  if (numLoops <= 0) {
+    return numLoops;
+  }
+
+  // A loop whose every edge has, for its solid end, a corner at exactly zero bounds nothing.
+  int numSheets = 0;
+
+  for (int l = 0; l < numLoops; l++) {
+    bool degenerate = true;
+
+    for (int k = start[l]; k < start[l + 1] && degenerate; k++) {
+      int low  = -1;
+      int high = -1;
+
+      detail::edgeCorners(loop[k], low, high);
+
+      const Real solidEnd = isFluid(a_surface.m_corner[low]) ? a_surface.m_corner[high] : a_surface.m_corner[low];
+
+      degenerate = (solidEnd == 0.0);
+    }
+
+    numSheets += degenerate ? 0 : 1;
+  }
+
+  return numSheets;
 #endif
 }
 
@@ -563,7 +624,10 @@ CutCellBody::mergeCoplanar(const Polygon* a_in, const int a_num, Polygon* a_out,
 }
 
 bool
-CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept
+CutCellBody::restrictFace(const CutCellSurface* a_children,
+                          const bool*           a_closedQuadrant,
+                          const int             a_dir,
+                          const int             a_side) noexcept
 {
   CH_assert(a_children != nullptr);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
@@ -616,6 +680,10 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
       return false;
     }
 
+    if (a_closedQuadrant != nullptr && a_closedQuadrant[q]) {
+      continue;
+    }
+
     for (int n = 0; n < numWalked; n++) {
       if (numSub >= 4 * (1 << (SpaceDim - 1))) {
         return false;
@@ -655,15 +723,66 @@ CutCellBody::restrictFace(const CutCellSurface* a_children, const int a_dir, con
   return true;
 }
 
-bool
-CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
+void
+CutCellBody::defineWhole() noexcept
 {
-  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
-  CH_assert(a_side == 0 || a_side == 1);
+  *this = CutCellBody();
 
-  const int face = 2 * a_dir + a_side;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      int faceCorner[1 << (SpaceDim - 1)];
 
-  // this face's polygon goes, and so does the interface, which was built to meet its chord
+      detail::faceCorners(dir, side, faceCorner);
+
+      Polygon& polygon = m_polygon[m_numPolygons];
+
+      polygon               = Polygon();
+      polygon.m_numVertices = 0;
+      polygon.m_face        = 2 * dir + side;
+
+      for (int i = 0; i < (1 << (SpaceDim - 1)); i++) {
+        polygon.m_vertexEdge[polygon.m_numVertices] = -1;
+        polygon.m_vertex[polygon.m_numVertices++]   = detail::cornerPosition(faceCorner[i]);
+      }
+
+      this->orientOutward(polygon, dir, side);
+
+      m_numPolygons++;
+    }
+  }
+
+  this->accumulateMoments();
+}
+
+void
+CutCellBody::recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const
+{
+  CH_assert(a_face >= 0 && a_face < s_numFaces);
+
+  a_overrides.beginFace(a_face, a_reason);
+
+  if (a_reason == CutCellFaceOverrides::s_closed) {
+    return;
+  }
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& polygon = m_polygon[ip];
+
+    if (polygon.m_face == a_face) {
+      a_overrides.addPolygon(polygon.m_vertex, polygon.m_vertexEdge, polygon.m_numVertices);
+    }
+  }
+}
+
+bool
+CutCellBody::replaceFace(const CutCellFaceOverrides& a_overrides, const int a_entry) noexcept
+{
+  CH_assert(a_overrides.reason(a_entry) == CutCellFaceOverrides::s_finer);
+  CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
+  const int face = a_overrides.face(a_entry);
+
+  // this face's chord goes, and so does the interface, which was built to meet it
   int kept = 0;
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
@@ -674,9 +793,76 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
 
   m_numPolygons = kept;
 
-  // A neighbour that holds no solid says the whole face is open; one that holds no fluid leaves it closed, and
-  // then the face has no polygon at all.
-  if (a_neighbourIsFluid) {
+  int polyBegin = 0;
+  int polyEnd   = 0;
+
+  a_overrides.polygons(a_entry, polyBegin, polyEnd);
+
+  for (int p = polyBegin; p < polyEnd; p++) {
+    int vertBegin = 0;
+    int vertEnd   = 0;
+
+    a_overrides.vertices(p, vertBegin, vertEnd);
+
+    if (m_numPolygons >= s_maxPolygons || vertEnd - vertBegin > s_maxVertices) {
+      return false;
+    }
+
+    Polygon& polygon = m_polygon[m_numPolygons++];
+
+    polygon.m_face        = face;
+    polygon.m_numVertices = vertEnd - vertBegin;
+
+    for (int v = vertBegin; v < vertEnd; v++) {
+      polygon.m_vertex[v - vertBegin]      = a_overrides.vertex(v);
+      polygon.m_vertexEdge[v - vertBegin]  = a_overrides.vertexEdge(v);
+      polygon.m_segmentFace[v - vertBegin] = -1;
+    }
+  }
+
+  return true;
+}
+
+bool
+CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+
+  const int face = 2 * a_dir + a_side;
+
+  // Closing: the face's polygon is already exactly the boundary the fluid needs there, so it stays and becomes
+  // interface lying in the face, and nothing else changes. Rebuilding the interface instead would cap every loop
+  // left open with a flat patch, which collapses a body whose remaining faces leave two loops -- a sliver closed
+  // on two sides keeps only its two end faces, and their caps lie on top of them.
+  if (!a_neighbourIsFluid) {
+    for (int ip = 0; ip < m_numPolygons; ip++) {
+      if (m_polygon[ip].m_face == face) {
+        m_polygon[ip].m_face = -1;
+      }
+    }
+
+    this->accumulateMoments();
+
+    const bool closed  = this->closureResidual() <= 1.0E-9;
+    const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+    return closed && inRange;
+  }
+
+  // Opening: this face's polygon goes, and so does the interface, which was built to meet its chord
+  int kept = 0;
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    if (m_polygon[ip].m_face != face && m_polygon[ip].m_face >= 0) {
+      m_polygon[kept++] = m_polygon[ip];
+    }
+  }
+
+  m_numPolygons = kept;
+
+  // A neighbour that holds no solid says the whole face is open.
+  {
     if (m_numPolygons >= s_maxPolygons) {
       return false;
     }
@@ -704,8 +890,6 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
   if (!this->closeInterface()) {
     return false;
   }
-
-  this->accumulateMoments();
 
   const bool closed  = this->closureResidual() <= 1.0E-9;
   const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
@@ -833,7 +1017,13 @@ CutCellBody::weldTJunctions() noexcept
 bool
 CutCellBody::closeInterface() noexcept
 {
-  return this->closeBoundary(-1);
+  if (!this->closeBoundary(-1)) {
+    return false;
+  }
+
+  this->accumulateMoments();
+
+  return true;
 }
 
 bool
@@ -849,7 +1039,16 @@ CutCellBody::closeBoundary(const int a_face) noexcept
   RealVect from[s_maxPolygons * s_maxVertices];
   RealVect to[s_maxPolygons * s_maxVertices];
 
-  int numOpen = 0;
+  // Every edge, and which polygon it belongs to. An edge is closed by one edge of another polygon running the other
+  // way, and each edge closes at most one: a hole in a face covered by interface lying in the face uses the
+  // hole's edges three times once the body is cut through it -- the face, the hole and the interface -- and one of
+  // them stays open, as the boundary the cut has to close.
+  RealVect edgeFrom[s_maxPolygons * s_maxVertices];
+  RealVect edgeTo[s_maxPolygons * s_maxVertices];
+  int      edgeOwner[s_maxPolygons * s_maxVertices];
+  bool     matched[s_maxPolygons * s_maxVertices];
+
+  int numEdges = 0;
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
     const Polygon& p = m_polygon[ip];
@@ -862,30 +1061,31 @@ CutCellBody::closeBoundary(const int a_face) noexcept
         continue;
       }
 
-      bool shared = false;
+      CH_assert(numEdges < s_maxPolygons * s_maxVertices);
 
-      for (int jp = 0; jp < m_numPolygons && !shared; jp++) {
-        if (jp == ip) {
-          continue;
-        }
+      edgeFrom[numEdges]  = a;
+      edgeTo[numEdges]    = b;
+      edgeOwner[numEdges] = ip;
+      matched[numEdges]   = false;
+      numEdges++;
+    }
+  }
 
-        const Polygon& q = m_polygon[jp];
+  int numOpen = 0;
 
-        for (int j = 0; j < q.m_numVertices && !shared; j++) {
-          const RealVect& c = q.m_vertex[j];
-          const RealVect& d = q.m_vertex[(j + 1) % q.m_numVertices];
-
-          shared = detail::sameVertex(a, d) && detail::sameVertex(b, c);
-        }
+  for (int e = 0; e < numEdges; e++) {
+    for (int f = e + 1; f < numEdges && !matched[e]; f++) {
+      if (!matched[f] && edgeOwner[f] != edgeOwner[e] && detail::sameVertex(edgeFrom[e], edgeTo[f]) &&
+          detail::sameVertex(edgeTo[e], edgeFrom[f])) {
+        matched[e] = true;
+        matched[f] = true;
       }
+    }
 
-      if (!shared) {
-        CH_assert(numOpen < s_maxPolygons * s_maxVertices);
-
-        from[numOpen] = b;
-        to[numOpen]   = a;
-        numOpen++;
-      }
+    if (!matched[e]) {
+      from[numOpen] = edgeTo[e];
+      to[numOpen]   = edgeFrom[e];
+      numOpen++;
     }
   }
 
@@ -1059,6 +1259,181 @@ CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
   }
 }
 
+#else
+void
+CutCellBody::appendInterfaceFacets(Vector<Real>&   a_facets,
+                                   const IntVect&  a_cell,
+                                   const RealVect& a_probLo,
+                                   const Real      a_dx) const noexcept
+{
+  CH_assert(a_dx > 0.0);
+
+  // the segments of the polygon that lie in no cell face, each as its two ends, with a third coordinate of zero
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& p = m_polygon[ip];
+
+    for (int i = 0; i < p.m_numVertices; i++) {
+      if (p.m_segmentFace[i] >= 0) {
+        continue;
+      }
+
+      const RealVect& a = p.m_vertex[i];
+      const RealVect& b = p.m_vertex[(i + 1) % p.m_numVertices];
+
+      if (detail::sameVertex(a, b)) {
+        continue;
+      }
+
+      for (const RealVect* end : {&a, &b}) {
+        for (int d = 0; d < SpaceDim; d++) {
+          a_facets.push_back(a_probLo[d] + a_dx * (static_cast<Real>(a_cell[d]) + ((*end)[d] + 0.5)));
+        }
+
+        a_facets.push_back(0.0);
+      }
+    }
+  }
+}
+
+#endif
+
+#if CH_SPACEDIM == 2
+void
+CutCellBody::defineWhole() noexcept
+{
+  *this = CutCellBody();
+
+  // the four corners counter-clockwise, and the face each segment leaving one of them lies in
+  constexpr int ringCorner[4] = {0, 1, 3, 2};
+  constexpr int ringFace[4]   = {2, 1, 3, 0};
+
+  Polygon& polygon = m_polygon[0];
+
+  polygon.m_numVertices = 4;
+  polygon.m_face        = -1;
+
+  for (int i = 0; i < 4; i++) {
+    polygon.m_vertex[i]      = detail::cornerPosition(ringCorner[i]);
+    polygon.m_vertexEdge[i]  = -1;
+    polygon.m_segmentFace[i] = ringFace[i];
+  }
+
+  m_numPolygons = 1;
+
+  this->accumulateMoments();
+}
+
+void
+CutCellBody::recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const
+{
+  CH_assert(a_face >= 0 && a_face < s_numFaces);
+
+  // a face in two dimensions is changed in place, and what changed it is all there is to record
+  a_overrides.beginFace(a_face, a_reason);
+}
+
+bool
+CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(m_numPolygons == 1);
+
+  // Only closing: a face onto a cell that holds no fluid keeps its stretch of the polygon, which becomes interface
+  // lying in the face.
+  if (a_neighbourIsFluid) {
+    return false;
+  }
+
+  const int face = 2 * a_dir + a_side;
+
+  Polygon& polygon = m_polygon[0];
+
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] == face) {
+      polygon.m_segmentFace[i] = -1;
+    }
+  }
+
+  this->accumulateMoments();
+
+  const bool closed  = this->closureResidual() <= 1.0E-9;
+  const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+  return closed && inRange;
+}
+
+bool
+CutCellBody::closeHalfFace(const int a_dir, const int a_side, const int a_half) noexcept
+{
+  CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_side == 0 || a_side == 1);
+  CH_assert(a_half == 0 || a_half == 1);
+  CH_assert(m_numPolygons == 1);
+
+  const int face    = 2 * a_dir + a_side;
+  const int tangent = 1 - a_dir;
+
+  Polygon& polygon = m_polygon[0];
+
+  // a stretch of the face that runs past the midpoint is split there, so that each half is its own segments
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] != face) {
+      continue;
+    }
+
+    const RealVect a = polygon.m_vertex[i];
+    const RealVect b = polygon.m_vertex[(i + 1) % polygon.m_numVertices];
+
+    if (!((a[tangent] < 0.0 && b[tangent] > 0.0) || (a[tangent] > 0.0 && b[tangent] < 0.0))) {
+      continue;
+    }
+
+    if (polygon.m_numVertices >= s_maxVertices) {
+      return false;
+    }
+
+    for (int k = polygon.m_numVertices; k > i + 1; k--) {
+      polygon.m_vertex[k]      = polygon.m_vertex[k - 1];
+      polygon.m_vertexEdge[k]  = polygon.m_vertexEdge[k - 1];
+      polygon.m_segmentFace[k] = polygon.m_segmentFace[k - 1];
+    }
+
+    RealVect midpoint = a;
+
+    midpoint[tangent] = 0.0;
+
+    polygon.m_vertex[i + 1]      = midpoint;
+    polygon.m_vertexEdge[i + 1]  = -1;
+    polygon.m_segmentFace[i + 1] = face;
+
+    polygon.m_numVertices++;
+
+    i++;
+  }
+
+  for (int i = 0; i < polygon.m_numVertices; i++) {
+    if (polygon.m_segmentFace[i] != face) {
+      continue;
+    }
+
+    const RealVect& a = polygon.m_vertex[i];
+    const RealVect& b = polygon.m_vertex[(i + 1) % polygon.m_numVertices];
+
+    const Real middle = 0.5 * (a[tangent] + b[tangent]);
+
+    if ((a_half == 0 && middle < 0.0) || (a_half == 1 && middle > 0.0)) {
+      polygon.m_segmentFace[i] = -1;
+    }
+  }
+
+  this->accumulateMoments();
+
+  const bool closed  = this->closureResidual() <= 1.0E-9;
+  const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
+
+  return closed && inRange;
+}
 #endif
 
 int
@@ -1479,6 +1854,78 @@ CutCellBody::define(const CutCellSurface& a_surface) noexcept
   const bool inRange = m_volumeFraction >= -1.0E-12 && m_volumeFraction <= 1.0 + 1.0E-12;
 
   return closed && inRange;
+}
+
+bool
+CutCellBody::define(const CutCellSurface&       a_surface,
+                    const CutCellFaceOverrides& a_overrides,
+                    const IntVect&              a_cell) noexcept
+{
+  if (CutCellBody::classify(a_surface) == Kind::Regular) {
+    this->defineWhole();
+  }
+  else if (!this->define(a_surface)) {
+    return false;
+  }
+
+  const int entry = a_overrides.find(a_cell);
+
+  if (entry < 0) {
+    return true;
+  }
+
+  int faceBegin = 0;
+  int faceEnd   = 0;
+
+  a_overrides.faces(entry, faceBegin, faceEnd);
+
+#if CH_SPACEDIM == 3
+  bool restricted = false;
+
+  for (int f = faceBegin; f < faceEnd; f++) {
+    if (a_overrides.reason(f) != CutCellFaceOverrides::s_finer) {
+      continue;
+    }
+
+    if (!this->replaceFace(a_overrides, f)) {
+      return false;
+    }
+
+    restricted = true;
+  }
+
+  if (restricted && !this->closeInterface()) {
+    return false;
+  }
+#else
+  for (int f = faceBegin; f < faceEnd; f++) {
+    const int reason = a_overrides.reason(f);
+
+    if (reason != CutCellFaceOverrides::s_closedLowHalf && reason != CutCellFaceOverrides::s_closedHighHalf) {
+      continue;
+    }
+
+    const int face = a_overrides.face(f);
+
+    if (!this->closeHalfFace(face / 2, face % 2, (reason == CutCellFaceOverrides::s_closedLowHalf) ? 0 : 1)) {
+      return false;
+    }
+  }
+#endif
+
+  for (int f = faceBegin; f < faceEnd; f++) {
+    if (a_overrides.reason(f) != CutCellFaceOverrides::s_closed) {
+      continue;
+    }
+
+    const int face = a_overrides.face(f);
+
+    if (!this->snapFace(face / 2, face % 2, false)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 #if CH_SPACEDIM == 3
@@ -2103,6 +2550,93 @@ CutCellBody::divergenceResidual() const noexcept
   RealVect residual = apertureVector - m_boundaryArea * m_normal;
 
   return residual.vectorLength();
+}
+
+bool
+CutCellBody::identical(const CutCellBody& a_other) const noexcept
+{
+  const auto sameVector = [](const RealVect& a_first, const RealVect& a_second) -> bool {
+    for (int d = 0; d < SpaceDim; d++) {
+      if (a_first[d] != a_second[d]) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  if (m_numPolygons != a_other.m_numPolygons) {
+    return false;
+  }
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& mine   = m_polygon[ip];
+    const Polygon& theirs = a_other.m_polygon[ip];
+
+    if (mine.m_face != theirs.m_face || mine.m_numVertices != theirs.m_numVertices) {
+      return false;
+    }
+
+    for (int iv = 0; iv < mine.m_numVertices; iv++) {
+      if (!sameVector(mine.m_vertex[iv], theirs.m_vertex[iv]) || mine.m_vertexEdge[iv] != theirs.m_vertexEdge[iv]) {
+        return false;
+      }
+    }
+  }
+
+  for (int face = 0; face < s_numFaces; face++) {
+    if (m_areaFraction[face] != a_other.m_areaFraction[face] ||
+        !sameVector(m_faceCentroid[face], a_other.m_faceCentroid[face])) {
+      return false;
+    }
+  }
+
+  return m_volumeFraction == a_other.m_volumeFraction && m_boundaryArea == a_other.m_boundaryArea &&
+         m_trueBoundaryArea == a_other.m_trueBoundaryArea && sameVector(m_volumeCentroid, a_other.m_volumeCentroid) &&
+         sameVector(m_normal, a_other.m_normal) && sameVector(m_boundaryCentroid, a_other.m_boundaryCentroid) &&
+         sameVector(m_closure, a_other.m_closure);
+}
+
+std::uint64_t
+CutCellBody::fingerprint() const noexcept
+{
+  // FNV-1a over the bytes of every field identical compares, in the same order
+  std::uint64_t hash = 14695981039346656037ULL;
+
+  const auto mix = [&hash](const void* a_data, const std::size_t a_bytes) {
+    const unsigned char* bytes = static_cast<const unsigned char*>(a_data);
+
+    for (std::size_t i = 0; i < a_bytes; i++) {
+      hash ^= bytes[i];
+      hash *= 1099511628211ULL;
+    }
+  };
+
+  mix(&m_numPolygons, sizeof(int));
+
+  for (int ip = 0; ip < m_numPolygons; ip++) {
+    const Polygon& polygon = m_polygon[ip];
+
+    mix(&polygon.m_face, sizeof(int));
+    mix(&polygon.m_numVertices, sizeof(int));
+
+    for (int iv = 0; iv < polygon.m_numVertices; iv++) {
+      mix(&polygon.m_vertex[iv], sizeof(RealVect));
+      mix(&polygon.m_vertexEdge[iv], sizeof(int));
+    }
+  }
+
+  mix(m_areaFraction, sizeof(m_areaFraction));
+  mix(m_faceCentroid, sizeof(m_faceCentroid));
+  mix(&m_volumeFraction, sizeof(Real));
+  mix(&m_boundaryArea, sizeof(Real));
+  mix(&m_trueBoundaryArea, sizeof(Real));
+  mix(&m_volumeCentroid, sizeof(RealVect));
+  mix(&m_normal, sizeof(RealVect));
+  mix(&m_boundaryCentroid, sizeof(RealVect));
+  mix(&m_closure, sizeof(RealVect));
+
+  return hash;
 }
 
 } // namespace PolyhedralEB

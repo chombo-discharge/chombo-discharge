@@ -518,6 +518,8 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
     }
   }
 
+  m_tileTrees[m_startLevel] = this->buildTree(m_cutTiles[m_startLevel]);
+
   timer.startEvent("Index the boxes");
   this->buildBoxTrees();
   timer.stopEvent("Index the boxes");
@@ -664,6 +666,142 @@ ComputationalGeometry::classify(const Box& a_box, const ProblemDomain& a_domain,
   }
 
   return this->classify(coarsen(a_box, ratio), finest, a_phase);
+}
+
+void
+ComputationalGeometry::ownedPieces(std::vector<std::vector<std::pair<int, Box>>>& a_pieces,
+                                   const Box&                                     a_box,
+                                   const int                                      a_level) const
+{
+  CH_TIME("ComputationalGeometry::ownedPieces");
+
+  const int numLevels = m_domains.size();
+
+  a_pieces.clear();
+  a_pieces.resize(numLevels);
+
+  for (int lvl = m_startLevel; lvl < numLevels; lvl++) {
+    if (m_cutTiles[lvl].size() == 0) {
+      continue;
+    }
+
+    // the box on this level: every cell it touches, coarsened outward onto a coarser level
+    Box region = a_box;
+
+    if (lvl < a_level) {
+      region.coarsen(1 << (a_level - lvl));
+    }
+    else if (lvl > a_level) {
+      region.refine(1 << (lvl - a_level));
+    }
+
+    region &= m_domains[lvl].domainBox();
+
+    if (region.isEmpty()) {
+      continue;
+    }
+
+    const bool finerTiles = (lvl + 1 < numLevels) && (m_cutTiles[lvl + 1].size() > 0);
+
+    const Vector<int> tiles = this->tilesMeeting(lvl, region);
+
+    a_pieces[lvl].reserve(tiles.size());
+
+    for (int i = 0; i < tiles.size(); i++) {
+      const int t     = tiles[i];
+      const Box piece = m_cutTiles[lvl][t] & region;
+
+      Vector<int> finer;
+
+      if (finerTiles) {
+        finer = this->tilesMeeting(lvl + 1, refine(piece, 2));
+      }
+
+      if (finer.size() == 0) {
+        a_pieces[lvl].push_back(std::make_pair(t, piece));
+
+        continue;
+      }
+
+      // what the next level's tiles hold of it is theirs
+      IntVectSet owned(DenseIntVectSet(piece, true));
+
+      for (int j = 0; j < finer.size(); j++) {
+        owned -= coarsen(m_cutTiles[lvl + 1][finer[j]], 2);
+      }
+
+      const Vector<Box> boxes = owned.boxes();
+
+      for (int j = 0; j < boxes.size(); j++) {
+        a_pieces[lvl].push_back(std::make_pair(t, boxes[j]));
+      }
+    }
+  }
+}
+
+void
+ComputationalGeometry::checkOwnedPieces(const Box& a_box, const int a_level) const
+{
+  CH_TIME("ComputationalGeometry::checkOwnedPieces");
+
+  std::vector<std::vector<std::pair<int, Box>>> pieces;
+
+  this->ownedPieces(pieces, a_box, a_level);
+
+  const int numLevels = m_domains.size();
+
+  for (int lvl = m_startLevel; lvl < numLevels; lvl++) {
+    Box region = a_box;
+
+    if (lvl < a_level) {
+      region.coarsen(1 << (a_level - lvl));
+    }
+    else if (lvl > a_level) {
+      region.refine(1 << (lvl - a_level));
+    }
+
+    region &= m_domains[lvl].domainBox();
+
+    if (region.isEmpty()) {
+      if (pieces[lvl].size() > 0) {
+        MayDay::Error("ComputationalGeometry::checkOwnedPieces - a level the box does not reach has pieces");
+      }
+
+      continue;
+    }
+
+    BaseFab<int> count(region, 1);
+
+    count.setVal(0);
+
+    for (const std::pair<int, Box>& piece : pieces[lvl]) {
+      if (!m_cutTiles[lvl][piece.first].contains(piece.second) || !region.contains(piece.second)) {
+        MayDay::Error("ComputationalGeometry::checkOwnedPieces - a piece lies outside its tile or the box");
+      }
+
+      for (BoxIterator bit(piece.second); bit.ok(); ++bit) {
+        count(bit(), 0)++;
+      }
+    }
+
+    const bool finerTiles = (lvl + 1 < numLevels) && (m_cutTiles[lvl + 1].size() > 0);
+
+    for (BoxIterator bit(region); bit.ok(); ++bit) {
+      const IntVect iv = bit();
+
+      const bool held    = this->tilesMeeting(lvl, Box(iv, iv)).size() > 0;
+      const bool refined = finerTiles && this->tilesMeeting(lvl + 1, refine(Box(iv, iv), 2)).size() > 0;
+
+      const int expected = (held && !refined) ? 1 : 0;
+
+      if (count(iv, 0) != expected) {
+        pout() << "ComputationalGeometry::checkOwnedPieces - level " << lvl << " cell " << iv << " is in "
+               << count(iv, 0) << " pieces, and should be in " << expected << endl;
+
+        MayDay::Error("ComputationalGeometry::checkOwnedPieces - the pieces do not partition the owned cells");
+      }
+    }
+  }
 }
 
 int

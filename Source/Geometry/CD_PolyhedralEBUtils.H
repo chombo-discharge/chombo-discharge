@@ -166,11 +166,11 @@ polygonMoments(const RealVect* a_vertex,
 /**
  * @brief The chords on a cell face, each an unordered pair of edge indices.
  * @details A face with two crossings carries one chord. A face whose corners alternate fluid
- * and solid carries four crossings and there are two ways to join them; the bilinear
- * interpolant of the four corner values decides it. The saddle shares its side with exactly
- * one of the two diagonals: that diagonal meets through the middle, and the other is the pair
- * the chords cut off. Both cells adjoining the face hold the same four values, so they cannot
- * disagree. With four crossings each chord joins two consecutive edges of the face circuit.
+ * and solid carries four crossings and there are two ways to join them; the surface's face decision
+ * (CutCellSurface::m_fluidJoined, read from the implicit function at the centre of the face) says
+ * which diagonal meets through the middle, and the other is the pair the chords cut off. Both cells
+ * adjoining the face read the same point, so they cannot disagree. With four crossings each chord
+ * joins two consecutive edges of the face circuit.
  * @param[in]  a_dir     Coordinate direction of the face normal.
  * @param[in]  a_side    0 for the low face in that direction, 1 for the high face.
  * @param[in]  a_surface Corner values and edge crossings of the cell.

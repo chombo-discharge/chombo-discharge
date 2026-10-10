@@ -81,7 +81,14 @@ Driver.refine_dielectrics           = -1                   ## Refine dielectric 
 # ====================================================================================================
 # ThinPlate class options
 # ====================================================================================================
-ThinPlate.normal        = 1 1 0       ## Plate normal, 45 degrees about z
-ThinPlate.thickness     = 0.015625    ## Half a cell at 64^3 over [-1,1] (dx = 0.03125)
-ThinPlate.offset        = 0.0         ## Signed distance of the plate's mid-plane from the origin
-ThinPlate.invert        = false       ## Swap gas and solid, making the plate a gap of gas through solid
+ThinPlate.normal        = 1 1 0        ## Plate normal, 45 degrees about z
+ThinPlate.thickness     = 0.0078125    ## A quarter cell at 64^3 over [-1,1] (dx = 0.03125)
+ThinPlate.offset        = 0.0          ## Signed distance of the plate's mid-plane from the origin
+ThinPlate.invert        = true         ## Swap gas and solid, making the plate a gap of gas through solid
+
+# ====================================================================================================
+# PolyhedralGeometryShop class options
+# ====================================================================================================
+PolyhedralGeometryShop.sanity_check      = true     ## Check the surface is closed, on every level and across every seam
+PolyhedralGeometryShop.test_copy         = true     ## Copy the graphs onto other layouts, and require every body unchanged
+PolyhedralGeometryShop.write_surface     = false    ## Write the interface triangles for inspection

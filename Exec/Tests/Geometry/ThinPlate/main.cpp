@@ -1,6 +1,7 @@
-// Scratch: an infinite plate, rotated 45 degrees about z, thinner than a cell.  A cell straddling it has
+// An infinite plate, rotated 45 degrees about z, thinner than a cell.  A cell straddling it has
 // its two corners along the (1,1) diagonal in the gas and the other two inside the plate, which is the
-// alternating configuration -- the fluid is two lumps and the surface enters as two sheets.
+// alternating configuration -- the fluid is two lumps and the surface enters as two sheets. Inverted, the
+// plate is a gap of gas through solid: the solid is two lumps around one thin piece of fluid.
 #include <CD_Driver.H>
 #include <CD_GeometryStepper.H>
 
@@ -10,27 +11,30 @@ using namespace Physics::Geometry;
 class SlabIF : public BaseIF
 {
 public:
-  SlabIF(const RealVect& a_normal, const RealVect& a_point, const Real a_thickness)
-    : m_normal(a_normal / a_normal.vectorLength()), m_point(a_point), m_thickness(a_thickness)
+  SlabIF(const RealVect& a_normal, const RealVect& a_point, const Real a_thickness, const bool a_invert)
+    : m_normal(a_normal / a_normal.vectorLength()), m_point(a_point), m_thickness(a_thickness), m_invert(a_invert)
   {}
 
   Real
   value(const RealVect& a_point) const override
   {
     // positive inside the plate, negative in the gas: an electrode's function is negative outside it
-    return 0.5 * m_thickness - std::abs(m_normal.dotProduct(a_point - m_point));
+    const Real value = 0.5 * m_thickness - std::abs(m_normal.dotProduct(a_point - m_point));
+
+    return m_invert ? -value : value;
   }
 
   BaseIF*
   newImplicitFunction() const override
   {
-    return static_cast<BaseIF*>(new SlabIF(m_normal, m_point, m_thickness));
+    return static_cast<BaseIF*>(new SlabIF(m_normal, m_point, m_thickness, m_invert));
   }
 
 protected:
   RealVect m_normal;
   RealVect m_point;
   Real     m_thickness;
+  bool     m_invert;
 };
 
 class ThinPlate : public ComputationalGeometry
@@ -42,16 +46,18 @@ public:
 
     Real         thickness;
     Real         offset;
+    bool         invert;
     Vector<Real> n(SpaceDim);
 
     pp.get("thickness", thickness);
     pp.get("offset", offset);
+    pp.get("invert", invert);
     pp.getarr("normal", n, 0, SpaceDim);
 
     const RealVect normal = RealVect(D_DECL(n[0], n[1], n[2]));
     const RealVect point  = offset * normal / normal.vectorLength();
 
-    m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new SlabIF(normal, point, thickness)), true));
+    m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new SlabIF(normal, point, thickness, invert)), true));
   }
 };
 

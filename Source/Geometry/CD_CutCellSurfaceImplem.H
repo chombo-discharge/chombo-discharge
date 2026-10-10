@@ -31,6 +31,9 @@ inline CutCellSurface::CutCellSurface() noexcept
   for (int corner = 0; corner < s_numCorners; corner++) {
     m_corner[corner] = 0.0;
   }
+
+  m_fluidJoined = 0;
+  m_role        = s_native;
 }
 
 inline bool
@@ -42,7 +45,7 @@ CutCellSurface::hasCrossing(const int a_edge) const noexcept
 inline int
 CutCellSurface::linearSize() const noexcept
 {
-  return static_cast<int>(sizeof(m_crossing) + sizeof(m_corner));
+  return static_cast<int>(sizeof(m_crossing) + sizeof(m_corner) + sizeof(m_fluidJoined) + sizeof(m_role));
 }
 
 inline void
@@ -52,6 +55,8 @@ CutCellSurface::linearOut(void* a_buffer) const noexcept
 
   std::memcpy(buffer, m_crossing, sizeof(m_crossing));
   std::memcpy(buffer + sizeof(m_crossing), m_corner, sizeof(m_corner));
+  std::memcpy(buffer + sizeof(m_crossing) + sizeof(m_corner), &m_fluidJoined, sizeof(m_fluidJoined));
+  std::memcpy(buffer + sizeof(m_crossing) + sizeof(m_corner) + sizeof(m_fluidJoined), &m_role, sizeof(m_role));
 }
 
 inline void
@@ -61,6 +66,8 @@ CutCellSurface::linearIn(const void* a_buffer) noexcept
 
   std::memcpy(m_crossing, buffer, sizeof(m_crossing));
   std::memcpy(m_corner, buffer + sizeof(m_crossing), sizeof(m_corner));
+  std::memcpy(&m_fluidJoined, buffer + sizeof(m_crossing) + sizeof(m_corner), sizeof(m_fluidJoined));
+  std::memcpy(&m_role, buffer + sizeof(m_crossing) + sizeof(m_corner) + sizeof(m_fluidJoined), sizeof(m_role));
 }
 
 } // namespace PolyhedralEB

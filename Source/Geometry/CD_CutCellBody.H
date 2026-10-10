@@ -13,11 +13,15 @@
 #ifndef CD_CUTCELLBODY_H
 #define CD_CUTCELLBODY_H
 
+// Std includes
+#include <cstdint>
+
 // Chombo includes
 #include <RealVect.H>
 #include <LoHiSide.H>
 
 // Our includes
+#include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
 #include <CD_PolyhedralEBUtils.H>
 #include <CD_NamespaceHeader.H>
@@ -76,6 +80,21 @@ public:
   define(const CutCellSurface& a_surface) noexcept;
 
   /**
+   * @brief Build the body of a cut cell from its surface and its face overrides, as the polyhedral graph stores them.
+   * @details The body is defined from the surface -- as the whole cell where every corner is fluid -- and the cell's
+   * face overrides are applied in the order they were recorded: in three dimensions every face restricted to the finer
+   * level, the interface closed over them, then every closed face; in two, every closed half, then every closed face.
+   * That is the order the graph's stitching made them in, so the body comes out as the graph builds it, bit for bit.
+   * A cell with no entry in the overrides is its surface's body.
+   * @param[in] a_surface   The cell's surface.
+   * @param[in] a_overrides Face overrides holding the cell's entry, if it has one.
+   * @param[in] a_cell      The cell, as the overrides know it.
+   * @return True if every step closed.
+   */
+  bool
+  define(const CutCellSurface& a_surface, const CutCellFaceOverrides& a_overrides, const IntVect& a_cell) noexcept;
+
+  /**
    * @brief How the cell relates to the interface.
    * @details The cell is cut as soon as two corners disagree under isFluid, regular if every corner
    * is fluid and covered otherwise. An exact zero is solid, so a cell whose face lies in the
@@ -97,9 +116,17 @@ public:
    * cycle is the ordinary case: one patch, and the fluid either side of it. More than one means the cell holds
    * a feature thinner than itself -- a plate the nodes only see where it happens to swallow a corner, say --
    * and neither the corner values nor the crossings carry enough to say what that feature is. In two dimensions
-   * the crossings pair into chords and the count is half of them.
+   * the crossings pair into chords, one around each run of solid corners.
+   *
+   * A sheet whose solid side is nothing but corners at exactly zero is not counted. Such a corner lies on the
+   * surface, and the fluid rule calls it solid, so the edges leaving it for fluid corners carry crossings -- but
+   * every one of them lies on the corner itself, and the sheet they bound is a point, or a segment where two such
+   * corners share an edge: the surface touches the cell there and does not enter it. A surface tangent to a node
+   * plane along a line through nodes touches every cell along the line this way, often at two corners diagonal
+   * across a face, which read as two sheets and would have a cell that holds nothing but fluid filled.
    * @param[in] a_surface Corner values and edge crossings in the cell's own frame.
-   * @return Number of sheets, zero where the corners agree, or -1 where the crossings do not form cycles.
+   * @return Number of sheets that hold area, zero where the corners agree, or -1 where the crossings do not form
+   * cycles.
    */
   static int
   numSheets(const CutCellSurface& a_surface) noexcept;
@@ -253,11 +280,12 @@ public:
   Real
   closureResidual() const noexcept;
 
-#if CH_SPACEDIM == 3
   /**
-   * @brief Append this body's interface, as triangles in physical coordinates.
+   * @brief Append this body's interface, as triangles in three dimensions and segments in two, in physical
+   * coordinates.
    * @details The interface is the embedded boundary inside this cell: the polygons the body holds that belong to no
-   * cell face. Each is written as a fan of triangles, nine reals per triangle, so that the result can be
+   * cell face in three dimensions, written as fans of triangles, and the segments of its polygon that lie in no
+   * cell face in two. Every point is three reals, the third zero in two dimensions, so that the result can be
    * gathered across ranks and written as one surface. Nothing is appended by a body that is not cut.
    * Coordinates are formed from the cell index rather than the cell centre, so that a vertex two cells share
    * -- a point on their common face, or a crossing on a common edge -- is the same double from both.
@@ -272,6 +300,8 @@ public:
                         const RealVect& a_probLo,
                         const Real      a_dx) const noexcept;
 
+#if CH_SPACEDIM == 3
+
   /**
    * @brief Print every polygon this body holds, in the cell's own frame, for inspection.
    * @param[in,out] a_out Stream to print to.
@@ -284,21 +314,41 @@ public:
    * @details The face is described at the resolution of the level below rather than this cell's, which is what makes it
    * agree with cells on the other side of a refinement boundary. The interface is dropped with it, since it
    * was built to meet the chord being replaced; call closeInterface once every face that needs restricting has
-   * been. The moments are not recomputed: they stay those of the body as defined, since a restricted body is a
-   * surface to write rather than a cell to take moments from.
-   * @param[in] a_children Surfaces of the children covering this face, in quadrant order.
-   * @param[in] a_dir      Direction of the face.
-   * @param[in] a_side     Side of the cell the face is on.
+   * been, which is also what recomputes the moments.
+   *
+   * A quadrant marked closed contributes nothing: the finer cell across it was filled, so that part of the face opens
+   * onto nothing, and what the quadrant would have held becomes interface when the interface is closed, as a face
+   * closed through snapFace does.
+   * @param[in] a_children       Surfaces of the children covering this face, in quadrant order.
+   * @param[in] a_closedQuadrant One flag per quadrant, true where the quadrant is closed; null where none is.
+   * @param[in] a_dir            Direction of the face.
+   * @param[in] a_side           Side of the cell the face is on.
    * @return True if the children's chords merged into a face this body can hold.
    */
   bool
-  restrictFace(const CutCellSurface* a_children, const int a_dir, const int a_side) noexcept;
+  restrictFace(const CutCellSurface* a_children,
+               const bool*           a_closedQuadrant,
+               const int             a_dir,
+               const int             a_side) noexcept;
+
+  /**
+   * @brief Replace one face's polygons with a face entry's, and drop the interface.
+   * @details What restrictFace does, with the merged polygons read from the entry instead of walked from the children:
+   * the face's polygons and the interface go, and the entry's polygons are appended in the order they are stored.
+   * Call closeInterface once every face that needs replacing has been.
+   * @param[in] a_overrides The overrides.
+   * @param[in] a_entry     Face entry to take the polygons from.
+   * @return True if the polygons fitted in the body's storage.
+   */
+  bool
+  replaceFace(const CutCellFaceOverrides& a_overrides, const int a_entry) noexcept;
 
   /**
    * @brief Rebuild the interface from the face polygons this body holds.
    * @details Every face-polygon edge that no other face polygon carries in reverse bounds the interface, and walking
    * those edges gives its loops. Used instead of the crossing loops once a face has been restricted, since a
-   * restricted face has vertices that are not crossings of this cell's edges at all.
+   * restricted face has vertices that are not crossings of this cell's edges at all. The moments are recomputed
+   * from the closed body.
    * @return True if every loop closed and the result fitted in the body's storage.
    */
   bool
@@ -317,26 +367,6 @@ public:
   closeBoundary(const int a_face) noexcept;
 
   /**
-   * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
-   * face loses become interface.
-   * @details A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a
-   * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
-   * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
-   * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
-   * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
-   * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
-   * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
-   * gain the same vector. The moments are recomputed, unlike restrictFace, because this body is one a cell takes its
-   * moments from.
-   * @param[in] a_dir               Direction of the face.
-   * @param[in] a_side              Side of the cell the face is on.
-   * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
-   * @return True if the body closed again and its volume stayed in range.
-   */
-  bool
-  snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept;
-
-  /**
    * @brief Split every polygon edge at the vertices of other polygons that lie on it.
    * @details Restricting a face rebuilds it at the finer level's resolution, so an edge the face shares
    * with a face that was left alone can be one segment on one side and several on the other, or carry a
@@ -349,6 +379,64 @@ public:
    */
   bool
   weldTJunctions() noexcept;
+
+#endif
+
+  /**
+   * @brief Make the body the whole cell: every face a polygon, and no interface.
+   * @details What a cell whose corners are all fluid holds, written as polygons rather than taken as a degenerate body,
+   * so that a face of it can be restricted to the finer level or closed onto a filled cell and the interface closed
+   * over what changed.
+   */
+  void
+  defineWhole() noexcept;
+
+  /**
+   * @brief Write one face's polygons, as this body holds them, into a set of face overrides.
+   * @details Opens a face entry for the cell last begun and adds every polygon lying in that face. A face closed onto
+   * a covered cell is recorded with no polygon.
+   * @param[in]     a_face      Face index, 2 * dir + side.
+   * @param[in]     a_reason    CutCellFaceOverrides::s_finer or CutCellFaceOverrides::s_closed.
+   * @param[in,out] a_overrides The overrides, with the cell already begun.
+   */
+  void
+  recordFace(const int a_face, const int a_reason, CutCellFaceOverrides& a_overrides) const;
+
+  /**
+   * @brief Make one face agree with a neighbour that holds no solid, or none that holds no fluid, and let what the
+   * face loses become interface.
+   * @details A neighbour whose kind was decided otherwise than from its own corners leaves this cell describing a
+   * face the neighbour does not agree with: this cell's chord on the shared face ends against nothing, and the two
+   * sides read different apertures for it. That happens when the volume threshold or the dust rule turns a cell
+   * into a regular or a covered one from its own body, and when the graph fills a cell holding more than one
+   * sheet, which is covered whatever its nodes read. The face takes the neighbour's answer -- the whole face, or none
+   * of it -- and the footprint it gives up becomes part of the interface, which lies in the plane of that face. The
+   * identity sum(alpha_hi - alpha_lo) = a_B*n survives it exactly, since the aperture and the boundary's area vector
+   * gain the same vector. The moments are recomputed. Closing keeps the rest of the body as it is and relabels the
+   * face's polygon as interface lying in the face; opening, three dimensions only, rebuilds the interface to meet
+   * the whole face. In two dimensions the face's stretch of the polygon becomes interface lying in the face.
+   * @param[in] a_dir               Direction of the face.
+   * @param[in] a_side              Side of the cell the face is on.
+   * @param[in] a_neighbourIsFluid  True if the neighbour holds no solid, false if it holds no fluid.
+   * @return True if the body closed again and its volume stayed in range.
+   */
+  bool
+  snapFace(const int a_dir, const int a_side, const bool a_neighbourIsFluid) noexcept;
+
+#if CH_SPACEDIM == 2
+  /**
+   * @brief Close one half of a face, and let what that half held become interface.
+   * @details Two dimensions only, where a face is a segment and a face on a refinement boundary is covered by two
+   * finer faces, one each side of its midpoint. Where the finer cell across one of them was filled, that half of the
+   * face opens onto nothing: the polygon's stretch of the face is split at the midpoint and the part in that half
+   * becomes interface lying in the face, as snapFace does for a whole face. The moments are recomputed.
+   * @param[in] a_dir  Direction of the face.
+   * @param[in] a_side Side of the cell the face is on.
+   * @param[in] a_half Which half: 0 below the face's midpoint along the other direction, 1 above it.
+   * @return True if the polygon had room for the vertex at the midpoint and the body still closes.
+   */
+  bool
+  closeHalfFace(const int a_dir, const int a_side, const int a_half) noexcept;
 
 #endif
 
@@ -377,6 +465,25 @@ public:
    */
   Real
   divergenceResidual() const noexcept;
+
+  /**
+   * @brief Whether another body holds the same polygons and the same moments, bit for bit.
+   * @details Compares every polygon's face, vertices and vertex edges in order, then every moment.
+   * @param[in] a_other The other body.
+   * @return True if nothing differs.
+   */
+  bool
+  identical(const CutCellBody& a_other) const noexcept;
+
+  /**
+   * @brief A 64-bit hash of everything identical compares: every polygon's face, vertices and vertex edges in order,
+   * and every moment, bit for bit.
+   * @details Two identical bodies hash the same; a sum of hashes over many bodies is what tells two ranks, or two
+   * layouts, that they hold the same bodies without sending the bodies.
+   * @return The hash.
+   */
+  std::uint64_t
+  fingerprint() const noexcept;
 
 protected:
   /**
