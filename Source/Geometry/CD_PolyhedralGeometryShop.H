@@ -1098,11 +1098,12 @@ protected:
    * A quadrant of a seam face across which the finer level filled a cell is closed. A regular or covered cell beside
    * the finer level is made cut where the finer level describes the face between them otherwise than the cell's
    * corners do -- the node at the middle of the face on the other side, or a filled cell across a quadrant of a regular
-   * one -- and stitched like any other; a node at the middle of such a face's edge that disagrees with the edge's ends
-   * is an edge the finer level crosses twice, which is counted and reported rather than acted on. Every stitched
-   * surface carries its role. Under sanity_check each body is also built from the stored data, and from the implicit
-   * function where its children can say the same, and they must agree bit for bit. Collective.
-   * A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
+   * one -- and stitched like any other. A cell pierced at the middle of such a face should have been refined by
+   * ComputationalGeometry, so each one is listed in pout and warned about. A node at the middle of such a face's edge
+   * that disagrees with the edge's ends is an edge the finer level crosses twice, which is counted and reported rather
+   * than acted on. Every stitched surface carries its role. Under sanity_check each body is also built from the stored
+   * data, and from the implicit function where its children can say the same, and they must agree bit for bit.
+   * Collective. A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
    * @param[in,out] a_coarse  The level.
    * @param[in]     a_fine    The finer level, or null where there is none.
    * @param[in]     a_coarser The coarser level, or null where there is none.

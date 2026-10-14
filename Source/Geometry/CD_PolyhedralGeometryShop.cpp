@@ -2067,6 +2067,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
   long long numMismatched      = 0;
   long long numTwiceCrossed    = 0;
   long long numPromoted        = 0;
+  long long numPierced         = 0;
   long long numClosedQuadrants = 0;
   int       numReported        = 0;
 
@@ -2129,6 +2130,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
       // cuts or closes -- a solid node on the face, or a quadrant across which the finer level filled a cell -- or a
       // covered cell onto whose face it opens.
       bool promoted = false;
+      bool pierced  = false;
 
       if (!cut.contains(iv)) {
         const int state = statesFab(iv, 0);
@@ -2193,6 +2195,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 
                 if (middleOfFace) {
                   promoted = true;
+                  pierced  = true;
                 }
                 else if (grids[dit()].contains(iv)) {
                   numTwiceCrossed++;
@@ -2223,6 +2226,15 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 
         if (grids[dit()].contains(iv)) {
           numPromoted++;
+
+          // ComputationalGeometry refines a cell whose face toward the finer level is pierced at its middle, so one
+          // left here is a node that read differently there, or a seam the refinement passes did not resolve
+          if (pierced) {
+            numPierced++;
+
+            pout() << "PolyhedralGeometryShop::stitchLevel - cell " << iv << " in domain " << domain
+                   << " is pierced at the middle of a face toward the finer level and is made cut" << endl;
+          }
         }
       }
 
@@ -2330,6 +2342,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
   }
 
   const long long totalPromoted = ParallelOps::sum(numPromoted);
+  const long long totalPierced  = ParallelOps::sum(numPierced);
   const long long totalClosed   = ParallelOps::sum(numClosedQuadrants);
   const long long totalTwice    = ParallelOps::sum(numTwiceCrossed);
 
@@ -2342,6 +2355,12 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
     pout() << "PolyhedralGeometryShop::stitchLevel - made " << totalPromoted
            << " cells beside the finer level cut, and "
            << "closed " << totalClosed << " seam face quadrants onto filled finer cells" << endl;
+  }
+
+  if (totalPierced > 0 && procID() == 0) {
+    MayDay::Warning(
+      "PolyhedralGeometryShop::stitchLevel - cells pierced at the middle of a face toward the finer level "
+      "were made cut, and coarsening may not sum them exactly; pout lists them");
   }
 
   if (m_sanityCheck && ParallelOps::sum(numMismatched) > 0) {
