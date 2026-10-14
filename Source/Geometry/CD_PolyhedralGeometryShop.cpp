@@ -2808,6 +2808,10 @@ PolyhedralGeometryShop::testCopyBodies() const
     }
   }
 
+  // What the geometry's own hierarchy fills its index space with, which the same hierarchy cut into octants must fill
+  // its own with too.
+  std::uint64_t hierarchyMoments = 0;
+
   // Every owned cell, as each destination rebuilds it, counted once.
   const auto check = [&](const std::string&                    a_what,
                          const std::vector<DisjointBoxLayout>& a_grids,
@@ -3170,6 +3174,142 @@ PolyhedralGeometryShop::testCopyBodies() const
           }
         }
       }
+    }
+
+    // The index-space data each box fills from the copy: its flags as the graph has them, each node the one its body
+    // gives, and over the valid cells a hash that does not depend on how the hierarchy is cut into boxes.
+    const auto hashNode = [](const int a_level, const IrregNode& a_node) -> std::uint64_t {
+      std::uint64_t hash = 1469598103934665603ULL;
+
+      const auto mix = [&hash](const void* a_data, const std::size_t a_bytes) -> void {
+        const unsigned char* bytes = static_cast<const unsigned char*>(a_data);
+
+        for (std::size_t b = 0; b < a_bytes; b++) {
+          hash = (hash ^ bytes[b]) * 1099511628211ULL;
+        }
+      };
+
+      mix(&a_level, sizeof(a_level));
+      mix(&a_node.m_cell, sizeof(a_node.m_cell));
+      mix(&a_node.m_volFrac, sizeof(a_node.m_volFrac));
+      mix(&a_node.m_volCentroid, sizeof(a_node.m_volCentroid));
+      mix(&a_node.m_bndryCentroid, sizeof(a_node.m_bndryCentroid));
+
+      for (int face = 0; face < 2 * SpaceDim; face++) {
+        for (int k = 0; k < a_node.m_arc[face].size(); k++) {
+          mix(&a_node.m_arc[face][k], sizeof(int));
+          mix(&a_node.m_areaFrac[face][k], sizeof(Real));
+          mix(&a_node.m_faceCentroid[face][k], sizeof(RealVect));
+        }
+      }
+
+      return hash;
+    };
+
+    const auto sameNode = [](const IrregNode& a_one, const IrregNode& a_other) -> bool {
+      bool same = a_one.m_cell == a_other.m_cell && a_one.m_volFrac == a_other.m_volFrac &&
+                  a_one.m_volCentroid == a_other.m_volCentroid && a_one.m_bndryCentroid == a_other.m_bndryCentroid;
+
+      for (int face = 0; face < 2 * SpaceDim && same; face++) {
+        same = a_one.m_arc[face].constStdVector() == a_other.m_arc[face].constStdVector() &&
+               a_one.m_areaFrac[face].constStdVector() == a_other.m_areaFrac[face].constStdVector() &&
+               a_one.m_faceCentroid[face].constStdVector() == a_other.m_faceCentroid[face].constStdVector();
+      }
+
+      return same;
+    };
+
+    std::uint64_t momentHash    = 0;
+    long long     numNodes      = 0;
+    long long     numCollapsed  = 0;
+    long long     numFiner      = 0;
+    long long     numWrongFlags = 0;
+    long long     numWrongNodes = 0;
+
+    for (int i = 0; i < numDest; i++) {
+      const int ratio = (i + 1 < numDest) ? (1 << (dest.getGeometryLevel(i + 1) - dest.getGeometryLevel(i))) : 1;
+
+      const Vector<Box> finerBoxes = (i + 1 < numDest) ? a_grids[i + 1].boxArray() : Vector<Box>();
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        BaseFab<int>      flags;
+        Vector<IrregNode> nodes;
+
+        dest.fillNodes(flags, nodes, numCollapsed, numFiner, i, dit());
+
+        for (BoxIterator bit(flags.box()); bit.ok(); ++bit) {
+          const int state = dest.getState(i, dit(), bit());
+
+          const bool wrong = (state == PolyhedralEBGraph::s_regular && flags(bit(), 0) != 1) ||
+                             (state == PolyhedralEBGraph::s_covered && flags(bit(), 0) != -1);
+
+          numWrongFlags += wrong ? 1 : 0;
+        }
+
+        IntVectSet valid;
+
+        PolyhedralGeometryShop::validRegion(valid,
+                                            a_grids[i][dit()],
+                                            a_domains[i],
+                                            (i + 1 < numDest) ? &a_grids[i + 1] : nullptr,
+                                            (i + 1 < numDest) ? &finerBoxes : nullptr,
+                                            ratio,
+                                            0);
+
+        for (int n = 0; n < nodes.size(); n++) {
+          const IrregNode& node = nodes[n];
+
+          long long ignored = 0;
+
+          PolyhedralGeometryShop::destinationBodies(bodies, ignored, dest, i, dit(), node.m_cell);
+
+          IrregNode expected;
+
+          if (bodies.size() == 1) {
+            PolyhedralGeometryShop::fillNode(expected, bodies.front(), flags, node.m_cell, a_domains[i]);
+          }
+
+          if (bodies.size() != 1 || !sameNode(node, expected)) {
+            numWrongNodes++;
+          }
+
+          if (valid.contains(node.m_cell)) {
+            momentHash += hashNode(dest.getGeometryLevel(i), node);
+            numNodes++;
+          }
+        }
+      }
+    }
+
+    momentHash    = globalSum(momentHash);
+    numNodes      = ParallelOps::sum(numNodes);
+    numCollapsed  = ParallelOps::sum(numCollapsed);
+    numFiner      = ParallelOps::sum(numFiner);
+    numWrongFlags = ParallelOps::sum(numWrongFlags);
+    numWrongNodes = ParallelOps::sum(numWrongNodes);
+
+    if (numWrongFlags > 0 || numWrongNodes > 0) {
+      if (procID() == 0) {
+        pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": " << numWrongFlags
+               << " cells flagged otherwise than the graph says, " << numWrongNodes
+               << " nodes differing from their bodies" << endl;
+      }
+
+      MayDay::Error("PolyhedralGeometryShop::testCopyBodies - the index-space data differs from the copied graph");
+    }
+
+    if (a_what == "the geometry's hierarchy") {
+      hierarchyMoments = momentHash;
+    }
+    else if (a_what == "the geometry's hierarchy in octants" && momentHash != hierarchyMoments) {
+      MayDay::Error("PolyhedralGeometryShop::testCopyBodies - cutting the boxes into octants changed the moments");
+    }
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": " << numNodes
+             << " nodes filled from the copy as their bodies give them, " << numCollapsed
+             << " of the children in more than one piece kept as one, " << numFiner
+             << " cut cells a finer level owns left for coarsening" << endl;
     }
 
     const_cast<PolyhedralGeometryShop*>(this)->m_baseIF = saved;
@@ -5194,7 +5334,7 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
                                  const PolyhedralEB::CutCellBody& a_body,
                                  const BaseFab<int>&              a_regIrregCovered,
                                  const IntVect&                   a_cell,
-                                 const ProblemDomain&             a_domain) const
+                                 const ProblemDomain&             a_domain)
 {
   CH_assert(a_regIrregCovered.box().contains(a_cell));
   CH_assert(a_regIrregCovered(a_cell, 0) == 0);

@@ -18,10 +18,13 @@
 #include <BoxIterator.H>
 #include <CH_assert.H>
 #include <CH_Timer.H>
+#include <MayDay.H>
 
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_PolyhedralEBGraph.H>
+#include <CD_PolyhedralGeometryShop.H>
+#include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
 namespace {
@@ -556,6 +559,124 @@ AMRPolyhedralEBGraph::describe(std::vector<PolyhedralEB::CutCellDescription>& a_
   }
 
   a_cells.push_back(description);
+}
+
+void
+AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
+                                Vector<IrregNode>& a_nodes,
+                                long long&         a_numCollapsed,
+                                long long&         a_numFiner,
+                                const int          a_level,
+                                const DataIndex&   a_dit) const
+{
+  CH_TIME("AMRPolyhedralEBGraph::fillNodes");
+
+  using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellDescription;
+
+  const ProblemDomain& domain        = this->getDomain(a_level);
+  const int            geometryLevel = this->getGeometryLevel(a_level);
+  const Box            box           = this->getGrids(a_level)[a_dit];
+  const Box            region        = grow(box, this->getGhost()) & domain.domainBox();
+  const Box            nodeRegion    = grow(box, this->getGhost() - 1) & domain.domainBox();
+
+  a_regIrregCovered.define(region, 1);
+  a_nodes.resize(0);
+
+  // What every cell is, and the body of every cut cell a node is written for: all of them are known before any node is,
+  // since a node reads the cells across its faces.
+  std::vector<IntVect>     cutCells;
+  std::vector<CutCellBody> cutBodies;
+
+  std::vector<CutCellDescription> described;
+
+  CutCellBody body;
+  CutCellBody children[1 << SpaceDim];
+
+  for (BoxIterator bit(region); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    const int state = this->getState(a_level, a_dit, iv);
+
+    if (state == PolyhedralEBGraph::s_regular) {
+      a_regIrregCovered(iv, 0) = 1;
+
+      continue;
+    }
+
+    if (state == PolyhedralEBGraph::s_covered) {
+      a_regIrregCovered(iv, 0) = -1;
+
+      continue;
+    }
+
+    a_regIrregCovered(iv, 0) = 0;
+
+    if (state != PolyhedralEBGraph::s_cut || !nodeRegion.contains(iv)) {
+      continue;
+    }
+
+    this->getCutCells(described, a_level, a_dit, iv);
+
+    CH_assert(!described.empty());
+
+    if (described.front().m_level > geometryLevel) {
+      a_numFiner++;
+
+      continue;
+    }
+
+    CH_assert(described.size() == 1);
+
+    const CutCellDescription& cell = described.front();
+
+    if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
+      MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+    }
+
+    // a coarser cell is cut down a level at a time, keeping the child on the way to this cell
+    IntVect parent = cell.m_cell;
+
+    for (int k = cell.m_level + 1; k <= geometryLevel; k++) {
+      const IntVect child = coarsen(iv, 1 << (geometryLevel - k));
+
+      int which = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        which |= (child[d] - 2 * parent[d]) << d;
+      }
+
+      if (!body.subdivide(children)) {
+        a_numCollapsed++;
+      }
+
+      body   = children[which];
+      parent = child;
+    }
+
+    if (body.numPolygons() > 0 && body.closureResidual() > 1.0E-9) {
+      MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivided cell did not close");
+    }
+
+    if (body.numPolygons() == 0 || body.volumeFraction() <= 0.0) {
+      a_regIrregCovered(iv, 0) = -1;
+    }
+    else if (body.volumeFraction() >= 1.0 && body.boundaryArea() <= 0.0) {
+      a_regIrregCovered(iv, 0) = 1;
+    }
+    else {
+      cutCells.push_back(iv);
+      cutBodies.push_back(body);
+    }
+  }
+
+  for (std::size_t n = 0; n < cutCells.size(); n++) {
+    IrregNode node;
+
+    PolyhedralGeometryShop::fillNode(node, cutBodies[n], a_regIrregCovered, cutCells[n], domain);
+
+    a_nodes.push_back(node);
+  }
 }
 
 #include <CD_NamespaceFooter.H>
