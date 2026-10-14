@@ -1,3 +1,15 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * @file   main.cpp
+ * @brief  Convergence test for radiative transfer on a uniform grid.
+ * @author Robert Marskar
+ */
+
 #include <CD_Driver.H>
 #include <CD_EddingtonSP1.H>
 #include <CD_CoaxialCable.H>
@@ -25,7 +37,7 @@ main(int argc, char* argv[])
 
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
+  ParmParse         pp(argc - 2, argv + 2, nullptr, input_file.c_str());
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
   Real      dt;
@@ -40,7 +52,7 @@ main(int argc, char* argv[])
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
+  RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(nullptr);
 
   // Set up the time stepper.
   auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(
@@ -62,9 +74,9 @@ main(int argc, char* argv[])
       DataOps::incr(error, timestepper->getPhi(), -1.0);
 
       // Computes max, L1, and L2 norms.
-      const Real Linf = DataOps::norm(*error[0], amr->getDomains()[0], 0, true);
-      const Real L1   = DataOps::norm(*error[0], amr->getDomains()[0], 1, true);
-      const Real L2   = DataOps::norm(*error[0], amr->getDomains()[0], 2, true);
+      const Real Linf = DataOps::norm(*error[0], 0, *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real L1   = DataOps::norm(*error[0], 1, *amr->getVofIterator("primal", phase::gas)[0]);
+      const Real L2   = DataOps::norm(*error[0], 2, *amr->getVofIterator("primal", phase::gas)[0]);
 
       norms.emplace_back(std::array<Real, 3>{Linf, L1, L2});
     }
@@ -86,7 +98,7 @@ main(int argc, char* argv[])
               << "L1 error\t"
               << "L2 error\n";
 
-    for (int i = 0; i < norms.size(); i++) {
+    for (size_t i = 0; i < norms.size(); i++) {
       std::cout << std::pow(2, i + 1) << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
                 << std::get<2>(norms[i]) << "\n";
     }

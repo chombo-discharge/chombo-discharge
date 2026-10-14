@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_Random.cpp
-  @brief  Implementation of CD_Random.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_Random.cpp
+ * @brief  Implementation of CD_Random.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_Random.H>
@@ -20,6 +21,6 @@ thread_local std::normal_distribution<Real>       Random::s_normal01  = std::nor
 
 bool Random::s_seeded = false;
 
-//std::once_flag once = std::once_flag();
+// std::once_flag once = std::once_flag();
 
 #include <CD_NamespaceFooter.H>

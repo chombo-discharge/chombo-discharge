@@ -1,31 +1,38 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner            = -1 -1 -1       ## Low corner of problem domain
-AmrMesh.hi_corner            = 1  1  1        ## High corner of problem domain
-AmrMesh.verbosity            = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain      = 32 32 32       ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 1              ## Maximum amr depth
-AmrMesh.max_sim_depth        = -1             ## Maximum simulation depth
-AmrMesh.mg_coarsen           = 4              ## Pre-coarsening of MG levels, useful for deeper bottom solves
-AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
-AmrMesh.buffer_size          = 2              ## Number of cells between grid levels
-AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting          = morton         ## Morton sorting
-AmrMesh.blocking_factor      = 16             ## Default blocking factor (16 in 3D)
-AmrMesh.max_box_size         = 16             ## Maximum allowed box size
-AmrMesh.max_ebis_box         = 16             ## Maximum allowed box size
-AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios
-AmrMesh.lsf_ghost            = 2              ## Number of ghost cells when writing level-set to grid
-AmrMesh.num_ghost            = 2              ## Number of ghost cells. Default is 3
-AmrMesh.eb_ghost             = 2              ## Set number of of ghost cells for EB stuff
-AmrMesh.mg_interp_order      = 2              ## Multigrid interpolation order
-AmrMesh.mg_interp_radius     = 2              ## Multigrid interpolation radius
-AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
-AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
-AmrMesh.load_balance         = volume         ## Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+AmrMesh.lo_corner               = -1 -1 -1       ## Low corner of problem domain
+AmrMesh.hi_corner               = 1  1  1        ## High corner of problem domain
+AmrMesh.verbosity               = -1             ## Controls verbosity.
+AmrMesh.coarsest_domain         = 32 32 32       ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 1              ## Maximum amr depth
+AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
+AmrMesh.mg_coarsen              = 4              ## Pre-coarsening of MG levels, useful for deeper bottom solves
+AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
+AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
+AmrMesh.grid_algorithm          = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting             = morton         ## Morton sorting
+AmrMesh.min_block_size          = 8              ## Default blocking factor (16 in 3D)
+AmrMesh.max_block_size          = 16             ## Maximum allowed box size
+AmrMesh.max_ebis_box            = 16             ## Maximum allowed box size
+AmrMesh.eb_min_block_size       = 8              ## Smallest box the geometry grids are tiled with.
+AmrMesh.eb_max_block_size       = 8              ## Largest such box, a whole number of eb_min_block_size.
+AmrMesh.ref_rat                 = 2 2 2 2 2 2    ## Refinement ratios
+AmrMesh.lsf_ghost               = 2              ## Number of ghost cells when writing level-set to grid
+AmrMesh.num_ghost               = 2              ## Number of ghost cells. Default is 3
+AmrMesh.eb_ghost                = 2              ## Set number of of ghost cells for EB stuff
+AmrMesh.mg_interp_order         = 2              ## Multigrid interpolation order
+AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radius
+AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
+AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
+AmrMesh.redist_radius           = 1              ## Redistribution radius for hyperbolic conservation laws
+AmrMesh.mirror_band_radius      = 2              ## Mirror deposition: band half-width in cells. Requires num_ghost >= this.
+AmrMesh.mirror_cond_tol         = 1.E-3          ## Mirror deposition: min eigenvalue ratio of U^T U in the curvature fit.
+AmrMesh.mirror_crease_tol       = 1.E-1          ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
+AmrMesh.mirror_max_jacobian     = 1.E4           ## Mirror deposition: refuse (J = 1) above this. Must exceed ~500.
+AmrMesh.mirror_min_denom        = 1.E-4          ## Mirror deposition: refuse (J = 1) below this. Must be under ~4E-3.
+AmrMesh.load_balance            = volume         ## Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -51,7 +58,7 @@ Driver.write_loads                  = false               ## Write (accumulated)
 Driver.output_directory             = ./                  ## Output directory
 Driver.output_names                 = simulation          ## Simulation output names
 Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
 Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank'
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
@@ -64,33 +71,41 @@ Driver.refine_dielectrics           = -1                  ## Refine dielectric s
 # ====================================================================================================
 # EDDINGTON_SP1 CLASS OPTIONS
 # ====================================================================================================
-EddingtonSP1.verbosity             = -1            ## Solver verbosity
-EddingtonSP1.stationary            = false         ## Stationary solver
-EddingtonSP1.reflectivity          = 0.            ## Reflectivity
-EddingtonSP1.kappa_scale           = true          ## Kappa scale source or not (depends on algorithm)
-EddingtonSP1.plt_vars              = phi src       ## Plot variables. Available are 'phi' and 'src'
-EddingtonSP1.use_regrid_slopes     = true          ## Slopes on/off when regridding
-EddingtonSP1.gmg_verbosity         = -10           ## GMG verbosity
-EddingtonSP1.gmg_pre_smooth        = 8             ## Number of relaxations in downsweep
-EddingtonSP1.gmg_post_smooth       = 8             ## Number of relaxations in upsweep
-EddingtonSP1.gmg_bott_smooth       = 8             ## NUmber of relaxations before dropping to bottom solver
-EddingtonSP1.gmg_min_iter          = 5             ## Minimum number of iterations
-EddingtonSP1.gmg_max_iter          = 32            ## Maximum number of iterations
-EddingtonSP1.gmg_exit_tol          = 1.E-6         ## Residue tolerance
-EddingtonSP1.gmg_exit_hang         = 0.2           ## Solver hang
-EddingtonSP1.gmg_min_cells         = 2             ## Bottom drop
-EddingtonSP1.gmg_bottom_solver     = bicgstab      ## Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
-EddingtonSP1.gmg_cycle             = vcycle        ## Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_ebbc_weight       = 2             ## EBBC weight (only for Dirichlet)
-EddingtonSP1.gmg_ebbc_order        = 2             ## EBBC order (only for Dirichlet)
-EddingtonSP1.gmg_smoother          = red_black     ## Relaxation type. 'jacobi', 'red_black', or 'multi_color'
-EddingtonSP1.ebbc                  = larsen 0.0    ## Bc on embedded boundaries.
-EddingtonSP1.bc.x.lo               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
-EddingtonSP1.bc.x.hi               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
-EddingtonSP1.bc.y.lo               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
-EddingtonSP1.bc.y.hi               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
-EddingtonSP1.bc.z.lo               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
-EddingtonSP1.bc.z.hi               = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.verbosity             = -1         ## Solver verbosity
+EddingtonSP1.stationary            = false      ## Stationary solver
+EddingtonSP1.reflectivity          = 0.         ## Reflectivity
+EddingtonSP1.kappa_scale           = true       ## Kappa scale source or not (depends on algorithm)
+EddingtonSP1.plt_vars              = phi src    ## Plot variables. Available are 'phi' and 'src'
+EddingtonSP1.use_regrid_slopes     = true       ## Slopes on/off when regridding
+
+EddingtonSP1.solver                    = gmg gmres     ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+EddingtonSP1.krylov_eps                = 1.E-10        ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+EddingtonSP1.krylov_max_iter           = 50            ## Outer Krylov max iterations (gmres/bicgstab)
+EddingtonSP1.krylov_restart            = 30            ## GMRES restart length (gmres only)
+EddingtonSP1.krylov_vcycles            = 1             ## V-cycles per Krylov preconditioner application
+EddingtonSP1.krylov_retry_interval     = 1             ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+EddingtonSP1.krylov_reprobe_iters      = 0             ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
+EddingtonSP1.gmg_verbosity             = -10           ## GMG verbosity
+EddingtonSP1.gmg_pre_smooth            = 8             ## Number of relaxations in downsweep
+EddingtonSP1.gmg_post_smooth           = 8             ## Number of relaxations in upsweep
+EddingtonSP1.gmg_bott_smooth           = 8             ## NUmber of relaxations before dropping to bottom solver
+EddingtonSP1.gmg_min_iter              = 5             ## Minimum number of iterations
+EddingtonSP1.gmg_max_iter              = 32            ## Maximum number of iterations
+EddingtonSP1.gmg_exit_tol              = 1.E-6         ## Residue tolerance
+EddingtonSP1.gmg_exit_hang             = 0.2           ## Solver hang
+EddingtonSP1.gmg_min_cells             = 2             ## Bottom drop
+EddingtonSP1.gmg_bottom_solver         = bicgstab      ## Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
+EddingtonSP1.gmg_cycle                 = vcycle        ## Cycle type. Only 'vcycle' supported for now
+EddingtonSP1.gmg_ebbc_weight           = 2             ## EBBC weight (only for Dirichlet)
+EddingtonSP1.gmg_ebbc_order            = 2             ## EBBC order (only for Dirichlet)
+EddingtonSP1.gmg_smoother              = red_black     ## Relaxation type. 'jacobi', 'red_black', or 'multi_color'
+EddingtonSP1.ebbc                      = larsen 0.0    ## Bc on embedded boundaries.
+EddingtonSP1.bc.x.lo                   = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.bc.x.hi                   = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.bc.y.lo                   = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.bc.y.hi                   = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.bc.z.lo                   = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.bc.z.hi                   = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_AdvectionDiffusionTagger.cpp
-  @brief  Implementation of CD_AdvectionDiffusionTagger.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_AdvectionDiffusionTagger.cpp
+ * @brief  Implementation of CD_AdvectionDiffusionTagger.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -21,14 +22,12 @@
 using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionTagger::AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr)
+  : m_realm(a_solver->getRealm()), m_solver(a_solver), m_amr(a_amr)
 {
   CH_TIME("AdvectionDiffusionTagger::AdvectionDiffusionTagger");
 
-  m_solver    = a_solver;
-  m_amr       = a_amr;
   m_name      = "AdvectionDiffusion";
   m_verbosity = -1;
-  m_realm     = a_solver->getRealm();
 }
 
 AdvectionDiffusionTagger::~AdvectionDiffusionTagger()
@@ -56,7 +55,7 @@ AdvectionDiffusionTagger::parseOptions()
 }
 
 bool
-AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
+AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-convert-member-functions-to-static)
 {
   CH_TIME("AdvectionDiffusionTagger::tagCells");
 
@@ -79,8 +78,14 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
 
   // Compute the gradient
   m_amr->computeGradient(vec, sca, m_realm, phase::gas); // vec =  grad(phi)
-  DataOps::vectorLength(sca, vec);                       // sca = |grad(phi)|
-  DataOps::setCoveredValue(sca, 0, 0.0);                 // Set covered cell values to zero.
+  DataOps::vectorLength(sca,
+                        vec,
+                        m_amr->getNotCoveredCells(m_realm, phase::gas),
+                        m_amr->getMultiCutVofIterator(m_realm, phase::gas));
+  DataOps::setCoveredValue(sca,
+                           m_amr->getCoveredCells(m_realm, phase::gas),
+                           0,
+                           0.0); // Set covered cell values to zero.
 
   int foundTags = 0;
 
@@ -125,13 +130,14 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
           if (curv > m_refCurv && std::abs(phiReg(iv, 0)) > m_refMagn) {
             tags |= iv;
 
-            foundTags = 1;
+            foundTags += 1;
           }
         }
       };
 
-      // Execute kernel. Regular cells only.
-      BoxLoops::loop(cellBox, taggingKernel);
+      // Execute kernel. Regular cells only. Not vectorizable: data-dependent curvature test + DenseIntVectSet
+      // insertion (tags |= iv). reduction(+ : foundTags) + per-box tags -> no race. One-time tagging.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, taggingKernel);
     }
   }
 

@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DischargeIO.cpp
-  @brief  Implementation of DischargeIO.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_DischargeIO.cpp
+ * @brief  Implementation of DischargeIO.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <sstream>
@@ -16,10 +17,21 @@
 #include <CH_HDF5.H>
 #include <EBAMRIO.H>
 #include <PolyGeom.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_DischargeIO.H>
+#include <CD_BoxLoops.H>
+#include <CD_GitHash.H>
 #include <CD_NamespaceHeader.H>
+
+std::string
+DischargeIO::gitHash() noexcept
+{
+  CH_TIME("DischargeIO::gitHash()");
+
+  return std::string(CD_GIT_HASH);
+}
 
 std::string
 DischargeIO::numberFmt(const long long n, char sep) noexcept
@@ -31,15 +43,17 @@ DischargeIO::numberFmt(const long long n, char sep) noexcept
   string s = fmt.str();
   s.reserve(s.length() + s.length() / 3);
 
-  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-    if (i != 0 && j % 3 == 0)
+  for (int i = 0, j = 3 - static_cast<int>(s.length() % 3); i < s.length(); ++i, ++j) {
+    if (i != 0 && j % 3 == 0) {
       s.insert(i++, 1, sep);
+    }
+  }
 
   return s;
 }
 
 Vector<std::string>
-DischargeIO::numberFmt(const Vector<long long> a_numbers, char a_sep) noexcept
+DischargeIO::numberFmt(const Vector<long long>& a_numbers, char a_sep) noexcept
 {
   CH_TIME("DischargeIO::numberFmt(Vector<long long>, char)");
 
@@ -64,7 +78,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   CH_assert(a_handleH5.isOpen());
   CH_assert(a_numLevels >= 0);
 
-  const int numInputVars      = a_variableNames.size();
+  const int numInputVars      = static_cast<int>(a_variableNames.size());
   const int indexVolFrac      = numInputVars;
   const int indexBoundaryArea = indexVolFrac + 1;
   const int indexAreaFrac     = indexBoundaryArea + 1;
@@ -115,12 +129,17 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   // Write the header to file.
   HDF5HeaderData header;
 
+  bool      useProbLo = false;
+  ParmParse pp("DischargeIO");
+  pp.query("use_prob_lo", useProbLo);
+
   header.m_string["filetype"]    = "VanillaAMRFileType";
+  header.m_string["git_hash"]    = gitHash();
   header.m_int["num_levels"]     = a_numLevels;
   header.m_int["num_components"] = numCompTotal;
-#if 0 // Uncommenting this because VisIt doesn't know what to do with it.
-  header.m_realvect["prob_lo"]   = a_probLo;
-#endif
+  if (useProbLo) {
+    header.m_realvect["prob_lo"] = a_probLo;
+  }
 
   for (int comp = 0; comp < numCompTotal; comp++) {
     char labelString[100];
@@ -139,7 +158,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
 void
 DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
                               const LevelData<EBCellFAB>& a_outputData,
-                              const ProblemDomain         a_domain,
+                              const ProblemDomain&        a_domain,
                               const Real                  a_dx,
                               const Real                  a_dt,
                               const Real                  a_time,
@@ -193,8 +212,8 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
     levelFAB.copy(outputDataReg, 0, 0, numInputVars);
     CH_STOP(t2);
 
-    // Run through the multi-valued cells and set the single-valued output-data to be the sum of the multi-valued data. I just
-    // don't know of a different way of doing this that would also play well with HDF5..
+    // Run through the multi-valued cells and set the single-valued output-data to be the sum of the multi-valued data.
+    // I just don't know of a different way of doing this that would also play well with HDF5..
     CH_START(t3);
     const IntVectSet multiCells = ebisbox.getMultiCells(outputBox);
     for (IVSIterator ivsIt(multiCells); ivsIt.ok(); ++ivsIt) {
@@ -235,9 +254,7 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
 
     // Set EB moment data for each cell.
     CH_START(t5);
-    for (BoxIterator bit(outputBox); bit.ok(); ++bit) {
-      const IntVect& iv = bit();
-
+    auto ebMomentKernel = [&](const IntVect& iv) -> void {
       const bool isCovered   = ebisbox.isCovered(iv);
       const bool isRegular   = ebisbox.isRegular(iv);
       const bool isIrregular = !isCovered && !isRegular;
@@ -304,7 +321,9 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
           levelFAB(iv, indexDist) = -PolyGeom::computeAlpha(volFrac, normal) * a_dx;
         }
       }
-    }
+    };
+
+    BoxLoops::loop<D_DECL(1, 1, 1)>(outputBox, ebMomentKernel);
     CH_STOP(t5);
 
     // At this point we want to fill one layer of ghost cells OUTSIDE the domain.
@@ -320,13 +339,13 @@ DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
           const Box boundaryBox = adjCellBox(validBox, dir, sit(), 1);
 
           if (!(domainBox.contains(boundaryBox))) {
-            for (BoxIterator bit(boundaryBox); bit.ok(); ++bit) {
-              const IntVect iv = bit();
-
+            auto ghostCopyKernel = [&](const IntVect& iv) -> void {
               for (int comp = 0; comp < numCompTotal; comp++) {
                 levelFAB(iv, comp) = levelFAB(iv + shift, comp);
               }
-            }
+            };
+
+            BoxLoops::loop<D_DECL(1, 1, 1)>(boundaryBox, ghostCopyKernel);
           }
         }
       }
@@ -358,11 +377,11 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
                          const Vector<DisjointBoxLayout>&     a_grids,
                          const Vector<LevelData<EBCellFAB>*>& a_data,
                          const Vector<ProblemDomain>&         a_domains,
-                         const Vector<Real>                   a_dx,
-                         const Vector<int>                    a_refinementRatios,
+                         const Vector<Real>&                  a_dx,
+                         const Vector<int>&                   a_refinementRatios,
                          const Real                           a_dt,
                          const Real                           a_time,
-                         const RealVect                       a_probLo,
+                         const RealVect&                      a_probLo,
                          const int                            a_numLevels,
                          const int                            a_numGhost) noexcept
 {
@@ -375,21 +394,11 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   CH_assert(a_data.size() >= a_numLevels);
   CH_assert(a_refinementRatios.size() >= a_numLevels - 1);
 
-  // Indices for where we store the Chombo stuff. This is for storing the volume fraction, EB boundary area,
-  // face area fractions etc. These things are written AFTER the user input variables.
-  const int numInputVars      = a_data[0]->nComp();
-  const int indexVolFrac      = numInputVars;
-  const int indexBoundaryArea = indexVolFrac + 1;
-  const int indexAreaFrac     = indexBoundaryArea + 1;
-  const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
-  const int indexDist         = indexNormal + SpaceDim;
-  const int numCompTotal      = indexDist + 1;
-
   // Write header.
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
 #endif
-  HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+  HDF5Handle handle(a_filename, HDF5Handle::CREATE);
 
   // write header data
   DischargeIO::writeEBHDF5Header(handle, a_numLevels, a_probLo, a_variableNames);

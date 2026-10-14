@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrGodunov.cpp
-  @brief  Implementation of CD_CdrGodunov.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_CdrGodunov.cpp
+ * @brief  Implementation of CD_CdrGodunov.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ExtrapAdvectBC.H>
@@ -20,7 +21,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrGodunov::CdrGodunov() : CdrMultigrid()
+CdrGodunov::CdrGodunov()
 {
   CH_TIME("CdrGodunov::CdrGodunov()");
 
@@ -78,7 +79,8 @@ CdrGodunov::computeAdvectionDt()
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
-  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers
+  // for details:
   //
   //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
   //       Minion, J. Comp. Phys 123 (435), 1996
@@ -87,10 +89,9 @@ CdrGodunov::computeAdvectionDt()
 
   if (m_isMobile) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real               dx    = m_amr->getDx()[lvl];
-      const DataIterator&      dit   = dbl.dataIterator();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const Real               dx  = m_amr->getDx()[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
       const int nbox = dit.size();
 
@@ -99,17 +100,21 @@ CdrGodunov::computeAdvectionDt()
         const DataIndex& din     = dit[mybox];
         const Box        cellBox = dbl[din];
         const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
-        const EBISBox&   ebisBox = ebisl[din];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+        // Use the precomputed not-covered mask (1 in regular/irregular cells, 0 in covered) instead of a per-cell
+        // out-of-line EBISBox::isRegular query, and iterate only the MULTI-valued cut-cells below. Singly-cut cells
+        // are handled by the regular box loop (their single-valued cell velocity equals the VoF velocity), so cut
+        // cells are no longer processed twice and the min-reduction is unchanged.
+        VoFIterator& vofit = (*m_amr->getMultiCutVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Regular grid data.
-        const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+        const BaseFab<Real>& veloReg    = velo.getSingleValuedFAB();
+        const BaseFab<Real>& notCovered = (*m_amr->getNotCoveredCells(m_realm, m_phase)[lvl])[din].getSingleValuedFAB();
 
         // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
         auto regularKernel = [&](const IntVect& iv) -> void {
           Real velMax = 0.0;
-          if (ebisBox.isRegular(iv)) {
+          if (notCovered(iv, m_comp) > 0.0) {
             for (int dir = 0; dir < SpaceDim; dir++) {
               velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
             }
@@ -133,7 +138,7 @@ CdrGodunov::computeAdvectionDt()
         };
 
         // Execute the kernels.
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -179,7 +184,8 @@ CdrGodunov::allocate()
   // CdrMultigrid allocates everything except storage needed for the advection object.
   CdrMultigrid::allocate();
 
-  // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates.
+  // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator
+  // operates.
   if (m_isMobile) {
     const Vector<RefCountedPtr<EBLevelGrid>>& eblgs       = m_amr->getEBLevelGrid(m_realm, m_phase);
     const Vector<int>&                        refRatios   = m_amr->getRefinementRatios();
@@ -200,7 +206,8 @@ CdrGodunov::allocate()
         refRat   = refRatios[lvl - 1];
       }
 
-      // Note: There is a "bug" in the function signature in Chombo. The second-to-last argument is the slope limiter and not the EBCF things.
+      // Note: There is a "bug" in the function signature in Chombo. The second-to-last argument is the slope limiter
+      // and not the EBCF things.
       const EBIndexSpace* const ebis = eblgs[lvl]->getEBIS();
 
       m_levelAdvect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator>(new EBAdvectLevelIntegrator(*eblgs[lvl],
@@ -227,8 +234,8 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
   CH_assert(a_facePhi[0]->nComp() == 1);
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
-  // If we are extrapolating in time the source term will yield different states on the face centers. The source term is the source
-  // S^k + Div(D*Grad(Phi)), which we add to the solver below.
+  // If we are extrapolating in time the source term will yield different states on the face centers. The source term is
+  // the source S^k + Div(D*Grad(Phi)), which we add to the solver below.
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, 1);
 
@@ -274,8 +281,8 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
       // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
       // that permits it to run advection code (through setDoingVel(0)).
       ebAdvectPatch.setVelocities(cellVel, faceVel);
-      ebAdvectPatch.setDoingVel(0);
-      ebAdvectPatch.setCurComp(m_comp);
+      EBAdvectPatchIntegrator::setDoingVel(0);
+      EBAdvectPatchIntegrator::setCurComp(m_comp);
       ebAdvectPatch.setEBPhysIBC(ExtrapAdvectBCFactory());
 
       // Extrapolate to face-centers. The face-centered states are Godunov-style extrapolated in time to a_extrapDt.

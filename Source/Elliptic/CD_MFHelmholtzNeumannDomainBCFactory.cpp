@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -18,12 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory()
+  : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory()");
-
-  m_multByBco   = true;
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(const Real a_DphiDn)
@@ -36,7 +34,7 @@ MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(const Real 
 MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(
   const std::function<Real(const RealVect& a_pos)>& a_DphiDn)
 {
-  CH_TIME("MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(std::functino<Real(RealVect)>)");
+  CH_TIME("MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(std::function<Real(RealVect)>)");
 
   this->setDphiDn(a_DphiDn);
 }
@@ -93,13 +91,13 @@ MFHelmholtzNeumannDomainBCFactory::setBxDphiDn(const std::function<Real(const Re
 }
 
 RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzNeumannDomainBCFactory::create(const int a_iphase) const
+MFHelmholtzNeumannDomainBCFactory::create(const int /*a_iphase*/) const
 {
   CH_TIME("MFHelmholtzNeumannDomainBCFactory::create(int)");
 
   CH_assert(m_useFunction || m_useConstant);
 
-  auto bc = new EBHelmholtzNeumannDomainBC();
+  auto* bc = new EBHelmholtzNeumannDomainBC();
 
   if (m_multByBco) {
     if (m_useConstant) {

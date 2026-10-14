@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MFHelmholtzJumpBC.cpp
-  @brief  Implementation of CD_MFHelmholtzJumpBC.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFHelmholtzJumpBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzJumpBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>
@@ -146,8 +147,10 @@ MFHelmholtzJumpBC::defineStencils()
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
+  // clang-format off
   // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
-  //       stencils can later be used to compute the bounadry value on the interface.
+  //       stencils can later be used to compute the boundary value on the interface.
+  // clang-format on
 
   // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {
@@ -167,8 +170,6 @@ MFHelmholtzJumpBC::defineStencils()
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
-
-      const Box box = dbl[din];
 
       m_gradPhiStencils[din].define(m_mflg, din);
       m_gradPhiWeights[din].define(m_mflg, din);
@@ -190,7 +191,6 @@ MFHelmholtzJumpBC::defineStencils()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const Box         box     = dbl[din];
         const EBISBox&    ebisbox = ebisl[din];
         const EBGraph&    ebgraph = ebisbox.getEBGraph();
         const IntVectSet& ivs     = m_ivs[din];
@@ -202,7 +202,8 @@ MFHelmholtzJumpBC::defineStencils()
         // Iteration space for kernel
         VoFIterator vofit(ivs, ebgraph);
 
-        // Kernel
+        // Kernel. Not auto-vectorizable (and not hot): this is a one-time, sparse VoFIterator sweep
+        // over the multi-phase interface cells that builds a least-squares gradient stencil per cell.
         auto kernel = [&](const VolIndex& vof) -> void {
           int order = -1;
 
@@ -281,7 +282,7 @@ MFHelmholtzJumpBC::defineStencils()
             // const std::string vofErr  = " on vof = ";
             // const std::string impErr  = " (this may cause multigrid divergence)";
 
-            // std::cout << baseErr << m_mflg.getDomain() << vofErr << vof << impErr << std::endl;
+            // std::cout << baseErr << m_mflg.getDomain() << vofErr << vof << impErr << endl;
 
             bndryWeights(vof, m_comp) = 0.0;
             gradStencils(vof, m_comp).clear();
@@ -321,7 +322,6 @@ MFHelmholtzJumpBC::buildAverageStencils()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box         box     = dbl[din];
       const EBISBox&    ebisbox = ebisl[din];
       const IntVectSet& ivs     = m_ivs[din];
 
@@ -357,7 +357,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
           curStencil += gradStencils(vof, m_comp);
         }
 
-        const Real invNum = 1. / allVofs.size();
+        const Real invNum = 1. / static_cast<double>(allVofs.size());
 
         avgBco *= invNum;
         curWeight *= invNum;
@@ -369,7 +369,8 @@ MFHelmholtzJumpBC::buildAverageStencils()
     }
   }
 
-  // For efficiency reasons, store 1/(bp*wp + bq*wq). Scale the average stencils by this value as well since we apply it anyways.
+  // For efficiency reasons, store 1/(bp*wp + bq*wq). Scale the average stencils by this value as well since we apply it
+  // anyways.
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
@@ -422,6 +423,8 @@ MFHelmholtzJumpBC::buildAverageStencils()
       Vector<RefCountedPtr<BaseIndex>>   dstBaseIndex;
       Vector<RefCountedPtr<BaseStencil>> dstBaseStencil;
 
+      // Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that gathers the
+      // per-cell averaging stencils into the AggStencil builder vectors.
       auto kernel = [&](const VolIndex& vof) -> void {
         const VoFStencil& stencil = (m_avgStencils[din].getIVFAB(iphase))(VolIndex(vof.gridIndex(), 0), 0);
 
@@ -447,9 +450,11 @@ MFHelmholtzJumpBC::defineIterators()
 {
   CH_TIME("MFHelmholtzJumpBC::defineIterators()");
 
+  // clang-format off
   // TLDR: This function defines iterators for iterating over regular cut-cells and over multi-fluid cut-cells. The iterators
   //       must exist for both single-phase and multi-phase vofs. This is true even if we're not actually solving a multiphase
   //       problem because the boundary conditions classes will still need the iterators.
+  // clang-format on
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
   const DataIterator&      dit = dbl.dataIterator();
@@ -506,8 +511,10 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
 {
   CH_TIME("MFHelmholtzJumpBC::getLeastSquarseBoundaryGradStencil(...)");
 
+  // clang-format off
   // TLDR: This routine computes a stencil for approximating dphi/dn using least squares gradient reconstruction on the EB centroid. We assume that the value
   //       is a "known term" in the expansion.
+  // clang-format on
 
   bool       foundStencil = false;
   const bool addStartVof  = false;
@@ -599,17 +606,19 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   CH_TIMER("aggsten", t2);
   CH_TIMER("compute_phi_bndry", t3);
 
-  // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where dphi/dn can be represented as
+  // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where
+  // dphi/dn can be represented as
   //
   //          dphi/dn = wB*phiB + sum[w(i) * phi(i)]
   //
   //       This yields an equation which can be solved for phiB. The solution to that is
   //
-  //           phiB = sigma/(b1*w1 + b2*w2) - b1*sum[w1(i) * phi1(i)]/(b1*w1 + b2*w2) - b2*sum[w2(i) * phi2(i)]/(b1*w1 + b2*w2).
+  //           phiB = sigma/(b1*w1 + b2*w2) - b1*sum[w1(i) * phi1(i)]/(b1*w1 + b2*w2) - b2*sum[w2(i) * phi2(i)]/(b1*w1 +
+  //           b2*w2).
   //
-  //       Because I'm not crazy, I have stored the term 1/(b1*w1 + b2*w2) in m_denom so we can just multiply it in when we need it. Moreover,
-  //       this term has already been multiplied into the stencil weights, which is the reason why we only do the stencil apply below (without dividing
-  //       by the above factor).
+  //       Because I'm not crazy, I have stored the term 1/(b1*w1 + b2*w2) in m_denom so we can just multiply it in when
+  //       we need it. Moreover, this term has already been multiplied into the stencil weights, which is the reason why
+  //       we only do the stencil apply below (without dividing by the above factor).
 
   CH_START(t1);
   constexpr int vofComp     = 0;
@@ -619,17 +628,10 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   const EBCellFAB& phiPhase0 = a_phi.getPhase(firstPhase);
   const EBCellFAB& phiPhase1 = a_phi.getPhase(secondPhase);
 
-  const EBISBox& ebisBoxPhase0 = phiPhase0.getEBISBox();
-  const EBISBox& ebisBoxPhase1 = phiPhase1.getEBISBox();
-
   BaseIVFAB<Real>& bndryPhiPhase0 = m_boundaryPhi[a_dit].getIVFAB(firstPhase);
   BaseIVFAB<Real>& bndryPhiPhase1 = m_boundaryPhi[a_dit].getIVFAB(secondPhase);
 
-  const BaseIVFAB<VoFStencil>& avgStencilsPhase0 = m_avgStencils[a_dit].getIVFAB(firstPhase);
-  const BaseIVFAB<VoFStencil>& avgStencilsPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase);
-
   const BaseIVFAB<Real>& denomFactorPhase0 = m_denom[a_dit].getIVFAB(firstPhase);
-  const BaseIVFAB<Real>& denomFactorPhase1 = m_denom[a_dit].getIVFAB(secondPhase);
 
   const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase0 = m_avgVoFs[a_dit].getIVFAB(firstPhase);
   const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase1 = m_avgVoFs[a_dit].getIVFAB(secondPhase);
@@ -657,15 +659,20 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       for (int i = 0; i < vofsPhase0.size(); i++) {
         jump += a_jump(vofsPhase0[i], m_comp);
       }
-      jump *= 1. / vofsPhase0.size();
+      jump *= 1. / static_cast<double>(vofsPhase0.size());
     }
 
+    // For multi-valued cells (vofsPhase{0,1}.size() > 1, rare) the jump relation is enforced on a single canonical
+    // VoF per phase -- the first valid VoF, [0]. This replaces the old VolIndex(iv, 0) proxy, which indexed component
+    // 0 rather than a valid VoF in the opposite phase.
+    const Real phi1Canon = bndryPhiPhase1(vofsPhase1[0], m_comp);
     for (int i = 0; i < vofsPhase0.size(); i++) {
-      bndryPhiPhase0(vofsPhase0[i], m_comp) += bndryPhiPhase1(vof0, m_comp);
+      bndryPhiPhase0(vofsPhase0[i], m_comp) += phi1Canon;
       bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
     }
+    const Real phi0Combined = bndryPhiPhase0(vofsPhase0[0], m_comp);
     for (int i = 0; i < vofsPhase1.size(); i++) {
-      bndryPhiPhase1(vofsPhase1[i], m_comp) = bndryPhiPhase0(vof0, m_comp);
+      bndryPhiPhase1(vofsPhase1[i], m_comp) = phi0Combined;
     }
 
     if (!a_homogeneousPhysBC) {

@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MFHelmholtzDirichletEBBC.cpp
-  @brief  Implementation of CD_MFHelmholtzDirichletEBBC.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFHelmholtzDirichletEBBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzDirichletEBBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -19,17 +20,16 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC),
+    m_useConstant(false),
+    m_useFunction(false),
+    m_order(-1),
+    m_weight(-1),
+    m_dropOrder(false)
 {
   CH_TIME("MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 
   // Default settings.
-  m_order  = -1;
-  m_weight = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
-  m_dropOrder   = false;
 }
 
 MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC()
@@ -102,7 +102,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
   CH_assert(m_weight >= 0);
   CH_assert(m_useConstant || m_useFunction);
 
-  // Also issue run-time errors because those errors can break everything. But I don't see how you would get in a position where that happens.
+  // Also issue run-time errors because those errors can break everything. But I don't see how you would get in a
+  // position where that happens.
   if (m_order <= 0 || m_weight < 0) {
     MayDay::Error("MFHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
   }
@@ -110,7 +111,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
     MayDay::Error("MFHelmholtzDirichletEBBC - not using constant or function!");
   }
 
-  // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares reconstruction.
+  // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares
+  // reconstruction.
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
   const DataIterator&      dit    = dbl.dataIterator();
@@ -137,6 +139,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, din);
 
+    // Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that builds a
+    // least-squares gradient stencil per single-phase cut-cell.
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
@@ -215,7 +219,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
         weights(vof, m_comp)  = pairSten.first;
         stencils(vof, m_comp) = pairSten.second;
 
-        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
+        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the
+        // area fraction.
         weights(vof, m_comp) *= areaFrac / m_dx;
         stencils(vof, m_comp) *= areaFrac / m_dx;
       }
@@ -225,7 +230,7 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
@@ -237,9 +242,9 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                                 EBCellFAB&             a_Lphi,
-                                                 const EBCellFAB&       a_phi,
+MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                                 EBCellFAB&   a_Lphi,
+                                                 const EBCellFAB& /*a_phi*/,
                                                  const BaseIVFAB<Real>& a_Bcoef,
                                                  const DataIndex&       a_dit,
                                                  const Real&            a_beta,
@@ -248,9 +253,15 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_single
   CH_TIME("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
-  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
+  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is
+  // not.
 
   // Do single phase cells. Only inhomogeneous contribution here.
+  //
+  // Not auto-vectorizable: sparse VoFIterator scatter over single-phase cut-cells, with the per-vof
+  // cost dominated by out-of-line BaseIVFAB/EBCellFAB operator() lookups (and the std::function BC
+  // value when m_useFunction). Unlike MFHelmholtzEBBC there is no hoistable out-of-line container
+  // lookup here -- m_boundaryWeights[a_dit] is an inline index the compiler already lifts.
   if (!a_homogeneousPhysBC) {
 
     auto kernel = [&](const VolIndex& vof) -> void {
@@ -275,8 +286,6 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_single
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

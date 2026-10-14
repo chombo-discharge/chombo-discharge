@@ -1,22 +1,23 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_KMCDualStateReactionImplem.H
-  @brief  Implementation of CD_KMCDualStateReaction.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_KMCDualStateReactionImplem.H
+ * @brief  Implementation of CD_KMCDualStateReaction.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_KMCDualStateReactionImplem_H
-#define CD_KMCDualStateReactionImplem_H
+#ifndef CD_KMCDUALSTATEREACTIONIMPLEM_H
+#define CD_KMCDUALSTATEREACTIONIMPLEM_H
 
 // Std includes
 #include <limits>
 
 // Chombo includes
-#include <CH_Timer.H>
+#include <CH_assert.H>
 
 // Our includes
 #include <CD_KMCDualStateReaction.H>
@@ -27,8 +28,6 @@ inline KMCDualStateReaction<State, T>::KMCDualStateReaction(const std::list<size
                                                             const std::list<size_t>& a_rhsReactives,
                                                             const std::list<size_t>& a_rhsNonReactives) noexcept
 {
-  CH_TIME("KMCDualStateReaction::KMCDualStateReaction");
-
   m_lhsReactives    = a_lhsReactives;
   m_rhsReactives    = a_rhsReactives;
   m_rhsNonReactives = a_rhsNonReactives;
@@ -40,16 +39,12 @@ inline KMCDualStateReaction<State, T>::KMCDualStateReaction(const std::list<size
 
 template <typename State, typename T>
 inline KMCDualStateReaction<State, T>::~KMCDualStateReaction()
-{
-  CH_TIME("KMCDualStateReaction::~KMCDualStateReaction");
-}
+{}
 
 template <typename State, typename T>
 inline void
 KMCDualStateReaction<State, T>::computeStateChanges() noexcept
 {
-  CH_TIME("KMCDualStateReaction::computeStateChanges");
-
   // Consumed species.
   for (const auto& r : m_lhsReactives) {
     if (m_reactiveStateChange.find(r) == m_reactiveStateChange.end()) {
@@ -80,9 +75,10 @@ KMCDualStateReaction<State, T>::computeStateChanges() noexcept
     }
   }
 
-  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species. We need to do this
-  // because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1) unique pairs of particles. Or in general when
-  // we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!) combinations. In the propensity function we compute the propensity as
+  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species.
+  // We need to do this because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1)
+  // unique pairs of particles. Or in general when we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!)
+  // combinations. In the propensity function we compute the propensity as
   //
   //    a = rate * factor * N * (N-1) * (N-2) ...
   //
@@ -118,6 +114,30 @@ KMCDualStateReaction<State, T>::computeStateChanges() noexcept
   for (const auto& rn : reactantNumbers) {
     m_propensityFactor *= 1.0 / factorial(rn.second);
   }
+
+  // Compact the reactant tally into the form propensity() consumes, so that the falling factorial
+  // can be formed straight off the incoming state rather than off a private copy of it.
+  m_lhsOrders.clear();
+  m_lhsOrders.reserve(reactantNumbers.size());
+
+  for (const auto& rn : reactantNumbers) {
+    m_lhsOrders.emplace_back(rn.first, rn.second);
+  }
+
+  // Dense mirror of m_reactiveStateChange for the per-cell lookups in KMCSolver. The map is keyed by
+  // species index, so the highest key fixes the length; species the reaction does not touch keep a
+  // zero state change.
+  m_reactiveStateChangeDense.clear();
+
+  if (!m_reactiveStateChange.empty()) {
+    const size_t highestSpecies = m_reactiveStateChange.rbegin()->first;
+
+    m_reactiveStateChangeDense.assign(highestSpecies + 1, (T)0);
+
+    for (const auto& s : m_reactiveStateChange) {
+      m_reactiveStateChangeDense[s.first] = s.second;
+    }
+  }
 }
 
 template <typename State, typename T>
@@ -131,8 +151,6 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) noexcept
 {
-  CH_TIME("KMCDualStateReaction::population");
-
   const auto& reactiveState = a_state.getReactiveState();
 
   CH_assert(reactiveState.size() > a_reactant);
@@ -144,19 +162,26 @@ template <typename State, typename T>
 inline Real
 KMCDualStateReaction<State, T>::propensity(const State& a_state) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::propensity");
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
 
   Real A = m_rate * m_propensityFactor;
 
-  auto reactiveState = a_state.getReactiveState();
+  const auto& reactiveState = a_state.getReactiveState();
 
-  for (const auto& r : m_lhsReactives) {
-    A *= reactiveState[r];
+  // For a species entering the reaction k times the contribution is the falling factorial
+  // X * (X-1) * ... * (X-k+1) -- the same product the previous implementation formed by walking
+  // m_lhsReactives and decrementing a private copy of the state after each factor. Taking the order
+  // from m_lhsOrders gives the identical product without copying the state.
+  for (const auto& lhs : m_lhsOrders) {
+    T X = reactiveState[lhs.first];
 
-    reactiveState[r]--;
+    for (size_t k = 0; k < lhs.second; k++) {
+      A *= X;
+
+      X -= (T)1;
+    }
   }
 
   return A;
@@ -166,8 +191,6 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::computeCriticalNumberOfReactions");
-
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
@@ -190,21 +213,21 @@ KMCDualStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCDualStateReaction<State, T>::getReactants() const noexcept
 {
   return m_lhsReactives;
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCDualStateReaction<State, T>::getReactiveProducts() const noexcept
 {
   return m_rhsReactives;
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCDualStateReaction<State, T>::getNonReactiveProducts() const noexcept
 {
   return m_rhsNonReactives;
@@ -214,12 +237,12 @@ template <typename State, typename T>
 inline T
 KMCDualStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::getStateChange");
-
+  // Species beyond the dense vector are not part of this reaction, so their state change is zero --
+  // the same answer the map lookup gave for an absent key.
   T nuIJ = 0;
 
-  if (m_reactiveStateChange.find(a_particleReactant) != m_reactiveStateChange.end()) {
-    nuIJ = m_reactiveStateChange.at(a_particleReactant);
+  if (a_particleReactant < m_reactiveStateChangeDense.size()) {
+    nuIJ = m_reactiveStateChangeDense[a_particleReactant];
   }
 
   return nuIJ;
@@ -229,8 +252,6 @@ template <typename State, typename T>
 inline void
 KMCDualStateReaction<State, T>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::advanceState");
-
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
@@ -254,8 +275,6 @@ template <typename State, typename T>
 inline void
 KMCDualStateReaction<State, T>::sanityCheck(const State& a_state) const noexcept
 {
-  CH_TIME("KMCDualStateReaction::sanityCheck");
-
   const auto& reactiveState = a_state.getReactiveState();
   const auto& photonState   = a_state.getNonReactiveState();
 

@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzRobinEBBCFactory_H
-#define CD_EBHelmholtzRobinEBBCFactory_H
+#ifndef CD_EBHELMHOLTZROBINEBBCFACTORY_H
+#define CD_EBHELMHOLTZROBINEBBCFACTORY_H
 
 // Std includes
 #include <functional>
@@ -19,93 +20,95 @@
 #include <CD_EBHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
-  @brief Base class for making Robin boundary conditions with EBHelmholtzOp. 
-  @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated to the EB to first order. 
-  @note The B-coefficient is not the same as in the Helmholtz equation...
-  @note In our notation, n points into the computational domain. 
-*/
+/**
+ * @brief Base class for making Robin boundary conditions with EBHelmholtzOp.
+ * @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated
+ * to the EB to first order.
+ * @note The B-coefficient is not the same as in the Helmholtz equation...
+ * @note In our notation, n points into the computational domain.
+ */
 class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory
 {
 public:
-  /*!
-    @brief Constructor. 
-  */
+  /**
+   * @brief Constructor.
+   */
   EBHelmholtzRobinEBBCFactory();
 
-  /*!
-    @brief Full constructor which sets constant coefficients
-    @param[in] a_order  Stencil order. Must be > 0
-    @param[in] a_weight Equation weights. Must be >=0
-    @param[in] a_A      Robin A-coefficient
-    @param[in] a_B      Robin B-coefficient
-    @param[in] a_C      Robin C-coefficient
-  */
+  /**
+   * @brief Full constructor which sets constant coefficients
+   * @param[in] a_order  Stencil order. Must be > 0
+   * @param[in] a_weight Equation weights. Must be >=0
+   * @param[in] a_A      Robin A-coefficient
+   * @param[in] a_B      Robin B-coefficient
+   * @param[in] a_C      Robin C-coefficient
+   */
   EBHelmholtzRobinEBBCFactory(const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C);
 
-  /*!
-    @brief Full constructor which sets variable coefficients
-    @param[in] a_order  Stencil order. Must be > 0
-    @param[in] a_weight Equation weights. Must be >=0
-    @param[in] a_A      Robin A-coefficient
-    @param[in] a_B      Robin B-coefficient
-    @param[in] a_C      Robin C-coefficient
-  */
+  /**
+   * @brief Full constructor which sets variable coefficients
+   * @param[in] a_order  Stencil order. Must be > 0
+   * @param[in] a_weight Equation weights. Must be >=0
+   * @param[in] a_A      Robin A-coefficient
+   * @param[in] a_B      Robin B-coefficient
+   * @param[in] a_C      Robin C-coefficient
+   */
   EBHelmholtzRobinEBBCFactory(const int                                         a_order,
                               const int                                         a_weight,
                               const std::function<Real(const RealVect& a_pos)>& a_A,
                               const std::function<Real(const RealVect& a_pos)>& a_B,
                               const std::function<Real(const RealVect& a_pos)>& a_C);
 
-  /*!
-    @brief Destructor (does nothing). 
-  */
+  /**
+   * @brief Destructor (does nothing).
+   */
   virtual ~EBHelmholtzRobinEBBCFactory();
 
-  /*!
-    @brief Set BC order
-    @param[in] a_order Order
-  */
+  /**
+   * @brief Set BC order
+   * @param[in] a_order Order
+   */
   void
   setOrder(const int a_order);
 
-  /*!
-    @brief Set equation weights for least squares reconstruction. 
-    @param[in] a_weight Weights
-  */
+  /**
+   * @brief Set equation weights for least squares reconstruction.
+   * @param[in] a_weight Weights
+   */
   void
   setWeight(const int a_weight);
 
-  /*!
-    @brief Set constant coefficients
-    @param[in] a_A A-coefficient
-    @param[in] a_B B-coefficient
-    @param[in] a_C C-coefficient
-  */
+  /**
+   * @brief Set constant coefficients
+   * @param[in] a_A A-coefficient
+   * @param[in] a_B B-coefficient
+   * @param[in] a_C C-coefficient
+   */
   void
   setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
-  /*!
-    @brief Set variable coefficients
-    @param[in] a_A A-coefficient
-    @param[in] a_B B-coefficient
-    @param[in] a_C C-coefficient
-  */
+  /**
+   * @brief Set variable coefficients
+   * @param[in] a_A A-coefficient
+   * @param[in] a_B B-coefficient
+   * @param[in] a_C C-coefficient
+   */
   void
   setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
                   const std::function<Real(const RealVect& a_pos)>& a_B,
                   const std::function<Real(const RealVect& a_pos)>& a_C);
 
-  /*!
-    @brief Drop BC order if domain size is equal or below this.
-  */
+  /**
+   * @brief Drop BC order if domain size is equal or below this.
+   * @param[in] a_domainSize Description
+   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
 
-  /*!
-    @brief Factory method. 
-    @return An EBHelmholtzRobinEBBC object with specified order and coefficients. 
-  */
+  /**
+   * @brief Factory method.
+   * @return An EBHelmholtzRobinEBBC object with specified order and coefficients.
+   */
   RefCountedPtr<EBHelmholtzEBBC>
   create() override;
 
@@ -113,56 +116,57 @@ protected:
   /*
     @brief Use constant for BC
   */
+  /** @brief Use constant. */
   bool m_useConstant;
 
-  /*!
-    @brief Use function for BC value
-  */
+  /**
+   * @brief Use function for BC value
+   */
   bool m_useFunction;
 
-  /*!
-    @brief (Attempted) stencil order
-  */
+  /**
+   * @brief (Attempted) stencil order
+   */
   int m_order;
 
-  /*!
-    @brief Weight for least squares gradient reconstruction. 
-  */
+  /**
+   * @brief Weight for least squares gradient reconstruction.
+   */
   int m_weight;
 
-  /*!
-    @brief Special flag for dropping stencil order when domains become coarser than this.
-  */
+  /**
+   * @brief Special flag for dropping stencil order when domains become coarser than this.
+   */
   int m_domainDropOrder;
 
-  /*!
-    @brief Constant A-coefficient
-  */
+  /**
+   * @brief Constant A-coefficient
+   */
   Real m_constantA;
 
-  /*!
-    @brief Constant B-coefficient
-  */
+  /**
+   * @brief Constant B-coefficient
+   */
   Real m_constantB;
 
-  /*!
-    @brief Constant C-coefficient
-  */
+  /**
+   * @brief Constant C-coefficient
+   */
   Real m_constantC;
 
-  /*!
-    @brief Function-based A-coefficient
-  */
+  /**
+   * @brief Function-based A-coefficient
+   */
   std::function<Real(const RealVect& a_pos)> m_functionA;
 
-  /*!
-    @brief Function-based B-coefficient
-  */
+  /**
+   * @brief Function-based B-coefficient
+   */
   std::function<Real(const RealVect& a_pos)> m_functionB;
 
-  /*!
-    @brief Function-based C-coefficient
-  */
+  /**
+   * @brief Function-based C-coefficient
+   */
   std::function<Real(const RealVect& a_pos)> m_functionC;
 };
 

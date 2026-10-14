@@ -1,18 +1,20 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_KMCDualStateImplem.H
-  @brief  Implementation of CD_KMCDualState.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_KMCDualStateImplem.H
+ * @brief  Implementation of CD_KMCDualState.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_KMCDualStateImplem_H
-#define CD_KMCDualStateImplem_H
+#ifndef CD_KMCDUALSTATEIMPLEM_H
+#define CD_KMCDUALSTATEIMPLEM_H
 
-#include <CH_Timer.H>
+// Chombo includes
+#include <CH_assert.H>
 
 // Our includes
 #include <CD_KMCDualState.H>
@@ -21,8 +23,6 @@
 template <typename T>
 KMCDualState<T>::KMCDualState(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept
 {
-  CH_TIME("KMCDualState::KMCDualState");
-
   this->define(a_numReactiveSpecies, a_numNonReactiveSpecies);
 
   CH_assert(m_reactiveState.size() > 0);
@@ -36,8 +36,6 @@ template <typename T>
 inline void
 KMCDualState<T>::define(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept
 {
-  CH_TIME("KMCDualState::define");
-
   m_numReactiveSpecies    = a_numReactiveSpecies;
   m_numNonReactiveSpecies = a_numNonReactiveSpecies;
 
@@ -49,8 +47,6 @@ template <typename T>
 inline bool
 KMCDualState<T>::isValidState() const noexcept
 {
-  CH_TIME("KMCDualState::isValidState");
-
   bool isValid = true;
 
   for (const auto& p : m_reactiveState) {
@@ -88,6 +84,8 @@ template <typename T>
 inline void
 KMCDualState<T>::linearIn(const std::vector<T>& a_linearizedState) noexcept
 {
+  CH_assert(a_linearizedState.size() == m_numReactiveSpecies + m_numNonReactiveSpecies);
+
   for (size_t i = 0; i < m_numReactiveSpecies; i++) {
     m_reactiveState[i] = a_linearizedState[i];
   }

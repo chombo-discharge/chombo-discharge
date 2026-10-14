@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_LeastSquares.cpp
-  @brief  Implementation of CD_LeastSquares.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_LeastSquares.cpp
+ * @brief  Implementation of CD_LeastSquares.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_LaPackUtils.H>
@@ -43,7 +44,7 @@ LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
                                                                         a_dx);
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   VoFStencil ret;
   if (K > M) { // Have enough equations to compute.
@@ -62,7 +63,7 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
                           const int          a_radius,
                           const int          a_p,
                           const int          a_order,
-                          const IntVectSet   a_knownTerms)
+                          const IntVectSet&  a_knownTerms)
 {
 
   VoFStencil gradSten;
@@ -101,7 +102,7 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
                           const int          a_radius,
                           const int          a_p,
                           const int          a_order,
-                          const IntVectSet   a_knownTerms)
+                          const IntVectSet&  a_knownTerms)
 {
   VoFStencil gradSten;
 
@@ -109,8 +110,8 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
     const VolIndex vofLo = a_face.getVoF(Side::Lo);
     const VolIndex vofHi = a_face.getVoF(Side::Hi);
 
-    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
-    // using std::set below. After that, just get the distances and solve the least squares system.
+    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which
+    // we discard using std::set below. After that, just get the distances and solve the least squares system.
     Vector<VolIndex> allVofs;
     Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo,
                                                         a_ebisbox,
@@ -124,12 +125,15 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
                                                         true);
 
     std::set<VolIndex> setVofs;
-    for (const auto& v : loVofs.stdVector())
+    for (const auto& v : loVofs.stdVector()) {
       setVofs.emplace(v);
-    for (const auto& v : hiVofs.stdVector())
+    }
+    for (const auto& v : hiVofs.stdVector()) {
       setVofs.emplace(v);
-    for (const auto& v : setVofs)
+    }
+    for (const auto& v : setVofs) {
       allVofs.push_back(v);
+    }
 
     // Can be smaller than order if you've eliminated some equations.
     const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
@@ -318,7 +322,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const int               a_p,
                               const int               a_order,
-                              const IntVectSet        a_knownTerms)
+                              const IntVectSet&       a_knownTerms)
 {
   Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
@@ -330,7 +334,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const Vector<Real>&     a_weights,
                               const int               a_order,
-                              const IntVectSet        a_knownTerms)
+                              const IntVectSet&       a_knownTerms)
 {
 
   // TLDR: This routine
@@ -507,7 +511,7 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
 
     // This is because some unknowns (rows) can be been eliminated.
     const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
-    const int K = a_displacements.size();
+    const int K = static_cast<int>(a_displacements.size());
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 
@@ -519,7 +523,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
         "LeastSquares::computeSingleLevelStencils - you have specified the same terms as both unknown and known");
     }
 
-    // Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.
+    // Build the A-matrix in column major order (this is what Fortran wants) so we can use
+    // LaPackUtils::computePseudoInverse.
     // ----------------------------------------------------------------------------------------------------------------------
     // If we have an (unweighted) full system then our system A*x = b is
     //
@@ -535,9 +540,9 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
     // solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose
     // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
     //
-    // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
-    // This will also correspond to a modification of the right-hand side, but the required modifications are not accesible
-    // in this routine, and so the user will have to make sense of them.
+    // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the
+    // system. This will also correspond to a modification of the right-hand side, but the required modifications are
+    // not accessible in this routine, and so the user will have to make sense of them.
 
     int          i = 0;                // Exists just because we fill memory linearly.
     Vector<Real> linA(K * M, 0.0);     // Equal to (w*A)
@@ -570,7 +575,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
       //
       // The MultiIndex won't know about this, and will (correctly!), believe that the first row corresponds to
       // multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to
-      // identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens below.
+      // identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens
+      // below.
       std::map<IntVect, int> rowMap;
       int                    row = 0;
       for (MultiIndex mi(a_order); mi.ok(); ++mi) {
@@ -597,7 +603,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
         sten.clear();
 
         // Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want
-        // the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also weighted).
+        // the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also
+        // weighted).
         for (int k = 0; k < K; k++) {
           const int idx = row + k * M;
           sten.add(a_allVofs[k], a_weights[k] * linAplus[idx]);

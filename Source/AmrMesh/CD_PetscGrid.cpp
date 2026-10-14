@@ -1,14 +1,14 @@
-/*!
-  chombo-discharge
-  Copyright © 2026 SINTEF Energy Research.
-  Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
-*/
+/**
+ * chombo-discharge
+ * Copyright © 2026 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
 
-/*!
-  @file   CD_PetscGrid.cpp
-  @brief  Implementation of CD_PetscGrid.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_PetscGrid.cpp
+ * @brief  Implementation of CD_PetscGrid.H
+ * @author Robert Marskar
+ */
 
 #ifdef CH_USE_PETSC
 
@@ -289,7 +289,7 @@ PetscGrid::defineAMRCells() noexcept
         }
       };
 
-      BoxLoops::loop(ghostedCellBox, setValidCells);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(ghostedCellBox, setValidCells);
 
       // Fix CF region flags
       if (lvl < m_finestLevel) {
@@ -299,7 +299,7 @@ PetscGrid::defineAMRCells() noexcept
           amrToPetsc(iv).setCoarCF(haloCells(iv));
         };
 
-        BoxLoops::loop(cellBox, setOuterCFRegion);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, setOuterCFRegion);
       }
 
       if (lvl > 0) {
@@ -309,7 +309,7 @@ PetscGrid::defineAMRCells() noexcept
           amrToPetsc(iv).setFineCF(haloCells(iv));
         };
 
-        BoxLoops::loop(cellBox, setInnerCFRegion);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, setInnerCFRegion);
       }
 
       // Fix up domain side flags
@@ -323,7 +323,7 @@ PetscGrid::defineAMRCells() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, setDomainFlag);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, setDomainFlag);
       }
     }
   }
@@ -395,7 +395,7 @@ PetscGrid::definePetscRows() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
 
         vofit.define(irregIVS, ebgraph);
       }
@@ -636,7 +636,7 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, kernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
       }
     }
   }
@@ -692,7 +692,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 }
 
 void
-PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
+PetscGrid::dumpPetscGrid(const std::string& a_filename) const noexcept
 {
   CH_TIME("PetscGrid::dumpPetscGrid");
   if (m_verbose) {
@@ -754,7 +754,7 @@ PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
         }
       };
 
-      BoxLoops::loop(data.box(), kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(data.box(), kernel);
     }
   }
 

@@ -1,0 +1,6 @@
+# ====================================================================================================
+# Tessellation geometry class options
+# ====================================================================================================
+Tessellation.mesh_file       = myFile.stl    ## STL file
+Tessellation.flip_inside     = false         ## Flip inside/outside
+Tessellation.z_coord         = 0.0           ## z-coordinate for 2D slicing this object

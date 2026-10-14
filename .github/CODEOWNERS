@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# CODEOWNERS for chombo-discharge
+#
+# Each line maps a path pattern to one or more owners. Owners are automatically
+# requested for review on PRs that touch matching files. When "Require review
+# from Code Owners" is enabled in the branch protection rule for `main`, at
+# least one listed owner must approve before the PR can be merged.
+#
+# Later matches take precedence over earlier ones, so order from most general
+# to most specific.
+
+# Default owner for everything in the repository.
+*                       @rmrsk
+
+# Core library and geometries.
+/Source/                @rmrsk
+/Geometries/            @rmrsk
+
+# Physics modules.
+/Physics/               @rmrsk
+
+# Build system, local make definitions, and submodules.
+/Lib/                   @rmrsk
+/Submodules/            @rmrsk
+*.mk                    @rmrsk
+GNUmakefile             @rmrsk
+**/GNUmakefile          @rmrsk
+
+# Documentation.
+/Docs/                  @rmrsk
+
+# Tests and example applications.
+/Exec/                  @rmrsk
+
+# CI, repository configuration, and these ownership rules themselves.
+/.github/               @rmrsk
+/.pre-commit-config.yaml @rmrsk
+/REUSE.toml             @rmrsk
+/.clang-format          @rmrsk
+/.clang-tidy            @rmrsk

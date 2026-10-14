@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_GeometryStepper.H
-  @brief  Declaration of a TimeStepper class without any solver functionality, i.e. for geometries only. 
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_GeometryStepper.H
+ * @brief  Declaration of the Physics::Geometry::GeometryStepper TimeStepper
+ * @author Robert Marskar
+ */
 
-#ifndef _GEOMETRY_STEPPER_
-#define _GEOMETRY_STEPPER_
+#ifndef CD_GEOMETRYSTEPPER_H
+#define CD_GEOMETRYSTEPPER_H
 
 // Our includes
 #include <CD_TimeStepper.H>
@@ -18,175 +19,175 @@
 
 namespace Physics {
 
-  /*!
-    @brief Namespace for encapsulating the Geometry module -- i.e. functionality for just plotting various geometries. 
-  */
-  namespace Geometry {
+/**
+ * @brief Namespace for encapsulating the Geometry module — functionality for visualising geometries without any
+ * physics.
+ */
+namespace Geometry {
 
-    /*!
-      @brief This implementation does absolutely nothing -- it instantiates a TimeStepper with empty functionality. 
-      @details The usage of this module is just to make it easy to develop/implement geometries. The user will simply set up an "application" with this module
-      and use Driver.geometry_only=true when running his application. 
-    */
-    class GeometryStepper : public TimeStepper
-    {
-    public:
-      /*!
-	@brief Destructor (does nothing)
-      */
-      GeometryStepper();
+/**
+ * @brief Minimal TimeStepper that performs no physics, intended for geometry development and visualisation.
+ * @details All lifecycle methods are no-ops. The intended use is to set `Driver.geometry_only=true`
+ * in the input script, which causes Driver to write a single plot file of the computational geometry
+ * and then exit. This makes it easy to inspect and tune complex EB geometries without building a
+ * full physics application.
+ */
+class GeometryStepper : public TimeStepper
+{
+public:
+  /**
+   * @brief Constructor.
+   */
+  GeometryStepper();
 
-      /*!
-	@brief Destructor (does nothing)
-      */
-      virtual ~GeometryStepper();
+  /**
+   * @brief Destructor.
+   */
+  virtual ~GeometryStepper();
 
-      /*!
-	@brief Set up solvers (does nothing)
-      */
-      virtual void
-      setupSolvers() override;
+  /**
+   * @brief Set up solvers (no-op).
+   */
+  virtual void
+  setupSolvers() override;
 
-      /*!
-	@brief Allocate solver internals (does nothing)
-      */
-      virtual void
-      allocate() override;
+  /**
+   * @brief Allocate solver internals (no-op).
+   */
+  virtual void
+  allocate() override;
 
-      /*!
-	@brief Fill solver initial data (does nothing)
-      */
-      virtual void
-      initialData() override;
+  /**
+   * @brief Fill solver initial data (no-op).
+   */
+  virtual void
+  initialData() override;
 
-      /*!
-	@brief Post initialization function (does nothing)
-      */
-      virtual void
-      postInitialize() override;
+  /**
+   * @brief Post-initialization hook (no-op).
+   */
+  virtual void
+  postInitialize() override;
 
-      /*!
-	@brief Post-restart function (does nothing)
-      */
-      virtual void
-      postCheckpointSetup() override;
+  /**
+   * @brief Post-restart hook (no-op).
+   */
+  virtual void
+  postCheckpointSetup() override;
 
-      /*!
-	@brief Realm register -- does nothing
-      */
-      virtual void
-      registerRealms() override;
+  /**
+   * @brief Register realms (no-op).
+   */
+  virtual void
+  registerRealms() override;
 
-      /*!
-	@brief operator registration (does nothing)
-      */
-      virtual void
-      registerOperators() override;
+  /**
+   * @brief Register operators (no-op).
+   */
+  virtual void
+  registerOperators() override;
 
 #ifdef CH_USE_HDF5
-      /*!  
-	@brief Write checkpoint data to file (does nothing)
-	@param[inout] a_handle HDF5 fil
-	@param[in]    a_lvl    Grid level
-      */
-      virtual void
-      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+  /**
+   * @brief Write checkpoint data to file (no-op).
+   * @param[in,out] a_handle HDF5 file handle.
+   * @param[in]    a_lvl    Grid level.
+   */
+  virtual void
+  writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
+
 #ifdef CH_USE_HDF5
-      /*!
-	@brief Read checkpoint data from file (does nothing)
-	@param[inout] a_handle HDF5 file
-	@param[in]    a_lvl    Grid level
-      */
-      virtual void
-      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+  /**
+   * @brief Read checkpoint data from file (no-op).
+   * @param[in,out] a_handle HDF5 file handle.
+   * @param[in]    a_lvl    Grid level.
+   */
+  virtual void
+  readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
 
-      /*!
-	@brief Get the number of plot variables for this time stepper. 
-	@return Returns 0
-      */
-      virtual int
-      getNumberOfPlotVariables() const override;
+  /**
+   * @brief Get the number of plot variables.
+   * @return Always returns 0.
+   */
+  virtual int
+  getNumberOfPlotVariables() const override;
 
-      /*!
-	@brief Get plot variable names (returns empty vector)
-      */
-      virtual Vector<std::string>
-      getPlotVariableNames() const override;
+  /**
+   * @brief Get plot variable names.
+   * @return Always returns an empty vector.
+   */
+  virtual Vector<std::string>
+  getPlotVariableNames() const override;
 
-      /*!
-	@brief Write plot data to output holder (does nothing since there's no IO form this class)
-	@param[inout] a_output            Output data holder.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-	@param[in]    a_outputRealm       Output realm
-	@param[in]    a_level             Grid level
-      */
-      virtual void
-      writePlotData(LevelData<EBCellFAB>& a_output,
-                    int&                  a_icomp,
-                    const std::string     a_realm,
-                    const int             a_level) const override;
+  /**
+   * @brief Write plot data to output holder (no-op).
+   * @param[in,out] a_output       Output data holder.
+   * @param[in,out] a_icomp        Starting component in a_output.
+   * @param[in]     a_outputRealm  Output realm name.
+   * @param[in]     a_level        Grid level.
+   */
+  virtual void
+  writePlotData(LevelData<EBCellFAB>& a_output,
+                int&                  a_icomp,
+                const std::string&    a_outputRealm,
+                const int             a_level) const override;
 
-      /*!
-	@brief Compute a time step to be used by Driver. 
-	@return Returns 0
-      */
-      virtual Real
-      computeDt() override;
+  /**
+   * @brief Compute a time step.
+   * @return Always returns 0.
+   */
+  virtual Real
+  computeDt() override;
 
-      /*!
-	@brief Advancement routine. Does nothing. 
-	@param[in] a_dt Time step to be used for advancement
-	@return    Returns the time step that was used. 
-	@note This returns the largest time step possible to ensure end-of-simulation.
-      */
-      virtual Real
-      advance(const Real a_dt) override;
+  /**
+   * @brief Advance by one time step (no-op).
+   * @param[in] a_dt Time step size.
+   * @return Returns std::numeric_limits<Real>::max() to drive Driver to terminate after one step.
+   */
+  virtual Real
+  advance(const Real a_dt) override;
 
-      /*!
-	@brief Synchronzie solver times and time steps (does nothing)
-	@param[in] a_step Time step
-	@param[in] a_time Time (in seconds)
-	@param[in] a_dt   Time step that was used. 
-      */
-      virtual void
-      synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+  /**
+   * @brief Synchronize solver times and time steps (no-op).
+   * @param[in] a_step Current time step number.
+   * @param[in] a_time Current simulation time in seconds.
+   * @param[in] a_dt   Time step that was used.
+   */
+  virtual void
+  synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
 
-      /*!
-	@brief Print a step report (does nothing)
-	@details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. 
-      */
-      virtual void
-      printStepReport() override;
+  /**
+   * @brief Print a step report (no-op).
+   */
+  virtual void
+  printStepReport() override;
 
-      /*!
-	@brief Perform pre-regrid operations (does nothing)
-	@param[in] a_lmin           The coarsest level that changes
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-      */
-      virtual void
-      preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+  /**
+   * @brief Perform pre-regrid operations (no-op).
+   * @param[in] a_lmin           The coarsest level that changes.
+   * @param[in] a_oldFinestLevel The finest level before the regrid.
+   */
+  virtual void
+  preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
 
-      /*!
-	@brief Time stepper regrid method (does nothing)
-	@param[in] a_lmin           The coarsest level that changed. 
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-	@param[in] a_newFinestLevel The finest level after the regrid. 
-      */
-      virtual void
-      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+  /**
+   * @brief Regrid method (no-op).
+   * @param[in] a_lmin           The coarsest level that changed.
+   * @param[in] a_oldFinestLevel The finest level before the regrid.
+   * @param[in] a_newFinestLevel The finest level after the regrid.
+   */
+  virtual void
+  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
-      /*!
-	@brief Perform post-regrid operations (does nothing)
-	@param[in] a_lmin           The coarsest level that changed. 
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-	@param[in] a_newFinestLevel The finest level after the regrid. 
-      */
-      virtual void
-      postRegrid() override;
-    };
-  } // namespace Geometry
+  /**
+   * @brief Post-regrid operations (no-op).
+   */
+  virtual void
+  postRegrid() override;
+};
+} // namespace Geometry
 } // namespace Physics
 
 #include <CD_NamespaceFooter.H>

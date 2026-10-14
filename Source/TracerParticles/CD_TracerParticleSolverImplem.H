@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_TracerParticleSolverImplem.H
-  @brief  Implementation of CD_TracerParticleSolver.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_TracerParticleSolverImplem.H
+ * @brief  Implementation of CD_TracerParticleSolver.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_TracerParticleSolverImplem_H
-#define CD_TracerParticleSolverImplem_H
+#ifndef CD_TRACERPARTICLESOLVERIMPLEM_H
+#define CD_TRACERPARTICLESOLVERIMPLEM_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -41,8 +42,8 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
 }
 
 template <typename P>
-inline TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>&              a_amr,
-                                                     const RefCountedPtr<ComputationalGeometry> a_compGeom)
+inline TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>&               a_amr,
+                                                     const RefCountedPtr<ComputationalGeometry>& a_compGeom)
   : TracerParticleSolver<P>()
 {
   CH_TIME("TracerParticleSolver::TracerParticleSolver(RefCountedPtr<AmrMesh>, RefCountedPtr<ComputationalGeometry>)");
@@ -312,8 +313,8 @@ TracerParticleSolver<P>::preRegrid(const int a_lbase, const int a_oldFinestLevel
 
   CH_assert(a_lbase >= 0);
 
-  // Put particles in pre-regrid mode.
-  m_particles.preRegrid(a_lbase);
+  // Put particles in pre-regrid mode (the SoA container caches all levels; no lbase needed).
+  m_particles.preRegrid();
 }
 
 template <typename P>
@@ -368,7 +369,15 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const noexcept
 
   DataOps::setValue(a_phi, 0.0);
 
-  this->depositParticles<P, const Real&, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+  CH_assert(a_phi[0]->nComp() == 1);
+
+  m_amr->depositWeight(a_phi,
+                       m_realm,
+                       m_phase,
+                       m_particles,
+                       m_deposition,
+                       m_coarseFineDeposition,
+                       IrregularDeposition::Native);
 
   if (m_volumeScale) {
     DataOps::volumeScale(a_phi, m_amr->getDx());
@@ -384,7 +393,7 @@ TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexce
     pout() << m_name + "::interpolateWeight(EBAMRCellData)" << endl;
   }
 
-  m_amr->interpolateParticles<P, Real&, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, true);
+  m_amr->interpolateWeight(m_particles, m_realm, m_phase, a_scalar, m_interpolation, true);
 }
 
 template <typename P>
@@ -396,12 +405,12 @@ TracerParticleSolver<P>::interpolateVelocities()
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
-  m_amr->interpolateParticles<P, RealVect&, &P::velocity>(m_particles,
-                                                          m_realm,
-                                                          m_phase,
-                                                          m_velocityField,
-                                                          m_interpolation,
-                                                          true);
+  m_amr->interpolateParticles<D_DECL(&P::v_x, &P::v_y, &P::v_z)>(m_particles,
+                                                                 m_realm,
+                                                                 m_phase,
+                                                                 m_velocityField,
+                                                                 m_interpolation,
+                                                                 true);
 }
 
 template <typename P>
@@ -509,7 +518,7 @@ template <typename P>
 inline void
 TracerParticleSolver<P>::writePlotData(LevelData<EBCellFAB>& a_output,
                                        int&                  a_comp,
-                                       const std::string     a_outputRealm,
+                                       const std::string&    a_outputRealm,
                                        const int             a_level) const noexcept
 {
   CH_TIME("TracerParticleSolver::writePlotData");
@@ -563,7 +572,7 @@ TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
@@ -578,7 +587,7 @@ TracerParticleSolver<P>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
   const Interval srcInterv(0, numComp - 1);
@@ -639,13 +648,14 @@ TracerParticleSolver<P>::computeDt() const
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const List<P>& particles = m_particles[lvl][din].listItems();
+      const ParticleSoA<P>&     leaf        = m_particles[lvl][din];
+      const std::size_t         n           = leaf.size();
+      const ParticleReal* const v[SpaceDim] = {
+        D_DECL(leaf.template column<&P::v_x>(), leaf.template column<&P::v_y>(), leaf.template column<&P::v_z>())};
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        const RealVect& v = lit().velocity();
-
+      for (std::size_t i = 0; i < n; i++) {
         for (int dir = 0; dir < SpaceDim; dir++) {
-          dt = std::min(dt, dx / std::abs(v[dir]));
+          dt = std::min(dt, dx / std::abs(static_cast<Real>(v[dir][i])));
         }
       }
     }
@@ -727,30 +737,6 @@ TracerParticleSolver<P>::getInterpolationType() const
   }
 
   return m_interpolation;
-}
-
-template <typename P>
-template <class T, class Ret, Ret (T::*MemberFunc)() const>
-void
-TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
-                                          const ParticleContainer<T>& a_particles,
-                                          const DepositionType        a_baseDeposition,
-                                          const CoarseFineDeposition  a_coarseFineDeposition) const noexcept
-{
-  CH_TIME("TracerParticleSolver::depositParticles()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticles()" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  m_amr->depositParticles<T, Ret, MemberFunc>(a_phi,
-                                              m_realm,
-                                              m_phase,
-                                              a_particles,
-                                              a_baseDeposition,
-                                              a_coarseFineDeposition,
-                                              false);
 }
 
 #include <CD_NamespaceFooter.H>

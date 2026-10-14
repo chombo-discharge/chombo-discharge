@@ -3,7 +3,7 @@
 Radiative transfer
 ==================
 
-The radiative transfer model runs a single solver using the :ref:`Chap:RtSolver` interface, where the underlying solver can derived from any subclass of :ref:`Chap:RtSolver`.
+The radiative transfer model runs a single solver using the :ref:`Chap:RtSolver` interface, where the underlying solver can be derived from any subclass of :ref:`Chap:RtSolver`.
 This module is designed to show how to set up and run :ref:`Chap:RtSolver`, and the code was not written to solve any particular problem.
 Selecting between different types of solvers must be done at compile time. 
 

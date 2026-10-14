@@ -5,7 +5,7 @@
 
 .. warning::
 
-   This section is not very well documented. The following featurse are definitely missing:
+   This section is not very well documented. The following features are definitely missing:
 
    * Use of hybrid models (PPC-fluid specifications)
    * How the physics time step is restricted
@@ -69,15 +69,16 @@ These limits are given by the following input variables:
 
 .. literalinclude:: ../../../../Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepper.options
    :language: text
-   :lines: 22-35
+   :lines: 20-32
 
 Particle placement
 ------------------
 
-The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support three methods for placing new particles:
+The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support four methods for placing new particles:
 
 #. Place all particles on the cell centroid.
 #. Randomly distribute the new particles within the grid cell.
+#. Place each new particle on top of one of the particles already in the cell, drawn with probability proportional to the parent weight.
 #. Compute an upstream position within the grid cell and randomly distribute the particles in the downstream region.
 
 The methods each have their advantages and disadvantages.
@@ -85,9 +86,234 @@ Placing all new particles on the cell centroid has the advantage that there will
 Randomly distributing the new particles has the advantage that it generates secondary particles more evenly over the reaction region.
 Both these methods (``centroid`` and ``random``) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
+The parent method avoids it in a different way: it introduces no sub-grid transport at all, since a new particle simply inherits the position of one that was already there.
 See :ref:`Chap:ItoKMCJSON` for instructions on how to assign the particle placement method.
 
+.. _Chap:ItoKMCCdrProducts:
 
+CDR reaction products
+---------------------
+
+A reaction can create both Îto and CDR products, and the two do not have to reach the mesh the same way.
+Îto products are particles at a sub-cell position, and reach the mesh through the Îto solvers' deposition kernel, which is usually not nearest-grid-point.
+CDR products have no particles of their own, so the reaction network's per-cell production can simply be added to the cell that computed it.
+An ionization event then spreads the electron's charge over a deposition stencil while leaving the ion's charge in a single cell, which is a spurious charge separation on the cell scale, proportional to the ionization rate and therefore largest at the streamer head.
+
+Which of the two is used is set by
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.cdr_products = particle  # 'mesh' or 'particle'
+
+``mesh``
+   Add the production straight into the cell that produced it.
+
+``particle``
+   Emit the production as computational particles and deposit them exactly as the Îto solvers deposit theirs -- same kernel, same coarse-fine strategy, same cut-cell strategy, including the mirroring or redistribution passes that go with it.
+   Both halves of a reaction then reach the mesh the same way.
+   This is the default.
+
+Only *production* becomes particles.
+Mass removed from a CDR species is proportional to the cell-averaged density, which carries no sub-cell information, so it is subtracted in the cell it was taken from.
+The reaction network reports a net change per species, which is split by sign for this.
+
+.. note::
+
+   The production is partitioned into at most ``ItoKMCJSON.max_new_particles`` computational particles of integer weight, exactly as the Îto products are.
+   That key must be at least 1; the run aborts otherwise.
+   The placement is stochastic, so the deposited production carries a sampling error falling off as :math:`1/\sqrt{N}` in the number of particles used.
+
+.. note::
+
+   The ``parent`` placement method (see :ref:`Chap:ItoKMCJSONParticlePlacement`) does not apply to CDR products.
+   A CDR product has no parents in the cell -- its particle container is transient and holds only what the current time step created -- so it falls back to a uniformly random position within the cell.
+   The other three placement methods apply unchanged.
+
+.. warning::
+
+   ``ItoKMCGodunovStepper.redistribute_cdr`` is ignored when ``cdr_products = particle``.
+   The reactive redistribution exists to correct the :math:`\kappa` damping that the in-cell injection imposes on a cut-cell reaction; once the production is deposited by the Îto solver it carries the solver's own cut-cell normalization, and there is no such damping left to correct.
+
+.. warning::
+
+   Photoionization products are unaffected by this setting.
+   They are created at the photon absorption position and have no in-cell representation to fall back on, so they are always deposited -- nearest-grid-point under ``mesh``, and with the Îto solvers' deposition under ``particle``.
+
+Reactive field centering
+------------------------
+
+The transport step is semi-implicit, so the electric field it ends on, :math:`\mathbf{E}^{k+1}`, is the field
+*after* the plasma has screened it.
+Evaluating the whole reactive substep at that field therefore biases the rate coefficients low wherever screening
+occurs, and because the Townsend coefficient is strongly field-dependent a modest field error turns into a much
+larger error in the ionization rate.
+The chemistry is therefore evaluated at
+
+.. math::
+
+   \mathbf{E} = \left(1-\theta\right)\mathbf{E}^k + \theta\mathbf{E}^{k+1},
+
+where :math:`\mathbf{E}^k` is the field at the start of the step and :math:`\theta` is set by
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.reactive_E_centering = 0.5  # Time-centering of E in the reactive step
+
+The default :math:`\theta = 0.5` is the time-centered field, which removes the leading-order bias.
+Setting :math:`\theta = 1` recovers the end-of-step field and :math:`\theta = 0` the field the step started from.
+Values outside :math:`\left[0,1\right]` extrapolate past fields that were never solved for, and are rejected at
+run time.
+
+.. note::
+
+   This centering applies to the reactions only.
+   The drift update keeps using :math:`\mathbf{E}^{k+1}` together with the lagged mobility, because that is the
+   pairing assumed by the semi-implicit Poisson operator.
+
+The :math:`\nabla D` drift correction
+-------------------------------------
+
+The particles are advanced with the drift :math:`\mathbf{V} + \nabla D` rather than :math:`\mathbf{V}` alone, so
+that they transport the same diffusive flux as the CDR solvers -- see :ref:`Chap:ItoDiffusionGradient` for why the
+term is there and how to turn it off.
+
+Where the term is applied matters for the semi-implicit coupling.
+The transport step splits the particle update as
+
+.. math::
+
+   \mathbf{X}^{k+1} = \mathbf{X}^k + \underbrace{\sqrt{2D^k\Delta t}\mathbf{W} + \Delta t\nabla D^k}_{\textrm{explicit}}
+   + \underbrace{\Delta t\mu^k\mathbf{E}^{k+1}\left(\mathbf{X}^k\right)}_{\textrm{implicit}},
+
+and the semi-implicit Poisson equation
+
+.. math::
+
+   \nabla\cdot\left[\left(\epsilon + \Delta t\sigma^k\right)\nabla\Phi^{k+1}\right] = -\rho^\dagger
+
+is exact only because :math:`\rho^\dagger` is deposited from particles displaced by everything *except* the
+:math:`\Delta t\mu\mathbf{E}^{k+1}` term, and because that remaining term is linear in :math:`\mathbf{E}^{k+1}`.
+:math:`\nabla D^k` is lagged and independent of the field, so it belongs in the explicit half, next to the
+stochastic hop, where :math:`\rho^\dagger` accounts for it exactly.
+Nothing about the Poisson operator, the conductivity, or the final update changes.
+This is the same treatment the CDR half of the step already gives the explicit
+:math:`\Delta t\nabla\cdot\left(D\nabla n^k\right)`.
+
+.. warning::
+
+   Enabling this correction changes results for any simulation whose diffusion coefficient varies in space,
+   which includes every model using a tabulated :math:`D\left(E/N\right)`.
+   The uncorrected particle swarm lags the fluid solution by of order :math:`\left|\nabla D\right|/\left|\mathbf{V}\right|`,
+   which is a few percent at a streamer head in atmospheric air.
+
+
+
+The diffusion hop at embedded boundaries
+----------------------------------------
+
+The Euler-Maruyama update displaces particles by :math:`\sqrt{2D\Delta t}\mathbf{W}` without asking whether the
+result lies inside the solid.
+The random walk therefore has no boundary condition at the embedded boundary: a particle in the fluid can hop into
+the solid, and there are none inside to hop back out.
+The charge that goes with it is deposited in a covered cell, which carries no cut-cell volume and contributes
+nothing to :math:`\rho`, so the near-wall region drains at a rate set by :math:`\sqrt{2D\Delta t}/\Delta x` rather
+than by anything physical.
+What this looks like in a simulation is a spurious *positive* space charge confined to the cut-cell layer, one cell
+wide at every resolution, present whenever the electrons are Ito particles and absent when their diffusion
+coefficient is set to zero.
+
+What happens instead is selected with
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.diffusive_deposit = reflect_ito  # 'inside', 'cancel', 'reflect_rho' or 'reflect_ito'
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 30 50
+
+   * - Setting
+     - Particle trajectory
+     - :math:`\rho^\dagger` deposit
+   * - ``inside``
+     - untouched
+     - deposited inside the solid, and thus lost
+   * - ``cancel``
+     - untouched
+     - deposited at the pre-hop position
+   * - ``reflect_rho``
+     - untouched
+     - mirrored about the boundary
+   * - ``reflect_ito``
+     - mirrored about the boundary
+     - follows the corrected hop
+
+The crossing point is located with the same intersection algorithm the owning :ref:`Chap:ItoSolver` is configured
+with (``ItoSolver.intersection_alg`` and ``ItoSolver.bisect_step``), so that reflection and the absorption test
+later in the advance agree on where the surface is.
+The surface normal is taken from the gradient of the implicit function there and the overshoot is mirrored about
+it, so a point that would have landed at depth :math:`d` inside comes to rest at depth :math:`d` outside.
+A reflection that cannot place the particle back in the fluid -- at a concave corner, or in a feature thinner than
+the hop -- is retried once and then falls back to the pre-hop position.
+Counts of crossings, and of reflections that fell back, are printed at ``ItoKMCGodunovStepper.verbosity > 5``.
+
+A separate switch controls whether the stochastic hop enters :math:`\rho^\dagger` at all:
+
+.. code-block:: text
+
+   ItoKMCGodunovStepper.rho_dagger_hop = true  # Include the stochastic hop in rho^dagger
+
+With ``false`` the particle still takes the hop, but the deposit displaces by :math:`\Delta t\nabla D` alone.
+The :math:`\nabla D` drift is never left out, being deterministic mean transport that the explicit half of the
+semi-implicit split must account for exactly.
+
+.. _Chap:ItoKMCDiffusiveDepositApproximation:
+
+Why ``reflect_ito`` is the default
+__________________________________
+
+``reflect_ito`` makes the boundary *reflecting* for the diffusive part of the step while it stays *absorbing* for
+the drift part, since a particle carried into the surface by :math:`\Delta t\mu\mathbf{E}` still intersects and is
+absorbed later in the advance.
+That split follows the operator splitting rather than anything physical, and it is a deliberate approximation
+rather than a boundary condition.
+It is worth stating why it is nonetheless the right default here, because the argument does not survive a change of
+regime.
+
+Diffusive loss of electrons to an anode is real, and with the ions far less mobile it does produce a genuine
+depletion layer carrying net positive charge.
+The question is whether that layer is representable.
+Its thickness is the convection-diffusion scale :math:`D_e/v_{\textrm{drift}}`, which for atmospheric air over
+:math:`E = 10^6` to :math:`3\times 10^7` V/m is roughly :math:`0.5` to :math:`1.3\,\mu\textrm{m}`; the Debye length
+at :math:`n_e \sim 10^{20}\,\textrm{m}^{-3}` and :math:`T_e \sim 3` to :math:`5` eV is :math:`1.3` to
+:math:`1.7\,\mu\textrm{m}`.
+A typical discharge simulation resolves cells one to two orders of magnitude coarser than this, so the layer sits
+below the grid scale.
+In the example cases the ions are additionally configured immobile and non-diffusive, so the ion half of the sheath
+cannot respond at *any* resolution.
+
+What ``inside`` produces in its place is not that layer.
+Its width is the hop length :math:`\sqrt{2D_e\Delta t}`, which is typically several times wider than the physical
+layer and is tied to :math:`\Delta t` and :math:`\Delta x` rather than to :math:`D_e` and the wall.
+The endpoint crossing test is also only :math:`O(\sqrt{\Delta t})` accurate for an absorbing wall
+:cite:`Peters2002`, so the loss it produces does not converge under time-step refinement.
+Suppressing the diffusive wall loss entirely is therefore closer to the truth than resolving it badly: the physical
+effect is invisible on the grid, and the alternative is an artefact several times larger standing in for it.
+
+.. warning::
+
+   This reasoning has limits, and ``reflect_ito`` becomes the wrong choice outside them.
+   Reconsider the setting if the mesh resolves below roughly one micron, if the ions are made mobile or diffusive
+   so that the sheath can respond, or if anode-sheath dynamics are themselves the object of study.
+   In those regimes a first-passage treatment of the absorbing wall, applied to the whole displacement rather than
+   to the diffusive part alone, is the correct construction and is not implemented here.
+
+.. note::
+
+   Two cases are not detected.
+   A hop passing clean *through* geometry thinner than ``ItoSolver.bisect_step`` leaves both endpoints outside the
+   solid and is invisible to the crossing test, and a reflected position is not tested against the domain
+   boundary.
 
 
 Spatial filtering
@@ -160,7 +386,7 @@ Species are defined either as input species for CDR solvers (see :ref:`Chap:CdrS
 It is sufficient to populate the ``ItoKMCPhysics`` species vectors ``m_cdrSpecies`` and ``m_itoSpecies`` if one only wants to initialize the solvers.
 See :ref:`Chap:ItoKMCPhysics` for their C++ definition.
 In addition to actually populating the vectors, users will typically also include initial conditions for the species.
-The interfaces permit initial particles and density functions for both both solver types.
+The interfaces permit initial particles and density functions for both solver types.
 Additionally, one must define all species associated with radiative transfer solvers.
 
 .. _Chap:ItoKMCPlasmaReaction:
@@ -200,7 +426,7 @@ Note that if the reaction was :math:`A + A\xrightarrow{c_2}\varnothing` then the
 since there are :math:`\frac{1}{2}X_A\left(X_A-1\right)` distinct pairs of particles of type :math:`A`.
 Likewise, the fluid rate coefficient would be :math:`k_2 = c_2\Delta V/2`.
 
-The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates :math:`c_j`, and it is us to the user to ensure that these are consistent with the fluid limit.
+The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates :math:`c_j`, and it is up to the user to ensure that these are consistent with the fluid limit.
 Internally, these reactions are implemented through the dual state KMC implementation, see :ref:`Chap:KineticMonteCarlo`.
 During the reaction advance the user only needs to update the :math:`c_j` coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine ``updateReactionRates(...)``, see :ref:`Chap:ItoKMCPhysics` for the complete specification.
@@ -239,7 +465,7 @@ There are two ways of doing this:
    This can imply a large computational cost since one will have to track all photons that are generated.
 
 The former method is normally the preferred way as it can lead to reductions in computational complexity and particle noise, but for flexibility ``ItoKMCPhysics`` supports both of these.
-The latter method can be of relevance if users wants precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).
+The latter method can be of relevance if users want precise descriptions of photons that trigger both photoionizing reactions and surface reactions (e.g., secondary electron emission).
    
 An alternative is to split the photon type :math:`\gamma` into volumetrically absorbed and surface absorbed photon species :math:`\gamma_v` and :math:`\gamma_s`.
 In this case one may pre-scale the photon-generating reactions by the photo-reaction probabilities :math:`\xi` (for volume absorption) and :math:`\zeta` (for surface absorption) as follows:
@@ -296,7 +522,7 @@ Caveats
 
 There are some caveats with using the time step limitation given above.
 For example, if there are no electrons in the simulation region, the above method will (correctly) return a very large time step based on the behavior of the other species.
-But one may very have *detachment* of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
+But one may very well have *detachment* of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
 Because of this, the above constraint is also applied on proxy-states of :math:`\vec{X}` that have been completely exhausted through critical reactions, which provides a much more reasonable time step.
 
 A second factor involved in the time step calculation above is that one may have regions where :math:`X_i` is very small, but where :math:`\sum_r \nu_{ri} a_r` is very high.
@@ -475,7 +701,7 @@ In principle, the molar fraction can have a positional dependency.
 .. warning::
 
    There's no internal renormalization of the molar fractions input by the user.
-   Internal inconsitencies will occur if the user supplies inputs molar fractions that sum to a number different than one.
+   Internal inconsistencies will occur if the user supplies inputs molar fractions that sum to a number different than one.
 
    Various checks will be enabled if the user compiles in debug-mode (see :ref:`Chap:Installation`), but these checks are not guaranteed to catch all cases.
 
@@ -691,10 +917,10 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	  "header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)", // Optional argument. Contains line immediately preceding the data to be read.
 	  "E/N column" : 0,                                          // Optional specification of column containing E/N (defaults to 0)
 	  "alpha/N column" : 1,                                      // Optional specification of column containing alpha/N (defaults to 1)
-	  "min E/N" : 1.0,                                           // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	  "min E/N" : 1.0,                                           // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	  "max E/N" : 1000.0,                                        // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	  "num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
-	  "spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	  "spacing" : "exponential",                                 // Optional specification of table representation. Defaults to 'exponential' but can also be 'linear'
 	  "scale E/N" : 1.0,                                         // Optional scaling of the column containing E/N
 	  "scale alpha/N" : 1.0                                      // Optional scaling       
        }
@@ -881,9 +1107,9 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
           "diffusive" : false,                             // Not diffusive
           "mobility" : {
 	     "type" : "table vs E/N",                      // Specification of tabulated mobility lookup method
-	     "file" : "bolsig_air.dat",                    // File containg the mobility data
+	     "file" : "bolsig_air.dat",                    // File containing the mobility data
 	     "dump" : "debug_mobility.dat",                // Optional argument for dumping table to disk (useful for debugging)		
-	     "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
+	     "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the column data
 	     "E/N column" : 0,                             // Column containing E/N
 	     "mu*N column" : 1,                            // Column containing mu*N
 	     "min E/N" : 1,                                // Minimum E/N kept when resampling table
@@ -904,7 +1130,7 @@ Parallel diffusion
 ^^^^^^^^^^^^^^^^^^
 
 ``ItoKMCJSON`` can limit diffusion against the electric field (or strictly speaking, the particle drift direction).
-The species specification permits a flag ``diffusion model`` that defauls to isotropic diffusion.
+The species specification permits a flag ``diffusion model`` that defaults to isotropic diffusion.
 However, it is possible to set this to other types of diffusion models.
 Currently, the available options are
 
@@ -942,7 +1168,7 @@ The temperature can be specified through the ``temperature`` field for each spec
 
 .. important::
    
-   If the specifies temperature is *not* specified by the user, it will be set equal to the background gas temperature.
+   If the specified temperature is *not* specified by the user, it will be set equal to the background gas temperature.
 
 Background gas
 ^^^^^^^^^^^^^^
@@ -1085,7 +1311,7 @@ For example, to add two particles with particle weights of 1, one may specify
        }
     ]
 
-The various supported ways of additional initial particles are discussed below.
+The various supported ways of adding initial particles are discussed below.
 
 .. important::
 
@@ -1325,7 +1551,7 @@ A basic definition of a single photon species is
 	    "id": "Y",              // Photon species id. Must be unique
 	    "kappa": {              // Specification of absorption coefficient. 
 		"type": "constant", // Specify constant absorption coefficient
-		"value": 1E4        // Value of the absorption coefficeint
+		"value": 1E4        // Value of the absorption coefficient
 	    }
 	}
     ]
@@ -1340,14 +1566,14 @@ Multiple photon species are added by appending with more entries, e.g.
 	    "id": "Y1",             // Photon species id. Must be unique
 	    "kappa": {              // Specification of absorption coefficient. 
 		"type": "constant", // Specify constant absorption coefficient
-		"value": 1E4        // Value of the absorption coefficeint
+		"value": 1E4        // Value of the absorption coefficient
 	    }
 	},
 	{
 	    "id": "Y2",             // Photon species id. Must be unique
 	    "kappa": {              // Specification of absorption coefficient. 
 		"type": "constant", // Specify constant absorption coefficient
-		"value": 1E4        // Value of the absorption coefficeint
+		"value": 1E4        // Value of the absorption coefficient
 	    }
 	}	
     ]
@@ -1416,7 +1642,7 @@ The ``stochastic B`` specifier computes a random absorption length from the expr
    \kappa = \left(\chi_{\textrm{min}}p_i\right)\left(\frac{\chi_{\textrm{max}}}{\chi_{\textrm{min}}}\right)^u,
 
 where :math:`p_i` is the partial pressure of some species :math:`i`, and :math:`p_i\chi_{\textrm{min}}` and :math:`p_i\chi_{\textrm{max}}` are minimum and maximum absorption lengths, and :math:`u` is a random number between 0 and 1.
-Note that that this is just a simpler way of using the ``stochastic A`` specifier above. 
+Note that this is just a simpler way of using the ``stochastic A`` specifier above. 
 The user must specify :math:`\chi_{\textrm{min}}`, :math:`\chi_{\textrm{max}}`, and the background species used when computing :math:`p_i`.
 This is done through fields ``chi min``, ``chi max``, and ``neutral``.
 For example:
@@ -1491,16 +1717,16 @@ For example:
    ]
 
 which is equivalent to the reaction :math:`\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+`.
-Each species must be separated by whitespace and a addition operator.
+Each species must be separated by whitespace and an addition operator.
 For example, the specification ``A + B + C`` will be interpreted as a reaction :math:`\text{A} + \text{B} + \text{C}` but the specification ``A+B + C`` will be interpreted as a reaction between one species ``A+B`` and another species ``C`` .
 
 Internally, both the left- and right-hand sides are checked against background and plasma species.
 The program will perform a run-time exit if the species are not defined in these lists.
-Note that the right-hand side can additonal contain photon species.
+Note that the right-hand side can additionally contain photon species.
 
 .. tip::
 
-   Products not not defined as a species can be enclosed by parenthesis ``(`` and ``)``.
+   Products not defined as a species can be enclosed by parenthesis ``(`` and ``)``.
 
 The reaction string generally expects all species on each side of the reaction to be defined.
 It is, however, occasionally useful to include products which are *not* defined.
@@ -1703,7 +1929,7 @@ An example JSON specification is
 Efficiency
 __________
 
-Reactions efficiencies can be modified in the same way as one do with the ``scale`` field, e.g. modify the rate constant as
+Reaction efficiencies can be modified in the same way as one does with the ``scale`` field, e.g. modify the rate constant as
 
 .. math::
 
@@ -1753,7 +1979,7 @@ An example file is e.g.
    500  0.8
    1000 1.0
    
-This data is then internally convered to a uniformly spaced lookup table (see :ref:`Chap:LookupTable`).
+This data is then internally converted to a uniformly spaced lookup table (see :ref:`Chap:LookupTable`).
 
 Efficiency vs E
 ^^^^^^^^^^^^^^^^^
@@ -1812,13 +2038,13 @@ Rate-based
 The reaction rate can be modified by a factor :math:`k_r/\left[k_r + k_p + k_q\right]`.
 The intention behind this scaling is that reaction :math:`r` occurs only if it is not predissociated (by rate :math:`k_p`) or quenched (by rate :math:`k_q`).
 Such processes can occur, for example, in excited molecules.
-This will modifiy the rate constant as
+This will modify the rate constant as
 
 .. math::
 
    k \rightarrow k\frac{k_r}{k_r + k_p + k_q},
 
-where the user will specifiy :math:`k_r`, :math:`k_p`, and :math:`k_q/N`.
+where the user will specify :math:`k_r`, :math:`k_p`, and :math:`k_q/N`.
 The JSON specification must contain ``quenching rates``, for example:
 
 .. code-block:: json
@@ -1983,14 +2209,23 @@ To enable a time step calculation, specify the ``include_dt_calc`` flag in the r
 
    It is normally sufficient to enable :math:`\Delta t` calculations for the ionizing reactions.
 
+.. _Chap:ItoKMCJSONParticlePlacement:
+
 Particle placement
 ------------------
 
 Specification of secondary particle placement is done through the JSON file by specifying the ``particle placement`` field.
-Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
-The method is specified through the ``method`` specifier, which must either be ``centroid``, ``random``, or ``downstream``.
+Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, inherited from one of the particles that are already in the cell, or placed randomly in the downstream region of some user-defined species.
+The method is specified through the ``method`` specifier, which must either be ``centroid``, ``random``, ``parent``, or ``downstream``.
 If specifying ``downstream``, one must also include a species specifier (which must correspond to one of the plasma species).
-The following three specifies are all valid:
+
+The ``parent`` method draws one of the particles that were already in the cell, with probability proportional to its weight, and puts the new particle on top of it.
+This is the placement that introduces no sub-grid transport of its own: unlike ``random`` it does not scatter the new weight across the cell, and unlike ``centroid`` it does not pull the new weight towards the cell centre.
+Both of those act as numerical transport terms whose magnitude is set by the grid resolution rather than by the physics.
+If the cell holds no particles of the species in question -- which happens for photoionization products -- ``parent`` falls back to ``random``.
+It also falls back to ``random`` for CDR reaction products, which have no parents at all -- see :ref:`Chap:ItoKMCCdrProducts`.
+
+The following four specifiers are all valid:
 
 .. code-block:: json
 		
@@ -2002,6 +2237,11 @@ The following three specifies are all valid:
     "particle placement":
     {
        "method": "random"
+    }
+
+    "particle placement":
+    {
+       "method": "parent"
     }
 
     "particle placement":
@@ -2106,7 +2346,7 @@ An example JSON specification that enables secondary electron emission due to ph
       }
    ]
 
-The ``reaction`` field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the left hand side must contain the secondary emissions.
+The ``reaction`` field specifies which reaction is triggered: The left hand side is the primary (outgoing) species and the right hand side must contain the secondary emissions.
 The left-hand side can consist of either photons (e.g., ``Y``) or particle (e.g., ``O2+``) species.
 The efficiency field specifies the efficiency of the reaction.
 When multiple reactions are specified, we randomly sample the reaction according to a discrete distribution with probabilities
@@ -2116,7 +2356,7 @@ When multiple reactions are specified, we randomly sample the reaction according
    p(i) = \frac{\nu_i}{\sum_i \nu_i},
 
 where :math:`\nu_i` are the efficiencies.
-Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has not real effect.
+Note that the efficiencies do not need to sum to one, and if only a single reaction is specified the efficiency specifier has no real effect.
 The above reactions include the null reaction in order to ensure that the correct secondary emission probability is reached, where the ``(null)`` specifier implies that no secondary emission takes place.
 In the above example the probability of secondary electron emission is 0.1, while the probability of a null-reaction (outgoing particle is absorbed without any associated emission) is 0.9.
 The above example can be compressed by using a wildcard and an ``efficiencies`` array as follows:
@@ -2224,7 +2464,7 @@ For example, some care might be required when using the Townsend attachment coef
 
 .. warning::
 
-   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
+   The JSON interface *does not guard* against inconsistencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
 
 Tips and tricks
 ---------------
@@ -2291,6 +2531,8 @@ Example programs that use the Îto-KMC module are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic` for a basic streamer discharge in atmospheric air.
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD` for a streamer discharge over a dielectric.
+* :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/ComparisonCdrPlasma` for the same streamer discharge run with both the
+  Îto-KMC and the ``CdrPlasma`` model, using the same geometry, transport data, chemistry, and initial particles.
 
 Setting up a new problem
 ========================

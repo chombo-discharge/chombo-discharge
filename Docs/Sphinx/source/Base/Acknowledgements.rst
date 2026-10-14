@@ -4,7 +4,7 @@ Acknowledgements
 ================
 
 Substantial efforts have been made in writing ``chombo-discharge``.
-Publications that arise from the use of ``chombo-discharge`` must acknowledge it's usage and cite the appropriate methodology papers.
+Publications that arise from the use of ``chombo-discharge`` must acknowledge its usage and cite the appropriate methodology papers.
 Currently, if you use ``chombo-discharge`` you should cite the following method paper: 
 
 .. code-block:: text

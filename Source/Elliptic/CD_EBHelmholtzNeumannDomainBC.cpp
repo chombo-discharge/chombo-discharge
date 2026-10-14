@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -18,14 +19,9 @@
 #include <CD_EBHelmholtzNeumannDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC()
+EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC() : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC()");
-
-  m_multByBco = true;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(const Real a_DphiDn)
@@ -99,8 +95,8 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                         const BaseFab<Real>&  a_Bcoef,
                                         const int&            a_dir,
                                         const Side::LoHiSide& a_side,
-                                        const DataIndex&      a_dit,
-                                        const bool            a_useHomogeneous) const
+                                        const DataIndex& /*a_dit*/,
+                                        const bool a_useHomogeneous) const
 {
   CH_TIME("EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, DataIndex, bool)");
 
@@ -120,6 +116,9 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     else if (m_useFunction) {
 
       // Kernel -- get dphi/dn at spatial position.
+      // Not auto-vectorizable: per-cell out-of-line getBoundaryPosition() and the std::function BC
+      // evaluation m_functionDphiDn(pos). This runs only for function-based Neumann BCs (the constant
+      // case above is a single setVal); it is the position-only-std::function family pattern.
       auto kernel = [&](const IntVect& iv) -> void {
         const RealVect pos    = this->getBoundaryPosition(iv, a_dir, a_side);
         const Real     DphiDn = m_functionDphiDn(pos);
@@ -128,20 +127,20 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       };
 
       // Execute the kernel.
-      BoxLoops::loop(a_faceFlux.box(), kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
     }
 
-    // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the input value
-    // is already multiplied by the B-coefficient.
+    // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the
+    // input value is already multiplied by the B-coefficient.
     if (m_multByBco) {
-      this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+      ChomboDischarge::EBHelmholtzNeumannDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
     }
   }
 }
 
 Real
-EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
-                                        const EBCellFAB&      a_phi,
+EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex& a_vof,
+                                        const EBCellFAB& /*a_phi*/,
                                         const EBFaceFAB&      a_Bcoef,
                                         const int&            a_dir,
                                         const Side::LoHiSide& a_side,
@@ -157,7 +156,6 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
   }
   else {
     const int            isign   = (a_side == Side::Lo) ? -1 : 1;
-    const IntVect        iv      = a_vof.gridIndex();
     const EBISBox&       ebisbox = m_eblg.getEBISL()[a_dit];
     const ProblemDomain& domain  = m_eblg.getDomain();
 
@@ -181,7 +179,6 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
             centeredDphiDn = m_functionDphiDn(this->getBoundaryPosition(curVof.gridIndex(), a_dir, a_side));
           }
           else {
-            centeredDphiDn = 0.0;
             MayDay::Error("EBHelmholtzNeumannDomainBC::getFaceFlux - logic bust");
           }
 
@@ -204,6 +201,12 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
   }
 
   return centroidFlux;
+}
+
+Real
+EBHelmholtzNeumannDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
+{
+  return 0.0;
 }
 
 #include <CD_NamespaceFooter.H>

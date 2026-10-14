@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MechanicalShaft.cpp
-  @brief  Implementation of CD_MechanicalShaft.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MechanicalShaft.cpp
+ * @brief  Implementation of CD_MechanicalShaft.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <string>
@@ -31,8 +32,10 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+/// @endcond
 
 MechanicalShaft::MechanicalShaft() noexcept
 {
@@ -76,7 +79,7 @@ MechanicalShaft::defineElectrode() noexcept
 
   Vector<Real> v;
   std::string  orientation = "+z";
-  Vec3         translate   = Vec3::zero();
+  Vec3         translate   = Vec3::zeros();
 
   bool live        = false;
   Real length      = -1.0;
@@ -115,8 +118,8 @@ MechanicalShaft::defineElectrode() noexcept
 
   outerCylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, outerRadius - halfCurv);
   innerCylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, innerRadius + halfCurv);
-  outerTorus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), outerRadius - halfCurv, halfCurv);
-  innerTorus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), innerRadius + halfCurv, halfCurv);
+  outerTorus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zeros(), outerRadius - halfCurv, halfCurv);
+  innerTorus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zeros(), innerRadius + halfCurv, halfCurv);
 
   hollowCylinder = EBGeometry::Difference<Real>(outerCylinder, innerCylinder);
   hollowCylinder = EBGeometry::Union<Real>(hollowCylinder, outerTorus);
@@ -170,11 +173,11 @@ MechanicalShaft::defineDielectric() noexcept
 
   ParmParse pp("MechanicalShaft");
 
-  std::string shape       = "";
+  std::string shape;
   std::string orientation = "+z";
 
   Real eps       = -1.0;
-  Vec3 translate = Vec3::zero();
+  Vec3 translate = Vec3::zeros();
 
   Vector<Real> v;
 
@@ -254,7 +257,7 @@ MechanicalShaft::getSimpleCylinder() const noexcept
 
   CH_assert(radius > 0.0);
 
-  return std::make_shared<EBGeometry::InfiniteCylinderSDF<Real>>(Vec3::zero(), radius, 2);
+  return std::make_shared<EBGeometry::InfiniteCylinderSDF<Real>>(Vec3::zeros(), radius, 2);
 }
 
 std::shared_ptr<ImpFunc>
@@ -335,7 +338,7 @@ MechanicalShaft::getCircularProfiles() const noexcept
 
   const Real inf = std::numeric_limits<Real>::max();
 
-  const Vec3 center = Vec3::zero();
+  const Vec3 center = Vec3::zeros();
   const Vec3 transl = profileTranslate * Vec3::unit(2);
   const Vec3 period = Vec3(inf, inf, profilePeriod);
   const Vec3 repLo  = profileRepLo * Vec3::unit(2);

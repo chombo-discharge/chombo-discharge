@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EBFluxRedistribution.cpp
-  @brief  Implementation of CD_EBFluxRedistribution.cpp
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_EBFluxRedistribution.cpp
+ * @brief  Implementation of CD_EBFluxRedistribution.cpp
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -22,11 +23,9 @@
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-EBFluxRedistribution::EBFluxRedistribution() noexcept
+EBFluxRedistribution::EBFluxRedistribution() noexcept : m_isDefined(false)
 {
   CH_TIME("EBFluxRedistribution::EBFluxRedistribution(weak)");
-
-  m_isDefined = false;
 }
 
 EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
@@ -63,7 +62,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
                              const EBLevelGrid& a_eblgFine,
                              const int          a_refToCoar,
                              const int          a_refToFine,
-                             const bool         a_redistributeOutside) noexcept
+                             const bool /*a_redistributeOutside*/) noexcept
 {
   CH_TIME("EBFluxRedistribution::define");
 
@@ -74,7 +73,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
   m_refToFine           = -1;
   m_hasCoar             = false;
   m_hasFine             = false;
-  m_redistributeOutside = false; //a_redistributeOutside;
+  m_redistributeOutside = false; // a_redistributeOutside;
 
   if (a_eblgCoar.isDefined()) {
     CH_assert(a_refToCoar >= 2);
@@ -100,7 +99,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
     m_hasFine   = true;
 
     // Gods how I hate filling EBISLayouts. But in this case we need it because if the user has asked for
-    // a larger refinement ratio than we have ghost cells, we need to explicity fetch the necessary geometric
+    // a larger refinement ratio than we have ghost cells, we need to explicitly fetch the necessary geometric
     // data in a larger radius than what is available in the input arguments.
     if (m_refToFine > a_eblgRefined.getGhost()) {
       DisjointBoxLayout dblRefined;
@@ -126,10 +125,12 @@ EBFluxRedistribution::defineStencils() noexcept
 {
   CH_TIMERS("EBFluxRedistribution::defineStencils");
 
+  // clang-format off
   // TLDR: This is a bit involved since we need to define stencils on the valid cut-cells on this level. If there's an EBCF interface we
   //       need to know about it because we don't want to:
   //       1) Redistribute from this level into ghost cells on the other side of the coarse-fine interface. That mass should go on the coarse level.
   //       2) Redistribute from this level into regions covered by the finer grid. That mass should go on the fine level instead.
+  // clang-format on
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const DataIterator&      dit   = dbl.dataIterator();
@@ -149,9 +150,10 @@ EBFluxRedistribution::defineStencils() noexcept
 
   const int nbox = dit.size();
 
-  // These are maps of the valid cells on this level, and cells that lie on the interface. The interfaceCells data is used to figure out
-  // which cells we will redistribute to when we redistribute from a cut-cell and across the coarse-fine interface into a coarse-grid cell. The
-  // validCells is used for 1) restricting which cells we redistribute from, and 2) which fine-grid cells redistribute to.
+  // These are maps of the valid cells on this level, and cells that lie on the interface. The interfaceCells data is
+  // used to figure out which cells we will redistribute to when we redistribute from a cut-cell and across the
+  // coarse-fine interface into a coarse-grid cell. The validCells is used for 1) restricting which cells we
+  // redistribute from, and 2) which fine-grid cells redistribute to.
   LevelData<BaseFab<bool>> interfaceCellsLD;
   LevelData<BaseFab<bool>> validCellsLD;
 
@@ -205,7 +207,8 @@ EBFluxRedistribution::defineStencils() noexcept
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex& vof = vofit();
 
-      // Get the VoFs in the neighborhood of this VoF. When we redistribute, also permit self-redistribution back into this cell.
+      // Get the VoFs in the neighborhood of this VoF. When we redistribute, also permit self-redistribution back into
+      // this cell.
       const bool             includeSelf  = true;
       const Vector<VolIndex> neighborVoFs = VofUtils::getVofsInRadius(vof,
                                                                       ebisBox,
@@ -313,8 +316,8 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     a_validCells[din].setVal(true);
   }
 
-  // If there's a finer level we need to figure out which cells on the fine level overlap with this level. Then we set those cells
-  // to 'false'. If there's no finer level then all cells on this level are valid cells.
+  // If there's a finer level we need to figure out which cells on the fine level overlap with this level. Then we set
+  // those cells to 'false'. If there's no finer level then all cells on this level are valid cells.
   if (m_hasFine) {
     DisjointBoxLayout dblCoFi;
     coarsen(dblCoFi, m_eblgFine.getDBL(), m_refToFine);
@@ -349,18 +352,18 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box cellBox = dbl[din];
-
       BaseFab<bool>&   validCells = a_validCells[din];
       const FArrayBox& mask       = data[din];
 
+      // Not auto-vectorizable: one-time (regrid) setup loop with a data-dependent conditional write
+      // to a bool mask.
       auto kernel = [&](const IntVect& iv) -> void {
         if (mask(iv) > 0.0) {
           validCells(iv) = false;
         }
       };
 
-      BoxLoops::loop(mask.box(), kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(mask.box(), kernel);
     }
   }
 }
@@ -488,11 +491,10 @@ EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCo
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblCoar    = m_eblgCoarsened.getDBL();
-  const DataIterator&      ditCoar    = dblCoar.dataIterator();
-  const EBISLayout&        ebislCoar  = m_eblgCoarsened.getEBISL();
-  const ProblemDomain&     domainCoar = m_eblgCoarsened.getDomain();
-  const int                nbox       = ditCoar.size();
+  const DisjointBoxLayout& dblCoar   = m_eblgCoarsened.getDBL();
+  const DataIterator&      ditCoar   = dblCoar.dataIterator();
+  const EBISLayout&        ebislCoar = m_eblgCoarsened.getEBISL();
+  const int                nbox      = ditCoar.size();
 
   LevelData<EBCellFAB> coarBuffer(dblCoar, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebislCoar));
 
@@ -547,11 +549,10 @@ EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
   CH_assert(a_phi.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const DataIterator&      dit    = dbl.dataIterator();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const int                nbox   = dit.size();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const DataIterator&      dit   = dbl.dataIterator();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const int                nbox  = dit.size();
 
   LevelData<EBCellFAB> levelBuffer(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebisl));
 

@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -17,12 +18,9 @@
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDirichletDomainBCFactory::EBHelmholtzDirichletDomainBCFactory()
+EBHelmholtzDirichletDomainBCFactory::EBHelmholtzDirichletDomainBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzDirichletDomainBCFactory::EBHelmholtzDirichletDomainBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzDirichletDomainBCFactory::EBHelmholtzDirichletDomainBCFactory(const Real a_value)
@@ -76,10 +74,11 @@ EBHelmholtzDirichletDomainBCFactory::create() const
   CH_assert(m_useConstant || m_useFunction);
 
   // Also issue a run-time error if user forgot to set the BC.
-  if (!(m_useConstant || m_useFunction))
+  if (!(m_useConstant || m_useFunction)) {
     MayDay::Error("EBHelmholtzDirichletDomainBCFactory::create - logic bust, not using function or constant!");
+  }
 
-  auto bc = new EBHelmholtzDirichletDomainBC();
+  auto* bc = new EBHelmholtzDirichletDomainBC();
 
   if (m_useConstant) {
     bc->setValue(m_constantValue);

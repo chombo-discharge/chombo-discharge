@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -20,15 +21,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_useConstant(false), m_useFunction(false), m_order(-1), m_weight(-1)
 {
   CH_TIME("MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
-
-  m_order  = -1;
-  m_weight = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()
@@ -129,7 +124,6 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      box     = dbl[din];
     const EBISBox& ebisbox = m_eblg.getEBISL()[din];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
@@ -152,7 +146,8 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
       // that fall within the quadrant that the cut-cell normal points into.
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
+        fluxStencil  = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
+        foundStencil = (fluxStencil.size() > 0);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
@@ -164,7 +159,8 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
       // If the above failed we try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
+        fluxStencil  = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
+        foundStencil = (fluxStencil.size() > 0);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
@@ -173,8 +169,8 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         }
       }
 
-      // The above stencil is a stencil for interpolating to the cut-cell centroid. We must have the stencil in flux form, using
-      // the expression A*phi + B*dphi/dn = C. Set Robin BC constants and scale stencil accordingly.
+      // The above stencil is a stencil for interpolating to the cut-cell centroid. We must have the stencil in flux
+      // form, using the expression A*phi + B*dphi/dn = C. Set Robin BC constants and scale stencil accordingly.
       if (foundStencil) {
         Real A;
         Real B;
@@ -209,7 +205,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         fluxStencil.clear();
       }
@@ -220,17 +216,19 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                             EBCellFAB&             a_Lphi,
-                                             const EBCellFAB&       a_phi,
+MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                             EBCellFAB&   a_Lphi,
+                                             const EBCellFAB& /*a_phi*/,
                                              const BaseIVFAB<Real>& a_Bcoef,
                                              const DataIndex&       a_dit,
                                              const Real&            a_beta,
                                              const bool&            a_homogeneousPhysBC) const
 {
 
+  // clang-format off
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored
   //       the term b*A*phi/B in the interpolation stencil and return it to the operator. The other term we compute below.
+  // clang-format on
 
   if (!a_homogeneousPhysBC) {
     auto kernel = [&](const VolIndex& vof) -> void {
@@ -264,8 +262,6 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhas
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 VoFStencil
@@ -278,9 +274,11 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
 
   CH_assert(a_order > 0);
 
+  // clang-format off
   // TLDR: This routine will compute a stencil for interpolating the mesh data to the embedded boundary centroid using least squares reconstruction
   //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
   //       the same as the order.
+  // clang-format on
 
   const EBISBox& ebisbox     = m_eblg.getEBISL()[a_dit];
   const bool     useStartVof = !(
@@ -325,7 +323,7 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   // If we have enough equations we can get an interpolation stencil.
   VoFStencil interpStencil;

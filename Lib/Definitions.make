@@ -55,7 +55,77 @@ XTRACPPFLAGS += $(GEOMETRIES_INCLUDE)
 # EBGeometry submodule needs to be visible.
 XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/EBGeometry
 
-# Source and Geometries libraries should always be visible. 
+# Build provenance. GenerateGitHash.sh writes CD_GIT_HASH -- the git description of this source tree
+# -- into a generated header, which CD_DischargeIO.cpp turns into DischargeIO::gitHash(). The header
+# lives outside Source/ so that it is invisible to Doxygen (Docs/doxygen.conf reads only
+# Source/Geometries/Physics) and to SOURCE_DIRS, and it is deliberately NOT a -D flag: Chombo's
+# dependency tracking keys on files, never on the VALUES of -D flags, so a hash passed that way would
+# silently never trigger a rebuild. The script rewrites the header only when the hash changes, so the
+# timestamp-based dependency tracking recompiles exactly one object file, and only when it must.
+#
+# The script is run at makefile-parse time rather than from a rule, because Definitions.make is
+# included by every sub-build (Source, Geometries, each Physics module, each application) and a rule
+# would have no single well-defined place to run first. It never fails: a missing git binary, a
+# release tarball with no .git, or a repository git refuses to touch all yield "unknown".
+#
+# The one-shot sentinel is exported for the same reason as CD_CONFIG_PRECISION_DONE below: recursive
+# $(MAKE) sub-builds re-parse this file, and the generation should happen once per build, not once
+# per recursion level -- which also keeps concurrent sub-makes under -j off the same output file.
+CD_BUILD_INFO_DIR := $(DISCHARGE_HOME)/Lib/Generated
+
+XTRACPPFLAGS += -I$(CD_BUILD_INFO_DIR)
+
+ifndef CD_GIT_HASH_DONE
+$(shell $(DISCHARGE_HOME)/Lib/GenerateGitHash.sh $(CD_BUILD_INFO_DIR)/CD_GitHash.H)
+CD_GIT_HASH_DONE := 1
+endif
+export CD_GIT_HASH_DONE
+
+# Particle payload precision (sets ParticleReal via -DCD_PARTICLE_REAL). Analogous to Chombo's
+# PRECISION flag, but it governs ONLY the SoA particle payload columns -- position and weight are
+# always double regardless. Set it on the command line (make PARTICLE_PRECISION=FLOAT) or in
+# Lib/Local/Make.defs.local; it defaults to DOUBLE. The value is resolved lazily (deferred) because
+# this file is included before Make.defs.local, and it is appended only to our own XTRACPPFLAGS --
+# so no modification of Chombo's makefile system is required.
+PARTICLE_PRECISION ?= DOUBLE
+XTRACPPFLAGS += -DCD_PARTICLE_REAL=$(if $(filter FLOAT,$(PARTICLE_PRECISION)),float,$(if $(filter \
+DOUBLE,$(PARTICLE_PRECISION)),double,$(error PARTICLE_PRECISION must be DOUBLE or FLOAT, got \
+'$(PARTICLE_PRECISION)')))
+
+# Fold BOTH floating-point precisions into Chombo's configuration string, in the order
+# <Chombo PRECISION>.<payload PARTICLE_PRECISION>, so every build artifact (o/<config>/,
+# lib<name><config>.a, main<config>.ex) is uniquely named by the precision of the mesh data AND of
+# the particle payload -- e.g. ...MPI.DOUBLE.FLOAT.ex. Distinct configs keep the object trees
+# separate, so a precision switch rebuilds cleanly and reuses each tree on switch-back. Without this,
+# Chombo's dependency tracking -- which keys only on source/header files, never on -D flag VALUES --
+# would never rebuild on a PARTICLE_PRECISION change: the switch would be silently ignored, or a
+# partial rebuild would mix objects with different sizeof(ParticleReal) into one ODR-violating binary.
+# Both halves are always explicit (DOUBLE included), unlike Chombo's native _precision which omits it.
+#
+# PRECISION must be given a default here, for the SAME reason PARTICLE_PRECISION is: the top-level
+# orchestrator (GNUmakefile) includes THIS file and exports XTRACONFIG to its recursive Chombo
+# sub-build, but it never reads Chombo's Make.defs.local where PRECISION is normally set. Without a
+# default $(PRECISION) is empty there, so the orchestrator builds/names the Chombo libraries as
+# ...OPENMPCC..DOUBLE while every app build (which DOES read Make.defs.local) computes
+# ...OPENMPCC.DOUBLE.DOUBLE -- a permanent mismatch that makes the prebuilt Chombo libraries
+# invisible and forces a second, redundant Chombo rebuild. `?=' yields to a real Make.defs.local or
+# command-line setting (e.g. PRECISION=FLOAT), so this only fills in the orchestrator's blank.
+PRECISION ?= DOUBLE
+#
+# The append is resolved lazily, so $(PRECISION)/$(PARTICLE_PRECISION) pick up values from
+# Make.defs.local, which is read after this file. It must also be IDEMPOTENT: Chombo exports
+# XTRACONFIG (mk/Make.rules), so recursive $(MAKE) sub-builds -- e.g. an app's `dependencies' rule
+# building discharge-lib, or the top-level orchestrator building Chombo -- inherit it through the
+# environment. A bare `+=' would re-append the token at every recursion level (...DOUBLE.FLOAT.DOUBLE
+# .FLOAT) and break library/object lookup. The one-shot sentinel below, exported so nested makes see
+# it, makes the append happen exactly once across the whole recursive build.
+ifndef CD_CONFIG_PRECISION_DONE
+XTRACONFIG += .$(PRECISION).$(PARTICLE_PRECISION)
+CD_CONFIG_PRECISION_DONE := 1
+endif
+export CD_CONFIG_PRECISION_DONE
+
+# Source and Geometries libraries should always be visible.
 XTRALIBFLAGS += $(addprefix -l, $(SOURCE_LIB))$(config)
 XTRALIBFLAGS += $(addprefix -l, $(GEOMETRIES_LIB))$(config)
 XTRALIBFLAGS += -L/$(DISCHARGE_HOME)/Lib

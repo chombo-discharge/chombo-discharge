@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EBAMRDataImplem.H
-  @brief  Implementation of EBAMRData.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_EBAMRDataImplem.H
+ * @brief  Implementation of EBAMRData.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_EBAMRDataImplem_H
-#define CD_EBAMRDataImplem_H
+#ifndef CD_EBAMRDATAIMPLEM_H
+#define CD_EBAMRDATAIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -104,9 +105,48 @@ template <typename T>
 void
 EBAMRData<T>::exchange() noexcept
 {
-  for (int lvl = 0; lvl < m_data.size(); lvl++) {
-    m_data[lvl]->exchange();
+  CH_TIMERS("EBAMRData<T>::exchange()");
+  CH_TIMER("EBAMRData<T>::exchange()::post", t1);
+  CH_TIMER("EBAMRData<T>::exchange()::local", t2);
+  CH_TIMER("EBAMRData<T>::exchange()::wait", t3);
+
+  // Pipeline the hierarchy instead of running one complete MPI round per level. Every level's messages go onto
+  // the wire first, then the on-rank copies run while they are in flight, and only then does anything wait. The
+  // exposed cost is the slowest single level rather than the sum over levels, and no level's messages are held
+  // back by the on-rank work of the levels below it.
+  //
+  // This is safe because the send and receive buffers, and the MPI requests, live on the Copier -- and each
+  // level's LevelData owns its own exchange Copier. The levels therefore never alias one another's buffers.
+  // Message matching is unchanged as well: every rank still posts its levels in the same order, so MPI's
+  // non-overtaking guarantee pairs sends with receives exactly as it does when the levels run one at a time.
+  //
+  // The IntVect::Zero test is the one LevelData::exchange() makes for itself. A level with no ghost cells has
+  // nothing to exchange, so it must be skipped here rather than handed to exchangePost().
+  const int numLevels = m_data.size();
+
+  CH_START(t1);
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_data[lvl]->ghostVect() != IntVect::Zero) {
+      m_data[lvl]->exchangePost(m_data[lvl]->exchangeCopier());
+    }
   }
+  CH_STOP(t1);
+
+  CH_START(t2);
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_data[lvl]->ghostVect() != IntVect::Zero) {
+      m_data[lvl]->exchangeLocal(m_data[lvl]->exchangeCopier());
+    }
+  }
+  CH_STOP(t2);
+
+  CH_START(t3);
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_data[lvl]->ghostVect() != IntVect::Zero) {
+      m_data[lvl]->exchangeEnd();
+    }
+  }
+  CH_STOP(t3);
 }
 
 template <typename T>
@@ -139,7 +179,7 @@ EBAMRData<T>::getRealm() const noexcept
 
 template <typename T>
 void
-EBAMRData<T>::setRealm(const std::string a_realm) noexcept
+EBAMRData<T>::setRealm(const std::string& a_realm) noexcept
 {
   m_realm = a_realm;
 }
@@ -156,7 +196,7 @@ template class EBAMRData<DomainFluxIFFAB>;
 template class EBAMRData<BaseFab<bool>>;
 template class EBAMRData<FArrayBox>;
 
-// Typedefs for simple typing.
+/// @cond DOXYGEN_SKIP
 typedef EBAMRData<MFCellFAB>       MFAMRCellData; // Cell-centered multifluid data
 typedef EBAMRData<MFFluxFAB>       MFAMRFluxData; // Face-centered multifluid data
 typedef EBAMRData<MFBaseIVFAB>     MFAMRIVData;   // Irregular face multifluid data
@@ -167,6 +207,7 @@ typedef EBAMRData<BaseIVFAB<Real>> EBAMRIVData;   // Data on irregular data cent
 typedef EBAMRData<DomainFluxIFFAB> EBAMRIFData;   // Data on domain phases
 typedef EBAMRData<BaseFab<bool>>   EBAMRBool;     // For holding bool at every cell
 typedef EBAMRData<FArrayBox>       EBAMRFAB;      // Just regular grid data.
+/// @endcond
 
 #include <CD_NamespaceFooter.H>
 

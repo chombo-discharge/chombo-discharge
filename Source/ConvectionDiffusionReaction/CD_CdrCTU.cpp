@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrCTU.cpp
-  @brief  Implementation of CD_CdrCTU.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_CdrCTU.cpp
+ * @brief  Implementation of CD_CdrCTU.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -19,15 +20,13 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrCTU::CdrCTU()
+CdrCTU::CdrCTU() : m_limiter(Limiter::MonotonizedCentral), m_useCTU(true)
 {
   CH_TIME("CdrCTU::CdrCTU()");
 
   // Class and object name
   m_className = "CdrCTU";
   m_name      = "CdrCTU";
-  m_limiter   = Limiter::MonotonizedCentral;
-  m_useCTU    = true;
 }
 
 CdrCTU::~CdrCTU()
@@ -69,6 +68,69 @@ CdrCTU::parseRuntimeOptions()
   this->parseRegridSlopes();          // Parses regrid slopes
 }
 
+void
+CdrCTU::allocate()
+{
+  CH_TIME("CdrCTU::allocate()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::allocate()" << endl;
+  }
+
+  CdrMultigrid::allocate();
+  this->defineIterators();
+}
+
+void
+CdrCTU::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+{
+  CH_TIME("CdrCTU::preRegrid(int, int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::preRegrid(int, int)" << endl;
+  }
+
+  CdrMultigrid::preRegrid(a_lbase, a_oldFinestLevel);
+  m_grownVofIter.resize(0);
+}
+
+void
+CdrCTU::regrid(const int a_lbase, const int a_oldFinestLevel, const int a_newFinestLevel)
+{
+  CH_TIME("CdrCTU::regrid(int, int, int)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::regrid(int, int, int)" << endl;
+  }
+
+  CdrMultigrid::regrid(a_lbase, a_oldFinestLevel, a_newFinestLevel);
+  this->defineIterators();
+}
+
+void
+CdrCTU::defineIterators()
+{
+  CH_TIME("CdrCTU::defineIterators()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::defineIterators()" << endl;
+  }
+
+  const int finest = m_amr->getFinestLevel();
+
+  m_grownVofIter.resize(1 + finest);
+
+  for (int lvl = 0; lvl <= finest; lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+
+    m_grownVofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const Box      grownBox = grow(dbl[dit], 1) & domain;
+      const EBISBox& ebisbox  = ebisl[dit()];
+      (*m_grownVofIter[lvl])[dit()].define(ebisbox.getIrregIVS(grownBox), ebisbox.getEBGraph());
+    }
+  }
+}
+
 Real
 CdrCTU::computeAdvectionDt()
 {
@@ -84,17 +146,17 @@ CdrCTU::computeAdvectionDt()
   }
   else {
 
-    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these three papers for details:
+    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these three
+    // papers for details:
     //
     //       Colella, J. Comp. Phys. 87 (171-200), 1990
     //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
     //       Minion, J. Comp. Phys 123 (435), 1996
     if (m_isMobile) {
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-        const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-        const Real               dx    = m_amr->getDx()[lvl];
-        const DataIterator&      dit   = dbl.dataIterator();
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+        const Real               dx  = m_amr->getDx()[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
 
         const int nbox = dit.size();
 
@@ -104,17 +166,22 @@ CdrCTU::computeAdvectionDt()
 
           const Box        cellBox = dbl[din];
           const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
-          const EBISBox&   ebisBox = ebisl[din];
 
-          VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+          // Use the precomputed not-covered mask (1 in regular/irregular cells, 0 in covered) instead of a per-cell
+          // out-of-line EBISBox::isRegular query, and iterate only the MULTI-valued cut-cells below. Singly-cut cells
+          // are handled by the regular box loop (their single-valued cell velocity equals the VoF velocity), so cut
+          // cells are no longer processed twice and the min-reduction is unchanged.
+          VoFIterator& vofit = (*m_amr->getMultiCutVofIterator(m_realm, m_phase)[lvl])[din];
 
           // Regular grid data.
-          const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+          const BaseFab<Real>& veloReg    = velo.getSingleValuedFAB();
+          const BaseFab<Real>& notCovered = (*m_amr->getNotCoveredCells(m_realm, m_phase)[lvl])[din]
+                                              .getSingleValuedFAB();
 
           // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
           auto regularKernel = [&](const IntVect& iv) -> void {
             Real velMax = 0.0;
-            if (ebisBox.isRegular(iv)) {
+            if (notCovered(iv, m_comp) > 0.0) {
               for (int dir = 0; dir < SpaceDim; dir++) {
                 velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
               }
@@ -138,7 +205,7 @@ CdrCTU::computeAdvectionDt()
           };
 
           // Execute the kernels.
-          BoxLoops::loop(cellBox, regularKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
           BoxLoops::loop(vofit, irregularKernel);
         }
       }
@@ -223,10 +290,10 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
       const Box      cellBox = dbl[din];
       const EBISBox& ebisbox = ebisl[din];
 
-      // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost cell for
-      // the slopes because in order to extrapolate to the left/right sides of a face, we need the centered slope on both
-      // sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope is computed using the
-      // left/right slopes, we end up needing two grid cells.
+      // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost
+      // cell for the slopes because in order to extrapolate to the left/right sides of a face, we need the centered
+      // slope on both sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope
+      // is computed using the left/right slopes, we end up needing two grid cells.
       Box grownBox = cellBox;
       grownBox.grow(1);
       EBCellFAB normalSlopes(ebisbox, grownBox, SpaceDim);
@@ -260,14 +327,13 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
   const Box&     domainBox = a_domain.domainBox();
   const EBISBox& ebisbox   = a_cellPhi.getEBISBox();
-  const EBGraph& ebgraph   = ebisbox.getEBGraph();
 
   // Compute slopes in regular cells.
   BaseFab<Real>&       slopesReg = a_normalSlopes.getSingleValuedFAB();
   const BaseFab<Real>& phiReg    = a_cellPhi.getSingleValuedFAB();
 
-  // Compute slopes in regular grid cells. Note that we need to grow the input box by one ghost cell in direction 'dir' because we need the
-  // centered slopes on both sides of the faces that we extrapolate to.
+  // Compute slopes in regular grid cells. Note that we need to grow the input box by one ghost cell in direction 'dir'
+  // because we need the centered slopes on both sides of the faces that we extrapolate to.
   for (int dir = 0; dir < SpaceDim; dir++) {
 
     // Grown box
@@ -291,8 +357,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     CH_assert(a_domain.contains(bndryHi));
 
     // Irregular kernel domain -- also does boundary cells if they are cut.
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownBox);
-    VoFIterator      vofit(irregIVS, ebgraph);
+    VoFIterator& vofit = (*m_grownVofIter[a_level])[a_dit];
 
     const IntVect shift = BASISV(dir);
 
@@ -316,7 +381,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->minmod(dwl, dwr);
+          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -334,7 +399,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->superbee(dwl, dwr);
+          slopesReg(iv, dir) = superbee(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -349,7 +414,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->monotonizedCentral(dwl, dwr);
+          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -428,17 +493,17 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         break;
       }
       case Limiter::MinMod: {
-        a_normalSlopes(vof, dir) = this->minmod(dwl, dwr);
+        a_normalSlopes(vof, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
 
         break;
       }
       case Limiter::Superbee: {
-        a_normalSlopes(vof, dir) = this->superbee(dwl, dwr);
+        a_normalSlopes(vof, dir) = superbee(dwl, dwr);
 
         break;
       }
       case Limiter::MonotonizedCentral: {
-        a_normalSlopes(vof, dir) = this->monotonizedCentral(dwl, dwr);
+        a_normalSlopes(vof, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
 
         break;
       }
@@ -449,9 +514,9 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     };
 
     // Apply the kernels. Beware of corrected slopes near the boundaries.
-    BoxLoops::loop(interiorCells, regularKernel);
-    BoxLoops::loop(bndryLo, boundaryKernelLo);
-    BoxLoops::loop(bndryHi, boundaryKernelHi);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryLo, boundaryKernelLo);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryHi, boundaryKernelHi);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -465,8 +530,8 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
                const ProblemDomain& a_domain,
                const Box&           a_cellBox,
                const int&           a_level,
-               const DataIndex&     a_dit,
-               const Real&          a_dt)
+               const DataIndex& /*a_dit*/,
+               const Real& a_dt)
 {
   CH_TIME("CdrCTU::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
   if (m_verbosity > 5) {
@@ -502,8 +567,8 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     const BaseFab<Real>& regCellVel = a_cellVel.getSingleValuedFAB();
     const BaseFab<Real>& regFaceVel = a_faceVel[dir].getSingleValuedFAB();
 
-    // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is defined
-    // by the faces of this box (in direction dir).
+    // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is
+    // defined by the faces of this box (in direction dir).
     const Vector<FaceIndex> irregFaces = ebgraph.getIrregFaces(a_cellBox, dir);
 
     // Interior faces.
@@ -512,7 +577,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     interiorFaces.grow(dir, -1);
     interiorFaces.surroundingNodes(dir);
 
-    // Bounary faces on lo/high side.
+    // Boundary faces on lo/high side.
     Box bndryFacesLo = adjCellLo(domainBox, dir, -1);
     Box bndryFacesHi = adjCellHi(domainBox, dir, -1);
 
@@ -656,7 +721,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               if (a_cellVel(vofLeft, transverseDir) < 0.0 && a_domain.contains(ivLeftUp)) {
                 const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofLeft, transverseDir, Side::Hi);
 
-                const int nFaces = facesHi.size();
+                const int nFaces = static_cast<int>(facesHi.size());
 
                 if (nFaces > 0) {
                   Real phiUp = 0.0;
@@ -672,7 +737,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               else if (a_cellVel(vofLeft, transverseDir) > 0.0 && a_domain.contains(ivLeftDown)) {
                 const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofLeft, transverseDir, Side::Lo);
 
-                const int nFaces = facesLo.size();
+                const int nFaces = static_cast<int>(facesLo.size());
 
                 if (nFaces > 0) {
                   Real phiDown = 0.0;
@@ -690,7 +755,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               if (a_cellVel(vofRigh, transverseDir) < 0.0 && a_domain.contains(ivRighUp)) {
                 const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofRigh, transverseDir, Side::Hi);
 
-                const int nFaces = facesHi.size();
+                const int nFaces = static_cast<int>(facesHi.size());
 
                 if (nFaces > 0) {
                   Real phiUp = 0.0;
@@ -705,7 +770,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
               else if (a_cellVel(vofRigh, transverseDir) > 0.0 && a_domain.contains(ivRighDown)) {
                 const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofRigh, transverseDir, Side::Lo);
 
-                const int nFaces = facesLo.size();
+                const int nFaces = static_cast<int>(facesLo.size());
 
                 if (nFaces > 0) {
                   Real phiDown = 0.0;
@@ -751,15 +816,15 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     };
 
     // Launch the kernels.
-    BoxLoops::loop(interiorFaces, regularKernel);
-    BoxLoops::loop(bndryFacesLo, boundaryKernelLo);
-    BoxLoops::loop(bndryFacesHi, boundaryKernelHi);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(interiorFaces, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesLo, boundaryKernelLo);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesHi, boundaryKernelHi);
     BoxLoops::loop(irregFaces, irregularKernel);
   }
 }
 
 Real
-CdrCTU::minmod(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -771,13 +836,13 @@ CdrCTU::minmod(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::superbee(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
   if (dwl * dwr > 0.0) {
-    const Real s1 = this->minmod(dwl, 2 * dwr);
-    const Real s2 = this->minmod(dwr, 2 * dwl);
+    const Real s1 = ChomboDischarge::CdrCTU::minmod(dwl, 2 * dwr);
+    const Real s2 = ChomboDischarge::CdrCTU::minmod(dwr, 2 * dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;
@@ -788,7 +853,7 @@ CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

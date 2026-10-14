@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrMultigrid.cpp
-  @brief  Implementation of CD_CdrMultigrid.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_CdrMultigrid.cpp
+ * @brief  Implementation of CD_CdrMultigrid.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -21,18 +22,16 @@
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-CdrMultigrid::CdrMultigrid() : CdrSolver()
+CdrMultigrid::CdrMultigrid() : m_hasMultigridSolver(false)
 {
   CH_TIME("CdrMultigrid::CdrMultigrid()");
 
   // Default settings
-  m_name               = "CdrMultigrid";
-  m_className          = "CdrMultigrid";
-  m_hasMultigridSolver = false;
+  m_name      = "CdrMultigrid";
+  m_className = "CdrMultigrid";
 }
 
-CdrMultigrid::~CdrMultigrid()
-{}
+CdrMultigrid::~CdrMultigrid() = default;
 
 void
 CdrMultigrid::registerOperators()
@@ -85,7 +84,7 @@ CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta)
     Vector<MGLevelOp<LevelData<EBCellFAB>>*> multigridOperators = m_multigridSolver->getAllOperators();
 
     for (int i = 0; i < multigridOperators.size(); i++) {
-      TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)multigridOperators[i];
+      auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)multigridOperators[i];
 
       helmholtzOperator->setAlphaAndBeta(a_alpha, a_beta);
     }
@@ -113,7 +112,7 @@ CdrMultigrid::setMultigridSolverCoefficients()
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     CH_assert(!(operatorsAMR[lvl] == nullptr));
 
-    EBHelmholtzOp& op = static_cast<EBHelmholtzOp&>(*operatorsAMR[lvl]);
+    auto& op = static_cast<EBHelmholtzOp&>(*operatorsAMR[lvl]);
 
     op.setAcoAndBco(m_helmAcoef[lvl], m_faceCenteredDiffusionCoefficient[lvl], m_ebCenteredDiffusionCoefficient[lvl]);
   }
@@ -130,7 +129,7 @@ CdrMultigrid::setMultigridSolverCoefficients()
     for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
       CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
 
-      EBHelmholtzOp& op = static_cast<EBHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+      auto& op = static_cast<EBHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
 
       op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
     }
@@ -154,7 +153,8 @@ CdrMultigrid::computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& 
   m_amr->alias(LphiPtr, a_kappaLphi);
   m_amr->alias(phiPtr, a_phi);
 
-  // Need to reset to make sure we are computing kappa*div(D*grad(phi)) and not something like kappa*(phi - div(D*grad(phi))).
+  // Need to reset to make sure we are computing kappa*div(D*grad(phi)) and not something like kappa*(phi -
+  // div(D*grad(phi))).
   this->resetAlphaAndBeta(0.0, 1.0);
 
   m_multigridSolver->computeAMROperator(LphiPtr, phiPtr, finestLevel, coarsestLevel, false);
@@ -185,8 +185,9 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     //          kappa*L(phi) = kappa*rho
     //
-    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
-    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass
+    //       this into multigrid. We assume that the user has provided a source-term that comes in is already weighted,
+    //       but that the old solution comes in unweighted.
 
     // Set up multigrid again because the diffusion coefficients might have changed underneath us.
     if (!m_hasMultigridSolver) {
@@ -200,13 +201,15 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     //     kappa * phi^(k+1) - kappa*dt*L(phi^(k+1)) = kappa * phi^k + kappa*dt*S
     //
-    // we need to put the right-hand side somewhere. We use scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted.
+    // we need to put the right-hand side somewhere. We use scratch for holding kappa*phi^k + kappa*dt*S. Note that we
+    // assume that S comes in weighted.
     DataOps::copy(scratch, a_oldPhi);
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
     DataOps::incr(scratch, a_source, a_dt);
 
-    // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
-    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those.
+    // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the
+    // left-hand side in the above equation are absorbed into the Helmholtz operator so we don't need to worry about
+    // those.
     this->resetAlphaAndBeta(1.0, -a_dt);
 
     // Aliasing because Chombo did not always use smart pointers.
@@ -229,11 +232,59 @@ CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     // Set the convergence metric.
     m_multigridSolver->m_convergenceMetric = zeroResid;
 
-    // Always from previous solution.
+    // Always from previous solution (warm start).
     DataOps::copy(a_newPhi, a_oldPhi);
 
-    // Do the multigrid solve.
-    m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+    // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
+    // previous one (a_newPhi is updated in place). Begin at the policy's preferred index, which skips a
+    // persistently-failing GMG while latched onto the fallback.
+    // Snapshot the warm-start solution (the copy of the old state); a failed attempt reverts to it unless it reduced
+    // the residual (see keepOrRestore).
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+    if (useChain) {
+      m_krylov.snapshotGuess(newPhi, eulerRHS);
+    }
+
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool converged    = false;
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
+    for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+
+      if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+        pout() << "CdrMultigrid - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
+      }
+
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
+        m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+
+        const int status = m_multigridSolver->m_exitStatus;
+
+        converged    = (status == 1 || status == 8);
+        gmgAttempted = true;
+        gmgConverged = converged;
+      }
+      else {
+        converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
+      }
+
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(newPhi, eulerRHS);
+      }
+    }
+
+    m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                   gmgConverged,
+                                   m_krylov.lastKrylovIterations(),
+                                   m_krylovSettings.verbosity,
+                                   "CdrMultigrid");
   }
   else {
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -268,8 +319,9 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     //
     //          kappa*L(phi) = kappa*rho
     //
-    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
-    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass
+    //       this into multigrid. We assume that the user has provided a source-term that comes in is already weighted,
+    //       but that the old solution comes in unweighted.
 
     // Set up multigrid again because the diffusion coefficients might have changed underneath us.
     if (!m_hasMultigridSolver) {
@@ -281,14 +333,15 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
 
     // Make the right-hand side for the Euler equation. Since we are solving
     //
-    //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) +
+    //     kappa*dt*S^(k+1/2)
     //
-    // we need to put the right-hand side somewhere. We use scratch for holding the right-hand side. Note that S^(k+1/2) should come in weighted and the old solution
-    // come in unweighted.
+    // we need to put the right-hand side somewhere. We use scratch for holding the right-hand side. Note that S^(k+1/2)
+    // should come in weighted and the old solution come in unweighted.
 
     // First, put kappa*phi^k in scratch.
     DataOps::copy(scratch, a_oldPhi);
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
 
     // Add the source term, which by assumption comes in weighted by the volume fraction.
     DataOps::incr(scratch, a_source, a_dt);
@@ -307,8 +360,9 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // After this we have scratch = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
     DataOps::incr(scratch, kappaLphi, 0.5 * a_dt);
 
-    // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt. The kappas on the left-hand side
-    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those.
+    // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt.
+    // The kappas on the left-hand side in the above equation are absorbed into the Helmholtz operator so we don't need
+    // to worry about those.
     this->resetAlphaAndBeta(1.0, -0.5 * a_dt);
 
     // Aliasing because Chombo did not always use smart pointers.
@@ -328,11 +382,59 @@ CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
     // Set the convergence metric.
     m_multigridSolver->m_convergenceMetric = zeroResid;
 
-    // Always from previous solution.
+    // Always from previous solution (warm start).
     DataOps::copy(a_newPhi, a_oldPhi);
 
-    // Do the multigrid solve.
-    m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+    // Do the multigrid solve, trying the solver chain in order (e.g. 'gmg gmres'). Each attempt warm-starts from the
+    // previous one (a_newPhi is updated in place). Begin at the policy's preferred index, which skips a
+    // persistently-failing GMG while latched onto the fallback.
+    // Snapshot the warm-start solution (the copy of the old state); a failed attempt reverts to it unless it reduced
+    // the residual (see keepOrRestore).
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+    if (useChain) {
+      m_krylov.snapshotGuess(newPhi, eulerRHS);
+    }
+
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool converged    = false;
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
+    for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+
+      if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+        pout() << "CdrMultigrid - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
+      }
+
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
+        m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+
+        const int status = m_multigridSolver->m_exitStatus;
+
+        converged    = (status == 1 || status == 8);
+        gmgAttempted = true;
+        gmgConverged = converged;
+      }
+      else {
+        converged = m_krylov.solve(newPhi, eulerRHS, false, solverType, m_krylovSettings);
+      }
+
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(newPhi, eulerRHS);
+      }
+    }
+
+    m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                   gmgConverged,
+                                   m_krylov.lastKrylovIterations(),
+                                   m_krylovSettings.verbosity,
+                                   "CdrMultigrid");
   }
   else {
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -429,8 +531,12 @@ CdrMultigrid::setupHelmholtzFactory()
                              ghostRhs,
                              m_smoother,
                              relaxFactor,
+                             m_chebyOrder,
+                             m_chebyEigRatio,
+                             m_rasInnerSweeps,
                              bottomDomain,
-                             m_amr->getMaxBoxSize()));
+                             m_amr->getMaxBlockSize(),
+                             m_multigridRefluxFree));
 }
 
 void
@@ -442,7 +548,7 @@ CdrMultigrid::setupMultigrid()
   }
 
   // Select the bottom solver
-  LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
+  LinearSolver<LevelData<EBCellFAB>>* botsolver = nullptr;
   switch (m_bottomSolverType) {
   case BottomSolverType::Simple: {
     botsolver = &m_simpleSolver;
@@ -458,6 +564,8 @@ CdrMultigrid::setupMultigrid()
     botsolver = &m_gmres;
 
     m_gmres.m_verbosity = 0; // Shut up.
+
+    break;
   }
   default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");
@@ -523,6 +631,26 @@ CdrMultigrid::setupMultigrid()
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // Define the outer-Krylov adapter if requested (reuses the just-initialised multigrid solver as preconditioner).
+  if (m_krylovSettings.usesKrylov()) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylov.define(&(*m_multigridSolver),
+                    m_amr->getValidCells(m_realm),
+                    dxScal,
+                    0,
+                    finestLevel,
+                    m_krylovSettings.numVCycles);
+  }
 }
 
 void
@@ -586,8 +714,6 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
   else {
     DataOps::setValue(a_divJ, 0.0);
   }
-
-  return;
 }
 
 void
@@ -687,6 +813,8 @@ CdrMultigrid::parseMultigridSettings()
 
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
 
   pp.get("gmg_verbosity", m_multigridVerbosity);
@@ -698,9 +826,10 @@ CdrMultigrid::parseMultigridSettings()
   pp.get("gmg_exit_tol", m_multigridExitTolerance);
   pp.get("gmg_exit_hang", m_multigridExitHang);
   pp.get("gmg_min_cells", m_minCellsBottom);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
-  // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
-  // where <number> is the number of relaxation for the smoothing solver.
+  // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver =
+  // bicgstab or '= simple <number>' where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
     pp.get("gmg_bottom_solver", str);
@@ -733,8 +862,14 @@ CdrMultigrid::parseMultigridSettings()
       "CdrMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Relaxation type
-  pp.get("gmg_smoother", str);
+  // Relaxation type. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_chebyOrder     = 3;
+  m_chebyEigRatio  = 4.0;
+  m_rasInnerSweeps = 2;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_smoother = EBHelmholtzOp::Smoother::PointJacobi;
   }
@@ -743,6 +878,27 @@ CdrMultigrid::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_smoother = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_smoother = EBHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "CdrMultigrid::parseMultigridSettings - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_chebyOrder, 1);
+    pp.get("gmg_smoother", m_chebyEigRatio, 2);
+  }
+  else if (str == "ras") {
+    m_smoother = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "CdrMultigrid::parseMultigridSettings - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_rasInnerSweeps, 1);
   }
   else {
     MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown relaxation method requested");
@@ -753,14 +909,51 @@ CdrMultigrid::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
-    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.
   if (m_minCellsBottom < 2) {
     m_minCellsBottom = 2;
   }
+
+  // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
+  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
+  const int numKrylovSolvers = pp.countval("solver");
+
+  if (numKrylovSolvers < 1) {
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
+                  "'bicgstab'");
+  }
+
+  m_krylovSettings.solvers.resize(numKrylovSolvers);
+
+  for (int i = 0; i < numKrylovSolvers; i++) {
+    std::string solverStr;
+    pp.get("solver", solverStr, i);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
+  }
+
+  pp.get("krylov_eps", m_krylovSettings.eps);
+  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
+  pp.get("krylov_restart", m_krylovSettings.restart);
+  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+
+  // The Krylov solvers reuse the gmg_verbosity setting.
+  m_krylovSettings.verbosity = m_multigridVerbosity;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -15,9 +15,9 @@ The class is templated as
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 28-29
+   :lines: 30-31
 
-where the template parameter ``N`` indicates the number of dependent variables (``N=1`` yields a compile-time error).
+where the template parameter ``N`` indicates the number of dependent variables (``N=0`` yields a compile-time error).
 Internally, the data is stored as an ``std::vector<std::array<T, N + 1> >`` where the vector entries are rows and the ``std::array<T, N + 1>`` are the column entries in that row.
 
 .. tip::
@@ -43,7 +43,7 @@ To add data to the table, use the member function
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 59-65
+   :lines: 62-68
    :dedent: 2
 
 where the parameter pack must have ``N+1`` entries.
@@ -56,7 +56,7 @@ For example, to add two rows of data to a table with two dependent variables:
    myTable.addData(4.0, 5.0, 6.0);
    myTable.addData(1.0, 2.0, 3.0);   
 
-This will insert two new rows at the end up the table.
+This will insert two new rows at the end of the table.
 
 .. important::
 
@@ -73,7 +73,7 @@ To scale data in a particular column, use
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 84-90
+   :lines: 87-93
    :dedent: 2
 
 where ``K`` is the column to be scaled.
@@ -85,7 +85,7 @@ To swap columns in the table, use
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 74-82
+   :lines: 77-85
    :dedent: 2
 
 For example, if the input data looked like
@@ -114,7 +114,7 @@ One can restrict the data range of the table by calling
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 92-100
+   :lines: 95-105
    :dedent: 2
 
 where ``a_min`` and ``a_max`` are the permissible ranges for data in the input column (``a_column``).
@@ -137,7 +137,7 @@ A ``LookupTable1D`` is regularized through
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 116-123
+   :lines: 121-128
    :dedent: 2
 
 Here, ``a_independentVariable`` is the independent variable and ``a_numPoints`` is the number of grid points in the regularized table.
@@ -182,7 +182,7 @@ The function signatures are
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 125-138
+   :lines: 130-145
    :dedent: 2
 
 In the above, the template parameter ``K`` is the column to retrieve and ``a_x`` is the value of the independent variable.
@@ -222,7 +222,7 @@ To set the range strategy one can use
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 102-114
+   :lines: 107-119
    :dedent: 2
 
 where ``a_strategy`` must be either of
@@ -239,7 +239,7 @@ For debugging purposes, ``LookupTable1D`` can write the internal data to an outp
 
 .. literalinclude:: ../../../../Source/Utilities/CD_LookupTable1D.H
    :language: c++
-   :lines: 168-194
+   :lines: 175-201
    :dedent: 2
 
 These functions will print the table (either raw or regularized) to an output stream or file, and the user can later plot the data in an external plotting tool.

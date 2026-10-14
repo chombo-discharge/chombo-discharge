@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MeshODESolverImplem.H
-  @brief  Implementation of CD_MeshODESolver.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MeshODESolverImplem.H
+ * @brief  Implementation of CD_MeshODESolver.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_MeshODESolverImplem_H
-#define CD_MeshODESolverImplem_H
+#ifndef CD_MESHODESOLVERIMPLEM_H
+#define CD_MESHODESOLVERIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -25,15 +26,9 @@
 
 template <size_t N>
 MeshODESolver<N>::MeshODESolver()
+  : m_verbosity(-1), m_name("MeshODESolver"), m_className("MeshODESolver"), m_realm(Realm::Primal), m_phase(phase::gas)
 {
   CH_TIME("MeshODESolver::MeshODESolver()");
-
-  // Default settings.
-  m_verbosity = -1;
-  m_name      = "MeshODESolver";
-  m_className = "MeshODESolver";
-  m_phase     = phase::gas;
-  m_realm     = Realm::Primal;
 
   this->parseOptions();
 }
@@ -186,7 +181,12 @@ MeshODESolver<N>::setPhi(const std::function<Real(const RealVect& a_pos)>& a_phi
     pout() << m_name + "::setPhi(std::function, size_t)" << endl;
   }
 
-  DataOps::setValue(m_phi, a_phiFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);
+  DataOps::setValue(m_phi,
+                    a_phiFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    a_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 template <size_t N>
@@ -230,7 +230,7 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
-          phiFAB(iv, i) = y[i];
+          phiFAB(iv, static_cast<int>(i)) = y[i];
         }
       };
 
@@ -255,8 +255,10 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Run the kernels.
-      BoxLoops::loop(cellBox, regularKernel);
+      // Run the kernels. Not vectorizable: a_phiFunc(pos) is a std::function callback per cell.
+      // Multi-cut N/A: the regular kernel uses the cell-CENTER position while the irregular kernel uses the
+      // CENTROID (a_phiFunc is position-dependent), so singly-cut cells cannot fold into the regular kernel.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -271,7 +273,12 @@ MeshODESolver<N>::setRHS(const std::function<Real(const RealVect& a_pos)>& a_src
     pout() << m_name + "::setRHS(std::function, size_t)" << endl;
   }
 
-  DataOps::setValue(m_rhs, a_srcFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);
+  DataOps::setValue(m_rhs,
+                    a_srcFunc,
+                    m_amr->getProbLo(),
+                    m_amr->getDx(),
+                    a_comp,
+                    m_amr->getMultiCutVofIterator(m_realm, m_phase));
 }
 
 template <size_t N>
@@ -326,7 +333,7 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
 
           // Make y from the mesh data.
           for (size_t i = 0; i < N; i++) {
-            y[i] = phiFAB(iv, i);
+            y[i] = phiFAB(iv, static_cast<int>(i));
           }
 
           // Compute the right-hand side.
@@ -335,7 +342,7 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
-          rhsFAB(iv, i) = f[i];
+          rhsFAB(iv, static_cast<int>(i)) = f[i];
         }
       };
 
@@ -367,8 +374,13 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Run the kernels.
-      BoxLoops::loop(cellBox, regularKernel);
+      // Run the kernels. Not vectorizable: a_rhsFunction(y, m_time) is a std::function callback per cell.
+      // Multi-cut investigated, NOT applied: a_rhsFunction is position-independent so singly-cut cells could
+      // in principle fold into the regular kernel (not-covered mask + getMultiCutVofIterator). Not done
+      // because the not-covered mask also includes multi-valued cells, and letting the regular kernel write
+      // their single-valued-FAB entry (today left at 0) is not provably observationally-neutral; the gain is
+      // marginal since the per-cell std::function call dominates and stays non-vectorizable regardless.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -389,7 +401,7 @@ MeshODESolver<N>::allocate() noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept
+MeshODESolver<N>::preRegrid(const int /*a_lbase*/, const int /*a_oldFinestLevel*/) noexcept
 {
   CH_TIME("MeshODESolver::preRegrid(int, int)");
   if (m_verbosity > 5) {
@@ -478,7 +490,7 @@ MeshODESolver<N>::registerOperators() const noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::setRealm(const std::string a_realm) noexcept
+MeshODESolver<N>::setRealm(const std::string& a_realm) noexcept
 {
   CH_TIME("MeshODESolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -587,11 +599,11 @@ MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
   int numPlotVars = 0;
 
   if (m_plotPhi) {
-    numPlotVars += int(N);
+    numPlotVars += static_cast<int>(N);
   }
 
   if (m_plotRHS) {
-    numPlotVars += int(N);
+    numPlotVars += static_cast<int>(N);
   }
 
   return numPlotVars;
@@ -627,7 +639,7 @@ template <size_t N>
 void
 MeshODESolver<N>::writePlotData(LevelData<EBCellFAB>& a_output,
                                 int&                  a_icomp,
-                                const std::string     a_outputRealm,
+                                const std::string&    a_outputRealm,
                                 const int             a_level) const noexcept
 {
   CH_TIME("MeshODESolver::writePlotData");
@@ -694,7 +706,7 @@ MeshODESolver<N>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
   m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);
@@ -728,12 +740,17 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
+  read<EBCellFAB>(a_handle,
+                  *m_phi[a_level],
+                  m_name,
+                  m_amr->getGrids(m_realm)[a_level],
+                  Interval(0, static_cast<int>(N) - 1),
+                  false);
   read<EBCellFAB>(a_handle,
                   *m_rhs[a_level],
                   m_name + "_src",
                   m_amr->getGrids(m_realm)[a_level],
-                  Interval(0, N - 1),
+                  Interval(0, static_cast<int>(N) - 1),
                   false);
 }
 #endif

@@ -9,7 +9,7 @@ $(ebaseobject): dependencies
 .DEFAULT_GOAL=$(ebase)
 
 # Build dependencies.
-dependencies: 
+dependencies:
 	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) radiativetransfer
 

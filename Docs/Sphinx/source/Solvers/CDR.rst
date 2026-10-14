@@ -10,13 +10,13 @@ Here, we discuss the discretization of the equation
    
    \frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v} \phi - D\nabla \phi\right) = S.
 
-We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in a cut-cells and regular cells.
+We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in cut cells and regular cells.
 Here, :math:`\mathbf{v}` indicates a drift velocity and :math:`D` is the (isotropic) diffusion coefficient.
 
 .. note::
    
    Using cell-centered versions :math:`\phi` might be problematic for some models since the state is extended outside the valid region.
-   Models might have to recenter the state in order compute e.g. physically meaningful reaction terms in cut-cells.
+   Models might have to recenter the state in order to compute e.g. physically meaningful reaction terms in cut-cells.
 
 .. tip::
    
@@ -48,7 +48,7 @@ These approximations are encapsulated by the following functions:
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of functions responsible for calculating approximations to divergence operators.
    :language: c++
-   :lines: 159-211
+   :lines: 164-227
    :dedent: 2
 
 These functions are not implemented in ``CdrSolver``, but in subclasses.
@@ -60,7 +60,7 @@ The implicit advance methods for ``CdrSolver`` are encapsulated by the following
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of current implicit diffusion advance functions.
    :language: c++
-   :lines: 121-134,145-157
+   :lines: 124-139,150-162
    :dedent: 2
 
 .. _Chap:CdrDetails:   
@@ -78,7 +78,7 @@ Computing explicit divergences for equations like
 .. math::
    \frac{\partial \phi}{\partial t} + \nabla\cdot\mathbf{G} = 0
 
-is problematic because of the arbitarily small volume fractions of cut cells.
+is problematic because of the arbitrarily small volume fractions of cut cells.
 In general, we seek a method-of-lines update :math:`\phi^{k+1} = \phi^k - \Delta t \left[\nabla\cdot \mathbf{G}^k\right]` where :math:`\left[\nabla\cdot\mathbf{G}\right]` is a stable numerical approximation based on some finite volume approximation.
 
 Pure finite volume methods use
@@ -124,7 +124,7 @@ and perform an intermediate update
    \phi_{\mathbf{i}}^{k+1} = \phi_{\mathbf{i}}^k - \Delta tD_{\mathbf{i}}^H.
    
 The hybrid divergence update fails to conserve mass by an amount :math:`\delta M_{\mathbf{i}} = \kappa_{\mathbf{i}}\left(1-\kappa_{\mathbf{i}}\right)\left(D_{\mathbf{i}}^c - D_{\mathbf{i}}^{nc}\right)`.
-In order to main overall conservation, the excess mass is redistributed into neighboring grid cells.
+In order to maintain overall conservation, the excess mass is redistributed into neighboring grid cells.
 Let :math:`\delta M_{\mathbf{i}, \mathbf{j}}` be the redistributed mass from :math:`\mathbf{j}` to :math:`\mathbf{i}` where
    
 .. math::
@@ -146,7 +146,7 @@ The user will need to call the function
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 213-221
+   :lines: 229-240
    :dedent: 2
 
 where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebFlux`` is the flux through the embedded boundary.
@@ -154,7 +154,7 @@ The above steps are performed by interpolating ``a_G`` to face centroids in the 
 The result is put in ``a_divG``.
 
 Note that when refinement boundaries intersect with embedded boundaries, the redistribution process is far more complicated since it needs to account for mass that moves over refinement boundaries.
-These additional complicated are taken care of inside ``a_divG``, but are not discussed in detail here. 
+These additional complications are taken care of inside ``a_divG``, but are not discussed in detail here. 
 
 .. caution::
    
@@ -165,11 +165,11 @@ These additional complicated are taken care of inside ``a_divG``, but are not di
 Explicit advection
 __________________
 
-Scalar advection updates follows the computation of the explicit divergence discussed in :ref:`Chap:ExplicitDivergence`.
+Scalar advection updates follow the computation of the explicit divergence discussed in :ref:`Chap:ExplicitDivergence`.
 The face-centered fluxes :math:`\mathbf{G} = \phi\mathbf{v}` are computed by instantiation classes for the convection-diffusion-reaction solvers.
 The function signature for explicit advection (``computeDivF``) was given in :numref:`cdr_div_functions`.
 
-The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF`` using the procedure outlined above.
+The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and the result is put in ``a_divF`` using the procedure outlined above.
 In the simplest case, these fluxes are simply calculated using an upwind rule, potentially extrapolated with slope-limiters from the cell-center.
 In more complex cases, we use both the normal and transverse slopes in a cell.
 The argument ``a_extrapDt`` is the time step size.
@@ -228,7 +228,7 @@ For example, in order to perform an advection-diffusion advance over a time step
    DataOps:incr(phi, divJ, -dt);                           // makes phi -> phi - dt*divJ
 
 Often, time integrators have the option of using implicit or explicit diffusion.
-If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``computeDivJ`` rather separately calling ``computeDivF`` and ``computeDivD``.
+If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``computeDivJ`` rather than separately calling ``computeDivF`` and ``computeDivD``.
 If you had a split-step Godunov method, the above procedure for a forward Euler method for both parts would be:
 
 .. code-block:: c++
@@ -253,7 +253,7 @@ __________________
 Usage of implicit diffusion can occasionally be necessary, especially if the diffusive time step leads to numerical stiffness and severe time step limitations.
 The convection-diffusion-reaction solvers support two basic implicit diffusion solves which were given in :ref:`cdr_implicit_diffusion`.
 
-As an example, perform a split step Godunov method with the Euler rules for explicit advection and implicit diffusion is done as follows:
+As an example, performing a split-step Godunov method with the Euler rules for explicit advection and implicit diffusion is done as follows:
 
 .. code-block:: c++
 
@@ -279,8 +279,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 287-294
-   :dedent: 2
+   :lines: 334-341
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
 In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.
@@ -292,7 +291,7 @@ CdrCTU
 
 ``CdrCTU`` is an implementation class that uses the corner transport upwind (CTU) discretization.
 The CTU discretization uses information that propagates over corners of grid cells when calculating the face states.
-It can combine this with use various limiters:
+It can combine this with the use of various limiters:
 
 * No limiter.
 * Minmod.
@@ -391,6 +390,8 @@ We do not discuss all options here, but note the following:
 * ``CdrCTU.use_ctu``, which must be *true* or *false*.
   If setting this to false, transverse terms are turned off the ``CdrCTU`` will use the donor-cell scheme and time step restriction.
 * All options that begin with ``gmg_`` indicate control over how the geometric multigrid algorithm operates, e.g., number of smoothings on each level or the bottom solver type.
+  In particular, ``gmg_reflux_free`` (default ``false``) selects the reflux-free AMR operator, which fills coarse-level coarse-fine interface fluxes by conservatively averaging the fine-level fluxes computed from the composite solution, rather than applying a separate reflux correction step.
+  The two formulations are mathematically equivalent.
 * ``CdrCTU.plt_vars`` indicate which variables are added to plot files.
 
 .. _Chap:CdrGodunov:
@@ -422,7 +423,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 589-656
+   :lines: 625-693
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
@@ -441,7 +442,7 @@ One can use ``DataOps`` functions to fill the data directly using a C++ lambda:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DataOps.H
    :language: c++
-   :lines: 1171-1184
+   :lines: 1298-1314
    :dedent: 2
 
 This would typically look something like this:

@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_Initialize.cpp
-  @brief  Implementation of CD_Initialize.cpp
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_Initialize.cpp
+ * @brief  Implementation of CD_Initialize.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #if defined(CH_MPI) || defined(CH_USE_PETSC)
@@ -27,6 +28,7 @@
 
 // Our includes
 #include <CD_Initialize.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 std::string dischargeInputFile;
@@ -48,7 +50,7 @@ initialize(int argc, char* argv[])
   int provided;
   MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
   if (provided < MPI_THREAD_FUNNELED) {
-    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << std::endl;
+    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << endl;
   }
 #else
   // MPI only
@@ -80,6 +82,7 @@ initialize(int argc, char* argv[])
 | (__| | | | (_) | | | | | | |_) | (_) |_____| (_| | \__ \ (__| | | | (_| | | | (_| |  __/
  \___|_| |_|\___/|_| |_| |_|_.__/ \___/       \__,_|_|___/\___|_| |_|\__,_|_|  \__, |\___|
 )" << endl;
+    pout() << "  Version:           " << DischargeIO::gitHash() << "\n";
     pout() << "  Working directory: " << cwd << "\n";
     pout() << "  Input file:        " << dischargeInputFile << "\n";
     pout() << "  Run command:       ";
@@ -135,7 +138,7 @@ initialize(int argc, char* argv[])
     pout() << "  PETSc:  FALSE\n";
 #endif
     pout() << "==========================================================================================" << endl;
-    pout() << std::endl;
+    pout() << endl;
   }
 
 #if defined(CH_USE_PETSC)

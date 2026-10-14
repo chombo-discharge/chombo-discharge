@@ -75,7 +75,7 @@ Firstly, note that there are two layers to the time integrators:
 #. A pure class ``CdrPlasmaStepper`` which inherits from ``TimeSteppers`` but does not implement an ``advance`` method.
    This class simply provides the base functionality for more easily developing time integrators.
    ``CdrPlasmaStepper`` contains methods that are necessary for coupling the solvers, e.g. calling the :ref:`Chap:CdrPlasmaPhysics` methods at the correct time.
-#. Implementations of ``CdrPlasmaPhysics``, which implement the ``advance`` method and can thus be used for advancing models.
+#. Implementations of ``CdrPlasmaStepper``, which implement the ``advance`` method and can thus be used for advancing models.
    
 The supported time integrators are located in :file:`$DISCHARGE_HOME/CdrPlasma/TimeSteppers`.
 There are two integrators that are commonly used.
@@ -216,7 +216,7 @@ Spectral deferred corrections
 -----------------------------
 
 The ``CdrPlasmaImExSdcStepper`` uses implicit-explicit (ImEx) spectral deferred corrections (SDCs) to advance the equations.
-This integrator implements the ``advance`` method for ``CdrPlasmStepper``, and is a high-order method with implicit diffusion.
+This integrator implements the ``advance`` method for ``CdrPlasmaStepper``, and is a high-order method with implicit diffusion.
 
 SDC basics
 __________
@@ -410,22 +410,29 @@ A successful implementation of :ref:`Chap:CdrPlasmaPhysics` has the following:
   
 #. Implemented the core functionality that couple the solvers together. 
 
-``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
+``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species that is instantiated.
 For information on how to interface into the CDR solvers, see :ref:`Chap:CdrSpecies`.
 Likewise, see :ref:`Chap:RtSpecies` for how to interface into the RTE solvers.
 
 Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
-For this reason we also provide an implementation layer :ref:`Chap:CdrPlasmaJSON` that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for description the physics.
+For this reason we also provide an implementation layer :ref:`Chap:CdrPlasmaJSON` that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for describing the physics.
 
 Complete API
 ------------
 
 The full API for the ``CdrPlasmaPhysics`` class is given below:
 
+.. raw:: html
+
+   <details>
+   <summary><a>Show/hide full 0D interface</a></summary>
+
 .. literalinclude:: ../../../../Physics/CdrPlasma/CD_CdrPlasmaPhysics.H
-   :language: c++
-   :dedent: 4
-   :lines: 28-264
+   :language: c++   
+
+.. raw:: html
+
+   </details><br>   
 
 .. _Chap:CdrPlasmaJSON:
 
@@ -433,7 +440,7 @@ JSON interface
 ==============
 
 Since implementations of :ref:`Chap:CdrPlasmaPhysics` are usually boilerplate, we provide a class ``CdrPlasmaJSON`` which can initialize and parse various types of initial conditions and reactions from a JSON input file.
-This class is defined in ``$DISCHARGE_HOME/Physics/PlasmaModels/CdrPlasmaJSON``.
+This class is defined in ``$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON``.
 
 ``CdrPlasmaJSON`` is a full implementation of ``CdrPlasmaPhysics`` which supports the definition of various species (neutral, plasma species, and photons) and methods of coupling them.
 We expect that ``CdrPlasmaJSON`` provides the simplest method of setting up a new plasma model.
@@ -476,7 +483,7 @@ The user must use one of the following:
 
    When specifying ``CdrPlasmaJSON.discrete_photons = true``, ``CdrPlasmaJSON`` will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers' source terms.
    This means that the radiative transfer solver source terms *contain the physical number of photons generated in one time step*. 
-   To turn off sampling inside the radiative transfer solver, we specify ``McPhoto.photon_generation = stochastic`` and set ``McPhoto.source_type = number`` to let the solver know that the source contains the number of physical photons. 
+   To turn off sampling inside the radiative transfer solver, we specify ``McPhoto.photon_generation = deterministic`` and set ``McPhoto.source_type = number`` to let the solver know that the source contains the number of physical photons.
 
 * Alternatively, set the following class options:
    
@@ -577,7 +584,7 @@ For example, specification of tropospheric conditions can be included by
 Tabulated
 _________
 
-To specify temperature, density, and pressure as function of altitude, set ``law`` to ``table`` and incldue the following fields:
+To specify temperature, density, and pressure as function of altitude, set ``law`` to ``table`` and include the following fields:
 
 * ``file`` For specifying which file we read the data from.
 * ``height`` For specifying the column where the height is stored (in meters).
@@ -586,7 +593,7 @@ To specify temperature, density, and pressure as function of altitude, set ``law
 * ``density`` For specifying the column where the density (in :math:`\textrm{kg}\cdot\textrm{m}^{-3}`) is stored.
 * ``molar mass`` For specifying the molar mass (in :math:`\textrm{g}\cdot\textrm{mol}^{-1}`) of the gas.
 * ``min height`` For setting the minimum altitude in the ``chombo-discharge`` internal table.
-* ``max height`` For setting the minimum altitude in the ``chombo-discharge`` internal table.
+* ``max height`` For setting the maximum altitude in the ``chombo-discharge`` internal table.
 * ``res height`` For setting the height resolution in the ``chombo-discharge`` internal table.
 
 For example, assume that our file ``MyAtmosphere.dat`` contains the following data:
@@ -699,7 +706,7 @@ Initial data can be provided with
 Density functions
 ^^^^^^^^^^^^^^^^^
 
-To provide initial data one include ``initial data`` for each species.
+To provide initial data, one includes ``initial data`` for each species.
 Currently, the following fields are supported:
 
 * ``uniform`` For specifying a uniform background density.
@@ -713,7 +720,7 @@ Currently, the following fields are supported:
     
   The position must be a 2D/3D array.
 
-* ``gauss2`` for specifying Gaussian seeds :math:`n = n_0\exp\left(-\frac{\left(\mathbf{x}-\mathbf{x_0}\right)^4}{2R^4}\right)`.
+* ``gauss4`` for specifying Gaussian seeds :math:`n = n_0\exp\left(-\frac{\left(\mathbf{x}-\mathbf{x_0}\right)^4}{2R^4}\right)`.
   ``gauss4`` is an array where each array entry must contain
 
   * ``radius``, for specifying the radius :math:`R`: 
@@ -796,6 +803,35 @@ The current implementation supports
 	 "diffusive": true,
 	 "initial particles": {
 	   "sphere": {
+	     "center": [0,0,0],
+	     "radius": 1.0,
+	     "number": 100,
+	     "weight": 1.0
+	   }
+	 }
+       }
+     ]
+   }
+
+* ``gaussian`` For drawing initial particles from a Gaussian distribution.
+  Mandatory fields are
+
+  * ``center`` for specifying the center of the distribution.
+  * ``radius`` for specifying the standard deviation of the distribution.
+  * ``number`` for the number of computational particles.
+  * ``weight`` for the initial particle weight.
+
+  .. code-block:: json
+
+   {"plasma species":
+     [
+       {
+         "name": "e",
+         "Z":  -1,
+	 "mobile": true,
+	 "diffusive": true,
+	 "initial particles": {
+	   "gaussian": {
 	     "center": [0,0,0],
 	     "radius": 1.0,
 	     "number": 100,
@@ -1023,7 +1059,7 @@ For performance reasons, the tables are always resampled, see :ref:`Chap:LookupT
 Diffusion coefficients
 ______________________
 
-Setting the diffusion coefficient is done *exactly* in the same was as the mobility.
+Setting the diffusion coefficient is done *exactly* in the same way as the mobility.
 If a species is diffusive, one must include the field ``diffusion`` as well as ``lookup``.
 For example, the JSON input for specifying a tabulated diffusion coefficient is done by
 
@@ -1543,7 +1579,7 @@ ___________________
 Collisional quenching
 ^^^^^^^^^^^^^^^^^^^^^
 
-To quench a reaction, include a field ``qenching_pressure`` and specify the *quenching pressure* (in atmospheres).
+To quench a reaction, include a field ``quenching_pressure`` and specify the *quenching pressure* (in atmospheres).
 When computing reaction rates, the rate for the reaction will be modified as
 
 .. math::
@@ -1661,7 +1697,7 @@ Note that this correction makes sense when rates are dependent only on the elect
 
 .. note::
 
-   When using the energy correction, the specifies species must be both mobile and diffusive.
+   When using the energy correction, the specified species must be both mobile and diffusive.
 
 Plotting reactions
 __________________

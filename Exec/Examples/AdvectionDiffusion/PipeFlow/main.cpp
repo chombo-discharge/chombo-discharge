@@ -19,7 +19,7 @@ main(int argc, char* argv[])
   auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
   auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
-  timestepper->setVelocity([](const RealVect& a_position) {
+  timestepper->setVelocity([](const RealVect& /*a_position*/) {
     return RealVect(D_DECL(1.0, 1.0, 0.0));
   });
 

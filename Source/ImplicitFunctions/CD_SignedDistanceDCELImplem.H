@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_SignedDistanceDCELImplem.H
-  @brief  Implementation of CD_SignedDistanceDCEL.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_SignedDistanceDCELImplem.H
+ * @brief  Implementation of CD_SignedDistanceDCEL.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_SignedDistanceDCELImplem_H
-#define CD_SignedDistanceDCELImplem_H
+#ifndef CD_SIGNEDDISTANCEDCELIMPLEM_H
+#define CD_SIGNEDDISTANCEDCELIMPLEM_H
 
 // Our includes
 #include <CD_SignedDistanceDCEL.H>
@@ -49,8 +50,8 @@ SignedDistanceDCEL<T>::value(const RealVect& a_point) const
   EBGeometry::Vec3T<T> p(a_point[0], a_point[1], a_point[2]);
 #endif
 
-  T retval = m_mesh->signedDistance(
-    p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals.
+  T retval = m_mesh->signedDistance(p); // Note that Dcel::mesh can return either positive or negative for outside,
+                                        // depending on the orientation of the input normals.
 
   if (m_flipInside) {
     retval = -retval;

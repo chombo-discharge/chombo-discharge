@@ -122,7 +122,7 @@ FC             = gfortran
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
-CXXSTD         = 14
+CXXSTD         = 17
 #USE_64        =
 #USE_COMPLEX   =
 USE_PETSC      = FALSE
@@ -157,7 +157,7 @@ USE_MF         = TRUE
 #cppoptflags   =
 #cxxcppflags   =
 #cxxdbgflags   =
-cxxoptflags    = -O3
+cxxoptflags    = -O3 -fno-math-errno
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =

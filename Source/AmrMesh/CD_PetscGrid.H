@@ -1,18 +1,19 @@
-/* chombo-discharge
- * Copyright © 2026 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_PetscGrid.H
-  @brief  File containing declaration of PetscGrid.
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_PetscGrid.H
+ * @brief  File containing declaration of PetscGrid.
+ * @author Robert Marskar
+ */
+
+#ifndef CD_PETSCGRID_H
+#define CD_PETSCGRID_H
 
 #ifdef CH_USE_PETSC
-
-#ifndef CD_PetscGrid_H
-#define CD_PetscGrid_H
 
 // Petsc includes
 #include "petsc.h"
@@ -42,32 +43,32 @@
 class PetscGrid
 {
 public:
-  /*!
-    @brief Default constructor. Must subsequently call define
-  */
+  /**
+   * @brief Default constructor. Must subsequently call define
+   */
   PetscGrid() noexcept;
 
-  /*!
-    @brief Destructor. Does nothing.
-  */
+  /**
+   * @brief Destructor. Does nothing.
+   */
   virtual ~PetscGrid() noexcept;
 
-  /*!
-    @brief Main define function. Puts object in usable state.
-    @details Note that a_levelGridsCoFi must be coarsened from finer grids. That is, entry lvl
-    in levelGridsCoFi must be a coarsened version of a_levelGrids[lvl+1]. Similarly, a_levelGridsFiCo
-    must be a refinement, i.e., a_levelGridsFiCo[lvl] must be a refinemetn of a_levelGrids[lvl].
-    @param[in] a_levelGrids chombo-discharge AMR grids
-    @param[in] a_levelGridsCoFi Coarsened grids.
-    @param[in] a_levelGridsFiCo Refined grids.
-    @param[in] a_validCells Data holder which is true for cells not covered by a finer grid and false otherwise.
-    @param[in] a_coarHaloCF Data holder which is true on cells that lie on the coarse side of a CF interface
-    @param[in] a_fineHaloCF Data holder which is true on cells that lie on the fine side of a CF interface
-    @param[in] a_refinementRatios Refinement ratios between grid level.
-    @param[in] a_dx Grid resolutions on each level.
-    @param[in] a_finestLevel Finest defined grid level.
-    @param[in] a_numGhost Number of ghost cells described in the grid.
-  */
+  /**
+   * @brief Main define function. Puts object in usable state.
+   * @details Note that a_levelGridsCoFi must be coarsened from finer grids. That is, entry lvl
+   * in levelGridsCoFi must be a coarsened version of a_levelGrids[lvl+1]. Similarly, a_levelGridsFiCo
+   * must be a refinement, i.e., a_levelGridsFiCo[lvl] must be a refinemetn of a_levelGrids[lvl].
+   * @param[in] a_levelGrids chombo-discharge AMR grids
+   * @param[in] a_levelGridsCoFi Coarsened grids.
+   * @param[in] a_levelGridsFiCo Refined grids.
+   * @param[in] a_validCells Data holder which is true for cells not covered by a finer grid and false otherwise.
+   * @param[in] a_coarHaloCF Data holder which is true on cells that lie on the coarse side of a CF interface
+   * @param[in] a_fineHaloCF Data holder which is true on cells that lie on the fine side of a CF interface
+   * @param[in] a_refinementRatios Refinement ratios between grid level.
+   * @param[in] a_dx Grid resolutions on each level.
+   * @param[in] a_finestLevel Finest defined grid level.
+   * @param[in] a_numGhost Number of ghost cells described in the grid.
+   */
   virtual void
   define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
          const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
@@ -80,10 +81,10 @@ public:
          const int                                              a_finestLevel,
          const int                                              a_numGhost) noexcept;
 
-  /*!
-    @brief Clear the object.
-    @details This deallocates all PETSc-relevant allocations.
-  */
+  /**
+   * @brief Clear the object.
+   * @details This deallocates all PETSc-relevant allocations.
+   */
   virtual void
   clear() noexcept;
 
@@ -167,19 +168,19 @@ public:
   virtual void
   create(Vec& x) noexcept;
 
-  /*!
-    @brief Destroy a PETSc vector.
-    @details This will deallocate the PETSc vector.
-    param[in,out] x PETSc vector
-  */
+  /**
+   * @brief Destroy a PETSc vector.
+   * @details This will deallocate the PETSc vector.
+   * param[in,out] x PETSc vector
+   */
   virtual void
   destroy(Vec& x) noexcept;
 
-  /*!
-    @brief Set values in a PETSc vector.
-    @details a_value Does not need to be the same across all ranks. 
-    @param[in,out] x Global PETSc vector
-  */
+  /**
+   * @brief Set values in a PETSc vector.
+   * @details a_value Does not need to be the same across all ranks.
+   * @param[in,out] x Global PETSc vector
+   */
   virtual void
   setValue(Vec& a_x, const PetscScalar a_value) const noexcept;
 
@@ -204,111 +205,111 @@ public:
   virtual void
   putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept;
 
-  /*!
-    @brief Write the PETSc grid to an output HDF5 file
-  */
+  /**
+   * @brief Write the PETSc grid to an output HDF5 file
+   */
   virtual void
-  dumpPetscGrid(const std::string a_filename) const noexcept;
+  dumpPetscGrid(const std::string& a_filename) const noexcept;
 
 protected:
-  /*!
-    @brief Is defined or not
-  */
+  /**
+   * @brief Is defined or not
+   */
   bool m_isDefined;
 
-  /*!
-    @brief Verbose or not
-  */
+  /**
+   * @brief Verbose or not
+   */
   bool m_verbose;
 
-  /*!
-    @brief Run-time debug or not
-  */
+  /**
+   * @brief Run-time debug or not
+   */
   bool m_debug;
 
-  /*!
-    @brief Run-time profile or not
-  */
+  /**
+   * @brief Run-time profile or not
+   */
   bool m_profile;
 
-  /*!
-    @brief Finest grid level
-  */
+  /**
+   * @brief Finest grid level
+   */
   int m_finestLevel;
 
-  /*!
-    @brief Number of ghost cells
-  */
+  /**
+   * @brief Number of ghost cells
+   */
   int m_numGhost;
 
-  /*!
-    @brief Number of phases
-  */
+  /**
+   * @brief Number of phases
+   */
   int m_numPhases;
 
-  /*!
-    @brief Number of rows owned locally
-  */
+  /**
+   * @brief Number of rows owned locally
+   */
   PetscInt m_numLocalRows;
 
-  /*!
-    @brief Number of global rows
-  */
+  /**
+   * @brief Number of global rows
+   */
   PetscInt m_numGlobalRows;
 
-  /*!
-    @brief Global row corresponding to the first local row
-  */
+  /**
+   * @brief Global row corresponding to the first local row
+   */
   PetscInt m_localRowBegin;
 
-  /*!
-    @brief Local index to global index mapping for PETSc
-  */
+  /**
+   * @brief Local index to global index mapping for PETSc
+   */
   ISLocalToGlobalMapping m_localToGlobalIS;
 
-  /*!
-    @brief Number of rows per MPI rank. Visible to all ranks. 
-  */
+  /**
+   * @brief Number of rows per MPI rank. Visible to all ranks.
+   */
   Vector<PetscInt> m_numRowsPerRank;
 
-  /*!
-    @brief Grids on each level
-  */
+  /**
+   * @brief Grids on each level
+   */
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGrids;
 
-  /*!
-    @brief Coarsened grids
-  */
+  /**
+   * @brief Coarsened grids
+   */
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsCoFi;
 
-  /*!
-    @brief Refined grids
-  */
+  /**
+   * @brief Refined grids
+   */
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;
 
-  /*!
-    @brief Data holder which is true for cells not covered by a finer grid.
-  */
+  /**
+   * @brief Data holder which is true for cells not covered by a finer grid.
+   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
 
-  /*!
-    @brief Coarse-side cells on refinement interface
-  */
+  /**
+   * @brief Coarse-side cells on refinement interface
+   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_coarHaloCF;
 
-  /*!
-    @brief Fine-side cells on refinement interface
-  */
+  /**
+   * @brief Fine-side cells on refinement interface
+   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fineHaloCF;
 
-  /*!
-    @brief Refinement ratios between levels.
-  */
+  /**
+   * @brief Refinement ratios between levels.
+   */
   Vector<int> m_refRat;
 
-  /*!
-    @brief Grid resolutions
-  */
+  /**
+   * @brief Grid resolutions
+   */
   Vector<Real> m_dx;
 
   /*!
@@ -334,10 +335,10 @@ protected:
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;
 
-  /*!
-    @brief Mapping of PETSc local row index back to AMR
-    @details Locally owned. Maps a local row index to a level/grid/cell.
-  */
+  /**
+   * @brief Mapping of PETSc local row index back to AMR
+   * @details Locally owned. Maps a local row index to a level/grid/cell.
+   */
   Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR[2];
 
   /*!
@@ -360,18 +361,18 @@ protected:
   virtual void
   defineAMRCells() noexcept;
 
-  /*!
-    @brief Build the Chombo <--> Petsc index mapping for the valid cells.
-    @details This defines m_localRows and m_globalRows, m_numRowsPerRank, m_localToGlobalIS, and figures out the number
-    of degrees of freedom on each MPI rank. After this is called, it will be possible to index local grid cells into a PETSc
-    vector row.
-  */
+  /**
+   * @brief Build the Chombo <--> Petsc index mapping for the valid cells.
+   * @details This defines m_localRows and m_globalRows, m_numRowsPerRank, m_localToGlobalIS, and figures out the number
+   * of degrees of freedom on each MPI rank. After this is called, it will be possible to index local grid cells into a
+   * PETSc vector row.
+   */
   virtual void
   definePetscRows() noexcept;
 
-  /*!
-    @brief Define the coarsened/refined views of m_amrToPetsc.
-  */
+  /**
+   * @brief Define the coarsened/refined views of m_amrToPetsc.
+   */
   virtual void
   defineCoFiBuffers() noexcept;
 };

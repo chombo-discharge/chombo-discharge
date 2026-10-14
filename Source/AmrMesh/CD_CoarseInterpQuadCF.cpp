@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CoarseInterpQuadCF.cpp
-  @brief  Implementation of CD_CoarseInterpQuadCF.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_CoarseInterpQuadCF.cpp
+ * @brief  Implementation of CD_CoarseInterpQuadCF.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -16,13 +17,12 @@
 
 // Our includes
 #include <CD_CoarseInterpQuadCF.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept
+CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept : m_isDefined(false)
 {
   CH_TIME("CoarseInterpQuadCF::CoarseInterpQuadCF()");
-
-  m_isDefined = false;
 }
 
 CoarseInterpQuadCF::~CoarseInterpQuadCF() noexcept
@@ -97,9 +97,14 @@ CoarseInterpQuadCF::defineStencils() noexcept
   // Go through the cells and figure out which FD approximation we will use.
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != m_ignoreDir) {
-      for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
-        const IntVect ivCoar = bit();
+      // Initialize to "no stencil" so that cells which cannot form a (one-sided) derivative without
+      // reaching outside the valid region contribute zero rather than reading uninitialized data. This
+      // matters at domain boundaries, where a centered stencil would reach a coarse cell outside the
+      // domain that is never filled in the coarse interpolation buffer.
+      m_firstDerivStencils[dir].setVal(FirstDerivStencil::None);
+      m_secondDerivStencils[dir].setVal(SecondDerivStencil::None);
 
+      BoxLoops::loop<D_DECL(1, 1, 1)>(m_stencilBox, [&](const IntVect& ivCoar) -> void {
         const IntVect ivLoLo = ivCoar - 2 * BASISV(dir);
         const IntVect ivLo   = ivCoar - BASISV(dir);
         const IntVect ivHi   = ivCoar + BASISV(dir);
@@ -130,7 +135,7 @@ CoarseInterpQuadCF::defineStencils() noexcept
         else if (!useLo && useHi) {
           m_firstDerivStencils[dir](ivCoar, 0) = FirstDerivStencil::Forward1;
         }
-      }
+      });
     }
   }
 }
@@ -155,9 +160,7 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
   // Go through the cells and compute finite difference approximations to the mixed derivative. We do this ala Chombo
   // and average the mixed-derivative stencils on edges of the cell since some of the cells we otherwise would need
   // might be covered by the fine grid.
-  for (BoxIterator bit(m_stencilBox); bit.ok(); ++bit) {
-    const IntVect ivCoar = bit();
-
+  BoxLoops::loop<D_DECL(1, 1, 1)>(m_stencilBox, [&](const IntVect& ivCoar) -> void {
     if (validCells.contains(grow(Box(ivCoar, ivCoar), 1))) {
       m_mixedDerivStencils(ivCoar, 0) = MixedDerivStencil::Standard;
     }
@@ -200,7 +203,7 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
         derivSten *= 1.0 / numQuadrants;
       }
     }
-  }
+  });
 #endif
 }
 
@@ -310,9 +313,9 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
 }
 
 Real
-CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& a_coarPhi,
-                                      const IntVect&   a_ivCoar,
-                                      const int        a_coarVar) const noexcept
+CoarseInterpQuadCF::computeMixedDeriv([[maybe_unused]] const FArrayBox& a_coarPhi,
+                                      const IntVect&                    a_ivCoar,
+                                      [[maybe_unused]] int              a_coarVar) const noexcept
 {
   CH_TIME("CoarseInterpQuadCF::computeMixedDeriv");
 

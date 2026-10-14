@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -18,12 +19,9 @@
 #include <CD_EBHelmholtzRobinDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()
+EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzRobinDomainBC::~EBHelmholtzRobinDomainBC()
@@ -79,6 +77,9 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
   // Kernel. As always, we linearly extrapolate to the boundary and set the flux from that.
+  // Not auto-vectorizable: the per-cell out-of-line ebisbox.isCovered(ivNear) query (which gates the
+  // extrapolation) blocks it, as do the std::function coefficients in the function-BC case. This is a
+  // thin domain-boundary face slab, so the cost is small. (getEBISL() is already hoisted above.)
   auto kernel = [&](const IntVect& iv) -> void {
     const IntVect ivNear  = iv - isign * BASISV(a_dir);
     const bool    hasNear = !ebisbox.isCovered(ivNear);
@@ -123,10 +124,10 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   };
 
   // Run the kernel
-  BoxLoops::loop(a_faceFlux.box(), kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient.
-  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+  ChomboDischarge::EBHelmholtzRobinDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real
@@ -174,7 +175,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
           for (int i = 0; i < nearVofs.size(); i++) {
             nearPhi += a_phi(nearVofs[i], m_comp);
           }
-          nearPhi = nearPhi / nearVofs.size();
+          nearPhi = nearPhi / static_cast<double>(nearVofs.size());
 
           // Linear extrapolation to boundary from curVof
           curExtrap = 1.5 * a_phi(curVof, m_comp) - 0.5 * nearPhi;
@@ -204,10 +205,6 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
         C = a_useHomogeneous ? 0 : this->m_functionC(pos);
       }
       else {
-        A = 0.0;
-        B = 0.0;
-        C = 0.0;
-
         MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (VolIndex version) - logic bust");
       }
 
@@ -228,6 +225,17 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
   }
 
   return centroidFlux;
+}
+
+Real
+EBHelmholtzRobinDomainBC::getDiagWeight(const int /*a_dir*/, const Side::LoHiSide /*a_side*/) const
+{
+  // Placeholder weight (preserves the pre-pure-virtual base default of 1.0). The true Robin diagonal contribution
+  // is coefficient-dependent: the phi_i coefficient in getFaceFlux() above scales with the runtime A/B ratio and
+  // the side, so it cannot be expressed as the single constant this scalar API returns. This weight feeds only the
+  // relaxation/smoother diagonal, so an inexact value degrades smoother efficiency but never the converged solution
+  // (see EBHelmholtzDomainBC::getDiagWeight). Deriving a coefficient-aware weight would require extending the API.
+  return 1.0;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -1,14 +1,15 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   FieldSolverGMG.cpp
-  @brief  Implementation of FieldSolverGMG.H
-  @author Robert Marskar
-  @todo   Once the new operator is in, check the computeLoads routine. 
-*/
+/**
+ * @file   CD_FieldSolverGMG.cpp
+ * @brief  Implementation of FieldSolverGMG.H
+ * @author Robert Marskar
+ * @todo   Once the new operator is in, check the computeLoads routine.
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -28,13 +29,13 @@
 constexpr Real FieldSolverGMG::m_alpha;
 constexpr Real FieldSolverGMG::m_beta;
 
-FieldSolverGMG::FieldSolverGMG() : FieldSolver()
+FieldSolverGMG::FieldSolverGMG() : m_isSolverSetup(false)
 {
   CH_TIME("FieldSolverGMG::FieldSolverGMG()");
 
   // Default settings
-  m_isSolverSetup = false;
-  m_className     = "FieldSolverGMG";
+
+  m_className = "FieldSolverGMG";
 }
 
 FieldSolverGMG::~FieldSolverGMG()
@@ -97,6 +98,8 @@ FieldSolverGMG::parseMultigridSettings()
 
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
   pp.get("gmg_verbosity", m_multigridVerbosity);
   pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
@@ -116,9 +119,11 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
+  pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
-  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
-  // where <number> is the number of relaxation for the smoothing solver.
+  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver =
+  // bicgstab or '= simple <number>' where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
     pp.get("gmg_bottom_solver", str);
@@ -151,8 +156,14 @@ FieldSolverGMG::parseMultigridSettings()
       "FieldSolverGMG::parseMultigridSettings() - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Get a string for the multigrid smoother. This must either be "jacobi", "red_black", or "multi_color".
-  pp.get("gmg_smoother", str);
+  // Get a string for the multigrid smoother. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_multigridChebyOrder     = 3;
+  m_multigridChebyEigRatio  = 4.0;
+  m_multigridRasInnerSweeps = 2;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::PointJacobi;
   }
@@ -161,6 +172,27 @@ FieldSolverGMG::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "FieldSolverGMG::parseMultigridSettings() - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridChebyOrder, 1);
+    pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
+  }
+  else if (str == "ras") {
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "FieldSolverGMG::parseMultigridSettings() - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridRasInnerSweeps, 1);
   }
   else {
     MayDay::Error("FieldSolverGMG::parseMultigridSettings() - unsupported relaxation method requested");
@@ -171,9 +203,12 @@ FieldSolverGMG::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
     MayDay::Error(
-      "FieldSolverGMG::parseMultigridSettings - unsupported multigrid cycle type requested. Only vcycle supported for now. ");
+      "FieldSolverGMG::parseMultigridSettings - unsupported multigrid cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.
@@ -187,18 +222,49 @@ FieldSolverGMG::parseMultigridSettings()
     m_multigridBcWeight      = 4;
     m_multigridJumpOrder     = 1;
     m_multigridJumpWeight    = 4;
-    m_multigridRelaxFactor   = 1.5;
+    m_multigridRelaxFactor   = 1.0;
     m_multigridPreSmooth     = 12;
     m_multigridPostSmooth    = 12;
     m_multigridBottomSmooth  = 0;
-    m_multigridPreCondSmooth = 12;
+    m_multigridPreCondSmooth = 40;
     m_minCellsBottom         = std::max(8, m_minCellsBottom);
     m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     m_multigridType          = MultigridType::VCycle;
-    m_bottomSolverType       = BottomSolverType::BiCGStab;
     m_bottomSolverType       = BottomSolverType::Simple;
-    m_mfsolver.setNumSmooths(16);
+    m_mfsolver.setNumSmooths(40);
   }
+
+  // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
+  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
+  const int numKrylovSolvers = pp.countval("solver");
+  if (numKrylovSolvers < 1) {
+    MayDay::Error("FieldSolverGMG::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
+                  "'bicgstab'");
+  }
+
+  m_krylovSettings.solvers.resize(numKrylovSolvers);
+
+  for (int i = 0; i < numKrylovSolvers; i++) {
+    std::string solverStr;
+
+    pp.get("solver", solverStr, i);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
+  }
+
+  pp.get("krylov_eps", m_krylovSettings.eps);
+  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
+  pp.get("krylov_restart", m_krylovSettings.restart);
+  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+  m_krylovSettings.verbosity = m_multigridVerbosity; // The Krylov solvers reuse the gmg_verbosity setting.
 
   // Things won't run unless this is fulfilled.
   CH_assert(m_minCellsBottom >= 2);
@@ -233,6 +299,7 @@ FieldSolverGMG::parseJumpBC()
   }
   else {
     const std::string errorString = "FieldSolverGMG::parseJumpBC -- error, argument '" + str + "' not recognized";
+
     MayDay::Error(errorString.c_str());
   }
 }
@@ -253,8 +320,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // TLDR: This is the main solve routine. The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi))
   //       which we use to solve the Poisson equation div(eps*grad(phi)) = -rho/eps0.
   //
-  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign provided in the operator
-  //       through the b-coefficient. (So really, we're actually solving kappa*[-div(eps*grad(phi))] = kappa*(rho/eps0)
+  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign provided in
+  //       the operator through the b-coefficient. (So really, we're actually solving kappa*[-div(eps*grad(phi))] =
+  //       kappa*(rho/eps0)
 
   CH_assert(m_isVoltageSet);
   CH_assert(a_phi[0]->nComp() == 1);
@@ -291,7 +359,9 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Special flag for when a_rho is on the centroid but was not scaled by kappa on input. The multigrid operator solves
   // kappa*L(phi) = kappa*rho so the right-hand side must be kappa-weighted.
   if (m_kappaSource) {
-    DataOps::kappaScale(kappaRhoByEps0);
+    DataOps::kappaScale(kappaRhoByEps0,
+                        m_amr->getVofIterator(m_realm, phase::gas),
+                        m_amr->getVofIterator(m_realm, phase::solid));
   }
 
   m_amr->conservativeAverage(a_phi, m_realm);
@@ -301,10 +371,11 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
 
   // Do the scaled surface charge
   DataOps::copy(sigmaByEps0, a_sigma);
-  DataOps::scale(sigmaByEps0, 1. / (Units::eps0));
+  DataOps::scale(sigmaByEps0, 1. / (Units::eps0), m_amr->getVofIterator(m_realm, phase::gas));
   CH_STOP(t2);
 
-  // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators (MFHelmholtzOps).
+  // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators
+  // (MFHelmholtzOps).
   m_helmholtzOpFactory->setJump(sigmaByEps0, 1.0);
 
   // Aliasing, because Chombo is not too smart about smart pointers.
@@ -332,15 +403,69 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Convergence criterion.
   const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
-  // If the residue rho - L(phi) is too large then we must get a new solution.
+  // If the residue rho - L(phi) is too large then we must get a new solution. The solver chain is tried in order
+  // (e.g. 'gmg gmres' tries stand-alone multigrid, then GMRES if it fails). A failed attempt is kept as the warm
+  // start for the next solver only if it reduced the residual below the initial residual (see keepOrRestore);
+  // otherwise the next solver restarts from the initial-residual solution.
   if (phiResid > convergedResid) {
-    m_multigridSolver->m_convergenceMetric = zeroResid;
-    m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
-
-    const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-    if (status == 1 || status == 8) {                   // 8 => Norm sufficiently small
-      converged = true;
+    // Begin the chain at the policy's preferred index: normally 0 (try GMG first), but the index of the first Krylov
+    // solver while latched onto the fallback (re-probing GMG only every krylov_retry_interval solves).
+    // Establish and snapshot the chain's starting solution (the "initial-residual solution"). Every fallback attempt
+    // starts from this same guess, except that a failed attempt which actually reduced the residual is kept as the
+    // warm start for the next solver (see keepOrRestore below).
+    if (a_zeroPhi) {
+      DataOps::setValue(a_phi, 0.0);
     }
+
+    const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+    if (useChain) {
+      m_krylov.snapshotGuess(phi, rhs);
+    }
+
+    const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+    bool gmgAttempted = false;
+    bool gmgConverged = false;
+
+    for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+      const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+      const bool                            zeroPhi    = false; // phi already holds the starting solution
+
+      if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+        pout() << "FieldSolverGMG::solve - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+               << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+               << endl;
+      }
+
+      if (solverType == EllipticSolverChain::SolverType::GMG) {
+        m_multigridSolver->m_convergenceMetric = zeroResid;
+        m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
+
+        const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
+
+        converged    = (status == 1 || status == 8); // 8 => Norm sufficiently small
+        gmgAttempted = true;
+        gmgConverged = converged;
+      }
+      else {
+        // Outer Krylov solve with the V-cycle as preconditioner (residual-correction form; the inhomogeneous BC
+        // contribution enters through the initial residual computed inside the driver).
+        converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
+      }
+
+      // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual;
+      // otherwise revert to the initial-residual solution before trying the next solver.
+      if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+        m_krylov.keepOrRestore(phi, rhs);
+      }
+    }
+
+    m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                   gmgConverged,
+                                   m_krylov.lastKrylovIterations(),
+                                   m_krylovSettings.verbosity,
+                                   "FieldSolverGMG::solve");
   }
   else {
     converged = true;
@@ -354,11 +479,13 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
 
   this->computeElectricField(m_electricField, a_phi);
 
-  // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter in the Helmholtz solve).
+  // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter
+  // in the Helmholtz solve).
   if (m_jumpBcType == JumpBCType::SaturationCharge) {
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
+
     DataOps::copy(m_sigma, factorySigma);
-    DataOps::scale(m_sigma, Units::eps0);
+    DataOps::scale(m_sigma, Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
 
     m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
   }
@@ -467,7 +594,7 @@ FieldSolverGMG::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     CH_assert(!(operatorsAMR[lvl] == nullptr));
 
-    MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
+    auto& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
 
     op.setAcoAndBco(a_permittivityCell[lvl], a_permittivityFace[lvl], a_permittivityEB[lvl]);
   }
@@ -484,7 +611,7 @@ FieldSolverGMG::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
     for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
       CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
 
-      MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+      auto& op = static_cast<MFHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
 
       op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
     }
@@ -536,7 +663,14 @@ FieldSolverGMG::setPermittivities()
     // cell-centered data to faces, including one ghost face.
     m_amr->interpGhost(permCellGas, m_realm, phase::gas);
 
-    DataOps::averageCellToFace(permFluxGas, permCellGas, m_amr->getDomains(), tanGhost, interv, interv, average);
+    DataOps::averageCellToFace(permFluxGas,
+                               permCellGas,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::gas));
 
     m_amr->average(permFluxGas, m_realm, phase::gas, average);
   }
@@ -554,7 +688,14 @@ FieldSolverGMG::setPermittivities()
     // cell-centered data to faces, including one ghost face.
     m_amr->interpGhost(permCellSol, m_realm, phase::solid);
 
-    DataOps::averageCellToFace(permFluxSol, permCellSol, m_amr->getDomains(), tanGhost, interv, interv, average);
+    DataOps::averageCellToFace(permFluxSol,
+                               permCellSol,
+                               m_amr->getDomains(),
+                               tanGhost,
+                               interv,
+                               interv,
+                               average,
+                               m_amr->getFaceIteratorWithTangentialGhosts(m_realm, phase::solid));
 
     m_amr->average(permFluxSol, m_realm, phase::solid, average);
   }
@@ -579,8 +720,10 @@ FieldSolverGMG::setupHelmholtzFactory()
     MayDay::Abort("FieldSolverGMG.gmg_relax_factor must be 0 < gmg_relax_factor <= 2 ");
   }
 
+  // clang-format off
   // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We
   //       should already have registered the operators when we come to this routine.
+  // clang-format on
 
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
@@ -643,8 +786,8 @@ FieldSolverGMG::setupHelmholtzFactory()
     bottomDomain.coarsen(2);
   }
 
-  // Number of ghost cells in data holders. This is needed because EBHelmholtzOp uses restriction/prolongation objects from Chombo, and they
-  // need to know explicit object size to optimize irregular access.
+  // Number of ghost cells in data holders. This is needed because EBHelmholtzOp uses restriction/prolongation objects
+  // from Chombo, and they need to know explicit object size to optimize irregular access.
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells() * IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells() * IntVect::Unit;
 
@@ -689,8 +832,8 @@ FieldSolverGMG::setupHelmholtzFactory()
     jumpBcFactory->setCoarseGridDropOrder(false);
   }
 
-  // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
-  // so there is no diagonal term in the operator after all.
+  // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to
+  // zero so there is no diagonal term in the operator after all.
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(
     new MFHelmholtzOpFactory(m_multifluidIndexSpace,
                              m_dataLocation,
@@ -714,11 +857,15 @@ FieldSolverGMG::setupHelmholtzFactory()
                              ghostRhs,
                              m_multigridRelaxMethod,
                              m_multigridRelaxFactor,
+                             m_multigridChebyOrder,
+                             m_multigridChebyEigRatio,
+                             m_multigridRasInnerSweeps,
                              bottomDomain,
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
                              m_multigridPreCondSmooth,
-                             m_amr->getMaxBoxSize()));
+                             m_amr->getMaxBlockSize(),
+                             m_multigridRefluxFree));
 }
 
 void
@@ -729,8 +876,8 @@ FieldSolverGMG::setupMultigrid()
     pout() << "FieldSolverGMG::setupMultigrid()" << endl;
   }
 
-  // This routine sets up a standard Chombo multigrid solver using the AMRMultiGrid template. Fortunately, MFHelmholtzOp implements
-  // the required functions and we have already set up the factory.
+  // This routine sets up a standard Chombo multigrid solver using the AMRMultiGrid template. Fortunately, MFHelmholtzOp
+  // implements the required functions and we have already set up the factory.
 
   // Select the bottom solver -- the user will have specified this when parseMultigridSettings() was called.
   LinearSolver<LevelData<MFCellFAB>>* bottomSolver = nullptr;
@@ -743,10 +890,14 @@ FieldSolverGMG::setupMultigrid()
   case BottomSolverType::BiCGStab: {
     bottomSolver = &m_bicgstab;
 
+    m_bicgstab.m_verbosity = m_multigridBottomSolverVerbosity;
+
     break;
   }
   case BottomSolverType::GMRES: {
     bottomSolver = &m_gmres;
+
+    m_gmres.m_verbosity = m_multigridBottomSolverVerbosity;
 
     break;
   }
@@ -819,21 +970,43 @@ FieldSolverGMG::setupMultigrid()
 
   // Init the solver. This instantiates the all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // If an outer Krylov solver is requested, set the bottom solver once (AMRVCycle needs it) and define the adapter
+  // that exposes the V-cycle as a preconditioner. Reuses the just-initialised multigrid solver and its operators.
+  if (m_krylovSettings.usesKrylov()) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylov.define(&(*m_multigridSolver),
+                    m_amr->getValidCells(m_realm),
+                    dxScal,
+                    0,
+                    finestLevel,
+                    m_krylovSettings.numVCycles);
+  }
 }
 
 Vector<long long>
-FieldSolverGMG::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
+FieldSolverGMG::computeLoads(const DisjointBoxLayout& /*a_dbl*/, const int a_level)
 {
   CH_TIME("FieldSolverGMG::computeLoads(DisjointBoxLayout, int)");
   if (m_verbosity > 5) {
     pout() << "FieldSolverGMG::computeLoads(DisjointBoxLayout, int)" << endl;
   }
 
-  // This routine estimates the computational loads on a grid level. It does that by creating an operator (which we later delete)
-  // on the grid level corresponding to a_level. It then uses a TimedDataIterator in the input DisjointBoxLayout to estimate the
-  // compute time spent when visiting each patch during a typical smoothing step. This step is defined in MFHelmholtzOp::computeOperatorLoads
-  // and consists of coarse-fine interpolation, updating BCs, and calling the smoothing kernel (e.g. red-black Gauss-seidel). Fortunately
-  // this will provide this class with the opportunity to use introspective load balancing.
+  // This routine estimates the computational loads on a grid level. It does that by creating an operator (which we
+  // later delete) on the grid level corresponding to a_level. It then uses a TimedDataIterator in the input
+  // DisjointBoxLayout to estimate the compute time spent when visiting each patch during a typical smoothing step. This
+  // step is defined in MFHelmholtzOp::computeOperatorLoads and consists of coarse-fine interpolation, updating BCs, and
+  // calling the smoothing kernel (e.g. red-black Gauss-seidel). Fortunately this will provide this class with the
+  // opportunity to use introspective load balancing.
 
   constexpr int numApply = 50;
 
@@ -846,8 +1019,9 @@ FieldSolverGMG::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
   MFAMRCellData dummy;
   m_amr->allocate(dummy, m_realm, m_nComp);
 
-  // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing kernels.
-  auto oper = (MFHelmholtzOp*)m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
+  // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing
+  // kernels.
+  auto* oper = m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
 
   const Vector<long long> loads = oper->computeOperatorLoads(*dummy[a_level], numApply);
 

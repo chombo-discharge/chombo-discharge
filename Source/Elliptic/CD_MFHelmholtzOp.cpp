@@ -1,16 +1,19 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MFHelmholtzOp.cpp
-  @brief  Implementation of CD_MFHelmholtzOp.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFHelmholtzOp.cpp
+ * @brief  Implementation of CD_MFHelmholtzOp.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <chrono>
+#include <cmath>
+#include <vector>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -61,7 +64,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const int&                                       a_jumpWeight,
                              const int&                                       a_preCondSmooth,
                              const Smoother&                                  a_relaxType,
-                             const Real&                                      a_relaxFactor)
+                             const Real&                                      a_relaxFactor,
+                             const int&                                       a_chebyOrder,
+                             const Real&                                      a_chebyEigRatio,
+                             const int&                                       a_rasInnerSweeps,
+                             const bool                                       a_refluxFree)
 {
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp(...)");
 
@@ -120,12 +127,12 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    EBLevelGrid eblg = a_mflg.getEBLevelGrid(iphase);
-    EBLevelGrid dummy;
-    EBLevelGrid eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
+    const EBLevelGrid& eblg = a_mflg.getEBLevelGrid(iphase);
+    EBLevelGrid        dummy;
+    EBLevelGrid        eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
     RefCountedPtr<EBReflux>                fluxRegister = RefCountedPtr<EBReflux>(nullptr);
@@ -174,6 +181,16 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
       break;
     }
+    case MFHelmholtzOp::Smoother::Chebyshev: {
+      ebHelmRelax = EBHelmholtzOp::Smoother::Chebyshev;
+
+      break;
+    }
+    case MFHelmholtzOp::Smoother::RestrictedAdditiveSchwarz: {
+      ebHelmRelax = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+      break;
+    }
     default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
 
@@ -208,7 +225,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        a_ghostPhi,
                                                                                        a_ghostRhs,
                                                                                        ebHelmRelax,
-                                                                                       a_relaxFactor));
+                                                                                       a_relaxFactor,
+                                                                                       a_chebyOrder,
+                                                                                       a_chebyEigRatio,
+                                                                                       a_rasInnerSweeps,
+                                                                                       a_refluxFree));
 
     m_helmOps.insert({iphase, oper});
   }
@@ -337,11 +358,11 @@ MFHelmholtzOp::fillGrad(const LevelData<MFCellFAB>& a_phi)
 }
 
 void
-MFHelmholtzOp::getFlux(MFFluxFAB&                  a_flux,
-                       const LevelData<MFCellFAB>& a_data,
-                       const Box&                  a_grid,
-                       const DataIndex&            a_dit,
-                       Real                        a_scale)
+MFHelmholtzOp::getFlux(MFFluxFAB& /*a_flux*/,
+                       const LevelData<MFCellFAB>& /*a_data*/,
+                       const Box& /*a_grid*/,
+                       const DataIndex& /*a_dit*/,
+                       Real /*a_scale*/)
 {
   MayDay::Warning("MFHelmholtzOp::getFlux - not implemented (yet)");
 }
@@ -447,8 +468,10 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       const FArrayBox& regY = Y.getFArrayBox();
 
       const EBISBox& ebisbox = X.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
 
+      // Not auto-vectorizable: the per-cell isRegular() guard is one blocker, but even a guard-free
+      // rewrite would not vectorize -- this is an FP sum-reduction, and GCC will not reassociate the
+      // running sum without -fassociative-math/-ffast-math, which this project deliberately does not set.
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv)) {
           sumKappaXY += regX(iv, 0) * regY(iv, 0);
@@ -459,22 +482,14 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const Real kappa = ebisbox.volFrac(vof);
 
-        sumKappaXY += (kappa * X(vof, 0)) * (kappa * Y(vof, 0));
+        sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
         sumVolume += kappa;
       };
 
-      const bool isCovered   = ebisbox.isAllCovered();
-      const bool isRegular   = ebisbox.isAllRegular();
-      const bool isIrregular = !isCovered && !isRegular;
-
-      if (isIrregular) {
-        VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
-
-        BoxLoops::loop(cellBox, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
-      }
-      else if (isCovered) {
-        BoxLoops::loop(cellBox, regularKernel);
+      const bool isCovered = ebisbox.isAllCovered();
+      if (!isCovered) {
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+        BoxLoops::loop(m_helmOps.at(i)->getVofIterIrreg()[din], irregularKernel);
       }
     }
   }
@@ -489,6 +504,81 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
   }
 
   return dotProd;
+}
+
+void
+MFHelmholtzOp::dotProductMaskedLocal(Real&                           a_sumKappaXY,
+                                     Real&                           a_sumVolume,
+                                     const LevelData<MFCellFAB>&     a_lhs,
+                                     const LevelData<MFCellFAB>&     a_rhs,
+                                     const LevelData<BaseFab<bool>>& a_mask,
+                                     const bool                      a_needVolume) const noexcept
+{
+  CH_TIME("MFHelmholtzOp::dotProductMaskedLocal");
+
+  // TLDR: Rank-local (un-reduced) partials for the masked AMR inner product, summed over both phases. The caller
+  //       (AMRMultigridKrylovOp) batches the per-level partials into a single MPI reduction; the volume is
+  //       geometry-only and is reduced/cached once, so a_needVolume can be false on subsequent calls.
+
+  Real sumKappaXY = 0.0;
+  Real sumVolume  = 0.0;
+
+  const DisjointBoxLayout& dbl  = a_lhs.disjointBoxLayout();
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : sumKappaXY, sumVolume)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const Box        cellBox = dbl[din];
+    const MFCellFAB& lhs     = a_lhs[din];
+
+    const BaseFab<bool>& mask = a_mask[din];
+
+    // The cell mask is shared across phases. Masked cells (covered by a finer level) are kept in the volume
+    // normalisation but excluded from the numerator -- matching Chombo's MultilevelLinearOp convention.
+    for (int i = 0; i < lhs.numPhases(); i++) {
+      const EBCellFAB& X = a_lhs[din].getPhase(i);
+      const EBCellFAB& Y = a_rhs[din].getPhase(i);
+
+      const FArrayBox& regX = X.getFArrayBox();
+      const FArrayBox& regY = Y.getFArrayBox();
+
+      const EBISBox& ebisbox = X.getEBISBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (ebisbox.isRegular(iv)) {
+          if (a_needVolume) {
+            sumVolume += 1.0;
+          }
+          if (mask(iv, 0)) {
+            sumKappaXY += regX(iv, 0) * regY(iv, 0);
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect& iv    = vof.gridIndex();
+        const Real     kappa = ebisbox.volFrac(vof);
+
+        if (a_needVolume) {
+          sumVolume += kappa;
+        }
+        if (mask(iv, 0)) {
+          sumKappaXY += kappa * X(vof, 0) * Y(vof, 0);
+        }
+      };
+
+      const bool isCovered = ebisbox.isAllCovered();
+      if (!isCovered) {
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
+        BoxLoops::loop(m_helmOps.at(i)->getVofIterIrreg()[din], irregularKernel);
+      }
+    }
+  }
+
+  a_sumKappaXY = sumKappaXY;
+  a_sumVolume  = sumVolume;
 }
 
 void
@@ -508,7 +598,7 @@ MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
 }
 
 void
-MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted)
+MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool /*a_ghosted*/)
 {
   CH_TIME("MFHelmholtzOp::createCoarser");
 
@@ -524,7 +614,7 @@ MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFC
 }
 
 void
-MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat)
+MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& /*a_refRat*/)
 {
   CH_TIME("MFHelmholtzOp::createCoarsened");
 
@@ -544,18 +634,18 @@ MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>&
 {
   CH_TIME("MFHelmholtzOp::preCond");
 
+  for (auto& op : m_helmOps) {
+    LevelData<EBCellFAB> corr;
+    LevelData<EBCellFAB> resi;
+
+    MultifluidAlias::aliasMF(corr, op.first, a_corr);
+    MultifluidAlias::aliasMF(resi, op.first, a_residual);
+
+    op.second->assignLocal(corr, resi);
+    op.second->scaleLocal(corr, op.second->getRelaxationCoeff());
+  }
+
   if (m_numSmoothPreCond > 0) {
-    for (auto& op : m_helmOps) {
-      LevelData<EBCellFAB> corr;
-      LevelData<EBCellFAB> resi;
-
-      MultifluidAlias::aliasMF(corr, op.first, a_corr);
-      MultifluidAlias::aliasMF(resi, op.first, a_residual);
-
-      op.second->assignLocal(corr, resi);
-      op.second->scaleLocal(corr, op.second->getRelaxationCoeff());
-    }
-
     this->relax(a_corr, a_residual, m_numSmoothPreCond);
   }
 }
@@ -601,8 +691,8 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
       const int iphase = op.first;
 
       // Doing the nasty, but applyOp will only monkey with ghost cells in a_phi.
-      EBCellFAB& Lph = (EBCellFAB&)a_Lphi[din].getPhase(iphase);
-      EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
+      auto& Lph = a_Lphi[din].getPhase(iphase);
+      auto& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
       const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
       const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
@@ -620,12 +710,15 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
 {
   CH_TIME("MFHelmholtzOp::interpolateCF");
 
+  // clang-format off
   // TLDR: This is a wrapper for interpolating ghost cells on each phase. The user can put a_homogeneousCF = false if he wants inhomogeneous interpolation. This routine
   //       was written so that we avoid calling Multifluid::aliasMF, since that tends to be expensive to call during every smoothing step.
+  // clang-format on
 
   if (m_hasCoar) {
     if (a_homogeneousCF) {
-      // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive).
+      // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data
+      // (which can be expensive).
       const DataIterator& dit  = a_phi.dataIterator();
       const int           nbox = dit.size();
 
@@ -638,7 +731,7 @@ MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi,
 
           RefCountedPtr<EBMultigridInterpolator>& phaseInterpolator = m_interpolator.getInterpolator(iphase);
 
-          EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
+          auto& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
           phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), din);
         }
@@ -717,7 +810,7 @@ MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
     MayDay::Abort("MFHelmholtzOp::exchangeGhost -- a_phi.disjointBoxLayout() != m_mflg.getGrids");
   }
 
-  LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&)a_phi;
+  auto& phi = (LevelData<MFCellFAB>&)a_phi;
 
   phi.exchange(m_exchangeCopier);
 }
@@ -745,6 +838,16 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
 
     break;
   }
+  case Smoother::Chebyshev: {
+    this->relaxChebyshev(a_correction, a_residual, a_iterations);
+
+    break;
+  }
+  case Smoother::RestrictedAdditiveSchwarz: {
+    this->relaxRestrictedAdditiveSchwarz(a_correction, a_residual, a_iterations);
+
+    break;
+  }
   default: {
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
 
@@ -760,8 +863,10 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxPointJacobi");
 
+  // clang-format off
   // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|. Here, diag(L) is captured
   //       in m_relCoef. For performance integration, EBHelmholtzOp has a public function for the kernel.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -812,10 +917,12 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
 {
   CH_TIME("MFHelmholtzOp::relaxGSRedBlack");
 
+  // clang-format off
   // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       for a red-black update pattern:
   //
   //       For performance integration, this calls the EBHelmholtzOp red-black kernel directly.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -861,17 +968,81 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
 }
 
 void
+MFHelmholtzOp::relaxRestrictedAdditiveSchwarz(LevelData<MFCellFAB>&       a_correction,
+                                              const LevelData<MFCellFAB>& a_residual,
+                                              const int                   a_iterations)
+{
+  CH_TIME("MFHelmholtzOp::relaxRestrictedAdditiveSchwarz");
+
+  // TLDR: Restricted additive Schwarz (block) smoother. Ghost cells/jump BCs are filled ONCE per outer iteration,
+  //       then each patch performs a number of frozen-ghost red-black sweeps (inexact local Dirichlet solve). Across
+  //       patches the iteration is additive (block Jacobi). The inner-sweep count is taken from the first phase
+  //       operator.
+
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;
+
+  int innerSweeps = 2;
+  if (!m_helmOps.empty()) {
+    innerSweeps = m_helmOps.begin()->second->getRasInnerSweeps();
+  }
+
+  for (int i = 0; i < a_iterations; i++) {
+
+    // Fill/interpolate ghost cells and match the BC once per outer iteration -- frozen during the inner block sweeps.
+    this->exchangeGhost(a_correction);
+    this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+    this->updateJumpBC(a_correction, homogeneousPhysBC);
+
+    // Inexact local solve on each patch.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+
+      for (int sweep = 0; sweep < innerSweeps; sweep++) {
+        for (int redBlack = 0; redBlack <= 1; redBlack++) {
+          for (auto& op : m_helmOps) {
+            const int iphase = op.first;
+
+            EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+            EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+            const EBCellFAB& res = a_residual[din].getPhase(iphase);
+
+            const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+            const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+            const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+            op.second->gauSaiRedBlackKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, redBlack);
+          }
+        }
+      }
+    }
+  }
+}
+
+void
 MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
                                  const LevelData<MFCellFAB>& a_residual,
                                  const int                   a_iterations)
 {
   CH_TIME("MFHelmholtzOp::relaxGSMultiColor");
 
+  // clang-format off
   // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
   //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D. This is just like red-black except that
   //       we have four/eight colors in 2D/3D.
   //
   //       For performance integration, this calls the EBHelmholtzOp multi-color kernel directly.
+  // clang-format on
 
   LevelData<MFCellFAB> Lcorr;
   this->create(Lcorr, a_correction);
@@ -919,6 +1090,80 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
 }
 
 void
+MFHelmholtzOp::relaxChebyshev(LevelData<MFCellFAB>&       a_correction,
+                              const LevelData<MFCellFAB>& a_residual,
+                              const int                   a_iterations)
+{
+  CH_TIME("MFHelmholtzOp::relaxChebyshev");
+
+  // TLDR: Chebyshev-Richardson smoother; calls EBHelmholtzOp::chebyshevKernel per phase.
+  //       The Chebyshev step sizes are taken from the first phase's per-op settings.
+
+  // Fetch Chebyshev parameters from the first phase operator.
+  int  chebyOrder    = 3;
+  Real chebyEigRatio = 4.0;
+  Real lambdaMax     = 2.0;
+
+  if (!m_helmOps.empty()) {
+    chebyOrder    = m_helmOps.begin()->second->getChebyOrder();
+    chebyEigRatio = m_helmOps.begin()->second->getChebyEigRatio();
+    lambdaMax     = m_helmOps.begin()->second->getSpectralRadius();
+  }
+
+  const Real lambdaMin = lambdaMax / chebyEigRatio;
+  const Real theta     = 0.5 * (lambdaMax + lambdaMin);
+  const Real delta     = 0.5 * (lambdaMax - lambdaMin);
+
+  std::vector<Real> omega(chebyOrder);
+
+  for (int i = 0; i < chebyOrder; i++) {
+    const Real sigma = theta - delta * std::cos((2 * i + 1) * M_PI / (2 * chebyOrder));
+    omega[i]         = 1.0 / sigma;
+  }
+
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;
+
+  for (int iter = 0; iter < a_iterations; iter++) {
+    for (int i = 0; i < chebyOrder; i++) {
+
+      this->exchangeGhost(a_correction);
+      this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+      this->updateJumpBC(a_correction, homogeneousPhysBC);
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box cellBox = dbl[din];
+
+        for (auto& op : m_helmOps) {
+          const int iphase = op.first;
+
+          EBCellFAB&       Lph = Lcorr[din].getPhase(iphase);
+          EBCellFAB&       phi = a_correction[din].getPhase(iphase);
+          const EBCellFAB& res = a_residual[din].getPhase(iphase);
+
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->chebyshevKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, omega[i]);
+        }
+      }
+    }
+  }
+}
+
+void
 MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
                                 LevelData<MFCellFAB>&       a_phi,
                                 const LevelData<MFCellFAB>& a_rhs)
@@ -941,7 +1186,9 @@ MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
     MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
 
+    op.second->turnOffExchange();
     op.second->restrictResidual(resCoar, phi, rhs);
+    op.second->turnOnExchange();
   }
 }
 
@@ -1112,8 +1359,6 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 {
   CH_TIME("MFHelmholtzOp::AMROperatorNF");
 
-  constexpr bool homogeneousCFBC = false;
-
   // Note; There is no coarse-fine interpolation here because that will have been
   // done by AMROperator (which is called before this routine).
   this->exchangeGhost(a_phi);
@@ -1150,7 +1395,7 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
   CH_TIME("MFHelmholtzOp::AMROperatorNC");
 
   if (m_hasFine) {
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)a_finerOp;
+    auto* finerOp = (MFHelmholtzOp*)a_finerOp;
 
     for (auto& op : finerOp->m_helmOps) {
       LevelData<EBCellFAB> phi;
@@ -1175,7 +1420,7 @@ MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
     MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
 
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
+    auto* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
     // Don't need to update ghost cells again, coarsen, or exchange data.
     op.second->turnOffCFInterp();
@@ -1200,10 +1445,8 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
 {
   CH_TIME("MFHelmholtzOp::AMROperator");
 
-  constexpr bool homogeneousCFBC = false;
-
   if (m_hasFine) {
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)a_finerOp;
+    auto* finerOp = (MFHelmholtzOp*)a_finerOp;
 
     for (auto& op : finerOp->m_helmOps) {
       LevelData<EBCellFAB> phi;
@@ -1230,11 +1473,11 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
     MultifluidAlias::aliasMF(phi, op.first, a_phi);
     MultifluidAlias::aliasMF(phiCoar, op.first, a_phiCoar);
 
-    MFHelmholtzOp* finerOp = (MFHelmholtzOp*)(a_finerOp);
+    auto* finerOp = (MFHelmholtzOp*)(a_finerOp);
 
-    // Don't need to update ghost cells again, coarsen, or exchange data. Our ability to turn off coarse-fine interpolation comes from
-    // the fact that EBHelmholtzOp will interpolate the ghost cells on the finer level during the reflux stage. When we enter this routine
-    // we already have updated our ghost cells!
+    // Don't need to update ghost cells again, coarsen, or exchange data. Our ability to turn off coarse-fine
+    // interpolation comes from the fact that EBHelmholtzOp will interpolate the ghost cells on the finer level during
+    // the reflux stage. When we enter this routine we already have updated our ghost cells!
     op.second->turnOffCFInterp();
     op.second->turnOffCoarsening();
     op.second->turnOffExchange();
