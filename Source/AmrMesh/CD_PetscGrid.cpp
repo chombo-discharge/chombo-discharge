@@ -447,7 +447,7 @@ PetscGrid::definePetscRows() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       }
     }
     m_amrToPetsc[lvl]->exchange();

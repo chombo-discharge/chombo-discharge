@@ -35,11 +35,12 @@
 
 #warning "This class should have vof iterators that iterate over only the valid cells on each phase/level/grid index"
 
-/*!
-  @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
-  @details This class includes functions for putting chombo-discharge in PETSc and vice versa.
-  @note This class assumes that PETSc will only care about a single component per grid cell (two components in a multifluid cell).
-*/
+/**
+ * @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
+ * @details This class includes functions for putting chombo-discharge in PETSc and vice versa.
+ * @note This class assumes that PETSc will only care about a single component per grid cell (two components in a
+ * multifluid cell).
+ */
 class PetscGrid
 {
 public:
@@ -88,83 +89,83 @@ public:
   virtual void
   clear() noexcept;
 
-  /*!
-    @brief Is defined or not
-  */
+  /**
+   * @brief Is defined or not
+   */
   virtual bool
   isDefined() const noexcept;
 
-  /*!
-    @brief Get the grids
-  */
+  /**
+   * @brief Get the grids
+   */
   virtual Vector<DisjointBoxLayout>
   getGrids() const noexcept;
 
-  /*!
-    @brief Get the grids on each level.
-  */
+  /**
+   * @brief Get the grids on each level.
+   */
   virtual const Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGrids() const noexcept;
 
-  /*!
-    @brief Get the refined coarse grids on each level.
-  */
+  /**
+   * @brief Get the refined coarse grids on each level.
+   */
   virtual const Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGridsFiCo() const noexcept;
 
-  /*!
-    @brief Get the coarsened fine coarse grids on each level.
-  */
+  /**
+   * @brief Get the coarsened fine coarse grids on each level.
+   */
   virtual const Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGridsCoFi() const noexcept;
 
-  /*!
-    @brief Get the VoF iterator defined on the specified phase
-    @return m_vofIteratork[iphase].
-  */
+  /**
+   * @brief Get the VoF iterator defined on the specified phase
+   * @return m_vofIteratork[iphase].
+   */
   virtual Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVoFIterator(const int a_iphase) const noexcept;
 
-  /*!
-    @brief Get the cut-cells that are also PETSc rows on the specified phase.
-    @return m_vofIteratork[iphase].
-  */
+  /**
+   * @brief Get the cut-cells that are also PETSc rows on the specified phase.
+   * @return m_vofIteratork[iphase].
+   */
   virtual const Vector<RefCountedPtr<LayoutData<IntVectSet>>>&
   getIrregIVS(const int a_iphase) const noexcept;
 
-  /*!
-    @brief Get the mapping between the AMR cells and PETSc rows
-  */
+  /**
+   * @brief Get the mapping between the AMR cells and PETSc rows
+   */
   virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
   getAMRToPetsc() const noexcept;
 
-  /*!
-    @brief Get the mapping between the AMR cells and PETSc rows.
-    @details This returns the mapping on every level l, where the levels are defined
-    by coarsening of the finer level. 
-  */
+  /**
+   * @brief Get the mapping between the AMR cells and PETSc rows.
+   * @details This returns the mapping on every level l, where the levels are defined
+   * by coarsening of the finer level.
+   */
   virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
   getAMRToPetscCoFi() const noexcept;
 
-  /*!
-    @brief Get the mapping between the AMR cells and PETSc rows.
-    @details This returns the mapping on every level l, where the levels are defined
-    by refinement of a coarser level.
-  */
+  /**
+   * @brief Get the mapping between the AMR cells and PETSc rows.
+   * @details This returns the mapping on every level l, where the levels are defined
+   * by refinement of a coarser level.
+   */
   virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
   getAMRToPetscFiCo() const noexcept;
 
-  /*!
-    @brief Get the number of valid phases
-  */
+  /**
+   * @brief Get the number of valid phases
+   */
   virtual int
   getNumPhases() const noexcept;
 
-  /*!
-    @brief Create a PETSc vector.
-    @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
-    param[in,out] x PETSc vector    
-  */
+  /**
+   * @brief Create a PETSc vector.
+   * @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
+   * param[in,out] x PETSc vector
+   */
   virtual void
   create(Vec& x) noexcept;
 
@@ -184,24 +185,24 @@ public:
   virtual void
   setValue(Vec& a_x, const PetscScalar a_value) const noexcept;
 
-  /*!
-    @brief Push data form a chombo-discharge data holder into PETSc.
-    @details The current implementation iterates through the AMR cells on each rank and extracts the subvector
-    on each rank. Fillling is done using the local row number obtained via amrToPetsc (we simply subtract each
-    rank's starting row index).
-    @param[out] a_x PETSc vector
-    @param[in] a_y chombo-discharge data holder    
-  */
+  /**
+   * @brief Push data form a chombo-discharge data holder into PETSc.
+   * @details The current implementation iterates through the AMR cells on each rank and extracts the subvector
+   * on each rank. Fillling is done using the local row number obtained via amrToPetsc (we simply subtract each
+   * rank's starting row index).
+   * @param[out] a_x PETSc vector
+   * @param[in] a_y chombo-discharge data holder
+   */
   virtual void
   putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept;
 
-  /*!
-    @brief Pull data from a PETSc vector into a chombo-discharge data holder.
-    @details The current implementation iterates through the local subvector (via m_petscToAMR), and assigns
-    values to each AMR cell using the local PETSc row. 
-    @param[in,out] a_y chombo-discharge data holder
-    @param[in] a_x PETSc vector    
-  */
+  /**
+   * @brief Pull data from a PETSc vector into a chombo-discharge data holder.
+   * @details The current implementation iterates through the local subvector (via m_petscToAMR), and assigns
+   * values to each AMR cell using the local PETSc row.
+   * @param[in,out] a_y chombo-discharge data holder
+   * @param[in] a_x PETSc vector
+   */
   virtual void
   putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept;
 
@@ -312,27 +313,31 @@ protected:
    */
   Vector<Real> m_dx;
 
-  /*!
-    @brief Mapping structure for moving between AMR cells and PETSc rows.
-    @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc.
-    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row.     
-  */
+  /**
+   * @brief Mapping structure for moving between AMR cells and PETSc rows.
+   * @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another
+   * cell, etc.
+   * @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local
+   * row.
+   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;
 
-  /*!
-    @brief Mapping structure for moving between AMR cells and PETSc rows.
-    @details This is like m_amrToPetsc, except that it is defined on the coarsened grids. Index i thus contains the coarsening of
-    level i+1.
-    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row. 
-  */
+  /**
+   * @brief Mapping structure for moving between AMR cells and PETSc rows.
+   * @details This is like m_amrToPetsc, except that it is defined on the coarsened grids. Index i thus contains the
+   * coarsening of level i+1.
+   * @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local
+   * row.
+   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscCoFi;
 
-  /*!
-    @brief Mapping structure for moving between AMR cells and PETSc rows.
-    @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the refinement of
-    level i.
-    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row.         
-  */
+  /**
+   * @brief Mapping structure for moving between AMR cells and PETSc rows.
+   * @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the
+   * refinement of level i.
+   * @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local
+   * row.
+   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;
 
   /**
@@ -341,23 +346,23 @@ protected:
    */
   Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR[2];
 
-  /*!
-    @brief Iterator for iterating through the cut-cells on each phase
-    @note This is defined only on the valid cut-cells that are also PETSc rows
-  */
+  /**
+   * @brief Iterator for iterating through the cut-cells on each phase
+   * @note This is defined only on the valid cut-cells that are also PETSc rows
+   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIterators[2];
 
-  /*!
-    @brief Cut-cells that are also PETSc rows. 
-    @note This is defined only on the valid cut-cells that are also PETSc rows
-  */
+  /**
+   * @brief Cut-cells that are also PETSc rows.
+   * @note This is defined only on the valid cut-cells that are also PETSc rows
+   */
   Vector<RefCountedPtr<LayoutData<IntVectSet>>> m_irregIVS[2];
 
-  /*!
-    @brief Define basic cell information for PetscGrid.
-    @details This defines basic cell properties, indicating whether or not a cell is covered by a finer grid, if it abuts
-    the coarse-fine interface, etc.
-  */
+  /**
+   * @brief Define basic cell information for PetscGrid.
+   * @details This defines basic cell properties, indicating whether or not a cell is covered by a finer grid, if it
+   * abuts the coarse-fine interface, etc.
+   */
   virtual void
   defineAMRCells() noexcept;
 
