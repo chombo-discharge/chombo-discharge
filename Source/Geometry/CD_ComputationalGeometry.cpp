@@ -1318,6 +1318,97 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
 }
 
 bool
+ComputationalGeometry::piercedSeamFace(const IntVect&           a_cell,
+                                       const int                a_level,
+                                       const phase::which_phase a_phase,
+                                       const BaseFab<bool>&     a_refined) const
+{
+  CH_TIME("ComputationalGeometry::piercedSeamFace");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::piercedSeamFace" << endl;
+  }
+
+  if (SpaceDim < 3) {
+    return false;
+  }
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
+
+  if (implicitFunction.isNull()) {
+    return false;
+  }
+
+  const BaseIF& f = *implicitFunction;
+
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Real fineDx = 0.5 * dx;
+
+  // The node values of the cell, as it is built from, and the middle of each face toward the level above, which
+  // is a node of that level and is snapped at its spacing.
+  BaseFab<Real> nodeValues;
+
+  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, Box(a_cell, a_cell), m_probLo, dx);
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
+
+      if (!a_refined.box().contains(other) || !a_refined(other, 0)) {
+        continue;
+      }
+
+      const int t0 = (dir + 1) % SpaceDim;
+      const int t1 = (dir + 2) % SpaceDim;
+
+      // the middle as a node of the level above, placed as that level places its nodes
+      IntVect middle = 2 * a_cell;
+
+      middle[dir] += 2 * side;
+      middle[t0] += 1;
+      middle[t1] += 1;
+
+      RealVect x = m_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += fineDx * static_cast<Real>(middle[d]);
+      }
+
+      const Real midValue = PolyhedralGeometryShop::snappedValue(f, x, fineDx);
+
+      if (midValue == 0.0) {
+        continue;
+      }
+
+      const bool midFluid = PolyhedralEB::isFluid(midValue);
+
+      // The corners are read as the middle's opposite wherever they are free to be, since that is the reading
+      // that hides the piercing.
+      bool agreeAgainst = true;
+
+      for (int c = 0; c < 4 && agreeAgainst; c++) {
+        IntVect node = a_cell;
+
+        node[dir] += side;
+        node[t0] += c & 1;
+        node[t1] += (c >> 1) & 1;
+
+        const Real value = nodeValues(node, 0);
+
+        agreeAgainst = (value == 0.0) || (PolyhedralEB::isFluid(value) != midFluid);
+      }
+
+      if (agreeAgainst) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+bool
 ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::hasTwistedPatch");
@@ -1558,10 +1649,11 @@ ComputationalGeometry::makeTiles()
                         m_maxBlockSize * IntVect::Unit);
 
   // The tiles are built, then read back: a cell left on the coarse side of a level boundary whose edge the level
-  // above crosses twice is tagged, and the tiles are built again. The pass has to come after the tiles exist
-  // rather than before, because the tiled region is not a function of the box classification alone -- the tiler
-  // nests, and nesting puts tiles above boxes that never refined, which is exactly where such a cell hides. Each
-  // pass only adds tags, so the region grows and the loop ends; in practice one further pass finds nothing.
+  // above crosses twice, or whose shared face it pierces at the middle, is tagged, and the tiles are built again. The
+  // pass has to come after the tiles exist rather than before, because the tiled region is not a function of the box
+  // classification alone -- the tiler nests, and nesting puts tiles above boxes that never refined, which is exactly
+  // where such a cell hides. Each pass only adds tags, so the region grows and the loop ends; in practice one further
+  // pass finds nothing.
   for (int pass = 0; pass < s_maxTilePasses; pass++) {
     Vector<Vector<Box>> tiles;
 
@@ -1583,12 +1675,13 @@ ComputationalGeometry::makeTiles()
     }
 
     if (m_verbose && procID() == 0) {
-      pout() << "ComputationalGeometry::makeTiles - tiling again for the cells the level above would cross twice"
-             << endl;
+      pout() << "ComputationalGeometry::makeTiles - tiling again for the cells the level above would cross twice or "
+             << "pierce" << endl;
     }
   }
 
-  MayDay::Error("ComputationalGeometry::makeTiles - the tiles never resolved every doubly crossed edge");
+  MayDay::Error("ComputationalGeometry::makeTiles - the tiles never resolved every doubly crossed edge and pierced "
+                "face");
 }
 
 bool
@@ -1659,7 +1752,8 @@ ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
         }
 
         for (const phase::which_phase& curPhase : phases) {
-          if (this->doublyCrossedEdge(Box(iv, iv), lvl, curPhase)) {
+          if (this->doublyCrossedEdge(Box(iv, iv), lvl, curPhase) ||
+              this->piercedSeamFace(iv, lvl, curPhase, refined)) {
             levelTags |= iv;
 
             numTagged++;
