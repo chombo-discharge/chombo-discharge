@@ -10,14 +10,14 @@
  * @author Robert Marskar
  */
 
-#if CH_USE_PETSC
+#ifdef CH_USE_PETSC
 
 #ifndef CD_FIELDSOLVERAMG_H
 #define CD_FIELDSOLVERAMG_H
 
 // Our includes
 #include <CD_FieldSolver.H>
-#include <CD_MFHelmholtzPetsc.H>
+#include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -25,6 +25,8 @@
  * equations.
  * @details This is a matrix-based solver which uses the composite grid. I.e., it should be insensitive to geometric
  * coarsening errors.
+ * @note This is currently a skeleton: there is no operator, and solve() only round-trips a PETSc vector through
+ * PetscGrid as a smoke test of the AMR to PETSc mapping. It always reports non-convergence.
  */
 class FieldSolverAMG : public FieldSolver
 {
@@ -68,7 +70,7 @@ public:
 
   /**
    * @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides.
-   * @param[inout] a_potential Potential
+   * @param[in,out] a_potential Potential
    * @param[in] a_rho Space charge density
    * @param[in] a_sigma Surface charge density.
    * @param[in] a_zeroPhi Set a_potential to zero first.
@@ -95,7 +97,7 @@ public:
 
   /**
    * @brief Compute the cell-centered electric field.
-   * @param[out] a_electricField Cell-centered electric field
+   * @param[out] a_E             Cell-centered electric field
    * @param[in]  a_potential     Cell-centered potential
    */
   virtual void
@@ -103,7 +105,7 @@ public:
 
   /**
    * @brief Compute the face-centered electric field.
-   * @param[out] a_electricField Face-centered electric field
+   * @param[out] a_E             Face-centered electric field
    * @param[in]  a_potential     Cell-centered potential
    */
   virtual void
@@ -111,7 +113,7 @@ public:
 
   /**
    * @brief Compute the cell-centered electric field on a specific phase.
-   * @param[out] a_electricField Cell-centered electric field
+   * @param[out] a_E             Cell-centered electric field
    * @param[in]  a_phase         Phase
    * @param[in]  a_potential     Cell-centered potential
    */
@@ -122,7 +124,7 @@ public:
 
   /**
    * @brief Compute the face-centered electric field on a specific phase.
-   * @param[out] a_electricField Face-centered electric field
+   * @param[out] a_E             Face-centered electric field
    * @param[in]  a_phase         Phase
    * @param[in]  a_potential     Cell-centered potential
    */

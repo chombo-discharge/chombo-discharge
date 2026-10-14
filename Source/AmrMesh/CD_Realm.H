@@ -588,6 +588,7 @@ public:
 #ifdef CH_USE_PETSC
   /**
    * @brief Get the PETSc grid object
+   * @return The PETSc grid for this realm.
    */
   const RefCountedPtr<PetscGrid>&
   getPetscGrid() const noexcept;

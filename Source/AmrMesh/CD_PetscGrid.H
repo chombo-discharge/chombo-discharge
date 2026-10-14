@@ -89,6 +89,7 @@ public:
 
   /**
    * @brief Is defined or not
+   * @return True if the grid has been defined.
    */
   virtual bool
   isDefined() const noexcept;
@@ -96,23 +97,24 @@ public:
   /**
    * @brief Create a PETSc vector.
    * @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
-   * param[in,out] x PETSc vector
+   * @param[in,out] a_x PETSc vector
    */
   virtual void
-  create(Vec& x) noexcept;
+  create(Vec& a_x) noexcept;
 
   /**
    * @brief Destroy a PETSc vector.
    * @details This will deallocate the PETSc vector.
-   * param[in,out] x PETSc vector
+   * @param[in,out] a_x PETSc vector
    */
   virtual void
-  destroy(Vec& x) noexcept;
+  destroy(Vec& a_x) noexcept;
 
   /**
    * @brief Set values in a PETSc vector.
    * @details a_value Does not need to be the same across all ranks.
-   * @param[in,out] x Global PETSc vector
+   * @param[in,out] a_x     Global PETSc vector
+   * @param[in]     a_value Value to set
    */
   virtual void
   setValue(Vec& a_x, const PetscScalar a_value) const noexcept;
@@ -135,6 +137,7 @@ public:
 
   /**
    * @brief Write the PETSc grid to an output HDF5 file
+   * @param[in] a_filename Output file name
    */
   virtual void
   dumpPetscGrid(const std::string& a_filename) const noexcept;

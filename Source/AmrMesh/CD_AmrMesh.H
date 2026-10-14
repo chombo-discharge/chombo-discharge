@@ -2178,6 +2178,7 @@ public:
   /**
    * @brief Get a PETSc grid object
    * @param[in] a_realm Realm name.
+   * @return The PETSc grid for the realm.
    */
   const RefCountedPtr<PetscGrid>&
   getPetscGrid(const std::string& a_realm) const noexcept;

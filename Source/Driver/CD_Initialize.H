@@ -46,6 +46,7 @@ extern std::string dischargeInputFile;
  * @details This initializes MPI and possibly also PETSc, and builds the ParmParse table used for fetching argument.
  * @param[in] argc The usual number of arguments on the command line.
  * @param[in] argv[] Usual arguments.
+ * @return Exit code (0 on success).
  */
 #if defined(CH_USE_PETSC)
 PetscErrorCode
