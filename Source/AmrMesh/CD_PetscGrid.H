@@ -188,7 +188,7 @@ public:
   /**
    * @brief Push data form a chombo-discharge data holder into PETSc.
    * @details The current implementation iterates through the AMR cells on each rank and extracts the subvector
-   * on each rank. Fillling is done using the local row number obtained via amrToPetsc (we simply subtract each
+   * on each rank. Filling is done using the local row number obtained via amrToPetsc (we simply subtract each
    * rank's starting row index).
    * @param[out] a_x PETSc vector
    * @param[in] a_y chombo-discharge data holder
