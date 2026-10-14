@@ -193,6 +193,179 @@ rankOffset(const long long a_mine, long long& a_offset, long long& a_total)
 #endif
 }
 
+/**
+ * @brief Append the nodes of a cell's VoFs as an index space holds them, so that a graph can be built from them again.
+ * @details Each VoF's arcs come from its faces -- the VoF across, or the domain boundary -- with their apertures and
+ * centroids. Where the moments hold no data for the cell, the moments are left at zero: a graph is built from arcs
+ * alone.
+ * @param[in,out] a_nodes The nodes, appended to.
+ * @param[in]     a_graph Graph holding the cell.
+ * @param[in]     a_data  Moments over some part of the graph's region.
+ * @param[in]     a_cell  The cell, irregular in the graph.
+ * @param[in]     a_withMoments Whether the moments hold data for the cell.
+ */
+void
+appendNodes(Vector<IrregNode>& a_nodes,
+            const EBGraph&     a_graph,
+            const EBData&      a_data,
+            const IntVect&     a_cell,
+            const bool         a_withMoments)
+{
+  const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
+
+  for (int v = 0; v < vofs.size(); v++) {
+    IrregNode node;
+
+    node.m_cell          = a_cell;
+    node.m_cellIndex     = vofs[v].cellIndex();
+    node.m_volFrac       = a_withMoments ? a_data.volFrac(vofs[v]) : 0.0;
+    node.m_volCentroid   = a_withMoments ? a_data.centroid(vofs[v]) : RealVect::Zero;
+    node.m_bndryCentroid = a_withMoments ? a_data.bndryCentroid(vofs[v]) : RealVect::Zero;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const int               index = IrregNode::index(dir, sit());
+        const Vector<FaceIndex> faces = a_graph.getFaces(vofs[v], dir, sit());
+
+        node.m_arc[index].resize(0);
+        node.m_areaFrac[index].resize(0);
+        node.m_faceCentroid[index].resize(0);
+
+        for (int i = 0; i < faces.size(); i++) {
+          node.m_arc[index].push_back(faces[i].isBoundary() ? -1 : faces[i].getVoF(sit()).cellIndex());
+          node.m_areaFrac[index].push_back(a_withMoments ? a_data.areaFrac(faces[i]) : 0.0);
+          node.m_faceCentroid[index].push_back(a_withMoments ? a_data.centroid(faces[i]) : RealVect::Zero);
+        }
+      }
+    }
+
+    a_nodes.push_back(node);
+  }
+}
+
+/**
+ * @brief Make each regular cell beside a multi-valued one a cut cell of volume one.
+ * @details Chombo's coarsening reads the face of a regular cell as leading to the first VoF of the cell across, so a
+ * regular cell's face into any other VoF of a multi-valued neighbour is lost. EBISLevel::fixRegularNextToMultiValued
+ * makes such cells full cut cells and divides the face evenly among the VoFs across; here each face into a VoF across
+ * is the face that VoF holds toward the cell, with its aperture and centroid. The nodes of a cell must be contiguous,
+ * and a cell at the region's edge sees only the neighbours inside it.
+ * @param[in,out] a_flags  Regular (1), cut (0) or covered (-1) for the region's cells. The cells made cut are set to 0.
+ * @param[in,out] a_nodes  Nodes of the region's cut cells. A node is appended for each cell made cut.
+ * @param[in]     a_region Region the flags describe.
+ * @param[in]     a_valid  Part of the region whose cells made cut are counted.
+ * @param[in]     a_domain Domain the region lies in.
+ * @return The number of cells in a_valid made cut.
+ */
+long long
+cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
+                            Vector<IrregNode>&   a_nodes,
+                            const Box&           a_region,
+                            const Box&           a_valid,
+                            const ProblemDomain& a_domain)
+{
+  BaseFab<int> first(a_region, 1);
+  BaseFab<int> count(a_region, 1);
+
+  first.setVal(-1);
+  count.setVal(0);
+
+  for (int n = 0; n < a_nodes.size(); n++) {
+    const IntVect& cell = a_nodes[n].m_cell;
+
+    if (a_region.contains(cell)) {
+      if (first(cell, 0) < 0) {
+        first(cell, 0) = n;
+      }
+
+      CH_assert(first(cell, 0) + count(cell, 0) == n);
+
+      count(cell, 0)++;
+    }
+  }
+
+  Vector<IrregNode> madeCut;
+
+  long long numMadeCut = 0;
+
+  for (BoxIterator bit(a_region); bit.ok(); ++bit) {
+    const IntVect cell = bit();
+
+    if (a_flags(cell, 0) != 1) {
+      continue;
+    }
+
+    bool besideMulti = false;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect other = cell + sign(sit()) * BASISV(dir);
+
+        besideMulti = besideMulti || (a_region.contains(other) && count(other, 0) > 1);
+      }
+    }
+
+    if (!besideMulti) {
+      continue;
+    }
+
+    IrregNode node;
+
+    node.m_cell          = cell;
+    node.m_cellIndex     = 0;
+    node.m_volFrac       = 1.0;
+    node.m_volCentroid   = RealVect::Zero;
+    node.m_bndryCentroid = RealVect::Zero;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const int     index = IrregNode::index(dir, sit());
+        const IntVect other = cell + sign(sit()) * BASISV(dir);
+
+        node.m_arc[index].resize(0);
+        node.m_areaFrac[index].resize(0);
+        node.m_faceCentroid[index].resize(0);
+
+        if (!a_domain.contains(other)) {
+          node.m_arc[index].push_back(-1);
+          node.m_areaFrac[index].push_back(1.0);
+          node.m_faceCentroid[index].push_back(RealVect::Zero);
+        }
+        else if (a_region.contains(other) && count(other, 0) > 0) {
+          const int back = IrregNode::index(dir, flip(sit()));
+
+          for (int q = 0; q < count(other, 0); q++) {
+            const IrregNode& across = a_nodes[first(other, 0) + q];
+
+            for (int i = 0; i < across.m_arc[back].size(); i++) {
+              node.m_arc[index].push_back(across.m_cellIndex);
+              node.m_areaFrac[index].push_back(across.m_areaFrac[back][i]);
+              node.m_faceCentroid[index].push_back(across.m_faceCentroid[back][i]);
+            }
+          }
+        }
+        else {
+          node.m_arc[index].push_back(0);
+          node.m_areaFrac[index].push_back(1.0);
+          node.m_faceCentroid[index].push_back(RealVect::Zero);
+        }
+      }
+    }
+
+    a_flags(cell, 0) = 0;
+
+    madeCut.push_back(node);
+
+    if (a_valid.contains(cell)) {
+      numMadeCut++;
+    }
+  }
+
+  a_nodes.append(madeCut);
+
+  return numMadeCut;
+}
+
 } // namespace
 
 PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
@@ -448,30 +621,405 @@ PolyhedralGeometryShop::buildMoments()
   m_ebGraphs.resize(numLevels);
   m_ebData.resize(numLevels);
 
-  const int finest = numLevels - 1;
+  // Finest first: a level's cells under the next finer level come from coarsening that level, which is complete by
+  // then.
+  long long numInexact  = 0;
+  long long numPromoted = 0;
 
-  EBGraphFactory graphFactory(domains[finest]);
+  for (int lvl = numLevels - 1; lvl >= 0; lvl--) {
+    if (grids[lvl].size() == 0) {
+      continue;
+    }
+
+    LevelData<EBGraph> coarsenedGraph;
+    LevelData<EBData>  coarsenedData;
+
+    const bool haveFiner = lvl + 1 < numLevels && !m_ebGraphs[lvl + 1].isNull();
+
+    if (haveFiner) {
+      this->coarsenLevel(coarsenedGraph, coarsenedData, numInexact, copy, grids, domains, lvl + 1);
+    }
+
+    this->assembleLevel(numPromoted,
+                        copy,
+                        haveFiner ? &coarsenedGraph : nullptr,
+                        haveFiner ? &coarsenedData : nullptr,
+                        grids,
+                        domains,
+                        lvl);
+  }
+
+  numInexact  = ParallelOps::sum(numInexact);
+  numPromoted = ParallelOps::sum(numPromoted);
+
+  if (m_testCopy && procID() == 0) {
+    pout() << "PolyhedralGeometryShop::buildMoments - " << numInexact
+           << " coarsened cells whose moments differ from the sums over their children, " << numPromoted
+           << " regular cells beside a multi-valued one written as full cut cells" << endl;
+  }
+
+  if (m_testCopy && numInexact > 0) {
+    MayDay::Error("PolyhedralGeometryShop::buildMoments - coarsening does not sum the finer moments");
+  }
+}
+
+void
+PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
+                                     LevelData<EBData>&                    a_coarData,
+                                     long long&                            a_numInexact,
+                                     const AMRPolyhedralEBGraph&           a_copy,
+                                     const std::vector<DisjointBoxLayout>& a_grids,
+                                     const std::vector<ProblemDomain>&     a_domains,
+                                     const int                             a_fineLevel) const
+{
+  CH_TIME("PolyhedralGeometryShop::coarsenLevel");
+
+  const int f = a_fineLevel;
+  const int k = a_fineLevel - 1;
+
+  const Interval interv(0, 0);
+
+  DisjointBoxLayout coarsened;
+
+  coarsen(coarsened, a_grids[f], 2);
+
+  EBGraphFactory fineGraphFactory(a_domains[f]);
+  EBGraphFactory coarGraphFactory(a_domains[k]);
   EBDataFactory  dataFactory;
 
-  m_ebGraphs[finest] = RefCountedPtr<LevelData<EBGraph>>(
-    new LevelData<EBGraph>(grids[finest], 1, IntVect::Unit, graphFactory));
-  m_ebData[finest] = RefCountedPtr<LevelData<EBData>>(
-    new LevelData<EBData>(grids[finest], 1, IntVect::Zero, dataFactory));
+  // The fine level as Chombo's coarsening reads it: the graph with three ghost cells and the moments with two. Inside
+  // the level's own boxes the cells are the level's, finished; outside them they are cut from the coarser cells they
+  // lie in, which the copied graph subdivides.
+  LevelData<EBGraph> fineGraph(a_grids[f], 1, s_coarsenFineGraphGhost * IntVect::Unit, fineGraphFactory);
+  LevelData<EBData>  fineData(a_grids[f], 1, s_coarsenFineDataGhost * IntVect::Unit, dataFactory);
+
+  // The finished level, brought onto the boxes and their ghost cells in a fresh graph: Chombo's copy adds the VoFs it
+  // receives to those a cell already holds, so it is never copied into a graph already built.
+  LevelData<EBGraph> finished(a_grids[f], 1, s_coarsenFineGraphGhost * IntVect::Unit, fineGraphFactory);
+  LevelData<EBData>  finishedData(a_grids[f], 1, s_coarsenFineDataGhost * IntVect::Unit, dataFactory);
+
+  m_ebGraphs[f]->copyTo(interv, finished, interv);
+
+  for (DataIterator dit(a_grids[f]); dit.ok(); ++dit) {
+    const Box region = grow(a_grids[f][dit()], s_coarsenFineDataGhost) & a_domains[f].domainBox();
+
+    finishedData[dit()].defineVoFData(finished[dit()], region);
+    finishedData[dit()].defineFaceData(finished[dit()], region);
+  }
+
+  m_ebData[f]->copyTo(interv, finishedData, interv);
+
+  // whether a cell of the fine level lies in one of its boxes, where the finished level has it
+  const auto finishedHas = [&](const IntVect& a_cell) -> bool {
+    Vector<int> hits;
+
+    a_grids[f].intersecting(Box(a_cell, a_cell), hits);
+
+    return hits.size() > 0;
+  };
 
   long long numCollapsed = 0;
   long long numFiner     = 0;
 
-  for (DataIterator dit(grids[finest]); dit.ok(); ++dit) {
-    const Box box = grids[finest][dit()];
+  for (DataIterator dit(a_grids[f]); dit.ok(); ++dit) {
+    const Box graphRegion = grow(a_grids[f][dit()], s_coarsenFineGraphGhost) & a_domains[f].domainBox();
+    const Box dataRegion  = grow(a_grids[f][dit()], s_coarsenFineDataGhost) & a_domains[f].domainBox();
+
+    BaseFab<int>      flags;
+    Vector<IrregNode> fromCopy;
+
+    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, f, dit());
+
+    Vector<IrregNode> nodes;
+
+    for (int n = 0; n < fromCopy.size(); n++) {
+      if (graphRegion.contains(fromCopy[n].m_cell) && !finishedHas(fromCopy[n].m_cell)) {
+        nodes.push_back(fromCopy[n]);
+      }
+    }
+
+    for (BoxIterator bit(graphRegion); bit.ok(); ++bit) {
+      const IntVect cell = bit();
+
+      if (!finishedHas(cell)) {
+        continue;
+      }
+
+      const EBGraph& graph = finished[dit()];
+
+      if (graph.isRegular(cell)) {
+        flags(cell, 0) = 1;
+      }
+      else if (graph.isCovered(cell)) {
+        flags(cell, 0) = -1;
+      }
+      else {
+        flags(cell, 0) = 0;
+
+        appendNodes(nodes, graph, finishedData[dit()], cell, dataRegion.contains(cell));
+      }
+    }
+
+    cutRegularNextToMultiValued(flags, nodes, graphRegion, a_grids[f][dit()], a_domains[f]);
+
+    fineGraph[dit()].buildGraph(flags, nodes, graphRegion, a_domains[f]);
+    fineData[dit()].define(fineGraph[dit()], nodes, dataRegion);
+  }
+
+  // The coarse level's VoFs, over each box and over its one ghost cell, coarsened from the fine cells under them; then
+  // the faces, and the moments, as EBISLevel coarsens a level.
+  a_coarGraph.define(coarsened, 1, IntVect::Zero, coarGraphFactory);
+  a_coarData.define(coarsened, 1, IntVect::Zero, dataFactory);
+
+  LevelData<EBGraph> coarGhost(coarsened, 1, IntVect::Unit, coarGraphFactory);
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    const Box box = coarsened[dit()];
+
+    coarGhost[dit()].coarsenVoFs(fineGraph[dit()], grow(box, 1) & a_domains[k].domainBox());
+    a_coarGraph[dit()].coarsenVoFs(fineGraph[dit()], box);
+  }
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    a_coarGraph[dit()].coarsenFaces(coarGhost[dit()], fineGraph[dit()]);
+  }
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    a_coarData[dit()].coarsenVoFs(fineData[dit()], fineGraph[dit()], coarGhost[dit()], coarsened[dit()]);
+  }
+
+  // The moments of the faces need the coarse faces, which the valid cells now have: copied into a fresh graph, since
+  // Chombo's copy adds what it receives to what a cell holds, and the ghost cells no coarsened box holds taken from the
+  // coarsened VoFs, by a local copy that replaces.
+  LevelData<EBGraph> coarFaces(coarsened, 1, IntVect::Unit, coarGraphFactory);
+
+  a_coarGraph.copyTo(interv, coarFaces, interv);
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    for (BoxIterator bit(grow(coarsened[dit()], 1) & a_domains[k].domainBox()); bit.ok(); ++bit) {
+      Vector<int> hits;
+
+      coarsened.intersecting(Box(bit(), bit()), hits);
+
+      if (hits.size() == 0) {
+        const Box cell(bit(), bit());
+
+        coarFaces[dit()].copy(cell, interv, cell, coarGhost[dit()], interv);
+      }
+    }
+  }
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    a_coarData[dit()].coarsenFaces(fineData[dit()], fineGraph[dit()], coarFaces[dit()], coarsened[dit()]);
+  }
+
+  // Each coarse cell against its children: its volume, its first moment and its apertures are the children's,
+  // summed and scaled, whatever VoFs either side splits them into.
+  if (m_testCopy) {
+    const auto volume = [](const EBGraph& a_graph, const EBData& a_data, const IntVect& a_cell, RealVect& a_moment) {
+      a_moment = RealVect::Zero;
+
+      if (a_graph.isRegular(a_cell)) {
+        return 1.0;
+      }
+
+      if (a_graph.isCovered(a_cell)) {
+        return 0.0;
+      }
+
+      Real sum = 0.0;
+
+      const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
+
+      for (int v = 0; v < vofs.size(); v++) {
+        sum += a_data.volFrac(vofs[v]);
+        a_moment += a_data.volFrac(vofs[v]) * a_data.centroid(vofs[v]);
+      }
+
+      return sum;
+    };
+
+    const auto aperture = [](const EBGraph&       a_graph,
+                             const EBData&        a_data,
+                             const IntVect&       a_cell,
+                             const int            a_dir,
+                             const Side::LoHiSide a_side) -> Real {
+      if (a_graph.isRegular(a_cell)) {
+        return 1.0;
+      }
+
+      if (a_graph.isCovered(a_cell)) {
+        return 0.0;
+      }
+
+      Real sum = 0.0;
+
+      const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
+
+      for (int v = 0; v < vofs.size(); v++) {
+        const Vector<FaceIndex> faces = a_graph.getFaces(vofs[v], a_dir, a_side);
+
+        for (int i = 0; i < faces.size(); i++) {
+          sum += a_data.areaFrac(faces[i]);
+        }
+      }
+
+      return sum;
+    };
+
+    constexpr Real tolerance = 1.0E-12;
+
+    long long numChecked   = 0;
+    long long numIrregular = 0;
+    long long numMulti     = 0;
+
+    const Real volumeScale = 1.0 / static_cast<Real>(1 << SpaceDim);
+    const Real faceScale   = 1.0 / static_cast<Real>(1 << (SpaceDim - 1));
+
+    for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+      for (BoxIterator bit(coarsened[dit()]); bit.ok(); ++bit) {
+        const IntVect cell = bit();
+
+        RealVect coarseMoment;
+
+        const Real coarseVolume = volume(a_coarGraph[dit()], a_coarData[dit()], cell, coarseMoment);
+
+        Real     fineVolume = 0.0;
+        RealVect fineMoment = RealVect::Zero;
+
+        for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
+          RealVect moment;
+
+          const Real childVolume = volume(fineGraph[dit()], fineData[dit()], cit(), moment);
+
+          // the child's centre, a quarter of a coarse cell from the parent's
+          RealVect offset;
+
+          for (int d = 0; d < SpaceDim; d++) {
+            offset[d] = 0.5 * static_cast<Real>(cit()[d] - 2 * cell[d]) - 0.25;
+          }
+
+          fineVolume += volumeScale * childVolume;
+          fineMoment += volumeScale * (childVolume * offset + 0.5 * moment);
+        }
+
+        bool exact = std::abs(coarseVolume - fineVolume) <= tolerance &&
+                     (coarseMoment - fineMoment).vectorLength() <= tolerance;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            Box layer = refine(Box(cell, cell), 2);
+
+            const int plane = (sit() == Side::Lo) ? layer.smallEnd(dir) : layer.bigEnd(dir);
+
+            layer.setSmall(dir, plane);
+            layer.setBig(dir, plane);
+
+            Real fineAperture = 0.0;
+
+            for (BoxIterator cit(layer); cit.ok(); ++cit) {
+              fineAperture += faceScale * aperture(fineGraph[dit()], fineData[dit()], cit(), dir, sit());
+            }
+
+            const Real coarseAperture = aperture(a_coarGraph[dit()], a_coarData[dit()], cell, dir, sit());
+
+            exact = exact && std::abs(coarseAperture - fineAperture) <= tolerance;
+          }
+        }
+
+        a_numInexact += exact ? 0 : 1;
+
+        numChecked++;
+
+        if (a_coarGraph[dit()].isIrregular(cell)) {
+          numIrregular++;
+          numMulti += (a_coarGraph[dit()].getVoFs(cell).size() > 1) ? 1 : 0;
+        }
+      }
+    }
+
+    numChecked   = ParallelOps::sum(numChecked);
+    numIrregular = ParallelOps::sum(numIrregular);
+    numMulti     = ParallelOps::sum(numMulti);
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::coarsenLevel - level " << f << " onto " << k << ": " << numChecked
+             << " cells coarsened and checked against their children, " << numIrregular << " of them cut, " << numMulti
+             << " multi-valued" << endl;
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::assembleLevel(long long&                            a_numPromoted,
+                                      const AMRPolyhedralEBGraph&           a_copy,
+                                      const LevelData<EBGraph>*             a_coarsenedGraph,
+                                      const LevelData<EBData>*              a_coarsenedData,
+                                      const std::vector<DisjointBoxLayout>& a_grids,
+                                      const std::vector<ProblemDomain>&     a_domains,
+                                      const int                             a_level)
+{
+  CH_TIME("PolyhedralGeometryShop::assembleLevel");
+
+  const int            lvl    = a_level;
+  const ProblemDomain& domain = a_domains[lvl];
+
+  const Interval interv(0, 0);
+
+  EBGraphFactory graphFactory(domain);
+  EBDataFactory  dataFactory;
+
+  m_ebGraphs[lvl] = RefCountedPtr<LevelData<EBGraph>>(
+    new LevelData<EBGraph>(a_grids[lvl], 1, IntVect::Unit, graphFactory));
+  m_ebData[lvl] = RefCountedPtr<LevelData<EBData>>(new LevelData<EBData>(a_grids[lvl], 1, IntVect::Zero, dataFactory));
+
+  // The coarsened cells, brought onto this level's boxes and their one ghost cell.
+  const bool haveFiner = a_coarsenedGraph != nullptr;
+
+  LevelData<EBGraph> fromFiner;
+  LevelData<EBData>  fromFinerData;
+
+  if (haveFiner) {
+    // the graph one cell wider than the moments, whose faces at their edge read the cells across them
+    fromFiner.define(a_grids[lvl], 1, 2 * IntVect::Unit, graphFactory);
+    fromFinerData.define(a_grids[lvl], 1, IntVect::Unit, dataFactory);
+
+    a_coarsenedGraph->copyTo(interv, fromFiner, interv);
+
+    for (DataIterator dit(a_grids[lvl]); dit.ok(); ++dit) {
+      const Box region = grow(a_grids[lvl][dit()], 1) & domain.domainBox();
+
+      fromFinerData[dit()].defineVoFData(fromFiner[dit()], region);
+      fromFinerData[dit()].defineFaceData(fromFiner[dit()], region);
+    }
+
+    a_coarsenedData->copyTo(interv, fromFinerData, interv);
+  }
+
+  // whether a cell of this level lies under the next finer level, where the coarsening has it
+  const auto underFiner = [&](const IntVect& a_cell) -> bool {
+    if (!haveFiner) {
+      return false;
+    }
+
+    Vector<int> hits;
+
+    a_grids[lvl + 1].intersecting(refine(Box(a_cell, a_cell), 2), hits);
+
+    return hits.size() > 0;
+  };
+
+  long long numCollapsed = 0;
+  long long numFiner     = 0;
+
+  for (DataIterator dit(a_grids[lvl]); dit.ok(); ++dit) {
+    const Box box    = a_grids[lvl][dit()];
+    const Box region = grow(box, 1) & domain.domainBox();
 
     BaseFab<int>      flags;
     Vector<IrregNode> nodes;
 
-    copy.fillNodes(flags, nodes, numCollapsed, numFiner, finest, dit());
-
-    // As EBISLevel keeps it: the graph over the box and one ghost cell, so that the faces of the box's edge cells see
-    // the cells across them, and the moments over the box.
-    const Box region = grow(box, 1) & domains[finest].domainBox();
+    a_copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit());
 
     Vector<IrregNode> held;
 
@@ -481,15 +1029,85 @@ PolyhedralGeometryShop::buildMoments()
       }
     }
 
-    EBGraph& graph = (*m_ebGraphs[finest])[dit()];
-    EBData&  data  = (*m_ebData[finest])[dit()];
+    if (haveFiner) {
+      const EBGraph& finer     = fromFiner[dit()];
+      const EBData&  finerData = fromFinerData[dit()];
 
-    graph.buildGraph(flags, held, region, domains[finest]);
+      // A coarsened cell becomes the nodes of its VoFs, as the coarsening made them.
+      for (BoxIterator bit(region); bit.ok(); ++bit) {
+        const IntVect cell = bit();
+
+        if (!underFiner(cell)) {
+          continue;
+        }
+
+        if (finer.isRegular(cell)) {
+          flags(cell, 0) = 1;
+
+          continue;
+        }
+
+        if (finer.isCovered(cell)) {
+          flags(cell, 0) = -1;
+
+          continue;
+        }
+
+        flags(cell, 0) = 0;
+
+        appendNodes(held, finer, finerData, cell, true);
+      }
+
+      // A cell of this level's own beside a coarsened one takes the faces between them from the coarsened side, which
+      // knows which of its VoFs each one leads into.
+      for (int n = 0; n < held.size(); n++) {
+        IrregNode& node = held[n];
+
+        if (underFiner(node.m_cell)) {
+          continue;
+        }
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const IntVect other = node.m_cell + sign(sit()) * BASISV(dir);
+
+            if (!region.contains(other) || !underFiner(other) || !finer.isIrregular(other)) {
+              continue;
+            }
+
+            const int index = IrregNode::index(dir, sit());
+
+            node.m_arc[index].resize(0);
+            node.m_areaFrac[index].resize(0);
+            node.m_faceCentroid[index].resize(0);
+
+            const Vector<VolIndex> across = finer.getVoFs(other);
+
+            for (int v = 0; v < across.size(); v++) {
+              const Vector<FaceIndex> faces = finer.getFaces(across[v], dir, flip(sit()));
+
+              for (int i = 0; i < faces.size(); i++) {
+                node.m_arc[index].push_back(across[v].cellIndex());
+                node.m_areaFrac[index].push_back(finerData.areaFrac(faces[i]));
+                node.m_faceCentroid[index].push_back(finerData.centroid(faces[i]));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    a_numPromoted += cutRegularNextToMultiValued(flags, held, region, box, domain);
+
+    EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
+    EBData&  data  = (*m_ebData[lvl])[dit()];
+
+    graph.buildGraph(flags, held, region, domain);
     data.define(graph, held, box);
   }
 
   if (ParallelOps::sum(numFiner) > 0) {
-    MayDay::Error("PolyhedralGeometryShop::buildMoments - a cell of the finest level is owned by a finer one");
+    MayDay::Error("PolyhedralGeometryShop::assembleLevel - a cell a finer level owns lies outside that level's boxes");
   }
 }
 
@@ -3551,6 +4169,20 @@ PolyhedralGeometryShop::testMoments() const
       continue;
     }
 
+    // a cell under the next finer level is coarsened from it, which buildMoments checks against the sums over its
+    // children; the faces of the level's own cells onto one are the coarsened side's
+    const auto underFiner = [&](const IntVect& a_cell) -> bool {
+      if (lvl + 1 >= numLevels || m_ebGraphs[lvl + 1].isNull()) {
+        return false;
+      }
+
+      Vector<int> hits;
+
+      grids[lvl + 1].intersecting(refine(Box(a_cell, a_cell), 2), hits);
+
+      return hits.size() > 0;
+    };
+
     for (DataIterator dit(grids[lvl]); dit.ok(); ++dit) {
       const Box box = grids[lvl][dit()];
 
@@ -3563,11 +4195,19 @@ PolyhedralGeometryShop::testMoments() const
       const EBData&  data  = (*m_ebData[lvl])[dit()];
 
       for (BoxIterator bit(box); bit.ok(); ++bit) {
+        if (underFiner(bit())) {
+          continue;
+        }
+
         const int flag = flags(bit(), 0);
 
         numCells++;
 
-        if ((flag == 1 && !graph.isRegular(bit())) || (flag == -1 && !graph.isCovered(bit())) ||
+        // a regular cell beside a multi-valued coarsened one is written as a cut cell holding the whole of itself
+        const bool wholeCut = graph.isIrregular(bit()) && graph.getVoFs(bit()).size() == 1 &&
+                              data.volFrac(graph.getVoFs(bit())[0]) == 1.0;
+
+        if ((flag == 1 && !graph.isRegular(bit()) && !wholeCut) || (flag == -1 && !graph.isCovered(bit())) ||
             (flag == 0 && !graph.isIrregular(bit()))) {
           numWrong++;
         }
@@ -3597,6 +4237,10 @@ PolyhedralGeometryShop::testMoments() const
 
         for (int dir = 0; dir < SpaceDim; dir++) {
           for (SideIterator sit; sit.ok(); ++sit) {
+            if (underFiner(node.m_cell + sign(sit()) * BASISV(dir))) {
+              continue;
+            }
+
             const int               index = IrregNode::index(dir, sit());
             const Vector<FaceIndex> faces = graph.getFaces(vof, dir, sit());
 

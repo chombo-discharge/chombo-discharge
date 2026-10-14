@@ -196,10 +196,12 @@ public:
   /**
    * @brief Compute the index-space data on the geometry's own grids, from the graph and nothing else.
    * @details One LevelData<EBGraph> and one LevelData<EBData> per level, over every box the geometry built on it, as
-   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph decides what each cell is,
-   * and each cut cell takes the moments of its stitched body; the graph is copied onto the grids first, so that every
-   * box holds what it needs. Only the finest level is built: the coarser levels hold cells under the finer one, which
-   * come from coarsening it. Collective. Requires buildGraphs.
+   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph is copied onto the grids
+   * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
+   * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
+   * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). Under
+   * PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective.
+   * Requires buildGraphs.
    */
   void
   buildMoments();
@@ -460,6 +462,54 @@ public:
    */
   void
   testMoments() const;
+
+  /**
+   * @brief Coarsen a level of the index space onto its coarsened layout, by Chombo's coarsening.
+   * @details The fine level is read as Chombo's coarsening reads it, with s_coarsenFineGraphGhost ghost cells of graph
+   * and s_coarsenFineDataGhost of moments: inside the level's boxes from the finished level, outside them from the
+   * copied graph, which cuts those cells from the coarser cells they lie in. The coarse ghost graph is coarsened over
+   * each box's ghost cell rather than copied, so that it exists where no coarsened box does. Under
+   * PolyhedralGeometryShop.test_copy every coarse cell's volume, first moment and apertures are compared with the sums
+   * over its children, and a cell differing by more than round-off is counted.
+   * @param[out] a_coarGraph  Coarsened graph, defined here over the coarsened fine layout.
+   * @param[out] a_coarData   Coarsened moments, defined here over the coarsened fine layout.
+   * @param[out] a_numInexact Incremented for every coarse cell that is not the sum of its children.
+   * @param[in]  a_copy       The graph copied onto the geometry's grids.
+   * @param[in]  a_grids      The geometry's grids.
+   * @param[in]  a_domains    Their domains.
+   * @param[in]  a_fineLevel  Level to coarsen, already built.
+   */
+  void
+  coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
+               LevelData<EBData>&                    a_coarData,
+               long long&                            a_numInexact,
+               const AMRPolyhedralEBGraph&           a_copy,
+               const std::vector<DisjointBoxLayout>& a_grids,
+               const std::vector<ProblemDomain>&     a_domains,
+               const int                             a_fineLevel) const;
+
+  /**
+   * @brief Build a level of the index space from its own cells and the cells coarsened from the level above.
+   * @details The level's own cells take what the copied graph says. Its cells under the next finer level take the
+   * coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which
+   * VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut
+   * cell, since a regular cell connects to one VoF only; this changes no moment.
+   * @param[out] a_numPromoted     Incremented for every regular cell written as a full cut cell.
+   * @param[in]  a_copy            The graph copied onto the geometry's grids.
+   * @param[in]  a_coarsenedGraph  coarsenLevel's graph for the level above, or null on the finest level.
+   * @param[in]  a_coarsenedData   coarsenLevel's moments for the level above, or null on the finest level.
+   * @param[in]  a_grids           The geometry's grids.
+   * @param[in]  a_domains         Their domains.
+   * @param[in]  a_level           Level to build.
+   */
+  void
+  assembleLevel(long long&                            a_numPromoted,
+                const AMRPolyhedralEBGraph&           a_copy,
+                const LevelData<EBGraph>*             a_coarsenedGraph,
+                const LevelData<EBData>*              a_coarsenedData,
+                const std::vector<DisjointBoxLayout>& a_grids,
+                const std::vector<ProblemDomain>&     a_domains,
+                const int                             a_level);
 
   /**
    * @brief A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its
@@ -726,6 +776,16 @@ protected:
    * of the copied ring. Nothing to do with the ghost cells a solver asks of the index space.
    */
   static constexpr int s_momentRing = 4;
+
+  /**
+   * @brief Ghost cells of the fine graph Chombo's coarsening reads, as EBISLevel builds a coarse level.
+   */
+  static constexpr int s_coarsenFineGraphGhost = 3;
+
+  /**
+   * @brief Ghost cells of the fine moments Chombo's coarsening reads, as EBISLevel builds a coarse level.
+   */
+  static constexpr int s_coarsenFineDataGhost = 2;
 
   /**
    * @brief Kind of a node of the written graph: a cut cell, at its fluid's centroid.
