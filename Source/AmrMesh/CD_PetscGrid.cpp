@@ -105,6 +105,17 @@ PetscGrid::clear() noexcept
   }
 }
 
+bool
+PetscGrid::isDefined() const noexcept
+{
+  CH_TIME("PetscGrid::isDefined");
+  if (m_verbose) {
+    pout() << "PetscGrid::isDefined" << endl;
+  }
+
+  return m_isDefined;
+}
+
 void
 PetscGrid::defineAMRCells() noexcept
 {

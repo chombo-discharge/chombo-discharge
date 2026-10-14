@@ -12,9 +12,48 @@
 
 #ifdef CH_USE_PETSC
 
+// Std includes
+#include <cstdint>
+#include <cstring>
+#include <type_traits>
+
 // Our includes
 #include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
+
+namespace {
+/**
+ * @brief Copy a trivially-copyable value into a byte buffer and advance the buffer pointer.
+ * @param[in,out] a_p Buffer pointer. Advanced by sizeof(T).
+ * @param[in] a_x Value to write.
+ */
+template <class T>
+void
+pushValue(uint8_t*& a_p, const T& a_x) noexcept
+{
+  static_assert(std::is_trivially_copyable<T>::value, "pushValue expects trivially-copyable values");
+
+  std::memcpy(a_p, &a_x, sizeof(T));
+
+  a_p += sizeof(T);
+}
+
+/**
+ * @brief Copy a trivially-copyable value out of a byte buffer and advance the buffer pointer.
+ * @param[in,out] a_p Buffer pointer. Advanced by sizeof(T).
+ * @param[out] a_x Value to read into.
+ */
+template <class T>
+void
+pullValue(const uint8_t*& a_p, T& a_x) noexcept
+{
+  static_assert(std::is_trivially_copyable<T>::value, "pullValue expects trivially-copyable values");
+
+  std::memcpy(&a_x, a_p, sizeof(T));
+
+  a_p += sizeof(T);
+}
+} // namespace
 
 PetscAMRCell::PetscAMRCell() noexcept
 {
@@ -142,13 +181,13 @@ linearIn(PetscAMRCell& a_amrCell, const void* const a_buffer)
 {
   const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
 
-  detail::pullParticleProperty(p, a_amrCell.m_petscRows[0]);
-  detail::pullParticleProperty(p, a_amrCell.m_petscRows[1]);
-  detail::pullParticleProperty(p, a_amrCell.m_isCoveredByFinerGrid);
-  detail::pullParticleProperty(p, a_amrCell.m_isGhostCF);
-  detail::pullParticleProperty(p, a_amrCell.m_isCoarCF);
-  detail::pullParticleProperty(p, a_amrCell.m_isFineCF);
-  detail::pullParticleProperty(p, a_amrCell.m_isDomainBoundaryCell);
+  pullValue(p, a_amrCell.m_petscRows[0]);
+  pullValue(p, a_amrCell.m_petscRows[1]);
+  pullValue(p, a_amrCell.m_isCoveredByFinerGrid);
+  pullValue(p, a_amrCell.m_isGhostCF);
+  pullValue(p, a_amrCell.m_isCoarCF);
+  pullValue(p, a_amrCell.m_isFineCF);
+  pullValue(p, a_amrCell.m_isDomainBoundaryCell);
 }
 
 void
@@ -156,13 +195,13 @@ linearOut(void* const a_buffer, const PetscAMRCell& a_amrCell)
 {
   uint8_t* p = static_cast<uint8_t*>(a_buffer);
 
-  detail::pushParticleProperty(p, a_amrCell.m_petscRows[0]);
-  detail::pushParticleProperty(p, a_amrCell.m_petscRows[1]);
-  detail::pushParticleProperty(p, a_amrCell.m_isCoveredByFinerGrid);
-  detail::pushParticleProperty(p, a_amrCell.m_isGhostCF);
-  detail::pushParticleProperty(p, a_amrCell.m_isCoarCF);
-  detail::pushParticleProperty(p, a_amrCell.m_isFineCF);
-  detail::pushParticleProperty(p, a_amrCell.m_isDomainBoundaryCell);
+  pushValue(p, a_amrCell.m_petscRows[0]);
+  pushValue(p, a_amrCell.m_petscRows[1]);
+  pushValue(p, a_amrCell.m_isCoveredByFinerGrid);
+  pushValue(p, a_amrCell.m_isGhostCF);
+  pushValue(p, a_amrCell.m_isCoarCF);
+  pushValue(p, a_amrCell.m_isFineCF);
+  pushValue(p, a_amrCell.m_isDomainBoundaryCell);
 }
 
 #include <CD_NamespaceFooter.H>

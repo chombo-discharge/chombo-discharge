@@ -14,8 +14,10 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <ParmParse.H>
 
 // Our includes
+#include <CD_BoxLoops.H>
 #include <CD_LeastSquares.H>
 #include <CD_VofUtils.H>
 #include <CD_Timer.H>

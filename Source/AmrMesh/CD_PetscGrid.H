@@ -88,6 +88,12 @@ public:
   clear() noexcept;
 
   /**
+   * @brief Is defined or not
+   */
+  virtual bool
+  isDefined() const noexcept;
+
+  /**
    * @brief Create a PETSc vector.
    * @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
    * param[in,out] x PETSc vector
