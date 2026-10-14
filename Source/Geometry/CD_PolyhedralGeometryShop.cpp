@@ -35,6 +35,8 @@
 #include <BRMeshRefine.H>
 #include <BoxIterator.H>
 #include <CH_assert.H>
+#include <EBDataFactory.H>
+#include <EBGraphFactory.H>
 #include <IntVectSet.H>
 #include <LoHiSide.H>
 #include <MayDay.H>
@@ -48,6 +50,7 @@
 #include <CD_PolyUtils.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_ComputationalGeometry.H>
+#include <CD_LoadBalancing.H>
 #include <CD_ParallelOps.H>
 #include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
@@ -398,6 +401,118 @@ PolyhedralGeometryShop::buildGraphs()
   this->reportUnresolvedRefinement();
 }
 
+void
+PolyhedralGeometryShop::buildMoments()
+{
+  CH_TIME("PolyhedralGeometryShop::buildMoments");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::buildMoments" << endl;
+  }
+
+  if (m_graphs.size() == 0) {
+    MayDay::Error("PolyhedralGeometryShop::buildMoments - buildGraphs has not run");
+  }
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  // The geometry's own grids, every box of every level, balanced by cell count.
+  std::vector<DisjointBoxLayout> grids(numLevels);
+  std::vector<ProblemDomain>     domains(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains[lvl] = m_compGeom->getDomain(lvl);
+
+    const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
+
+    Vector<long> loads(boxes.size());
+
+    for (int i = 0; i < boxes.size(); i++) {
+      loads[i] = boxes[i].numPts();
+    }
+
+    Vector<int> ranks;
+
+    LoadBalancing::makeBalance(ranks, loads, boxes);
+
+    grids[lvl].define(boxes, ranks, domains[lvl]);
+  }
+
+  // The graph, copied onto those grids with the ring the coarsening reads.
+  AMRPolyhedralEBGraph copy;
+
+  this->copyGraphs(copy, grids, domains, s_momentRing);
+
+  m_ebGraphs.resize(0);
+  m_ebData.resize(0);
+  m_ebGraphs.resize(numLevels);
+  m_ebData.resize(numLevels);
+
+  const int finest = numLevels - 1;
+
+  EBGraphFactory graphFactory(domains[finest]);
+  EBDataFactory  dataFactory;
+
+  m_ebGraphs[finest] = RefCountedPtr<LevelData<EBGraph>>(
+    new LevelData<EBGraph>(grids[finest], 1, IntVect::Unit, graphFactory));
+  m_ebData[finest] = RefCountedPtr<LevelData<EBData>>(
+    new LevelData<EBData>(grids[finest], 1, IntVect::Zero, dataFactory));
+
+  long long numCollapsed = 0;
+  long long numFiner     = 0;
+
+  for (DataIterator dit(grids[finest]); dit.ok(); ++dit) {
+    const Box box = grids[finest][dit()];
+
+    BaseFab<int>      flags;
+    Vector<IrregNode> nodes;
+
+    copy.fillNodes(flags, nodes, numCollapsed, numFiner, finest, dit());
+
+    // As EBISLevel keeps it: the graph over the box and one ghost cell, so that the faces of the box's edge cells see
+    // the cells across them, and the moments over the box.
+    const Box region = grow(box, 1) & domains[finest].domainBox();
+
+    Vector<IrregNode> held;
+
+    for (int n = 0; n < nodes.size(); n++) {
+      if (region.contains(nodes[n].m_cell)) {
+        held.push_back(nodes[n]);
+      }
+    }
+
+    EBGraph& graph = (*m_ebGraphs[finest])[dit()];
+    EBData&  data  = (*m_ebData[finest])[dit()];
+
+    graph.buildGraph(flags, held, region, domains[finest]);
+    data.define(graph, held, box);
+  }
+
+  if (ParallelOps::sum(numFiner) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::buildMoments - a cell of the finest level is owned by a finer one");
+  }
+}
+
+const LevelData<EBGraph>&
+PolyhedralGeometryShop::getEBGraph(const int a_level) const
+{
+  if (a_level < 0 || a_level >= m_ebGraphs.size() || m_ebGraphs[a_level].isNull()) {
+    MayDay::Error("PolyhedralGeometryShop::getEBGraph - no index-space graph on this level");
+  }
+
+  return *m_ebGraphs[a_level];
+}
+
+const LevelData<EBData>&
+PolyhedralGeometryShop::getEBData(const int a_level) const
+{
+  if (a_level < 0 || a_level >= m_ebData.size() || m_ebData[a_level].isNull()) {
+    MayDay::Error("PolyhedralGeometryShop::getEBData - no index-space moments on this level");
+  }
+
+  return *m_ebData[a_level];
+}
+
 const PolyhedralEBGraph&
 PolyhedralGeometryShop::getGraph(const int a_level) const noexcept
 {
@@ -457,6 +572,11 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Copy bodies");
     this->testCopyBodies();
     timer.stopEvent("Copy bodies");
+
+    timer.startEvent("Moments");
+    const_cast<PolyhedralGeometryShop*>(this)->buildMoments();
+    this->testMoments();
+    timer.stopEvent("Moments");
   }
 
   // The surface: triangles in three dimensions, the chords of the cut cells in two.
@@ -2241,7 +2361,7 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
     geometryLevels[i] = this->destinationLevel(a_domains[i]);
   }
 
-  a_dest.define(a_grids, a_domains, geometryLevels, numGeo, a_ghost);
+  a_dest.define(a_grids, a_domains, geometryLevels, numGeo, a_ghost, *m_compGeom, m_phase);
 
   // This rank's destination boxes and graph boxes by their index in their layouts, which is how a header names them.
   std::vector<std::vector<DataIndex>> destIndex(numDest);
@@ -3381,6 +3501,148 @@ PolyhedralGeometryShop::testCopyBodies() const
   const ProblemDomain finerDomain = refine(domains.back(), 2);
 
   check("a level past the finest", {PolyhedralGeometryShop::shuffledLayout(finer, finerDomain)}, {finerDomain});
+}
+
+void
+PolyhedralGeometryShop::testMoments() const
+{
+  CH_TIME("PolyhedralGeometryShop::testMoments");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testMoments" << endl;
+  }
+
+  const int numLevels = m_ebGraphs.size();
+
+  // The graph copied again onto the same grids, where each box's flags and nodes say what its index space must hold.
+  std::vector<DisjointBoxLayout> grids(numLevels);
+  std::vector<ProblemDomain>     domains(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains[lvl] = m_compGeom->getDomain(lvl);
+    grids[lvl]   = m_ebGraphs[lvl].isNull() ? DisjointBoxLayout() : m_ebGraphs[lvl]->disjointBoxLayout();
+  }
+
+  // the levels buildMoments did not build take the geometry's boxes, so that the copy sees the whole hierarchy
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_ebGraphs[lvl].isNull()) {
+      const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
+
+      Vector<int> ranks(boxes.size(), 0);
+
+      grids[lvl].define(boxes, ranks, domains[lvl]);
+    }
+  }
+
+  AMRPolyhedralEBGraph copy;
+
+  this->copyGraphs(copy, grids, domains, s_momentRing);
+
+  Real      maxFaceDeviation = 0.0;
+  Real      maxAreaDeviation = 0.0;
+  long long numCells         = 0;
+  long long numVoFs          = 0;
+  long long numWrong         = 0;
+  long long numCollapsed     = 0;
+  long long numFiner         = 0;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_ebGraphs[lvl].isNull()) {
+      continue;
+    }
+
+    for (DataIterator dit(grids[lvl]); dit.ok(); ++dit) {
+      const Box box = grids[lvl][dit()];
+
+      BaseFab<int>      flags;
+      Vector<IrregNode> nodes;
+
+      copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit());
+
+      const EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
+      const EBData&  data  = (*m_ebData[lvl])[dit()];
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        const int flag = flags(bit(), 0);
+
+        numCells++;
+
+        if ((flag == 1 && !graph.isRegular(bit())) || (flag == -1 && !graph.isCovered(bit())) ||
+            (flag == 0 && !graph.isIrregular(bit()))) {
+          numWrong++;
+        }
+      }
+
+      for (int n = 0; n < nodes.size(); n++) {
+        const IrregNode& node = nodes[n];
+
+        if (!box.contains(node.m_cell)) {
+          continue;
+        }
+
+        const Vector<VolIndex> vofs = graph.getVoFs(node.m_cell);
+
+        if (vofs.size() != 1) {
+          numWrong++;
+
+          continue;
+        }
+
+        const VolIndex& vof = vofs[0];
+
+        numVoFs++;
+
+        bool same = data.volFrac(vof) == node.m_volFrac && data.centroid(vof) == node.m_volCentroid &&
+                    data.bndryCentroid(vof) == node.m_bndryCentroid;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const int               index = IrregNode::index(dir, sit());
+            const Vector<FaceIndex> faces = graph.getFaces(vof, dir, sit());
+
+            if (faces.size() != node.m_arc[index].size()) {
+              same = false;
+
+              continue;
+            }
+
+            // A face two cut cells share holds one centroid, which either may have written: the two compute it from the
+            // same crossings, each over its own polygon, and agree to round-off.
+            for (int f = 0; f < faces.size(); f++) {
+              const Real deviation = (data.centroid(faces[f]) - node.m_faceCentroid[index][f]).vectorLength();
+
+              maxFaceDeviation = std::max(maxFaceDeviation, deviation);
+
+              const Real areaDeviation = std::abs(data.areaFrac(faces[f]) - node.m_areaFrac[index][f]);
+
+              maxAreaDeviation = std::max(maxAreaDeviation, areaDeviation);
+
+              same = same && areaDeviation <= 1.0E-12 && deviation <= 1.0E-12;
+            }
+          }
+        }
+
+        numWrong += same ? 0 : 1;
+      }
+    }
+  }
+
+  numCells         = ParallelOps::sum(numCells);
+  numVoFs          = ParallelOps::sum(numVoFs);
+  numWrong         = ParallelOps::sum(numWrong);
+  maxFaceDeviation = ParallelOps::max(maxFaceDeviation);
+  maxAreaDeviation = ParallelOps::max(maxAreaDeviation);
+
+  if (procID() == 0) {
+    pout() << "PolyhedralGeometryShop::testMoments - " << numCells << " cells and " << numVoFs
+           << " cut-cell VoFs read back from the index space, " << numWrong
+           << " differing from the graph; apertures within " << maxAreaDeviation << ", face centroids within "
+           << maxFaceDeviation << endl;
+  }
+
+  if (numWrong > 0) {
+    MayDay::Error("PolyhedralGeometryShop::testMoments - the index space differs from the graph it was built from");
+  }
 }
 
 DisjointBoxLayout

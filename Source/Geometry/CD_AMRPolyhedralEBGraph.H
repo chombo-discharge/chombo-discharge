@@ -28,7 +28,10 @@
 #include <CD_CutCellDescription.H>
 #include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
+
+class ComputationalGeometry;
 
 /**
  * @brief The polyhedral graph as an AMR hierarchy of any layout holds it: every cell of every box, ghost cells
@@ -69,13 +72,18 @@ public:
    * @param[in] a_geometryLevels  Geometry level of every destination level.
    * @param[in] a_numSourceLevels Number of geometry levels.
    * @param[in] a_ghost           Ghost width every destination box is filled to.
+   * @param[in] a_geometry        The geometry the graph was built over, which says what a cell no tile holds is; kept
+   * by reference, and must outlive this object.
+   * @param[in] a_phase           Phase of the graph.
    */
   void
   define(const std::vector<DisjointBoxLayout>& a_grids,
          const std::vector<ProblemDomain>&     a_domains,
          const std::vector<int>&               a_geometryLevels,
          const int                             a_numSourceLevels,
-         const int                             a_ghost);
+         const int                             a_ghost,
+         const ComputationalGeometry&          a_geometry,
+         const phase::which_phase              a_phase);
 
   /**
    * @brief Whether define has run.
@@ -148,8 +156,11 @@ public:
               const IntVect&                                 a_cell) const;
 
   /**
-   * @brief What a cell of a destination box is: cut if any geometry cell owning part of it is, regular or covered if
-   * all of them are, and s_unowned if no geometry level owns any of it here.
+   * @brief What a cell of a destination box is: cut if any geometry cell owning part of it is, or if it holds both
+   * regular and covered fluid, regular or covered if all of it is, and s_unowned if the box holds nothing of it.
+   * @details The graph holds only cut tiles. A part of the cell no tile holds is regular or covered whole, as the
+   * geometry's own boxes say (ComputationalGeometry::classify), and is read from them at the finest level holding any
+   * of the cell.
    * @param[in] a_level Destination level.
    * @param[in] a_dit   Destination box.
    * @param[in] a_cell  The cell, on the destination level.
@@ -157,6 +168,17 @@ public:
    */
   int
   getState(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const;
+
+  /**
+   * @brief Whether a destination box holds a cell: within its ring and the domain, and not under the next finer
+   * destination level.
+   * @param[in] a_level Destination level.
+   * @param[in] a_dit   Destination box.
+   * @param[in] a_cell  The cell, on the destination level.
+   * @return True if the box holds the cell.
+   */
+  bool
+  holds(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const;
 
   /**
    * @brief Fill a destination box's index-space data from the copied graph: what each cell is, and a node with the
@@ -307,6 +329,16 @@ protected:
    * @brief Number of geometry levels.
    */
   int m_numSourceLevels;
+
+  /**
+   * @brief The geometry the graph was built over, which classifies the cells no tile holds.
+   */
+  const ComputationalGeometry* m_geometry;
+
+  /**
+   * @brief Phase of the graph.
+   */
+  phase::which_phase m_phase;
 
   /**
    * @brief Destination layout of every level.

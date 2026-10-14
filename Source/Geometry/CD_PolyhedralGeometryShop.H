@@ -20,7 +20,10 @@
 
 // Chombo includes
 #include <BaseFab.H>
+#include <EBData.H>
+#include <EBGraph.H>
 #include <IntVectSet.H>
+#include <LevelData.H>
 
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
@@ -189,6 +192,33 @@ public:
    */
   const PolyhedralEBGraph&
   getGraph(const int a_level) const noexcept;
+
+  /**
+   * @brief Compute the index-space data on the geometry's own grids, from the graph and nothing else.
+   * @details One LevelData<EBGraph> and one LevelData<EBData> per level, over every box the geometry built on it, as
+   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph decides what each cell is,
+   * and each cut cell takes the moments of its stitched body; the graph is copied onto the grids first, so that every
+   * box holds what it needs. Only the finest level is built: the coarser levels hold cells under the finer one, which
+   * come from coarsening it. Collective. Requires buildGraphs.
+   */
+  void
+  buildMoments();
+
+  /**
+   * @brief The index-space graph buildMoments made for a level.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The graph, over the level's boxes.
+   */
+  const LevelData<EBGraph>&
+  getEBGraph(const int a_level) const;
+
+  /**
+   * @brief The index-space moments buildMoments made for a level.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The moments, over the level's boxes.
+   */
+  const LevelData<EBData>&
+  getEBData(const int a_level) const;
 
   /**
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
@@ -421,6 +451,15 @@ public:
    */
   void
   testCopyBodies() const;
+
+  /**
+   * @brief Check the index-space data buildMoments made against the graph it came from.
+   * @details On every level built, each cell is what the graph says it is, and each VoF of a cut cell carries the
+   * moments of the cell's stitched body exactly: volume fraction and centroid, boundary centroid, and per face the
+   * aperture and centroid. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testMoments() const;
 
   /**
    * @brief A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its
@@ -682,6 +721,13 @@ protected:
   static constexpr int s_elementVertices = SpaceDim;
 
   /**
+   * @brief Width of the ring the graph is copied onto the geometry's grids with for buildMoments.
+   * @details Chombo's coarsening reads three fine ghost cells of the graph, and fillNodes writes nodes one cell short
+   * of the copied ring. Nothing to do with the ghost cells a solver asks of the index space.
+   */
+  static constexpr int s_momentRing = 4;
+
+  /**
    * @brief Kind of a node of the written graph: a cut cell, at its fluid's centroid.
    */
   static constexpr int s_cellNode = 0;
@@ -735,6 +781,16 @@ protected:
    * @brief Graph of every level, indexed as the geometry indexes its levels; undefined where a level has no tiles.
    */
   Vector<RefCountedPtr<PolyhedralEBGraph>> m_graphs;
+
+  /**
+   * @brief Index-space graph of every level buildMoments built, over the geometry's boxes; null where it built none.
+   */
+  Vector<RefCountedPtr<LevelData<EBGraph>>> m_ebGraphs;
+
+  /**
+   * @brief Index-space moments of every level buildMoments built, over the geometry's boxes; null where it built none.
+   */
+  Vector<RefCountedPtr<LevelData<EBData>>> m_ebData;
 
   /**
    * @brief Phase this generator serves on those grids.

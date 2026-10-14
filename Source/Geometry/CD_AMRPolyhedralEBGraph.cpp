@@ -24,6 +24,7 @@
 #include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_PolyhedralEBGraph.H>
 #include <CD_PolyhedralGeometryShop.H>
+#include <CD_ComputationalGeometry.H>
 #include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
@@ -89,7 +90,9 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
                              const std::vector<ProblemDomain>&     a_domains,
                              const std::vector<int>&               a_geometryLevels,
                              const int                             a_numSourceLevels,
-                             const int                             a_ghost)
+                             const int                             a_ghost,
+                             const ComputationalGeometry&          a_geometry,
+                             const phase::which_phase              a_phase)
 {
   CH_TIME("AMRPolyhedralEBGraph::define");
 
@@ -101,6 +104,8 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
   m_geometryLevels  = a_geometryLevels;
   m_numSourceLevels = a_numSourceLevels;
   m_ghost           = a_ghost;
+  m_geometry        = &a_geometry;
+  m_phase           = a_phase;
 
   allocate(m_pieces, a_grids, a_numSourceLevels);
   allocate(m_pieceOffsets, a_grids, a_numSourceLevels);
@@ -271,6 +276,47 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
     }
   }
 
+  // The part of the cell no piece holds, read from the geometry's boxes at the finest level holding any of it. The box
+  // holds a cell only within its ring and outside the finer destination level, which is where nothing is answered.
+  if (!anyCut && this->holds(a_level, a_dit, a_cell)) {
+    int finest = geometryLevel;
+
+    for (int lvl = geometryLevel + 1; lvl < m_numSourceLevels; lvl++) {
+      if (!this->getPieces(a_level, a_dit, lvl).empty()) {
+        finest = lvl;
+      }
+    }
+
+    const Box region = (finest > geometryLevel) ? refine(Box(a_cell, a_cell), 1 << (finest - geometryLevel))
+                                                : Box(a_cell, a_cell);
+
+    // the destination's own domain when nothing finer holds part of the cell, which may lie past the geometry's levels
+    const ProblemDomain onFinest = (finest > geometryLevel) ? m_geometry->getDomain(finest) : m_domains[a_level];
+
+    IntVectSet rest(region);
+
+    for (int lvl = 0; lvl <= std::min(finest, m_numSourceLevels - 1) && !rest.isEmpty(); lvl++) {
+      for (const Box& piece : this->getPieces(a_level, a_dit, lvl)) {
+        const Box onFinest = refine(piece, 1 << (finest - lvl));
+
+        if (onFinest.intersects(region)) {
+          rest -= onFinest;
+        }
+      }
+    }
+
+    if (!rest.isEmpty()) {
+      const Vector<Box> boxes = rest.boxes();
+
+      for (int i = 0; i < boxes.size(); i++) {
+        const GeometryService::InOut type = m_geometry->classify(boxes[i], onFinest, m_phase);
+
+        anyRegular = anyRegular || type != GeometryService::Covered;
+        anyCovered = anyCovered || type != GeometryService::Regular;
+      }
+    }
+  }
+
   if (anyCut || (anyRegular && anyCovered)) {
     return PolyhedralEBGraph::s_cut;
   }
@@ -284,6 +330,31 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
   }
 
   return s_unowned;
+}
+
+bool
+AMRPolyhedralEBGraph::holds(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const
+{
+  const ProblemDomain& domain = m_domains[a_level];
+  const Box            box    = m_grids[a_level][a_dit];
+
+  if (!(grow(box, m_ghost) & domain.domainBox()).contains(a_cell)) {
+    return false;
+  }
+
+  if (a_level + 1 < static_cast<int>(m_grids.size())) {
+    const int ratio = 1 << (m_geometryLevels[a_level + 1] - m_geometryLevels[a_level]);
+
+    Vector<int> hits;
+
+    m_grids[a_level + 1].intersecting(refine(Box(a_cell, a_cell), ratio), hits);
+
+    if (hits.size() > 0) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 const std::vector<Box>&
@@ -618,9 +689,8 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
 
     this->getCutCells(described, a_level, a_dit, iv);
 
-    CH_assert(!described.empty());
-
-    if (described.front().m_level > geometryLevel) {
+    // a cell holding regular and covered fluid with no cut cell of its own lies over finer geometry
+    if (described.empty() || described.front().m_level > geometryLevel) {
       a_numFiner++;
 
       continue;
