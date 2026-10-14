@@ -2,6 +2,9 @@
 
 > **This file is a planning document carried by the PETSc stack branches. It is never merged into
 > `main`.** See [Keeping this file out of main](#keeping-this-file-out-of-main).
+>
+> Picking this up in a new session? Read [Handoff](#handoff), then
+> [Building with PETSc](#building-with-petsc), then [Design](#design) and [Code map](#code-map).
 
 ## Goal
 
@@ -162,6 +165,11 @@ To do:
 - [ ] `PetscGrid` accessors from #602 (level grids, AMR → PETSc maps, iterators over valid cut cells).
       Check the `LayoutData<IntVectSet>` + `mutable LayoutData<VoFIterator>` pair against `CLAUDE.md` §0
       and drop whichever is redundant. Fix their doxygen warnings.
+- [ ] Port the global-row fix from #602 together with the accessors. On `main` (and so here),
+      `PetscAMRCell` holds rank-**local** rows, and `m_amrToPetsc[lvl]->exchange()` runs at the end of
+      `defineAMRCells`, before `definePetscRows` assigns any rows. Ghost entries therefore never carry a
+      row, and the CoFi/FiCo copies carry local rows that are wrong on any other rank. #602 offsets every
+      row by `m_localRowBegin` and moves the `exchange()` after that (see [Code map](#code-map)).
 - [ ] Cell substitution rules from the Design table: valid cell → row; L+1 cell → row; CF ghost →
       interpolator stencil, resolved recursively; covered L cell → error (a neighbourhood must never
       contain one). One function, `VoFStencil` on (L, box) → `PetscStencil`, plus the dual-level variant
@@ -238,6 +246,90 @@ To do:
 
 Settled 2026-10-14: the discretisation is assembled by new classes rather than by translating GMG
 stencils or extending the GMG/BC classes (see Design); #601/#602 collapsed into `petsc_mapping`.
+
+## Handoff
+
+State on 2026-10-14:
+
+- `petsc_mapping` (#741, draft, one commit `b5f7cfa8` on top of `main` at `0800b4d45`) is the live
+  branch. Its PR description is filled in from the template; the checklist is unticked.
+- #601 and #602 are closed. Their branches `field_amg` (`dddc6ffe`) and `helmholtz_petsc`
+  (`25536f6b`) stay in the fork, unsynced with `main`, for reference.
+- `helmholtz_petsc` is where the `PetscGrid` accessors and the global-row fix are ported from (PR 1
+  to-do). Both are already in `25536f6b`; port the code by hand rather than merging the branch.
+
+## Building with PETSc
+
+Recipe that worked on Ubuntu 24.04 (the cloud container):
+
+```bash
+apt-get install -y petsc-dev libopenmpi-dev openmpi-bin gfortran csh   # csh: Chombo's build scripts
+git submodule update --init          # if Submodules/json fails, fetch the pinned commit inside it by hand
+export DISCHARGE_HOME=$PWD CHOMBO_HOME=$PWD/Submodules/Chombo-3.3/lib PETSC_DIR=/usr/lib/petsc
+sed 's/USE_PETSC      = FALSE/USE_PETSC      = TRUE/' Lib/Local/Make.defs.MPI.GNU > $CHOMBO_HOME/mk/Make.defs.local
+make -j4 discharge-lib DIM=2         # the first build (Chombo included) is slow
+cd Exec/Examples/Electrostatics/PETSc && make -j4 DIM=2
+mpirun --oversubscribe -np 4 ./main2d.*.ex example2d.inputs Driver.max_steps=0
+```
+
+- `Make.defs.local` goes in `$CHOMBO_HOME/mk/`, not `Lib/Local/` (that is what CI does too).
+- `USE_PETSC=TRUE` requires `MPI=TRUE`; `CD_Initialize.H` errors out otherwise.
+- PETSc's `petscvariables` brings in hypre, so `-pc_type hypre` is available with this package.
+- A clone made with `--depth` breaks `git merge-base`; run `git fetch --unshallow` first.
+
+## Code map
+
+Facts about existing code that the to-do items build on. Where `main` and
+`helmholtz_petsc` differ, both are given.
+
+### Rows: `PetscGrid`
+
+- One PETSc row per (valid cell, phase). Valid = on its level, not covered by a finer level, not
+  covered by the EB. Multi-valued cells abort (`definePetscRows`).
+- `m_amrToPetsc[lvl]` is a `LevelData<BaseFab<PetscAMRCell>>` on level `lvl`'s grids with ghosts.
+  `PetscAMRCell::getPetscRow(phase)` gives the row (`-1` if not a row), plus the flags
+  `isCoveredByFinerGrid`, `isCoarCF`, `isFineCF`, `isGhostCF`, `isDomainBoundaryCell`.
+  On `main` the row is rank-local and ghosts hold none; on `helmholtz_petsc` it is global and ghosts
+  hold neighbouring boxes' rows (see the PR 1 to-do).
+- `m_amrToPetscCoFi[lvl]` (`lvl < finest`): the level-`lvl` map copied onto *coarsen(level `lvl+1`)*
+  grids. These share `DataIndex` with level `lvl+1`, so a fine box can look up the coarse rows under
+  it. Note the offset: the CoFi data for fine level `l` lives at index `l-1`.
+- `m_amrToPetscFiCo[lvl]` (`lvl > 0`): the level-`lvl` map copied onto *refine(level `lvl-1`)* grids,
+  so a coarse box can look up the fine rows on top of it (the CF flux sum in PR 3).
+- No accessors on `main`. `helmholtz_petsc` adds `getAMRToPetsc*`, `getMFLevelGrids*`, and per-phase
+  `getVoFIterator`/`getIrregIVS` over cut cells that are rows.
+
+### Coarse-fine ghost stencils (#600)
+
+- `EBMultigridInterpolator::getInterpolationStencilEB(ghostVoF, din)` returns a `VoFStencil` pair and
+  `getInterpolationStencilRegular(ghostIV, din, dir, side)` a `DerivStencil` (IntVect-keyed) pair, each
+  `(fine, coarse)`. The coarse part is in the **CoFi index space** (coarsened fine grids, same `din`),
+  so resolve it through `m_amrToPetscCoFi[l-1]`.
+- The only implementation is `EBLeastSquaresMultigridInterpolator`, which aborts if asked for a
+  non-ghost cell.
+
+### GMG stencils (reference only)
+
+The Design section rules out reusing these, but they are where to look when checking what GMG does
+in the same cell, e.g. for the comparison tests:
+
+- Interior regular cells: `EBHelmholtzOp` uses Fortran kernels, not stencils.
+- Irregular cells: `EBHelmholtzOp::m_relaxStencils` and `m_centroidFluxStencil[dir]` (protected, no
+  accessors).
+- EB fluxes: `EBHelmholtzEBBC::getGradPhiStencils()`, `MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil`.
+- Jump cells: `MFHelmholtzJumpBC::getGradPhiStencils()`.
+- Configuration from inputs: `FieldSolverGMG::setupHelmholtzFactory`.
+
+### Not carried over from #601/#602
+
+- `MFHelmholtzPetsc` (#602): `computeEBDirichletStencil` gathers a single-level neighbourhood and
+  returns an empty stencil, and every other `compute*Stencil` is empty. It also has a bug in the
+  `hasFine` branch: `eblgFine = mflg.getEBLevelGrid(...)` uses the coarse grid, not `mflgFine`.
+  Superseded by the dual-level design.
+- `FieldSolverAMG` (#601, lands in PR 2): `solve()` round-trips a `Vec` filled with the rank number
+  through `PetscGrid` and returns `false`. `setupSolver()` builds `MFHelmholtzPetsc` with hard-coded
+  orders and weights (drop that), the permittivity setters are empty, the E-field computation is
+  copied from `FieldSolverGMG`, and it guards with `#if CH_USE_PETSC` instead of `#ifdef`.
 
 ## Keeping this file out of main
 
