@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MFInterfaceFABImplem.H
-  @brief  Implementation of CD_MFInterfaceFAB.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFInterfaceFABImplem.H
+ * @brief  Implementation of CD_MFInterfaceFAB.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_MFInterfaceFABImplem_H
-#define CD_MFInterfaceFABImplem_H
+#ifndef CD_MFINTERFACEFABIMPLEM_H
+#define CD_MFINTERFACEFABIMPLEM_H
 
 // Our includes
 #include <CD_MFInterfaceFAB.H>
@@ -65,6 +66,8 @@ template <class T>
 BaseIVFAB<T>&
 MFInterfaceFAB<T>::getIVFAB(const int a_phase)
 {
+  CH_assert(a_phase >= 0 && a_phase < m_phase.size());
+  CH_assert(m_phase[a_phase] != nullptr);
   return *m_phase[a_phase];
 }
 
@@ -72,6 +75,8 @@ template <class T>
 const BaseIVFAB<T>&
 MFInterfaceFAB<T>::getIVFAB(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_phase.size());
+  CH_assert(m_phase[a_phase] != nullptr);
   return *m_phase[a_phase];
 }
 
@@ -79,6 +84,7 @@ template <class T>
 BaseIVFAB<T>*
 MFInterfaceFAB<T>::getPhasePtr(int a_phase)
 {
+  CH_assert(a_phase >= 0 && a_phase < m_phase.size());
   return m_phase[a_phase];
 }
 

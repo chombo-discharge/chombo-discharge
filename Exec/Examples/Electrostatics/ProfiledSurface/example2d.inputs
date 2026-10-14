@@ -1,29 +1,36 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner            = -0.04  0.
-AmrMesh.hi_corner            = 0.04  0.04
-AmrMesh.verbosity            = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain      = 128 64         ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 6              ## Maximum amr depth
-AmrMesh.max_sim_depth        = -1             ## Maximum simulation depth
-AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
-AmrMesh.buffer_size          = 4              ## Number of cells between grid levels
-AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting          = morton         ## 'none', 'standardSort', 'shuffle', or 'morton'
-AmrMesh.blocking_factor      = 8              ## Default blocking factor (16 in 3D)
-AmrMesh.max_box_size         = 16             ## Maximum allowed box size
-AmrMesh.max_ebis_box         = 16             ## Maximum allowed box size
-AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios
-AmrMesh.num_ghost            = 2              ## Number of ghost cells. Default is 3
-AmrMesh.lsf_ghost            = 0              ## Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost             = 2              ## Set number of of ghost cells for EB stuff
-AmrMesh.mg_interp_order      = 2              ## Multigrid interpolation order
-AmrMesh.mg_interp_radius     = 2              ## Multigrid interpolation radius
-AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
-AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
+AmrMesh.lo_corner               = -0.04  0.
+AmrMesh.hi_corner               = 0.04  0.04
+AmrMesh.verbosity               = -1             ## Controls verbosity.
+AmrMesh.coarsest_domain         = 128 64         ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 6              ## Maximum amr depth
+AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
+AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
+AmrMesh.buffer_size             = 4              ## Number of cells between grid levels
+AmrMesh.grid_algorithm          = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting             = morton         ## 'none', 'standardSort', 'shuffle', or 'morton'
+AmrMesh.min_block_size          = 8              ## Default blocking factor (16 in 3D)
+AmrMesh.max_block_size          = 16             ## Maximum allowed box size
+AmrMesh.max_ebis_box            = 16             ## Maximum allowed box size
+AmrMesh.eb_min_block_size       = 8              ## Smallest box the geometry grids are tiled with.
+AmrMesh.eb_max_block_size       = 8              ## Largest such box, a whole number of eb_min_block_size.
+AmrMesh.ref_rat                 = 2 2 2 2 2 2    ## Refinement ratios
+AmrMesh.num_ghost               = 2              ## Number of ghost cells. Default is 3
+AmrMesh.lsf_ghost               = 0              ## Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost                = 2              ## Set number of of ghost cells for EB stuff
+AmrMesh.mg_interp_order         = 2              ## Multigrid interpolation order
+AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radius
+AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
+AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
+AmrMesh.redist_radius           = 1              ## Redistribution radius for hyperbolic conservation laws
+AmrMesh.mirror_band_radius      = 2              ## Mirror deposition: band half-width in cells. Requires num_ghost >= this.
+AmrMesh.mirror_cond_tol         = 1.E-3          ## Mirror deposition: min eigenvalue ratio of U^T U in the curvature fit.
+AmrMesh.mirror_crease_tol       = 1.E-1          ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
+AmrMesh.mirror_max_jacobian     = 1.E4           ## Mirror deposition: refuse (J = 1) above this. Must exceed ~500.
+AmrMesh.mirror_min_denom        = 1.E-4          ## Mirror deposition: refuse (J = 1) below this. Must be under ~4E-3.
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -49,7 +56,7 @@ Driver.write_loads                  = false                ## Write (accumulated
 Driver.output_directory             = ./                   ## Output directory
 Driver.output_names                 = simulation           ## Simulation output names
 Driver.max_plot_depth               = -1                   ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                   ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                   ## Restrict checkpoint depth (-1 => finest simulation level)
 Driver.num_plot_ghost               = 1                    ## Number of ghost cells to include in plots
 Driver.plt_vars                     = levelset mpi_rank    ## 'tags', 'mpi_rank'
 Driver.restart                      = 0                    ## Restart step (less or equal to 0 implies fresh simulation)
@@ -76,6 +83,13 @@ FieldSolverGMG.kappa_source          = true                    ## Volume weighte
 FieldSolverGMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
 FieldSolverGMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
+FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
+FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
+FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
+FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
+FieldSolverGMG.krylov_vcycles               = 1            ## V-cycles per Krylov preconditioner application
+FieldSolverGMG.krylov_retry_interval        = 1            ## Re-probe GMG every N solves while latched to the Krylov fallback (1 = always retry GMG first)
+FieldSolverGMG.krylov_reprobe_iters         = 0            ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
 FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
@@ -94,9 +108,11 @@ FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition
 FieldSolverGMG.gmg_jump_weight              = 1            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverGMG.gmg_reduce_order             = false        ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
+FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator
 
 # ====================================================================================================
 # SurfaceODESolver solver settings.

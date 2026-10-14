@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ParallelOpsImplem.H
-  @brief  Implementation of CD_ParallelOps.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_ParallelOpsImplem.H
+ * @brief  Implementation of CD_ParallelOps.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_ParallelOpsImplem_H
-#define CD_ParallelOpsImplem_H
+#ifndef CD_PARALLELOPSIMPLEM_H
+#define CD_PARALLELOPSIMPLEM_H
 
 // Std includes
 #include <limits>
@@ -450,7 +451,12 @@ ParallelOps::sum(Vector<Real>& a_data) noexcept
   CH_TIME("ParallelOps::sum(Real)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_CH_REAL,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -463,7 +469,12 @@ ParallelOps::sum(Vector<int>& a_data) noexcept
   CH_TIME("ParallelOps::sum(int)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_INT,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -476,7 +487,12 @@ ParallelOps::sum(Vector<long int>& a_data) noexcept
   CH_TIME("ParallelOps::sum(long int)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_LONG,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -489,7 +505,12 @@ ParallelOps::sum(Vector<long long int>& a_data) noexcept
   CH_TIME("ParallelOps::sum(long long int)");
 
 #ifdef CH_MPI
-  const int result = MPI_Allreduce(MPI_IN_PLACE, &(a_data[0]), a_data.size(), MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  const int result = MPI_Allreduce(MPI_IN_PLACE,
+                                   a_data.stdVector().data(),
+                                   a_data.size(),
+                                   MPI_LONG_LONG,
+                                   MPI_SUM,
+                                   Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::sum -- MPI communication error");
   }
@@ -564,6 +585,22 @@ ParallelOps::gather(const Real& a_localValue) noexcept
   return ret;
 #else
   return Vector<Real>(1, a_localValue);
+#endif
+}
+
+inline Vector<long long>
+ParallelOps::gather(const long long& a_localValue) noexcept
+{
+  CH_TIME("ParallelOps::gather(long long)");
+
+#ifdef CH_MPI
+  Vector<long long> ret(numProc());
+
+  MPI_Allgather(&a_localValue, 1, MPI_LONG_LONG, ret.stdVector().data(), 1, MPI_LONG_LONG, Chombo_MPI::comm);
+
+  return ret;
+#else
+  return Vector<long long>(1, a_localValue);
 #endif
 }
 

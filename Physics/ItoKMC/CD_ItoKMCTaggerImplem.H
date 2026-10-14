@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ItoKMCTaggerImplem.H
-  @brief  Implementation of CD_ItoKMCTagger.H
-  @author Robert marskar
-*/
+/**
+ * @file   CD_ItoKMCTaggerImplem.H
+ * @brief  Implementation of CD_ItoKMCTagger.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_ItoKMCTaggerImplem_H
-#define CD_ItoKMCTaggerImplem_H
+#ifndef CD_ITOKMCTAGGERIMPLEM_H
+#define CD_ITOKMCTAGGERIMPLEM_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -154,7 +155,7 @@ template <typename S>
 void
 ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output,
                                int&                  a_icomp,
-                               const std::string     a_outputRealm,
+                               const std::string&    a_outputRealm,
                                const int             a_level) const noexcept
 {
   CH_TIME("ItoKMCTagger::writePlotData");
@@ -175,7 +176,7 @@ ItoKMCTagger<S>::writePlotData(LevelData<EBCellFAB>& a_output,
 
       m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
-      DataOps::setCoveredValue(a_output, a_icomp, 0.0);
+      DataOps::setCoveredValue(a_output, *m_amr->getCoveredCells(a_outputRealm, m_phase)[a_level], a_icomp, 0.0);
 
       a_icomp++;
     }
@@ -345,10 +346,11 @@ ItoKMCTagger<S>::tagCellsBox(DenseIntVectSet&          a_refinedCells,
     }
   };
 
-  // Run the kernels.
+  // Run the kernels. Not vectorizable: the regular kernel calls the virtual refineCell/coarsenCell per cell
+  // + DenseIntVectSet insertion + control flow. One-time tagging (per regrid).
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 

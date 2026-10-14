@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @brief  CD_ScanShop.cpp
-  @brief  Implementation of CD_ScanShop.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_ScanShop.cpp
+ * @brief  Implementation of CD_ScanShop.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <chrono>
@@ -21,25 +22,25 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-ScanShop::ScanShop(const BaseIF&       a_localGeom,
-                   const int           a_verbosity,
-                   const Real          a_dx,
-                   const RealVect      a_probLo,
-                   const ProblemDomain a_finestDomain,
-                   const ProblemDomain a_scanLevel,
-                   const int           a_ebGhost,
-                   const Real          a_thrshdVoF)
-  : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF)
+ScanShop::ScanShop(const BaseIF&        a_localGeom,
+                   int                  a_verbosity,
+                   Real                 a_dx,
+                   const RealVect&      a_probLo,
+                   const ProblemDomain& a_finestDomain,
+                   const ProblemDomain& a_scanLevel,
+                   int                  a_ebGhost,
+                   Real                 a_thrshdVoF)
+  : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF),
+    m_fileName("ScanShopReport.dat"),
+    m_boxSorting(BoxSorting::Morton),
+    m_profile(false),
+    m_distanceSkip(false),
+    m_ebGhost(a_ebGhost),
+    m_baseIF(&a_localGeom),
+    m_hasScanLevel(false)
 {
 
   CH_TIME("ScanShop::ScanShop(BaseIF, int, Real, RealVect, ProblemDomain, ProblemDomain, int, Real)");
-
-  m_baseIF       = &a_localGeom;
-  m_hasScanLevel = false;
-  m_profile      = false;
-  m_ebGhost      = a_ebGhost;
-  m_fileName     = "ScanShopReport.dat";
-  m_boxSorting   = BoxSorting::Morton;
 
   // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
   // need to construct these here, and then extract the proper resolution when we actually call makeGrids
@@ -50,6 +51,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
 
   std::string str;
   pp.query("profile", m_profile);
+  pp.query("distance_skip", m_distanceSkip);
   pp.query("box_sorting", str);
 
   if (str == "none") {
@@ -82,18 +84,18 @@ ScanShop::~ScanShop()
 }
 
 void
-ScanShop::setProfileFileName(const std::string a_fileName)
+ScanShop::setProfileFileName(std::string a_fileName)
 {
-  m_fileName = a_fileName;
+  m_fileName = std::move(a_fileName);
 
   m_timer = Timer(m_fileName);
 }
 
 void
-ScanShop::makeDomains(const Real          a_dx,
-                      const RealVect      a_probLo,
-                      const ProblemDomain a_finestDomain,
-                      const ProblemDomain a_scanLevel)
+ScanShop::makeDomains(Real                 a_dx,
+                      const RealVect&      a_probLo,
+                      const ProblemDomain& a_finestDomain,
+                      const ProblemDomain& a_scanLevel)
 {
   CH_TIME("ScanShop::makeDomains(Real, RealVect, ProblemDomain, ProblemDomain)");
 
@@ -136,7 +138,7 @@ void
 ScanShop::makeGrids(const ProblemDomain& a_domain,
                     DisjointBoxLayout&   a_grids,
                     const int&           a_maxGridSize,
-                    const int&           a_maxIrregGridSize)
+                    const int& /*a_maxIrregGridSize*/)
 {
   CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");
   m_timer.startEvent("Make grids");
@@ -144,7 +146,7 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
   // Build the scan level first
   if (!m_hasScanLevel) {
     m_timer.startEvent("Build coarse");
-    for (int lvl = m_domains.size() - 1; lvl >= m_scanLevel; lvl--) {
+    for (int lvl = static_cast<int>(m_domains.size()) - 1; lvl >= m_scanLevel; lvl--) {
       ScanShop::buildCoarseLevel(lvl, a_maxGridSize); // Coarser levels built in the same way as the scan level
     }
     m_timer.stopEvent("Build coarse");
@@ -156,13 +158,14 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
   }
 
   // Find the level corresponding to a_domain
-  int whichLevel;
+  int whichLevel = -1;
   for (int lvl = 0; lvl < m_domains.size(); lvl++) {
     if (m_domains[lvl].domainBox() == a_domain.domainBox()) {
       whichLevel = lvl;
       break;
     }
   }
+  CH_assert(whichLevel >= 0);
 
   if (m_hasThisLevel[whichLevel]) {
     a_grids = m_grids[whichLevel];
@@ -194,7 +197,7 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
 }
 
 void
-ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
+ScanShop::buildCoarseLevel(int a_level, int a_maxGridSize)
 {
   CH_TIME("ScanShop::buildCoarseLevel(int, int)");
 
@@ -269,7 +272,7 @@ ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
 }
 
 void
-ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
+ScanShop::buildFinerLevels(int a_coarserLevel, int a_maxGridSize)
 {
   CH_TIME("ScanShop::buildFinerLevels(int, int)");
 
@@ -361,7 +364,7 @@ void
 ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
                       Vector<Box>& a_regularBoxes,
                       Vector<Box>& a_cutCellBoxes,
-                      const int    a_level)
+                      int          a_level)
 {
   CH_TIME("ScanShop::defineLevel");
 
@@ -372,8 +375,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   LoadBalancing::gatherBoxes(a_cutCellBoxes);
   m_timer.stopEvent("Gather boxes");
 
-  // This is needed because when we join the regular and covered boxes onto the same "load" when we sort them, but we need to have
-  // the indexing correctly. For the cut-cell boxes we load balance them independently.
+  // This is needed because when we join the regular and covered boxes onto the same "load" when we sort them, but we
+  // need to have the indexing correctly. For the cut-cell boxes we load balance them independently.
   m_timer.startEvent("Sort boxes");
   const Vector<int> coveredTypes(a_coveredBoxes.size(), 0);
   const Vector<int> regularTypes(a_regularBoxes.size(), 1);
@@ -412,8 +415,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   LoadBalancing::makeBalance(cutCellProcs, rankLoads2, cutCellLoads, a_cutCellBoxes);
   m_timer.stopEvent("Make balance");
 
-  // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map
-  // that is usable by Chombo's DisjointBoxLayout.
+  // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank
+  // map that is usable by Chombo's DisjointBoxLayout.
   m_timer.startEvent("Vector append");
   Vector<Box> allBoxes;
   Vector<int> allProcs;
@@ -429,9 +432,10 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   allTypes.append(cutCellTypes);
   m_timer.stopEvent("Vector append");
 
-  // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if
-  // we want to be able to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
-  // what we will have in the DataIterator. This means that we must lexicographically sort the boxes.
+  // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we
+  // must do the same if we want to be able to globally index correctly into the box types. So, create a view of the
+  // boxes and box types that is consistent with what we will have in the DataIterator. This means that we must
+  // lexicographically sort the boxes.
   m_timer.startEvent("Lexi-sort");
   const std::vector<std::pair<Box, int>> sortedBoxesAndTypes = this->getSortedBoxesAndTypes(allBoxes, allTypes);
   m_timer.stopEvent("Lexi-sort");
@@ -507,8 +511,8 @@ ScanShop::InsideOutside(const Box&           a_region,
     }
   }
 
-  // A strang but true thing. This function is used in EBISLevel::simplifyGraphFromGeo and that function can send in a_domain
-  // and a_dx on different levels....
+  // A strang but true thing. This function is used in EBISLevel::simplifyGraphFromGeo and that function can send in
+  // a_domain and a_dx on different levels....
   ProblemDomain domain;
   if (a_dx < m_dx[whichLevel] && whichLevel > 0) {
     domain = m_domains[whichLevel - 1];
@@ -554,3 +558,4 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

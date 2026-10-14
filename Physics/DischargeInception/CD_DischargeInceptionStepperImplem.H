@@ -1,20 +1,21 @@
-/*! chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Copyright © 2022 NTNU.
- * Copyright © 2022 Fanny Skirbekk
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ * SPDX-FileCopyrightText: 2022-2026 NTNU
+ * SPDX-FileCopyrightText: 2022-2026 Fanny Skirbekk
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DischargeInceptionStepperImplem.H
-  @brief  Implementation of CD_DischargeInceptionStepper.H
-  @author Robert Marskar (SINTEF)
-  @author Rasmus Hoholm (SINTEF)
-  @author Fanny Skirbekk (NTNU)
-*/
+/**
+ * @file   CD_DischargeInceptionStepperImplem.H
+ * @brief  Implementation of CD_DischargeInceptionStepper.H
+ * @author Robert Marskar (SINTEF)
+ * @author Rasmus Hoholm (SINTEF)
+ * @author Fanny Skirbekk (NTNU)
+ */
 
-#ifndef CD_DischargeInceptionStepperImplem_H
-#define CD_DischargeInceptionStepperImplem_H
+#ifndef CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
+#define CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
 
 // Std includes
 #include <iostream>
@@ -26,6 +27,7 @@
 // Our includes
 #include <CD_Units.H>
 #include <CD_OpenMP.H>
+#include <CD_ParticleLoops.H>
 #include <CD_DischargeInceptionSpecies.H>
 #include <CD_DischargeInceptionStepper.H>
 #include <CD_PolyUtils.H>
@@ -333,7 +335,7 @@ DischargeInceptionStepper<P, F, C>::solvePoisson() noexcept
     Real max;
     Real min;
 
-    DataOps::getMaxMin(max, min, phiGas, 0);
+    DataOps::getMaxMin(max, min, phiGas, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     if (std::max(std::abs(max), std::abs(min)) > errorThresh * testVoltage) {
       MayDay::Error("DischargeInceptionStepper::solvePoisson - debug test failed. Check your BCs!");
@@ -1072,7 +1074,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotData(LevelData<EBCellFAB>& a_output,
                                                   int&                  a_icomp,
-                                                  const std::string     a_outputRealm,
+                                                  const std::string&    a_outputRealm,
                                                   const int             a_level) const
 {
   CH_TIME("DischargeInceptionStepper::writePlotData");
@@ -1115,7 +1117,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>& a_output,
                                                             int&                  a_icomp,
-                                                            const std::string     a_outputRealm,
+                                                            const std::string&    a_outputRealm,
                                                             const int             a_level) const noexcept
 {
   CH_TIME("DischargeInceptionStepper::writePlotDataStationary");
@@ -1153,7 +1155,9 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
       DataOps::incr(m_electricField, m_electricFieldHomo, Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);
+      DataOps::squareRoot(scratch,
+                          m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                          m_amr->getMultiCutVofIterator(m_realm, phase::solid));
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
@@ -1162,18 +1166,31 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
       DataOps::incr(m_electricField, m_electricFieldHomo, -Real(V));
       DataOps::incr(m_electricField, m_electricFieldInho, 1.0);
       DataOps::dotProduct(scratch, m_electricField, m_electricField);
-      DataOps::squareRoot(scratch);
+      DataOps::squareRoot(scratch,
+                          m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                          m_amr->getMultiCutVofIterator(m_realm, phase::solid));
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
       m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
     }
 
     // Write the space charge density
-    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratch,
+                      m_rho,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas),
+                      m_amr->getVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
 
-    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratchSurf,
+                      m_sigma,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas));
     m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
   }
 
@@ -1314,7 +1331,7 @@ template <typename P, typename F, typename C>
 void
 DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>& a_output,
                                                            int&                  a_icomp,
-                                                           const std::string     a_outputRealm,
+                                                           const std::string&    a_outputRealm,
                                                            const int             a_level) const noexcept
 {
   CH_TIME("DischargeInceptionStepper::writePlotDataTransient");
@@ -1336,7 +1353,9 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
     m_amr->allocate(scratchSurf, m_realm, phase::gas, 1);
 
     DataOps::dotProduct(scratch, m_electricField, m_electricField);
-    DataOps::squareRoot(scratch);
+    DataOps::squareRoot(scratch,
+                        m_amr->getMultiCutVofIterator(m_realm, phase::gas),
+                        m_amr->getMultiCutVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
 
@@ -1345,12 +1364,23 @@ DischargeInceptionStepper<P, F, C>::writePlotDataTransient(LevelData<EBCellFAB>&
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, m_electricField, phase::gas, a_outputRealm, a_level, true);
 
     // Write the space charge density
-    DataOps::setValue(scratch, m_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratch,
+                      m_rho,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas),
+                      m_amr->getVofIterator(m_realm, phase::solid));
     m_amr->arithmeticAverage(scratch, m_realm);
     m_amr->interpGhostPwl(scratch, m_realm);
     m_fieldSolver->writeMultifluidData(a_output, a_icomp, scratch, phase::gas, a_outputRealm, a_level, true);
 
-    DataOps::setValue(scratchSurf, m_sigma, m_amr->getProbLo(), m_amr->getDx(), 0);
+    DataOps::setValue(scratchSurf,
+                      m_sigma,
+                      m_amr->getProbLo(),
+                      m_amr->getDx(),
+                      0,
+                      m_amr->getVofIterator(m_realm, phase::gas));
     m_fieldSolver->writeSurfaceData(a_output, a_icomp, *scratchSurf[a_level], a_outputRealm, a_level);
   }
 
@@ -1653,8 +1683,8 @@ DischargeInceptionStepper<P, F, C>::advance(const Real a_dt)
     Real maxT = -std::numeric_limits<Real>::max();
     Real minT = +std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
-    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0);
+    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
     if (!m_fullIntegration) {
       maxK = std::min(maxK, m_inceptionK);
@@ -1695,7 +1725,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
   // flux is an incoming flux.
   EBAMRIVData& ebFlux = m_ionSolver->getEbFlux();
   m_ionSolver->extrapolateAdvectiveFluxToEB(ebFlux);
-  DataOps::floor(ebFlux, 0.0);
+  DataOps::floor(ebFlux, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
   switch (m_transportAlgorithm) {
   case TransportAlgorithm::Euler: {
@@ -1743,7 +1773,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
 
     m_ionSolver->computeDivF(k1, phi, a_dt, false, true, true);
 
-    DataOps::kappaScale(k1);
+    DataOps::kappaScale(k1, m_amr->getVofIterator(m_realm, m_phase));
     DataOps::scale(k1, -1.0);
 
     // Use k1 as the old solution.
@@ -1759,7 +1789,7 @@ DischargeInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
   }
   }
 
-  DataOps::floor(phi, 0.0);
+  DataOps::floor(phi, 0.0, m_amr->getVofIterator(m_realm, m_phase));
 
   m_amr->average(phi, m_realm, m_phase, Average::Conservative);
   m_amr->interpGhost(phi, m_realm, m_phase);
@@ -2123,7 +2153,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
 
     const Real dx = m_amr->getDx()[lvl];
 
-    ParticleData<P>& levelParticles = amrParticles[lvl];
+    auto& levelParticles = amrParticles[lvl];
 
     const int nbox = dit.size();
 
@@ -2134,47 +2164,43 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = validCellsLD[din];
 
-      List<P>& particles = levelParticles[din].listItems();
+      ParticleSoA<P>& leaf = levelParticles[din];
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          P p;
-          p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-
-          particles.add(p);
+          leaf.append(m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx, 0.0);
         }
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
-          P p;
-          p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-
-          particles.add(p);
+          leaf.append(m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx), 0.0);
         }
       };
 
-      // Execute kernels over appropriate regions.
+      // Execute kernels over appropriate regions. Not vectorizable: per-cell append. Multi-cut N/A:
+      // regular uses cell-CENTER, irregular uses CENTROID position.
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // Set mass to zero and do a backup of the initial position (we need to rewind particles
-        // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
-        // particle integration.
-        p.weight()           = 0.0;
-        p.template vect<0>() = p.position();
-      }
+      // Back up the initial position into the rewind column (weight was set to zero on append).
+      const double* const pos[SpaceDim] = {
+        D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      double* const x0[SpaceDim] = {
+        D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          x0[dir][i] = pos[dir][i];
+        }
+      });
     }
   }
 
   // Remove particles inside the EB.
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase, 0.0);
 
   amrParticles.remap();
 }
@@ -2212,7 +2238,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     const Real     dx     = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
 
-    ParticleData<P>& levelParticles = amrParticles[lvl];
+    auto& levelParticles = amrParticles[lvl];
 
     const int nbox = dit.size();
 
@@ -2223,7 +2249,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
       const EBISBox&       ebisbox    = ebisl[din];
       const BaseFab<bool>& validCells = validCellsLD[din];
 
-      List<P>& particles = levelParticles[din].listItems();
+      ParticleSoA<P>& leaf = levelParticles[din];
 
       const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
@@ -2245,11 +2271,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
             const Real curEta   = m_eta(E, x);
 
             if (curAlpha > curEta) {
-              P p;
-
-              p.position() = x;
-
-              particles.add(p);
+              leaf.append(x, 0.0);
 
               alphaReg(iv, 0) = curAlpha - curEta;
             }
@@ -2268,32 +2290,33 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
             const Real curEta   = m_eta(E, x);
 
             if (curAlpha > curEta) {
-              P p;
-
-              p.position() = x;
-
-              particles.add(p);
+              leaf.append(x, 0.0);
 
               alpha(vof, 0) = curAlpha - curEta;
             }
           }
         };
 
-        // Execute kernels over appropriate regions.
+        // Execute kernels over appropriate regions. Not vectorizable: m_alpha/m_eta std::function
+        // coefficients per cell + per-particle append + data-dependent branch. Multi-cut N/A (center vs centroid).
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        p.weight()           = 0.0;
-        p.template vect<0>() = p.position();
-        p.template vect<2>() = RealVect::Zero;
-      }
+      // Back up the initial position into the rewind column (weight + grad-alpha columns are already
+      // zero from the default-payload append).
+      const double* const pos[SpaceDim] = {
+        D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      double* const x0[SpaceDim] = {
+        D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          x0[dir][i] = pos[dir][i];
+        }
+      });
     }
   }
 
@@ -2369,8 +2392,8 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     Real maxT = -std::numeric_limits<Real>::max();
     Real minT = +std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
-    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0);
+    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+    DataOps::getMaxMin(maxT, minT, m_townsendCriterion, 0, m_amr->getMultiCutVofIterator(m_realm, m_phase));
     if (!m_fullIntegration) {
       maxK = std::min(maxK, m_inceptionK);
       maxT = std::min(maxT, 1.0);
@@ -2402,12 +2425,12 @@ DischargeInceptionStepper<P, F, C>::interpolateGradAlphaToParticles() noexcept
   }
 
   // Interpolate onto the particle weight structure
-  m_amr->interpolateParticles<P, RealVect&, &P::template vect<2>>(m_tracerParticleSolver->getParticles(),
-                                                                  m_realm,
-                                                                  m_phase,
-                                                                  m_gradAlpha,
-                                                                  m_tracerParticleSolver->getInterpolationType(),
-                                                                  true);
+  m_amr->interpolateParticles<D_DECL(&P::ga_x, &P::ga_y, &P::ga_z)>(m_tracerParticleSolver->getParticles(),
+                                                                    m_realm,
+                                                                    m_phase,
+                                                                    m_gradAlpha,
+                                                                    m_tracerParticleSolver->getInterpolationType(),
+                                                                    true);
 }
 
 template <typename P, typename F, typename C>
@@ -2484,12 +2507,12 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
   this->superposition(gasField, 1.0);
 
-  DataOps::getMaxMinNorm(maxField, minField, gasField);
+  DataOps::getMaxMinNorm(maxField, minField, gasField, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Compute the critical field and the minimum possible inception voltage.
   const Real Ecrit = this->getCriticalField();
 
-  Real curVoltage = (1.0 + m_relativeDeltaU) * Ecrit / maxField;
+  Real curVoltage = m_relativeDeltaU * Ecrit / maxField;
   Real curMaxK    = 0.0;
   int  curIter    = 0;
 
@@ -2534,12 +2557,21 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
     curMaxK = std::max(maxKPlus, maxKMinu);
 
-    // Figure out the next voltage.
+    // Figure out the next voltage. User linear extrapolation near the first point and log-linear otherwise.
     K2 = curMaxK;
     U2 = curVoltage;
 
-    const Real dKdU        = (K2 - K1) / (U2 - U1);
-    const Real nextVoltage = U1 + ((K2 - K1) + m_deltaK) / dKdU;
+    Real nextVoltage;
+    if (K1 <= 0.0) {
+      const Real dKdU = (K2 - K1) / (U2 - U1);
+
+      nextVoltage = U1 + ((K2 - K1) + m_deltaK) / dKdU;
+    }
+    else {
+      const Real dKdU = std::log(K2 / K1) / (U2 - U1);
+
+      nextVoltage = U1 + std::log((K2 + m_deltaK) / K1) / dKdU;
+    }
 
     K1 = K2;
     U1 = U2;
@@ -2649,23 +2681,34 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        // Column pointers are captured once: remove() is an in-place swap-pop and setting positions/weights
+        // is in-place, so these stay valid across the loop (only processedLeaf grows, internally).
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::ga_x>(),
+                                                         solverLeaf.template column<&P::ga_y>(),
+                                                         solverLeaf.template column<&P::ga_z>())};
 
-          const RealVect x         = p.position();
-          const RealVect vel       = p.velocity();
-          const Real     v         = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v         = vec.vectorLength();
           const Real     E         = v;
           const Real     alpha     = m_alpha(E, x);
           const Real     eta       = m_eta(E, x);
           const Real     alphaEff  = alpha - eta;
           const Real     tol       = 1E-10;
-          const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
+          const Real     gradAlpha = tol + RealVect(D_DECL(ga[0][i], ga[1][i], ga[2][i])).vectorLength();
 
-          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
           deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
@@ -2674,7 +2717,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           deltaX = std::max(deltaX, m_minPhysDx);
 
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + dt * vel;
+          const RealVect newPos = x + dt * vec;
           const Real     delta  = (newPos - x).vectorLength();
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
@@ -2683,43 +2726,48 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           Real s = 0.0;
 
           if (alphaEff < 0.0) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (insideEB) {
             // If the particle struck the EB or domain we finish off the integration with a partial step
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
             if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, m_minGridDx * dx, s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
             if (ParticleOps::domainIntersection(x, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
-            p.weight()   = p.weight() + deltaX * alphaEff;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
+            w[i] = w[i] + deltaX * alphaEff;
 
-            ++lit;
+            i++;
           }
         }
 
         // Transfer particles that completed their integration.
         if (!m_fullIntegration) {
-          for (ListIterator<P> lit(solverParticles); lit.ok();) {
-            P& p = lit();
-
-            if (p.weight() >= m_inceptionK) {
-              processedParticles.transfer(lit);
+          std::size_t j = 0;
+          while (j < solverLeaf.size()) {
+            if (w[j] >= m_inceptionK) {
+              processedLeaf.appendParticle(solverLeaf, j);
+              solverLeaf.remove(j);
             }
             else {
-              ++lit;
+              j++;
             }
           }
         }
@@ -2745,11 +2793,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles = amrParticles[lvl][din].listItems();
+        ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
-          lit().weight() = std::min(m_inceptionK, lit().weight());
-        }
+        double* const w = leaf.weightColumn();
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          w[i] = std::min(m_inceptionK, w[i]);
+        });
       }
     }
   }
@@ -2833,23 +2883,37 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const ga[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::ga_x>(),
+                                                         solverLeaf.template column<&P::ga_y>(),
+                                                         solverLeaf.template column<&P::ga_z>())};
+        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                   solverLeaf.template column<&P::vk_y>(),
+                                                   solverLeaf.template column<&P::vk_z>())};
+        ParticleReal* const       alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        ParticleReal* const       dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          const RealVect x         = p.position();
-          const RealVect vel       = p.velocity();
-          const Real     v         = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v         = vec.vectorLength();
           const Real     E         = v;
           const Real     alpha     = m_alpha(E, x);
           const Real     eta       = m_eta(E, x);
           const Real     alphaEff  = alpha - eta;
           const Real     tol       = 1E-10;
-          const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
+          const Real     gradAlpha = tol + RealVect(D_DECL(ga[0][i], ga[1][i], ga[2][i])).vectorLength();
 
-          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
           deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
@@ -2858,7 +2922,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           deltaX = std::max(deltaX, m_minPhysDx);
 
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + dt * vel;
+          const RealVect newPos = x + dt * vec;
           const Real     delta  = (newPos - x).vectorLength();
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
@@ -2868,33 +2932,37 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           Real s = 0.0;
 
           if (alphaEff < 0.0) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (insideEB) {
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
             if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, m_minGridDx * dx, s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
             if (ParticleOps::domainIntersection(x, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
-              p.weight() = p.weight() + s * delta * alphaEff;
+              w[i] = w[i] + s * delta * alphaEff;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
-            p.template real<0>() = alphaEff;
-            p.template real<1>() = dt;
-            p.template vect<1>() = vel;
+            // Do an Euler step, storing alpha(p^k), v(p^k), and the time step size.
+            alphaEffCol[i] = alphaEff;
+            dtCol[i]       = dt;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              vk[dir][i]  = vec[dir];
+              pos[dir][i] = newPos[dir];
+            }
 
-            p.position() = newPos;
-
-            ++lit;
+            i++;
           }
         }
       }
@@ -2917,26 +2985,35 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                         solverLeaf.template column<&P::vk_y>(),
+                                                         solverLeaf.template column<&P::vk_z>())};
+        const ParticleReal* const alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        const ParticleReal* const dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          P& p = lit();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const Real     dt = dtCol[i];
+          const RealVect vkv(D_DECL(vk[0][i], vk[1][i], vk[2][i]));
+          const RealVect vk1(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const Real     E = vk1.vectorLength();
 
-          const Real     dt  = p.template real<1>();
-          const RealVect vk  = p.template vect<1>();
-          const RealVect vk1 = p.velocity();
-          const RealVect x   = p.position();
-          const Real     E   = vk1.vectorLength();
-
-          // Note the weird subtraction since p.position() was updated
-          // to p^k + dt * v^k.
-          const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = oldPos + 0.5 * dt * (vk + vk1);
+          // Note the weird subtraction since the position was updated to p^k + dt * v^k.
+          const RealVect oldPos = x - dt * vkv;
+          const RealVect newPos = oldPos + 0.5 * dt * (vkv + vk1);
 
           // Compute new alpha.
-          const Real alphak  = p.template real<0>();
+          const Real alphak  = alphaEffCol[i];
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
           const Real delta   = (newPos - oldPos).vectorLength();
 
@@ -2950,42 +3027,47 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           Real s = 0.0;
 
           if (negativeAlpha) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (insideEB) {
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
             if (ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_minGridDx * dx, s)) {
-              p.weight() = p.weight() + s * delta * alphak;
+              w[i] = w[i] + s * delta * alphak;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
             if (ParticleOps::domainIntersection(oldPos, newPos, m_amr->getProbLo(), m_amr->getProbHi(), s)) {
-              p.weight() = p.weight() + s * delta * alphak;
+              w[i] = w[i] + s * delta * alphak;
             }
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
-            p.weight()   = p.weight() + 0.5 * delta * (alphak + alphak1);
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
+            w[i] = w[i] + 0.5 * delta * (alphak + alphak1);
 
-            ++lit;
+            i++;
           }
         }
 
         // Transfer particles that completed their integration (if we're doing partial integration)
         if (!m_fullIntegration) {
-          for (ListIterator<P> lit(solverParticles); lit.ok();) {
-            P& p = lit();
-
-            if (p.weight() >= m_inceptionK) {
-              processedParticles.transfer(lit);
+          std::size_t j = 0;
+          while (j < solverLeaf.size()) {
+            if (w[j] >= m_inceptionK) {
+              processedLeaf.appendParticle(solverLeaf, j);
+              solverLeaf.remove(j);
             }
             else {
-              ++lit;
+              j++;
             }
           }
         }
@@ -3012,11 +3094,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles = amrParticles[lvl][din].listItems();
+        ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
-          lit().weight() = std::min(m_inceptionK, lit().weight());
-        }
+        double* const w = leaf.weightColumn();
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          w[i] = std::min(m_inceptionK, w[i]);
+        });
       }
     }
   }
@@ -3130,8 +3214,8 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
       DataOps::copy(expKPlus, KPlus);
       DataOps::copy(expKMinu, KMinu);
 
-      DataOps::compute(expKPlus, exponentiate);
-      DataOps::compute(expKMinu, exponentiate);
+      DataOps::compute(expKPlus, exponentiate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+      DataOps::compute(expKMinu, exponentiate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
       DataOps::multiply(townsendCriterionPlus, expKPlus);
       DataOps::multiply(townsendCriterionMinu, expKMinu);
@@ -3145,8 +3229,8 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
           return std::min(x, 1.0);
         };
 
-        DataOps::compute(townsendCriterionPlus, truncate);
-        DataOps::compute(townsendCriterionMinu, truncate);
+        DataOps::compute(townsendCriterionPlus, truncate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
+        DataOps::compute(townsendCriterionMinu, truncate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
       }
     }
 
@@ -3197,14 +3281,17 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionTransient(const Real
     return x > 0.0 ? exp(x) - 1 : 0.0;
   };
   DataOps::copy(m_townsendCriterion, m_inceptionIntegral);
-  DataOps::compute(m_townsendCriterion, exponentiate);
+  DataOps::compute(m_townsendCriterion, exponentiate, m_amr->getMultiCutVofIterator(m_realm, m_phase));
   DataOps::multiply(m_townsendCriterion, gamma);
 
   // If we're running without full integration we truncate the Townsend value to 1.
   if (!m_fullIntegration) {
-    DataOps::compute(m_townsendCriterion, [](const Real x) {
-      return std::min(x, 1.0);
-    });
+    DataOps::compute(
+      m_townsendCriterion,
+      [](const Real x) {
+        return std::min(x, 1.0);
+      },
+      m_amr->getMultiCutVofIterator(m_realm, m_phase));
   }
 
   m_amr->conservativeAverage(m_townsendCriterion, m_realm, m_phase);
@@ -3262,19 +3349,25 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
 
-          const RealVect x      = p.position();
-          const RealVect vel    = p.velocity();
-          const Real     v      = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v      = vec.vectorLength();
           const Real     E      = v;
           const Real     deltaX = m_townsendGridDx * dx;
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + dt * vel;
+          const RealVect newPos = x + dt * vec;
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
@@ -3285,20 +3378,24 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
           const Real alphaEff      = alpha - eta;
           const bool negativeAlpha = alphaEff <= 0.0;
 
-          p.weight() = 0.0;
+          w[i] = 0.0;
 
           if (insideEB) {
-            p.weight() = m_secondaryEmission(E, x);
+            w[i] = m_secondaryEmission(E, x);
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain || negativeAlpha) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
 
-            ++lit;
+            i++;
           }
         }
       }
@@ -3382,15 +3479,26 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
-          P& p = lit();
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        ParticleReal* const       vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                   solverLeaf.template column<&P::vk_y>(),
+                                                   solverLeaf.template column<&P::vk_z>())};
+        ParticleReal* const       alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        ParticleReal* const       dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          const RealVect x        = p.position();
-          const RealVect vel      = p.velocity();
-          const Real     v        = vel.vectorLength();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const RealVect vec(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const Real     v        = vec.vectorLength();
           const Real     E        = v;
           const Real     alpha    = m_alpha(E, x);
           const Real     eta      = m_eta(E, x);
@@ -3399,31 +3507,35 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
           // Compute a time step that we will use for the integration.
           const Real     deltaX = m_townsendGridDx * dx;
           const Real     dt     = deltaX / v;
-          const RealVect newPos = p.position() + vel * dt;
+          const RealVect newPos = x + vec * dt;
 
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
           if (insideEB) {
-            p.weight() = m_secondaryEmission(E, x);
+            w[i] = m_secondaryEmission(E, x);
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (alphaEff < 0.0) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            // Do an Euler step, storaging alpha(p^k), v(p^k), and the time step size.
-            p.template real<0>() = alphaEff;
-            p.template real<1>() = dt;
-            p.template vect<1>() = vel;
+            // Do an Euler step, storing alpha(p^k), v(p^k), and the time step size.
+            alphaEffCol[i] = alphaEff;
+            dtCol[i]       = dt;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              vk[dir][i]  = vec[dir];
+              pos[dir][i] = newPos[dir];
+            }
 
-            p.position() = newPos;
-
-            ++lit;
+            i++;
           }
         }
       }
@@ -3444,26 +3556,35 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& solverParticles    = amrParticles[lvl][din].listItems();
-        List<P>& processedParticles = amrProcessedParticles[lvl][din].listItems();
+        ParticleSoA<P>& solverLeaf    = amrParticles[lvl][din];
+        ParticleSoA<P>& processedLeaf = amrProcessedParticles[lvl][din];
 
-        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+        double* const w             = solverLeaf.weightColumn();
+        double* const pos[SpaceDim] = {
+          D_DECL(solverLeaf.positionColumn(0), solverLeaf.positionColumn(1), solverLeaf.positionColumn(2))};
+        const ParticleReal* const vel[SpaceDim] = {D_DECL(solverLeaf.template column<&P::v_x>(),
+                                                          solverLeaf.template column<&P::v_y>(),
+                                                          solverLeaf.template column<&P::v_z>())};
+        const ParticleReal* const vk[SpaceDim]  = {D_DECL(solverLeaf.template column<&P::vk_x>(),
+                                                         solverLeaf.template column<&P::vk_y>(),
+                                                         solverLeaf.template column<&P::vk_z>())};
+        const ParticleReal* const alphaEffCol   = solverLeaf.template column<&P::alphaEff>();
+        const ParticleReal* const dtCol         = solverLeaf.template column<&P::dtStep>();
 
-          P& p = lit();
+        std::size_t i = 0;
+        while (i < solverLeaf.size()) {
+          const Real     dt = dtCol[i];
+          const RealVect vkv(D_DECL(vk[0][i], vk[1][i], vk[2][i]));
+          const RealVect vk1(D_DECL(vel[0][i], vel[1][i], vel[2][i]));
+          const RealVect x(D_DECL(pos[0][i], pos[1][i], pos[2][i]));
+          const Real     E = vk1.vectorLength();
 
-          const Real     dt  = p.template real<1>();
-          const RealVect vk  = p.template vect<1>();
-          const RealVect vk1 = p.velocity();
-          const RealVect x   = p.position();
-          const Real     E   = vk1.vectorLength();
-
-          // Note the weird subtraction since p.position() was updated
-          // to p^k + dt * v^k.
-          const RealVect oldPos = p.position() - dt * vk;
-          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+          // Note the weird subtraction since the position was updated to p^k + dt * v^k.
+          const RealVect oldPos = x - dt * vkv;
+          const RealVect newPos = x + 0.5 * dt * (vk1 - vkv);
 
           // Compute new alpha.
-          const Real alphak  = p.template real<0>();
+          const Real alphak  = alphaEffCol[i];
           const Real alphak1 = m_alpha(E, x) - m_eta(E, x);
 
           // Stop integration for particles that move into regions alpha < 0.0,
@@ -3472,21 +3593,25 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          // If the particle wound up inside the EB we finish off the integration with a partial Euler step
-          Real s = 0.0;
+          // (negativeAlpha is computed but, as in the original, only outsideDomain/insideEB stop the track.)
+          (void)negativeAlpha;
 
           if (insideEB) {
-            p.weight() = m_secondaryEmission(E, oldPos);
+            w[i] = m_secondaryEmission(E, oldPos);
 
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else if (outsideDomain) {
-            processedParticles.transfer(lit);
+            processedLeaf.appendParticle(solverLeaf, i);
+            solverLeaf.remove(i);
           }
           else {
-            p.position() = newPos;
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              pos[dir][i] = newPos[dir];
+            }
 
-            ++lit;
+            i++;
           }
         }
       }
@@ -3524,7 +3649,8 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
 
   Real Rdot = 0.0;
 
-  // TLDR: We are computing the integral of dne/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
+  // TLDR: We are computing the integral of done/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over
+  // the "critical surface"
   const RealVect probLo = m_amr->getProbLo();
 
   // Compute the electric field at the input voltage
@@ -3603,11 +3729,12 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
         }
       };
 
-      // Run the kernels.
+      // Run the kernels. Not vectorizable: FP sum reduction (Rdot) + multiple std::function coefficients
+      // (m_alpha/m_eta/m_detachmentRate/m_fieldEmission/m_backgroundRate) + data-dependent branch.
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -3636,11 +3763,17 @@ DischargeInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-        P& p = lit();
+      ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
-        p.position() = p.template vect<0>();
-      }
+      double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+      const double* const x0[SpaceDim] = {
+        D_DECL(leaf.template column<&P::x0_x>(), leaf.template column<&P::x0_y>(), leaf.template column<&P::x0_z>())};
+
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          pos[dir][i] = x0[dir][i]; // rewind to the snapshot position
+        }
+      });
     }
   }
 
@@ -3668,11 +3801,13 @@ DischargeInceptionStepper<P, F, C>::resetTracerParticles() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
-        P& p = lit();
+      ParticleSoA<P>& leaf = amrParticles[lvl][din];
 
-        p.weight() = 0.0;
-      }
+      double* const w = leaf.weightColumn();
+
+      ParticleLoops::loop(leaf, [&](const std::size_t i) {
+        w[i] = 0.0;
+      });
     }
   }
 }
@@ -3745,10 +3880,12 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
           bgIonization(vof, 0) = m_backgroundRate(E, pos);
         };
 
-        // Execute kernels
+        // Execute kernels. Not vectorizable: m_backgroundRate std::function coefficient evaluated per cell.
+        // (Representative of the stationary coefficient computes -- detachment/field-emission/evaluateFunction/
+        // ion mobility/ion diffusion all share this std::function-per-cell structure.)
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(dbl[din], regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -3833,7 +3970,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
         // Execute kernels
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(dbl[din], regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4086,7 +4223,7 @@ DischargeInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_dat
     Box          cellBox = dbl[din];
     VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[din];
 
-    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -4341,7 +4478,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         const Box&   cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4419,7 +4556,7 @@ DischargeInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCe
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -4508,7 +4645,7 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4574,7 +4711,7 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexc
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -4794,7 +4931,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4877,7 +5014,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real&
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5102,7 +5239,7 @@ DischargeInceptionStepper<P, F, C>::particleOutsideGrid(const RealVect& a_pos,
 
 template <typename P, typename F, typename C>
 bool
-DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect a_pos) const noexcept
+DischargeInceptionStepper<P, F, C>::particleInsideEB(const RealVect& a_pos) const noexcept
 {
 #ifndef NDEBUG
   CH_TIME("DischargeInceptionStepper::particleInsideEB");
@@ -5171,7 +5308,7 @@ DischargeInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) no
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
       Box          cellBox = dbl[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5236,7 +5373,7 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
       Box          cellBox = dbl[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5258,7 +5395,8 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
                              1,
                              Interval(0, 0),
                              Interval(0, 0),
-                             Average::Arithmetic);
+                             Average::Arithmetic,
+                             m_amr->getFaceIteratorWithTangentialGhosts(m_realm, m_phase));
 }
 
 template <typename P, typename F, typename C>
@@ -5302,8 +5440,11 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
     pout() << "DischargeInceptionStepper::getMaxValueAndLocation" << endl;
   }
 
-  a_maxVal = -std::numeric_limits<Real>::max();
-  a_maxPos = RealVect::Zero;
+  // Local (val, pos) accumulator so the OpenMP box loop can use a custom pairmax reduction -- writing the
+  // shared a_maxVal/a_maxPos directly from the kernels would be a data race across threads.
+  std::pair<Real, RealVect> maxValAndPos;
+  maxValAndPos.first  = -std::numeric_limits<Real>::max();
+  maxValAndPos.second = RealVect::Zero;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -5316,7 +5457,7 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(pairmax : maxValAndPos)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din     = dit[mybox];
       const Box&       cellbox = dbl[din];
@@ -5328,32 +5469,33 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
 
       CH_assert(data.nComp() == 1);
 
+      // Not vectorizable: max+argmax reduction with a data-dependent branch.
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          if (dataReg(iv, 0) > a_maxVal) {
-            a_maxVal = dataReg(iv, 0);
-            a_maxPos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          if (dataReg(iv, 0) > maxValAndPos.first) {
+            maxValAndPos.first  = dataReg(iv, 0);
+            maxValAndPos.second = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
           }
         }
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex(), 0) && ebisbox.isIrregular(vof.gridIndex())) {
-          if (data(vof, 0) > a_maxVal) {
-            a_maxVal = data(vof, 0);
-            a_maxPos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+          if (data(vof, 0) > maxValAndPos.first) {
+            maxValAndPos.first  = data(vof, 0);
+            maxValAndPos.second = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
           }
         }
       };
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
 
-  const std::pair<Real, RealVect> globalMaxValAndPos = ParallelOps::max(a_maxVal, a_maxPos);
+  const std::pair<Real, RealVect> globalMaxValAndPos = ParallelOps::max(maxValAndPos.first, maxValAndPos.second);
 
   a_maxVal = globalMaxValAndPos.first;
   a_maxPos = globalMaxValAndPos.second;
@@ -5393,7 +5535,7 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
@@ -5408,7 +5550,7 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
   }
   CH_STOP(t4);
 
-  DataOps::setCoveredValue(scratch, 0.0);
+  DataOps::setCoveredValue(scratch, *m_amr->getCoveredCells(m_realm, m_phase)[a_level], 0.0);
 
   CH_START(t5);
   m_amr->copyData(a_output, scratch, a_level, a_outputRealm, m_realm, dstInterv, srcInterv);

@@ -4,7 +4,7 @@ Overview
 ========
 
 A design principle in ``chombo-discharge`` is the division between the AMR core, geometry, solvers, physics coupling, and user applications. 
-As an example, the fundamental time integrator class ``TimeStepper`` in ``chombo-discharge`` is a just an abstraction, i.e., it only presents an API which application codes must conform to.
+As an example, the fundamental time integrator class ``TimeStepper`` in ``chombo-discharge`` is just an abstraction, i.e., it only presents an API which application codes must conform to.
 Because of that, ``TimeStepper`` can be used for solving completely unrelated problems. 
 We have, for example, implementations of ``TimeStepper`` for solving radiative transfer equations, advection-diffusion problems, electrostatic problems, or for plasma problems.
 
@@ -15,7 +15,7 @@ In general, solvers may share common features (such as elliptic discretizations)
 For this reason numerical solvers are asked to *register* AMR requirements.
 For example, elliptic solvers need functionality for interpolating ghost cells over the refinement boundary, but pure particle solvers have no need for such functionality.
 A consequence of this is that the numerical solvers are asked (during their instantiation) to register what type of AMR infrastructure they require. 
-In return, the AMR core will allocate this infrastructure and make it available to solver, as illustrated in :numref:`Fig:Design`. 
+In return, the AMR core will allocate this infrastructure and make it available to the solver, as illustrated in :numref:`Fig:Design`. 
 
 .. _Fig:Design:
 .. figure:: /_static/figures/Design.png

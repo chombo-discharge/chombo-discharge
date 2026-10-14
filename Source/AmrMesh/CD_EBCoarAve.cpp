@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EBCoarAve.cpp
-  @brief  Implementation of CD_EBCoarAve.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_EBCoarAve.cpp
+ * @brief  Implementation of CD_EBCoarAve.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>
@@ -20,10 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCoarAve::EBCoarAve() noexcept
+EBCoarAve::EBCoarAve() noexcept : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve");
-  m_isDefined = false;
 }
 
 EBCoarAve::~EBCoarAve() noexcept
@@ -66,10 +66,9 @@ EBCoarAve::EBCoarAve(const EBLevelGrid& a_eblgFine,
                      const EBLevelGrid& a_eblgCoar,
                      const EBLevelGrid& a_eblgCoFi,
                      const int&         a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve(EBLevelGrid version)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_eblgCoFi, a_refRat);
 }
@@ -158,7 +157,7 @@ EBCoarAve::defineCellStencils() noexcept
     auto buildStencils = [&](const VolIndex& coarVoF) -> void {
       const Real             kappaC      = ebisBoxCoar.volFrac(coarVoF);
       const Vector<VolIndex> fineVoFs    = ebislCoar.refine(coarVoF, m_refRat, din);
-      const int              numFineVoFs = fineVoFs.size();
+      const int              numFineVoFs = static_cast<int>(fineVoFs.size());
 
       VoFStencil& arithSten = arithmeticStencils(coarVoF, 0);
       VoFStencil& harmSten  = harmonicStencils(coarVoF, 0);
@@ -240,7 +239,7 @@ EBCoarAve::defineFaceStencils() noexcept
       auto buildStencils = [&](const FaceIndex& coarFace) -> void {
         const Real              areaCoar     = ebisBoxCoar.areaFrac(coarFace);
         const Vector<FaceIndex> fineFaces    = ebislCoar.refine(coarFace, m_refRat, din);
-        const int               numFineFaces = fineFaces.size();
+        const int               numFineFaces = static_cast<int>(fineFaces.size());
 
         FaceStencil& arithSten = arithmeticStencils(coarFace, 0);
         FaceStencil& harmSten  = harmonicStencils(coarFace, 0);
@@ -330,7 +329,7 @@ EBCoarAve::defineEBStencils() noexcept
           fineVoFs.push_back(refinedVoFs[i]);
         }
       }
-      const int numFineVoFs = fineVoFs.size();
+      const int numFineVoFs = static_cast<int>(fineVoFs.size());
 
       if (numFineVoFs > 0) {
         for (int ifine = 0; ifine < numFineVoFs; ifine++) {
@@ -460,17 +459,31 @@ EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
   const BaseIVFAB<VoFStencil>& coarseningStencils = m_cellArithmeticStencils[a_datInd];
 
   // Coarsening of regular cells.
+  // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells (a
+  // strided gather plus an inner refinement loop).
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit(), a_fineVar);
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect ivFine = m_refRat * iv + IntVect(D_DECL(i, j, k));
+          coarDataReg(iv, a_coarVar) += fineDataReg(ivFine, a_fineVar);
+        }
+      }
+#if CH_SPACEDIM == 3
     }
+#endif
 
     coarDataReg(iv, a_coarVar) *= dxFactor;
   };
 
   // Coarsening of cut-cells.
+  // Runs over all cut cells (not just multiply-cut ones): it applies a geometry-aware coarsening
+  // stencil whose value differs from the regular gather-sum, so the regular kernel above does not
+  // produce the correct value on cut cells.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
     a_coarData(vof, a_coarVar) = 0.0;
 
@@ -484,7 +497,7 @@ EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
   CH_START(t1);
   const Box& coarBox = m_eblgCoFi.getDBL()[a_datInd];
 
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
@@ -512,7 +525,7 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
 
   // Regular cells
   const Box  refiBox    = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-  const Real numPerCoar = refiBox.numPts();
+  const Real numPerCoar = static_cast<double>(refiBox.numPts());
 
   FArrayBox&       coarDataReg = a_coarData.getFArrayBox();
   const FArrayBox& fineDataReg = a_fineData.getFArrayBox();
@@ -520,17 +533,31 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
   const BaseIVFAB<VoFStencil>& coarseningStencils = m_cellHarmonicStencils[a_datInd];
 
   // Harmonic coarsening of regular cells. Harmonic averaging is phiCoar = n/sum_{i<n}(1/x_i)
+  // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells (a
+  // strided gather plus an inner refinement loop).
   auto regularKernel = [&](const IntVect& iv) -> void {
     Real coarVal = 0.0;
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarVal += 1.0 / fineDataReg(m_refRat * iv + bit(), a_fineVar);
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect ivFine = m_refRat * iv + IntVect(D_DECL(i, j, k));
+          coarVal += 1.0 / fineDataReg(ivFine, a_fineVar);
+        }
+      }
+#if CH_SPACEDIM == 3
     }
+#endif
 
     coarDataReg(iv, a_coarVar) = numPerCoar / coarVal;
   };
 
   // Coarsening of cut-cells. We've put the stencil weights = 1/n so we only need to accumulate and invert.
+  // Runs over all cut cells (not just multiply-cut ones): it applies a geometry-aware coarsening
+  // stencil whose value differs from the regular gather-sum, so the regular kernel above does not
+  // produce the correct value on cut cells.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
     a_coarData(vof, a_coarVar) = 0.0;
 
@@ -546,7 +573,7 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
   CH_START(t1);
   const Box& coarBox = m_eblgCoFi.getDBL()[a_datInd];
 
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular cells
@@ -583,17 +610,31 @@ EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
   const BaseIVFAB<VoFStencil>& coarseningStencils = m_cellConservativeStencils[a_datInd];
 
   // Coarsening of regular cells.
+  // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells (a
+  // strided gather plus an inner refinement loop).
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
-    for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
-      coarDataReg(iv, a_coarVar) += fineDataReg(m_refRat * iv + bit(), a_fineVar);
+#if CH_SPACEDIM == 3
+    for (int k = refiBox.smallEnd(2); k <= refiBox.bigEnd(2); k++) {
+#endif
+      for (int j = refiBox.smallEnd(1); j <= refiBox.bigEnd(1); j++) {
+        for (int i = refiBox.smallEnd(0); i <= refiBox.bigEnd(0); i++) {
+          const IntVect ivFine = m_refRat * iv + IntVect(D_DECL(i, j, k));
+          coarDataReg(iv, a_coarVar) += fineDataReg(ivFine, a_fineVar);
+        }
+      }
+#if CH_SPACEDIM == 3
     }
+#endif
 
     coarDataReg(iv, a_coarVar) *= dxFactor;
   };
 
   // Coarsening of cut-cells.
+  // Runs over all cut cells (not just multiply-cut ones): it applies a geometry-aware coarsening
+  // stencil whose value differs from the regular gather-sum, so the regular kernel above does not
+  // produce the correct value on cut cells.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
     a_coarData(vof, a_coarVar) = 0.0;
 
@@ -607,7 +648,7 @@ EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
   CH_START(t1);
   const Box& coarBox = m_eblgCoFi.getDBL()[a_datInd];
 
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
@@ -720,6 +761,8 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
   const int zDoLoop = (a_dir == 2) ? 0 : 1;
 #endif
 
+  // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells (a
+  // strided gather plus an inner refinement loop).
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
@@ -741,6 +784,9 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
   };
 
   // Kernel for doing irregular faces.
+  // Runs over all cut faces (not just multiply-cut ones): it applies a geometry-aware coarsening
+  // stencil whose value differs from the regular gather-sum, so the regular kernel above does not
+  // produce the correct value on cut faces.
   auto irregularKernel = [&](const FaceIndex& face) -> void {
     a_coarData(face, a_coarVar) = 0.0;
 
@@ -755,7 +801,7 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
   const Box& coarBox     = m_eblgCoFi.getDBL()[a_datInd];
   const Box  coarFaceBox = surroundingNodes(coarBox, a_dir);
 
-  BoxLoops::loop(coarFaceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarFaceBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular faces
@@ -795,6 +841,8 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
 #endif
 
   // Kernel for doing regular faces.
+  // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells (a
+  // strided gather plus an inner refinement loop).
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
@@ -816,6 +864,9 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
   };
 
   // Kernel for doing irregular faces.
+  // Runs over all cut faces (not just multiply-cut ones): it applies a geometry-aware coarsening
+  // stencil whose value differs from the regular gather-sum, so the regular kernel above does not
+  // produce the correct value on cut faces.
   auto irregularKernel = [&](const FaceIndex& face) -> void {
     a_coarData(face, a_coarVar) = 0.0;
 
@@ -832,7 +883,7 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
   const Box& coarBox     = m_eblgCoFi.getDBL()[a_datInd];
   const Box  coarFaceBox = surroundingNodes(coarBox, a_dir);
 
-  BoxLoops::loop(coarFaceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarFaceBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular faces
@@ -872,6 +923,8 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
   const int zDoLoop = (a_dir == 2) ? 0 : 1;
 #endif
 
+  // Not auto-vectorizable: this is a fine->coarse gather-reduction over the refRat^D fine cells (a
+  // strided gather plus an inner refinement loop).
   auto regularKernel = [&](const IntVect& iv) -> void {
     coarDataReg(iv, a_coarVar) = 0.0;
 
@@ -893,6 +946,9 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
   };
 
   // Kernel for doing irregular faces.
+  // Runs over all cut faces (not just multiply-cut ones): it applies a geometry-aware coarsening
+  // stencil whose value differs from the regular gather-sum, so the regular kernel above does not
+  // produce the correct value on cut faces.
   auto irregularKernel = [&](const FaceIndex& face) -> void {
     a_coarData(face, a_coarVar) = 0.0;
 
@@ -907,7 +963,7 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
   const Box& coarBox     = m_eblgCoFi.getDBL()[a_datInd];
   const Box  coarFaceBox = surroundingNodes(coarBox, a_dir);
 
-  BoxLoops::loop(coarFaceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarFaceBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular faces

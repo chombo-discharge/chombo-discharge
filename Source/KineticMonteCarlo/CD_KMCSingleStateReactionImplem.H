@@ -1,19 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_KMCSingleStateReactionImplem.H
-  @brief  Implementation of CD_KMCSingleStateReaction.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_KMCSingleStateReactionImplem.H
+ * @brief  Implementation of CD_KMCSingleStateReaction.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_KMCSingleStateReactionImplem_H
-#define CD_KMCSingleStateReactionImplem_H
-
-// Chombo includes
-#include <CH_Timer.H>
+#ifndef CD_KMCSINGLESTATEREACTIONIMPLEM_H
+#define CD_KMCSINGLESTATEREACTIONIMPLEM_H
 
 // Our includes
 #include <CD_KMCSingleStateReaction.H>
@@ -22,27 +20,19 @@
 template <typename State, typename T>
 inline KMCSingleStateReaction<State, T>::KMCSingleStateReaction(const std::list<size_t>& a_reactants,
                                                                 const std::list<size_t>& a_products) noexcept
+  : m_reactants(a_reactants), m_products(a_products)
 {
-  CH_TIME("KMCSingleStateReaction::KMCSingleStateReaction");
-
-  m_reactants = a_reactants;
-  m_products  = a_products;
-
   this->computeStateChanges();
 }
 
 template <typename State, typename T>
 inline KMCSingleStateReaction<State, T>::~KMCSingleStateReaction()
-{
-  CH_TIME("KMCSingleStateReaction::~KMCSingleStateReaction");
-}
+{}
 
 template <typename State, typename T>
 inline void
 KMCSingleStateReaction<State, T>::computeStateChanges() noexcept
 {
-  CH_TIME("KMCSingleStateReaction::computeStateChanges");
-
   // Consumed particles.
   for (const auto& r : m_reactants) {
     if (m_stateChange.find(r) == m_stateChange.end()) {
@@ -63,9 +53,10 @@ KMCSingleStateReaction<State, T>::computeStateChanges() noexcept
     }
   }
 
-  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species. We need to do this
-  // because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1) unique pairs of particles. Or in general when
-  // we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!) combinations. In the propensity function we compute the propensity as
+  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species.
+  // We need to do this because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1)
+  // unique pairs of particles. Or in general when we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!)
+  // combinations. In the propensity function we compute the propensity as
   //
   //    a = rate * factor * N * (N-1) * (N-2) ...
   //
@@ -111,8 +102,6 @@ template <typename State, typename T>
 inline Real
 KMCSingleStateReaction<State, T>::propensity(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::propensity");
-
   Real A = m_rate * m_propensityFactor;
 
   State tmp = a_state;
@@ -130,8 +119,6 @@ template <typename State, typename T>
 inline T
 KMCSingleStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::computeCriticalNumberOfReactions");
-
   T Lj = std::numeric_limits<T>::max();
 
   for (const auto& s : m_stateChange) {
@@ -148,7 +135,7 @@ KMCSingleStateReaction<State, T>::computeCriticalNumberOfReactions(const State& 
 }
 
 template <typename State, typename T>
-inline std::list<size_t>
+inline const std::list<size_t>&
 KMCSingleStateReaction<State, T>::getReactants() const noexcept
 {
   return m_reactants;
@@ -158,8 +145,6 @@ template <typename State, typename T>
 inline T
 KMCSingleStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::getStateChange");
-
   T nuIJ = 0;
 
   if (m_stateChange.find(a_particleReactant) != m_stateChange.end()) {
@@ -173,8 +158,6 @@ template <typename State, typename T>
 inline void
 KMCSingleStateReaction<State, T>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
-  CH_TIME("KMCSingleStateReaction::advanceState");
-
   for (const auto& s : m_stateChange) {
     a_state[s.first] += a_numReactions * s.second;
   }

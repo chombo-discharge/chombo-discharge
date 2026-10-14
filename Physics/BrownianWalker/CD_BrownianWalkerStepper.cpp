@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_BrownianWalkerStepper.cpp
-  @brief  Implementation of CD_BrownianWalkerStepper.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_BrownianWalkerStepper.cpp
+ * @brief  Implementation of CD_BrownianWalkerStepper.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <ParmParse.H>
@@ -17,30 +18,51 @@
 #include <CD_BrownianWalkerStepper.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_Random.H>
+#include <CD_ParticleLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_EBCoarseToFineInterp.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::BrownianWalker;
 
-BrownianWalkerStepper::BrownianWalkerStepper()
+BrownianWalkerStepper::BrownianWalkerStepper() : BrownianWalkerStepper("BrownianWalker")
+{}
+
+BrownianWalkerStepper::BrownianWalkerStepper(const std::string& a_className)
+  : m_phase(phase::gas), m_className(a_className)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper");
 
-  ParmParse pp("BrownianWalker");
-
-  m_phase = phase::gas;
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("realm", m_realm);
   pp.get("diffco", m_diffCo);
   pp.get("mobility", m_mobility);
   pp.get("omega", m_omega);
+
+  std::string velocityField;
+  pp.get("velocity_field", velocityField);
+  if (velocityField == "rotational") {
+    m_constantVelocity = false;
+  }
+  else if (velocityField == "constant") {
+    m_constantVelocity = true;
+  }
+  else {
+    MayDay::Error(
+      "BrownianWalkerStepper::BrownianWalkerStepper -- 'velocity_field' must be 'rotational' or 'constant'");
+  }
+
+  Vector<Real> velocity(SpaceDim);
+  pp.getarr("constant_velocity", velocity, 0, SpaceDim);
+  m_velocity = RealVect(D_DECL(velocity[0], velocity[1], velocity[2]));
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
   pp.get("which_balance", str);
+  pp.get("verify_conservation", m_verifyConservation);
 
   if (str == "mesh") {
     m_whichLoadBalance = LoadBalancingMethod::Mesh;
@@ -54,7 +76,12 @@ BrownianWalkerStepper::BrownianWalkerStepper()
   }
 }
 
-BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver) : BrownianWalkerStepper()
+BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver)
+  : BrownianWalkerStepper(a_solver, "BrownianWalker")
+{}
+
+BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver, const std::string& a_className)
+  : BrownianWalkerStepper(a_className)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper(full)");
 
@@ -73,10 +100,9 @@ BrownianWalkerStepper::parseRuntimeOptions()
 {
   CH_TIME("BrownianWalkerStepper::parseRuntimeOptions");
 
-  ParmParse pp("BrownianWalker");
+  ParmParse pp(m_className.c_str());
 
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
   pp.get("cfl", m_cfl);
   pp.get("load_balance", m_loadBalance);
 
@@ -141,8 +167,11 @@ BrownianWalkerStepper::setDiffusion()
 
   CH_assert(m_solver->isDiffusive());
 
-  // Set something crazy for the diffusion field. This should not matter because we set the particle diffusion coefficients directly.
-  m_solver->setDiffusionFunction(std::numeric_limits<Real>::max());
+  // The mesh diffusion field must hold the same coefficient the particles carry. The particle coefficients are
+  // still assigned directly (setParticleDiffusion), so this field is not what moves the walkers -- but it is the
+  // field that is plotted as 'dco', and it is the field a grad(D) drift correction would have to differentiate.
+  // EBCellFAB::setVal covers ghost cells and the value is uniform, so no coarsening or ghost fill is needed here.
+  m_solver->setDiffusionFunction(m_diffCo);
 }
 
 void
@@ -161,7 +190,12 @@ BrownianWalkerStepper::setVelocity()
   EBAMRCellData& vel = m_solver->getVelocityFunction();
 
   // Nifty lambda describing the advective field
-  auto veloFunc = [omega = this->m_omega](const RealVect pos) -> RealVect {
+  auto veloFunc = [omega = this->m_omega, constant = this->m_constantVelocity, velocity = this->m_velocity](
+                    const RealVect& pos) -> RealVect {
+    if (constant) {
+      return velocity;
+    }
+
     const Real r     = pos.vectorLength();
     const Real theta = atan2(pos[1], pos[0]);
 
@@ -169,17 +203,17 @@ BrownianWalkerStepper::setVelocity()
   };
 
   DataOps::setValue(vel, 0.0);
-  DataOps::setValue(vel, veloFunc, m_amr->getProbLo(), m_amr->getDx());
+  DataOps::setValue(vel, veloFunc, m_amr->getProbLo(), m_amr->getDx(), m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Coarsen and update ghost cells.
   m_amr->conservativeAverage(vel, m_realm, m_phase);
   m_amr->interpGhost(vel, m_realm, m_phase);
 
-  DataOps::setCoveredValue(vel, 0, 0.0);
+  DataOps::setCoveredValue(vel, m_amr->getCoveredCells(m_realm, m_phase), 0, 0.0);
 }
 
 bool
-BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) const
+BrownianWalkerStepper::loadBalanceThisRealm(const std::string& a_realm) const
 {
   CH_TIME("BrownianWalkerStepper::loadBalanceThisRealm");
   if (m_verbosity > 5) {
@@ -192,7 +226,7 @@ BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) const
 void
 BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                                         Vector<Vector<Box>>&             a_boxes,
-                                        const std::string                a_realm,
+                                        const std::string&               a_realm,
                                         const Vector<DisjointBoxLayout>& a_grids,
                                         const int                        a_lmin,
                                         const int                        a_finestLevel)
@@ -299,7 +333,7 @@ BrownianWalkerStepper::getPlotVariableNames() const
 void
 BrownianWalkerStepper::writePlotData(LevelData<EBCellFAB>& a_output,
                                      int&                  a_icomp,
-                                     const std::string     a_outputRealm,
+                                     const std::string&    a_outputRealm,
                                      const int             a_level) const
 {
   CH_TIME("BrownianWalkerStepper::writePlotData");
@@ -356,6 +390,62 @@ BrownianWalkerStepper::printStepReport()
   pout() << "                                   #part = " << localParticles << " (" << globalParticles << ")" << endl;
 }
 
+void
+BrownianWalkerStepper::postPlot()
+{
+  CH_TIME("BrownianWalkerStepper::postPlot");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::postPlot" << endl;
+  }
+
+  this->plotParticles();
+}
+
+void
+BrownianWalkerStepper::plotParticles() const noexcept
+{
+  CH_TIME("BrownianWalkerStepper::plotParticles");
+  if (m_verbosity > 2) {
+    pout() << "BrownianWalkerStepper::plotParticles" << endl;
+  }
+
+  bool plotParticles = false;
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("plot_particles", plotParticles);
+
+  if (plotParticles) {
+    const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+    // Create the output folder.
+    // Solver names may contain spaces ("scalar species"), so the path has to be quoted -- an unquoted
+    // one makes the shell create a directory per word and the file open then fails with a bare
+    // MPI_ERR_NO_SUCH_FILE from deep inside HDF5.
+    const std::string dir     = "particles/" + m_solver->getName();
+    const std::string cmd     = "mkdir -p \'" + dir + "\'";
+    int               success = 0;
+
+    if (procID() == 0) {
+      success = system(cmd.c_str());
+    }
+
+    if (success != 0) {
+      MayDay::Error("BrownianWalkerStepper::plotParticles - could not create 'particles' directory");
+    }
+
+    const std::string prefix = "./particles/" + m_solver->getName() + "/" + m_solver->getName();
+
+    char fileChar[1000];
+    sprintf(fileChar, "%s.step%07d.%dd.h5part", prefix.c_str(), m_timeStep, SpaceDim);
+
+    // Written straight from the live SoA container. The output datasets (id, position, weight and the
+    // selected ItoParticle payload columns) come from ParticleTraits<ItoParticle>::h5PartColumns, so the
+    // files match what ItoKMCGodunovStepper writes and the same post-processing reads both.
+    DischargeIO::writeH5Part(std::string(fileChar), particles, m_amr->getProbLo(), m_time);
+  }
+}
+
 bool
 BrownianWalkerStepper::needToRegrid()
 {
@@ -375,16 +465,22 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
     pout() << "BrownianWalkerStepper::preRegrid" << endl;
   }
 
+  // clang-format off
   // TLDR: This does two things. The first is to deposit the number of particles per cell (ish) to the mesh. This can be used to load balance the application
   //       in the regrid step. The second this is that it puts all particle data holders in "regrid" mode.
+  // clang-format on
   m_amr->allocate(m_regridPPC, m_realm, m_phase, 1);
 
+  // ORDERING: this deposit must stay ahead of m_solver->preRegrid() below. That call moves the bulk
+  // particles into the solver's reduced regrid holder and leaves the ItoParticle container empty, so
+  // depositing afterwards would deposit nothing and loadBalanceBoxesMesh() would balance on zeros.
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
-  m_solver->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(
-    m_regridPPC,
-    m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
-    DepositionType::NGP,
-    CoarseFineDeposition::Interp);
+  m_solver->depositWeight(m_regridPPC,
+                          m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
+                          DepositionType::NGP,
+                          CoarseFineDeposition::Interp);
+
+  m_solver->coarsenAndFillGhosts(m_regridPPC);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];
@@ -405,7 +501,7 @@ BrownianWalkerStepper::setupSolvers()
     pout() << "BrownianWalkerStepper::setupSolvers" << endl;
   }
 
-  m_species = RefCountedPtr<ItoSpecies>(new BrownianWalkerSpecies());
+  m_species = RefCountedPtr<ItoSpecies>(new BrownianWalkerSpecies(m_className));
 
   m_solver->setVerbosity(m_verbosity);
   m_solver->parseOptions();
@@ -459,7 +555,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
 
   // TLDR: This function advances the particles using an Euler-Maruyama kernel. The steps are simply:
   //
-  //          1. Compute Xnew = Xold + V*dt + sqrt(2*D*dt)*N0 where N0 is a random number
+  //          1. Compute Xnew = Xold + (V + grad(D))*dt + sqrt(2*D*dt)*N0 where N0 is a random number
   //          2. Remap the particles, assigning them to new grid boxes.
   //          3. Remove particles that struck the EB.
   //          4. Make super-particles.
@@ -467,12 +563,22 @@ BrownianWalkerStepper::advance(const Real a_dt)
   //          6. Deposit particles on mesh.
   //
 
+  // The grad(D) drift correction, which makes the walkers transport v*n - D*grad(n) rather than the
+  // v*n - grad(D*n) a plain Ito update gives. m_diffCo is uniform here, so the gradient is identically zero
+  // and this changes nothing -- it is wired up so the code path is exercised and so that a spatially varying
+  // diffusion coefficient would be handled correctly.
+  const bool gradientDrift = m_solver->isDiffusive() && m_solver->isDiffusionGradientDrift();
+
+  if (gradientDrift) {
+    m_solver->computeDiffusionGradient();
+  }
+
   // 1. Euler-Maruayma kernel on each patch.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
-    ParticleData<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     const int nbox = dit.size();
 
@@ -481,24 +587,61 @@ BrownianWalkerStepper::advance(const Real a_dt)
       const DataIndex& din = dit[mybox];
 
       // Particles that we iterate through.
-      List<ItoParticle>& particleList = particles[din].listItems();
+      ParticleSoA<ItoParticle>& leaf = particles[lvl][din];
+
+      const std::size_t n = leaf.size();
+
+      // grad(D) at the particle positions, onto the scratch vector columns. This MUST happen before any of the
+      // kernels below move a particle: the interpolation stencil reads the patch that owns X^k, and the particles
+      // are not remapped until after the whole Euler-Maruyama kernel has run.
+      if (gradientDrift) {
+        m_solver->interpolateDiffusionGradient(lvl, din);
+      }
 
       // Euler step.
       if (m_solver->isMobile()) {
-        for (ListIterator<ItoParticle> lit(particleList); lit; ++lit) {
-          ItoParticle& p  = lit();
-          p.oldPosition() = p.position();
-          p.position() += p.velocity() * a_dt;
-        }
+        double* oldPos[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::old_x>(),
+                                           leaf.column<&ItoParticle::old_y>(),
+                                           leaf.column<&ItoParticle::old_z>())};
+
+        const ParticleReal* v[SpaceDim] = {
+          D_DECL(leaf.column<&ItoParticle::vx>(), leaf.column<&ItoParticle::vy>(), leaf.column<&ItoParticle::vz>())};
+
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            oldPos[dir][i] = pos[dir][i];
+            pos[dir][i] += static_cast<Real>(v[dir][i]) * a_dt;
+          }
+        });
+      }
+
+      // grad(D) drift. This is a drift term like the one above, but it applies to any diffusive solver,
+      // mobile or not. The scratch vector columns hold (grad D)(X^k) from the interpolation above.
+      if (gradientDrift) {
+        const ParticleReal* gradD[SpaceDim] = {D_DECL(leaf.column<&ItoParticle::scratch_x>(),
+                                                      leaf.column<&ItoParticle::scratch_y>(),
+                                                      leaf.column<&ItoParticle::scratch_z>())};
+
+        double* const pos[SpaceDim] = {D_DECL(leaf.positionColumn(0), leaf.positionColumn(1), leaf.positionColumn(2))};
+
+        ParticleLoops::loop(leaf, [&](const std::size_t i) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            pos[dir][i] += static_cast<Real>(gradD[dir][i]) * a_dt;
+          }
+        });
       }
 
       // Diffusion hop
       if (m_solver->isDiffusive()) {
-        for (ListIterator<ItoParticle> lit(particleList); lit; ++lit) {
-          ItoParticle&   p   = lit();
+        const ParticleReal* D = leaf.column<&ItoParticle::diffusion>();
+
+        for (std::size_t i = 0; i < n; i++) {
           const RealVect ran = Random::getNormal01() * Random::getDirection();
-          const RealVect hop = ran * sqrt(2.0 * p.diffusion() * a_dt);
-          p.position() += hop;
+          const RealVect hop = ran * sqrt(2.0 * static_cast<Real>(D[i]) * a_dt);
+
+          leaf.setPosition(i, leaf.position(i) + hop);
         }
       }
     }
@@ -532,11 +675,10 @@ BrownianWalkerStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
     pout() << "BrownianWalkerStepper::regrid" << endl;
   }
 
-  // Solver regrids.
+  // Solver regrids. The super-particle merge happens inside that call now (see
+  // ItoSolver.regrid_superparticles), on the reduced particles and before they are rebuilt as
+  // ItoParticles -- merging again here would just re-merge an already-merged population.
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  // Make superparticles
-  this->makeSuperParticles();
 }
 
 void
@@ -568,20 +710,60 @@ BrownianWalkerStepper::makeSuperParticles()
     pout() << "BrownianWalkerStepper::makeSuperParticles" << endl;
   }
 
-  // TLDR: ItoSolver requires the particles to be sorted by cell when making superparticles. So we explicitly
-  //       need to call cell/patch sorting methods.
+  if (m_solver->getParticlesPerCell()[0] > 0) {
+    // A merge redistributes weight but must never create or destroy it. When requested, compute the
+    // total particle weight on the container before and after the merge -- independent of the merge
+    // scheme and of how the container is organized -- and abort if it drifts by more than round-off.
+    // (makeSuperparticles() does any cell-sorting it needs internally and returns the container
+    // patch-organized.)
+    const Real weightBefore = m_verifyConservation ? this->computeTotalWeight() : 0.0;
 
-  if (m_ppc > 0) {
-    m_solver->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
-    m_solver->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk);
+
+    if (m_verifyConservation) {
+      const Real weightAfter = this->computeTotalWeight();
+      const Real absDrift    = std::abs(weightAfter - weightBefore);
+
+      if (absDrift > 1.E-9 * std::max(1.0, std::abs(weightBefore))) {
+        MayDay::Abort("BrownianWalkerStepper::makeSuperParticles -- superparticle merge did not conserve "
+                      "total particle weight");
+      }
+    }
   }
+}
+
+Real
+BrownianWalkerStepper::computeTotalWeight()
+{
+  CH_TIME("BrownianWalkerStepper::computeTotalWeight");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::computeTotalWeight" << endl;
+  }
+
+  const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+  Real weight = 0.0;
+
+  for (int lvl = 0; lvl <= particles.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = particles.getGrids()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const auto&         leaf = particles[lvl][dit()];
+      const double* const w    = leaf.weightColumn();
+
+      weight = ParticleLoops::reduce(leaf, weight, [&](const Real a_acc, const std::size_t a_i) {
+        return a_acc + w[a_i];
+      });
+    }
+  }
+
+  return ParallelOps::sum(weight);
 }
 
 void
 BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_procs,
                                             Vector<Vector<Box>>&             a_boxes,
-                                            const std::string                a_realm,
+                                            const std::string&               a_realm,
                                             const Vector<DisjointBoxLayout>& a_grids,
                                             const int                        a_lmin,
                                             const int                        a_finestLevel)
@@ -593,6 +775,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
+  // clang-format off
   // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
   //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
   //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
@@ -600,9 +783,9 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   //
   //       Once we've put that data on the new mesh, we can simply compute the sum of all mesh data in each grid patch. That sum is equal to the number of particles
   //       in the patch, which we can use for load balancing.
+  // clang-format on
 
-  constexpr int comp  = 0;
-  constexpr int nComp = 1;
+  constexpr int comp = 0;
 
   // Make some storage for the number of particles per cell on the new grids.
   EBAMRCellData newParticlesPerCell;
@@ -635,12 +818,13 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
     }
   }
 
-  // At this point we need to replace the data UNDERNEATH the fine grids and in the covered cells -- we don't want to count data in those regions are valid
-  // data (because it does not represent particles). After that's done, newParticlesPerCel should be a realistic representation of the number of particles per cell.
+  // At this point we need to replace the data UNDERNEATH the fine grids and in the covered cells -- we don't want to
+  // count data in those regions are valid data (because it does not represent particles). After that's done,
+  // newParticlesPerCel should be a realistic representation of the number of particles per cell.
   constexpr Real zero = 0.0;
 
   DataOps::setInvalidValue(newParticlesPerCell, refRat, zero);
-  DataOps::setCoveredValue(newParticlesPerCell, zero);
+  DataOps::setCoveredValue(newParticlesPerCell, m_amr->getCoveredCells(a_realm, m_phase), zero);
 
   // We now have everything we need to start load balancing.
   a_procs.resize(1 + a_finestLevel);
@@ -662,7 +846,8 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
     const Real               dx  = m_amr->getDx()[lvl];
     const Real               dV  = std::pow(dx, SpaceDim);
 
-    // Boxes, loads, and ranks. This is stuff to be assigned. Note that the input boxes are lexicographically sorted (this is what DisjointBoxLayout does).
+    // Boxes, loads, and ranks. This is stuff to be assigned. Note that the input boxes are lexicographically sorted
+    // (this is what DisjointBoxLayout does).
     Vector<Box>      boxes = dbl.boxArray();
     Vector<long int> loads;
     Vector<int>      ranks;
@@ -687,17 +872,24 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
       // later run with superparticle merging/splitting.
       Real sum = 0.0;
 
-      // We will have at most m_ppc particles per grid cell. This kernel does that.
+      // We will have at most this many particles per grid cell after the merge. This kernel does that.
+      // The target is the solver's (ItoSolver.particles_per_cell), read with the same per-level clamp
+      // the merge itself uses -- this loop is already per level, so a per-level target is honoured.
+      const Vector<int>& ppcPerLevel = m_solver->getParticlesPerCell();
+      const int          ppc         = (lvl < ppcPerLevel.size()) ? ppcPerLevel[lvl] : ppcPerLevel.back();
+
       auto kernel = [&](const IntVect& iv) -> void {
         if (!ebisBox.isCovered(iv)) {
           const Real numPhysParticles = std::abs(ppcFAB(iv, comp) * dV);
-          const Real numCompParticles = std::min(numPhysParticles, Real(m_ppc));
+          const Real numCompParticles = std::min(numPhysParticles, Real(ppc));
 
           sum += numCompParticles;
         }
       };
 
-      BoxLoops::loop(cellBox, kernel);
+      // Not vectorizable: local FP sum reduction over the box + out-of-line isCovered guard. One-time
+      // load balancing (per regrid). sum is box-local and loads[din.intCode()] is per-box -> no race.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
 
       loads[din.intCode()] = lround(sum);
     }
@@ -718,7 +910,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 void
 BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&             a_procs,
                                                  Vector<Vector<Box>>&             a_boxes,
-                                                 const std::string                a_realm,
+                                                 const std::string&               a_realm,
                                                  const Vector<DisjointBoxLayout>& a_grids,
                                                  const int                        a_lmin,
                                                  const int                        a_finestLevel)
@@ -730,21 +922,29 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
+  // clang-format off
   // TLDR: This load balancing method computes the number of particles in the new grids directly. It does so by remapping the particles
   //       to the new grids and then simply counting them. This is then used for load balancing. The downside of this method is that the
   //       particles needs to be remapped twice (once here, and once in BrownianWalkerStepper::regrid). So, this method is usually slower
   //       than the other one when the number of particles is large.
+  // clang-format on
 
-  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  // The bulk ItoParticle container is EMPTY at this point -- Driver::regrid() calls loadBalanceBoxes()
+  // between the solver's preRegrid() and regrid(), and preRegrid() moved the particles into the
+  // solver's reduced regrid holder. Count that instead. Reading getParticles(Bulk) here would produce
+  // an all-zero load vector, which LoadBalancing happily turns into a valid, completely unbalanced
+  // layout with nothing to indicate that anything went wrong.
+  ParticleContainer<ItoMergeParticle>& particles = m_solver->getRegridParticles();
 
-  // Regrid the particles onto the new mesh.
+  // Regrid the particles onto the new mesh (SoA regrid rebuilds over the new layout from the preRegrid cache).
+  // a_grids are the proxy grids (m_amr->getProxyGrids()) on which the Realm built its tile->box maps
+  // during regridAmr, so we alias those rather than building our own.
   particles.regrid(a_grids,
                    m_amr->getDomains(),
                    m_amr->getDx(),
                    m_amr->getRefinementRatios(),
-                   m_amr->getValidCells(particles.getRealm()),
-                   m_amr->getLevelTiles(particles.getRealm()),
-                   a_lmin,
+                   m_amr->getMinBlockSize(),
+                   m_amr->getLevelTiles(a_realm),
                    a_finestLevel);
 
   a_procs.resize(1 + a_finestLevel);
@@ -781,9 +981,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const List<ItoParticle>& patchParticles = particles[lvl][din].listItems();
-
-      loads[din.intCode()] = long(patchParticles.length());
+      loads[din.intCode()] = long(particles[lvl][din].size());
     }
 
     // If running with MPI, loads must be gathered on all ranks.
@@ -798,12 +996,12 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
     a_procs[lvl] = ranks;
   }
 
-  // Put particles back
-  particles.preRegrid(a_lmin);
+  // Put particles back (re-cache for the subsequent regrid).
+  particles.preRegrid();
 }
 
 Vector<long int>
-BrownianWalkerStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const
+BrownianWalkerStepper::getCheckpointLoads(const std::string& a_realm, const int a_level) const
 {
   CH_TIME("BrownianWalkerStepper::getCheckpointLoads(string, int)");
   if (m_verbosity > 5) {
@@ -818,6 +1016,10 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string a_realm, const int a
 
   loads.resize(boxArray.size(), 0L);
 
+  // ORDERING: safe only because every caller runs outside the preRegrid()->regrid() window, where the
+  // bulk container is empty. Driver reaches this through writeLoads() when writing a checkpoint, a plot
+  // file, or the pre-regrid file -- and the pre-regrid file is written before Driver::regrid() is
+  // entered at all, hence before preRegrid(). Anything that moves it inside that window reads zeros.
   const ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   const int nbox = dit.size();
@@ -826,9 +1028,7 @@ BrownianWalkerStepper::getCheckpointLoads(const std::string a_realm, const int a
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const List<ItoParticle>& patchParticles = particles[a_level][din].listItems();
-
-    loads[din.intCode()] = patchParticles.length();
+    loads[din.intCode()] = long(particles[a_level][din].size());
   }
 
   // If running with MPI, loads must be gathered on all ranks.

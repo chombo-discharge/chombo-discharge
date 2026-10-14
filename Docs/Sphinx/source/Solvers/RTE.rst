@@ -11,11 +11,11 @@ RtSolver
 Radiative transfer solvers are supported in the form of
 
 * Diffusion solvers, i.e. first order Eddington solvers, which take the form of a Helmholtz equation.
-* Particle solvers, which track photons are particles (e.g., Monte Carlo sampled solvers).
+* Particle solvers, which track photons as particles (e.g., Monte Carlo sampled solvers).
   
-The solvers share a parent class ``RtSolver``, and code that uses only the ``RtSolver`` interface will should be able to switch between the two implementations.
+The solvers share a parent class ``RtSolver``, and code that uses only the ``RtSolver`` interface should be able to switch between the two implementations.
 Note, however, that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic. 
-The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or instantaneous transport.
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves for fully transient or instantaneous transport.
 
 .. tip::
    
@@ -36,7 +36,7 @@ Currently, ``RtSpecies`` is a lightweight class where the user needs to implemen
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_RtSpecies.H
    :language: c++
-   :lines: 48-53
+   :lines: 51-57
    :dedent: 2
 
 This absorption coefficient is used in both the diffusion (see :ref:`Chap:DiffusionRTE`) and Monte Carlo (see :ref:`Chap:MonteCarloRTE`) solvers.
@@ -48,12 +48,12 @@ This absorption coefficient is used in both the diffusion (see :ref:`Chap:Diffus
 Setting the source term
 _______________________
 
-``RtSolver`` stores a source term :math:`\eta` on the mesh, which describes the number of photons that are generated produced per unit volume and time.
+``RtSolver`` stores a source term :math:`\eta` on the mesh, which describes the number of photons that are generated per unit volume and time.
 This variable can be set through the following functions:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_RtSolver.H
    :language: c++
-   :lines: 254-273
+   :lines: 264-283
    :dedent: 2
 
 The usage of :math:`\eta` varies between the different solvers.
@@ -83,7 +83,7 @@ In the diffusion approximation, the radiative transport equation is
 
    \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
-where :math:`\Psi` is the radiative intensity (i.e., photons absorbed per unit volume`.
+where :math:`\Psi` is the radiative intensity (i.e., photons absorbed per unit volume).
 Here, :math:`\kappa` is the absorption coefficient (i.e., inverse absorption length).
 This value can be spatially dependent, and is passed in through the :ref:`Chap:RtSpecies` function ``getAbsorptionCoefficient`` that was discussed above.
 Note that in the context below, :math:`\kappa` is *not* the volume fraction of a grid cell but the absorption coefficient.
@@ -104,8 +104,7 @@ To advance the solution, one will call the member function
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
    :language: c++
-   :lines: 80-89
-   :dedent: 2
+   :lines: 82-92
 
 Internally, this version will perform one of the following:
 
@@ -141,14 +140,14 @@ All of these boundary condition specifications take the form ``<type> <value>``.
       \kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,
 
    where :math:`r_1` and :math:`r_2` are reflection coefficients and :math:`g` is a surface source, see :cite:`Larsen2002`.
-   Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge :math:`g`.
+   Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface source :math:`g`.
    In the majority of cases, however, we will have :math:`r_1 = r_2 = g = 0` and the BC becomes
 
    .. math::
 
       \partial_n\Psi + \frac{3\kappa}{2}\Psi = g.   
       
-   The user must then pass a value ``larsen <value>``, where the ``value`` corresponds to the souce term :math:`g`.
+   The user must then pass a value ``larsen <value>``, where the ``value`` corresponds to the source term :math:`g`.
    Typically, this term is zero.
 
 .. tip::
@@ -165,14 +164,13 @@ To specify that function, ``EddingtonSP1`` has a member function
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
    :language: c++
-   :lines: 115-125
-   :dedent: 2
+   :lines: 118-129
 
 Here, the ``a_function`` argument is simply an alias:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1DomainBc.H
    :language: c++
-   :lines: 43-46
+   :lines: 45-48
    :dedent: 2
 
 Note that the boundary condition *type* is still Dirichlet, Neumann, or Larsen (depending on whether or not ``dirichlet_custom``, ``neumann_custom``, or ``larsen_custom`` was passed in). 
@@ -226,7 +224,7 @@ Monte Carlo solver
 ------------------
 
 ``McPhoto`` defines a class which can solve radiative transfer problems using discrete photons.
-The class derives from :ref:`Chap:RtSolver` and can thus be used also be used by applications that only require the :ref:`Chap:RtSolver` interface.
+The class derives from :ref:`Chap:RtSolver` and can thus also be used by applications that only require the :ref:`Chap:RtSolver` interface.
 ``McPhoto`` can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus capture shadows (which :ref:`Chap:EddingtonSP1` can not).
 
 The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see :ref:`Chap:ParticleMesh`) are thus required in order to deposit the photons on a mesh if one wants to compute mesh-based absorption profiles.
@@ -248,16 +246,16 @@ Various functions are in place for obtaining these particles:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
    :language: c++
-   :lines: 398-431
+   :lines: 403-436
    :dedent: 2
 
 Photon particle
 _______________
 
 The ``Photon`` particle is a simple encapsulation of a computational photon which is used by ``McPhoto``.
-It derives from ``GenericParticle<2,1>`` and stores (in addition to the particle position):
+It is a Structure-of-Arrays (SoA) payload ``struct`` used with ``ParticleContainer<Photon>``.
+The particle position and weight are container-owned columns, while the ``Photon`` payload itself stores:
 
-* The particle weight.
 * The particle mean absorption coefficient.
 * The particle velocity/direction.
 
@@ -276,7 +274,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 426-431
+      :lines: 431-436
       :dedent: 2
 
    The source photons can then be filled and added to the other photons.
@@ -285,7 +283,7 @@ There are several ways users can generate computational photons that are to be t
 
    .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
       :language: c++
-      :lines: 398-403
+      :lines: 403-408
       :dedent: 2
 
    Photons can then be added directly.
@@ -297,12 +295,12 @@ There are several ways users can generate computational photons that are to be t
 
       The ``advance`` function is *only* meant to be used together with a mesh-based source term that the user has filled prior to calling the method.
 
-      When using the ``advance``, the number of photons that are generated are limit to a user-specified number (see :ref:`Chap:McPhotoOptions` for further details).
+      When using the ``advance``, the number of photons that are generated are limited to a user-specified number (see :ref:`Chap:McPhotoOptions` for further details).
 
 Transport modes
 _______________
 
-``McPhoto`` can be run as a fully transient, in which photons are tracked in time, or as an instantaneous solver.
+``McPhoto`` can be run as a fully transient solver, in which photons are tracked in time, or as an instantaneous solver.
 For the instantaneous mode, photon absorption positions are stochastically sampled with Monte Carlo procedure and the photons are immediately absorbed on the mesh.
 For the transient mode the photon advancement occurs over :math:`\Delta t`, so there is a limited distance (:math:`c \Delta t`) that the photons can propagate.
 In this case, only some of the photons will be absorbed on the mesh whereas the rest may continue their propagation.
@@ -312,7 +310,7 @@ Instantaneous transport
 
 When using instantaneous transport, any photon generated in a time step is immediately absorbed on the boundary through the following steps:
 
-#. Optionally, have the solver generate photons to be transport (or add them externally).
+#. Optionally, have the solver generate photons to be transported (or add them externally).
 #. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`.
    Here, :math:`\kappa` is computed by calling the underlying :ref:`Chap:RtSpecies` absorption function.
    The absorbed position of the photon is set to :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.

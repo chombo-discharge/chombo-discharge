@@ -1,3 +1,13 @@
+# This orchestrator drives BOTH the Chombo library build (the `chombo' target) and our own
+# Source/Geometries/Physics builds. The payload-precision config token (see Lib/Definitions.make)
+# must be visible to every one of those sub-builds so all libraries share a single config string.
+# Chombo's makefiles never include Definitions.make, so without pulling the token in here and
+# exporting it the app would compute a token-bearing config and then fail to locate the (untagged)
+# Chombo libraries. Including Definitions.make sets XTRACONFIG (idempotently); exporting it makes the
+# recursive $(MAKE) sub-builds -- Chombo included -- inherit the same token.
+include $(DISCHARGE_HOME)/Lib/Definitions.make
+export XTRACONFIG
+
 all: discharge-source discharge-geometries discharge-physics
 
 chombo:
@@ -59,6 +69,7 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/DischargeInception pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticle     pristine
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
+	$(RM) -r $(DISCHARGE_HOME)/Lib/Generated
 
 pristine: allclean
 	$(MAKE) --directory=$(CHOMBO_HOME) realclean

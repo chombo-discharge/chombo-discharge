@@ -3,13 +3,13 @@
 Brownian walker
 ***************
 
-The Brownian walker model runs a single microscropic drift-diffusion using the :ref:`Chap:ItoSolver`, where the underlying transport kernel is
+The Brownian walker model runs a single microscopic drift-diffusion using the :ref:`Chap:ItoSolver`, where the underlying transport kernel is
 
 .. math::
    
    d\mathbf{X} = \mathbf{V}dt + \sqrt{2Ddt}\mathbf{W}
 
-where :math:`\mathbf{X}` is the spatial position of a particle :math:`\mathbf{V}` is the drift velocity and :math:`D` is the diffusion coefficient *in the continuum limit*.
+where :math:`\mathbf{X}` is the spatial position of a particle, :math:`\mathbf{V}` is the drift velocity and :math:`D` is the diffusion coefficient *in the continuum limit*.
 
 .. tip::
 
@@ -41,6 +41,9 @@ where :math:`r = \sqrt{x^2 + y^2}`, :math:`\tan\theta = \frac{x}{y}`.
 I.e. the flow field is a circulation around the Cartesian grid origin.
 The diffusion coefficient is simply set to a constant value.
 
+The velocity field can also be made spatially constant by setting ``BrownianWalker.velocity_field = constant``, in which case the field is read from ``BrownianWalker.constant_velocity`` (one component per coordinate direction, always three of them).
+A constant field translates the entire population rigidly, which is useful when the population itself, rather than the flow, is what is under study.
+
 To adjust the velocity field or diffusion coefficients, adjust the configuration options given in :ref:`Chap:BrownianWalkerConfiguration`.
 
 Time stepping
@@ -60,7 +63,7 @@ Superparticle handling
 ----------------------
 
 Superparticle handling in this module occurs via :ref:`Chap:ItoSolver`, so the user needs to specify the superparticle algorithm through the :ref:`Chap:ItoSolver` configuration options.
-However, the *number* of superparticles is adjusted through ``BrownianWalkerStepper``, and is set through ``BrownianWalker.ppc``.
+However, the *number* of superparticles is set on the solver, through ``ItoSolver.particles_per_cell``.
 Setting this value to anything less than 1 will turn off super-particle handling.
 
 .. _Chap:BrownianWalkerConfiguration:
@@ -73,6 +76,14 @@ The configuration options for ``BrownianWalkerStepper`` are given below:
 
 .. literalinclude:: ../../../../Physics/BrownianWalker/CD_BrownianWalkerStepper.options
    :language: text
+
+Setting ``BrownianWalker.plot_particles = true`` will additionally write the bulk particles to an H5Part file on every plot step.
+
+.. note::
+
+   The ``BrownianWalker`` prefix above is a default, not a fixed name.
+   ``BrownianWalkerStepper`` and ``BrownianWalkerSpecies`` both accept the prefix as a constructor argument, so a class deriving from ``BrownianWalkerStepper`` can pass its own name and have every option -- the inherited ones and the ones it adds -- read under a single prefix that matches the class the application instantiates.
+   :file:`$DISCHARGE_HOME/Exec/Examples/BrownianWalker/ParticleMerge` does this.
 
 Setting up a new problem
 ------------------------

@@ -23,7 +23,7 @@ Welcome to ``chombo-discharge``'s user documentation
 * Scalar advection-diffusion-reaction processes.
 * Electrostatics with support for electrodes and dielectrics.
 * Radiative transport as a diffusion or Monte Carlo process.
-* Particle-mesh operations (like Particle-In-Cell)
+* Particle-mesh operations (like Particle-In-Cell).
 * Parallel I/O with HDF5.
 * Dual-grid simulations with individual load balancing of fluid and particles.
 * Various multi-physics interfaces that use the above solvers.

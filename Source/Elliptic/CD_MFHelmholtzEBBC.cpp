@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MFHelmholtzEBBC.cpp
-  @brief  Implementation of CD_MFHelmholtzEBBC.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFHelmholtzEBBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzEBBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -51,9 +52,11 @@ MFHelmholtzEBBC::defineMultiPhase()
   CH_assert(m_jumpBC->getOrder() > 0);
   CH_assert(m_jumpBC->getWeight() >= 0);
 
+  // clang-format off
   // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is an "almost-Dirichlet" type of boundary condition
   //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for that flux, using the value on the boundary as
   //       a known term in the expansion.
+  // clang-format on
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const DataIterator&      dit = dbl.dataIterator();
 
@@ -82,7 +85,7 @@ MFHelmholtzEBBC::defineMultiPhase()
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
-    // Safety hook becase jumpBC might not have defined the data holders if we're not doing multiphase.
+    // Safety hook because jumpBC might not have defined the data holders if we're not doing multiphase.
     if (m_jumpBC->isMultiPhase()) {
       VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, din);
 
@@ -90,6 +93,7 @@ MFHelmholtzEBBC::defineMultiPhase()
       const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[din].getIVFAB(m_phase);
 
       // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think.
+      // Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that scales the jump stencils/weights.
       auto kernel = [&](const VolIndex& vof) -> void {
         const Real areaFrac = ebisbox.bndryArea(vof);
 
@@ -106,7 +110,7 @@ MFHelmholtzEBBC::defineMultiPhase()
 }
 
 void
-MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
+MFHelmholtzEBBC::applyEBFlux(VoFIterator& /*a_vofit*/,
                              EBCellFAB&             a_Lphi,
                              const EBCellFAB&       a_phi,
                              const BaseIVFAB<Real>& a_Bcoef,
@@ -116,7 +120,8 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
-  // TLDR: This is the function that is called by EBHelmholtzOp. We first do the single-phase cells and then the multi-phase cells.
+  // TLDR: This is the function that is called by EBHelmholtzOp. We first do the single-phase cells and then the
+  // multi-phase cells.
 
   VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs(m_phase, a_dit);
@@ -126,29 +131,40 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
 }
 
 void
-MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
-                                       EBCellFAB&             a_Lphi,
-                                       const EBCellFAB&       a_phi,
+MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
+                                       EBCellFAB&   a_Lphi,
+                                       const EBCellFAB& /*a_phi*/,
                                        const BaseIVFAB<Real>& a_Bcoef,
                                        const DataIndex&       a_dit,
                                        const Real&            a_beta,
-                                       const bool&            a_homogeneousPhysBC) const
+                                       const bool& /*a_homogeneousPhysBC*/) const
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFtIerator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
-  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
-  auto kernel = [&](const VolIndex& vof) -> void {
-    // Homogeneous contribution
-    const Real phiB  = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
-    const Real Bcoef = a_Bcoef(vof, m_comp);
+  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is
+  // not.
+  //
+  // IMPORTANT: only touch the jump-BC boundary-phi holder when this (phase, patch) actually has multi-phase cut-cells.
+  // MFHelmholtzJumpBC only defines m_boundaryPhi for multi-phase problems, so m_jumpBC->getBndryPhi(...) dereferences
+  // undefined data in single-phase regions / patches with no jump cells. The original code dodged this implicitly by
+  // calling getBndryPhi inside the per-vof kernel (which never runs for an empty iterator); we keep that guarantee with
+  // the explicit size() check while still hoisting the loop-invariant lookups (getBndryPhi is an out-of-line call the
+  // compiler cannot lift) out of the sparse, inherently scalar per-vof kernel.
+  if (a_multiPhaseVofs.size() > 0) {
+    const BaseIVFAB<Real>& bndryPhi        = m_jumpBC->getBndryPhi(m_phase, a_dit);
+    const BaseIVFAB<Real>& boundaryWeights = m_boundaryWeights[a_dit];
 
-    a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * m_boundaryWeights[a_dit](vof, m_comp);
-  };
+    auto kernel = [&](const VolIndex& vof) -> void {
+      // Homogeneous contribution
+      const Real phiB  = bndryPhi(vof, m_comp);
+      const Real Bcoef = a_Bcoef(vof, m_comp);
 
-  BoxLoops::loop(a_multiPhaseVofs, kernel);
+      a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * boundaryWeights(vof, m_comp);
+    };
 
-  return;
+    BoxLoops::loop(a_multiPhaseVofs, kernel);
+  }
 }
 
 bool

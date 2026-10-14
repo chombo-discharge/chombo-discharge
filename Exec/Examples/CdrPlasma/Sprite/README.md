@@ -10,7 +10,7 @@ The input scripts and plasma chemistry are defined in
 * Initial conditions: Defined in tanh.dat, which defines a height profile for the background density, including the ionosphere.
 
 This model is set up with a positive cloud charge that asymptotically decays with a specified rate.
-The remaining field resembles a dipole field from the cloud/ground, which initiaties a sprite discharge at approximately 80km altitude.
+The remaining field resembles a dipole field from the cloud/ground, which initiates a sprite discharge at approximately 80km altitude.
 
 This model uses a drift-diffusion for the electrons and ions, and Monte Carlo transport for the ionizing photons.
 For a further explanation to the parameters in the chemistry file, see the [chombo-discharge documentation](https://chombo-discharge.github.io/chombo-discharge/Applications/CdrPlasmaModel.html#json-interface).

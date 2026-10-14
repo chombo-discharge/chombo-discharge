@@ -1,17 +1,19 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_McPhoto.cpp
-  @brief  Implementation of CD_McPhoto.H
-  @author Robert Marskar
-  @todo   Create new classes for handling domain BCs -- the old ones stink. 
-*/
+/**
+ * @file   CD_McPhoto.cpp
+ * @brief  Implementation of CD_McPhoto.H
+ * @author Robert Marskar
+ * @todo   Create new classes for handling domain BCs -- the old ones stink.
+ */
 
 // Std includes
-#include <time.h>
+#include <limits>
+#include <ctime>
 #include <chrono>
 
 // Chombo includes
@@ -24,34 +26,32 @@
 #include <CD_McPhoto.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
-#include <CD_PointParticle.H>
 #include <CD_ParticleOps.H>
 #include <CD_Random.H>
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-McPhoto::McPhoto()
+McPhoto::McPhoto() : m_dirtySampling(false)
 {
   CH_TIME("McPhoto::McPhoto");
 
   m_name      = "McPhoto";
   m_className = "McPhoto";
 
-  m_stationary    = false;
-  m_dirtySampling = false;
+  m_stationary = false;
 }
 
-McPhoto::~McPhoto()
-{}
+McPhoto::~McPhoto() = default;
 
 bool
-McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi)
+McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool /*a_zerophi*/)
 {
   CH_TIME("McPhoto::advance");
   if (m_verbosity > 5) {
     pout() << m_name + "::advance" << endl;
   }
 
+  // clang-format off
   // Note: This routine does an on-the-fly generation of photons based on the contents in a_source. This routine is primarily
   //       written for fluid methods since all input/output parameters happen on the mesh. Most particle solvers will use a different
   //       approach and will probably fill m_sourcePhotons through a kinetic interface and use advancePhotonsInstantaneous or advancePhotonsTransient.
@@ -61,6 +61,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
   //       This routine is a bit convoluted because it permits sub-sampling of the photons generated in the grid cells. That is, instead of generating
   //       all photons at once and moving them, we divide them into packets and advance the packets independently of one another. This results in additional
   //       MPI calls, but can reduce memory when many photons are generated per cell.
+  // clang-format on
 
   DataOps::setValue(a_phi, 0.0);
 
@@ -72,10 +73,12 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
   m_amr->allocate(numPhysPhotonsTotal, m_realm, m_phase, 1);
   m_amr->allocate(numPhysPhotonsPacket, m_realm, m_phase, m_numSamplingPackets);
 
+  // clang-format off
   // Recall: m_photons are 'traveling' photons, m_sourcePhotons are photons to be transferred into m_photons before transport over dt,
   //         and m_ebPhotons and m_domainPhotons are photons that strike the EB or domain boundaries.
   //
   //         If we're doing an instantaneous solver, do a safety cleanout of m_photons first (past photons have been absorbed on the mesh).
+  // clang-format on
   if (m_instantaneous) {
     this->clear(m_photons);
   }
@@ -107,11 +110,11 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
         this->advancePhotonsInstantaneous(scratchPhotons, m_ebPhotons, m_domainPhotons, m_photons);
 
         // Absorb the bulk photons on the mesh.
-        this->depositPhotons<Photon, const Real&, &Photon::weight>(phi, scratchPhotons, m_deposition);
+        this->depositPhotons(phi, scratchPhotons, m_deposition);
         DataOps::incr(a_phi, phi, 1.0);
 
         // Store the photons that were absorbed.
-        m_bulkPhotons.transferParticles(scratchPhotons);
+        m_bulkPhotons.transferParticles(scratchPhotons.getParticles());
         scratchPhotons.clearParticles();
       }
     }
@@ -119,14 +122,14 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
       this->generateComputationalPhotons(m_photons, numPhysPhotonsTotal, m_maxPhotonsGeneratedPerCell);
       this->advancePhotonsTransient(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons, a_dt);
       this->remap(m_photons);
-      this->depositPhotons<Photon, const Real&, &Photon::weight>(a_phi, m_bulkPhotons, m_deposition);
+      this->depositPhotons(a_phi, m_bulkPhotons, m_deposition);
     }
   }
   else {
     const size_t maxPhotonsPerPacket = m_maxPhotonsGeneratedPerCell / m_numSamplingPackets;
     const size_t remainder           = m_maxPhotonsGeneratedPerCell % m_numSamplingPackets;
 
-    ParticleContainer<PointParticle> pointParticles;
+    ParticleContainer<NoPayload> pointParticles;
     m_amr->allocate(pointParticles, m_realm);
 
     for (int i = 0; i < m_numSamplingPackets; i++) {
@@ -230,7 +233,13 @@ McPhoto::parseDivergenceComputation()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("blend_conservation", m_blendConservation);
+  std::string irrStr;
+  pp.get("deposition_irreg", irrStr);
+  m_irregularDeposition = irregularDepositionFromString(irrStr);
+
+  if (m_irregularDeposition == IrregularDeposition::Mirror) {
+    MayDay::Error("McPhoto::parseOptions - 'deposition_irreg = mirror' is not supported by McPhoto");
+  }
 }
 
 void
@@ -506,20 +515,7 @@ McPhoto::clear(ParticleContainer<Photon>& a_photons)
     pout() << m_name + "::clear(ParticleContainer)" << endl;
   }
 
-  this->clear(a_photons.getParticles());
-}
-
-void
-McPhoto::clear(AMRParticles<Photon>& a_photons)
-{
-  CH_TIME("McPhoto::clear(AMRParticles)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::clear(AMRParticles)" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    a_photons[lvl]->clear();
-  }
+  a_photons.clearParticles();
 }
 
 void
@@ -546,18 +542,18 @@ McPhoto::allocate()
 }
 
 void
-McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+McPhoto::preRegrid(const int /*a_lmin*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("McPhoto::preRegrid");
   if (m_verbosity > 5) {
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_photons.preRegrid(a_lmin);
-  m_bulkPhotons.preRegrid(a_lmin);
-  m_ebPhotons.preRegrid(a_lmin);
-  m_domainPhotons.preRegrid(a_lmin);
-  m_sourcePhotons.preRegrid(a_lmin);
+  m_photons.preRegrid();
+  m_bulkPhotons.preRegrid();
+  m_ebPhotons.preRegrid();
+  m_domainPhotons.preRegrid();
+  m_sourcePhotons.preRegrid();
 
   this->deallocate();
 }
@@ -578,7 +574,7 @@ McPhoto::deallocate()
 }
 
 void
-McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+McPhoto::regrid(const int a_lmin, const int /*a_oldFinestLevel*/, const int a_newFinestLevel)
 {
   CH_TIME("McPhoto::regrid");
   if (m_verbosity > 5) {
@@ -598,8 +594,9 @@ McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFin
   m_amr->remapToNewGrids(m_domainPhotons, a_lmin, a_newFinestLevel);
   m_amr->remapToNewGrids(m_sourcePhotons, a_lmin, a_newFinestLevel);
 
-  // Deposit
-  this->depositPhotons();
+  // m_phi holds the density of the photons absorbed during the previous advance, i.e. the population in
+  // m_bulkPhotons. m_photons holds the photons that are still in flight.
+  this->depositPhotons(m_phi, m_bulkPhotons, m_deposition);
 }
 
 void
@@ -707,7 +704,7 @@ McPhoto::registerOperators()
 }
 
 void
-McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi)
+McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeBoundaryFlux");
   if (m_verbosity > 5) {
@@ -718,7 +715,7 @@ McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi)
 }
 
 void
-McPhoto::computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& a_phi)
+McPhoto::computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeDomainFlux");
   if (m_verbosity > 5) {
@@ -729,7 +726,7 @@ McPhoto::computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& a_phi
 }
 
 void
-McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
+McPhoto::computeFlux(EBAMRCellData& /*a_flux*/, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeFlux");
   if (m_verbosity > 5) {
@@ -743,7 +740,7 @@ McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
 }
 
 void
-McPhoto::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi)
+McPhoto::computeDensity(EBAMRCellData& /*a_isotropic*/, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeDensity");
   if (m_verbosity > 5) {
@@ -880,9 +877,12 @@ McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side)
 }
 
 Real
-McPhoto::randomExponential(const Real a_mean) const noexcept
+McPhoto::randomExponential(const Real a_rate) noexcept
 {
-  std::exponential_distribution<Real> dist(a_mean);
+  if (a_rate <= 0.0) {
+    return std::numeric_limits<Real>::infinity();
+  }
+  std::exponential_distribution<Real> dist(a_rate);
   return Random::get(dist);
 }
 
@@ -965,7 +965,9 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      // Not vectorizable: per-cell RNG photon draw (drawPhotons -> Random) + integer div/mod. Multi-cut
+      // N/A: regular kernel guards isRegular; cut cells go to the vofit kernel with the per-vof source.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -974,7 +976,6 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
 size_t
 McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) const noexcept
 {
-  CH_TIME("McPhoto::drawPhotons");
   if (m_verbosity > 5) {
     pout() << m_name + "::drawPhotons" << endl;
   }
@@ -996,8 +997,6 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) 
     factor = a_dt;
   }
   else {
-    factor = 0.0;
-
     MayDay::Error("McPhoto::drawPhotons -- logic bust");
   }
 
@@ -1007,7 +1006,7 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) 
     numPhysicalPhotons = Random::getPoisson<size_t>(mean);
   }
   else if (m_photoGenerationMethod == PhotonGeneration::Deterministic) {
-    numPhysicalPhotons = round(a_source * factor);
+    numPhysicalPhotons = static_cast<size_t>(round(a_source * factor));
   }
   else {
     MayDay::Error("mc::drawPhotons - unknown generation requested. Aborting...");
@@ -1048,14 +1047,14 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       const FArrayBox&     numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
       const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
-      List<Photon>& photons = a_photons[lvl][din].listItems();
+      ParticleSoA<Photon>& leaf = a_photons[lvl][din];
 
       // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
       // grids that are covered by finer grids don't draw photons.
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotonsReg(iv, 0);
+          const auto num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1064,16 +1063,22 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
             const RealVect lo = probLo + RealVect(iv) * dx;
             const RealVect hi = lo + RealVect::Unit * dx;
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
-              const RealVect pos    = Random::randomPosition(lo, hi);
-              const RealVect v      = Units::c * Random::getDirection();
-              const Real     weight = (Real)photonWeights[i];
-              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
+              const RealVect pos      = Random::randomPosition(lo, hi);
+              const RealVect v        = Units::c * Random::getDirection();
+              const RealVect velocity = v / v.vectorLength();
+              const Real     weight   = (Real)photonWeight;
+              const Real     kappa    = m_rtSpecies->getAbsorptionCoefficient(pos);
 
-              photons.add(Photon(pos, v / v.vectorLength(), kappa, weight));
+              leaf.append(pos,
+                          weight,
+                          Photon{static_cast<ParticleReal>(kappa),
+                                 D_DECL(static_cast<ParticleReal>(velocity[0]),
+                                        static_cast<ParticleReal>(velocity[1]),
+                                        static_cast<ParticleReal>(velocity[2]))});
             }
           }
         }
@@ -1085,7 +1090,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
 
         if (validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotons(vof, 0);
+          const auto num = static_cast<size_t>(numPhysPhotons(vof, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1104,15 +1109,21 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
               DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
             }
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
               const RealVect pos    = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
               const RealVect v      = Units::c * Random::getDirection();
-              const Real     weight = (Real)photonWeights[i];
+              const Real     weight = (Real)photonWeight;
+              const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
 
-              photons.add(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
+              leaf.append(pos,
+                          weight,
+                          Photon{static_cast<ParticleReal>(kappa),
+                                 D_DECL(static_cast<ParticleReal>(v[0]),
+                                        static_cast<ParticleReal>(v[1]),
+                                        static_cast<ParticleReal>(v[2]))});
             }
           }
         }
@@ -1121,17 +1132,20 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      // Not vectorizable: per-cell variable-length photon generation (partitionParticleWeights alloc, RNG
+      // position/direction, getAbsorptionCoefficient std::function, List append). Multi-cut N/A: regular
+      // kernel guards isRegular; cut cells go to the vofit kernel (EB-clipped sampling via computeMinValidBox).
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
 
 void
-McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
-                            EBAMRCellData&                    a_phi,
-                            const EBAMRCellData&              a_numPhysicalPhotons,
-                            const size_t                      a_maxPhotonsPerCell) const noexcept
+McPhoto::dirtySamplePhotons(ParticleContainer<NoPayload>& a_photons,
+                            EBAMRCellData&                a_phi,
+                            const EBAMRCellData&          a_numPhysicalPhotons,
+                            const size_t                  a_maxPhotonsPerCell) const noexcept
 {
   CH_TIME("McPhoto::dirtySamplePhotons");
   if (m_verbosity > 5) {
@@ -1160,14 +1174,14 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       const FArrayBox&     numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
       const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
-      List<PointParticle>& photons = a_photons[lvl][din].listItems();
+      ParticleSoA<NoPayload>& photons = a_photons[lvl][din];
 
       // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
       // grids that are covered by finer grids don't draw photons.
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotonsReg(iv, 0);
+          const auto num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1176,17 +1190,17 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
             const RealVect lo = probLo + RealVect(iv) * dx;
             const RealVect hi = lo + RealVect::Unit * dx;
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
               const RealVect pos            = Random::randomPosition(lo, hi);
               const RealVect direction      = Random::getDirection();
               const Real     kappa          = m_rtSpecies->getAbsorptionCoefficient(pos);
-              const Real     travelDistance = this->randomExponential(kappa);
+              const Real     travelDistance = ChomboDischarge::McPhoto::randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
-              photons.add(PointParticle(finalPos, (Real)photonWeights[i]));
+              photons.append(finalPos, (Real)photonWeight);
             }
           }
         }
@@ -1198,7 +1212,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
 
         if (validCells(iv, 0)) {
 
-          const size_t num = numPhysPhotons(vof, 0);
+          const auto num = static_cast<size_t>(numPhysPhotons(vof, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1217,18 +1231,18 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
             }
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
               const RealVect pos = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
               const RealVect direction      = Random::getDirection();
-              const Real     weight         = (Real)photonWeights[i];
+              const Real     weight         = (Real)photonWeight;
               const Real     kappa          = m_rtSpecies->getAbsorptionCoefficient(pos);
-              const Real     travelDistance = this->randomExponential(kappa);
+              const Real     travelDistance = ChomboDischarge::McPhoto::randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
-              photons.add(PointParticle(finalPos, weight));
+              photons.append(finalPos, weight);
             }
           }
         }
@@ -1237,15 +1251,18 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      // Not vectorizable: per-cell variable-length photon draw+absorb (partitionParticleWeights alloc, RNG
+      // position/direction, getAbsorptionCoefficient std::function, randomExponential, List append).
+      // Multi-cut N/A: regular kernel guards isRegular; cut cells go to the vofit kernel (EB-clipped sampling).
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
 
   a_photons.remap();
 
-  // Deposit photons on the mesh. I'm putting in a custom deposition method in case the user wants NGP deposition, which will be
-  // faster than the one supplied through AmrMesh.
+  // Deposit photons on the mesh. I'm putting in a custom deposition method in case the user wants NGP deposition, which
+  // will be faster than the one supplied through AmrMesh.
   if (m_deposition == DepositionType::NGP) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const ProblemDomain&     domain = m_amr->getDomains()[lvl];
@@ -1266,19 +1283,17 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
 
         EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-        EBCellFAB&                 output  = (*a_phi[lvl])[din];
-        const List<PointParticle>& photons = a_photons[lvl][din].listItems();
+        EBCellFAB&                    output  = (*a_phi[lvl])[din];
+        const ParticleSoA<NoPayload>& photons = a_photons[lvl][din];
 
-        particleMesh.deposit<PointParticle, const Real&, &PointParticle::weight>(output,
-                                                                                 photons,
-                                                                                 DepositionType::NGP,
-                                                                                 1.0,
-                                                                                 true);
+        particleMesh.depositWeight(output, photons, DepositionType::NGP, 1.0, true);
       }
     }
   }
   else {
-    this->depositPhotons<PointParticle, const Real&, &PointParticle::weight>(a_phi, a_photons, m_deposition);
+    m_amr
+      ->depositWeight(a_phi, m_realm, m_phase, a_photons, m_deposition, m_coarseFineDeposition, m_irregularDeposition);
+    this->depositHybridDivergence(a_phi);
   }
 
   a_photons.clearParticles();
@@ -1292,7 +1307,67 @@ McPhoto::depositPhotons()
     pout() << m_name + "::depositPhotons()" << endl;
   }
 
-  this->depositPhotons<Photon, const Real&, &Photon::weight>(m_phi, m_photons, m_deposition);
+  this->depositPhotons(m_phi, m_photons, m_deposition);
+}
+
+void
+McPhoto::depositPhotons(EBAMRCellData&             a_phi,
+                        ParticleContainer<Photon>& a_photons,
+                        const DepositionType&      a_deposition) const noexcept
+{
+  CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
+  }
+
+  CH_assert(a_phi[0]->nComp() == 1);
+
+  // a_phi contains only weights, i.e. not divided by kappa.
+  m_amr->depositWeight(a_phi, m_realm, m_phase, a_photons, a_deposition, m_coarseFineDeposition, m_irregularDeposition);
+
+  // Blend with the non-conservative divergence, redistribute, average down, and interpolate ghosts.
+  this->depositHybridDivergence(a_phi);
+}
+
+void
+McPhoto::depositHybridDivergence(EBAMRCellData& a_phi) const noexcept
+{
+  CH_TIME("McPhoto::depositHybridDivergence");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositHybridDivergence" << endl;
+  }
+
+  // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->depositNonConservative(m_depositionNC, a_phi);
+
+  // Compute hybrid deposition, including mass difference
+  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
+
+  // Redistribute
+  if (m_irregularDeposition == IrregularDeposition::Redistribute ||
+      m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
+    Vector<RefCountedPtr<EBFluxRedistribution>>& redistOps = m_amr->getRedistributionOp(m_realm, m_phase);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real     scale     = 1.0;
+      const Interval variables = Interval(0, 0);
+      const bool     hasCoar   = lvl > 0;
+      const bool     hasFine   = lvl < m_amr->getFinestLevel();
+
+      if (hasCoar) {
+        redistOps[lvl]->redistributeCoar(*a_phi[lvl - 1], *m_massDiff[lvl], scale, variables);
+      }
+
+      redistOps[lvl]->redistributeLevel(*a_phi[lvl], *m_massDiff[lvl], scale, variables);
+
+      if (hasFine) {
+        redistOps[lvl]->redistributeFine(*a_phi[lvl + 1], *m_massDiff[lvl], scale, variables);
+      }
+    }
+  }
+
+  // Average down and interpolate
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
+  m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
 void
@@ -1303,7 +1378,7 @@ McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData
     pout() << m_name + "::depositNonConservative" << endl;
   }
 
-  if (m_blendConservation) {
+  if (m_irregularDeposition == IrregularDeposition::RedistributeBlended) {
     m_amr->nonConservativeDivergence(a_depositionNC, a_depositionKappaC, m_realm, m_phase);
   }
   else {
@@ -1336,7 +1411,6 @@ McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
       BaseIVFAB<Real>&       deltaM = (*a_massDifference[lvl])[din];
       const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[din];
 
-      const Box      box     = dbl.get(din);
       const EBISBox& ebisbox = ebisl[din];
 
       // Iteration space for kernel.
@@ -1349,7 +1423,7 @@ McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
         const Real dnc   = divNC(vof, m_comp);
 
         // Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
-        // from other cells. This is why there is a flag m_blendConservation which always
+        // from other cells. This is why there is a RedistributeBlended selector which always
         // gives positive definite results.
         divH(vof, m_comp)   = dc + (1 - kappa) * dnc;           // On output, contains hybrid divergence
         deltaM(vof, m_comp) = (1 - kappa) * (dc - kappa * dnc); // Remember, dc already scaled by kappa.
@@ -1393,12 +1467,12 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
 
     EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-    EBCellFAB&          output  = a_output[din];
-    const List<Photon>& photons = a_photons[a_level][din].listItems();
+    EBCellFAB&                 output = a_output[din];
+    const ParticleSoA<Photon>& leaf   = a_photons[a_level][din];
 
     output.setVal(0.0);
 
-    particleMesh.deposit<Photon, const Real&, &Photon::weight>(output, photons, DepositionType::NGP, 1.0, true);
+    particleMesh.depositWeight(output, leaf, DepositionType::NGP, 1.0, true);
   }
 
   a_output.exchange();
@@ -1435,9 +1509,9 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
-  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the outside
-  // of the computational domain (for exactly the same reason that a photon on the interface between two cells map to the "upper one"). Adding
-  // a negligible safety factor to prevent that from happening.
+  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the
+  // outside of the computational domain (for exactly the same reason that a photon on the interface between two cells
+  // map to the "upper one"). Adding a negligible safety factor to prevent that from happening.
   constexpr Real SAFETY = 1.E-6;
 
   // This is the implicit function used for intersection tests
@@ -1454,22 +1528,36 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][din].listItems();
-      List<Photon>& ebPhotons   = a_ebPhotons[lvl][din].listItems();
-      List<Photon>& domPhotons  = a_domainPhotons[lvl][din].listItems();
-      List<Photon>& allPhotons  = a_photons[lvl][din].listItems();
+      ParticleSoA<Photon>& bulkPhotons = a_bulkPhotons[lvl][din];
+      ParticleSoA<Photon>& ebPhotons   = a_ebPhotons[lvl][din];
+      ParticleSoA<Photon>& domPhotons  = a_domainPhotons[lvl][din];
+      ParticleSoA<Photon>& allPhotons  = a_photons[lvl][din];
 
       // Iterate over the Photons that will be moved.
-      for (ListIterator<Photon> lit(allPhotons); lit.ok(); ++lit) {
-        Photon& p = lit();
+      for (std::size_t i = 0; i < allPhotons.size(); i++) {
+
+        // Read this photon's state from the SoA columns.
+        const RealVect oldPos   = allPhotons.position(i);
+        const Real     weight   = allPhotons.weight(i);
+        const Real     kappa    = allPhotons.template get<&Photon::kappa>(i);
+        const RealVect velocity = RealVect(D_DECL(allPhotons.template get<&Photon::v_x>(i),
+                                                  allPhotons.template get<&Photon::v_y>(i),
+                                                  allPhotons.template get<&Photon::v_z>(i)));
 
         // Draw a new random absorption position
-        const RealVect& oldPos    = p.position();
-        const RealVect& direction = p.velocity() / (p.velocity().vectorLength());
-        const RealVect  newPos    = oldPos + direction * this->randomExponential(p.kappa());
+        CH_assert(velocity.vectorLength() > 0.0);
 
-        // Check if we should check of different types of boundary intersections. These are cheap initial tests that allow
-        // us to skip intersection tests for some photons.
+        const RealVect direction = velocity / (velocity.vectorLength());
+        const RealVect newPos    = oldPos + direction * ChomboDischarge::McPhoto::randomExponential(kappa);
+
+        // The absorbed photon retains its kappa and velocity; only its position changes.
+        const Photon payload{static_cast<ParticleReal>(kappa),
+                             D_DECL(static_cast<ParticleReal>(velocity[0]),
+                                    static_cast<ParticleReal>(velocity[1]),
+                                    static_cast<ParticleReal>(velocity[2]))};
+
+        // Check if we should check of different types of boundary intersections. These are cheap initial tests that
+        // allow us to skip intersection tests for some photons.
         bool checkEB  = false;
         bool checkDom = false;
 
@@ -1483,17 +1571,18 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
         }
 
         if ((!checkEB && !checkDom) || m_transparentEB) {
-          p.position() = newPos;
-          bulkPhotons.add(p);
+          bulkPhotons.append(newPos, weight, payload);
         }
         else {
-          // Must do an intersection test (with either EB or domain). These tests work such that we parametrize the photon path as
+          // Must do an intersection test (with either EB or domain). These tests work such that we parametrize the
+          // photon path as
           //
           // x(s) = x0 + s*(x1-x0), s = [0,1]
           //
           // where x0 is the starting position (oldPos) and x1 is the new position (newPos).
           //
-          // We determine s for the domain boundaries and EBs. If the photon path cross both, smallest s takes precedence.
+          // We determine s for the domain boundaries and EBs. If the photon path cross both, smallest s takes
+          // precedence.
 
           Real sDom = std::numeric_limits<Real>::max();
           Real sEB  = std::numeric_limits<Real>::max();
@@ -1501,8 +1590,8 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           bool contactDomain = false;
           bool contactEB     = false;
 
-          // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the s-parameter
-          // will have been defined as well.
+          // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the
+          // s-parameter will have been defined as well.
           if (checkDom) {
             contactDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDom);
           }
@@ -1529,27 +1618,22 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
 
           // Move the photon to the appropriate data holder
           if (!contactEB && !contactDomain) {
-            p.position() = newPos;
-            bulkPhotons.add(p);
+            bulkPhotons.append(newPos, weight, payload);
           }
           else {
             const RealVect path = newPos - oldPos;
 
             if (sEB < sDom) {
-              p.position() = oldPos + sEB * path;
-
-              ebPhotons.add(p);
+              ebPhotons.append(oldPos + sEB * path, weight, payload);
             }
             else {
-              p.position() = oldPos + std::max((Real)0.0, sDom - SAFETY) * path;
-
-              domPhotons.add(p);
+              domPhotons.append(oldPos + std::max((Real)0.0, sDom - SAFETY) * path, weight, payload);
             }
           }
         }
       }
 
-      // Everything will have been absorbed, but we used ::add rather than ::transfer, so just clear out the starting photons.
+      // Everything will have been absorbed into the bulk/EB/domain holders, so just clear out the starting photons.
       allPhotons.clear();
     }
   }
@@ -1593,9 +1677,9 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
-  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the outside
-  // of the computational domain (for exactly the same reason that a photon on the interface between two cells map to the "upper one"). Adding
-  // a negligible safety factor to prevent that from happening.
+  // Safety factor -- weird thing but if particles lie EXACTLY on the high side of the domain boundary they map to the
+  // outside of the computational domain (for exactly the same reason that a photon on the interface between two cells
+  // map to the "upper one"). Adding a negligible safety factor to prevent that from happening.
   constexpr Real SAFETY = 1.E-8;
 
   // This is the implicit function used for intersection tests
@@ -1612,24 +1696,36 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][din].listItems();
-      List<Photon>& ebPhotons   = a_ebPhotons[lvl][din].listItems();
-      List<Photon>& domPhotons  = a_domainPhotons[lvl][din].listItems();
-      List<Photon>& allPhotons  = a_photons[lvl][din].listItems();
+      ParticleSoA<Photon>& bulkPhotons = a_bulkPhotons[lvl][din];
+      ParticleSoA<Photon>& ebPhotons   = a_ebPhotons[lvl][din];
+      ParticleSoA<Photon>& domPhotons  = a_domainPhotons[lvl][din];
+      ParticleSoA<Photon>& allPhotons  = a_photons[lvl][din];
 
-      // Iterate over the photons that will be moved.
-      for (ListIterator<Photon> lit(allPhotons); lit.ok(); ++lit) {
-        Photon& p = lit();
+      // Iterate over the photons that will be moved. Absorbed photons are removed via swap-and-pop (do not
+      // advance the index in that case); surviving photons have their position updated in place.
+      std::size_t i = 0;
+      while (i < allPhotons.size()) {
+
+        // Read this photon's state from the SoA columns.
+        const RealVect oldPos = allPhotons.position(i);
+        const Real     weight = allPhotons.weight(i);
+        const Real     kappa  = allPhotons.template get<&Photon::kappa>(i);
+        const RealVect v      = RealVect(D_DECL(allPhotons.template get<&Photon::v_x>(i),
+                                           allPhotons.template get<&Photon::v_y>(i),
+                                           allPhotons.template get<&Photon::v_z>(i)));
 
         // Move the Photon
-        const RealVect oldPos  = p.position();
-        const RealVect v       = p.velocity();
         const RealVect newPos  = oldPos + v * a_dt;
         const RealVect path    = newPos - oldPos;
         const Real     pathLen = path.vectorLength();
 
-        // Check if we should check of different types of boundary intersections. These are checp initial tests that allow
-        // us to skip more expensive intersection tests for some Photons.
+        // The absorbed photon retains its kappa and velocity; only its position changes.
+        const Photon payload{
+          static_cast<ParticleReal>(kappa),
+          D_DECL(static_cast<ParticleReal>(v[0]), static_cast<ParticleReal>(v[1]), static_cast<ParticleReal>(v[2]))};
+
+        // Check if we should check of different types of boundary intersections. These are checp initial tests that
+        // allow us to skip more expensive intersection tests for some Photons.
         bool checkEB  = false;
         bool checkDom = false;
 
@@ -1647,7 +1743,8 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
         bool absorbedEB     = false;
         bool absorbedDomain = false;
 
-        // Below, we do an intersection test (with either EB or domain). These tests work such that we parametrize the photon path as
+        // Below, we do an intersection test (with either EB or domain). These tests work such that we parametrize the
+        // photon path as
         //
         // x(s) = x0 + s*(x1-x0), s = [0,1]
         //
@@ -1662,7 +1759,7 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
         // Check absorption in the bulk. We draw a propagation distance, if the photon propagates longer
         // than this distance the photon is absorbed.
-        const Real travelLen = this->randomExponential(p.kappa());
+        const Real travelLen = ChomboDischarge::McPhoto::randomExponential(kappa);
         if (travelLen < pathLen) {
           absorbedBulk = true;
           sBulk        = travelLen / pathLen;
@@ -1698,26 +1795,31 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
         const bool absorb = absorbedBulk || absorbedEB || absorbedDomain;
 
         if (!absorb) {
-          p.position() = newPos;
+          // Photon survives -- update its position in place and advance to the next one.
+          allPhotons.setPosition(i, newPos);
+
+          i++;
         }
         else { // Determine scenarios -- if the photon was absorbed the smallest s-parameter takes precedence.
-          const Real s = std::min(sBulk, std::min(sEB, sDomain));
+          const Real     s         = std::min(sBulk, std::min(sEB, sDomain));
+          const RealVect absorbPos = oldPos + s * path;
 
-          p.position() = oldPos + s * path;
-
-          // Now check where it was actually absorbed
+          // Now check where it was actually absorbed and move it there.
           if (absorbedBulk && sBulk < std::min(sEB, sDomain)) {
-            bulkPhotons.transfer(lit);
+            bulkPhotons.append(absorbPos, weight, payload);
           }
           else if (absorbedEB && sEB < std::min(sBulk, sDomain)) {
-            ebPhotons.transfer(lit);
+            ebPhotons.append(absorbPos, weight, payload);
           }
           else if (absorbedDomain && sDomain < std::min(sBulk, sEB)) {
-            domPhotons.transfer(lit);
+            domPhotons.append(absorbPos, weight, payload);
           }
           else {
             MayDay::Error("McPhoto::advancePhotonsTransient - logic bust");
           }
+
+          // Remove the absorbed photon via swap-and-pop (do not advance the index).
+          allPhotons.remove(i);
         }
       }
     }
@@ -1753,26 +1855,20 @@ McPhoto::remap(ParticleContainer<Photon>& a_photons)
 }
 
 int
-McPhoto::countPhotons(const AMRParticles<Photon>& a_photons) const
+McPhoto::countPhotons(const ParticleContainer<Photon>& a_photons) const
 {
   CH_TIME("McPhoto::countPhotons");
   if (m_verbosity > 5) {
     pout() << m_name + "::countPhotons" << endl;
   }
 
-  int numPhotons = 0;
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    numPhotons += a_photons[lvl]->numValid();
-  }
-
-  return numPhotons;
+  return static_cast<int>(a_photons.getNumberOfValidParticlesLocal());
 }
 
 void
 McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
                        int&                  a_comp,
-                       const std::string     a_outputRealm,
+                       const std::string&    a_outputRealm,
                        const int             a_level) const noexcept
 {
   CH_TIMERS("McPhoto::writePlotData");
@@ -1983,7 +2079,7 @@ McPhoto::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    a_loads[din.intCode()] += m_bulkPhotons[a_level][din].listItems().length();
+    a_loads[din.intCode()] += static_cast<long long>(m_bulkPhotons[a_level][din].size());
   }
 }
 

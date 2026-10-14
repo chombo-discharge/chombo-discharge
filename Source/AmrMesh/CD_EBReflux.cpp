@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EBReflux.cpp
-  @brief  Implementation of CD_EBReflux.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_EBReflux.cpp
+ * @brief  Implementation of CD_EBReflux.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <NeighborIterator.H>
@@ -20,11 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBReflux::EBReflux() noexcept
+EBReflux::EBReflux() noexcept : m_isDefined(false)
 {
   CH_TIME("EBReflux::EBReflux(weak)");
-
-  m_isDefined = false;
 }
 
 EBReflux::EBReflux(const EBLevelGrid& a_eblg,
@@ -73,8 +72,7 @@ EBReflux::defineRegionsCF() noexcept
   const DisjointBoxLayout& dbl     = m_eblg.getDBL();
   const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
 
-  const ProblemDomain& domain     = m_eblg.getDomain();
-  const ProblemDomain& domainCoFi = m_eblgCoFi.getDomain();
+  const ProblemDomain& domain = m_eblg.getDomain();
 
   const EBISLayout& ebisl     = m_eblg.getEBISL();
   const EBISLayout& ebislCoFi = m_eblgCoFi.getEBISL();
@@ -145,12 +143,14 @@ EBReflux::defineRegionsCF() noexcept
         const FArrayBox& mask    = coarMask[din];
         DenseIntVectSet  cfivs(dbl[din], false);
 
-        for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
-          const IntVect iv = bit();
+        // Not auto-vectorizable: this is a one-time (define) setup loop with a data-dependent branch,
+        // an out-of-line ebisBox.isRegular(iv) query, and DenseIntVectSet insertion.
+        auto regularKernel = [&](const IntVect& iv) -> void {
           if (mask(iv, 0) > 0.0 && ebisBox.isRegular(iv)) {
             cfivs |= iv;
           }
-        }
+        };
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
 
         cfivs.recalcMinBox();
         m_regularCoarseFineRegions[din][std::make_pair(dir, sit())] = cfivs;
@@ -168,13 +168,15 @@ EBReflux::defineRegionsCF() noexcept
 
         IntVectSet irregCells;
 
+        // Not auto-vectorizable: this is a one-time (define) setup loop with a data-dependent branch,
+        // an out-of-line ebisBox.isIrregular(iv) query, and IntVectSet insertion.
         auto findIrregCells = [&](const IntVect& iv) -> void {
           if (mask(iv, 0) > 0.0 && ebisBox.isIrregular(iv)) {
             irregCells |= iv;
           }
         };
 
-        BoxLoops::loop(cellBox, findIrregCells);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, findIrregCells);
 
         // Define appropriate iterators.
         auto& irregularCoarseFineRegions = m_irregularCoarseFineRegions[din];
@@ -213,13 +215,11 @@ EBReflux::defineStencils() noexcept
     const DataIndex& din = ditCoar[mybox];
 
     const Box boxCoar = dblCoar[din];
-    const Box boxFine = dblFine[din];
 
     const EBISBox& ebisBoxCoar = ebislCoar[din];
     const EBISBox& ebisBoxFine = ebislFine[din];
 
     const EBGraph& graphCoar = ebisBoxCoar.getEBGraph();
-    const EBGraph& graphFine = ebisBoxFine.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -331,8 +331,6 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
-  const Real dxCoar         = 1.0;
-  const Real dxFine         = dxCoar / m_refRat;
   const Real invFinePerCoar = 1.0 / std::pow(m_refRat, SpaceDim - 1);
 
   const int nbox = ditCoar.size();
@@ -341,16 +339,8 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
     const DataIndex& din = ditCoar[mybox];
 
     const Box& coarCellBox = dblCoar[din];
-    const Box& fineCellBox = dblFine[din];
-
-    const EBISBox& coarEBISBox = ebislCoar[din];
-    const EBISBox& fineEBISBox = ebislFine[din];
-
-    const EBGraph& coarGraph = coarEBISBox.getEBGraph();
-    const EBGraph& fineGraph = fineEBISBox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      const Box coarFaceBox = surroundingNodes(coarCellBox, dir);
 
       EBFaceFAB&       coarFlux = a_coarFluxes[din][dir];
       const EBFaceFAB& fineFlux = a_fineFluxes[din][dir];
@@ -371,6 +361,8 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
         const auto& coarseningStencils = m_fluxCoarseningStencils[din].at(std::make_pair(dir, sit()));
 
         // Kernel for regular cells.
+        // Not auto-vectorizable: this is a fine->coarse flux gather-reduction over the fine faces
+        // (strided gather plus a nested reduction).
         auto regularKernel = [&](const IntVect& iv) -> void {
           coarFluxReg(iv, a_coarVar) = 0.0;
 
@@ -391,6 +383,9 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
           coarFluxReg(iv, a_coarVar) *= invFinePerCoar;
         };
 
+        // Runs over all cut faces (not just multiply-cut ones): it applies a geometry-aware
+        // coarsening stencil whose value differs from the regular gather-sum, so the regular kernel
+        // above does not produce the correct value on cut faces.
         auto irregularKernel = [&](const FaceIndex& face) -> void {
           coarFlux(face, a_coarVar) = 0.0;
 
@@ -411,7 +406,7 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
         CH_STOP(t1);
 
         CH_START(t2);
-        BoxLoops::loop(faceBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
         CH_STOP(t2);
 
         CH_START(t3);
@@ -450,7 +445,6 @@ EBReflux::refluxIntoCoarse(LevelData<EBCellFAB>&       a_Lphi,
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      cellBox = dbl[din];
     const EBISBox& ebisBox = ebisl[din];
 
     EBCellFAB& Lphi    = a_Lphi[din];

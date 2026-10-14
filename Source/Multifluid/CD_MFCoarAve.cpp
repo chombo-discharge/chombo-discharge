@@ -1,23 +1,22 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_MFCoarAve.cpp
-  @brief  Implementation of CD_MFCoarAve.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFCoarAve.cpp
+ * @brief  Implementation of CD_MFCoarAve.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_MFCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
-MFCoarAve::MFCoarAve()
-{}
+MFCoarAve::MFCoarAve() = default;
 
-MFCoarAve::~MFCoarAve()
-{}
+MFCoarAve::~MFCoarAve() = default;
 
 MFCoarAve::MFCoarAve(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps)
 {
@@ -33,6 +32,7 @@ MFCoarAve::define(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps)
 const RefCountedPtr<EBCoarAve>&
 MFCoarAve::getAveOp(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_aveOps.size());
   return m_aveOps[a_phase];
 }
 

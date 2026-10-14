@@ -1,0 +1,149 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * @file   CD_CutCellSurface.H
+ * @brief  Declaration of the data a cut cell's embedded boundary is reconstructed from.
+ * @author Robert Marskar
+ */
+
+#ifndef CD_CUTCELLSURFACE_H
+#define CD_CUTCELLSURFACE_H
+
+// Chombo includes
+#include <RealVect.H>
+
+// Our includes
+#include <CD_NamespaceHeader.H>
+
+namespace PolyhedralEB {
+
+/**
+ * @brief The values a cut cell's embedded boundary is reconstructed from.
+ * @details Holds the implicit function at the cell's corners and the parameter along each cell
+ * edge where it changes sign, both in the cell's own [-1/2, 1/2]^SpaceDim frame. Neither value
+ * belongs to the cell alone: a corner is shared by the 2^SpaceDim cells meeting there and an
+ * edge by the four cells meeting along it, so two neighbouring cells reconstruct the same
+ * surface bit for bit rather than to within a tolerance. That is what makes a face aperture
+ * agree when it is computed from either side.
+ *
+ * That agreement is between cells of one level. A cell's chords are straight at its own
+ * spacing, so on a face shared with cells of a finer level they are not what that level
+ * describes the face with, and the polyhedron this surface alone reconstructs is the
+ * level-local one. Which faces those are is not the surface's to know: it is recorded by the
+ * cut-cell connectivity of the level, and CutCellBody::restrictFace replaces such a face with
+ * the chords of the children covering it.
+ */
+class CutCellSurface
+{
+public:
+  /**
+   * @brief Number of cell edges a crossing can sit on.
+   */
+  static constexpr int s_numEdges = 2 * SpaceDim * (SpaceDim - 1);
+
+  /**
+   * @brief Number of cell corners.
+   */
+  static constexpr int s_numCorners = 1 << SpaceDim;
+
+  /**
+   * @brief Marks an edge whose endpoints lie on the same side of the interface.
+   */
+  static constexpr Real s_noCrossing = -1.0;
+
+  /**
+   * @brief Role of a stored surface: the cell's body is built from the surface alone.
+   */
+  static constexpr int s_native = 0;
+
+  /**
+   * @brief Role of a stored surface: some faces of the cell's body are the cell's face overrides rather than its own
+   * chords.
+   */
+  static constexpr int s_overridden = 1;
+
+  /**
+   * @brief Role of a surface: the cell is covered by a finer grid. Never stored or copied; a receiver that finds it has
+   * been handed a cell it should not describe.
+   */
+  static constexpr int s_invalid = 2;
+
+  /**
+   * @brief Constructor. Leaves every edge without a crossing, every corner at zero, no face joining its fluid
+   * corners, and the role native.
+   */
+  CutCellSurface() noexcept;
+
+  /**
+   * @brief Destructor.
+   */
+  ~CutCellSurface() noexcept = default;
+
+  /**
+   * @brief Whether the edge carries a crossing.
+   * @param[in] a_edge Edge index in [0, s_numEdges).
+   * @return True if the implicit function changes sign along the edge.
+   */
+  inline bool
+  hasCrossing(const int a_edge) const noexcept;
+
+  /**
+   * @brief Number of bytes the surface occupies in a linear buffer, as Chombo's containers ask of their payload.
+   * @return sizeof the crossings, the corners, the face decisions and the role together.
+   */
+  inline int
+  linearSize() const noexcept;
+
+  /**
+   * @brief Write the surface into a linear buffer, as Chombo's containers ask of their payload.
+   * @param[out] a_buffer Buffer of at least linearSize() bytes.
+   */
+  inline void
+  linearOut(void* a_buffer) const noexcept;
+
+  /**
+   * @brief Read the surface from a linear buffer written by linearOut.
+   * @param[in] a_buffer Buffer written by linearOut.
+   */
+  inline void
+  linearIn(const void* a_buffer) noexcept;
+
+  /**
+   * @brief Position along an edge where the implicit function changes sign.
+   * @details Parameterised from the edge's low corner, so that both cells sharing the edge read
+   * the same value. Only meaningful where hasCrossing is true.
+   */
+  Real m_crossing[s_numEdges];
+
+  /**
+   * @brief Implicit function at the cell corners, ordered so that corner c has offset
+   * ((c >> d) & 1) in direction d.
+   */
+  Real m_corner[s_numCorners];
+
+  /**
+   * @brief Which faces join their fluid corners, one bit per face whose corners alternate in sign.
+   * @details Bit 2 * dir + side in three dimensions, bit 0 for the cell itself in two. Four alternating corners
+   * cannot say whether the face's two fluid corners or its two solid ones meet across it; the implicit function
+   * at the centre of the face does, and is read where the surface is built, so that every cell sharing the face
+   * pairs its chords alike and a receiver of the surface never evaluates the function.
+   */
+  int m_fluidJoined;
+
+  /**
+   * @brief How the cell's body is built from this surface: s_native, s_overridden or s_invalid.
+   */
+  int m_role;
+};
+
+} // namespace PolyhedralEB
+
+#include <CD_NamespaceFooter.H>
+
+#include <CD_CutCellSurfaceImplem.H>
+
+#endif

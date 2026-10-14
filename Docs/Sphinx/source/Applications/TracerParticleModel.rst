@@ -4,7 +4,7 @@ Tracer particle model
 =====================
 
 The tracer particle model was written in order to illustrate the usage of :ref:`Chap:TracerParticleSolver`.
-The module can trace particles passively in a fixed velocity fieldk.`).
+The module can trace particles passively in a fixed velocity field.
 
 .. tip::
 
@@ -21,7 +21,7 @@ The model consists of the following implementation files:
 Basic problem
 -------------
 
-Currently, ``TracerParticleStepper`` simply instantiates a :ref:`Chap:TracerParticleSolver` the particles in a fixed velocity field.
+Currently, ``TracerParticleStepper`` simply instantiates a :ref:`Chap:TracerParticleSolver` to advance the particles in a fixed velocity field.
 There is currently no handling of particles that fall off the domain.
 
 Initial conditions

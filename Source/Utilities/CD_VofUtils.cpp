@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_VofUtils.cpp
-  @brief  Implementation of CD_VofUtils.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_VofUtils.cpp
+ * @brief  Implementation of CD_VofUtils.H
+ * @author Robert Marskar
+ */
 
 #include <CD_VofUtils.H>
 #include <CD_BoxLoops.H>
@@ -53,26 +54,38 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 
   Vector<VolIndex> vofs;
 
-  // Can only do this if actually have a normal vecto r
   if (a_normal != RealVect::Zero) {
+    vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, false);
+    vofs = VofUtils::restrictVofsToQuadrant(vofs, a_startVof, a_ebisbox, a_normal, a_radius);
 
-    // Fetch vofs using radius.
-    vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, a_addStartVof);
-
-    // Find the quadrant or "half-plane" where the quadrant vofs live, and restrict to that quadrant
-    Box quadBox;
-    if (VofUtils::isQuadrantWellDefined(a_normal)) {
-      // Box is the quadrant box
-      quadBox = VofUtils::getQuadrant(a_normal, a_startVof, a_ebisbox, a_radius);
+    if (a_addStartVof) {
+      vofs.push_back(a_startVof);
     }
-    else {
-      // Box consists of two quadrants.
-      const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(a_normal);
-      quadBox = VofUtils::getSymmetricQuadrant(cardinal, a_startVof, a_ebisbox, a_radius);
-    }
-
-    VofUtils::includeCells(vofs, quadBox);
   }
+
+  return vofs;
+}
+
+Vector<VolIndex>
+VofUtils::restrictVofsToQuadrant(const Vector<VolIndex>& /*a_vofs*/,
+                                 const VolIndex& a_startVof,
+                                 const EBISBox&  a_ebisbox,
+                                 const RealVect& a_normal,
+                                 const int       a_radius)
+{
+  Vector<VolIndex> vofs;
+
+  // Find the quadrant or "half-plane" where the quadrant vofs live, and restrict to that quadrant
+  Box quadBox;
+  if (VofUtils::isQuadrantWellDefined(a_normal)) {
+    quadBox = VofUtils::getQuadrant(a_normal, a_startVof, a_ebisbox, a_radius);
+  }
+  else {
+    const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(a_normal);
+    quadBox = VofUtils::getSymmetricQuadrant(cardinal, a_startVof, a_ebisbox, a_radius);
+  }
+
+  VofUtils::includeCells(vofs, quadBox);
 
   return vofs;
 }
@@ -91,26 +104,43 @@ VofUtils::getVofsInSemiCircle(const VolIndex&      a_startVof,
   Vector<VolIndex> vofs;
 
   if (a_normal != RealVect::Zero) {
+    vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, false);
+    vofs = VofUtils::restrictVofsToSemiCircle(vofs,
+                                              a_startVof,
+                                              a_ebisbox,
+                                              a_normal,
+                                              a_deltaThresh,
+                                              a_vofLocation,
+                                              a_cellLocation);
+    if (a_addStartVof) {
+      vofs.push_back(a_startVof);
+    }
+  }
+
+  return vofs;
+}
+
+Vector<VolIndex>
+VofUtils::restrictVofsToSemiCircle(const Vector<VolIndex>& a_vofs,
+                                   const VolIndex&         a_startVof,
+                                   const EBISBox&          a_ebisbox,
+                                   const RealVect&         a_normal,
+                                   const Real              a_deltaThresh,
+                                   const Location::Cell    a_vofLocation,
+                                   const Location::Cell    a_cellLocation)
+{
+  Vector<VolIndex> vofs;
+
+  if (a_normal != RealVect::Zero) {
     const RealVect x0 = Location::position(a_vofLocation, a_startVof, a_ebisbox, 1.0);
 
-    const Vector<VolIndex> vofsInRadius = VofUtils::getVofsInRadius(a_startVof,
-                                                                    a_ebisbox,
-                                                                    a_radius,
-                                                                    a_connectivity,
-                                                                    false);
-
-    for (int i = 0; i < vofsInRadius.size(); i++) {
-      const VolIndex& curVoF = vofsInRadius[i];
-
-      const RealVect delta = Location::position(a_cellLocation, curVoF, a_ebisbox, 1.0) - x0;
+    for (int i = 0; i < a_vofs.size(); i++) {
+      const VolIndex& curVoF = a_vofs[i];
+      const RealVect  delta  = Location::position(a_cellLocation, curVoF, a_ebisbox, 1.0) - x0;
 
       if (delta.dotProduct(a_normal) > a_deltaThresh) {
         vofs.push_back(curVoF);
       }
-    }
-
-    if (a_addStartVof) {
-      vofs.push_back(a_startVof);
     }
   }
 
@@ -196,6 +226,9 @@ VofUtils::getAllVofsInRadius(const VolIndex& a_startVof,
   bx &= a_ebisbox.getDomain();
   bx &= a_ebisbox.getRegion();
 
+  // Not auto-vectorizable: this gathers cut-cell VoFs through the out-of-line ebisbox.getVoFs(iv)
+  // (which allocates a Vector per cell) and appends them to a growing Vector. The access is
+  // irregular, allocating, and order-dependent, so the loop is left as a plain cell traversal.
   auto kernel = [&](const IntVect& iv) -> void {
     const std::vector<VolIndex> vofsInThisCell = a_ebisbox.getVoFs(iv).stdVector();
 
@@ -206,7 +239,7 @@ VofUtils::getAllVofsInRadius(const VolIndex& a_startVof,
     }
   };
 
-  BoxLoops::loop(bx, kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(bx, kernel);
 
   if (a_addStartVof) {
     allVofs.push_back(a_startVof);
@@ -303,11 +336,9 @@ VofUtils::onlyUnique(Vector<VolIndex>& a_vofs)
 }
 
 bool
-VofUtils::isQuadrantWellDefined(const RealVect a_normal)
+VofUtils::isQuadrantWellDefined(const RealVect& a_normal)
 {
   bool ret = true;
-
-  const RealVect v = a_normal; ///a_normal.vectorLength(); // Idiot guard.
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (std::abs(a_normal[dir]) == 1.0 || std::abs(a_normal[dir]) == 0.0) {
@@ -319,7 +350,7 @@ VofUtils::isQuadrantWellDefined(const RealVect a_normal)
 }
 
 std::pair<int, Side::LoHiSide>
-VofUtils::getCardinalDirection(const RealVect a_normal)
+VofUtils::getCardinalDirection(const RealVect& a_normal)
 {
   std::pair<int, Side::LoHiSide> ret;
 
@@ -347,10 +378,10 @@ VofUtils::getQuadrant(const RealVect& a_normal, const VolIndex& a_vof, const EBI
   Box bx(iv, iv);
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_normal[dir] < 0.0) {
-      bx.growLo(dir, a_radius);
+      bx.growLo(dir, static_cast<int>(a_radius));
     }
     else if (a_normal[dir] > 0.0) {
-      bx.growHi(dir, a_radius);
+      bx.growHi(dir, static_cast<int>(a_radius));
     }
     else {
       MayDay::Error(
@@ -374,11 +405,11 @@ VofUtils::getSymmetricQuadrant(const std::pair<int, Side::LoHiSide>& a_cardinal,
   Box bx(iv, iv);
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir == a_cardinal.first) {
-      bx.growDir(dir, a_cardinal.second, a_radius);
+      bx.growDir(dir, a_cardinal.second, static_cast<int>(a_radius));
     }
     else {
-      bx.growLo(dir, a_radius);
-      bx.growHi(dir, a_radius);
+      bx.growLo(dir, static_cast<int>(a_radius));
+      bx.growHi(dir, static_cast<int>(a_radius));
     }
   }
 
@@ -474,8 +505,9 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
     // Add if not already added
     bool haveStartVof = false;
     for (int ivof = 0; ivof < a_vofList.size(); ivof++) {
-      if (a_vofList[ivof] == a_startVof)
+      if (a_vofList[ivof] == a_startVof) {
         haveStartVof = true;
+      }
     }
 
     if (!haveStartVof) {
@@ -485,7 +517,8 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
         if (a_timesMoved[dir] < a_radius) {
           const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
 
-          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
+          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] == -1 || a_pathSign[dir] == 0) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = -1;
@@ -498,7 +531,8 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
             }
           }
 
-          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
+          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] == 0 || a_pathSign[dir] == 1) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = 1;
@@ -548,7 +582,8 @@ VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
           IntVect newTimesMoved = a_timesMoved;
           newTimesMoved[dir] += 1;
 
-          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
+          // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] <= 0) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = -1;
@@ -567,7 +602,8 @@ VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
             }
           }
 
-          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
+          // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn
+          // back".
           if (a_pathSign[dir] >= 0) {
             IntVect newPathSign = a_pathSign;
             newPathSign[dir]    = 1;

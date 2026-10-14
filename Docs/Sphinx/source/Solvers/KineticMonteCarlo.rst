@@ -3,7 +3,7 @@
 Kinetic Monte Carlo
 ===================
 
-Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+Kinetic Monte Carlo (KMC) algorithms are composed of various methods for stochastically simulating chemically reacting systems.
 While various flavors of KMC are encountered in different fields of science, KMC in the context of ``chombo-discharge`` is primarily associated with chemistry kernels.
 
 Concept
@@ -45,7 +45,7 @@ For unimolecular reactions of the type
    X_A + X_B + \ldots \xrightarrow{k} \emptyset
 
 with :math:`A \neq B \neq \ldots` the propensity function is :math:`k X_A X_B \ldots`.
-For bimolecular of the type
+For bimolecular reactions of the type
 
 .. math::
 
@@ -78,13 +78,13 @@ For the SSA we compute the time until the next reaction by
    T = \frac{1}{\sum_{r\in\vec{R}} a_r}\ln\left(\frac{1}{u_1}\right)
 
 where :math:`A = \sum_{r\in\vec{R}} a_r` and :math:`u_1` is a uniformly distributed random variable between :math:`0` and :math:`1`.
-The type of reaction that fires is deterimined from
+The type of reaction that fires is determined from
 
 .. math::
 
    r_c = \textrm{smallest integer satisfying } \sum_{r^\prime = 1}^{r_c} a_{r^\prime} > u_2A,
 
-where and :math:`u_2` is another uniformly distributed random variable between :math:`0` and :math:`1`.
+where :math:`u_2` is another uniformly distributed random variable between :math:`0` and :math:`1`.
 The state is then advanced as
 
 .. math::
@@ -106,6 +106,39 @@ With tau-leaping the state is advanced over a time :math:`\Delta t` as
    
 where :math:`\mathcal{P}` is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.
+
+The interval :math:`\Delta t` handed to the solver is substepped, and each substep is limited such that the propensities change by no more than a relative factor :math:`\epsilon`.
+This is the same criterion that the hybrid algorithm applies to its non-critical reactions, see :ref:`Chap:KMCLeapCondition`.
+Substeps that yield an invalid state are rejected and retried with a halved time step, so :math:`\epsilon` is what controls the accuracy of the leap while step rejection only guards validity.
+
+.. _Chap:KMCLeapCondition:
+
+Leap condition
+______________
+
+The leap :math:`\tau` is bounded, for every reactant :math:`X_i` of the reactions being leaped, by the smallest of
+
+.. math::
+
+   \tau \leq \frac{f_i}{\left|\mu_i\right|},\quad
+   \tau \leq \frac{f_i^2}{\sigma_i^2},\quad
+   \tau \leq \frac{f_i}{\lambda_i},
+
+where :math:`f_i = \max\left(\epsilon X_i, 1\right)` and
+
+.. math::
+
+   \mu_i = \sum_r \nu_{ir} a_r,\quad
+   \sigma_i^2 = \sum_r \nu_{ir}^2 a_r,\quad
+   \lambda_i = \sum_{r:\, \nu_{ir} < 0} \left|\nu_{ir}\right| a_r.
+
+The first two bounds are the leap condition of :cite:t:`Cao2006` on the mean and variance of the *net* change in :math:`X_i`.
+The third bounds the *gross* consumption of :math:`X_i`: the reactions that remove it may not, between them, be expected to fire more than :math:`f_i` times during the leap.
+The net change does not see this when production and loss nearly cancel, as they do for a fast intermediate in quasi-steady state, and the Poisson-sampled firings of the fast reaction then routinely exceed the population they draw on.
+Such a leap is rejected and retried with a smaller step, but the accepted step is then conditioned on the outcome of the random draw, which biases the result.
+The consumption bound resolves the fast reaction instead, and for a reactant that is only consumed it coincides with the first bound.
+Note that :math:`\epsilon` scales all three bounds but never removes them: for :math:`\epsilon \geq 1` the expected consumption of a reactant may reach or exceed its population, so the bounds no longer keep the sampled firings below the populations and the validity of the leap then rests on step rejection alone.
+The floor :math:`f_i = 1` at zero population applies for any :math:`\epsilon`.
 
 Tau-leaping variants
 ____________________
@@ -159,32 +192,36 @@ Assume that we wish to integrate over some time :math:`\Delta t`, which proceeds
    The critical reactions are defined as the subset of :math:`\vec{R}` that are within :math:`N_{\textrm{crit}}` firings away from exhausting one of its reactants.
    The non-critical reactions are defined as the remaining subset.
 
-#. Compute time steps until the firing of the next critical reaction, and a time step such that the propensities of the non-critical reactions do not change by more than some relative factor :math:`\epsilon`.
-   Let these time steps be given by :math:`\Delta \tau_{\textrm{c}}`\ and :math:`\Delta \tau_{\textrm{nc}}`.
-
-#. Select a reactive substep within :math:`\Delta t` from
+#. Compute a time step :math:`\Delta \tau_{\textrm{nc}}` such that the non-critical reactions satisfy the leap condition in :ref:`Chap:KMCLeapCondition`, and let the leap candidate be
 
    .. math::
 
-      \Delta \tau = \min\left[\Delta t - \tau, \min\left(\Delta \tau_{\textrm{c}}, \Delta \tau_{\textrm{nc}}\right)\right]
+      \Delta \tau_{\textrm{leap}} = \min\left(\Delta t - \tau, \Delta \tau_{\textrm{nc}}\right).
+
+#. If :math:`A\Delta\tau_{\textrm{leap}}` is smaller than some specified threshold, where :math:`A` is the total propensity of *all* reactions, tau leaping is inefficient and the whole reaction set is advanced with the SSA over :math:`\Delta\tau_{\textrm{leap}}` (or until a specified number of reactions have fired).
+   Let :math:`\tau \rightarrow \tau + \Delta\tau_{\textrm{leap}}` (or the time of the last firing) and return to step 2.
+   This decision is made from :math:`\Delta\tau_{\textrm{leap}}` alone, before any critical waiting time is drawn, so that it cannot depend on the value of that draw.
+
+#. Draw the time :math:`\Delta \tau_{\textrm{c}}` until the firing of the next critical reaction and select the reactive substep
+
+   .. math::
+
+      \Delta \tau = \min\left(\Delta \tau_{\textrm{leap}}, \Delta \tau_{\textrm{c}}\right).
 
 #. Resolve reactions as follows:
 
-   a. If :math:`\Delta \tau_{\textrm{c}} < \Delta \tau_{\textrm{nc}}` and :math:`\Delta \tau_{\textrm{c}} < \Delta t - \tau` then one critical reaction fires.
-      Determine the reaction type using the SSA algorithm.
+   a. If :math:`\Delta \tau_{\textrm{c}} < \Delta \tau_{\textrm{leap}}` then one critical reaction fires.
+      Advance the state using tau leaping for the non-critical reactions over :math:`\Delta\tau`, and then fire one critical reaction whose type is determined using the SSA algorithm.
 
-      Next, advance the state using tau leaping for the non-critical reaction.
-
-   b. Otherwise: No crical reactions fire.
-      Advance the state using tau-leapnig for the non-critical reactions only.
-      An exception is made if :math:`A\Delta\tau` is smaller than some specified threshold in which case we switch to SSA advancement (which is more efficient in this limit). 
+   b. Otherwise: No critical reactions fire.
+      Advance the state using tau-leaping for the non-critical reactions only.
 
 #. Check if :math:`\vec{X}` is a thermodynamically valid state.
 
    a. If the state is valid, accept it and let :math:`\tau \rightarrow \tau + \Delta\tau`.
 
    b. If the state is invalid, reject the advancement.
-      Let :math:`\Delta\tau_{\textrm{nc}} \rightarrow \Delta \tau_{\textrm{nc}}/2` and return to step 4).
+      Let :math:`\Delta\tau_{\textrm{nc}} \rightarrow \Delta \tau_{\textrm{nc}}/2` and return to step 3).
 
 #. If :math:`\tau < \Delta t`, return to step 2.
 
@@ -192,7 +229,7 @@ The :cite:t:`Cao2006` algorithm requires algorithmic specifications as follows:
 
 * The factor :math:`\epsilon` which determines the non-critical time step.
 * The factor :math:`N_{\textrm{crit}}` which determines which reactions are critical or not.
-* Factors for determining when and how to switch to the SSA-based algorithm in step 5b. 
+* Factors for determining when and how to switch to the SSA-based algorithm in step 4.
 
 .. _Chap:KMCSolver:
 
@@ -203,8 +240,7 @@ In ``chombo-discharge``, the KMC solver is implemented as
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 40-57, 73-78
-   :dedent: 0
+   :lines: 42-66,82-87
 
 Here, the template parameters are:
 
@@ -226,7 +262,7 @@ The ``State`` representation *must* have a member function
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleState.H
    :language: c++
-   :lines: 87-92
+   :lines: 95-100
    :dedent: 2
 
 This function should return true if the state is a valid one (e.g., no negative populations) and false otherwise. 
@@ -239,7 +275,7 @@ The reaction representation ``R`` *must* have the following member functions:
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H
    :language: c++
-   :lines: 73-108
+   :lines: 75-116
    :dedent: 2
 
 These template requirements exist so that users can define their states independent of their reactions.
@@ -324,14 +360,14 @@ The most general one that uses the hybrid advance is
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 396-406
+   :lines: 439-449
    :dedent: 2
 
 When using the hybrid algorithm, the user should set the hybrid solver parameters through the function
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 104-119
+   :lines: 115-129
    :dedent: 2
 
 State and reaction examples
@@ -349,7 +385,8 @@ Verification
 Verification tests for ``KMCSolver`` are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C1`
-* :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`  
+* :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`
+* :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C3`
 
 C1: Avalanche model
 ___________________
@@ -381,7 +418,7 @@ Figure :numref:`Fig:KineticMonteCarloC1` shows the Kinetic Monte Carlo solution 
 C2: Schlögl model
 _________________
 
-Solution the Schlögl model are given in :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`.
+Solutions to the Schlögl model are given in :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C2`.
 For the Schlögl model we solve for a single population :math:`X` with the reactions
 
 .. math::
@@ -392,7 +429,7 @@ For the Schlögl model we solve for a single population :math:`X` with the react
    X  &\xrightarrow{c_4} B2.   
 
 The states :math:`B_1` and :math:`B_2` are buffered states with populations that do not change during the reactions. 
-Figure :numref:`Fig:KineticMonteCarloC1` shows the Kinetic Monte Carlo solutions for rates
+Figure :numref:`Fig:KineticMonteCarloC2` shows the Kinetic Monte Carlo solutions for rates
 
 .. math::
 
@@ -410,4 +447,34 @@ The initial state is :math:`X(0) = 250`.
    :align: center
 
    Convergence to bi-stable states for the Schlögl model.
+
+C3: Stiff two-group model
+_________________________
+
+A stiff two-group electron chemistry is given in :file:`$DISCHARGE_HOME/Exec/Convergence/KineticMonteCarlo/C3`.
+A slow branching reaction feeds a fast reaction that relaxes back,
+
+.. math::
+
+   e &\xrightarrow{\nu_i} el + el + M^+, \\
+   el &\xrightarrow{\nu_r} e,
+
+with :math:`\nu_i = 7.468\times 10^{9}\,\textrm{s}^{-1}` and :math:`\nu_r = 1.741\times 10^{11}\,\textrm{s}^{-1}`, so that :math:`el` turns over :math:`\nu_r\Delta t = 1.74` times per step of :math:`\Delta t = 10\,\textrm{ps}`.
+Every reaction is first order, so the moment equations
+
+.. math::
+
+   \frac{\textrm{d}}{\textrm{d}t}\begin{pmatrix}\langle e\rangle \\ \langle el\rangle\end{pmatrix} = \begin{pmatrix} -\nu_i & \nu_r \\ 2\nu_i & -\nu_r\end{pmatrix}\begin{pmatrix}\langle e\rangle \\ \langle el\rangle\end{pmatrix}
+
+are exact and the program integrates them for reference.
+The example runs many realizations from a specified number of initial electrons and prints the mean populations after every step, so both limits can be checked: many realizations, and many initial particles where tau leaping rather than the SSA does the work.
+This is the case that requires the consumption bound in :ref:`Chap:KMCLeapCondition`: the net change of :math:`el` is small however many times it turns over, and a leap bounded by the net change alone samples more relaxations than there are :math:`el` particles.
+Figure :numref:`Fig:KineticMonteCarloC3` shows the hybrid midpoint solution for :math:`\epsilon = 0.5` and :math:`N_{\textrm{crit}} = 5`, starting from a single electron; the mean of :math:`e + el` at :math:`t = 1\,\textrm{ns}` agrees with the moment equations to within the sampling error of :math:`0.2\%`.
+
+.. _Fig:KineticMonteCarloC3:
+.. figure:: /_static/figures/KineticMonteCarloC3.png
+   :width: 50%
+   :align: center
+
+   Mean populations for the stiff two-group model, hybrid midpoint tau leaping against the moment equations.
 

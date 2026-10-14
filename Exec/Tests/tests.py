@@ -19,16 +19,19 @@ if sys.version_info < MIN_PYTHON:
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--compile',   help="Compile executables.",           action='store_true')
-parser.add_argument('--silent',    help="Turn off unnecessary output.",   action='store_true')
-parser.add_argument('--clean',     help="Do a clean compile.",            action='store_true')
-parser.add_argument('--benchmark', help="Generate benchmark files only.", action='store_true')
-parser.add_argument('--no_exec',   help="Do not run executables.",        action='store_true')
-parser.add_argument('--compare',   help="Turn off HDF5 comparisons",      action='store_true')
+parser.add_argument('--compile',   help="Compile executables.",                          action='store_true')
+parser.add_argument('--silent',    help="Turn off unnecessary output.",                  action='store_true')
+parser.add_argument('--clean',     help="Do a clean compile.",                           action='store_true')
+parser.add_argument('--benchmark', help="Generate benchmark files only.",                action='store_true')
+parser.add_argument('--no_exec',   help="Do not run executables.",                       action='store_true')
+parser.add_argument('--compare',   help="Compare output against benchmarks (h5diff).",   action='store_true')
 parser.add_argument('-mpi',        help="Use MPI or not",         type=str, default=None,  required=False)
 parser.add_argument('-petsc',      help="Compile with PETSC",     type=str, default=None,  required=False)
 parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default=None,  required=False)
 parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default=None,  required=False)
+parser.add_argument('-debug',      help="Build with debug symbols (DEBUG=TRUE/FALSE)", type=str, default=None, required=False)
+parser.add_argument('-opt',        help="Optimisation level (OPT=HIGH/FALSE)",         type=str, default=None, required=False)
+parser.add_argument('-particle_precision', help="Particle payload precision (PARTICLE_PRECISION=DOUBLE/FLOAT)", type=str, default=None, required=False)
 parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=None,       required=False)
 parser.add_argument('-cores',      help="Number of cores to use", type=int, default=2,        required=False)
 parser.add_argument('-exec_mpi',   help="MPI run command.",       type=str, default="mpirun", required=False)
@@ -126,7 +129,7 @@ def pre_check(silent):
 # --------------------------------------------------
 # Function that compiles a test
 # --------------------------------------------------
-def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, clean, main):
+def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, debug, opt, particle_precision, clean, main):
     """ Set up and run a compilation of the target test. """
 
     makeCommand = "make "
@@ -145,6 +148,12 @@ def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, clean, main):
         makeCommand += "USE_HDF=" + str(hdf).upper() + " "
     if petsc is not None:
         makeCommand += "USE_PETSC=" + str(petsc).upper() + " "
+    if debug is not None:
+        makeCommand += "DEBUG=" + str(debug).upper() + " "
+    if opt is not None:
+        makeCommand += "OPT=" + str(opt).upper() + " "
+    if particle_precision is not None:
+        makeCommand += "PARTICLE_PRECISION=" + str(particle_precision).upper() + " "
     if omp is not None and str(omp).upper() == "TRUE":
         makeCommand += "USE_MT=FALSE "
 
@@ -282,6 +291,9 @@ for test in config.sections():
                                         omp=args.openmp,
                                         hdf=args.hdf,
                                         petsc=args.petsc,
+                                        debug=args.debug,
+                                        opt=args.opt,
+                                        particle_precision=args.particle_precision,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if compile_code != 0:
@@ -352,11 +364,11 @@ for test in config.sections():
                             os.environ['OMP_SCHEDULE'] = "dynamic"
                             os.environ['OMP_PROC_BIND'] = "true"
 
-                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
+                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + os.path.abspath(inputFile)
                         else:
                             # MPI only case
                             num_mpi_ranks = args.cores
-                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
+                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + os.path.abspath(inputFile)
                     else:
                         # No MPI case
                         if has_openmp:
@@ -398,42 +410,55 @@ for test in config.sections():
                         # --------------------------------------------------
                         if args.benchmark:
                             print("\t Regression test '" + str(test) + "' has generated benchmark files.")
-                        elif not args.benchmark and args.compare and args.hdf is not None and str(args.hdf).upper() == "TRUE":
+                        elif not args.benchmark and args.compare:
                             # --------------------------------------------------
-                            # Loop through all files that were generated and
-                            # compare them with h5diff. Print an error message
-                            # if files don't match.
+                            # Glob for all output files that were generated and
+                            # compare each one with its benchmark counterpart.
+                            # This handles early termination (keepGoing()==false)
+                            # and avoids assuming files exist at specific step
+                            # numbers derived from nsteps/plot_interval.
                             # --------------------------------------------------
-                            for i in range (0, nsteps+nplot, nplot):
+                            output_prefix = str(config[str(test)]['output'])
+                            bench_prefix  = str(config[str(test)]['benchmark'])
+                            reg_pattern   = "plt/" + output_prefix + ".step*." + str(dim) + "d.hdf5"
+                            reg_files     = sorted(glob.glob(reg_pattern))
 
-                                # --------------------------------------------------
-                                # Get the two files that will be compared
-                                # --------------------------------------------------
-                                regFile =  "plt/" + str(config[str(test)]['output'])
-                                benFile =  "plt/" + str(config[str(test)]['benchmark'])
+                            if not reg_files:
+                                print("\t No output files found to compare")
+                            else:
+                                for regFile in reg_files:
+                                    benFile = "plt/" + bench_prefix + regFile[len("plt/" + output_prefix):]
 
-                                regFile = regFile + (".step{0:07}.".format(i)) + str(dim) + "d.hdf5"
-                                benFile = benFile + (".step{0:07}.".format(i)) + str(dim) + "d.hdf5"
-
-                                if not os.path.exists(benFile):
-                                    print("\t Benchmark file(s) not found, generate them with --benchmark")
-                                else:
-                                    print("\t Comparing files " + regFile +  " and " + str(benFile))
-
-                                    # --------------------------------------------------
-                                    # Run h5diff and compare the two files. Print a
-                                    # petite message if they match, and a huge-ass
-                                    # warning if they don't.
-                                    # --------------------------------------------------
-                                    compare_command = "h5diff " + regFile + " " + benFile
-                                    if args.silent:
-                                        compare_code = subprocess.call(compare_command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                                    if not os.path.exists(benFile):
+                                        print("\t Benchmark file(s) not found, generate them with --benchmark")
                                     else:
-                                        compare_code = subprocess.call(compare_command, shell=True)
+                                        print("\t Comparing files " + regFile +  " and " + str(benFile))
 
-                                        if compare_code != 0:
-                                            print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                                        # The root group of a plot file carries the git description of
+                                        # the executable that wrote it (see
+                                        # DischargeIO::writeEBHDF5Header). Benchmarks are generated
+                                        # from the pre-change tree and compared against the
+                                        # post-change tree, so that attribute differs by construction
+                                        # and h5diff would otherwise fail every comparison in the
+                                        # suite. --exclude-attribute drops the attributes of the named
+                                        # object only: everything under /level_N -- the data sets and
+                                        # their dt/dx/time/prob_domain/ref_ratio attributes -- is
+                                        # still compared, as is /Chombo_global.
+                                        compare_command = "h5diff --exclude-attribute / " + regFile + " " + benFile
+                                        if args.silent:
+                                            compare_code = subprocess.call(compare_command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
                                         else:
-                                            print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+                                            compare_code = subprocess.call(compare_command, shell=True)
+
+                                        # The result must be acted on whether or not --silent was passed. It used to be
+                                        # examined only in the else branch above, so under --silent a mismatch produced
+                                        # no output at all -- and ret_code was never set either way, so the suite exited
+                                        # 0 on a failed comparison. A regression harness that cannot fail is worse than
+                                        # no harness, because it is trusted.
+                                        if compare_code != 0:
+                                            ret_code = 1
+                                            print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                                        elif not args.silent:
+                                            print("\t Benchmark test succeeded for files " + regFile +  " and " + str(benFile))
 
 exit(ret_code)

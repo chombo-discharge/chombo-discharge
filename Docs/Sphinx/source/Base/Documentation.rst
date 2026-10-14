@@ -4,7 +4,7 @@ Using this documentation
 This documentation is the user documentation for ``chombo-discharge``.
 It includes an explanation of the data structures, algorithms, and code design.
 It is built as a part of the continuous integration (CI) at GitHub.
-The HTML, PDF, and doxygen documentation obtained from `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_  is automatically kept up-to-date with the latest version of ``chombo-discharge``.
+The HTML, PDF, and Doxygen documentation obtained from `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_  is automatically kept up-to-date with the latest version of ``chombo-discharge``.
 
 .. only:: html
 

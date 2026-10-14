@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EBGhostCellInterpolator.cpp
-  @brief  Implementation of CD_EBGhostCellInterpolator.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_EBGhostCellInterpolator.cpp
+ * @brief  Implementation of CD_EBGhostCellInterpolator.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -21,11 +22,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBGhostCellInterpolator::EBGhostCellInterpolator() noexcept
+EBGhostCellInterpolator::EBGhostCellInterpolator() noexcept : m_isDefined(false)
 {
   CH_TIME("EBGhostCellInterpolator::EBGhostCellInterpolator(weak)");
-
-  m_isDefined = false;
 }
 
 EBGhostCellInterpolator::EBGhostCellInterpolator(const EBLevelGrid& a_eblgFine,
@@ -83,7 +82,6 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const ProblemDomain& domainFine = m_eblgFine.getDomain();
-  const ProblemDomain& domainCoar = m_eblgCoFi.getDomain();
 
   const DataIterator dit = dblFine.dataIterator();
 
@@ -163,6 +161,13 @@ EBGhostCellInterpolator::defineBuffers() noexcept
   CH_TIME("EBGhostCellInterpolator::defineBuffers");
 
   m_copier.define(m_eblgCoar.getDBL(), m_eblgCoFi.getDBL(), m_ghostCF * IntVect::Unit);
+
+  // SpaceDim components covers every caller on the hot path; interpolate() falls back to a local buffer for
+  // the rare wider call.
+  m_coarsenedFineData.define(m_eblgCoFi.getDBL(),
+                             SpaceDim,
+                             m_ghostCF * IntVect::Unit,
+                             EBCellFactory(m_eblgCoFi.getEBISL()));
 }
 
 void
@@ -174,42 +179,59 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
   CH_TIMERS("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>");
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::buffer_define", t1);
   CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::copy_exchange", t2);
-  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::regular_cells", t3);
-  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::irregular_cells", t4);
+  CH_TIMER("EBGhostCellInterpolator::interpolate(LD<EBCellFAB>::interp_cells", t3);
 
+  CH_assert(m_isDefined);
   CH_assert(a_phiFine.nComp() > a_variables.end());
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_phiFine.nComp() == a_phiCoar.nComp());
 
-  LevelData<EBCellFAB> phiCoFi(m_eblgCoFi.getDBL(), 1, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
+  const int numVars = a_variables.size();
 
-  for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
-    const Interval srcInterv = Interval(icomp, icomp);
-    const Interval dstInterv = Interval(0, 0);
+  // The member buffer holds SpaceDim components, which covers every caller on the hot path. A call that asks
+  // for more -- physics plot variables, whose count comes from the user's model -- takes a local buffer, so
+  // the resident footprint stays bounded while every call still fetches its variables in one round trip.
+  const bool wideCall = numVars > m_coarsenedFineData.nComp();
 
-    a_phiCoar.copyTo(srcInterv, phiCoFi, dstInterv, m_copier);
+  LevelData<EBCellFAB> wideBuffer;
 
-    // Fill invalid regions.
-    const DataIterator dit = m_eblgFine.getDBL().dataIterator();
+  CH_START(t1);
+  if (wideCall) {
+    wideBuffer.define(m_eblgCoFi.getDBL(), numVars, m_ghostCF * IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
+  }
+  CH_STOP(t1);
 
-    const int nbox = dit.size();
+  LevelData<EBCellFAB>& phiCoFi = wideCall ? wideBuffer : m_coarsenedFineData;
+
+  // Fetch all the coarse-grid variables in one round trip rather than one per variable.
+  CH_START(t2);
+  a_phiCoar.copyTo(a_variables, phiCoFi, Interval(0, numVars - 1), m_copier);
+  CH_STOP(t2);
+
+  // Fill invalid regions.
+  const DataIterator dit = m_eblgFine.getDBL().dataIterator();
+
+  const int nbox = dit.size();
+
+  CH_START(t3);
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-      EBCellFAB&       phiFine = a_phiFine[din];
-      const EBCellFAB& phiCoar = phiCoFi[din];
+    EBCellFAB&       phiFine = a_phiFine[din];
+    const EBCellFAB& phiCoar = phiCoFi[din];
 
-      FArrayBox&       phiFineReg = phiFine.getFArrayBox();
-      const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
+    FArrayBox&       phiFineReg = phiFine.getFArrayBox();
+    const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
 
-      this->interpolateRegular(phiFineReg, phiCoarReg, din, icomp, 0, a_interpType);
-      this->interpolateIrregular(phiFine, phiCoar, din, icomp, 0, a_interpType);
+    for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++) {
+      const int coarComp = icomp - a_variables.begin();
+
+      this->interpolateRegular(phiFineReg, phiCoarReg, din, icomp, coarComp, a_interpType);
+      this->interpolateIrregular(phiFine, phiCoar, din, icomp, coarComp, a_interpType);
     }
   }
-
-  // Fill valid regions.
-  a_phiFine.exchange(a_variables);
+  CH_STOP(t3);
 }
 
 void
@@ -239,6 +261,8 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
       const Box interpBox = m_regularGhostRegions[a_dit].at(std::make_pair(dir, sit()));
 
       // Kernel for setting phiFine = phiCoar in the ghost cells.
+      // Not auto-vectorizable: the coarse data is gathered through coarsen(fineIV, m_refRat), which is
+      // a non-contiguous (broadcast) read and involves floor-division branches.
       auto regSetFineToCoar = [&](const IntVect fineIV) -> void {
         const IntVect coarIV = coarsen(fineIV, m_refRat);
 
@@ -247,7 +271,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
 
       // Set phiFine = phiCoar
       CH_START(t1);
-      BoxLoops::loop(interpBox, regSetFineToCoar);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interpBox, regSetFineToCoar);
       CH_STOP(t1);
 
       // Add contributions from slopes.
@@ -257,78 +281,22 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
         for (int slopeDir = 0; slopeDir < SpaceDim; slopeDir++) {
           const IntVect s = BASISV(slopeDir);
 
-          // Figure out how to compute the slopes.
-          std::function<void(const IntVect& iv)> regularSlopeKernel;
+          // Select the slope limiter once (a function pointer, rather than wrapping the whole kernel
+          // in a per-cell std::function). All limiters share the signature Real(const Real&, const Real&).
+          Real (*limiter)(const Real&, const Real&) = nullptr;
           switch (a_interpType) {
           case EBGhostCellInterpolator::Type::MinMod: {
-            regularSlopeKernel = [&](const IntVect& iv) -> void {
-              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-
-              const bool hasLo = domainCoar.contains(iv - s);
-              const bool hasHi = domainCoar.contains(iv + s);
-
-              if (hasLo && hasHi) {
-                slopes(iv, 0) = this->minmod(dwl, dwr);
-              }
-              else if (hasLo && !hasHi) {
-                slopes(iv, 0) = dwl;
-              }
-              else if (!hasLo && hasHi) {
-                slopes(iv, 0) = dwr;
-              }
-              else {
-                slopes(iv, 0) = 0.0;
-              }
-            };
+            limiter = &EBGhostCellInterpolator::minmod;
 
             break;
           }
           case EBGhostCellInterpolator::Type::MonotonizedCentral: {
-            regularSlopeKernel = [&](const IntVect& iv) -> void {
-              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-
-              const bool hasLo = domainCoar.contains(iv - s);
-              const bool hasHi = domainCoar.contains(iv + s);
-
-              if (hasLo && hasHi) {
-                slopes(iv, 0) = this->monotonizedCentral(dwl, dwr);
-              }
-              else if (hasLo && !hasHi) {
-                slopes(iv, 0) = dwl;
-              }
-              else if (!hasLo && hasHi) {
-                slopes(iv, 0) = dwr;
-              }
-              else {
-                slopes(iv, 0) = 0.0;
-              }
-            };
+            limiter = &EBGhostCellInterpolator::monotonizedCentral;
 
             break;
           }
           case EBGhostCellInterpolator::Type::Superbee: {
-            regularSlopeKernel = [&](const IntVect& iv) -> void {
-              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-
-              const bool hasLo = domainCoar.contains(iv - s);
-              const bool hasHi = domainCoar.contains(iv + s);
-
-              if (hasLo && hasHi) {
-                slopes(iv, 0) = this->superbee(dwl, dwr);
-              }
-              else if (hasLo && !hasHi) {
-                slopes(iv, 0) = dwl;
-              }
-              else if (!hasLo && hasHi) {
-                slopes(iv, 0) = dwr;
-              }
-              else {
-                slopes(iv, 0) = 0.0;
-              }
-            };
+            limiter = &EBGhostCellInterpolator::superbee;
 
             break;
           }
@@ -337,7 +305,34 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
           }
           }
 
+          // Compute the (limited) slope in this direction on the coarse grid. Using a direct lambda
+          // (with the limiter as a function pointer) avoids the per-cell std::function indirection.
+          // Not auto-vectorizable: per-cell domain-boundary checks (domainCoar.contains) and the
+          // slope limiter introduce data-dependent control flow.
+          auto regularSlopeKernel = [&](const IntVect& iv) -> void {
+            const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
+            const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
+
+            const bool hasLo = domainCoar.contains(iv - s);
+            const bool hasHi = domainCoar.contains(iv + s);
+
+            if (hasLo && hasHi) {
+              slopes(iv, 0) = limiter(dwl, dwr);
+            }
+            else if (hasLo && !hasHi) {
+              slopes(iv, 0) = dwl;
+            }
+            else if (!hasLo && hasHi) {
+              slopes(iv, 0) = dwr;
+            }
+            else {
+              slopes(iv, 0) = 0.0;
+            }
+          };
+
           // Kernel for adding in slope limiter.
+          // Not auto-vectorizable: the coarse slope is gathered through coarsen(fineIV, m_refRat),
+          // which is a non-contiguous (broadcast) read and involves floor-division branches.
           auto addRegularSlopeContribution = [&](const IntVect& fineIV) -> void {
             const IntVect  coarIV = coarsen(fineIV, m_refRat);
             const RealVect delta = (RealVect(fineIV) - m_refRat * RealVect(coarIV) + 0.5 * (1.0 - m_refRat)) / m_refRat;
@@ -349,11 +344,11 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
           const Box coarsenedInterpBox = coarsen(interpBox, m_refRat);
 
           CH_START(t2);
-          BoxLoops::loop(coarsenedInterpBox, regularSlopeKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(coarsenedInterpBox, regularSlopeKernel);
           CH_STOP(t2);
 
           CH_START(t3);
-          BoxLoops::loop(interpBox, addRegularSlopeContribution);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(interpBox, addRegularSlopeContribution);
           CH_STOP(t3);
         }
       }
@@ -376,16 +371,12 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   CH_assert(a_phiFine.nComp() > a_fineVar);
   CH_assert(a_phiCoar.nComp() > a_coarVar);
 
-  const ProblemDomain& fineDomain = m_eblgFine.getDomain();
-  const ProblemDomain& coarDomain = m_eblgCoFi.getDomain();
+  const ProblemDomain& coarDomain    = m_eblgCoFi.getDomain();
+  const Box            coarDomainBox = coarDomain.domainBox();
 
   const EBISLayout& fineEBISL = m_eblgFine.getEBISL();
   const EBISLayout& coarEBISL = m_eblgCoFi.getEBISL();
 
-  const Box fineDomainBox = fineDomain.domainBox();
-  const Box coarDomainBox = coarDomain.domainBox();
-
-  const EBISBox& fineEBISBox = a_phiFine.getEBISBox();
   const EBISBox& coarEBISBox = a_phiCoar.getEBISBox();
 
   VoFIterator&     vofitCoar = m_coarIrregCells[a_dit];
@@ -443,17 +434,17 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
         break;
       }
       case EBGhostCellInterpolator::Type::MinMod: {
-        slopes(coarVoF, dir) = this->minmod(dwl, dwr);
+        slopes(coarVoF, dir) = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, dwr);
 
         break;
       }
       case EBGhostCellInterpolator::Type::MonotonizedCentral: {
-        slopes(coarVoF, dir) = this->monotonizedCentral(dwl, dwr);
+        slopes(coarVoF, dir) = ChomboDischarge::EBGhostCellInterpolator::monotonizedCentral(dwl, dwr);
 
         break;
       }
       case EBGhostCellInterpolator::Type::Superbee: {
-        slopes(coarVoF, dir) = this->superbee(dwl, dwr);
+        slopes(coarVoF, dir) = superbee(dwl, dwr);
 
         break;
       }
@@ -485,7 +476,7 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
 }
 
 Real
-EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -497,13 +488,13 @@ EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
   if (dwl * dwr > 0.0) {
-    const Real s1 = this->minmod(dwl, 2 * dwr);
-    const Real s2 = this->minmod(dwr, 2 * dwl);
+    const Real s1 = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, 2 * dwr);
+    const Real s2 = ChomboDischarge::EBGhostCellInterpolator::minmod(dwr, 2 * dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;
@@ -514,7 +505,7 @@ EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexce
 }
 
 Real
-EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

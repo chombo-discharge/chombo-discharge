@@ -1,17 +1,19 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DataParser.cpp
-  @brief  Implementation of CD_DataParser.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_DataParser.cpp
+ * @brief  Implementation of CD_DataParser.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -22,10 +24,10 @@
 #include <CD_NamespaceHeader.H>
 
 LookupTable1D<Real, 1>
-DataParser::simpleFileReadASCII(const std::string       a_fileName,
-                                const int               a_xColumn,
-                                const int               a_yColumn,
-                                const std::vector<char> a_ignoreChars)
+DataParser::simpleFileReadASCII(const std::string&       a_fileName,
+                                const int                a_xColumn,
+                                const int                a_yColumn,
+                                const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::simpleFileReadASCII");
 
@@ -44,8 +46,8 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
     // Only do stuff for lines that are not empty. If we have an empty line we just proceed to the next one.
     if (!line.empty()) {
 
-      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines that are comments.
-      // If the line starts with any of those symbols we do not parse it.
+      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines
+      // that are comments. If the line starts with any of those symbols we do not parse it.
       bool parseThisLine = true;
       for (const auto& ignoreChar : a_ignoreChars) {
         if (line.at(0) == ignoreChar) {
@@ -65,8 +67,9 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
           values.emplace_back(curVal);
         }
 
-        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
+        // data WILL be ignored.
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
@@ -78,12 +81,12 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
 }
 
 LookupTable1D<Real, 1>
-DataParser::fractionalFileReadASCII(const std::string       a_fileName,
-                                    const std::string       a_startRead,
-                                    const std::string       a_stopRead,
-                                    const int               a_xColumn,
-                                    const int               a_yColumn,
-                                    const std::vector<char> a_ignoreChars)
+DataParser::fractionalFileReadASCII(const std::string&       a_fileName,
+                                    const std::string&       a_startRead,
+                                    const std::string&       a_stopRead,
+                                    const int                a_xColumn,
+                                    const int                a_yColumn,
+                                    const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::fractionalFileReadASCII");
 
@@ -132,7 +135,7 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
 
         // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
         // data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addData(values[a_xColumn], values[a_yColumn]);
         }
@@ -143,13 +146,13 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
   return returnTable;
 }
 
-List<PointParticle>
-DataParser::readPointParticlesASCII(const std::string       a_fileName,
-                                    const unsigned int      a_xColumn,
-                                    const unsigned int      a_yColumn,
-                                    const unsigned int      a_zColumn,
-                                    const unsigned int      a_wColumn,
-                                    const std::vector<char> a_ignoreChars)
+ParticleSoA<NoPayload>
+DataParser::readPointParticlesASCII(const std::string& a_fileName,
+                                    const unsigned int a_xColumn,
+                                    const unsigned int a_yColumn,
+                                    const unsigned int /*a_zColumn*/,
+                                    const unsigned int       a_wColumn,
+                                    const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::readPointParticlesASCII");
 
@@ -157,7 +160,7 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
   std::ifstream inputFile(a_fileName);
   std::string   line;
 
-  List<PointParticle> particles;
+  ParticleSoA<NoPayload> particles;
 
   while (std::getline(inputFile, line)) {
 
@@ -167,8 +170,8 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
     // Only do stuff for lines that are not empty. If we have an empty line we just proceed to the next one.
     if (!line.empty()) {
 
-      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines that are comments.
-      // If the line starts with any of those symbols we do not parse it.
+      // Check if we should parse the line. The user will have input a bunch of comment symbols which indicate lines
+      // that are comments. If the line starts with any of those symbols we do not parse it.
       bool parseThisLine = true;
       for (const auto& ignoreChar : a_ignoreChars) {
         if (line.at(0) == ignoreChar) {
@@ -188,8 +191,9 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
           values.emplace_back(curVal);
         }
 
-        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
-        const int numColumnsOnThisLine = values.size();
+        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
+        // data WILL be ignored.
+        const int numColumnsOnThisLine = static_cast<int>(values.size());
         if (numColumnsOnThisLine < SpaceDim + 1) {
           const std::string str = "DataParser::readPointParticlesASCII - row does not contain enough data";
 
@@ -206,13 +210,101 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
 #endif
           weight = values[a_wColumn];
 
-          particles.add(PointParticle(pos, weight));
+          particles.append(pos, weight);
         }
       }
     }
   }
 
   return particles;
+}
+
+std::vector<std::shared_ptr<Triangle>>
+DataParser::readTriangles(const std::string& a_filename, const std::string& a_vertexDataIdentifier)
+{
+  CH_TIME("DataParser::readTriangles");
+
+  using Vec3 = Triangle::Vec3;
+
+  // Detect file type from the extension.
+  const auto fileType = EBGeometry::Parser::getFileType(a_filename);
+
+  if (fileType == EBGeometry::Parser::FileType::Unsupported) {
+    MayDay::Error(("DataParser::readTriangles - unsupported file type for '" + a_filename +
+                   "'. File must have a .ply or .vtk extension.")
+                    .c_str());
+  }
+
+  std::vector<Vec3>                vertices;
+  std::vector<std::vector<size_t>> facets;
+  std::vector<Real>                vertexData;
+  bool                             hasVertexData = true;
+
+  // Read the file and attempt to fetch the named per-vertex scalar property.
+  if (fileType == EBGeometry::Parser::FileType::PLY) {
+    auto ply = EBGeometry::Parser::readPLY<Real>(a_filename);
+
+    vertices = ply.getVertexCoordinates();
+    facets   = ply.getFacets();
+
+    try {
+      vertexData    = ply.getVertexProperties(a_vertexDataIdentifier);
+      hasVertexData = !vertexData.empty();
+    } catch (const std::out_of_range& e) {
+      MayDay::Warning(("DataParser::readTriangles - vertex property '" + a_vertexDataIdentifier +
+                       "' not found in PLY file '" + a_filename + "'. Ignoring vertex data.")
+                        .c_str());
+      hasVertexData = false;
+    }
+  }
+  else if (fileType == EBGeometry::Parser::FileType::VTK) {
+    auto vtk = EBGeometry::Parser::readVTK<Real>(a_filename);
+
+    vertices = vtk.getVertexCoordinates();
+    facets   = vtk.getFacets();
+
+    try {
+      vertexData    = vtk.getPointDataScalars(a_vertexDataIdentifier);
+      hasVertexData = !vertexData.empty();
+    } catch (const std::out_of_range& e) {
+      MayDay::Warning(("DataParser::readTriangles - point data scalar '" + a_vertexDataIdentifier +
+                       "' not found in VTK file '" + a_filename + "'. Ignoring vertex data.")
+                        .c_str());
+      hasVertexData = false;
+    }
+  }
+
+  // Build Triangle objects from the facet connectivity.
+  std::vector<std::shared_ptr<Triangle>> triangles;
+
+  for (const auto& facet : facets) {
+    if (facet.size() != 3) {
+      const std::string err = "DataParser::readTriangles - non-triangular facet encountered for '" + a_filename +
+                              "'. Skipping this.";
+
+      MayDay::Warning(err.c_str());
+
+      continue;
+    }
+
+    const size_t i0 = facet[0];
+    const size_t i1 = facet[1];
+    const size_t i2 = facet[2];
+
+    auto tri = std::make_shared<Triangle>(std::array<Vec3, 3>{vertices[i0], vertices[i1], vertices[i2]});
+
+    if (hasVertexData) {
+      tri->setVertexData({vertexData[i0], vertexData[i1], vertexData[i2]});
+    }
+
+    triangles.emplace_back(std::move(tri));
+  }
+
+  if (triangles.empty()) {
+    MayDay::Warning(("DataParser::readTriangles - no triangles were read from file '" + a_filename + "'.").c_str());
+  }
+
+  return triangles;
 }
 
 #include <CD_NamespaceFooter.H>

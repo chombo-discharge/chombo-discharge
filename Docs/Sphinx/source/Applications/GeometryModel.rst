@@ -8,7 +8,7 @@ Functionality
 
 The ``GeometryStepper`` class is a solver-less class used for supporting the development of new geometries, which in general derive from :ref:`Chap:ComputationalGeometry`.
 ``GeometryStepper`` implements :ref:`Chap:TimeStepper` without any true functionality.
-E.g., calling the ``advance`` method simply returns an infinitely large time step, and ``GeometryStepper`` provides no I/O functionality or cell refinemention functionality.
+E.g., calling the ``advance`` method simply returns an infinitely large time step, and ``GeometryStepper`` provides no I/O functionality or cell refinement functionality.
 
 .. important::
 

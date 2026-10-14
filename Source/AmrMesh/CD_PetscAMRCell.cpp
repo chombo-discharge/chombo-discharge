@@ -1,19 +1,19 @@
-/* chombo-discharge
- * Copyright © 2026 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file CD_PetscAMRCell.cpp
-  @brief Implementation of CD_PetscAMRCell.H
-  @author Robert Marskar
-*/
+/**
+ * @file CD_PetscAMRCell.cpp
+ * @brief Implementation of CD_PetscAMRCell.H
+ * @author Robert Marskar
+ */
 
 #ifdef CH_USE_PETSC
 
 // Our includes
 #include <CD_PetscAMRCell.H>
-#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 PetscAMRCell::PetscAMRCell() noexcept

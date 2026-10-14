@@ -25,7 +25,7 @@ FieldSolver
 -----------
 
 ``FieldSolver`` is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
-``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it is uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
+``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
 Currently, our only supported subclass is :ref:`Chap:FieldSolverGMG`, which supplies a finite-volume discretization that is solved with geometric multigrid.
@@ -67,7 +67,7 @@ The function signature for setting the voltage on various parts is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 381-387
+   :lines: 389-396
    :dedent: 2
 
 This allows setting a time-dependent voltage on electrodes and domain boundaries.
@@ -93,7 +93,7 @@ Domain boundary conditions
 --------------------------
 
 Domain boundary conditions for the solver must be set by the user through an input script, whereas the boundary conditions on internal surfaces are Dirichlet by default.
-Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss` law.
+Note that on multifluid-boundaries the boundary condition is enforced by the conventional matching boundary condition that follows from Gauss' law.
 
 General format
 ______________
@@ -126,7 +126,7 @@ To set a domain boundary condition function on a side, one can use the following
 					     const std::function<Real(const RealVect a_position, const Real a_time)>);
 
 For a general way of setting the function value on the domain side, one will use the above function together with an identifier ``dirichlet_custom`` or ``neumann_custom`` in the input script.
-This identifier simply tells ``FieldSolver`` to use that function to either specifiy :math:`\Phi` or :math:`\partial_n\Phi` on the boundary. 
+This identifier simply tells ``FieldSolver`` to use that function to either specify :math:`\Phi` or :math:`\partial_n\Phi` on the boundary. 
 These functions are then directly processed by the numerical discretizations.
 
 .. note::
@@ -177,7 +177,7 @@ For example, using
    FieldSolverGMG.bc.y.low  = dirichlet 0.0
    FieldSolverGMG.bc.y.high = dirichlet 1.0
 
-will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
+will set the voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
 Specifically, on the upper y-plane this specification will generate a potential boundary condition function of the type
 
 .. code-block:: c++
@@ -222,7 +222,105 @@ I.e. the boundary condition function that is passed into the numerical discretiz
       return func(a_pos, a_time) * neumannFraction;
    };
 
-Note that since ``func`` is initialized to one, the floating point number in the input option directly specifies the value of :math:`\partial_n\Phi`. 
+Note that since ``func`` is initialized to one, the floating point number in the input option directly specifies the value of :math:`\partial_n\Phi`.
+
+File-based boundary conditions
+______________________________
+
+``FieldSolver`` also supports loading spatially-varying domain boundary conditions from a
+data file, using the ``file`` keyword in the input script.
+The general format is
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.x.low = file <dirichlet|neumann> <path> <arg4> <multiplier>
+
+where ``<path>`` is the path to the data file, ``<multiplier>`` is a real-valued scale
+factor applied to the interpolated result, and ``<arg4>`` depends on the spatial dimension:
+
+* **2D**: ``<arg4>`` is an integer specifying the number of uniformly-spaced interpolation
+  points used to prepare the lookup table.
+  The file must be an ASCII column file readable by :func:`DataParser::simpleFileReadASCII`.
+  The boundary condition value is interpolated along the single tangential direction of the
+  domain side.
+
+  Example:
+
+  .. code-block:: text
+
+     FieldSolverGMG.bc.y.low = file dirichlet /path/to/data.txt 100 1.0
+
+* **3D**: ``<arg4>`` is a string naming the per-vertex scalar property in a PLY or VTK
+  triangle mesh file (see :ref:`Chap:DataParser`).
+  The mesh is loaded into a ``TriangleCollection``; for each boundary point the closest
+  triangle is found, the point is projected onto the triangle plane, and the vertex metadata
+  is interpolated using barycentric coordinates.
+
+  Example:
+
+  .. code-block:: text
+
+     FieldSolverGMG.bc.y.low = file dirichlet /path/to/mesh.ply scalarprop 1.0
+
+The resulting boundary condition value applied in both cases follows the same convention as
+the simplified format:
+
+* **Dirichlet**: ``interpolated_value × voltage(t) × multiplier``
+* **Neumann**: ``interpolated_value × multiplier``
+
+.. note::
+
+   The PLY/VTK mesh used for 3D file-based BCs does not need to coincide with the domain
+   boundary face — it only needs to cover the spatial extent of the boundary, since the
+   closest-triangle lookup is used.
+   If a named per-vertex scalar is not found in the mesh file, a warning is issued and all
+   vertex data defaults to zero.
+
+Radial file-based boundary conditions
+______________________________________
+
+For problems with axisymmetric boundary data, ``FieldSolver`` supports a
+``file_radial`` keyword.
+In this case, the boundary condition value is tabulated as a function of the
+in-plane radial distance from the axis normal to the face:
+
+* z-face: :math:`r = \sqrt{x^2 + y^2}`
+* y-face: :math:`r = \sqrt{x^2 + z^2}`
+* x-face: :math:`r = \sqrt{y^2 + z^2}`
+
+The format is:
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.z.hi = file_radial <dirichlet|neumann> <path> <numPoints> <multiplier>
+
+where
+
+* ``<path>`` is the path to a two-column ASCII file where the first column is
+  the radial distance :math:`r` and the second column is the BC value.
+  The file is read with :func:`DataParser::simpleFileReadASCII`.
+* ``<numPoints>`` is an integer specifying the number of uniformly-spaced
+  interpolation points for the prepared lookup table.
+* ``<multiplier>`` is a real-valued scale factor.
+
+The resulting BC value follows the same convention as the simplified format:
+
+* **Dirichlet**: ``interpolated_value × voltage(t) × multiplier``
+* **Neumann**: ``interpolated_value × multiplier``
+
+Example — Gaussian potential profile on the upper z-face:
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.z.hi = file_radial dirichlet /path/to/radial_profile.txt 200 1.0
+
+where ``radial_profile.txt`` contains two columns: ``r`` and ``value(r)``.
+
+.. note::
+
+   In 2D, ``file_radial`` uses :math:`r = |p_{\perp}|` where :math:`p_\perp`
+   is the single tangential coordinate, making it equivalent to looking up by
+   the absolute tangential distance.
 
 .. _Chap:PoissonEBBC:
    
@@ -249,7 +347,7 @@ The member function that does this is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 401-407
+   :lines: 411-417
    :dedent: 2
 
 Here, the type ``ElectrostaticEbBc::BcFunction`` is just an alias of ``std::function<Real(const RealVect a_position, const Real a_time)>``.
@@ -270,7 +368,7 @@ In principle, one can then also set spatially varying voltages along an electrod
 
 In the majority of cases the voltage on electrodes is either a live voltage or ground.
 Thus, although the above format is a general way of setting the voltage individually on each electrode (in both space and time) ``FieldSolver`` supports a simpler way of generating these voltage waveforms.
-When ``FieldSolver`` is instantiated, it will interally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
+When ``FieldSolver`` is instantiated, it will internally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
 The voltages that are set on the various electrodes are thus in the form:
 
 .. code-block:: c++
@@ -302,10 +400,10 @@ This is encapsulated by the pure member function
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 107-117
+   :lines: 112-122
    :dedent: 2
 
-where ``a_phi`` is the resulting potential that was computing with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
+where ``a_phi`` is the resulting potential that was computed with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
    
 .. _Chap:FieldSolverGMG:   
 
@@ -327,7 +425,7 @@ The current list of configuration options are indicated below
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolverGMG.options
    :language: text
-   :emphasize-lines: 4,12-14,16-36
+   :emphasize-lines: 4,12-14,16-37
    :caption: Input options for the ``FieldSolverGMG`` class. Runtime adjustable options are highlighted.	      
 
 Note that *all* options pertaining to IO or multigrid are run-time configurable (see :ref:`Chap:RuntimeConfig`).
@@ -349,80 +447,16 @@ See :ref:`Chap:PoissonDielectricBC` for additional details.
 Algorithmic adjustments
 _______________________
 
-By default, the Helmholtz operator uses a diagonally weighting of the operator using the volume fraction as weight.
+By default, the Helmholtz operator uses a diagonal weighting of the operator using the volume fraction as weight.
 This means that the quantity that is passed into ``AMRMultiGrid`` should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag ``kappa_source`` indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
 If this flag is set to ``false``, it is an indication that the user has taken responsibility to perform this weighting prior to calling ``FieldSolver::solve(...)``.
 If this flag is set to ``true``, ``FieldSolverGMG`` will perform the multiplication before the multigrid solve.
 
-.. _Chap:MultigridTuning:
-
 Tuning multigrid performance
 ____________________________
 
-Multigrid operates by coarsening the solution (and the geometry with it) on a hierarchy of grid levels, and smoothing the solution on each level.
-There are a number of factors that influence the multigrid performance.
-Often the most critical factors are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
-In addition, the multigrid convergence is improved by increasing the number of smoothings per grid level (up to a certain point), as well as the type of smoother and bottom solver being used.
-We explain these options below:
-
-* ``FieldSolverGMG.gmg_verbosity``.
-  Controls the multigrid verbosity.
-  Setting it to a number :math:`> 0` will print multigrid convergence information.  
-* ``FieldSolverGMG.gmg_use_default_settings``.
-  Use default multigrid settings.
-  This tends to make most problems converge.
-* ``FieldSolverGMG.gmg_pre_smooth``.
-  Controls the number of relaxations on each level during multigrid downsweeps.
-* ``FieldSolverGMG.gmg_post_smooth``.
-  Controls the number of relaxations on each level during multigrid upsweeps.
-* ``FieldSolverGMG.gmg_bott_smooth``.
-  Controls the number of relaxations before entering the bottom solve. 
-* ``FieldSolverGMG.gmg_min_iter``.
-  Sets the minimum number of iterations that multigrid will perform. 
-* ``FieldSolverGMG.gmg_max_iter``.
-  Sets the maximum number of iterations that multigrid will perform. 
-* ``FieldSolverGMG.gmg_exit_tol``.
-  Sets the exit tolerance for multigrid.
-  Multigrid will exit the iterations if :math:`r < \lambda r_0` where :math:`\lambda` is the specified tolerance, :math:`r = |L\Phi -\rho|` is the residual and :math:`r_0` is the residual for :math:`\Phi = 0`.  
-* ``FieldSolverGMG.gmg_exit_hang``.
-  Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
-  Letting :math:`r^k` be the residual after :math:`k` multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of :math:`r^{k+1} < (1-h)r^k`, where :math:`h` is the "hang" factor.
-* ``FieldSolverGMG.gmg_min_cells``.
-  Sets the minimum amount of cells along any coordinate direction for coarsened levels.
-  Note that this will control how far multigrid will coarsen. Setting a number ``gmg_min_cells = 16`` will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction. 
-* ``FieldSolverGMG.gmg_bc_order``.
-  Sets the stencil order for Dirichlet boundary conditions (on electrodes).
-  Note that this is also the stencil radius. 
-* ``FieldSolverGMG.gmg_bc_weight``. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
-  See :ref:`Chap:LeastSquares` for details. 
-* ``FieldSolverGMG.gmg_jump_order``. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
-  Note that this is also the stencil radius. 
-* ``FieldSolverGMG.gmg_jump_weight``.
-  Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
-  See :ref:`Chap:LeastSquares` for details. 
-* ``FieldSolverGMG.gmg_bottom_solver``.
-  Sets the bottom solver type. 
-* ``FieldSolverGMG.gmg_cycle``.
-  Sets the multigrid method.
-  Currently, only V-cycles are supported.
-* ``FieldSolverGMG.gmg_smoother``.
-  Sets the multigrid smoother.
-* ``FieldSolverGMG.gmg_relax_factor``.
-  Sets the multigrid relaxation factor.
-
-
-  .. tip::
-     
-     Enabling this setting tends to make most problems converge quite well.
-
-
-.. warning::
-
-   When setting the bottom solver (which by default is a biconjugate gradient stabilized method) to a regular smoother, one must also specify the number of smoothings to perform.
-   E.g., ``FieldSolverGMG.gmg_bottom_solver = simple 64``.
-   Setting the bottom solver to ``simple`` without specifying the number of smoothings that will be performed will issue a run-time error. 
-		
+The multigrid solver (smoothers, bottom solvers, cycle type, exit criteria) and the outer Krylov (GMRES/BiCGStab) configuration are shared across all ``chombo-discharge`` solvers and are documented centrally -- including the full list of ``gmg_*`` and ``krylov_*`` options -- in :ref:`Chap:MultigridTuning`.
 
 Adjusting output
 ________________
@@ -468,12 +502,12 @@ Recall that the polarization (in frequency space) is
 
 where :math:`\chi(\omega)` is the dielectric susceptibility.
 
-There are two forms that ``chombo-discharge`` can support frequency dependent permittivities; through convolution or through auxiliary differential equations (ADEs).
+There are two forms through which ``chombo-discharge`` can support frequency-dependent permittivities: through convolution or through auxiliary differential equations (ADEs).
 
 Convolution approach
 ____________________
 
-In the time domain, the displacement field is.
+In the time domain, the displacement field is:
 
 .. math::
 
@@ -538,7 +572,7 @@ The Gauss law yields
    \nabla\cdot\left[\left(1 + C_0^k\right)\mathbf{E}^k\right] = \frac{\rho}{\epsilon_0} - \frac{1}{\epsilon_0}\nabla\cdot\sum_{m>0} C_m^k\mathbf{P}^{k-m}.
 
 Unlike the convolution approach, this only requires storing terms required for the ADE description. 
-This depends both on the order of the ADE, as well as it's discretization.
+This depends both on the order of the ADE, as well as its discretization.
 Normally, the ADE is a low-order PDE and a few terms are sufficient.    
    
 Limitations

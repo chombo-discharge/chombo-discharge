@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_Initialize.cpp
-  @brief  Implementation of CD_Initialize.cpp
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_Initialize.cpp
+ * @brief  Implementation of CD_Initialize.H
+ * @author Robert Marskar
+ */
 
 // Std includes
 #if defined(CH_MPI) || defined(CH_USE_PETSC)
@@ -27,6 +28,7 @@
 
 // Our includes
 #include <CD_Initialize.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 std::string dischargeInputFile;
@@ -43,7 +45,17 @@ initialize(int argc, char* argv[])
   const PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 #else
 #if defined(CH_MPI)
+#ifdef _OPENMP
+  // MPI+OpenMP: Initialize with thread support
+  int provided;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+  if (provided < MPI_THREAD_FUNNELED) {
+    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << endl;
+  }
+#else
+  // MPI only
   MPI_Init(&argc, &argv);
+#endif
 #endif
 #endif
 
@@ -70,6 +82,7 @@ initialize(int argc, char* argv[])
 | (__| | | | (_) | | | | | | |_) | (_) |_____| (_| | \__ \ (__| | | | (_| | | | (_| |  __/
  \___|_| |_|\___/|_| |_| |_|_.__/ \___/       \__,_|_|___/\___|_| |_|\__,_|_|  \__, |\___|
 )" << endl;
+    pout() << "  Version:           " << DischargeIO::gitHash() << "\n";
     pout() << "  Working directory: " << cwd << "\n";
     pout() << "  Input file:        " << dischargeInputFile << "\n";
     pout() << "  Run command:       ";
@@ -82,7 +95,30 @@ initialize(int argc, char* argv[])
     pout() << "\n";
     pout() << "--------------------------------------------------------------------------------\n";
 #ifdef CH_MPI
-    pout() << "  MPI:    TRUE (" << numProc() << " ranks)\n";
+    pout() << "  MPI:    TRUE (" << numProc() << " ranks";
+#ifdef _OPENMP
+    int thread_support;
+    MPI_Query_thread(&thread_support);
+    pout() << ", thread support: ";
+    switch (thread_support) {
+    case MPI_THREAD_SINGLE:
+      pout() << "SINGLE";
+      break;
+    case MPI_THREAD_FUNNELED:
+      pout() << "FUNNELED";
+      break;
+    case MPI_THREAD_SERIALIZED:
+      pout() << "SERIALIZED";
+      break;
+    case MPI_THREAD_MULTIPLE:
+      pout() << "MULTIPLE";
+      break;
+    default:
+      pout() << "UNKNOWN";
+      break;
+    }
+#endif
+    pout() << ")\n";
 #else
     pout() << "  MPI:    FALSE\n";
 #endif
@@ -102,7 +138,7 @@ initialize(int argc, char* argv[])
     pout() << "  PETSc:  FALSE\n";
 #endif
     pout() << "==========================================================================================" << endl;
-    pout() << std::endl;
+    pout() << endl;
   }
 
 #if defined(CH_USE_PETSC)

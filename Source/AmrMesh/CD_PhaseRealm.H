@@ -1,16 +1,20 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_PhaseRealm.H
-  @brief  Declaration of the PhaseRealm class. 
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_PhaseRealm.H
+ * @brief  Declaration of the PhaseRealm class.
+ * @author Robert Marskar
+ */
 
-#ifndef CD_PhaseRealm_H
-#define CD_PhaseRealm_H
+#ifndef CD_PHASEREALM_H
+#define CD_PHASEREALM_H
+
+// Std includes
+#include <array>
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
@@ -25,7 +29,6 @@
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
-#include <CD_ParticleContainer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBFluxRedistribution.H>
@@ -49,88 +52,92 @@ static const std::string s_eb_irreg_interp     = "eb_irreg_interp";     // For d
 static const std::string s_eb_coar_ave         = "eb_coar_ave";         // For coarsening
 static const std::string s_eb_fill_patch       = "eb_fill_patch";       // For regridding data
 static const std::string s_eb_fine_interp      = "eb_fine_interp";      // For linearly filling ghost cells
-static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registeration
+static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registration
 static const std::string s_eb_redist           = "eb_redist";           // For redistribution
 static const std::string s_noncons_div         = "eb_non_cons_div";     // For computing non-conservative divergences
 static const std::string s_eb_multigrid        = "eb_multigrid";        // For multigrid interpolation
 static const std::string s_levelset            = "levelset";            // For putting level-set on mesh
 static const std::string s_particle_mesh       = "particle_mesh";       // For doing particle-mesh operations.
+static const std::string s_mirror_deposition   = "mirror_deposition";   // For mirrored cut-cell deposition.
 
-/*!
-  @brief Class that holds important things for doing AMR over a specific phase and processor distribution. 
-  @details This class is essentially an EBAMR core-grid class, containing the usually EBAMR stuff within
-  a single EBIndexSpace. In thus contains a set of grids (DisjointBoxLayout) and the usual EB stuff
-  (EBLevelGrid, EBISLayout). In addition, it contains a bunch of operators that can be registered by the
-  user (through the user interface AmrMesh). These operators live in this class, and they can be fetched
-  e.g. by AmrMesh. 
-  @note This class is a book-keeping class used by AmrMesh -- it is not meant for direct interaction. 
-  @note To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.verbose=true
-*/
+/**
+ * @brief Class that holds important things for doing AMR over a specific phase and processor distribution.
+ * @details This class is essentially an EBAMR core-grid class, containing the usually EBAMR stuff within
+ * a single EBIndexSpace. In thus contains a set of grids (DisjointBoxLayout) and the usual EB stuff
+ * (EBLevelGrid, EBISLayout). In addition, it contains a bunch of operators that can be registered by the
+ * user (through the user interface AmrMesh). These operators live in this class, and they can be fetched
+ * e.g. by AmrMesh.
+ * @note This class is a book-keeping class used by AmrMesh -- it is not meant for direct interaction.
+ * @note To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.verbose=true
+ */
 class PhaseRealm
 {
 public:
-  /*!
-    @brief Default constructor. Must subsequently call define
-  */
+  /**
+   * @brief Default constructor. Must subsequently call define
+   */
   PhaseRealm();
 
-  /*!
-    @brief Disallowed copy ctor
-    @param[in] a_other Other realm
-  */
+  /**
+   * @brief Disallowed copy ctor
+   * @param[in] a_other Other realm
+   */
   PhaseRealm(const PhaseRealm& a_other) = delete;
 
-  /*!
-    @brief Disallowed move ctor
-    @param[in] a_other Other realm
-  */
+  /**
+   * @brief Disallowed move ctor
+   * @param[in] a_other Other realm
+   */
   PhaseRealm(const PhaseRealm&& a_other) = delete;
 
-  /*!
-    @brief Disallowed copy assignment operator
-    @param[in] a_other Other realm
-  */
+  /**
+   * @brief Disallowed copy assignment operator
+   * @param[in] a_other Other realm
+   */
   PhaseRealm&
   operator=(const PhaseRealm& a_other) = delete;
 
-  /*!
-    @brief Disallowed move assignment operator
-    @param[in] a_other Other realm
-  */
+  /**
+   * @brief Disallowed move assignment operator
+   * @param[in] a_other Other realm
+   */
   PhaseRealm&
   operator=(const PhaseRealm&& a_other) = delete;
 
-  /*!
-    @brief Destructor
-  */
+  /**
+   * @brief Destructor
+   */
   virtual ~PhaseRealm();
 
-  /*!
-    @brief Full define function
-    @param[in] a_grids            Grids on each level, i.e. boxes and processor distributions
-    @param[in] a_domains          Problem domains
-    @param[in] a_refRat           Refinement ratios
-    @param[in] a_dx               Grid resolutions
-    @param[in] a_probLo           Lower-left corner of physical domain
-    @param[in] a_finestLevel      Finest grid level
-    @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
-    @param[in] a_numGhost         Number of ghost cells in data holders
-    @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
-    @param[in] a_redistRad        Redistribution radius
-    @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
-    @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
-    @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
-    @param[in] a_centroidStencil  Stencil type for interpolation from cell centers to cell centroids
-    @param[in] a_ebStencil        Stencil type for interpolation from cell centers to eb centroids
-    @param[in] a_baseif           Implicit/signed distance function 
-    @param[in] a_ebis             EBIndexSpace discrete information
-  */
+  /**
+   * @brief Full define function
+   * @param[in] a_grids            Grids on each level, i.e. boxes and processor distributions
+   * @param[in] a_domains          Problem domains
+   * @param[in] a_refRat           Refinement ratios
+   * @param[in] a_dx               Grid resolutions
+   * @param[in] a_probLo           Lower-left corner of physical domain
+   * @param[in] a_finestLevel      Finest grid level
+   * @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
+   * @param[in] a_numGhost         Number of ghost cells in data holders
+   * @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
+   * @param[in] a_redistRad        Redistribution radius
+   * @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
+   * @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
+   * @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
+   * @param[in] a_mirrorBandRadius Mirror deposition: band half-width in cells. Must not exceed a_numGhost.
+   * @param[in] a_mirrorCondTol    Mirror deposition: smallest permitted eigenvalue ratio in the curvature fit.
+   * @param[in] a_mirrorCreaseTol  Mirror deposition: largest permitted fit residual before falling back to J = 1.
+   * @param[in] a_centroidStencil  Stencil type for interpolation from cell centers to cell centroids
+   * @param[in] a_ebStencil        Stencil type for interpolation from cell centers to eb centroids
+   * @param[in] a_baseif           Implicit/signed distance function
+   * @param[in] a_ebis             EBIndexSpace discrete information
+   */
   void
   define(const Vector<DisjointBoxLayout>&      a_grids,
          const Vector<ProblemDomain>&          a_domains,
          const Vector<int>&                    a_refRat,
          const Vector<Real>&                   a_dx,
-         const RealVect                        a_probLo,
+         const RealVect&                       a_probLo,
          const int                             a_finestLevel,
          const int                             a_ebGhost,
          const int                             a_numGhost,
@@ -139,529 +146,782 @@ public:
          const int                             a_mgInterpOrder,
          const int                             a_mgInterpRadius,
          const int                             a_mgInterpWeight,
+         const int                             a_mirrorBandRadius,
+         const Real                            a_mirrorCondTol,
+         const Real                            a_mirrorCreaseTol,
          const CellCentroidInterpolation::Type a_centroidStencil,
          const EBCentroidInterpolation::Type   a_ebStencil,
          const RefCountedPtr<BaseIF>&          a_baseif,
          const RefCountedPtr<EBIndexSpace>&    a_ebis);
 
-  /*!
-    @brief Set grid method
-    @param[in] a_grids       New grids
-    @param[in] a_finestLevel New finest grid level
-    @details This sets m_grids to be a_grids, but does not perform a regrid of remaining members.
-  */
+  /**
+   * @brief Set grid method
+   * @param[in] a_grids       New grids
+   * @param[in] a_finestLevel New finest grid level
+   * @details This sets m_grids to be a_grids, but does not perform a regrid of remaining members.
+   */
   void
   setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
 
-  /*!
-    @brief Perform pre-regrid operations
-  */
+  /**
+   * @brief Perform pre-regrid operations
+   */
   void
   preRegrid();
 
-  /*!
-    @brief Regrid method for EBAMR base
-    @param[in] a_lmin Coarsest grid level that changed. 
-    @details This regrids EBLevelGrid and iterators
-  */
+  /**
+   * @brief Regrid method for EBAMR base
+   * @param[in] a_lmin Coarsest grid level that changed.
+   * @details This regrids EBLevelGrid and iterators
+   */
   void
   regridBase(const int a_lmin);
 
-  /*!
-    @brief Regrid method for EBAMR operators.
-    @param[in] a_lmin Coarsest grid level that changed. 
-    @details This regrids all operators. 
-  */
+  /**
+   * @brief Regrid method for EBAMR operators.
+   * @param[in] a_lmin Coarsest grid level that changed.
+   * @details This regrids all operators.
+   */
   void
   regridOperators(const int a_lmin);
 
-  /*!
-    @brief Register an AMR operator
-    @param[in] a_operator Operator name
-    @details Issues run-time error if a_operator can't be recognized
-  */
+  /**
+   * @brief Register an AMR operator
+   * @param[in] a_operator Operator name
+   * @details Issues run-time error if a_operator can't be recognized
+   */
   void
-  registerOperator(const std::string a_operator);
+  registerOperator(const std::string& a_operator);
 
-  /*!
-    @brief Query if an AMR operator has been registered
-    @param[in] a_operator operator name
-    @return True if operator has been registered and false otherwise
-  */
+  /**
+   * @brief Query if an AMR operator has been registered
+   * @param[in] a_operator operator name
+   * @return True if operator has been registered and false otherwise
+   */
   bool
-  queryOperator(const std::string a_operator) const;
+  queryOperator(const std::string& a_operator) const;
 
-  /*!
-    @brief Return the EB index space
-  */
+  /**
+   * @brief Return the EB index space
+   * @return E b index space
+   */
   const RefCountedPtr<EBIndexSpace>&
   getEBIndexSpace() const;
 
-  /*!
-    @brief Get refinment ratios
-    @return Returns m_refinementRatios
-  */
+  /**
+   * @brief Get refinement ratios
+   * @return Returns m_refinementRatios
+   */
   const Vector<int>&
   getRefinementRatios() const;
 
-  /*!
-    @brief Returns resolutions
-    @return Returns m_dx
-  */
+  /**
+   * @brief Returns resolutions
+   * @return Returns m_dx
+   */
   const Vector<Real>&
   getDx() const;
 
-  /*!
-    @brief Get AMR grids
-    @return Immutable m_grids
-  */
+  /**
+   * @brief Get AMR grids
+   * @return Immutable m_grids
+   */
   const Vector<DisjointBoxLayout>&
   getGrids() const;
 
-  /*!
-    @brief Get problem domains
-    @return Returns m_domains
-  */
+  /**
+   * @brief Get problem domains
+   * @return Returns m_domains
+   */
   const Vector<ProblemDomain>&
   getDomains() const;
 
-  /*!
-    @brief Get EBIS layout
-    @return Immutable m_ebislayout
-  */
+  /**
+   * @brief Get EBIS layout
+   * @return Immutable m_ebislayout
+   */
   const Vector<EBISLayout>&
   getEBISLayout() const;
 
-  /*!
-    @brief Get EBLevelGrids
-  */
+  /**
+   * @brief Get EBLevelGrids
+   * @return E b level grid
+   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGrid() const;
 
-  /*!
-    @brief Get coarsened fine grids
-  */
+  /**
+   * @brief Get coarsened fine grids
+   * @return E b level grid co fi
+   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi() const;
 
-  /*!
-    @brief Get refined grids
-  */
+  /**
+   * @brief Get refined grids
+   * @return E b level grid fi co
+   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridFiCo() const;
 
-  /*!
-    @brief Return vof iterator for iterating over irregular cells in each grid patch
-    @return m_vofIter (which is, in fact, mutable)
-  */
+  /**
+   * @brief Return VoF iterators covering all cut-cells (singly- and multiply-cut) in each grid patch.
+   * @details For a pass that covers only multiply-cut cells, use getMultiCutVofIterator instead.
+   * @return m_vofIter (which is, in fact, mutable)
+   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator() const;
 
-  /*!
-    @brief Get objects for interpolation from cell centers to centroids. 
-  */
+  /**
+   * @brief Return vof iterator for iterating over multiply-cut cells only (cells with more than one VoF)
+   * @return m_multiCutVofIter (which is, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getMultiCutVofIterator() const;
+
+  /**
+   * @brief Return face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingWithBoundary).
+   * @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+   * Domain boundary faces are included. For cell-to-face averaging that excludes domain boundary faces,
+   * use getFaceIteratorNoBoundary instead.
+   * @return m_faceIter (which is, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIterator() const;
+
+  /**
+   * @brief Return face iterators over cut-cell faces in each valid grid box (FaceStop::SurroundingNoBoundary).
+   * @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+   * Domain boundary faces are excluded. Intended for cell-to-face averaging where domain boundary faces
+   * are fixed up separately.
+   * @return m_faceIterNoBoundary (which is, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorNoBoundary() const;
+
+  /**
+   * @brief Return per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+   * @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+   * For the iterator in direction dir, the underlying IVS covers irregular cells in a box grown by 1
+   * in the two directions tangential to dir; the dir extent stays at the valid box. Domain boundary
+   * faces are excluded (FaceStop::SurroundingNoBoundary). Callers require at least 1 ghost layer in
+   * cell data. For faces strictly inside the valid box, use getFaceIterator instead.
+   * @return m_faceIterTanGhost (which is, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getFaceIteratorWithTangentialGhosts() const;
+
+  /**
+   * @brief Return face iterators restricted to multiply-cut faces in each valid grid box.
+   * @details Each entry is an array of SpaceDim FaceIterators, one per coordinate direction.
+   * Only faces that abut at least one multiply-cut cell (cells with more than one VoF) are
+   * iterated. Faces are enumerated with FaceStop::SurroundingNoBoundary. Used as a second
+   * pass after a box loop over getSingleValuedFAB to avoid double-processing singly-cut faces.
+   * @return m_multiCutFaceIter (which is, in fact, mutable)
+   */
+  Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>>&
+  getMultiCutFaceIterator() const;
+
+  /**
+   * @brief Get objects for interpolation from cell centers to centroids.
+   * @return Cell centroid interpolation
+   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
   getCellCentroidInterpolation() const;
 
-  /*!
-    @brief Get objects for interpolation from cell centers to EB centroids
-  */
+  /**
+   * @brief Get objects for interpolation from cell centers to EB centroids
+   * @return E b centroid interpolation
+   */
   const Vector<RefCountedPtr<EBCentroidInterpolation>>&
   getEBCentroidInterpolation() const;
 
-  /*!
-    @brief Get objects for computing non-conservative divergences.
-  */
+  /**
+   * @brief Get objects for computing non-conservative divergences.
+   * @return Non conservative divergence
+   */
   const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
   getNonConservativeDivergence() const;
 
-  /*!
-    @brief Get gradient object
-  */
+  /**
+   * @brief Get gradient object
+   * @return Gradient op
+   */
   const Vector<RefCountedPtr<EBGradient>>&
   getGradientOp() const;
 
-  /*!
-    @brief Get particle-mesh operator
-  */
+  /**
+   * @brief Get particle-mesh operator
+   * @return Particle mesh
+   */
   EBAMRParticleMesh&
   getParticleMesh() const;
 
-  /*!
-    @brief Get the surface deposition operator
-  */
+  /**
+   * @brief Get the surface deposition operator
+   * @return Surface deposition
+   */
   EBAMRSurfaceDeposition&
   getSurfaceDeposition() const;
 
-  /*!
-    @brief Get coarsening operators
-  */
+  /**
+   * @brief Get coarsening operators
+   * @return Coarse average
+   */
   Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage() const;
 
-  /*!
-    @brief Get deposition operator
-  */
+  /**
+   * @brief Get deposition operator
+   * @return E b coarse fine particle mesh
+   */
   Vector<RefCountedPtr<EBCoarseFineParticleMesh>>&
   getEBCoarseFineParticleMesh() const;
 
-  /*!
-    @brief Get multigrid interpolator
-  */
+  /**
+   * @brief Get multigrid interpolator
+   * @return Multigrid interpolator
+   */
   Vector<RefCountedPtr<EBMultigridInterpolator>>&
   getMultigridInterpolator() const;
 
-  /*!
-    @brief Get ghost cell interpolation utility
-  */
+  /**
+   * @brief Get ghost cell interpolation utility
+   * @return Ghost cell interpolator
+   */
   Vector<RefCountedPtr<EBGhostCellInterpolator>>&
   getGhostCellInterpolator() const;
 
-  /*!
-    @brief Get piecewise linear ghost cell interpolation utility
-  */
+  /**
+   * @brief Get piecewise linear ghost cell interpolation utility
+   * @return Fine interp
+   */
   Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp() const;
 
-  /*!
-    @brief Get flux register utility
-  */
+  /**
+   * @brief Get flux register utility
+   * @return Flux register
+   */
   Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister() const;
 
-  /*!
-    @brief Get the redistribution operators
-    @param[in] a_phase Phase (gas or solid)
-  */
+  /**
+   * @brief Get the redistribution operators
+   * @return Redistribution operators on all levels
+   */
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp() const;
 
-  /*!
-    @brief Get level-set function
-  */
+  /**
+   * @brief Get level-set function
+   * @return Levelset
+   */
   const EBAMRFAB&
   getLevelset() const;
 
+  /**
+   * @brief Get the regular-cell mask (value 1 in regular cells, 0 elsewhere).
+   * @return m_regularCells
+   */
+  const EBAMRCellData&
+  getRegularCells() const;
+
+  /**
+   * @brief Get the covered-cell mask (value 1 in covered cells, 0 elsewhere).
+   * @return m_coveredCells
+   */
+  const EBAMRCellData&
+  getCoveredCells() const;
+
+  /**
+   * @brief Get the non-covered-cell mask (value 1 in regular/irregular cells, 0 in covered cells).
+   * @return m_notCoveredCells
+   */
+  const EBAMRCellData&
+  getNotCoveredCells() const;
+
+  /**
+   * @brief Get the irregular-cell mask (value 1 in irregular/cut cells, 0 elsewhere).
+   * @return m_irregularCells
+   */
+  const EBAMRCellData&
+  getIrregularCells() const;
+
+  /**
+   * @brief Get the per-band-cell surface data used by mirrored deposition.
+   * @details Empty unless the s_mirror_deposition operator was registered. Component layout is in
+   * CD_MirrorDeposition.H.
+   * @return m_mirrorSurfaceData
+   */
+  const EBAMRCellData&
+  getMirrorSurfaceData() const;
+
+  /**
+   * @brief Get, per level, whether that level has any cut cell anywhere in the domain.
+   * @details All-reduced, so the answer is the same on every rank. Nonzero means the level has cut cells.
+   * @return m_mirrorHasCutCells
+   */
+  const Vector<int>&
+  getMirrorHasCutCells() const;
+
 protected:
-  /*!
-    @brief True if things on this phase can be defined. False otherwise. Only used internally. 
-  */
+  /**
+   * @brief True if things on this phase can be defined. False otherwise. Only used internally.
+   */
   bool m_isDefined;
 
-  /*!
-    @brief Relic of an ancient past. Always true. 
-  */
+  /**
+   * @brief Relic of an ancient past. Always true.
+   */
   bool m_hasEbCf;
 
-  /*!
-    @brief Profile or not
-  */
+  /**
+   * @brief Profile or not
+   */
   bool m_profile;
 
-  /*!
-    @brief Verbose or not
-  */
+  /**
+   * @brief Verbose or not
+   */
   bool m_verbose;
 
-  /*!
-    @brief Finest grid level
-  */
+  /**
+   * @brief Whether mirrored deposition fits a shape operator, or settles for a plane mirror.
+   * @details Optional, read from PhaseRealm.mirror_curvature_correction and defaulting to true. With it false the
+   * curvature fit is skipped entirely and the shape operator stays zero, which degrades mirrored deposition to a
+   * plane mirror -- reflect() needs no special case for that, since a zero shape operator already collapses the
+   * patch normal to n_c and the Jacobian to one.
+   * @details It exists to answer whether the correction earns its cost on a given geometry, and the answer is not
+   * obviously yes or no. On a rod dielectric it moved individual cut cells by up to a factor of three, always
+   * upwards when disabled, because a convex surface has J < 1 and a plane mirror does not down-weight the image.
+   * On a gently curved surface the effect is small. Measure before deciding.
+   */
+  bool m_mirrorCurvatureCorrection;
+
+  /**
+   * @brief Finest grid level
+   */
   int m_finestLevel;
 
-  /*!
-    @brief Number of ghost cells in data holders
-  */
+  /**
+   * @brief Number of ghost cells in data holders
+   */
   int m_numGhostCells;
 
-  /*!
-    @brief Number of ghost cells in EBLevelGrid/EBISLayout/EBISBox
-  */
+  /**
+   * @brief Number of ghost cells in EBLevelGrid/EBISLayout/EBISBox
+   */
   int m_numEbGhostsCells;
 
-  /*!
-    @brief Number of ghost cells in level-set function (on the mesh)
-  */
+  /**
+   * @brief Number of ghost cells in level-set function (on the mesh)
+   */
   int m_numLsfGhostCells;
 
-  /*!
-    @brief Redistribution radius
-  */
+  /**
+   * @brief Redistribution radius
+   */
   int m_redistributionRadius;
 
-  /*!
-    @brief Multigrid interpolator order
-  */
+  /**
+   * @brief Multigrid interpolator order
+   */
   int m_multigridInterpolationOrder;
 
-  /*!
-    @brief Multigrid interpolator radius
-  */
+  /**
+   * @brief Multigrid interpolator radius
+   */
   int m_multigridInterpolationRadius;
 
-  /*!
-    @brief Multigrid interpolator weight (for least squares)
-  */
+  /**
+   * @brief Multigrid interpolator weight (for least squares)
+   */
   int m_multigridInterpolationWeight;
 
-  /*!
-    @brief Lower-left corner of computational domain
-  */
+  /**
+   * @brief Lower-left corner of computational domain
+   */
   RealVect m_probLo;
 
-  /*!
-    @brief Cell-center to cell-centroid interpolation method.
-  */
+  /**
+   * @brief Cell-center to cell-centroid interpolation method.
+   */
   CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
-  /*!
-    @brief Cell-center to cell-centroid interpolation method.
-  */
+  /**
+   * @brief Cell-center to cell-centroid interpolation method.
+   */
   EBCentroidInterpolation::Type m_ebCentroidInterpolationType;
 
-  /*!
-    @brief Grid resolutions
-  */
+  /**
+   * @brief Grid resolutions
+   */
   Vector<Real> m_dx;
 
-  /*!
-    @brief Refinement ratios between levels
-  */
+  /**
+   * @brief Refinement ratios between levels
+   */
   Vector<int> m_refinementRatios;
 
-  /*!
-    @brief EB index space
-  */
+  /**
+   * @brief EB index space
+   */
   RefCountedPtr<EBIndexSpace> m_ebis;
 
-  /*!
-    @brief Implicit/SD function
-  */
+  /**
+   * @brief Implicit/SD function
+   */
   RefCountedPtr<BaseIF> m_baseif;
 
-  /*!
-    @brief Operator map for checking which ones are registered
-  */
+  /**
+   * @brief Operator map for checking which ones are registered
+   */
   std::map<std::string, bool> m_operatorMap;
 
-  /*!
-    @brief AMR grids
-  */
+  /**
+   * @brief AMR grids
+   */
   Vector<DisjointBoxLayout> m_grids;
 
-  /*!
-    @brief Problem domains
-  */
+  /**
+   * @brief Problem domains
+   */
   Vector<ProblemDomain> m_domains;
 
-  /*!
-    @brief EBIS layouts
-  */
+  /**
+   * @brief EBIS layouts
+   */
   Vector<EBISLayout> m_ebisl;
 
-  /*!
-    @brief EB level grids
-  */
+  /**
+   * @brief EB level grids
+   */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblg;
 
-  /*!
-    @brief Coarsened fine-level EB grids. 
-    @details m_eblgCoFi[lvl] holds the grids on level lvl that are a coarsening of the grids on lvl+1
-  */
+  /**
+   * @brief Coarsened fine-level EB grids.
+   * @details m_eblgCoFi[lvl] holds the grids on level lvl that are a coarsening of the grids on lvl+1
+   */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgCoFi;
 
-  /*!
-    @brief Coarsened fine-level EB grids. 
-    @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
-  */
+  /**
+   * @brief Coarsened fine-level EB grids.
+   * @details m_eblgFiCo[lvl] holds the refinement of the grids on level lvl-1
+   */
   Vector<RefCountedPtr<EBLevelGrid>> m_eblgFiCo;
 
-  /*!
-    @brief Level-set function
-  */
+  /**
+   * @brief Level-set function
+   */
   EBAMRFAB m_levelset;
 
-  /*! 
-    @brief Cut-cell iterator
-  */
+  /**
+   * @brief Cell mask with value 1 in regular cells and 0 elsewhere.
+   */
+  EBAMRCellData m_regularCells;
+
+  /**
+   * @brief Cell mask with value 1 in covered cells and 0 elsewhere.
+   */
+  EBAMRCellData m_coveredCells;
+
+  /**
+   * @brief Cell mask with value 1 in non-covered (regular and irregular) cells and 0 in covered cells.
+   */
+  EBAMRCellData m_notCoveredCells;
+
+  /**
+   * @brief Cell mask with value 1 in irregular (cut) cells and 0 elsewhere.
+   */
+  EBAMRCellData m_irregularCells;
+
+  /**
+   * @brief Per-band-cell local surface patch used by mirrored deposition: (status, x_c, n_c, S_c).
+   * @details Eight components in 2-D, thirteen in 3-D; the layout is defined by CD_MirrorDeposition.H. Regrid
+   * lifetime, so not mutable -- the m_irregularCells convention. Only built when the s_mirror_deposition operator is
+   * registered, because it is not cheap: at the shipped defaults it costs roughly 430 MB per level, per phase, per
+   * realm, against 131 MB for the four cell masks together.
+   */
+  EBAMRCellData m_mirrorSurfaceData;
+
+  /**
+   * @brief Per level, whether the level has any cut cell ANYWHERE in the domain.
+   * @details All-reduced across ranks, and that is load-bearing rather than tidy: the mirror pass early-outs on this,
+   * and the pass contains a collective remap, so a per-rank answer would deadlock the ranks that disagree.
+   * @details Held as int rather than bool because Chombo's Vector<T>::operator[] returns T&, which the
+   * std::vector<bool> proxy specialization cannot provide -- Vector<bool> does not compile.
+   */
+  Vector<int> m_mirrorHasCutCells;
+
+  /**
+   * @brief Mirror deposition: band half-width in cells.
+   */
+  int m_mirrorBandRadius;
+
+  /**
+   * @brief Mirror deposition: smallest permitted eigenvalue ratio of U^T U in the shape-operator fit.
+   */
+  Real m_mirrorConditionTolerance;
+
+  /**
+   * @brief Mirror deposition: largest permitted dimensionless residual of the shape-operator fit.
+   */
+  Real m_mirrorCreaseTolerance;
+
+  /**
+   * @brief Cut-cell iterator (all irregular cells)
+   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIter;
 
-  /*!
-    @brief Coarsening operator
-  */
+  /**
+   * @brief Cut-cell iterator restricted to multiply-cut cells (cells with more than one VoF)
+   */
+  mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_multiCutVofIter;
+
+  /**
+   * @brief Face iterators over cut-cell faces in the valid box (FaceStop::SurroundingWithBoundary).
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIter;
+
+  /**
+   * @brief Face iterators over cut-cell faces in the valid box (FaceStop::SurroundingNoBoundary).
+   * @details Domain boundary faces are excluded. Use this for cell-to-face averaging where boundary
+   * faces are fixed up separately. See getFaceIteratorNoBoundary.
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterNoBoundary;
+
+  /**
+   * @brief Per-direction face iterators covering cut-cell faces that reach into the tangential ghost layer.
+   * @details For the iterator in direction dir, the IVS covers irregular cells in a box grown by 1
+   * in the two directions tangential to dir; the dir extent stays at the valid-box boundary.
+   * Domain boundary faces are excluded (FaceStop::SurroundingNoBoundary).
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_faceIterTanGhost;
+
+  /**
+   * @brief Face iterators over multiply-cut faces in each valid grid box (SurroundingNoBoundary stop criterion)
+   */
+  mutable Vector<RefCountedPtr<LayoutData<std::array<FaceIterator, SpaceDim>>>> m_multiCutFaceIter;
+
+  /**
+   * @brief Coarsening operator
+   */
   mutable Vector<RefCountedPtr<EBCoarAve>> m_coarAve;
 
-  /*!
-    @brief Multigrid interpolation utility
-  */
+  /**
+   * @brief Multigrid interpolation utility
+   */
   mutable Vector<RefCountedPtr<EBMultigridInterpolator>> m_multigridInterpolator;
 
-  /*!
-    @brief Ghost cell interpolation utility
-  */
+  /**
+   * @brief Ghost cell interpolation utility
+   */
   mutable Vector<RefCountedPtr<EBGhostCellInterpolator>> m_ghostCellInterpolator;
 
-  /*!
-    @brief Regridding utility (for filling new grid patches)
-  */
+  /**
+   * @brief Regridding utility (for filling new grid patches)
+   */
   mutable Vector<RefCountedPtr<EBCoarseToFineInterp>> m_ebFineInterp;
 
-  /*!
-    @brief Flux register utility
-  */
+  /**
+   * @brief Flux register utility
+   */
   mutable Vector<RefCountedPtr<EBReflux>> m_ebReflux;
 
-  /*!
-    @brief Redistribution utilities
-  */
+  /**
+   * @brief Redistribution utilities
+   */
   mutable Vector<RefCountedPtr<EBFluxRedistribution>> m_redistributionOp;
 
-  /*!
-    @brief Gradient operator
-  */
+  /**
+   * @brief Gradient operator
+   */
   mutable Vector<RefCountedPtr<EBGradient>> m_gradientOp;
 
-  /*!
-    @brief For doing particle-mesh operations
-  */
+  /**
+   * @brief For doing particle-mesh operations
+   */
   mutable EBAMRParticleMesh m_particleMesh;
 
-  /*!
-    @brief For doing particle deposition onto surfaces
-  */
+  /**
+   * @brief For doing particle deposition onto surfaces
+   */
   mutable EBAMRSurfaceDeposition m_surfaceDeposition;
 
-  /*!
-    @brief For interpolating data from cell centers to cell centroids. 
-  */
+  /**
+   * @brief For interpolating data from cell centers to cell centroids.
+   */
   mutable Vector<RefCountedPtr<CellCentroidInterpolation>> m_cellCentroidInterpolation;
 
-  /*!
-    @brief For interpolating data from cell centers to EB centroids. 
-  */
+  /**
+   * @brief For interpolating data from cell centers to EB centroids.
+   */
   mutable Vector<RefCountedPtr<EBCentroidInterpolation>> m_ebCentroidInterpolation;
 
-  /*!
-    @brief For computing non-conservative divergences
-  */
+  /**
+   * @brief For computing non-conservative divergences
+   */
   mutable Vector<RefCountedPtr<EBNonConservativeDivergence>> m_nonConservativeDivergence;
 
-  /*!
-    @brief Define EBLevelGrids
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define EBLevelGrids
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineEBLevelGrid(const int a_lmin);
 
-  /*!
-    @brief Define vof iterators
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define vof iterators
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineVofIterator(const int a_lmin);
 
-  /*!
-    @brief Define coarsening utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define coarsening utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineEBCoarAve(const int a_lmin);
 
-  /*!
-    @brief Define multigrid interpolation utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define multigrid interpolation utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineEBMultigrid(const int a_lmin);
 
-  /*!
-    @brief Define regrid utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define regrid utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineFillPatch(const int a_lmin);
 
-  /*!
-    @brief Define ghost cell interpolation utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define ghost cell interpolation utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineEBCoarseToFineInterp(const int a_lmin);
 
-  /*!
-    @brief Define multigrid injection utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define multigrid injection utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineMultigridInjection(const int a_lmin);
 
-  /*!
-    @brief Define flux register utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define flux register utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   * @param[in] a_regsize Description
+   */
   void
   defineFluxReg(const int a_lmin, const int a_regsize);
 
-  /*!
-    @brief Define operator redistribution utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define operator redistribution utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   * @param[in] a_regsize Description
+   */
   void
   defineRedistOper(const int a_lmin, const int a_regsize);
 
-  /*!
-    @brief Define operator redistribution utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define operator redistribution utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   * @param[in] a_regsize Description
+   */
   void
   defineFineToCoarRedistOper(const int a_lmin, const int a_regsize);
 
-  /*!
-    @brief Define operator redistribution utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define operator redistribution utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   * @param[in] a_regsize Description
+   */
   void
   defineCoarToFineRedistOper(const int a_lmin, const int a_regsize);
 
-  /*!
-    @brief Define operator redistribution utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define operator redistribution utility
+   * @param[in] a_lmin Coarsest grid level that changes
+   * @param[in] a_regsize Description
+   */
   void
   defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);
 
-  /*!
-    @brief Define particle mesh operator. 
-  */
+  /**
+   * @brief Define particle mesh operator.
+   */
   void
   defineParticleMesh();
 
-  /*!
-    @brief Define gradient stencils
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Build the per-band-cell surface data used by mirrored cut-cell deposition.
+   * @details Runs three passes over each level: seed the cut cells with a boundary centroid and normal, fit the
+   * shape operator over the 5^D neighbourhood, then extend the result outwards to the band by Euclidean-nearest
+   * assignment. An exchange separates each pass from the next, and the ORDER MATTERS -- passes B and C read their
+   * neighbours from the FIELD rather than from EBISBox, which is what makes a cut cell no box on this level owns
+   * read back as Status::None instead of silently contributing stale geometry. See the implementation.
+   * @details The seed geometry comes from EBISBox by default. It can instead be taken from the implicit function --
+   * normal from the gradient, centroid by one Newton step onto phi = 0 -- which is roughly four orders of magnitude
+   * more accurate on a sphere but costs O(2*SpaceDim) evaluations of BaseIF::value per cut cell per regrid. The
+   * switch is the compile-time constant useImplicitFunctionGeometry at the top of the implementation, which also
+   * carries the measured accuracy table and the reasoning. Whichever source is used is reported at m_verbose,
+   * including the case where the implicit function was wanted but the realm has none.
+   * @details Does nothing unless the s_mirror_deposition operator is registered on this realm and phase, so realms
+   * that never mirror pay neither the memory nor the passes.
+   * @note Requires AmrMesh.eb_ghost >= 2, so that EBISBox is valid over the 5^D curvature-fit stencil, and
+   * AmrMesh.num_ghost >= AmrMesh.mirror_band_radius, so that the exchange can deliver the cut-cell data the band
+   * reads. These are independent requirements on independent quantities -- eb_ghost sizes the region over which
+   * geometric data is valid, num_ghost sizes the DATA -- and deriving one from the other has been a recurring
+   * mistake. Both are checked at define time and abort by name.
+   * @param[in] a_lmin Coarsest level that changed.
+   */
+  void
+  defineMirrorSurfaceData(const int a_lmin);
+
+  /**
+   * @brief Define gradient stencils
+   * @param[in] a_lmin Description
+   */
   void
   defineGradSten(const int a_lmin);
 
-  /*!
-    @brief Define data recentering stencils
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define data recentering stencils
+   */
   void
   defineIrregSten();
 
-  /*!
-    @brief Define non-conservative divergence stencils
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Define non-conservative divergence stencils
+   * @param[in] a_lmin Coarsest grid level that changes
+   */
   void
   defineNonConservativeDivergence(const int a_lmin);
 
-  /*!
-    @brief Put the level-set on the mesh
-    @param[in] a_lmin Coarsest grid level that changes
-  */
+  /**
+   * @brief Put the level-set on the mesh
+   * @param[in] a_lmin Coarsest grid level that changes
+   * @param[in] a_numGhost Description
+   */
   void
   defineLevelSet(const int a_lmin, const int a_numGhost);
+
+  /**
+   * @brief Define the regular/covered/irregular cell masks.
+   * @details Each mask is a cell-centered field that is 1 in cells of the corresponding type and 0
+   * elsewhere. The masks are built geometrically from the EBISBox and let kernels replace per-cell
+   * EBISBox::isRegular/isCovered queries (which are not inlinable) with a vectorizable mask load.
+   * @param[in] a_lmin     Coarsest grid level that changes
+   * @param[in] a_numGhost Number of ghost cells
+   */
+  void
+  defineMasks(const int a_lmin, const int a_numGhost);
 };
 
 #include <CD_NamespaceFooter.H>

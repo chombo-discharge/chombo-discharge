@@ -1,18 +1,19 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EddingtonSP1.cpp
-  @brief  Implementation of CD_EddingtonSP1.H
-  @author Robert Marskar
-  @todo   Stencil weights and order need to be input parameters!
-*/
+/**
+ * @file   CD_EddingtonSP1.cpp
+ * @brief  Implementation of CD_EddingtonSP1.H
+ * @author Robert Marskar
+ * @todo   Stencil weights and order need to be input parameters!
+ */
 
 // Std includes
 #include <chrono>
-#include <time.h>
+#include <ctime>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -33,29 +34,27 @@ constexpr Real EddingtonSP1::m_alpha;
 constexpr Real EddingtonSP1::m_beta;
 
 Real
-EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time)
+EddingtonSP1::s_defaultDomainBcFunction(const RealVect& /*a_position*/, const Real /*a_time*/)
 {
   return 1.0;
 }
 
-EddingtonSP1::EddingtonSP1() : RtSolver()
+EddingtonSP1::EddingtonSP1() : m_isSolverSetup(false), m_regridSlopes(true)
 {
 
   // Default settings
   m_name      = "EddingtonSP1";
   m_className = "EddingtonSP1";
 
-  m_verbosity     = -1;
-  m_isSolverSetup = false;
-  m_dataLocation  = Location::Cell::Center;
-  m_regridSlopes  = true;
+  m_verbosity = -1;
+
+  m_dataLocation = Location::Cell::Center;
 
   // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side.
   this->setDefaultDomainBcFunctions();
 }
 
-EddingtonSP1::~EddingtonSP1()
-{}
+EddingtonSP1::~EddingtonSP1() = default;
 
 void
 EddingtonSP1::parseOptions()
@@ -157,7 +156,7 @@ EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 }
 
 EddingtonSP1DomainBc::BcType
-EddingtonSP1::parseBcString(const std::string a_str) const
+EddingtonSP1::parseBcString(const std::string& a_str) const
 {
   CH_TIME("EddingtonSP1::parseBcString");
   if (m_verbosity > 5) {
@@ -190,6 +189,7 @@ EddingtonSP1::parseDomainBC()
     pout() << m_name + "::parseDomainBC" << endl;
   }
 
+  // clang-format off
   // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
   //       anywhere in space and time on a domain edge (face). The code below simply creates those functions and associates them with an edge (face in 3D)
   //
@@ -199,6 +199,7 @@ EddingtonSP1::parseDomainBC()
   //
   //       For flexibility we want to be able to specify the BC functions in two forms, using a multiplier or not. The specification for this is e.g.
   //       "dirichlet <number>" in which case the bc function is multiplied by <number>. Use "dirichlet_custom" to use the bc functions directly.
+  // clang-format on
 
   ParmParse pp(m_className.c_str());
 
@@ -217,11 +218,12 @@ EddingtonSP1::parseDomainBC()
       std::function<Real(const RealVect, const Real)> curFunc;
 
       switch (num) {
-      case 1: { // If only providing dirichlet_custom, neumann_custom, larsen_custom, the second value is overridden and only the function is used as BC.
+      case 1: { // If only providing dirichlet_custom, neumann_custom, larsen_custom, the second value is overridden and
+                // only the function is used as BC.
         pp.get(bcString.c_str(), str, 0);
 
         // Set the function. Capture solver time by reference.
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -242,7 +244,8 @@ EddingtonSP1::parseDomainBC()
 
         break;
       }
-      case 2: { // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function times the value.
+      case 2: { // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function
+                // times the value.
         Real val;
 
         pp.get(bcString.c_str(), str, 0);
@@ -250,7 +253,7 @@ EddingtonSP1::parseDomainBC()
 
         bcType = this->parseBcString(str);
 
-        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time) * val;
         };
 
@@ -317,8 +320,7 @@ EddingtonSP1::parseStationary()
     pout() << m_name + "::parseStationary" << endl;
   }
 
-  ParmParse   pp(m_className.c_str());
-  std::string str;
+  ParmParse pp(m_className.c_str());
 
   pp.get("stationary", m_stationary);
 }
@@ -340,10 +342,12 @@ EddingtonSP1::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
+    if (str[i] == "phi") {
       m_plotPhi = true;
-    else if (str[i] == "src")
+    }
+    else if (str[i] == "src") {
       m_plotSource = true;
+    }
   }
 }
 
@@ -360,6 +364,8 @@ EddingtonSP1::parseMultigridSettings()
 {
   ParmParse pp(m_className.c_str());
 
+  m_multigridRefluxFree = false;
+
   std::string str;
 
   pp.get("gmg_verbosity", m_multigridVerbosity);
@@ -373,9 +379,10 @@ EddingtonSP1::parseMultigridSettings()
   pp.get("gmg_min_cells", m_minCellsBottom);
   pp.get("gmg_ebbc_order", m_multigridBcOrder);
   pp.get("gmg_ebbc_weight", m_multigridBcWeight);
+  pp.query("gmg_reflux_free", m_multigridRefluxFree);
 
-  // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
-  // where <number> is the number of relaxation for the smoothing solver.
+  // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver =
+  // bicgstab or '= simple <number>' where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
     pp.get("gmg_bottom_solver", str);
@@ -408,8 +415,14 @@ EddingtonSP1::parseMultigridSettings()
       "EddingtonSP1::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Relaxation type
-  pp.get("gmg_smoother", str);
+  // Relaxation type. The Chebyshev smoother takes two extra arguments,
+  // i.e. 'gmg_smoother = chebyshev <order> <eig_ratio>', and the restricted additive Schwarz smoother takes one,
+  // i.e. 'gmg_smoother = ras <inner_sweeps>'.
+  m_multigridChebyOrder     = 3;
+  m_multigridChebyEigRatio  = 4.0;
+  m_multigridRasInnerSweeps = 2;
+
+  pp.get("gmg_smoother", str, 0);
   if (str == "jacobi") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::PointJacobi;
   }
@@ -418,6 +431,27 @@ EddingtonSP1::parseMultigridSettings()
   }
   else if (str == "multi_color") {
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+  }
+  else if (str == "chebyshev") {
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::Chebyshev;
+
+    if (pp.countval("gmg_smoother") != 3) {
+      MayDay::Error(
+        "EddingtonSP1::parseMultigridSettings - the Chebyshev smoother requires 'gmg_smoother = chebyshev <order> <eig_ratio>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridChebyOrder, 1);
+    pp.get("gmg_smoother", m_multigridChebyEigRatio, 2);
+  }
+  else if (str == "ras") {
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::RestrictedAdditiveSchwarz;
+
+    if (pp.countval("gmg_smoother") != 2) {
+      MayDay::Error(
+        "EddingtonSP1::parseMultigridSettings - the restricted additive Schwarz smoother requires 'gmg_smoother = ras <inner_sweeps>'");
+    }
+
+    pp.get("gmg_smoother", m_multigridRasInnerSweeps, 1);
   }
   else {
     MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
@@ -428,14 +462,50 @@ EddingtonSP1::parseMultigridSettings()
   if (str == "vcycle") {
     m_multigridType = MultigridType::VCycle;
   }
+  else if (str == "wcycle") {
+    m_multigridType = MultigridType::WCycle;
+  }
   else {
-    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested. Use 'vcycle' or 'wcycle'.");
   }
 
   // No lower than 2.
   if (m_minCellsBottom < 2) {
     m_minCellsBottom = 2;
   }
+
+  // Outer solver path: 'solver' = gmg | gmres | bicgstab (a space-separated list is a fallback chain), plus the
+  // krylov_* settings. When the solver is not gmg, the gmg_* settings above configure the V-cycle that preconditions
+  // the outer Krylov solver. These are read here (mandatory, like the gmg_* keys) and passed to the Krylov driver.
+  const int numKrylovSolvers = pp.countval("solver");
+
+  if (numKrylovSolvers < 1) {
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - 'solver' must list at least one of 'gmg', 'gmres', "
+                  "'bicgstab'");
+  }
+  m_krylovSettings.solvers.resize(numKrylovSolvers);
+  for (int i = 0; i < numKrylovSolvers; i++) {
+    std::string solverStr;
+
+    pp.get("solver", solverStr, i);
+    m_krylovSettings.solvers[i] = EllipticSolverChain::toSolverType(solverStr);
+  }
+
+  pp.get("krylov_eps", m_krylovSettings.eps);
+  pp.get("krylov_max_iter", m_krylovSettings.maxIter);
+  pp.get("krylov_restart", m_krylovSettings.restart);
+  pp.get("krylov_vcycles", m_krylovSettings.numVCycles);
+
+  // Re-probe GMG every this many solves while latched onto the Krylov fallback (1 = always retry
+  // GMG first); larger values approach a permanent latch. State persists across regrids (see FallbackPolicy).
+  pp.get("krylov_retry_interval", m_fallbackPolicy.retryInterval);
+
+  // Adaptive early re-probe: if the Krylov fallback converges in <= this many iterations the V-cycle
+  // preconditioner is clearly strong, so re-probe GMG on the next solve. 0 disables it (only retry_interval applies).
+  pp.get("krylov_reprobe_iters", m_fallbackPolicy.reprobeIters);
+
+  // The Krylov solvers reuse the gmg_verbosity setting.
+  m_krylovSettings.verbosity = m_multigridVerbosity;
 }
 
 void
@@ -469,7 +539,7 @@ EddingtonSP1::parseRegridSlopes()
 }
 
 void
-EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel)
+EddingtonSP1::preRegrid(const int /*a_base*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("EddingtonSP1::preRegrid");
   if (m_verbosity > 5) {
@@ -613,7 +683,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
 
     // If we're doing a stationary solve, we must scale the source term by kappa (unless it's otherwise been done).
     if (m_kappaScale) {
-      DataOps::kappaScale(scaledSource);
+      DataOps::kappaScale(scaledSource, m_amr->getVofIterator(m_realm, m_phase));
     }
 
     // Aliasing, because Chombo is not too smart.
@@ -635,14 +705,60 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, rhs, finestLevel, coarsestLevel);
 
     if (phiResid > zeroResid * m_multigridExitTolerance) {
-      // Residual is too large, solve.
-      m_multigridSolver->m_convergenceMetric = zeroResid;
-      m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
-
-      const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-      if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
-        converged = true;
+      // Establish and snapshot the chain's starting solution. Every fallback attempt starts from this same guess,
+      // except that a failed attempt which reduced the residual is kept as the warm start (see keepOrRestore). Begin
+      // at the policy's preferred index, which skips a persistently-failing GMG while latched onto the fallback.
+      if (a_zeroPhi) {
+        DataOps::setValue(a_phi, 0.0);
       }
+
+      const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+      if (useChain) {
+        m_krylov.snapshotGuess(phi, rhs);
+      }
+
+      const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+      bool gmgAttempted = false;
+      bool gmgConverged = false;
+
+      for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+        const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+        const bool                            zeroPhi    = false; // phi already holds the starting solution
+
+        if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+          pout() << "EddingtonSP1::advance - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+                 << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+                 << endl;
+        }
+
+        if (solverType == EllipticSolverChain::SolverType::GMG) {
+          m_multigridSolver->m_convergenceMetric = zeroResid;
+          m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, zeroPhi);
+
+          const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
+
+          converged    = (status == 1 || status == 8 || status == 9);
+          gmgAttempted = true;
+          gmgConverged = converged;
+        }
+        else {
+          // Outer Krylov solve with the V-cycle as preconditioner.
+          converged = m_krylov.solve(phi, rhs, zeroPhi, solverType, m_krylovSettings);
+        }
+
+        // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+        if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+          m_krylov.keepOrRestore(phi, rhs);
+        }
+      }
+
+      m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                     gmgConverged,
+                                     m_krylov.lastKrylovIterations(),
+                                     m_krylovSettings.verbosity,
+                                     "EddingtonSP1::advance");
     }
     else {
       // Solution is already good enough
@@ -650,18 +766,19 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     }
     m_multigridSolver->revert(phi, rhs, finestLevel, 0);
 
-    DataOps::setCoveredValue(a_phi, 0, 0.0);
+    DataOps::setCoveredValue(a_phi, m_amr->getCoveredCells(m_realm, m_phase), 0, 0.0);
   }
   else {
     this->advanceEuler(a_phi, scaledSource, Units::c * a_dt, a_zeroPhi);
 
     const int status = m_multigridSolver->m_exitStatus; // 1 => Initial norm sufficiently reduced
-    if (status == 1 || status == 8 || status == 9) {    // 8 => Norm sufficiently small
+
+    if (status == 1 || status == 8 || status == 9) { // 8 => Norm sufficiently small
       converged = true;
     }
   }
 
-  DataOps::setCoveredValue(a_phi, 0.0);
+  DataOps::setCoveredValue(a_phi, m_amr->getCoveredCells(m_realm, m_phase), 0.0);
 
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
@@ -699,22 +816,24 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   // Compute the diagonal scaling of the operator.
   Vector<AMRLevelOp<LevelData<EBCellFAB>>*> amrOps = m_multigridSolver->getAMROperators();
   Vector<MGLevelOp<LevelData<EBCellFAB>>*>  mgOps  = m_multigridSolver->getAllOperators();
+
   for (int i = 0; i < amrOps.size(); i++) {
-    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
+    auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
 
     helmholtzOperator->diagonalScale(*scratch[i], false);
   }
 
   // Set coefficients for multigrid solve.
   for (int i = 0; i < mgOps.size(); i++) {
-    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
+    auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
 
     helmholtzOperator->setAlphaAndBeta(1.0, -a_dt);
   }
 
   DataOps::incr(scratch, a_source, a_dt);
+
   if (m_kappaScale) {
-    DataOps::kappaScale(scratch);
+    DataOps::kappaScale(scratch, m_amr->getVofIterator(m_realm, m_phase));
   }
 
   Vector<LevelData<EBCellFAB>*> newPhi;
@@ -728,11 +847,63 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   const int coarsestLevel = 0;
   const int finestLevel   = m_amr->getFinestLevel();
 
-  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve.
+  // Figure out how far away we are from a "converged" solution and set the convergence metric. Then solve, trying
+  // the solver chain in order (e.g. 'gmg gmres') and warm-starting each attempt from the previous one.
   const Real zeroResid = m_multigridSolver->computeAMRResidual(zer, eulerRHS, finestLevel, coarsestLevel);
 
-  m_multigridSolver->m_convergenceMetric = zeroResid;
-  m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, a_zeroPhi);
+  // Establish and snapshot the chain's starting solution; failed attempts revert to it unless they reduced the
+  // residual (see keepOrRestore).
+  if (a_zeroPhi) {
+    DataOps::setValue(a_phi, 0.0);
+  }
+
+  const bool useChain = m_krylovSettings.solvers.size() > 1 && m_krylovSettings.usesKrylov();
+
+  if (useChain) {
+    m_krylov.snapshotGuess(newPhi, eulerRHS);
+  }
+
+  const int startIdx = m_fallbackPolicy.startIndex(m_krylovSettings.solvers);
+
+  bool converged    = false;
+  bool gmgAttempted = false;
+  bool gmgConverged = false;
+
+  for (int i = startIdx; i < m_krylovSettings.solvers.size() && !converged; i++) {
+    const EllipticSolverChain::SolverType solverType = m_krylovSettings.solvers[i];
+    const bool                            zeroPhi    = false; // newPhi already holds the starting solution
+
+    if (i > startIdx && m_krylovSettings.verbosity >= 1) {
+      pout() << "EddingtonSP1::advanceEuler - '" << EllipticSolverChain::solverTypeName(m_krylovSettings.solvers[i - 1])
+             << "' did not converge; falling back to '" << EllipticSolverChain::solverTypeName(solverType) << "'"
+             << endl;
+    }
+
+    if (solverType == EllipticSolverChain::SolverType::GMG) {
+      m_multigridSolver->m_convergenceMetric = zeroResid;
+      m_multigridSolver->solve(newPhi, eulerRHS, finestLevel, coarsestLevel, zeroPhi);
+
+      const int status = m_multigridSolver->m_exitStatus;
+
+      converged    = (status == 1 || status == 8 || status == 9);
+      gmgAttempted = true;
+      gmgConverged = converged;
+    }
+    else {
+      converged = m_krylov.solve(newPhi, eulerRHS, zeroPhi, solverType, m_krylovSettings);
+    }
+
+    // Warm-start rule: keep a failed attempt only if it reduced the residual below the chain's initial residual.
+    if (!converged && useChain && i + 1 < m_krylovSettings.solvers.size()) {
+      m_krylov.keepOrRestore(newPhi, eulerRHS);
+    }
+  }
+
+  m_fallbackPolicy.recordOutcome(gmgAttempted,
+                                 gmgConverged,
+                                 m_krylov.lastKrylovIterations(),
+                                 m_krylovSettings.verbosity,
+                                 "EddingtonSP1::advanceEuler");
 }
 
 void
@@ -803,8 +974,10 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   a_helmBcoIrreg.setVal(std::numeric_limits<Real>::max());
 #endif
 
+  // clang-format off
   // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa, B = 1/(3*kappa). We happen to know that
-  //       the interior face stencils are interpolated using the neigboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
+  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
+  // clang-format on
 
   const RealVect probLo = m_amr->getProbLo();
   const Real     dx     = m_amr->getDx()[a_lvl];
@@ -812,12 +985,10 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   const EBISBox& ebisbox = a_helmAco.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-  const Box cellBox    = m_amr->getGrids(m_realm)[a_lvl][a_dit];
-  const Box helmAcoBox = a_helmAco.box() & m_amr->getDomains()[a_lvl];
-  const Box helmBcoBox = a_helmBco.box() & m_amr->getDomains()[a_lvl];
+  const Box cellBox = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
-  // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
-  // outside of the cell-centered grid patch.
+  // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so
+  // there's no need to fill anything outside of the cell-centered grid patch.
   BaseFab<Real>& helmAcoReg       = a_helmAco.getSingleValuedFAB();
   auto           regularAcoKernel = [&](const IntVect& iv) -> void {
     const RealVect pos   = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
@@ -826,16 +997,21 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     helmAcoReg(iv, m_comp) = kappa;
   };
 
-  BoxLoops::loop(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.
+  // Not vectorizable: getAbsorptionCoefficient(pos) is an out-of-line species callback per cell. One-time
+  // coefficient setup (not per-timestep). Multi-cut not applied here: the irregular kernel below overwrites
+  // (=) every cut cell with the m_dataLocation value (which differs from the cell-center value when
+  // m_dataLocation is Centroid), so folding singly-cut cells into this regular kernel would be wrong for the
+  // centroid discretization; the redundant cut-cell fill is overwritten and harmless on a setup routine.
+  BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.
 
-  // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring face-centered fluxes. The interpolating stencil
-  // will have a radius of 1, so we need to fill one of the ghost faces outside of the grid patch. Only the ones that are "tangential" to the face direction
-  // are necessary to fill.
+  // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring
+  // face-centered fluxes. The interpolating stencil will have a radius of 1, so we need to fill one of the ghost faces
+  // outside of the grid patch. Only the ones that are "tangential" to the face direction are necessary to fill.
   for (int dir = 0; dir < SpaceDim; dir++) {
     EBFaceFAB& helmBcoFace = a_helmBco[dir];
 
-    // Kernel region -- make a cell-centered box, grown by one in every direction except 'dir'. This box will also contain
-    // the "ghost faces".
+    // Kernel region -- make a cell-centered box, grown by one in every direction except 'dir'. This box will also
+    // contain the "ghost faces".
     Box grownCellBox = cellBox;
     for (int otherDir = 0; otherDir < SpaceDim; otherDir++) {
       if (otherDir != dir) {
@@ -844,13 +1020,11 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     }
     grownCellBox &= m_amr->getDomains()[a_lvl];
 
-    // Cut-cells in the grown box.
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownCellBox);
-
     // Actual kernel region. The face-centered box which also contains the "ghost faces" and a FaceIterator for
-    // doing the irregular face stuff.
+    // doing the irregular face stuff. Only multi-cut cells need the irregular kernel since singly-cut faces are
+    // already covered by the regular box loop above.
     const Box    faceBox = surroundingNodes(grownCellBox, dir);
-    FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+    FaceIterator faceit(ebisbox.getMultiCells(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
     // Regular kernel.
     BaseFab<Real>& helmBcoReg       = helmBcoFace.getSingleValuedFAB();
@@ -869,15 +1043,17 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
       helmBcoFace(face, m_comp) = 1. / (3.0 * kappa);
     };
 
-    // Run the kernels
-    BoxLoops::loop(faceBox, regularBcoKernel);
+    // Run the kernels. Not vectorizable: getAbsorptionCoefficient(pos) is an out-of-line species callback
+    // per face. Multi-cut ALREADY applied: faceit iterates only getMultiCells (multi-cut faces); singly-cut
+    // faces are handled by the regular box loop, valid because both use the face-CENTER location.
+    BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularBcoKernel);
     BoxLoops::loop(faceit, irregularBcoKernel);
   }
 
-  // Fill A-coefficient in cut-cells and the EB-centered B-coefficient. Again, the A-part is diagonal so we don't need to fill anything outside the grid patch. For
-  // the B-coefficient on the EB face then the stencil in the cut-cell will not reach into neighboring EB faces (really, it shouldn't!) so no need for filling
-  // things outside the grid patch here, either.
-  // Kernel region for cut-cells
+  // Fill A-coefficient in cut-cells and the EB-centered B-coefficient. Again, the A-part is diagonal so we don't need
+  // to fill anything outside the grid patch. For the B-coefficient on the EB face then the stencil in the cut-cell will
+  // not reach into neighboring EB faces (really, it shouldn't!) so no need for filling things outside the grid patch
+  // here, either. Kernel region for cut-cells
   VoFIterator& vofit           = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   auto         irregularKernel = [&](const VolIndex& vof) -> void {
     const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
@@ -924,8 +1100,9 @@ EddingtonSP1::setupHelmholtzFactory()
   domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(
     new EBHelmholtzEddingtonSP1DomainBCFactory(m_domainBc, m_rtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
 
-  // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC we happened to
-  // read a line from the input script in the format = <type> <value> which was put into a function. Associate that function here.
+  // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC
+  // we happened to read a line from the input script in the format = <type> <value> which was put into a function.
+  // Associate that function here.
   switch (m_ebbc.first) {
   case EBBCType::Dirichlet:
     ebbcFactory = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>(
@@ -969,8 +1146,12 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       ghostRhs,
                                                                                       m_multigridRelaxMethod,
                                                                                       relaxFactor,
+                                                                                      m_multigridChebyOrder,
+                                                                                      m_multigridChebyEigRatio,
+                                                                                      m_multigridRasInnerSweeps,
                                                                                       bottomDomain,
-                                                                                      m_amr->getMaxBoxSize()));
+                                                                                      m_amr->getMaxBlockSize(),
+                                                                                      m_multigridRefluxFree));
 }
 
 void
@@ -982,7 +1163,7 @@ EddingtonSP1::setupMultigrid()
   }
 
   // Select the bottom solver
-  LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
+  LinearSolver<LevelData<EBCellFAB>>* botsolver = nullptr;
   if (m_bottomSolverType == BottomSolverType::Simple) {
     botsolver = &m_simpleSolver;
   }
@@ -1045,6 +1226,26 @@ EddingtonSP1::setupMultigrid()
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
+
+  // Define the outer-Krylov adapter if requested (reuses the just-initialised multigrid solver as preconditioner).
+  if (m_krylovSettings.usesKrylov()) {
+    m_multigridSolver->setBottomSolver(finestLevel, 0);
+
+    Vector<DisjointBoxLayout> grids  = m_amr->getGrids(m_realm);
+    Vector<int>               refRat = m_amr->getRefinementRatios();
+    Vector<Real>              dxScal = m_amr->getDx();
+
+    grids.resize(1 + finestLevel);
+    refRat.resize(1 + finestLevel);
+    dxScal.resize(1 + finestLevel);
+
+    m_krylov.define(&(*m_multigridSolver),
+                    m_amr->getValidCells(m_realm),
+                    dxScal,
+                    0,
+                    finestLevel,
+                    m_krylovSettings.numVCycles);
+  }
 }
 
 void
@@ -1058,12 +1259,10 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
   // TLDR: Equations say boundary flux => F_n = c*Psi/2, so we
   //       extrapolate the solution to the boundary and multiply by c/2.
 
-  const int finestLevel = m_amr->getFinestLevel();
-
   m_amr->interpToEB(a_ebFlux, a_phi, m_realm, m_phase);
   m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);
 
-  DataOps::scale(a_ebFlux, 0.5 * Units::c);
+  DataOps::scale(a_ebFlux, 0.5 * Units::c, m_amr->getVofIterator(m_realm, m_phase));
 }
 
 void

@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaTagger.cpp
-  @brief  Implementation of CD_CdrPlasmaTagger.H
-  @author Robert marskar
-*/
+/**
+ * @file   CD_CdrPlasmaTagger.cpp
+ * @brief  Implementation of CD_CdrPlasmaTagger.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBArith.H>
@@ -154,7 +155,7 @@ CdrPlasmaTagger::getPlotVariableNames() const
 void
 CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
                                int&                  a_icomp,
-                               const std::string     a_outputRealm,
+                               const std::string&    a_outputRealm,
                                const int             a_level) const
 {
   CH_TIME("CdrPlasmaTagger::writePlotData");
@@ -172,10 +173,10 @@ CdrPlasmaTagger::writePlotData(LevelData<EBCellFAB>& a_output,
 
     const EBAMRCellData& tagField = m_tracers[i];
 
-    // Copy data to the ouput data holder. Covered data is bogus.
+    // Copy data to the output data holder. Covered data is bogus.
     m_amr->copyData(a_output, *tagField[a_level], a_level, a_outputRealm, tagField.getRealm(), dstInterv, srcInterv);
 
-    DataOps::setCoveredValue(a_output, a_icomp, 0.0);
+    DataOps::setCoveredValue(a_output, *m_amr->getCoveredCells(a_outputRealm, m_phase)[a_level], a_icomp, 0.0);
 
     a_icomp++;
   }
@@ -195,7 +196,8 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
   const RealVect probLo = m_amr->getProbLo();
   const Real     time   = m_timeStepper->getTime();
 
-  // Determine how deep we should flag cells for refinement. We will never flag cells on AmrMesh's maximum AMR depth, so we restrict to that.
+  // Determine how deep we should flag cells for refinement. We will never flag cells on AmrMesh's maximum AMR depth, so
+  // we restrict to that.
   const int finestLevel    = m_amr->getFinestLevel();
   const int maxDepth       = m_amr->getMaxAmrDepth();
   const int finestTagLevel = (finestLevel == maxDepth) ? maxDepth - 1 : finestLevel;
@@ -205,7 +207,8 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
     // Compute tracer fields -- note that this is implemented by subclasses.
     this->computeTracers();
 
-    // Go through the AMR levels, being careful not to add cell tags on the maximum possible AMR depth (because grid level l+1 is generated from tags on level l).
+    // Go through the AMR levels, being careful not to add cell tags on the maximum possible AMR depth (because grid
+    // level l+1 is generated from tags on level l).
     for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit   = dbl.dataIterator();
@@ -243,7 +246,8 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
         this->coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, din, box, ebisbox, time, dx, probLo);
 
         // Check if we got any new tags, or we are just recycling old tags. If we did not get new tags then
-        // we will ask the Driver to skip the regrid completely. Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
+        // we will ask the Driver to skip the regrid completely. Basically we will check if (current_tags + refined_tags
+        // - coarsenTags) == current_tags
         DenseIntVectSet cpy1 = tags;
         tags -= coarsenTags;
         tags |= refineTags;
@@ -269,12 +273,12 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
                                 const Vector<EBCellFAB*>& a_tracers,
                                 const Vector<EBCellFAB*>& a_gradTracers,
                                 const int                 a_lvl,
-                                const DataIndex           a_dit,
-                                const Box                 a_box,
+                                const DataIndex&          a_dit,
+                                const Box&                a_box,
                                 const EBISBox&            a_ebisbox,
                                 const Real                a_time,
                                 const Real                a_dx,
-                                const RealVect            a_probLo)
+                                const RealVect&           a_probLo)
 {
   CH_TIME("CdrPlasmaTagger::refineCellsBox(...)");
   if (m_verbosity > 5) {
@@ -339,11 +343,12 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
     }
   };
 
-  // Irregular kernel region. Should probably be stored in its own VoFIterator but I'm lazy so let's define it right here.
-  VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+  // Irregular kernel region.
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
-  // Execute the kernels.
-  BoxLoops::loop(a_box, regularKernel);
+  // Execute the kernels. Not vectorizable: the regular kernel calls the virtual refineCell per cell (plus
+  // insideTagBox + DenseIntVectSet insertion + control flow). One-time tagging (per regrid).
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 
@@ -352,12 +357,12 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
                                  const Vector<EBCellFAB*>& a_tracers,
                                  const Vector<EBCellFAB*>& a_gradTracers,
                                  const int                 a_lvl,
-                                 const DataIndex           a_dit,
-                                 const Box                 a_box,
+                                 const DataIndex&          a_dit,
+                                 const Box&                a_box,
                                  const EBISBox&            a_ebisbox,
                                  const Real                a_time,
                                  const Real                a_dx,
-                                 const RealVect            a_probLo)
+                                 const RealVect&           a_probLo)
 {
   CH_TIME("CdrPlasmaTagger::coarsenCellsBox(...)");
   if (m_verbosity > 5) {
@@ -413,12 +418,13 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
     if (!isPointInside) {
       a_coarsenedCells |= vof.gridIndex();
     }
-    else
+    else {
       // Reconstruct the tracer fields and gradients again.
       for (int i = 0; i < m_numTracers; i++) {
         tr[i] = (*a_tracers[i])(vof, 0);
         gt[i] = RealVect(D_DECL((*a_gradTracers[i])(vof, 0), (*a_gradTracers[i])(vof, 1), (*a_gradTracers[i])(vof, 2)));
       }
+    }
 
     // Call the per-cell refinement method.
     const bool coarsen = this->coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
@@ -429,10 +435,11 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
   };
 
   // Kernel region for the irregular kernel.
-  VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
-  // Execute the kernels
-  BoxLoops::loop(a_box, regularKernel);
+  // Execute the kernels. Not vectorizable: the regular kernel calls the virtual coarsenCell per cell (plus
+  // insideTagBox + DenseIntVectSet insertion + control flow). One-time tagging (per regrid).
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 

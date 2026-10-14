@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -17,12 +18,9 @@
 #include <CD_MFHelmholtzDirichletDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory()
+MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory(const Real a_value)
@@ -68,7 +66,7 @@ MFHelmholtzDirichletDomainBCFactory::setValue(const std::function<Real(const Rea
 }
 
 RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzDirichletDomainBCFactory::create(const int a_iphase) const
+MFHelmholtzDirichletDomainBCFactory::create(const int /*a_iphase*/) const
 {
   CH_TIME("MFHelmholtzDirichletDomainBCFactory::create(int)");
 
@@ -79,7 +77,7 @@ MFHelmholtzDirichletDomainBCFactory::create(const int a_iphase) const
     MayDay::Error("MFHelmholtzDirichletDomainBCFactory::create - logic bust, not using function or constant!");
   }
 
-  auto bc = new EBHelmholtzDirichletDomainBC();
+  auto* bc = new EBHelmholtzDirichletDomainBC();
 
   if (m_useConstant) {
     bc->setValue(m_constantValue);

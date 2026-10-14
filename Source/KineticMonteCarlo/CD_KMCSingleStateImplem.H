@@ -1,19 +1,20 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_KMCSingleStateImplem.H
-  @brief  Implementation of CD_KMCSingleState.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_KMCSingleStateImplem.H
+ * @brief  Implementation of CD_KMCSingleState.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_KMCSingleStateImplem_H
-#define CD_KMCSingleStateImplem_H
+#ifndef CD_KMCSINGLESTATEIMPLEM_H
+#define CD_KMCSINGLESTATEIMPLEM_H
 
 // Chombo includes
-#include <CH_Timer.H>
+#include <CH_assert.H>
 
 // Our includes
 #include <CD_KMCSingleState.H>
@@ -22,23 +23,17 @@
 template <typename T>
 KMCSingleState<T>::KMCSingleState(const size_t a_numSpecies) noexcept
 {
-  CH_TIME("KMCSingleState::KMCSingleState");
-
   m_state.resize(a_numSpecies);
 }
 
 template <typename T>
 inline KMCSingleState<T>::~KMCSingleState()
-{
-  CH_TIME("KMCSingleState::~KMCSingleState");
-}
+{}
 
 template <typename T>
 inline bool
 KMCSingleState<T>::isValidState() const noexcept
 {
-  CH_TIME("KMCSingleState::isValidState");
-
   bool isValid = true;
 
   for (const auto& p : m_state) {

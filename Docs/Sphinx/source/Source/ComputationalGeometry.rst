@@ -5,7 +5,7 @@ ComputationalGeometry
 
 ``ComputationalGeometry`` is the class that implements geometries in ``chombo-discharge``.
 In principle, geometries consist of electrodes and dielectrics but there are many problems where the actual nature of the EB is irrelevant (such as fluid flow).
-For other problems, such as ones involving electric fields, the classification into electrodes and dielectric are obviously important.
+For other problems, such as ones involving electric fields, the classification into electrodes and dielectrics are obviously important.
 
 .. tip::
 
@@ -20,9 +20,9 @@ Making a non-empty ``ComputationalGeometry`` class requires that you inherit fro
 .. _ComputationalGeometryMembers:		    
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :language: c++
-   :caption: List of all data member of the ``ComputationalGeometry`` base class. Highlighted members must be instantiated by the user in order to create a new geometry.
-   :lines: 158-196
-   :emphasize-lines: 4, 24, 29	   
+   :caption: Data members of the ``ComputationalGeometry`` base class that describe the geometry. Highlighted members must be instantiated by the user in order to create a new geometry.
+   :lines: 374-442
+   :emphasize-lines: 49, 54, 69
    :dedent: 2
 
 Here, ``m_eps0`` is the *relative gas permittivity* (which is virtually always 1), ``m_electrodes`` are the electrodes for the geometry and ``m_dielectrics`` are the dielectrics for the geometry.
@@ -74,16 +74,16 @@ The constructor for the electrode class is given in :numref:`List:Electrode`.
 
 .. _List:Electrode:
 .. literalinclude:: ../../../../Source/Geometry/CD_Electrode.H
-   :caption: Constructor for the the ``Electrode`` object.
-   :lines: 40
+   :caption: Constructor for the ``Electrode`` object.
+   :lines: 34-41
    :language: c++
    :dedent: 2
 
-In the code block above, ``a_baseIF`` argument is the implicit function for the electrode object, and the ``a_live`` argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
+In the code block above, the ``a_baseIF`` argument is the implicit function for the electrode object, and the ``a_live`` argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
 For example, if ``a_live`` is set to false, :ref:`Chap:FieldSolver` will fetch this value and determine that the electrode is at ground. 
-Otherwise, if ``a_live`` is set to true then :ref:`Chap:FieldSolver` will determine that the electrode is at live voltage, and the ``a_fraction`` argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
+Otherwise, if ``a_live`` is set to true then :ref:`Chap:FieldSolver` will determine that the electrode is at live voltage, and the ``a_voltageFraction`` argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
 This is also used throughout other physics modules in ``chombo-discharge``.
-The user can also set a specified fraction of the live voltage but setting the ``a_voltageFraction`` parameter to a relative fraction of the applied voltage.
+The user can also set a specified fraction of the live voltage by setting the ``a_voltageFraction`` parameter to a relative fraction of the applied voltage.
 
 .. tip::
 
@@ -99,14 +99,14 @@ This class is lightweight and consists of a tuple that holds a level-set functio
 The constructors for this class are
 
 .. literalinclude:: ../../../../Source/Geometry/CD_Dielectric.H
-   :caption: Constructors for the the ``Dielectric`` object.
+   :caption: Constructors for the ``Dielectric`` object.
    :language: c++
-   :lines: 36-50
+   :lines: 37-51
    :dedent: 2
 
-where the ``a_baseIF`` argument is the level-set function and the second argument sets a the permittivity.
+where the ``a_baseIF`` argument is the level-set function and the second argument sets the permittivity.
 In the constructor, the relative permittivity can be set to a constant (first constructor) or to a spatially varying value (second constructor).
-Several solvers will then use the permittivities were specified by the user.
+Several solvers will then use the permittivities as specified by the user.
 
 .. tip::
 
@@ -120,7 +120,7 @@ It is possible to retrieve the implicit functions for the electrodes and dielect
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :caption: Member functions for retrieving the defined electrodes and dielectrics. 
    :language: c++
-   :lines: 48-60
+   :lines: 83-95
    :dedent: 2
 
 Obtaining the implicit functions for each part can be useful when determining which object is closest to some physical location :math:`\mathbf{x}`.
@@ -132,7 +132,7 @@ Retrieving compound implicit functions
 When generating the geometry we compute the implicit functions for each *phase*, the gas-phase, the dielectric-phase, and the electrodes.
 We outlined this process in :eq:`ElectrodeRegion` and :eq:`DielectricRegion`.
 
-To retrive the implicit function corresponding to a particular phase, use
+To retrieve the implicit function corresponding to a particular phase, use
 
 .. code-block:: c++
 

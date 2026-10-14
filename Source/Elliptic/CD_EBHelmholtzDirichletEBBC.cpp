@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -23,14 +24,6 @@
 EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()
 {
   CH_TIME("EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = 0;
-  m_dropOrder       = false;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC()
@@ -143,7 +136,8 @@ EBHelmholtzDirichletEBBC::define()
     // Iteration space for kernel
     VoFIterator vofit(ivs, ebgraph);
 
-    // Kernel
+    // Kernel. Not auto-vectorizable (and not hot): one-time, sparse VoFIterator sweep that builds a
+    // least-squares gradient stencil per cut-cell.
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
@@ -206,7 +200,8 @@ EBHelmholtzDirichletEBBC::define()
         weights(vof, m_comp)  = pairSten.first;
         stencils(vof, m_comp) = pairSten.second;
 
-        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
+        // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the
+        // area fraction.
         weights(vof, m_comp) *= areaFrac / m_dx;
         stencils(vof, m_comp) *= areaFrac / m_dx;
       }
@@ -216,7 +211,7 @@ EBHelmholtzDirichletEBBC::define()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         weights(vof, m_comp) = 0.0;
         stencils(vof, m_comp).clear();
@@ -228,9 +223,9 @@ EBHelmholtzDirichletEBBC::define()
 }
 
 void
-EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                      EBCellFAB&             a_Lphi,
-                                      const EBCellFAB&       a_phi,
+EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator& a_vofit,
+                                      EBCellFAB&   a_Lphi,
+                                      const EBCellFAB& /*a_phi*/,
                                       const BaseIVFAB<Real>& a_Bcoef,
                                       const DataIndex&       a_dit,
                                       const Real&            a_beta,
@@ -242,6 +237,11 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
   if (!a_homogeneousPhysBC) {
 
+    // Not auto-vectorizable: sparse VoFIterator scatter over cut-cells, per-vof cost dominated by
+    // out-of-line BaseIVFAB/EBCellFAB operator() lookups (and the std::function BC value). The only
+    // loop-invariant, m_boundaryWeights[a_dit], is an inline index the compiler already hoists, and
+    // areaFrac is folded into those weights -- so there is no out-of-line lookup to lift here (cf.
+    // the EBHelmholtzNeumannEBBC EBISBox hoist).
     auto kernel = [&](const VolIndex& vof) -> void {
       Real       value = 0.0;
       const Real B     = a_Bcoef(vof, m_comp);
@@ -265,8 +265,6 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
     BoxLoops::loop(a_vofit, kernel);
   }
-
-  return;
 }
 
 bool

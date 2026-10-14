@@ -5,7 +5,7 @@ AmrMesh
 
 ``AmrMesh`` handles virtually the entire AMR and cut-cell infrastructure in ``chombo-discharge``, and has the following responsibility:
 
-#. Generate grids form a set of cell tags (potentially more than one set of grids).
+#. Generate grids from a set of cell tags (potentially more than one set of grids).
 #. Load balance the grids if necessary.
 #. Instantiate the cut-cell information on grids.
 #. Provide a mask which tells the user if a cell is covered by a finer grid.
@@ -18,7 +18,7 @@ AmrMesh
    * Infrastructure for particle-mesh operators.
    * ... and many others.
 
-In addition to these, ``AmrMesh`` contains function for actually allocating data with user-defined centering (e.g., cell, face, EB) on a specified :ref:`Chap:Realm`.
+In addition to these, ``AmrMesh`` contains functions for actually allocating data with user-defined centering (e.g., cell, face, EB) on a specified :ref:`Chap:Realm`.
 It also has responsibility for allocating particle containers.
 
 One thing that ``AmrMesh`` is *not*, is a numerical discretization holder for PDEs, which is a responsibility that is generally deferred to solvers.
@@ -35,8 +35,8 @@ The behavior of :ref:`Chap:AmrMesh` is modified through its available input para
 Class options
 -------------
 
-Various class options are available for adjusting the behavior of the ``Driver`` class.
-Below, we include the current template options file for the ``Driver`` class.
+Various class options are available for adjusting the behavior of the ``AmrMesh`` class.
+Below, we include the current template options file for the ``AmrMesh`` class.
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.options
    :emphasize-lines: 9-15,21-26
@@ -52,18 +52,28 @@ Coarse-grid decomposition
 ``AmrMesh.coarsest_domain`` is the number of grid cells on the coarsest grid level (i.e., without AMR).
 It is important that cell sizes are uniform, so one must always have :math:`\Delta x = \Delta y = \Delta z`.
 Usually, this means that ``AmrMesh.lo_corner``, ``AmrMesh.hi_corner``, and ``AmrMesh.coarsest_domain`` must all be consistently defined. Moreover, it is normally desirable to make ``AmrMesh.coarsest_domain`` a factor of 2 (e.g., 64, 128, 256, etc.), since this permits arbitrarily deep multigrid coarsening.
-This is not a requirement, however, although we do note that ``AmrMesh.coarsest_domain`` *must* be divisible by ``AmrMesh.blocking_factor``.
+This is not a requirement, however, although we do note that ``AmrMesh.coarsest_domain`` *must* be divisible by ``AmrMesh.min_block_size``.
 
 Domain decomposition
 --------------------
 
 With Cartesian AMR, each grid level is decomposed into grid blocks of constant size, or sizes that potentially vary between some min/max size along each dimension.
-In ``chombo-discharge`` this is encapsulated by ``AmrMesh.blocking_factor``, which is the smallest grid box that can be generated when meshing the domain.
-Likewise, ``AmrMesh.max_box_size`` is the maximum box size that can be produced, but usage of a constant box size is common an increased requirement in ``chombo-discharge``.
+In ``chombo-discharge`` this is encapsulated by ``AmrMesh.min_block_size``, which is the smallest grid box that can be generated when meshing the domain.
+Likewise, ``AmrMesh.max_block_size`` is the maximum box size that can be produced.
+When ``AmrMesh.max_block_size`` is larger than ``AmrMesh.min_block_size`` the grids may contain variable-sized (and anisotropic) boxes, each box being a union of aligned ``AmrMesh.min_block_size`` tiles; see :ref:`Chap:MeshGeneration`.
+This is supported by all solvers, including the particle infrastructure.
 
 .. tip::
 
-   Use fixed box sizes where ``AmrMesh.blocking_factor`` and ``AmrMesh.max_box_size`` are the same.
+   Setting ``AmrMesh.min_block_size`` equal to ``AmrMesh.max_block_size`` yields fixed-size boxes, which is the most common configuration.
+
+The block sizes must satisfy a few requirements, which are checked at run time:
+
+* ``AmrMesh.min_block_size`` must be a multiple of every refinement ratio in ``AmrMesh.ref_rat`` (so refined boxes coarsen cleanly), which in particular requires ``min_block_size`` :math:`\geq` the refinement ratio.
+* ``AmrMesh.max_block_size`` must be greater than or equal to ``AmrMesh.min_block_size`` and an integer multiple of it.
+* ``AmrMesh.coarsest_domain`` must be a multiple of ``AmrMesh.min_block_size`` in every direction.
+
+There is no lower bound of 8 on the box sizes; e.g. ``min_block_size = max_block_size = 4`` is permitted (with factor-2 refinement).
 
 The flag ``AmrMesh.max_ebis_box`` indicates essentially the blocking factor when generating the cut-cell information at the start of a simulation.
 It may happen for very large simulations that one has to increase the box size (e.g., to 32) in order to trim grid metadata.
@@ -73,9 +83,9 @@ We want to point out that mixed refinement factors are supported.
 
 .. tip::
 
-   If ``AmrMesh.max_amr_depth`` is greater than the number of refinement ratios specified in ``AmrMesh.ref_rat``, ``chombo-discharge`` will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement every if ``AmrMesh.ref_rat = 2``.
+   If ``AmrMesh.max_amr_depth`` is greater than the number of refinement ratios specified in ``AmrMesh.ref_rat``, ``chombo-discharge`` will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement everywhere if ``AmrMesh.ref_rat = 2``.
 
-Two gridding algorithms are supported, called Tiled mesh refinement the classical Berger-Rigoutsos refinement algorithm.
+Two gridding algorithms are supported, called Tiled mesh refinement and the classical Berger-Rigoutsos refinement algorithm.
 These are discussed in :ref:`Chap:MeshGeneration`, and the user can specify which one to use by setting ``AmrMesh.grid_algorithm`` accordingly.
 In general, the tiled algorithm is exceedingly more performant at larger scales.
 

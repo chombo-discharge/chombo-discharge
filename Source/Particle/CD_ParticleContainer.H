@@ -1,716 +1,1096 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ParticleContainer.H
-  @brief  Declaration of a class for holding particles on an AMR hierarchy
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_ParticleContainer.H
+ * @brief  Declaration of an AMR-hierarchy container that owns per-patch ParticleSoA leaves.
+ * @author Robert Marskar
+ */
 
-#ifndef CD_ParticleContainer_H
-#define CD_ParticleContainer_H
+#ifndef CD_PARTICLECONTAINER_H
+#define CD_PARTICLECONTAINER_H
+
+// Std includes
+#include <cmath>
+#include <cstdint>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 // Chombo includes
-#include <Particle.H>
-#include <ParticleData.H>
-#include <ParticleValidRegion.H>
-#include <BinItem.H>
-#include <BinFab.H>
+#include <REAL.H>
+#include <SPACE.H>
+#include <RealVect.H>
+#include <IntVect.H>
+#include <Box.H>
 #include <ProblemDomain.H>
 #include <DisjointBoxLayout.H>
-#include <BaseEBCellFAB.H>
+#include <BoxLayout.H>
+#include <DataIterator.H>
+#include <LayoutData.H>
+#include <LevelData.H>
+#include <BaseFab.H>
+#include <RefCountedPtr.H>
+#include <Vector.H>
+#include <SPMD.H>
+#include <CH_Timer.H>
+#include <CH_assert.H>
 
 // Our includes
-#include <CD_OpenMP.H>
 #include <CD_LevelTiles.H>
-#include <CD_ParticleMap.H>
+#include <CD_ParticleGhostMask.H>
+#include <CD_ParallelOps.H>
+#include <CD_ParticleSoA.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
-  @brief Alias for ParticleData on each AMR level.
-*/
-template <class P>
-using AMRParticles = Vector<RefCountedPtr<ParticleData<P>>>;
+/**
+ * @brief Per-level holder vector: one ParticleSoA leaf container per box, per level.
+ * @tparam P      Payload type.
+ * @tparam Traits Column descriptor.
+ */
+template <typename P, typename Traits>
+using AMRParticlesSoA = Vector<RefCountedPtr<LayoutData<ParticleSoA<P, Traits>>>>;
 
-/*!
-  @brief Alias for cell-sorted particles on each AMR level.
-*/
-template <class P>
-using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P>>>>;
-
-/*!
-  @brief Templated class for holding particles on an AMR hierarchy with particle remapping. 
-  @details The template parameter P should derive from Chombo's BinItem. 
-  @note ParticleContainers are, because of Chombo, restricted to square-block grids. This means
-  that the blocking factor and maximum box size must be the same. 
-*/
-template <class P>
+/**
+ * @brief AMR-hierarchy container of computational particles, stored per patch in Struct-of-Arrays form.
+ * @details
+ * ParticleContainer owns particles distributed across an AMR hierarchy. For every level it holds one
+ * @c LayoutData<ParticleSoA<P>> indexed by @c DataIndex over that level's @c DisjointBoxLayout, so the
+ * particles of a single patch are reached as @c container[lvl][din] and stored contiguously in
+ * Struct-of-Arrays form (see ParticleSoA). Each particle carries a position and a weight (owned by the
+ * leaf) plus the user payload @c P, which contributes the extra per-particle columns.
+ *
+ * <h3>Particle holders</h3>
+ * Three parallel sets of per-level leaves are maintained:
+ * - <b>valid</b>  -- the live particles, each owned by the patch whose grid cell contains it. Reached
+ *                    through operator[] and getParticles().
+ * - <b>mask</b>   -- a halo selection copied or moved out of the valid particles by a per-cell mask,
+ *                    used for halo deposition near refinement boundaries (getMaskParticles()).
+ * - <b>buffer</b> -- particles living on the grown grids (each box grown by the refinement ratio), used
+ *                    as scratch when depositing across coarse-fine boundaries (getBufferParticles()).
+ *
+ * <h3>Ownership and lifetime</h3>
+ * The per-level holders are shared @c RefCountedPtr, so the container is move-only: copy construction and
+ * copy assignment are deleted (a copy would alias the holders). Construct an empty container, then call
+ * define() with the grids and AMR metadata before any other use; isDefined() reports readiness.
+ *
+ * <h3>Particle ownership and routing</h3>
+ * A particle belongs to the patch on the finest level whose cell contains its position. After particles
+ * move, remap() routes each one back to its owning patch -- across MPI ranks and across levels as needed.
+ * On a regrid, call preRegrid() before the grids change and regrid() afterwards to carry the particles
+ * onto the new layout. Particles that leave the domain are dropped and reported by
+ * getNumberOfOutcastParticlesLocal() / getNumberOfOutcastParticlesGlobal().
+ *
+ * <h3>Cell sorting</h3>
+ * A leaf stores its particles in arbitrary (append) order by default. organizeParticlesByCell() sorts
+ * each valid leaf so that the particles of a cell occupy a contiguous range (queried through the leaf's
+ * CSR cell offsets); organizeParticlesByPatch() returns to the unsorted view. isOrganizedByCell() reports
+ * the current state.
+ *
+ * <h4>Typical usage</h4>
+ * @code{.cpp}
+ *   ParticleContainer<MyPayload> particles;
+ *   particles.define(grids, domains, dx, refRat, probLo, minBlockSize, levelTiles, finestLevel, "primal", validCells);
+ *
+ *   // Add particles locally, then route every particle to its owning patch (and across ranks).
+ *   particles.addParticlesLocal(lvl, pos, weight, MyPayload{...});
+ *   particles.remap();
+ *
+ *   // Iterate the valid particles of one patch.
+ *   const DisjointBoxLayout& dbl  = particles.getGrids()[lvl];
+ *   const DataIterator&      dit  = dbl.dataIterator();
+ *   const int                nbox = dit.size();
+ * #pragma omp parallel for schedule(runtime)
+ *   for (int mybox = 0; mybox < nbox; mybox++) {
+ *     const DataIndex&        din  = dit[mybox];
+ *     ParticleSoA<MyPayload>& leaf = particles[lvl][din];
+ *     for (std::size_t i = 0; i < leaf.size(); i++) {
+ *       const RealVect x = leaf.position(i);
+ *       // ... use x, leaf.weight(i), payload columns ...
+ *     }
+ *   }
+ * @endcode
+ *
+ * @tparam P      User payload struct contributing the per-particle payload columns; defaults to NoPayload.
+ * @tparam Traits Column descriptor for the payload; defaults to ParticleTraits<P>.
+ */
+template <typename P = NoPayload, typename Traits = ParticleTraits<P>>
 class ParticleContainer
 {
 public:
-  using ValidMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
+  /**
+   * @brief The per-patch leaf type owned at every (level, box).
+   */
+  using Leaf = ParticleSoA<P, Traits>;
 
-  /*!
-    @brief Default constructor. Leaves object in undefined state. 
-  */
-  ParticleContainer();
+  /**
+   * @brief The per-level holder type (one Leaf per box on the level's DisjointBoxLayout).
+   */
+  using LevelParticles = LayoutData<Leaf>;
 
-  /*!
-    @brief Full constructor
-    @param[in] a_grids          AMR grids
-    @param[in] a_domains        AMR domains
-    @param[in] a_dx             Grid resolutions
-    @param[in] a_refRat         Refinement ratios
-    @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
-    @param[in] a_levelTiles     Tiled AMR grids
-    @param[in] a_probLo         Lower-left corner of the physical domain
-    @param[in] a_blockingFactor Grid blocking factor
-    @param[in] a_finestLevel    Finest grid level
-    @param[in] a_realm          Realm where these particles live. 
-  */
-  ParticleContainer(const Vector<DisjointBoxLayout>&         a_grids,
-                    const Vector<ProblemDomain>&             a_domains,
-                    const Vector<Real>&                      a_dx,
-                    const Vector<int>&                       a_refRat,
-                    const Vector<ValidMask>&                 a_validMask,
-                    const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
-                    const RealVect&                          a_probLo,
-                    const int                                a_blockingFactor,
-                    const int                                a_finestLevel,
-                    const std::string                        a_realm);
+  /**
+   * @name Construction and lifetime
+   */
+  ///@{
 
-  /*!
-    @brief Destructor ( does nothing)
-  */
-  virtual ~ParticleContainer();
+  /**
+   * @brief Construct an empty, undefined container. Call define() before use.
+   */
+  ParticleContainer()
+    : m_probLo(RealVect::Zero),
+      m_minBlockSize(0),
+      m_finestLevel(-1),
+      m_numOutcastLocal(0),
+      m_isDefined(false),
+      m_isOrganizedByCell(false)
+  {}
 
-  /*!
-    @brief Define the container. This will do a clear-out of all particles. 
-    @param[in] a_grids          AMR grids
-    @param[in] a_domains        AMR domains
-    @param[in] a_dx             Grid resolutions
-    @param[in] a_refRat         Refinement ratios
-    @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
-    @param[in] a_levelTiles     Tiled AMR grids
-    @param[in] a_probLo         Lower-left corner of the physical domain
-    @param[in] a_blockingFactor Grid blocking factor
-    @param[in] a_finestLevel    Finest grid level
-    @param[in] a_realm          Realm where these particles live. 
-  */
+  /**
+   * @brief Destructor.
+   */
+  ~ParticleContainer() = default;
+
+  /**
+   * @brief Copy construction is deleted (holders are shared RefCountedPtr -- a copy would alias).
+   */
+  ParticleContainer(const ParticleContainer&) = delete;
+
+  /**
+   * @brief Copy assignment is deleted (move-only ownership).
+   * @return Reference to this.
+   */
+  ParticleContainer&
+  operator=(const ParticleContainer&) = delete;
+
+  /**
+   * @brief Allocate the per-level holders and the per-level tile-ownership maps over the AMR grids.
+   * @details Allocates one empty Leaf per box for the valid, mask, and buffer holders on every level in
+   * [0, a_finestLevel], and builds a LevelTiles per level (from the grids + blocking factor) used by
+   * remap() to map a particle to its owning patch/rank. The mask and buffer holders start empty; they are
+   * populated on demand by copyMaskParticles()/transferMaskParticles() and the deposition routines. Must
+   * be called once before any other operation.
+   * @param[in] a_grids          Per-level DisjointBoxLayouts.
+   * @param[in] a_domains        Per-level problem domains.
+   * @param[in] a_dx             Per-level (isotropic) grid spacing.
+   * @param[in] a_refRat         Per-level refinement ratio (entry l is the ratio between level l and l+1).
+   * @param[in] a_probLo         Lower-left corner of the physical domain.
+   * @param[in] a_minBlockSize Grid blocking factor (tile size); the grids must be unions of
+   *                             minBlockSize-sized boxes for the tile ownership to be exact.
+   * @param[in] a_levelTiles     The owning Realm's per-level tile->box maps, aliased (never built locally)
+   *                             as the patch-locating structure used by remap(). Must correspond to
+   *                             a_grids. Not owned; must outlive this container.
+   * @param[in] a_finestLevel    Finest AMR level index.
+   * @param[in] a_realm          Realm label (diagnostics only).
+   * @param[in] a_validCells     Optional alias to the realm's valid-cell mask (true = cell not covered
+   *                             by a finer level), enabling remap()'s stayer fast path. Pass nullptr to
+   *                             always re-pool every particle. Not owned; must outlive this container.
+   */
   void
-  define(const Vector<DisjointBoxLayout>&         a_grids,
-         const Vector<ProblemDomain>&             a_domains,
-         const Vector<Real>&                      a_dx,
-         const Vector<int>&                       a_refRat,
-         const Vector<ValidMask>&                 a_validMask,
-         const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
-         const RealVect&                          a_probLo,
-         const int                                a_blockingFactor,
-         const int                                a_finestLevel,
-         const std::string                        a_realm);
+  define(const Vector<DisjointBoxLayout>&                       a_grids,
+         const Vector<ProblemDomain>&                           a_domains,
+         const Vector<Real>&                                    a_dx,
+         const Vector<int>&                                     a_refRat,
+         const RealVect&                                        a_probLo,
+         const int                                              a_minBlockSize,
+         const Vector<RefCountedPtr<LevelTiles>>&               a_levelTiles,
+         const int                                              a_finestLevel,
+         const std::string&                                     a_realm,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>* a_validCells)
+  {
+    CH_TIME("ParticleContainer::define");
 
-  /*!
-    @brief Regrid function. a_base is the coarsest grid level which did not change
-    @param[in] a_grids          AMR grids
-    @param[in] a_domains        AMR domains
-    @param[in] a_dx             Grid resolutions
-    @param[in] a_refRat         Refinement ratios
-    @param[in] a_validMask      Valid cells
-    @param[in] a_levelTiles     Tiled AMR grids
-    @param[in] a_base           Coarsest grid level that did not change. 
-    @param[in] a_newFinestLevel New finest grid level
-  */
+    CH_assert(a_grids.size() > a_finestLevel);
+    CH_assert(a_domains.size() > a_finestLevel);
+    CH_assert(a_dx.size() > a_finestLevel);
+    CH_assert(a_refRat.size() > a_finestLevel);
+    CH_assert(a_levelTiles.size() > a_finestLevel);
+
+    m_grids           = a_grids;
+    m_domains         = a_domains;
+    m_refRat          = a_refRat;
+    m_probLo          = a_probLo;
+    m_minBlockSize    = a_minBlockSize;
+    m_finestLevel     = a_finestLevel;
+    m_realm           = a_realm;
+    m_validCells      = a_validCells;
+    m_numOutcastLocal = 0;
+
+    m_dx.resize(a_finestLevel + 1);
+    for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+      m_dx[lvl] = a_dx[lvl] * RealVect::Unit;
+    }
+
+    // Alias the Realm's per-level tile->box maps (the single source of truth); never build our own.
+    m_levelTiles = a_levelTiles;
+
+    m_particles.resize(a_finestLevel + 1);
+    m_maskParticles.resize(a_finestLevel + 1);
+    for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+      m_particles[lvl]     = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
+      m_maskParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(a_grids[lvl]));
+    }
+
+    // Buffer particles live on the grown grids (boxes grown by the refinement factor on finer levels).
+    this->setupGrownGrids();
+    m_bufferParticles.resize(a_finestLevel + 1);
+    for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+      m_bufferParticles[lvl] = RefCountedPtr<LevelParticles>(new LevelParticles(m_grownGrids[lvl]));
+    }
+
+    m_isOrganizedByCell = false;
+    m_isDefined         = true;
+  }
+
+  ///@}
+
+  /**
+   * @name Grid metadata
+   */
+  ///@{
+
+  /**
+   * @brief Per-level AMR grids.
+   * @return The DisjointBoxLayouts, one per level.
+   */
+  const Vector<DisjointBoxLayout>&
+  getGrids() const
+  {
+    return m_grids;
+  }
+
+  /**
+   * @brief Per-level grid spacing.
+   * @return The (isotropic) grid spacing per level, as RealVects.
+   */
+  Vector<RealVect>
+  getDx() const
+  {
+    return m_dx;
+  }
+
+  /**
+   * @brief Lower-left corner of the physical domain.
+   * @return The probLo corner.
+   */
+  RealVect
+  getProbLo() const
+  {
+    return m_probLo;
+  }
+
+  /**
+   * @brief Finest AMR level index.
+   * @return The finest level.
+   */
+  int
+  getFinestLevel() const
+  {
+    return m_finestLevel;
+  }
+
+  /**
+   * @brief Realm label.
+   * @return The realm string.
+   */
+  std::string
+  getRealm() const
+  {
+    return m_realm;
+  }
+
+  ///@}
+
+  /**
+   * @name Particle holders
+   */
+  ///@{
+
+  /**
+   * @brief The valid particles on all levels.
+   * @return Mutable per-level holder vector.
+   */
+  AMRParticlesSoA<P, Traits>&
+  getParticles()
+  {
+    return m_particles;
+  }
+
+  /**
+   * @brief The valid particles on all levels (const).
+   * @return Const per-level holder vector.
+   */
+  const AMRParticlesSoA<P, Traits>&
+  getParticles() const
+  {
+    return m_particles;
+  }
+
+  /**
+   * @brief The halo/mask particles on all levels.
+   * @return Mutable per-level holder vector.
+   */
+  AMRParticlesSoA<P, Traits>&
+  getMaskParticles()
+  {
+    return m_maskParticles;
+  }
+
+  /**
+   * @brief The halo/mask particles on all levels (const).
+   * @return Const per-level holder vector.
+   */
+  const AMRParticlesSoA<P, Traits>&
+  getMaskParticles() const
+  {
+    return m_maskParticles;
+  }
+
+  /**
+   * @brief The grown-grid buffer particles on all levels.
+   * @return Mutable per-level holder vector.
+   */
+  AMRParticlesSoA<P, Traits>&
+  getBufferParticles()
+  {
+    return m_bufferParticles;
+  }
+
+  /**
+   * @brief The grown-grid buffer particles on all levels (const).
+   * @return Const per-level holder vector.
+   */
+  const AMRParticlesSoA<P, Traits>&
+  getBufferParticles() const
+  {
+    return m_bufferParticles;
+  }
+
+  /**
+   * @brief Valid particles on one level (index by DataIndex to reach a patch's Leaf).
+   * @details Chain a second index by @c DataIndex to reach the patch's ParticleSoA leaf:
+   * @code{.cpp}
+   *   ParticleSoA<P>& leaf = particles[lvl][din];
+   * @endcode
+   * @param[in] a_lvl Level index.
+   * @return Mutable per-level holder; operator[](DataIndex) yields the patch's ParticleSoA.
+   */
+  LevelParticles&
+  operator[](const int a_lvl)
+  {
+    CH_assert(m_isDefined);
+    CH_assert(a_lvl >= 0 && a_lvl <= m_finestLevel);
+
+    return *m_particles[a_lvl];
+  }
+
+  /**
+   * @brief Valid particles on one level (const).
+   * @param[in] a_lvl Level index.
+   * @return Const per-level holder.
+   */
+  const LevelParticles&
+  operator[](const int a_lvl) const
+  {
+    CH_assert(m_isDefined);
+    CH_assert(a_lvl >= 0 && a_lvl <= m_finestLevel);
+
+    return *m_particles[a_lvl];
+  }
+
+  ///@}
+
+  /**
+   * @name State
+   */
+  ///@{
+
+  /**
+   * @brief Whether the valid leaves are currently cell-sorted.
+   * @return True if organizeParticlesByCell() is in effect, false after organizeParticlesByPatch().
+   */
+  bool
+  isOrganizedByCell() const
+  {
+    return m_isOrganizedByCell;
+  }
+
+  /**
+   * @brief Whether define() has been called.
+   * @return True iff defined.
+   */
+  bool
+  isDefined() const
+  {
+    return m_isDefined;
+  }
+
+  ///@}
+
+  /**
+   * @name Population
+   */
+  ///@{
+
+  /**
+   * @brief Drop all valid particles on every level (keeps each leaf's arena capacity).
+   */
+  void
+  clearParticles()
+  {
+    CH_TIME("ParticleContainer::clearParticles");
+
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      LevelParticles&          level = *m_particles[lvl];
+      const DisjointBoxLayout& dbl   = m_grids[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const int                nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        level[din].clear();
+      }
+    }
+  }
+
+  /**
+   * @brief Add a free-standing buffer of particles to the container, routing each to its owner.
+   * @details The buffer (e.g. filled by ParticleManagement::drawRandomParticles(ParticleSoA)) is catenated
+   * onto a local leaf -- O(1) when that leaf is empty -- and then remap() routes every particle (including
+   * across ranks and levels) to the patch/level/rank that owns its position. a_particles is left empty.
+   * Assumes this rank owns at least one box (true whenever level 0 covers the domain). Unlike
+   * addParticlesLocal(), the positions need not already belong to this rank.
+   * @code{.cpp}
+   *   ParticleSoA<P> drawn;
+   *   ParticleManagement::drawRandomParticles(drawn, ...);
+   *   particles.addParticlesDestructive(drawn); // drawn is empty afterwards; particles are routed to owners
+   * @endcode
+   * @param[in,out] a_particles Buffer of particles to ingest (emptied on return).
+   */
+  void
+  addParticlesDestructive(ParticleSoA<P, Traits>& a_particles)
+  {
+    CH_TIME("ParticleContainer::addParticlesDestructive");
+
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      DataIterator dit = m_grids[lvl].dataIterator();
+      if (dit.ok()) {
+        (*m_particles[lvl])[dit()].catenate(a_particles); // move the buffer onto a local leaf
+        break;
+      }
+    }
+
+    this->remap(); // route every ingested particle to its owning patch/level/rank
+  }
+
+  ///@}
+
+  /**
+   * @name Counting
+   */
+  ///@{
+
+  /**
+   * @brief Number of valid particles owned by this rank.
+   * @details Ghost particles (any non-Valid GhostType) are excluded -- only owned, valid particles
+   * are counted, even if a transient ghost halo is currently present in the leaves.
+   * @return Local valid particle count summed over all levels and patches.
+   */
+  unsigned long long
+  getNumberOfValidParticlesLocal() const
+  {
+    CH_TIME("ParticleContainer::getNumberOfValidParticlesLocal");
+
+    CH_assert(m_isDefined);
+
+    unsigned long long n = 0;
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const LevelParticles&    level = *m_particles[lvl];
+      const DisjointBoxLayout& dbl   = m_grids[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+      const int                nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : n)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din  = dit[mybox];
+        const Leaf&      leaf = level[din];
+
+        for (std::size_t i = 0; i < leaf.size(); i++) {
+          if (!leaf.isGhost(i)) {
+            n++;
+          }
+        }
+      }
+    }
+
+    return n;
+  }
+
+  /**
+   * @brief Number of valid particles across all ranks.
+   * @return Global valid particle count (MPI all-reduce of the local count; == local in serial).
+   */
+  unsigned long long
+  getNumberOfValidParticlesGlobal() const
+  {
+    CH_TIME("ParticleContainer::getNumberOfValidParticlesGlobal");
+
+    CH_assert(m_isDefined);
+
+    return ParallelOps::sum(this->getNumberOfValidParticlesLocal());
+  }
+
+  /**
+   * @brief Number of particles dropped off-domain by the most recent remap() on this rank.
+   * @return Local outcast count from the last remap.
+   */
+  unsigned long long
+  getNumberOfOutcastParticlesLocal() const
+  {
+    return m_numOutcastLocal;
+  }
+
+  /**
+   * @brief Number of particles dropped off-domain by the most recent remap(), across all ranks.
+   * @return Global outcast count from the last remap (== local in serial).
+   */
+  unsigned long long
+  getNumberOfOutcastParticlesGlobal() const
+  {
+    return ParallelOps::sum(m_numOutcastLocal);
+  }
+
+  ///@}
+
+  /**
+   * @name Dynamics
+   */
+  ///@{
+
+  /**
+   * @brief Redistribute every valid particle to the patch/level/rank that owns its cell.
+   * @details Pool model: collect all valid particles, map each to its destination via the
+   * finest-level tile that contains it (LevelTiles), append same-rank movers into the destination
+   * leaf and scatter cross-rank movers with MPI. Particles whose cell is not owned by any tile on
+   * any level (off-domain) are dropped and counted in getNumberOfOutcastParticles*(). Invalidates
+   * any cell-sort. Particle ids are preserved; rankID is set to the new owning rank.
+   */
+  void
+  remap();
+
+  /**
+   * @brief Cache the current valid particles ahead of a regrid.
+   * @details Snapshots the current per-level holders (and their layout) so that regrid() can
+   * rebuild over a new layout and redistribute the cached particles. Call exactly once before
+   * regrid().
+   */
+  void
+  preRegrid();
+
+  /**
+   * @brief Rebuild over a new AMR layout and redistribute the preRegrid()-cached particles onto it.
+   * @details Re-allocates the per-level holders and tile maps over the new grids (all levels), then
+   * runs the same pool->map->scatter as remap() but sourced from the cache. Positions are unchanged;
+   * each cached particle is routed to the patch/level/rank owning its cell on the NEW layout, with
+   * ids preserved. Off-domain particles are counted in getNumberOfOutcastParticles*(). Must follow a
+   * preRegrid().
+   * @param[in] a_grids          New per-level DisjointBoxLayouts.
+   * @param[in] a_domains        New per-level problem domains.
+   * @param[in] a_dx             New per-level (isotropic) grid spacing.
+   * @param[in] a_refRat         New per-level refinement ratios.
+   * @param[in] a_minBlockSize Grid blocking factor (tile size) for the new grids.
+   * @param[in] a_levelTiles     The owning Realm's per-level tile->box maps for the new grids, aliased
+   *                             (never built locally). Must correspond to a_grids.
+   * @param[in] a_newFinestLevel New finest AMR level index.
+   */
   void
   regrid(const Vector<DisjointBoxLayout>&         a_grids,
          const Vector<ProblemDomain>&             a_domains,
          const Vector<Real>&                      a_dx,
          const Vector<int>&                       a_refRat,
-         const Vector<ValidMask>&                 a_validMask,
+         const int                                a_minBlockSize,
          const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
-         const int                                a_base,
          const int                                a_newFinestLevel);
 
-  /*!
-    @brief Cache particles before calling regrid. 
-    @param[in] a_base Coarsest grid level which will not change. 
-  */
-  void
-  preRegrid(const int a_base);
+  ///@}
 
-  /*!
-    @brief Compute new particle IDs.
-  */
-  void
-  resetParticleIDs() noexcept;
+  /**
+   * @name Ghost particles
+   */
+  ///@{
 
-  /*!
-    @brief Copy particles to mask particle data holder.
-    @param[in] a_mask Mask
-    @note If the mask is nullptr on any of the levels, those levels will be ignored. 
-  */
+  /**
+   * @brief Fill each patch's ghost halo from prebuilt Realm particle ghost masks.
+   * @details A ghost particle is a transient, non-owned copy of a particle that lives in an adjacent
+   * region (a neighbouring patch on the same level, the next-coarser level, or the next-finer level) and
+   * overlaps this patch's ghosted box. For every valid particle, this scatters a copy to each destination
+   * patch listed by the masks for the particle's cell: same-level targets from a_maskSame, next-finer
+   * targets from a_maskCoarToFine, and next-coarser targets from a_maskFineToCoar. Copies are appended
+   * into the destination leaf (same-rank directly, cross-rank via MPI), tagged with the GhostType from the
+   * receiver's view (SameLevel / Coarse / Fine) so consumers can tell them from owned particles via
+   * ParticleSoA::isGhost(), and keep the source's particleID. clearGhostParticles() is called first so it
+   * is safe to refill; ghosts are transient (remap()/preRegrid()/regrid() drop them). Pass
+   * AmrMesh::getTrivialParticleGhostMask() for a direction that should not scatter. The masks must have
+   * been built on the same grids as this container (see AmrMesh::registerParticleGhostMask and
+   * AmrMesh::getParticleGhostMask(realm, width)). Periodic domains are not supported (mask construction
+   * aborts on them).
+   * @param[in] a_maskSame       Same-level ghost mask (source cell -> same-level target boxes).
+   * @param[in] a_maskCoarToFine Coarse-to-fine ghost mask (source cell -> next-finer target boxes).
+   * @param[in] a_maskFineToCoar Fine-to-coarse ghost mask (source cell -> next-coarser target boxes).
+   */
   void
-  copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask) const;
+  fillGhostParticles(const AMRParticleGhostMask& a_maskSame,
+                     const AMRParticleGhostMask& a_maskCoarToFine,
+                     const AMRParticleGhostMask& a_maskFineToCoar);
 
-  /*!
-    @brief Copy particles to masked particle data holder. 
-    @param[in] a_level Grid level
-    @param[in] a_mask  Mask
-  */
+  /**
+   * @brief Remove every ghost particle (any non-Valid GhostType) from all levels and patches.
+   * @details Owned (Valid) particles are left untouched. Removal is by swap-and-pop, so particle
+   * order within a leaf is not preserved. Keeps leaf capacity.
+   */
   void
-  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;
+  clearGhostParticles();
 
-  /*!
-    @brief Copy particles to the mask particle data holder.
-    @param[in] a_mask Mask
-    @note If the mask is nullptr on any of the levels, those levels will be ignored. 
-  */
+  /**
+   * @brief Claim ownership of this rank's particles by stamping their owner rank (rankID = procID()).
+   * @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the owner rank it
+   * carries. For non-ghost particles: when a_onlyValidRegion is true, only those whose cell lies inside
+   * the leaf's own grid box are claimed and out-of-box strays are left untouched; when false, every
+   * non-ghost particle is claimed. The region test is purely geometric on the ungrown patch box (it does
+   * not consider finer-level coverage or GhostType). No MPI communication.
+   * @param[in] a_onlyValidRegion Restrict to non-ghost particles inside the leaf's grid box.
+   */
+  void
+  claimOwnership(const bool a_onlyValidRegion);
+
+  /**
+   * @brief Assign globally-unique, contiguous particle IDs to the owned particles.
+   * @details Ghost particles (isGhost()) are always left untouched, so a ghost keeps the source's id. A
+   * non-ghost particle qualifies for a new id iff a_onlyValidRegion is false OR its cell lies inside the
+   * leaf's own grid box; a non-ghost that does not qualify (an out-of-box stray, only possible when
+   * a_onlyValidRegion is true) is set to ParticleSoA::s_invalidID. Qualifying particles receive contiguous
+   * ids in rank order (rank 0 first) starting at a_startID, made unique across ranks via an all-gather of
+   * the per-rank counts and an exclusive prefix. The region test is purely geometric on the ungrown patch
+   * box. Note: the assigned ids are a numbering snapshot, not a persistent identity -- they depend on the
+   * rank/box ordering and change across regrids and different rank counts.
+   * @param[in] a_onlyValidRegion Restrict new ids to non-ghost particles inside the leaf's grid box.
+   * @param[in] a_startID         Global id of the first assigned particle; ids occupy [a_startID, a_startID + return).
+   * @return The global number of ids assigned (across all ranks).
+   */
+  long long
+  resetParticleIDs(const bool a_onlyValidRegion, const ParticleID a_startID);
+
+  ///@}
+
+  /**
+   * @name Halo and buffer particles
+   */
+  ///@{
+
+  /**
+   * @brief Copy the valid particles selected by a per-cell mask into the mask holder, all levels.
+   * @param[in] a_mask Per-level cell masks (skipped where null).
+   */
+  void
+  copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask);
+
+  /**
+   * @brief Copy the valid particles whose cell the mask marks true into the mask holder, one level.
+   * @details Clears the level's mask leaves, then COPIES (keeps in the valid holder) every valid
+   * particle whose cell is true in the mask. Ids/rank are preserved.
+   * @param[in] a_level Level to fill.
+   * @param[in] a_mask  Per-cell boolean mask over that level's valid grids (box == grid box).
+   */
+  void
+  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
+
+  /**
+   * @brief Move the valid particles selected by a per-cell mask into the mask holder, all levels.
+   * @param[in] a_mask Per-level cell masks (skipped where null).
+   */
   void
   transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask);
 
-  /*!
-    @brief Copy particles to masked particle data holder. 
-    @param[in] a_level Grid level
-    @param[in] a_mask  Mask
-  */
+  /**
+   * @brief Move the valid particles whose cell the mask marks true into the mask holder, one level.
+   * @details Like copyMaskParticles but MOVES (removes from the valid holder via swap-and-pop, which
+   * does not preserve order). Does not clear the mask holder first (accumulates). Ids/rank preserved.
+   * @param[in] a_level Level to fill.
+   * @param[in] a_mask  Per-cell boolean mask over that level's valid grids (box == grid box).
+   */
   void
   transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
 
-  /*!
-    @brief Sort particles according to the < operator in the particle.
-  */
+  /**
+   * @brief Drop all mask/halo particles on every level (keeps capacity).
+   */
   void
-  sortParticles() noexcept;
+  clearMaskParticles()
+  {
+    CH_TIME("ParticleContainer::clearMaskParticles");
 
-  /*!
-    @brief Clear all particles
-  */
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      LevelParticles&          level = *m_maskParticles[lvl];
+      const DisjointBoxLayout& dbl   = m_grids[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        level[din].clear();
+      }
+    }
+  }
+
+  /**
+   * @brief Drop all buffer particles on every level (keeps capacity).
+   */
   void
-  clearParticles();
+  clearBufferParticles()
+  {
+    CH_TIME("ParticleContainer::clearBufferParticles");
 
-  /*!
-    @brief Clear the buffer particles. 
-  */
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      LevelParticles&     level = *m_bufferParticles[lvl];
+      const BoxLayout&    dbl   = m_grownGrids[lvl];
+      const DataIterator& dit   = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        level[din].clear();
+      }
+    }
+  }
+
+  /**
+   * @brief Per-level grown grids that the buffer particles live on.
+   * @return The grown BoxLayouts (boxes grown by the refinement factor on finer levels).
+   */
+  const Vector<BoxLayout>&
+  getGrownGrids() const
+  {
+    return m_grownGrids;
+  }
+
+  /**
+   * @brief Move all particles from another holder (on the same valid grids) into the valid holder.
+   * @details Per level/patch, catenates the source leaf into the valid leaf (a per-column bulk move
+   * preserving ids/rank, or an O(1) arena swap when the valid leaf is empty), leaving the source
+   * empty. Used to return halo/mask particles to the valid holder after a HaloNGP deposition. Assumes
+   * a_source is defined over this container's valid grids.
+   * @param[in,out] a_source Holder to drain into the valid particles.
+   */
   void
-  clearBufferParticles() const;
+  transferParticles(AMRParticlesSoA<P, Traits>& a_source)
+  {
+    CH_TIME("ParticleContainer::transferParticles");
 
-  /*!
-    @brief Clear the "mask" particles. 
-  */
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      LevelParticles& src = *a_source[lvl];
+      LevelParticles& dst = *m_particles[lvl];
+
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        dst[din].catenate(src[din]); // bulk move (id/rank preserved); empty dst -> O(1) swap
+      }
+    }
+
+    m_isOrganizedByCell = false;
+  }
+
+  ///@}
+
+  /**
+   * @name Cell sorting
+   */
+  ///@{
+
+  /**
+   * @brief Cell-sort every valid leaf (counting sort into Fortran cell order + CSR cell offsets).
+   * @details After this, each leaf is `isSorted()` and cell c owns the contiguous particle range
+   * [`cellStart(c)`, `cellStart(c+1)`) (query via the leaf accessors). Sets isOrganizedByCell().
+   */
   void
-  clearMaskParticles() const;
+  organizeParticlesByCell()
+  {
+    CH_TIME("ParticleContainer::organizeParticlesByCell");
 
-  /*!
-    @brief Clear outcast particles
-  */
+    CH_assert(m_isDefined);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      LevelParticles& level = *m_particles[lvl];
+
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        level[din].sortByCell(dbl[din], m_dx[lvl], m_probLo);
+      }
+    }
+
+    m_isOrganizedByCell = true;
+  }
+
+  /**
+   * @brief Return to a by-patch view (the leaves remain a single contiguous array per patch).
+   * @details Clears isOrganizedByCell(); the CSR cell offsets are no longer to be relied upon. There is no
+   * data movement -- the leaf already holds all particles of a patch contiguously.
+   */
   void
-  clearOutcast() noexcept;
+  organizeParticlesByPatch()
+  {
+    CH_TIME("ParticleContainer::organizeParticlesByPatch");
 
-  /*!
-    @brief Clear particles on input data holder
-    @param[inout] a_particles
-  */
-  void
-  clear(AMRParticles<P>& a_particles) const;
+    m_isOrganizedByCell = false;
+  }
 
-  /*!
-    @brief Is cell-sorted or not
-  */
-  bool
-  isOrganizedByCell() const;
+  ///@}
 
-  /*!
-    @brief Get finest AMR level
-  */
-  int
-  getFinestLevel() const;
-
-  /*!
-    @brief Get the realm where this ParticleContainer lives. 
-  */
-  const std::string
-  getRealm() const;
-
-  /*!
-    @brief Get all particles on all levels
-    @return m_particles
-  */
-  AMRParticles<P>&
-  getParticles();
-
-  /*!
-    @brief Get all particles on a level. Const version.
-    @return m_particles
-  */
-  const AMRParticles<P>&
-  getParticles() const;
-
-  /*!
-    @brief Get buffer particles on all levels
-    @return m_bufferParticles
-  */
-  AMRParticles<P>&
-  getBufferParticles();
-
-  /*!
-    @brief Get buffer particles on all levels. Const version. 
-    @return m_bufferParticles
-  */
-  const AMRParticles<P>&
-  getBufferParticles() const;
-
-  /*!
-    @brief Get the mask particles. 
-    @return m_maskParticles
-  */
-  AMRParticles<P>&
-  getMaskParticles();
-
-  /*!
-    @brief Get the mask particles. Const version. 
-    @return m_maskParticles
-  */
-  const AMRParticles<P>&
-  getMaskParticles() const;
-
-  /*!
-    @brief Get the AMR grids
-  */
-  const Vector<DisjointBoxLayout>&
-  getGrids() const;
-
-  /*!
-    @brief Get lower-left corner
-    @return m_probLo
-  */
-  const RealVect
-  getProbLo() const noexcept;
-
-  /*!
-    @brief Get grid resolutions
-    @return m_dx
-  */
-  const Vector<RealVect>
-  getDx() const noexcept;
-
-  /*!
-    @brief Get particle data on a level
-    @param[in] a_level AMR level
-  */
-  ParticleData<P>&
-  operator[](const int a_level);
-
-  /*!
-    @brief Get data on a level. Const version. 
-    @param[in] a_level AMR level
-  */
-  const ParticleData<P>&
-  operator[](const int a_level) const;
-
-  /*!
-    @brief Get all cell particles. 
-    @note This will issue an error if the particles are not sorted by cell. 
-  */
-  AMRCellParticles<P>&
-  getCellParticles();
-
-  /*!
-    @brief Get cell particles, const version. 
-    @note This will issue an error if the particles are not sorted by cell. 
-  */
-  const AMRCellParticles<P>&
-  getCellParticles() const;
-
-  /*!
-    @brief Get cell particles
-    @param[in] a_level Grid level
-    @note This will issue an error if the particles are not sorted by cell. 
-  */
-  LayoutData<BinFab<P>>&
-  getCellParticles(const int a_level);
-
-  /*!
-    @brief Get cell particles, const version. 
-    @param[in] a_level Grid level
-    @note This will issue an error if the particles are not sorted by cell. 
-  */
-  const LayoutData<BinFab<P>>&
-  getCellParticles(const int a_level) const;
-
-  /*!
-    @brief Get cell particles on a specific level and grid inex. 
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
-    @note This will issue an error if the particles are not sorted by cell. 
-  */
-  BinFab<P>&
-  getCellParticles(const int a_level, const DataIndex a_dit);
-
-  /*!
-    @brief Get cell particles, const version. 
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
-    @note This will issue an error if the particles are not sorted by cell. 
-  */
-  const BinFab<P>&
-  getCellParticles(const int a_level, const DataIndex a_dit) const;
-
-  /*!
-    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. 
-    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
-    @param[in]  a_level Grid level
-    @param[in]  a_dit   Grid index
-    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
-  */
-  void
-  getCellParticles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
-
-  /*!
-    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. The original particles are destroyed. 
-    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
-    @param[in]  a_level Grid level
-    @param[in]  a_dit   Grid index
-    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
-  */
-  void
-  getCellParticlesDestructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
-
-  /*!
-    @brief Sort particles by cell
-    @details This will fill m_cellSortedParticles and destroy the patch-sorted particles. 
-  */
-  void
-  organizeParticlesByCell();
-
-  /*!
-    @brief Sort particles by cell
-    @details This will fill m_particles from m_cellSortedParticles and destroy the cell-sorted particles. 
-  */
-  void
-  organizeParticlesByPatch();
-
-  /*!
-    @brief Add particles to container
-    @param[in] a_particles particles to add to this container. 
-  */
-  void
-  addParticles(const List<P>& a_particles);
-
-  /*!
-    @brief Add particles to container. The input particles are destroyed by this routine. 
-    @param[in] a_particles particles to add to this container. . 
-  */
-  void
-  addParticlesDestructive(List<P>& a_particles);
-
-  /*!
-    @brief Add particles to a certain level and patch. The input particles are cell-sorted. 
-    @param[in] a_particles Input particles (cell-sorted)
-    @param[in] a_lvl       Grid level
-    @param[in] a_dit       Grid index
-  */
-  void
-  addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
-
-  /*!
-    @brief Add particles to a certain level and patch. The input particles are cell-sorted (and destroyed on output). 
-    @param[inout] a_particles Input particles (cell-sorted). Destroyed on exit. 
-    @param[in]    a_lvl       Grid level
-    @param[in]    a_dit       Grid index
-  */
-  void
-  addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
-
-  /*!
-    @brief Add particles from other container to this one
-    @param[in] a_otherContainer Other particle container. 
-  */
-  void
-  addParticles(const ParticleContainer<P>& a_otherContainer);
-
-  /*!
-    @brief Add particles from other container to this one. This destroys the particles in the other container. 
-    @param[inout] a_otherContainer Other particle container (destroyed on output). 
-  */
-  void
-  addParticlesDestructive(ParticleContainer<P>& a_otherContainer);
-
-  /*!
-    @brief Run a sanity check and make sure all particles are in their correctly assigned box
-  */
-  void
-  sanityCheck() const noexcept;
-
-  /*!
-    @brief Remap over the entire AMR hierarchy
-  */
-  void
-  remap();
-
-  /*!
-    @brief Move particles into this container. 
-    @param[inout] a_otherContainer Other particle container. 
-    @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
-  */
-  void
-  transferParticles(ParticleContainer<P>& a_otherContainer);
-
-  /*!
-    @brief Move particles into this container. 
-    @param[inout] a_otherContainer Other particle container. 
-    @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
-  */
-  void
-  transferParticles(AMRParticles<P>& a_otherContainer);
-
-  /*!
-    @brief Evict particles if they move out of the valid region.
-    @param[inout] a_evictedParticles List that the particles are moved into.
-    @param[inout] a_particles        Particles.
-    @param[in]    a_level            Grid level.
-  */
-  void
-  admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
-
-  /*!
-    @brief Set the particle member to the input value
-    @details This is a jack-of-all-trades kind of routine for setting a particle field. The template parameter indicates the field to be set, it must be a
-    pointer-to-member-function that returns the field to be set. For example, if the particle class P has a field mass which one wants to set, and this field
-    is returned by a function Real& P::mass(), one can set the quantity for all particles by calling ParticleContainer<P>::setValue<&P::mass>(Real)
-    @param[in] a_value Value 
-  */
-  template <Real& (P::*particleScalarField)()>
-  inline void
-  setValue(const Real a_value);
-
-  /*!
-    @brief Set the particle member to the input value
-    @details This is a jack-of-all-trades kind of routine for setting a particle field. The template parameter indicates the field to be set, it must be a
-    pointer-to-member-function that returns the field to be set. For example, if the particle class P has a field vector which one wants to set, and this field
-    is returned by a function RealVect& P::velocity(), one can set the quantity for all particles by calling ParticleContainer<P>::setValue<&P::velocity>(RealVect);
-    @param[in] a_value Value 
-  */
-  template <RealVect& (P::*particleVectorField)()>
-  inline void
-  setValue(const RealVect a_value);
-
-  /*!
-    @brief Get local number of particles
-  */
-  unsigned long long
-  getNumberOfValidParticlesLocal() const;
-
-  /*!
-    @brief Get global number of particles
-  */
-  unsigned long long
-  getNumberOfValidParticlesGlobal() const;
-
-  /*!
-    @brief Get local number of particles
-  */
-  unsigned long long
-  getNumberOfOutcastParticlesLocal() const;
-
-  /*!
-    @brief Get global number of particles
-  */
-  unsigned long long
-  getNumberOfOutcastParticlesGlobal() const;
-
-  /*!
-    @brief Get the number particles in the halo cells. 
-  */
-  unsigned long long
-  getNumberOfMaskParticlesLocal() const;
-
-  /*!
-    @brief Get the number particles in the halo cells. 
-  */
-  unsigned long long
-  getNumberOfMaskParticlesGlobal() const;
+  /**
+   * @brief Map a position to its owning (level, grid index, rank) via the finest containing tile.
+   * @details Thin wrapper over the shared LevelTiles::findDestination point->block core, passing this
+   * container's aliased grid metadata (probLo, dx, minBlockSize, level tiles). Public because the distributed
+   * nearest-neighbor particle merge (ParticleManagement::mergeNearestNeighborsTree) locates each newly created
+   * merged particle's owning patch/rank through the SAME tile-hash query remap() uses internally, rather than a
+   * linear scan over patches -- see PositionLocator in CD_NearestNeighborParticleMerge.H.
+   * @param[in] a_pos Particle position.
+   * @return The resolved destination; valid==false if no tile on any level owns the cell.
+   */
+  LevelTiles::LevelAndBox
+  findDestination(const RealVect& a_pos) const;
 
 protected:
-  // Reductions for performing catenation and join operations in a thread-safe manner.
-#pragma omp declare reduction(catenate : List<P> : ThreadSafeCatenation<P>(omp_out, omp_in))
-#pragma omp declare reduction(join : List<P> : ThreadSafeJoin<P>(omp_out, omp_in))
+  /**
+   * @brief Build the grown grids (buffer-particle layout): boxes grown by the refinement factor.
+   */
+  void
+  setupGrownGrids();
 
-  /*!
-    @brief Realm on which the ParticleContainer is defined
-  */
-  std::string m_realm;
+  /**
+   * @brief Pool key identifying a destination patch: (level, grid index within the level).
+   */
+  using PoolKey = std::pair<int, unsigned int>;
 
-  /*!
-    @brief Blocking factor, aka grid size. 
-  */
-  int m_blockingFactor;
+  /**
+   * @brief Per-rank pool of movers: pool[rank] maps a destination patch to a small SoA of particles.
+   */
+  using MoverPool = std::vector<std::map<PoolKey, Leaf>>;
 
-  /*!
-    @brief Finest grid level
-  */
-  int m_finestLevel;
+  /**
+   * @brief Gather every particle of a source holder into a per-rank, per-destination-patch pool.
+   * @details Reads each particle, resolves its owning (level, grid index, rank) on the CURRENT tile
+   * maps, and copies it into the pool (ids preserved, rankID set to the new owner). Off-domain
+   * particles are counted into m_numOutcastLocal (which this resets).
+   * @param[in] a_source      Source holders (e.g. the valid particles, or the regrid cache).
+   * @param[in] a_sourceGrids The DisjointBoxLayouts the source holders are defined on.
+   * @return The per-rank mover pool.
+   */
+  MoverPool
+  gatherToPool(AMRParticlesSoA<P, Traits>& a_source, const Vector<DisjointBoxLayout>& a_sourceGrids);
 
-  /*!
-    @brief Lower left corner of the physical domain. 
-  */
-  RealVect m_probLo;
+  /**
+   * @brief Mask fast path for remap(): pool ONLY the movers, leaving stayers in place.
+   * @details Scans m_particles in place; a particle still inside its box AND in a cell flagged valid by
+   * m_validCells (not covered by a finer level) is a stayer and is left untouched. Every other particle
+   * is a mover: it is copied into the returned pool (ids preserved, rankID set to the new owner) and
+   * swap-popped out of its leaf. Off-domain movers are counted into m_numOutcastLocal (reset here).
+   * Requires m_validCells to be non-null and sized to m_finestLevel+1 (the caller checks this).
+   * @return The per-rank mover pool; stayers remain in m_particles (so distributeFromPool must append,
+   * not assume empty destinations, and remap() must NOT clearParticles() on this path).
+   */
+  MoverPool
+  gatherMoversToPool();
 
-  /*!
-    @brief Check if particle container is defined.
-  */
-  bool m_isDefined;
+  /**
+   * @brief Gather ghost copies into a per-rank pool using prebuilt particle ghost masks.
+   * @details For each valid particle, reads its cell's target boxes from the three masks and bins a copy
+   * per (destination level, grid index, rank) with the GhostType from the receiver's view (SameLevel /
+   * Coarse / Fine); particleID preserved, rankID set to this rank (the owner). Distribute the returned pool
+   * with a_setOwnerToReceiver == false. A trivial (empty) mask contributes nothing.
+   * @param[in] a_maskSame       Same-level mask.
+   * @param[in] a_maskCoarToFine Coarse-to-fine mask (targets on the next-finer level).
+   * @param[in] a_maskFineToCoar Fine-to-coarse mask (targets on the next-coarser level).
+   * @return The per-rank ghost pool.
+   */
+  MoverPool
+  gatherGhostsFromMasks(const AMRParticleGhostMask& a_maskSame,
+                        const AMRParticleGhostMask& a_maskCoarToFine,
+                        const AMRParticleGhostMask& a_maskFineToCoar);
 
-  /*!
-    @brief Check if particle container is "cell sorted". 
-  */
-  bool m_isOrganizedByCell;
+  /**
+   * @brief Assign a pool into the valid holders: local appends + MPI scatter.
+   * @param[in,out] a_pool              Per-rank pool (consumed). Same-rank bins are catenated into the
+   *                                    destination leaf; cross-rank bins are linearized and Alltoallv'd.
+   * @param[in] a_setOwnerToReceiver    If true, every cross-rank particle's rankID is set to the
+   *                                    receiving rank (remap/regrid ownership). If false, the rankID
+   *                                    carried in the pool is preserved (ghost particles keep their owner).
+   */
+  void
+  distributeFromPool(MoverPool& a_pool, const bool a_setOwnerToReceiver);
 
-  /*!
-    @brief Profile or not
-  */
-  bool m_profile;
-
-  /*!
-    @brief Debug or not
-  */
-  bool m_debug;
-
-  /*!
-    @brief Verbose or not
-  */
-  bool m_verbose;
-
-  /*!
-    @brief Tiled AMR space
-  */
-  Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
-
-  /*!
-    @brief AMR grids
-  */
+  /**
+   * @brief Per-level AMR grids.
+   */
   Vector<DisjointBoxLayout> m_grids;
 
-  /*!
-    @brief Old AMR grids. Used during regrids
-  */
-  Vector<DisjointBoxLayout> m_oldGrids;
-
-  /*!
-    @brief Problem domains
-  */
+  /**
+   * @brief Per-level problem domains.
+   */
   Vector<ProblemDomain> m_domains;
 
-  /*!
-    @brief Map of valid cells; evaluates to false if a cell is covered by a finer grid. 
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validRegion;
-
-  /*!
-    @brief Grown layouts
-  */
-  Vector<BoxLayout> m_grownGrids;
-
-  /*!
-    @brief Resolutions on each grid level
-  */
+  /**
+   * @brief Per-level grid spacing (isotropic, stored as RealVect).
+   */
   Vector<RealVect> m_dx;
 
-  /*!
-    @brief Refinement ratios. Entry at index 'l' is the refinement between level 'l' and level 'l+1'
-  */
+  /**
+   * @brief Per-level refinement ratios (entry l is the ratio between level l and l+1).
+   */
   Vector<int> m_refRat;
 
-  /*!
-    @brief The actual particles that this ParticleContainer represents
-  */
-  mutable AMRParticles<P> m_particles;
-
-  /*!
-    @brief Special data holder that holds particles on a grown grid layout. 
-    @details This particle data holder uses grids that exceed the DisjointBoxLayout on each level (boxes are grown by m_refRat). This
-    means that this particle data holder can store particles that are out the DisjointBoxLayout by m_refRat cells. This is very useful
-    when one wants to deposit particles on the fine level, but where the particles live on the coarse level. In such cases one will typically
-    copy some (or all) particles from the coarse level to this data holder and deposit from this data holder onto the fine level. 
-  */
-  mutable AMRParticles<P> m_bufferParticles;
-
-  /*!
-    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
-    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
-  */
-  mutable AMRParticles<P> m_maskParticles;
-
-  /*!
-    @brief Particles stored on the old grid. 
-    @details Populated during the preRegrid call.
-  */
-  AMRParticles<P> m_cacheParticles;
-
-  /*!
-    @brief Cell particles. 
-  */
-  AMRCellParticles<P> m_cellSortedParticles;
-
-  /*!
-    @brief Set up grown grids
-    @param[in] a_base        Base level
-    @param[in] a_finestLevel Finest AMR level
-  */
-  void
-  setupGrownGrids(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Setup function for the particle data (m_particles and m_maskParticles)
-    @param[in] a_base        Base level
-    @param[in] a_finestLevel Finest AMR level
-  */
-  void
-  setupParticleData(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Gather the particles onto a single list
-    @param[inout] a_list List containing all the particles in a_particles
-    @param[inout] a_particles Particles to transfer to list
-    @note This is supposed to get inside an OpenMP parallel region.
-  */
-  inline void
-  transferParticlesToSingleList(List<P>& a_list, AMRParticles<P>& a_particles) const noexcept;
-
-  /*!
-    @brief Copy the input particles onto a single list
-    @param[inout] a_list List containing all the particles in a_particles
-    @param[inout] a_particles Particles to transfer to list
-    @note This is supposed to get inside an OpenMP parallel region.
-  */
-  inline void
-  copyParticlesToSingleList(List<P>& a_list, const AMRParticles<P>& a_particles) const noexcept;
-
-  /*!
-    @brief Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks
-    @param[inout] a_mappedParticles Particles mapped according to rank ownership (vector index) and grid level and index (std::pair)
-    @param[inout] a_unmappedParticles Particles that are not mapped (yet)
-  */
-  inline void
-  mapParticlesToAMRGrid(std::vector<ParticleMap<List<P>>>& a_mappedParticles,
-                        List<P>&                           a_unmappedParticles) const noexcept;
-
-  /*!
-    @brief Catenate the particles. This is usually called within OpenMP parallel regions.
-    @param[inout] a_globalParticles Global particle map
-    @param[inout] a_localParticles Local particle map
+  /**
+   * @brief Per-level tile-ownership maps (cell tile -> owning grid index / rank), used by remap().
    */
-  inline void
-  catenateParticleMaps(std::vector<ParticleMap<List<P>>>& a_globalParticles,
-                       std::vector<ParticleMap<List<P>>>& a_localParticles) const noexcept;
+  Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
 
-  /*!
-    @brief Gather particles locally
-    @param[inout] a_mappedParticles Particles that have been mapped to this rank. 
-    @param[inout] a_particleData Where to assign the mapped particles
-  */
-  inline void
-  assignLocalParticles(ParticleMap<List<P>>& a_mappedParticles, AMRParticles<P>& a_particleData) const noexcept;
+  /**
+   * @brief Lower-left corner of the physical domain.
+   */
+  RealVect m_probLo;
+
+  /**
+   * @brief Grid blocking factor (tile size).
+   */
+  int m_minBlockSize;
+
+  /**
+   * @brief Finest AMR level index.
+   */
+  int m_finestLevel;
+
+  /**
+   * @brief Particles dropped off-domain by the most recent remap() (local count).
+   */
+  unsigned long long m_numOutcastLocal;
+
+  /**
+   * @brief Realm label (diagnostics only).
+   */
+  std::string m_realm;
+
+  /**
+   * @brief Optional alias to the realm's valid-cell mask (true = cell not covered by a finer level).
+   * @details Used by remap() to leave "stayer" particles in place: a particle still inside its box and
+   * in a cell not covered by a finer grid cannot change owner, so it need not be re-pooled. Null (or a
+   * stale size) makes remap() fall back to re-pooling every particle. Aliases a stable Realm member that
+   * is rebuilt each regrid; set at define(), never owned here.
+   */
+  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>* m_validCells = nullptr;
+
+  /**
+   * @brief Whether define() has been called.
+   */
+  bool m_isDefined;
+
+  /**
+   * @brief Whether the valid leaves are currently cell-sorted.
+   */
+  bool m_isOrganizedByCell;
+
+  /**
+   * @brief Valid particles: one ParticleSoA leaf per box, per level.
+   */
+  AMRParticlesSoA<P, Traits> m_particles;
+
+  /**
+   * @brief Regrid cache: the pre-regrid valid holders, kept alive over the old layout by preRegrid().
+   */
+  AMRParticlesSoA<P, Traits> m_cacheParticles;
+
+  /**
+   * @brief The old (pre-regrid) grids the cache holders are defined on (for iterating the cache).
+   */
+  Vector<DisjointBoxLayout> m_cacheGrids;
+
+  /**
+   * @brief Halo/mask particles per level.
+   */
+  AMRParticlesSoA<P, Traits> m_maskParticles;
+
+  /**
+   * @brief Grown-grid buffer particles per level (on m_grownGrids; filled during halo deposition).
+   */
+  AMRParticlesSoA<P, Traits> m_bufferParticles;
+
+  /**
+   * @brief Per-level grown grids (boxes grown by the refinement factor on finer levels) for the buffer.
+   */
+  Vector<BoxLayout> m_grownGrids;
+
+  /**
+   * @brief Cell index containing a position on a given level (floor((x - probLo)/dx)).
+   * @param[in] a_lvl Level index.
+   * @param[in] a_pos Position.
+   * @return The containing cell IntVect.
+   */
+  inline IntVect
+  cellIndex(const int a_lvl, const RealVect& a_pos) const
+  {
+    IntVect iv;
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      iv[dir] = static_cast<int>(std::floor((a_pos[dir] - m_probLo[dir]) / m_dx[a_lvl][dir]));
+    }
+    return iv;
+  }
+
+  /**
+   * @brief True if a position's cell lies inside a (grid) box on a given level.
+   * @details Purely geometric valid-region test shared by claimOwnership/resetParticleIDs -- the box is the
+   * leaf's ungrown patch box, so a particle in its patch's ghost shell tests false.
+   * @param[in] a_lvl Level index.
+   * @param[in] a_box Box (typically the leaf's grid box).
+   * @param[in] a_pos Position.
+   * @return True if cellIndex(a_lvl, a_pos) is contained in a_box.
+   */
+  inline bool
+  inValidBox(const int a_lvl, const Box& a_box, const RealVect& a_pos) const
+  {
+    return a_box.contains(this->cellIndex(a_lvl, a_pos));
+  }
 };
 
 #include <CD_NamespaceFooter.H>

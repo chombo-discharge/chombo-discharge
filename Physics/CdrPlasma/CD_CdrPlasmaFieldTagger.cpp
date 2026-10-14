@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaFieldTagger.cpp
-  @brief  Implementation of CD_CdrPlasmaFieldTagger.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_CdrPlasmaFieldTagger.cpp
+ * @brief  Implementation of CD_CdrPlasmaFieldTagger.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBArith.H>
@@ -29,8 +30,7 @@ CdrPlasmaFieldTagger::CdrPlasmaFieldTagger()
   m_name = "CdrPlasmaFieldTagger";
 }
 
-CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger()
-{}
+CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger() = default;
 
 void
 CdrPlasmaFieldTagger::allocateStorage() const
@@ -70,7 +70,10 @@ CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_electricField, EBAMR
   m_timeStepper->computeElectricField(a_electricField, m_phase);
 
   // Compute |E| onto scratch
-  DataOps::vectorLength(m_scratch, a_electricField);
+  DataOps::vectorLength(m_scratch,
+                        a_electricField,
+                        m_amr->getNotCoveredCells(m_realm, m_phase),
+                        m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Now compute grad(|E|).
   m_amr->computeGradient(a_gradElectricField, m_scratch, m_realm, phase::gas);
@@ -109,10 +112,16 @@ CdrPlasmaFieldTagger::computeTracers() const
   Real maxGradElectricField = -std::numeric_limits<Real>::max();
   Real minGradElectricField = std::numeric_limits<Real>::max();
 
-  // Get the maximum and minium value of the electric field and its gradient. This is the
+  // Get the maximum and minimum value of the electric field and its gradient. This is the
   // norm so we are getting the max of |E| and the max of |grad(|E|)|.
-  DataOps::getMaxMinNorm(maxElectricField, minElectricField, m_electricField);
-  DataOps::getMaxMinNorm(maxGradElectricField, minGradElectricField, m_gradElectricField);
+  DataOps::getMaxMinNorm(maxElectricField,
+                         minElectricField,
+                         m_electricField,
+                         m_amr->getMultiCutVofIterator(m_realm, m_phase));
+  DataOps::getMaxMinNorm(maxGradElectricField,
+                         minGradElectricField,
+                         m_gradElectricField,
+                         m_amr->getMultiCutVofIterator(m_realm, m_phase));
 
   // Go through each AMR level and compute the tracer fields.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -196,15 +205,16 @@ CdrPlasmaFieldTagger::computeTracers() const
 
         // Put the tracer field where it belongs.
         for (int i = 0; i < m_numTracers; i++) {
-          (*tr[i])(vof, comp);
+          (*tr[i])(vof, comp) = tracers[i];
         }
       };
 
       // Irregular kernel region
-      VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      // Execute the kernels
-      BoxLoops::loop(box, regularKernel);
+      // Execute the kernels. Not vectorizable: the tracer function is a virtual call per cell returning a
+      // Vector<Real> (heap allocation). Per-box writes -> no race.
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }

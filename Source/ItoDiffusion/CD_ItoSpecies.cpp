@@ -1,42 +1,37 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ItoSpecies.cpp
-  @brief  Implementation of CD_ItoSpecies.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_ItoSpecies.cpp
+ * @brief  Implementation of CD_ItoSpecies.H
+ * @author Robert Marskar
+ */
 
 // Our includes
 #include <CD_ItoSpecies.H>
 #include <CD_NamespaceHeader.H>
 
-ItoSpecies::ItoSpecies()
+ItoSpecies::ItoSpecies() : m_name("ItoSpecies"), m_chargeNumber(0), m_isDiffusive(false), m_isMobile(false)
 {
-  m_name           = "ItoSpecies";
-  m_isMobile       = false;
-  m_isDiffusive    = false;
-  m_chargeNumber   = 0;
-  m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
+
+  m_initialDensity = [](const RealVect& /*x*/, const Real& /*t*/) -> Real {
     return 0.0;
   };
 }
 
-ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive)
+ItoSpecies::ItoSpecies(const std::string& a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive)
+  : m_name(a_name), m_chargeNumber(a_chargeNumber), m_isDiffusive(a_diffusive), m_isMobile(a_mobile)
 {
-  m_name           = a_name;
-  m_chargeNumber   = a_chargeNumber;
-  m_isMobile       = a_mobile;
-  m_isDiffusive    = a_diffusive;
-  m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
+
+  m_initialDensity = [](const RealVect& /*x*/, const Real& /*t*/) -> Real {
     return 0.0;
   };
 }
 
-ItoSpecies::~ItoSpecies()
-{}
+ItoSpecies::~ItoSpecies() = default;
 
 std::string
 ItoSpecies::getName() const
@@ -74,26 +69,26 @@ ItoSpecies::setInitialDensity(const std::function<Real(const RealVect& x, const 
   m_initialDensity = a_initialDensity;
 }
 
-List<ItoParticle>&
+ParticleSoA<ItoParticle>&
 ItoSpecies::getInitialParticles()
 {
   return m_initialParticles;
 }
 
-const List<ItoParticle>&
+const ParticleSoA<ItoParticle>&
 ItoSpecies::getInitialParticles() const
 {
   return m_initialParticles;
 }
 
 Real
-ItoSpecies::mobility(const Real a_energy) const
+ItoSpecies::mobility(const Real /*a_energy*/) const
 {
   return 0.0;
 }
 
 Real
-ItoSpecies::diffusion(const Real a_energy) const
+ItoSpecies::diffusion(const Real /*a_energy*/) const
 {
   return 0.0;
 }

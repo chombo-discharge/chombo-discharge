@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ItoKMCFieldTaggerImplem.H
-  @brief  Implementation of CD_ItoKMCFieldTagger.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_ItoKMCFieldTaggerImplem.H
+ * @brief  Implementation of CD_ItoKMCFieldTagger.H
+ * @author Robert Marskar
+ */
 
-#ifndef CD_ItoKMCFieldTaggerImplem_H
-#define CD_ItoKMCFieldTaggerImplem_H
+#ifndef CD_ITOKMCFIELDTAGGERIMPLEM_H
+#define CD_ITOKMCFIELDTAGGERIMPLEM_H
 
 // Our includes
 #include <CD_ItoKMCFieldTagger.H>
@@ -79,7 +80,10 @@ ItoKMCFieldTagger<S>::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_
   CH_assert(a_gradE[0]->nComp() == SpaceDim);
 
   this->m_timeStepper->computeElectricField(a_E, this->m_phase);
-  DataOps::vectorLength(m_scratch, a_E);
+  DataOps::vectorLength(m_scratch,
+                        a_E,
+                        this->m_amr->getNotCoveredCells(this->m_realm, this->m_phase),
+                        this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
   this->m_amr->computeGradient(a_gradE, m_scratch, this->m_realm, this->m_phase);
 
   this->m_amr->conservativeAverage(a_gradE, this->m_realm, this->m_phase);
@@ -110,8 +114,11 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
   Real maxE, minE;
   Real maxGradE, minGradE;
 
-  DataOps::getMaxMinNorm(maxE, minE, m_E);
-  DataOps::getMaxMinNorm(maxGradE, minGradE, m_gradE);
+  DataOps::getMaxMinNorm(maxE, minE, m_E, this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
+  DataOps::getMaxMinNorm(maxGradE,
+                         minGradE,
+                         m_gradE,
+                         this->m_amr->getMultiCutVofIterator(this->m_realm, this->m_phase));
 
   for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = this->m_amr->getGrids(this->m_realm)[lvl];
@@ -175,9 +182,10 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
         }
       };
 
-      // Run the kernels
+      // Run the kernels. Not vectorizable: computeTagFields is a virtual call per cell returning a
+      // Vector<Real> (heap allocation). Per-box writes -> no race.
       VoFIterator& vofit = (*this->m_amr->getVofIterator(this->m_realm, this->m_phase)[lvl])[din];
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
 

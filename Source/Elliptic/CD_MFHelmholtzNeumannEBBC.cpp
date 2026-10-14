@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
-  @file   CD_MFHelmholtzNeumannEBBC.cpp
-  @brief  Implementation of CD_MFHelmholtzNeumannEBBC.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_MFHelmholtzNeumannEBBC.cpp
+ * @brief  Implementation of CD_MFHelmholtzNeumannEBBC.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -18,12 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC()
@@ -89,9 +87,9 @@ MFHelmholtzNeumannEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                               EBCellFAB&             a_Lphi,
-                                               const EBCellFAB&       a_phi,
+MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                               EBCellFAB&   a_Lphi,
+                                               const EBCellFAB& /*a_phi*/,
                                                const BaseIVFAB<Real>& a_Bcoef,
                                                const DataIndex&       a_dit,
                                                const Real&            a_beta,
@@ -102,6 +100,12 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePh
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
   if (!a_homogeneousPhysBC) {
+
+    // The EBISBox is loop-invariant, so fetch it once. EBLevelGrid::getEBISL() returns an EBISLayout by
+    // value (a RefCountedPtr copy with atomic refcounting) and EBISLayout::operator[] is out-of-line, so
+    // evaluating this per vof inside the sparse-but-not-vectorizable kernel is needless work. The returned
+    // EBISBox reference stays valid because the underlying layout is owned by m_eblg.
+    const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
     auto kernel = [&](const VolIndex& vof) -> void {
       Real value = 0.0;
@@ -115,18 +119,15 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePh
 
       // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
       // beta is not.
-      const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
-      const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     B         = m_multByBco ? a_Bcoef(vof, m_comp) : 1;
-      const Real     kappaDivF = a_beta * B * value * areaFrac / m_dx;
+      const Real areaFrac  = ebisbox.bndryArea(vof);
+      const Real B         = m_multByBco ? a_Bcoef(vof, m_comp) : 1;
+      const Real kappaDivF = a_beta * B * value * areaFrac / m_dx;
 
       a_Lphi(vof, m_comp) += kappaDivF;
     };
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

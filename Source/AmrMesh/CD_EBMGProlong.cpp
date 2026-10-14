@@ -1,13 +1,14 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_EBMGProlong.cpp
-  @brief  Implementation of CD_EBMGProlong.H
-  @author Robert Marskar
-*/
+/**
+ * @file   CD_EBMGProlong.cpp
+ * @brief  Implementation of CD_EBMGProlong.H
+ * @author Robert Marskar
+ */
 
 // Chombo includes
 #include <EBCellFactory.H>
@@ -19,18 +20,15 @@
 #include <CD_EBMGProlong.H>
 #include <CD_NamespaceHeader.H>
 
-EBMGProlong::EBMGProlong() noexcept
+EBMGProlong::EBMGProlong() noexcept : m_isDefined(false)
 {
   CH_TIME("EBMGProlong::EBMGProlong(default)");
-
-  m_isDefined = false;
 }
 
 EBMGProlong::EBMGProlong(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBMGProlong::EBMGProlong(full)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
@@ -153,15 +151,26 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       const BaseIVFAB<VoFStencil>& prolongStencils = m_prolongStencils[din];
 
       // Regular kernel.
+      // Not auto-vectorizable: this is a coarse->fine scatter to the refRat^D fine cells (strided
+      // writes plus the inner refinement-box loop), gated per fine cell by the out-of-line
+      // ebisBoxFine.isIrregular(ivFine) query (cut cells are handled by the irregular kernel).
       auto regularKernel = [&](const IntVect& ivCoar) -> void {
-        for (BoxIterator bit(refineBox); bit.ok(); ++bit) {
-          const IntVect ivFine = m_refRat * ivCoar + bit();
+#if CH_SPACEDIM == 3
+        for (int k = refineBox.smallEnd(2); k <= refineBox.bigEnd(2); k++) {
+#endif
+          for (int j = refineBox.smallEnd(1); j <= refineBox.bigEnd(1); j++) {
+            for (int i = refineBox.smallEnd(0); i <= refineBox.bigEnd(0); i++) {
+              const IntVect ivFine = m_refRat * ivCoar + IntVect(D_DECL(i, j, k));
 
-          // Put a guard for cut-cells on the fine grid because the irregular will do those.
-          if (!(ebisBoxFine.isIrregular(ivFine))) {
-            fineDataReg(ivFine, ivar) += coarDataReg(ivCoar, 0);
+              // Put a guard for cut-cells on the fine grid because the irregular will do those.
+              if (!(ebisBoxFine.isIrregular(ivFine))) {
+                fineDataReg(ivFine, ivar) += coarDataReg(ivCoar, 0);
+              }
+            }
           }
+#if CH_SPACEDIM == 3
         }
+#endif
       };
 
       // Irregular kernel
@@ -181,7 +190,7 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       VoFIterator& fineVoFs = m_vofitFine[din];
 
       CH_START(t1);
-      BoxLoops::loop(coarBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
       CH_STOP(t1);
 
       CH_START(t2);

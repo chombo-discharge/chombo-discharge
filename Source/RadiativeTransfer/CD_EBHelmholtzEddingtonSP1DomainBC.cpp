@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -23,28 +24,25 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
                                                                  const RefCountedPtr<RtSpecies>& a_species,
                                                                  const Real                      a_r1,
                                                                  const Real                      a_r2)
+  : m_eddingtonBCs(a_eddingtonBCs), m_species(a_species), m_r1(a_r1), m_r2(a_r2)
 {
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC");
-
-  m_eddingtonBCs = a_eddingtonBCs;
-  m_species      = a_species;
-  m_r1           = a_r1;
-  m_r2           = a_r2;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
       const EddingtonSP1DomainBc::DomainSide domainSide = std::make_pair(dir, sit());
       const EddingtonSP1DomainBc::BcType&    bcType     = m_eddingtonBCs.getBc(domainSide).first;
 
-      // Make a lambda which allows us to pass in the function using EBHelmholtzDomainBC API, which takes a std::function<Real(const RealVect a_position)>
-      // type of function.
+      // Make a lambda which allows us to pass in the function using EBHelmholtzDomainBC API, which takes a
+      // std::function<Real(const RealVect a_position)> type of function.
       //
-      // This is the function type that the EBHelmholtzOp API requires, and it is a design choice mandated by our choice to make that operator
-      // time-independent. Although this might seem weird, the time dependence is nonetheless passed in because a_eddingtonSP1BCs are passed in
-      // from EddingtonSP1, and in that solver we capture RtSolver::m_time by reference.
+      // This is the function type that the EBHelmholtzOp API requires, and it is a design choice mandated by our choice
+      // to make that operator time-independent. Although this might seem weird, the time dependence is nonetheless
+      // passed in because a_eddingtonSP1BCs are passed in from EddingtonSP1, and in that solver we capture
+      // RtSolver::m_time by reference.
       //
-      // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a time-dependent operator (which
-      // I really don't want to do).
+      // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a
+      // time-dependent operator (which I really don't want to do).
       auto func = [domainSide, &BC = this->m_eddingtonBCs](const RealVect& a_position) -> Real {
         const Real dummyDt = 0.0;
 
@@ -134,6 +132,15 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   return bcPtr->getFaceFlux(a_vof, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
+}
+
+Real
+EBHelmholtzEddingtonSP1DomainBC::getDiagWeight(const int a_dir, const Side::LoHiSide a_side) const
+{
+  // Delegate to the actual per-face BC, like getFaceFlux above.
+  const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
+
+  return bcPtr->getDiagWeight(a_dir, a_side);
 }
 
 #include <CD_NamespaceFooter.H>

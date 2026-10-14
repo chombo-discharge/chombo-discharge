@@ -50,8 +50,8 @@ For a more general way of specifying the space charge, ``FieldStepper`` has a pu
 
 .. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.H
    :language: c++
-   :lines: 228-233
-   :dedent: 6
+   :lines: 239-245
+   :dedent: 2
 
 Setting the surface charge
 --------------------------
@@ -61,15 +61,15 @@ For a more general way of specifying the surface charge, ``FieldStepper`` has a 
 
 .. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.H
    :language: c++
-   :lines: 235-240
-   :dedent: 6
+   :lines: 247-252
+   :dedent: 2
 
 .. _Chap:FieldStepperConfiguration: 
 
 Solver configuration
 --------------------
 
-The ``FieldStepper`` has relatively few configuration options, which are mostly limited to setting the space and surface charge
+The ``FieldStepper`` has relatively few configuration options, which are mostly limited to setting the space and surface charge.
 The configuration options for ``FieldStepper`` are given below:
 
 .. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.options

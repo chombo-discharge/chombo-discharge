@@ -67,7 +67,7 @@ where unknowns in :math:`\mathbf{u}` are the coefficients in the Taylor series, 
 Neighborhood algorithm
 ----------------------
 
-To avoid reaching over or around embedded boundaries, the neighborhood algorithms only includes grid cells which can be reached by a *monotone* path.
+To avoid reaching over or around embedded boundaries, the neighborhood algorithms only include grid cells which can be reached by a *monotone* path.
 This path is defined by walking through neighboring grid cells without changing direction, see e.g. :numref:`MonotonePath`.
 
 .. _MonotonePath:
@@ -119,7 +119,7 @@ Typically, the weights are some power of the Euclidean distance
 Pseudo-inverse
 --------------
 
-An over-determined system does not have a unique solution, and so to obtain the solution to :math:`\mathbf{u}` for the system :math:`\mathbf{W}\mathbf{A}\mathbf{u} = \mathbf{W}\mathbf{b}` we use ordinary least squres.
+An over-determined system does not have a unique solution, and so to obtain the solution to :math:`\mathbf{u}` for the system :math:`\mathbf{W}\mathbf{A}\mathbf{u} = \mathbf{W}\mathbf{b}` we use ordinary least squares.
 The solution is then
 
 .. math::
