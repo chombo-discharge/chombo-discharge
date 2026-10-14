@@ -6,11 +6,11 @@
 
 /**
  * @file   CD_FieldSolverAMG.cpp
- * @brief  Implementation of CD_FieldSolver.H
+ * @brief  Implementation of CD_FieldSolverAMG.H
  * @author Robert Marskar
  */
 
-#if CH_USE_PETSC
+#ifdef CH_USE_PETSC
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -62,7 +62,8 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   this->setupSolver();
 
-#if 1 // Check that PETSc works.
+  // There is no operator yet. As a smoke test of the AMR <-> PETSc mapping, round-trip a vector that holds the
+  // owning rank through PetscGrid, so that a_potential shows the PETSc domain decomposition.
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
   Vec x;
@@ -73,7 +74,6 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   petscGrid->destroy(x);
 
   petscGrid->dumpPetscGrid("petsc.hdf5");
-#endif
 
   return converged;
 }

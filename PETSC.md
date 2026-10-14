@@ -72,7 +72,7 @@ the one above merges, then `main`.
 
 | # | Branch | PR | Scope | Status |
 |---|--------|----|-------|--------|
-| 1 | `field_amg` | #601 | Infrastructure: PETSc CI build, `PetscStencil`, `FieldSolverAMG` skeleton | Synced; needs CI job and scope trim |
+| 1 | `field_amg` | #601 | Infrastructure: PETSc CI build, `PetscStencil`, `FieldSolverAMG` skeleton | Checklist done; needs retitle and PR description |
 | 2 | `helmholtz_petsc` | #602 | `PetscGrid` accessors; VoF-stencil → PETSc-row translation | Synced; needs re-scope (see below) |
 | 3 | `petsc_regular` | — | Single-level, single-phase, no-EB operator assembly + KSP solve; domain BCs | Not started |
 | 4 | `petsc_amr` | — | Composite operator across coarse-fine interfaces | Not started |
@@ -85,22 +85,29 @@ the one above merges, then `main`.
 
 Retitle: *"PETSc infrastructure for an algebraic multigrid field solver"*.
 
-- [ ] Add a CI job that builds with `USE_PETSC=TRUE MPI=TRUE` (Ubuntu `petsc-dev`, `libopenmpi-dev`,
+- [x] Add a CI job that builds with `USE_PETSC=TRUE MPI=TRUE` (Ubuntu `petsc-dev`, `libopenmpi-dev`,
       `csh`), 2D and 3D, `discharge-lib` + `Exec/Examples/Electrostatics/PETSc`. Without this every
-      PETSc file is compiled by nobody, which is how the two draft PRs drifted.
-- [ ] Add `CH_USE_PETSC` to `PREDEFINED` in `Docs/doxygen.conf` so the PETSc classes are documented
-      and the doxygen warnings check actually sees them.
+      PETSc file is compiled by nobody, which is how the two draft PRs drifted. → `Linux-PETSc` in
+      `CI.yml`, a `CI-passed` dependency. Like the other build jobs it skips draft PRs.
+- [x] Add `CH_USE_PETSC` to `PREDEFINED` in `Docs/doxygen.conf` so the PETSc classes are documented
+      and the doxygen warnings check actually sees them. This exposed 37 warnings, most in PETSc code
+      already on `main` (`PetscGrid`, `PetscAMRCell`, `getPetscGrid`, `initialize`); all fixed, the
+      check is at 0. `PetscGrid::create/destroy` parameters renamed `x` → `a_x` on the way.
 - [ ] `PetscStencil`: justify against `VoFStencil` in the PR description (it is keyed on a global
-      PETSc row instead of a `VolIndex` + level/box, which is what `MatSetValues` needs). Make `add`
-      O(1) amortised or document the expected stencil width that keeps the linear scan acceptable.
-      Doxygen for all members.
-- [ ] `FieldSolverAMG`: keep as a skeleton whose `solve` round-trips through `PetscGrid` (useful as a
+      PETSc row instead of a `VolIndex` + level/box, which is what `MatSetValues` needs). *PR
+      description still to do; the same justification is now in the class Doxygen.*
+- [x] `PetscStencil::add`: kept as a linear scan; the expected width (tens of entries, ~100 at most
+      for a 3D least-squares neighbourhood plus CF interpolation) is documented on `add`. Doxygen for
+      all members.
+- [x] `FieldSolverAMG`: keep as a skeleton whose `solve` round-trips through `PetscGrid` (useful as a
       smoke test). Remove the dead `setupSolver` body that constructs `MFHelmholtzPetsc` — that moves
-      to PR 7. Fix `#if CH_USE_PETSC` → `#ifdef`.
-- [ ] Move the `MFHelmholtzPetsc` declaration out of this PR (it belongs with its implementation in
-      PR 2/3), or keep it but with no `#warning`s.
+      to PR 7. Fix `#if CH_USE_PETSC` → `#ifdef`. *`setupSolver` was already empty after the sync;
+      the `#if 1` around the smoke test is gone and the class Doxygen says it is a skeleton.*
+- [x] Move the `MFHelmholtzPetsc` declaration out of this PR (it belongs with its implementation in
+      PR 2/3), or keep it but with no `#warning`s. *Removed from `field_amg`; `helmholtz_petsc` keeps
+      its own copy (the merge upward resolves the modify/delete in its favour).*
 - [x] `Exec/Examples/Electrostatics/PETSc` compiles and runs (`mpirun -np 4`), 2D. 3D unchecked.
-- [ ] Drop `Exec/Examples/Electrostatics/ProfiledSurface/dev.inputs` (a scratch file; #602 already
+- [x] Drop `Exec/Examples/Electrostatics/ProfiledSurface/dev.inputs` (a scratch file; #602 already
       deletes it).
 
 ### 2 — Row translation (`helmholtz_petsc`, #602)

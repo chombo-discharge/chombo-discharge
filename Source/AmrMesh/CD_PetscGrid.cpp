@@ -532,7 +532,7 @@ PetscGrid::defineCoFiBuffers() noexcept
 }
 
 void
-PetscGrid::create(Vec& x) noexcept
+PetscGrid::create(Vec& a_x) noexcept
 {
   CH_TIME("PetscGrid::create");
   if (m_verbose) {
@@ -541,14 +541,14 @@ PetscGrid::create(Vec& x) noexcept
 
   CH_assert(m_isDefined);
 
-  PetscCallVoid(VecCreate(Chombo_MPI::comm, &x));
-  PetscCallVoid(VecSetSizes(x, m_numLocalRows, m_numGlobalRows));
-  PetscCallVoid(VecSetLocalToGlobalMapping(x, m_localToGlobalIS));
-  PetscCallVoid(VecSetFromOptions(x));
+  PetscCallVoid(VecCreate(Chombo_MPI::comm, &a_x));
+  PetscCallVoid(VecSetSizes(a_x, m_numLocalRows, m_numGlobalRows));
+  PetscCallVoid(VecSetLocalToGlobalMapping(a_x, m_localToGlobalIS));
+  PetscCallVoid(VecSetFromOptions(a_x));
 }
 
 void
-PetscGrid::destroy(Vec& x) noexcept
+PetscGrid::destroy(Vec& a_x) noexcept
 {
   CH_TIME("PetscGrid::destroy");
   if (m_verbose) {
@@ -557,7 +557,7 @@ PetscGrid::destroy(Vec& x) noexcept
 
   CH_assert(m_isDefined);
 
-  PetscCallVoid(VecDestroy(&x));
+  PetscCallVoid(VecDestroy(&a_x));
 }
 
 void
