@@ -148,13 +148,18 @@ EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular(const IntVec
   }
 
 #if CH_SPACEDIM == 3
+  // The mixed term is the cross derivative times the product of the two tangential displacements, as in
+  // regularCoarseFineInterp.
   const DerivStencil mixedDeriv = coarseStencils.getMixedDerivStencil(coarIV);
+
+  Real mixedFactor = 1.0;
   for (int d = 0; d < SpaceDim; d++) {
     if (d != a_dir) {
-      for (int i = 0; i < mixedDeriv.size(); i++) {
-        coarStencil.accumulate(mixedDeriv.getIndex(i), mixedDeriv.getWeight(i) * delta[d]);
-      }
+      mixedFactor *= delta[d];
     }
+  }
+  for (int i = 0; i < mixedDeriv.size(); i++) {
+    coarStencil.accumulate(mixedDeriv.getIndex(i), mixedDeriv.getWeight(i) * mixedFactor);
   }
 #endif
 
@@ -184,6 +189,46 @@ EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  
   }
 
   return std::make_pair(fineStencil, coarStencil);
+}
+
+std::pair<VoFStencil, VoFStencil>
+EBLeastSquaresMultigridInterpolator::getGhostStencil(const VolIndex& a_fineGhost, const DataIndex& a_din) const noexcept
+{
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getGhostStencil");
+
+  const IntVect& iv = a_fineGhost.gridIndex();
+
+  if (m_ghostCells[a_din].contains(iv)) {
+    return this->getInterpolationStencilEB(a_fineGhost, a_din);
+  }
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (SideIterator sit; sit.ok(); ++sit) {
+      if (m_cfivs[a_din].at(std::make_pair(dir, sit())).contains(iv)) {
+        const std::pair<DerivStencil, DerivStencil> regular = this->getInterpolationStencilRegular(iv,
+                                                                                                   a_din,
+                                                                                                   dir,
+                                                                                                   sit());
+
+        // Away from the EB, every cell is a single VoF.
+        std::pair<VoFStencil, VoFStencil> stencils;
+
+        for (int i = 0; i < regular.first.size(); i++) {
+          stencils.first.add(VolIndex(regular.first.getIndex(i), 0), regular.first.getWeight(i));
+        }
+
+        for (int i = 0; i < regular.second.size(); i++) {
+          stencils.second.add(VolIndex(regular.second.getIndex(i), 0), regular.second.getWeight(i));
+        }
+
+        return stencils;
+      }
+    }
+  }
+
+  MayDay::Abort("EBLeastSquaresMultigridInterpolator::getGhostStencil -- cell is not filled by coarseFineInterp");
+
+  return std::pair<VoFStencil, VoFStencil>();
 }
 
 void
