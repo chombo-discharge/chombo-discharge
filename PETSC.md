@@ -152,7 +152,7 @@ mapping between chombo-discharge and PETSc. #601 and #602 are closed; their bran
 Done on `field_amg` and carried over:
 
 - [x] `Linux-PETSc` CI job: 2D and 3D, `MPI=TRUE USE_PETSC=TRUE`, Ubuntu `petsc-dev`; builds
-      `discharge-lib` and the PETSc example; `CI-passed` depends on it. Skips draft PRs, like the other
+      `discharge-lib` and runs the `PetscMapping` test; `CI-passed` depends on it. Skips draft PRs, like the other
       build jobs.
 - [x] `CH_USE_PETSC` in doxygen `PREDEFINED`; all warnings this exposed in code on `main` fixed.
 - [x] Build fix for `PetscAMRCell` after #656.
@@ -160,25 +160,38 @@ Done on `field_amg` and carried over:
       which is what `MatSetValues` takes; a `VolIndex` is only meaningful with a level and box) and why
       `add` is a linear scan (stencils have tens of entries, ~100 at most).
 
-To do:
+Added since:
 
-- [ ] `PetscGrid` accessors from #602 (level grids, AMR → PETSc maps, iterators over valid cut cells).
-      Check the `LayoutData<IntVectSet>` + `mutable LayoutData<VoFIterator>` pair against `CLAUDE.md` §0
-      and drop whichever is redundant. Fix their doxygen warnings.
-- [ ] Port the global-row fix from #602 together with the accessors. On `main` (and so here),
-      `PetscAMRCell` holds rank-**local** rows, and `m_amrToPetsc[lvl]->exchange()` runs at the end of
-      `defineAMRCells`, before `definePetscRows` assigns any rows. Ghost entries therefore never carry a
-      row, and the CoFi/FiCo copies carry local rows that are wrong on any other rank. #602 offsets every
-      row by `m_localRowBegin` and moves the `exchange()` after that (see [Code map](#code-map)).
-- [ ] Cell substitution rules from the Design table: valid cell → row; L+1 cell → row; CF ghost →
-      interpolator stencil, resolved recursively; covered L cell → error (a neighbourhood must never
-      contain one). One function, `VoFStencil` on (L, box) → `PetscStencil`, plus the dual-level variant
-      taking the (L+1, L) pair from `computeDualLevelStencils`.
-- [ ] Verification items 2 and 3 from the Design section, as tests.
-- [ ] Test executable (replacing the example as the PETSc check): for random `phi` on a 2- and 3-level
-      grid with EB, (a) Chombo → PETSc → Chombo round-trips exactly on valid cells; (b) a ghost cell's
-      substituted stencil applied to the PETSc vector equals the ghost value from `interpGhostMG` to
-      round-off.
+- [x] `PetscGrid` accessors from #602: `getNumPhases`, `getMFLevelGrids{,CoFi,FiCo}`,
+      `getAMRToPetsc{,CoFi,FiCo}`, `getVoFIterator(phase)`. Kept only the `mutable LayoutData<VoFIterator>`
+      (the codebase idiom, e.g. `EBHelmholtzOp`): multi-valued cells abort, so the cut-cell `IntVectSet` was
+      redundant. Dropped `getGrids()` (no callers, duplicates `getMFLevelGrids`) and the `#warning`.
+- [x] Global-row fix: rows are offset by `m_localRowBegin` and `m_amrToPetsc` is exchanged afterwards, so
+      ghost cells and the CoFi/FiCo copies hold correct global rows on any rank count.
+- [x] Substitution: `PetscGrid::getPetscStencil(VoFStencil, level, din, phase, interpolator)`. Valid cell
+      (own or neighbouring box) → row; CF ghost → the interpolator's stencil, fine part as level-L rows and
+      coarse part as level-(L-1) rows via the CoFi map; anything else aborts with the reason. Two-level
+      overload takes `(fine, coarse)` from `computeDualLevelStencils`, fine part resolved through the FiCo map.
+      Recursion turned out unnecessary: ghost stencils only reference valid cells (verification item 2).
+- [x] `EBMultigridInterpolator::getGhostStencil(vof, din)`: returns the stencil `coarseFineInterp` actually
+      uses for a ghost cell (EB stencil if the cell is in the EB ghost set, otherwise the regular one).
+- [x] Verification items 2 and 3, as the test below. Results:
+  - A 3D bug on `main`: `getInterpolationStencilRegular` summed the mixed-derivative term over the
+    tangential displacements, while `regularCoarseFineInterp` (what GMG runs) multiplies them. Fixed in the
+    stencil; with the old formula the test fails in 3D (`interpGhostMG` 0.18400 vs stencil 0.18343).
+  - Item 2 found a bug on `main` in `CoarseInterpQuadCF::defineStencils`/`defineMixedDerivStencils`: the
+    valid-cell set is in coarse index space but the fine boxes were subtracted without coarsening, so the
+    regular CF interpolation could difference through coarse cells covered by the fine level. Fixed by
+    coarsening the boxes. **This changes GMG results at coarse-fine interfaces** (same convergence rate on
+    `RodSphere`; residual history differs), so AMR benchmark files change. Kept as its own commit so it
+    can go to `main` as a separate PR.
+  - With both fixes, every ghost stencil references only rows, and reproduces `interpGhostMG` to round-off.
+- [x] Test `Exec/Tests/Electrostatics/PetscMapping` (RodSphere setup, two phases, three levels in 2D): round
+      trip exact; ghost cells overlapping neighbour boxes hold the neighbour's global row; two-level stencils
+      find the level-(L+1) rows under covered cells (average equals `conservativeAverage`); every CF ghost
+      cell's PETSc stencil reproduces `interpGhostMG` (max error 7e-16). Passes on 1 and 4 ranks in 2D and
+      3D. The `Linux-PETSc` CI job builds and runs it on 2 ranks instead of building the example. It is not in
+      `Electrostatics.ini`, since `tests.py` also runs non-PETSc builds.
 - [x] `Exec/Examples/Electrostatics/PETSc`: switched to `FieldSolverGMG`, so `main` builds with PETSc
       without `FieldSolverAMG`. Builds in 2D and 3D; the 2D example runs on 4 ranks.
 - [x] `FieldSolverAMG` skeleton is not in this PR; it moves to PR 2 (source on `field_amg`).
@@ -251,12 +264,12 @@ stencils or extending the GMG/BC classes (see Design); #601/#602 collapsed into 
 
 State on 2026-10-14:
 
-- `petsc_mapping` (#741, draft, one commit `b5f7cfa8` on top of `main` at `0800b4d45`) is the live
-  branch. Its PR description is filled in from the template; the checklist is unticked.
+- `petsc_mapping` (#741, draft, on top of `main` at `0800b4d45`) is the live branch. Its PR description
+  is filled in from the template; the checklist is unticked.
 - #601 and #602 are closed. Their branches `field_amg` (`dddc6ffe`) and `helmholtz_petsc`
-  (`25536f6b`) stay in the fork, unsynced with `main`, for reference.
-- `helmholtz_petsc` is where the `PetscGrid` accessors and the global-row fix are ported from (PR 1
-  to-do). Both are already in `25536f6b`; port the code by hand rather than merging the branch.
+  (`25536f6b`) stay in the fork for reference; both are synced with `main` at `0800b4d45`.
+- The `PetscGrid` accessors and the global-row fix from `helmholtz_petsc` have been ported into
+  `petsc_mapping` by hand. Nothing else on those branches is needed for PR 1.
 
 ## Building with PETSc
 
@@ -287,17 +300,17 @@ Facts about existing code that the to-do items build on. Where `main` and
 - One PETSc row per (valid cell, phase). Valid = on its level, not covered by a finer level, not
   covered by the EB. Multi-valued cells abort (`definePetscRows`).
 - `m_amrToPetsc[lvl]` is a `LevelData<BaseFab<PetscAMRCell>>` on level `lvl`'s grids with ghosts.
-  `PetscAMRCell::getPetscRow(phase)` gives the row (`-1` if not a row), plus the flags
-  `isCoveredByFinerGrid`, `isCoarCF`, `isFineCF`, `isGhostCF`, `isDomainBoundaryCell`.
-  On `main` the row is rank-local and ghosts hold none; on `helmholtz_petsc` it is global and ghosts
-  hold neighbouring boxes' rows (see the PR 1 to-do).
+  `PetscAMRCell::getPetscRow(phase)` gives the global row (`-1` if not a row), plus the flags
+  `isCoveredByFinerGrid`, `isCoarCF`, `isFineCF`, `isGhostCF`, `isDomainBoundaryCell`. Ghost cells
+  overlapping a neighbouring box hold that box's rows; ghost cells outside the level keep `isGhostCF`.
+  (On `main` the row is rank-local and ghosts hold none; PR 1 fixes that.)
 - `m_amrToPetscCoFi[lvl]` (`lvl < finest`): the level-`lvl` map copied onto *coarsen(level `lvl+1`)*
   grids. These share `DataIndex` with level `lvl+1`, so a fine box can look up the coarse rows under
   it. Note the offset: the CoFi data for fine level `l` lives at index `l-1`.
 - `m_amrToPetscFiCo[lvl]` (`lvl > 0`): the level-`lvl` map copied onto *refine(level `lvl-1`)* grids,
   so a coarse box can look up the fine rows on top of it (the CF flux sum in PR 3).
-- No accessors on `main`. `helmholtz_petsc` adds `getAMRToPetsc*`, `getMFLevelGrids*`, and per-phase
-  `getVoFIterator`/`getIrregIVS` over cut cells that are rows.
+- Accessors (PR 1): `getAMRToPetsc*`, `getMFLevelGrids*`, `getNumPhases`, and per-phase
+  `getVoFIterator` over cut cells that are rows.
 
 ### Coarse-fine ghost stencils (#600)
 
@@ -306,7 +319,9 @@ Facts about existing code that the to-do items build on. Where `main` and
   `(fine, coarse)`. The coarse part is in the **CoFi index space** (coarsened fine grids, same `din`),
   so resolve it through `m_amrToPetscCoFi[l-1]`.
 - The only implementation is `EBLeastSquaresMultigridInterpolator`, which aborts if asked for a
-  non-ghost cell.
+  non-ghost cell. `getGhostStencil(vof, din)` (PR 1) picks whichever of the two `coarseFineInterp` uses.
+- Regular ghost cells are one layer across each face (no corners); EB ghost cells reach `mg_interp_radius`
+  deep near cut cells.
 
 ### GMG stencils (reference only)
 
