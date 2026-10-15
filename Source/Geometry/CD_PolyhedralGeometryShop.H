@@ -223,6 +223,26 @@ public:
   getEBData(const int a_level) const;
 
   /**
+   * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
+   * @details The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what
+   * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. Nothing evaluates the
+   * implicit function. Collective. Requires buildMoments.
+   * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
+   * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
+   * @param[in]  a_grids      The layout.
+   * @param[in]  a_domain     Its domain: one of the geometry's, or one refined from the finest by two per level.
+   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
+   * @param[in]  a_dataGhost  Ghost width of the moments.
+   */
+  void
+  fillLayout(LevelData<EBGraph>&      a_graph,
+             LevelData<EBData>&       a_data,
+             const DisjointBoxLayout& a_grids,
+             const ProblemDomain&     a_domain,
+             const int                a_graphGhost,
+             const int                a_dataGhost) const;
+
+  /**
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
    * @details Every cut cell of every irregular box is reconstructed at its own level, cells the next finer level
    * carries are skipped, and a face shared with such a cell is restricted to the finer chords and the
@@ -462,6 +482,39 @@ public:
    */
   void
   testMoments() const;
+
+  /**
+   * @brief Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants
+   * and onto the boxes of the level below refined.
+   * @details The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own
+   * box holds to round-off, every face must read the same aperture from its two sides, and every cell of the level
+   * below must be the sum of the cells it holds, to round-off. Collective. Switched by
+   * PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testFill() const;
+
+  /**
+   * @brief Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells
+   * included.
+   * @details A cell in the geometry's boxes on the level takes what buildMoments made there -- its own body, or the
+   * VoFs coarsened from the finer level -- and a cell outside them is cut from the coarser cell it lies in, from the
+   * copied graph. A regular cell beside a multi-valued one is written as a full cut cell. A cut cell a finer level owns
+   * outside the geometry's boxes on the level stops the run. Collective.
+   * @param[out] a_graph      The graph, defined here over the level's layout with a_graphGhost ghost cells.
+   * @param[out] a_data       The moments, defined here over the level's layout with a_dataGhost ghost cells.
+   * @param[in]  a_copy       The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost.
+   * @param[in]  a_level      Destination level to fill.
+   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
+   * @param[in]  a_dataGhost  Ghost width of the moments.
+   */
+  void
+  fillLevel(LevelData<EBGraph>&         a_graph,
+            LevelData<EBData>&          a_data,
+            const AMRPolyhedralEBGraph& a_copy,
+            const int                   a_level,
+            const int                   a_graphGhost,
+            const int                   a_dataGhost) const;
 
   /**
    * @brief Coarsen a level of the index space onto its coarsened layout, by Chombo's coarsening.
@@ -786,6 +839,11 @@ protected:
    * @brief Ghost cells of the fine moments Chombo's coarsening reads, as EBISLevel builds a coarse level.
    */
   static constexpr int s_coarsenFineDataGhost = 2;
+
+  /**
+   * @brief Number of components cellSignature writes: the VoF count, the volume, the first moment and the apertures.
+   */
+  static constexpr int s_signatureComps = 2 + 3 * SpaceDim;
 
   /**
    * @brief Kind of a node of the written graph: a cut cell, at its fluid's centroid.
