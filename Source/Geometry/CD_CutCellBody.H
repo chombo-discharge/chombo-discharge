@@ -360,11 +360,17 @@ public:
    * interface: cutting the body with a plane leaves it open along that plane, and the patch closing it lies in
    * a face of the cell rather than in the interface. A patch in a cell face is oriented by that face, since
    * the edges bounding the opening do not say which way round it should be.
-   * @param[in] a_face Face the closing patch lies in, or -1 for the interface.
+   * A close to round-off takes two vertices as one only when they differ by round-off, as the vertices of a body cut
+   * from another do, so fluid thinner than the weld tolerance keeps its edges and is closed along them. Two edges of
+   * one polygon that run over each other then close each other too: they are the zero-width bridge a patch takes
+   * between two pieces of an opening that touch along a segment. Otherwise vertices within the weld tolerance are
+   * one, edges shorter than it are dropped, and an edge is closed only by another polygon's.
+   * @param[in] a_face     Face the closing patch lies in, or -1 for the interface.
+   * @param[in] a_roundOff Whether vertices are one only within round-off, rather than within the weld tolerance.
    * @return True if every loop closed and the result fitted in the body's storage.
    */
   bool
-  closeBoundary(const int a_face) noexcept;
+  closeBoundary(const int a_face, const bool a_roundOff) noexcept;
 
   /**
    * @brief Split every polygon edge at the vertices of other polygons that lie on it.
