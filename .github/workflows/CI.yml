@@ -407,8 +407,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
-    # Compile-only check of the code behind CH_USE_PETSC, which no other job builds. Ubuntu's petsc-dev is built
-    # against OpenMPI, so this job is MPI-only.
+    # Builds the code behind CH_USE_PETSC, which no other job builds, and runs the PETSc mapping test. Ubuntu's
+    # petsc-dev is built against OpenMPI, so this job is MPI-only.
     strategy:
       fail-fast: false
       matrix:
@@ -438,10 +438,16 @@ jobs:
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE discharge-lib
 
-      - name: Build PETSc example
-        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Examples/Electrostatics/PETSc
+      - name: Build PETSc mapping test
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscMapping
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
+
+      - name: Run PETSc mapping test
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscMapping
+        run: |
+          mpirun --oversubscribe -np ${{ env.CORES }} ./main${{ matrix.dim }}d.*.ex regression${{ matrix.dim }}d.inputs
+          grep -q "PetscMapping -- all tests passed" pout.0
 
   Build-documentation:
     needs: Formatting
