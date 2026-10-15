@@ -24,6 +24,7 @@
 #include <EBCellFAB.H>
 #include <MFCellFAB.H>
 #include <EBISLayout.H>
+#include <VoFIterator.H>
 
 // Our includes
 #include <CD_DischargeIO.H>
@@ -31,6 +32,8 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_PetscDOF.H>
 #include <CD_PetscAMRCell.H>
+#include <CD_PetscStencil.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -93,6 +96,115 @@ public:
    */
   virtual bool
   isDefined() const noexcept;
+
+  /**
+   * @brief Get the number of phases.
+   * @return Number of phases (1 or 2).
+   */
+  virtual int
+  getNumPhases() const noexcept;
+
+  /**
+   * @brief Get the grids on each level.
+   * @return m_levelGrids
+   */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGrids() const noexcept;
+
+  /**
+   * @brief Get the coarsened fine grids.
+   * @details Entry lvl is level lvl+1 coarsened to the resolution of level lvl, and shares DataIndex with level lvl+1.
+   * The finest level has no entry.
+   * @return m_levelGridsCoFi
+   */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridsCoFi() const noexcept;
+
+  /**
+   * @brief Get the refined coarse grids.
+   * @details Entry lvl is level lvl-1 refined to the resolution of level lvl, and shares DataIndex with level lvl-1.
+   * Level 0 has no entry.
+   * @return m_levelGridsFiCo
+   */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridsFiCo() const noexcept;
+
+  /**
+   * @brief Get the map from AMR cells to PETSc rows, on the grids of each level.
+   * @details Valid cells and ghost cells both hold global PETSc rows.
+   * @return m_amrToPetsc
+   */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetsc() const noexcept;
+
+  /**
+   * @brief Get the map from AMR cells to PETSc rows, on the coarsened fine grids.
+   * @details Entry lvl holds the rows of level lvl on the grids of getMFLevelGridsCoFi()[lvl].
+   * @return m_amrToPetscCoFi
+   */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetscCoFi() const noexcept;
+
+  /**
+   * @brief Get the map from AMR cells to PETSc rows, on the refined coarse grids.
+   * @details Entry lvl holds the rows of level lvl on the grids of getMFLevelGridsFiCo()[lvl].
+   * @return m_amrToPetscFiCo
+   */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetscFiCo() const noexcept;
+
+  /**
+   * @brief Get iterators over the cut cells that are PETSc rows on a phase.
+   * @details Non-const because a VoFIterator must be reset to be iterated over.
+   * @param[in] a_iphase Phase index
+   * @return m_vofIterators[a_iphase], one LayoutData per level.
+   */
+  virtual Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getVoFIterator(const int a_iphase) const noexcept;
+
+  /**
+   * @brief Rewrite a stencil over level cells as a stencil over global PETSc rows.
+   * @details Each entry of a_stencil is a cell on level a_level, in the index space of grid a_din, possibly in its
+   * ghost region. Entries resolve as follows:
+   * - A cell that is a PETSc row on a_phase (a valid cell of a_din or of a neighbouring box) becomes its row.
+   * - A ghost cell across a refinement boundary becomes the stencil that a_interpolator uses to fill it. The fine
+   *   part must consist of rows on a_level, and the coarse part of rows on a_level-1.
+   * Anything else aborts: cells covered by a finer level, cells covered by the EB on a_phase, and ghost cells outside
+   * the domain, which the domain boundary condition must handle before the stencil gets here.
+   * @param[in] a_stencil      Stencil over cells on level a_level.
+   * @param[in] a_level        Grid level.
+   * @param[in] a_din          Grid index on level a_level.
+   * @param[in] a_phase        Phase.
+   * @param[in] a_interpolator Coarse-fine interpolator for level a_level on a_phase. Only used for ghost cells.
+   * @return The same stencil, over global PETSc rows.
+   */
+  virtual PetscStencil
+  getPetscStencil(const VoFStencil&              a_stencil,
+                  const int                      a_level,
+                  const DataIndex&               a_din,
+                  const int                      a_phase,
+                  const EBMultigridInterpolator* a_interpolator) const noexcept;
+
+  /**
+   * @brief Rewrite a two-level stencil, as from LeastSquares::computeDualLevelStencils, over global PETSc rows.
+   * @details a_coarStencil is over cells on level a_level and resolves as in the single-level version. a_fineStencil is
+   * over cells on level a_level+1, in the index space of grid a_din refined to level a_level+1. Each of its entries
+   * must be a PETSc row on level a_level+1; anything else aborts.
+   * @param[in] a_fineStencil  Stencil over cells on level a_level+1.
+   * @param[in] a_coarStencil  Stencil over cells on level a_level.
+   * @param[in] a_level        Grid level of a_coarStencil. Must be below the finest level.
+   * @param[in] a_din          Grid index on level a_level.
+   * @param[in] a_phase        Phase.
+   * @param[in] a_interpolator Coarse-fine interpolator for level a_level on a_phase. Only used for ghost cells.
+   * @return The sum of both stencils, over global PETSc rows.
+   */
+  virtual PetscStencil
+  getPetscStencil(const VoFStencil&              a_fineStencil,
+                  const VoFStencil&              a_coarStencil,
+                  const int                      a_level,
+                  const DataIndex&               a_din,
+                  const int                      a_phase,
+                  const EBMultigridInterpolator* a_interpolator) const noexcept;
 
   /**
    * @brief Create a PETSc vector.
@@ -247,6 +359,7 @@ protected:
    * @brief Mapping structure for moving between AMR cells and PETSc rows.
    * @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another
    * cell, etc.
+   * @note This holds global PETSc rows, also in ghost cells. Subtract m_localRowBegin to get the local row.
    */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;
 
@@ -254,6 +367,7 @@ protected:
    * @brief Mapping structure for moving between AMR cells and PETSc rows.
    * @details This is like m_amrToPetsc, except that it is defined on the coarsened grids. Index i thus contains the
    * coarsening of level i+1.
+   * @note This holds global PETSc rows.
    */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscCoFi;
 
@@ -261,6 +375,7 @@ protected:
    * @brief Mapping structure for moving between AMR cells and PETSc rows.
    * @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the
    * refinement of level i.
+   * @note This holds global PETSc rows.
    */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;
 
@@ -269,6 +384,12 @@ protected:
    * @details Locally owned. Maps a local row index to a level/grid/cell.
    */
   Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR[2];
+
+  /**
+   * @brief Iterators over the cut cells that are PETSc rows, per phase and level.
+   * @details Mutable because iterating over a VoFIterator resets it.
+   */
+  mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIterators[2];
 
   /**
    * @brief Define basic cell information for PetscGrid.
