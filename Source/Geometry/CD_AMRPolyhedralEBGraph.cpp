@@ -716,7 +716,19 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
         which |= (child[d] - 2 * parent[d]) << d;
       }
 
+      // A subdivision fails when a child is in more than one piece, which is kept as one and counted; one that fails
+      // with every child in one piece has lost fluid its parent holds.
       if (!body.subdivide(children)) {
+        bool inPieces = false;
+
+        for (int c = 0; c < (1 << SpaceDim); c++) {
+          inPieces = inPieces || !children[c].isConnected();
+        }
+
+        if (!inPieces) {
+          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
+        }
+
         a_numCollapsed++;
       }
 

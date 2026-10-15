@@ -381,10 +381,15 @@ public:
    * the interface and leaves the interface itself unclosed. Inserting each side's vertices into the other's
    * edge makes the two agree segment for segment; the inserted vertices lie on the edge they are inserted
    * into, so no polygon changes shape.
+   * A weld to round-off takes a vertex as lying on an edge only when it is off the edge by round-off, as the vertices
+   * of a body cut from another are, so the far side of fluid thinner than the weld tolerance is not spliced into the
+   * near side's edges.
+   * @param[in] a_roundOff Whether a vertex lies on an edge, or is one of its ends, only within round-off, rather than
+   * within the weld tolerance.
    * @return False if a polygon would need more vertices than it can hold.
    */
   bool
-  weldTJunctions() noexcept;
+  weldTJunctions(const bool a_roundOff) noexcept;
 
 #endif
 

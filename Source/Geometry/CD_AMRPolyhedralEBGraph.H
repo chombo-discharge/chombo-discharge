@@ -195,6 +195,7 @@ public:
    * cell short of that, so that every face of a node has the cell across it in hand.
    * @param[out] a_regIrregCovered One for regular, minus one for covered, zero for irregular, per cell.
    * @param[out] a_nodes           One node per irregular cell the box fills.
+   * A subdivision that fails with every child in one piece has lost fluid its parent holds, and stops the run.
    * @param[out] a_numCollapsed    Incremented for every child a subdivision left in more than one piece.
    * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
    * @param[in]  a_level           Destination level.

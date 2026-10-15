@@ -953,9 +953,15 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
 }
 
 bool
-CutCellBody::weldTJunctions() noexcept
+CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
 {
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
+  const Real tolerance = a_roundOff ? s_roundOffTolerance : detail::s_weldTolerance;
+
+  const auto same = [a_roundOff](const RealVect& a_a, const RealVect& a_b) -> bool {
+    return a_roundOff ? sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
+  };
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
     Polygon& p = m_polygon[ip];
@@ -967,7 +973,7 @@ CutCellBody::weldTJunctions() noexcept
       const RealVect along  = b - a;
       const Real     length = along.vectorLength();
 
-      if (length <= detail::s_weldTolerance) {
+      if (length <= tolerance) {
         continue;
       }
 
@@ -987,7 +993,7 @@ CutCellBody::weldTJunctions() noexcept
         for (int j = 0; j < q.m_numVertices; j++) {
           const RealVect& v = q.m_vertex[j];
 
-          if (detail::sameVertex(v, a) || detail::sameVertex(v, b)) {
+          if (same(v, a) || same(v, b)) {
             continue;
           }
 
@@ -997,14 +1003,14 @@ CutCellBody::weldTJunctions() noexcept
             continue;
           }
 
-          if (((v - a) - t * along).vectorLength() > detail::s_weldTolerance) {
+          if (((v - a) - t * along).vectorLength() > tolerance) {
             continue;
           }
 
           bool have = false;
 
           for (int k = 0; k < numInside && !have; k++) {
-            have = detail::sameVertex(inside[k], v);
+            have = same(inside[k], v);
           }
 
           if (have) {
@@ -1087,7 +1093,7 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
   CH_assert(a_face >= -1 && a_face < s_numFaces);
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
-  if (!this->weldTJunctions()) {
+  if (!this->weldTJunctions(a_roundOff)) {
     return false;
   }
 
