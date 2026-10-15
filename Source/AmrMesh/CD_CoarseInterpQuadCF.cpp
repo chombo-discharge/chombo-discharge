@@ -87,10 +87,10 @@ CoarseInterpQuadCF::defineStencils() noexcept
 
   // Stencils will have a radius of 2, so figure out which cells we are allowed to use.
   DenseIntVectSet validCells(grow(m_stencilBox, 2), true);
-  validCells -= m_dblFine[m_dit];
+  validCells -= coarsen(m_dblFine[m_dit], m_refRat);
   NeighborIterator nit(m_dblFine);
   for (nit.begin(m_dit); nit.ok(); ++nit) {
-    validCells -= m_dblFine[nit()];
+    validCells -= coarsen(m_dblFine[nit()], m_refRat);
   }
   validCells &= m_domainCoar;
 
@@ -148,10 +148,10 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
 
   // Stencils will have a radius of 2, so figure out which cells we are allowed to use.
   DenseIntVectSet validCells(grow(m_stencilBox, 2), true);
-  validCells -= m_dblFine[m_dit];
+  validCells -= coarsen(m_dblFine[m_dit], m_refRat);
   NeighborIterator nit(m_dblFine);
   for (nit.begin(m_dit); nit.ok(); ++nit) {
-    validCells -= m_dblFine[nit()];
+    validCells -= coarsen(m_dblFine[nit()], m_refRat);
   }
   validCells &= m_domainCoar;
 
