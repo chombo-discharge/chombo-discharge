@@ -328,17 +328,20 @@ PetscGrid::addRows(PetscStencil&                a_petscStencil,
 
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
 
+  // Both checks abort in every build rather than being assertions. An entry outside the map would read out of bounds,
+  // and PETSc silently ignores negative indices in MatSetValues, so a missing row would drop the entry from the matrix
+  // without an error. Each check is a single compare on the normal path; the diagnosis is in abortInvalidEntry.
   for (int i = 0; i < a_stencil.size(); i++) {
     const IntVect& iv = a_stencil.vof(i).gridIndex();
 
-    CH_assert(a_map.box().contains(iv));
+    if (!(a_map.box().contains(iv))) {
+      this->abortInvalidEntry(iv, a_map, a_phase, a_what);
+    }
 
     const PetscInt row = a_map(iv).getPetscRow(a_phase);
 
-    // Not an assertion: PETSc silently ignores negative indices in MatSetValues, so a missing row would otherwise drop
-    // the entry from the matrix without an error.
     if (row < 0) {
-      this->abortNotARow(iv, a_map(iv), a_what);
+      this->abortInvalidEntry(iv, a_map, a_phase, a_what);
     }
 
     a_petscStencil.add(row, a_stencil.weight(i));
@@ -346,27 +349,32 @@ PetscGrid::addRows(PetscStencil&                a_petscStencil,
 }
 
 void
-PetscGrid::abortNotARow(const IntVect& a_iv, const PetscAMRCell& a_cell, const std::string& a_what) const noexcept
+PetscGrid::abortInvalidEntry(const IntVect&               a_iv,
+                             const BaseFab<PetscAMRCell>& a_map,
+                             const int                    a_phase,
+                             const std::string&           a_what) const noexcept
 {
-  CH_TIME("PetscGrid::abortNotARow");
+  CH_TIME("PetscGrid::abortInvalidEntry");
   if (m_verbose) {
-    pout() << "PetscGrid::abortNotARow" << endl;
-  }
-
-  std::string reason;
-
-  if (a_cell.isCoveredByFinerGrid()) {
-    reason = "is covered by a finer level";
-  }
-  else if (a_cell.isGhostCF()) {
-    reason = "is a ghost cell outside the level (across a refinement boundary or the domain boundary)";
-  }
-  else {
-    reason = "is covered by the EB on this phase";
+    pout() << "PetscGrid::abortInvalidEntry" << endl;
   }
 
   std::stringstream msg;
-  msg << "PetscGrid::addRows -- " << a_what << " entry " << a_iv << " is not a PETSc row: it " << reason;
+  msg << "PetscGrid::addRows -- " << a_what << " entry " << a_iv << " on phase " << a_phase;
+
+  if (!(a_map.box().contains(a_iv))) {
+    msg << " lies outside the PETSc map, whose box with ghost cells is " << a_map.box();
+  }
+  else if (a_map(a_iv).isCoveredByFinerGrid()) {
+    msg << " is not a PETSc row: it is covered by a finer level";
+  }
+  else if (a_map(a_iv).isGhostCF()) {
+    msg << " is not a PETSc row: it is a ghost cell outside the level (across a refinement boundary or the domain "
+           "boundary)";
+  }
+  else {
+    msg << " is not a PETSc row: it is covered by the EB on this phase";
+  }
 
   MayDay::Abort(msg.str().c_str());
 }

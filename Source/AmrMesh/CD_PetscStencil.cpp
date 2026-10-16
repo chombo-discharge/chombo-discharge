@@ -19,11 +19,6 @@
 #include <CD_PetscStencil.H>
 #include <CD_NamespaceHeader.H>
 
-PetscStencil::PetscStencil()
-{
-  this->clear();
-}
-
 void
 PetscStencil::clear()
 {

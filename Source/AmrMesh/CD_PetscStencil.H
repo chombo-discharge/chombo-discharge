@@ -38,7 +38,7 @@ public:
   /**
    * @brief Default constructor. Creates an empty stencil.
    */
-  PetscStencil();
+  PetscStencil() = default;
 
   /**
    * @brief Destructor.
