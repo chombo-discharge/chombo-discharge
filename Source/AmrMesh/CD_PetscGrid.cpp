@@ -225,11 +225,10 @@ PetscGrid::getVoFIterator(const int a_iphase) const noexcept
 }
 
 PetscStencil
-PetscGrid::getPetscStencil(const VoFStencil&              a_stencil,
-                           const int                      a_level,
-                           const DataIndex&               a_din,
-                           const int                      a_phase,
-                           const EBMultigridInterpolator* a_interpolator) const noexcept
+PetscGrid::getPetscStencil(const VoFStencil& a_stencil,
+                           const int         a_level,
+                           const DataIndex&  a_din,
+                           const int         a_phase) const noexcept
 {
   CH_TIME("PetscGrid::getPetscStencil");
   if (m_verbose) {
@@ -240,126 +239,100 @@ PetscGrid::getPetscStencil(const VoFStencil&              a_stencil,
   CH_assert(a_level >= 0 && a_level <= m_finestLevel);
   CH_assert(a_phase >= 0 && a_phase < m_numPhases);
 
-  const BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[a_level])[a_din];
-  const ProblemDomain&         domain     = m_levelGrids[a_level]->getDomain();
-
-  // Row of a cell on level a_level, or a negative value if it is not a row.
-  auto getRow = [&](const IntVect& a_iv) -> PetscInt {
-    if (!(amrToPetsc.box().contains(a_iv))) {
-      MayDay::Abort("PetscGrid::getPetscStencil -- stencil reaches beyond the ghost cells of the PETSc map");
-    }
-
-    return amrToPetsc(a_iv).getPetscRow(a_phase);
-  };
-
   PetscStencil petscStencil;
 
-  for (int i = 0; i < a_stencil.size(); i++) {
-    const VolIndex& vof    = a_stencil.vof(i);
-    const IntVect&  iv     = vof.gridIndex();
-    const Real&     weight = a_stencil.weight(i);
-    const PetscInt  row    = getRow(iv);
-
-    if (row >= 0) {
-      petscStencil.add(row, weight);
-    }
-    else if (amrToPetsc(iv).isCoveredByFinerGrid()) {
-      MayDay::Abort("PetscGrid::getPetscStencil -- stencil references a cell covered by a finer level");
-    }
-    else if (amrToPetsc(iv).isGhostCF() && domain.contains(iv) && a_level > 0) {
-      if (a_interpolator == nullptr) {
-        MayDay::Abort("PetscGrid::getPetscStencil -- stencil references a ghost cell but there is no interpolator");
-      }
-
-      const std::pair<VoFStencil, VoFStencil> ghostStencils = a_interpolator->getGhostStencil(vof, a_din);
-
-      const VoFStencil& fineStencil = ghostStencils.first;
-      const VoFStencil& coarStencil = ghostStencils.second;
-
-      for (int j = 0; j < fineStencil.size(); j++) {
-        const PetscInt fineRow = getRow(fineStencil.vof(j).gridIndex());
-
-        if (fineRow < 0) {
-          MayDay::Abort("PetscGrid::getPetscStencil -- ghost cell stencil references a fine cell that is not a row");
-        }
-
-        petscStencil.add(fineRow, weight * fineStencil.weight(j));
-      }
-
-      // The coarse stencil lives on the coarsened fine grids, under the same grid index as the fine grid.
-      const BaseFab<PetscAMRCell>& amrToPetscCoar = (*m_amrToPetscCoFi[a_level - 1])[a_din];
-
-      for (int j = 0; j < coarStencil.size(); j++) {
-        const IntVect& coarIV = coarStencil.vof(j).gridIndex();
-
-        if (!(amrToPetscCoar.box().contains(coarIV))) {
-          MayDay::Abort("PetscGrid::getPetscStencil -- ghost cell stencil reaches beyond the coarse PETSc map");
-        }
-
-        const PetscInt coarRow = amrToPetscCoar(coarIV).getPetscRow(a_phase);
-
-        if (coarRow < 0) {
-          const PetscAMRCell& coarCell = amrToPetscCoar(coarIV);
-
-          std::stringstream msg;
-          msg << "PetscGrid::getPetscStencil -- ghost cell stencil references a coarse cell that is not a row (level = "
-              << a_level << ", phase = " << a_phase << ", ghost cell = " << iv << ", coarse cell = " << coarIV
-              << ", covered by finer level = " << coarCell.isCoveredByFinerGrid()
-              << ", ghost = " << coarCell.isGhostCF() << ")";
-
-          MayDay::Abort(msg.str().c_str());
-        }
-
-        petscStencil.add(coarRow, weight * coarStencil.weight(j));
-      }
-    }
-    else {
-      MayDay::Abort("PetscGrid::getPetscStencil -- stencil references a cell that is covered by the EB or outside the "
-                    "domain");
-    }
-  }
+  this->addRows(petscStencil, a_stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
 
   return petscStencil;
 }
 
 PetscStencil
-PetscGrid::getPetscStencil(const VoFStencil&              a_fineStencil,
-                           const VoFStencil&              a_coarStencil,
-                           const int                      a_level,
-                           const DataIndex&               a_din,
-                           const int                      a_phase,
-                           const EBMultigridInterpolator* a_interpolator) const noexcept
+PetscGrid::getPetscStencilWithFinerLevel(const VoFStencil& a_stencil,
+                                         const VoFStencil& a_fineStencil,
+                                         const int         a_level,
+                                         const DataIndex&  a_din,
+                                         const int         a_phase) const noexcept
 {
-  CH_TIME("PetscGrid::getPetscStencil(two-level)");
+  CH_TIME("PetscGrid::getPetscStencilWithFinerLevel");
   if (m_verbose) {
-    pout() << "PetscGrid::getPetscStencil(two-level)" << endl;
+    pout() << "PetscGrid::getPetscStencilWithFinerLevel" << endl;
   }
 
   CH_assert(m_isDefined);
   CH_assert(a_level >= 0 && a_level < m_finestLevel);
+  CH_assert(a_phase >= 0 && a_phase < m_numPhases);
 
-  PetscStencil petscStencil = this->getPetscStencil(a_coarStencil, a_level, a_din, a_phase, a_interpolator);
+  PetscStencil petscStencil;
 
-  // The rows of level a_level+1 on the refinement of grid a_din.
-  const BaseFab<PetscAMRCell>& amrToPetscFine = (*m_amrToPetscFiCo[a_level + 1])[a_din];
-
-  for (int i = 0; i < a_fineStencil.size(); i++) {
-    const IntVect& fineIV = a_fineStencil.vof(i).gridIndex();
-
-    if (!(amrToPetscFine.box().contains(fineIV))) {
-      MayDay::Abort("PetscGrid::getPetscStencil -- fine stencil reaches beyond the fine PETSc map");
-    }
-
-    const PetscInt fineRow = amrToPetscFine(fineIV).getPetscRow(a_phase);
-
-    if (fineRow < 0) {
-      MayDay::Abort("PetscGrid::getPetscStencil -- fine stencil references a cell that is not a row");
-    }
-
-    petscStencil.add(fineRow, a_fineStencil.weight(i));
-  }
+  // The level a_level+1 rows on the refinement of grid a_din share its DataIndex.
+  this->addRows(petscStencil, a_stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
+  this->addRows(petscStencil, a_fineStencil, (*m_amrToPetscFiCo[a_level + 1])[a_din], a_phase, "fine stencil");
 
   return petscStencil;
+}
+
+PetscStencil
+PetscGrid::getPetscStencilWithCoarserLevel(const VoFStencil& a_stencil,
+                                           const VoFStencil& a_coarStencil,
+                                           const int         a_level,
+                                           const DataIndex&  a_din,
+                                           const int         a_phase) const noexcept
+{
+  CH_TIME("PetscGrid::getPetscStencilWithCoarserLevel");
+  if (m_verbose) {
+    pout() << "PetscGrid::getPetscStencilWithCoarserLevel" << endl;
+  }
+
+  CH_assert(m_isDefined);
+  CH_assert(a_level > 0 && a_level <= m_finestLevel);
+  CH_assert(a_phase >= 0 && a_phase < m_numPhases);
+
+  PetscStencil petscStencil;
+
+  // The level a_level-1 rows on the coarsening of grid a_din share its DataIndex.
+  this->addRows(petscStencil, a_stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
+  this->addRows(petscStencil, a_coarStencil, (*m_amrToPetscCoFi[a_level - 1])[a_din], a_phase, "coarse stencil");
+
+  return petscStencil;
+}
+
+void
+PetscGrid::addRows(PetscStencil&                a_petscStencil,
+                   const VoFStencil&            a_stencil,
+                   const BaseFab<PetscAMRCell>& a_map,
+                   const int                    a_phase,
+                   const std::string&           a_what) const noexcept
+{
+  CH_TIME("PetscGrid::addRows");
+
+  for (int i = 0; i < a_stencil.size(); i++) {
+    const IntVect& iv = a_stencil.vof(i).gridIndex();
+
+    std::string reason;
+
+    if (!(a_map.box().contains(iv))) {
+      reason = "lies beyond the ghost cells of the PETSc map";
+    }
+    else if (a_map(iv).getPetscRow(a_phase) >= 0) {
+      a_petscStencil.add(a_map(iv).getPetscRow(a_phase), a_stencil.weight(i));
+    }
+    else if (a_map(iv).isCoveredByFinerGrid()) {
+      reason = "is covered by a finer level";
+    }
+    else if (a_map(iv).isGhostCF()) {
+      reason = "is a ghost cell outside the level (across a refinement boundary or the domain boundary)";
+    }
+    else {
+      reason = "is covered by the EB on this phase";
+    }
+
+    if (!reason.empty()) {
+      std::stringstream msg;
+      msg << "PetscGrid::addRows -- " << a_what << " entry " << iv << " " << reason;
+
+      MayDay::Abort(msg.str().c_str());
+    }
+  }
 }
 
 void

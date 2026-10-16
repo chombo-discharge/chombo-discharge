@@ -25,6 +25,7 @@
 #include <MFCellFAB.H>
 #include <EBISLayout.H>
 #include <VoFIterator.H>
+#include <Stencils.H>
 
 // Our includes
 #include <CD_DischargeIO.H>
@@ -33,7 +34,6 @@
 #include <CD_PetscDOF.H>
 #include <CD_PetscAMRCell.H>
 #include <CD_PetscStencil.H>
-#include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -163,48 +163,64 @@ public:
   getVoFIterator(const int a_iphase) const noexcept;
 
   /**
-   * @brief Rewrite a stencil over level cells as a stencil over global PETSc rows.
+   * @brief Rewrite a stencil over cells on one level as a stencil over global PETSc rows.
    * @details Each entry of a_stencil is a cell on level a_level, in the index space of grid a_din, possibly in its
-   * ghost region. Entries resolve as follows:
-   * - A cell that is a PETSc row on a_phase (a valid cell of a_din or of a neighbouring box) becomes its row.
-   * - A ghost cell across a refinement boundary becomes the stencil that a_interpolator uses to fill it. The fine
-   *   part must consist of rows on a_level, and the coarse part of rows on a_level-1.
-   * Anything else aborts: cells covered by a finer level, cells covered by the EB on a_phase, and ghost cells outside
-   * the domain, which the domain boundary condition must handle before the stencil gets here.
-   * @param[in] a_stencil      Stencil over cells on level a_level.
-   * @param[in] a_level        Grid level.
-   * @param[in] a_din          Grid index on level a_level.
-   * @param[in] a_phase        Phase.
-   * @param[in] a_interpolator Coarse-fine interpolator for level a_level on a_phase. Only used for ghost cells.
+   * ghost region. Every entry must be a PETSc row on a_phase, i.e. a valid cell of a_din or of a neighbouring box.
+   * Anything else aborts with the reason: a cell covered by a finer level, a coarse-fine ghost cell, a cell covered by
+   * the EB, or a cell outside the domain. Ghost cells and boundary conditions are the caller's to resolve first.
+   * @param[in] a_stencil Stencil over cells on level a_level.
+   * @param[in] a_level   Grid level.
+   * @param[in] a_din     Grid index on level a_level.
+   * @param[in] a_phase   Phase.
    * @return The same stencil, over global PETSc rows.
    */
   virtual PetscStencil
-  getPetscStencil(const VoFStencil&              a_stencil,
-                  const int                      a_level,
-                  const DataIndex&               a_din,
-                  const int                      a_phase,
-                  const EBMultigridInterpolator* a_interpolator) const noexcept;
+  getPetscStencil(const VoFStencil& a_stencil,
+                  const int         a_level,
+                  const DataIndex&  a_din,
+                  const int         a_phase) const noexcept;
 
   /**
-   * @brief Rewrite a two-level stencil, as from LeastSquares::computeDualLevelStencils, over global PETSc rows.
-   * @details a_coarStencil is over cells on level a_level and resolves as in the single-level version. a_fineStencil is
-   * over cells on level a_level+1, in the index space of grid a_din refined to level a_level+1. Each of its entries
-   * must be a PETSc row on level a_level+1; anything else aborts.
-   * @param[in] a_fineStencil  Stencil over cells on level a_level+1.
-   * @param[in] a_coarStencil  Stencil over cells on level a_level.
-   * @param[in] a_level        Grid level of a_coarStencil. Must be below the finest level.
-   * @param[in] a_din          Grid index on level a_level.
-   * @param[in] a_phase        Phase.
-   * @param[in] a_interpolator Coarse-fine interpolator for level a_level on a_phase. Only used for ghost cells.
+   * @brief Rewrite a two-level stencil, over cells on a level and the next finer level, as a stencil over global PETSc
+   * rows.
+   * @details This is the form produced by LeastSquares::computeDualLevelStencils for a stencil on level a_level that
+   * uses level a_level+1 cells. a_stencil resolves as in the single-level version. a_fineStencil is over cells on level
+   * a_level+1, in the index space of grid a_din refined to level a_level+1 (getMFLevelGridsFiCo), and each of its
+   * entries must be a PETSc row on level a_level+1.
+   * @param[in] a_stencil     Stencil over cells on level a_level.
+   * @param[in] a_fineStencil Stencil over cells on level a_level+1.
+   * @param[in] a_level       Grid level of a_stencil. Must be below the finest level.
+   * @param[in] a_din         Grid index on level a_level.
+   * @param[in] a_phase       Phase.
    * @return The sum of both stencils, over global PETSc rows.
    */
   virtual PetscStencil
-  getPetscStencil(const VoFStencil&              a_fineStencil,
-                  const VoFStencil&              a_coarStencil,
-                  const int                      a_level,
-                  const DataIndex&               a_din,
-                  const int                      a_phase,
-                  const EBMultigridInterpolator* a_interpolator) const noexcept;
+  getPetscStencilWithFinerLevel(const VoFStencil& a_stencil,
+                                const VoFStencil& a_fineStencil,
+                                const int         a_level,
+                                const DataIndex&  a_din,
+                                const int         a_phase) const noexcept;
+
+  /**
+   * @brief Rewrite a two-level stencil, over cells on a level and the next coarser level, as a stencil over global
+   * PETSc rows.
+   * @details This is the form of the coarse-fine ghost cell stencils of EBMultigridInterpolator::getGhostStencil.
+   * a_stencil resolves as in the single-level version. a_coarStencil is over cells on level a_level-1, in the index
+   * space of the level a_level grid a_din coarsened to level a_level-1 (getMFLevelGridsCoFi), and each of its entries
+   * must be a PETSc row on level a_level-1.
+   * @param[in] a_stencil     Stencil over cells on level a_level.
+   * @param[in] a_coarStencil Stencil over cells on level a_level-1.
+   * @param[in] a_level       Grid level of a_stencil. Must be above level 0.
+   * @param[in] a_din         Grid index on level a_level.
+   * @param[in] a_phase       Phase.
+   * @return The sum of both stencils, over global PETSc rows.
+   */
+  virtual PetscStencil
+  getPetscStencilWithCoarserLevel(const VoFStencil& a_stencil,
+                                  const VoFStencil& a_coarStencil,
+                                  const int         a_level,
+                                  const DataIndex&  a_din,
+                                  const int         a_phase) const noexcept;
 
   /**
    * @brief Create a PETSc vector.
@@ -407,6 +423,23 @@ protected:
    */
   virtual void
   definePetscRows() noexcept;
+
+  /**
+   * @brief Add the rows of a stencil's cells to a PETSc stencil.
+   * @details Looks up each entry of a_stencil in a_map. Every entry must lie in a_map's box and be a PETSc row on
+   * a_phase; anything else aborts, naming a_what and the reason.
+   * @param[in,out] a_petscStencil PETSc stencil to add to.
+   * @param[in]     a_stencil      Stencil over the cells of a_map.
+   * @param[in]     a_map          Map from cells to PETSc rows, for one grid patch.
+   * @param[in]     a_phase        Phase.
+   * @param[in]     a_what         Which stencil this is, for the abort message.
+   */
+  virtual void
+  addRows(PetscStencil&                a_petscStencil,
+          const VoFStencil&            a_stencil,
+          const BaseFab<PetscAMRCell>& a_map,
+          const int                    a_phase,
+          const std::string&           a_what) const noexcept;
 
   /**
    * @brief Define the coarsened/refined views of m_amrToPetsc.

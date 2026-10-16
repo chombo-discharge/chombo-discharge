@@ -55,10 +55,11 @@ fillRandom(MFAMRCellData& a_data)
  * @details Aborts on the first failure.
  * - The Chombo -> PETSc -> Chombo round trip reproduces every row exactly.
  * - Ghost cells that overlap a neighbouring box hold the global row of that box's cell.
- * - The two-level PetscGrid::getPetscStencil finds the level l+1 rows under a covered level l cell: their average
+ * - PetscGrid::getPetscStencilWithFinerLevel finds the level l+1 rows under a covered level l cell: their average
  *   equals the conservative average.
- * - Every coarse-fine ghost cell that the multigrid interpolator fills, rewritten by PetscGrid::getPetscStencil and
- *   applied to the PETSc vector, reproduces the value from AmrMesh::interpGhostMG to round-off.
+ * - Every coarse-fine ghost cell that the multigrid interpolator fills: its stencil from
+ *   EBMultigridInterpolator::getGhostStencil, mapped by PetscGrid::getPetscStencilWithCoarserLevel and applied to the
+ *   PETSc vector, reproduces the value from AmrMesh::interpGhostMG to round-off.
  * @param[in] a_amr   AmrMesh, after the driver has set up the grids.
  * @param[in] a_realm Realm.
  */
@@ -196,14 +197,16 @@ runTests(const AmrMesh& a_amr, const std::string& a_realm)
             }
 
             VoFStencil fineStencil;
-            VoFStencil coarStencil;
 
             for (BoxIterator cit(children); cit.ok(); ++cit) {
               fineStencil.add(VolIndex(cit(), 0), 1.0 / children.numPts());
             }
 
-            const PetscStencil stencil = petscGrid
-                                           ->getPetscStencil(fineStencil, coarStencil, lvl, dit(), iphase, nullptr);
+            const PetscStencil stencil = petscGrid->getPetscStencilWithFinerLevel(VoFStencil(),
+                                                                                  fineStencil,
+                                                                                  lvl,
+                                                                                  dit(),
+                                                                                  iphase);
 
             Real value = 0.0;
             for (int i = 0; i < stencil.size(); i++) {
@@ -270,10 +273,15 @@ runTests(const AmrMesh& a_amr, const std::string& a_realm)
 
           const VolIndex vof(iv, 0);
 
-          VoFStencil ghost;
-          ghost.add(vof, 1.0);
+          // The ghost cell's value is what the interpolator fills it with: a stencil over level lvl cells and the
+          // coarsened level lvl-1 cells under this grid.
+          const std::pair<VoFStencil, VoFStencil> ghost = interpolators[lvl]->getGhostStencil(vof, dit());
 
-          const PetscStencil stencil = petscGrid->getPetscStencil(ghost, lvl, dit(), iphase, &(*interpolators[lvl]));
+          const PetscStencil stencil = petscGrid->getPetscStencilWithCoarserLevel(ghost.first,
+                                                                                  ghost.second,
+                                                                                  lvl,
+                                                                                  dit(),
+                                                                                  iphase);
 
           Real value = 0.0;
           Real scale = 0.0;
