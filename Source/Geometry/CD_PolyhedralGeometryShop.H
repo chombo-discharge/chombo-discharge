@@ -20,7 +20,10 @@
 
 // Chombo includes
 #include <BaseFab.H>
+#include <EBData.H>
+#include <EBGraph.H>
 #include <IntVectSet.H>
+#include <LevelData.H>
 
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
@@ -140,6 +143,33 @@ public:
   PolyhedralGeometryShop&
   operator=(const PolyhedralGeometryShop& a_other) = delete;
 
+  using ScanShop::InsideOutside;
+
+  /**
+   * @brief Whether a box is all regular, all covered or holds the surface, as EBISLevel asks it of a region.
+   * @details Answered from the boxes the geometry's grids classify (ComputationalGeometry::classify), which the
+   * graph's cut tiles come from, so the index space treats as uniform exactly what the graph does. The scan
+   * ScanShop answers from samples the implicit function at each level's own spacing and reads it as a distance, so it
+   * can call a coarse box covered while the coarsened finer cells hold fluid. EBISLevel fills a ghost graph from that
+   * answer before it copies the coarsened graph over it, and then reads a regular cell beside a cell with no face
+   * toward it. EBISLevel also passes a region of the level above or below on a domain, so the region is classified
+   * as lying on the domain, one level finer and one level coarser, and is uniform only if all three agree. A domain
+   * coarser than every level the grids describe is answered as irregular, which is always safe. Before setGrids,
+   * ScanShop answers.
+   * @param[in] a_region Region to classify.
+   * @param[in] a_domain Domain of the region.
+   * @param[in] a_probLo Lower-left corner of the domain.
+   * @param[in] a_dx     Grid spacing.
+   * @param[in] a_dit    Grid index.
+   * @return Regular, covered or irregular.
+   */
+  GeometryService::InOut
+  InsideOutside(const Box&           a_region,
+                const ProblemDomain& a_domain,
+                const RealVect&      a_probLo,
+                const Real&          a_dx,
+                const DataIndex&     a_dit) const override;
+
   /**
    * @brief Fill the graph and the nodes for one box.
    * @details Classifies the cells, reuses GeometryShop's fix-up for the regular cells bordering a covered one, and then
@@ -189,6 +219,55 @@ public:
    */
   const PolyhedralEBGraph&
   getGraph(const int a_level) const noexcept;
+
+  /**
+   * @brief Compute the index-space data on the geometry's own grids, from the graph and nothing else.
+   * @details One LevelData<EBGraph> and one LevelData<EBData> per level, over every box the geometry built on it, as
+   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph is copied onto the grids
+   * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
+   * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
+   * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). Under
+   * PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective.
+   * Requires buildGraphs.
+   */
+  void
+  buildMoments();
+
+  /**
+   * @brief The index-space graph buildMoments made for a level.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The graph, over the level's boxes.
+   */
+  const LevelData<EBGraph>&
+  getEBGraph(const int a_level) const;
+
+  /**
+   * @brief The index-space moments buildMoments made for a level.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The moments, over the level's boxes.
+   */
+  const LevelData<EBData>&
+  getEBData(const int a_level) const;
+
+  /**
+   * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
+   * @details The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what
+   * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. Nothing evaluates the
+   * implicit function. Collective. Requires buildMoments.
+   * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
+   * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
+   * @param[in]  a_grids      The layout.
+   * @param[in]  a_domain     Its domain: one of the geometry's, or one refined from the finest by two per level.
+   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
+   * @param[in]  a_dataGhost  Ghost width of the moments.
+   */
+  void
+  fillLayout(LevelData<EBGraph>&      a_graph,
+             LevelData<EBData>&       a_data,
+             const DisjointBoxLayout& a_grids,
+             const ProblemDomain&     a_domain,
+             const int                a_graphGhost,
+             const int                a_dataGhost) const;
 
   /**
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
@@ -421,6 +500,98 @@ public:
    */
   void
   testCopyBodies() const;
+
+  /**
+   * @brief Check the index-space data buildMoments made against the graph it came from.
+   * @details On every level built, each cell is what the graph says it is, and each VoF of a cut cell carries the
+   * moments of the cell's stitched body exactly: volume fraction and centroid, boundary centroid, and per face the
+   * aperture and centroid. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testMoments() const;
+
+  /**
+   * @brief Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants
+   * and onto the boxes of the level below refined.
+   * @details The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own
+   * box holds to round-off, every face must read the same aperture from its two sides, and every cell of the level
+   * below must be the sum of the cells it holds, to round-off. Collective. Switched by
+   * PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testFill() const;
+
+  /**
+   * @brief Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells
+   * included.
+   * @details A cell in the geometry's boxes on the level takes what buildMoments made there -- its own body, or the
+   * VoFs coarsened from the finer level -- and a cell outside them is cut from the coarser cell it lies in, from the
+   * copied graph. A regular cell beside a multi-valued one is written as a full cut cell. A cut cell a finer level owns
+   * outside the geometry's boxes on the level stops the run. Collective.
+   * @param[out] a_graph      The graph, defined here over the level's layout with a_graphGhost ghost cells.
+   * @param[out] a_data       The moments, defined here over the level's layout with a_dataGhost ghost cells.
+   * @param[in]  a_copy       The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost.
+   * @param[in]  a_level      Destination level to fill.
+   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
+   * @param[in]  a_dataGhost  Ghost width of the moments.
+   */
+  void
+  fillLevel(LevelData<EBGraph>&         a_graph,
+            LevelData<EBData>&          a_data,
+            const AMRPolyhedralEBGraph& a_copy,
+            const int                   a_level,
+            const int                   a_graphGhost,
+            const int                   a_dataGhost) const;
+
+  /**
+   * @brief Coarsen a level of the index space onto its coarsened layout.
+   * @details Reads the finished fine level only. The children of a coarse cell are all inside the fine boxes, which
+   * are blocked by two. Each coarse cell's VoFs are the pieces its children's VoFs fall into when joined through the
+   * fine faces between sibling cells, and each carries the sums of its fine VoFs' volumes and first moments, and its
+   * boundary centroid weighted by their boundary areas. A coarse face is split by the VoF across that its fine faces
+   * lead into: a piece of the coarse cell across when that cell is coarsened too, the one VoF of a cell the level owns,
+   * or the domain boundary; its aperture is the scaled sum of those fine apertures, and its centroid their
+   * aperture-weighted mean. Every sum runs in an order fixed by the fine level, so every box writes a coarse face with
+   * the same bits. Coarse nodes are written for the valid cells only. Under PolyhedralGeometryShop.test_copy every
+   * coarse cell's volume, first moment and apertures are compared with the sums over its children, and a cell differing
+   * by more than round-off is counted.
+   * @param[out] a_coarGraph  Coarsened graph, defined here over the coarsened fine layout.
+   * @param[out] a_coarData   Coarsened moments, defined here over the coarsened fine layout.
+   * @param[out] a_numInexact Incremented for every coarse cell that is not the sum of its children.
+   * @param[in]  a_grids      The geometry's grids.
+   * @param[in]  a_domains    Their domains.
+   * @param[in]  a_fineLevel  Level to coarsen, already built.
+   */
+  void
+  coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
+               LevelData<EBData>&                    a_coarData,
+               long long&                            a_numInexact,
+               const std::vector<DisjointBoxLayout>& a_grids,
+               const std::vector<ProblemDomain>&     a_domains,
+               const int                             a_fineLevel) const;
+
+  /**
+   * @brief Build a level of the index space from its own cells and the cells coarsened from the level above.
+   * @details The level's own cells take what the copied graph says. Its cells under the next finer level take the
+   * coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which
+   * VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut
+   * cell, since a regular cell connects to one VoF only; this changes no moment.
+   * @param[out] a_numPromoted     Incremented for every regular cell written as a full cut cell.
+   * @param[in]  a_copy            The graph copied onto the geometry's grids.
+   * @param[in]  a_coarsenedGraph  coarsenLevel's graph for the level above, or null on the finest level.
+   * @param[in]  a_coarsenedData   coarsenLevel's moments for the level above, or null on the finest level.
+   * @param[in]  a_grids           The geometry's grids.
+   * @param[in]  a_domains         Their domains.
+   * @param[in]  a_level           Level to build.
+   */
+  void
+  assembleLevel(long long&                            a_numPromoted,
+                const AMRPolyhedralEBGraph&           a_copy,
+                const LevelData<EBGraph>*             a_coarsenedGraph,
+                const LevelData<EBData>*              a_coarsenedData,
+                const std::vector<DisjointBoxLayout>& a_grids,
+                const std::vector<ProblemDomain>&     a_domains,
+                const int                             a_level);
 
   /**
    * @brief A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its
@@ -657,11 +828,42 @@ public:
            const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
            const IntVect&                              a_cell);
 
+  /**
+   * @brief Write a cut cell's node from its body.
+   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
+   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come
+   * from the body. Reads nothing of the shop, so the copied graph writes its nodes with it too.
+   * @param[out] a_node             The node to fill
+   * @param[in]  a_body             The cell's assembled polyhedron
+   * @param[in]  a_regIrregCovered  Regular/Covered/Irregular cells
+   * @param[in]  a_cell             The cell
+   * @param[in]  a_domain           Domain
+   */
+  static void
+  fillNode(IrregNode&                       a_node,
+           const PolyhedralEB::CutCellBody& a_body,
+           const BaseFab<int>&              a_regIrregCovered,
+           const IntVect&                   a_cell,
+           const ProblemDomain&             a_domain);
+
 protected:
   /**
    * @brief Vertices of one element of the written surface: a triangle in three dimensions, a segment in two.
    */
   static constexpr int s_elementVertices = SpaceDim;
+
+  /**
+   * @brief Width of the ring the graph is copied onto the geometry's grids with for buildMoments.
+   * @details assembleLevel builds each box with one ghost cell, fillNodes writes nodes one cell short of the copied
+   * ring, and a node's face toward a cut cell below it reads that cell's body, one cell further out. Nothing to do with
+   * the ghost cells a solver asks of the index space.
+   */
+  static constexpr int s_momentRing = 2;
+
+  /**
+   * @brief Number of components cellSignature writes: the VoF count, the volume, the first moment and the apertures.
+   */
+  static constexpr int s_signatureComps = 2 + 3 * SpaceDim;
 
   /**
    * @brief Kind of a node of the written graph: a cut cell, at its fluid's centroid.
@@ -719,6 +921,16 @@ protected:
   Vector<RefCountedPtr<PolyhedralEBGraph>> m_graphs;
 
   /**
+   * @brief Index-space graph of every level buildMoments built, over the geometry's boxes; null where it built none.
+   */
+  Vector<RefCountedPtr<LevelData<EBGraph>>> m_ebGraphs;
+
+  /**
+   * @brief Index-space moments of every level buildMoments built, over the geometry's boxes; null where it built none.
+   */
+  Vector<RefCountedPtr<LevelData<EBData>>> m_ebData;
+
+  /**
    * @brief Phase this generator serves on those grids.
    */
   phase::which_phase m_phase;
@@ -765,6 +977,12 @@ protected:
    * default.
    */
   UnresolvedAction m_unresolvedAction;
+
+  /**
+   * @brief Whether a cell whose fluid falls into more than one piece is always filled (true), or only when its fluid is
+   * the larger part of it (false). PolyhedralGeometryShop.fill_split_fluid, always by default, or majority.
+   */
+  bool m_fillSplitFluid;
 
   /**
    * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
@@ -964,11 +1182,12 @@ protected:
    * A quadrant of a seam face across which the finer level filled a cell is closed. A regular or covered cell beside
    * the finer level is made cut where the finer level describes the face between them otherwise than the cell's
    * corners do -- the node at the middle of the face on the other side, or a filled cell across a quadrant of a regular
-   * one -- and stitched like any other; a node at the middle of such a face's edge that disagrees with the edge's ends
-   * is an edge the finer level crosses twice, which is counted and reported rather than acted on. Every stitched
-   * surface carries its role. Under sanity_check each body is also built from the stored data, and from the implicit
-   * function where its children can say the same, and they must agree bit for bit. Collective.
-   * A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
+   * one -- and stitched like any other. A cell pierced at the middle of such a face should have been refined by
+   * ComputationalGeometry, so each one is listed in pout and warned about. A node at the middle of such a face's edge
+   * that disagrees with the edge's ends is an edge the finer level crosses twice, which is counted and reported rather
+   * than acted on. Every stitched surface carries its role. Under sanity_check each body is also built from the stored
+   * data, and from the implicit function where its children can say the same, and they must agree bit for bit.
+   * Collective. A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
    * @param[in,out] a_coarse  The level.
    * @param[in]     a_fine    The finer level, or null where there is none.
    * @param[in]     a_coarser The coarser level, or null where there is none.
@@ -1041,24 +1260,6 @@ protected:
    * @brief Volume fraction below which a cut cell carries no fluid worth keeping.
    */
   Real m_volumeThreshold;
-
-  /**
-   * @brief Write a cut cell's node from its body.
-   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
-   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come
-   * from the body.
-   * @param[out] a_node             The node to fill
-   * @param[in]  a_body             The cell's assembled polyhedron
-   * @param[in]  a_regIrregCovered  Regular/Covered/Irregular cells
-   * @param[in]  a_cell             The cell
-   * @param[in]  a_domain           Domain
-   */
-  void
-  fillNode(IrregNode&                       a_node,
-           const PolyhedralEB::CutCellBody& a_body,
-           const BaseFab<int>&              a_regIrregCovered,
-           const IntVect&                   a_cell,
-           const ProblemDomain&             a_domain) const;
 };
 
 #include <CD_NamespaceFooter.H>

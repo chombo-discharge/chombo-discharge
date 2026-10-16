@@ -17,7 +17,9 @@
 #include <vector>
 
 // Chombo includes
+#include <BaseFab.H>
 #include <DisjointBoxLayout.H>
+#include <IrregNode.H>
 #include <LayoutData.H>
 #include <ProblemDomain.H>
 #include <RefCountedPtr.H>
@@ -26,7 +28,10 @@
 #include <CD_CutCellDescription.H>
 #include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
+
+class ComputationalGeometry;
 
 /**
  * @brief The polyhedral graph as an AMR hierarchy of any layout holds it: every cell of every box, ghost cells
@@ -67,13 +72,18 @@ public:
    * @param[in] a_geometryLevels  Geometry level of every destination level.
    * @param[in] a_numSourceLevels Number of geometry levels.
    * @param[in] a_ghost           Ghost width every destination box is filled to.
+   * @param[in] a_geometry        The geometry the graph was built over, which says what a cell no tile holds is; kept
+   * by reference, and must outlive this object.
+   * @param[in] a_phase           Phase of the graph.
    */
   void
   define(const std::vector<DisjointBoxLayout>& a_grids,
          const std::vector<ProblemDomain>&     a_domains,
          const std::vector<int>&               a_geometryLevels,
          const int                             a_numSourceLevels,
-         const int                             a_ghost);
+         const int                             a_ghost,
+         const ComputationalGeometry&          a_geometry,
+         const phase::which_phase              a_phase);
 
   /**
    * @brief Whether define has run.
@@ -146,8 +156,11 @@ public:
               const IntVect&                                 a_cell) const;
 
   /**
-   * @brief What a cell of a destination box is: cut if any geometry cell owning part of it is, regular or covered if
-   * all of them are, and s_unowned if no geometry level owns any of it here.
+   * @brief What a cell of a destination box is: cut if any geometry cell owning part of it is, or if it holds both
+   * regular and covered fluid, regular or covered if all of it is, and s_unowned if the box holds nothing of it.
+   * @details The graph holds only cut tiles. A part of the cell no tile holds is regular or covered whole, as the
+   * geometry's own boxes say (ComputationalGeometry::classify), and is read from them at the finest level holding any
+   * of the cell.
    * @param[in] a_level Destination level.
    * @param[in] a_dit   Destination box.
    * @param[in] a_cell  The cell, on the destination level.
@@ -155,6 +168,48 @@ public:
    */
   int
   getState(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const;
+
+  /**
+   * @brief Whether a destination box holds a cell: within its ring and the domain, and not under the next finer
+   * destination level.
+   * @param[in] a_level Destination level.
+   * @param[in] a_dit   Destination box.
+   * @param[in] a_cell  The cell, on the destination level.
+   * @return True if the box holds the cell.
+   */
+  bool
+  holds(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const;
+
+  /**
+   * @brief Fill a destination box's index-space data from the copied graph: what each cell is, and a node with the
+   * moments of each cut cell, as GeometryService::fillGraph hands them to the index space.
+   * @details The graph decides what a cell is, and nothing overrides it: a cell it calls regular is regular, one it
+   * calls covered is covered. A cut cell owned at the box's level takes its stitched body. A cell cut from a coarser
+   * ancestor takes the child the ancestor's body subdivides down to; a child holding no fluid is covered, a child that
+   * is all fluid with no interface is regular, and a child the subdivision leaves in more than one piece is kept as one
+   * node whose moments are the sums over its pieces, its volume centroid the summed first moment, and is counted. A
+   * cell a finer level owns is not filled yet: it is marked irregular, gets no node, and is counted.
+   *
+   * The flags cover the box grown by the ghost width, within the domain; a cell the copy holds nothing for -- under the
+   * next finer destination level -- is marked irregular and gets no node. Nodes are written for the cells one ghost
+   * cell short of that, so that every face of a node has the cell across it in hand. A face beside a regular cell is
+   * open over all of it, and a face two cut cells share takes its aperture and centroid from the low cell's body, on
+   * both sides, so every box writes it with the same bits.
+   * @param[out] a_regIrregCovered One for regular, minus one for covered, zero for irregular, per cell.
+   * @param[out] a_nodes           One node per irregular cell the box fills.
+   * A subdivision that fails with every child in one piece has lost fluid its parent holds, and stops the run.
+   * @param[out] a_numCollapsed    Incremented for every child a subdivision left in more than one piece.
+   * @param[out] a_numFiner        Incremented for every cut cell a finer level owns.
+   * @param[in]  a_level           Destination level.
+   * @param[in]  a_dit             Destination box.
+   */
+  void
+  fillNodes(BaseFab<int>&      a_regIrregCovered,
+            Vector<IrregNode>& a_nodes,
+            long long&         a_numCollapsed,
+            long long&         a_numFiner,
+            const int          a_level,
+            const DataIndex&   a_dit) const;
 
   /**
    * @brief The pieces a destination box holds of a geometry level: boxes of cells, each owned by one of its tiles.
@@ -277,6 +332,16 @@ protected:
    * @brief Number of geometry levels.
    */
   int m_numSourceLevels;
+
+  /**
+   * @brief The geometry the graph was built over, which classifies the cells no tile holds.
+   */
+  const ComputationalGeometry* m_geometry;
+
+  /**
+   * @brief Phase of the graph.
+   */
+  phase::which_phase m_phase;
 
   /**
    * @brief Destination layout of every level.

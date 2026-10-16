@@ -18,10 +18,14 @@
 #include <BoxIterator.H>
 #include <CH_assert.H>
 #include <CH_Timer.H>
+#include <MayDay.H>
 
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_PolyhedralEBGraph.H>
+#include <CD_PolyhedralGeometryShop.H>
+#include <CD_ComputationalGeometry.H>
+#include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
 namespace {
@@ -86,7 +90,9 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
                              const std::vector<ProblemDomain>&     a_domains,
                              const std::vector<int>&               a_geometryLevels,
                              const int                             a_numSourceLevels,
-                             const int                             a_ghost)
+                             const int                             a_ghost,
+                             const ComputationalGeometry&          a_geometry,
+                             const phase::which_phase              a_phase)
 {
   CH_TIME("AMRPolyhedralEBGraph::define");
 
@@ -98,6 +104,8 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
   m_geometryLevels  = a_geometryLevels;
   m_numSourceLevels = a_numSourceLevels;
   m_ghost           = a_ghost;
+  m_geometry        = &a_geometry;
+  m_phase           = a_phase;
 
   allocate(m_pieces, a_grids, a_numSourceLevels);
   allocate(m_pieceOffsets, a_grids, a_numSourceLevels);
@@ -268,6 +276,47 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
     }
   }
 
+  // The part of the cell no piece holds, read from the geometry's boxes at the finest level holding any of it. The box
+  // holds a cell only within its ring and outside the finer destination level, which is where nothing is answered.
+  if (!anyCut && this->holds(a_level, a_dit, a_cell)) {
+    int finest = geometryLevel;
+
+    for (int lvl = geometryLevel + 1; lvl < m_numSourceLevels; lvl++) {
+      if (!this->getPieces(a_level, a_dit, lvl).empty()) {
+        finest = lvl;
+      }
+    }
+
+    const Box region = (finest > geometryLevel) ? refine(Box(a_cell, a_cell), 1 << (finest - geometryLevel))
+                                                : Box(a_cell, a_cell);
+
+    // the destination's own domain when nothing finer holds part of the cell, which may lie past the geometry's levels
+    const ProblemDomain onFinest = (finest > geometryLevel) ? m_geometry->getDomain(finest) : m_domains[a_level];
+
+    IntVectSet rest(region);
+
+    for (int lvl = 0; lvl <= std::min(finest, m_numSourceLevels - 1) && !rest.isEmpty(); lvl++) {
+      for (const Box& piece : this->getPieces(a_level, a_dit, lvl)) {
+        const Box onFinest = refine(piece, 1 << (finest - lvl));
+
+        if (onFinest.intersects(region)) {
+          rest -= onFinest;
+        }
+      }
+    }
+
+    if (!rest.isEmpty()) {
+      const Vector<Box> boxes = rest.boxes();
+
+      for (int i = 0; i < boxes.size(); i++) {
+        const GeometryService::InOut type = m_geometry->classify(boxes[i], onFinest, m_phase);
+
+        anyRegular = anyRegular || type != GeometryService::Covered;
+        anyCovered = anyCovered || type != GeometryService::Regular;
+      }
+    }
+  }
+
   if (anyCut || (anyRegular && anyCovered)) {
     return PolyhedralEBGraph::s_cut;
   }
@@ -281,6 +330,31 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
   }
 
   return s_unowned;
+}
+
+bool
+AMRPolyhedralEBGraph::holds(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const
+{
+  const ProblemDomain& domain = m_domains[a_level];
+  const Box            box    = m_grids[a_level][a_dit];
+
+  if (!(grow(box, m_ghost) & domain.domainBox()).contains(a_cell)) {
+    return false;
+  }
+
+  if (a_level + 1 < static_cast<int>(m_grids.size())) {
+    const int ratio = 1 << (m_geometryLevels[a_level + 1] - m_geometryLevels[a_level]);
+
+    Vector<int> hits;
+
+    m_grids[a_level + 1].intersecting(refine(Box(a_cell, a_cell), ratio), hits);
+
+    if (hits.size() > 0) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 const std::vector<Box>&
@@ -556,6 +630,184 @@ AMRPolyhedralEBGraph::describe(std::vector<PolyhedralEB::CutCellDescription>& a_
   }
 
   a_cells.push_back(description);
+}
+
+void
+AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
+                                Vector<IrregNode>& a_nodes,
+                                long long&         a_numCollapsed,
+                                long long&         a_numFiner,
+                                const int          a_level,
+                                const DataIndex&   a_dit) const
+{
+  CH_TIME("AMRPolyhedralEBGraph::fillNodes");
+
+  using PolyhedralEB::CutCellBody;
+  using PolyhedralEB::CutCellDescription;
+
+  const ProblemDomain& domain        = this->getDomain(a_level);
+  const int            geometryLevel = this->getGeometryLevel(a_level);
+  const Box            box           = this->getGrids(a_level)[a_dit];
+  const Box            region        = grow(box, this->getGhost()) & domain.domainBox();
+  const Box            nodeRegion    = grow(box, this->getGhost() - 1) & domain.domainBox();
+
+  a_regIrregCovered.define(region, 1);
+  a_nodes.resize(0);
+
+  // What every cell is, and the body of every cut cell in the region: all of them are known before any node is, since a
+  // node reads the cells across its faces, and the bodies of those on its low sides.
+  std::vector<IntVect>     cutCells;
+  std::vector<CutCellBody> cutBodies;
+
+  BaseFab<int> bodyIndex(region, 1);
+
+  bodyIndex.setVal(-1);
+
+  std::vector<CutCellDescription> described;
+
+  CutCellBody body;
+  CutCellBody children[1 << SpaceDim];
+
+  for (BoxIterator bit(region); bit.ok(); ++bit) {
+    const IntVect iv = bit();
+
+    const int state = this->getState(a_level, a_dit, iv);
+
+    if (state == PolyhedralEBGraph::s_regular) {
+      a_regIrregCovered(iv, 0) = 1;
+
+      continue;
+    }
+
+    if (state == PolyhedralEBGraph::s_covered) {
+      a_regIrregCovered(iv, 0) = -1;
+
+      continue;
+    }
+
+    a_regIrregCovered(iv, 0) = 0;
+
+    if (state != PolyhedralEBGraph::s_cut) {
+      continue;
+    }
+
+    // the counts are over the cells nodes are written for
+    const bool counted = nodeRegion.contains(iv);
+
+    this->getCutCells(described, a_level, a_dit, iv);
+
+    // a cell holding regular and covered fluid with no cut cell of its own lies over finer geometry
+    if (described.empty() || described.front().m_level > geometryLevel) {
+      a_numFiner += counted ? 1 : 0;
+
+      continue;
+    }
+
+    CH_assert(described.size() == 1);
+
+    const CutCellDescription& cell = described.front();
+
+    if (!body.define(cell.m_surface, cell.m_overrides, cell.m_cell)) {
+      MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a cut cell's body could not be built");
+    }
+
+    // a coarser cell is cut down a level at a time, keeping the child on the way to this cell
+    IntVect parent = cell.m_cell;
+
+    for (int k = cell.m_level + 1; k <= geometryLevel; k++) {
+      const IntVect child = coarsen(iv, 1 << (geometryLevel - k));
+
+      int which = 0;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        which |= (child[d] - 2 * parent[d]) << d;
+      }
+
+      // A subdivision fails when a child is in more than one piece, which is kept as one and counted; one that fails
+      // with every child in one piece has lost fluid its parent holds.
+      if (!body.subdivide(children)) {
+        bool inPieces = false;
+
+        for (int c = 0; c < (1 << SpaceDim); c++) {
+          inPieces = inPieces || !children[c].isConnected();
+        }
+
+        if (!inPieces) {
+          MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
+        }
+
+        a_numCollapsed += counted ? 1 : 0;
+      }
+
+      body   = children[which];
+      parent = child;
+    }
+
+    if (body.numPolygons() > 0 && body.closureResidual() > 1.0E-9) {
+      MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivided cell did not close");
+    }
+
+    if (body.numPolygons() == 0 || body.volumeFraction() <= 0.0) {
+      a_regIrregCovered(iv, 0) = -1;
+    }
+    else if (body.volumeFraction() >= 1.0 && body.boundaryArea() <= 0.0) {
+      a_regIrregCovered(iv, 0) = 1;
+    }
+    else {
+      bodyIndex(iv, 0) = cutBodies.size();
+
+      cutCells.push_back(iv);
+      cutBodies.push_back(body);
+    }
+  }
+
+  for (std::size_t n = 0; n < cutCells.size(); n++) {
+    const IntVect& cell = cutCells[n];
+
+    if (!nodeRegion.contains(cell)) {
+      continue;
+    }
+
+    IrregNode node;
+
+    PolyhedralGeometryShop::fillNode(node, cutBodies[n], a_regIrregCovered, cell, domain);
+
+    // A face is the regular cell's if one side is regular, open over all of it, and otherwise the low cell's: both
+    // sides write it from the same cell, where they would otherwise compute it each over its own polygon and to
+    // different roundings. Every box holding the face then holds the same bits, whichever box writes it into a layout.
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect across = cell + sign(sit()) * BASISV(dir);
+        const int     index  = IrregNode::index(dir, sit());
+
+        if (!region.contains(across)) {
+          continue;
+        }
+
+        if (a_regIrregCovered(across, 0) > 0) {
+          node.m_arc[index]          = Vector<int>(1, 0);
+          node.m_areaFrac[index]     = Vector<Real>(1, 1.0);
+          node.m_faceCentroid[index] = Vector<RealVect>(1, RealVect::Zero);
+        }
+        else if (sit() == Side::Lo && bodyIndex(across, 0) >= 0) {
+          const CutCellBody& loBody = cutBodies[bodyIndex(across, 0)];
+
+          if (loBody.areaFraction(dir, Side::Hi) > 0.0) {
+            node.m_arc[index]          = Vector<int>(1, 0);
+            node.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, loBody.areaFraction(dir, Side::Hi)));
+            node.m_faceCentroid[index] = Vector<RealVect>(1, loBody.faceCentroid(dir, Side::Hi));
+          }
+          else {
+            node.m_arc[index].resize(0);
+            node.m_areaFrac[index].resize(0);
+            node.m_faceCentroid[index].resize(0);
+          }
+        }
+      }
+    }
+
+    a_nodes.push_back(node);
+  }
 }
 
 #include <CD_NamespaceFooter.H>
