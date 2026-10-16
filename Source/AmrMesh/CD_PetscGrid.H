@@ -85,7 +85,8 @@ public:
 
   /**
    * @brief Clear the object.
-   * @details This deallocates all PETSc-relevant allocations.
+   * @details This deallocates all PETSc-relevant allocations and marks the grid as undefined, so calling it twice is
+   * safe.
    */
   virtual void
   clear() noexcept;

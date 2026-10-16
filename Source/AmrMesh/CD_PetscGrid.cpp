@@ -47,6 +47,9 @@ PetscGrid::PetscGrid() noexcept
 PetscGrid::~PetscGrid() noexcept
 {
   CH_TIME("PetscGrid::~PetscGrid");
+  if (m_verbose) {
+    pout() << "PetscGrid::~PetscGrid" << endl;
+  }
 }
 
 void
@@ -72,6 +75,18 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   pp.query("debug", m_debug);
   pp.query("profile", m_profile);
 
+  CH_assert(a_finestLevel >= 0);
+  CH_assert(a_numGhost >= 0);
+  CH_assert(a_levelGrids.size() > a_finestLevel);
+  CH_assert(a_levelGridsCoFi.size() > a_finestLevel);
+  CH_assert(a_levelGridsFiCo.size() > a_finestLevel);
+  CH_assert(a_validCells.size() > a_finestLevel);
+  CH_assert(a_coarHaloCF.size() > a_finestLevel);
+  CH_assert(a_fineHaloCF.size() > a_finestLevel);
+  CH_assert(a_refinementRatios.size() >= a_finestLevel);
+  CH_assert(a_dx.size() > a_finestLevel);
+  CH_assert(!(a_levelGrids[0].isNull()));
+
   m_levelGrids     = a_levelGrids;
   m_levelGridsCoFi = a_levelGridsCoFi;
   m_levelGridsFiCo = a_levelGridsFiCo;
@@ -85,8 +100,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   m_numGhost    = a_numGhost;
   m_numPhases   = m_levelGrids[0]->numPhases();
 
-  CH_assert(m_numGhost >= 0);
-  CH_assert(m_finestLevel >= 0);
+  // m_petscToAMR and m_vofIterators hold at most two phases.
+  CH_assert(m_numPhases == 1 || m_numPhases == 2);
 
   this->defineAMRCells();
   this->definePetscRows();
@@ -106,6 +121,9 @@ PetscGrid::clear() noexcept
   if (m_isDefined) {
     PetscCallVoid(ISLocalToGlobalMappingDestroy(&m_localToGlobalIS));
   }
+
+  // The index set is gone, so a second clear() must not destroy it again.
+  m_isDefined = false;
 }
 
 bool
@@ -304,6 +322,11 @@ PetscGrid::addRows(PetscStencil&                a_petscStencil,
                    const std::string&           a_what) const noexcept
 {
   CH_TIME("PetscGrid::addRows");
+  if (m_verbose) {
+    pout() << "PetscGrid::addRows" << endl;
+  }
+
+  CH_assert(a_phase >= 0 && a_phase < m_numPhases);
 
   for (int i = 0; i < a_stencil.size(); i++) {
     const IntVect& iv = a_stencil.vof(i).gridIndex();
@@ -325,6 +348,11 @@ PetscGrid::addRows(PetscStencil&                a_petscStencil,
 void
 PetscGrid::abortNotARow(const IntVect& a_iv, const PetscAMRCell& a_cell, const std::string& a_what) const noexcept
 {
+  CH_TIME("PetscGrid::abortNotARow");
+  if (m_verbose) {
+    pout() << "PetscGrid::abortNotARow" << endl;
+  }
+
   std::string reason;
 
   if (a_cell.isCoveredByFinerGrid()) {
@@ -350,6 +378,12 @@ PetscGrid::defineAMRCells() noexcept
   if (m_verbose) {
     pout() << "PetscGrid::defineAMRCells" << endl;
   }
+
+  CH_assert(m_finestLevel >= 0);
+  CH_assert(m_levelGrids.size() > m_finestLevel);
+  CH_assert(m_validCells.size() > m_finestLevel);
+  CH_assert(m_coarHaloCF.size() > m_finestLevel);
+  CH_assert(m_fineHaloCF.size() > m_finestLevel);
 
   const int curComp = 0;
   const int numComp = 1;
@@ -441,6 +475,7 @@ PetscGrid::definePetscRows() noexcept
   }
 
   CH_assert(!(m_levelGrids[0].isNull()));
+  CH_assert(m_amrToPetsc.size() > m_finestLevel);
 
   m_numLocalRows  = 0;
   m_numGlobalRows = 0;
@@ -567,6 +602,10 @@ PetscGrid::defineCoFiBuffers() noexcept
     pout() << "PetscGrid::defineCoFiBuffers" << endl;
   }
 
+  CH_assert(m_amrToPetsc.size() > m_finestLevel);
+  CH_assert(m_levelGridsCoFi.size() > m_finestLevel);
+  CH_assert(m_levelGridsFiCo.size() > m_finestLevel);
+
   const int numComp = 1;
 
   m_amrToPetscCoFi.resize(1 + m_finestLevel);
@@ -687,6 +726,7 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
   }
 
   CH_assert(m_isDefined);
+  CH_assert(a_y.size() > m_finestLevel);
 
   // Get the local PETSc vector and do basic error checks.
   PetscInt     startIdx = -1;
@@ -744,6 +784,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   }
 
   CH_assert(m_isDefined);
+  CH_assert(a_y.size() > m_finestLevel);
 
   // Get the local PETSc vector and do basic error checks.
   PetscInt     startIdx = -1;
@@ -773,6 +814,8 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
         FArrayBox& data = (*a_y[lvl])[din].getPhase(iphase).getFArrayBox();
 
         for (int i = 0; i < petscToAMR.size(); i++) {
+          CH_assert(petscToAMR[i].localRow >= 0 && petscToAMR[i].localRow < m_numLocalRows);
+
           data(petscToAMR[i].gridCell, 0) = arr[petscToAMR[i].localRow];
         }
       }
