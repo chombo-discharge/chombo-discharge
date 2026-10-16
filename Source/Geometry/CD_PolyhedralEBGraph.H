@@ -135,6 +135,8 @@ public:
    * in them is described up there and is not filled down here.
    * @param[in] a_coarser         Graph of the coarser level, already defined, or null where there is none. A face onto
    * a cell it filled is closed here, and a cell with such a face is kept cut, as beside a cell this level fills.
+   * @param[in] a_fillSplitFluid  Whether a cell whose fluid falls into more than one piece is always filled, or only
+   * when its fluid is the larger part of it; see findUnresolvedCells.
    */
   virtual void
   define(const BaseIF&            a_function,
@@ -144,7 +146,8 @@ public:
          const Real               a_dx,
          const int                a_numGhost,
          const Vector<Box>&       a_covered,
-         const PolyhedralEBGraph* a_coarser);
+         const PolyhedralEBGraph* a_coarser,
+         const bool               a_fillSplitFluid);
 
   /**
    * @brief Build the graph of a level over a given layout, from another graph of the same level.
@@ -256,6 +259,9 @@ public:
    * @param[in]  a_covered    Cells a finer level carries.
    * @param[in]  a_probLo     Lower-left corner of the domain.
    * @param[in]  a_dx         Grid spacing.
+   * @param[in]  a_fillSplitFluid True to fill every cell whose fluid falls into more than one piece. False to fill
+   * such a cell only when its fluid is the larger part of it -- a thin solid sheet between fluid, which has to stay a
+   * barrier -- and otherwise keep it as one body of several pieces.
    * @param[out] a_unresolved For each cell of the region, why it must be filled -- s_filledPieces or s_filledGap -- or
    * s_notFilled.
    */
@@ -266,6 +272,7 @@ public:
                       const Vector<Box>&    a_covered,
                       const RealVect&       a_probLo,
                       const Real            a_dx,
+                      const bool            a_fillSplitFluid,
                       BaseFab<signed char>& a_unresolved);
 
   /**
@@ -547,11 +554,13 @@ protected:
    * @param[in] a_carried       The marker from markCarried.
    * @param[in] a_coarserFilled The marker from markCoarserFilled, with one ghost cell, or null where there is no
    * coarser level.
+   * @param[in] a_fillSplitFluid Whether a cell whose fluid falls into more than one piece is always filled.
    */
   void
   defineCells(const BaseIF&                          a_function,
               const LevelData<BaseFab<signed char>>& a_carried,
-              const LevelData<BaseFab<signed char>>* a_coarserFilled);
+              const LevelData<BaseFab<signed char>>* a_coarserFilled,
+              const bool                             a_fillSplitFluid);
 
   /**
    * @brief Mark the open faces that lie in the domain boundary, and those onto cells no tile of this level carries.

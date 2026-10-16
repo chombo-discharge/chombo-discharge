@@ -47,7 +47,8 @@ PolyhedralEBGraph::define(const BaseIF&            a_function,
                           const Real               a_dx,
                           const int                a_numGhost,
                           const Vector<Box>&       a_covered,
-                          const PolyhedralEBGraph* a_coarser)
+                          const PolyhedralEBGraph* a_coarser,
+                          const bool               a_fillSplitFluid)
 {
   CH_TIME("PolyhedralEBGraph::define");
 
@@ -79,7 +80,7 @@ PolyhedralEBGraph::define(const BaseIF&            a_function,
     this->markCoarserFilled(coarserFilled, *a_coarser, 1);
   }
 
-  this->defineCells(a_function, carried, (a_coarser != nullptr) ? &coarserFilled : nullptr);
+  this->defineCells(a_function, carried, (a_coarser != nullptr) ? &coarserFilled : nullptr, a_fillSplitFluid);
   this->defineOuterFaces(carried);
 
   m_isDefined = true;
@@ -137,6 +138,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
                                        const Vector<Box>&    a_covered,
                                        const RealVect&       a_probLo,
                                        const Real            a_dx,
+                                       const bool            a_fillSplitFluid,
                                        BaseFab<signed char>& a_unresolved)
 {
   CH_TIME("PolyhedralEBGraph::findUnresolvedCells");
@@ -290,9 +292,24 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
       continue;
     }
 
-    // Two pieces of fluid are two cells' worth of fluid, which one body cannot hold however well each is resolved.
+    // Two pieces of fluid are two cells' worth of fluid, which one VoF cannot keep apart however well each is
+    // resolved. Filled, unless the fluid is the smaller part of the cell and the caller keeps such a cell: the body
+    // then holds the pieces as one, which joins pockets of fluid the solid separates but keeps the solid's shape, where
+    // filling would square it off. A body that cannot be built is filled.
     if (fluidPiecesOf(surface) > 1) {
-      a_unresolved(iv, 0) = s_filledPieces;
+      if (a_fillSplitFluid) {
+        a_unresolved(iv, 0) = s_filledPieces;
+
+        continue;
+      }
+
+      CutCellBody body;
+
+      PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
+
+      if (!body.define(surface) || body.volumeFraction() >= 0.5) {
+        a_unresolved(iv, 0) = s_filledPieces;
+      }
 
       continue;
     }
@@ -317,7 +334,8 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
 void
 PolyhedralEBGraph::defineCells(const BaseIF&                          a_function,
                                const LevelData<BaseFab<signed char>>& a_carried,
-                               const LevelData<BaseFab<signed char>>* a_coarserFilled)
+                               const LevelData<BaseFab<signed char>>* a_coarserFilled,
+                               const bool                             a_fillSplitFluid)
 {
   CH_TIME("PolyhedralEBGraph::defineCells");
 
@@ -375,7 +393,14 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     // Which cells cannot be described at all, decided before any of them is classified.
     BaseFab<signed char> unresolved(grown, 1);
 
-    PolyhedralEBGraph::findUnresolvedCells(a_function, nodeValues, grown, m_covered, m_probLo, m_dx, unresolved);
+    PolyhedralEBGraph::findUnresolvedCells(a_function,
+                                           nodeValues,
+                                           grown,
+                                           m_covered,
+                                           m_probLo,
+                                           m_dx,
+                                           a_fillSplitFluid,
+                                           unresolved);
 
     // Counted over the cells this box owns, not over the ring it also filled: neighbouring boxes reach into
     // one another's ring, and a cell counted there would be reported once per box that reaches it.

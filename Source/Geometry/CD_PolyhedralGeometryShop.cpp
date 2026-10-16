@@ -473,6 +473,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_verbose          = false;
   m_maxRefinement    = 1;
   m_unresolvedAction = UnresolvedAction::Warn;
+  m_fillSplitFluid   = true;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
@@ -514,6 +515,20 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   else {
     MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - unresolved_cells must be warn, cover or "
                   "collapse");
+  }
+
+  std::string splitFluid = "always";
+
+  pp.query("fill_split_fluid", splitFluid);
+
+  if (splitFluid == "always") {
+    m_fillSplitFluid = true;
+  }
+  else if (splitFluid == "majority") {
+    m_fillSplitFluid = false;
+  }
+  else {
+    MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - fill_split_fluid must be always or majority");
   }
 
   if (m_verbose) {
@@ -583,8 +598,15 @@ PolyhedralGeometryShop::buildGraphs()
     const PolyhedralEBGraph* coarser = (lvl > startLevel && m_graphs[lvl - 1]->isDefined()) ? &(*m_graphs[lvl - 1])
                                                                                             : nullptr;
 
-    m_graphs[lvl]
-      ->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, covered, coarser);
+    m_graphs[lvl]->define(*m_baseIF,
+                          tiles,
+                          m_compGeom->getDomain(lvl),
+                          m_probLo,
+                          m_compGeom->getDx(lvl),
+                          1,
+                          covered,
+                          coarser,
+                          m_fillSplitFluid);
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
@@ -7174,6 +7196,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                                          Vector<Box>(),
                                          a_probLo,
                                          a_dx,
+                                         m_fillSplitFluid,
                                          unresolved);
 
   IntVectSet irregularCells;

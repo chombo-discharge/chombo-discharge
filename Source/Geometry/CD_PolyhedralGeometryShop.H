@@ -952,6 +952,12 @@ protected:
   UnresolvedAction m_unresolvedAction;
 
   /**
+   * @brief Whether a cell whose fluid falls into more than one piece is always filled (true), or only when its fluid is
+   * the larger part of it (false). PolyhedralGeometryShop.fill_split_fluid, always by default, or majority.
+   */
+  bool m_fillSplitFluid;
+
+  /**
    * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
    */
   bool m_testCopy;
