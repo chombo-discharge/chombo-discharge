@@ -934,10 +934,14 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
     const Box      box   = coarsened[dit()];
     const EBGraph& graph = fineGraph[dit()];
 
-    // the moments read through an EBISBox, which answers regular cells and faces as well as cut ones
+    // The moments of the children read through an EBISBox, which answers regular cells as well as cut ones. A face
+    // is read from the child's side: the cell across may lie outside the fine boxes, where the copied graph holds
+    // nothing, and EBISBox would read any face beside a regular cell as fully open.
     EBISBox data;
 
     data.define(fineGraph[dit()], fineData[dit()], dit());
+
+    const EBData& faceData = fineData[dit()];
 
     // Which coarse cells around the box lie under the fine level: the fine boxes are blocked by two, so such a cell has
     // all of its children in them.
@@ -1178,9 +1182,10 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
                   }
                 }
 
-                const Real aperture = data.areaFrac(faces[n]);
+                const bool regular  = graph.isRegular(vofs[i].gridIndex());
+                const Real aperture = regular ? 1.0 : faceData.areaFrac(faces[n]);
 
-                RealVect centroid = shift + 0.5 * data.centroid(faces[n]);
+                RealVect centroid = shift + (regular ? RealVect::Zero : 0.5 * faceData.centroid(faces[n]));
 
                 centroid[dir] = 0.0;
 
