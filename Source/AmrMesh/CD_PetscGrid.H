@@ -426,8 +426,9 @@ protected:
 
   /**
    * @brief Add the rows of a stencil's cells to a PETSc stencil.
-   * @details Looks up each entry of a_stencil in a_map. Every entry must lie in a_map's box and be a PETSc row on
-   * a_phase; anything else aborts, naming a_what and the reason.
+   * @details Looks up each entry of a_stencil in a_map. Every entry must lie in a_map's box (asserted) and be a PETSc
+   * row on a_phase. An entry that is not a row aborts in every build, through abortNotARow, because PETSc silently
+   * ignores negative indices.
    * @param[in,out] a_petscStencil PETSc stencil to add to.
    * @param[in]     a_stencil      Stencil over the cells of a_map.
    * @param[in]     a_map          Map from cells to PETSc rows, for one grid patch.
@@ -440,6 +441,15 @@ protected:
           const BaseFab<PetscAMRCell>& a_map,
           const int                    a_phase,
           const std::string&           a_what) const noexcept;
+
+  /**
+   * @brief Abort because a stencil entry is not a PETSc row, naming the cell and the reason.
+   * @param[in] a_iv   Cell.
+   * @param[in] a_cell Its entry in the AMR to PETSc map.
+   * @param[in] a_what Which stencil the entry belongs to.
+   */
+  virtual void
+  abortNotARow(const IntVect& a_iv, const PetscAMRCell& a_cell, const std::string& a_what) const noexcept;
 
   /**
    * @brief Define the coarsened/refined views of m_amrToPetsc.

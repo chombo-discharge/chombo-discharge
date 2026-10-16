@@ -308,31 +308,39 @@ PetscGrid::addRows(PetscStencil&                a_petscStencil,
   for (int i = 0; i < a_stencil.size(); i++) {
     const IntVect& iv = a_stencil.vof(i).gridIndex();
 
-    std::string reason;
+    CH_assert(a_map.box().contains(iv));
 
-    if (!(a_map.box().contains(iv))) {
-      reason = "lies beyond the ghost cells of the PETSc map";
-    }
-    else if (a_map(iv).getPetscRow(a_phase) >= 0) {
-      a_petscStencil.add(a_map(iv).getPetscRow(a_phase), a_stencil.weight(i));
-    }
-    else if (a_map(iv).isCoveredByFinerGrid()) {
-      reason = "is covered by a finer level";
-    }
-    else if (a_map(iv).isGhostCF()) {
-      reason = "is a ghost cell outside the level (across a refinement boundary or the domain boundary)";
-    }
-    else {
-      reason = "is covered by the EB on this phase";
+    const PetscInt row = a_map(iv).getPetscRow(a_phase);
+
+    // Not an assertion: PETSc silently ignores negative indices in MatSetValues, so a missing row would otherwise drop
+    // the entry from the matrix without an error.
+    if (row < 0) {
+      this->abortNotARow(iv, a_map(iv), a_what);
     }
 
-    if (!reason.empty()) {
-      std::stringstream msg;
-      msg << "PetscGrid::addRows -- " << a_what << " entry " << iv << " " << reason;
-
-      MayDay::Abort(msg.str().c_str());
-    }
+    a_petscStencil.add(row, a_stencil.weight(i));
   }
+}
+
+void
+PetscGrid::abortNotARow(const IntVect& a_iv, const PetscAMRCell& a_cell, const std::string& a_what) const noexcept
+{
+  std::string reason;
+
+  if (a_cell.isCoveredByFinerGrid()) {
+    reason = "is covered by a finer level";
+  }
+  else if (a_cell.isGhostCF()) {
+    reason = "is a ghost cell outside the level (across a refinement boundary or the domain boundary)";
+  }
+  else {
+    reason = "is covered by the EB on this phase";
+  }
+
+  std::stringstream msg;
+  msg << "PetscGrid::addRows -- " << a_what << " entry " << a_iv << " is not a PETSc row: it " << reason;
+
+  MayDay::Abort(msg.str().c_str());
 }
 
 void
