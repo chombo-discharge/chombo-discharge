@@ -24,11 +24,6 @@ PetscStencil::PetscStencil()
   this->clear();
 }
 
-PetscStencil::~PetscStencil()
-{
-  this->clear();
-}
-
 void
 PetscStencil::clear()
 {
@@ -41,7 +36,7 @@ PetscStencil::size() const noexcept
 {
   CH_assert(m_rows.size() == m_weights.size());
 
-  return m_rows.size();
+  return static_cast<int>(m_rows.size());
 }
 
 PetscInt
@@ -90,7 +85,7 @@ PetscStencil::operator+=(const PetscStencil& a_otherStencil) noexcept
 }
 
 PetscStencil&
-PetscStencil::operator*=(const Real& a_scalingFactor) noexcept
+PetscStencil::operator*=(const PetscScalar& a_scalingFactor) noexcept
 {
   const int N = this->size();
 

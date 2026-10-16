@@ -12,6 +12,9 @@
 
 #ifdef CH_USE_PETSC
 
+// Std includes
+#include <sstream>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <AMRIO.H>
@@ -137,6 +140,8 @@ PetscGrid::getMFLevelGrids() const noexcept
     pout() << "PetscGrid::getMFLevelGrids" << endl;
   }
 
+  CH_assert(m_isDefined);
+
   return m_levelGrids;
 }
 
@@ -147,6 +152,8 @@ PetscGrid::getMFLevelGridsCoFi() const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::getMFLevelGridsCoFi" << endl;
   }
+
+  CH_assert(m_isDefined);
 
   return m_levelGridsCoFi;
 }
@@ -159,6 +166,8 @@ PetscGrid::getMFLevelGridsFiCo() const noexcept
     pout() << "PetscGrid::getMFLevelGridsFiCo" << endl;
   }
 
+  CH_assert(m_isDefined);
+
   return m_levelGridsFiCo;
 }
 
@@ -169,6 +178,8 @@ PetscGrid::getAMRToPetsc() const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::getAMRToPetsc" << endl;
   }
+
+  CH_assert(m_isDefined);
 
   return m_amrToPetsc;
 }
@@ -181,6 +192,8 @@ PetscGrid::getAMRToPetscCoFi() const noexcept
     pout() << "PetscGrid::getAMRToPetscCoFi" << endl;
   }
 
+  CH_assert(m_isDefined);
+
   return m_amrToPetscCoFi;
 }
 
@@ -191,6 +204,8 @@ PetscGrid::getAMRToPetscFiCo() const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::getAMRToPetscFiCo" << endl;
   }
+
+  CH_assert(m_isDefined);
 
   return m_amrToPetscFiCo;
 }
@@ -203,6 +218,7 @@ PetscGrid::getVoFIterator(const int a_iphase) const noexcept
     pout() << "PetscGrid::getVoFIterator" << endl;
   }
 
+  CH_assert(m_isDefined);
   CH_assert(a_iphase >= 0 && a_iphase < m_numPhases);
 
   return m_vofIterators[a_iphase];
@@ -285,12 +301,13 @@ PetscGrid::getPetscStencil(const VoFStencil&              a_stencil,
         if (coarRow < 0) {
           const PetscAMRCell& coarCell = amrToPetscCoar(coarIV);
 
-          pout() << "PetscGrid::getPetscStencil -- level = " << a_level << ", phase = " << a_phase
-                 << ", ghost cell = " << iv << ", coarse cell = " << coarIV
-                 << ", covered by finer level = " << coarCell.isCoveredByFinerGrid()
-                 << ", ghost = " << coarCell.isGhostCF() << endl;
+          std::stringstream msg;
+          msg << "PetscGrid::getPetscStencil -- ghost cell stencil references a coarse cell that is not a row (level = "
+              << a_level << ", phase = " << a_phase << ", ghost cell = " << iv << ", coarse cell = " << coarIV
+              << ", covered by finer level = " << coarCell.isCoveredByFinerGrid()
+              << ", ghost = " << coarCell.isGhostCF() << ")";
 
-          MayDay::Abort("PetscGrid::getPetscStencil -- ghost cell stencil references a coarse cell that is not a row");
+          MayDay::Abort(msg.str().c_str());
         }
 
         petscStencil.add(coarRow, weight * coarStencil.weight(j));
@@ -470,7 +487,7 @@ PetscGrid::definePetscRows() noexcept
         const EBISBox&  ebisBox = ebisl[din];
         const EBGraph&  ebgraph = ebisBox.getEBGraph();
 
-        // Cut cells that are rows. Multi-valued cells abort below, so each of these is a single VoF.
+        // Cut cells that are rows. The kernel aborts on multi-valued cells, so each of these is a single VoF.
         IntVectSet irregIVS;
 
         BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
@@ -723,6 +740,8 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
           const PetscInt globalRow = amrToPetsc(iv).getPetscRow(iphase);
 
           if (globalRow >= 0) {
+            CH_assert(globalRow >= m_localRowBegin && globalRow < m_localRowBegin + m_numLocalRows);
+
             arr[globalRow - m_localRowBegin] = data(iv, 0);
           }
         };

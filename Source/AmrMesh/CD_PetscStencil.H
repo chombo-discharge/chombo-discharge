@@ -43,7 +43,7 @@ public:
   /**
    * @brief Destructor.
    */
-  ~PetscStencil();
+  ~PetscStencil() = default;
 
   /**
    * @brief Remove all entries from the stencil.
@@ -101,7 +101,7 @@ public:
    * @return This stencil.
    */
   PetscStencil&
-  operator*=(const Real& a_scalingFactor) noexcept;
+  operator*=(const PetscScalar& a_scalingFactor) noexcept;
 
 protected:
   /**
