@@ -33,8 +33,11 @@
  *
  * Entries are appended by add() and operator+= without looking for an existing entry with the same row, so a row
  * can appear more than once until compress() is called. compress() sorts the entries by row and merges duplicates,
- * which makes the rows unique and ascending. Building a stencil of N entries this way costs O(N log N), compared with
- * O(N^2) for merging on every add; at a hundred entries the difference is roughly a factor of three to five.
+ * which makes the rows unique and ascending. Duplicates are summed in the order they were added, so the result is the
+ * same as merging on every add, bit for bit. Call compress() before passing the entries to MatSetValues: duplicate
+ * rows would be summed with ADD_VALUES but would overwrite each other with INSERT_VALUES. Building a stencil of N
+ * entries this way costs O(N log N), compared with O(N^2) for merging on every add; at a hundred entries the difference
+ * is roughly a factor of three to five.
  */
 class PetscStencil
 {
@@ -98,7 +101,8 @@ public:
 
   /**
    * @brief Sort the entries by row and merge entries with the same row by summing their weights.
-   * @details After this the rows are unique and in ascending order, which is the cheapest order for MatSetValues.
+   * @details After this the rows are unique and in ascending order, which is the cheapest order for MatSetValues. The
+   * sort is stable, so the weights of a row are summed in the order they were added.
    */
   void
   compress() noexcept;

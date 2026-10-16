@@ -67,11 +67,12 @@ PetscStencil::operator+=(const PetscStencil& a_otherStencil) noexcept
 void
 PetscStencil::compress() noexcept
 {
-  std::sort(m_entries.begin(),
-            m_entries.end(),
-            [](const std::pair<PetscInt, PetscScalar>& a, const std::pair<PetscInt, PetscScalar>& b) -> bool {
-              return a.first < b.first;
-            });
+  // Stable, so duplicates are summed in insertion order and the result does not depend on the sort implementation.
+  std::stable_sort(m_entries.begin(),
+                   m_entries.end(),
+                   [](const std::pair<PetscInt, PetscScalar>& a, const std::pair<PetscInt, PetscScalar>& b) -> bool {
+                     return a.first < b.first;
+                   });
 
   // Merge runs of equal rows into the first entry of each run.
   size_t numUnique = 0;

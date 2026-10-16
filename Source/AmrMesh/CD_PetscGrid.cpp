@@ -100,8 +100,11 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   m_numGhost    = a_numGhost;
   m_numPhases   = m_levelGrids[0]->numPhases();
 
-  // m_petscToAMR and m_vofIterators hold at most two phases.
-  CH_assert(m_numPhases == 1 || m_numPhases == 2);
+  // m_petscToAMR and m_vofIterators hold at most two phases. Checked in every build: a third phase would write past
+  // the end of both arrays.
+  if (m_numPhases != 1 && m_numPhases != 2) {
+    MayDay::Abort("PetscGrid::define -- only one or two phases are supported");
+  }
 
   this->defineAMRCells();
   this->definePetscRows();
