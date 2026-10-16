@@ -51,8 +51,50 @@ fillRandom(MFAMRCellData& a_data)
 }
 
 /**
+ * @brief Abort unless the rows of a stencil are unique and ascending, as PetscGrid returns them.
+ * @param[in] a_stencil Stencil to check.
+ */
+static void
+checkCompressed(const PetscStencil& a_stencil)
+{
+  for (int i = 1; i < a_stencil.size(); i++) {
+    if (a_stencil.row(i) <= a_stencil.row(i - 1)) {
+      MayDay::Abort("PetscMapping -- stencil rows are not unique and ascending");
+    }
+  }
+}
+
+/**
+ * @brief Abort unless PetscStencil::compress sorts the rows and sums the weights of duplicate rows.
+ */
+static void
+testCompress()
+{
+  PetscStencil a;
+  a.add(7, 1.0);
+  a.add(3, 2.0);
+  a.add(7, 4.0);
+
+  PetscStencil b;
+  b.add(3, 8.0);
+  b.add(5, 16.0);
+
+  a += b;
+  a *= 0.5;
+  a.compress();
+
+  checkCompressed(a);
+
+  if (a.size() != 3 || a.row(0) != 3 || a.row(1) != 5 || a.row(2) != 7 || a.weight(0) != 5.0 || a.weight(1) != 8.0 ||
+      a.weight(2) != 2.5) {
+    MayDay::Abort("PetscMapping -- PetscStencil::compress did not merge duplicate rows");
+  }
+}
+
+/**
  * @brief Run the tests.
  * @details Aborts on the first failure.
+ * - PetscStencil::compress sorts the rows and merges duplicates, and every stencil from PetscGrid is compressed.
  * - The Chombo -> PETSc -> Chombo round trip reproduces every row exactly.
  * - Ghost cells that overlap a neighbouring box hold the global row of that box's cell.
  * - PetscGrid::getPetscStencilWithFinerLevel finds the level l+1 rows under a covered level l cell: their average
@@ -111,6 +153,8 @@ runTests(const AmrMesh& a_amr, const std::string& a_realm)
 
   const PetscScalar* xAllArr;
   PetscCallVoid(VecGetArrayRead(xAll, &xAllArr));
+
+  testCompress();
 
   // 1. Round trip.
   DataOps::setValue(phiBack, 0.0);
@@ -208,6 +252,8 @@ runTests(const AmrMesh& a_amr, const std::string& a_realm)
                                                                                   dit(),
                                                                                   iphase);
 
+            checkCompressed(stencil);
+
             Real value = 0.0;
             for (int i = 0; i < stencil.size(); i++) {
               value += stencil.weight(i) * xAllArr[stencil.row(i)];
@@ -282,6 +328,8 @@ runTests(const AmrMesh& a_amr, const std::string& a_realm)
                                                                                   lvl,
                                                                                   dit(),
                                                                                   iphase);
+
+          checkCompressed(stencil);
 
           Real value = 0.0;
           Real scale = 0.0;

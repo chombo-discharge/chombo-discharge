@@ -261,6 +261,8 @@ PetscGrid::getPetscStencil(const VoFStencil& a_stencil,
 
   this->addRows(petscStencil, a_stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
 
+  petscStencil.compress();
+
   return petscStencil;
 }
 
@@ -286,6 +288,8 @@ PetscGrid::getPetscStencilWithFinerLevel(const VoFStencil& a_stencil,
   this->addRows(petscStencil, a_stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
   this->addRows(petscStencil, a_fineStencil, (*m_amrToPetscFiCo[a_level + 1])[a_din], a_phase, "fine stencil");
 
+  petscStencil.compress();
+
   return petscStencil;
 }
 
@@ -310,6 +314,8 @@ PetscGrid::getPetscStencilWithCoarserLevel(const VoFStencil& a_stencil,
   // The level a_level-1 rows on the coarsening of grid a_din share its DataIndex.
   this->addRows(petscStencil, a_stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
   this->addRows(petscStencil, a_coarStencil, (*m_amrToPetscCoFi[a_level - 1])[a_din], a_phase, "coarse stencil");
+
+  petscStencil.compress();
 
   return petscStencil;
 }

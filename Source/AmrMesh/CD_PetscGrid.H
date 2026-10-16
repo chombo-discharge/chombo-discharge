@@ -173,7 +173,7 @@ public:
    * @param[in] a_level   Grid level.
    * @param[in] a_din     Grid index on level a_level.
    * @param[in] a_phase   Phase.
-   * @return The same stencil, over global PETSc rows.
+   * @return The same stencil, over global PETSc rows, compressed (unique, ascending rows).
    */
   virtual PetscStencil
   getPetscStencil(const VoFStencil& a_stencil,
@@ -193,7 +193,7 @@ public:
    * @param[in] a_level       Grid level of a_stencil. Must be below the finest level.
    * @param[in] a_din         Grid index on level a_level.
    * @param[in] a_phase       Phase.
-   * @return The sum of both stencils, over global PETSc rows.
+   * @return The sum of both stencils, over global PETSc rows, compressed (unique, ascending rows).
    */
   virtual PetscStencil
   getPetscStencilWithFinerLevel(const VoFStencil& a_stencil,
@@ -214,7 +214,7 @@ public:
    * @param[in] a_level       Grid level of a_stencil. Must be above level 0.
    * @param[in] a_din         Grid index on level a_level.
    * @param[in] a_phase       Phase.
-   * @return The sum of both stencils, over global PETSc rows.
+   * @return The sum of both stencils, over global PETSc rows, compressed (unique, ascending rows).
    */
   virtual PetscStencil
   getPetscStencilWithCoarserLevel(const VoFStencil& a_stencil,

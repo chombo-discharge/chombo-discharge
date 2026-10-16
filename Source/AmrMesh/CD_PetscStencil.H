@@ -15,12 +15,12 @@
 #ifndef CD_PETSCSTENCIL_H
 #define CD_PETSCSTENCIL_H
 
+// Std includes
+#include <utility>
+#include <vector>
+
 // Petsc includes
 #include "petsc.h"
-
-// Chombo includes
-#include <REAL.H>
-#include <Vector.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -29,8 +29,12 @@
  * @brief A linear stencil over global PETSc rows, i.e. a list of (row, weight) pairs.
  * @details This plays the role that VoFStencil plays for Chombo data, but each entry is a global PETSc row rather than
  * a VolIndex. A VoFStencil entry is only meaningful together with the level and grid patch it was built on, whereas
- * a PetscStencil entry can be passed directly to MatSetValues. Rows are unique within a stencil: adding an existing
- * row accumulates its weight.
+ * a PetscStencil entry can be passed directly to MatSetValues.
+ *
+ * Entries are appended by add() and operator+= without looking for an existing entry with the same row, so a row
+ * can appear more than once until compress() is called. compress() sorts the entries by row and merges duplicates,
+ * which makes the rows unique and ascending. Building a stencil of N entries this way costs O(N log N), compared with
+ * O(N^2) for merging on every add; at a hundred entries the difference is roughly a factor of three to five.
  */
 class PetscStencil
 {
@@ -75,25 +79,29 @@ public:
   weight(const int a_entry) const noexcept;
 
   /**
-   * @brief Add a weight to a row of this stencil.
-   * @details If the row is already in the stencil its weight is incremented, otherwise a new entry is appended.
-   * Finding the row is a linear scan, so building a stencil of N entries costs O(N^2). This is deliberate: the
-   * stencils assembled here have tens of entries, and at most on the order of a hundred (a 3D least-squares
-   * neighbourhood expanded by coarse-fine interpolation stencils). At that size a scan over contiguous storage is
-   * cheaper than hashing or sorting.
+   * @brief Append an entry to this stencil.
+   * @details The entry is not merged with an existing entry for the same row; call compress() for that.
    * @param[in] a_row    Global PETSc row
-   * @param[in] a_weight Weight to add to the row
+   * @param[in] a_weight Weight of the entry
    */
   void
   add(const PetscInt& a_row, const PetscScalar& a_weight) noexcept;
 
   /**
-   * @brief Add another stencil to this stencil, entry by entry, using add().
+   * @brief Append all entries of another stencil to this stencil.
+   * @details Entries are not merged with existing entries for the same row; call compress() for that.
    * @param[in] a_otherStencil Other PETSc stencil
    * @return This stencil.
    */
   PetscStencil&
   operator+=(const PetscStencil& a_otherStencil) noexcept;
+
+  /**
+   * @brief Sort the entries by row and merge entries with the same row by summing their weights.
+   * @details After this the rows are unique and in ascending order, which is the cheapest order for MatSetValues.
+   */
+  void
+  compress() noexcept;
 
   /**
    * @brief Scale all weights in this stencil.
@@ -105,14 +113,9 @@ public:
 
 protected:
   /**
-   * @brief Global PETSc rows. Unique within the stencil; m_rows[i] pairs with m_weights[i].
+   * @brief Stencil entries as (global PETSc row, weight). Rows are unique and ascending only after compress().
    */
-  Vector<PetscInt> m_rows;
-
-  /**
-   * @brief Weights, one per entry in m_rows.
-   */
-  Vector<PetscScalar> m_weights;
+  std::vector<std::pair<PetscInt, PetscScalar>> m_entries;
 };
 
 #include <CD_NamespaceFooter.H>

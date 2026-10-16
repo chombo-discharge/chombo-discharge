@@ -12,6 +12,9 @@
 
 #ifdef CH_USE_PETSC
 
+// Std includes
+#include <algorithm>
+
 // Chombo includes
 #include <CH_assert.H>
 
@@ -22,70 +25,76 @@
 void
 PetscStencil::clear()
 {
-  m_rows.resize(0);
-  m_weights.resize(0);
+  m_entries.resize(0);
 }
 
 int
 PetscStencil::size() const noexcept
 {
-  CH_assert(m_rows.size() == m_weights.size());
-
-  return static_cast<int>(m_rows.size());
+  return static_cast<int>(m_entries.size());
 }
 
 PetscInt
 PetscStencil::row(const int a_entry) const noexcept
 {
-  return m_rows[a_entry];
+  CH_assert(a_entry >= 0 && a_entry < this->size());
+
+  return m_entries[a_entry].first;
 }
 
 PetscScalar
 PetscStencil::weight(const int a_entry) const noexcept
 {
-  return m_weights[a_entry];
+  CH_assert(a_entry >= 0 && a_entry < this->size());
+
+  return m_entries[a_entry].second;
 }
 
 void
 PetscStencil::add(const PetscInt& a_row, const PetscScalar& a_weight) noexcept
 {
-  bool alreadyHere = false;
-
-  const int N = this->size();
-
-  for (int i = 0; i < N; i++) {
-    if (m_rows[i] == a_row) {
-      m_weights[i] += a_weight;
-
-      alreadyHere = true;
-
-      break;
-    }
-  }
-
-  if (!alreadyHere) {
-    m_rows.push_back(a_row);
-    m_weights.push_back(a_weight);
-  }
+  m_entries.emplace_back(a_row, a_weight);
 }
 
 PetscStencil&
 PetscStencil::operator+=(const PetscStencil& a_otherStencil) noexcept
 {
-  for (int i = 0; i < a_otherStencil.size(); i++) {
-    this->add(a_otherStencil.row(i), a_otherStencil.weight(i));
-  }
+  m_entries.insert(m_entries.end(), a_otherStencil.m_entries.begin(), a_otherStencil.m_entries.end());
 
   return *this;
+}
+
+void
+PetscStencil::compress() noexcept
+{
+  std::sort(m_entries.begin(),
+            m_entries.end(),
+            [](const std::pair<PetscInt, PetscScalar>& a, const std::pair<PetscInt, PetscScalar>& b) -> bool {
+              return a.first < b.first;
+            });
+
+  // Merge runs of equal rows into the first entry of each run.
+  size_t numUnique = 0;
+
+  for (size_t i = 0; i < m_entries.size(); i++) {
+    if (numUnique > 0 && m_entries[numUnique - 1].first == m_entries[i].first) {
+      m_entries[numUnique - 1].second += m_entries[i].second;
+    }
+    else {
+      m_entries[numUnique] = m_entries[i];
+
+      numUnique++;
+    }
+  }
+
+  m_entries.resize(numUnique);
 }
 
 PetscStencil&
 PetscStencil::operator*=(const PetscScalar& a_scalingFactor) noexcept
 {
-  const int N = this->size();
-
-  for (int i = 0; i < N; i++) {
-    m_weights[i] *= a_scalingFactor;
+  for (auto& entry : m_entries) {
+    entry.second *= a_scalingFactor;
   }
 
   return *this;
