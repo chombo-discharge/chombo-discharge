@@ -406,6 +406,10 @@ cellSignature(FArrayBox& a_signature, const EBGraph& a_graph, const EBData& a_da
 
     a_signature(cell, 0) = vofs.size();
 
+    // The apertures of a cell side, gathered over its VoFs. The cell across the side holds the same faces, gathered in
+    // the order of its own VoFs, so they are summed in increasing order for the two sides to agree bit for bit.
+    std::vector<Real> apertures[2 * SpaceDim];
+
     for (int v = 0; v < vofs.size(); v++) {
       const Real volume = a_data.volFrac(vofs[v]);
 
@@ -420,9 +424,17 @@ cellSignature(FArrayBox& a_signature, const EBGraph& a_graph, const EBData& a_da
           const Vector<FaceIndex> faces = a_graph.getFaces(vofs[v], dir, sit());
 
           for (int i = 0; i < faces.size(); i++) {
-            a_signature(cell, 2 + SpaceDim + 2 * dir + (sit() == Side::Hi ? 1 : 0)) += a_data.areaFrac(faces[i]);
+            apertures[2 * dir + (sit() == Side::Hi ? 1 : 0)].push_back(a_data.areaFrac(faces[i]));
           }
         }
+      }
+    }
+
+    for (int side = 0; side < 2 * SpaceDim; side++) {
+      std::sort(apertures[side].begin(), apertures[side].end());
+
+      for (const Real aperture : apertures[side]) {
+        a_signature(cell, 2 + SpaceDim + side) += aperture;
       }
     }
   }
