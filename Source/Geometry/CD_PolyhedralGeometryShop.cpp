@@ -37,6 +37,7 @@
 #include <CH_assert.H>
 #include <EBDataFactory.H>
 #include <EBGraphFactory.H>
+#include <EBISBox.H>
 #include <IntVectSet.H>
 #include <LoHiSide.H>
 #include <MayDay.H>
@@ -711,7 +712,7 @@ PolyhedralGeometryShop::buildMoments()
     const bool haveFiner = lvl + 1 < numLevels && !m_ebGraphs[lvl + 1].isNull();
 
     if (haveFiner) {
-      this->coarsenLevel(coarsenedGraph, coarsenedData, numInexact, copy, grids, domains, lvl + 1);
+      this->coarsenLevel(coarsenedGraph, coarsenedData, numInexact, grids, domains, lvl + 1);
     }
 
     this->assembleLevel(numPromoted,
@@ -862,7 +863,6 @@ void
 PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
                                      LevelData<EBData>&                    a_coarData,
                                      long long&                            a_numInexact,
-                                     const AMRPolyhedralEBGraph&           a_copy,
                                      const std::vector<DisjointBoxLayout>& a_grids,
                                      const std::vector<ProblemDomain>&     a_domains,
                                      const int                             a_fineLevel) const
@@ -882,57 +882,332 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
   EBGraphFactory coarGraphFactory(a_domains[k]);
   EBDataFactory  dataFactory;
 
-  // The fine level as Chombo's coarsening reads it: the graph with three ghost cells and the moments with two.
-  LevelData<EBGraph> fineGraph;
-  LevelData<EBData>  fineData;
+  // The finished fine level on its own boxes, with the moments of the fine cells under each coarse cell of a box and
+  // its one ghost cell, and the graph one fine cell beyond those, which their faces read. Copied into fresh containers,
+  // since Chombo's copy adds the VoFs it receives to those a cell already holds.
+  constexpr int fineGraphGhost = 3;
+  constexpr int fineDataGhost  = 2;
 
-  this->fillLevel(fineGraph, fineData, a_copy, f, s_coarsenFineGraphGhost, s_coarsenFineDataGhost);
+  LevelData<EBGraph> fineGraph(a_grids[f], 1, fineGraphGhost * IntVect::Unit, fineGraphFactory);
+  LevelData<EBData>  fineData(a_grids[f], 1, fineDataGhost * IntVect::Unit, dataFactory);
 
-  // The coarse level's VoFs, over each box and over its one ghost cell, coarsened from the fine cells under them; then
-  // the faces, and the moments, as EBISLevel coarsens a level.
-  a_coarGraph.define(coarsened, 1, IntVect::Zero, coarGraphFactory);
+  m_ebGraphs[f]->copyTo(interv, fineGraph, interv);
+
+  for (DataIterator dit(a_grids[f]); dit.ok(); ++dit) {
+    const Box region = grow(a_grids[f][dit()], fineDataGhost) & a_domains[f].domainBox();
+
+    fineData[dit()].defineVoFData(fineGraph[dit()], region);
+    fineData[dit()].defineFaceData(fineGraph[dit()], region);
+  }
+
+  m_ebData[f]->copyTo(interv, fineData, interv);
+
+  a_coarGraph.define(coarsened, 1, IntVect::Unit, coarGraphFactory);
   a_coarData.define(coarsened, 1, IntVect::Zero, dataFactory);
 
-  LevelData<EBGraph> coarGhost(coarsened, 1, IntVect::Unit, coarGraphFactory);
+  const Real volumeScale = 1.0 / static_cast<Real>(1 << SpaceDim);
+  const Real faceScale   = 1.0 / static_cast<Real>(1 << (SpaceDim - 1));
 
   for (DataIterator dit(coarsened); dit.ok(); ++dit) {
-    const Box box = coarsened[dit()];
+    const Box      box   = coarsened[dit()];
+    const EBGraph& graph = fineGraph[dit()];
 
-    coarGhost[dit()].coarsenVoFs(fineGraph[dit()], grow(box, 1) & a_domains[k].domainBox());
-    a_coarGraph[dit()].coarsenVoFs(fineGraph[dit()], box);
-  }
+    // the moments read through an EBISBox, which answers regular cells and faces as well as cut ones
+    EBISBox data;
 
-  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
-    a_coarGraph[dit()].coarsenFaces(coarGhost[dit()], fineGraph[dit()]);
-  }
+    data.define(fineGraph[dit()], fineData[dit()], dit());
 
-  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
-    a_coarData[dit()].coarsenVoFs(fineData[dit()], fineGraph[dit()], coarGhost[dit()], coarsened[dit()]);
-  }
+    // Which coarse cells around the box lie under the fine level: the fine boxes are blocked by two, so such a cell has
+    // all of its children in them.
+    const Box around = grow(box, 1) & a_domains[k].domainBox();
 
-  // The moments of the faces need the coarse faces, which the valid cells now have: copied into a fresh graph, since
-  // Chombo's copy adds what it receives to what a cell holds, and the ghost cells no coarsened box holds taken from the
-  // coarsened VoFs, by a local copy that replaces.
-  LevelData<EBGraph> coarFaces(coarsened, 1, IntVect::Unit, coarGraphFactory);
+    BaseFab<int> underFiner(around, 1);
 
-  a_coarGraph.copyTo(interv, coarFaces, interv);
+    underFiner.setVal(0);
 
-  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
-    for (BoxIterator bit(grow(coarsened[dit()], 1) & a_domains[k].domainBox()); bit.ok(); ++bit) {
-      Vector<int> hits;
+    Vector<int> hits;
 
-      coarsened.intersecting(Box(bit(), bit()), hits);
+    a_grids[f].intersecting(refine(around, 2), hits);
 
-      if (hits.size() == 0) {
-        const Box cell(bit(), bit());
+    for (int h = 0; h < hits.size(); h++) {
+      const Box overlap = coarsen(a_grids[f].boxArray()[hits[h]], 2) & around;
 
-        coarFaces[dit()].copy(cell, interv, cell, coarGhost[dit()], interv);
+      if (!overlap.isEmpty()) {
+        underFiner.setVal(1, overlap, 0);
       }
     }
-  }
 
-  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
-    a_coarData[dit()].coarsenFaces(fineData[dit()], fineGraph[dit()], coarFaces[dit()], coarsened[dit()]);
+    // The VoFs of a coarse cell's children, in the order a BoxIterator meets the children, and the piece of the coarse
+    // cell each falls in: two are one piece if a fine face between sibling cells joins them. Pieces are numbered in
+    // the order their first VoF is met.
+    const auto group = [&](std::vector<VolIndex>& a_vofs, std::vector<int>& a_piece, const IntVect& a_cell) -> int {
+      a_vofs.resize(0);
+
+      for (BoxIterator cit(refine(Box(a_cell, a_cell), 2)); cit.ok(); ++cit) {
+        const Vector<VolIndex> vofs = graph.getVoFs(cit());
+
+        for (int v = 0; v < vofs.size(); v++) {
+          a_vofs.push_back(vofs[v]);
+        }
+      }
+
+      const int numVoFs = a_vofs.size();
+
+      const auto find = [&](const VolIndex& a_vof) -> int {
+        for (int i = 0; i < numVoFs; i++) {
+          if (a_vofs[i] == a_vof) {
+            return i;
+          }
+        }
+
+        return -1;
+      };
+
+      std::vector<int> root(numVoFs);
+
+      for (int i = 0; i < numVoFs; i++) {
+        root[i] = i;
+      }
+
+      const auto rootOf = [&root](int a_index) -> int {
+        while (root[a_index] != a_index) {
+          a_index = root[a_index];
+        }
+
+        return a_index;
+      };
+
+      for (int i = 0; i < numVoFs; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          if (a_vofs[i].gridIndex()[dir] != 2 * a_cell[dir]) {
+            continue;
+          }
+
+          const Vector<FaceIndex> faces = graph.getFaces(a_vofs[i], dir, Side::Hi);
+
+          for (int n = 0; n < faces.size(); n++) {
+            const int j = find(faces[n].getVoF(Side::Hi));
+
+            CH_assert(j >= 0);
+
+            const int a = rootOf(i);
+            const int b = rootOf(j);
+
+            root[std::max(a, b)] = std::min(a, b);
+          }
+        }
+      }
+
+      a_piece.resize(numVoFs);
+
+      std::vector<int> number(numVoFs, -1);
+
+      int numPieces = 0;
+
+      for (int i = 0; i < numVoFs; i++) {
+        const int r = rootOf(i);
+
+        if (number[r] < 0) {
+          number[r] = numPieces++;
+        }
+
+        a_piece[i] = number[r];
+      }
+
+      return numPieces;
+    };
+
+    // a coarse cell's centre to the centre of one of its children, in coarse cells
+    const auto offset = [](const IntVect& a_child, const IntVect& a_cell) -> RealVect {
+      RealVect shift;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        shift[d] = 0.5 * static_cast<Real>(a_child[d] - 2 * a_cell[d]) - 0.25;
+      }
+
+      return shift;
+    };
+
+    // The coarse graph is built over the box and its ghost cell, since the moments of the box's faces read the cells
+    // across them. A ghost cell the level owns is written regular, the one VoF the coarsened cells' faces lead into;
+    // a coarsened ghost cell keeps only its faces toward cells of the ring.
+    BaseFab<int>      flags(around, 1);
+    Vector<IrregNode> nodes;
+
+    std::vector<VolIndex> vofs;
+    std::vector<VolIndex> acrossVoFs;
+    std::vector<int>      piece;
+    std::vector<int>      acrossPiece;
+
+    for (BoxIterator bit(around); bit.ok(); ++bit) {
+      const IntVect cell = bit();
+
+      if (underFiner(cell, 0) == 0) {
+        flags(cell, 0) = 1;
+
+        continue;
+      }
+
+      bool allRegular = true;
+
+      for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
+        allRegular = allRegular && graph.isRegular(cit());
+      }
+
+      if (allRegular) {
+        flags(cell, 0) = 1;
+
+        continue;
+      }
+
+      const int numPieces = group(vofs, piece, cell);
+
+      if (numPieces == 0) {
+        flags(cell, 0) = -1;
+
+        continue;
+      }
+
+      flags(cell, 0) = 0;
+
+      for (int p = 0; p < numPieces; p++) {
+        IrregNode node;
+
+        node.m_cell      = cell;
+        node.m_cellIndex = p;
+
+        Real     volume        = 0.0;
+        RealVect firstMoment   = RealVect::Zero;
+        Real     boundaryArea  = 0.0;
+        RealVect boundaryFirst = RealVect::Zero;
+
+        for (std::size_t i = 0; i < vofs.size(); i++) {
+          if (piece[i] != p) {
+            continue;
+          }
+
+          const RealVect shift = offset(vofs[i].gridIndex(), cell);
+          const Real     kappa = data.volFrac(vofs[i]);
+          const Real     area  = data.bndryArea(vofs[i]);
+
+          volume += kappa;
+          firstMoment += kappa * (shift + 0.5 * data.centroid(vofs[i]));
+          boundaryArea += area;
+          boundaryFirst += area * (shift + 0.5 * data.bndryCentroid(vofs[i]));
+        }
+
+        node.m_volFrac       = volumeScale * volume;
+        node.m_volCentroid   = (volume > 0.0) ? firstMoment / volume : RealVect::Zero;
+        node.m_bndryCentroid = (boundaryArea > 0.0) ? boundaryFirst / boundaryArea : RealVect::Zero;
+
+        // Each coarse face splits by the piece across that its fine faces lead into: the piece of the coarse cell
+        // across when that cell is coarsened too, its one VoF when the level owns it, and the domain boundary.
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const int     index  = IrregNode::index(dir, sit());
+            const IntVect across = cell + sign(sit()) * BASISV(dir);
+            const int     plane  = (sit() == Side::Lo) ? 2 * cell[dir] : 2 * cell[dir] + 1;
+
+            // a face of a ghost cell toward a cell beyond the ring is left out
+            if (a_domains[k].contains(across) && !around.contains(across)) {
+              node.m_arc[index].resize(0);
+              node.m_areaFrac[index].resize(0);
+              node.m_faceCentroid[index].resize(0);
+
+              continue;
+            }
+
+            const bool acrossCoarsened = around.contains(across) && underFiner(across, 0) != 0;
+
+            if (acrossCoarsened) {
+              group(acrossVoFs, acrossPiece, across);
+            }
+
+            std::vector<int>      arcs;
+            std::vector<Real>     areas;
+            std::vector<RealVect> moments;
+
+            for (std::size_t i = 0; i < vofs.size(); i++) {
+              if (piece[i] != p || vofs[i].gridIndex()[dir] != plane) {
+                continue;
+              }
+
+              const RealVect          shift = offset(vofs[i].gridIndex(), cell);
+              const Vector<FaceIndex> faces = graph.getFaces(vofs[i], dir, sit());
+
+              for (int n = 0; n < faces.size(); n++) {
+                int arc = -1;
+
+                if (!faces[n].isBoundary()) {
+                  arc = 0;
+
+                  if (acrossCoarsened) {
+                    const VolIndex other = faces[n].getVoF(sit());
+
+                    arc = -1;
+
+                    for (std::size_t j = 0; j < acrossVoFs.size(); j++) {
+                      if (acrossVoFs[j] == other) {
+                        arc = acrossPiece[j];
+                      }
+                    }
+
+                    CH_assert(arc >= 0);
+                  }
+                }
+
+                const Real aperture = data.areaFrac(faces[n]);
+
+                RealVect centroid = shift + 0.5 * data.centroid(faces[n]);
+
+                centroid[dir] = 0.0;
+
+                std::size_t bucket = 0;
+
+                while (bucket < arcs.size() && arcs[bucket] != arc) {
+                  bucket++;
+                }
+
+                if (bucket == arcs.size()) {
+                  arcs.push_back(arc);
+                  areas.push_back(0.0);
+                  moments.push_back(RealVect::Zero);
+                }
+
+                areas[bucket] += aperture;
+                moments[bucket] += aperture * centroid;
+              }
+            }
+
+            // in increasing order of the VoF across
+            std::vector<std::size_t> order(arcs.size());
+
+            for (std::size_t b = 0; b < order.size(); b++) {
+              order[b] = b;
+            }
+
+            std::sort(order.begin(), order.end(), [&arcs](const std::size_t a, const std::size_t b) {
+              return arcs[a] < arcs[b];
+            });
+
+            node.m_arc[index].resize(0);
+            node.m_areaFrac[index].resize(0);
+            node.m_faceCentroid[index].resize(0);
+
+            for (const std::size_t b : order) {
+              node.m_arc[index].push_back(arcs[b]);
+              node.m_areaFrac[index].push_back(faceScale * areas[b]);
+              node.m_faceCentroid[index].push_back((areas[b] > 0.0) ? moments[b] / areas[b] : RealVect::Zero);
+            }
+          }
+        }
+
+        nodes.push_back(node);
+      }
+    }
+
+    a_coarGraph[dit()].buildGraph(flags, nodes, around, a_domains[k]);
+    a_coarData[dit()].define(a_coarGraph[dit()], nodes, box);
   }
 
   // Each coarse cell against its children: its volume, its first moment and its apertures are the children's,
@@ -994,9 +1269,6 @@ PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coa
     long long numChecked   = 0;
     long long numIrregular = 0;
     long long numMulti     = 0;
-
-    const Real volumeScale = 1.0 / static_cast<Real>(1 << SpaceDim);
-    const Real faceScale   = 1.0 / static_cast<Real>(1 << (SpaceDim - 1));
 
     for (DataIterator dit(coarsened); dit.ok(); ++dit) {
       for (BoxIterator bit(coarsened[dit()]); bit.ok(); ++bit) {
@@ -4528,8 +4800,9 @@ PolyhedralGeometryShop::testFill() const
   const int numLevels = m_ebGraphs.size();
   const int numComps  = s_signatureComps;
 
-  const int graphGhost = s_coarsenFineGraphGhost;
-  const int dataGhost  = s_coarsenFineDataGhost;
+  // the ghost widths EBISLevel reads a fine level with when it coarsens one, which a filled layout is tested at
+  constexpr int graphGhost = 3;
+  constexpr int dataGhost  = 2;
 
   constexpr Real tolerance = 1.0E-12;
 

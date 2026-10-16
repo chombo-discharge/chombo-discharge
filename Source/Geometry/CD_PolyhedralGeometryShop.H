@@ -517,17 +517,20 @@ public:
             const int                   a_dataGhost) const;
 
   /**
-   * @brief Coarsen a level of the index space onto its coarsened layout, by Chombo's coarsening.
-   * @details The fine level is read as Chombo's coarsening reads it, with s_coarsenFineGraphGhost ghost cells of graph
-   * and s_coarsenFineDataGhost of moments: inside the level's boxes from the finished level, outside them from the
-   * copied graph, which cuts those cells from the coarser cells they lie in. The coarse ghost graph is coarsened over
-   * each box's ghost cell rather than copied, so that it exists where no coarsened box does. Under
-   * PolyhedralGeometryShop.test_copy every coarse cell's volume, first moment and apertures are compared with the sums
-   * over its children, and a cell differing by more than round-off is counted.
+   * @brief Coarsen a level of the index space onto its coarsened layout.
+   * @details Reads the finished fine level only. The children of a coarse cell are all inside the fine boxes, which
+   * are blocked by two. Each coarse cell's VoFs are the pieces its children's VoFs fall into when joined through the
+   * fine faces between sibling cells, and each carries the sums of its fine VoFs' volumes and first moments, and its
+   * boundary centroid weighted by their boundary areas. A coarse face is split by the VoF across that its fine faces
+   * lead into: a piece of the coarse cell across when that cell is coarsened too, the one VoF of a cell the level owns,
+   * or the domain boundary; its aperture is the scaled sum of those fine apertures, and its centroid their
+   * aperture-weighted mean. Every sum runs in an order fixed by the fine level, so every box writes a coarse face with
+   * the same bits. Coarse nodes are written for the valid cells only. Under PolyhedralGeometryShop.test_copy every
+   * coarse cell's volume, first moment and apertures are compared with the sums over its children, and a cell differing
+   * by more than round-off is counted.
    * @param[out] a_coarGraph  Coarsened graph, defined here over the coarsened fine layout.
    * @param[out] a_coarData   Coarsened moments, defined here over the coarsened fine layout.
    * @param[out] a_numInexact Incremented for every coarse cell that is not the sum of its children.
-   * @param[in]  a_copy       The graph copied onto the geometry's grids.
    * @param[in]  a_grids      The geometry's grids.
    * @param[in]  a_domains    Their domains.
    * @param[in]  a_fineLevel  Level to coarsen, already built.
@@ -536,7 +539,6 @@ public:
   coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
                LevelData<EBData>&                    a_coarData,
                long long&                            a_numInexact,
-               const AMRPolyhedralEBGraph&           a_copy,
                const std::vector<DisjointBoxLayout>& a_grids,
                const std::vector<ProblemDomain>&     a_domains,
                const int                             a_fineLevel) const;
@@ -825,20 +827,11 @@ protected:
 
   /**
    * @brief Width of the ring the graph is copied onto the geometry's grids with for buildMoments.
-   * @details Chombo's coarsening reads three fine ghost cells of the graph, and fillNodes writes nodes one cell short
-   * of the copied ring. Nothing to do with the ghost cells a solver asks of the index space.
+   * @details assembleLevel builds each box with one ghost cell, fillNodes writes nodes one cell short of the copied
+   * ring, and a node's face toward a cut cell below it reads that cell's body, one cell further out. Nothing to do with
+   * the ghost cells a solver asks of the index space.
    */
-  static constexpr int s_momentRing = 4;
-
-  /**
-   * @brief Ghost cells of the fine graph Chombo's coarsening reads, as EBISLevel builds a coarse level.
-   */
-  static constexpr int s_coarsenFineGraphGhost = 3;
-
-  /**
-   * @brief Ghost cells of the fine moments Chombo's coarsening reads, as EBISLevel builds a coarse level.
-   */
-  static constexpr int s_coarsenFineDataGhost = 2;
+  static constexpr int s_momentRing = 2;
 
   /**
    * @brief Number of components cellSignature writes: the VoF count, the volume, the first moment and the apertures.
