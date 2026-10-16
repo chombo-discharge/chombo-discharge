@@ -192,7 +192,9 @@ public:
    *
    * The flags cover the box grown by the ghost width, within the domain; a cell the copy holds nothing for -- under the
    * next finer destination level -- is marked irregular and gets no node. Nodes are written for the cells one ghost
-   * cell short of that, so that every face of a node has the cell across it in hand.
+   * cell short of that, so that every face of a node has the cell across it in hand. A face beside a regular cell is
+   * open over all of it, and a face two cut cells share takes its aperture and centroid from the low cell's body, on
+   * both sides, so every box writes it with the same bits.
    * @param[out] a_regIrregCovered One for regular, minus one for covered, zero for irregular, per cell.
    * @param[out] a_nodes           One node per irregular cell the box fills.
    * A subdivision that fails with every child in one piece has lost fluid its parent holds, and stops the run.

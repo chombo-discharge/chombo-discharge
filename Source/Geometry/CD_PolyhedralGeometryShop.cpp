@@ -3790,6 +3790,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 
     CutCellBody              body;
     std::vector<CutCellBody> bodies;
+    std::vector<CutCellBody> loBodies;
 
     std::vector<PolyhedralEB::CutCellDescription> described;
 
@@ -4169,11 +4170,59 @@ PolyhedralGeometryShop::testCopyBodies() const
 
           IrregNode expected;
 
-          if (bodies.size() == 1) {
+          const bool built = bodies.size() == 1;
+
+          if (built) {
             PolyhedralGeometryShop::fillNode(expected, bodies.front(), flags, node.m_cell, a_domains[i]);
           }
 
-          if (bodies.size() != 1 || !sameNode(node, expected)) {
+          // a face beside a regular cell is open over all of it, and one shared with a cut cell below is that cell's
+          for (int dir = 0; dir < SpaceDim && built; dir++) {
+            for (SideIterator sit; sit.ok(); ++sit) {
+              const IntVect across = node.m_cell + sign(sit()) * BASISV(dir);
+              const int     index  = IrregNode::index(dir, sit());
+
+              if (!flags.box().contains(across)) {
+                continue;
+              }
+
+              if (flags(across, 0) > 0) {
+                expected.m_arc[index]          = Vector<int>(1, 0);
+                expected.m_areaFrac[index]     = Vector<Real>(1, 1.0);
+                expected.m_faceCentroid[index] = Vector<RealVect>(1, RealVect::Zero);
+
+                continue;
+              }
+
+              if (sit() == Side::Hi || flags(across, 0) != 0) {
+                continue;
+              }
+
+              // a cell over finer geometry stands for the finer bodies under it, and the face stays the node's own
+              dest.getCutCells(described, i, dit(), across);
+
+              if (described.size() != 1 || described.front().m_level > dest.getGeometryLevel(i)) {
+                continue;
+              }
+
+              PolyhedralGeometryShop::destinationBodies(loBodies, ignored, dest, i, dit(), across);
+
+              const PolyhedralEB::CutCellBody& loBody = loBodies.front();
+
+              if (loBody.areaFraction(dir, Side::Hi) > 0.0) {
+                expected.m_arc[index]          = Vector<int>(1, 0);
+                expected.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, loBody.areaFraction(dir, Side::Hi)));
+                expected.m_faceCentroid[index] = Vector<RealVect>(1, loBody.faceCentroid(dir, Side::Hi));
+              }
+              else {
+                expected.m_arc[index].resize(0);
+                expected.m_areaFrac[index].resize(0);
+                expected.m_faceCentroid[index].resize(0);
+              }
+            }
+          }
+
+          if (!built || !sameNode(node, expected)) {
             numWrongNodes++;
           }
 
@@ -4519,6 +4568,42 @@ PolyhedralGeometryShop::testFill() const
 
       signature(filled, graph, data, a_domain, dataGhost);
 
+      // Over the valid cells, a hash that does not depend on which rank holds which box, so that runs on different
+      // numbers of ranks can be compared.
+      std::uint64_t hash = 0;
+
+      for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+        for (BoxIterator bit(a_grids[dit()]); bit.ok(); ++bit) {
+          std::uint64_t cellHash = 14695981039346656037ULL;
+
+          const auto mix = [&cellHash](const void* a_data, const std::size_t a_bytes) -> void {
+            const unsigned char* bytes = static_cast<const unsigned char*>(a_data);
+
+            for (std::size_t b = 0; b < a_bytes; b++) {
+              cellHash = (cellHash ^ bytes[b]) * 1099511628211ULL;
+            }
+          };
+
+          const IntVect cell = bit();
+
+          mix(&cell, sizeof(cell));
+
+          for (int comp = 0; comp < numComps; comp++) {
+            const Real value = filled[dit()](cell, comp);
+
+            mix(&value, sizeof(value));
+          }
+
+          hash += cellHash;
+        }
+      }
+
+#ifdef CH_MPI
+      std::uint64_t localHash = hash;
+
+      MPI_Allreduce(&localHash, &hash, 1, MPI_UINT64_T, MPI_SUM, Chombo_MPI::comm);
+#endif
+
       long long numStored   = 0;
       long long numDiffer   = 0;
       long long numGhosts   = 0;
@@ -4549,9 +4634,7 @@ PolyhedralGeometryShop::testFill() const
           numGhosts++;
 
           for (int comp = 0; comp < numComps; comp++) {
-            // a face two cells share holds the aperture whichever of them wrote it last, which the two compute from
-            // their own bodies and which differ by round-off
-            if (std::abs(exchanged[dit()](bit(), comp) - filled[dit()](bit(), comp)) > tolerance) {
+            if (exchanged[dit()](bit(), comp) != filled[dit()](bit(), comp)) {
               numGhostOff++;
 
               break;
@@ -4573,12 +4656,12 @@ PolyhedralGeometryShop::testFill() const
             const Real mine   = filled[dit()](bit(), 2 + SpaceDim + 2 * dir + 1);
             const Real theirs = filled[dit()](across, 2 + SpaceDim + 2 * dir);
 
-            numFaceOff += (std::abs(mine - theirs) > tolerance) ? 1 : 0;
+            numFaceOff += (mine != theirs) ? 1 : 0;
           }
         }
       }
 
-      // The cells the geometry's level holds, bit for bit but for the round-off on their faces.
+      // The cells the geometry's level holds, bit for bit.
       if (a_level < numLevels && !m_ebGraphs[a_level].isNull()) {
         LevelData<FArrayBox> stored;
         LevelData<FArrayBox> brought;
@@ -4596,12 +4679,7 @@ PolyhedralGeometryShop::testFill() const
             numStored++;
 
             for (int comp = 0; comp < numComps; comp++) {
-              const Real difference = std::abs(brought[dit()](bit(), comp) - stored[dit()](bit(), comp));
-
-              // a face on a box boundary holds whichever of its two cells wrote it last, as in the ghost cells below
-              const bool onFace = comp >= 2 + SpaceDim;
-
-              if (onFace ? difference > tolerance : difference != 0.0) {
+              if (brought[dit()](bit(), comp) != stored[dit()](bit(), comp)) {
                 numDiffer++;
 
                 break;
@@ -4696,7 +4774,7 @@ PolyhedralGeometryShop::testFill() const
                << " cells the level holds differ from it, " << numGhostOff << " of " << numGhosts
                << " ghost cells differ from the box that holds them, " << numFaceOff << " of " << numFaces
                << " faces read differently from their two sides, " << numInexact << " of " << numParents
-               << " coarser cells are not the sums of the cells they hold" << endl;
+               << " coarser cells are not the sums of the cells they hold; hash " << hash << endl;
       }
 
       if (numDiffer > 0 || numGhostOff > 0 || numFaceOff > 0 || numInexact > 0) {

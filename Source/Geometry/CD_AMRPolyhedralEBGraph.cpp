@@ -654,10 +654,14 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
   a_regIrregCovered.define(region, 1);
   a_nodes.resize(0);
 
-  // What every cell is, and the body of every cut cell a node is written for: all of them are known before any node is,
-  // since a node reads the cells across its faces.
+  // What every cell is, and the body of every cut cell in the region: all of them are known before any node is, since a
+  // node reads the cells across its faces, and the bodies of those on its low sides.
   std::vector<IntVect>     cutCells;
   std::vector<CutCellBody> cutBodies;
+
+  BaseFab<int> bodyIndex(region, 1);
+
+  bodyIndex.setVal(-1);
 
   std::vector<CutCellDescription> described;
 
@@ -683,15 +687,18 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
 
     a_regIrregCovered(iv, 0) = 0;
 
-    if (state != PolyhedralEBGraph::s_cut || !nodeRegion.contains(iv)) {
+    if (state != PolyhedralEBGraph::s_cut) {
       continue;
     }
+
+    // the counts are over the cells nodes are written for
+    const bool counted = nodeRegion.contains(iv);
 
     this->getCutCells(described, a_level, a_dit, iv);
 
     // a cell holding regular and covered fluid with no cut cell of its own lies over finer geometry
     if (described.empty() || described.front().m_level > geometryLevel) {
-      a_numFiner++;
+      a_numFiner += counted ? 1 : 0;
 
       continue;
     }
@@ -729,7 +736,7 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
           MayDay::Error("AMRPolyhedralEBGraph::fillNodes - a subdivision does not reproduce its parent");
         }
 
-        a_numCollapsed++;
+        a_numCollapsed += counted ? 1 : 0;
       }
 
       body   = children[which];
@@ -747,15 +754,57 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
       a_regIrregCovered(iv, 0) = 1;
     }
     else {
+      bodyIndex(iv, 0) = cutBodies.size();
+
       cutCells.push_back(iv);
       cutBodies.push_back(body);
     }
   }
 
   for (std::size_t n = 0; n < cutCells.size(); n++) {
+    const IntVect& cell = cutCells[n];
+
+    if (!nodeRegion.contains(cell)) {
+      continue;
+    }
+
     IrregNode node;
 
-    PolyhedralGeometryShop::fillNode(node, cutBodies[n], a_regIrregCovered, cutCells[n], domain);
+    PolyhedralGeometryShop::fillNode(node, cutBodies[n], a_regIrregCovered, cell, domain);
+
+    // A face is the regular cell's if one side is regular, open over all of it, and otherwise the low cell's: both
+    // sides write it from the same cell, where they would otherwise compute it each over its own polygon and to
+    // different roundings. Every box holding the face then holds the same bits, whichever box writes it into a layout.
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect across = cell + sign(sit()) * BASISV(dir);
+        const int     index  = IrregNode::index(dir, sit());
+
+        if (!region.contains(across)) {
+          continue;
+        }
+
+        if (a_regIrregCovered(across, 0) > 0) {
+          node.m_arc[index]          = Vector<int>(1, 0);
+          node.m_areaFrac[index]     = Vector<Real>(1, 1.0);
+          node.m_faceCentroid[index] = Vector<RealVect>(1, RealVect::Zero);
+        }
+        else if (sit() == Side::Lo && bodyIndex(across, 0) >= 0) {
+          const CutCellBody& loBody = cutBodies[bodyIndex(across, 0)];
+
+          if (loBody.areaFraction(dir, Side::Hi) > 0.0) {
+            node.m_arc[index]          = Vector<int>(1, 0);
+            node.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, loBody.areaFraction(dir, Side::Hi)));
+            node.m_faceCentroid[index] = Vector<RealVect>(1, loBody.faceCentroid(dir, Side::Hi));
+          }
+          else {
+            node.m_arc[index].resize(0);
+            node.m_areaFrac[index].resize(0);
+            node.m_faceCentroid[index].resize(0);
+          }
+        }
+      }
+    }
 
     a_nodes.push_back(node);
   }
