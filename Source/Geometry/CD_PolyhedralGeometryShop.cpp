@@ -7167,6 +7167,58 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
   }
 }
 
+GeometryService::InOut
+PolyhedralGeometryShop::InsideOutside(const Box&           a_region,
+                                      const ProblemDomain& a_domain,
+                                      const RealVect&      a_probLo,
+                                      const Real&          a_dx,
+                                      const DataIndex&     a_dit) const
+{
+  CH_TIME("PolyhedralGeometryShop::InsideOutside");
+
+  if (m_compGeom == nullptr) {
+    return ScanShop::InsideOutside(a_region, a_domain, a_probLo, a_dx, a_dit);
+  }
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  const bool stored = m_compGeom->getLevel(a_domain) >= 0;
+  const bool finer  = numLevels > 0 &&
+                     a_domain.domainBox().size(0) > m_compGeom->getDomain(numLevels - 1).domainBox().size(0);
+
+  if (!stored && !finer) {
+    return GeometryService::Irregular;
+  }
+
+  // EBISLevel builds a coarse level calling this with the boxes of the level above on the coarse domain, and with the
+  // coarse boxes on the fine domain, so the region may lie one level finer or coarser than the domain says. It is
+  // classified on the domain as each of the three, and is uniform only if all three agree.
+  const Box& domainBox = a_domain.domainBox();
+
+  GeometryService::InOut answer = GeometryService::Irregular;
+
+  bool first = true;
+
+  for (const Box& region : {a_region, coarsen(a_region, 2), refine(a_region, 2)}) {
+    const Box inside = region & domainBox;
+
+    if (inside.isEmpty()) {
+      continue;
+    }
+
+    const GeometryService::InOut type = m_compGeom->classify(inside, a_domain, m_phase);
+
+    if (type == GeometryService::Irregular || (!first && type != answer)) {
+      return GeometryService::Irregular;
+    }
+
+    answer = type;
+    first  = false;
+  }
+
+  return answer;
+}
+
 void
 PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                                   Vector<IrregNode>&   a_nodes,

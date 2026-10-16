@@ -143,6 +143,33 @@ public:
   PolyhedralGeometryShop&
   operator=(const PolyhedralGeometryShop& a_other) = delete;
 
+  using ScanShop::InsideOutside;
+
+  /**
+   * @brief Whether a box is all regular, all covered or holds the surface, as EBISLevel asks it of a region.
+   * @details Answered from the boxes the geometry's grids classify (ComputationalGeometry::classify), which the
+   * graph's cut tiles come from, so the index space treats as uniform exactly what the graph does. The scan
+   * ScanShop answers from samples the implicit function at each level's own spacing and reads it as a distance, so it
+   * can call a coarse box covered while the coarsened finer cells hold fluid. EBISLevel fills a ghost graph from that
+   * answer before it copies the coarsened graph over it, and then reads a regular cell beside a cell with no face
+   * toward it. EBISLevel also passes a region of the level above or below on a domain, so the region is classified
+   * as lying on the domain, one level finer and one level coarser, and is uniform only if all three agree. A domain
+   * coarser than every level the grids describe is answered as irregular, which is always safe. Before setGrids,
+   * ScanShop answers.
+   * @param[in] a_region Region to classify.
+   * @param[in] a_domain Domain of the region.
+   * @param[in] a_probLo Lower-left corner of the domain.
+   * @param[in] a_dx     Grid spacing.
+   * @param[in] a_dit    Grid index.
+   * @return Regular, covered or irregular.
+   */
+  GeometryService::InOut
+  InsideOutside(const Box&           a_region,
+                const ProblemDomain& a_domain,
+                const RealVect&      a_probLo,
+                const Real&          a_dx,
+                const DataIndex&     a_dit) const override;
+
   /**
    * @brief Fill the graph and the nodes for one box.
    * @details Classifies the cells, reuses GeometryShop's fix-up for the regular cells bordering a covered one, and then
