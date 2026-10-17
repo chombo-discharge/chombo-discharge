@@ -202,7 +202,14 @@ FieldSolverAMG::setupSolver()
   PetscCallAbort(Chombo_MPI::comm, KSPSetType(m_ksp, m_kspType.c_str()));
   PetscCallAbort(Chombo_MPI::comm, KSPGetPC(m_ksp, &pc));
   PetscCallAbort(Chombo_MPI::comm, PCSetType(pc, m_pcType.c_str()));
-  PetscCallAbort(Chombo_MPI::comm, KSPSetTolerances(m_ksp, m_kspRtol, m_kspAtol, PETSC_DEFAULT, m_kspMaxIter));
+  // Keep PETSc's divergence tolerance. PETSC_DEFAULT is deprecated for this from PETSc 3.22, which has PETSC_CURRENT.
+#if PETSC_VERSION_GE(3, 22, 0)
+  constexpr PetscReal keepDivergenceTol = PETSC_CURRENT;
+#else
+  constexpr PetscReal keepDivergenceTol = PETSC_DEFAULT;
+#endif
+
+  PetscCallAbort(Chombo_MPI::comm, KSPSetTolerances(m_ksp, m_kspRtol, m_kspAtol, keepDivergenceTol, m_kspMaxIter));
   PetscCallAbort(Chombo_MPI::comm, KSPSetOptionsPrefix(m_ksp, "fieldsolveramg_"));
   PetscCallAbort(Chombo_MPI::comm, KSPSetFromOptions(m_ksp));
 

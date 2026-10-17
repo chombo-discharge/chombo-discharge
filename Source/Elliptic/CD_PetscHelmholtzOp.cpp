@@ -121,6 +121,15 @@ PetscHelmholtzOp::checkSupported() const noexcept
     MayDay::Abort("PetscHelmholtzOp -- only a single level is supported for now");
   }
 
+  // Faces across a periodic boundary would be taken for domain faces, see assembleMatrix.
+  const ProblemDomain& domain = mflg[0]->getDomain();
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (domain.isPeriodic(dir)) {
+      MayDay::Abort("PetscHelmholtzOp -- periodic domains are not supported for now");
+    }
+  }
+
   // No embedded boundaries: the gas phase must be regular everywhere, and any other phase must have no cells (which is
   // what a geometry without dielectrics gives).
   const DisjointBoxLayout& dbl = mflg[0]->getGrids();

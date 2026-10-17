@@ -36,7 +36,7 @@
  * phi-dependent part of the boundary flux goes into the matrix and the constant part into the right-hand side, see
  * addBoundaryConditionsToRHS.
  *
- * Supported so far: a single level, no embedded boundaries. Anything else aborts.
+ * Supported so far: a single level, no embedded boundaries, no periodic directions. Anything else aborts.
  */
 class PetscHelmholtzOp
 {
