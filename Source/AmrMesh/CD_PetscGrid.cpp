@@ -153,6 +153,32 @@ PetscGrid::getNumPhases() const noexcept
   return m_numPhases;
 }
 
+PetscInt
+PetscGrid::getNumLocalRows() const noexcept
+{
+  CH_TIME("PetscGrid::getNumLocalRows");
+  if (m_verbose) {
+    pout() << "PetscGrid::getNumLocalRows" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  return m_numLocalRows;
+}
+
+PetscInt
+PetscGrid::getNumGlobalRows() const noexcept
+{
+  CH_TIME("PetscGrid::getNumGlobalRows");
+  if (m_verbose) {
+    pout() << "PetscGrid::getNumGlobalRows" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  return m_numGlobalRows;
+}
+
 const Vector<RefCountedPtr<MFLevelGrid>>&
 PetscGrid::getMFLevelGrids() const noexcept
 {
