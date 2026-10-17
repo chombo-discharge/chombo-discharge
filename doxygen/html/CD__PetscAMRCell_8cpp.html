@@ -80,16 +80,173 @@ $(function() {
 </div>
 </div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">CD_PetscAMRCell.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
 <p>Implementation of <a class="el" href="CD__PetscAMRCell_8H.html" title="Declaration of a cell type for indicating if a cell is covered, ghost, etc.">CD_PetscAMRCell.H</a>.  
 <a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__PetscAMRCell_8H_source.html">CD_PetscAMRCell.H</a>&gt;</code><br />
+<code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
+<code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for CD_PetscAMRCell.cpp:</div>
+<div class="dyncontent">
+<div class="center"><img src="CD__PetscAMRCell_8cpp__incl.png" border="0" usemap="#aSource_2AmrMesh_2CD__PetscAMRCell_8cpp" alt=""/></div>
+<map name="aSource_2AmrMesh_2CD__PetscAMRCell_8cpp" id="aSource_2AmrMesh_2CD__PetscAMRCell_8cpp">
+<area shape="rect" title="Implementation of CD_PetscAMRCell.H." alt="" coords="167,5,446,31"/>
+<area shape="rect" title=" " alt="" coords="5,79,72,104"/>
+<area shape="poly" title=" " alt="" coords="264,33,86,80,85,75,263,28"/>
+<area shape="rect" title=" " alt="" coords="96,79,163,104"/>
+<area shape="poly" title=" " alt="" coords="279,33,172,76,170,71,277,28"/>
+<area shape="rect" title=" " alt="" coords="187,79,279,104"/>
+<area shape="poly" title=" " alt="" coords="296,33,257,71,253,67,293,29"/>
+<area shape="rect" href="CD__PetscAMRCell_8H.html" title="Declaration of a cell type for indicating if a cell is covered, ghost, etc." alt="" coords="304,79,456,104"/>
+<area shape="poly" title=" " alt="" coords="321,29,360,67,356,71,317,33"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="343,152,529,177"/>
+<area shape="poly" title=" " alt="" coords="393,28,436,46,455,60,470,77,476,94,474,111,458,142,453,140,469,109,471,94,466,80,451,64,433,51,391,33"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="553,152,732,177"/>
+<area shape="poly" title=" " alt="" coords="350,28,417,49,490,76,558,110,614,142,612,147,555,114,488,81,415,54,349,33"/>
+<area shape="rect" title=" " alt="" coords="151,152,220,177"/>
+<area shape="poly" title=" " alt="" coords="350,107,231,150,229,145,348,102"/>
+<area shape="rect" title=" " alt="" coords="244,152,319,177"/>
+<area shape="poly" title=" " alt="" coords="366,106,310,146,307,142,363,102"/>
+<area shape="poly" title=" " alt="" coords="391,103,421,140,416,143,387,106"/>
+<area shape="poly" title=" " alt="" coords="423,101,588,146,586,151,422,107"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a76caa709dd848c726eaf9824077f1db5" id="r_a76caa709dd848c726eaf9824077f1db5"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__PetscAMRCell_8cpp.html#a76caa709dd848c726eaf9824077f1db5">linearSize</a> (const <a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &amp;a_amrCell)</td></tr>
+<tr class="memdesc:a76caa709dd848c726eaf9824077f1db5"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPetscAMRCell.html" title="Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...">PetscAMRCell</a> specialization of the linearization size function used by LevelData.  <br /></td></tr>
+<tr class="separator:a76caa709dd848c726eaf9824077f1db5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa69c2c67fa58246bbad24398d1650a90" id="r_aa69c2c67fa58246bbad24398d1650a90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__PetscAMRCell_8cpp.html#aa69c2c67fa58246bbad24398d1650a90">linearIn</a> (<a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &amp;a_amrCell, const void *const a_buffer)</td></tr>
+<tr class="memdesc:aa69c2c67fa58246bbad24398d1650a90"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPetscAMRCell.html" title="Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...">PetscAMRCell</a> specialization of the linearization function used by LevelData.  <br /></td></tr>
+<tr class="separator:aa69c2c67fa58246bbad24398d1650a90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a540ccd877a386da8d350122718bb54f1" id="r_a540ccd877a386da8d350122718bb54f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__PetscAMRCell_8cpp.html#a540ccd877a386da8d350122718bb54f1">linearOut</a> (void *const a_buffer, const <a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &amp;a_amrCell)</td></tr>
+<tr class="memdesc:a540ccd877a386da8d350122718bb54f1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPetscAMRCell.html" title="Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...">PetscAMRCell</a> specialization of the linearization function used by LevelData.  <br /></td></tr>
+<tr class="separator:a540ccd877a386da8d350122718bb54f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implementation of <a class="el" href="CD__PetscAMRCell_8H.html" title="Declaration of a cell type for indicating if a cell is covered, ghost, etc.">CD_PetscAMRCell.H</a>. </p>
 <dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="aa69c2c67fa58246bbad24398d1650a90" name="aa69c2c67fa58246bbad24398d1650a90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa69c2c67fa58246bbad24398d1650a90">&#9670;&#160;</a></span>linearIn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void linearIn </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amrCell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *const&#160;</td>
+          <td class="paramname"><em>a_buffer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classPetscAMRCell.html" title="Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...">PetscAMRCell</a> specialization of the linearization function used by LevelData. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_amrCell</td><td>Input object </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Buffer </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a540ccd877a386da8d350122718bb54f1" name="a540ccd877a386da8d350122718bb54f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a540ccd877a386da8d350122718bb54f1">&#9670;&#160;</a></span>linearOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void linearOut </td>
+          <td>(</td>
+          <td class="paramtype">void *const&#160;</td>
+          <td class="paramname"><em>a_buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amrCell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classPetscAMRCell.html" title="Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...">PetscAMRCell</a> specialization of the linearization function used by LevelData. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_buffer</td><td>Buffer to which we write the data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amrCell</td><td>Object to linearize </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a76caa709dd848c726eaf9824077f1db5" name="a76caa709dd848c726eaf9824077f1db5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76caa709dd848c726eaf9824077f1db5">&#9670;&#160;</a></span>linearSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr int linearSize </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_amrCell</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classPetscAMRCell.html" title="Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...">PetscAMRCell</a> specialization of the linearization size function used by LevelData. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amrCell</td><td>Input object </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of bytes needed to linearize a_amrCell. </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

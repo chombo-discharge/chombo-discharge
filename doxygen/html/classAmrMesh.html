@@ -709,6 +709,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sanityCheck</b> () co
 <tr class="memitem:a6911f33d98ee93014a118574582eb6df" id="r_a6911f33d98ee93014a118574582eb6df"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFluxRedistribution.html">EBFluxRedistribution</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6911f33d98ee93014a118574582eb6df">getRedistributionOp</a> (const std::string &amp;a_realm, const <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a> a_phase) const</td></tr>
 <tr class="memdesc:a6911f33d98ee93014a118574582eb6df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the redistribution operators.  <br /></td></tr>
 <tr class="separator:a6911f33d98ee93014a118574582eb6df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b1de7588c980cf5519c3a52a5406979" id="r_a2b1de7588c980cf5519c3a52a5406979"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2b1de7588c980cf5519c3a52a5406979">getPetscGrid</a> (const std::string &amp;a_realm) const noexcept</td></tr>
+<tr class="memdesc:a2b1de7588c980cf5519c3a52a5406979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a PETSc grid object.  <br /></td></tr>
+<tr class="separator:a2b1de7588c980cf5519c3a52a5406979"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10aa1580b30fe66ec3e313435c44d1f1" id="r_a10aa1580b30fe66ec3e313435c44d1f1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a10aa1580b30fe66ec3e313435c44d1f1">getRealms</a> () const</td></tr>
 <tr class="memdesc:a10aa1580b30fe66ec3e313435c44d1f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of all Realms.  <br /></td></tr>
 <tr class="separator:a10aa1580b30fe66ec3e313435c44d1f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5722,6 +5725,41 @@ template&lt;typename P , typename Traits &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Particle mesh </dd></dl>
+
+</div>
+</div>
+<a id="a2b1de7588c980cf5519c3a52a5406979" name="a2b1de7588c980cf5519c3a52a5406979"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b1de7588c980cf5519c3a52a5406979">&#9670;&#160;</a></span>getPetscGrid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp; AmrMesh::getPetscGrid </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_realm</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a PETSc grid object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The PETSc grid for the realm. </dd></dl>
 
 </div>
 </div>

@@ -279,6 +279,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>preRegrid</b> ()</td>
 <tr class="memitem:aee559491c405845d7b80b9ef1e19543c" id="r_aee559491c405845d7b80b9ef1e19543c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structLevelTiles_1_1LevelAndBox.html">LevelTiles::LevelAndBox</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aee559491c405845d7b80b9ef1e19543c">getLevelAndBox</a> (const RealVect &amp;a_pos) const noexcept</td></tr>
 <tr class="memdesc:aee559491c405845d7b80b9ef1e19543c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the (finest) grid box covering a physical position.  <br /></td></tr>
 <tr class="separator:aee559491c405845d7b80b9ef1e19543c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a466df39c567d8d5d0f5b5fdc6ec3bfbd" id="r_a466df39c567d8d5d0f5b5fdc6ec3bfbd"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a466df39c567d8d5d0f5b5fdc6ec3bfbd">getPetscGrid</a> () const noexcept</td></tr>
+<tr class="memdesc:a466df39c567d8d5d0f5b5fdc6ec3bfbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the PETSc grid object.  <br /></td></tr>
+<tr class="separator:a466df39c567d8d5d0f5b5fdc6ec3bfbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -436,6 +439,10 @@ std::map&lt; int, <a class="el" href="CD__ParticleGhostMask_8H.html#a214d48ca297
 <tr class="memitem:afa40dbffe1b4dfc754fc1670d22e29bc" id="r_afa40dbffe1b4dfc754fc1670d22e29bc"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#afa40dbffe1b4dfc754fc1670d22e29bc">m_particleGhostExposure</a></td></tr>
 <tr class="memdesc:afa40dbffe1b4dfc754fc1670d22e29bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle boundary-exposure masks, keyed by ghost width. Per width: indexed by level, true in every cell that has at least one outgoing ghost-shipment target in ANY direction &ndash; i.e. the OR over the same-level, fine-to-coarse and coarse-to-fine masks of numTargets(cell) &gt; 0.  <br /></td></tr>
 <tr class="separator:afa40dbffe1b4dfc754fc1670d22e29bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2910c064ec3df15d8bea0bf7d6934c9" id="r_ac2910c064ec3df15d8bea0bf7d6934c9"><td class="memItemLeft" align="right" valign="top"><a id="ac2910c064ec3df15d8bea0bf7d6934c9" name="ac2910c064ec3df15d8bea0bf7d6934c9"></a>
+RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_petscGrid</b></td></tr>
+<tr class="memdesc:ac2910c064ec3df15d8bea0bf7d6934c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">PETSc grid. <br /></td></tr>
+<tr class="separator:ac2910c064ec3df15d8bea0bf7d6934c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87e0c0bd3a397036248609c566e4cfcc" id="r_a87e0c0bd3a397036248609c566e4cfcc"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="namespacephase.html#a23c76f548a5eb1955ed8c929c541108b">phase::which_phase</a>, RefCountedPtr&lt; <a class="el" href="classPhaseRealm.html">PhaseRealm</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a87e0c0bd3a397036248609c566e4cfcc">m_realms</a></td></tr>
 <tr class="memdesc:a87e0c0bd3a397036248609c566e4cfcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase realms.  <br /></td></tr>
 <tr class="separator:a87e0c0bd3a397036248609c566e4cfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2441,6 +2448,34 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Particle mesh </dd></dl>
+
+</div>
+</div>
+<a id="a466df39c567d8d5d0f5b5fdc6ec3bfbd" name="a466df39c567d8d5d0f5b5fdc6ec3bfbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a466df39c567d8d5d0f5b5fdc6ec3bfbd">&#9670;&#160;</a></span>getPetscGrid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp; Realm::getPetscGrid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the PETSc grid object. </p>
+<dl class="section return"><dt>Returns</dt><dd>The PETSc grid for this realm. </dd></dl>
 
 </div>
 </div>

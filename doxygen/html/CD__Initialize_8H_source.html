@@ -119,28 +119,28 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">extern</span> std::string <a class="code hl_variable" href="CD__Initialize_8H.html#ac8e19801b30b06ad1471ded42fceae57">dischargeInputFile</a>;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#if defined(CH_USE_PETSC)</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>PetscErrorCode</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><a class="code hl_function" href="CD__Initialize_8H.html#a0ca8be2514e22d4a86610e20a2a01608">initialize</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[]);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><a class="code hl_function" href="CD__Initialize_8H.html#a0ca8be2514e22d4a86610e20a2a01608">initialize</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[]);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#if defined(CH_USE_PETSC)</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>PetscErrorCode</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><a class="code hl_function" href="CD__Initialize_8H.html#a8a5d9e45fe83de57fd9597193f3b4533">finalize</a>();</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="keywordtype">int</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><a class="code hl_function" href="CD__Initialize_8H.html#a8a5d9e45fe83de57fd9597193f3b4533">finalize</a>();</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#if defined(CH_USE_PETSC)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>PetscErrorCode</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><a class="code hl_function" href="CD__Initialize_8H.html#a5a4394f7096cdd3837c4cc51ed281632">initialize</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[]);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><a class="code hl_function" href="CD__Initialize_8H.html#a5a4394f7096cdd3837c4cc51ed281632">initialize</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[]);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#if defined(CH_USE_PETSC)</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>PetscErrorCode</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><a class="code hl_function" href="CD__Initialize_8H.html#a44980b419cde0b672826b3ac59c38a9a">finalize</a>();</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keywordtype">int</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><a class="code hl_function" href="CD__Initialize_8H.html#a44980b419cde0b672826b3ac59c38a9a">finalize</a>();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__Initialize_8H_html_a0c42874407245a41ff2d427f9c24758e"><div class="ttname"><a href="CD__Initialize_8H.html#a0c42874407245a41ff2d427f9c24758e">dischargeParser</a></div><div class="ttdeci">ParmParse * dischargeParser</div><div class="ttdoc">Global chombo-discharge ParmParse input parameter object. This must have global lifetime.</div><div class="ttdef"><b>Definition</b> CD_Initialize.cpp:35</div></div>
-<div class="ttc" id="aCD__Initialize_8H_html_a0ca8be2514e22d4a86610e20a2a01608"><div class="ttname"><a href="CD__Initialize_8H.html#a0ca8be2514e22d4a86610e20a2a01608">initialize</a></div><div class="ttdeci">void initialize(int argc, char *argv[])</div><div class="ttdoc">chombo-discharge main initialization function.</div><div class="ttdef"><b>Definition</b> CD_Initialize.cpp:42</div></div>
-<div class="ttc" id="aCD__Initialize_8H_html_a8a5d9e45fe83de57fd9597193f3b4533"><div class="ttname"><a href="CD__Initialize_8H.html#a8a5d9e45fe83de57fd9597193f3b4533">finalize</a></div><div class="ttdeci">int finalize()</div><div class="ttdoc">chombo-discharge finalization functions. Exits MPI and writes timer report if called for.</div><div class="ttdef"><b>Definition</b> CD_Initialize.cpp:148</div></div>
+<div class="ttc" id="aCD__Initialize_8H_html_a44980b419cde0b672826b3ac59c38a9a"><div class="ttname"><a href="CD__Initialize_8H.html#a44980b419cde0b672826b3ac59c38a9a">finalize</a></div><div class="ttdeci">PetscErrorCode finalize()</div><div class="ttdoc">chombo-discharge finalization functions. Exits MPI and writes timer report if called for.</div><div class="ttdef"><b>Definition</b> CD_Initialize.cpp:148</div></div>
+<div class="ttc" id="aCD__Initialize_8H_html_a5a4394f7096cdd3837c4cc51ed281632"><div class="ttname"><a href="CD__Initialize_8H.html#a5a4394f7096cdd3837c4cc51ed281632">initialize</a></div><div class="ttdeci">PetscErrorCode initialize(int argc, char *argv[])</div><div class="ttdoc">chombo-discharge main initialization function.</div><div class="ttdef"><b>Definition</b> CD_Initialize.cpp:42</div></div>
 <div class="ttc" id="aCD__Initialize_8H_html_ac8e19801b30b06ad1471ded42fceae57"><div class="ttname"><a href="CD__Initialize_8H.html#ac8e19801b30b06ad1471ded42fceae57">dischargeInputFile</a></div><div class="ttdeci">std::string dischargeInputFile</div><div class="ttdoc">Global chombo-discharge input file name.</div><div class="ttdef"><b>Definition</b> CD_Initialize.cpp:34</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

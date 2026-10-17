@@ -150,6 +150,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBLeastSquaresMul
 <tr class="memitem:abe95062d17c3d269f34ab6593b366f61" id="r_abe95062d17c3d269f34ab6593b366f61"><td class="memItemLeft" align="right" valign="top">virtual std::pair&lt; VoFStencil, VoFStencil &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBLeastSquaresMultigridInterpolator.html#abe95062d17c3d269f34ab6593b366f61">getInterpolationStencilEB</a> (const VolIndex &amp;a_fineGhost, const DataIndex &amp;a_din) const noexcept override</td></tr>
 <tr class="memdesc:abe95062d17c3d269f34ab6593b366f61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an explicit stencil for a ghost cell near the refinement boundary.  <br /></td></tr>
 <tr class="separator:abe95062d17c3d269f34ab6593b366f61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a182450c7bec0c976a9a1c1d92847c40f" id="r_a182450c7bec0c976a9a1c1d92847c40f"><td class="memItemLeft" align="right" valign="top">std::pair&lt; VoFStencil, VoFStencil &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a182450c7bec0c976a9a1c1d92847c40f">getGhostStencil</a> (const VolIndex &amp;a_fineGhost, const DataIndex &amp;a_din) const noexcept override</td></tr>
+<tr class="memdesc:a182450c7bec0c976a9a1c1d92847c40f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the stencil that coarseFineInterp uses to fill a ghost cell.  <br /></td></tr>
+<tr class="separator:a182450c7bec0c976a9a1c1d92847c40f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ae332cb264e56eeb4658c1548744d93" id="r_a5ae332cb264e56eeb4658c1548744d93"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a5ae332cb264e56eeb4658c1548744d93">coarseFineInterp</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const Interval a_variables) const noexcept override</td></tr>
 <tr class="memdesc:a5ae332cb264e56eeb4658c1548744d93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do inhomogeneous interpolation.  <br /></td></tr>
 <tr class="separator:a5ae332cb264e56eeb4658c1548744d93"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -735,6 +738,54 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 <dl class="section return"><dt>Returns</dt><dd>Ghost c f </dd></dl>
 
 <p>Implements <a class="el" href="classEBMultigridInterpolator.html#a82dbe484ab2d13dddf72d2ed2cf4b69c">EBMultigridInterpolator</a>.</p>
+
+</div>
+</div>
+<a id="a182450c7bec0c976a9a1c1d92847c40f" name="a182450c7bec0c976a9a1c1d92847c40f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a182450c7bec0c976a9a1c1d92847c40f">&#9670;&#160;</a></span>getGhostStencil()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; VoFStencil, VoFStencil &gt; EBLeastSquaresMultigridInterpolator::getGhostStencil </td>
+          <td>(</td>
+          <td class="paramtype">const VolIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_fineGhost</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;&#160;</td>
+          <td class="paramname"><em>a_din</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the stencil that coarseFineInterp uses to fill a ghost cell. </p>
+<p>Ghost cells near the EB are filled by the EB stencils, which overwrite the regular interpolation, so they take getInterpolationStencilEB. The other ghost cells are filled by the regular interpolation and take getInterpolationStencilRegular. Aborts if the cell is neither. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineGhost</td><td>Ghost cell on the fine side of the refinement boundary. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The first/second entry is the fine/coarse stencil. </dd></dl>
+
+<p>Implements <a class="el" href="classEBMultigridInterpolator.html#a81fde242c42296b15cb7117ddbc52d26">EBMultigridInterpolator</a>.</p>
 
 </div>
 </div>

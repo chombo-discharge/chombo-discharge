@@ -108,95 +108,126 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// Our includes</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">class </span>PetscAMRCell</div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html">   37</a></span><span class="keyword">class </span><a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  PetscAMRCell() noexcept;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <a class="code hl_function" href="classPetscAMRCell.html#a7a11ae352f87bbdd6e3dab8bfca89b7c">PetscAMRCell</a>() <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  ~PetscAMRCell() noexcept;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <a class="code hl_function" href="classPetscAMRCell.html#a46d32b84504aa6f7e1b7ee86ce7d3f07">~PetscAMRCell</a>() <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  PetscAMRCell(const PetscAMRCell&amp;) = default;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#abd5971e448dcb2971c8e56cfd2fe7e52">   53</a></span>  <a class="code hl_function" href="classPetscAMRCell.html#abd5971e448dcb2971c8e56cfd2fe7e52">PetscAMRCell</a>(<span class="keyword">const</span> <a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp;) = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  PetscAMRCell(PetscAMRCell&amp;&amp;) = default;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#a44657e989dfec0e82fbb8f3002e4af09">   58</a></span>  <a class="code hl_function" href="classPetscAMRCell.html#a44657e989dfec0e82fbb8f3002e4af09">PetscAMRCell</a>(<a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  PetscAMRCell&amp;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  operator=(const PetscAMRCell&amp;) = default;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  PetscAMRCell&amp;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  operator=(PetscAMRCell&amp;&amp;) = default;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  define(const PetscInt a_petscRowPhase0,</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>         const PetscInt a_petscRowPhase1,</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>         const <span class="keywordtype">bool</span>     a_isCoveredByFinerGrid,</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>         const <span class="keywordtype">bool</span>     a_isCoarCF,</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>         const <span class="keywordtype">bool</span>     a_isFineCF,</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>         const <span class="keywordtype">bool</span>     a_isGhostCF,</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>         const <span class="keywordtype">bool</span>     a_isDomainBoundaryCell) noexcept;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  setPetscRow(const <span class="keywordtype">int</span> a_phase, const PetscInt a_row) noexcept;</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  setCoveredByFinerGrid(const <span class="keywordtype">bool</span> a_coveredByFinerGrid) noexcept;</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  setCoarCF(const <span class="keywordtype">bool</span> a_isCoarCF) noexcept;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  setFineCF(const <span class="keywordtype">bool</span> a_isFineCF) noexcept;</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  setGhostCF(const <span class="keywordtype">bool</span> a_isGhostCF) noexcept;</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="keywordtype">void</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  setDomainBoundaryCell(const <span class="keywordtype">bool</span> a_isDomainBoundaryCell) noexcept;</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  PetscInt</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  getPetscRow(const <span class="keywordtype">int</span> a_iphase) const noexcept;</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  <span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>  isCoveredByFinerGrid() const noexcept;</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  <span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  isCoarCF() const noexcept;</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#a4bd78e7329aa8a47d5ac51c8c0db03b2">   65</a></span>  <a class="code hl_function" href="classPetscAMRCell.html#a4bd78e7329aa8a47d5ac51c8c0db03b2">operator=</a>(<span class="keyword">const</span> <a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#ab49b77635b3088e049ec7b28cf09e452">   72</a></span>  <a class="code hl_function" href="classPetscAMRCell.html#ab49b77635b3088e049ec7b28cf09e452">operator=</a>(<a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_function" href="classPetscAMRCell.html#a31e600f2106257be30e9833d6c7cc63d">define</a>(<span class="keyword">const</span> PetscInt a_petscRowPhase0,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>         <span class="keyword">const</span> PetscInt a_petscRowPhase1,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>         <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_isCoveredByFinerGrid,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>         <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_isCoarCF,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>         <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_isFineCF,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>         <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_isGhostCF,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>         <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_isDomainBoundaryCell) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  <a class="code hl_function" href="classPetscAMRCell.html#ad36c0f7afd106773aa86d6d52c6952b8">setPetscRow</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_phase, <span class="keyword">const</span> PetscInt a_row) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <a class="code hl_function" href="classPetscAMRCell.html#a48a661667aeded247e8eb85bbd59da44">setCoveredByFinerGrid</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span> a_coveredByFinerGrid) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <a class="code hl_function" href="classPetscAMRCell.html#a25d262560e4d4dfeaf090aec57621618">setCoarCF</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span> a_isCoarCF) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  <a class="code hl_function" href="classPetscAMRCell.html#a68ad7453720887cf0889845f9fb183f2">setFineCF</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span> a_isFineCF) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>  <a class="code hl_function" href="classPetscAMRCell.html#a4da391c2f86f883fe359517c6eb2ad12">setGhostCF</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span> a_isGhostCF) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <a class="code hl_function" href="classPetscAMRCell.html#a36c1d37e8a1f969537f5f75a2a7e2e41">setDomainBoundaryCell</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span> a_isDomainBoundaryCell) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  PetscInt</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  <a class="code hl_function" href="classPetscAMRCell.html#af9197c2116403084f04cae983f3171f6">getPetscRow</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_iphase) <span class="keyword">const</span> <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>  <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  <a class="code hl_function" href="classPetscAMRCell.html#ad1f03e6741a02a16185a0268492241f4">isCoveredByFinerGrid</a>() const noexcept;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>  <span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  isFineCF() const noexcept;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <a class="code hl_function" href="classPetscAMRCell.html#acfd62d8aec548c42a3b85097bae0dd6b">isCoarCF</a>() const noexcept;</div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  isGhostCF() const noexcept;</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>  <span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  isDomainBoundaryCell() const noexcept;</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>  PetscInt m_petscRows[2];</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  <span class="keywordtype">bool</span> m_isCoveredByFinerGrid;</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  <span class="keywordtype">bool</span> m_isGhostCF;</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  <span class="keywordtype">bool</span> m_isCoarCF;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>  <span class="keywordtype">bool</span> m_isFineCF;</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  <span class="keywordtype">bool</span> m_isDomainBoundaryCell;</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>};</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>constexpr <span class="keywordtype">int</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>linearSize(const PetscAMRCell&amp; a_amrCell);</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>linearIn(PetscAMRCell&amp; a_amrCell, const <span class="keywordtype">void</span>* const a_buffer);</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>linearOut(<span class="keywordtype">void</span>* const a_buffer, const PetscAMRCell&amp; a_amrCell);</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span> </div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  <a class="code hl_function" href="classPetscAMRCell.html#a5da46585506300f41e3638a85586b6f5">isFineCF</a>() const noexcept;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>  <a class="code hl_function" href="classPetscAMRCell.html#add04589d01eb516c050ca69cc57c66ae">isGhostCF</a>() const noexcept;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>  <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>  <a class="code hl_function" href="classPetscAMRCell.html#aed85b07d3cddea3e1f4d6c5b9a8d38ed">isDomainBoundaryCell</a>() const noexcept;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#a4fcae705fbe3f6bb8cf729dcaff4c440">  182</a></span>  PetscInt <a class="code hl_variable" href="classPetscAMRCell.html#a4fcae705fbe3f6bb8cf729dcaff4c440">m_petscRows</a>[2];</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#a1b51c95913d90ea95b1f80d0f1159333">  187</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classPetscAMRCell.html#a1b51c95913d90ea95b1f80d0f1159333">m_isCoveredByFinerGrid</a>;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#a1352f6e3a14292c494b88d885dc2a0af">  192</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classPetscAMRCell.html#a1352f6e3a14292c494b88d885dc2a0af">m_isGhostCF</a>;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#a60e8f76c7c31a2cd4a009d369b223eeb">  197</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classPetscAMRCell.html#a60e8f76c7c31a2cd4a009d369b223eeb">m_isCoarCF</a>;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#afcbd31aba083930798de662c5c703b6a">  202</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classPetscAMRCell.html#afcbd31aba083930798de662c5c703b6a">m_isFineCF</a>;</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno"><a class="line" href="classPetscAMRCell.html#aff6b6492df937ece96ca11d6bb346199">  207</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="classPetscAMRCell.html#aff6b6492df937ece96ca11d6bb346199">m_isDomainBoundaryCell</a>;</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>};</div>
+</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>constexpr <span class="keywordtype">int</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span><a class="code hl_function" href="CD__PetscAMRCell_8H.html#a76caa709dd848c726eaf9824077f1db5">linearSize</a>(const <a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp; a_amrCell);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span><a class="code hl_function" href="CD__PetscAMRCell_8H.html#aa69c2c67fa58246bbad24398d1650a90">linearIn</a>(<a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp; a_amrCell, const <span class="keywordtype">void</span>* const a_buffer);</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span><a class="code hl_function" href="CD__PetscAMRCell_8H.html#a540ccd877a386da8d350122718bb54f1">linearOut</a>(<span class="keywordtype">void</span>* const a_buffer, const <a class="code hl_class" href="classPetscAMRCell.html">PetscAMRCell</a>&amp; a_amrCell);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aCD__PetscAMRCell_8H_html_a540ccd877a386da8d350122718bb54f1"><div class="ttname"><a href="CD__PetscAMRCell_8H.html#a540ccd877a386da8d350122718bb54f1">linearOut</a></div><div class="ttdeci">void linearOut(void *const a_buffer, const PetscAMRCell &amp;a_amrCell)</div><div class="ttdoc">PetscAMRCell specialization of the linearization function used by LevelData.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:194</div></div>
+<div class="ttc" id="aCD__PetscAMRCell_8H_html_a76caa709dd848c726eaf9824077f1db5"><div class="ttname"><a href="CD__PetscAMRCell_8H.html#a76caa709dd848c726eaf9824077f1db5">linearSize</a></div><div class="ttdeci">constexpr int linearSize(const PetscAMRCell &amp;a_amrCell)</div><div class="ttdoc">PetscAMRCell specialization of the linearization size function used by LevelData.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:165</div></div>
+<div class="ttc" id="aCD__PetscAMRCell_8H_html_aa69c2c67fa58246bbad24398d1650a90"><div class="ttname"><a href="CD__PetscAMRCell_8H.html#aa69c2c67fa58246bbad24398d1650a90">linearIn</a></div><div class="ttdeci">void linearIn(PetscAMRCell &amp;a_amrCell, const void *const a_buffer)</div><div class="ttdoc">PetscAMRCell specialization of the linearization function used by LevelData.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:180</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html"><div class="ttname"><a href="classPetscAMRCell.html">PetscAMRCell</a></div><div class="ttdoc">Class for storing grid information and corresponding PETSc rows. Used for mapping between Chombo and ...</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:38</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a1352f6e3a14292c494b88d885dc2a0af"><div class="ttname"><a href="classPetscAMRCell.html#a1352f6e3a14292c494b88d885dc2a0af">PetscAMRCell::m_isGhostCF</a></div><div class="ttdeci">bool m_isGhostCF</div><div class="ttdoc">If true, the cell lies outside the grid level.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:192</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a1b51c95913d90ea95b1f80d0f1159333"><div class="ttname"><a href="classPetscAMRCell.html#a1b51c95913d90ea95b1f80d0f1159333">PetscAMRCell::m_isCoveredByFinerGrid</a></div><div class="ttdeci">bool m_isCoveredByFinerGrid</div><div class="ttdoc">If true, the cell is covered by a finer grid.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:187</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a25d262560e4d4dfeaf090aec57621618"><div class="ttname"><a href="classPetscAMRCell.html#a25d262560e4d4dfeaf090aec57621618">PetscAMRCell::setCoarCF</a></div><div class="ttdeci">void setCoarCF(const bool a_isCoarCF) noexcept</div><div class="ttdoc">Set coarse-side CF flag.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:105</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a31e600f2106257be30e9833d6c7cc63d"><div class="ttname"><a href="classPetscAMRCell.html#a31e600f2106257be30e9833d6c7cc63d">PetscAMRCell::define</a></div><div class="ttdeci">void define(const PetscInt a_petscRowPhase0, const PetscInt a_petscRowPhase1, const bool a_isCoveredByFinerGrid, const bool a_isCoarCF, const bool a_isFineCF, const bool a_isGhostCF, const bool a_isDomainBoundaryCell) noexcept</div><div class="ttdoc">Define operator. Sets all parameters.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:73</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a36c1d37e8a1f969537f5f75a2a7e2e41"><div class="ttname"><a href="classPetscAMRCell.html#a36c1d37e8a1f969537f5f75a2a7e2e41">PetscAMRCell::setDomainBoundaryCell</a></div><div class="ttdeci">void setDomainBoundaryCell(const bool a_isDomainBoundaryCell) noexcept</div><div class="ttdoc">Set domain boundary flag.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:123</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a44657e989dfec0e82fbb8f3002e4af09"><div class="ttname"><a href="classPetscAMRCell.html#a44657e989dfec0e82fbb8f3002e4af09">PetscAMRCell::PetscAMRCell</a></div><div class="ttdeci">PetscAMRCell(PetscAMRCell &amp;&amp;)=default</div><div class="ttdoc">Move constructor – can use default.</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a46d32b84504aa6f7e1b7ee86ce7d3f07"><div class="ttname"><a href="classPetscAMRCell.html#a46d32b84504aa6f7e1b7ee86ce7d3f07">PetscAMRCell::~PetscAMRCell</a></div><div class="ttdeci">~PetscAMRCell() noexcept</div><div class="ttdoc">Destructor - does nothing.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:69</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a48a661667aeded247e8eb85bbd59da44"><div class="ttname"><a href="classPetscAMRCell.html#a48a661667aeded247e8eb85bbd59da44">PetscAMRCell::setCoveredByFinerGrid</a></div><div class="ttdeci">void setCoveredByFinerGrid(const bool a_coveredByFinerGrid) noexcept</div><div class="ttdoc">Set covered by finer grid flag.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:99</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a4bd78e7329aa8a47d5ac51c8c0db03b2"><div class="ttname"><a href="classPetscAMRCell.html#a4bd78e7329aa8a47d5ac51c8c0db03b2">PetscAMRCell::operator=</a></div><div class="ttdeci">PetscAMRCell &amp; operator=(const PetscAMRCell &amp;)=default</div><div class="ttdoc">Copy assignment, can use default.</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a4da391c2f86f883fe359517c6eb2ad12"><div class="ttname"><a href="classPetscAMRCell.html#a4da391c2f86f883fe359517c6eb2ad12">PetscAMRCell::setGhostCF</a></div><div class="ttdeci">void setGhostCF(const bool a_isGhostCF) noexcept</div><div class="ttdoc">Set ghosted coarse-fined flag.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:117</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a4fcae705fbe3f6bb8cf729dcaff4c440"><div class="ttname"><a href="classPetscAMRCell.html#a4fcae705fbe3f6bb8cf729dcaff4c440">PetscAMRCell::m_petscRows</a></div><div class="ttdeci">PetscInt m_petscRows[2]</div><div class="ttdoc">If &gt;= 0, this contains the PETSc row corresponding to the grid cell on phase 0.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:182</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a5da46585506300f41e3638a85586b6f5"><div class="ttname"><a href="classPetscAMRCell.html#a5da46585506300f41e3638a85586b6f5">PetscAMRCell::isFineCF</a></div><div class="ttdeci">bool isFineCF() const noexcept</div><div class="ttdoc">Check if the cell lies on the fine-side of the refinement interface.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:147</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a60e8f76c7c31a2cd4a009d369b223eeb"><div class="ttname"><a href="classPetscAMRCell.html#a60e8f76c7c31a2cd4a009d369b223eeb">PetscAMRCell::m_isCoarCF</a></div><div class="ttdeci">bool m_isCoarCF</div><div class="ttdoc">If true, the cell lies on the coarse side of the coarse-fine boundary.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:197</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a68ad7453720887cf0889845f9fb183f2"><div class="ttname"><a href="classPetscAMRCell.html#a68ad7453720887cf0889845f9fb183f2">PetscAMRCell::setFineCF</a></div><div class="ttdeci">void setFineCF(const bool a_isFineCF) noexcept</div><div class="ttdoc">Set fine-side CF flag.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:111</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_a7a11ae352f87bbdd6e3dab8bfca89b7c"><div class="ttname"><a href="classPetscAMRCell.html#a7a11ae352f87bbdd6e3dab8bfca89b7c">PetscAMRCell::PetscAMRCell</a></div><div class="ttdeci">PetscAMRCell() noexcept</div><div class="ttdoc">Constructor - does nothing.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:58</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_ab49b77635b3088e049ec7b28cf09e452"><div class="ttname"><a href="classPetscAMRCell.html#ab49b77635b3088e049ec7b28cf09e452">PetscAMRCell::operator=</a></div><div class="ttdeci">PetscAMRCell &amp; operator=(PetscAMRCell &amp;&amp;)=default</div><div class="ttdoc">Move assignment, can use default.</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_abd5971e448dcb2971c8e56cfd2fe7e52"><div class="ttname"><a href="classPetscAMRCell.html#abd5971e448dcb2971c8e56cfd2fe7e52">PetscAMRCell::PetscAMRCell</a></div><div class="ttdeci">PetscAMRCell(const PetscAMRCell &amp;)=default</div><div class="ttdoc">Copy constructor – can use default.</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_acfd62d8aec548c42a3b85097bae0dd6b"><div class="ttname"><a href="classPetscAMRCell.html#acfd62d8aec548c42a3b85097bae0dd6b">PetscAMRCell::isCoarCF</a></div><div class="ttdeci">bool isCoarCF() const noexcept</div><div class="ttdoc">Check if the cell lies on the coarse-side of the refinement interface.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:141</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_ad1f03e6741a02a16185a0268492241f4"><div class="ttname"><a href="classPetscAMRCell.html#ad1f03e6741a02a16185a0268492241f4">PetscAMRCell::isCoveredByFinerGrid</a></div><div class="ttdeci">bool isCoveredByFinerGrid() const noexcept</div><div class="ttdoc">Check if the cell is covered by a finer grid.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:135</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_ad36c0f7afd106773aa86d6d52c6952b8"><div class="ttname"><a href="classPetscAMRCell.html#ad36c0f7afd106773aa86d6d52c6952b8">PetscAMRCell::setPetscRow</a></div><div class="ttdeci">void setPetscRow(const int a_phase, const PetscInt a_row) noexcept</div><div class="ttdoc">Set corresponding row in PETSc for specific phase.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:91</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_add04589d01eb516c050ca69cc57c66ae"><div class="ttname"><a href="classPetscAMRCell.html#add04589d01eb516c050ca69cc57c66ae">PetscAMRCell::isGhostCF</a></div><div class="ttdeci">bool isGhostCF() const noexcept</div><div class="ttdoc">Check if the cell is a ghost cell outside this grid level.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:153</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_aed85b07d3cddea3e1f4d6c5b9a8d38ed"><div class="ttname"><a href="classPetscAMRCell.html#aed85b07d3cddea3e1f4d6c5b9a8d38ed">PetscAMRCell::isDomainBoundaryCell</a></div><div class="ttdeci">bool isDomainBoundaryCell() const noexcept</div><div class="ttdoc">Check if the cell is a domain boundary cell.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:159</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_af9197c2116403084f04cae983f3171f6"><div class="ttname"><a href="classPetscAMRCell.html#af9197c2116403084f04cae983f3171f6">PetscAMRCell::getPetscRow</a></div><div class="ttdeci">PetscInt getPetscRow(const int a_iphase) const noexcept</div><div class="ttdoc">Get the PETSc row corresponding to this cell and phase.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.cpp:129</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_afcbd31aba083930798de662c5c703b6a"><div class="ttname"><a href="classPetscAMRCell.html#afcbd31aba083930798de662c5c703b6a">PetscAMRCell::m_isFineCF</a></div><div class="ttdeci">bool m_isFineCF</div><div class="ttdoc">If true, the cell lies on the fine side of the coarse-fine boundary.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:202</div></div>
+<div class="ttc" id="aclassPetscAMRCell_html_aff6b6492df937ece96ca11d6bb346199"><div class="ttname"><a href="classPetscAMRCell.html#aff6b6492df937ece96ca11d6bb346199">PetscAMRCell::m_isDomainBoundaryCell</a></div><div class="ttdeci">bool m_isDomainBoundaryCell</div><div class="ttdoc">If true, the cell is a domain boundary cell.</div><div class="ttdef"><b>Definition</b> CD_PetscAMRCell.H:207</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
