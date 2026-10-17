@@ -400,6 +400,55 @@ jobs:
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
+  Linux-PETSc:
+    if: github.event.pull_request.draft == false
+    needs: [Formatting, REUSE, Codespell]
+    name: Linux-PETSc
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    # Builds the code behind CH_USE_PETSC, which no other job builds, and runs the PETSc mapping test. Ubuntu's
+    # petsc-dev is built against OpenMPI, so this job is MPI-only.
+    strategy:
+      fail-fast: false
+      matrix:
+        dim: [2, 3]
+
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+      PETSC_DIR: /usr/lib/petsc
+      CORES: 2
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install g++ gfortran csh libblas-dev liblapack-dev libopenmpi-dev openmpi-bin petsc-dev
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+
+      - name: Build chombo-discharge
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE discharge-lib
+
+      - name: Build PETSc mapping test
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscMapping
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
+
+      - name: Run PETSc mapping test
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscMapping
+        run: |
+          mpirun --oversubscribe -np ${{ env.CORES }} ./main${{ matrix.dim }}d.*.ex regression${{ matrix.dim }}d.inputs
+          grep -q "PetscMapping -- all tests passed" pout.0
+
   Build-documentation:
     needs: Formatting
     runs-on : ubuntu-latest
@@ -453,7 +502,7 @@ jobs:
           rm -rf Sphinx/build
 
   CI-passed:
-    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell, Clang-tidy, Cppcheck]
+    needs: [Linux-GNU, Linux-oneAPI, Linux-PETSc, Build-documentation, REUSE, Codespell, Clang-tidy, Cppcheck]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing

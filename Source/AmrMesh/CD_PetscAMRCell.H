@@ -59,12 +59,14 @@ public:
 
   /**
    * @brief Copy assignment, can use default
+   * @return This cell.
    */
   PetscAMRCell&
   operator=(const PetscAMRCell&) = default;
 
   /**
    * @brief Move assignment, can use default
+   * @return This cell.
    */
   PetscAMRCell&
   operator=(PetscAMRCell&&) = default;
@@ -133,36 +135,43 @@ public:
 
   /**
    * @brief Get the PETSc row corresponding to this cell and phase
+   * @param[in] a_iphase Phase index
+   * @return PETSc row, or a negative value if the cell is not a PETSc row on this phase.
    */
   PetscInt
   getPetscRow(const int a_iphase) const noexcept;
 
   /**
    * @brief Check if the cell is covered by a finer grid
+   * @return True if the cell is covered by a finer grid.
    */
   bool
   isCoveredByFinerGrid() const noexcept;
 
   /**
    * @brief Check if the cell lies on the coarse-side of the refinement interface
+   * @return True if the cell lies on the coarse side of the refinement interface.
    */
   bool
   isCoarCF() const noexcept;
 
   /**
    * @brief Check if the cell lies on the fine-side of the refinement interface
+   * @return True if the cell lies on the fine side of the refinement interface.
    */
   bool
   isFineCF() const noexcept;
 
   /**
    * @brief Check if the cell is a ghost cell outside this grid level
+   * @return True if the cell is a ghost cell outside this grid level.
    */
   bool
   isGhostCF() const noexcept;
 
   /**
-   * @brief Check if the cell is a domain cell
+   * @brief Check if the cell is a domain boundary cell
+   * @return True if the cell abuts the domain boundary.
    */
   bool
   isDomainBoundaryCell() const noexcept;
@@ -200,6 +209,8 @@ public:
 
 /**
  * @brief PetscAMRCell specialization of the linearization size function used by LevelData
+ * @param[in] a_amrCell Input object
+ * @return Number of bytes needed to linearize a_amrCell.
  */
 constexpr int
 linearSize(const PetscAMRCell& a_amrCell);

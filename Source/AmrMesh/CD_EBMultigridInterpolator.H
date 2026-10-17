@@ -76,6 +76,18 @@ public:
                                  const Side::LoHiSide a_side) const noexcept = 0;
 
   /**
+   * @brief Get the stencil that coarseFineInterp uses to fill a ghost cell.
+   * @details This dispatches to getInterpolationStencilEB or getInterpolationStencilRegular, whichever fills the ghost
+   * cell, and returns both stencils as VoFStencils. The coarse stencil is in the index space of the coarsened fine
+   * grids, under the same grid index. Aborts if coarseFineInterp does not fill the cell.
+   * @param[in] a_fineGhost Ghost cell on the fine side of the refinement boundary.
+   * @param[in] a_din Grid index.
+   * @return The first/second entry is the fine/coarse stencil.
+   */
+  virtual std::pair<VoFStencil, VoFStencil>
+  getGhostStencil(const VolIndex& a_fineGhost, const DataIndex& a_din) const noexcept = 0;
+
+  /**
    * @brief Do inhomogeneous interpolation
    * @param[in,out] a_phiFine   Fine phi
    * @param[in]    a_phiCoar   Coarse phi
