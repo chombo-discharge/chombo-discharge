@@ -19,6 +19,7 @@
 #include <utility>
 
 // Chombo includes
+#include <Vector.H>
 #include <EBLevelGrid.H>
 #include <Stencils.H>
 #include <RealVect.H>
@@ -40,8 +41,9 @@
  * the face. The discretizations in the subclasses are the same as in the EBHelmholtz domain BCs, so that
  * PetscHelmholtzOp and EBHelmholtzOp discretize the same problem.
  *
- * The stencil is returned as two parts, (level, level+1), the form taken by PetscGrid::getPetscStencilWithFinerLevel.
- * The level+1 part is reserved for boundary stencils that reach under a finer level; it is empty for now.
+ * The BC is defined once for the whole AMR hierarchy, and every query names the level of the cell. The stencil is
+ * returned as two parts, (level, level+1), the form taken by PetscGrid::getPetscStencilWithFinerLevel. The level+1
+ * part is reserved for boundary stencils that reach under a finer level; it is empty for now.
  */
 class PetscHelmholtzDomainBC
 {
@@ -85,14 +87,17 @@ public:
   operator=(const PetscHelmholtzDomainBC&& a_other) = delete;
 
   /**
-   * @brief Define the BC on a level.
+   * @brief Define the BC on all AMR levels.
    * @param[in] a_dataLocation Data location. Only cell centers are supported.
-   * @param[in] a_eblg         Grids on the level
+   * @param[in] a_eblg         Grids on each level
    * @param[in] a_probLo       Lower-left corner of the computational domain
-   * @param[in] a_dx           Grid resolution on the level
+   * @param[in] a_dx           Grid resolution on each level
    */
   virtual void
-  define(const Location::Cell a_dataLocation, const EBLevelGrid& a_eblg, const RealVect& a_probLo, const Real a_dx);
+  define(const Location::Cell       a_dataLocation,
+         const Vector<EBLevelGrid>& a_eblg,
+         const RealVect&            a_probLo,
+         const Vector<Real>&        a_dx);
 
   /**
    * @brief Get the stencil of the face flux through a domain face.
@@ -100,6 +105,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The stencil as (cells on this level, cells on the next finer level).
    */
@@ -107,6 +113,7 @@ public:
   getFaceFluxStencil(const VolIndex&      a_vof,
                      const int            a_dir,
                      const Side::LoHiSide a_side,
+                     const int            a_level,
                      const DataIndex&     a_din) const = 0;
 
   /**
@@ -115,6 +122,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The constant part of the flux.
    */
@@ -122,6 +130,7 @@ public:
   getFaceFluxConstant(const VolIndex&      a_vof,
                       const int            a_dir,
                       const Side::LoHiSide a_side,
+                      const int            a_level,
                       const DataIndex&     a_din) const = 0;
 
 protected:
@@ -136,9 +145,9 @@ protected:
   Location::Cell m_dataLocation;
 
   /**
-   * @brief Grids on the level.
+   * @brief Grids on each level.
    */
-  EBLevelGrid m_eblg;
+  Vector<EBLevelGrid> m_eblg;
 
   /**
    * @brief Lower-left corner of the computational domain.
@@ -146,19 +155,23 @@ protected:
   RealVect m_probLo;
 
   /**
-   * @brief Grid resolution on the level.
+   * @brief Grid resolution on each level.
    */
-  Real m_dx;
+  Vector<Real> m_dx;
 
   /**
    * @brief Get the physical position of the center of a domain face.
    * @param[in] a_iv   Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @return Position of the face center.
    */
   RealVect
-  getBoundaryPosition(const IntVect& a_iv, const int a_dir, const Side::LoHiSide a_side) const noexcept;
+  getBoundaryPosition(const IntVect&       a_iv,
+                      const int            a_dir,
+                      const Side::LoHiSide a_side,
+                      const int            a_level) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

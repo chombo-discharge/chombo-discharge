@@ -71,6 +71,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return Two empty stencils.
    */
@@ -78,6 +79,7 @@ public:
   getFaceFluxStencil(const VolIndex&      a_vof,
                      const int            a_dir,
                      const Side::LoHiSide a_side,
+                     const int            a_level,
                      const DataIndex&     a_din) const override;
 
   /**
@@ -85,6 +87,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The flux, -s * dphi/dn with s = -1 on the low side and +1 on the high side.
    */
@@ -92,6 +95,7 @@ public:
   getFaceFluxConstant(const VolIndex&      a_vof,
                       const int            a_dir,
                       const Side::LoHiSide a_side,
+                      const int            a_level,
                       const DataIndex&     a_din) const override;
 
 protected:

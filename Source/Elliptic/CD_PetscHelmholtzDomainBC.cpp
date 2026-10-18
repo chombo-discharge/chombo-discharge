@@ -20,7 +20,7 @@
 #include <CD_PetscHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-PetscHelmholtzDomainBC::PetscHelmholtzDomainBC() : m_isDefined(false), m_dx(-1.0)
+PetscHelmholtzDomainBC::PetscHelmholtzDomainBC() : m_isDefined(false)
 {
   CH_TIME("PetscHelmholtzDomainBC::PetscHelmholtzDomainBC");
 }
@@ -31,14 +31,15 @@ PetscHelmholtzDomainBC::~PetscHelmholtzDomainBC()
 }
 
 void
-PetscHelmholtzDomainBC::define(const Location::Cell a_dataLocation,
-                               const EBLevelGrid&   a_eblg,
-                               const RealVect&      a_probLo,
-                               const Real           a_dx)
+PetscHelmholtzDomainBC::define(const Location::Cell       a_dataLocation,
+                               const Vector<EBLevelGrid>& a_eblg,
+                               const RealVect&            a_probLo,
+                               const Vector<Real>&        a_dx)
 {
   CH_TIME("PetscHelmholtzDomainBC::define");
 
-  CH_assert(a_dx > 0.0);
+  CH_assert(a_eblg.size() > 0);
+  CH_assert(a_dx.size() >= a_eblg.size());
 
   if (a_dataLocation != Location::Cell::Center) {
     MayDay::Abort("PetscHelmholtzDomainBC::define -- only cell-centered data is supported");
@@ -54,12 +55,15 @@ PetscHelmholtzDomainBC::define(const Location::Cell a_dataLocation,
 RealVect
 PetscHelmholtzDomainBC::getBoundaryPosition(const IntVect&       a_iv,
                                             const int            a_dir,
-                                            const Side::LoHiSide a_side) const noexcept
+                                            const Side::LoHiSide a_side,
+                                            const int            a_level) const noexcept
 {
   CH_assert(m_isDefined);
+  CH_assert(a_level >= 0 && a_level < m_dx.size());
 
-  return m_probLo + (0.5 * RealVect::Unit + RealVect(a_iv)) * m_dx +
-         0.5 * m_dx * RealVect(BASISV(a_dir)) * sign(a_side);
+  const Real dx = m_dx[a_level];
+
+  return m_probLo + (0.5 * RealVect::Unit + RealVect(a_iv)) * dx + 0.5 * dx * RealVect(BASISV(a_dir)) * sign(a_side);
 }
 
 #include <CD_NamespaceFooter.H>

@@ -65,6 +65,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The stencil as (cells on this level, cells on the next finer level).
    */
@@ -72,6 +73,7 @@ public:
   getFaceFluxStencil(const VolIndex&      a_vof,
                      const int            a_dir,
                      const Side::LoHiSide a_side,
+                     const int            a_level,
                      const DataIndex&     a_din) const override;
 
   /**
@@ -79,6 +81,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The constant part of the flux, C/B.
    */
@@ -86,6 +89,7 @@ public:
   getFaceFluxConstant(const VolIndex&      a_vof,
                       const int            a_dir,
                       const Side::LoHiSide a_side,
+                      const int            a_level,
                       const DataIndex&     a_din) const override;
 
 protected:
@@ -137,10 +141,16 @@ protected:
    * @param[in]  a_iv   Cell adjacent to the domain face
    * @param[in]  a_dir  Coordinate direction of the face
    * @param[in]  a_side Domain side of the face
+   * @param[in]  a_level Level of the cell
    */
   void
-  getCoefficients(Real& a_A, Real& a_B, Real& a_C, const IntVect& a_iv, const int a_dir, const Side::LoHiSide a_side)
-    const;
+  getCoefficients(Real&                a_A,
+                  Real&                a_B,
+                  Real&                a_C,
+                  const IntVect&       a_iv,
+                  const int            a_dir,
+                  const Side::LoHiSide a_side,
+                  const int            a_level) const;
 };
 
 #include <CD_NamespaceFooter.H>

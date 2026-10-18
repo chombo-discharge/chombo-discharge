@@ -80,21 +80,22 @@ public:
   /**
    * @brief Define the BC objects on every domain side.
    * @param[in] a_dataLocation Data location
-   * @param[in] a_eblg         Grids on the level
+   * @param[in] a_eblg         Grids on each level
    * @param[in] a_probLo       Lower-left corner of the computational domain
-   * @param[in] a_dx           Grid resolution on the level
+   * @param[in] a_dx           Grid resolution on each level
    */
   void
-  define(const Location::Cell a_dataLocation,
-         const EBLevelGrid&   a_eblg,
-         const RealVect&      a_probLo,
-         const Real           a_dx) override final;
+  define(const Location::Cell       a_dataLocation,
+         const Vector<EBLevelGrid>& a_eblg,
+         const RealVect&            a_probLo,
+         const Vector<Real>&        a_dx) override final;
 
   /**
    * @brief Get the face flux stencil from the BC object on the domain side.
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The stencil as (cells on this level, cells on the next finer level).
    */
@@ -102,6 +103,7 @@ public:
   getFaceFluxStencil(const VolIndex&      a_vof,
                      const int            a_dir,
                      const Side::LoHiSide a_side,
+                     const int            a_level,
                      const DataIndex&     a_din) const override final;
 
   /**
@@ -109,6 +111,7 @@ public:
    * @param[in] a_vof  Cell adjacent to the domain face
    * @param[in] a_dir  Coordinate direction of the face
    * @param[in] a_side Domain side of the face
+   * @param[in] a_level Level of the cell
    * @param[in] a_din  Grid index of the cell
    * @return The constant part of the flux.
    */
@@ -116,6 +119,7 @@ public:
   getFaceFluxConstant(const VolIndex&      a_vof,
                       const int            a_dir,
                       const Side::LoHiSide a_side,
+                      const int            a_level,
                       const DataIndex&     a_din) const override final;
 
 protected:

@@ -185,6 +185,7 @@ FieldSolverAMG::setupSolver()
 
   m_petscOp = RefCountedPtr<PetscHelmholtzOp>(new PetscHelmholtzOp());
   m_petscOp->define(m_amr->getPetscGrid(m_realm),
+                    m_amr->getMultigridInterpolator(m_realm, phase::gas),
                     domainBc,
                     m_permittivityCell,
                     m_permittivityFace,

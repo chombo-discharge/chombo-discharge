@@ -62,7 +62,8 @@ PetscHelmholtzRobinDomainBC::getCoefficients(Real&                a_A,
                                              Real&                a_C,
                                              const IntVect&       a_iv,
                                              const int            a_dir,
-                                             const Side::LoHiSide a_side) const
+                                             const Side::LoHiSide a_side,
+                                             const int            a_level) const
 {
   if (m_useConstant) {
     a_A = m_constantA;
@@ -70,7 +71,7 @@ PetscHelmholtzRobinDomainBC::getCoefficients(Real&                a_A,
     a_C = m_constantC;
   }
   else if (m_useFunction) {
-    const RealVect pos = this->getBoundaryPosition(a_iv, a_dir, a_side);
+    const RealVect pos = this->getBoundaryPosition(a_iv, a_dir, a_side, a_level);
 
     a_A = m_functionA(pos);
     a_B = m_functionB(pos);
@@ -85,6 +86,7 @@ std::pair<VoFStencil, VoFStencil>
 PetscHelmholtzRobinDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
                                                 const int            a_dir,
                                                 const Side::LoHiSide a_side,
+                                                const int            a_level,
                                                 const DataIndex&     a_din) const
 {
   CH_assert(m_isDefined);
@@ -94,11 +96,12 @@ PetscHelmholtzRobinDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
   Real B;
   Real C;
 
-  this->getCoefficients(A, B, C, a_vof.gridIndex(), a_dir, a_side);
+  this->getCoefficients(A, B, C, a_vof.gridIndex(), a_dir, a_side, a_level);
 
   const Real    factor  = sign(a_side) * A / B;
   const IntVect ivNear  = a_vof.gridIndex() - sign(a_side) * BASISV(a_dir);
-  const bool    hasNear = m_eblg.getDomain().contains(ivNear) && !m_eblg.getEBISL()[a_din].isCovered(ivNear);
+  const bool    hasNear = m_eblg[a_level].getDomain().contains(ivNear) &&
+                       !m_eblg[a_level].getEBISL()[a_din].isCovered(ivNear);
 
   // phi on the face is extrapolated linearly from the cell and its interior neighbor, or set to the cell value if
   // there is no neighbor.
@@ -119,6 +122,7 @@ Real
 PetscHelmholtzRobinDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
                                                  const int            a_dir,
                                                  const Side::LoHiSide a_side,
+                                                 const int            a_level,
                                                  const DataIndex& /*a_din*/) const
 {
   CH_assert(m_isDefined);
@@ -128,7 +132,7 @@ PetscHelmholtzRobinDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
   Real B;
   Real C;
 
-  this->getCoefficients(A, B, C, a_vof.gridIndex(), a_dir, a_side);
+  this->getCoefficients(A, B, C, a_vof.gridIndex(), a_dir, a_side, a_level);
 
   return C / B;
 }

@@ -5,7 +5,7 @@ AmrMesh.lo_corner               = 0 0            ## Low corner of problem domain
 AmrMesh.hi_corner               = 1 1            ## High corner of problem domain
 AmrMesh.verbosity               = -1             ## Controls verbosity.
 AmrMesh.coarsest_domain         = 32 32          ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth           = 0              ## Maximum amr depth
+AmrMesh.max_amr_depth           = 2              ## Maximum amr depth
 AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
 AmrMesh.mg_coarsen              = 4              ## Pre-coarsening of MG levels, useful for deeper bottom solves
 AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
@@ -45,7 +45,7 @@ Driver.regrid_interval              = 10                  ## Regrid interval
 Driver.checkpoint_interval          = -1                  ## Checkpoint interval
 Driver.write_regrid_files           = false               ## Don't write regrid files.
 Driver.write_restart_files          = false               ## Write restart files or not
-Driver.initial_regrids              = 0                   ## Number of initial regrids
+Driver.initial_regrids              = 2                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
 Driver.stop_time                    = 1.0                 ## Stop time
@@ -124,7 +124,7 @@ FieldSolverAMG.bc.y.hi               = neumann_custom      ## Bc type (see docs)
 FieldSolverAMG.plt_vars              = phi rho E           ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverAMG.use_regrid_slopes     = true                ## Use slopes when regridding or not
 
-FieldSolverAMG.ksp_type         = cg        ## PETSc Krylov solver, e.g. 'cg', 'gmres', 'bcgs'
+FieldSolverAMG.ksp_type         = gmres     ## PETSc Krylov solver. The AMR operator is not symmetric, so not cg
 FieldSolverAMG.pc_type          = gamg      ## PETSc preconditioner, e.g. 'gamg', 'hypre'
 FieldSolverAMG.ksp_rtol         = 1.E-10    ## Relative residual tolerance
 FieldSolverAMG.ksp_atol         = 1.E-50    ## Absolute residual tolerance
@@ -142,6 +142,18 @@ PetscRegular.max_difference         = 1.E-8    ## Fail if AMG and GMG differ by 
 SurfaceODESolver.verbosity     = -1              ## Chattiness
 SurfaceODESolver.regrid        = conservative    ## Regrid method. 'conservative' or 'arithmetic'
 SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid arguments are 'phi' and 'rhs'
+
+# ====================================================================================================
+# CellTagger class options (refinement boxes for RefinementBoxTagger)
+# ====================================================================================================
+CellTagger.buffer            = 0            ## Grow tagged cells
+CellTagger.num_ref_boxes     = 2            ## Number of refinement boxes. 0 gives a single level.
+CellTagger.ref_box1_lo       = 0.2 0.2      ## Refine region between
+CellTagger.ref_box1_hi       = 0.7 0.7      ## these two corners
+CellTagger.ref_box1_lvl      = 1            ## to this level
+CellTagger.ref_box2_lo       = 0.35 0.35    ## Refine region between
+CellTagger.ref_box2_hi       = 0.55 0.55    ## these two corners
+CellTagger.ref_box2_lvl      = 2            ## to this level
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS

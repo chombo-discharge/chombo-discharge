@@ -68,10 +68,12 @@ std::pair<VoFStencil, VoFStencil>
 PetscHelmholtzNeumannDomainBC::getFaceFluxStencil(const VolIndex& /*a_vof*/,
                                                   const int a_dir,
                                                   const Side::LoHiSide /*a_side*/,
+                                                  const int a_level,
                                                   const DataIndex& /*a_din*/) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
+  CH_assert(a_level >= 0 && a_level < m_eblg.size());
 
   return std::make_pair(VoFStencil(), VoFStencil());
 }
@@ -80,6 +82,7 @@ Real
 PetscHelmholtzNeumannDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
                                                    const int            a_dir,
                                                    const Side::LoHiSide a_side,
+                                                   const int            a_level,
                                                    const DataIndex& /*a_din*/) const
 {
   CH_assert(m_isDefined);
@@ -91,7 +94,7 @@ PetscHelmholtzNeumannDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
     DphiDn = m_constantDphiDn;
   }
   else if (m_useFunction) {
-    DphiDn = m_functionDphiDn(this->getBoundaryPosition(a_vof.gridIndex(), a_dir, a_side));
+    DphiDn = m_functionDphiDn(this->getBoundaryPosition(a_vof.gridIndex(), a_dir, a_side, a_level));
   }
   else {
     MayDay::Abort("PetscHelmholtzNeumannDomainBC::getFaceFluxConstant -- dphi/dn not set");

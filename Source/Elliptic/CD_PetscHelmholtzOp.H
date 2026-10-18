@@ -24,6 +24,7 @@
 
 // Our includes
 #include <CD_PetscGrid.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_PetscHelmholtzDomainBC.H>
 #include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
@@ -36,7 +37,15 @@
  * phi-dependent part of the boundary flux goes into the matrix and the constant part into the right-hand side, see
  * addBoundaryConditionsToRHS.
  *
- * Supported so far: a single level, no embedded boundaries, no periodic directions. Anything else aborts.
+ * The operator is composite: it spans all AMR levels, and the rows are the valid cells of each level. Near a
+ * refinement boundary:
+ * - A fine-level face whose neighbor is a coarse-fine ghost cell uses the ghost cell's interpolation stencil from
+ *   EBMultigridInterpolator::getGhostStencil, which is over level l and level l-1 rows.
+ * - A coarse cell does not use its faces that open onto cells covered by the finer level. Instead, every fine face on
+ *   the refinement boundary adds its flux to the coarse cell on the other side, scaled by the face area ratio. This is
+ *   refluxing, built into the matrix, and makes the operator conservative across levels.
+ *
+ * Supported so far: one phase, no embedded boundaries, no periodic directions. Anything else aborts.
  */
 class PetscHelmholtzOp
 {
@@ -81,9 +90,10 @@ public:
 
   /**
    * @brief Define the operator.
-   * @details This defines the domain BC on the level and assembles the matrix.
-   * @param[in] a_petscGrid PETSc grid (rows)
-   * @param[in] a_domainBc  Domain boundary conditions
+   * @details This defines the domain BC on all levels and assembles the matrix.
+   * @param[in] a_petscGrid     PETSc grid (rows)
+   * @param[in] a_interpolators Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
+   * @param[in] a_domainBc      Domain boundary conditions
    * @param[in] a_aCoef     Cell-centered a-coefficient
    * @param[in] a_bCoef     Face-centered b-coefficient
    * @param[in] a_probLo    Lower-left corner of the computational domain
@@ -92,14 +102,15 @@ public:
    * @param[in] a_beta      Operator beta
    */
   virtual void
-  define(const RefCountedPtr<PetscGrid>&              a_petscGrid,
-         const RefCountedPtr<PetscHelmholtzDomainBC>& a_domainBc,
-         const MFAMRCellData&                         a_aCoef,
-         const MFAMRFluxData&                         a_bCoef,
-         const RealVect&                              a_probLo,
-         const Vector<Real>&                          a_dx,
-         const Real                                   a_alpha,
-         const Real                                   a_beta) noexcept;
+  define(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
+         const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators,
+         const RefCountedPtr<PetscHelmholtzDomainBC>&          a_domainBc,
+         const MFAMRCellData&                                  a_aCoef,
+         const MFAMRFluxData&                                  a_bCoef,
+         const RealVect&                                       a_probLo,
+         const Vector<Real>&                                   a_dx,
+         const Real                                            a_alpha,
+         const Real                                            a_beta) noexcept;
 
   /**
    * @brief Get the assembled matrix.
@@ -132,6 +143,11 @@ protected:
    * @brief PETSc grid.
    */
   RefCountedPtr<PetscGrid> m_petscGrid;
+
+  /**
+   * @brief Coarse-fine ghost cell interpolators on each level.
+   */
+  Vector<RefCountedPtr<EBMultigridInterpolator>> m_interpolators;
 
   /**
    * @brief Domain boundary conditions.
@@ -174,7 +190,8 @@ protected:
   Mat m_matrix;
 
   /**
-   * @brief Abort unless the grids are supported by this operator: one level, no embedded boundaries.
+   * @brief Abort unless the grids are supported by this operator: one phase, no embedded boundaries, no periodic
+   * directions.
    */
   virtual void
   checkSupported() const noexcept;
@@ -184,6 +201,14 @@ protected:
    */
   virtual void
   assembleMatrix() noexcept;
+
+  /**
+   * @brief Add a stencil to a row of the matrix.
+   * @param[in] a_row     Global PETSc row
+   * @param[in] a_stencil Stencil over global PETSc rows
+   */
+  virtual void
+  addToMatrix(const PetscInt a_row, const PetscStencil& a_stencil) noexcept;
 
   /**
    * @brief Get the b-coefficient on a face.

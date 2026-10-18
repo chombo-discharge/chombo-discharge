@@ -69,6 +69,7 @@ std::pair<VoFStencil, VoFStencil>
 PetscHelmholtzDirichletDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
                                                     const int            a_dir,
                                                     const Side::LoHiSide a_side,
+                                                    const int            a_level,
                                                     const DataIndex& /*a_din*/) const
 {
   CH_assert(m_isDefined);
@@ -76,7 +77,7 @@ PetscHelmholtzDirichletDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
 
   // The flux is s * (phi_B - phi)/(dx/2), with s = -1 on the low side and +1 on the high side.
   VoFStencil stencil;
-  stencil.add(a_vof, -sign(a_side) * 2.0 / m_dx);
+  stencil.add(a_vof, -sign(a_side) * 2.0 / m_dx[a_level]);
 
   return std::make_pair(stencil, VoFStencil());
 }
@@ -85,6 +86,7 @@ Real
 PetscHelmholtzDirichletDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
                                                      const int            a_dir,
                                                      const Side::LoHiSide a_side,
+                                                     const int            a_level,
                                                      const DataIndex& /*a_din*/) const
 {
   CH_assert(m_isDefined);
@@ -96,13 +98,13 @@ PetscHelmholtzDirichletDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
     value = m_constantValue;
   }
   else if (m_useFunction) {
-    value = m_functionValue(this->getBoundaryPosition(a_vof.gridIndex(), a_dir, a_side));
+    value = m_functionValue(this->getBoundaryPosition(a_vof.gridIndex(), a_dir, a_side, a_level));
   }
   else {
     MayDay::Abort("PetscHelmholtzDirichletDomainBC::getFaceFluxConstant -- value not set");
   }
 
-  return sign(a_side) * 2.0 * value / m_dx;
+  return sign(a_side) * 2.0 * value / m_dx[a_level];
 }
 
 #include <CD_NamespaceFooter.H>

@@ -68,10 +68,10 @@ PetscHelmholtzElectrostaticDomainBC::~PetscHelmholtzElectrostaticDomainBC()
 }
 
 void
-PetscHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
-                                            const EBLevelGrid&   a_eblg,
-                                            const RealVect&      a_probLo,
-                                            const Real           a_dx)
+PetscHelmholtzElectrostaticDomainBC::define(const Location::Cell       a_dataLocation,
+                                            const Vector<EBLevelGrid>& a_eblg,
+                                            const RealVect&            a_probLo,
+                                            const Vector<Real>&        a_dx)
 {
   CH_TIME("PetscHelmholtzElectrostaticDomainBC::define");
 
@@ -88,18 +88,20 @@ std::pair<VoFStencil, VoFStencil>
 PetscHelmholtzElectrostaticDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
                                                         const int            a_dir,
                                                         const Side::LoHiSide a_side,
+                                                        const int            a_level,
                                                         const DataIndex&     a_din) const
 {
-  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getFaceFluxStencil(a_vof, a_dir, a_side, a_din);
+  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getFaceFluxStencil(a_vof, a_dir, a_side, a_level, a_din);
 }
 
 Real
 PetscHelmholtzElectrostaticDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
                                                          const int            a_dir,
                                                          const Side::LoHiSide a_side,
+                                                         const int            a_level,
                                                          const DataIndex&     a_din) const
 {
-  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getFaceFluxConstant(a_vof, a_dir, a_side, a_din);
+  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getFaceFluxConstant(a_vof, a_dir, a_side, a_level, a_din);
 }
 
 #include <CD_NamespaceFooter.H>
