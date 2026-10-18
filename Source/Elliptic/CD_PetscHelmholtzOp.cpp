@@ -130,7 +130,8 @@ PetscHelmholtzOp::checkSupported() const noexcept
 
   const Vector<RefCountedPtr<MFLevelGrid>>& mflg = m_petscGrid->getMFLevelGrids();
 
-  // Faces across a periodic boundary would be taken for domain faces, see assembleMatrix.
+  // Faces across a periodic boundary would be taken for domain faces, see assembleMatrix. Periodicity is a property of
+  // the domain, so checking the coarsest level covers all levels.
   const ProblemDomain& domain = mflg[0]->getDomain();
 
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -304,8 +305,12 @@ PetscHelmholtzOp::assembleMatrix() noexcept
                                                                                                    lvl,
                                                                                                    din);
 
-              // Boundary stencils that reach under the finer level are not supported yet.
-              CH_assert(faceStencil.second.size() == 0);
+              // Boundary stencils that reach under the finer level are not supported yet. Checked in every build:
+              // dropping the second part would silently change the operator.
+              if (faceStencil.second.size() != 0) {
+                MayDay::Abort("PetscHelmholtzOp::assembleMatrix -- domain BC stencils on the finer level are not "
+                              "supported yet");
+              }
 
               VoFStencil bcStencil = faceStencil.first;
               bcStencil *= factor;
@@ -363,10 +368,14 @@ PetscHelmholtzOp::assembleMatrix() noexcept
 
               this->addToMatrix(rowCoar, coarContribution);
             }
-            else {
+            else if (cells(ivNeigh).isCoveredByFinerGrid()) {
               // The neighbor is covered by the finer level: this face is replaced by the fine faces under it, which
               // add their fluxes to this row from the finer level.
-              CH_assert(cells(ivNeigh).isCoveredByFinerGrid());
+            }
+            else {
+              // Checked in every build: skipping the face would silently drop it from the operator.
+              MayDay::Abort("PetscHelmholtzOp::assembleMatrix -- neighbor cell is not a row, a coarse-fine ghost "
+                            "cell, or covered by the finer level");
             }
           }
         }
