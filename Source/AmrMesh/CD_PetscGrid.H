@@ -106,6 +106,20 @@ public:
   getNumPhases() const noexcept;
 
   /**
+   * @brief Get the number of PETSc rows owned by this rank.
+   * @return m_numLocalRows
+   */
+  virtual PetscInt
+  getNumLocalRows() const noexcept;
+
+  /**
+   * @brief Get the total number of PETSc rows over all ranks.
+   * @return m_numGlobalRows
+   */
+  virtual PetscInt
+  getNumGlobalRows() const noexcept;
+
+  /**
    * @brief Get the grids on each level.
    * @return m_levelGrids
    */
