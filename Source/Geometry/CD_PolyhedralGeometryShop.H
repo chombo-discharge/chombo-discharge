@@ -20,10 +20,17 @@
 
 // Chombo includes
 #include <BaseFab.H>
+#include <BaseIF.H>
 #include <EBData.H>
 #include <EBGraph.H>
+#include <FArrayBox.H>
 #include <IntVectSet.H>
+#include <IrregNode.H>
 #include <LevelData.H>
+
+#ifdef CH_USE_HDF5
+#include <hdf5.h>
+#endif
 
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
@@ -1035,6 +1042,129 @@ protected:
    * @brief Volume fraction below which a cut cell carries no fluid worth keeping.
    */
   Real m_volumeThreshold;
+
+private:
+  /**
+   * @brief An implicit function that stops the run if it is ever evaluated.
+   * @details Put in place of the shop's own function while a test copies the graph and rebuilds bodies from the copy,
+   * which must be done from the graph's data alone.
+   */
+  class AbortingIF : public BaseIF
+  {
+  public:
+    /**
+     * @brief Stop the run.
+     * @param[in] a_point Where the function was asked for.
+     * @return Nothing; it does not return.
+     */
+    Real
+    value(const RealVect& a_point) const override;
+
+    /**
+     * @brief A copy.
+     * @return A new aborting function.
+     */
+    BaseIF*
+    newImplicitFunction() const override;
+  };
+
+#ifdef CH_USE_HDF5
+  /**
+   * @brief Write one attribute, a scalar or a short array.
+   * @param[in] a_where Group or file to attach it to.
+   * @param[in] a_name  Name of the attribute.
+   * @param[in] a_type  HDF5 type of its elements.
+   * @param[in] a_count Number of elements, one for a scalar.
+   * @param[in] a_data  The elements.
+   */
+  static void
+  writeH5Attribute(const hid_t        a_where,
+                   const std::string& a_name,
+                   const hid_t        a_type,
+                   const hsize_t      a_count,
+                   const void*        a_data);
+
+  /**
+   * @brief Write one dataset, sized by what every rank holds together, with this rank's rows in its own stretch.
+   * @details A rank with nothing to write selects nothing and takes part in the call all the same. It describes that
+   * with the null dataspace: a simple dataspace of zero extent is not one, the call fails, and a rank that fails on its
+   * way into a collective write leaves every other rank waiting in it.
+   * @param[in] a_where    Group or file to put it in.
+   * @param[in] a_name     Name of the dataset.
+   * @param[in] a_type     HDF5 type of its elements.
+   * @param[in] a_rows     Rows this rank writes.
+   * @param[in] a_offset   Row this rank's stretch starts at.
+   * @param[in] a_total    Rows over all ranks; nothing is written when there are none.
+   * @param[in] a_columns  Columns per row; one makes the dataset one-dimensional.
+   * @param[in] a_data     This rank's rows.
+   * @param[in] a_transfer Transfer property list.
+   */
+  static void
+  writeH5Slab(const hid_t        a_where,
+              const std::string& a_name,
+              const hid_t        a_type,
+              const hsize_t      a_rows,
+              const hsize_t      a_offset,
+              const hsize_t      a_total,
+              const hsize_t      a_columns,
+              const void*        a_data,
+              const hid_t        a_transfer);
+#endif
+
+  /**
+   * @brief Append the nodes of a cell's VoFs as an index space holds them, so that a graph can be built from them
+   * again.
+   * @details Each VoF's arcs come from its faces -- the VoF across, or the domain boundary -- with their apertures and
+   * centroids. Where the moments hold no data for the cell, the moments are left at zero: a graph is built from arcs
+   * alone.
+   * @param[in,out] a_nodes The nodes, appended to.
+   * @param[in]     a_graph Graph holding the cell.
+   * @param[in]     a_data  Moments over some part of the graph's region.
+   * @param[in]     a_cell  The cell, irregular in the graph.
+   * @param[in]     a_withMoments Whether the moments hold data for the cell.
+   */
+  static void
+  appendNodes(Vector<IrregNode>& a_nodes,
+              const EBGraph&     a_graph,
+              const EBData&      a_data,
+              const IntVect&     a_cell,
+              const bool         a_withMoments);
+
+  /**
+   * @brief Make each regular cell beside a multi-valued one a cut cell of volume one.
+   * @details Chombo's coarsening reads the face of a regular cell as leading to the first VoF of the cell across, so a
+   * regular cell's face into any other VoF of a multi-valued neighbour is lost. EBISLevel::fixRegularNextToMultiValued
+   * makes such cells full cut cells and divides the face evenly among the VoFs across; here each face into a VoF across
+   * is the face that VoF holds toward the cell, with its aperture and centroid. The nodes of a cell must be contiguous,
+   * and a cell at the region's edge sees only the neighbours inside it.
+   * @param[in,out] a_flags  Regular (1), cut (0) or covered (-1) for the region's cells. The cells made cut are set to
+   * 0.
+   * @param[in,out] a_nodes  Nodes of the region's cut cells. A node is appended for each cell made cut.
+   * @param[in]     a_region Region the flags describe.
+   * @param[in]     a_valid  Part of the region whose cells made cut are counted.
+   * @param[in]     a_domain Domain the region lies in.
+   * @return The number of cells in a_valid made cut.
+   */
+  static long long
+  cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
+                              Vector<IrregNode>&   a_nodes,
+                              const Box&           a_region,
+                              const Box&           a_valid,
+                              const ProblemDomain& a_domain);
+
+  /**
+   * @brief Write the index space of each cell of a region as numbers, summed over the cell's VoFs: the number of VoFs,
+   * the volume fraction, the first moment of volume and the aperture of every face.
+   * @details Component 0 is the number of VoFs, 1 the volume fraction, 2 to 1 + SpaceDim the first moment about the
+   * cell centre in units of the cell, and 2 + SpaceDim + 2 * dir + side the aperture on that side. A regular cell reads
+   * as a single VoF of volume one with every face open, so a full cut cell reads the same.
+   * @param[in,out] a_signature At least s_signatureComps components over the region.
+   * @param[in]     a_graph     The graph.
+   * @param[in]     a_data      The moments, over the region.
+   * @param[in]     a_region    The cells to write.
+   */
+  static void
+  cellSignature(FArrayBox& a_signature, const EBGraph& a_graph, const EBData& a_data, const Box& a_region);
 };
 
 #include <CD_NamespaceFooter.H>

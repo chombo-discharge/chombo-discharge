@@ -222,6 +222,36 @@ constexpr Real s_weldTolerance = 1.0E-10;
 inline bool
 sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept;
 
+/**
+ * @brief Distance below which two vertices of a body cut from another are one, since they then differ only by the
+ * round-off of the arithmetic that placed them. Far below the weld tolerance, so fluid thinner than the weld keeps its
+ * vertices, and far below the tolerance to which a cut reproduces its parent's moments.
+ */
+constexpr Real s_roundOffTolerance = 1.0E-13;
+
+/**
+ * @brief Whether two vertices differ only by round-off.
+ * @param[in] a_a One vertex.
+ * @param[in] a_b The other.
+ * @return True if they are within s_roundOffTolerance.
+ */
+inline bool
+sameToRoundOff(const RealVect& a_a, const RealVect& a_b) noexcept;
+
+/**
+ * @brief Where the segment between two vertices crosses the plane x[a_dir] = 0, the same to the bit whichever way
+ * round the segment is given.
+ * @details An endpoint on the plane is the crossing itself. Otherwise the crossing is interpolated from the endpoint
+ * below the plane and placed on it exactly, so the two children either side of a cut, and two polygons sharing the
+ * segment, put the vertex in one place.
+ * @param[in] a_a   One endpoint.
+ * @param[in] a_b   The other endpoint, on the other side of the plane or on it.
+ * @param[in] a_dir The direction normal to the plane.
+ * @return The crossing.
+ */
+inline RealVect
+crossing(const RealVect& a_a, const RealVect& a_b, const int a_dir) noexcept;
+
 } // namespace detail
 
 class CutCellBody;

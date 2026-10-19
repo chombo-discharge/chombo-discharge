@@ -430,6 +430,19 @@ protected:
            const DataIndex&                               a_dit,
            const int                                      a_sourceLevel,
            const IntVect&                                 a_sourceCell) const;
+
+private:
+  /**
+   * @brief A LayoutData over a layout, for every pair of destination level and geometry level.
+   * @param[out] a_data            One per pair.
+   * @param[in]  a_grids           Destination layout of every level.
+   * @param[in]  a_numSourceLevels Number of geometry levels.
+   */
+  template <class T>
+  static void
+  allocate(std::vector<std::vector<RefCountedPtr<LayoutData<T>>>>& a_data,
+           const std::vector<DisjointBoxLayout>&                   a_grids,
+           const int                                               a_numSourceLevels);
 };
 
 #include <CD_NamespaceFooter.H>

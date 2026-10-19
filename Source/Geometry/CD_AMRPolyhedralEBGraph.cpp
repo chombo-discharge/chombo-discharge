@@ -27,20 +27,24 @@
 #include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
-namespace {
+AMRPolyhedralEBGraph::AMRPolyhedralEBGraph() noexcept
+{
+  m_isDefined       = false;
+  m_ghost           = 0;
+  m_numSourceLevels = 0;
+}
 
-/**
- * @brief A LayoutData over a layout, for every pair of destination level and geometry level.
- * @param[out] a_data            One per pair.
- * @param[in]  a_grids           Destination layout of every level.
- * @param[in]  a_numSourceLevels Number of geometry levels.
- */
+AMRPolyhedralEBGraph::~AMRPolyhedralEBGraph() noexcept
+{}
+
 template <class T>
 void
-allocate(std::vector<std::vector<RefCountedPtr<LayoutData<T>>>>& a_data,
-         const std::vector<DisjointBoxLayout>&                   a_grids,
-         const int                                               a_numSourceLevels)
+AMRPolyhedralEBGraph::allocate(std::vector<std::vector<RefCountedPtr<LayoutData<T>>>>& a_data,
+                               const std::vector<DisjointBoxLayout>&                   a_grids,
+                               const int                                               a_numSourceLevels)
 {
+  CH_TIME("AMRPolyhedralEBGraph::allocate");
+
   a_data.assign(a_grids.size(), {});
 
   for (std::size_t i = 0; i < a_grids.size(); i++) {
@@ -51,40 +55,6 @@ allocate(std::vector<std::vector<RefCountedPtr<LayoutData<T>>>>& a_data,
     }
   }
 }
-
-/**
- * @brief Position of a cell in a box, counted as a BoxIterator meets the box's cells.
- * @param[in] a_box  The box.
- * @param[in] a_cell A cell of it.
- * @return The position.
- */
-long
-linearIndex(const Box& a_box, const IntVect& a_cell)
-{
-  CH_assert(a_box.contains(a_cell));
-
-  long position = 0;
-  long stride   = 1;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    position += stride * (a_cell[d] - a_box.smallEnd(d));
-    stride *= a_box.size(d);
-  }
-
-  return position;
-}
-
-} // namespace
-
-AMRPolyhedralEBGraph::AMRPolyhedralEBGraph() noexcept
-{
-  m_isDefined       = false;
-  m_ghost           = 0;
-  m_numSourceLevels = 0;
-}
-
-AMRPolyhedralEBGraph::~AMRPolyhedralEBGraph() noexcept
-{}
 
 void
 AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
@@ -412,13 +382,13 @@ AMRPolyhedralEBGraph::getSourceState(const int        a_level,
     return s_unowned;
   }
 
-  const long b = linearIndex(binBox, bin);
+  const long b = binBox.index(bin);
 
   for (int k = binOffsets[b]; k < binOffsets[b + 1]; k++) {
     const int p = binPieces[k];
 
     if (pieces[p].contains(a_sourceCell)) {
-      return states[offsets[p] + linearIndex(pieces[p], a_sourceCell)];
+      return states[offsets[p] + pieces[p].index(a_sourceCell)];
     }
   }
 
@@ -535,7 +505,7 @@ AMRPolyhedralEBGraph::piecesNear(std::vector<int>& a_pieces,
   const Box bins = coarsen(a_region, binSize) & binBox;
 
   for (BoxIterator bit(bins); bit.ok(); ++bit) {
-    const long b = linearIndex(binBox, bit());
+    const long b = binBox.index(bit());
 
     for (int k = binOffsets[b]; k < binOffsets[b + 1]; k++) {
       a_pieces.push_back(binPieces[k]);
@@ -617,7 +587,7 @@ AMRPolyhedralEBGraph::finish()
 
         for (const Box& piece : pieces) {
           for (BoxIterator bit(coarsen(piece, binSize)); bit.ok(); ++bit) {
-            counts[linearIndex(binBox, bit())]++;
+            counts[binBox.index(bit())]++;
           }
         }
 
@@ -633,7 +603,7 @@ AMRPolyhedralEBGraph::finish()
 
         for (std::size_t p = 0; p < pieces.size(); p++) {
           for (BoxIterator bit(coarsen(pieces[p], binSize)); bit.ok(); ++bit) {
-            binPieces[fill[linearIndex(binBox, bit())]++] = static_cast<int>(p);
+            binPieces[fill[binBox.index(bit())]++] = static_cast<int>(p);
           }
         }
       }

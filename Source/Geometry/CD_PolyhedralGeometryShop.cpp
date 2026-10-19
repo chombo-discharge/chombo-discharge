@@ -56,57 +56,29 @@
 #include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
-namespace {
-
-/**
- * @brief An implicit function that stops the run if it is ever evaluated.
- * @details Put in place of the shop's own function while a test copies the graph and rebuilds bodies from the copy,
- * which must be done from the graph's data alone.
- */
-class AbortingIF : public BaseIF
+Real
+PolyhedralGeometryShop::AbortingIF::value(const RealVect& a_point) const
 {
-public:
-  /**
-   * @brief Stop the run.
-   * @param[in] a_point Where the function was asked for.
-   * @return Nothing; it does not return.
-   */
-  Real
-  value(const RealVect& a_point) const override
-  {
-    pout() << "AbortingIF::value - evaluated at " << a_point << endl;
+  pout() << "AbortingIF::value - evaluated at " << a_point << endl;
 
-    MayDay::Error("AbortingIF::value - the implicit function was evaluated where only the graph may be read");
+  MayDay::Error("AbortingIF::value - the implicit function was evaluated where only the graph may be read");
 
-    return 0.0;
-  }
+  return 0.0;
+}
 
-  /**
-   * @brief A copy.
-   * @return A new aborting function.
-   */
-  BaseIF*
-  newImplicitFunction() const override
-  {
-    return new AbortingIF();
-  }
-};
+BaseIF*
+PolyhedralGeometryShop::AbortingIF::newImplicitFunction() const
+{
+  return new AbortingIF();
+}
 
 #ifdef CH_USE_HDF5
-/**
- * @brief Write one attribute, a scalar or a short array.
- * @param[in] a_where Group or file to attach it to.
- * @param[in] a_name  Name of the attribute.
- * @param[in] a_type  HDF5 type of its elements.
- * @param[in] a_count Number of elements, one for a scalar.
- * @param[in] a_data  The elements.
- */
 void
-writeH5Attribute(const hid_t        a_where,
-                 const std::string& a_name,
-                 const hid_t        a_type,
-                 const hsize_t      a_count,
-                 const void*        a_data)
+PolyhedralGeometryShop::writeH5Attribute(const hid_t        a_where,
+                                         const std::string& a_name,
+                                         const hid_t        a_type,
+                                         const hsize_t      a_count,
+                                         const void*        a_data)
 {
   const hid_t space     = (a_count == 1) ? H5Screate(H5S_SCALAR) : H5Screate_simple(1, &a_count, nullptr);
   const hid_t attribute = H5Acreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT);
@@ -116,31 +88,16 @@ writeH5Attribute(const hid_t        a_where,
   H5Sclose(space);
 }
 
-/**
- * @brief Write one dataset, sized by what every rank holds together, with this rank's rows in its own stretch.
- * @details A rank with nothing to write selects nothing and takes part in the call all the same. It describes that
- * with the null dataspace: a simple dataspace of zero extent is not one, the call fails, and a rank that fails on its
- * way into a collective write leaves every other rank waiting in it.
- * @param[in] a_where    Group or file to put it in.
- * @param[in] a_name     Name of the dataset.
- * @param[in] a_type     HDF5 type of its elements.
- * @param[in] a_rows     Rows this rank writes.
- * @param[in] a_offset   Row this rank's stretch starts at.
- * @param[in] a_total    Rows over all ranks; nothing is written when there are none.
- * @param[in] a_columns  Columns per row; one makes the dataset one-dimensional.
- * @param[in] a_data     This rank's rows.
- * @param[in] a_transfer Transfer property list.
- */
 void
-writeH5Slab(const hid_t        a_where,
-            const std::string& a_name,
-            const hid_t        a_type,
-            const hsize_t      a_rows,
-            const hsize_t      a_offset,
-            const hsize_t      a_total,
-            const hsize_t      a_columns,
-            const void*        a_data,
-            const hid_t        a_transfer)
+PolyhedralGeometryShop::writeH5Slab(const hid_t        a_where,
+                                    const std::string& a_name,
+                                    const hid_t        a_type,
+                                    const hsize_t      a_rows,
+                                    const hsize_t      a_offset,
+                                    const hsize_t      a_total,
+                                    const hsize_t      a_columns,
+                                    const void*        a_data,
+                                    const hid_t        a_transfer)
 {
   if (a_total == 0) {
     return;
@@ -171,46 +128,12 @@ writeH5Slab(const hid_t        a_where,
 }
 #endif
 
-/**
- * @brief Where this rank's rows start among every rank's, and how many there are in all.
- * @param[in]  a_mine   Rows this rank holds.
- * @param[out] a_offset Rows the ranks before this one hold.
- * @param[out] a_total  Rows every rank holds together.
- */
 void
-rankOffset(const long long a_mine, long long& a_offset, long long& a_total)
-{
-  a_offset = 0;
-  a_total  = a_mine;
-
-#ifdef CH_MPI
-  MPI_Exscan(&a_mine, &a_offset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-
-  if (procID() == 0) {
-    a_offset = 0;
-  }
-
-  MPI_Allreduce(&a_mine, &a_total, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif
-}
-
-/**
- * @brief Append the nodes of a cell's VoFs as an index space holds them, so that a graph can be built from them again.
- * @details Each VoF's arcs come from its faces -- the VoF across, or the domain boundary -- with their apertures and
- * centroids. Where the moments hold no data for the cell, the moments are left at zero: a graph is built from arcs
- * alone.
- * @param[in,out] a_nodes The nodes, appended to.
- * @param[in]     a_graph Graph holding the cell.
- * @param[in]     a_data  Moments over some part of the graph's region.
- * @param[in]     a_cell  The cell, irregular in the graph.
- * @param[in]     a_withMoments Whether the moments hold data for the cell.
- */
-void
-appendNodes(Vector<IrregNode>& a_nodes,
-            const EBGraph&     a_graph,
-            const EBData&      a_data,
-            const IntVect&     a_cell,
-            const bool         a_withMoments)
+PolyhedralGeometryShop::appendNodes(Vector<IrregNode>& a_nodes,
+                                    const EBGraph&     a_graph,
+                                    const EBData&      a_data,
+                                    const IntVect&     a_cell,
+                                    const bool         a_withMoments)
 {
   const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
 
@@ -244,26 +167,12 @@ appendNodes(Vector<IrregNode>& a_nodes,
   }
 }
 
-/**
- * @brief Make each regular cell beside a multi-valued one a cut cell of volume one.
- * @details Chombo's coarsening reads the face of a regular cell as leading to the first VoF of the cell across, so a
- * regular cell's face into any other VoF of a multi-valued neighbour is lost. EBISLevel::fixRegularNextToMultiValued
- * makes such cells full cut cells and divides the face evenly among the VoFs across; here each face into a VoF across
- * is the face that VoF holds toward the cell, with its aperture and centroid. The nodes of a cell must be contiguous,
- * and a cell at the region's edge sees only the neighbours inside it.
- * @param[in,out] a_flags  Regular (1), cut (0) or covered (-1) for the region's cells. The cells made cut are set to 0.
- * @param[in,out] a_nodes  Nodes of the region's cut cells. A node is appended for each cell made cut.
- * @param[in]     a_region Region the flags describe.
- * @param[in]     a_valid  Part of the region whose cells made cut are counted.
- * @param[in]     a_domain Domain the region lies in.
- * @return The number of cells in a_valid made cut.
- */
 long long
-cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
-                            Vector<IrregNode>&   a_nodes,
-                            const Box&           a_region,
-                            const Box&           a_valid,
-                            const ProblemDomain& a_domain)
+PolyhedralGeometryShop::cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
+                                                    Vector<IrregNode>&   a_nodes,
+                                                    const Box&           a_region,
+                                                    const Box&           a_valid,
+                                                    const ProblemDomain& a_domain)
 {
   CH_TIME("PolyhedralGeometryShop::cutRegularNextToMultiValued");
 
@@ -372,19 +281,11 @@ cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
   return numMadeCut;
 }
 
-/**
- * @brief Write the index space of each cell of a region as numbers, summed over the cell's VoFs: the number of VoFs,
- * the volume fraction, the first moment of volume and the aperture of every face.
- * @details Component 0 is the number of VoFs, 1 the volume fraction, 2 to 1 + SpaceDim the first moment about the cell
- * centre in units of the cell, and 2 + SpaceDim + 2 * dir + side the aperture on that side. A regular cell reads as a
- * single VoF of volume one with every face open, so a full cut cell reads the same.
- * @param[in,out] a_signature At least s_signatureComps components over the region.
- * @param[in]     a_graph     The graph.
- * @param[in]     a_data      The moments, over the region.
- * @param[in]     a_region    The cells to write.
- */
 void
-cellSignature(FArrayBox& a_signature, const EBGraph& a_graph, const EBData& a_data, const Box& a_region)
+PolyhedralGeometryShop::cellSignature(FArrayBox&     a_signature,
+                                      const EBGraph& a_graph,
+                                      const EBData&  a_data,
+                                      const Box&     a_region)
 {
   CH_TIME("PolyhedralGeometryShop::cellSignature");
 
@@ -450,8 +351,6 @@ cellSignature(FArrayBox& a_signature, const EBGraph& a_graph, const EBData& a_da
     }
   }
 }
-
-} // namespace
 
 PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                                                const int            a_verbosity,
@@ -878,11 +777,11 @@ PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
       else {
         flags(cell, 0) = 0;
 
-        appendNodes(nodes, graph, storedData[dit()], cell, dataRegion.contains(cell));
+        PolyhedralGeometryShop::appendNodes(nodes, graph, storedData[dit()], cell, dataRegion.contains(cell));
       }
     }
 
-    cutRegularNextToMultiValued(flags, nodes, graphRegion, grids[dit()], domain);
+    PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, nodes, graphRegion, grids[dit()], domain);
 
     a_graph[dit()].buildGraph(flags, nodes, graphRegion, domain);
     a_data[dit()].define(a_graph[dit()], nodes, dataRegion);
@@ -1494,7 +1393,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
 
         flags(cell, 0) = 0;
 
-        appendNodes(held, finer, finerData, cell, true);
+        PolyhedralGeometryShop::appendNodes(held, finer, finerData, cell, true);
       }
 
       // A cell of this level's own beside a coarsened one takes the faces between them from the coarsened side, which
@@ -1536,7 +1435,7 @@ PolyhedralGeometryShop::assembleLevel(long long&                            a_nu
       }
     }
 
-    a_numPromoted += cutRegularNextToMultiValued(flags, held, region, box, domain);
+    a_numPromoted += PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, held, region, box, domain);
 
     EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
     EBData&  data  = (*m_ebData[lvl])[dit()];
@@ -4888,10 +4787,11 @@ PolyhedralGeometryShop::testFill() const
     for (DataIterator dit(a_graph.disjointBoxLayout()); dit.ok(); ++dit) {
       a_signature[dit()].setVal(unwritten);
 
-      cellSignature(a_signature[dit()],
-                    a_graph[dit()],
-                    a_data[dit()],
-                    grow(a_signature.disjointBoxLayout()[dit()], a_ghost) & a_domain.domainBox());
+      PolyhedralGeometryShop::cellSignature(a_signature[dit()],
+                                            a_graph[dit()],
+                                            a_data[dit()],
+                                            grow(a_signature.disjointBoxLayout()[dit()], a_ghost) &
+                                              a_domain.domainBox());
     }
   };
 
@@ -5410,7 +5310,7 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 
       const double levelDx = dx;
 
-      writeH5Attribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &levelDx);
+      PolyhedralGeometryShop::writeH5Attribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &levelDx);
     }
 
     const long long mineNodes = nodeKappa.size();
@@ -5419,8 +5319,8 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     long long nodeOffset = 0;
     long long edgeOffset = 0;
 
-    rankOffset(mineNodes, nodeOffset, totalNodes[lvl]);
-    rankOffset(mineEdges, edgeOffset, totalEdges[lvl]);
+    ParallelOps::rankOffset(mineNodes, nodeOffset, totalNodes[lvl]);
+    ParallelOps::rankOffset(mineEdges, edgeOffset, totalEdges[lvl]);
 
     // a node is its own element, and an edge's two vertices are written one after the other
     std::vector<long long> nodeConnectivity(mineNodes);
@@ -5436,70 +5336,142 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     const hsize_t nodeCount = totalNodes[lvl];
     const hsize_t edgeCount = totalEdges[lvl];
 
-    writeH5Slab(group,
-                "nodePositions",
-                H5T_NATIVE_DOUBLE,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                3,
-                nodePosition.data(),
-                transfer);
-    writeH5Slab(group,
-                "nodeConnectivity",
-                H5T_NATIVE_LLONG,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                1,
-                nodeConnectivity.data(),
-                transfer);
-    writeH5Slab(group, "kappa", H5T_NATIVE_DOUBLE, myNodes, nodeStart, nodeCount, 1, nodeKappa.data(), transfer);
-    writeH5Slab(group, "role", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRole.data(), transfer);
-    writeH5Slab(group, "sheets", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeSheets.data(), transfer);
-    writeH5Slab(group, "rank", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRank.data(), transfer);
-    writeH5Slab(group, "kind", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeKind.data(), transfer);
-    writeH5Slab(group,
-                "nodeAperture",
-                H5T_NATIVE_DOUBLE,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                1,
-                nodeAperture.data(),
-                transfer);
-    writeH5Slab(group, "nodeFaceState", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeFace.data(), transfer);
-    writeH5Slab(group,
-                "nodeOverridden",
-                H5T_NATIVE_INT,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                1,
-                nodeOverridden.data(),
-                transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodePositions",
+                                        H5T_NATIVE_DOUBLE,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        3,
+                                        nodePosition.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeConnectivity",
+                                        H5T_NATIVE_LLONG,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeConnectivity.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "kappa",
+                                        H5T_NATIVE_DOUBLE,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeKappa.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "role",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeRole.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "sheets",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeSheets.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "rank",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeRank.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "kind",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeKind.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeAperture",
+                                        H5T_NATIVE_DOUBLE,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeAperture.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeFaceState",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeFace.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeOverridden",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeOverridden.data(),
+                                        transfer);
 
-    writeH5Slab(group,
-                "edgePositions",
-                H5T_NATIVE_DOUBLE,
-                2 * myEdges,
-                2 * edgeStart,
-                2 * edgeCount,
-                3,
-                edgePosition.data(),
-                transfer);
-    writeH5Slab(group,
-                "edgeConnectivity",
-                H5T_NATIVE_LLONG,
-                myEdges,
-                edgeStart,
-                edgeCount,
-                2,
-                edgeConnectivity.data(),
-                transfer);
-    writeH5Slab(group, "aperture", H5T_NATIVE_DOUBLE, myEdges, edgeStart, edgeCount, 1, edgeAperture.data(), transfer);
-    writeH5Slab(group, "faceState", H5T_NATIVE_INT, myEdges, edgeStart, edgeCount, 1, edgeFace.data(), transfer);
-    writeH5Slab(group, "overridden", H5T_NATIVE_INT, myEdges, edgeStart, edgeCount, 1, edgeOverridden.data(), transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "edgePositions",
+                                        H5T_NATIVE_DOUBLE,
+                                        2 * myEdges,
+                                        2 * edgeStart,
+                                        2 * edgeCount,
+                                        3,
+                                        edgePosition.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "edgeConnectivity",
+                                        H5T_NATIVE_LLONG,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        2,
+                                        edgeConnectivity.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "aperture",
+                                        H5T_NATIVE_DOUBLE,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        1,
+                                        edgeAperture.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "faceState",
+                                        H5T_NATIVE_INT,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        1,
+                                        edgeFace.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "overridden",
+                                        H5T_NATIVE_INT,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        1,
+                                        edgeOverridden.data(),
+                                        transfer);
 
     H5Gclose(group);
   }
@@ -5731,7 +5703,15 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
                              const hsize_t      a_total,
                              const hsize_t      a_columns,
                              const void*        a_data) -> void {
-    writeH5Slab(a_where, a_name, a_type, a_rows, a_offset, a_total, a_columns, a_data, transfer);
+    PolyhedralGeometryShop::writeH5Slab(a_where,
+                                        a_name,
+                                        a_type,
+                                        a_rows,
+                                        a_offset,
+                                        a_total,
+                                        a_columns,
+                                        a_data,
+                                        transfer);
   };
 
   const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";

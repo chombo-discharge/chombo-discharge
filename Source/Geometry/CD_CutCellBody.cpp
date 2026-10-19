@@ -26,61 +26,6 @@
 
 namespace PolyhedralEB {
 
-namespace {
-
-/**
- * @brief Where the segment between two vertices crosses the plane x[a_dir] = 0, the same to the bit whichever way
- * round the segment is given.
- * @details An endpoint on the plane is the crossing itself. Otherwise the crossing is interpolated from the endpoint
- * below the plane and placed on it exactly, so the two children either side of a cut, and two polygons sharing the
- * segment, put the vertex in one place.
- * @param[in] a_a   One endpoint.
- * @param[in] a_b   The other endpoint, on the other side of the plane or on it.
- * @param[in] a_dir The direction normal to the plane.
- * @return The crossing.
- */
-RealVect
-crossing(const RealVect& a_a, const RealVect& a_b, const int a_dir) noexcept
-{
-  if (a_a[a_dir] == 0.0) {
-    return a_a;
-  }
-
-  if (a_b[a_dir] == 0.0) {
-    return a_b;
-  }
-
-  const RealVect& lo = (a_a[a_dir] < 0.0) ? a_a : a_b;
-  const RealVect& hi = (a_a[a_dir] < 0.0) ? a_b : a_a;
-
-  RealVect x = lo + (hi - lo) * (lo[a_dir] / (lo[a_dir] - hi[a_dir]));
-
-  x[a_dir] = 0.0;
-
-  return x;
-}
-
-/**
- * @brief Distance below which two vertices of a body cut from another are one, since they then differ only by the
- * round-off of the arithmetic that placed them. Far below the weld tolerance, so fluid thinner than the weld keeps its
- * vertices, and far below the tolerance to which a cut reproduces its parent's moments.
- */
-constexpr Real s_roundOffTolerance = 1.0E-13;
-
-/**
- * @brief Whether two vertices differ only by round-off.
- * @param[in] a_a One vertex.
- * @param[in] a_b The other.
- * @return True if they are within s_roundOffTolerance.
- */
-bool
-sameToRoundOff(const RealVect& a_a, const RealVect& a_b) noexcept
-{
-  return (a_a - a_b).vectorLength() <= s_roundOffTolerance;
-}
-
-} // namespace
-
 CutCellBody::CutCellBody() noexcept
 {
   m_numPolygons      = 0;
@@ -957,10 +902,10 @@ CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
 {
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
-  const Real tolerance = a_roundOff ? s_roundOffTolerance : detail::s_weldTolerance;
+  const Real tolerance = a_roundOff ? detail::s_roundOffTolerance : detail::s_weldTolerance;
 
   const auto same = [a_roundOff](const RealVect& a_a, const RealVect& a_b) -> bool {
-    return a_roundOff ? sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
+    return a_roundOff ? detail::sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
   };
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
@@ -1098,7 +1043,7 @@ CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
   }
 
   const auto same = [a_roundOff](const RealVect& a_a, const RealVect& a_b) -> bool {
-    return a_roundOff ? sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
+    return a_roundOff ? detail::sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
   };
 
   RealVect from[s_maxPolygons * s_maxVertices];
@@ -2056,7 +2001,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
           }
 
           if (aIn != bIn) {
-            add[numAdd++] = crossing(a, b, dir);
+            add[numAdd++] = detail::crossing(a, b, dir);
           }
 
           for (int k = 0; k < numAdd; k++) {
@@ -2064,7 +2009,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
             // from; the repeat carries no length and is dropped rather than leaving a zero-length edge, which
             // the closure walk would read as an opening. A vertex only within the weld of the last one is kept, so
             // fluid thinner than the weld survives the cut.
-            if (out.m_numVertices > 0 && sameToRoundOff(out.m_vertex[out.m_numVertices - 1], add[k])) {
+            if (out.m_numVertices > 0 && detail::sameToRoundOff(out.m_vertex[out.m_numVertices - 1], add[k])) {
               continue;
             }
 
@@ -2079,7 +2024,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
         }
 
         // the first and last can meet the same way round the circuit
-        while (out.m_numVertices > 1 && sameToRoundOff(out.m_vertex[0], out.m_vertex[out.m_numVertices - 1])) {
+        while (out.m_numVertices > 1 && detail::sameToRoundOff(out.m_vertex[0], out.m_vertex[out.m_numVertices - 1])) {
           out.m_numVertices--;
         }
 
@@ -2172,7 +2117,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
         // A vertex on the cut is inside for both children, so an entry or exit there repeats the vertex it
         // came from; the repeat carries no length and is dropped rather than closing a zero-area segment. A
         // vertex only within the weld of the last one is kept, so fluid thinner than the weld survives the cut.
-        if (out.m_numVertices > 0 && sameToRoundOff(out.m_vertex[out.m_numVertices - 1], a_x)) {
+        if (out.m_numVertices > 0 && detail::sameToRoundOff(out.m_vertex[out.m_numVertices - 1], a_x)) {
           out.m_segmentFace[out.m_numVertices - 1] = a_face;
 
           return true;
@@ -2202,11 +2147,11 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
         }
         else if (aIn) {
           // leaving: the segment from here runs along the cut until the fluid comes back
-          alive = emit(a, tagAB) && emit(crossing(a, b, dir), cutFace);
+          alive = emit(a, tagAB) && emit(detail::crossing(a, b, dir), cutFace);
         }
         else if (bIn) {
           // returning: the segment from the crossing to b is the stretch of a -> b that survived
-          alive = emit(crossing(a, b, dir), tagAB);
+          alive = emit(detail::crossing(a, b, dir), tagAB);
         }
       }
 
