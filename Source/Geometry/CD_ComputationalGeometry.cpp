@@ -575,6 +575,9 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
   bool anyCovered = false;
   bool decided    = false;
 
+  // The boxes the query meets. The tree pads its K-ary nodes by repeating a child, so a box can be met more than once.
+  std::vector<int> met;
+
   // The query box as a bounding volume, its cells taken as the unit cubes they are. A node is entered if its
   // bounds meet it; the exact box test then filters the candidates, which a touching node can produce.
   const BV query = this->boundingVolume(a_box);
@@ -603,6 +606,8 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
         continue;
       }
 
+      met.push_back(index);
+
       switch (types[index]) {
       case GeometryService::Regular: {
         anyRegular = true;
@@ -630,6 +635,41 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
 
   if (decided) {
     return GeometryService::Irregular;
+  }
+
+  // A level holds boxes only where the level below refined, which a box regular or covered in both phases always
+  // does and an irregular leaf never does. The cells of the query the level does not hold lie under such a leaf,
+  // and the level below answers for them, coarsening outward as the empty level above does. The boxes of a level
+  // are disjoint, so the overlaps of the distinct boxes met add up to the cells held.
+  std::sort(met.begin(), met.end());
+
+  met.erase(std::unique(met.begin(), met.end()), met.end());
+
+  long long numHeld = 0;
+
+  for (const int index : met) {
+    numHeld += (boxes[index] & a_box).numPts();
+  }
+
+  CH_assert(numHeld <= a_box.numPts());
+
+  if (numHeld < a_box.numPts()) {
+    if (a_level == 0) {
+      return GeometryService::Irregular;
+    }
+
+    const GeometryService::InOut below = this->classify(coarsen(a_box, 2), a_level - 1, a_phase);
+
+    if (below == GeometryService::Irregular) {
+      return GeometryService::Irregular;
+    }
+
+    anyRegular = anyRegular || below == GeometryService::Regular;
+    anyCovered = anyCovered || below == GeometryService::Covered;
+
+    if (anyRegular && anyCovered) {
+      return GeometryService::Irregular;
+    }
   }
 
   return anyCovered ? GeometryService::Covered : GeometryService::Regular;

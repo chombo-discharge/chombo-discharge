@@ -213,12 +213,13 @@ public:
 
   /**
    * @brief Classify a box on a level from the grids makeGrids built.
-   * @details Every level is a partition of its domain into boxes, each classified per phase, so the box is
-   * regular if every box of the level it meets is regular in the phase, covered if every one is covered, and
-   * irregular otherwise -- including when it meets both a regular and a covered box, since the surface must then
-   * lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves
-   * are the polyhedral graph's. A level the geometry built no boxes on -- everything below it a leaf, so nothing
-   * refined that far -- is answered by the level below it, coarsening as the domain overload does.
+   * @details Every level holds boxes, each classified per phase, so the box is regular if every box of the level
+   * it meets is regular in the phase, covered if every one is covered, and irregular otherwise -- including when
+   * it meets both a regular and a covered box, since the surface must then lie between them. This is the answer
+   * for a cell or a box anywhere on a stored level; the cut cells themselves are the polyhedral graph's. A level
+   * holds boxes only where the level below refined, so the part of the box under an irregular leaf of a coarser
+   * level, and all of it on a level the geometry built no boxes on, is answered by the level below, coarsening
+   * the box outward. A coarsest level that does not hold all of the box answers irregular.
    * @param[in] a_box   Box to classify, on the level's index space.
    * @param[in] a_level Level, 0 being the coarsest.
    * @param[in] a_phase Phase.
