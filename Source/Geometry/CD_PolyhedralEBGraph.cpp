@@ -22,7 +22,7 @@
 
 // Our includes
 #include <CD_PolyhedralEBGraph.H>
-#include <CD_PolyhedralGeometryShop.H>
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_CutCellBody.H>
 #include <CD_LoadBalancing.H>
 #include <CD_ParallelOps.H>
@@ -142,6 +142,10 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
                                        BaseFab<signed char>& a_unresolved)
 {
   CH_TIME("PolyhedralEBGraph::findUnresolvedCells");
+
+  CH_assert(a_dx > 0.0);
+  CH_assert(a_nodeValues.box().contains(surroundingNodes(a_region)));
+  CH_assert(a_unresolved.box().contains(a_region));
 
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
@@ -274,7 +278,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
   // the crossings a body is built from, bisected once per edge for the cells that need a body here
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralGeometryShop::defineIntercepts(intercept, a_region);
+  PolyhedralEB::defineIntercepts(intercept, a_region);
 
   for (BoxIterator bit(a_region); bit.ok(); ++bit) {
     const IntVect iv = bit();
@@ -285,8 +289,8 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
 
     CutCellSurface surface;
 
-    PolyhedralGeometryShop::fillCorners(surface, a_nodeValues, iv);
-    PolyhedralGeometryShop::decideFaces(a_function, surface, iv, a_probLo, a_dx);
+    PolyhedralEB::fillCorners(surface, a_nodeValues, iv);
+    PolyhedralEB::decideFaces(a_function, surface, iv, a_probLo, a_dx);
 
     if (sheetsOf(surface) <= 1) {
       continue;
@@ -305,7 +309,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
 
       CutCellBody body;
 
-      PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
+      PolyhedralEB::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
 
       if (!body.define(surface) || body.volumeFraction() >= 0.5) {
         a_unresolved(iv, 0) = s_filledPieces;
@@ -323,12 +327,34 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
     // cannot be built is filled.
     CutCellBody body;
 
-    PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
+    PolyhedralEB::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
 
     if (!body.define(surface) || body.volumeFraction() < 0.5) {
       a_unresolved(iv, 0) = s_filledGap;
     }
   }
+}
+
+bool
+PolyhedralEBGraph::isFilled(const BaseFab<signed char>&                 a_states,
+                            const BaseFab<signed char>&                 a_refined,
+                            const IntVectSet&                           a_withSurface,
+                            const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
+                            const IntVect&                              a_cell)
+{
+  using PolyhedralEB::CutCellBody;
+
+  // Covered, and yet its corners disagree: the graph filled it. A cell the finer level carries reads covered whenever
+  // its corners do, but it is described up there, and a covered cell whose corners agree closes its faces already.
+  if (!a_states.box().contains(a_cell) || a_states(a_cell, 0) != s_covered) {
+    return false;
+  }
+
+  if (a_refined.box().contains(a_cell) && a_refined(a_cell, 0) != 0) {
+    return false;
+  }
+
+  return a_withSurface.contains(a_cell) && CutCellBody::classify(a_surfaces(a_cell, 0)) == CutCellBody::Kind::Cut;
 }
 
 void
@@ -387,8 +413,8 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     // other side. Both boxes then reach the same verdict for the nodes they share without being told.
     const Box grown = grow(box, 1) & m_domain.domainBox();
 
-    PolyhedralGeometryShop::fillNodeValues(a_function, nodeValues, grown, m_probLo, m_dx);
-    PolyhedralGeometryShop::defineIntercepts(intercept, box);
+    PolyhedralEB::fillNodeValues(a_function, nodeValues, grown, m_probLo, m_dx);
+    PolyhedralEB::defineIntercepts(intercept, box);
 
     // Which cells cannot be described at all, decided before any of them is classified.
     BaseFab<signed char> unresolved(grown, 1);
@@ -419,7 +445,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
       // neighbours read a state for it, but no crossing is solved for, no body is built, and it is not a cut cell
       // of this level; its faces stay closed, since what opens onto it is the finer level's to say.
       if (refined(iv, 0) != 0) {
-        PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
+        PolyhedralEB::fillCorners(surface, nodeValues, iv);
 
         const CutCellBody::Kind corners = CutCellBody::classify(surface);
 
@@ -430,7 +456,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
         continue;
       }
 
-      PolyhedralGeometryShop::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
+      PolyhedralEB::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
 
       // A cell whose fluid falls into two pieces cannot be described by one body: read from the nodes, a plate
       // through the middle comes out as two slivers hugging opposite edges, and the fluid runs straight through a
@@ -478,7 +504,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
         // exactly the size of what it held, and no repair on the neighbours' faces can put it back. The volume
         // threshold that keeps such cells out of the index space is applied where the index space is built,
         // which is where its reason -- a solver that would rather not see a cell of no volume -- applies.
-        if (PolyhedralGeometryShop::isDust(body) && !nextToFilled) {
+        if (PolyhedralEB::isDust(body) && !nextToFilled) {
           state = s_regular;
         }
         else {
@@ -626,6 +652,8 @@ PolyhedralEBGraph::spreadAnchors()
 {
   CH_TIME("PolyhedralEBGraph::spreadAnchors");
 
+  CH_assert(m_anchored.isDefined());
+
   const Box& domainBox = m_domain.domainBox();
 
   std::vector<IntVect> front;
@@ -722,6 +750,9 @@ long long
 PolyhedralEBGraph::anchorAcrossLevels(PolyhedralEBGraph& a_coarse, PolyhedralEBGraph& a_fine)
 {
   CH_TIME("PolyhedralEBGraph::anchorAcrossLevels");
+
+  CH_assert(a_coarse.m_anchored.isDefined());
+  CH_assert(a_fine.m_anchored.isDefined());
 
   if (refine(a_coarse.m_domain, 2) != a_fine.m_domain) {
     MayDay::Error("PolyhedralEBGraph::anchorAcrossLevels - the fine domain is not the coarse domain refined by two");
@@ -821,6 +852,8 @@ PolyhedralEBGraph::anchorUncarriedCells()
 {
   CH_TIME("PolyhedralEBGraph::anchorUncarriedCells");
 
+  CH_assert(m_anchored.isDefined());
+
   for (DataIterator dit(m_grids); dit.ok(); ++dit) {
     BaseFab<signed char>& anchor = m_anchored[dit()];
 
@@ -836,6 +869,8 @@ long long
 PolyhedralEBGraph::fillSealedCells()
 {
   CH_TIME("PolyhedralEBGraph::fillSealedCells");
+
+  CH_assert(m_anchored.isDefined());
 
   const Box& domainBox = m_domain.domainBox();
 
@@ -959,7 +994,7 @@ PolyhedralEBGraph::defineGhostCells(const BaseIF& a_function, const LevelData<Ba
               x[d] += m_dx * static_cast<Real>(node[d]);
             }
 
-            nodeValues(node, 0) = PolyhedralGeometryShop::snappedValue(a_function, x, m_dx);
+            nodeValues(node, 0) = PolyhedralEB::snappedValue(a_function, x, m_dx);
             nodeKnown(node, 0)  = 1;
           }
 
@@ -1177,6 +1212,9 @@ PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
 {
   CH_TIME("PolyhedralEBGraph::markCoarserFilled");
 
+  CH_assert(a_ghost >= 0);
+  CH_assert(a_coarser.isDefined());
+
   if (refine(a_coarser.m_domain, 2) != m_domain) {
     MayDay::Error("PolyhedralEBGraph::markCoarserFilled - this domain is not the coarser domain refined by two");
   }
@@ -1190,11 +1228,11 @@ PolyhedralEBGraph::markCoarserFilled(LevelData<BaseFab<signed char>>& a_filled,
     filled.setVal(0);
 
     for (BoxIterator bit(a_coarser.m_grids[dit()]); bit.ok(); ++bit) {
-      if (PolyhedralGeometryShop::isFilled(a_coarser.m_cellStates[dit()],
-                                           a_coarser.m_refined[dit()],
-                                           a_coarser.m_surfaceCells[dit()],
-                                           a_coarser.m_surfaces[dit()],
-                                           bit())) {
+      if (PolyhedralEBGraph::isFilled(a_coarser.m_cellStates[dit()],
+                                      a_coarser.m_refined[dit()],
+                                      a_coarser.m_surfaceCells[dit()],
+                                      a_coarser.m_surfaces[dit()],
+                                      bit())) {
         filled(bit(), 0) = 1;
       }
     }

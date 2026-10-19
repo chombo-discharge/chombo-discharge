@@ -276,6 +276,24 @@ public:
                       BaseFab<signed char>& a_unresolved);
 
   /**
+   * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.
+   * @details The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners
+   * agree closes the face by its corners already, and a cell the finer level carries is described up there.
+   * @param[in] a_states      Cell states around the cell.
+   * @param[in] a_refined     Refined mask around the cell.
+   * @param[in] a_withSurface Cells around the cell that hold a surface.
+   * @param[in] a_surfaces    Their surfaces.
+   * @param[in] a_cell        The cell.
+   * @return True if the cell was filled.
+   */
+  static bool
+  isFilled(const BaseFab<signed char>&                 a_states,
+           const BaseFab<signed char>&                 a_refined,
+           const IntVectSet&                           a_withSurface,
+           const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
+           const IntVect&                              a_cell);
+
+  /**
    * @brief Whether define has run.
    * @return True after define.
    */

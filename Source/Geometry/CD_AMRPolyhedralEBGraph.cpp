@@ -24,7 +24,6 @@
 #include <CD_AMRPolyhedralEBGraph.H>
 #include <CD_PolyhedralEBGraph.H>
 #include <CD_PolyhedralGeometryShop.H>
-#include <CD_ComputationalGeometry.H>
 #include <CD_CutCellBody.H>
 #include <CD_NamespaceHeader.H>
 
@@ -62,6 +61,8 @@ allocate(std::vector<std::vector<RefCountedPtr<LayoutData<T>>>>& a_data,
 long
 linearIndex(const Box& a_box, const IntVect& a_cell)
 {
+  CH_assert(a_box.contains(a_cell));
+
   long position = 0;
   long stride   = 1;
 
@@ -91,21 +92,21 @@ AMRPolyhedralEBGraph::define(const std::vector<DisjointBoxLayout>& a_grids,
                              const std::vector<int>&               a_geometryLevels,
                              const int                             a_numSourceLevels,
                              const int                             a_ghost,
-                             const ComputationalGeometry&          a_geometry,
-                             const phase::which_phase              a_phase)
+                             const std::function<GeometryService::InOut(const Box&, const ProblemDomain&)>& a_classify)
 {
   CH_TIME("AMRPolyhedralEBGraph::define");
 
   CH_assert(a_grids.size() == a_domains.size());
   CH_assert(a_grids.size() == a_geometryLevels.size());
+  CH_assert(a_numSourceLevels >= 0);
+  CH_assert(a_ghost >= 0);
 
   m_grids           = a_grids;
   m_domains         = a_domains;
   m_geometryLevels  = a_geometryLevels;
   m_numSourceLevels = a_numSourceLevels;
   m_ghost           = a_ghost;
-  m_geometry        = &a_geometry;
-  m_phase           = a_phase;
+  m_classify        = a_classify;
 
   allocate(m_pieces, a_grids, a_numSourceLevels);
   allocate(m_pieceOffsets, a_grids, a_numSourceLevels);
@@ -156,18 +157,24 @@ AMRPolyhedralEBGraph::getGhost() const noexcept
 const DisjointBoxLayout&
 AMRPolyhedralEBGraph::getGrids(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+
   return m_grids[a_level];
 }
 
 const ProblemDomain&
 AMRPolyhedralEBGraph::getDomain(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+
   return m_domains[a_level];
 }
 
 int
 AMRPolyhedralEBGraph::getGeometryLevel(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+
   return m_geometryLevels[a_level];
 }
 
@@ -178,6 +185,9 @@ AMRPolyhedralEBGraph::getCutCells(std::vector<PolyhedralEB::CutCellDescription>&
                                   const IntVect&                                 a_cell) const
 {
   CH_TIME("AMRPolyhedralEBGraph::getCutCells");
+
+  CH_assert(m_isDefined);
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
 
   a_cells.clear();
 
@@ -230,6 +240,10 @@ AMRPolyhedralEBGraph::getCutCells(std::vector<PolyhedralEB::CutCellDescription>&
 int
 AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const
 {
+  CH_assert(m_isDefined);
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(m_classify);
+
   const int geometryLevel = m_geometryLevels[a_level];
 
   bool anyRegular = false;
@@ -291,7 +305,8 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
                                                 : Box(a_cell, a_cell);
 
     // the destination's own domain when nothing finer holds part of the cell, which may lie past the geometry's levels
-    const ProblemDomain onFinest = (finest > geometryLevel) ? m_geometry->getDomain(finest) : m_domains[a_level];
+    const ProblemDomain onFinest = (finest > geometryLevel) ? refine(m_domains[a_level], 1 << (finest - geometryLevel))
+                                                            : m_domains[a_level];
 
     IntVectSet rest(region);
 
@@ -309,7 +324,7 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
       const Vector<Box> boxes = rest.boxes();
 
       for (int i = 0; i < boxes.size(); i++) {
-        const GeometryService::InOut type = m_geometry->classify(boxes[i], onFinest, m_phase);
+        const GeometryService::InOut type = m_classify(boxes[i], onFinest);
 
         anyRegular = anyRegular || type != GeometryService::Covered;
         anyCovered = anyCovered || type != GeometryService::Regular;
@@ -335,6 +350,8 @@ AMRPolyhedralEBGraph::getState(const int a_level, const DataIndex& a_dit, const 
 bool
 AMRPolyhedralEBGraph::holds(const int a_level, const DataIndex& a_dit, const IntVect& a_cell) const
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+
   const ProblemDomain& domain = m_domains[a_level];
   const Box            box    = m_grids[a_level][a_dit];
 
@@ -360,6 +377,9 @@ AMRPolyhedralEBGraph::holds(const int a_level, const DataIndex& a_dit, const Int
 const std::vector<Box>&
 AMRPolyhedralEBGraph::getPieces(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   return (*m_pieces[a_level][a_sourceLevel])[a_dit];
 }
 
@@ -369,6 +389,9 @@ AMRPolyhedralEBGraph::getSourceState(const int        a_level,
                                      const int        a_sourceLevel,
                                      const IntVect&   a_sourceCell) const
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   const std::vector<Box>&         pieces  = (*m_pieces[a_level][a_sourceLevel])[a_dit];
   const std::vector<int>&         offsets = (*m_pieceOffsets[a_level][a_sourceLevel])[a_dit];
   const std::vector<signed char>& states  = (*m_states[a_level][a_sourceLevel])[a_dit];
@@ -405,6 +428,9 @@ AMRPolyhedralEBGraph::getSourceState(const int        a_level,
 const std::vector<IntVect>&
 AMRPolyhedralEBGraph::getSurfaceCells(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   return (*m_surfaceCells[a_level][a_sourceLevel])[a_dit];
 }
 
@@ -415,6 +441,9 @@ AMRPolyhedralEBGraph::getSourceSurface(const int        a_level,
                                        const IntVect&   a_sourceCell) const
 {
   using PolyhedralEB::CutCellFaceOverrides;
+
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
 
   const std::vector<IntVect>& cells = (*m_surfaceCells[a_level][a_sourceLevel])[a_dit];
 
@@ -432,12 +461,18 @@ AMRPolyhedralEBGraph::getFaceOverrides(const int        a_level,
                                        const DataIndex& a_dit,
                                        const int        a_sourceLevel) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   return (*m_faceOverrides[a_level][a_sourceLevel])[a_dit];
 }
 
 PolyhedralEB::CutCellFaceOverrides&
 AMRPolyhedralEBGraph::getFaceOverrides(const int a_level, const DataIndex& a_dit, const int a_sourceLevel) noexcept
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   return (*m_faceOverrides[a_level][a_sourceLevel])[a_dit];
 }
 
@@ -448,6 +483,9 @@ AMRPolyhedralEBGraph::addPiece(const int          a_level,
                                const Box&         a_region,
                                const signed char* a_states)
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   std::vector<Box>&         pieces  = (*m_pieces[a_level][a_sourceLevel])[a_dit];
   std::vector<int>&         offsets = (*m_pieceOffsets[a_level][a_sourceLevel])[a_dit];
   std::vector<signed char>& states  = (*m_states[a_level][a_sourceLevel])[a_dit];
@@ -464,6 +502,9 @@ AMRPolyhedralEBGraph::addSurface(const int                           a_level,
                                  const IntVect&                      a_sourceCell,
                                  const PolyhedralEB::CutCellSurface& a_surface)
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   (*m_surfaceCells[a_level][a_sourceLevel])[a_dit].push_back(a_sourceCell);
   (*m_surfaces[a_level][a_sourceLevel])[a_dit].push_back(a_surface);
 }
@@ -475,6 +516,9 @@ AMRPolyhedralEBGraph::piecesNear(std::vector<int>& a_pieces,
                                  const int         a_sourceLevel,
                                  const Box&        a_region) const
 {
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   a_pieces.clear();
 
   const std::vector<Box>& pieces = (*m_pieces[a_level][a_sourceLevel])[a_dit];
@@ -507,6 +551,8 @@ void
 AMRPolyhedralEBGraph::finish()
 {
   CH_TIME("AMRPolyhedralEBGraph::finish");
+
+  CH_assert(m_isDefined);
 
   using PolyhedralEB::CutCellFaceOverrides;
   using PolyhedralEB::CutCellSurface;
@@ -605,6 +651,9 @@ AMRPolyhedralEBGraph::describe(std::vector<PolyhedralEB::CutCellDescription>& a_
   using PolyhedralEB::CutCellDescription;
   using PolyhedralEB::CutCellFaceOverrides;
 
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_grids.size()));
+  CH_assert(a_sourceLevel >= 0 && a_sourceLevel < m_numSourceLevels);
+
   const PolyhedralEB::CutCellSurface* surface = this->getSourceSurface(a_level, a_dit, a_sourceLevel, a_sourceCell);
 
   CH_assert(surface != nullptr);
@@ -641,6 +690,8 @@ AMRPolyhedralEBGraph::fillNodes(BaseFab<int>&      a_regIrregCovered,
                                 const DataIndex&   a_dit) const
 {
   CH_TIME("AMRPolyhedralEBGraph::fillNodes");
+
+  CH_assert(m_isDefined);
 
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellDescription;

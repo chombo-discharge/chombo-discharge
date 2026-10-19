@@ -14,11 +14,13 @@
 #define CD_AMRPOLYHEDRALEBGRAPH_H
 
 // Std includes
+#include <functional>
 #include <vector>
 
 // Chombo includes
 #include <BaseFab.H>
 #include <DisjointBoxLayout.H>
+#include <GeometryService.H>
 #include <IrregNode.H>
 #include <LayoutData.H>
 #include <ProblemDomain.H>
@@ -28,10 +30,7 @@
 #include <CD_CutCellDescription.H>
 #include <CD_CutCellFaceOverrides.H>
 #include <CD_CutCellSurface.H>
-#include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
-
-class ComputationalGeometry;
 
 /**
  * @brief The polyhedral graph as an AMR hierarchy of any layout holds it: every cell of every box, ghost cells
@@ -72,18 +71,16 @@ public:
    * @param[in] a_geometryLevels  Geometry level of every destination level.
    * @param[in] a_numSourceLevels Number of geometry levels.
    * @param[in] a_ghost           Ghost width every destination box is filled to.
-   * @param[in] a_geometry        The geometry the graph was built over, which says what a cell no tile holds is; kept
-   * by reference, and must outlive this object.
-   * @param[in] a_phase           Phase of the graph.
+   * @param[in] a_classify        Says what a box no tile holds is, on a given domain: ComputationalGeometry::classify
+   * for the graph's phase. Whatever it refers to must outlive this object.
    */
   void
-  define(const std::vector<DisjointBoxLayout>& a_grids,
-         const std::vector<ProblemDomain>&     a_domains,
-         const std::vector<int>&               a_geometryLevels,
-         const int                             a_numSourceLevels,
-         const int                             a_ghost,
-         const ComputationalGeometry&          a_geometry,
-         const phase::which_phase              a_phase);
+  define(const std::vector<DisjointBoxLayout>&                                          a_grids,
+         const std::vector<ProblemDomain>&                                              a_domains,
+         const std::vector<int>&                                                        a_geometryLevels,
+         const int                                                                      a_numSourceLevels,
+         const int                                                                      a_ghost,
+         const std::function<GeometryService::InOut(const Box&, const ProblemDomain&)>& a_classify);
 
   /**
    * @brief Whether define has run.
@@ -334,14 +331,9 @@ protected:
   int m_numSourceLevels;
 
   /**
-   * @brief The geometry the graph was built over, which classifies the cells no tile holds.
+   * @brief Classifies the boxes no tile holds, on a given domain.
    */
-  const ComputationalGeometry* m_geometry;
-
-  /**
-   * @brief Phase of the graph.
-   */
-  phase::which_phase m_phase;
+  std::function<GeometryService::InOut(const Box&, const ProblemDomain&)> m_classify;
 
   /**
    * @brief Destination layout of every level.
