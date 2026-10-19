@@ -14,8 +14,8 @@ AmrMesh.box_sorting             = morton         ## 'none', 'shuffle', 'morton'
 AmrMesh.min_block_size          = 8              ## Blocking factor.
 AmrMesh.max_block_size          = 16             ## Maximum allowed box size
 AmrMesh.max_ebis_box            = 16             ## Maximum allowed box size for EBIS generation.
-AmrMesh.eb_min_block_size       = 4              ## Smallest box the geometry grids are tiled with.
-AmrMesh.eb_max_block_size       = 16             ## Largest such box, a whole number of eb_min_block_size.
+AmrMesh.eb_min_block_size       = 8              ## Smallest box the geometry grids are tiled with.
+AmrMesh.eb_max_block_size       = 8              ## Largest such box, a whole number of eb_min_block_size.
 AmrMesh.ref_rat                 = 2 2 2 2 2 2    ## Refinement ratios (mixed ratios are allowed).
 AmrMesh.num_ghost               = 2              ## Number of ghost cells.
 AmrMesh.lsf_ghost               = 2              ## Number of ghost cells when writing level-set to grid
@@ -91,6 +91,7 @@ NoisePlane.clamp_dx     = 0.1            ## Noise clamp falloff
 # ====================================================================================================
 # PolyhedralGeometryShop class options
 # ====================================================================================================
-PolyhedralGeometryShop.sanity_check      = false    ## Check the surface is closed, on every level and across every seam
-PolyhedralGeometryShop.test_copy         = false    ## Copy the graphs onto other layouts, and require every body unchanged
-PolyhedralGeometryShop.write_surface     = true     ## Write the interface triangles for inspection
+PolyhedralGeometryShop.sanity_check         = true      ## Check the surface is closed, on every level and across every seam
+PolyhedralGeometryShop.test_copy            = true      ## Copy the graphs onto other layouts, and require every body unchanged
+PolyhedralGeometryShop.write_surface        = false     ## Write the interface triangles for inspection
+PolyhedralGeometryShop.fill_split_fluid     = always    ## Fill fluid cells
