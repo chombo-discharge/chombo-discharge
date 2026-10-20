@@ -415,11 +415,16 @@ jobs:
           sudo apt install texlive-latex-extra
           sudo apt install latexmk
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       - name: Restore pip cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/pip
-          key: docs-pip-sphinx5.0.0-rtd-bibtex
+          key: docs-pip-py3.12-sphinx5.0.0-rtd-bibtex
 
       - name: Install Python dependencies
         run: |
