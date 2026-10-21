@@ -1,13 +1,12 @@
 #include <CD_Driver.H>
 #include <CD_DiskProfiledPlane.H>
 #include <CD_FieldStepper.H>
-#include <CD_FieldSolverAMG.H>
 #include <CD_FieldSolverGMG.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::Electrostatics;
 
-using FSOLVE = FieldSolverAMG;
+using FSOLVE = FieldSolverGMG;
 
 int
 main(int argc, char* argv[])

@@ -135,6 +135,18 @@ public:
   getInterpolationStencilEB(const VolIndex& a_fineGhost, const DataIndex& a_din) const noexcept override;
 
   /**
+   * @brief Get the stencil that coarseFineInterp uses to fill a ghost cell.
+   * @details Ghost cells near the EB are filled by the EB stencils, which overwrite the regular interpolation, so they
+   * take getInterpolationStencilEB. The other ghost cells are filled by the regular interpolation and take
+   * getInterpolationStencilRegular. Aborts if the cell is neither.
+   * @param[in] a_fineGhost Ghost cell on the fine side of the refinement boundary.
+   * @param[in] a_din Grid index.
+   * @return The first/second entry is the fine/coarse stencil.
+   */
+  std::pair<VoFStencil, VoFStencil>
+  getGhostStencil(const VolIndex& a_fineGhost, const DataIndex& a_din) const noexcept override;
+
+  /**
    * @brief Do inhomogeneous interpolation
    * @param[in,out] a_phiFine   Fine phi
    * @param[in]    a_phiCoar   Coarse phi
