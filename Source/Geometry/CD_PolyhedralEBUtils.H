@@ -275,15 +275,15 @@ isDust(const PolyhedralEB::CutCellBody& a_body) noexcept;
  * @brief Evaluate the implicit function at every node of a region.
  * @details One evaluation per node rather than per cell corner, since the cells meeting at a node share it and must
  * agree on its value. Values are read through snappedValue.
- * @param[in]  a_function   Implicit function
  * @param[out] a_nodeValues Node-centred values over a_region
+ * @param[in]  a_function   Implicit function
  * @param[in]  a_region     Cell-centred region whose nodes are wanted
  * @param[in]  a_probLo     Lower-left corner of computational domain
  * @param[in]  a_dx         Grid resolution
  */
 void
-fillNodeValues(const BaseIF&   a_function,
-               BaseFab<Real>&  a_nodeValues,
+fillNodeValues(BaseFab<Real>&  a_nodeValues,
+               const BaseIF&   a_function,
                const Box&      a_region,
                const RealVect& a_probLo,
                const Real&     a_dx);
@@ -338,18 +338,18 @@ fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_node
  * @details The corners come from the shared node values and every edge whose ends disagree gets its crossing through
  * the shared cache, so every caller that reconstructs a cell -- the graph, the surface pass and the grid
  * builder's curvature test -- builds the same cell.
- * @param[in]     a_function   Implicit function
  * @param[in,out] a_intercept  Edge-centred crossing cache
  * @param[out]    a_surface    The values the cell's body is reconstructed from
+ * @param[in]     a_function   Implicit function
  * @param[in]     a_nodeValues Node-centred implicit function values
  * @param[in]     a_cell       The cell
  * @param[in]     a_probLo     Lower-left corner of computational domain
  * @param[in]     a_dx         Grid resolution
  */
 void
-buildSurface(const BaseIF&                 a_function,
-             BaseFab<Real>                 a_intercept[SpaceDim],
+buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
              PolyhedralEB::CutCellSurface& a_surface,
+             const BaseIF&                 a_function,
              const BaseFab<Real>&          a_nodeValues,
              const IntVect&                a_cell,
              const RealVect&               a_probLo,
@@ -364,15 +364,15 @@ buildSurface(const BaseIF&                 a_function,
  * at the centre of the face is read instead, with the value snap of a grid twice as fine, so that it is the very
  * node a finer level holds there. Every cell sharing the face reads the same point. A centre that reads exactly
  * zero falls back to the bilinear saddle. In two dimensions the face is the cell itself.
- * @param[in]     a_function Implicit function.
  * @param[in,out] a_surface  Surface whose corners are filled; its face decisions are set.
+ * @param[in]     a_function Implicit function.
  * @param[in]     a_cell     The cell.
  * @param[in]     a_probLo   Lower-left corner of the domain.
  * @param[in]     a_dx       Grid spacing.
  */
 void
-decideFaces(const BaseIF&                 a_function,
-            PolyhedralEB::CutCellSurface& a_surface,
+decideFaces(PolyhedralEB::CutCellSurface& a_surface,
+            const BaseIF&                 a_function,
             const IntVect&                a_cell,
             const RealVect&               a_probLo,
             const Real                    a_dx) noexcept;

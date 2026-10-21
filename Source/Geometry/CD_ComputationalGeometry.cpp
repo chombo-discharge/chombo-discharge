@@ -498,7 +498,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   Vector<Vector<int>>                    tileHosts(numLevels);
 
   timer.startEvent("Classify tiles");
-  this->classifyTiles(firstChild, numChildren, gasTileTypes, solidTileTypes, tileHosts);
+  this->classifyTiles(gasTileTypes, solidTileTypes, tileHosts, firstChild, numChildren);
   timer.stopEvent("Classify tiles");
 
   timer.startEvent("Decimate boxes");
@@ -907,7 +907,7 @@ ComputationalGeometry::getCutTiles(const int a_level) const noexcept
 }
 
 const Vector<Box>&
-ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept
+ComputationalGeometry::getSplitBoxes(Vector<int>& a_reasons, const int a_level) const noexcept
 {
   CH_assert(a_level >= 0 && a_level < m_domains.size());
   CH_assert(m_splitBoxes[a_level].size() == m_splitReasons[a_level].size());
@@ -1313,7 +1313,7 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
   // since that is the spacing the level above would classify it at.
   BaseFab<Real> nodeValues;
 
-  PolyhedralEB::fillNodeValues(f, nodeValues, valid, m_probLo, dx);
+  PolyhedralEB::fillNodeValues(nodeValues, f, valid, m_probLo, dx);
 
   const Box& nodeBox = nodeValues.box();
 
@@ -1408,7 +1408,7 @@ ComputationalGeometry::piercedSeamFace(const IntVect&           a_cell,
   // is a node of that level and is snapped at its spacing.
   BaseFab<Real> nodeValues;
 
-  PolyhedralEB::fillNodeValues(f, nodeValues, Box(a_cell, a_cell), m_probLo, dx);
+  PolyhedralEB::fillNodeValues(nodeValues, f, Box(a_cell, a_cell), m_probLo, dx);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (int side = 0; side < 2; side++) {
@@ -1498,7 +1498,7 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralEB::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
+  PolyhedralEB::fillNodeValues(nodeValues, f, grown, m_probLo, dx);
   PolyhedralEB::defineIntercepts(intercept, grown);
 
   constexpr int perDir = CutCellSurface::s_numEdges / SpaceDim;
@@ -1514,7 +1514,7 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
   for (BoxIterator bit(valid); bit.ok(); ++bit) {
     CutCellSurface surface;
 
-    PolyhedralEB::buildSurface(f, intercept, surface, nodeValues, bit(), m_probLo, dx);
+    PolyhedralEB::buildSurface(intercept, surface, f, nodeValues, bit(), m_probLo, dx);
 
     if (CutCellBody::classify(surface) != CutCellBody::Kind::Cut) {
       continue;
@@ -1591,7 +1591,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralEB::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
+  PolyhedralEB::fillNodeValues(nodeValues, f, grown, m_probLo, dx);
   PolyhedralEB::defineIntercepts(intercept, grown);
 
   BaseFab<Real> normal(grown, SpaceDim);
@@ -1604,7 +1604,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
 
     PolyhedralEB::CutCellSurface surface;
 
-    PolyhedralEB::buildSurface(f, intercept, surface, nodeValues, iv, m_probLo, dx);
+    PolyhedralEB::buildSurface(intercept, surface, f, nodeValues, iv, m_probLo, dx);
 
     if (PolyhedralEB::CutCellBody::classify(surface) != PolyhedralEB::CutCellBody::Kind::Cut) {
       continue;
@@ -1998,11 +1998,11 @@ ComputationalGeometry::containingBox(const int a_level, const IntVect& a_cell) c
 }
 
 void
-ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_firstChild,
-                                     const Vector<Vector<int>>&              a_numChildren,
-                                     Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+ComputationalGeometry::classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                                      Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
-                                     Vector<Vector<int>>&                    a_tileHosts) const
+                                     Vector<Vector<int>>&                    a_tileHosts,
+                                     const Vector<Vector<int>>&              a_firstChild,
+                                     const Vector<Vector<int>>&              a_numChildren) const
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
   if (m_verbose) {

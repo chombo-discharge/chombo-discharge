@@ -132,14 +132,14 @@ PolyhedralEBGraph::defineData()
 }
 
 void
-PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
+PolyhedralEBGraph::findUnresolvedCells(BaseFab<signed char>& a_unresolved,
+                                       const BaseIF&         a_function,
                                        const BaseFab<Real>&  a_nodeValues,
                                        const Box&            a_region,
                                        const Vector<Box>&    a_covered,
                                        const RealVect&       a_probLo,
                                        const Real            a_dx,
-                                       const bool            a_fillSplitFluid,
-                                       BaseFab<signed char>& a_unresolved)
+                                       const bool            a_fillSplitFluid)
 {
   CH_TIME("PolyhedralEBGraph::findUnresolvedCells");
 
@@ -290,7 +290,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
     CutCellSurface surface;
 
     PolyhedralEB::fillCorners(surface, a_nodeValues, iv);
-    PolyhedralEB::decideFaces(a_function, surface, iv, a_probLo, a_dx);
+    PolyhedralEB::decideFaces(surface, a_function, iv, a_probLo, a_dx);
 
     if (sheetsOf(surface) <= 1) {
       continue;
@@ -309,7 +309,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
 
       CutCellBody body;
 
-      PolyhedralEB::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
+      PolyhedralEB::buildSurface(intercept, surface, a_function, a_nodeValues, iv, a_probLo, a_dx);
 
       if (!body.define(surface) || body.volumeFraction() >= 0.5) {
         a_unresolved(iv, 0) = s_filledPieces;
@@ -327,7 +327,7 @@ PolyhedralEBGraph::findUnresolvedCells(const BaseIF&         a_function,
     // cannot be built is filled.
     CutCellBody body;
 
-    PolyhedralEB::buildSurface(a_function, intercept, surface, a_nodeValues, iv, a_probLo, a_dx);
+    PolyhedralEB::buildSurface(intercept, surface, a_function, a_nodeValues, iv, a_probLo, a_dx);
 
     if (!body.define(surface) || body.volumeFraction() < 0.5) {
       a_unresolved(iv, 0) = s_filledGap;
@@ -413,20 +413,20 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
     // other side. Both boxes then reach the same verdict for the nodes they share without being told.
     const Box grown = grow(box, 1) & m_domain.domainBox();
 
-    PolyhedralEB::fillNodeValues(a_function, nodeValues, grown, m_probLo, m_dx);
+    PolyhedralEB::fillNodeValues(nodeValues, a_function, grown, m_probLo, m_dx);
     PolyhedralEB::defineIntercepts(intercept, box);
 
     // Which cells cannot be described at all, decided before any of them is classified.
     BaseFab<signed char> unresolved(grown, 1);
 
-    PolyhedralEBGraph::findUnresolvedCells(a_function,
+    PolyhedralEBGraph::findUnresolvedCells(unresolved,
+                                           a_function,
                                            nodeValues,
                                            grown,
                                            m_covered,
                                            m_probLo,
                                            m_dx,
-                                           a_fillSplitFluid,
-                                           unresolved);
+                                           a_fillSplitFluid);
 
     // Counted over the cells this box owns, not over the ring it also filled: neighbouring boxes reach into
     // one another's ring, and a cell counted there would be reported once per box that reaches it.
@@ -456,7 +456,7 @@ PolyhedralEBGraph::defineCells(const BaseIF&                          a_function
         continue;
       }
 
-      PolyhedralEB::buildSurface(a_function, intercept, surface, nodeValues, iv, m_probLo, m_dx);
+      PolyhedralEB::buildSurface(intercept, surface, a_function, nodeValues, iv, m_probLo, m_dx);
 
       // A cell whose fluid falls into two pieces cannot be described by one body: read from the nodes, a plate
       // through the middle comes out as two slivers hugging opposite edges, and the fluid runs straight through a

@@ -605,7 +605,7 @@ ParallelOps::gather(const long long& a_localValue) noexcept
 }
 
 inline void
-ParallelOps::rankOffset(const long long a_mine, long long& a_offset, long long& a_total) noexcept
+ParallelOps::rankOffset(long long& a_offset, long long& a_total, const long long a_mine) noexcept
 {
   CH_TIME("ParallelOps::rankOffset");
 

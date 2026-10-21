@@ -253,6 +253,8 @@ public:
    * see whether its neighbours were filled, and those reaches overlap between neighbouring boxes; a count taken
    * here would report a cell near a box boundary once for every box that reaches it. The caller counts over the
    * cells it owns.
+   * @param[out] a_unresolved For each cell of the region, why it must be filled -- s_filledPieces or s_filledGap -- or
+   * s_notFilled.
    * @param[in]  a_function   Implicit function, read at face centres and along the edges of multi-sheet cells.
    * @param[in]  a_nodeValues Node values of the region.
    * @param[in]  a_region     Cells to ask.
@@ -262,18 +264,16 @@ public:
    * @param[in]  a_fillSplitFluid True to fill every cell whose fluid falls into more than one piece. False to fill
    * such a cell only when its fluid is the larger part of it -- a thin solid sheet between fluid, which has to stay a
    * barrier -- and otherwise keep it as one body of several pieces.
-   * @param[out] a_unresolved For each cell of the region, why it must be filled -- s_filledPieces or s_filledGap -- or
-   * s_notFilled.
    */
   static void
-  findUnresolvedCells(const BaseIF&         a_function,
+  findUnresolvedCells(BaseFab<signed char>& a_unresolved,
+                      const BaseIF&         a_function,
                       const BaseFab<Real>&  a_nodeValues,
                       const Box&            a_region,
                       const Vector<Box>&    a_covered,
                       const RealVect&       a_probLo,
                       const Real            a_dx,
-                      const bool            a_fillSplitFluid,
-                      BaseFab<signed char>& a_unresolved);
+                      const bool            a_fillSplitFluid);
 
   /**
    * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.

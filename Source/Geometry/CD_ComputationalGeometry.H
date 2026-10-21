@@ -319,12 +319,12 @@ public:
   /**
    * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair reaching
    * into the ring outside it, 3 two surfaces facing each other across the band.
-   * @param[in]  a_level   Level, 0 being the coarsest.
    * @param[out] a_reasons One reason per box, parallel to the returned boxes.
+   * @param[in]  a_level   Level, 0 being the coarsest.
    * @return The boxes.
    */
   const Vector<Box>&
-  getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept;
+  getSplitBoxes(Vector<int>& a_reasons, const int a_level) const noexcept;
 
   /**
    * @brief Classification of every box on a level for a phase, parallel to getBoxes(level).
@@ -847,18 +847,18 @@ protected:
    * Nothing is cut here; the hosts are what decimateBoxes reads. The box a tile lies in is found by descending
    * the child links from the start level, where the box containing a point is lattice arithmetic.
    *
-   * @param[in]  a_firstChild     Child links from buildFinerLevels.
-   * @param[in]  a_numChildren    Child counts from buildFinerLevels.
    * @param[out] a_gasTileTypes   Gas-phase classification of each tile, indexed [level][tile].
    * @param[out] a_solidTileTypes Solid-phase classification of each tile, indexed [level][tile].
    * @param[out] a_tileHosts      Index of the box each tile lies in, or -1, indexed [level][tile].
+   * @param[in]  a_firstChild     Child links from buildFinerLevels.
+   * @param[in]  a_numChildren    Child counts from buildFinerLevels.
    */
   void
-  classifyTiles(const Vector<Vector<int>>&              a_firstChild,
-                const Vector<Vector<int>>&              a_numChildren,
-                Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+  classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                 Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
-                Vector<Vector<int>>&                    a_tileHosts) const;
+                Vector<Vector<int>>&                    a_tileHosts,
+                const Vector<Vector<int>>&              a_firstChild,
+                const Vector<Vector<int>>&              a_numChildren) const;
 
   /**
    * @brief Boxes per leaf the spatial index over a level's boxes is built with.

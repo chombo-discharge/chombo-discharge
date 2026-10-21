@@ -27,8 +27,8 @@
 namespace PolyhedralEB {
 
 void
-fillNodeValues(const BaseIF&   a_function,
-               BaseFab<Real>&  a_nodeValues,
+fillNodeValues(BaseFab<Real>&  a_nodeValues,
+               const BaseIF&   a_function,
                const Box&      a_region,
                const RealVect& a_probLo,
                const Real&     a_dx)
@@ -269,9 +269,9 @@ fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_node
 }
 
 void
-buildSurface(const BaseIF&                 a_function,
-             BaseFab<Real>                 a_intercept[SpaceDim],
+buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
              PolyhedralEB::CutCellSurface& a_surface,
+             const BaseIF&                 a_function,
              const BaseFab<Real>&          a_nodeValues,
              const IntVect&                a_cell,
              const RealVect&               a_probLo,
@@ -304,12 +304,12 @@ buildSurface(const BaseIF&                 a_function,
     }
   }
 
-  decideFaces(a_function, a_surface, a_cell, a_probLo, a_dx);
+  decideFaces(a_surface, a_function, a_cell, a_probLo, a_dx);
 }
 
 void
-decideFaces(const BaseIF&                 a_function,
-            PolyhedralEB::CutCellSurface& a_surface,
+decideFaces(PolyhedralEB::CutCellSurface& a_surface,
+            const BaseIF&                 a_function,
             const IntVect&                a_cell,
             const RealVect&               a_probLo,
             const Real                    a_dx) noexcept

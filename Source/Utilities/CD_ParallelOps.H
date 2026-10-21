@@ -245,12 +245,12 @@ gather(const long long& a_localValue) noexcept;
 
 /**
  * @brief Where this rank's rows start among every rank's, and how many there are in all.
- * @param[in]  a_mine   Rows this rank holds.
  * @param[out] a_offset Rows the ranks before this one hold.
  * @param[out] a_total  Rows every rank holds together.
+ * @param[in]  a_mine   Rows this rank holds.
  */
 inline void
-rankOffset(const long long a_mine, long long& a_offset, long long& a_total) noexcept;
+rankOffset(long long& a_offset, long long& a_total, const long long a_mine) noexcept;
 } // namespace ParallelOps
 
 #include <CD_NamespaceFooter.H>

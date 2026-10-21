@@ -833,6 +833,7 @@ protected:
    * crossed edge stops the run.
    * @param[out]    a_body        The body.
    * @param[in,out] a_surface     The cell's surface; its refined edges' crossings are rewritten.
+   * @param[in,out] a_overrides   Overrides to record the changed faces in, with the cell begun; null records nothing.
    * @param[in]     a_children    The cell's eight children in corner order, which must be given when any edge is
    * refined and describe at least the cell's refined faces and edges; null otherwise.
    * @param[in]     a_edgeRefined Which edges are refined, from edgesRefined.
@@ -843,20 +844,19 @@ protected:
    * the finer level's fills.
    * @param[in]     a_domain      Domain box of the cell's level.
    * @param[in]     a_cell        The cell.
-   * @param[in,out] a_overrides   Overrides to record the changed faces in, with the cell begun; null records nothing.
    * @return Number of quadrants closed onto filled finer cells.
    */
   static int
   stitchBody(PolyhedralEB::CutCellBody&          a_body,
              PolyhedralEB::CutCellSurface&       a_surface,
+             PolyhedralEB::CutCellFaceOverrides* a_overrides,
              const PolyhedralEB::CutCellSurface* a_children,
              const bool*                         a_edgeRefined,
              const BaseFab<signed char>&         a_filled,
              const BaseFab<signed char>&         a_refined,
              const BaseFab<signed char>*         a_fineFilled,
              const Box&                          a_domain,
-             const IntVect&                      a_cell,
-             PolyhedralEB::CutCellFaceOverrides* a_overrides);
+             const IntVect&                      a_cell);
 
   /**
    * @brief Stitch a cut cell's body with its children reconstructed from the implicit function.
@@ -939,22 +939,22 @@ protected:
    * @details The cell states, a mask of the cells that hold a surface, the sets of those cells and their surfaces --
    * everything a cell of the finer level is rebuilt from, apart from faces it restricts to a level above it. Cells
    * the finer level does not hold read s_absent. Collective.
-   * @param[in]  a_fine     The finer level.
-   * @param[in]  a_grids    The coarser level's layout.
-   * @param[in]  a_ring     Width of the ring around every box, in cells of the coarser level.
    * @param[out] a_states   Cell states.
    * @param[out] a_mask     One where a cell holds a surface.
    * @param[out] a_sets     The cells that hold a surface, per box.
    * @param[out] a_surfaces Their surfaces.
+   * @param[in]  a_fine     The finer level.
+   * @param[in]  a_grids    The coarser level's layout.
+   * @param[in]  a_ring     Width of the ring around every box, in cells of the coarser level.
    */
   static void
-  copyFinerCells(const PolyhedralEBGraph&                         a_fine,
-                 const DisjointBoxLayout&                         a_grids,
-                 const int                                        a_ring,
-                 LevelData<BaseFab<signed char>>&                 a_states,
+  copyFinerCells(LevelData<BaseFab<signed char>>&                 a_states,
                  LevelData<BaseFab<signed char>>&                 a_mask,
                  LayoutData<IntVectSet>&                          a_sets,
-                 LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces);
+                 LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces,
+                 const PolyhedralEBGraph&                         a_fine,
+                 const DisjointBoxLayout&                         a_grids,
+                 const int                                        a_ring);
 
   /**
    * @brief Stitch one level: take its refined edges' crossings and its seam faces from the finer level's stored cells,
@@ -1017,16 +1017,16 @@ protected:
    * the tolerance a position falls in and the twenty-six around it, which is what keeps this out of the quadratic
    * scan a surface meeting the mesh squarely would otherwise provoke, with every candidate still measured against
    * so that two positions either side of a lattice wall are not told apart.
-   * @param[in]  a_facets       Triangles, nine reals each.
-   * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
    * @param[out] a_vertices     The vertices, three reals each.
    * @param[out] a_connectivity Three vertex indices per triangle.
+   * @param[in]  a_facets       Triangles, nine reals each.
+   * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
    */
   static void
-  indexFacets(const Vector<Real>& a_facets,
-              const Real          a_tolerance,
-              std::vector<Real>&  a_vertices,
-              std::vector<int>&   a_connectivity);
+  indexFacets(std::vector<Real>&  a_vertices,
+              std::vector<int>&   a_connectivity,
+              const Vector<Real>& a_facets,
+              const Real          a_tolerance);
 
   /**
    * @brief Residual above which the stored moments and the ones PolyGeom recomputes disagree.

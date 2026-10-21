@@ -1712,14 +1712,14 @@ PolyhedralGeometryShop::edgesRefined(bool a_edgeRefined[PolyhedralEB::CutCellSur
 int
 PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
                                    PolyhedralEB::CutCellSurface&       a_surface,
+                                   PolyhedralEB::CutCellFaceOverrides* a_overrides,
                                    const PolyhedralEB::CutCellSurface* a_children,
                                    const bool*                         a_edgeRefined,
                                    const BaseFab<signed char>&         a_filled,
                                    const BaseFab<signed char>&         a_refined,
                                    const BaseFab<signed char>*         a_fineFilled,
                                    const Box&                          a_domain,
-                                   const IntVect&                      a_cell,
-                                   PolyhedralEB::CutCellFaceOverrides* a_overrides)
+                                   const IntVect&                      a_cell)
 {
   CH_TIME("PolyhedralGeometryShop::stitchBody");
 
@@ -2050,7 +2050,7 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
     BaseFab<Real> fineNodeValues;
     BaseFab<Real> fineIntercept[SpaceDim];
 
-    PolyhedralEB::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
+    PolyhedralEB::fillNodeValues(fineNodeValues, f, fineBox, m_probLo, 0.5 * dx);
     PolyhedralEB::defineIntercepts(fineIntercept, fineBox);
 
     for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
@@ -2060,20 +2060,20 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
         child[d] += (c >> d) & 1;
       }
 
-      PolyhedralEB::buildSurface(f, fineIntercept, children[c], fineNodeValues, child, m_probLo, 0.5 * dx);
+      PolyhedralEB::buildSurface(fineIntercept, children[c], f, fineNodeValues, child, m_probLo, 0.5 * dx);
     }
   }
 
   PolyhedralGeometryShop::stitchBody(a_body,
                                      surface,
+                                     nullptr,
                                      anyEdgeRefined ? children : nullptr,
                                      edgeRefined,
                                      a_filled,
                                      a_refined,
                                      nullptr,
                                      domain,
-                                     a_cell,
-                                     nullptr);
+                                     a_cell);
 }
 
 void
@@ -2294,13 +2294,13 @@ PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
 }
 
 void
-PolyhedralGeometryShop::copyFinerCells(const PolyhedralEBGraph&                         a_fine,
-                                       const DisjointBoxLayout&                         a_grids,
-                                       const int                                        a_ring,
-                                       LevelData<BaseFab<signed char>>&                 a_states,
+PolyhedralGeometryShop::copyFinerCells(LevelData<BaseFab<signed char>>&                 a_states,
                                        LevelData<BaseFab<signed char>>&                 a_mask,
                                        LayoutData<IntVectSet>&                          a_sets,
-                                       LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces)
+                                       LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces,
+                                       const PolyhedralEBGraph&                         a_fine,
+                                       const DisjointBoxLayout&                         a_grids,
+                                       const int                                        a_ring)
 {
   CH_TIME("PolyhedralGeometryShop::copyFinerCells");
 
@@ -2383,7 +2383,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
   LevelData<IVSFAB<CutCellSurface>> fineSurfaces;
 
   if (a_fine != nullptr) {
-    PolyhedralGeometryShop::copyFinerCells(*a_fine, grids, numGhost + 1, fineStates, fineMask, fineSets, fineSurfaces);
+    PolyhedralGeometryShop::copyFinerCells(fineStates, fineMask, fineSets, fineSurfaces, *a_fine, grids, numGhost + 1);
   }
 
   LevelData<IVSFAB<CutCellSurface>>& surfaces  = a_coarse.getSurfaces();
@@ -2658,14 +2658,14 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 
       const int numClosed = PolyhedralGeometryShop::stitchBody(body,
                                                                surface,
+                                                               &faces,
                                                                anyEdgeRefined ? children : nullptr,
                                                                edgeRefined,
                                                                filledFab,
                                                                refinedFab,
                                                                fineFilled.box().isEmpty() ? nullptr : &fineFilled,
                                                                domain,
-                                                               iv,
-                                                               &faces);
+                                                               iv);
 
       faces.endCell();
 
@@ -5319,8 +5319,8 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     long long nodeOffset = 0;
     long long edgeOffset = 0;
 
-    ParallelOps::rankOffset(mineNodes, nodeOffset, totalNodes[lvl]);
-    ParallelOps::rankOffset(mineEdges, edgeOffset, totalEdges[lvl]);
+    ParallelOps::rankOffset(nodeOffset, totalNodes[lvl], mineNodes);
+    ParallelOps::rankOffset(edgeOffset, totalEdges[lvl], mineEdges);
 
     // a node is its own element, and an edge's two vertices are written one after the other
     std::vector<long long> nodeConnectivity(mineNodes);
@@ -5557,10 +5557,10 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 }
 
 void
-PolyhedralGeometryShop::indexFacets(const Vector<Real>& a_facets,
-                                    const Real          a_tolerance,
-                                    std::vector<Real>&  a_vertices,
-                                    std::vector<int>&   a_connectivity)
+PolyhedralGeometryShop::indexFacets(std::vector<Real>&  a_vertices,
+                                    std::vector<int>&   a_connectivity,
+                                    const Vector<Real>& a_facets,
+                                    const Real          a_tolerance)
 {
   CH_TIME("PolyhedralGeometryShop::indexFacets");
 
@@ -5747,7 +5747,7 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
     std::vector<Real> vertices;
     std::vector<int>  connectivity;
 
-    PolyhedralGeometryShop::indexFacets(a_facets[lvl], tolerance, vertices, connectivity);
+    PolyhedralGeometryShop::indexFacets(vertices, connectivity, a_facets[lvl], tolerance);
 
     // An element two of whose vertices are the same vertex has collapsed, a triangle to a line or a segment to a
     // point, and bounds nothing.
@@ -5828,7 +5828,7 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
 
     Vector<int> reasons;
 
-    const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
+    const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(reasons, lvl);
 
     std::vector<int> corners;
     std::vector<int> gasType;
@@ -6323,13 +6323,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     Box fineDomain;
 
     if (lvl + 1 < a_graphs.size() && a_graphs[lvl + 1]->isDefined()) {
-      PolyhedralGeometryShop::copyFinerCells(*a_graphs[lvl + 1],
-                                             grids,
-                                             3,
-                                             fineStates,
+      PolyhedralGeometryShop::copyFinerCells(fineStates,
                                              fineMask,
                                              fineSets,
-                                             fineSurfaces);
+                                             fineSurfaces,
+                                             *a_graphs[lvl + 1],
+                                             grids,
+                                             3);
 
       fineDomain = a_graphs[lvl + 1]->getDomain().domainBox();
     }
@@ -6475,13 +6475,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
               PolyhedralGeometryShop::stitchBody(fineBody,
                                                  fineSurface,
                                                  nullptr,
+                                                 nullptr,
                                                  noRefinedEdge,
                                                  fineFilledFab,
                                                  noneRefined,
                                                  nullptr,
                                                  fineDomain,
-                                                 fiv,
-                                                 nullptr);
+                                                 fiv);
 
               Vector<Real> fineFacets;
 
@@ -6908,7 +6908,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   a_nodes.resize(0);
 
   BaseFab<Real> nodeValues;
-  PolyhedralEB::fillNodeValues(*m_baseIF, nodeValues, a_ghostRegion, a_probLo, a_dx);
+  PolyhedralEB::fillNodeValues(nodeValues, *m_baseIF, a_ghostRegion, a_probLo, a_dx);
 
   // The same reading the graph takes: a cell one body cannot describe, or that is mostly a gap of fluid, is filled
   // rather than built. Decided for the whole region before any cell is classified. Nothing is
@@ -6916,14 +6916,14 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   // it -- so no cell is spared for being resolved elsewhere.
   BaseFab<signed char> unresolved(a_ghostRegion, 1);
 
-  PolyhedralEBGraph::findUnresolvedCells(*m_baseIF,
+  PolyhedralEBGraph::findUnresolvedCells(unresolved,
+                                         *m_baseIF,
                                          nodeValues,
                                          a_ghostRegion,
                                          Vector<Box>(),
                                          a_probLo,
                                          a_dx,
-                                         m_fillSplitFluid,
-                                         unresolved);
+                                         m_fillSplitFluid);
 
   IntVectSet irregularCells;
 
@@ -6999,7 +6999,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = ivsIt();
 
     PolyhedralEB::CutCellSurface surface;
-    PolyhedralEB::buildSurface(*m_baseIF, intercept, surface, nodeValues, iv, a_probLo, a_dx);
+    PolyhedralEB::buildSurface(intercept, surface, *m_baseIF, nodeValues, iv, a_probLo, a_dx);
 
     PolyhedralEB::CutCellBody body;
 
