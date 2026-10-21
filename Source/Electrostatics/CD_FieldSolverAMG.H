@@ -187,7 +187,7 @@ protected:
   bool m_isSolverSetup;
 
   /**
-   * @brief PETSc Krylov solver type, e.g. 'cg' or 'gmres'.
+   * @brief PETSc Krylov solver type, KSPBCGS or KSPGMRES, from the 'bicgstab' or 'gmres' option.
    */
   std::string m_kspType;
 

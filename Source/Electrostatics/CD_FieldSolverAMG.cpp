@@ -78,7 +78,21 @@ FieldSolverAMG::parseSolverSettings()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("ksp_type", m_kspType);
+  // The Krylov solver is given by our name for it, and stored as the PETSc type.
+  std::string kspType;
+
+  pp.get("ksp_type", kspType);
+
+  if (kspType == "bicgstab") {
+    m_kspType = KSPBCGS;
+  }
+  else if (kspType == "gmres") {
+    m_kspType = KSPGMRES;
+  }
+  else {
+    MayDay::Abort("FieldSolverAMG::parseSolverSettings -- 'ksp_type' must be 'bicgstab' or 'gmres'");
+  }
+
   pp.get("pc_type", m_pcType);
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);

@@ -128,7 +128,7 @@ FieldSolverAMG.bc.z.hi               = dirichlet_custom    ## Bc type (see docs)
 FieldSolverAMG.plt_vars              = phi rho E           ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverAMG.use_regrid_slopes     = true                ## Use slopes when regridding or not
 
-FieldSolverAMG.ksp_type         = cg        ## PETSc Krylov solver, e.g. 'cg', 'gmres', 'bcgs'
+FieldSolverAMG.ksp_type         = gmres     ## Krylov solver, 'bicgstab' or 'gmres'
 FieldSolverAMG.pc_type          = gamg      ## PETSc preconditioner, e.g. 'gamg', 'hypre'
 FieldSolverAMG.ksp_rtol         = 1.E-10    ## Relative residual tolerance
 FieldSolverAMG.ksp_atol         = 1.E-50    ## Absolute residual tolerance
