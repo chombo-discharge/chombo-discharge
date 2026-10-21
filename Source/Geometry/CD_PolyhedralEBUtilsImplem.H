@@ -409,6 +409,33 @@ sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept
   return (a_a - a_b).vectorLength() <= s_weldTolerance;
 }
 
+inline bool
+sameToRoundOff(const RealVect& a_a, const RealVect& a_b) noexcept
+{
+  return (a_a - a_b).vectorLength() <= s_roundOffTolerance;
+}
+
+inline RealVect
+crossing(const RealVect& a_a, const RealVect& a_b, const int a_dir) noexcept
+{
+  if (a_a[a_dir] == 0.0) {
+    return a_a;
+  }
+
+  if (a_b[a_dir] == 0.0) {
+    return a_b;
+  }
+
+  const RealVect& lo = (a_a[a_dir] < 0.0) ? a_a : a_b;
+  const RealVect& hi = (a_a[a_dir] < 0.0) ? a_b : a_a;
+
+  RealVect x = lo + (hi - lo) * (lo[a_dir] / (lo[a_dir] - hi[a_dir]));
+
+  x[a_dir] = 0.0;
+
+  return x;
+}
+
 } // namespace detail
 } // namespace PolyhedralEB
 

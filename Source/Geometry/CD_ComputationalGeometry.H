@@ -213,12 +213,13 @@ public:
 
   /**
    * @brief Classify a box on a level from the grids makeGrids built.
-   * @details Every level is a partition of its domain into boxes, each classified per phase, so the box is
-   * regular if every box of the level it meets is regular in the phase, covered if every one is covered, and
-   * irregular otherwise -- including when it meets both a regular and a covered box, since the surface must then
-   * lie between them. This is the answer for a cell or a box anywhere on a stored level; the cut cells themselves
-   * are the polyhedral graph's. A level the geometry built no boxes on -- everything below it a leaf, so nothing
-   * refined that far -- is answered by the level below it, coarsening as the domain overload does.
+   * @details Every level holds boxes, each classified per phase, so the box is regular if every box of the level
+   * it meets is regular in the phase, covered if every one is covered, and irregular otherwise -- including when
+   * it meets both a regular and a covered box, since the surface must then lie between them. This is the answer
+   * for a cell or a box anywhere on a stored level; the cut cells themselves are the polyhedral graph's. A level
+   * holds boxes only where the level below refined, so the part of the box under an irregular leaf of a coarser
+   * level, and all of it on a level the geometry built no boxes on, is answered by the level below, coarsening
+   * the box outward. A coarsest level that does not hold all of the box answers irregular.
    * @param[in] a_box   Box to classify, on the level's index space.
    * @param[in] a_level Level, 0 being the coarsest.
    * @param[in] a_phase Phase.
@@ -318,12 +319,12 @@ public:
   /**
    * @brief The boxes that split in the upward pass on a level, with why: 1 a pair inside the box, 2 a pair reaching
    * into the ring outside it, 3 two surfaces facing each other across the band.
-   * @param[in]  a_level   Level, 0 being the coarsest.
    * @param[out] a_reasons One reason per box, parallel to the returned boxes.
+   * @param[in]  a_level   Level, 0 being the coarsest.
    * @return The boxes.
    */
   const Vector<Box>&
-  getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept;
+  getSplitBoxes(Vector<int>& a_reasons, const int a_level) const noexcept;
 
   /**
    * @brief Classification of every box on a level for a phase, parallel to getBoxes(level).
@@ -785,6 +786,32 @@ protected:
   doublyCrossedEdge(const Box& a_box, const int a_level, const phase::which_phase a_phase) const;
 
   /**
+   * @brief Whether a face of a cell toward the level above is pierced at its middle by the surface.
+   * @details In three dimensions the middle of a cell face is a node of the level above and of no cell of this
+   * level. Four corners that agree under isFluid with a middle that disagrees are a surface that dips through the
+   * face and back without crossing any of its edges: the level above sees it, the cell on this side does not. A
+   * cell that is regular or covered at its own spacing then has to close against an opening it holds no volume
+   * behind, and its body is a film of zero thickness lying in that face. Only the faces toward a cell the level
+   * above covers are tested, since a face between two cells of this level is read from the same nodes on both
+   * sides. Such a cell is refined, after which the level above describes the volume under the opening.
+   *
+   * Corners that read exactly zero are left open, as in doublyCrossedEdge: the corners count as agreeing if any
+   * reading of them makes them, and a middle that is itself zero decides nothing. In two dimensions the middle of
+   * a face is the middle of an edge, which doublyCrossedEdge tests, and this returns false.
+   * @param[in] a_cell    Cell to test.
+   * @param[in] a_level   Level the cell is on.
+   * @param[in] a_phase   Phase whose implicit function is tested.
+   * @param[in] a_refined Whether each cell around a_cell is covered by the level above; its box contains every
+   * face neighbour of a_cell inside the domain.
+   * @return True if some face of a_cell toward a refined neighbour is pierced at its middle.
+   */
+  bool
+  piercedSeamFace(const IntVect&           a_cell,
+                  const int                a_level,
+                  const phase::which_phase a_phase,
+                  const BaseFab<bool>&     a_refined) const;
+
+  /**
    * @brief Step 2: tile the boxes that are irregular in either phase into one properly nested set per level.
    * @details Pseudocode:
    *
@@ -820,18 +847,18 @@ protected:
    * Nothing is cut here; the hosts are what decimateBoxes reads. The box a tile lies in is found by descending
    * the child links from the start level, where the box containing a point is lattice arithmetic.
    *
-   * @param[in]  a_firstChild     Child links from buildFinerLevels.
-   * @param[in]  a_numChildren    Child counts from buildFinerLevels.
    * @param[out] a_gasTileTypes   Gas-phase classification of each tile, indexed [level][tile].
    * @param[out] a_solidTileTypes Solid-phase classification of each tile, indexed [level][tile].
    * @param[out] a_tileHosts      Index of the box each tile lies in, or -1, indexed [level][tile].
+   * @param[in]  a_firstChild     Child links from buildFinerLevels.
+   * @param[in]  a_numChildren    Child counts from buildFinerLevels.
    */
   void
-  classifyTiles(const Vector<Vector<int>>&              a_firstChild,
-                const Vector<Vector<int>>&              a_numChildren,
-                Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+  classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                 Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
-                Vector<Vector<int>>&                    a_tileHosts) const;
+                Vector<Vector<int>>&                    a_tileHosts,
+                const Vector<Vector<int>>&              a_firstChild,
+                const Vector<Vector<int>>&              a_numChildren) const;
 
   /**
    * @brief Boxes per leaf the spatial index over a level's boxes is built with.
@@ -880,7 +907,8 @@ protected:
   meeting(const std::shared_ptr<BoxTree>& a_tree, const Vector<Box>& a_boxes, const Box& a_box);
 
   /**
-   * @brief Tag the cells on the coarse side of a level boundary that the level above it would cross twice.
+   * @brief Tag the cells on the coarse side of a level boundary that the level above it would cross twice, or
+   * pierce through the middle of a shared face.
    * @details A cell whose edge carries no crossing while each of its halves carries one describes a surface that
    * enters and leaves through that edge. Nothing is wrong with it until the level above describes the other side
    * of that face: the coarse chord then has no crossing to match the two the children have, and the two
@@ -895,6 +923,9 @@ protected:
    * include one that meets the refined region along that edge alone. Of the other three, the two sharing a face
    * with the refined one carry the same edge and are tagged on this pass, and once they are refined the fourth
    * has a refined face neighbour and is taken on the next, which is what the repeated passes are for.
+   *
+   * A face toward the level above that is pierced at its middle (piercedSeamFace) is tagged for the same reason:
+   * the level above describes an opening there that the cell cannot match.
    * @param[in,out] a_tags Tags, in the tiler's levels; cells are added to them.
    * @return True if any cell was tagged, so that the tiles must be built again.
    */

@@ -19,7 +19,7 @@ AmrMesh.eb_max_block_size       = 8              ## Largest such box, a whole nu
 AmrMesh.ref_rat                 = 2 2 2 2 2 2    ## Refinement ratios (mixed ratios are allowed).
 AmrMesh.num_ghost               = 2              ## Number of ghost cells.
 AmrMesh.lsf_ghost               = 2              ## Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost                = 4              ## Set number of of ghost cells for EB stuff
+AmrMesh.eb_ghost                = 2              ## Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order         = 2              ## Multigrid interpolation order
 AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radius
 AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
@@ -91,6 +91,7 @@ NoisePlane.clamp_dx     = 0.1            ## Noise clamp falloff
 # ====================================================================================================
 # PolyhedralGeometryShop class options
 # ====================================================================================================
-PolyhedralGeometryShop.sanity_check      = true     ## Check the surface is closed, on every level and across every seam
-PolyhedralGeometryShop.test_copy         = true     ## Copy the graphs onto other layouts, and require every body unchanged
-PolyhedralGeometryShop.write_surface     = false    ## Write the interface triangles for inspection
+PolyhedralGeometryShop.sanity_check         = true      ## Check the surface is closed, on every level and across every seam
+PolyhedralGeometryShop.test_copy            = false     ## Copy the graphs onto other layouts, and require every body unchanged
+PolyhedralGeometryShop.write_surface        = false     ## Write the interface triangles for inspection
+PolyhedralGeometryShop.fill_split_fluid     = always    ## Fill fluid cells

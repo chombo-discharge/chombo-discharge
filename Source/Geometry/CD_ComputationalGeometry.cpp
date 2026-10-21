@@ -43,6 +43,7 @@
 #include <CD_Units.H>
 #include <CD_ScanShop.H>
 #include <CD_PolyhedralGeometryShop.H>
+#include <CD_PolyhedralEBUtils.H>
 #include <CD_CutCellBody.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
@@ -497,7 +498,7 @@ ComputationalGeometry::makeGrids(const ProblemDomain& a_startDomain,
   Vector<Vector<int>>                    tileHosts(numLevels);
 
   timer.startEvent("Classify tiles");
-  this->classifyTiles(firstChild, numChildren, gasTileTypes, solidTileTypes, tileHosts);
+  this->classifyTiles(gasTileTypes, solidTileTypes, tileHosts, firstChild, numChildren);
   timer.stopEvent("Classify tiles");
 
   timer.startEvent("Decimate boxes");
@@ -574,6 +575,9 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
   bool anyCovered = false;
   bool decided    = false;
 
+  // The boxes the query meets. The tree pads its K-ary nodes by repeating a child, so a box can be met more than once.
+  std::vector<int> met;
+
   // The query box as a bounding volume, its cells taken as the unit cubes they are. A node is entered if its
   // bounds meet it; the exact box test then filters the candidates, which a touching node can produce.
   const BV query = this->boundingVolume(a_box);
@@ -601,6 +605,8 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
       if (!boxes[index].intersectsNotEmpty(a_box)) {
         continue;
       }
+
+      met.push_back(index);
 
       switch (types[index]) {
       case GeometryService::Regular: {
@@ -631,6 +637,41 @@ ComputationalGeometry::classify(const Box& a_box, const int a_level, const phase
     return GeometryService::Irregular;
   }
 
+  // A level holds boxes only where the level below refined, which a box regular or covered in both phases always
+  // does and an irregular leaf never does. The cells of the query the level does not hold lie under such a leaf,
+  // and the level below answers for them, coarsening outward as the empty level above does. The boxes of a level
+  // are disjoint, so the overlaps of the distinct boxes met add up to the cells held.
+  std::sort(met.begin(), met.end());
+
+  met.erase(std::unique(met.begin(), met.end()), met.end());
+
+  long long numHeld = 0;
+
+  for (const int index : met) {
+    numHeld += (boxes[index] & a_box).numPts();
+  }
+
+  CH_assert(numHeld <= a_box.numPts());
+
+  if (numHeld < a_box.numPts()) {
+    if (a_level == 0) {
+      return GeometryService::Irregular;
+    }
+
+    const GeometryService::InOut below = this->classify(coarsen(a_box, 2), a_level - 1, a_phase);
+
+    if (below == GeometryService::Irregular) {
+      return GeometryService::Irregular;
+    }
+
+    anyRegular = anyRegular || below == GeometryService::Regular;
+    anyCovered = anyCovered || below == GeometryService::Covered;
+
+    if (anyRegular && anyCovered) {
+      return GeometryService::Irregular;
+    }
+  }
+
   return anyCovered ? GeometryService::Covered : GeometryService::Regular;
 }
 
@@ -641,6 +682,8 @@ ComputationalGeometry::classify(const Box& a_box, const ProblemDomain& a_domain,
   if (m_verbose) {
     pout() << "ComputationalGeometry::classify(ProblemDomain)" << endl;
   }
+
+  CH_assert(m_domains.size() > 0);
 
   const int level = this->getLevel(a_domain);
 
@@ -829,6 +872,8 @@ ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
                                 const int                    a_level,
                                 const GeometryService::InOut a_type) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_boxes.size());
+
   Vector<Box> boxes;
 
   const Vector<Box>&                    levelBoxes = m_boxes[a_level];
@@ -848,18 +893,23 @@ ComputationalGeometry::getBoxes(const phase::which_phase     a_phase,
 const Vector<Box>&
 ComputationalGeometry::getBoxes(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
+
   return m_boxes[a_level];
 }
 
 const Vector<Box>&
 ComputationalGeometry::getCutTiles(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
+
   return m_cutTiles[a_level];
 }
 
 const Vector<Box>&
-ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) const noexcept
+ComputationalGeometry::getSplitBoxes(Vector<int>& a_reasons, const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
   CH_assert(m_splitBoxes[a_level].size() == m_splitReasons[a_level].size());
 
   a_reasons = m_splitReasons[a_level];
@@ -870,18 +920,24 @@ ComputationalGeometry::getSplitBoxes(const int a_level, Vector<int>& a_reasons) 
 const Vector<GeometryService::InOut>&
 ComputationalGeometry::getTypes(const phase::which_phase a_phase, const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
+
   return this->types(a_phase)[a_level];
 }
 
 const ProblemDomain&
 ComputationalGeometry::getDomain(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
+
   return m_domains[a_level];
 }
 
 Real
 ComputationalGeometry::getDx(const int a_level) const noexcept
 {
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
+
   return m_dx[a_level];
 }
 
@@ -923,6 +979,9 @@ ComputationalGeometry::buildFinerLevels(Vector<Vector<int>>& a_firstChild, Vecto
   if (m_verbose) {
     pout() << "ComputationalGeometry::buildFinerLevels" << endl;
   }
+
+  CH_assert(a_firstChild.size() >= m_stopLevel);
+  CH_assert(a_numChildren.size() == a_firstChild.size());
 
   auto isIrregular = [](const GeometryService::InOut a_type) -> bool {
     return a_type == GeometryService::Irregular;
@@ -1167,7 +1226,7 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
       x[dir] += dx * static_cast<Real>(iv[dir]);
     }
 
-    const Real value = PolyhedralGeometryShop::snappedValue(f, x, dx);
+    const Real value = PolyhedralEB::snappedValue(f, x, dx);
 
     closest = std::min(closest, std::abs(value));
 
@@ -1218,7 +1277,7 @@ ComputationalGeometry::classifyBox(const Box& a_box, const int a_level, const ph
       x[dir] += fineDx;
 
       // the midpoint is a node of the level above, and is read at that level's spacing
-      if (PolyhedralEB::isFluid(PolyhedralGeometryShop::snappedValue(f, x, fineDx)) != anyFluid) {
+      if (PolyhedralEB::isFluid(PolyhedralEB::snappedValue(f, x, fineDx)) != anyFluid) {
         return GeometryService::Irregular;
       }
     }
@@ -1254,7 +1313,7 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
   // since that is the spacing the level above would classify it at.
   BaseFab<Real> nodeValues;
 
-  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, valid, m_probLo, dx);
+  PolyhedralEB::fillNodeValues(nodeValues, f, valid, m_probLo, dx);
 
   const Box& nodeBox = nodeValues.box();
 
@@ -1295,7 +1354,7 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
 
       x[dir] += 0.5 * dx;
 
-      const Real midValue = PolyhedralGeometryShop::snappedValue(f, x, fineDx);
+      const Real midValue = PolyhedralEB::snappedValue(f, x, fineDx);
 
       if (midValue == 0.0) {
         continue;
@@ -1318,6 +1377,97 @@ ComputationalGeometry::doublyCrossedEdge(const Box& a_box, const int a_level, co
 }
 
 bool
+ComputationalGeometry::piercedSeamFace(const IntVect&           a_cell,
+                                       const int                a_level,
+                                       const phase::which_phase a_phase,
+                                       const BaseFab<bool>&     a_refined) const
+{
+  CH_TIME("ComputationalGeometry::piercedSeamFace");
+  if (m_verbose) {
+    pout() << "ComputationalGeometry::piercedSeamFace" << endl;
+  }
+
+  if (SpaceDim < 3) {
+    return false;
+  }
+
+  const RefCountedPtr<BaseIF>& implicitFunction = this->getImplicitFunction(a_phase);
+
+  if (implicitFunction.isNull()) {
+    return false;
+  }
+
+  const BaseIF& f = *implicitFunction;
+
+  const Real dx = m_dx[a_level];
+
+  CH_assert(dx > 0.0);
+  const Real fineDx = 0.5 * dx;
+
+  // The node values of the cell, as it is built from, and the middle of each face toward the level above, which
+  // is a node of that level and is snapped at its spacing.
+  BaseFab<Real> nodeValues;
+
+  PolyhedralEB::fillNodeValues(nodeValues, f, Box(a_cell, a_cell), m_probLo, dx);
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int side = 0; side < 2; side++) {
+      const IntVect other = a_cell + (2 * side - 1) * BASISV(dir);
+
+      if (!a_refined.box().contains(other) || !a_refined(other, 0)) {
+        continue;
+      }
+
+      const int t0 = (dir + 1) % SpaceDim;
+      const int t1 = (dir + 2) % SpaceDim;
+
+      // the middle as a node of the level above, placed as that level places its nodes
+      IntVect middle = 2 * a_cell;
+
+      middle[dir] += 2 * side;
+      middle[t0] += 1;
+      middle[t1] += 1;
+
+      RealVect x = m_probLo;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] += fineDx * static_cast<Real>(middle[d]);
+      }
+
+      const Real midValue = PolyhedralEB::snappedValue(f, x, fineDx);
+
+      if (midValue == 0.0) {
+        continue;
+      }
+
+      const bool midFluid = PolyhedralEB::isFluid(midValue);
+
+      // The corners are read as the middle's opposite wherever they are free to be, since that is the reading
+      // that hides the piercing.
+      bool agreeAgainst = true;
+
+      for (int c = 0; c < 4 && agreeAgainst; c++) {
+        IntVect node = a_cell;
+
+        node[dir] += side;
+        node[t0] += c & 1;
+        node[t1] += (c >> 1) & 1;
+
+        const Real value = nodeValues(node, 0);
+
+        agreeAgainst = (value == 0.0) || (PolyhedralEB::isFluid(value) != midFluid);
+      }
+
+      if (agreeAgainst) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+bool
 ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, const phase::which_phase a_phase) const
 {
   CH_TIME("ComputationalGeometry::hasTwistedPatch");
@@ -1325,6 +1475,8 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
   if (m_verbose) {
     pout() << "ComputationalGeometry::hasTwistedPatch" << endl;
   }
+
+  CH_assert(a_level >= 0 && a_level < m_domains.size());
 
 #if CH_SPACEDIM == 3
   using PolyhedralEB::CutCellBody;
@@ -1346,8 +1498,8 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
-  PolyhedralGeometryShop::defineIntercepts(intercept, grown);
+  PolyhedralEB::fillNodeValues(nodeValues, f, grown, m_probLo, dx);
+  PolyhedralEB::defineIntercepts(intercept, grown);
 
   constexpr int perDir = CutCellSurface::s_numEdges / SpaceDim;
 
@@ -1362,7 +1514,7 @@ ComputationalGeometry::hasTwistedPatch(const Box& a_box, const int a_level, cons
   for (BoxIterator bit(valid); bit.ok(); ++bit) {
     CutCellSurface surface;
 
-    PolyhedralGeometryShop::buildSurface(f, intercept, surface, nodeValues, bit(), m_probLo, dx);
+    PolyhedralEB::buildSurface(intercept, surface, f, nodeValues, bit(), m_probLo, dx);
 
     if (CutCellBody::classify(surface) != CutCellBody::Kind::Cut) {
       continue;
@@ -1439,8 +1591,8 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
   BaseFab<Real> nodeValues;
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralGeometryShop::fillNodeValues(f, nodeValues, grown, m_probLo, dx);
-  PolyhedralGeometryShop::defineIntercepts(intercept, grown);
+  PolyhedralEB::fillNodeValues(nodeValues, f, grown, m_probLo, dx);
+  PolyhedralEB::defineIntercepts(intercept, grown);
 
   BaseFab<Real> normal(grown, SpaceDim);
   BaseFab<int>  isCut(grown, 1);
@@ -1452,7 +1604,7 @@ ComputationalGeometry::exceedsCurvature(const Box& a_box, const int a_level, con
 
     PolyhedralEB::CutCellSurface surface;
 
-    PolyhedralGeometryShop::buildSurface(f, intercept, surface, nodeValues, iv, m_probLo, dx);
+    PolyhedralEB::buildSurface(intercept, surface, f, nodeValues, iv, m_probLo, dx);
 
     if (PolyhedralEB::CutCellBody::classify(surface) != PolyhedralEB::CutCellBody::Kind::Cut) {
       continue;
@@ -1558,10 +1710,11 @@ ComputationalGeometry::makeTiles()
                         m_maxBlockSize * IntVect::Unit);
 
   // The tiles are built, then read back: a cell left on the coarse side of a level boundary whose edge the level
-  // above crosses twice is tagged, and the tiles are built again. The pass has to come after the tiles exist
-  // rather than before, because the tiled region is not a function of the box classification alone -- the tiler
-  // nests, and nesting puts tiles above boxes that never refined, which is exactly where such a cell hides. Each
-  // pass only adds tags, so the region grows and the loop ends; in practice one further pass finds nothing.
+  // above crosses twice, or whose shared face it pierces at the middle, is tagged, and the tiles are built again. The
+  // pass has to come after the tiles exist rather than before, because the tiled region is not a function of the box
+  // classification alone -- the tiler nests, and nesting puts tiles above boxes that never refined, which is exactly
+  // where such a cell hides. Each pass only adds tags, so the region grows and the loop ends; in practice one further
+  // pass finds nothing.
   for (int pass = 0; pass < s_maxTilePasses; pass++) {
     Vector<Vector<Box>> tiles;
 
@@ -1583,12 +1736,13 @@ ComputationalGeometry::makeTiles()
     }
 
     if (m_verbose && procID() == 0) {
-      pout() << "ComputationalGeometry::makeTiles - tiling again for the cells the level above would cross twice"
-             << endl;
+      pout() << "ComputationalGeometry::makeTiles - tiling again for the cells the level above would cross twice or "
+             << "pierce" << endl;
     }
   }
 
-  MayDay::Error("ComputationalGeometry::makeTiles - the tiles never resolved every doubly crossed edge");
+  MayDay::Error("ComputationalGeometry::makeTiles - the tiles never resolved every doubly crossed edge and pierced "
+                "face");
 }
 
 bool
@@ -1598,6 +1752,8 @@ ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
   if (m_verbose) {
     pout() << "ComputationalGeometry::tagUnresolvedSeams" << endl;
   }
+
+  CH_assert(a_tags.size() >= m_stopLevel - m_startLevel);
 
   const phase::which_phase phases[2] = {phase::gas, phase::solid};
 
@@ -1659,7 +1815,8 @@ ComputationalGeometry::tagUnresolvedSeams(Vector<IntVectSet>& a_tags) const
         }
 
         for (const phase::which_phase& curPhase : phases) {
-          if (this->doublyCrossedEdge(Box(iv, iv), lvl, curPhase)) {
+          if (this->doublyCrossedEdge(Box(iv, iv), lvl, curPhase) ||
+              this->piercedSeamFace(iv, lvl, curPhase, refined)) {
             levelTags |= iv;
 
             numTagged++;
@@ -1701,6 +1858,8 @@ ComputationalGeometry::buildBoxTree(const int a_level)
     pout() << "ComputationalGeometry::buildBoxTree" << endl;
   }
 
+  CH_assert(a_level >= 0 && a_level < m_boxes.size());
+
   m_boxTrees.resize(m_boxes.size());
 
   m_boxTrees[a_level] = this->buildTree(m_boxes[a_level]);
@@ -1739,6 +1898,8 @@ ComputationalGeometry::buildTileTrees()
 std::shared_ptr<ComputationalGeometry::BoxTree>
 ComputationalGeometry::buildTree(const Vector<Box>& a_boxes) const
 {
+  CH_TIME("ComputationalGeometry::buildTree");
+
   if (a_boxes.size() == 0) {
     return nullptr;
   }
@@ -1837,16 +1998,18 @@ ComputationalGeometry::containingBox(const int a_level, const IntVect& a_cell) c
 }
 
 void
-ComputationalGeometry::classifyTiles(const Vector<Vector<int>>&              a_firstChild,
-                                     const Vector<Vector<int>>&              a_numChildren,
-                                     Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
+ComputationalGeometry::classifyTiles(Vector<Vector<GeometryService::InOut>>& a_gasTileTypes,
                                      Vector<Vector<GeometryService::InOut>>& a_solidTileTypes,
-                                     Vector<Vector<int>>&                    a_tileHosts) const
+                                     Vector<Vector<int>>&                    a_tileHosts,
+                                     const Vector<Vector<int>>&              a_firstChild,
+                                     const Vector<Vector<int>>&              a_numChildren) const
 {
   CH_TIME("ComputationalGeometry::classifyTiles");
   if (m_verbose) {
     pout() << "ComputationalGeometry::classifyTiles" << endl;
   }
+
+  CH_assert(a_numChildren.size() == a_firstChild.size());
 
   constexpr int regular   = 1;
   constexpr int covered   = 2;

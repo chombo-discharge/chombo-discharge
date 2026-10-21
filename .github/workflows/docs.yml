@@ -24,6 +24,14 @@ jobs:
           sudo apt install texlive
           sudo apt install texlive-latex-extra
           sudo apt install latexmk
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: |
           python3 -m pip install sphinx==5.0.0 sphinx_rtd_theme sphinxcontrib-bibtex
 
       - name: Build doxygen
