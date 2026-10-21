@@ -18,9 +18,15 @@
 // Petsc includes
 #include <petsc.h>
 
+// Std includes
+#include <vector>
+
 // Chombo includes
 #include <RefCountedPtr.H>
 #include <RealVect.H>
+#include <LayoutData.H>
+#include <BaseFab.H>
+#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_PetscGrid.H>
@@ -57,18 +63,28 @@
  *   face fluxes that cover it, using the same fine-face stencils as the fine rows. The coarse and fine rows thus see
  *   the same flux through the interface, which makes the composite operator conservative.
  *
- * The coefficients alpha, beta, a and b are multiplied into the matrix entries at assembly, so changing any of them
- * means refilling the matrix (beta alone could be applied with MatScale). Refilling is not implemented yet; it follows
- * this plan:
+ * The coefficients alpha, beta, a and b are multiplied into the matrix entries, so changing any of them means refilling
+ * the matrix. The a- and b-coefficients are held by reference, so the caller can change their values in place;
+ * setCoefficients points the operator to other data, and setAlphaAndBeta changes alpha and beta. Neither touches the
+ * matrix: fillMatrix is the only function that does. It refills the existing matrix, keeping its preallocation and
+ * sparsity pattern, so the AMG preconditioner can keep its interpolation (PCGAMGSetReuseInterpolation) and only
+ * recompute its coarse operators.
  *
- * - Refill the existing matrix: MatZeroEntries and the same assembly, which keeps the preallocation and the sparsity
- *   pattern. Every stencil is recomputed, so the result is the same as a fresh assembly. The AMG preconditioner keeps
- *   its interpolation (PCGAMGSetReuseInterpolation) and only recomputes its coarse operators.
- * - If recomputing the stencils dominates, store the face flux stencils without beta and b, one per face, for the faces
- *   whose stencils are expensive: EB faces, domain faces, and the fine faces on refinement boundaries (with the ghost
- *   cells already replaced). The coarse side of a refinement boundary reuses the stencils of the fine faces that
- *   cover it, each multiplied by its own fine-face b. Regular faces between valid cells on one level are two-point
- *   differences and are recomputed.
+ * Faces between two valid cells on one level have two-point stencils, which fillMatrix computes as it goes. The other
+ * faces have stencils that are expensive to compute, so they are computed once per define and stored without beta and
+ * b; fillMatrix then only multiplies them by beta and the b-coefficient on the face. The stored stencils are over PETSc
+ * rows, with ghost cells already replaced, and are held per category so that fillMatrix iterates over each category
+ * on its own:
+ *
+ * - Domain faces: m_domainFluxStencils, with their boundary weights in m_boundaryWeights.
+ * - EB faces: m_ebFluxStencils.
+ * - Fine side of a refinement boundary: m_fineCFFluxStencils, multiplied by the fine-face b.
+ * - Coarse side of a refinement boundary: m_coarCFFluxStencils, one stencil per fine face under the coarse face. Each
+ * is multiplied by the b-coefficient on its fine face, which fillMatrix first copies from the fine level into the index
+ *   space of the coarse level (m_bCoefFiCo).
+ *
+ * Only the domain faces are handled so far, and their stencils are computed in fillMatrix rather than stored; the
+ * other categories, and the functions that define them, are placeholders.
  */
 class PetscHelmholtzOp
 {
@@ -113,7 +129,8 @@ public:
 
   /**
    * @brief Define the operator.
-   * @details This defines the domain BC on the level and assembles the matrix.
+   * @details This defines the domain BC, creates the matrix, and fills it.
+   * The a- and b-coefficients are held by reference, see setCoefficients.
    * @param[in] a_petscGrid PETSc grid (rows)
    * @param[in] a_domainBc  Domain boundary conditions
    * @param[in] a_aCoef     Cell-centered a-coefficient
@@ -132,6 +149,31 @@ public:
          const Vector<Real>&                          a_dx,
          const Real                                   a_alpha,
          const Real                                   a_beta) noexcept;
+
+  /**
+   * @brief Set alpha and beta. The matrix is not changed until fillMatrix is called.
+   * @param[in] a_alpha Operator alpha
+   * @param[in] a_beta  Operator beta
+   */
+  virtual void
+  setAlphaAndBeta(const Real a_alpha, const Real a_beta) noexcept;
+
+  /**
+   * @brief Point the operator to other a- and b-coefficients. The matrix is not changed until fillMatrix is called.
+   * @details The coefficients are held by reference, so later changes to their values are seen by fillMatrix.
+   * @param[in] a_aCoef Cell-centered a-coefficient
+   * @param[in] a_bCoef Face-centered b-coefficient
+   */
+  virtual void
+  setCoefficients(const MFAMRCellData& a_aCoef, const MFAMRFluxData& a_bCoef) noexcept;
+
+  /**
+   * @brief Fill the matrix from the current alpha, beta, and a- and b-coefficients.
+   * @details This refills the existing matrix, keeping its preallocation and sparsity pattern. It also stores the
+   * boundary weights used by addBoundaryConditionsToRHS.
+   */
+  virtual void
+  fillMatrix() noexcept;
 
   /**
    * @brief Get the assembled matrix.
@@ -208,10 +250,50 @@ protected:
 
   /**
    * @brief Weight w_B of the boundary data in the flux through each domain face.
-   * @details From PetscHelmholtzDomainBC::getFaceFluxStencil, filled when the matrix is assembled. Defined on the phase
-   * that is assembled.
+   * @details From PetscHelmholtzDomainBC::getFaceFluxStencil, filled by fillMatrix. Defined on the phase that is
+   * assembled.
    */
   EBAMRIFData m_boundaryWeights;
+
+  /**
+   * @brief Flux stencils through the domain faces, without beta and b, over PETSc rows.
+   * @details Indexed as [dir][side][level], with Side::Lo = 0 and Side::Hi = 1. Each BaseFab is defined over the cells
+   * of the box that abut the domain side, and holds the stencil of the flux through the domain face of each cell.
+   * Placeholder: not defined or used yet.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseFab<PetscStencil>>>> m_domainFluxStencils[SpaceDim][2];
+
+  /**
+   * @brief Flux stencils through the EB faces, without beta and b, over PETSc rows.
+   * @details Indexed by level, with one stencil per cut cell. Placeholder: not defined or used yet.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<PetscStencil>>>> m_ebFluxStencils;
+
+  /**
+   * @brief Flux stencils through the fine faces on a refinement boundary, seen from the fine side.
+   * @details Without beta and b, over PETSc rows, with the coarse-fine ghost cells replaced. Indexed as
+   * [dir][side][level]. Each BaseFab is defined over the cells of the box that abut the box side, and holds the stencil
+   * of the flux through that side for the cells whose neighbor across it is a coarse-fine ghost cell; other entries are
+   * empty. Placeholder: not defined or used yet.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseFab<PetscStencil>>>> m_fineCFFluxStencils[SpaceDim][2];
+
+  /**
+   * @brief Flux stencils through the fine faces on a refinement boundary, seen from the coarse side.
+   * @details Without beta and b, over PETSc rows. Indexed as [dir][side][level], for the levels below the finest. Each
+   * BaseFab is defined over the cells of the coarse box. For a coarse cell whose neighbor across the side is covered by
+   * the finer level, the entry holds the stencils of the fine faces under the coarse face, in a fixed order that
+   * matches the fine faces in m_bCoefFiCo; other entries are empty. Placeholder: not defined or used yet.
+   */
+  Vector<RefCountedPtr<LayoutData<BaseFab<std::vector<PetscStencil>>>>> m_coarCFFluxStencils[SpaceDim][2];
+
+  /**
+   * @brief The b-coefficient of the finer level, in the index space of the coarse level.
+   * @details Entry lvl is defined on the grids of level lvl refined to level lvl + 1 (PetscGrid::getMFLevelGridsFiCo),
+   * which share DataIndex with level lvl, so that the coarse side of a refinement boundary finds the fine-face b
+   * under its own grid index. Copied from the finer level by fillMatrix. Placeholder: not defined or used yet.
+   */
+  EBAMRFluxData m_bCoefFiCo;
 
   /**
    * @brief Abort unless the grids are supported by this operator: one level, no embedded boundaries.
@@ -220,10 +302,38 @@ protected:
   checkSupported() const noexcept;
 
   /**
-   * @brief Assemble the matrix.
+   * @brief Create the matrix, with its preallocation, and allocate the boundary weights.
    */
   virtual void
-  assembleMatrix() noexcept;
+  createMatrix() noexcept;
+
+  /**
+   * @brief Define the flux stencils through the domain faces, m_domainFluxStencils.
+   * @details Placeholder: not implemented yet, and aborts.
+   */
+  virtual void
+  defineDomainFluxStencils() noexcept;
+
+  /**
+   * @brief Define the flux stencils through the EB faces, m_ebFluxStencils.
+   * @details Placeholder: not implemented yet, and aborts.
+   */
+  virtual void
+  defineEBFluxStencils() noexcept;
+
+  /**
+   * @brief Define the flux stencils through the refinement boundaries, m_fineCFFluxStencils and m_coarCFFluxStencils.
+   * @details Placeholder: not implemented yet, and aborts.
+   */
+  virtual void
+  defineCoarseFineFluxStencils() noexcept;
+
+  /**
+   * @brief Copy the b-coefficient of each finer level into the index space of the coarse level, m_bCoefFiCo.
+   * @details Placeholder: not implemented yet, and aborts.
+   */
+  virtual void
+  copyFineBcoefToCoarse() noexcept;
 
   /**
    * @brief Get the b-coefficient on a face.

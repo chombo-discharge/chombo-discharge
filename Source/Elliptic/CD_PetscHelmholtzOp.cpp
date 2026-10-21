@@ -83,9 +83,35 @@ PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&              a_petscGri
 
   m_domainBc->define(m_petscGrid, m_probLo, m_dx);
 
-  this->assembleMatrix();
+  this->createMatrix();
 
   m_isDefined = true;
+
+  this->fillMatrix();
+}
+
+void
+PetscHelmholtzOp::setAlphaAndBeta(const Real a_alpha, const Real a_beta) noexcept
+{
+  CH_TIME("PetscHelmholtzOp::setAlphaAndBeta");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::setAlphaAndBeta" << endl;
+  }
+
+  m_alpha = a_alpha;
+  m_beta  = a_beta;
+}
+
+void
+PetscHelmholtzOp::setCoefficients(const MFAMRCellData& a_aCoef, const MFAMRFluxData& a_bCoef) noexcept
+{
+  CH_TIME("PetscHelmholtzOp::setCoefficients");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::setCoefficients" << endl;
+  }
+
+  m_aCoef = a_aCoef;
+  m_bCoef = a_bCoef;
 }
 
 const Mat&
@@ -171,25 +197,16 @@ PetscHelmholtzOp::getBcoef(const IntVect&       a_iv,
 }
 
 void
-PetscHelmholtzOp::assembleMatrix() noexcept
+PetscHelmholtzOp::createMatrix() noexcept
 {
-  CH_TIME("PetscHelmholtzOp::assembleMatrix");
+  CH_TIME("PetscHelmholtzOp::createMatrix");
   if (m_verbose) {
-    pout() << "PetscHelmholtzOp::assembleMatrix" << endl;
+    pout() << "PetscHelmholtzOp::createMatrix" << endl;
   }
 
-  constexpr int level = 0;
   constexpr int phase = 0;
 
-  const Real dx = m_dx[level];
-
   const Vector<RefCountedPtr<MFLevelGrid>>& mflg = m_petscGrid->getMFLevelGrids();
-
-  const EBLevelGrid&       eblg   = mflg[level]->getEBLevelGrid(phase);
-  const DisjointBoxLayout& dbl    = eblg.getDBL();
-  const ProblemDomain&     domain = eblg.getDomain();
-
-  const LevelData<BaseFab<PetscAMRCell>>& amrToPetsc = *m_petscGrid->getAMRToPetsc()[level];
 
   // A row has the cell and at most one neighbor per face. The Robin BC references the interior neighbor, which is a
   // neighbor already. Neighbors in other boxes can be on other ranks.
@@ -225,6 +242,39 @@ PetscHelmholtzOp::assembleMatrix() noexcept
                                      1,
                                      IntVect::Zero,
                                      DomainFluxIFFABFactory(eblgLvl.getEBISL(), eblgLvl.getDomain())));
+  }
+}
+
+void
+PetscHelmholtzOp::fillMatrix() noexcept
+{
+  CH_TIME("PetscHelmholtzOp::fillMatrix");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::fillMatrix" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  constexpr int level = 0;
+  constexpr int phase = 0;
+
+  const Real dx = m_dx[level];
+
+  const Vector<RefCountedPtr<MFLevelGrid>>& mflg = m_petscGrid->getMFLevelGrids();
+
+  const EBLevelGrid&       eblg   = mflg[level]->getEBLevelGrid(phase);
+  const DisjointBoxLayout& dbl    = eblg.getDBL();
+  const ProblemDomain&     domain = eblg.getDomain();
+
+  const LevelData<BaseFab<PetscAMRCell>>& amrToPetsc = *m_petscGrid->getAMRToPetsc()[level];
+
+  // Zero the entries of a matrix that has been filled before. A refill keeps the sparsity pattern.
+  PetscBool isAssembled = PETSC_FALSE;
+
+  PetscCallVoid(MatAssembled(m_matrix, &isAssembled));
+
+  if (isAssembled) {
+    PetscCallVoid(MatZeroEntries(m_matrix));
   }
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
@@ -399,6 +449,50 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
 
   PetscCallVoid(VecAssemblyBegin(a_rhs));
   PetscCallVoid(VecAssemblyEnd(a_rhs));
+}
+
+void
+PetscHelmholtzOp::defineDomainFluxStencils() noexcept
+{
+  CH_TIME("PetscHelmholtzOp::defineDomainFluxStencils");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::defineDomainFluxStencils" << endl;
+  }
+
+  MayDay::Abort("PetscHelmholtzOp::defineDomainFluxStencils -- not implemented yet");
+}
+
+void
+PetscHelmholtzOp::defineEBFluxStencils() noexcept
+{
+  CH_TIME("PetscHelmholtzOp::defineEBFluxStencils");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::defineEBFluxStencils" << endl;
+  }
+
+  MayDay::Abort("PetscHelmholtzOp::defineEBFluxStencils -- not implemented yet");
+}
+
+void
+PetscHelmholtzOp::defineCoarseFineFluxStencils() noexcept
+{
+  CH_TIME("PetscHelmholtzOp::defineCoarseFineFluxStencils");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::defineCoarseFineFluxStencils" << endl;
+  }
+
+  MayDay::Abort("PetscHelmholtzOp::defineCoarseFineFluxStencils -- not implemented yet");
+}
+
+void
+PetscHelmholtzOp::copyFineBcoefToCoarse() noexcept
+{
+  CH_TIME("PetscHelmholtzOp::copyFineBcoefToCoarse");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::copyFineBcoefToCoarse" << endl;
+  }
+
+  MayDay::Abort("PetscHelmholtzOp::copyFineBcoefToCoarse -- not implemented yet");
 }
 
 #include <CD_NamespaceFooter.H>
