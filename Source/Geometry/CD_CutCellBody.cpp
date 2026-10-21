@@ -898,9 +898,15 @@ CutCellBody::snapFace(const int a_dir, const int a_side, const bool a_neighbourI
 }
 
 bool
-CutCellBody::weldTJunctions() noexcept
+CutCellBody::weldTJunctions(const bool a_roundOff) noexcept
 {
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
+
+  const Real tolerance = a_roundOff ? detail::s_roundOffTolerance : detail::s_weldTolerance;
+
+  const auto same = [a_roundOff](const RealVect& a_a, const RealVect& a_b) -> bool {
+    return a_roundOff ? detail::sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
+  };
 
   for (int ip = 0; ip < m_numPolygons; ip++) {
     Polygon& p = m_polygon[ip];
@@ -912,7 +918,7 @@ CutCellBody::weldTJunctions() noexcept
       const RealVect along  = b - a;
       const Real     length = along.vectorLength();
 
-      if (length <= detail::s_weldTolerance) {
+      if (length <= tolerance) {
         continue;
       }
 
@@ -932,7 +938,7 @@ CutCellBody::weldTJunctions() noexcept
         for (int j = 0; j < q.m_numVertices; j++) {
           const RealVect& v = q.m_vertex[j];
 
-          if (detail::sameVertex(v, a) || detail::sameVertex(v, b)) {
+          if (same(v, a) || same(v, b)) {
             continue;
           }
 
@@ -942,14 +948,14 @@ CutCellBody::weldTJunctions() noexcept
             continue;
           }
 
-          if (((v - a) - t * along).vectorLength() > detail::s_weldTolerance) {
+          if (((v - a) - t * along).vectorLength() > tolerance) {
             continue;
           }
 
           bool have = false;
 
           for (int k = 0; k < numInside && !have; k++) {
-            have = detail::sameVertex(inside[k], v);
+            have = same(inside[k], v);
           }
 
           if (have) {
@@ -1017,7 +1023,7 @@ CutCellBody::weldTJunctions() noexcept
 bool
 CutCellBody::closeInterface() noexcept
 {
-  if (!this->closeBoundary(-1)) {
+  if (!this->closeBoundary(-1, false)) {
     return false;
   }
 
@@ -1027,14 +1033,18 @@ CutCellBody::closeInterface() noexcept
 }
 
 bool
-CutCellBody::closeBoundary(const int a_face) noexcept
+CutCellBody::closeBoundary(const int a_face, const bool a_roundOff) noexcept
 {
   CH_assert(a_face >= -1 && a_face < s_numFaces);
   CH_assert(m_numPolygons >= 0 && m_numPolygons <= s_maxPolygons);
 
-  if (!this->weldTJunctions()) {
+  if (!this->weldTJunctions(a_roundOff)) {
     return false;
   }
+
+  const auto same = [a_roundOff](const RealVect& a_a, const RealVect& a_b) -> bool {
+    return a_roundOff ? detail::sameToRoundOff(a_a, a_b) : detail::sameVertex(a_a, a_b);
+  };
 
   RealVect from[s_maxPolygons * s_maxVertices];
   RealVect to[s_maxPolygons * s_maxVertices];
@@ -1057,7 +1067,7 @@ CutCellBody::closeBoundary(const int a_face) noexcept
       const RealVect& a = p.m_vertex[i];
       const RealVect& b = p.m_vertex[(i + 1) % p.m_numVertices];
 
-      if (detail::sameVertex(a, b)) {
+      if (same(a, b)) {
         continue;
       }
 
@@ -1075,8 +1085,8 @@ CutCellBody::closeBoundary(const int a_face) noexcept
 
   for (int e = 0; e < numEdges; e++) {
     for (int f = e + 1; f < numEdges && !matched[e]; f++) {
-      if (!matched[f] && edgeOwner[f] != edgeOwner[e] && detail::sameVertex(edgeFrom[e], edgeTo[f]) &&
-          detail::sameVertex(edgeTo[e], edgeFrom[f])) {
+      if (!matched[f] && (a_roundOff || edgeOwner[f] != edgeOwner[e]) && same(edgeFrom[e], edgeTo[f]) &&
+          same(edgeTo[e], edgeFrom[f])) {
         matched[e] = true;
         matched[f] = true;
       }
@@ -1114,7 +1124,7 @@ CutCellBody::closeBoundary(const int a_face) noexcept
     bool closed = false;
 
     for (int guard = 0; guard <= numOpen && !closed; guard++) {
-      if (detail::sameVertex(current, end)) {
+      if (same(current, end)) {
         closed = true;
 
         break;
@@ -1123,7 +1133,7 @@ CutCellBody::closeBoundary(const int a_face) noexcept
       int next = -1;
 
       for (int j = 0; j < numOpen && next < 0; j++) {
-        if (!used[j] && detail::sameVertex(from[j], current)) {
+        if (!used[j] && same(from[j], current)) {
           next = j;
         }
       }
@@ -1991,14 +2001,15 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
           }
 
           if (aIn != bIn) {
-            add[numAdd++] = a + (b - a) * (a[dir] / (a[dir] - b[dir]));
+            add[numAdd++] = detail::crossing(a, b, dir);
           }
 
           for (int k = 0; k < numAdd; k++) {
             // A vertex on the cut is inside for both children, so a crossing there repeats the vertex it came
             // from; the repeat carries no length and is dropped rather than leaving a zero-length edge, which
-            // the closure walk would read as an opening.
-            if (out.m_numVertices > 0 && detail::sameVertex(out.m_vertex[out.m_numVertices - 1], add[k])) {
+            // the closure walk would read as an opening. A vertex only within the weld of the last one is kept, so
+            // fluid thinner than the weld survives the cut.
+            if (out.m_numVertices > 0 && detail::sameToRoundOff(out.m_vertex[out.m_numVertices - 1], add[k])) {
               continue;
             }
 
@@ -2013,7 +2024,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
         }
 
         // the first and last can meet the same way round the circuit
-        while (out.m_numVertices > 1 && detail::sameVertex(out.m_vertex[0], out.m_vertex[out.m_numVertices - 1])) {
+        while (out.m_numVertices > 1 && detail::sameToRoundOff(out.m_vertex[0], out.m_vertex[out.m_numVertices - 1])) {
           out.m_numVertices--;
         }
 
@@ -2028,7 +2039,7 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
         break;
       }
 
-      if (!child.closeBoundary(cutFace)) {
+      if (!child.closeBoundary(cutFace, true)) {
         return false;
       }
     }
@@ -2104,8 +2115,9 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
 
       const auto emit = [&](const RealVect& a_x, const int a_face) -> bool {
         // A vertex on the cut is inside for both children, so an entry or exit there repeats the vertex it
-        // came from; the repeat carries no length and is dropped rather than closing a zero-area segment.
-        if (out.m_numVertices > 0 && detail::sameVertex(out.m_vertex[out.m_numVertices - 1], a_x)) {
+        // came from; the repeat carries no length and is dropped rather than closing a zero-area segment. A
+        // vertex only within the weld of the last one is kept, so fluid thinner than the weld survives the cut.
+        if (out.m_numVertices > 0 && detail::sameToRoundOff(out.m_vertex[out.m_numVertices - 1], a_x)) {
           out.m_segmentFace[out.m_numVertices - 1] = a_face;
 
           return true;
@@ -2135,11 +2147,11 @@ CutCellBody::subdivide(CutCellBody* a_children) const noexcept
         }
         else if (aIn) {
           // leaving: the segment from here runs along the cut until the fluid comes back
-          alive = emit(a, tagAB) && emit(a + (b - a) * (a[dir] / (a[dir] - b[dir])), cutFace);
+          alive = emit(a, tagAB) && emit(detail::crossing(a, b, dir), cutFace);
         }
         else if (bIn) {
           // returning: the segment from the crossing to b is the stretch of a -> b that survived
-          alive = emit(a + (b - a) * (a[dir] / (a[dir] - b[dir])), tagAB);
+          alive = emit(detail::crossing(a, b, dir), tagAB);
         }
       }
 

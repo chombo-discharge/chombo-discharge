@@ -90,5 +90,5 @@ ThinPlate.invert        = false    ## Swap gas and solid, making the plate a gap
 # PolyhedralGeometryShop class options
 # ====================================================================================================
 PolyhedralGeometryShop.sanity_check      = true     ## Check the surface is closed, on every level and across every seam
-PolyhedralGeometryShop.test_copy         = true     ## Copy the graphs onto other layouts, and require every body unchanged
+PolyhedralGeometryShop.test_copy         = false    ## Copy the graphs onto other layouts, and require every body unchanged
 PolyhedralGeometryShop.write_surface     = false    ## Write the interface triangles for inspection

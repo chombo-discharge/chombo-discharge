@@ -35,6 +35,9 @@
 #include <BRMeshRefine.H>
 #include <BoxIterator.H>
 #include <CH_assert.H>
+#include <EBDataFactory.H>
+#include <EBGraphFactory.H>
+#include <EBISBox.H>
 #include <IntVectSet.H>
 #include <LoHiSide.H>
 #include <MayDay.H>
@@ -48,61 +51,34 @@
 #include <CD_PolyUtils.H>
 #include <CD_PolyhedralGeometryShop.H>
 #include <CD_ComputationalGeometry.H>
+#include <CD_LoadBalancing.H>
 #include <CD_ParallelOps.H>
 #include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
-namespace {
-
-/**
- * @brief An implicit function that stops the run if it is ever evaluated.
- * @details Put in place of the shop's own function while a test copies the graph and rebuilds bodies from the copy,
- * which must be done from the graph's data alone.
- */
-class AbortingIF : public BaseIF
+Real
+PolyhedralGeometryShop::AbortingIF::value(const RealVect& a_point) const
 {
-public:
-  /**
-   * @brief Stop the run.
-   * @param[in] a_point Where the function was asked for.
-   * @return Nothing; it does not return.
-   */
-  Real
-  value(const RealVect& a_point) const override
-  {
-    pout() << "AbortingIF::value - evaluated at " << a_point << endl;
+  pout() << "AbortingIF::value - evaluated at " << a_point << endl;
 
-    MayDay::Error("AbortingIF::value - the implicit function was evaluated where only the graph may be read");
+  MayDay::Error("AbortingIF::value - the implicit function was evaluated where only the graph may be read");
 
-    return 0.0;
-  }
+  return 0.0;
+}
 
-  /**
-   * @brief A copy.
-   * @return A new aborting function.
-   */
-  BaseIF*
-  newImplicitFunction() const override
-  {
-    return new AbortingIF();
-  }
-};
+BaseIF*
+PolyhedralGeometryShop::AbortingIF::newImplicitFunction() const
+{
+  return new AbortingIF();
+}
 
 #ifdef CH_USE_HDF5
-/**
- * @brief Write one attribute, a scalar or a short array.
- * @param[in] a_where Group or file to attach it to.
- * @param[in] a_name  Name of the attribute.
- * @param[in] a_type  HDF5 type of its elements.
- * @param[in] a_count Number of elements, one for a scalar.
- * @param[in] a_data  The elements.
- */
 void
-writeH5Attribute(const hid_t        a_where,
-                 const std::string& a_name,
-                 const hid_t        a_type,
-                 const hsize_t      a_count,
-                 const void*        a_data)
+PolyhedralGeometryShop::writeH5Attribute(const hid_t        a_where,
+                                         const std::string& a_name,
+                                         const hid_t        a_type,
+                                         const hsize_t      a_count,
+                                         const void*        a_data)
 {
   const hid_t space     = (a_count == 1) ? H5Screate(H5S_SCALAR) : H5Screate_simple(1, &a_count, nullptr);
   const hid_t attribute = H5Acreate2(a_where, a_name.c_str(), a_type, space, H5P_DEFAULT, H5P_DEFAULT);
@@ -112,31 +88,16 @@ writeH5Attribute(const hid_t        a_where,
   H5Sclose(space);
 }
 
-/**
- * @brief Write one dataset, sized by what every rank holds together, with this rank's rows in its own stretch.
- * @details A rank with nothing to write selects nothing and takes part in the call all the same. It describes that
- * with the null dataspace: a simple dataspace of zero extent is not one, the call fails, and a rank that fails on its
- * way into a collective write leaves every other rank waiting in it.
- * @param[in] a_where    Group or file to put it in.
- * @param[in] a_name     Name of the dataset.
- * @param[in] a_type     HDF5 type of its elements.
- * @param[in] a_rows     Rows this rank writes.
- * @param[in] a_offset   Row this rank's stretch starts at.
- * @param[in] a_total    Rows over all ranks; nothing is written when there are none.
- * @param[in] a_columns  Columns per row; one makes the dataset one-dimensional.
- * @param[in] a_data     This rank's rows.
- * @param[in] a_transfer Transfer property list.
- */
 void
-writeH5Slab(const hid_t        a_where,
-            const std::string& a_name,
-            const hid_t        a_type,
-            const hsize_t      a_rows,
-            const hsize_t      a_offset,
-            const hsize_t      a_total,
-            const hsize_t      a_columns,
-            const void*        a_data,
-            const hid_t        a_transfer)
+PolyhedralGeometryShop::writeH5Slab(const hid_t        a_where,
+                                    const std::string& a_name,
+                                    const hid_t        a_type,
+                                    const hsize_t      a_rows,
+                                    const hsize_t      a_offset,
+                                    const hsize_t      a_total,
+                                    const hsize_t      a_columns,
+                                    const void*        a_data,
+                                    const hid_t        a_transfer)
 {
   if (a_total == 0) {
     return;
@@ -167,30 +128,229 @@ writeH5Slab(const hid_t        a_where,
 }
 #endif
 
-/**
- * @brief Where this rank's rows start among every rank's, and how many there are in all.
- * @param[in]  a_mine   Rows this rank holds.
- * @param[out] a_offset Rows the ranks before this one hold.
- * @param[out] a_total  Rows every rank holds together.
- */
 void
-rankOffset(const long long a_mine, long long& a_offset, long long& a_total)
+PolyhedralGeometryShop::appendNodes(Vector<IrregNode>& a_nodes,
+                                    const EBGraph&     a_graph,
+                                    const EBData&      a_data,
+                                    const IntVect&     a_cell,
+                                    const bool         a_withMoments)
 {
-  a_offset = 0;
-  a_total  = a_mine;
+  const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
 
-#ifdef CH_MPI
-  MPI_Exscan(&a_mine, &a_offset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+  for (int v = 0; v < vofs.size(); v++) {
+    IrregNode node;
 
-  if (procID() == 0) {
-    a_offset = 0;
+    node.m_cell          = a_cell;
+    node.m_cellIndex     = vofs[v].cellIndex();
+    node.m_volFrac       = a_withMoments ? a_data.volFrac(vofs[v]) : 0.0;
+    node.m_volCentroid   = a_withMoments ? a_data.centroid(vofs[v]) : RealVect::Zero;
+    node.m_bndryCentroid = a_withMoments ? a_data.bndryCentroid(vofs[v]) : RealVect::Zero;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const int               index = IrregNode::index(dir, sit());
+        const Vector<FaceIndex> faces = a_graph.getFaces(vofs[v], dir, sit());
+
+        node.m_arc[index].resize(0);
+        node.m_areaFrac[index].resize(0);
+        node.m_faceCentroid[index].resize(0);
+
+        for (int i = 0; i < faces.size(); i++) {
+          node.m_arc[index].push_back(faces[i].isBoundary() ? -1 : faces[i].getVoF(sit()).cellIndex());
+          node.m_areaFrac[index].push_back(a_withMoments ? a_data.areaFrac(faces[i]) : 0.0);
+          node.m_faceCentroid[index].push_back(a_withMoments ? a_data.centroid(faces[i]) : RealVect::Zero);
+        }
+      }
+    }
+
+    a_nodes.push_back(node);
   }
-
-  MPI_Allreduce(&a_mine, &a_total, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif
 }
 
-} // namespace
+long long
+PolyhedralGeometryShop::cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
+                                                    Vector<IrregNode>&   a_nodes,
+                                                    const Box&           a_region,
+                                                    const Box&           a_valid,
+                                                    const ProblemDomain& a_domain)
+{
+  CH_TIME("PolyhedralGeometryShop::cutRegularNextToMultiValued");
+
+  CH_assert(a_flags.box().contains(a_region));
+  CH_assert(a_region.contains(a_valid));
+
+  BaseFab<int> first(a_region, 1);
+  BaseFab<int> count(a_region, 1);
+
+  first.setVal(-1);
+  count.setVal(0);
+
+  for (int n = 0; n < a_nodes.size(); n++) {
+    const IntVect& cell = a_nodes[n].m_cell;
+
+    if (a_region.contains(cell)) {
+      if (first(cell, 0) < 0) {
+        first(cell, 0) = n;
+      }
+
+      CH_assert(first(cell, 0) + count(cell, 0) == n);
+
+      count(cell, 0)++;
+    }
+  }
+
+  Vector<IrregNode> madeCut;
+
+  long long numMadeCut = 0;
+
+  for (BoxIterator bit(a_region); bit.ok(); ++bit) {
+    const IntVect cell = bit();
+
+    if (a_flags(cell, 0) != 1) {
+      continue;
+    }
+
+    bool besideMulti = false;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const IntVect other = cell + sign(sit()) * BASISV(dir);
+
+        besideMulti = besideMulti || (a_region.contains(other) && count(other, 0) > 1);
+      }
+    }
+
+    if (!besideMulti) {
+      continue;
+    }
+
+    IrregNode node;
+
+    node.m_cell          = cell;
+    node.m_cellIndex     = 0;
+    node.m_volFrac       = 1.0;
+    node.m_volCentroid   = RealVect::Zero;
+    node.m_bndryCentroid = RealVect::Zero;
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const int     index = IrregNode::index(dir, sit());
+        const IntVect other = cell + sign(sit()) * BASISV(dir);
+
+        node.m_arc[index].resize(0);
+        node.m_areaFrac[index].resize(0);
+        node.m_faceCentroid[index].resize(0);
+
+        if (!a_domain.contains(other)) {
+          node.m_arc[index].push_back(-1);
+          node.m_areaFrac[index].push_back(1.0);
+          node.m_faceCentroid[index].push_back(RealVect::Zero);
+        }
+        else if (a_region.contains(other) && count(other, 0) > 0) {
+          const int back = IrregNode::index(dir, flip(sit()));
+
+          for (int q = 0; q < count(other, 0); q++) {
+            const IrregNode& across = a_nodes[first(other, 0) + q];
+
+            for (int i = 0; i < across.m_arc[back].size(); i++) {
+              node.m_arc[index].push_back(across.m_cellIndex);
+              node.m_areaFrac[index].push_back(across.m_areaFrac[back][i]);
+              node.m_faceCentroid[index].push_back(across.m_faceCentroid[back][i]);
+            }
+          }
+        }
+        else {
+          node.m_arc[index].push_back(0);
+          node.m_areaFrac[index].push_back(1.0);
+          node.m_faceCentroid[index].push_back(RealVect::Zero);
+        }
+      }
+    }
+
+    a_flags(cell, 0) = 0;
+
+    madeCut.push_back(node);
+
+    if (a_valid.contains(cell)) {
+      numMadeCut++;
+    }
+  }
+
+  a_nodes.append(madeCut);
+
+  return numMadeCut;
+}
+
+void
+PolyhedralGeometryShop::cellSignature(FArrayBox&     a_signature,
+                                      const EBGraph& a_graph,
+                                      const EBData&  a_data,
+                                      const Box&     a_region)
+{
+  CH_TIME("PolyhedralGeometryShop::cellSignature");
+
+  CH_assert(a_signature.box().contains(a_region));
+  CH_assert(a_signature.nComp() >= 2 + 3 * SpaceDim);
+
+  for (BoxIterator bit(a_region); bit.ok(); ++bit) {
+    const IntVect cell = bit();
+
+    for (int comp = 0; comp < a_signature.nComp(); comp++) {
+      a_signature(cell, comp) = 0.0;
+    }
+
+    if (a_graph.isCovered(cell)) {
+      continue;
+    }
+
+    if (a_graph.isRegular(cell)) {
+      a_signature(cell, 0) = 1.0;
+      a_signature(cell, 1) = 1.0;
+
+      for (int comp = 2 + SpaceDim; comp < 2 + 3 * SpaceDim; comp++) {
+        a_signature(cell, comp) = 1.0;
+      }
+
+      continue;
+    }
+
+    const Vector<VolIndex> vofs = a_graph.getVoFs(cell);
+
+    a_signature(cell, 0) = vofs.size();
+
+    // The apertures of a cell side, gathered over its VoFs. The cell across the side holds the same faces, gathered in
+    // the order of its own VoFs, so they are summed in increasing order for the two sides to agree bit for bit.
+    std::vector<Real> apertures[2 * SpaceDim];
+
+    for (int v = 0; v < vofs.size(); v++) {
+      const Real volume = a_data.volFrac(vofs[v]);
+
+      a_signature(cell, 1) += volume;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        a_signature(cell, 2 + dir) += volume * a_data.centroid(vofs[v])[dir];
+      }
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        for (SideIterator sit; sit.ok(); ++sit) {
+          const Vector<FaceIndex> faces = a_graph.getFaces(vofs[v], dir, sit());
+
+          for (int i = 0; i < faces.size(); i++) {
+            apertures[2 * dir + (sit() == Side::Hi ? 1 : 0)].push_back(a_data.areaFrac(faces[i]));
+          }
+        }
+      }
+    }
+
+    for (int side = 0; side < 2 * SpaceDim; side++) {
+      std::sort(apertures[side].begin(), apertures[side].end());
+
+      for (const Real aperture : apertures[side]) {
+        a_signature(cell, 2 + SpaceDim + side) += aperture;
+      }
+    }
+  }
+}
 
 PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
                                                const int            a_verbosity,
@@ -222,6 +382,7 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   m_verbose          = false;
   m_maxRefinement    = 1;
   m_unresolvedAction = UnresolvedAction::Warn;
+  m_fillSplitFluid   = true;
 
   // Hidden options, as ScanShop keeps its own.
   ParmParse pp("PolyhedralGeometryShop");
@@ -263,6 +424,20 @@ PolyhedralGeometryShop::PolyhedralGeometryShop(const BaseIF&        a_localGeom,
   else {
     MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - unresolved_cells must be warn, cover or "
                   "collapse");
+  }
+
+  std::string splitFluid = "always";
+
+  pp.query("fill_split_fluid", splitFluid);
+
+  if (splitFluid == "always") {
+    m_fillSplitFluid = true;
+  }
+  else if (splitFluid == "majority") {
+    m_fillSplitFluid = false;
+  }
+  else {
+    MayDay::Error("PolyhedralGeometryShop::PolyhedralGeometryShop - fill_split_fluid must be always or majority");
   }
 
   if (m_verbose) {
@@ -332,8 +507,15 @@ PolyhedralGeometryShop::buildGraphs()
     const PolyhedralEBGraph* coarser = (lvl > startLevel && m_graphs[lvl - 1]->isDefined()) ? &(*m_graphs[lvl - 1])
                                                                                             : nullptr;
 
-    m_graphs[lvl]
-      ->define(*m_baseIF, tiles, m_compGeom->getDomain(lvl), m_probLo, m_compGeom->getDx(lvl), 1, covered, coarser);
+    m_graphs[lvl]->define(*m_baseIF,
+                          tiles,
+                          m_compGeom->getDomain(lvl),
+                          m_probLo,
+                          m_compGeom->getDx(lvl),
+                          1,
+                          covered,
+                          coarser,
+                          m_fillSplitFluid);
     timer.stopEvent("Define level " + std::to_string(lvl));
   }
 
@@ -398,6 +580,928 @@ PolyhedralGeometryShop::buildGraphs()
   this->reportUnresolvedRefinement();
 }
 
+void
+PolyhedralGeometryShop::buildMoments()
+{
+  CH_TIME("PolyhedralGeometryShop::buildMoments");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::buildMoments" << endl;
+  }
+
+  if (m_graphs.size() == 0) {
+    MayDay::Error("PolyhedralGeometryShop::buildMoments - buildGraphs has not run");
+  }
+
+  CH_assert(m_compGeom != nullptr);
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  // The geometry's own grids, every box of every level, balanced by cell count.
+  std::vector<DisjointBoxLayout> grids(numLevels);
+  std::vector<ProblemDomain>     domains(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains[lvl] = m_compGeom->getDomain(lvl);
+
+    const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
+
+    Vector<long> loads(boxes.size());
+
+    for (int i = 0; i < boxes.size(); i++) {
+      loads[i] = boxes[i].numPts();
+    }
+
+    Vector<int> ranks;
+
+    LoadBalancing::makeBalance(ranks, loads, boxes);
+
+    grids[lvl].define(boxes, ranks, domains[lvl]);
+  }
+
+  // The graph, copied onto those grids with the ring the coarsening reads.
+  AMRPolyhedralEBGraph copy;
+
+  this->copyGraphs(copy, grids, domains, s_momentRing);
+
+  m_ebGraphs.resize(0);
+  m_ebData.resize(0);
+  m_ebGraphs.resize(numLevels);
+  m_ebData.resize(numLevels);
+
+  // Finest first: a level's cells under the next finer level come from coarsening that level, which is complete by
+  // then.
+  long long numInexact  = 0;
+  long long numPromoted = 0;
+
+  for (int lvl = numLevels - 1; lvl >= 0; lvl--) {
+    if (grids[lvl].size() == 0) {
+      continue;
+    }
+
+    LevelData<EBGraph> coarsenedGraph;
+    LevelData<EBData>  coarsenedData;
+
+    const bool haveFiner = lvl + 1 < numLevels && !m_ebGraphs[lvl + 1].isNull();
+
+    if (haveFiner) {
+      this->coarsenLevel(coarsenedGraph, coarsenedData, numInexact, grids, domains, lvl + 1);
+    }
+
+    this->assembleLevel(numPromoted,
+                        copy,
+                        haveFiner ? &coarsenedGraph : nullptr,
+                        haveFiner ? &coarsenedData : nullptr,
+                        grids,
+                        domains,
+                        lvl);
+  }
+
+  numInexact  = ParallelOps::sum(numInexact);
+  numPromoted = ParallelOps::sum(numPromoted);
+
+  if (m_testCopy && procID() == 0) {
+    pout() << "PolyhedralGeometryShop::buildMoments - " << numInexact
+           << " coarsened cells whose moments differ from the sums over their children, " << numPromoted
+           << " regular cells beside a multi-valued one written as full cut cells" << endl;
+  }
+
+  if (m_testCopy && numInexact > 0) {
+    MayDay::Error("PolyhedralGeometryShop::buildMoments - coarsening does not sum the finer moments");
+  }
+}
+
+void
+PolyhedralGeometryShop::fillLevel(LevelData<EBGraph>&         a_graph,
+                                  LevelData<EBData>&          a_data,
+                                  const AMRPolyhedralEBGraph& a_copy,
+                                  const int                   a_level,
+                                  const int                   a_graphGhost,
+                                  const int                   a_dataGhost) const
+{
+  CH_TIME("PolyhedralGeometryShop::fillLevel");
+
+  CH_assert(a_graphGhost > a_dataGhost);
+  CH_assert(a_graphGhost < a_copy.getGhost());
+
+  const DisjointBoxLayout& grids  = a_copy.getGrids(a_level);
+  const ProblemDomain&     domain = a_copy.getDomain(a_level);
+  const int                geom   = a_copy.getGeometryLevel(a_level);
+
+  const Interval interv(0, 0);
+
+  EBGraphFactory graphFactory(domain);
+  EBDataFactory  dataFactory;
+
+  a_graph.define(grids, 1, a_graphGhost * IntVect::Unit, graphFactory);
+  a_data.define(grids, 1, a_dataGhost * IntVect::Unit, dataFactory);
+
+  // The level as buildMoments made it, where it made one, brought onto the boxes and their ghost cells in a fresh
+  // graph: Chombo's copy adds the VoFs it receives to those a cell already holds, so it is never copied into a graph
+  // already built.
+  const bool haveStored = geom < m_ebGraphs.size() && !m_ebGraphs[geom].isNull();
+
+  LevelData<EBGraph> stored(grids, 1, a_graphGhost * IntVect::Unit, graphFactory);
+  LevelData<EBData>  storedData(grids, 1, a_dataGhost * IntVect::Unit, dataFactory);
+
+  if (haveStored) {
+    m_ebGraphs[geom]->copyTo(interv, stored, interv);
+
+    for (DataIterator dit(grids); dit.ok(); ++dit) {
+      const Box region = grow(grids[dit()], a_dataGhost) & domain.domainBox();
+
+      storedData[dit()].defineVoFData(stored[dit()], region);
+      storedData[dit()].defineFaceData(stored[dit()], region);
+    }
+
+    m_ebData[geom]->copyTo(interv, storedData, interv);
+  }
+
+  // whether buildMoments made a cell, in one of the geometry's boxes on the level
+  const auto storedHas = [&](const IntVect& a_cell) -> bool {
+    if (!haveStored) {
+      return false;
+    }
+
+    Vector<int> hits;
+
+    m_ebGraphs[geom]->disjointBoxLayout().intersecting(Box(a_cell, a_cell), hits);
+
+    return hits.size() > 0;
+  };
+
+  long long numCollapsed = 0;
+  long long numFiner     = 0;
+  long long numUnfilled  = 0;
+
+  for (DataIterator dit(grids); dit.ok(); ++dit) {
+    const Box graphRegion = grow(grids[dit()], a_graphGhost) & domain.domainBox();
+    const Box dataRegion  = grow(grids[dit()], a_dataGhost) & domain.domainBox();
+
+    BaseFab<int>      flags;
+    Vector<IrregNode> fromCopy;
+    BaseFab<bool>     withNode(graphRegion, 1);
+
+    withNode.setVal(false);
+
+    a_copy.fillNodes(flags, fromCopy, numCollapsed, numFiner, a_level, dit());
+
+    Vector<IrregNode> nodes;
+
+    for (int n = 0; n < fromCopy.size(); n++) {
+      if (graphRegion.contains(fromCopy[n].m_cell) && !storedHas(fromCopy[n].m_cell)) {
+        nodes.push_back(fromCopy[n]);
+
+        withNode(fromCopy[n].m_cell, 0) = true;
+      }
+    }
+
+    for (BoxIterator bit(graphRegion); bit.ok(); ++bit) {
+      const IntVect cell = bit();
+
+      // a cut cell the copy could not fill -- one a finer level owns -- is one buildMoments made
+      if (!storedHas(cell)) {
+        numUnfilled += (flags(cell, 0) == 0 && !withNode(cell, 0)) ? 1 : 0;
+
+        continue;
+      }
+
+      const EBGraph& graph = stored[dit()];
+
+      if (graph.isRegular(cell)) {
+        flags(cell, 0) = 1;
+      }
+      else if (graph.isCovered(cell)) {
+        flags(cell, 0) = -1;
+      }
+      else {
+        flags(cell, 0) = 0;
+
+        PolyhedralGeometryShop::appendNodes(nodes, graph, storedData[dit()], cell, dataRegion.contains(cell));
+      }
+    }
+
+    PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, nodes, graphRegion, grids[dit()], domain);
+
+    a_graph[dit()].buildGraph(flags, nodes, graphRegion, domain);
+    a_data[dit()].define(a_graph[dit()], nodes, dataRegion);
+  }
+
+  if (ParallelOps::sum(numUnfilled) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::fillLevel - a cell a finer level owns lies outside that level's boxes");
+  }
+}
+
+void
+PolyhedralGeometryShop::coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
+                                     LevelData<EBData>&                    a_coarData,
+                                     long long&                            a_numInexact,
+                                     const std::vector<DisjointBoxLayout>& a_grids,
+                                     const std::vector<ProblemDomain>&     a_domains,
+                                     const int                             a_fineLevel) const
+{
+  CH_TIME("PolyhedralGeometryShop::coarsenLevel");
+
+  const int f = a_fineLevel;
+  const int k = a_fineLevel - 1;
+
+  const Interval interv(0, 0);
+
+  DisjointBoxLayout coarsened;
+
+  coarsen(coarsened, a_grids[f], 2);
+
+  EBGraphFactory fineGraphFactory(a_domains[f]);
+  EBGraphFactory coarGraphFactory(a_domains[k]);
+  EBDataFactory  dataFactory;
+
+  // The finished fine level on its own boxes, with the moments of the fine cells under each coarse cell of a box and
+  // its one ghost cell, and the graph one fine cell beyond those, which their faces read. Copied into fresh containers,
+  // since Chombo's copy adds the VoFs it receives to those a cell already holds.
+  constexpr int fineGraphGhost = 3;
+  constexpr int fineDataGhost  = 2;
+
+  LevelData<EBGraph> fineGraph(a_grids[f], 1, fineGraphGhost * IntVect::Unit, fineGraphFactory);
+  LevelData<EBData>  fineData(a_grids[f], 1, fineDataGhost * IntVect::Unit, dataFactory);
+
+  m_ebGraphs[f]->copyTo(interv, fineGraph, interv);
+
+  for (DataIterator dit(a_grids[f]); dit.ok(); ++dit) {
+    const Box region = grow(a_grids[f][dit()], fineDataGhost) & a_domains[f].domainBox();
+
+    fineData[dit()].defineVoFData(fineGraph[dit()], region);
+    fineData[dit()].defineFaceData(fineGraph[dit()], region);
+  }
+
+  m_ebData[f]->copyTo(interv, fineData, interv);
+
+  a_coarGraph.define(coarsened, 1, IntVect::Unit, coarGraphFactory);
+  a_coarData.define(coarsened, 1, IntVect::Zero, dataFactory);
+
+  const Real volumeScale = 1.0 / static_cast<Real>(1 << SpaceDim);
+  const Real faceScale   = 1.0 / static_cast<Real>(1 << (SpaceDim - 1));
+
+  for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+    const Box      box   = coarsened[dit()];
+    const EBGraph& graph = fineGraph[dit()];
+
+    // The moments of the children read through an EBISBox, which answers regular cells as well as cut ones. A face
+    // is read from the child's side: the cell across may lie outside the fine boxes, where the copied graph holds
+    // nothing, and EBISBox would read any face beside a regular cell as fully open.
+    EBISBox data;
+
+    data.define(fineGraph[dit()], fineData[dit()], dit());
+
+    const EBData& faceData = fineData[dit()];
+
+    // Which coarse cells around the box lie under the fine level: the fine boxes are blocked by two, so such a cell has
+    // all of its children in them.
+    const Box around = grow(box, 1) & a_domains[k].domainBox();
+
+    BaseFab<int> underFiner(around, 1);
+
+    underFiner.setVal(0);
+
+    Vector<int> hits;
+
+    a_grids[f].intersecting(refine(around, 2), hits);
+
+    for (int h = 0; h < hits.size(); h++) {
+      const Box overlap = coarsen(a_grids[f].boxArray()[hits[h]], 2) & around;
+
+      if (!overlap.isEmpty()) {
+        underFiner.setVal(1, overlap, 0);
+      }
+    }
+
+    // The VoFs of a coarse cell's children, in the order a BoxIterator meets the children, and the piece of the coarse
+    // cell each falls in: two are one piece if a fine face between sibling cells joins them. Pieces are numbered in
+    // the order their first VoF is met.
+    const auto group = [&](std::vector<VolIndex>& a_vofs, std::vector<int>& a_piece, const IntVect& a_cell) -> int {
+      a_vofs.resize(0);
+
+      for (BoxIterator cit(refine(Box(a_cell, a_cell), 2)); cit.ok(); ++cit) {
+        const Vector<VolIndex> vofs = graph.getVoFs(cit());
+
+        for (int v = 0; v < vofs.size(); v++) {
+          a_vofs.push_back(vofs[v]);
+        }
+      }
+
+      const int numVoFs = a_vofs.size();
+
+      const auto find = [&](const VolIndex& a_vof) -> int {
+        for (int i = 0; i < numVoFs; i++) {
+          if (a_vofs[i] == a_vof) {
+            return i;
+          }
+        }
+
+        return -1;
+      };
+
+      std::vector<int> root(numVoFs);
+
+      for (int i = 0; i < numVoFs; i++) {
+        root[i] = i;
+      }
+
+      const auto rootOf = [&root](int a_index) -> int {
+        while (root[a_index] != a_index) {
+          a_index = root[a_index];
+        }
+
+        return a_index;
+      };
+
+      for (int i = 0; i < numVoFs; i++) {
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          if (a_vofs[i].gridIndex()[dir] != 2 * a_cell[dir]) {
+            continue;
+          }
+
+          const Vector<FaceIndex> faces = graph.getFaces(a_vofs[i], dir, Side::Hi);
+
+          for (int n = 0; n < faces.size(); n++) {
+            const int j = find(faces[n].getVoF(Side::Hi));
+
+            CH_assert(j >= 0);
+
+            const int a = rootOf(i);
+            const int b = rootOf(j);
+
+            root[std::max(a, b)] = std::min(a, b);
+          }
+        }
+      }
+
+      a_piece.resize(numVoFs);
+
+      std::vector<int> number(numVoFs, -1);
+
+      int numPieces = 0;
+
+      for (int i = 0; i < numVoFs; i++) {
+        const int r = rootOf(i);
+
+        if (number[r] < 0) {
+          number[r] = numPieces++;
+        }
+
+        a_piece[i] = number[r];
+      }
+
+      return numPieces;
+    };
+
+    // a coarse cell's centre to the centre of one of its children, in coarse cells
+    const auto offset = [](const IntVect& a_child, const IntVect& a_cell) -> RealVect {
+      RealVect shift;
+
+      for (int d = 0; d < SpaceDim; d++) {
+        shift[d] = 0.5 * static_cast<Real>(a_child[d] - 2 * a_cell[d]) - 0.25;
+      }
+
+      return shift;
+    };
+
+    // The coarse graph is built over the box and its ghost cell, since the moments of the box's faces read the cells
+    // across them. A ghost cell the level owns is written regular, the one VoF the coarsened cells' faces lead into;
+    // a coarsened ghost cell keeps only its faces toward cells of the ring.
+    BaseFab<int>      flags(around, 1);
+    Vector<IrregNode> nodes;
+
+    std::vector<VolIndex> vofs;
+    std::vector<VolIndex> acrossVoFs;
+    std::vector<int>      piece;
+    std::vector<int>      acrossPiece;
+
+    for (BoxIterator bit(around); bit.ok(); ++bit) {
+      const IntVect cell = bit();
+
+      if (underFiner(cell, 0) == 0) {
+        flags(cell, 0) = 1;
+
+        continue;
+      }
+
+      bool allRegular = true;
+
+      for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
+        allRegular = allRegular && graph.isRegular(cit());
+      }
+
+      if (allRegular) {
+        flags(cell, 0) = 1;
+
+        continue;
+      }
+
+      const int numPieces = group(vofs, piece, cell);
+
+      if (numPieces == 0) {
+        flags(cell, 0) = -1;
+
+        continue;
+      }
+
+      flags(cell, 0) = 0;
+
+      for (int p = 0; p < numPieces; p++) {
+        IrregNode node;
+
+        node.m_cell      = cell;
+        node.m_cellIndex = p;
+
+        Real     volume        = 0.0;
+        RealVect firstMoment   = RealVect::Zero;
+        Real     boundaryArea  = 0.0;
+        RealVect boundaryFirst = RealVect::Zero;
+
+        for (std::size_t i = 0; i < vofs.size(); i++) {
+          if (piece[i] != p) {
+            continue;
+          }
+
+          const RealVect shift = offset(vofs[i].gridIndex(), cell);
+          const Real     kappa = data.volFrac(vofs[i]);
+          const Real     area  = data.bndryArea(vofs[i]);
+
+          volume += kappa;
+          firstMoment += kappa * (shift + 0.5 * data.centroid(vofs[i]));
+          boundaryArea += area;
+          boundaryFirst += area * (shift + 0.5 * data.bndryCentroid(vofs[i]));
+        }
+
+        node.m_volFrac       = volumeScale * volume;
+        node.m_volCentroid   = (volume > 0.0) ? firstMoment / volume : RealVect::Zero;
+        node.m_bndryCentroid = (boundaryArea > 0.0) ? boundaryFirst / boundaryArea : RealVect::Zero;
+
+        // Each coarse face splits by the piece across that its fine faces lead into: the piece of the coarse cell
+        // across when that cell is coarsened too, its one VoF when the level owns it, and the domain boundary.
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const int     index  = IrregNode::index(dir, sit());
+            const IntVect across = cell + sign(sit()) * BASISV(dir);
+            const int     plane  = (sit() == Side::Lo) ? 2 * cell[dir] : 2 * cell[dir] + 1;
+
+            // a face of a ghost cell toward a cell beyond the ring is left out
+            if (a_domains[k].contains(across) && !around.contains(across)) {
+              node.m_arc[index].resize(0);
+              node.m_areaFrac[index].resize(0);
+              node.m_faceCentroid[index].resize(0);
+
+              continue;
+            }
+
+            const bool acrossCoarsened = around.contains(across) && underFiner(across, 0) != 0;
+
+            if (acrossCoarsened) {
+              group(acrossVoFs, acrossPiece, across);
+            }
+
+            std::vector<int>      arcs;
+            std::vector<Real>     areas;
+            std::vector<RealVect> moments;
+
+            for (std::size_t i = 0; i < vofs.size(); i++) {
+              if (piece[i] != p || vofs[i].gridIndex()[dir] != plane) {
+                continue;
+              }
+
+              const RealVect          shift = offset(vofs[i].gridIndex(), cell);
+              const Vector<FaceIndex> faces = graph.getFaces(vofs[i], dir, sit());
+
+              for (int n = 0; n < faces.size(); n++) {
+                int arc = -1;
+
+                if (!faces[n].isBoundary()) {
+                  arc = 0;
+
+                  if (acrossCoarsened) {
+                    const VolIndex other = faces[n].getVoF(sit());
+
+                    arc = -1;
+
+                    for (std::size_t j = 0; j < acrossVoFs.size(); j++) {
+                      if (acrossVoFs[j] == other) {
+                        arc = acrossPiece[j];
+                      }
+                    }
+
+                    CH_assert(arc >= 0);
+                  }
+                }
+
+                const bool regular  = graph.isRegular(vofs[i].gridIndex());
+                const Real aperture = regular ? 1.0 : faceData.areaFrac(faces[n]);
+
+                RealVect centroid = shift + (regular ? RealVect::Zero : 0.5 * faceData.centroid(faces[n]));
+
+                centroid[dir] = 0.0;
+
+                std::size_t bucket = 0;
+
+                while (bucket < arcs.size() && arcs[bucket] != arc) {
+                  bucket++;
+                }
+
+                if (bucket == arcs.size()) {
+                  arcs.push_back(arc);
+                  areas.push_back(0.0);
+                  moments.push_back(RealVect::Zero);
+                }
+
+                areas[bucket] += aperture;
+                moments[bucket] += aperture * centroid;
+              }
+            }
+
+            // in increasing order of the VoF across
+            std::vector<std::size_t> order(arcs.size());
+
+            for (std::size_t b = 0; b < order.size(); b++) {
+              order[b] = b;
+            }
+
+            std::sort(order.begin(), order.end(), [&arcs](const std::size_t a, const std::size_t b) {
+              return arcs[a] < arcs[b];
+            });
+
+            node.m_arc[index].resize(0);
+            node.m_areaFrac[index].resize(0);
+            node.m_faceCentroid[index].resize(0);
+
+            for (const std::size_t b : order) {
+              node.m_arc[index].push_back(arcs[b]);
+              node.m_areaFrac[index].push_back(faceScale * areas[b]);
+              node.m_faceCentroid[index].push_back((areas[b] > 0.0) ? moments[b] / areas[b] : RealVect::Zero);
+            }
+          }
+        }
+
+        nodes.push_back(node);
+      }
+    }
+
+    a_coarGraph[dit()].buildGraph(flags, nodes, around, a_domains[k]);
+    a_coarData[dit()].define(a_coarGraph[dit()], nodes, box);
+  }
+
+  // Each coarse cell against its children: its volume, its first moment and its apertures are the children's,
+  // summed and scaled, whatever VoFs either side splits them into.
+  if (m_testCopy) {
+    const auto volume = [](const EBGraph& a_graph, const EBData& a_data, const IntVect& a_cell, RealVect& a_moment) {
+      a_moment = RealVect::Zero;
+
+      if (a_graph.isRegular(a_cell)) {
+        return 1.0;
+      }
+
+      if (a_graph.isCovered(a_cell)) {
+        return 0.0;
+      }
+
+      Real sum = 0.0;
+
+      const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
+
+      for (int v = 0; v < vofs.size(); v++) {
+        sum += a_data.volFrac(vofs[v]);
+        a_moment += a_data.volFrac(vofs[v]) * a_data.centroid(vofs[v]);
+      }
+
+      return sum;
+    };
+
+    const auto aperture = [](const EBGraph&       a_graph,
+                             const EBData&        a_data,
+                             const IntVect&       a_cell,
+                             const int            a_dir,
+                             const Side::LoHiSide a_side) -> Real {
+      if (a_graph.isRegular(a_cell)) {
+        return 1.0;
+      }
+
+      if (a_graph.isCovered(a_cell)) {
+        return 0.0;
+      }
+
+      Real sum = 0.0;
+
+      const Vector<VolIndex> vofs = a_graph.getVoFs(a_cell);
+
+      for (int v = 0; v < vofs.size(); v++) {
+        const Vector<FaceIndex> faces = a_graph.getFaces(vofs[v], a_dir, a_side);
+
+        for (int i = 0; i < faces.size(); i++) {
+          sum += a_data.areaFrac(faces[i]);
+        }
+      }
+
+      return sum;
+    };
+
+    constexpr Real tolerance = 1.0E-12;
+
+    long long numChecked   = 0;
+    long long numIrregular = 0;
+    long long numMulti     = 0;
+
+    for (DataIterator dit(coarsened); dit.ok(); ++dit) {
+      for (BoxIterator bit(coarsened[dit()]); bit.ok(); ++bit) {
+        const IntVect cell = bit();
+
+        RealVect coarseMoment;
+
+        const Real coarseVolume = volume(a_coarGraph[dit()], a_coarData[dit()], cell, coarseMoment);
+
+        Real     fineVolume = 0.0;
+        RealVect fineMoment = RealVect::Zero;
+
+        for (BoxIterator cit(refine(Box(cell, cell), 2)); cit.ok(); ++cit) {
+          RealVect moment;
+
+          const Real childVolume = volume(fineGraph[dit()], fineData[dit()], cit(), moment);
+
+          // the child's centre, a quarter of a coarse cell from the parent's
+          RealVect offset;
+
+          for (int d = 0; d < SpaceDim; d++) {
+            offset[d] = 0.5 * static_cast<Real>(cit()[d] - 2 * cell[d]) - 0.25;
+          }
+
+          fineVolume += volumeScale * childVolume;
+          fineMoment += volumeScale * (childVolume * offset + 0.5 * moment);
+        }
+
+        bool exact = std::abs(coarseVolume - fineVolume) <= tolerance &&
+                     (coarseMoment - fineMoment).vectorLength() <= tolerance;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            Box layer = refine(Box(cell, cell), 2);
+
+            const int plane = (sit() == Side::Lo) ? layer.smallEnd(dir) : layer.bigEnd(dir);
+
+            layer.setSmall(dir, plane);
+            layer.setBig(dir, plane);
+
+            Real fineAperture = 0.0;
+
+            for (BoxIterator cit(layer); cit.ok(); ++cit) {
+              fineAperture += faceScale * aperture(fineGraph[dit()], fineData[dit()], cit(), dir, sit());
+            }
+
+            const Real coarseAperture = aperture(a_coarGraph[dit()], a_coarData[dit()], cell, dir, sit());
+
+            exact = exact && std::abs(coarseAperture - fineAperture) <= tolerance;
+          }
+        }
+
+        a_numInexact += exact ? 0 : 1;
+
+        numChecked++;
+
+        if (a_coarGraph[dit()].isIrregular(cell)) {
+          numIrregular++;
+          numMulti += (a_coarGraph[dit()].getVoFs(cell).size() > 1) ? 1 : 0;
+        }
+      }
+    }
+
+    numChecked   = ParallelOps::sum(numChecked);
+    numIrregular = ParallelOps::sum(numIrregular);
+    numMulti     = ParallelOps::sum(numMulti);
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::coarsenLevel - level " << f << " onto " << k << ": " << numChecked
+             << " cells coarsened and checked against their children, " << numIrregular << " of them cut, " << numMulti
+             << " multi-valued" << endl;
+    }
+  }
+}
+
+void
+PolyhedralGeometryShop::assembleLevel(long long&                            a_numPromoted,
+                                      const AMRPolyhedralEBGraph&           a_copy,
+                                      const LevelData<EBGraph>*             a_coarsenedGraph,
+                                      const LevelData<EBData>*              a_coarsenedData,
+                                      const std::vector<DisjointBoxLayout>& a_grids,
+                                      const std::vector<ProblemDomain>&     a_domains,
+                                      const int                             a_level)
+{
+  CH_TIME("PolyhedralGeometryShop::assembleLevel");
+
+  CH_assert(a_grids.size() == a_domains.size());
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(a_grids.size()));
+  CH_assert(a_level < static_cast<int>(m_ebGraphs.size()) && a_level < static_cast<int>(m_ebData.size()));
+  CH_assert((a_coarsenedGraph == nullptr) == (a_coarsenedData == nullptr));
+  CH_assert(a_coarsenedGraph == nullptr || a_level + 1 < static_cast<int>(a_grids.size()));
+
+  const int            lvl    = a_level;
+  const ProblemDomain& domain = a_domains[lvl];
+
+  const Interval interv(0, 0);
+
+  EBGraphFactory graphFactory(domain);
+  EBDataFactory  dataFactory;
+
+  m_ebGraphs[lvl] = RefCountedPtr<LevelData<EBGraph>>(
+    new LevelData<EBGraph>(a_grids[lvl], 1, IntVect::Unit, graphFactory));
+  m_ebData[lvl] = RefCountedPtr<LevelData<EBData>>(new LevelData<EBData>(a_grids[lvl], 1, IntVect::Zero, dataFactory));
+
+  // The coarsened cells, brought onto this level's boxes and their one ghost cell.
+  const bool haveFiner = a_coarsenedGraph != nullptr;
+
+  LevelData<EBGraph> fromFiner;
+  LevelData<EBData>  fromFinerData;
+
+  if (haveFiner) {
+    // the graph one cell wider than the moments, whose faces at their edge read the cells across them
+    fromFiner.define(a_grids[lvl], 1, 2 * IntVect::Unit, graphFactory);
+    fromFinerData.define(a_grids[lvl], 1, IntVect::Unit, dataFactory);
+
+    a_coarsenedGraph->copyTo(interv, fromFiner, interv);
+
+    for (DataIterator dit(a_grids[lvl]); dit.ok(); ++dit) {
+      const Box region = grow(a_grids[lvl][dit()], 1) & domain.domainBox();
+
+      fromFinerData[dit()].defineVoFData(fromFiner[dit()], region);
+      fromFinerData[dit()].defineFaceData(fromFiner[dit()], region);
+    }
+
+    a_coarsenedData->copyTo(interv, fromFinerData, interv);
+  }
+
+  // whether a cell of this level lies under the next finer level, where the coarsening has it
+  const auto underFiner = [&](const IntVect& a_cell) -> bool {
+    if (!haveFiner) {
+      return false;
+    }
+
+    Vector<int> hits;
+
+    a_grids[lvl + 1].intersecting(refine(Box(a_cell, a_cell), 2), hits);
+
+    return hits.size() > 0;
+  };
+
+  long long numCollapsed = 0;
+  long long numFiner     = 0;
+
+  for (DataIterator dit(a_grids[lvl]); dit.ok(); ++dit) {
+    const Box box    = a_grids[lvl][dit()];
+    const Box region = grow(box, 1) & domain.domainBox();
+
+    BaseFab<int>      flags;
+    Vector<IrregNode> nodes;
+
+    a_copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit());
+
+    Vector<IrregNode> held;
+
+    for (int n = 0; n < nodes.size(); n++) {
+      if (region.contains(nodes[n].m_cell)) {
+        held.push_back(nodes[n]);
+      }
+    }
+
+    if (haveFiner) {
+      const EBGraph& finer     = fromFiner[dit()];
+      const EBData&  finerData = fromFinerData[dit()];
+
+      // A coarsened cell becomes the nodes of its VoFs, as the coarsening made them.
+      for (BoxIterator bit(region); bit.ok(); ++bit) {
+        const IntVect cell = bit();
+
+        if (!underFiner(cell)) {
+          continue;
+        }
+
+        if (finer.isRegular(cell)) {
+          flags(cell, 0) = 1;
+
+          continue;
+        }
+
+        if (finer.isCovered(cell)) {
+          flags(cell, 0) = -1;
+
+          continue;
+        }
+
+        flags(cell, 0) = 0;
+
+        PolyhedralGeometryShop::appendNodes(held, finer, finerData, cell, true);
+      }
+
+      // A cell of this level's own beside a coarsened one takes the faces between them from the coarsened side, which
+      // knows which of its VoFs each one leads into.
+      for (int n = 0; n < held.size(); n++) {
+        IrregNode& node = held[n];
+
+        if (underFiner(node.m_cell)) {
+          continue;
+        }
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            const IntVect other = node.m_cell + sign(sit()) * BASISV(dir);
+
+            if (!region.contains(other) || !underFiner(other) || !finer.isIrregular(other)) {
+              continue;
+            }
+
+            const int index = IrregNode::index(dir, sit());
+
+            node.m_arc[index].resize(0);
+            node.m_areaFrac[index].resize(0);
+            node.m_faceCentroid[index].resize(0);
+
+            const Vector<VolIndex> across = finer.getVoFs(other);
+
+            for (int v = 0; v < across.size(); v++) {
+              const Vector<FaceIndex> faces = finer.getFaces(across[v], dir, flip(sit()));
+
+              for (int i = 0; i < faces.size(); i++) {
+                node.m_arc[index].push_back(across[v].cellIndex());
+                node.m_areaFrac[index].push_back(finerData.areaFrac(faces[i]));
+                node.m_faceCentroid[index].push_back(finerData.centroid(faces[i]));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    a_numPromoted += PolyhedralGeometryShop::cutRegularNextToMultiValued(flags, held, region, box, domain);
+
+    EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
+    EBData&  data  = (*m_ebData[lvl])[dit()];
+
+    graph.buildGraph(flags, held, region, domain);
+    data.define(graph, held, box);
+  }
+
+  if (ParallelOps::sum(numFiner) > 0) {
+    MayDay::Error("PolyhedralGeometryShop::assembleLevel - a cell a finer level owns lies outside that level's boxes");
+  }
+}
+
+const LevelData<EBGraph>&
+PolyhedralGeometryShop::getEBGraph(const int a_level) const
+{
+  if (a_level < 0 || a_level >= m_ebGraphs.size() || m_ebGraphs[a_level].isNull()) {
+    MayDay::Error("PolyhedralGeometryShop::getEBGraph - no index-space graph on this level");
+  }
+
+  return *m_ebGraphs[a_level];
+}
+
+const LevelData<EBData>&
+PolyhedralGeometryShop::getEBData(const int a_level) const
+{
+  if (a_level < 0 || a_level >= m_ebData.size() || m_ebData[a_level].isNull()) {
+    MayDay::Error("PolyhedralGeometryShop::getEBData - no index-space moments on this level");
+  }
+
+  return *m_ebData[a_level];
+}
+
+void
+PolyhedralGeometryShop::fillLayout(LevelData<EBGraph>&      a_graph,
+                                   LevelData<EBData>&       a_data,
+                                   const DisjointBoxLayout& a_grids,
+                                   const ProblemDomain&     a_domain,
+                                   const int                a_graphGhost,
+                                   const int                a_dataGhost) const
+{
+  CH_TIME("PolyhedralGeometryShop::fillLayout");
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::fillLayout" << endl;
+  }
+
+  if (m_ebGraphs.size() == 0) {
+    MayDay::Error("PolyhedralGeometryShop::fillLayout - buildMoments has not run");
+  }
+
+  if (a_dataGhost < 0 || a_graphGhost <= a_dataGhost) {
+    MayDay::Error("PolyhedralGeometryShop::fillLayout - the graph needs more ghost cells than the moments");
+  }
+
+  // the copy one cell wider than the graph, so that every face of a node has the cell across it in hand
+  AMRPolyhedralEBGraph copy;
+
+  this->copyGraphs(copy,
+                   std::vector<DisjointBoxLayout>{a_grids},
+                   std::vector<ProblemDomain>{a_domain},
+                   a_graphGhost + 1);
+
+  this->fillLevel(a_graph, a_data, copy, 0, a_graphGhost, a_dataGhost);
+}
+
 const PolyhedralEBGraph&
 PolyhedralGeometryShop::getGraph(const int a_level) const noexcept
 {
@@ -457,6 +1561,15 @@ PolyhedralGeometryShop::verifySurface() const
     timer.startEvent("Copy bodies");
     this->testCopyBodies();
     timer.stopEvent("Copy bodies");
+
+    timer.startEvent("Moments");
+    const_cast<PolyhedralGeometryShop*>(this)->buildMoments();
+    this->testMoments();
+    timer.stopEvent("Moments");
+
+    timer.startEvent("Fill layouts");
+    this->testFill();
+    timer.stopEvent("Fill layouts");
   }
 
   // The surface: triangles in three dimensions, the chords of the cut cells in two.
@@ -541,28 +1654,6 @@ PolyhedralGeometryShop::collectFacets(Vector<Real>& a_facets, const int a_level)
 }
 
 bool
-PolyhedralGeometryShop::isFilled(const BaseFab<signed char>&                 a_states,
-                                 const BaseFab<signed char>&                 a_refined,
-                                 const IntVectSet&                           a_withSurface,
-                                 const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-                                 const IntVect&                              a_cell)
-{
-  using PolyhedralEB::CutCellBody;
-
-  // Covered, and yet its corners disagree: the graph filled it. A cell the finer level carries reads covered whenever
-  // its corners do, but it is described up there, and a covered cell whose corners agree closes its faces already.
-  if (!a_states.box().contains(a_cell) || a_states(a_cell, 0) != PolyhedralEBGraph::s_covered) {
-    return false;
-  }
-
-  if (a_refined.box().contains(a_cell) && a_refined(a_cell, 0) != 0) {
-    return false;
-  }
-
-  return a_withSurface.contains(a_cell) && CutCellBody::classify(a_surfaces(a_cell, 0)) == CutCellBody::Kind::Cut;
-}
-
-bool
 PolyhedralGeometryShop::edgesRefined(bool a_edgeRefined[PolyhedralEB::CutCellSurface::s_numEdges],
                                      const BaseFab<signed char>& a_refined,
                                      const Box&                  a_domain,
@@ -621,16 +1712,19 @@ PolyhedralGeometryShop::edgesRefined(bool a_edgeRefined[PolyhedralEB::CutCellSur
 int
 PolyhedralGeometryShop::stitchBody(PolyhedralEB::CutCellBody&          a_body,
                                    PolyhedralEB::CutCellSurface&       a_surface,
+                                   PolyhedralEB::CutCellFaceOverrides* a_overrides,
                                    const PolyhedralEB::CutCellSurface* a_children,
                                    const bool*                         a_edgeRefined,
                                    const BaseFab<signed char>&         a_filled,
                                    const BaseFab<signed char>&         a_refined,
                                    const BaseFab<signed char>*         a_fineFilled,
                                    const Box&                          a_domain,
-                                   const IntVect&                      a_cell,
-                                   PolyhedralEB::CutCellFaceOverrides* a_overrides)
+                                   const IntVect&                      a_cell)
 {
   CH_TIME("PolyhedralGeometryShop::stitchBody");
+
+  CH_assert(a_children == nullptr || a_edgeRefined != nullptr);
+  CH_assert(a_domain.contains(a_cell));
 
   using PolyhedralEB::CutCellBody;
   using PolyhedralEB::CutCellSurface;
@@ -928,6 +2022,9 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
 {
   CH_TIME("PolyhedralGeometryShop::defineBodyFromFunction");
 
+  CH_assert(a_graph.isDefined());
+  CH_assert(a_graph.getDomain().contains(a_cell));
+
   using PolyhedralEB::CutCellSurface;
 
   const BaseIF& f = *m_baseIF;
@@ -953,8 +2050,8 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
     BaseFab<Real> fineNodeValues;
     BaseFab<Real> fineIntercept[SpaceDim];
 
-    PolyhedralGeometryShop::fillNodeValues(f, fineNodeValues, fineBox, m_probLo, 0.5 * dx);
-    PolyhedralGeometryShop::defineIntercepts(fineIntercept, fineBox);
+    PolyhedralEB::fillNodeValues(fineNodeValues, f, fineBox, m_probLo, 0.5 * dx);
+    PolyhedralEB::defineIntercepts(fineIntercept, fineBox);
 
     for (int c = 0; c < CutCellSurface::s_numCorners; c++) {
       IntVect child = 2 * a_cell;
@@ -963,20 +2060,20 @@ PolyhedralGeometryShop::defineBodyFromFunction(PolyhedralEB::CutCellBody&       
         child[d] += (c >> d) & 1;
       }
 
-      PolyhedralGeometryShop::buildSurface(f, fineIntercept, children[c], fineNodeValues, child, m_probLo, 0.5 * dx);
+      PolyhedralEB::buildSurface(fineIntercept, children[c], f, fineNodeValues, child, m_probLo, 0.5 * dx);
     }
   }
 
   PolyhedralGeometryShop::stitchBody(a_body,
                                      surface,
+                                     nullptr,
                                      anyEdgeRefined ? children : nullptr,
                                      edgeRefined,
                                      a_filled,
                                      a_refined,
                                      nullptr,
                                      domain,
-                                     a_cell,
-                                     nullptr);
+                                     a_cell);
 }
 
 void
@@ -986,6 +2083,8 @@ PolyhedralGeometryShop::defineBody(PolyhedralEB::CutCellBody&                  a
                                    const IntVect&                              a_cell)
 {
   CH_TIME("PolyhedralGeometryShop::defineBody");
+
+  CH_assert(a_surfaces.getIVS().contains(a_cell));
 
   if (!a_body.define(a_surfaces(a_cell, 0), a_overrides, a_cell)) {
     pout() << "PolyhedralGeometryShop::defineBody - cell " << a_cell
@@ -1006,6 +2105,9 @@ PolyhedralGeometryShop::readFineCells(BaseFab<Real>&                            
 {
   CH_TIME("PolyhedralGeometryShop::readFineCells");
 
+  CH_assert(a_states.box().contains(a_region));
+  CH_assert(a_mask.box().contains(a_region));
+
   using PolyhedralEB::CutCellSurface;
 
   Box nodeBox = a_region;
@@ -1018,7 +2120,7 @@ PolyhedralGeometryShop::readFineCells(BaseFab<Real>&                            
 
   known.setVal(0);
 
-  PolyhedralGeometryShop::defineIntercepts(a_crossings, a_region);
+  PolyhedralEB::defineIntercepts(a_crossings, a_region);
 
   a_fluidJoined.define(a_region, 1);
   a_fluidJoined.setVal(-1);
@@ -1117,7 +2219,7 @@ PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
 
   a_surface = CutCellSurface();
 
-  PolyhedralGeometryShop::fillCorners(a_surface, a_nodes, a_cell);
+  PolyhedralEB::fillCorners(a_surface, a_nodes, a_cell);
 
   // A face's decision belongs to the face, and is known from whichever cell beside it holds a surface: a child of an
   // unrefined coarse cell holds none, but the finer cell across its face may. A face neither side knows falls back on
@@ -1192,15 +2294,18 @@ PolyhedralGeometryShop::assembleSurface(PolyhedralEB::CutCellSurface& a_surface,
 }
 
 void
-PolyhedralGeometryShop::copyFinerCells(const PolyhedralEBGraph&                         a_fine,
-                                       const DisjointBoxLayout&                         a_grids,
-                                       const int                                        a_ring,
-                                       LevelData<BaseFab<signed char>>&                 a_states,
+PolyhedralGeometryShop::copyFinerCells(LevelData<BaseFab<signed char>>&                 a_states,
                                        LevelData<BaseFab<signed char>>&                 a_mask,
                                        LayoutData<IntVectSet>&                          a_sets,
-                                       LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces)
+                                       LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces,
+                                       const PolyhedralEBGraph&                         a_fine,
+                                       const DisjointBoxLayout&                         a_grids,
+                                       const int                                        a_ring)
 {
   CH_TIME("PolyhedralGeometryShop::copyFinerCells");
+
+  CH_assert(a_fine.isDefined());
+  CH_assert(a_ring >= 0);
 
   using PolyhedralEB::CutCellSurface;
 
@@ -1253,6 +2358,10 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 {
   CH_TIME("PolyhedralGeometryShop::stitchLevel");
 
+  CH_assert(a_coarse.isDefined());
+  CH_assert(a_fine == nullptr || a_fine->isDefined());
+  CH_assert(a_coarser == nullptr || a_coarser->isDefined());
+
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::stitchLevel" << endl;
   }
@@ -1274,7 +2383,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
   LevelData<IVSFAB<CutCellSurface>> fineSurfaces;
 
   if (a_fine != nullptr) {
-    PolyhedralGeometryShop::copyFinerCells(*a_fine, grids, numGhost + 1, fineStates, fineMask, fineSets, fineSurfaces);
+    PolyhedralGeometryShop::copyFinerCells(fineStates, fineMask, fineSets, fineSurfaces, *a_fine, grids, numGhost + 1);
   }
 
   LevelData<IVSFAB<CutCellSurface>>& surfaces  = a_coarse.getSurfaces();
@@ -1296,11 +2405,11 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
     filledFab.setVal(0);
 
     for (BoxIterator bit(box); bit.ok(); ++bit) {
-      if (PolyhedralGeometryShop::isFilled(states[dit()],
-                                           refined[dit()],
-                                           a_coarse.getSurfaceCells()[dit()],
-                                           surfaces[dit()],
-                                           bit())) {
+      if (PolyhedralEBGraph::isFilled(states[dit()],
+                                      refined[dit()],
+                                      a_coarse.getSurfaceCells()[dit()],
+                                      surfaces[dit()],
+                                      bit())) {
         filledFab(bit(), 0) = 1;
       }
     }
@@ -1329,6 +2438,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
   long long numMismatched      = 0;
   long long numTwiceCrossed    = 0;
   long long numPromoted        = 0;
+  long long numPierced         = 0;
   long long numClosedQuadrants = 0;
   int       numReported        = 0;
 
@@ -1391,6 +2501,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
       // cuts or closes -- a solid node on the face, or a quadrant across which the finer level filled a cell -- or a
       // covered cell onto whose face it opens.
       bool promoted = false;
+      bool pierced  = false;
 
       if (!cut.contains(iv)) {
         const int state = statesFab(iv, 0);
@@ -1455,6 +2566,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 
                 if (middleOfFace) {
                   promoted = true;
+                  pierced  = true;
                 }
                 else if (grids[dit()].contains(iv)) {
                   numTwiceCrossed++;
@@ -1485,6 +2597,15 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 
         if (grids[dit()].contains(iv)) {
           numPromoted++;
+
+          // ComputationalGeometry refines a cell whose face toward the finer level is pierced at its middle, so one
+          // left here is a node that read differently there, or a seam the refinement passes did not resolve
+          if (pierced) {
+            numPierced++;
+
+            pout() << "PolyhedralGeometryShop::stitchLevel - cell " << iv << " in domain " << domain
+                   << " is pierced at the middle of a face toward the finer level and is made cut" << endl;
+          }
         }
       }
 
@@ -1537,14 +2658,14 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 
       const int numClosed = PolyhedralGeometryShop::stitchBody(body,
                                                                surface,
+                                                               &faces,
                                                                anyEdgeRefined ? children : nullptr,
                                                                edgeRefined,
                                                                filledFab,
                                                                refinedFab,
                                                                fineFilled.box().isEmpty() ? nullptr : &fineFilled,
                                                                domain,
-                                                               iv,
-                                                               &faces);
+                                                               iv);
 
       faces.endCell();
 
@@ -1592,6 +2713,7 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
   }
 
   const long long totalPromoted = ParallelOps::sum(numPromoted);
+  const long long totalPierced  = ParallelOps::sum(numPierced);
   const long long totalClosed   = ParallelOps::sum(numClosedQuadrants);
   const long long totalTwice    = ParallelOps::sum(numTwiceCrossed);
 
@@ -1606,6 +2728,12 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
            << "closed " << totalClosed << " seam face quadrants onto filled finer cells" << endl;
   }
 
+  if (totalPierced > 0 && procID() == 0) {
+    MayDay::Warning(
+      "PolyhedralGeometryShop::stitchLevel - cells pierced at the middle of a face toward the finer level "
+      "were made cut, and coarsening may not sum them exactly; pout lists them");
+  }
+
   if (m_sanityCheck && ParallelOps::sum(numMismatched) > 0) {
     MayDay::Error("PolyhedralGeometryShop::stitchLevel - a stitched body differs from its reference");
   }
@@ -1614,6 +2742,8 @@ PolyhedralGeometryShop::stitchLevel(PolyhedralEBGraph&       a_coarse,
 int
 PolyhedralGeometryShop::destinationLevel(const ProblemDomain& a_domain) const
 {
+  CH_assert(m_compGeom != nullptr);
+
   const int level = m_compGeom->getLevel(a_domain);
 
   if (level >= 0) {
@@ -1675,6 +2805,8 @@ PolyhedralGeometryShop::destinationPieces(std::vector<std::vector<std::pair<int,
                                           const int                                      a_level) const
 {
   CH_TIME("PolyhedralGeometryShop::destinationPieces");
+
+  CH_assert(m_compGeom != nullptr);
 
   std::vector<std::vector<std::pair<int, Box>>> owned;
 
@@ -1747,6 +2879,7 @@ PolyhedralGeometryShop::planCopy(std::vector<std::vector<PolyhedralEB::GraphCopy
   using PolyhedralEB::GraphCopyHeader;
 
   CH_assert(a_grids.size() == a_domains.size());
+  CH_assert(m_compGeom != nullptr);
 
   const int numDest  = static_cast<int>(a_grids.size());
   const int numGeo   = static_cast<int>(m_graphs.size());
@@ -2073,6 +3206,8 @@ PolyhedralGeometryShop::testCopyPlan() const
 {
   CH_TIME("PolyhedralGeometryShop::testCopyPlan");
 
+  CH_assert(m_compGeom != nullptr);
+
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::testCopyPlan" << endl;
   }
@@ -2218,6 +3353,9 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
 {
   CH_TIME("PolyhedralGeometryShop::copyGraphs");
 
+  CH_assert(m_compGeom != nullptr);
+  CH_assert(a_grids.size() == a_domains.size());
+
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::copyGraphs" << endl;
   }
@@ -2241,7 +3379,17 @@ PolyhedralGeometryShop::copyGraphs(AMRPolyhedralEBGraph&                 a_dest,
     geometryLevels[i] = this->destinationLevel(a_domains[i]);
   }
 
-  a_dest.define(a_grids, a_domains, geometryLevels, numGeo, a_ghost);
+  const ComputationalGeometry& geometry = *m_compGeom;
+  const phase::which_phase     phase    = m_phase;
+
+  a_dest.define(a_grids,
+                a_domains,
+                geometryLevels,
+                numGeo,
+                a_ghost,
+                [&geometry, phase](const Box& a_box, const ProblemDomain& a_domain) -> GeometryService::InOut {
+                  return geometry.classify(a_box, a_domain, phase);
+                });
 
   // This rank's destination boxes and graph boxes by their index in their layouts, which is how a header names them.
   std::vector<std::vector<DataIndex>> destIndex(numDest);
@@ -2754,6 +3902,8 @@ PolyhedralGeometryShop::testCopyBodies() const
 {
   CH_TIME("PolyhedralGeometryShop::testCopyBodies");
 
+  CH_assert(m_compGeom != nullptr);
+
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::testCopyBodies" << endl;
   }
@@ -2807,6 +3957,10 @@ PolyhedralGeometryShop::testCopyBodies() const
       }
     }
   }
+
+  // What the geometry's own hierarchy fills its index space with, which the same hierarchy cut into octants must fill
+  // its own with too.
+  std::uint64_t hierarchyMoments = 0;
 
   // Every owned cell, as each destination rebuilds it, counted once.
   const auto check = [&](const std::string&                    a_what,
@@ -2882,6 +4036,7 @@ PolyhedralGeometryShop::testCopyBodies() const
 
     CutCellBody              body;
     std::vector<CutCellBody> bodies;
+    std::vector<CutCellBody> loBodies;
 
     std::vector<PolyhedralEB::CutCellDescription> described;
 
@@ -3172,6 +4327,190 @@ PolyhedralGeometryShop::testCopyBodies() const
       }
     }
 
+    // The index-space data each box fills from the copy: its flags as the graph has them, each node the one its body
+    // gives, and over the valid cells a hash that does not depend on how the hierarchy is cut into boxes.
+    const auto hashNode = [](const int a_level, const IrregNode& a_node) -> std::uint64_t {
+      std::uint64_t hash = 1469598103934665603ULL;
+
+      const auto mix = [&hash](const void* a_data, const std::size_t a_bytes) -> void {
+        const unsigned char* bytes = static_cast<const unsigned char*>(a_data);
+
+        for (std::size_t b = 0; b < a_bytes; b++) {
+          hash = (hash ^ bytes[b]) * 1099511628211ULL;
+        }
+      };
+
+      mix(&a_level, sizeof(a_level));
+      mix(&a_node.m_cell, sizeof(a_node.m_cell));
+      mix(&a_node.m_volFrac, sizeof(a_node.m_volFrac));
+      mix(&a_node.m_volCentroid, sizeof(a_node.m_volCentroid));
+      mix(&a_node.m_bndryCentroid, sizeof(a_node.m_bndryCentroid));
+
+      for (int face = 0; face < 2 * SpaceDim; face++) {
+        for (int k = 0; k < a_node.m_arc[face].size(); k++) {
+          mix(&a_node.m_arc[face][k], sizeof(int));
+          mix(&a_node.m_areaFrac[face][k], sizeof(Real));
+          mix(&a_node.m_faceCentroid[face][k], sizeof(RealVect));
+        }
+      }
+
+      return hash;
+    };
+
+    const auto sameNode = [](const IrregNode& a_one, const IrregNode& a_other) -> bool {
+      bool same = a_one.m_cell == a_other.m_cell && a_one.m_volFrac == a_other.m_volFrac &&
+                  a_one.m_volCentroid == a_other.m_volCentroid && a_one.m_bndryCentroid == a_other.m_bndryCentroid;
+
+      for (int face = 0; face < 2 * SpaceDim && same; face++) {
+        same = a_one.m_arc[face].constStdVector() == a_other.m_arc[face].constStdVector() &&
+               a_one.m_areaFrac[face].constStdVector() == a_other.m_areaFrac[face].constStdVector() &&
+               a_one.m_faceCentroid[face].constStdVector() == a_other.m_faceCentroid[face].constStdVector();
+      }
+
+      return same;
+    };
+
+    std::uint64_t momentHash    = 0;
+    long long     numNodes      = 0;
+    long long     numCollapsed  = 0;
+    long long     numFiner      = 0;
+    long long     numWrongFlags = 0;
+    long long     numWrongNodes = 0;
+
+    for (int i = 0; i < numDest; i++) {
+      const int ratio = (i + 1 < numDest) ? (1 << (dest.getGeometryLevel(i + 1) - dest.getGeometryLevel(i))) : 1;
+
+      const Vector<Box> finerBoxes = (i + 1 < numDest) ? a_grids[i + 1].boxArray() : Vector<Box>();
+
+      for (DataIterator dit(a_grids[i]); dit.ok(); ++dit) {
+        BaseFab<int>      flags;
+        Vector<IrregNode> nodes;
+
+        dest.fillNodes(flags, nodes, numCollapsed, numFiner, i, dit());
+
+        for (BoxIterator bit(flags.box()); bit.ok(); ++bit) {
+          const int state = dest.getState(i, dit(), bit());
+
+          const bool wrong = (state == PolyhedralEBGraph::s_regular && flags(bit(), 0) != 1) ||
+                             (state == PolyhedralEBGraph::s_covered && flags(bit(), 0) != -1);
+
+          numWrongFlags += wrong ? 1 : 0;
+        }
+
+        IntVectSet valid;
+
+        PolyhedralGeometryShop::validRegion(valid,
+                                            a_grids[i][dit()],
+                                            a_domains[i],
+                                            (i + 1 < numDest) ? &a_grids[i + 1] : nullptr,
+                                            (i + 1 < numDest) ? &finerBoxes : nullptr,
+                                            ratio,
+                                            0);
+
+        for (int n = 0; n < nodes.size(); n++) {
+          const IrregNode& node = nodes[n];
+
+          long long ignored = 0;
+
+          PolyhedralGeometryShop::destinationBodies(bodies, ignored, dest, i, dit(), node.m_cell);
+
+          IrregNode expected;
+
+          const bool built = bodies.size() == 1;
+
+          if (built) {
+            PolyhedralGeometryShop::fillNode(expected, bodies.front(), flags, node.m_cell, a_domains[i]);
+          }
+
+          // a face beside a regular cell is open over all of it, and one shared with a cut cell below is that cell's
+          for (int dir = 0; dir < SpaceDim && built; dir++) {
+            for (SideIterator sit; sit.ok(); ++sit) {
+              const IntVect across = node.m_cell + sign(sit()) * BASISV(dir);
+              const int     index  = IrregNode::index(dir, sit());
+
+              if (!flags.box().contains(across)) {
+                continue;
+              }
+
+              if (flags(across, 0) > 0) {
+                expected.m_arc[index]          = Vector<int>(1, 0);
+                expected.m_areaFrac[index]     = Vector<Real>(1, 1.0);
+                expected.m_faceCentroid[index] = Vector<RealVect>(1, RealVect::Zero);
+
+                continue;
+              }
+
+              if (sit() == Side::Hi || flags(across, 0) != 0) {
+                continue;
+              }
+
+              // a cell over finer geometry stands for the finer bodies under it, and the face stays the node's own
+              dest.getCutCells(described, i, dit(), across);
+
+              if (described.size() != 1 || described.front().m_level > dest.getGeometryLevel(i)) {
+                continue;
+              }
+
+              PolyhedralGeometryShop::destinationBodies(loBodies, ignored, dest, i, dit(), across);
+
+              const PolyhedralEB::CutCellBody& loBody = loBodies.front();
+
+              if (loBody.areaFraction(dir, Side::Hi) > 0.0) {
+                expected.m_arc[index]          = Vector<int>(1, 0);
+                expected.m_areaFrac[index]     = Vector<Real>(1, std::min(1.0, loBody.areaFraction(dir, Side::Hi)));
+                expected.m_faceCentroid[index] = Vector<RealVect>(1, loBody.faceCentroid(dir, Side::Hi));
+              }
+              else {
+                expected.m_arc[index].resize(0);
+                expected.m_areaFrac[index].resize(0);
+                expected.m_faceCentroid[index].resize(0);
+              }
+            }
+          }
+
+          if (!built || !sameNode(node, expected)) {
+            numWrongNodes++;
+          }
+
+          if (valid.contains(node.m_cell)) {
+            momentHash += hashNode(dest.getGeometryLevel(i), node);
+            numNodes++;
+          }
+        }
+      }
+    }
+
+    momentHash    = globalSum(momentHash);
+    numNodes      = ParallelOps::sum(numNodes);
+    numCollapsed  = ParallelOps::sum(numCollapsed);
+    numFiner      = ParallelOps::sum(numFiner);
+    numWrongFlags = ParallelOps::sum(numWrongFlags);
+    numWrongNodes = ParallelOps::sum(numWrongNodes);
+
+    if (numWrongFlags > 0 || numWrongNodes > 0) {
+      if (procID() == 0) {
+        pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": " << numWrongFlags
+               << " cells flagged otherwise than the graph says, " << numWrongNodes
+               << " nodes differing from their bodies" << endl;
+      }
+
+      MayDay::Error("PolyhedralGeometryShop::testCopyBodies - the index-space data differs from the copied graph");
+    }
+
+    if (a_what == "the geometry's hierarchy") {
+      hierarchyMoments = momentHash;
+    }
+    else if (a_what == "the geometry's hierarchy in octants" && momentHash != hierarchyMoments) {
+      MayDay::Error("PolyhedralGeometryShop::testCopyBodies - cutting the boxes into octants changed the moments");
+    }
+
+    if (procID() == 0) {
+      pout() << "PolyhedralGeometryShop::testCopyBodies - onto " << a_what << ": " << numNodes
+             << " nodes filled from the copy as their bodies give them, " << numCollapsed
+             << " of the children in more than one piece kept as one, " << numFiner
+             << " cut cells a finer level owns left for coarsening" << endl;
+    }
+
     const_cast<PolyhedralGeometryShop*>(this)->m_baseIF = saved;
 
     maxSeam     = ParallelOps::max(maxSeam);
@@ -3241,6 +4580,501 @@ PolyhedralGeometryShop::testCopyBodies() const
   const ProblemDomain finerDomain = refine(domains.back(), 2);
 
   check("a level past the finest", {PolyhedralGeometryShop::shuffledLayout(finer, finerDomain)}, {finerDomain});
+}
+
+void
+PolyhedralGeometryShop::testMoments() const
+{
+  CH_TIME("PolyhedralGeometryShop::testMoments");
+
+  CH_assert(m_compGeom != nullptr);
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testMoments" << endl;
+  }
+
+  const int numLevels = m_ebGraphs.size();
+
+  // The graph copied again onto the same grids, where each box's flags and nodes say what its index space must hold.
+  std::vector<DisjointBoxLayout> grids(numLevels);
+  std::vector<ProblemDomain>     domains(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    domains[lvl] = m_compGeom->getDomain(lvl);
+    grids[lvl]   = m_ebGraphs[lvl].isNull() ? DisjointBoxLayout() : m_ebGraphs[lvl]->disjointBoxLayout();
+  }
+
+  // the levels buildMoments did not build take the geometry's boxes, so that the copy sees the whole hierarchy
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_ebGraphs[lvl].isNull()) {
+      const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
+
+      Vector<int> ranks(boxes.size(), 0);
+
+      grids[lvl].define(boxes, ranks, domains[lvl]);
+    }
+  }
+
+  AMRPolyhedralEBGraph copy;
+
+  this->copyGraphs(copy, grids, domains, s_momentRing);
+
+  Real      maxFaceDeviation = 0.0;
+  Real      maxAreaDeviation = 0.0;
+  long long numCells         = 0;
+  long long numVoFs          = 0;
+  long long numWrong         = 0;
+  long long numCollapsed     = 0;
+  long long numFiner         = 0;
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    if (m_ebGraphs[lvl].isNull()) {
+      continue;
+    }
+
+    // a cell under the next finer level is coarsened from it, which buildMoments checks against the sums over its
+    // children; the faces of the level's own cells onto one are the coarsened side's
+    const auto underFiner = [&](const IntVect& a_cell) -> bool {
+      if (lvl + 1 >= numLevels || m_ebGraphs[lvl + 1].isNull()) {
+        return false;
+      }
+
+      Vector<int> hits;
+
+      grids[lvl + 1].intersecting(refine(Box(a_cell, a_cell), 2), hits);
+
+      return hits.size() > 0;
+    };
+
+    for (DataIterator dit(grids[lvl]); dit.ok(); ++dit) {
+      const Box box = grids[lvl][dit()];
+
+      BaseFab<int>      flags;
+      Vector<IrregNode> nodes;
+
+      copy.fillNodes(flags, nodes, numCollapsed, numFiner, lvl, dit());
+
+      const EBGraph& graph = (*m_ebGraphs[lvl])[dit()];
+      const EBData&  data  = (*m_ebData[lvl])[dit()];
+
+      for (BoxIterator bit(box); bit.ok(); ++bit) {
+        if (underFiner(bit())) {
+          continue;
+        }
+
+        const int flag = flags(bit(), 0);
+
+        numCells++;
+
+        // a regular cell beside a multi-valued coarsened one is written as a cut cell holding the whole of itself
+        const bool wholeCut = graph.isIrregular(bit()) && graph.getVoFs(bit()).size() == 1 &&
+                              data.volFrac(graph.getVoFs(bit())[0]) == 1.0;
+
+        if ((flag == 1 && !graph.isRegular(bit()) && !wholeCut) || (flag == -1 && !graph.isCovered(bit())) ||
+            (flag == 0 && !graph.isIrregular(bit()))) {
+          numWrong++;
+        }
+      }
+
+      for (int n = 0; n < nodes.size(); n++) {
+        const IrregNode& node = nodes[n];
+
+        if (!box.contains(node.m_cell)) {
+          continue;
+        }
+
+        const Vector<VolIndex> vofs = graph.getVoFs(node.m_cell);
+
+        if (vofs.size() != 1) {
+          numWrong++;
+
+          continue;
+        }
+
+        const VolIndex& vof = vofs[0];
+
+        numVoFs++;
+
+        bool same = data.volFrac(vof) == node.m_volFrac && data.centroid(vof) == node.m_volCentroid &&
+                    data.bndryCentroid(vof) == node.m_bndryCentroid;
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          for (SideIterator sit; sit.ok(); ++sit) {
+            if (underFiner(node.m_cell + sign(sit()) * BASISV(dir))) {
+              continue;
+            }
+
+            const int               index = IrregNode::index(dir, sit());
+            const Vector<FaceIndex> faces = graph.getFaces(vof, dir, sit());
+
+            if (faces.size() != node.m_arc[index].size()) {
+              same = false;
+
+              continue;
+            }
+
+            // A face two cut cells share holds one centroid, which either may have written: the two compute it from the
+            // same crossings, each over its own polygon, and agree to round-off.
+            for (int f = 0; f < faces.size(); f++) {
+              const Real deviation = (data.centroid(faces[f]) - node.m_faceCentroid[index][f]).vectorLength();
+
+              maxFaceDeviation = std::max(maxFaceDeviation, deviation);
+
+              const Real areaDeviation = std::abs(data.areaFrac(faces[f]) - node.m_areaFrac[index][f]);
+
+              maxAreaDeviation = std::max(maxAreaDeviation, areaDeviation);
+
+              same = same && areaDeviation <= 1.0E-12 && deviation <= 1.0E-12;
+            }
+          }
+        }
+
+        numWrong += same ? 0 : 1;
+      }
+    }
+  }
+
+  numCells         = ParallelOps::sum(numCells);
+  numVoFs          = ParallelOps::sum(numVoFs);
+  numWrong         = ParallelOps::sum(numWrong);
+  maxFaceDeviation = ParallelOps::max(maxFaceDeviation);
+  maxAreaDeviation = ParallelOps::max(maxAreaDeviation);
+
+  if (procID() == 0) {
+    pout() << "PolyhedralGeometryShop::testMoments - " << numCells << " cells and " << numVoFs
+           << " cut-cell VoFs read back from the index space, " << numWrong
+           << " differing from the graph; apertures within " << maxAreaDeviation << ", face centroids within "
+           << maxFaceDeviation << endl;
+  }
+
+  if (numWrong > 0) {
+    MayDay::Error("PolyhedralGeometryShop::testMoments - the index space differs from the graph it was built from");
+  }
+}
+
+void
+PolyhedralGeometryShop::testFill() const
+{
+  CH_TIME("PolyhedralGeometryShop::testFill");
+
+  CH_assert(m_compGeom != nullptr);
+
+  if (m_verbose) {
+    pout() << "PolyhedralGeometryShop::testFill" << endl;
+  }
+
+  const int numLevels = m_ebGraphs.size();
+  const int numComps  = s_signatureComps;
+
+  // the ghost widths EBISLevel reads a fine level with when it coarsens one, which a filled layout is tested at
+  constexpr int graphGhost = 3;
+  constexpr int dataGhost  = 2;
+
+  constexpr Real tolerance = 1.0E-12;
+
+  // marks a cell no box wrote to
+  constexpr Real unwritten = -1.0E300;
+
+  const Interval all(0, numComps - 1);
+
+  const auto signature = [&](LevelData<FArrayBox>&     a_signature,
+                             const LevelData<EBGraph>& a_graph,
+                             const LevelData<EBData>&  a_data,
+                             const ProblemDomain&      a_domain,
+                             const int                 a_ghost) {
+    a_signature.define(a_graph.disjointBoxLayout(), numComps, a_ghost * IntVect::Unit);
+
+    for (DataIterator dit(a_graph.disjointBoxLayout()); dit.ok(); ++dit) {
+      a_signature[dit()].setVal(unwritten);
+
+      PolyhedralGeometryShop::cellSignature(a_signature[dit()],
+                                            a_graph[dit()],
+                                            a_data[dit()],
+                                            grow(a_signature.disjointBoxLayout()[dit()], a_ghost) &
+                                              a_domain.domainBox());
+    }
+  };
+
+  // the valid cells of a signature brought onto another layout, unwritten where it holds nothing
+  const auto onto =
+    [&](LevelData<FArrayBox>& a_dest, const LevelData<FArrayBox>& a_source, const DisjointBoxLayout& a_grids) {
+      a_dest.define(a_grids, numComps, IntVect::Zero);
+
+      for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+        a_dest[dit()].setVal(unwritten);
+      }
+
+      a_source.copyTo(all, a_dest, all);
+    };
+
+  // A destination is filled, and its cells must be what the geometry's own level holds where it holds them, cut from
+  // the coarser cells exactly where it does not, and the same in every box that holds them as a ghost cell.
+  const auto check =
+    [&](const std::string& a_what, const DisjointBoxLayout& a_grids, const ProblemDomain& a_domain, const int a_level) {
+      LevelData<EBGraph> graph;
+      LevelData<EBData>  data;
+
+      this->fillLayout(graph, data, a_grids, a_domain, graphGhost, dataGhost);
+
+      LevelData<FArrayBox> filled;
+
+      signature(filled, graph, data, a_domain, dataGhost);
+
+      // Over the valid cells, a hash that does not depend on which rank holds which box, so that runs on different
+      // numbers of ranks can be compared.
+      std::uint64_t hash = 0;
+
+      for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+        for (BoxIterator bit(a_grids[dit()]); bit.ok(); ++bit) {
+          std::uint64_t cellHash = 14695981039346656037ULL;
+
+          const auto mix = [&cellHash](const void* a_data, const std::size_t a_bytes) -> void {
+            const unsigned char* bytes = static_cast<const unsigned char*>(a_data);
+
+            for (std::size_t b = 0; b < a_bytes; b++) {
+              cellHash = (cellHash ^ bytes[b]) * 1099511628211ULL;
+            }
+          };
+
+          const IntVect cell = bit();
+
+          mix(&cell, sizeof(cell));
+
+          for (int comp = 0; comp < numComps; comp++) {
+            const Real value = filled[dit()](cell, comp);
+
+            mix(&value, sizeof(value));
+          }
+
+          hash += cellHash;
+        }
+      }
+
+#ifdef CH_MPI
+      std::uint64_t localHash = hash;
+
+      MPI_Allreduce(&localHash, &hash, 1, MPI_UINT64_T, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+      long long numStored   = 0;
+      long long numDiffer   = 0;
+      long long numGhosts   = 0;
+      long long numGhostOff = 0;
+      long long numFaces    = 0;
+      long long numFaceOff  = 0;
+      long long numParents  = 0;
+      long long numInexact  = 0;
+
+      // Every ghost cell against the box whose valid cell it is.
+      LevelData<FArrayBox> exchanged(a_grids, numComps, dataGhost * IntVect::Unit);
+
+      for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+        exchanged[dit()].setVal(unwritten);
+        exchanged[dit()].copy(filled[dit()], a_grids[dit()]);
+      }
+
+      exchanged.exchange(all);
+
+      for (DataIterator dit(a_grids); dit.ok(); ++dit) {
+        const Box grown = grow(a_grids[dit()], dataGhost) & a_domain.domainBox();
+
+        for (BoxIterator bit(grown); bit.ok(); ++bit) {
+          if (a_grids[dit()].contains(bit()) || exchanged[dit()](bit(), 0) == unwritten) {
+            continue;
+          }
+
+          numGhosts++;
+
+          for (int comp = 0; comp < numComps; comp++) {
+            if (exchanged[dit()](bit(), comp) != filled[dit()](bit(), comp)) {
+              numGhostOff++;
+
+              break;
+            }
+          }
+        }
+
+        // each face read from the cells on its two sides
+        for (BoxIterator bit(a_grids[dit()]); bit.ok(); ++bit) {
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            const IntVect across = bit() + BASISV(dir);
+
+            if (!grown.contains(across)) {
+              continue;
+            }
+
+            numFaces++;
+
+            const Real mine   = filled[dit()](bit(), 2 + SpaceDim + 2 * dir + 1);
+            const Real theirs = filled[dit()](across, 2 + SpaceDim + 2 * dir);
+
+            numFaceOff += (mine != theirs) ? 1 : 0;
+          }
+        }
+      }
+
+      // The cells the geometry's level holds, bit for bit.
+      if (a_level < numLevels && !m_ebGraphs[a_level].isNull()) {
+        LevelData<FArrayBox> stored;
+        LevelData<FArrayBox> brought;
+
+        signature(stored, *m_ebGraphs[a_level], *m_ebData[a_level], a_domain, 0);
+
+        onto(brought, filled, stored.disjointBoxLayout());
+
+        for (DataIterator dit(stored.disjointBoxLayout()); dit.ok(); ++dit) {
+          for (BoxIterator bit(stored.disjointBoxLayout()[dit()]); bit.ok(); ++bit) {
+            if (brought[dit()](bit(), 0) == unwritten) {
+              continue;
+            }
+
+            numStored++;
+
+            for (int comp = 0; comp < numComps; comp++) {
+              if (brought[dit()](bit(), comp) != stored[dit()](bit(), comp)) {
+                numDiffer++;
+
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // Each coarser cell of the geometry against the sums over the cells it holds, where the destination holds all of
+      // them.
+      if (a_level > 0 && !m_ebGraphs[a_level - 1].isNull() && a_grids.coarsenable(2)) {
+        DisjointBoxLayout coarse;
+
+        coarsen(coarse, a_grids, 2);
+
+        LevelData<FArrayBox> sums(coarse, numComps, IntVect::Zero);
+
+        const Real volumeScale = 1.0 / static_cast<Real>(1 << SpaceDim);
+        const Real faceScale   = 1.0 / static_cast<Real>(1 << (SpaceDim - 1));
+
+        for (DataIterator dit(coarse); dit.ok(); ++dit) {
+          sums[dit()].setVal(0.0);
+
+          for (BoxIterator bit(coarse[dit()]); bit.ok(); ++bit) {
+            const IntVect parent = bit();
+
+            for (BoxIterator cit(refine(Box(parent, parent), 2)); cit.ok(); ++cit) {
+              const IntVect child = cit();
+
+              const Real volume = filled[dit()](child, 1);
+
+              sums[dit()](parent, 1) += volumeScale * volume;
+
+              for (int dir = 0; dir < SpaceDim; dir++) {
+                const Real offset = 0.5 * static_cast<Real>(child[dir] - 2 * parent[dir]) - 0.25;
+
+                sums[dit()](parent, 2 + dir) += volumeScale * (volume * offset + 0.5 * filled[dit()](child, 2 + dir));
+
+                for (SideIterator sit; sit.ok(); ++sit) {
+                  const int  side    = (sit() == Side::Hi) ? 1 : 0;
+                  const bool onPlane = (child[dir] - 2 * parent[dir]) == side;
+
+                  if (onPlane) {
+                    sums[dit()](parent, 2 + SpaceDim + 2 * dir + side) += faceScale *
+                                                                          filled[dit()](child,
+                                                                                        2 + SpaceDim + 2 * dir + side);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        LevelData<FArrayBox> parents;
+        LevelData<FArrayBox> brought;
+
+        signature(parents, *m_ebGraphs[a_level - 1], *m_ebData[a_level - 1], m_compGeom->getDomain(a_level - 1), 0);
+
+        onto(brought, sums, parents.disjointBoxLayout());
+
+        for (DataIterator dit(parents.disjointBoxLayout()); dit.ok(); ++dit) {
+          for (BoxIterator bit(parents.disjointBoxLayout()[dit()]); bit.ok(); ++bit) {
+            if (brought[dit()](bit(), 1) == unwritten) {
+              continue;
+            }
+
+            numParents++;
+
+            for (int comp = 1; comp < numComps; comp++) {
+              if (std::abs(brought[dit()](bit(), comp) - parents[dit()](bit(), comp)) > tolerance) {
+                numInexact++;
+
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      numStored   = ParallelOps::sum(numStored);
+      numDiffer   = ParallelOps::sum(numDiffer);
+      numGhosts   = ParallelOps::sum(numGhosts);
+      numGhostOff = ParallelOps::sum(numGhostOff);
+      numFaces    = ParallelOps::sum(numFaces);
+      numFaceOff  = ParallelOps::sum(numFaceOff);
+      numParents  = ParallelOps::sum(numParents);
+      numInexact  = ParallelOps::sum(numInexact);
+
+      if (procID() == 0) {
+        pout() << "PolyhedralGeometryShop::testFill - " << a_what << ": " << numDiffer << " of " << numStored
+               << " cells the level holds differ from it, " << numGhostOff << " of " << numGhosts
+               << " ghost cells differ from the box that holds them, " << numFaceOff << " of " << numFaces
+               << " faces read differently from their two sides, " << numInexact << " of " << numParents
+               << " coarser cells are not the sums of the cells they hold; hash " << hash << endl;
+      }
+
+      if (numDiffer > 0 || numGhostOff > 0 || numFaceOff > 0 || numInexact > 0) {
+        MayDay::Error("PolyhedralGeometryShop::testFill - a filled layout differs from the geometry's index space");
+      }
+    };
+
+  const auto octants = [](const Vector<Box>& a_boxes) -> Vector<Box> {
+    Vector<Box> pieces;
+
+    for (int i = 0; i < a_boxes.size(); i++) {
+      Vector<Box> children;
+
+      domainSplit(a_boxes[i], children, std::max(1, a_boxes[i].shortside() / 2), 1);
+
+      pieces.append(children);
+    }
+
+    return pieces;
+  };
+
+  // Every level the geometry has and one past the finest: its own boxes in octants, and the boxes of the level below
+  // refined onto it, which reach the cells it holds no tile for.
+  for (int lvl = 0; lvl <= numLevels; lvl++) {
+    const ProblemDomain domain = (lvl < numLevels) ? m_compGeom->getDomain(lvl)
+                                                   : refine(m_compGeom->getDomain(numLevels - 1), 2);
+
+    const std::string level = (lvl < numLevels) ? "level " + std::to_string(lvl) : "a level past the finest";
+
+    if (lvl < numLevels && !m_ebGraphs[lvl].isNull()) {
+      const Vector<Box>& boxes = m_compGeom->getBoxes(lvl);
+
+      check(level + "'s boxes in octants", PolyhedralGeometryShop::shuffledLayout(octants(boxes), domain), domain, lvl);
+    }
+
+    if (lvl > 0 && !m_ebGraphs[lvl - 1].isNull()) {
+      Vector<Box> boxes = m_compGeom->getBoxes(lvl - 1);
+
+      for (int i = 0; i < boxes.size(); i++) {
+        boxes[i].refine(2);
+      }
+
+      check(level + " over the boxes below it refined",
+            PolyhedralGeometryShop::shuffledLayout(octants(boxes), domain),
+            domain,
+            lvl);
+    }
+  }
 }
 
 DisjointBoxLayout
@@ -3476,7 +5310,7 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 
       const double levelDx = dx;
 
-      writeH5Attribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &levelDx);
+      PolyhedralGeometryShop::writeH5Attribute(group, "dx", H5T_NATIVE_DOUBLE, 1, &levelDx);
     }
 
     const long long mineNodes = nodeKappa.size();
@@ -3485,8 +5319,8 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     long long nodeOffset = 0;
     long long edgeOffset = 0;
 
-    rankOffset(mineNodes, nodeOffset, totalNodes[lvl]);
-    rankOffset(mineEdges, edgeOffset, totalEdges[lvl]);
+    ParallelOps::rankOffset(nodeOffset, totalNodes[lvl], mineNodes);
+    ParallelOps::rankOffset(edgeOffset, totalEdges[lvl], mineEdges);
 
     // a node is its own element, and an edge's two vertices are written one after the other
     std::vector<long long> nodeConnectivity(mineNodes);
@@ -3502,70 +5336,142 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
     const hsize_t nodeCount = totalNodes[lvl];
     const hsize_t edgeCount = totalEdges[lvl];
 
-    writeH5Slab(group,
-                "nodePositions",
-                H5T_NATIVE_DOUBLE,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                3,
-                nodePosition.data(),
-                transfer);
-    writeH5Slab(group,
-                "nodeConnectivity",
-                H5T_NATIVE_LLONG,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                1,
-                nodeConnectivity.data(),
-                transfer);
-    writeH5Slab(group, "kappa", H5T_NATIVE_DOUBLE, myNodes, nodeStart, nodeCount, 1, nodeKappa.data(), transfer);
-    writeH5Slab(group, "role", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRole.data(), transfer);
-    writeH5Slab(group, "sheets", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeSheets.data(), transfer);
-    writeH5Slab(group, "rank", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeRank.data(), transfer);
-    writeH5Slab(group, "kind", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeKind.data(), transfer);
-    writeH5Slab(group,
-                "nodeAperture",
-                H5T_NATIVE_DOUBLE,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                1,
-                nodeAperture.data(),
-                transfer);
-    writeH5Slab(group, "nodeFaceState", H5T_NATIVE_INT, myNodes, nodeStart, nodeCount, 1, nodeFace.data(), transfer);
-    writeH5Slab(group,
-                "nodeOverridden",
-                H5T_NATIVE_INT,
-                myNodes,
-                nodeStart,
-                nodeCount,
-                1,
-                nodeOverridden.data(),
-                transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodePositions",
+                                        H5T_NATIVE_DOUBLE,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        3,
+                                        nodePosition.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeConnectivity",
+                                        H5T_NATIVE_LLONG,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeConnectivity.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "kappa",
+                                        H5T_NATIVE_DOUBLE,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeKappa.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "role",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeRole.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "sheets",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeSheets.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "rank",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeRank.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "kind",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeKind.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeAperture",
+                                        H5T_NATIVE_DOUBLE,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeAperture.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeFaceState",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeFace.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "nodeOverridden",
+                                        H5T_NATIVE_INT,
+                                        myNodes,
+                                        nodeStart,
+                                        nodeCount,
+                                        1,
+                                        nodeOverridden.data(),
+                                        transfer);
 
-    writeH5Slab(group,
-                "edgePositions",
-                H5T_NATIVE_DOUBLE,
-                2 * myEdges,
-                2 * edgeStart,
-                2 * edgeCount,
-                3,
-                edgePosition.data(),
-                transfer);
-    writeH5Slab(group,
-                "edgeConnectivity",
-                H5T_NATIVE_LLONG,
-                myEdges,
-                edgeStart,
-                edgeCount,
-                2,
-                edgeConnectivity.data(),
-                transfer);
-    writeH5Slab(group, "aperture", H5T_NATIVE_DOUBLE, myEdges, edgeStart, edgeCount, 1, edgeAperture.data(), transfer);
-    writeH5Slab(group, "faceState", H5T_NATIVE_INT, myEdges, edgeStart, edgeCount, 1, edgeFace.data(), transfer);
-    writeH5Slab(group, "overridden", H5T_NATIVE_INT, myEdges, edgeStart, edgeCount, 1, edgeOverridden.data(), transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "edgePositions",
+                                        H5T_NATIVE_DOUBLE,
+                                        2 * myEdges,
+                                        2 * edgeStart,
+                                        2 * edgeCount,
+                                        3,
+                                        edgePosition.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "edgeConnectivity",
+                                        H5T_NATIVE_LLONG,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        2,
+                                        edgeConnectivity.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "aperture",
+                                        H5T_NATIVE_DOUBLE,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        1,
+                                        edgeAperture.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "faceState",
+                                        H5T_NATIVE_INT,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        1,
+                                        edgeFace.data(),
+                                        transfer);
+    PolyhedralGeometryShop::writeH5Slab(group,
+                                        "overridden",
+                                        H5T_NATIVE_INT,
+                                        myEdges,
+                                        edgeStart,
+                                        edgeCount,
+                                        1,
+                                        edgeOverridden.data(),
+                                        transfer);
 
     H5Gclose(group);
   }
@@ -3651,12 +5557,15 @@ PolyhedralGeometryShop::writeGraph(const std::string& a_fileName) const
 }
 
 void
-PolyhedralGeometryShop::indexFacets(const Vector<Real>& a_facets,
-                                    const Real          a_tolerance,
-                                    std::vector<Real>&  a_vertices,
-                                    std::vector<int>&   a_connectivity)
+PolyhedralGeometryShop::indexFacets(std::vector<Real>&  a_vertices,
+                                    std::vector<int>&   a_connectivity,
+                                    const Vector<Real>& a_facets,
+                                    const Real          a_tolerance)
 {
   CH_TIME("PolyhedralGeometryShop::indexFacets");
+
+  CH_assert(a_tolerance > 0.0);
+  CH_assert(a_facets.size() % 3 == 0);
 
   const int numPoints = static_cast<int>(a_facets.size() / 3);
 
@@ -3737,6 +5646,8 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
 {
   CH_TIME("PolyhedralGeometryShop::writeSurface");
 
+  CH_assert(m_compGeom != nullptr);
+
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::writeSurface - writing " << a_fileName << endl;
   }
@@ -3792,7 +5703,15 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
                              const hsize_t      a_total,
                              const hsize_t      a_columns,
                              const void*        a_data) -> void {
-    writeH5Slab(a_where, a_name, a_type, a_rows, a_offset, a_total, a_columns, a_data, transfer);
+    PolyhedralGeometryShop::writeH5Slab(a_where,
+                                        a_name,
+                                        a_type,
+                                        a_rows,
+                                        a_offset,
+                                        a_total,
+                                        a_columns,
+                                        a_data,
+                                        transfer);
   };
 
   const std::string phaseName = (m_phase == phase::gas) ? "gas" : "solid";
@@ -3828,7 +5747,7 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
     std::vector<Real> vertices;
     std::vector<int>  connectivity;
 
-    PolyhedralGeometryShop::indexFacets(a_facets[lvl], tolerance, vertices, connectivity);
+    PolyhedralGeometryShop::indexFacets(vertices, connectivity, a_facets[lvl], tolerance);
 
     // An element two of whose vertices are the same vertex has collapsed, a triangle to a line or a segment to a
     // point, and bounds nothing.
@@ -3909,7 +5828,7 @@ PolyhedralGeometryShop::writeSurface(const std::string& a_fileName, const Vector
 
     Vector<int> reasons;
 
-    const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(lvl, reasons);
+    const Vector<Box>& splitBoxes = m_compGeom->getSplitBoxes(reasons, lvl);
 
     std::vector<int> corners;
     std::vector<int> gasType;
@@ -4074,6 +5993,8 @@ void
 PolyhedralGeometryShop::sanityCheck() const
 {
   CH_TIME("PolyhedralGeometryShop::sanityCheck");
+
+  CH_assert(m_compGeom != nullptr);
 
   if (m_verbose) {
     pout() << "PolyhedralGeometryShop::sanityCheck" << endl;
@@ -4402,13 +6323,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
     Box fineDomain;
 
     if (lvl + 1 < a_graphs.size() && a_graphs[lvl + 1]->isDefined()) {
-      PolyhedralGeometryShop::copyFinerCells(*a_graphs[lvl + 1],
-                                             grids,
-                                             3,
-                                             fineStates,
+      PolyhedralGeometryShop::copyFinerCells(fineStates,
                                              fineMask,
                                              fineSets,
-                                             fineSurfaces);
+                                             fineSurfaces,
+                                             *a_graphs[lvl + 1],
+                                             grids,
+                                             3);
 
       fineDomain = a_graphs[lvl + 1]->getDomain().domainBox();
     }
@@ -4450,11 +6371,11 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
         fineFilledFab.setVal(0);
 
         for (BoxIterator fit(fineRegion & fineDomain); fit.ok(); ++fit) {
-          if (PolyhedralGeometryShop::isFilled(fineStates[dit()],
-                                               noneRefined,
-                                               fineSets[dit()],
-                                               fineSurfaces[dit()],
-                                               fit())) {
+          if (PolyhedralEBGraph::isFilled(fineStates[dit()],
+                                          noneRefined,
+                                          fineSets[dit()],
+                                          fineSurfaces[dit()],
+                                          fit())) {
             fineFilledFab(fit(), 0) = 1;
           }
         }
@@ -4554,13 +6475,13 @@ PolyhedralGeometryShop::sanityCheck(const Vector<RefCountedPtr<PolyhedralEBGraph
               PolyhedralGeometryShop::stitchBody(fineBody,
                                                  fineSurface,
                                                  nullptr,
+                                                 nullptr,
                                                  noRefinedEdge,
                                                  fineFilledFab,
                                                  noneRefined,
                                                  nullptr,
                                                  fineDomain,
-                                                 fiv,
-                                                 nullptr);
+                                                 fiv);
 
               Vector<Real> fineFacets;
 
@@ -4830,371 +6751,13 @@ PolyhedralGeometryShop::testGraphCopy() const
 
 PolyhedralGeometryShop::~PolyhedralGeometryShop()
 {}
-void
-PolyhedralGeometryShop::fillNodeValues(const BaseIF&   a_function,
-                                       BaseFab<Real>&  a_nodeValues,
-                                       const Box&      a_region,
-                                       const RealVect& a_probLo,
-                                       const Real&     a_dx)
-{
-  CH_assert(a_dx > 0.0);
-
-  Box nodeBox = a_region;
-  nodeBox.surroundingNodes();
-
-  a_nodeValues.define(nodeBox, 1);
-
-  for (BoxIterator bit(nodeBox); bit.ok(); ++bit) {
-    const IntVect iv = bit();
-
-    RealVect x = a_probLo;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      x[d] += a_dx * static_cast<Real>(iv[d]);
-    }
-
-    a_nodeValues(iv, 0) = PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
-  }
-}
-
-void
-PolyhedralGeometryShop::defineIntercepts(BaseFab<Real> a_intercept[SpaceDim], const Box& a_region)
-{
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    Box edgeBox = a_region;
-    edgeBox.surroundingNodes();
-    edgeBox.enclosedCells(dir);
-
-    a_intercept[dir].define(edgeBox, 1);
-    a_intercept[dir].setVal(PolyhedralEB::CutCellSurface::s_noCrossing);
-  }
-}
-
-Real
-PolyhedralGeometryShop::edgeCrossing(const BaseIF&   a_function,
-                                     BaseFab<Real>   a_intercept[SpaceDim],
-                                     const IntVect&  a_cell,
-                                     const int       a_edge,
-                                     const Real      a_lo,
-                                     const Real      a_hi,
-                                     const RealVect& a_probLo,
-                                     const Real&     a_dx)
-{
-  CH_assert(a_dx > 0.0);
-
-  const int dir = PolyhedralEB::detail::edgeDirection(a_edge);
-
-  int offset[SpaceDim];
-  PolyhedralEB::detail::edgeOrigin(a_edge, offset);
-
-  // the edge is addressed by the node at its low end
-  IntVect edgeIV = a_cell;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    edgeIV[d] += offset[d];
-  }
-
-  if (a_intercept[dir].box().contains(edgeIV) &&
-      a_intercept[dir](edgeIV, 0) != PolyhedralEB::CutCellSurface::s_noCrossing) {
-    return a_intercept[dir](edgeIV, 0);
-  }
-
-  // bisection between the two endpoints. The endpoints are taken from the shared node values
-  // and the edge is addressed by its own index, so every cell reaching this edge hands the
-  // solver the same interval and gets the same root back
-  const Real root = PolyhedralGeometryShop::edgeRoot(a_function, edgeIV, dir, a_lo, a_hi, a_probLo, a_dx);
-
-  if (a_intercept[dir].box().contains(edgeIV)) {
-    a_intercept[dir](edgeIV, 0) = root;
-  }
-
-  return root;
-}
-
-bool
-PolyhedralGeometryShop::isDust(const PolyhedralEB::CutCellBody& a_body) noexcept
-{
-  // Exactly, not within a tolerance: a degenerate body has no polygon of positive area at all, so both of these
-  // are zero by construction rather than by luck.
-  return (1.0 - a_body.volumeFraction() <= 0.0) && (a_body.boundaryArea() <= 0.0);
-}
-
-Real
-PolyhedralGeometryShop::snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept
-{
-  const Real value = a_function.value(a_point);
-
-  if (std::abs(value) > s_snapTolerance * a_dx) {
-    return value;
-  }
-
-  return PolyhedralGeometryShop::resolveTangency(a_function, a_point, a_dx);
-}
-
-Real
-PolyhedralGeometryShop::resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept
-{
-  const Real delta    = s_probeSpacing * a_dx;
-  const Real zeroBand = s_snapTolerance * a_dx;
-
-  Real probe[2 * SpaceDim];
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    const RealVect e = BASISREALV(dir);
-
-    probe[2 * dir]     = a_function.value(a_point - delta * e);
-    probe[2 * dir + 1] = a_function.value(a_point + delta * e);
-  }
-
-  Real reading = 0.0;
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    const Real lo = probe[2 * dir];
-    const Real hi = probe[2 * dir + 1];
-
-    if ((lo < 0.0 && hi > 0.0) || (lo > 0.0 && hi < 0.0)) {
-      return 0.0;
-    }
-
-    if (std::abs(lo) > zeroBand && std::abs(hi) > zeroBand) {
-      if (std::abs(lo) > std::abs(reading)) {
-        reading = lo;
-      }
-      if (std::abs(hi) > std::abs(reading)) {
-        reading = hi;
-      }
-    }
-  }
-
-  return reading;
-}
-
-Real
-PolyhedralGeometryShop::edgeRoot(const BaseIF&   a_function,
-                                 const IntVect&  a_edgeIV,
-                                 const int       a_dir,
-                                 const Real      a_loValue,
-                                 const Real      a_hiValue,
-                                 const RealVect& a_probLo,
-                                 const Real      a_dx) noexcept
-{
-  RealVect lowPoint = a_probLo;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    lowPoint[d] += a_dx * static_cast<Real>(a_edgeIV[d]);
-  }
-
-  // An edge whose ends are both away from zero and of opposite sign carries one plain root, and Brent's method
-  // brackets it in a handful of evaluations where bisection needs tens. An end that reads as exactly zero is a
-  // different problem: the function may be zero along a stretch of the edge, and the crossing is then where it
-  // leaves that stretch rather than where it reaches it. That is a step in the fluid predicate, which has no
-  // continuous root to interpolate, so those edges are walked by bisecting the predicate below.
-  if (a_loValue != 0.0 && a_hiValue != 0.0 && ((a_loValue < 0.0) != (a_hiValue < 0.0))) {
-    const auto alongEdge = [&](const Real a_t) -> Real {
-      RealVect x = lowPoint;
-
-      x[a_dir] += a_dx * a_t;
-
-      return PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
-    };
-
-    const Real brent = PolyUtils::brentSolve(0.0, 1.0, alongEdge);
-
-    if (brent >= 0.0 && brent <= 1.0) {
-      return brent;
-    }
-  }
-
-  Real lo      = 0.0;
-  Real hi      = 1.0;
-  Real loValue = a_loValue;
-
-  for (int iter = 0; iter < 100; iter++) {
-    const Real mid = 0.5 * (lo + hi);
-
-    RealVect x = lowPoint;
-    x[a_dir] += a_dx * mid;
-
-    const Real value = PolyhedralGeometryShop::snappedValue(a_function, x, a_dx);
-
-    if (PolyhedralEB::isFluid(value) == PolyhedralEB::isFluid(loValue)) {
-      lo      = mid;
-      loValue = value;
-    }
-    else {
-      hi = mid;
-    }
-
-    if (hi - lo < 1.0E-15) {
-      break;
-    }
-  }
-
-  Real root = 0.5 * (lo + hi);
-
-  // an endpoint exactly on the interface owns a crossing that lands close to it
-  if (a_loValue == 0.0 && root < s_rootSnap) {
-    root = 0.0;
-  }
-  else if (a_hiValue == 0.0 && root > 1.0 - s_rootSnap) {
-    root = 1.0;
-  }
-
-  return root;
-}
-void
-PolyhedralGeometryShop::fillCorners(PolyhedralEB::CutCellSurface& a_surface,
-                                    const BaseFab<Real>&          a_nodeValues,
-                                    const IntVect&                a_cell)
-{
-  for (int c = 0; c < PolyhedralEB::CutCellSurface::s_numCorners; c++) {
-    IntVect node = a_cell;
-
-    for (int d = 0; d < SpaceDim; d++) {
-      node[d] += (c >> d) & 1;
-    }
-
-    a_surface.m_corner[c] = a_nodeValues(node, 0);
-  }
-}
-
-void
-PolyhedralGeometryShop::buildSurface(const BaseIF&                 a_function,
-                                     BaseFab<Real>                 a_intercept[SpaceDim],
-                                     PolyhedralEB::CutCellSurface& a_surface,
-                                     const BaseFab<Real>&          a_nodeValues,
-                                     const IntVect&                a_cell,
-                                     const RealVect&               a_probLo,
-                                     const Real&                   a_dx)
-{
-  a_surface = PolyhedralEB::CutCellSurface();
-
-  PolyhedralGeometryShop::fillCorners(a_surface, a_nodeValues, a_cell);
-
-  for (int e = 0; e < PolyhedralEB::CutCellSurface::s_numEdges; e++) {
-    int low  = -1;
-    int high = -1;
-
-    PolyhedralEB::detail::edgeCorners(e, low, high);
-
-    CH_assert(low >= 0 && low < PolyhedralEB::CutCellSurface::s_numCorners);
-    CH_assert(high >= 0 && high < PolyhedralEB::CutCellSurface::s_numCorners);
-
-    const Real loValue = a_surface.m_corner[low];
-    const Real hiValue = a_surface.m_corner[high];
-
-    // an edge carries a crossing exactly when its two ends disagree under the one predicate the
-    // corners are classified by, so the number of crossings on a face counts sign changes. A corner
-    // at exactly zero is not by itself the crossing: the function may be zero along part of the
-    // edge, and edgeRoot finds where it stops being so
-    if (PolyhedralEB::isFluid(loValue) != PolyhedralEB::isFluid(hiValue)) {
-      a_surface.m_crossing[e] = PolyhedralGeometryShop::edgeCrossing(a_function,
-                                                                     a_intercept,
-                                                                     a_cell,
-                                                                     e,
-                                                                     loValue,
-                                                                     hiValue,
-                                                                     a_probLo,
-                                                                     a_dx);
-    }
-  }
-
-  PolyhedralGeometryShop::decideFaces(a_function, a_surface, a_cell, a_probLo, a_dx);
-}
-
-void
-PolyhedralGeometryShop::decideFaces(const BaseIF&                 a_function,
-                                    PolyhedralEB::CutCellSurface& a_surface,
-                                    const IntVect&                a_cell,
-                                    const RealVect&               a_probLo,
-                                    const Real                    a_dx) noexcept
-{
-  using PolyhedralEB::isFluid;
-
-  a_surface.m_fluidJoined = 0;
-
-  // which way one face goes, from its four corners in circuit order and its centre
-  auto fluidJoined = [&](const Real      a_f00,
-                         const Real      a_f10,
-                         const Real      a_f11,
-                         const Real      a_f01,
-                         const RealVect& a_centre,
-                         bool&           a_alternating) -> bool {
-    a_alternating = isFluid(a_f00) == isFluid(a_f11) && isFluid(a_f10) == isFluid(a_f01) &&
-                    isFluid(a_f00) != isFluid(a_f10);
-
-    if (!a_alternating) {
-      return false;
-    }
-
-    const Real value = PolyhedralGeometryShop::snappedValue(a_function, a_centre, 0.5 * a_dx);
-
-    if (value != 0.0) {
-      return isFluid(value);
-    }
-
-    const Real den = a_f00 + a_f11 - a_f10 - a_f01;
-
-    return isFluid((std::abs(den) > 0.0) ? (a_f00 * a_f11 - a_f10 * a_f01) / den : (a_f00 + a_f11));
-  };
-
-#if CH_SPACEDIM == 3
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    for (int side = 0; side < 2; side++) {
-      int faceCorner[4];
-
-      PolyhedralEB::detail::faceCorners(dir, side, faceCorner);
-
-      RealVect centre = a_probLo;
-
-      for (int d = 0; d < SpaceDim; d++) {
-        const Real offset = (d == dir) ? static_cast<Real>(side) : 0.5;
-
-        centre[d] += a_dx * (static_cast<Real>(a_cell[d]) + offset);
-      }
-
-      bool alternating = false;
-
-      const bool joined = fluidJoined(a_surface.m_corner[faceCorner[0]],
-                                      a_surface.m_corner[faceCorner[1]],
-                                      a_surface.m_corner[faceCorner[2]],
-                                      a_surface.m_corner[faceCorner[3]],
-                                      centre,
-                                      alternating);
-
-      if (alternating && joined) {
-        a_surface.m_fluidJoined |= 1 << (2 * dir + side);
-      }
-    }
-  }
-#else
-  RealVect centre = a_probLo;
-
-  for (int d = 0; d < SpaceDim; d++) {
-    centre[d] += a_dx * (static_cast<Real>(a_cell[d]) + 0.5);
-  }
-
-  bool alternating = false;
-
-  const bool joined = fluidJoined(a_surface.m_corner[0],
-                                  a_surface.m_corner[1],
-                                  a_surface.m_corner[3],
-                                  a_surface.m_corner[2],
-                                  centre,
-                                  alternating);
-
-  if (alternating && joined) {
-    a_surface.m_fluidJoined = 1;
-  }
-#endif
-}
 
 void
 PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
                                  const PolyhedralEB::CutCellBody& a_body,
                                  const BaseFab<int>&              a_regIrregCovered,
                                  const IntVect&                   a_cell,
-                                 const ProblemDomain&             a_domain) const
+                                 const ProblemDomain&             a_domain)
 {
   CH_assert(a_regIrregCovered.box().contains(a_cell));
   CH_assert(a_regIrregCovered(a_cell, 0) == 0);
@@ -5273,6 +6836,58 @@ PolyhedralGeometryShop::fillNode(IrregNode&                       a_node,
   }
 }
 
+GeometryService::InOut
+PolyhedralGeometryShop::InsideOutside(const Box&           a_region,
+                                      const ProblemDomain& a_domain,
+                                      const RealVect&      a_probLo,
+                                      const Real&          a_dx,
+                                      const DataIndex&     a_dit) const
+{
+  CH_TIME("PolyhedralGeometryShop::InsideOutside");
+
+  if (m_compGeom == nullptr) {
+    return ScanShop::InsideOutside(a_region, a_domain, a_probLo, a_dx, a_dit);
+  }
+
+  const int numLevels = m_compGeom->getNumGridLevels();
+
+  const bool stored = m_compGeom->getLevel(a_domain) >= 0;
+  const bool finer  = numLevels > 0 &&
+                     a_domain.domainBox().size(0) > m_compGeom->getDomain(numLevels - 1).domainBox().size(0);
+
+  if (!stored && !finer) {
+    return GeometryService::Irregular;
+  }
+
+  // EBISLevel builds a coarse level calling this with the boxes of the level above on the coarse domain, and with the
+  // coarse boxes on the fine domain, so the region may lie one level finer or coarser than the domain says. It is
+  // classified on the domain as each of the three, and is uniform only if all three agree.
+  const Box& domainBox = a_domain.domainBox();
+
+  GeometryService::InOut answer = GeometryService::Irregular;
+
+  bool first = true;
+
+  for (const Box& region : {a_region, coarsen(a_region, 2), refine(a_region, 2)}) {
+    const Box inside = region & domainBox;
+
+    if (inside.isEmpty()) {
+      continue;
+    }
+
+    const GeometryService::InOut type = m_compGeom->classify(inside, a_domain, m_phase);
+
+    if (type == GeometryService::Irregular || (!first && type != answer)) {
+      return GeometryService::Irregular;
+    }
+
+    answer = type;
+    first  = false;
+  }
+
+  return answer;
+}
+
 void
 PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
                                   Vector<IrregNode>&   a_nodes,
@@ -5293,7 +6908,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   a_nodes.resize(0);
 
   BaseFab<Real> nodeValues;
-  PolyhedralGeometryShop::fillNodeValues(*m_baseIF, nodeValues, a_ghostRegion, a_probLo, a_dx);
+  PolyhedralEB::fillNodeValues(nodeValues, *m_baseIF, a_ghostRegion, a_probLo, a_dx);
 
   // The same reading the graph takes: a cell one body cannot describe, or that is mostly a gap of fluid, is filled
   // rather than built. Decided for the whole region before any cell is classified. Nothing is
@@ -5301,13 +6916,14 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   // it -- so no cell is spared for being resolved elsewhere.
   BaseFab<signed char> unresolved(a_ghostRegion, 1);
 
-  PolyhedralEBGraph::findUnresolvedCells(*m_baseIF,
+  PolyhedralEBGraph::findUnresolvedCells(unresolved,
+                                         *m_baseIF,
                                          nodeValues,
                                          a_ghostRegion,
                                          Vector<Box>(),
                                          a_probLo,
                                          a_dx,
-                                         unresolved);
+                                         m_fillSplitFluid);
 
   IntVectSet irregularCells;
 
@@ -5315,7 +6931,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = bit();
 
     PolyhedralEB::CutCellSurface surface;
-    PolyhedralGeometryShop::fillCorners(surface, nodeValues, iv);
+    PolyhedralEB::fillCorners(surface, nodeValues, iv);
 
     if (unresolved(iv, 0) != PolyhedralEBGraph::s_notFilled) {
       a_regIrregCovered(iv, 0) = -1;
@@ -5375,7 +6991,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 
   BaseFab<Real> intercept[SpaceDim];
 
-  PolyhedralGeometryShop::defineIntercepts(intercept, grow(a_validRegion, 1) & a_ghostRegion);
+  PolyhedralEB::defineIntercepts(intercept, grow(a_validRegion, 1) & a_ghostRegion);
 
   IntVectSet droppedCells;
 
@@ -5383,7 +6999,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     const IntVect iv = ivsIt();
 
     PolyhedralEB::CutCellSurface surface;
-    PolyhedralGeometryShop::buildSurface(*m_baseIF, intercept, surface, nodeValues, iv, a_probLo, a_dx);
+    PolyhedralEB::buildSurface(intercept, surface, *m_baseIF, nodeValues, iv, a_probLo, a_dx);
 
     PolyhedralEB::CutCellBody body;
 
@@ -5410,7 +7026,7 @@ PolyhedralGeometryShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
     }
 
     // the mirror image: a body with next to no solid in it is a regular cell
-    if (PolyhedralGeometryShop::isDust(body)) {
+    if (PolyhedralEB::isDust(body)) {
       a_regIrregCovered(iv, 0) = 1;
 
       continue;
