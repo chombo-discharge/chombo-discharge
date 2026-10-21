@@ -1,11 +1,11 @@
 <map id="Source/ImplicitFunctions/CD_NeedleIF.H" name="Source/ImplicitFunctions/CD_NeedleIF.H">
-<area shape="rect" id="Node000001" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="173,5,354,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,84,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,48,91,91,89,86,210,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="108,93,237,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="243,48,198,86,195,82,240,44"/>
-<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,93,447,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="287,44,332,82,328,86,284,48"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,93,650,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="335,43,505,87,504,92,334,48"/>
+<area shape="rect" id="Node000001" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)." alt="" coords="170,5,350,50"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,98,83,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,53,94,95,92,90,202,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="106,98,235,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,49,198,89,195,85,234,51"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="258,98,443,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="285,48,327,88,322,87,283,53"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="467,98,645,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="339,48,497,93,491,94,338,53"/>
 </map>

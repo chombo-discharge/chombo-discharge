@@ -1,20 +1,20 @@
 <map id="Source/KineticMonteCarlo/CD_KMCDualStateImplem.H" name="Source/KineticMonteCarlo/CD_KMCDualStateImplem.H">
-<area shape="rect" id="Node000001" title="Implementation of CD_KMCDualState.H." alt="" coords="158,5,369,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="59,93,161,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,48,146,89,143,85,225,43"/>
-<area shape="rect" id="Node000003" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="185,93,341,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="258,46,258,79,252,79,253,45"/>
-<area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="287,167,472,192"/>
-<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="300,43,329,64,355,92,370,122,378,153,373,154,365,124,350,95,325,68,297,48"/>
-<area shape="rect" id="Node000008" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="497,167,675,192"/>
-<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="305,43,550,158,548,163,302,48"/>
-<area shape="poly" id="edge8_Node000003_Node000001" title=" " alt="" coords="267,93,270,59,275,59,273,93"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="5,167,68,192"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="228,121,82,167,80,162,226,116"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="92,167,163,192"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="243,121,163,163,160,158,240,116"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="187,167,263,192"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="259,120,240,156,235,153,255,118"/>
-<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="283,116,350,157,347,162,281,121"/>
-<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="316,116,521,161,520,166,315,121"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_KMCDualState.H." alt="" coords="156,5,365,50"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="58,98,159,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,52,147,93,145,88,222,49"/>
+<area shape="rect" id="Node000003" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="183,98,338,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="254,48,254,84,250,81,251,53"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="283,174,467,201"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="299,48,328,70,352,97,367,127,374,159,369,157,362,129,348,99,324,73,298,53"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="491,174,670,201"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="305,48,543,165,538,168,304,53"/>
+<area shape="poly" id="edge8_Node000003_Node000001" title=" " alt="" coords="265,96,268,67,271,63,270,99"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,174,68,201"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="221,129,83,174,81,169,220,124"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="91,174,160,201"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="239,126,164,169,162,164,234,127"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="184,174,260,201"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="256,125,238,162,234,158,251,128"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="282,124,345,165,339,165,280,129"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="318,124,511,169,505,170,318,129"/>
 </map>

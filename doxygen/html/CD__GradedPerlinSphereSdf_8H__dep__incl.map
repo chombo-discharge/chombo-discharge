@@ -1,11 +1,11 @@
 <map id="Source/ImplicitFunctions/CD_GradedPerlinSphereSdf.H" name="Source/ImplicitFunctions/CD_GradedPerlinSphereSdf.H">
-<area shape="rect" id="Node000001" title="Declaration of a graded noisy sphere." alt="" coords="127,5,341,45"/>
-<area shape="rect" id="Node000002" href="$CD__GradedPerlinSphereSdf_8cpp.html" title="Implementation of CD_GradedPerlinSphereSdf.H." alt="" coords="5,93,233,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,56,146,95,143,91,196,52"/>
-<area shape="rect" id="Node000003" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="258,93,439,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,52,325,91,322,95,269,56"/>
-<area shape="rect" id="Node000004" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="165,181,333,221"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="318,144,273,183,269,179,314,140"/>
-<area shape="rect" id="Node000005" href="$CD__PerlinRodSdf_8cpp.html" title="Implementation of CD_PerlinRodSdf.H." alt="" coords="357,181,538,221"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="382,140,427,179,424,183,379,144"/>
+<area shape="rect" id="Node000001" title="Declaration of a graded noisy sphere." alt="" coords="125,5,340,50"/>
+<area shape="rect" id="Node000002" href="$CD__GradedPerlinSphereSdf_8cpp.html" title="Implementation of CD_GradedPerlinSphereSdf.H." alt="" coords="5,98,233,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,62,148,100,144,95,195,58"/>
+<area shape="rect" id="Node000003" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="257,98,437,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,57,322,97,317,98,271,62"/>
+<area shape="rect" id="Node000004" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="165,191,332,235"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="315,152,273,192,271,188,310,154"/>
+<area shape="rect" id="Node000005" href="$CD__PerlinRodSdf_8cpp.html" title="Implementation of CD_PerlinRodSdf.H." alt="" coords="356,191,536,235"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="383,151,425,191,419,190,381,156"/>
 </map>

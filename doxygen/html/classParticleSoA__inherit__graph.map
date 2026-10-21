@@ -1,7 +1,9 @@
 <map id="ParticleSoA&lt; P, Traits &gt;" name="ParticleSoA&lt; P, Traits &gt;">
-<area shape="rect" id="Node000001" title="Arena&#45;backed Struct&#45;of&#45;Arrays particle container for a single grid patch." alt="" coords="123,5,299,31"/>
-<area shape="rect" id="Node000002" href="$classParticleSoA.html" title=" " alt="" coords="5,93,200,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,41,119,95,116,91,184,37"/>
-<area shape="rect" id="Node000003" href="$classParticleSoA.html" title=" " alt="" coords="225,93,415,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="248,35,275,53,313,91,309,95,272,57,245,39"/>
+<area shape="rect" id="Node000001" title="Arena&#45;backed Struct&#45;of&#45;Arrays particle container for a single grid patch." alt="" coords="122,5,298,33"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="313,13,324,19,299,26,297,21,319,19,313,19"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="313,7,381,9,403,12,413,19,402,27,375,30,298,31,298,26,375,24,400,21,408,19,402,17,380,14,313,12"/>
+<area shape="rect" id="Node000002" href="$classParticleSoA.html" title=" " alt="" coords="5,106,199,134"/>
+<area shape="poly" id="edge3_Node000001_Node000002" title=" " alt="" coords="188,43,118,108,115,103,182,43"/>
+<area shape="rect" id="Node000003" href="$classParticleSoA.html" title=" " alt="" coords="223,106,413,134"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="259,38,283,55,302,80,315,107,310,105,298,83,279,59,257,43"/>
 </map>

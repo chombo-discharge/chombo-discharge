@@ -427,7 +427,7 @@ In each case, a simple smoother with a specified number of relaxations is applie
 <p>By default the Helmholtz equation is solved by stand-alone multigrid V-cycling (<code class="docutils literal notranslate"><span class="pre">solver</span> <span class="pre">=</span> <span class="pre">gmg</span></code>), which is the cheapest option and the right choice whenever it converges well.
 On hard problems, however, the V-cycle convergence rate can degrade or stall: strong coefficient contrast (e.g. high-permittivity dielectrics), awkward cut-cell geometry, deep AMR hierarchies, or nearly indefinite operators can all make multigrid converge slowly, <em>hang</em> (see <code class="docutils literal notranslate"><span class="pre">gmg_exit_hang</span></code>), or exhaust <code class="docutils literal notranslate"><span class="pre">gmg_max_iter</span></code>.
 In these cases the multigrid cycle can instead be used as a <em>preconditioner</em> for an outer Krylov method, which removes the slowly-converging error modes that the smoother and coarse-grid correction cannot, and converges robustly where stand-alone multigrid does not:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.solver = gmres      # or &#39;bicgstab&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.solver = gmres      # or 'bicgstab'
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> ships its own GMRES and BiCGStab implementations for this purpose (in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Elliptic</span></code>); these are <em>not</em> the Chombo bottom solvers of the same name.

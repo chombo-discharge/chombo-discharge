@@ -1,5 +1,5 @@
 <map id="Physics/CdrPlasma/CellTaggers/CdrPlasmaStreamerTagger/CD_CdrPlasmaStreamerTagger.H" name="Physics/CdrPlasma/CellTaggers/CdrPlasmaStreamerTagger/CD_CdrPlasmaStreamerTagger.H">
-<area shape="rect" id="Node000001" title="Declaration of the CdrPlasmaStreamerTagger class for AMR cell tagging based on streamer criteria." alt="" coords="11,5,250,60"/>
-<area shape="rect" id="Node000002" href="$CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation of CD_CdrPlasmaStreamerTagger.H." alt="" coords="5,108,256,163"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,74,133,108,128,108,128,74"/>
+<area shape="rect" id="Node000001" title="Declaration of the CdrPlasmaStreamerTagger class for AMR cell tagging based on streamer criteria." alt="" coords="12,5,249,67"/>
+<area shape="rect" id="Node000002" href="$CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation of CD_CdrPlasmaStreamerTagger.H." alt="" coords="5,115,256,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,80,133,115,128,113,129,85"/>
 </map>

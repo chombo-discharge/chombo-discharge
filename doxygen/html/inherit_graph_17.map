@@ -1,45 +1,45 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,499,188,524"/>
-<area shape="rect" id="Node000001" href="$classAerosol.html" title="Simple class for making a bunch of (manually constructored) dielectric sphere." alt="" coords="271,5,341,31"/>
-<area shape="poly" id="edge48_Node000000_Node000001" title=" " alt="" coords="95,485,100,401,107,344,118,282,136,218,160,154,192,94,234,40,251,28,269,21,271,26,253,33,238,44,197,97,165,156,141,219,124,283,112,345,105,401,101,485"/>
-<area shape="rect" id="Node000002" href="$classCoaxialCable.html" title="This is a class that defines a coaxial cable geometry." alt="" coords="252,55,360,80"/>
-<area shape="poly" id="edge49_Node000000_Node000002" title=" " alt="" coords="96,485,104,409,124,303,142,246,165,190,196,137,234,89,250,78,253,82,238,93,200,140,170,192,147,248,129,305,109,410,102,486"/>
-<area shape="rect" id="Node000003" href="$classCylinder.html" title="This is a class that defines a cylinder geometry." alt="" coords="268,104,344,129"/>
-<area shape="poly" id="edge50_Node000000_Node000003" title=" " alt="" coords="98,484,108,416,131,324,148,274,171,225,199,179,234,139,250,128,267,121,269,126,252,132,238,143,204,183,176,228,153,276,136,325,113,417,103,485"/>
-<area shape="rect" id="Node000004" href="$classDiskProfiledPlane.html" title="Geometry class for disk electrode and profiled surface experiments." alt="" coords="238,153,374,179"/>
-<area shape="poly" id="edge51_Node000000_Node000004" title=" " alt="" coords="99,484,112,424,137,345,155,303,177,261,203,222,234,188,251,177,254,181,238,192,207,226,181,264,160,305,142,347,117,425,105,485"/>
-<area shape="rect" id="Node000005" href="$classDoubleRod.html" title="This is a class that defines two dielectric rods." alt="" coords="259,203,353,228"/>
-<area shape="poly" id="edge52_Node000000_Node000005" title=" " alt="" coords="102,484,117,433,144,367,182,298,206,266,234,237,258,223,260,228,238,241,210,269,187,301,148,369,122,435,107,486"/>
-<area shape="rect" id="Node000006" href="$classElectrodeArray.html" title="This is a class that defines an array of electrodes." alt="" coords="247,252,365,277"/>
-<area shape="poly" id="edge53_Node000000_Node000006" title=" " alt="" coords="105,485,123,442,151,389,188,334,234,287,254,275,256,280,238,291,192,337,155,392,128,444,110,487"/>
-<area shape="rect" id="Node000007" href="$classGECReferenceCell.html" title="Simplified GEC reference cell geometry." alt="" coords="236,301,376,327"/>
-<area shape="poly" id="edge54_Node000000_Node000007" title=" " alt="" coords="109,485,158,412,194,371,234,336,256,324,258,329,238,340,197,375,162,415,114,488"/>
-<area shape="rect" id="Node000008" href="$classMechanicalShaft.html" title="Mechanical shaft class. Consists of a single ring electrode and an infinitely long&gt; shaft with variou..." alt="" coords="241,351,371,376"/>
-<area shape="poly" id="edge55_Node000000_Node000008" title=" " alt="" coords="116,487,167,436,200,409,235,385,259,374,261,378,237,390,203,413,171,440,120,490"/>
-<area shape="rect" id="Node000009" href="$classNoisePlane.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="259,400,353,425"/>
-<area shape="poly" id="edge56_Node000000_Node000009" title=" " alt="" coords="129,489,235,434,264,423,266,428,237,439,132,494"/>
-<area shape="rect" id="Node000010" href="$classRandomInterface.html" title="Class that represents two random interface smooshed together." alt="" coords="239,449,373,475"/>
-<area shape="poly" id="edge57_Node000000_Node000010" title=" " alt="" coords="164,493,251,472,252,477,165,498"/>
-<area shape="rect" id="Node000011" href="$classRegularGeometry.html" title="This class implements an empty geometry." alt="" coords="237,499,375,524"/>
-<area shape="poly" id="edge58_Node000000_Node000011" title=" " alt="" coords="202,509,237,509,237,514,202,514"/>
-<area shape="rect" id="Node000012" href="$classRod.html" title="Geometry class representing a single cylindrical rod electrode." alt="" coords="283,548,329,573"/>
-<area shape="poly" id="edge59_Node000000_Node000012" title=" " alt="" coords="165,525,283,553,282,558,164,530"/>
-<area shape="rect" id="Node000013" href="$classRodDielectric.html" title="Class that defines an electrode rod and a dielectric (some shapes supported)." alt="" coords="251,597,361,623"/>
-<area shape="poly" id="edge60_Node000000_Node000013" title=" " alt="" coords="133,529,237,582,268,595,266,600,235,587,130,533"/>
-<area shape="rect" id="Node000014" href="$classRodNeedleDisk.html" title="A class that defines a rod electrode with a needle out of the tip, and a plane (electrode) a set dist..." alt="" coords="245,647,367,672"/>
-<area shape="poly" id="edge61_Node000000_Node000014" title=" " alt="" coords="120,532,171,582,203,608,237,632,264,644,261,649,235,636,200,613,168,586,117,536"/>
-<area shape="rect" id="Node000015" href="$classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="244,696,368,721"/>
-<area shape="poly" id="edge62_Node000000_Node000015" title=" " alt="" coords="114,535,163,607,198,646,238,681,261,694,258,698,234,686,194,650,159,610,110,538"/>
-<area shape="rect" id="Node000016" href="$classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="262,745,350,771"/>
-<area shape="poly" id="edge63_Node000000_Node000016" title=" " alt="" coords="110,536,128,578,156,631,192,684,238,731,263,745,260,749,234,735,188,687,151,633,124,581,105,538"/>
-<area shape="rect" id="Node000017" href="$classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="252,795,360,820"/>
-<area shape="poly" id="edge64_Node000000_Node000017" title=" " alt="" coords="107,536,123,587,149,653,187,721,211,752,238,780,257,792,255,797,234,784,207,756,183,724,144,655,118,589,102,538"/>
-<area shape="rect" id="Node000018" href="$classSpherePlane.html" title="Sphere&#45;plane gap geometry." alt="" coords="255,844,357,869"/>
-<area shape="poly" id="edge65_Node000000_Node000018" title=" " alt="" coords="105,537,118,597,143,675,160,716,182,757,207,796,238,829,256,842,253,846,234,833,203,799,177,760,155,719,138,677,113,598,100,538"/>
-<area shape="rect" id="Node000019" href="$classTessellation.html" title="A geometry consisting of a single polygon mesh read from an STL file." alt="" coords="257,893,355,919"/>
-<area shape="poly" id="edge66_Node000000_Node000019" title=" " alt="" coords="103,537,113,605,136,696,154,745,176,793,204,839,238,879,258,892,255,897,234,883,200,842,172,796,149,747,131,698,108,606,98,538"/>
-<area shape="rect" id="Node000020" href="$classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="274,943,338,968"/>
-<area shape="poly" id="edge67_Node000000_Node000020" title=" " alt="" coords="102,537,109,613,130,717,148,774,171,829,201,882,238,928,255,940,275,948,273,953,252,945,234,932,196,885,166,832,143,776,125,719,104,614,96,538"/>
-<area shape="rect" id="Node000021" href="$classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="265,992,347,1017"/>
-<area shape="poly" id="edge68_Node000000_Node000021" title=" " alt="" coords="101,537,106,621,113,677,124,738,142,802,166,865,197,925,238,977,251,987,266,994,264,999,248,992,234,981,193,928,161,867,137,804,119,739,107,678,100,621,95,538"/>
+<area shape="rect" id="Node000000" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,525,188,553"/>
+<area shape="rect" id="Node000001" href="$classAerosol.html" title="Simple class for making a bunch of (manually constructored) dielectric sphere." alt="" coords="270,5,340,33"/>
+<area shape="poly" id="edge48_Node000000_Node000001" title=" " alt="" coords="95,510,99,421,106,363,117,298,135,231,159,164,192,101,234,44,250,31,271,24,268,28,253,36,238,48,196,103,164,166,140,232,122,299,111,363,104,422,100,510"/>
+<area shape="rect" id="Node000002" href="$classCoaxialCable.html" title="This is a class that defines a coaxial cable geometry." alt="" coords="252,57,359,85"/>
+<area shape="poly" id="edge49_Node000000_Node000002" title=" " alt="" coords="96,509,103,429,124,319,141,260,165,201,195,146,234,96,253,83,250,88,238,100,200,149,169,203,146,262,129,321,108,430,101,510"/>
+<area shape="rect" id="Node000003" href="$classCylinder.html" title="This is a class that defines a cylinder geometry." alt="" coords="268,109,343,137"/>
+<area shape="poly" id="edge50_Node000000_Node000003" title=" " alt="" coords="97,509,107,438,130,342,148,290,170,239,199,191,234,148,249,136,269,129,266,133,252,141,238,152,203,194,175,241,153,292,135,343,113,439,103,510"/>
+<area shape="rect" id="Node000004" href="$classDiskProfiledPlane.html" title="Geometry class for disk electrode and profiled surface experiments." alt="" coords="238,161,373,189"/>
+<area shape="poly" id="edge51_Node000000_Node000004" title=" " alt="" coords="99,509,112,446,137,364,154,320,176,277,202,236,234,200,255,187,252,192,237,204,207,239,181,280,159,322,142,366,117,448,105,510"/>
+<area shape="rect" id="Node000005" href="$classDoubleRod.html" title="This is a class that defines two dielectric rods." alt="" coords="259,213,352,241"/>
+<area shape="poly" id="edge52_Node000000_Node000005" title=" " alt="" coords="102,510,117,456,143,387,182,315,206,282,234,252,260,237,257,242,237,256,210,285,186,318,148,389,122,458,107,511"/>
+<area shape="rect" id="Node000006" href="$classElectrodeArray.html" title="This is a class that defines an array of electrodes." alt="" coords="247,265,364,293"/>
+<area shape="poly" id="edge53_Node000000_Node000006" title=" " alt="" coords="105,510,123,465,151,410,188,353,234,304,257,291,253,296,237,308,192,357,155,413,128,467,110,511"/>
+<area shape="rect" id="Node000007" href="$classGECReferenceCell.html" title="Simplified GEC reference cell geometry." alt="" coords="236,317,375,345"/>
+<area shape="poly" id="edge54_Node000000_Node000007" title=" " alt="" coords="110,510,159,434,194,392,234,356,259,343,255,348,237,360,198,396,163,438,115,513"/>
+<area shape="rect" id="Node000008" href="$classMechanicalShaft.html" title="Mechanical shaft class. Consists of a single ring electrode and an infinitely long&gt; shaft with variou..." alt="" coords="241,369,370,397"/>
+<area shape="poly" id="edge55_Node000000_Node000008" title=" " alt="" coords="117,512,168,460,200,432,234,408,262,396,258,400,237,412,203,436,172,464,122,515"/>
+<area shape="rect" id="Node000009" href="$classNoisePlane.html" title="This is a class that a rough sphere (either electrode or dielectric)." alt="" coords="258,421,352,449"/>
+<area shape="poly" id="edge56_Node000000_Node000009" title=" " alt="" coords="132,515,235,459,266,448,262,452,237,464,136,519"/>
+<area shape="rect" id="Node000010" href="$classRandomInterface.html" title="Class that represents two random interface smooshed together." alt="" coords="239,473,372,501"/>
+<area shape="poly" id="edge57_Node000000_Node000010" title=" " alt="" coords="168,519,248,500,245,504,172,523"/>
+<area shape="rect" id="Node000011" href="$classRegularGeometry.html" title="This class implements an empty geometry." alt="" coords="237,525,374,553"/>
+<area shape="poly" id="edge58_Node000000_Node000011" title=" " alt="" coords="202,537,239,538,234,541,205,541"/>
+<area shape="rect" id="Node000012" href="$classRod.html" title="Geometry class representing a single cylindrical rod electrode." alt="" coords="282,577,328,605"/>
+<area shape="poly" id="edge59_Node000000_Node000012" title=" " alt="" coords="169,555,284,584,280,587,171,560"/>
+<area shape="rect" id="Node000013" href="$classRodDielectric.html" title="Class that defines an electrode rod and a dielectric (some shapes supported)." alt="" coords="251,629,360,657"/>
+<area shape="poly" id="edge60_Node000000_Node000013" title=" " alt="" coords="134,559,237,614,267,628,262,630,235,619,135,564"/>
+<area shape="rect" id="Node000014" href="$classRodNeedleDisk.html" title="A class that defines a rod electrode with a needle out of the tip, and a plane (electrode) a set dist..." alt="" coords="245,681,366,709"/>
+<area shape="poly" id="edge61_Node000000_Node000014" title=" " alt="" coords="119,562,172,615,203,642,237,666,262,680,257,682,234,671,200,646,168,618,120,568"/>
+<area shape="rect" id="Node000015" href="$classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="244,733,367,761"/>
+<area shape="poly" id="edge62_Node000000_Node000015" title=" " alt="" coords="112,564,163,641,198,682,237,718,260,732,254,733,234,723,194,686,159,644,112,570"/>
+<area shape="rect" id="Node000016" href="$classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="262,785,349,813"/>
+<area shape="poly" id="edge63_Node000000_Node000016" title=" " alt="" coords="108,565,128,611,155,666,192,722,237,770,264,787,258,788,234,775,188,725,151,668,123,613,108,571"/>
+<area shape="rect" id="Node000017" href="$classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)." alt="" coords="252,837,359,865"/>
+<area shape="poly" id="edge64_Node000000_Node000017" title=" " alt="" coords="104,565,122,621,148,689,186,760,210,793,237,822,257,836,251,837,234,827,206,797,182,763,143,691,117,622,104,571"/>
+<area shape="rect" id="Node000018" href="$classSpherePlane.html" title="Sphere&#45;plane gap geometry." alt="" coords="254,889,356,917"/>
+<area shape="poly" id="edge65_Node000000_Node000018" title=" " alt="" coords="102,566,117,631,142,713,159,756,181,799,207,839,237,875,256,889,251,889,234,878,202,842,176,801,154,758,137,714,112,632,102,571"/>
+<area shape="rect" id="Node000019" href="$classTessellation.html" title="A geometry consisting of a single polygon mesh read from an STL file." alt="" coords="256,941,354,969"/>
+<area shape="poly" id="edge66_Node000000_Node000019" title=" " alt="" coords="100,566,113,640,135,735,153,786,175,837,203,884,237,927,258,942,253,942,234,930,199,887,170,839,148,788,130,737,107,641,100,571"/>
+<area shape="rect" id="Node000020" href="$classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="274,993,337,1021"/>
+<area shape="poly" id="edge67_Node000000_Node000020" title=" " alt="" coords="99,566,108,649,129,758,146,817,169,875,200,930,238,979,254,991,276,1001,270,1001,252,996,234,982,195,933,165,877,141,818,124,759,103,649,98,571"/>
+<area shape="rect" id="Node000021" href="$classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="265,1045,346,1073"/>
+<area shape="poly" id="edge68_Node000000_Node000021" title=" " alt="" coords="98,566,104,656,111,715,122,779,140,846,164,912,196,975,238,1031,250,1041,267,1051,261,1050,247,1045,234,1034,192,978,159,914,135,848,117,780,106,716,99,657,97,571"/>
 </map>

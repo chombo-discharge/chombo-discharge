@@ -1,18 +1,18 @@
 <map id="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_RteSpeciesJSON.H" name="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_RteSpeciesJSON.H">
-<area shape="rect" id="Node000001" title="Declaration of a class that encapsulates a RTE species for use with CdrPlasmaJSON." alt="" coords="126,5,325,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="44,108,87,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,62,100,104,98,99,175,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="5,181,99,207"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="199,62,76,174,73,170,195,58"/>
-<area shape="rect" id="Node000004" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="162,108,289,133"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="228,60,228,94,223,94,223,60"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="234,181,419,207"/>
-<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="260,58,283,81,302,107,316,137,325,167,320,169,311,139,298,109,279,84,257,62"/>
-<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="444,181,623,207"/>
-<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="277,58,500,173,498,177,275,62"/>
-<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="198,136,94,178,92,174,196,131"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="123,181,210,207"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="218,135,187,173,183,169,214,132"/>
-<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="243,131,300,171,297,175,240,136"/>
-<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="275,131,471,176,470,181,274,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a class that encapsulates a RTE species for use with CdrPlasmaJSON." alt="" coords="126,5,324,67"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="46,115,87,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,70,102,110,99,106,174,65"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,191,98,218"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,69,78,182,74,178,191,66"/>
+<area shape="rect" id="Node000004" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="162,115,288,143"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,65,227,100,222,98,223,70"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="233,191,417,218"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="261,65,283,88,302,114,315,145,323,177,318,174,310,146,297,116,279,91,260,70"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="441,191,619,218"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="281,65,495,182,490,184,279,70"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="195,145,97,187,95,182,192,141"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="122,191,208,218"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="216,142,187,181,184,176,212,144"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="244,141,298,181,292,181,242,146"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="280,141,463,186,458,187,279,146"/>
 </map>

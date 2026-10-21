@@ -1,11 +1,11 @@
 <map id="EBHelmholtzOp" name="EBHelmholtzOp">
-<area shape="rect" id="Node000001" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="270,123,394,148"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,224,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,49,310,120,307,125,164,54"/>
-<area shape="rect" id="Node000003" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="249,13,309,38"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="284,51,290,74,300,97,320,121,316,124,295,100,285,76,279,52"/>
-<area shape="rect" id="Node000004" href="$classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="333,13,443,38"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="382,52,360,100,343,124,339,121,355,97,377,50"/>
-<area shape="rect" id="Node000005" href="$classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="469,13,579,38"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="518,52,505,78,484,101,463,113,441,123,395,133,394,128,439,118,461,109,481,97,501,75,514,50"/>
+<area shape="rect" id="Node000001" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="266,145,389,173"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,223,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,56,308,144,303,146,162,61"/>
+<area shape="rect" id="Node000003" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="247,14,306,42"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="276,55,280,88,289,120,310,146,305,144,285,123,274,89,273,59"/>
+<area shape="rect" id="Node000004" href="$classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="331,14,441,42"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="379,55,352,123,338,147,335,143,348,120,375,58"/>
+<area shape="rect" id="Node000005" href="$classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="470,14,579,42"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="523,55,514,92,504,109,492,123,475,133,450,141,390,153,389,147,448,136,472,128,488,119,500,106,509,90,519,58"/>
 </map>

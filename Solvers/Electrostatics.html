@@ -540,18 +540,18 @@ The current list of configuration options are indicated below</p>
 # FieldSolverGMG class options
 # ====================================================================================================
 <span class="hll">FieldSolverGMG.verbosity             = -1               ## Class verbosity
-</span>FieldSolverGMG.jump_bc               = natural          ## Jump BC type (&#39;natural&#39; or &#39;saturation_charge&#39;)
+</span>FieldSolverGMG.jump_bc               = natural          ## Jump BC type ('natural' or 'saturation_charge')
 FieldSolverGMG.bc.x.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.x.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
-<span class="hll">FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;perm&#39;, &#39;sigma&#39;, &#39;Esol&#39;
+<span class="hll">FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 </span><span class="hll">FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 </span><span class="hll">FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
 </span>
-<span class="hll">FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. &#39;gmg&#39;, &#39;gmres&#39;, &#39;bicgstab&#39;. List = fallback chain
+<span class="hll">FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 </span><span class="hll">FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 </span><span class="hll">FieldSolverGMG.krylov_max_iter              = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 </span><span class="hll">FieldSolverGMG.krylov_restart               = 30           ## GMRES restart length (gmres only)
@@ -560,8 +560,8 @@ FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
 </span><span class="hll">FieldSolverGMG.krylov_reprobe_iters         = 0            ## Re-probe GMG early when the Krylov fallback converges in &lt;= this many iterations (0 = disabled)
 </span><span class="hll">FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
 </span><span class="hll">FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
-</span><span class="hll">FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. &#39;vcycle&#39; or &#39;wcycle&#39;
-</span><span class="hll">FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation. &#39;jacobi&#39;, &#39;multi_color&#39;, &#39;red_black&#39;, &#39;chebyshev &lt;order&gt; &lt;eig_ratio&gt;&#39;, or &#39;ras &lt;inner_sweeps&gt;&#39;
+</span><span class="hll">FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. 'vcycle' or 'wcycle'
+</span><span class="hll">FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev &lt;order&gt; &lt;eig_ratio&gt;', or 'ras &lt;inner_sweeps&gt;'
 </span><span class="hll">FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
 </span><span class="hll">FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
 </span><span class="hll">FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
@@ -578,7 +578,7 @@ FieldSolverGMG.gmg_bc_weight                = 4            ## Boundary condition
 FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
 FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
+FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
 FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator
 </pre></div>
@@ -613,7 +613,7 @@ If this flag is set to <code class="docutils literal notranslate"><span class="p
 <section id="adjusting-output">
 <h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
 <p>The user may plot the potential, the space charge, the electric, and the GMG residue as follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 </pre></div>
 </div>
 </section>

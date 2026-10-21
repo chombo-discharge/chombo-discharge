@@ -5,12 +5,15 @@ var searchData=
   ['newintersectionif_2',['NewIntersectionIF',['../classNewIntersectionIF.html',1,'']]],
   ['nncellbudget_3',['NNCellBudget',['../classParticleManagement_1_1NNCellBudget.html',1,'ParticleManagement']]],
   ['nncellkeyhasher_4',['NNCellKeyHasher',['../structParticleManagement_1_1detail_1_1NNCellKeyHasher.html',1,'ParticleManagement::detail']]],
-  ['nnfallbackcandidate_5',['NNFallbackCandidate',['../structParticleManagement_1_1detail_1_1NNFallbackCandidate.html',1,'ParticleManagement::detail']]],
-  ['nnmergeedge_6',['NNMergeEdge',['../structParticleManagement_1_1detail_1_1NNMergeEdge.html',1,'ParticleManagement::detail']]],
-  ['nnmergeproposal_7',['NNMergeProposal',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html',1,'ParticleManagement::detail']]],
-  ['nnmergeresult_8',['NNMergeResult',['../structParticleManagement_1_1detail_1_1NNMergeResult.html',1,'ParticleManagement::detail']]],
-  ['nnmergeverdict_9',['NNMergeVerdict',['../structParticleManagement_1_1detail_1_1NNMergeVerdict.html',1,'ParticleManagement::detail']]],
-  ['nnpooledparticle_10',['NNPooledParticle',['../structParticleManagement_1_1detail_1_1NNPooledParticle.html',1,'ParticleManagement::detail']]],
-  ['noiseplane_11',['NoisePlane',['../classNoisePlane.html',1,'']]],
-  ['nopayload_12',['NoPayload',['../structNoPayload.html',1,'']]]
+  ['nncellmeta_5',['NNCellMeta',['../structParticleManagement_1_1detail_1_1NNCellMeta.html',1,'ParticleManagement::detail']]],
+  ['nnfallbackcandidate_6',['NNFallbackCandidate',['../structParticleManagement_1_1detail_1_1NNFallbackCandidate.html',1,'ParticleManagement::detail']]],
+  ['nnmergeedge_7',['NNMergeEdge',['../structParticleManagement_1_1detail_1_1NNMergeEdge.html',1,'ParticleManagement::detail']]],
+  ['nnmergeproposal_8',['NNMergeProposal',['../structParticleManagement_1_1detail_1_1NNMergeProposal.html',1,'ParticleManagement::detail']]],
+  ['nnmergeresult_9',['NNMergeResult',['../structParticleManagement_1_1detail_1_1NNMergeResult.html',1,'ParticleManagement::detail']]],
+  ['nnmergeverdict_10',['NNMergeVerdict',['../structParticleManagement_1_1detail_1_1NNMergeVerdict.html',1,'ParticleManagement::detail']]],
+  ['nnpatchwork_11',['NNPatchWork',['../structParticleManagement_1_1detail_1_1NNPatchWork.html',1,'ParticleManagement::detail']]],
+  ['nnpooledparticle_12',['NNPooledParticle',['../structParticleManagement_1_1detail_1_1NNPooledParticle.html',1,'ParticleManagement::detail']]],
+  ['nnspatialindex_13',['NNSpatialIndex',['../structParticleManagement_1_1detail_1_1NNSpatialIndex.html',1,'ParticleManagement::detail']]],
+  ['noiseplane_14',['NoisePlane',['../classNoisePlane.html',1,'']]],
+  ['nopayload_15',['NoPayload',['../structNoPayload.html',1,'']]]
 ];

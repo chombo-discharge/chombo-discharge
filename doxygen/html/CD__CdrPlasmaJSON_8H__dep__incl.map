@@ -1,5 +1,5 @@
 <map id="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_CdrPlasmaJSON.H" name="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_CdrPlasmaJSON.H">
-<area shape="rect" id="Node000001" title="Declaration of a generic CdrPlasma model." alt="" coords="5,5,204,60"/>
-<area shape="rect" id="Node000002" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,108,204,163"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,74,107,108,102,108,102,74"/>
+<area shape="rect" id="Node000001" title="Declaration of a generic CdrPlasma model." alt="" coords="5,5,203,67"/>
+<area shape="rect" id="Node000002" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,115,203,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,80,107,115,101,114,102,85"/>
 </map>

@@ -1,10 +1,10 @@
 <map id="ItoSolver" name="ItoSolver">
-<area shape="rect" id="Node000001" title="Base class for Ito diffusion particle models." alt="" coords="121,211,201,236"/>
-<area shape="rect" id="Node000002" href="$classParticleContainer.html" title=" " alt="" coords="5,108,149,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,160,99,185,114,198,131,208,129,213,111,202,95,188,82,163"/>
-<area shape="rect" id="Node000003" href="$classParticleContainer.html" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="89,5,233,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,56,106,71,94,90,86,109,81,107,90,87,102,68,118,52"/>
-<area shape="rect" id="Node000004" href="$classParticleContainer.html" title=" " alt="" coords="173,108,320,148"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="196,53,210,68,238,106,233,109,206,71,192,57"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,162,213,189,183,213,179,208,209,185,228,158"/>
+<area shape="rect" id="Node000001" title="Base class for Ito diffusion particle models." alt="" coords="121,241,201,268"/>
+<area shape="rect" id="Node000002" href="$classParticleContainer.html" title=" " alt="" coords="5,123,149,168"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,181,88,200,96,215,110,228,127,240,122,240,107,232,92,218,83,202,79,186"/>
+<area shape="rect" id="Node000003" href="$classParticleContainer.html" title="AMR&#45;hierarchy container of computational particles, stored per patch in Struct&#45;of&#45;Arrays form." alt="" coords="89,5,233,50"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="113,62,104,76,91,99,84,124,79,122,87,97,100,72,116,58"/>
+<area shape="rect" id="Node000004" href="$classParticleContainer.html" title=" " alt="" coords="173,123,320,168"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="198,58,211,72,240,123,235,123,207,76,198,64"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="235,180,212,218,184,242,182,238,208,215,230,183"/>
 </map>

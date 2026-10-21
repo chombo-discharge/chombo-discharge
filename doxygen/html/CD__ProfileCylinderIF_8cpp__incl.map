@@ -1,32 +1,32 @@
 <map id="Source/ImplicitFunctions/CD_ProfileCylinderIF.cpp" name="Source/ImplicitFunctions/CD_ProfileCylinderIF.cpp">
-<area shape="rect" id="Node000001" title="Implementation of CD_ProfileCylinderIF.H." alt="" coords="431,5,615,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,116,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="432,45,130,96,129,90,431,39"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="140,93,264,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="447,48,263,93,262,87,446,43"/>
-<area shape="rect" id="Node000004" href="$CD__ProfileCylinderIF_8H.html" title="Declaration of a cylinder with a surface profile." alt="" coords="848,93,1015,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="616,42,859,88,858,93,615,47"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="753,167,939,192"/>
-<area shape="poly" id="edge19_Node000001_Node000006" title=" " alt="" coords="616,30,735,39,864,52,972,70,1009,80,1029,91,1038,106,1039,119,1033,130,1021,140,987,155,945,167,944,161,986,150,1018,135,1028,127,1033,117,1033,107,1025,95,1007,85,971,75,863,58,734,44,616,35"/>
-<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="447,167,626,192"/>
-<area shape="poly" id="edge20_Node000001_Node000007" title=" " alt="" coords="431,41,383,52,343,69,330,79,323,90,322,102,329,117,347,131,376,143,450,161,449,167,374,148,344,135,325,120,317,103,318,88,326,75,340,64,381,47,430,36"/>
-<area shape="rect" id="Node000008" href="$CD__RoundedCylinderIF_8H.html" title="Declaration of a cylindrical implicit function with rounded edges." alt="" coords="340,93,523,119"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="503,48,457,86,454,82,499,44"/>
-<area shape="rect" id="Node000009" href="$CD__CylinderSdf_8H.html" title="Declaration of a cylindrical signed distance function." alt="" coords="547,93,683,119"/>
-<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="547,44,593,82,589,86,544,48"/>
-<area shape="rect" id="Node000010" href="$CD__TorusSdf_8H.html" title="Declaration of a signed distance function for a torus." alt="" coords="708,93,824,119"/>
-<area shape="poly" id="edge15_Node000001_Node000010" title=" " alt="" coords="582,43,718,86,717,92,581,48"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="651,167,729,192"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="893,121,743,165,742,160,892,116"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="919,121,872,160,869,156,916,117"/>
-<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="868,121,614,167,614,162,867,116"/>
-<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="474,116,638,161,637,166,472,121"/>
-<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="498,116,766,162,765,167,498,121"/>
-<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="450,116,510,157,507,161,447,121"/>
-<area shape="poly" id="edge12_Node000009_Node000005" title=" " alt="" coords="629,117,670,155,666,159,625,121"/>
-<area shape="poly" id="edge13_Node000009_Node000006" title=" " alt="" coords="653,116,797,160,795,165,652,121"/>
-<area shape="poly" id="edge14_Node000009_Node000007" title=" " alt="" coords="604,121,561,159,558,156,601,117"/>
-<area shape="poly" id="edge16_Node000010_Node000005" title=" " alt="" coords="756,121,714,159,711,155,752,117"/>
-<area shape="poly" id="edge17_Node000010_Node000006" title=" " alt="" coords="781,117,825,156,821,160,777,121"/>
-<area shape="poly" id="edge18_Node000010_Node000007" title=" " alt="" coords="730,121,588,165,586,160,728,116"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_ProfileCylinderIF.H." alt="" coords="428,5,611,50"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,98,116,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,48,132,100,130,95,427,42"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="140,98,264,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="433,52,268,96,266,91,437,50"/>
+<area shape="rect" id="Node000004" href="$CD__ProfileCylinderIF_8H.html" title="Declaration of a cylinder with a surface profile." alt="" coords="843,98,1009,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="612,45,848,94,843,95,611,50"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="748,174,933,201"/>
+<area shape="poly" id="edge19_Node000001_Node000006" title=" " alt="" coords="611,25,723,28,845,38,903,47,954,59,995,76,1022,96,1031,110,1032,123,1026,134,1016,144,984,160,943,172,942,167,982,155,1013,140,1022,131,1027,122,1026,112,1019,100,992,80,952,64,902,52,845,43,723,33,611,31"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="445,174,623,201"/>
+<area shape="poly" id="edge20_Node000001_Node000007" title=" " alt="" coords="425,43,380,57,341,75,328,85,321,97,321,109,328,124,344,137,371,149,442,170,436,170,369,154,341,141,324,127,315,110,316,95,324,82,338,70,378,52,430,42"/>
+<area shape="rect" id="Node000008" href="$CD__RoundedCylinderIF_8H.html" title="Declaration of a cylindrical implicit function with rounded edges." alt="" coords="337,98,520,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="498,49,456,89,453,85,493,52"/>
+<area shape="rect" id="Node000009" href="$CD__CylinderSdf_8H.html" title="Declaration of a cylindrical signed distance function." alt="" coords="544,98,679,126"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="544,48,588,88,583,87,543,53"/>
+<area shape="rect" id="Node000010" href="$CD__TorusSdf_8H.html" title="Declaration of a signed distance function for a torus." alt="" coords="703,98,818,126"/>
+<area shape="poly" id="edge15_Node000001_Node000010" title=" " alt="" coords="584,48,710,92,705,93,583,53"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="647,174,724,201"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="886,126,740,173,739,167,880,127"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="913,125,868,166,866,161,908,127"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="858,126,620,173,619,168,853,127"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="475,124,635,171,630,171,474,129"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="503,124,754,170,749,171,502,129"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="448,124,506,165,500,164,447,129"/>
+<area shape="poly" id="edge12_Node000009_Node000005" title=" " alt="" coords="626,124,664,163,659,162,624,129"/>
+<area shape="poly" id="edge13_Node000009_Node000006" title=" " alt="" coords="653,124,788,169,782,168,652,129"/>
+<area shape="poly" id="edge14_Node000009_Node000007" title=" " alt="" coords="600,125,560,165,557,161,595,127"/>
+<area shape="poly" id="edge16_Node000010_Node000005" title=" " alt="" coords="750,125,711,165,709,160,745,127"/>
+<area shape="poly" id="edge17_Node000010_Node000006" title=" " alt="" coords="776,124,818,164,812,162,774,129"/>
+<area shape="poly" id="edge18_Node000010_Node000007" title=" " alt="" coords="723,126,589,171,588,166,717,127"/>
 </map>

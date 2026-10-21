@@ -352,7 +352,7 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="cm">   * @param[in,out] a_handle HDF5 file</span>
 <span class="cm">   * @param[in]    a_lvl    Grid level</span>
 <span class="cm">   * @details Implement this routine for checkpointing data for restarts. This will</span>
-<span class="cm">   * typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
+<span class="cm">   * typically call the solvers' checkpointing routine, but more data can be added.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">  </span><span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -363,7 +363,7 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="cm">   * @brief Read checkpoint data from file</span>
 <span class="cm">   * @param[in,out] a_handle HDF5 file</span>
 <span class="cm">   * @param[in]    a_lvl    Grid level</span>
-<span class="cm">   * @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting</span>
+<span class="cm">   * @details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting</span>
 <span class="cm">   * routine.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
@@ -418,7 +418,7 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="cm">   * balance your application, and also make sure that the loads returned from this routine are consistent with what you</span>
 <span class="cm">   * put in loadBalanceBoxes.</span>
 <span class="cm">   *</span>
-<span class="cm">   * Also note that the return vector has the same ordering as the DisjointBoxLayout&#39;s boxes on the input grid level.</span>
+<span class="cm">   * Also note that the return vector has the same ordering as the DisjointBoxLayout's boxes on the input grid level.</span>
 <span class="cm">   * See the implementation for further details.</span>
 <span class="cm">   * @param[in] a_realm Realm</span>
 <span class="cm">   * @param[in] a_level Grid level</span>
@@ -490,7 +490,7 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="w">  </span><span class="cm">/**</span>
 <span class="cm">   * @brief Function which can have Driver do regrids at arbitrary points in the simulation.</span>
 <span class="cm">   * @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of</span>
-<span class="cm">   * whether or not it is on the regular &quot;regrid intervals&quot;.</span>
+<span class="cm">   * whether or not it is on the regular "regrid intervals".</span>
 <span class="cm">   * @return True if an out-of-schedule regrid is requested.</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
@@ -591,8 +591,8 @@ The routines are used by <a class="reference internal" href="Driver.html#chap-dr
 To register a <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> register realms in the <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code> routine, as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">myTimeStepper::registerRealms</span><span class="p">(){</span>
 <span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
-<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;particleRealm&quot;</span><span class="p">);</span>
-<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;otherParticleRealm&quot;</span><span class="p">);</span>
+<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">"particleRealm"</span><span class="p">);</span>
+<span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">"otherParticleRealm"</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -612,9 +612,9 @@ It is still quite possible to parse lots of data into the solvers, e.g., setting
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::setupSolvers</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::setupSolvers&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::setupSolvers"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::setupSolvers&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::setupSolvers"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="o">!</span><span class="n">m_solver</span><span class="p">.</span><span class="n">isNull</span><span class="p">());</span>
@@ -633,7 +633,7 @@ It is still quite possible to parse lots of data into the solvers, e.g., setting
 <span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setRealm</span><span class="p">(</span><span class="n">m_realm</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isMobile</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isDiffusive</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::setupSolvers - can&#39;t turn off both advection AND diffusion&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::setupSolvers - can't turn off both advection AND diffusion"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -661,9 +661,9 @@ An example of this is given in <a class="reference internal" href="#list-advecti
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::registerOperators</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::registerOperators&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::registerOperators"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::registerOperators&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::registerOperators"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// Let the solver do this -- it knows what it needs.</span>
@@ -683,9 +683,9 @@ Again using <a class="reference internal" href="../Applications/AdvectionDiffusi
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::allocate</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::allocate&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::allocate"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::allocate&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::allocate"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">();</span>
@@ -707,9 +707,9 @@ A simpler example is again given by <a class="reference internal" href="../Appli
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::initialData</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::initialData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::initialData"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::initialData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::initialData"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// Fill the solver with initial data from the species.</span>
@@ -766,9 +766,9 @@ Below we include the implementation of this routine for the <a class="reference 
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span>
 <span class="nf">AdvectionDiffusionStepper::getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::getNumberOfPlotVariables&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::getNumberOfPlotVariables"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::getNumberOfPlotVariables&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::getNumberOfPlotVariables"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// Not plotting anything of our own, so return whatever the solver wants to plot.</span>
@@ -788,9 +788,9 @@ Below we include the implementation of this routine for the <a class="reference 
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
 <span class="n">AdvectionDiffusionStepper</span><span class="o">::</span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::getPlotVariableNames&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::getPlotVariableNames"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::getPlotVariableNames&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::getPlotVariableNames"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">getPlotVariableNames</span><span class="p">();</span>
@@ -830,9 +830,9 @@ An example is given below for the <a class="reference internal" href="../Applica
 <span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">    </span><span class="n">a_outputRealm</span><span class="p">,</span>
 <span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">             </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::writePlotData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::writePlotData"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::writePlotData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::writePlotData"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">a_level</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
@@ -855,7 +855,7 @@ The function signature is</p>
 <span class="cm"> * @param[in,out] a_handle HDF5 file</span>
 <span class="cm"> * @param[in]    a_lvl    Grid level</span>
 <span class="cm"> * @details Implement this routine for checkpointing data for restarts. This will</span>
-<span class="cm"> * typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
+<span class="cm"> * typically call the solvers' checkpointing routine, but more data can be added.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -868,9 +868,9 @@ Below, we again include an example for the <a class="reference internal" href=".
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::writeCheckpointData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::writeCheckpointData"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::writeCheckpointData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::writeCheckpointData"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">writeCheckpointLevel</span><span class="p">(</span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">);</span>
@@ -894,7 +894,7 @@ The data is read on a level-by-level basis, with a function signature</p>
 <span class="cm"> * @brief Read checkpoint data from file</span>
 <span class="cm"> * @param[in,out] a_handle HDF5 file</span>
 <span class="cm"> * @param[in]    a_lvl    Grid level</span>
-<span class="cm"> * @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting</span>
+<span class="cm"> * @details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting</span>
 <span class="cm"> * routine.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
@@ -908,9 +908,9 @@ E.g., the example for the <a class="reference internal" href="../Applications/Ad
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::readCheckpointData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::readCheckpointData"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::readCheckpointData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::readCheckpointData"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">readCheckpointLevel</span><span class="p">(</span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">);</span>
@@ -938,9 +938,9 @@ For the <a class="reference internal" href="../Applications/AdvectionDiffusionMo
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
 <span class="nf">AdvectionDiffusionStepper::computeDt</span><span class="p">()</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::computeDt&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::computeDt"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::computeDt&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::computeDt"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// TLDR: If we run explicit advection but implicit diffusion then we are only limited by the advective CFL. Otherwise,</span>
@@ -970,7 +970,7 @@ For the <a class="reference internal" href="../Applications/AdvectionDiffusionMo
 <span class="w">    </span><span class="k">break</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="w">  </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::computeDt - logic bust&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::computeDt - logic bust"</span><span class="p">);</span>
 
 <span class="w">    </span><span class="k">break</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
@@ -1012,9 +1012,9 @@ For simpler problems this routine is relatively straightforward to implement, ho
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
 <span class="nf">AdvectionDiffusionStepper::advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::advance&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::advance"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::advance&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::advance"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// State to be advanced.</span>
@@ -1064,7 +1064,7 @@ For simpler problems this routine is relatively straightforward to implement, ho
 
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isDiffusive</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">      </span><span class="c1">// Compute the finite volume approximation to kappa*div(F). The second &quot;hook&quot; is a debugging hook that includes</span>
+<span class="w">      </span><span class="c1">// Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes</span>
 <span class="w">      </span><span class="c1">// redistribution when computing kappa*div(F). It exists only for debugging/assurance reasons.</span>
 <span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">conservativeOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
@@ -1095,7 +1095,7 @@ For simpler problems this routine is relatively straightforward to implement, ho
 <span class="w">    </span><span class="k">break</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="w">  </span><span class="k">default</span><span class="o">:</span>
-<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper - unknown integrator requested&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper - unknown integrator requested"</span><span class="p">);</span>
 <span class="w">    </span><span class="k">break</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
@@ -1106,8 +1106,8 @@ For simpler problems this routine is relatively straightforward to implement, ho
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">finalMass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">computeMass</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">procID</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">m_debug</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;step = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_timeStep</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">&quot;</span>
-<span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;mass conservation % = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">100.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">finalMass</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">initialMass</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">initialMass</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"step = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_timeStep</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\t\t\t</span><span class="s">"</span>
+<span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"mass conservation % = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">100.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">finalMass</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">initialMass</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">initialMass</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span>
@@ -1130,9 +1130,9 @@ The implementation for <a class="reference internal" href="../Applications/Advec
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::synchronizeSolverTimes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::synchronizeSolverTimes&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::synchronizeSolverTimes"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::synchronizeSolverTimes&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::synchronizeSolverTimes"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">m_timeStep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_step</span><span class="p">;</span>
@@ -1188,9 +1188,9 @@ Solvers usually know how to do this, and in some cases this function can be dece
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::preRegrid&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::preRegrid"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::preRegrid&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::preRegrid"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">preRegrid</span><span class="p">(</span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">);</span>
@@ -1210,9 +1210,9 @@ Solvers are usually implemented with their own regrid routine, and if the only t
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">AdvectionDiffusionStepper::regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::regrid&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"AdvectionDiffusionStepper::regrid"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::regrid&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"AdvectionDiffusionStepper::regrid"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// Regrid CDR solver and set up the flow fields</span>
@@ -1305,9 +1305,9 @@ The default implementation of this function ensures that when we load balance a 
 <span class="w">                              </span><span class="kt">int</span><span class="w"> </span><span class="cm">/*a_lmin*/</span><span class="p">,</span>
 <span class="w">                              </span><span class="kt">int</span><span class="w"> </span><span class="n">a_finestLevel</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;TimeStepper::loadBalanceBoxes&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">"TimeStepper::loadBalanceBoxes"</span><span class="p">);</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;TimeStepper::loadBalanceBoxes&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"TimeStepper::loadBalanceBoxes"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">a_procs</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a_finestLevel</span><span class="p">);</span>

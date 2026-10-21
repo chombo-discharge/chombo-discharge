@@ -1,0 +1,5 @@
+<map id="detail::H5ColumnSubset&lt; Traits, Fallback, Void&lt; decltype(Traits::h5Columns)&gt; &gt;" name="detail::H5ColumnSubset&lt; Traits, Fallback, Void&lt; decltype(Traits::h5Columns)&gt; &gt;">
+<area shape="rect" id="Node000001" title="Specialization selecting the declared HDF5 payload subset when Traits::h5Columns exists." alt="" coords="5,168,250,229"/>
+<area shape="rect" id="Node000002" href="$structdetail_1_1H5ColumnSubset.html" title="Primary template resolving the HDF5 payload column subset; defaults to all columns." alt="" coords="17,5,238,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,64,130,168,125,167,125,67"/>
+</map>

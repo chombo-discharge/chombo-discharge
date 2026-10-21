@@ -1,5 +1,5 @@
 <map id="Physics::Geometry::GeometryStepper" name="Physics::Geometry::GeometryStepper">
-<area shape="rect" id="Node000001" title="Minimal TimeStepper that performs no physics, intended for geometry development and visualisation." alt="" coords="5,79,156,119"/>
-<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="28,5,133,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,44,83,79,78,79,78,44"/>
+<area shape="rect" id="Node000001" title="Minimal TimeStepper that performs no physics, intended for geometry development and visualisation." alt="" coords="5,81,156,126"/>
+<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="28,5,133,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,47,83,81,78,80,79,51"/>
 </map>

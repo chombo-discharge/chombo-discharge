@@ -1,7 +1,7 @@
 <map id="FieldSolver" name="FieldSolver">
-<area shape="rect" id="Node000001" title="Base class for electrostatic solvers." alt="" coords="131,93,226,119"/>
-<area shape="rect" id="Node000002" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="5,5,176,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,38,168,91,165,95,110,42"/>
-<area shape="rect" id="Node000003" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="201,5,335,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="257,45,237,71,203,95,200,91,233,67,253,41"/>
+<area shape="rect" id="Node000001" title="Base class for electrostatic solvers." alt="" coords="131,106,225,134"/>
+<area shape="rect" id="Node000002" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="5,5,175,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,42,146,80,168,106,163,105,142,84,110,47"/>
+<area shape="rect" id="Node000003" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="199,5,333,33"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,46,239,84,207,108,205,103,235,80,255,49"/>
 </map>

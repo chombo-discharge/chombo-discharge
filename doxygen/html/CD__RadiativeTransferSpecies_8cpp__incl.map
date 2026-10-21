@@ -1,23 +1,23 @@
 <map id="Physics/RadiativeTransfer/CD_RadiativeTransferSpecies.cpp" name="Physics/RadiativeTransfer/CD_RadiativeTransferSpecies.cpp">
-<area shape="rect" id="Node000001" title="Implementation of CD_RadiativeTransferSpecies.H." alt="" coords="148,5,391,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,104,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,48,100,91,98,86,217,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="128,93,232,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="249,48,205,86,202,82,246,44"/>
-<area shape="rect" id="Node000004" href="$CD__RadiativeTransferSpecies_8H.html" title="Declaration of the Physics::RadiativeTransfer::RadiativeTransferSpecies RtSpecies." alt="" coords="308,93,535,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="307,43,388,84,385,89,305,48"/>
-<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="589,240,774,265"/>
-<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="391,36,471,56,511,72,548,91,588,122,622,159,670,226,666,229,618,162,584,126,545,96,509,76,469,61,390,42"/>
-<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="157,240,336,265"/>
-<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="270,46,252,227,247,226,265,45"/>
-<area shape="rect" id="Node000005" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="358,167,485,192"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="424,119,424,153,419,153,419,119"/>
-<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="443,117,650,231,648,236,441,121"/>
-<area shape="poly" id="edge10_Node000004_Node000009" title=" " alt="" coords="408,121,347,169,272,232,269,228,344,165,404,117"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="478,240,565,265"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="439,190,495,230,492,234,436,194"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="360,240,453,265"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="422,193,414,227,409,226,416,192"/>
-<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="464,189,627,234,625,239,462,195"/>
-<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="394,194,289,237,287,232,392,190"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_RadiativeTransferSpecies.H." alt="" coords="148,5,390,50"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,98,104,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,53,104,94,102,90,214,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="128,98,232,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,52,207,89,204,85,248,49"/>
+<area shape="rect" id="Node000004" href="$CD__RadiativeTransferSpecies_8H.html" title="Declaration of the Physics::RadiativeTransfer::RadiativeTransferSpecies RtSpecies." alt="" coords="307,98,532,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="309,48,385,90,380,91,309,53"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="545,249,729,277"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="391,35,431,44,472,56,511,73,547,96,578,127,602,164,620,202,632,236,627,233,615,204,598,167,574,131,544,100,508,78,470,61,430,49,391,41"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="115,249,293,277"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="266,49,246,126,214,236,210,233,241,125,262,53"/>
+<area shape="rect" id="Node000005" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="357,174,482,201"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="422,124,422,159,418,157,418,128"/>
+<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="440,124,608,240,603,241,438,129"/>
+<area shape="poly" id="edge10_Node000004_Node000009" title=" " alt="" coords="404,126,236,243,234,238,398,126"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="434,249,520,277"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="431,199,460,238,455,236,429,204"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="318,249,410,277"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="412,201,384,239,381,235,407,203"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="459,199,587,244,581,244,458,205"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="384,202,257,247,256,241,379,202"/>
 </map>

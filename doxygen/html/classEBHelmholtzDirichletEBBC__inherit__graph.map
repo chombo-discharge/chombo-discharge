@@ -1,5 +1,5 @@
 <map id="EBHelmholtzDirichletEBBC" name="EBHelmholtzDirichletEBBC">
-<area shape="rect" id="Node000001" title="Base class for passing Dirichlet EB boundary conditions into EBHelmholtzOp." alt="" coords="5,79,201,104"/>
-<area shape="rect" id="Node000002" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="33,5,174,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,44,106,79,101,79,101,44"/>
+<area shape="rect" id="Node000001" title="Base class for passing Dirichlet EB boundary conditions into EBHelmholtzOp." alt="" coords="5,81,201,109"/>
+<area shape="rect" id="Node000002" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="33,5,173,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,47,105,82,101,80,101,51"/>
 </map>

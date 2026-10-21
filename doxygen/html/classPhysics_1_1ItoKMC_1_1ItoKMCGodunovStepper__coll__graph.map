@@ -1,9 +1,12 @@
 <map id="Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;" name="Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;">
-<area shape="rect" id="Node000001" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="128,183,367,223"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito&#45;KMC&#45;Poisson system of equations." alt="" coords="5,80,236,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,127,225,181,222,185,154,131"/>
-<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="68,5,173,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,44,123,80,118,80,118,44"/>
-<area shape="rect" id="Node000004" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="260,87,320,113"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="282,126,258,184,253,181,277,124"/>
+<area shape="rect" id="Node000001" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="982,60,1220,105"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="640,5,871,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,51,984,67,979,67,886,56"/>
+<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,20,110,47"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,25,134,24,375,13,481,13,616,19,643,23,637,23,616,24,481,19,375,18,134,29,126,30"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito&#45;KMC&#45;Poisson system of equations." alt="" coords="159,44,389,89"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="125,41,161,48,156,50,125,46"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,72,508,73,616,66,637,66,642,65,617,71,509,78,405,78"/>
+<area shape="rect" id="Node000005" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="726,92,785,119"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="800,100,979,91,984,91,800,105"/>
 </map>

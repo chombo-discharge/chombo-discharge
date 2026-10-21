@@ -1,48 +1,48 @@
 <map id="Physics/ItoKMC/CD_ItoKMCPhotoReaction.H" name="Physics/ItoKMC/CD_ItoKMCPhotoReaction.H">
-<area shape="rect" id="Node000001" title="Declaration of the Physics::ItoKMC::ItoKMCPhotoReaction class." alt="" coords="183,5,419,45"/>
-<area shape="rect" id="Node000002" href="$CD__ItoKMCPhotoReactionImplem_8H.html" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="183,93,419,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,59,296,93,290,93,289,59"/>
-<area shape="rect" id="Node000003" href="$CD__ItoKMCPhysics_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class." alt="" coords="443,101,705,126"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="374,47,538,98,537,103,373,52"/>
-<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="307,80,306,46,311,46,312,80"/>
-<area shape="rect" id="Node000004" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="11,189,286,214"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="504,131,206,191,205,186,503,126"/>
-<area shape="rect" id="Node000005" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="310,181,558,221"/>
-<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="538,135,459,183,456,179,536,130"/>
-<area shape="rect" id="Node000006" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="583,189,845,214"/>
-<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="606,131,696,186,694,191,603,136"/>
-<area shape="rect" id="Node000008" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="836,284,1091,309"/>
-<area shape="poly" id="edge25_Node000003_Node000008" title=" " alt="" coords="704,126,783,146,822,160,859,179,892,203,921,232,958,282,954,285,917,236,889,207,857,184,820,165,781,151,702,131"/>
-<area shape="rect" id="Node000018" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1061,181,1289,221"/>
-<area shape="poly" id="edge26_Node000003_Node000018" title=" " alt="" coords="668,125,1061,181,1061,186,667,131"/>
-<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="483,172,560,124,563,128,486,177"/>
-<area shape="rect" id="Node000007" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="563,277,812,317"/>
-<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="702,227,688,277,683,276,697,226"/>
-<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="758,216,933,281,932,286,756,221"/>
-<area shape="rect" id="Node000014" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="322,269,538,324"/>
-<area shape="poly" id="edge19_Node000006_Node000014" title=" " alt="" coords="667,221,511,272,509,267,665,216"/>
-<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="702,263,714,213,719,215,708,264"/>
-<area shape="rect" id="Node000009" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCFieldTagger abstract CellTagger." alt="" coords="587,379,817,419"/>
-<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="921,317,752,382,750,377,919,312"/>
-<area shape="rect" id="Node000013" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="842,379,1085,419"/>
-<area shape="poly" id="edge17_Node000008_Node000013" title=" " alt="" coords="958,323,959,379,953,379,953,323"/>
-<area shape="rect" id="Node000010" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="587,482,817,522"/>
-<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="696,433,697,482,692,482,691,433"/>
-<area shape="rect" id="Node000011" href="$CD__ItoKMCStreamerTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStreamerTagger CellTagger." alt="" coords="361,475,563,529"/>
-<area shape="poly" id="edge14_Node000009_Node000011" title=" " alt="" coords="646,427,526,477,524,472,644,422"/>
-<area shape="poly" id="edge13_Node000010_Node000009" title=" " alt="" coords="708,469,707,420,712,419,713,469"/>
-<area shape="rect" id="Node000012" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation of CD_ItoKMCStreamerTagger.H." alt="" coords="341,577,583,632"/>
-<area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="456,543,457,577,451,577,451,543"/>
-<area shape="poly" id="edge16_Node000012_Node000011" title=" " alt="" coords="468,564,467,530,473,530,473,564"/>
-<area shape="poly" id="edge18_Node000013_Node000008" title=" " alt="" coords="969,366,967,310,972,309,974,365"/>
-<area shape="rect" id="Node000015" href="$CD__ItoKMCBackgroundEvaluator_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCBackgroundEvaluator TimeStepper." alt="" coords="31,372,282,427"/>
-<area shape="poly" id="edge20_Node000014_Node000015" title=" " alt="" coords="347,331,229,374,227,369,345,326"/>
-<area shape="rect" id="Node000017" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="306,372,554,427"/>
-<area shape="poly" id="edge23_Node000014_Node000017" title=" " alt="" coords="424,338,425,372,419,372,419,338"/>
-<area shape="rect" id="Node000016" href="$CD__ItoKMCBackgroundEvaluatorImplem_8H.html" title="Implementation of CD_ItoKMCBackgroundEvaluator.H." alt="" coords="5,475,308,529"/>
-<area shape="poly" id="edge21_Node000015_Node000016" title=" " alt="" coords="151,440,151,475,146,475,145,440"/>
-<area shape="poly" id="edge22_Node000016_Node000015" title=" " alt="" coords="163,461,162,427,167,427,168,461"/>
-<area shape="poly" id="edge24_Node000017_Node000014" title=" " alt="" coords="436,359,435,324,441,324,441,358"/>
-<area shape="rect" id="Node000019" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1115,277,1356,317"/>
-<area shape="poly" id="edge27_Node000018_Node000019" title=" " alt="" coords="1197,231,1225,275,1221,278,1193,234"/>
+<area shape="rect" id="Node000001" title="Declaration of the Physics::ItoKMC::ItoKMCPhotoReaction class." alt="" coords="184,5,419,50"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCPhotoReactionImplem_8H.html" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="184,98,419,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="293,63,296,98,291,97,292,68"/>
+<area shape="rect" id="Node000003" href="$CD__ItoKMCPhysics_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class." alt="" coords="443,106,704,134"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="380,53,536,105,531,107,381,58"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="308,82,309,53,310,48,313,83"/>
+<area shape="rect" id="Node000004" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="12,199,286,227"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="495,140,212,201,210,196,498,136"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="311,191,558,235"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="532,144,462,192,458,188,536,141"/>
+<area shape="rect" id="Node000006" href="$CD__ItoKMCStepper_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStepper abstract TimeStepper." alt="" coords="583,199,844,227"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="606,140,695,198,690,199,606,145"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger." alt="" coords="834,300,1088,328"/>
+<area shape="poly" id="edge25_Node000003_Node000008" title=" " alt="" coords="711,135,786,155,823,170,857,188,891,214,919,245,957,300,951,299,915,248,887,218,855,193,821,175,785,161,712,140"/>
+<area shape="rect" id="Node000018" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1060,191,1287,235"/>
+<area shape="poly" id="edge26_Node000003_Node000018" title=" " alt="" coords="675,134,1062,193,1057,196,675,140"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="487,180,562,133,558,136,490,184"/>
+<area shape="rect" id="Node000007" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="561,292,810,336"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="699,239,686,293,682,290,696,243"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="760,230,931,299,926,300,760,236"/>
+<area shape="rect" id="Node000014" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="322,283,537,345"/>
+<area shape="poly" id="edge19_Node000006_Node000014" title=" " alt="" coords="659,234,517,285,515,280,664,231"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="702,275,714,229,718,225,706,278"/>
+<area shape="rect" id="Node000009" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCFieldTagger abstract CellTagger." alt="" coords="587,402,816,446"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="918,333,755,403,753,398,913,335"/>
+<area shape="rect" id="Node000013" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="841,402,1082,446"/>
+<area shape="poly" id="edge17_Node000008_Node000013" title=" " alt="" coords="955,341,956,403,952,400,952,346"/>
+<area shape="rect" id="Node000010" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="587,511,816,556"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="694,460,696,512,692,509,691,464"/>
+<area shape="rect" id="Node000011" href="$CD__ItoKMCStreamerTagger_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCStreamerTagger CellTagger." alt="" coords="362,503,563,564"/>
+<area shape="poly" id="edge14_Node000009_Node000011" title=" " alt="" coords="642,452,531,505,529,500,637,454"/>
+<area shape="poly" id="edge13_Node000010_Node000009" title=" " alt="" coords="708,494,707,449,710,445,712,497"/>
+<area shape="rect" id="Node000012" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation of CD_ItoKMCStreamerTagger.H." alt="" coords="342,612,584,674"/>
+<area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="456,578,457,613,452,610,452,582"/>
+<area shape="poly" id="edge16_Node000012_Node000011" title=" " alt="" coords="469,595,469,567,473,563,474,598"/>
+<area shape="poly" id="edge18_Node000013_Node000008" title=" " alt="" coords="968,385,966,331,969,326,972,388"/>
+<area shape="rect" id="Node000015" href="$CD__ItoKMCBackgroundEvaluator_8H.html" title="Declaration of the Physics::ItoKMC::ItoKMCBackgroundEvaluator TimeStepper." alt="" coords="31,393,281,455"/>
+<area shape="poly" id="edge20_Node000014_Node000015" title=" " alt="" coords="337,353,234,395,231,390,341,349"/>
+<area shape="rect" id="Node000017" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="306,393,553,455"/>
+<area shape="poly" id="edge23_Node000014_Node000017" title=" " alt="" coords="422,358,424,394,419,391,419,363"/>
+<area shape="rect" id="Node000016" href="$CD__ItoKMCBackgroundEvaluatorImplem_8H.html" title="Implementation of CD_ItoKMCBackgroundEvaluator.H." alt="" coords="5,503,307,564"/>
+<area shape="poly" id="edge21_Node000015_Node000016" title=" " alt="" coords="148,468,150,503,145,501,146,473"/>
+<area shape="poly" id="edge22_Node000016_Node000015" title=" " alt="" coords="162,486,163,457,165,453,167,488"/>
+<area shape="poly" id="edge24_Node000017_Node000014" title=" " alt="" coords="436,376,436,348,439,343,441,378"/>
+<area shape="rect" id="Node000019" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1113,292,1354,336"/>
+<area shape="poly" id="edge27_Node000018_Node000019" title=" " alt="" coords="1195,246,1223,292,1218,291,1193,251"/>
 </map>

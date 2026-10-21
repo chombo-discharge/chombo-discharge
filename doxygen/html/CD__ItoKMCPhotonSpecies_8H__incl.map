@@ -1,15 +1,15 @@
 <map id="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCPhotonSpecies.H" name="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCPhotonSpecies.H">
-<area shape="rect" id="Node000001" title="Declaration of a simple PhotonSpecies derived class for usage in ItoKMC." alt="" coords="221,5,511,45"/>
-<area shape="rect" id="Node000002" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="201,93,328,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="343,48,292,87,289,82,340,43"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="235,167,420,192"/>
-<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="364,46,336,154,331,153,359,45"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="445,167,623,192"/>
-<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="389,44,513,155,509,159,385,48"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,92,192"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="231,121,97,165,96,160,229,116"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="117,167,210,192"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="250,121,193,161,190,156,247,116"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="277,117,310,154,306,158,273,121"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="309,116,478,161,477,166,307,121"/>
+<area shape="rect" id="Node000001" title="Declaration of a simple PhotonSpecies derived class for usage in ItoKMC." alt="" coords="218,5,508,50"/>
+<area shape="rect" id="Node000002" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="200,98,326,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="339,49,292,90,289,86,335,52"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="232,174,417,201"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="360,49,334,160,329,157,356,52"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="441,174,619,201"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="387,48,508,163,502,163,385,53"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,174,92,201"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="226,129,102,171,101,166,224,124"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="116,174,208,201"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="248,125,193,167,191,162,243,127"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="275,124,307,162,301,161,273,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="311,124,470,169,465,170,310,129"/>
 </map>

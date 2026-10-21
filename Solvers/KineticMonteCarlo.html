@@ -481,12 +481,12 @@ Using <code class="docutils literal notranslate"><span class="pre">MyState</span
 <span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">a_state</span><span class="p">[</span><span class="n">m_A</span><span class="p">];</span>
 <span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="c1">// Never consider these reactions to be &quot;critical&quot;</span>
+<span class="w">   </span><span class="c1">// Never consider these reactions to be "critical"</span>
 <span class="w">   </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Mystate</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">();</span>
 <span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="c1">// Get a vector/list/deque etc. of the reactant&#39;s. &lt;some_container&gt; can be e.g. std::vector&lt;size_t&gt;</span>
+<span class="w">   </span><span class="c1">// Get a vector/list/deque etc. of the reactant's. &lt;some_container&gt; can be e.g. std::vector&lt;size_t&gt;</span>
 <span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">R</span><span class="o">::</span><span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">{</span><span class="n">m_A</span><span class="p">};</span>
 <span class="w">   </span><span class="p">}</span>

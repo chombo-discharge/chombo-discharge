@@ -1,9 +1,9 @@
 <map id="AMRMultigridKrylovOp&lt; T &gt;" name="AMRMultigridKrylovOp&lt; T &gt;">
-<area shape="rect" id="Node000001" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="84,95,292,120"/>
-<area shape="rect" id="Node000003" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="5,183,176,223"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="168,131,112,184,109,181,164,128"/>
-<area shape="rect" id="Node000004" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="200,183,371,223"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,124,258,142,272,161,282,181,277,184,267,164,254,146,230,128"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="79,5,297,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,59,191,94,185,94,185,59"/>
+<area shape="rect" id="Node000001" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="82,99,290,127"/>
+<area shape="rect" id="Node000003" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="5,200,175,245"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,136,152,153,109,202,106,198,148,149,160,140"/>
+<area shape="rect" id="Node000004" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="199,200,368,245"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="235,132,256,149,272,174,281,201,276,199,267,176,252,153,234,138"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="78,5,294,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,63,189,100,183,98,185,68"/>
 </map>

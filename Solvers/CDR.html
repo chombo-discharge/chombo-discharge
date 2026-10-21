@@ -283,7 +283,7 @@ In the current structure, <a class="reference internal" href="#chap-cdrmultigrid
 <span class="cm"> * @param[in]    a_oldPhi Solution at time t</span>
 <span class="cm"> * @param[in]    a_source Source term.</span>
 <span class="cm"> * @param[in]    a_dt     Time step</span>
-<span class="cm"> * @note For purely implicit Euler the source term should be centered at t+dt (otherwise it&#39;s an implicit-explicit</span>
+<span class="cm"> * @note For purely implicit Euler the source term should be centered at t+dt (otherwise it's an implicit-explicit</span>
 <span class="cm"> * method)</span>
 <span class="cm"> * @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) +</span>
 <span class="cm"> * dt*a_source.</span>
@@ -557,21 +557,21 @@ Several options are available for adjusting the behavior of the discretization, 
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
 # CdrCTU solver settings.
 # ====================================================================================================
-CdrCTU.bc.x.lo                  = wall                      ## &#39;data&#39;, &#39;function&#39;, &#39;wall&#39;, &#39;outflow&#39;, or &#39;solver&#39;
-CdrCTU.bc.x.hi                  = wall                      ## &#39;data&#39;, &#39;function&#39;, &#39;wall&#39;, &#39;outflow&#39;, or &#39;solver&#39;
-CdrCTU.bc.y.lo                  = wall                      ## &#39;data&#39;, &#39;function&#39;, &#39;wall&#39;, &#39;outflow&#39;, or &#39;solver&#39;
-CdrCTU.bc.y.hi                  = wall                      ## &#39;data&#39;, &#39;function&#39;, &#39;wall&#39;, &#39;outflow&#39;, or &#39;solver&#39;
-CdrCTU.bc.z.lo                  = wall                      ## &#39;data&#39;, &#39;function&#39;, &#39;wall&#39;, &#39;outflow&#39;, or &#39;solver&#39;
-CdrCTU.bc.z.hi                  = wall                      ## &#39;data&#39;, &#39;function&#39;, &#39;wall&#39;, &#39;outflow&#39;, or &#39;solver&#39;
-CdrCTU.slope_limiter            = minmod                    ## Slope limiter. &#39;none&#39;, &#39;minmod&#39;, &#39;mc&#39;, or &#39;superbee&#39;
-CdrCTU.use_ctu                  = true                      ## If true, use CTU. Otherwise it&#39;s DTU.
-CdrCTU.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;
-CdrCTU.plot_mode                = density                   ## Plot densities &#39;density&#39; or particle numbers (&#39;numbers&#39;)
+CdrCTU.bc.x.lo                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.x.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.y.lo                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.y.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.z.lo                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.z.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.slope_limiter            = minmod                    ## Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
+CdrCTU.use_ctu                  = true                      ## If true, use CTU. Otherwise it's DTU.
+CdrCTU.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+CdrCTU.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
-CdrCTU.which_redistribution     = volume                    ## Redistribution type. &#39;volume&#39;, &#39;mass&#39;, or &#39;none&#39; (turned off)
+CdrCTU.which_redistribution     = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
 CdrCTU.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
 
-CdrCTU.solver                    = gmg gmres    ## Solver(s), tried in order. &#39;gmg&#39;, &#39;gmres&#39;, &#39;bicgstab&#39;. List = fallback chain
+CdrCTU.solver                    = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 CdrCTU.krylov_eps                = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
 CdrCTU.krylov_max_iter           = 50           ## Outer Krylov max iterations (gmres/bicgstab)
 CdrCTU.krylov_restart            = 30           ## GMRES restart length (gmres only)
@@ -587,9 +587,9 @@ CdrCTU.gmg_max_iter              = 32           ## Maximum number of iterations
 CdrCTU.gmg_exit_tol              = 1.E-10       ## Residue tolerance
 CdrCTU.gmg_exit_hang             = 0.2          ## Solver hang
 CdrCTU.gmg_min_cells             = 16           ## Bottom drop
-CdrCTU.gmg_bottom_solver         = bicgstab     ## Bottom solver type. Valid options are &#39;simple&#39; and &#39;bicgstab&#39;
-CdrCTU.gmg_cycle                 = vcycle       ## Cycle type. &#39;vcycle&#39; or &#39;wcycle&#39;
-CdrCTU.gmg_smoother              = red_black    ## Relaxation. &#39;jacobi&#39;, &#39;multi_color&#39;, &#39;red_black&#39;, &#39;chebyshev &lt;order&gt; &lt;eig_ratio&gt;&#39;, or &#39;ras &lt;inner_sweeps&gt;&#39;
+CdrCTU.gmg_bottom_solver         = bicgstab     ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrCTU.gmg_cycle                 = vcycle       ## Cycle type. 'vcycle' or 'wcycle'
+CdrCTU.gmg_smoother              = red_black    ## Relaxation. 'jacobi', 'multi_color', 'red_black', 'chebyshev &lt;order&gt; &lt;eig_ratio&gt;', or 'ras &lt;inner_sweeps&gt;'
 CdrCTU.gmg_reflux_free           = false        ## If true, use reflux-free AMR operator
 </pre></div>
 </div>
@@ -743,7 +743,7 @@ One can use <code class="docutils literal notranslate"><span class="pre">DataOps
 <p>It is possible to adjust solver output when plotting data.
 This is done through the input file for the class that you’re using.
 For example, for the <code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code> implementation the following variables are available:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrCTU.plt_vars = phi vel src dco ebflux  # Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrCTU.plt_vars = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 </pre></div>
 </div>
 </section>
@@ -766,7 +766,7 @@ Here, diffusion code is turned off and the initial data is one everywhere.</p>
 <span class="w">   </span><span class="n">MySpecies</span><span class="p">(){</span>
 <span class="w">      </span><span class="n">m_mobile</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">      </span><span class="n">m_diffusive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-<span class="w">      </span><span class="n">m_name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;mySpecies&quot;</span><span class="p">;</span>
+<span class="w">      </span><span class="n">m_name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s">"mySpecies"</span><span class="p">;</span>
 <span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="o">~</span><span class="n">MySpecies</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>

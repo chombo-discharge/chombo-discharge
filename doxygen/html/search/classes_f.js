@@ -3,7 +3,7 @@ var searchData=
   ['scalar_0',['Scalar',['../structH5Part_1_1Scalar.html',1,'H5Part']]],
   ['scanshop_1',['ScanShop',['../classScanShop.html',1,'']]],
   ['settings_2',['Settings',['../structEllipticSolverChain_1_1Settings.html',1,'EllipticSolverChain']]],
-  ['sigmastorage_3',['sigmastorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::SigmaStorage']]],
+  ['sigmastorage_3',['SigmaStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::SigmaStorage']]],
   ['signeddistancebvh_4',['SignedDistanceBVH',['../classSignedDistanceBVH.html',1,'']]],
   ['signeddistancedcel_5',['SignedDistanceDCEL',['../classSignedDistanceDCEL.html',1,'']]],
   ['spherearray_6',['SphereArray',['../classSphereArray.html',1,'']]],

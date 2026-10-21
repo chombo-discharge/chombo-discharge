@@ -244,7 +244,7 @@ I.e. for a file <code class="file docutils literal notranslate"><span class="pre
 
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_MyClassImplem.H&gt;</span><span class="c1"> // Inline and template code included at the end.</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_MyClassImplem.H&gt;</span><span class="w"> </span><span class="c1">// Inline and template code included at the end.</span>
 
 <span class="cp">#endif</span>
 </pre></div>
@@ -285,7 +285,7 @@ MyClass.bc.x.lo        = dirichlet 1.0
 <h2>clang-format<a class="headerlink" href="#clang-format" title="Permalink to this heading"></a></h2>
 <p>We use <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> for formatting the source code.
 Before opening a pull request for review, navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and format the code using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>Source<span class="w"> </span>Physics<span class="w"> </span>Geometries<span class="w"> </span>Exec<span class="w"> </span><span class="se">\(</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.H&quot;</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.cpp&quot;</span><span class="w"> </span><span class="se">\)</span><span class="w"> </span>-exec<span class="w"> </span>clang-format<span class="w"> </span>-i<span class="w"> </span><span class="o">{}</span><span class="w"> </span>+
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>Source<span class="w"> </span>Physics<span class="w"> </span>Geometries<span class="w"> </span>Exec<span class="w"> </span><span class="se">\(</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.H"</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.cpp"</span><span class="w"> </span><span class="se">\)</span><span class="w"> </span>-exec<span class="w"> </span>clang-format<span class="w"> </span>-i<span class="w"> </span><span class="o">{}</span><span class="w"> </span>+
 </pre></div>
 </div>
 </section>

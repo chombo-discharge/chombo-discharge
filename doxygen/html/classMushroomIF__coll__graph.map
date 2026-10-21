@@ -1,5 +1,5 @@
 <map id="MushroomIF" name="MushroomIF">
-<area shape="rect" id="Node000001" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="5,79,108,104"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="23,5,90,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="59,44,59,79,54,79,54,44"/>
+<area shape="rect" id="Node000001" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="5,81,108,109"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="24,5,89,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="58,47,59,81,54,80,55,51"/>
 </map>

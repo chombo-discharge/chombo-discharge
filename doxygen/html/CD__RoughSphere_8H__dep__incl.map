@@ -1,5 +1,5 @@
 <map id="Geometries/RoughSphere/CD_RoughSphere.H" name="Geometries/RoughSphere/CD_RoughSphere.H">
-<area shape="rect" id="Node000001" title="Rough sphere geometry." alt="" coords="5,5,193,45"/>
-<area shape="rect" id="Node000002" href="$CD__RoughSphere_8cpp.html" title="Implementation of CD_RoughSphere.H." alt="" coords="5,93,193,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,59,102,93,97,93,97,59"/>
+<area shape="rect" id="Node000001" title="Rough sphere geometry." alt="" coords="5,5,193,50"/>
+<area shape="rect" id="Node000002" href="$CD__RoughSphere_8cpp.html" title="Implementation of CD_RoughSphere.H." alt="" coords="5,98,193,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,64,102,99,96,97,97,68"/>
 </map>

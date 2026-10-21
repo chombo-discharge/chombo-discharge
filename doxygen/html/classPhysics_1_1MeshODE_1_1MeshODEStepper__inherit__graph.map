@@ -1,5 +1,5 @@
 <map id="Physics::MeshODE::MeshODEStepper&lt; N &gt;" name="Physics::MeshODE::MeshODEStepper&lt; N &gt;">
-<area shape="rect" id="Node000001" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh." alt="" coords="5,79,308,104"/>
-<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="104,5,209,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,44,159,79,154,79,154,44"/>
+<area shape="rect" id="Node000001" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh." alt="" coords="5,81,308,109"/>
+<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="104,5,209,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,47,159,82,154,79,155,51"/>
 </map>

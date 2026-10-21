@@ -1,5 +1,5 @@
 <map id="MFHelmholtzSaturationChargeJumpBCFactory" name="MFHelmholtzSaturationChargeJumpBCFactory">
-<area shape="rect" id="Node000001" title="Factory class for making saturation charge jump boundary condition objects in multifluid Helmholtz co..." alt="" coords="5,79,228,119"/>
-<area shape="rect" id="Node000002" href="$classMFHelmholtzJumpBCFactory.html" title="Factory class for making jump boundary condition objects in a multifluid MFHelmholtzOp context." alt="" coords="13,5,220,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,44,119,79,114,79,114,44"/>
+<area shape="rect" id="Node000001" title="Factory class for making saturation charge jump boundary condition objects in multifluid Helmholtz co..." alt="" coords="5,81,227,126"/>
+<area shape="rect" id="Node000002" href="$classMFHelmholtzJumpBCFactory.html" title="Factory class for making jump boundary condition objects in a multifluid MFHelmholtzOp context." alt="" coords="13,5,219,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,47,118,81,114,79,114,51"/>
 </map>

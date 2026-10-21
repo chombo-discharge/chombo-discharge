@@ -1,9 +1,9 @@
 <map id="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCBackgroundSpecies.H" name="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCBackgroundSpecies.H">
-<area shape="rect" id="Node000001" title="Declaration of a background species class for usage with ItoKMCJSON." alt="" coords="139,5,397,60"/>
-<area shape="rect" id="Node000002" href="$CD__ItoKMCBackgroundSpecies_8cpp.html" title="Implementation of CD_ItoKMCBackgroundSpecies.H." alt="" coords="5,108,264,163"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,70,171,110,168,106,221,66"/>
-<area shape="rect" id="Node000003" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="289,115,517,155"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="315,66,379,113,376,117,312,70"/>
-<area shape="rect" id="Node000004" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="282,211,523,251"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="405,169,405,211,400,211,400,169"/>
+<area shape="rect" id="Node000001" title="Declaration of a background species class for usage with ItoKMCJSON." alt="" coords="139,5,397,67"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCBackgroundSpecies_8cpp.html" title="Implementation of CD_ItoKMCBackgroundSpecies.H." alt="" coords="5,115,264,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,79,173,117,170,113,221,75"/>
+<area shape="rect" id="Node000003" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="288,124,515,168"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="318,74,377,123,372,123,317,80"/>
+<area shape="rect" id="Node000004" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="281,225,521,269"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="403,182,403,226,399,223,399,186"/>
 </map>

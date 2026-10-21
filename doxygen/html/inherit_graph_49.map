@@ -1,13 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classEBHelmholtzDomainBCFactory.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp." alt="" coords="5,134,228,159"/>
-<area shape="rect" id="Node000001" href="$classEBHelmholtzDirichletDomainBCFactory.html" title="Factory class for passing Dirichlet domain boundary conditions into EBHelmholtzOp." alt="" coords="303,5,515,45"/>
-<area shape="poly" id="edge79_Node000000_Node000001" title=" " alt="" coords="146,124,205,89,275,55,311,43,313,48,277,60,207,94,149,129"/>
-<area shape="rect" id="Node000002" href="$classEBHelmholtzEddingtonSP1DomainBCFactory.html" title="Base class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp." alt="" coords="285,69,532,109"/>
-<area shape="poly" id="edge80_Node000000_Node000002" title=" " alt="" coords="195,129,306,107,307,112,196,134"/>
-<area shape="rect" id="Node000003" href="$classEBHelmholtzLarsenDomainBCFactory.html" title="Class for making Larsen boundary conditions." alt="" coords="276,134,541,159"/>
-<area shape="poly" id="edge81_Node000000_Node000003" title=" " alt="" coords="242,144,276,144,276,149,242,149"/>
-<area shape="rect" id="Node000004" href="$classEBHelmholtzNeumannDomainBCFactory.html" title="Class for passing Neumann boundary domain boundary conditions into EBHelmholtzOp." alt="" coords="299,184,519,224"/>
-<area shape="poly" id="edge82_Node000000_Node000004" title=" " alt="" coords="196,159,307,181,306,187,195,165"/>
-<area shape="rect" id="Node000005" href="$classEBHelmholtzRobinDomainBCFactory.html" title="Base class for making Robin domain boundary conditions with EBHelmholtzOp." alt="" coords="279,249,538,274"/>
-<area shape="poly" id="edge83_Node000000_Node000005" title=" " alt="" coords="149,165,206,200,277,234,321,246,319,251,275,238,204,205,146,169"/>
+<area shape="rect" id="Node000000" href="$classEBHelmholtzDomainBCFactory.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp." alt="" coords="5,143,227,171"/>
+<area shape="rect" id="Node000001" href="$classEBHelmholtzDirichletDomainBCFactory.html" title="Factory class for passing Dirichlet domain boundary conditions into EBHelmholtzOp." alt="" coords="301,5,512,50"/>
+<area shape="poly" id="edge79_Node000000_Node000001" title=" " alt="" coords="148,132,205,95,274,60,309,49,304,52,276,65,208,100,151,136"/>
+<area shape="rect" id="Node000002" href="$classEBHelmholtzEddingtonSP1DomainBCFactory.html" title="Base class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp." alt="" coords="284,75,530,119"/>
+<area shape="poly" id="edge80_Node000000_Node000002" title=" " alt="" coords="201,137,297,119,293,121,202,142"/>
+<area shape="rect" id="Node000003" href="$classEBHelmholtzLarsenDomainBCFactory.html" title="Class for making Larsen boundary conditions." alt="" coords="275,143,539,171"/>
+<area shape="poly" id="edge81_Node000000_Node000003" title=" " alt="" coords="242,154,277,156,272,158,243,160"/>
+<area shape="rect" id="Node000004" href="$classEBHelmholtzNeumannDomainBCFactory.html" title="Class for passing Neumann boundary domain boundary conditions into EBHelmholtzOp." alt="" coords="297,195,516,239"/>
+<area shape="poly" id="edge82_Node000000_Node000004" title=" " alt="" coords="201,172,299,193,294,195,201,177"/>
+<area shape="rect" id="Node000005" href="$classEBHelmholtzRobinDomainBCFactory.html" title="Base class for making Robin domain boundary conditions with EBHelmholtzOp." alt="" coords="278,263,536,291"/>
+<area shape="poly" id="edge83_Node000000_Node000005" title=" " alt="" coords="149,178,207,215,276,249,312,263,307,262,274,254,204,220,148,183"/>
 </map>

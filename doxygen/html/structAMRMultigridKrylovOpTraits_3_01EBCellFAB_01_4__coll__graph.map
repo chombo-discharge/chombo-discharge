@@ -1,0 +1,5 @@
+<map id="AMRMultigridKrylovOpTraits&lt; EBCellFAB &gt;" name="AMRMultigridKrylovOpTraits&lt; EBCellFAB &gt;">
+<area shape="rect" id="Node000001" title="EBCellFAB specialization. Used for encapsulating EBHelmholtzOp." alt="" coords="24,106,229,151"/>
+<area shape="rect" id="Node000002" href="$structAMRMultigridKrylovOpTraits.html" title="Trait mapping a FAB type to the concrete chombo&#45;discharge Helmholtz operator that owns it." alt="" coords="5,5,248,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,47,129,106,124,104,125,51"/>
+</map>

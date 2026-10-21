@@ -1,11 +1,11 @@
 <map id="Source/Utilities/CD_PolyUtils.H" name="Source/Utilities/CD_PolyUtils.H">
-<area shape="rect" id="Node000001" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="203,5,347,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,135,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,48,114,91,112,86,225,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="159,93,237,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,47,221,85,217,82,255,44"/>
-<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,93,447,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="296,44,334,82,331,85,292,47"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,93,650,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="344,43,507,87,505,92,343,48"/>
+<area shape="rect" id="Node000001" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="202,5,345,50"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,98,134,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,51,117,94,115,89,217,50"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="158,98,235,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="256,49,220,89,218,84,251,51"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="259,98,443,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="295,48,331,87,325,86,293,53"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="467,98,645,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="346,47,499,93,494,94,345,52"/>
 </map>

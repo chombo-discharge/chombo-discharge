@@ -1,21 +1,21 @@
 <map id="CellTagger" name="CellTagger">
-<area shape="rect" id="Node000001" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,141,96,166"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Cell tagger for the advection&#45;diffusion physics module." alt="" coords="174,5,377,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,128,99,90,120,71,143,55,173,41,175,46,145,60,123,75,103,94,71,131"/>
-<area shape="rect" id="Node000003" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="CellTagger implementation for the Brownian walker physics module." alt="" coords="183,69,367,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="98,134,143,119,187,107,188,112,145,124,100,139"/>
-<area shape="rect" id="Node000004" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract CellTagger base class for the CDR plasma physics module." alt="" coords="201,133,350,173"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="110,151,200,151,200,156,110,156"/>
-<area shape="rect" id="Node000007" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html" title="CellTagger for the DischargeInception module." alt="" coords="173,197,377,237"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="100,168,145,183,188,195,187,200,143,188,98,173"/>
-<area shape="rect" id="Node000008" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Abstract CellTagger for the Ito&#45;KMC&#45;Poisson physics module." alt="" coords="144,262,407,287"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="70,176,102,213,123,232,145,247,176,259,173,264,143,252,119,236,99,217,66,179"/>
-<area shape="rect" id="Node000005" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Intermediate CdrPlasmaTagger subclass that computes tracer fields from the electric field only." alt="" coords="473,133,648,173"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="364,151,473,151,473,156,364,156"/>
-<area shape="rect" id="Node000006" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Concrete CdrPlasmaFieldTagger that tags cells based on streamer inception criteria." alt="" coords="734,133,937,173"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="662,151,734,151,734,156,662,156"/>
-<area shape="rect" id="Node000009" href="$classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="455,255,667,295"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="420,272,454,272,454,277,420,277"/>
-<area shape="rect" id="Node000010" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="CellTagger for the ItoKMC module that refines on the ionization coefficient and field curvature." alt="" coords="715,255,956,295"/>
-<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="680,272,714,272,714,277,680,277"/>
+<area shape="rect" id="Node000001" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,152,95,180"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Cell tagger for the advection&#45;diffusion physics module." alt="" coords="173,5,374,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="66,138,98,98,118,77,141,60,174,46,170,50,144,65,122,81,102,101,70,141"/>
+<area shape="rect" id="Node000003" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="CellTagger implementation for the Brownian walker physics module." alt="" coords="182,75,365,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="99,144,142,129,184,118,179,122,143,134,102,149"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract CellTagger base class for the CDR plasma physics module." alt="" coords="199,144,348,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="110,164,200,165,197,168,111,169"/>
+<area shape="rect" id="Node000007" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html" title="CellTagger for the DischargeInception module." alt="" coords="172,213,375,258"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="100,183,143,198,184,212,179,213,142,204,101,189"/>
+<area shape="rect" id="Node000008" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Abstract CellTagger for the Ito&#45;KMC&#45;Poisson physics module." alt="" coords="143,282,404,310"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="69,191,101,232,121,252,144,268,169,281,164,281,141,273,118,256,97,236,67,196"/>
+<area shape="rect" id="Node000005" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Intermediate CdrPlasmaTagger subclass that computes tracer fields from the electric field only." alt="" coords="471,144,644,189"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="363,164,473,166,468,167,364,169"/>
+<area shape="rect" id="Node000006" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Concrete CdrPlasmaFieldTagger that tags cells based on streamer inception criteria." alt="" coords="730,144,933,189"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="659,164,732,166,727,167,660,169"/>
+<area shape="rect" id="Node000009" href="$classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="452,273,663,318"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="419,293,454,296,449,296,420,298"/>
+<area shape="rect" id="Node000010" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="CellTagger for the ItoKMC module that refines on the ionization coefficient and field curvature." alt="" coords="711,273,952,318"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="679,293,713,296,708,296,679,298"/>
 </map>

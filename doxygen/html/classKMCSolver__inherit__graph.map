@@ -1,4 +1,5 @@
 <map id="KMCSolver&lt; R, State, T &gt;" name="KMCSolver&lt; R, State, T &gt;">
-<area shape="rect" id="node1" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="9,5,200,32"/>
-<area shape="rect" id="node2" href="$classKMCSolver.html" title=" " alt="" coords="5,109,204,151"/>
+<area shape="rect" id="Node000001" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="10,5,199,33"/>
+<area shape="rect" id="Node000002" href="$classKMCSolver.html" title=" " alt="" coords="5,128,204,173"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,47,107,129,102,127,102,50"/>
 </map>

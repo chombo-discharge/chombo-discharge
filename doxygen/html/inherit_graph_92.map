@@ -1,7 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,31,101,56"/>
-<area shape="rect" id="Node000001" href="$classEBAddOp.html" title="A Copier class for making copying between BoxLayoutData&lt;EBCellFAB&gt; easier. This increments EBCellFABs..." alt="" coords="155,5,238,31"/>
-<area shape="poly" id="edge101_Node000000_Node000001" title=" " alt="" coords="114,30,155,23,156,28,115,35"/>
-<area shape="rect" id="Node000002" href="$classIrregAddOp.html" title="A Copier class for making copying between LevelData&lt;BaseIVFAB&lt;Real&gt;&gt; easier. This is an incrementatio..." alt="" coords="149,55,244,80"/>
-<area shape="poly" id="edge102_Node000000_Node000002" title=" " alt="" coords="115,51,150,57,149,62,114,56"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,83,85,111"/>
+<area shape="rect" id="Node000001" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="152,5,321,50"/>
+<area shape="poly" id="edge105_Node000000_Node000001" title=" " alt="" coords="94,75,132,60,168,49,163,52,134,65,96,79"/>
+<area shape="rect" id="Node000002" href="$classAMRMultigridKrylovOp.html" title=" " alt="" coords="152,75,321,119"/>
+<area shape="poly" id="edge106_Node000000_Node000002" title=" " alt="" coords="100,94,154,96,149,98,101,100"/>
+<area shape="rect" id="Node000003" href="$classAMRMultigridKrylovOp.html" title="Adapter presenting an already&#45;defined AMRMultiGrid as a LinearOp over the AMR hierarchy." alt="" coords="133,143,340,171"/>
+<area shape="poly" id="edge107_Node000000_Node000003" title=" " alt="" coords="93,114,133,129,173,142,168,143,132,134,93,120"/>
 </map>

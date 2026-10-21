@@ -1,5 +1,5 @@
 <map id="PerlinSdf" name="PerlinSdf">
-<area shape="rect" id="Node000001" title="Class that implements the improved Perlin noise function." alt="" coords="5,79,85,104"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="12,5,79,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="48,44,48,79,43,79,43,44"/>
+<area shape="rect" id="Node000001" title="Class that implements the improved Perlin noise function." alt="" coords="5,81,85,109"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="12,5,78,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="47,47,48,81,42,80,43,51"/>
 </map>

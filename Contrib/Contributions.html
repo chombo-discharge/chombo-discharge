@@ -320,7 +320,7 @@ A more detailed overview of the code structure is given in <a class="reference i
 </pre></div>
 </div>
 <p>Use <code class="docutils literal notranslate"><span class="pre">reuse</span> <span class="pre">annotate</span></code> to apply the header automatically:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>reuse<span class="w"> </span>annotate<span class="w"> </span>--copyright<span class="w"> </span><span class="s2">&quot;2021-2026 SINTEF Energy Research&quot;</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>reuse<span class="w"> </span>annotate<span class="w"> </span>--copyright<span class="w"> </span><span class="s2">"2021-2026 SINTEF Energy Research"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">               </span>--license<span class="w"> </span>GPL-3.0-or-later<span class="w"> </span><span class="se">\</span>
 <span class="w">               </span>--style<span class="w"> </span>c<span class="w"> </span>Source/MyModule/CD_MyClass.H<span class="w"> </span><span class="se">\</span>
 <span class="w">               </span>Source/MyModule/CD_MyClass.cpp
@@ -489,7 +489,7 @@ pull request if you have made changes to RST files.</p>
 <code class="docutils literal notranslate"><span class="pre">else</span></code> on new line after closing brace.</p></li>
 </ul>
 <p>To format all source files in the repository:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>Source<span class="w"> </span>Physics<span class="w"> </span>Geometries<span class="w"> </span>Exec<span class="w"> </span><span class="se">\(</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.H&quot;</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.cpp&quot;</span><span class="w"> </span><span class="se">\)</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>Source<span class="w"> </span>Physics<span class="w"> </span>Geometries<span class="w"> </span>Exec<span class="w"> </span><span class="se">\(</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.H"</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s2">"*.cpp"</span><span class="w"> </span><span class="se">\)</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-exec<span class="w"> </span>clang-format<span class="w"> </span>-i<span class="w"> </span><span class="o">{}</span><span class="w"> </span>+
 </pre></div>
 </div>
@@ -590,7 +590,7 @@ RST files for <code class="docutils literal notranslate"><span class="pre">..</s
 <p>Example output when a changed file is included in the docs:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Found literalincludes referencing changed files:
 
-Docs/Sphinx/source/Base/MyPage.rst:42 -&gt; includes &#39;../../Source/MyModule/CD_MyClass.H&#39;
+Docs/Sphinx/source/Base/MyPage.rst:42 -&gt; includes '../../Source/MyModule/CD_MyClass.H'
 </pre></div>
 </div>
 <p>The hook <strong>always passes</strong> — it never blocks a commit.  Its purpose is to remind you to
@@ -627,7 +627,7 @@ Add or update Sphinx documentation and Doxygen comments as appropriate.</p></li>
 </div>
 <p>Fix any reported issues, then stage and commit:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>Source/MyModule/CD_MyClass.H<span class="w"> </span>Source/MyModule/CD_MyClass.cpp
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add MyClass for ...&quot;</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Add MyClass for ..."</span>
 </pre></div>
 </div>
 </li>

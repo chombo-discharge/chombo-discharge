@@ -1,11 +1,14 @@
 <map id="Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;" name="Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;">
-<area shape="rect" id="Node000001" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="440,41,679,81"/>
-<area shape="rect" id="Node000004" href="$classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundEvaluator.html" title="Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time ..." alt="" coords="915,5,1173,45"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="693,49,914,32,915,38,693,54"/>
-<area shape="rect" id="Node000005" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title=" " alt="" coords="925,70,1163,125"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="685,81,703,83,817,91,924,94,924,100,816,96,702,88,684,86"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito&#45;KMC&#45;Poisson system of equations." alt="" coords="160,41,391,81"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="404,59,440,59,440,64,404,64"/>
-<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,49,111,74"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="124,59,160,59,160,64,124,64"/>
+<area shape="rect" id="Node000001" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="920,30,1158,75"/>
+<area shape="rect" id="Node000005" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title=" " alt="" coords="1409,22,1648,84"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="1174,50,1412,53,1406,53,1174,55"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="640,22,871,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,50,922,53,917,53,886,55"/>
+<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,35,110,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,40,134,39,375,28,481,28,616,34,643,38,637,38,616,39,481,33,375,33,134,45,126,45"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito&#45;KMC&#45;Poisson system of equations." alt="" coords="159,60,389,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="125,56,161,64,156,65,125,62"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,87,508,88,616,81,637,81,642,80,617,87,509,93,405,93"/>
+<area shape="rect" id="Node000006" href="$classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundEvaluator.html" title="Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time ..." alt="" coords="1697,30,1954,75"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="1663,50,1699,53,1694,53,1663,55"/>
 </map>

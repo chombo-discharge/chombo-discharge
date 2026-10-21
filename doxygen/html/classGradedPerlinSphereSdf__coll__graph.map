@@ -1,7 +1,7 @@
 <map id="GradedPerlinSphereSdf" name="GradedPerlinSphereSdf">
-<area shape="rect" id="Node000001" title="GradedPerlinSphereSdf function." alt="" coords="5,152,177,177"/>
-<area shape="rect" id="Node000002" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="29,79,154,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,118,94,152,89,152,89,118"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="58,5,125,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="94,44,94,79,89,79,89,44"/>
+<area shape="rect" id="Node000001" title="GradedPerlinSphereSdf function." alt="" coords="5,157,177,184"/>
+<area shape="rect" id="Node000002" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="29,81,153,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,123,93,157,89,155,89,126"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="58,5,124,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,46,94,81,88,80,90,51"/>
 </map>

@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classLookupTable1D.html" title=" " alt="" coords="5,5,200,31"/>
+<area shape="rect" id="Node000000" href="$classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code." alt="" coords="5,14,165,42"/>
+<area shape="rect" id="Node000001" href="$classMFHelmholtzSaturationChargeJumpBC.html" title="Class for computing matching the saturation charge boundary condition in an MFHelmholtzOp context." alt="" coords="213,5,434,50"/>
+<area shape="poly" id="edge116_Node000000_Node000001" title=" " alt="" coords="180,25,215,27,210,28,180,30"/>
 </map>

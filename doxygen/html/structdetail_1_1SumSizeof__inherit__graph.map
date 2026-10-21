@@ -1,0 +1,5 @@
+<map id="detail::SumSizeof&lt; Tuple &gt;" name="detail::SumSizeof&lt; Tuple &gt;">
+<area shape="rect" id="Node000001" title="Primary template for the compile&#45;time sum of sizeof() over a value tuple." alt="" coords="10,5,157,50"/>
+<area shape="rect" id="Node000002" href="$structdetail_1_1SumSizeof_3_01std_1_1tuple_3_01Ts_8_8_8_01_4_01_4.html" title="Specialization computing the compile&#45;time sum of sizeof() over a value tuple." alt="" coords="5,123,162,168"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,64,86,123,81,122,81,68"/>
+</map>

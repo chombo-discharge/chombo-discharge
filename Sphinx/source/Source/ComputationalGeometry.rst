@@ -21,7 +21,7 @@ Making a non-empty ``ComputationalGeometry`` class requires that you inherit fro
 .. literalinclude:: ../../../../Source/Geometry/CD_ComputationalGeometry.H
    :language: c++
    :caption: Data members of the ``ComputationalGeometry`` base class that describe the geometry. Highlighted members must be instantiated by the user in order to create a new geometry.
-   :lines: 374-442
+   :lines: 375-443
    :emphasize-lines: 49, 54, 69
    :dedent: 2
 

@@ -1,30 +1,38 @@
 <map id="Source/Geometry/CD_PolyhedralEBUtils.H" name="Source/Geometry/CD_PolyhedralEBUtils.H">
-<area shape="rect" id="Node000001" title="Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from." alt="" coords="312,5,470,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="23,167,116,192"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="328,48,267,69,204,96,146,129,97,161,94,157,143,124,202,91,265,64,326,43"/>
-<area shape="rect" id="Node000003" href="$CD__CutCellSurface_8H.html" title="Declaration of the data a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="216,93,374,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="369,48,321,87,318,82,366,43"/>
-<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="61,240,246,265"/>
-<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="312,32,235,42,151,65,110,83,73,105,40,134,13,168,9,180,9,189,22,208,48,222,81,234,79,239,46,227,19,212,4,191,3,179,9,165,36,130,69,101,108,78,149,60,234,37,311,26"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="379,240,558,265"/>
-<area shape="poly" id="edge12_Node000001_Node000005" title=" " alt="" coords="401,45,444,166,463,226,458,227,439,168,396,47"/>
-<area shape="rect" id="Node000008" href="$CD__PolyhedralEBUtilsImplem_8H.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="525,93,753,119"/>
-<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="443,43,584,87,582,92,442,48"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="260,121,120,165,118,160,258,116"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="256,121,216,140,197,153,181,168,166,197,158,227,153,225,161,195,177,165,194,149,213,135,254,116"/>
-<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="329,116,371,136,413,165,439,195,459,226,454,229,435,198,409,169,368,141,326,121"/>
-<area shape="rect" id="Node000006" href="$CD__CutCellSurfaceImplem_8H.html" title="Implementation of CD_CutCellSurface.H." alt="" coords="191,167,399,192"/>
-<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="291,119,289,153,284,153,285,119"/>
-<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="299,166,301,132,306,133,304,167"/>
-<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="273,194,190,236,188,231,271,190"/>
-<area shape="poly" id="edge10_Node000006_Node000005" title=" " alt="" coords="324,190,428,232,426,237,322,194"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="271,240,338,265"/>
-<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="299,192,304,226,298,227,294,193"/>
-<area shape="poly" id="edge16_Node000008_Node000001" title=" " alt="" coords="608,96,470,52,472,47,610,91"/>
-<area shape="poly" id="edge17_Node000008_Node000004" title=" " alt="" coords="613,121,524,156,412,195,316,220,227,240,226,235,314,215,410,189,522,151,611,116"/>
-<area shape="poly" id="edge18_Node000008_Node000005" title=" " alt="" coords="631,121,600,155,558,194,501,235,498,230,555,190,596,151,627,117"/>
-<area shape="rect" id="Node000009" title=" " alt="" coords="626,167,689,192"/>
-<area shape="poly" id="edge14_Node000008_Node000009" title=" " alt="" coords="645,118,654,153,649,154,639,120"/>
-<area shape="rect" id="Node000010" title=" " alt="" coords="713,167,816,192"/>
-<area shape="poly" id="edge15_Node000008_Node000010" title=" " alt="" coords="660,116,733,157,731,162,658,121"/>
+<area shape="rect" id="Node000001" title="Declaration of the cell topology and polygon geometry the polyhedral cut cells are built from." alt="" coords="370,5,528,50"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,98,95,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="368,47,111,100,109,95,370,42"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="119,98,197,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="370,52,213,98,211,93,373,49"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="221,98,282,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="394,52,297,95,294,90,399,49"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="306,98,386,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="424,49,376,90,373,86,419,52"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="428,174,520,201"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="454,48,472,159,467,157,450,52"/>
+<area shape="rect" id="Node000007" href="$CD__CutCellSurface_8H.html" title="Declaration of the data a cut cell&#39;s embedded boundary is reconstructed from." alt="" coords="566,98,723,126"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="501,48,602,91,597,92,500,53"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="466,249,650,277"/>
+<area shape="poly" id="edge15_Node000001_Node000008" title=" " alt="" coords="437,49,422,83,409,122,405,163,409,182,418,200,442,224,475,244,469,243,439,229,413,203,404,184,400,163,404,121,417,81,433,52"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="782,249,960,277"/>
+<area shape="poly" id="edge16_Node000001_Node000009" title=" " alt="" coords="528,38,630,59,684,75,736,96,799,125,823,143,848,172,863,202,870,235,866,232,858,204,844,175,820,147,797,129,734,100,682,80,628,64,529,43"/>
+<area shape="rect" id="Node000012" href="$CD__PolyhedralEBUtilsImplem_8H.html" title="Implementation of CD_PolyhedralEBUtils.H." alt="" coords="928,98,1156,126"/>
+<area shape="poly" id="edge17_Node000001_Node000012" title=" " alt="" coords="528,38,927,94,922,97,528,44"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="617,125,519,170,517,165,612,127"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="630,125,606,149,586,175,572,205,564,236,560,232,567,203,581,172,602,145,625,127"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="713,124,766,142,793,155,817,172,844,202,863,236,858,234,840,205,814,176,790,160,764,147,712,129"/>
+<area shape="rect" id="Node000010" href="$CD__CutCellSurfaceImplem_8H.html" title="Implementation of CD_CutCellSurface.H." alt="" coords="596,174,803,201"/>
+<area shape="poly" id="edge10_Node000007_Node000010" title=" " alt="" coords="648,124,675,163,670,161,646,129"/>
+<area shape="poly" id="edge12_Node000010_Node000007" title=" " alt="" coords="694,172,670,140,673,135,699,174"/>
+<area shape="poly" id="edge13_Node000010_Node000008" title=" " alt="" coords="677,201,598,244,596,239,671,203"/>
+<area shape="poly" id="edge14_Node000010_Node000009" title=" " alt="" coords="731,199,829,243,824,243,730,204"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="675,249,740,277"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="703,200,706,235,702,232,699,204"/>
+<area shape="poly" id="edge20_Node000012_Node000001" title=" " alt="" coords="951,99,543,44,543,38,955,96"/>
+<area shape="poly" id="edge21_Node000012_Node000008" title=" " alt="" coords="1015,126,926,165,816,204,726,229,640,248,640,243,724,224,815,199,924,160,1010,127"/>
+<area shape="poly" id="edge22_Node000012_Node000009" title=" " alt="" coords="1034,125,1003,163,962,203,907,243,905,238,959,199,999,160,1029,127"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="1030,174,1092,201"/>
+<area shape="poly" id="edge18_Node000012_Node000013" title=" " alt="" coords="1047,124,1056,160,1051,157,1044,128"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1115,174,1217,201"/>
+<area shape="poly" id="edge19_Node000012_Node000014" title=" " alt="" coords="1065,124,1133,166,1128,165,1064,129"/>
 </map>

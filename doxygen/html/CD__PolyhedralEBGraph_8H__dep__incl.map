@@ -1,14 +1,14 @@
 <map id="Source/Geometry/CD_PolyhedralEBGraph.H" name="Source/Geometry/CD_PolyhedralEBGraph.H">
-<area shape="rect" id="Node000001" title="Declaration of the cut&#45;cell connectivity of one level of the polyhedral geometry." alt="" coords="169,5,337,45"/>
-<area shape="rect" id="Node000002" href="$CD__AMRPolyhedralEBGraph_8cpp.html" title="Implementation of CD_AMRPolyhedralEBGraph.H." alt="" coords="5,93,216,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,55,143,96,141,91,209,50"/>
-<area shape="rect" id="Node000003" href="$CD__PolyhedralEBGraph_8cpp.html" title="Implementation of CD_PolyhedralEBGraph.H." alt="" coords="143,181,324,221"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,59,238,181,233,181,247,59"/>
-<area shape="rect" id="Node000004" href="$CD__PolyhedralGeometryShop_8H.html" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="331,93,541,133"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="307,49,397,91,395,96,305,54"/>
-<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="380,141,279,184,277,179,378,136"/>
-<area shape="rect" id="Node000005" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="349,181,563,221"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="446,146,454,181,449,182,441,148"/>
-<area shape="rect" id="Node000006" href="$CD__PolyhedralGeometryShop_8cpp.html" title="Implementation of CD_PolyhedralGeometryShop.H." alt="" coords="587,181,810,221"/>
-<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="507,135,642,179,640,184,506,140"/>
+<area shape="rect" id="Node000001" title="Declaration of the cut&#45;cell connectivity of one level of the polyhedral geometry." alt="" coords="100,5,268,50"/>
+<area shape="rect" id="Node000002" href="$CD__AMRPolyhedralEBGraph_8cpp.html" title="Implementation of CD_AMRPolyhedralEBGraph.H." alt="" coords="5,191,216,235"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,60,100,78,84,99,78,122,80,146,88,169,99,190,93,190,83,171,75,147,72,121,79,97,96,74,121,56"/>
+<area shape="rect" id="Node000003" href="$CD__PolyhedralEBGraph_8cpp.html" title="Implementation of CD_PolyhedralEBGraph.H." alt="" coords="94,98,274,143"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,63,186,99,181,97,183,68"/>
+<area shape="rect" id="Node000004" href="$CD__PolyhedralGeometryShop_8H.html" title="Declaration of a geometry generator whose moments are integrals of a stored surface." alt="" coords="298,98,507,143"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,54,353,97,348,98,250,59"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="321,147,181,193,180,188,315,148"/>
+<area shape="rect" id="Node000005" href="$CD__ComputationalGeometry_8cpp.html" title="Implementation of CD_ComputationalGeometry.H." alt="" coords="267,191,482,235"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="393,156,383,192,379,189,389,159"/>
+<area shape="rect" id="Node000006" href="$CD__PolyhedralGeometryShop_8cpp.html" title="Implementation of CD_PolyhedralGeometryShop.H." alt="" coords="505,191,726,235"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="468,146,567,190,562,190,467,152"/>
 </map>
