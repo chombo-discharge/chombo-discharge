@@ -161,9 +161,14 @@ PetscHelmholtzOp::checkSupported() const noexcept
     const EBLevelGrid& eblg  = mflg[0]->getEBLevelGrid(iphase);
     const EBISLayout&  ebisl = eblg.getEBISL();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const Box&     box     = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const DataIterator& dit  = dbl.dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(max : hasEB)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box&       box     = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
 
       const bool isSupported = (iphase == 0) ? ebisbox.isAllRegular() : ebisbox.isCovered(box);
 
@@ -278,8 +283,12 @@ PetscHelmholtzOp::fillMatrix() noexcept
     PetscCallVoid(MatZeroEntries(m_matrix));
   }
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const DataIndex&             din             = dit();
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex&             din             = dit[mybox];
     const Box                    box             = dbl[din];
     const BaseFab<PetscAMRCell>& cells           = amrToPetsc[din];
     const FArrayBox&             aco             = (*m_aCoef[level])[din].getPhase(phase).getFArrayBox();
@@ -370,7 +379,13 @@ PetscHelmholtzOp::fillMatrix() noexcept
         vals[i] = petscStencil.weight(i);
       }
 
-      PetscCallVoid(MatSetValues(m_matrix, 1, &row, petscStencil.size(), &cols[0], &vals[0], INSERT_VALUES));
+      // MatSetValues is not thread safe. PetscCallAbort, not PetscCallVoid, since a return cannot leave the critical
+      // section.
+#pragma omp critical(PetscHelmholtzOp_MatSetValues)
+      {
+        PetscCallAbort(Chombo_MPI::comm,
+                       MatSetValues(m_matrix, 1, &row, petscStencil.size(), &cols[0], &vals[0], INSERT_VALUES));
+      }
     };
 
     BoxLoops::loop(box, kernel);
@@ -403,8 +418,21 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
 
   const LevelData<BaseFab<PetscAMRCell>>& amrToPetsc = *m_petscGrid->getAMRToPetsc()[level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const DataIndex&             din             = dit();
+  // Write through the local array, which threads can share: every row this adds to is a cell of this rank, and a cell
+  // is only touched by the thread that has its box.
+  PetscInt     rowBegin = -1;
+  PetscInt     rowEnd   = -1;
+  PetscScalar* rhs      = nullptr;
+
+  PetscCallVoid(VecGetOwnershipRange(a_rhs, &rowBegin, &rowEnd));
+  PetscCallVoid(VecGetArray(a_rhs, &rhs));
+
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex&             din             = dit[mybox];
     const Box                    box             = dbl[din];
     const BaseFab<PetscAMRCell>& cells           = amrToPetsc[din];
     const EBISBox&               ebisbox         = eblg.getEBISL()[din];
@@ -435,12 +463,11 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
           const Real data   = m_domainBc->getBoundaryData(phase, level, din, vof, dir, side);
           const Real c      = m_beta * s * this->getBcoef(iv, dir, side, level, din, phase) / dx * weight * data;
 
-          const PetscInt    row = cells(iv).getPetscRow(phase);
-          const PetscScalar val = -c;
+          const PetscInt row = cells(iv).getPetscRow(phase);
 
-          CH_assert(row >= 0);
+          CH_assert(row >= rowBegin && row < rowEnd);
 
-          PetscCallVoid(VecSetValue(a_rhs, row, val, ADD_VALUES));
+          rhs[row - rowBegin] -= c;
         };
 
         BoxLoops::loop(bndryBox, kernel);
@@ -448,8 +475,7 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
     }
   }
 
-  PetscCallVoid(VecAssemblyBegin(a_rhs));
-  PetscCallVoid(VecAssemblyEnd(a_rhs));
+  PetscCallVoid(VecRestoreArray(a_rhs, &rhs));
 }
 
 void

@@ -172,14 +172,19 @@ maxDifference(const AmrMesh&       a_amr,
 
   Real maxDiff = 0.0;
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const FArrayBox& phi = (*a_phi[lvl])[dit()].getPhase(phase::gas).getFArrayBox();
+  const DataIterator& dit  = dbl.dataIterator();
+  const int           nbox = dit.size();
 
-    for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit) {
+#pragma omp parallel for schedule(runtime) reduction(max : maxDiff)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+    const FArrayBox& phi = (*a_phi[lvl])[din].getPhase(phase::gas).getFArrayBox();
+
+    for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
       const IntVect  iv    = bit();
       const RealVect pos   = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
       const Real     other = (a_other == nullptr) ? exactPhi(pos)
-                                                  : (*(*a_other)[lvl])[dit()].getPhase(phase::gas).getFArrayBox()(iv, 0);
+                                                  : (*(*a_other)[lvl])[din].getPhase(phase::gas).getFArrayBox()(iv, 0);
 
       maxDiff = std::max(maxDiff, std::abs(phi(iv, 0) - other));
     }
