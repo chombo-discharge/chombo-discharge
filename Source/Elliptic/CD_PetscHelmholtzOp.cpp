@@ -19,6 +19,7 @@
 
 // Our includes
 #include <CD_PetscHelmholtzOp.H>
+#include <CD_DomainFluxIFFABFactory.H>
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
@@ -80,14 +81,7 @@ PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&              a_petscGri
 
   this->checkSupported();
 
-  // Single level and single phase for now, see checkSupported.
-  constexpr int level = 0;
-  constexpr int phase = 0;
-
-  m_domainBc->define(Location::Cell::Center,
-                     m_petscGrid->getMFLevelGrids()[level]->getEBLevelGrid(phase),
-                     m_probLo,
-                     m_dx[level]);
+  m_domainBc->define(m_petscGrid, m_probLo, m_dx);
 
   this->assembleMatrix();
 
@@ -137,7 +131,8 @@ PetscHelmholtzOp::checkSupported() const noexcept
   int hasEB = 0;
 
   for (int iphase = 0; iphase < m_petscGrid->getNumPhases(); iphase++) {
-    const EBISLayout& ebisl = mflg[0]->getEBLevelGrid(iphase).getEBISL();
+    const EBLevelGrid& eblg  = mflg[0]->getEBLevelGrid(iphase);
+    const EBISLayout&  ebisl = eblg.getEBISL();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
       const Box&     box     = dbl[dit()];
@@ -188,7 +183,9 @@ PetscHelmholtzOp::assembleMatrix() noexcept
 
   const Real dx = m_dx[level];
 
-  const EBLevelGrid&       eblg   = m_petscGrid->getMFLevelGrids()[level]->getEBLevelGrid(phase);
+  const Vector<RefCountedPtr<MFLevelGrid>>& mflg = m_petscGrid->getMFLevelGrids();
+
+  const EBLevelGrid&       eblg   = mflg[level]->getEBLevelGrid(phase);
   const DisjointBoxLayout& dbl    = eblg.getDBL();
   const ProblemDomain&     domain = eblg.getDomain();
 
@@ -217,16 +214,34 @@ PetscHelmholtzOp::assembleMatrix() noexcept
   // Fail loudly if the preallocation is too small, rather than silently reallocating.
   PetscCallVoid(MatSetOption(m_matrix, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE));
 
+  // Storage for the weights of the boundary data on the domain faces.
+  m_boundaryWeights.resize(mflg.size());
+
+  for (int lvl = 0; lvl < mflg.size(); lvl++) {
+    const EBLevelGrid& eblgLvl = mflg[lvl]->getEBLevelGrid(phase);
+
+    m_boundaryWeights[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB>>(
+      new LevelData<DomainFluxIFFAB>(eblgLvl.getDBL(),
+                                     1,
+                                     IntVect::Zero,
+                                     DomainFluxIFFABFactory(eblgLvl.getEBISL(), eblgLvl.getDomain())));
+  }
+
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const DataIndex&             din   = dit();
-    const Box                    box   = dbl[din];
-    const BaseFab<PetscAMRCell>& cells = amrToPetsc[din];
-    const FArrayBox&             aco   = (*m_aCoef[level])[din].getPhase(phase).getFArrayBox();
+    const DataIndex&             din             = dit();
+    const Box                    box             = dbl[din];
+    const BaseFab<PetscAMRCell>& cells           = amrToPetsc[din];
+    const FArrayBox&             aco             = (*m_aCoef[level])[din].getPhase(phase).getFArrayBox();
+    const EBISBox&               ebisbox         = eblg.getEBISL()[din];
+    DomainFluxIFFAB&             boundaryWeights = (*m_boundaryWeights[level])[din];
 
     auto kernel = [&](const IntVect& iv) -> void {
       const VolIndex vof(iv, 0);
 
+      // Stencils over cells on the next coarser level, this level, and the next finer level.
+      VoFStencil stencilCoar;
       VoFStencil stencil;
+      VoFStencil stencilFine;
 
       stencil.add(vof, m_alpha * aco(iv, 0));
 
@@ -245,21 +260,54 @@ PetscHelmholtzOp::assembleMatrix() noexcept
             stencil.add(vof, -factor * s / dx);
           }
           else {
-            const std::pair<VoFStencil, VoFStencil> faceStencil = m_domainBc->getFaceFluxStencil(vof, dir, side, din);
+            VoFStencil bcStencilCoar;
+            VoFStencil bcStencil;
+            VoFStencil bcStencilFine;
 
-            // Single level: the finer-level part must be empty.
-            CH_assert(faceStencil.second.size() == 0);
+            Real bcWeight = 0.0;
 
-            VoFStencil bcStencil = faceStencil.first;
+            m_domainBc->getFaceFluxStencil(bcWeight,
+                                           bcStencilCoar,
+                                           bcStencil,
+                                           bcStencilFine,
+                                           phase,
+                                           level,
+                                           din,
+                                           vof,
+                                           dir,
+                                           side);
+
+            // Without embedded boundaries the cell has exactly one face on the domain side.
+            const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
+
+            CH_assert(faces.size() == 1);
+
+            boundaryWeights(dir, side)(faces[0], 0) = bcWeight;
+
+            bcStencilCoar *= factor;
             bcStencil *= factor;
+            bcStencilFine *= factor;
 
+            stencilCoar += bcStencilCoar;
             stencil += bcStencil;
+            stencilFine += bcStencilFine;
           }
         }
       }
 
-      const PetscStencil petscStencil = m_petscGrid->getPetscStencil(stencil, level, din, phase);
-      const PetscInt     row          = cells(iv).getPetscRow(phase);
+      PetscStencil petscStencil = m_petscGrid->getPetscStencil(stencil, level, din, phase);
+
+      if (stencilCoar.size() > 0) {
+        petscStencil += m_petscGrid->getPetscStencilWithCoarserLevel(VoFStencil(), stencilCoar, level, din, phase);
+      }
+
+      if (stencilFine.size() > 0) {
+        petscStencil += m_petscGrid->getPetscStencilWithFinerLevel(VoFStencil(), stencilFine, level, din, phase);
+      }
+
+      petscStencil.compress();
+
+      const PetscInt row = cells(iv).getPetscRow(phase);
 
       CH_assert(row >= 0);
 
@@ -296,16 +344,20 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
 
   const Real dx = m_dx[level];
 
-  const EBLevelGrid&       eblg   = m_petscGrid->getMFLevelGrids()[level]->getEBLevelGrid(phase);
+  const Vector<RefCountedPtr<MFLevelGrid>>& mflg = m_petscGrid->getMFLevelGrids();
+
+  const EBLevelGrid&       eblg   = mflg[level]->getEBLevelGrid(phase);
   const DisjointBoxLayout& dbl    = eblg.getDBL();
   const ProblemDomain&     domain = eblg.getDomain();
 
   const LevelData<BaseFab<PetscAMRCell>>& amrToPetsc = *m_petscGrid->getAMRToPetsc()[level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const DataIndex&             din   = dit();
-    const Box                    box   = dbl[din];
-    const BaseFab<PetscAMRCell>& cells = amrToPetsc[din];
+    const DataIndex&             din             = dit();
+    const Box                    box             = dbl[din];
+    const BaseFab<PetscAMRCell>& cells           = amrToPetsc[din];
+    const EBISBox&               ebisbox         = eblg.getEBISL()[din];
+    const DomainFluxIFFAB&       boundaryWeights = (*m_boundaryWeights[level])[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       for (SideIterator sit; sit.ok(); ++sit) {
@@ -323,11 +375,17 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
         bndryBox.shift(dir, -sign(side));
 
         auto kernel = [&](const IntVect& iv) -> void {
-          const VolIndex vof(iv, 0);
-          const Real     g = m_beta * s * this->getBcoef(iv, dir, side, level, din, phase) / dx *
-                         m_domainBc->getFaceFluxConstant(vof, dir, side, din);
+          const VolIndex          vof(iv, 0);
+          const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
+
+          CH_assert(faces.size() == 1);
+
+          const Real weight = boundaryWeights(dir, side)(faces[0], 0);
+          const Real data   = m_domainBc->getBoundaryData(phase, level, din, vof, dir, side);
+          const Real c      = m_beta * s * this->getBcoef(iv, dir, side, level, din, phase) / dx * weight * data;
+
           const PetscInt    row = cells(iv).getPetscRow(phase);
-          const PetscScalar val = -g;
+          const PetscScalar val = -c;
 
           CH_assert(row >= 0);
 

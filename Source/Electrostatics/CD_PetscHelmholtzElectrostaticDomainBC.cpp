@@ -68,38 +68,55 @@ PetscHelmholtzElectrostaticDomainBC::~PetscHelmholtzElectrostaticDomainBC()
 }
 
 void
-PetscHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
-                                            const EBLevelGrid&   a_eblg,
-                                            const RealVect&      a_probLo,
-                                            const Real           a_dx)
+PetscHelmholtzElectrostaticDomainBC::define(const RefCountedPtr<PetscGrid>& a_petscGrid,
+                                            const RealVect&                 a_probLo,
+                                            const Vector<Real>&             a_dx)
 {
   CH_TIME("PetscHelmholtzElectrostaticDomainBC::define");
 
-  PetscHelmholtzDomainBC::define(a_dataLocation, a_eblg, a_probLo, a_dx);
+  PetscHelmholtzDomainBC::define(a_petscGrid, a_probLo, a_dx);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
-      m_bcObjects.at(std::make_pair(dir, sit()))->define(a_dataLocation, a_eblg, a_probLo, a_dx);
+      m_bcObjects.at(std::make_pair(dir, sit()))->define(a_petscGrid, a_probLo, a_dx);
     }
   }
 }
 
-std::pair<VoFStencil, VoFStencil>
-PetscHelmholtzElectrostaticDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
+void
+PetscHelmholtzElectrostaticDomainBC::getFaceFluxStencil(Real&                a_boundaryWeight,
+                                                        VoFStencil&          a_stencilCoar,
+                                                        VoFStencil&          a_stencil,
+                                                        VoFStencil&          a_stencilFine,
+                                                        const int            a_phase,
+                                                        const int            a_level,
+                                                        const DataIndex&     a_din,
+                                                        const VolIndex&      a_vof,
                                                         const int            a_dir,
-                                                        const Side::LoHiSide a_side,
-                                                        const DataIndex&     a_din) const
+                                                        const Side::LoHiSide a_side) const
 {
-  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getFaceFluxStencil(a_vof, a_dir, a_side, a_din);
+  m_bcObjects.at(std::make_pair(a_dir, a_side))
+    ->getFaceFluxStencil(a_boundaryWeight,
+                         a_stencilCoar,
+                         a_stencil,
+                         a_stencilFine,
+                         a_phase,
+                         a_level,
+                         a_din,
+                         a_vof,
+                         a_dir,
+                         a_side);
 }
 
 Real
-PetscHelmholtzElectrostaticDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
-                                                         const int            a_dir,
-                                                         const Side::LoHiSide a_side,
-                                                         const DataIndex&     a_din) const
+PetscHelmholtzElectrostaticDomainBC::getBoundaryData(const int            a_phase,
+                                                     const int            a_level,
+                                                     const DataIndex&     a_din,
+                                                     const VolIndex&      a_vof,
+                                                     const int            a_dir,
+                                                     const Side::LoHiSide a_side) const
 {
-  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getFaceFluxConstant(a_vof, a_dir, a_side, a_din);
+  return m_bcObjects.at(std::make_pair(a_dir, a_side))->getBoundaryData(a_phase, a_level, a_din, a_vof, a_dir, a_side);
 }
 
 #include <CD_NamespaceFooter.H>

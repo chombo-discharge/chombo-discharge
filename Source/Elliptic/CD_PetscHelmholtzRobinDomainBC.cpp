@@ -60,7 +60,10 @@ void
 PetscHelmholtzRobinDomainBC::getCoefficients(Real&                a_A,
                                              Real&                a_B,
                                              Real&                a_C,
-                                             const IntVect&       a_iv,
+                                             const int            a_phase,
+                                             const int            a_level,
+                                             const DataIndex&     a_din,
+                                             const VolIndex&      a_vof,
                                              const int            a_dir,
                                              const Side::LoHiSide a_side) const
 {
@@ -70,7 +73,7 @@ PetscHelmholtzRobinDomainBC::getCoefficients(Real&                a_A,
     a_C = m_constantC;
   }
   else if (m_useFunction) {
-    const RealVect pos = this->getBoundaryPosition(a_iv, a_dir, a_side);
+    const RealVect pos = this->getBoundaryPosition(a_phase, a_level, a_din, a_vof, a_dir, a_side);
 
     a_A = m_functionA(pos);
     a_B = m_functionB(pos);
@@ -81,11 +84,17 @@ PetscHelmholtzRobinDomainBC::getCoefficients(Real&                a_A,
   }
 }
 
-std::pair<VoFStencil, VoFStencil>
-PetscHelmholtzRobinDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
+void
+PetscHelmholtzRobinDomainBC::getFaceFluxStencil(Real&                a_boundaryWeight,
+                                                VoFStencil&          a_stencilCoar,
+                                                VoFStencil&          a_stencil,
+                                                VoFStencil&          a_stencilFine,
+                                                const int            a_phase,
+                                                const int            a_level,
+                                                const DataIndex&     a_din,
+                                                const VolIndex&      a_vof,
                                                 const int            a_dir,
-                                                const Side::LoHiSide a_side,
-                                                const DataIndex&     a_din) const
+                                                const Side::LoHiSide a_side) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
@@ -94,32 +103,47 @@ PetscHelmholtzRobinDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
   Real B;
   Real C;
 
-  this->getCoefficients(A, B, C, a_vof.gridIndex(), a_dir, a_side);
+  this->getCoefficients(A, B, C, a_phase, a_level, a_din, a_vof, a_dir, a_side);
 
-  const Real    factor  = sign(a_side) * A / B;
-  const IntVect ivNear  = a_vof.gridIndex() - sign(a_side) * BASISV(a_dir);
-  const bool    hasNear = m_eblg.getDomain().contains(ivNear) && !m_eblg.getEBISL()[a_din].isCovered(ivNear);
+  const Vector<RefCountedPtr<MFLevelGrid>>& mflg    = m_petscGrid->getMFLevelGrids();
+  const EBLevelGrid&                        eblg    = mflg[a_level]->getEBLevelGrid(a_phase);
+  const EBISLayout&                         ebisl   = eblg.getEBISL();
+  const EBISBox&                            ebisbox = ebisl[a_din];
+  const BaseFab<PetscAMRCell>&              cells   = (*m_petscGrid->getAMRToPetsc()[a_level])[a_din];
 
-  // phi on the face is extrapolated linearly from the cell and its interior neighbor, or set to the cell value if
-  // there is no neighbor.
-  VoFStencil stencil;
+  const Real    factor = sign(a_side) * A / B;
+  const IntVect ivNear = a_vof.gridIndex() - sign(a_side) * BASISV(a_dir);
 
+  // The interior neighbor must be a cell on this level: inside the domain, not covered by the EB, and not covered by a
+  // finer grid.
+  const bool hasNear = eblg.getDomain().contains(ivNear) && !ebisbox.isCovered(ivNear) &&
+                       !cells(ivNear).isCoveredByFinerGrid();
+
+  a_stencilCoar.clear();
+  a_stencil.clear();
+  a_stencilFine.clear();
+
+  // phi on the face is extrapolated linearly from the cell and its interior neighbor. Without the neighbor, the
+  // extrapolation needs a least-squares reconstruction over the valid cells on this level and the next finer level.
   if (hasNear) {
-    stencil.add(a_vof, 1.5 * factor);
-    stencil.add(VolIndex(ivNear, 0), -0.5 * factor);
+    a_stencil.add(a_vof, 1.5 * factor);
+    a_stencil.add(VolIndex(ivNear, 0), -0.5 * factor);
   }
   else {
-    stencil.add(a_vof, factor);
+    MayDay::Abort("PetscHelmholtzRobinDomainBC::getFaceFluxStencil -- interior neighbor is not a cell on this level, "
+                  "and the least-squares reconstruction is not implemented");
   }
 
-  return std::make_pair(stencil, VoFStencil());
+  a_boundaryWeight = 1.0 / B;
 }
 
 Real
-PetscHelmholtzRobinDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
-                                                 const int            a_dir,
-                                                 const Side::LoHiSide a_side,
-                                                 const DataIndex& /*a_din*/) const
+PetscHelmholtzRobinDomainBC::getBoundaryData(const int            a_phase,
+                                             const int            a_level,
+                                             const DataIndex&     a_din,
+                                             const VolIndex&      a_vof,
+                                             const int            a_dir,
+                                             const Side::LoHiSide a_side) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
@@ -128,9 +152,9 @@ PetscHelmholtzRobinDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
   Real B;
   Real C;
 
-  this->getCoefficients(A, B, C, a_vof.gridIndex(), a_dir, a_side);
+  this->getCoefficients(A, B, C, a_phase, a_level, a_din, a_vof, a_dir, a_side);
 
-  return C / B;
+  return C;
 }
 
 #include <CD_NamespaceFooter.H>

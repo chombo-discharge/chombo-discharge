@@ -105,7 +105,7 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
-  // Right-hand side rho/eps0, with the constant part of the domain boundary fluxes moved into it. There are no
+  // Right-hand side rho/eps0, with the boundary data part of the domain boundary fluxes moved into it. There are no
   // embedded boundaries yet, so the surface charge does not enter.
   MFAMRCellData rhoByEps0;
   m_amr->allocate(rhoByEps0, m_realm, m_nComp);

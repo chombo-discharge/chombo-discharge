@@ -32,11 +32,43 @@
  * @brief Helmholtz operator alpha*a*phi + beta*div(b*grad(phi)), assembled as a PETSc matrix over the rows of a
  * PetscGrid.
  * @details Unlike EBHelmholtzOp, which applies the operator to data, this class assembles the operator once as a matrix
- * so that it can be solved with PETSc. The domain boundary conditions enter through PetscHelmholtzDomainBC: the
- * phi-dependent part of the boundary flux goes into the matrix and the constant part into the right-hand side, see
- * addBoundaryConditionsToRHS.
+ * so that it can be solved with PETSc. The domain boundary conditions enter through PetscHelmholtzDomainBC, which gives
+ * the flux through a domain face as w_B * g + sum_i w_i * phi_i with g the boundary data. The w_i go into the matrix.
+ * The w_B are kept per domain face when the matrix is assembled, and w_B * g goes into the right-hand side, see
+ * addBoundaryConditionsToRHS. The boundary data can thus change without the matrix being reassembled.
  *
  * Supported so far: a single level, no embedded boundaries, no periodic directions. Anything else aborts.
+ *
+ * The operator is assembled finite-volume style: the row of a cell is alpha*a*phi plus beta/dx times the sum, over the
+ * faces of the cell, of the face area fraction times b times the face flux, where each face flux is a stencil over
+ * PETSc rows. Cells covered by a finer level have no row. Multilevel assembly is not implemented yet; it follows this
+ * scheme:
+ *
+ * - Face between two valid cells on the same level: the two-point flux, as on a single level.
+ * - Domain face: the stencil and constant from PetscHelmholtzDomainBC. The stencil has parts on the next coarser
+ *   level, this level, and the next finer level. The part on this level may contain coarse-fine ghost cells, which
+ *   are replaced as on the fine side of a refinement boundary below. Any other entry that is not a PETSc row, e.g. a
+ *   cell covered by a finer grid, aborts, as do entries outside the ghost cells of the PetscGrid maps.
+ * - Fine side of a refinement boundary: the two-point flux between the fine cell and the ghost cell across the face.
+ *   The ghost cell is not a PETSc row, so it is replaced by its interpolation stencil from
+ *   EBMultigridInterpolator::getGhostStencil, which is over cells on the fine level and the next coarser level, and
+ *   mapped with PetscGrid::getPetscStencilWithCoarserLevel.
+ * - Coarse side of a refinement boundary: the flux through the coarse face is the area-weighted average of the fine
+ *   face fluxes that cover it, using the same fine-face stencils as the fine rows. The coarse and fine rows thus see
+ *   the same flux through the interface, which makes the composite operator conservative.
+ *
+ * The coefficients alpha, beta, a and b are multiplied into the matrix entries at assembly, so changing any of them
+ * means refilling the matrix (beta alone could be applied with MatScale). Refilling is not implemented yet; it follows
+ * this plan:
+ *
+ * - Refill the existing matrix: MatZeroEntries and the same assembly, which keeps the preallocation and the sparsity
+ *   pattern. Every stencil is recomputed, so the result is the same as a fresh assembly. The AMG preconditioner keeps
+ *   its interpolation (PCGAMGSetReuseInterpolation) and only recomputes its coarse operators.
+ * - If recomputing the stencils dominates, store the face flux stencils without beta and b, one per face, for the faces
+ *   whose stencils are expensive: EB faces, domain faces, and the fine faces on refinement boundaries (with the ghost
+ *   cells already replaced). The coarse side of a refinement boundary reuses the stencils of the fine faces that
+ *   cover it, each multiplied by its own fine-face b. Regular faces between valid cells on one level are two-point
+ *   differences and are recomputed.
  */
 class PetscHelmholtzOp
 {
@@ -109,9 +141,10 @@ public:
   getMatrix() const noexcept;
 
   /**
-   * @brief Move the constant part of the domain boundary fluxes into a right-hand side.
-   * @details The operator is A*phi + g, where A is the matrix and g holds the constant parts of the boundary fluxes.
-   * Solving A*phi + g = rhs is the same as solving A*phi = rhs - g, so this subtracts g from a_rhs.
+   * @brief Move the boundary data part of the domain boundary fluxes into a right-hand side.
+   * @details The operator is A*phi + c, where A is the matrix and c holds the w_B * g parts of the boundary fluxes,
+   * scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this
+   * subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly.
    * @param[in,out] a_rhs Right-hand side, on the rows of the PETSc grid
    */
   virtual void
@@ -172,6 +205,13 @@ protected:
    * @brief The assembled matrix.
    */
   Mat m_matrix;
+
+  /**
+   * @brief Weight w_B of the boundary data in the flux through each domain face.
+   * @details From PetscHelmholtzDomainBC::getFaceFluxStencil, filled when the matrix is assembled. Defined on the phase
+   * that is assembled.
+   */
+  EBAMRIFData m_boundaryWeights;
 
   /**
    * @brief Abort unless the grids are supported by this operator: one level, no embedded boundaries.

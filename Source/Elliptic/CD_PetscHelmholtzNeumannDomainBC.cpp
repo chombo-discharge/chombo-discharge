@@ -64,23 +64,36 @@ PetscHelmholtzNeumannDomainBC::setDphiDn(const std::function<Real(const RealVect
   m_functionDphiDn = a_DphiDn;
 }
 
-std::pair<VoFStencil, VoFStencil>
-PetscHelmholtzNeumannDomainBC::getFaceFluxStencil(const VolIndex& /*a_vof*/,
-                                                  const int a_dir,
-                                                  const Side::LoHiSide /*a_side*/,
-                                                  const DataIndex& /*a_din*/) const
+void
+PetscHelmholtzNeumannDomainBC::getFaceFluxStencil(Real&       a_boundaryWeight,
+                                                  VoFStencil& a_stencilCoar,
+                                                  VoFStencil& a_stencil,
+                                                  VoFStencil& a_stencilFine,
+                                                  const int /*a_phase*/,
+                                                  const int /*a_level*/,
+                                                  const DataIndex& /*a_din*/,
+                                                  const VolIndex& /*a_vof*/,
+                                                  const int            a_dir,
+                                                  const Side::LoHiSide a_side) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
 
-  return std::make_pair(VoFStencil(), VoFStencil());
+  a_stencilCoar.clear();
+  a_stencil.clear();
+  a_stencilFine.clear();
+
+  // A positive dphi/dn is a flux into the domain, as in EBHelmholtzNeumannDomainBC.
+  a_boundaryWeight = -sign(a_side);
 }
 
 Real
-PetscHelmholtzNeumannDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
-                                                   const int            a_dir,
-                                                   const Side::LoHiSide a_side,
-                                                   const DataIndex& /*a_din*/) const
+PetscHelmholtzNeumannDomainBC::getBoundaryData(const int            a_phase,
+                                               const int            a_level,
+                                               const DataIndex&     a_din,
+                                               const VolIndex&      a_vof,
+                                               const int            a_dir,
+                                               const Side::LoHiSide a_side) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
@@ -91,14 +104,13 @@ PetscHelmholtzNeumannDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
     DphiDn = m_constantDphiDn;
   }
   else if (m_useFunction) {
-    DphiDn = m_functionDphiDn(this->getBoundaryPosition(a_vof.gridIndex(), a_dir, a_side));
+    DphiDn = m_functionDphiDn(this->getBoundaryPosition(a_phase, a_level, a_din, a_vof, a_dir, a_side));
   }
   else {
-    MayDay::Abort("PetscHelmholtzNeumannDomainBC::getFaceFluxConstant -- dphi/dn not set");
+    MayDay::Abort("PetscHelmholtzNeumannDomainBC::getBoundaryData -- dphi/dn not set");
   }
 
-  // A positive dphi/dn is a flux into the domain, as in EBHelmholtzNeumannDomainBC.
-  return -sign(a_side) * DphiDn;
+  return DphiDn;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -65,27 +65,38 @@ PetscHelmholtzDirichletDomainBC::setValue(const std::function<Real(const RealVec
   m_functionValue = a_value;
 }
 
-std::pair<VoFStencil, VoFStencil>
-PetscHelmholtzDirichletDomainBC::getFaceFluxStencil(const VolIndex&      a_vof,
+void
+PetscHelmholtzDirichletDomainBC::getFaceFluxStencil(Real&       a_boundaryWeight,
+                                                    VoFStencil& a_stencilCoar,
+                                                    VoFStencil& a_stencil,
+                                                    VoFStencil& a_stencilFine,
+                                                    const int /*a_phase*/,
+                                                    const int a_level,
+                                                    const DataIndex& /*a_din*/,
+                                                    const VolIndex&      a_vof,
                                                     const int            a_dir,
-                                                    const Side::LoHiSide a_side,
-                                                    const DataIndex& /*a_din*/) const
+                                                    const Side::LoHiSide a_side) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
 
   // The flux is s * (phi_B - phi)/(dx/2), with s = -1 on the low side and +1 on the high side.
-  VoFStencil stencil;
-  stencil.add(a_vof, -sign(a_side) * 2.0 / m_dx);
+  a_stencilCoar.clear();
+  a_stencil.clear();
+  a_stencilFine.clear();
 
-  return std::make_pair(stencil, VoFStencil());
+  a_stencil.add(a_vof, -sign(a_side) * 2.0 / m_dx[a_level]);
+
+  a_boundaryWeight = sign(a_side) * 2.0 / m_dx[a_level];
 }
 
 Real
-PetscHelmholtzDirichletDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
-                                                     const int            a_dir,
-                                                     const Side::LoHiSide a_side,
-                                                     const DataIndex& /*a_din*/) const
+PetscHelmholtzDirichletDomainBC::getBoundaryData(const int            a_phase,
+                                                 const int            a_level,
+                                                 const DataIndex&     a_din,
+                                                 const VolIndex&      a_vof,
+                                                 const int            a_dir,
+                                                 const Side::LoHiSide a_side) const
 {
   CH_assert(m_isDefined);
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
@@ -96,13 +107,13 @@ PetscHelmholtzDirichletDomainBC::getFaceFluxConstant(const VolIndex&      a_vof,
     value = m_constantValue;
   }
   else if (m_useFunction) {
-    value = m_functionValue(this->getBoundaryPosition(a_vof.gridIndex(), a_dir, a_side));
+    value = m_functionValue(this->getBoundaryPosition(a_phase, a_level, a_din, a_vof, a_dir, a_side));
   }
   else {
-    MayDay::Abort("PetscHelmholtzDirichletDomainBC::getFaceFluxConstant -- value not set");
+    MayDay::Abort("PetscHelmholtzDirichletDomainBC::getBoundaryData -- value not set");
   }
 
-  return sign(a_side) * 2.0 * value / m_dx;
+  return value;
 }
 
 #include <CD_NamespaceFooter.H>
