@@ -160,7 +160,7 @@ public:
   setupSolver() override;
 
   /**
-   * @brief Change the permittivities used by the solver, and reassemble the operator.
+   * @brief Change the permittivities used by the solver. Not supported yet, and aborts.
    * @param[in] a_permittivityCell Cell-centered permittivity
    * @param[in] a_permittivityFace Face-centered permittivity
    * @param[in] a_permittivityEB   EB-centered permittivity

@@ -88,6 +88,7 @@ exactGradient(const RealVect& a_pos, const int a_dir)
 
 /**
  * @brief Set up a field solver on an existing mesh, as FieldStepper does.
+ * @tparam T Field solver class, e.g. FieldSolverAMG or FieldSolverGMG
  * @param[in] a_amr      AMR mesh
  * @param[in] a_compgeom Computational geometry
  * @param[in] a_realm    Realm
@@ -241,7 +242,7 @@ main(int argc, char* argv[])
       MayDay::Abort("PetscRegular -- FieldSolverGMG did not converge");
     }
     if (diff > maxAllowedDifference) {
-      MayDay::Abort("PetscRegular -- FieldSolverAMG and FieldSolverGMG differ by more than the solver tolerance");
+      MayDay::Abort("PetscRegular -- FieldSolverAMG and FieldSolverGMG differ by more than max_difference");
     }
     if (errorAMG > maxErrorConstant * dx * dx) {
       MayDay::Abort("PetscRegular -- the error is larger than expected for second order");

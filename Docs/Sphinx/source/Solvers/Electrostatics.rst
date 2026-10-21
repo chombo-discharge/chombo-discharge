@@ -29,6 +29,7 @@ FieldSolver
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
 Currently, our only supported subclass is :ref:`Chap:FieldSolverGMG`, which supplies a finite-volume discretization that is solved with geometric multigrid.
+An experimental subclass, ``FieldSolverAMG``, assembles the operator as a PETSc matrix and solves it with algebraic multigrid; it is limited to a single level without embedded boundaries.
 
 .. tip::
    

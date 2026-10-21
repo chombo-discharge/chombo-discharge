@@ -47,18 +47,20 @@
  *
  * The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim
  * and kappa-weighted, as in FieldSolverGMG: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell
- * (including the EB face), of the face area fraction (the boundary area on the EB face) times b times the face flux,
- * where each face flux is a stencil over PETSc rows. The right-hand side must use the same weighting: a volume source
- * is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also
+ * (including the EB face), of the face area fraction (the boundary area on the EB face) times b times s*F. Here F is
+ * the face flux, the derivative of phi in the +dir direction on the face, which is a stencil over PETSc rows, and
+ * s = -1 on the low side of the cell and +1 on the high side. The right-hand side must use the same weighting: a volume
+ * source is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also
  * multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Without embedded
  * boundaries kappa and the area fractions are 1, and are not applied yet. Cells covered by a finer level have no row.
  * Multilevel assembly is not implemented yet; it follows this scheme:
  *
  * - Face between two valid cells on the same level: the two-point flux, as on a single level.
- * - Domain face: the stencil and constant from PetscHelmholtzDomainBC. The stencil has parts on the next coarser
- *   level, this level, and the next finer level. The part on this level may contain coarse-fine ghost cells, which
- *   are replaced as on the fine side of a refinement boundary below. Any other entry that is not a PETSc row, e.g. a
- *   cell covered by a finer grid, aborts, as do entries outside the ghost cells of the PetscGrid maps.
+ * - Domain face: the stencils and the boundary weight w_B from PetscHelmholtzDomainBC::getFaceFluxStencil. The
+ *   stencil has parts on the next coarser level, this level, and the next finer level. The part on this level may
+ *   contain coarse-fine ghost cells, which are replaced as on the fine side of a refinement boundary below. Any other
+ *   entry that is not a PETSc row, e.g. a cell covered by a finer grid, aborts, as do entries outside the ghost cells
+ *   of the PetscGrid maps.
  * - Fine side of a refinement boundary: the two-point flux between the fine cell and the ghost cell across the face.
  *   The ghost cell is not a PETSc row, so it is replaced by its interpolation stencil from
  *   EBMultigridInterpolator::getGhostStencil, which is over cells on the fine level and the next coarser level, and
@@ -83,9 +85,9 @@
  * - Domain faces: m_domainFluxStencils, with their boundary weights in m_boundaryWeights.
  * - EB faces: m_ebFluxStencils.
  * - Fine side of a refinement boundary: m_fineCFFluxStencils, multiplied by the fine-face b.
- * - Coarse side of a refinement boundary: m_coarCFFluxStencils, one stencil per fine face under the coarse face. Each
- * is multiplied by the b-coefficient on its fine face, which fillMatrix first copies from the fine level into the index
- *   space of the coarse level (m_bCoefFiCo).
+ * - Coarse side of a refinement boundary: m_coarCFFluxStencils, one stencil per fine face under the coarse face.
+ *   Each is multiplied by the b-coefficient on its fine face, which fillMatrix first copies from the fine level into
+ *   the index space of the coarse level (m_bCoefFiCo).
  *
  * Only the domain faces are handled so far, and their stencils are computed in fillMatrix rather than stored; the
  * other categories, and the functions that define them, are placeholders.
@@ -295,14 +297,16 @@ protected:
 
   /**
    * @brief The b-coefficient of the finer level, in the index space of the coarse level.
-   * @details Entry lvl is defined on the grids of level lvl refined to level lvl + 1 (PetscGrid::getMFLevelGridsFiCo),
-   * which share DataIndex with level lvl, so that the coarse side of a refinement boundary finds the fine-face b
-   * under its own grid index. Copied from the finer level by fillMatrix. Placeholder: not defined or used yet.
+   * @details Entry lvl is defined on the grids of level lvl refined to level lvl + 1, i.e.
+   * PetscGrid::getMFLevelGridsFiCo()[lvl + 1], which share DataIndex with level lvl, so that the coarse side of a
+   * refinement boundary finds the fine-face b under its own grid index. Copied from the finer level by fillMatrix.
+   * Placeholder: not defined or used yet.
    */
   EBAMRFluxData m_bCoefFiCo;
 
   /**
-   * @brief Abort unless the grids are supported by this operator: one level, no embedded boundaries.
+   * @brief Abort unless the grids are supported by this operator: one level, no periodic directions, no embedded
+   * boundaries, and no cells in any phase other than the gas phase.
    */
   virtual void
   checkSupported() const noexcept;

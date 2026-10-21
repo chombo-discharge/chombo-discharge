@@ -141,7 +141,8 @@ PetscHelmholtzOp::checkSupported() const noexcept
     MayDay::Abort("PetscHelmholtzOp -- only a single level is supported for now");
   }
 
-  // Faces across a periodic boundary would be taken for domain faces, see assembleMatrix.
+  // ProblemDomain::contains is true across a periodic boundary, so fillMatrix would take such a face for an interior
+  // face whose neighbor is a periodic image outside the domain box, which has no PETSc row.
   const ProblemDomain& domain = mflg[0]->getDomain();
 
   for (int dir = 0; dir < SpaceDim; dir++) {
