@@ -45,10 +45,14 @@
  *
  * Supported so far: a single level, no embedded boundaries, no periodic directions. Anything else aborts.
  *
- * The operator is assembled finite-volume style: the row of a cell is alpha*a*phi plus beta/dx times the sum, over the
- * faces of the cell, of the face area fraction times b times the face flux, where each face flux is a stencil over
- * PETSc rows. Cells covered by a finer level have no row. Multilevel assembly is not implemented yet; it follows this
- * scheme:
+ * The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim
+ * and kappa-weighted, as in FieldSolverGMG: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell
+ * (including the EB face), of the face area fraction (the boundary area on the EB face) times b times the face flux,
+ * where each face flux is a stencil over PETSc rows. The right-hand side must use the same weighting: a volume source
+ * is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also
+ * multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Without embedded
+ * boundaries kappa and the area fractions are 1, and are not applied yet. Cells covered by a finer level have no row.
+ * Multilevel assembly is not implemented yet; it follows this scheme:
  *
  * - Face between two valid cells on the same level: the two-point flux, as on a single level.
  * - Domain face: the stencil and constant from PetscHelmholtzDomainBC. The stencil has parts on the next coarser
@@ -186,7 +190,9 @@ public:
    * @brief Move the boundary data part of the domain boundary fluxes into a right-hand side.
    * @details The operator is A*phi + c, where A is the matrix and c holds the w_B * g parts of the boundary fluxes,
    * scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this
-   * subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly.
+   * subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly. Only
+   * boundary terms are added: the domain boundary data now, and the EB boundary data and surface charge later. The
+   * caller supplies the volume source in a_rhs, kappa-weighted as described for the class.
    * @param[in,out] a_rhs Right-hand side, on the rows of the PETSc grid
    */
   virtual void
