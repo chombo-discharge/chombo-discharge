@@ -146,22 +146,27 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 # ====================================================================================================
 RefinementBoxTagger.verbosity         = -1         ## Class verbosity
 RefinementBoxTagger.buffer            = 0          ## Grow tagged cells
-RefinementBoxTagger.num_ref_boxes     = 2          ## Number of refinement boxes. 0 gives a single level.
+RefinementBoxTagger.num_ref_boxes     = 4          ## Number of refinement boxes. 0 gives a single level.
 RefinementBoxTagger.ref_box1_lo       = 0.3 0.3    ## Refine region between
 RefinementBoxTagger.ref_box1_hi       = 0.7 0.7    ## these two corners
 RefinementBoxTagger.ref_box1_lvl      = 1          ## to this level
 RefinementBoxTagger.ref_box2_lo       = 0.4 0.4    ## Refine region between
 RefinementBoxTagger.ref_box2_hi       = 0.6 0.6    ## these two corners
 RefinementBoxTagger.ref_box2_lvl      = 2          ## to this level
-
+RefinementBoxTagger.ref_box3_lo       = 0.0 0.0    ## Bottom-left corner, against the 1 V and Neumann sides
+RefinementBoxTagger.ref_box3_hi       = 0.2 0.2    ## these two corners
+RefinementBoxTagger.ref_box3_lvl      = 2          ## to this level
+RefinementBoxTagger.ref_box4_lo       = 0.8 0.8    ## Top-right corner, against the grounded and Neumann sides
+RefinementBoxTagger.ref_box4_hi       = 1.0 1.0    ## these two corners
+RefinementBoxTagger.ref_box4_lvl      = 2          ## to this level
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
-FieldStepper.verbosity        = 2          ## Verbosity, also of the field solver
-FieldStepper.realm            = primal     ## Primal Realm
-FieldStepper.load_balance     = false      ## Load balance or not
-FieldStepper.box_sorting      = morton     ## Box sorting algorithm
-FieldStepper.init_rho         = 1E-9       ## Space charge density
-FieldStepper.init_sigma       = 0.0        ## Surface charge density
-FieldStepper.rho_center       = 0.5 0.5    ## Space charge blob center
-FieldStepper.rho_radius       = 0.05       ## Space charge blob radius
+FieldStepper.verbosity                = 2          ## Verbosity, also of the field solver
+FieldStepper.realm                    = primal     ## Primal Realm
+FieldStepper.load_balance             = false      ## Load balance or not
+FieldStepper.box_sorting              = morton     ## Box sorting algorithm
+FieldStepper.init_rho                 = 1E-9       ## Space charge density
+FieldStepper.init_sigma               = 0.0        ## Surface charge density
+FieldStepper.rho_center               = 0.5 0.5    ## Space charge blob center
+FieldStepper.rho_radius               = 0.05       ## Space charge blob radius
