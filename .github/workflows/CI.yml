@@ -160,9 +160,12 @@ jobs:
           - {ver: 13, dim: 2, mpi: "TRUE", hdf: "TRUE", omp: "FALSE", pp: "FLOAT"}
           - {ver: 13, dim: 3, mpi: "TRUE", hdf: "TRUE", omp: "FALSE", pp: "FLOAT"}
 
+    # PETSc is enabled in every MPI cell (USE_PETSC follows matrix.mpi): Ubuntu's petsc-dev is built against
+    # OpenMPI, so it cannot be used without MPI. The tests marked petsc = true in the .ini files run in those cells.
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+      PETSC_DIR: /usr/lib/petsc
       CORES: 2
       GCC_CACHE_VERSION: v1
 
@@ -188,6 +191,7 @@ jobs:
           sudo apt-get install g++-${{ matrix.ver }} gfortran-${{ matrix.ver}} csh libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.ver }} 100
           sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{ matrix.ver }} 100
+          if [ "${{ matrix.mpi }}" = "TRUE" ]; then sudo apt-get install petsc-dev; fi
 
       - name: Copy makefile
         run: |
@@ -198,12 +202,12 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
-          key: gcc-chombo-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-chombo-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-petsc${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Build Chombo
         if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
-          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} chombo; }
+          build() { make -s -j"$1" DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} USE_PETSC=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} chombo; }
           # The recursive Chombo build can intermittently leave a truncated archive member on resource-
           # constrained runners. On failure, clear the partial libraries/objects and rebuild serially.
           build ${{ env.CORES }} || {
@@ -218,35 +222,37 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Lib/lib*.a
-          key: gcc-discharge-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-discharge-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-petsc${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Build chombo-discharge/source
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-source
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} USE_PETSC=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-source
 
       - name: Build chombo-discharge/geometries
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-geometries
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} USE_PETSC=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-physics
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} USE_PETSC=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} PARTICLE_PRECISION=${{ matrix.pp }} discharge-physics
 
       - name: Restore test executables cache
         id: cache-tests
         uses: actions/cache@v5
         with:
-          path: Exec/Tests/**/*.ex
-          key: gcc-test-execs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          path: |
+            Exec/Tests/**/*.ex
+            Exec/Examples/Electrostatics/PETSc/*.ex
+          key: gcc-test-execs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-petsc${{ matrix.mpi }}-omp${{ matrix.omp }}-pp${{ matrix.pp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Exec/Examples/Electrostatics/PETSc/*.cpp', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Compile tests
         if: steps.cache-tests.outputs.cache-hit != 'true'
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         run: |
-          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }} -particle_precision=${{ matrix.pp }}
+          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -petsc=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }} -particle_precision=${{ matrix.pp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
@@ -255,7 +261,7 @@ jobs:
         env:
           OMP_STACKSIZE: "64M"
         run: |
-          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
+          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -petsc=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
   Linux-oneAPI:
@@ -398,79 +404,6 @@ jobs:
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
-  Linux-PETSc:
-    if: github.event.pull_request.draft == false
-    needs: [Formatting, REUSE, Codespell]
-    name: Linux-PETSc
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-
-    # Builds the code behind CH_USE_PETSC, which no other job builds, and runs the PETSc mapping test. Ubuntu's
-    # petsc-dev is built against OpenMPI, so this job is MPI-only.
-    strategy:
-      fail-fast: false
-      matrix:
-        dim: [2, 3]
-
-    env:
-      DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
-      PETSC_DIR: /usr/lib/petsc
-      CORES: 2
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: true
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install g++ gfortran csh libblas-dev liblapack-dev libopenmpi-dev openmpi-bin petsc-dev
-
-      - name: Copy makefile
-        run: |
-          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
-
-      - name: Build chombo-discharge
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE discharge-lib
-
-      - name: Build PETSc mapping test
-        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscMapping
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
-
-      - name: Run PETSc mapping test
-        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscMapping
-        run: |
-          mpirun --oversubscribe -np ${{ env.CORES }} ./main${{ matrix.dim }}d.*.ex regression${{ matrix.dim }}d.inputs
-          grep -q "PetscMapping -- all tests passed" pout.0
-
-      - name: Build PETSc solver test
-        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscRegular
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
-
-      - name: Run PETSc solver test
-        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscRegular
-        run: |
-          # One level (max_amr_depth = 0) and three levels from the refinement boxes in the inputs, each at two
-          # resolutions: the test bounds the error by a constant times dx^2 at each, which checks second order.
-          if [ "${{ matrix.dim }}" = "2" ]; then resolutions="32 64"; else resolutions="16 32"; fi
-          for depth in 0 2; do
-            for n in $resolutions; do
-              domain=$(printf "$n %.0s" $(seq ${{ matrix.dim }}))
-              mpirun --oversubscribe -np ${{ env.CORES }} ./main${{ matrix.dim }}d.*.ex regression${{ matrix.dim }}d.inputs AmrMesh.coarsest_domain="$domain" AmrMesh.max_amr_depth=$depth
-              grep -q "PetscRegular -- all tests passed" pout.0
-            done
-          done
-
-      - name: Build PETSc example
-        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Examples/Electrostatics/PETSc
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
-
   Build-documentation:
     needs: Formatting
     runs-on : ubuntu-latest
@@ -529,7 +462,7 @@ jobs:
           rm -rf Sphinx/build
 
   CI-passed:
-    needs: [Linux-GNU, Linux-oneAPI, Linux-PETSc, Build-documentation, REUSE, Codespell, Clang-tidy, Cppcheck]
+    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell, Clang-tidy, Cppcheck]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing
