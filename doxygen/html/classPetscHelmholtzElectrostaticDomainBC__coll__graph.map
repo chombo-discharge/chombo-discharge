@@ -1,0 +1,7 @@
+<map id="PetscHelmholtzElectrostaticDomainBC" name="PetscHelmholtzElectrostaticDomainBC">
+<area shape="rect" id="Node000001" title="Domain boundary conditions for PetscHelmholtzOp, taken from ElectrostaticDomainBc." alt="" coords="102,106,306,151"/>
+<area shape="rect" id="Node000002" href="$classPetscHelmholtzDomainBC.html" title="Base class for domain boundary conditions of PetscHelmholtzOp." alt="" coords="5,5,198,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,42,186,105,181,106,123,47"/>
+<area shape="rect" id="Node000003" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="222,5,392,33"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="286,44,227,107,223,103,281,45"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="FieldSolverAMG" name="FieldSolverAMG">
+<area shape="rect" id="Node000001" title="Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc K..." alt="" coords="5,81,130,109"/>
+<area shape="rect" id="Node000002" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="21,5,114,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,47,70,81,65,80,66,51"/>
+</map>

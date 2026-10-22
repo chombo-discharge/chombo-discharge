@@ -97,9 +97,11 @@ Inheritance diagram for FieldSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classFieldSolver__inherit__graph.png" border="0" usemap="#aFieldSolver_inherit__map" loading="lazy" alt="Inheritance graph"/></div>
 <map name="aFieldSolver_inherit__map" id="aFieldSolver_inherit__map">
-<area shape="rect" title="Base class for electrostatic solvers." alt="" coords="21,5,115,33"/>
-<area shape="rect" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="5,81,131,109"/>
-<area shape="poly" title=" " alt="" coords="70,47,71,81,65,80,66,51"/>
+<area shape="rect" title="Base class for electrostatic solvers." alt="" coords="96,5,189,33"/>
+<area shape="rect" href="classFieldSolverAMG.html" title="Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc K..." alt="" coords="5,81,130,109"/>
+<area shape="poly" title=" " alt="" coords="120,44,82,83,79,78,115,45"/>
+<area shape="rect" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="154,81,280,109"/>
+<area shape="poly" title=" " alt="" coords="168,42,206,81,201,80,165,47"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -594,7 +596,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a1614a34e51f0d94c6dc98b7eb927d97f">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a34240c37dab7846d77b5e9c1f174832b">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a1614a34e51f0d94c6dc98b7eb927d97f">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -640,7 +642,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#aa4b70fcdb2f2e5075766a687eafc9277">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a1ff1521fd361feb59b6065bdb4f3d8b9">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#aa4b70fcdb2f2e5075766a687eafc9277">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -680,7 +682,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a6f75085eb025109e892c01c611e744bf">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#ab75c686f1043989ec9da1aa7f6207196">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a6f75085eb025109e892c01c611e744bf">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -720,7 +722,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a8b34ca0bf9096a34718b58a073b6f87a">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#aa99ed5958cb5c239b51362759f941005">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a8b34ca0bf9096a34718b58a073b6f87a">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1340,7 +1342,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Parse options (for derived class). </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a84846bcabd7ab2560df9d1d9e2cb72ac">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a180a0bd646036a146641948c760c77f0">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a84846bcabd7ab2560df9d1d9e2cb72ac">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1369,7 +1371,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Parse runtime options (for derived class). </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a4b8b1e553af21fc7798c4f28470964ab">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a1ec08a68a0ea0330a6a8884c4323e1a8">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a4b8b1e553af21fc7798c4f28470964ab">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1467,7 +1469,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Register operators for AMR. Derived classes have to implement these. </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a416f8cbbf19f2e2cae601ec3b6192a00">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a45b722860c2ea0578395570c35bc9454">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a416f8cbbf19f2e2cae601ec3b6192a00">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1514,7 +1516,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <p>This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#ae41d752e9d02e7b498d9fcfae8d2d0cd">FieldSolverGMG</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverAMG.html#a5111f1244668a91ee5740ec735b1af21">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#ae41d752e9d02e7b498d9fcfae8d2d0cd">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -2089,7 +2091,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> to change permittivities/conductivities under the hood of the multigrid solver. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#add5e2de507c3c032e14a0a97fd31891d">FieldSolverGMG</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverAMG.html#a8939b933db60c46495f82b2a86b4ddc4">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#add5e2de507c3c032e14a0a97fd31891d">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -2155,7 +2157,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 <p>Set up solver routines. </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a77474e5dd5e6782ae07696be3c7d2924">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#a75d298d461fae4d61f14bc9a3318a831">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a77474e5dd5e6782ae07696be3c7d2924">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -2308,7 +2310,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a4e7785defa75405a937b346a494adc27">FieldSolverGMG</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverAMG.html#ac149df691d89b46ff62ffdacd81b1c97">FieldSolverAMG</a>, and <a class="el" href="classFieldSolverGMG.html#a4e7785defa75405a937b346a494adc27">FieldSolverGMG</a>.</p>
 
 </div>
 </div>

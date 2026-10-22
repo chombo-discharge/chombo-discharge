@@ -1,5 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="5,5,99,33"/>
-<area shape="rect" id="Node000001" href="$classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="147,5,272,33"/>
-<area shape="poly" id="edge97_Node000000_Node000001" title=" " alt="" coords="114,17,149,19,144,19,114,22"/>
+<area shape="rect" id="Node000000" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="5,32,99,60"/>
+<area shape="rect" id="Node000001" href="$classFieldSolverAMG.html" title="Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc K..." alt="" coords="147,5,272,33"/>
+<area shape="poly" id="edge97_Node000000_Node000001" title=" " alt="" coords="114,33,150,29,144,31,115,38"/>
+<area shape="rect" id="Node000002" href="$classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="147,57,272,85"/>
+<area shape="poly" id="edge98_Node000000_Node000002" title=" " alt="" coords="114,53,149,61,144,61,114,58"/>
 </map>

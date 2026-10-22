@@ -1,35 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,432,110,459"/>
-<area shape="rect" id="Node000001" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="194,44,424,106"/>
-<area shape="poly" id="edge125_Node000000_Node000001" title=" " alt="" coords="56,416,60,354,75,273,87,231,105,189,127,150,156,116,173,102,195,92,192,96,176,106,160,119,131,153,109,191,92,233,80,275,66,355,61,416"/>
-<area shape="rect" id="Node000005" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html" title="TimeStepper implementation for advancing a single advection&#45;diffusion equation." alt="" coords="208,130,410,174"/>
-<area shape="poly" id="edge129_Node000000_Node000005" title=" " alt="" coords="59,416,67,366,83,303,112,239,132,210,156,185,180,169,209,159,205,163,182,174,159,189,136,214,116,242,88,305,72,367,64,417"/>
-<area shape="rect" id="Node000006" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html" title="TimeStepper implementation for advancing Brownian walker particles." alt="" coords="217,199,401,244"/>
-<area shape="poly" id="edge130_Node000000_Node000006" title=" " alt="" coords="63,416,75,379,94,335,120,291,156,254,184,238,218,228,215,232,187,242,159,258,125,294,98,337,80,381,68,417"/>
-<area shape="rect" id="Node000007" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract base class for advancing the coupled CDR plasma equations in time." alt="" coords="234,268,384,313"/>
-<area shape="poly" id="edge131_Node000000_Node000007" title=" " alt="" coords="72,417,106,368,130,344,156,323,194,306,236,296,232,300,196,311,159,328,133,348,110,372,76,419"/>
-<area shape="rect" id="Node000010" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html" title="TimeStepper for evaluating the streamer inception criterion in static or transient electric fields." alt="" coords="207,337,411,399"/>
-<area shape="poly" id="edge134_Node000000_Node000010" title=" " alt="" coords="110,424,157,408,208,394,204,398,158,413,114,428"/>
-<area shape="rect" id="Node000011" href="$classPhysics_1_1Electrostatics_1_1FieldStepper.html" title="TimeStepper for solving the electrostatic Poisson equation, optionally with surface charge." alt="" coords="226,423,392,468"/>
-<area shape="poly" id="edge135_Node000000_Node000011" title=" " alt="" coords="124,443,227,444,223,447,126,448"/>
-<area shape="rect" id="Node000012" href="$classPhysics_1_1Geometry_1_1GeometryStepper.html" title="Minimal TimeStepper that performs no physics, intended for geometry development and visualisation." alt="" coords="234,492,384,537"/>
-<area shape="poly" id="edge136_Node000000_Node000012" title=" " alt="" coords="110,463,158,478,235,498,231,501,157,483,112,468"/>
-<area shape="rect" id="Node000013" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Abstract TimeStepper for the Ito&#45;KMC&#45;Poisson system of equations." alt="" coords="194,562,424,606"/>
-<area shape="poly" id="edge137_Node000000_Node000013" title=" " alt="" coords="77,470,113,511,135,531,159,547,196,564,191,566,156,552,132,535,110,514,77,475"/>
-<area shape="rect" id="Node000014" href="$classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="TimeStepper for advancing a system of N coupled ODEs on an AMR mesh." alt="" coords="158,630,460,658"/>
-<area shape="poly" id="edge138_Node000000_Node000014" title=" " alt="" coords="67,471,81,507,100,546,126,585,159,617,180,629,174,630,156,621,122,588,95,549,76,509,67,477"/>
-<area shape="rect" id="Node000015" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html" title="TimeStepper for advancing a single radiative transfer species on an AMR mesh." alt="" coords="193,682,424,726"/>
-<area shape="poly" id="edge139_Node000000_Node000015" title=" " alt="" coords="63,472,76,517,93,570,121,623,138,647,159,667,195,689,190,690,156,672,134,650,116,626,88,572,70,519,63,477"/>
-<area shape="rect" id="Node000016" href="$classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="TimeStepper for advancing tracer particles in a prescribed velocity field on an AMR mesh." alt="" coords="207,751,411,796"/>
-<area shape="poly" id="edge140_Node000000_Node000016" title=" " alt="" coords="60,472,68,531,83,602,96,639,112,675,133,708,159,737,182,752,209,765,204,765,179,757,156,741,129,711,108,677,91,641,78,603,63,532,59,478"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title=" " alt="" coords="508,5,746,67"/>
-<area shape="poly" id="edge126_Node000001_Node000002" title=" " alt="" coords="438,57,510,49,505,52,441,61"/>
-<area shape="rect" id="Node000004" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="508,91,746,136"/>
-<area shape="poly" id="edge128_Node000001_Node000004" title=" " alt="" coords="438,88,510,98,505,100,440,93"/>
-<area shape="rect" id="Node000003" href="$classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundEvaluator.html" title="Implementation of ItoKMCGodunovStepper that also evaluates the background field at every regrid/time ..." alt="" coords="794,14,1052,58"/>
-<area shape="poly" id="edge127_Node000002_Node000003" title=" " alt="" coords="761,34,796,35,791,37,763,39"/>
-<area shape="rect" id="Node000008" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="CdrPlasmaStepper subclass that advances plasma equations using a split&#45;step Godunov method." alt="" coords="524,234,731,278"/>
-<area shape="poly" id="edge132_Node000007_Node000008" title=" " alt="" coords="398,279,526,266,521,269,400,284"/>
-<area shape="rect" id="Node000009" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="CdrPlasmaStepper subclass that advances plasma equations using implicit&#45;explicit spectral deferred co..." alt="" coords="524,303,730,348"/>
-<area shape="poly" id="edge133_Node000007_Node000009" title=" " alt="" coords="398,298,526,313,522,316,400,303"/>
+<area shape="rect" id="Node000000" href="$classTileI.html" title="Class for representing a tile (used in, e.g., TiledMeshRefine)." alt="" coords="5,5,127,33"/>
 </map>

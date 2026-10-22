@@ -108,6 +108,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscGrid</b> () 
 <tr class="memdesc:a39af46b869b7fe627442bb26ab0ee6b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not.  <br /></td></tr>
 <tr class="memitem:abd31f2b983dfeefd26e9993ef8936194" id="r_abd31f2b983dfeefd26e9993ef8936194"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd31f2b983dfeefd26e9993ef8936194">getNumPhases</a> () const noexcept</td></tr>
 <tr class="memdesc:abd31f2b983dfeefd26e9993ef8936194"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of phases.  <br /></td></tr>
+<tr class="memitem:a6f040e4d327e37300547d8b2ee9f034d" id="r_a6f040e4d327e37300547d8b2ee9f034d"><td class="memItemLeft" align="right" valign="top">virtual PetscInt&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f040e4d327e37300547d8b2ee9f034d">getNumLocalRows</a> () const noexcept</td></tr>
+<tr class="memdesc:a6f040e4d327e37300547d8b2ee9f034d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of PETSc rows owned by this rank.  <br /></td></tr>
+<tr class="memitem:a48869dc0c41859e050e67e6bbf8e61a2" id="r_a48869dc0c41859e050e67e6bbf8e61a2"><td class="memItemLeft" align="right" valign="top">virtual PetscInt&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48869dc0c41859e050e67e6bbf8e61a2">getNumGlobalRows</a> () const noexcept</td></tr>
+<tr class="memdesc:a48869dc0c41859e050e67e6bbf8e61a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the total number of PETSc rows over all ranks.  <br /></td></tr>
 <tr class="memitem:a370cdf69e9e9d452f3f8efebdfbfc400" id="r_a370cdf69e9e9d452f3f8efebdfbfc400"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a370cdf69e9e9d452f3f8efebdfbfc400">getMFLevelGrids</a> () const noexcept</td></tr>
 <tr class="memdesc:a370cdf69e9e9d452f3f8efebdfbfc400"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the grids on each level.  <br /></td></tr>
 <tr class="memitem:a02373035186af86a5d0a32fc36f7b3ac" id="r_a02373035186af86a5d0a32fc36f7b3ac"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02373035186af86a5d0a32fc36f7b3ac">getMFLevelGridsCoFi</a> () const noexcept</td></tr>
@@ -467,7 +471,7 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx<
 </div><div class="memdoc">
 
 <p>Main define function. Puts object in usable state. </p>
-<p>Note that a_levelGridsCoFi must be coarsened from finer grids. That is, entry lvl in levelGridsCoFi must be a coarsened version of a_levelGrids[lvl+1]. Similarly, a_levelGridsFiCo must be a refinement, i.e., a_levelGridsFiCo[lvl] must be a refinemetn of a_levelGrids[lvl]. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Note that a_levelGridsCoFi must be coarsened from finer grids. That is, entry lvl in levelGridsCoFi must be a coarsened version of a_levelGrids[lvl+1]. Similarly, a_levelGridsFiCo must be refined from coarser grids, i.e., a_levelGridsFiCo[lvl] must be a refinement of a_levelGrids[lvl-1]. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_levelGrids</td><td>chombo-discharge AMR grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_levelGridsCoFi</td><td>Coarsened grids. </td></tr>
@@ -772,6 +776,62 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx<
 
 <p>Get the refined coarse grids. </p>
 <p>Entry lvl is level lvl-1 refined to the resolution of level lvl, and shares DataIndex with level lvl-1. Level 0 has no entry. </p><dl class="section return"><dt>Returns</dt><dd>m_levelGridsFiCo </dd></dl>
+
+</div>
+</div>
+<a id="a48869dc0c41859e050e67e6bbf8e61a2" name="a48869dc0c41859e050e67e6bbf8e61a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48869dc0c41859e050e67e6bbf8e61a2">&#9670;&#160;</a></span>getNumGlobalRows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PetscInt PetscGrid::getNumGlobalRows </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the total number of PETSc rows over all ranks. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_numGlobalRows </dd></dl>
+
+</div>
+</div>
+<a id="a6f040e4d327e37300547d8b2ee9f034d" name="a6f040e4d327e37300547d8b2ee9f034d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f040e4d327e37300547d8b2ee9f034d">&#9670;&#160;</a></span>getNumLocalRows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PetscInt PetscGrid::getNumLocalRows </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of PETSc rows owned by this rank. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_numLocalRows </dd></dl>
 
 </div>
 </div>
