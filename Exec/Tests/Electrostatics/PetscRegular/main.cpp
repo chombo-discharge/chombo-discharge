@@ -20,7 +20,7 @@
 
 // Our includes
 #include <CD_Driver.H>
-#include <CD_CellTagger.H>
+#include <CD_RefinementBoxTagger.H>
 #include <CD_FieldSolverGMG.H>
 #include <CD_FieldSolverAMG.H>
 #include <CD_RegularGeometry.H>
@@ -87,91 +87,6 @@ exactGradient(const RealVect& a_pos, const int a_dir)
 
   return grad;
 }
-
-/**
- * @brief Cell tagger that only refines the boxes given as CellTagger.ref_box* in the input file.
- * @details This gives static refinement on a geometry without embedded boundaries, where geometric refinement does not
- * apply.
- */
-class RefinementBoxTagger : public CellTagger
-{
-public:
-  /**
-   * @brief Constructor.
-   * @param[in] a_amr   AMR mesh
-   * @param[in] a_realm Realm
-   */
-  RefinementBoxTagger(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm) : m_amr(a_amr), m_realm(a_realm)
-  {}
-
-  /**
-   * @brief Parse the refinement boxes and the buffer.
-   */
-  void
-  parseOptions() override
-  {
-    this->parseRefinementBoxes();
-    this->parseBuffer();
-  }
-
-  /**
-   * @brief Nothing to regrid.
-   */
-  void
-  regrid() override
-  {}
-
-  /**
-   * @brief Tag every cell whose center lies in a refinement box that asks for a finer level.
-   * @param[in,out] a_tags Cell tags on each level
-   * @return True if any cell was tagged.
-   */
-  bool
-  tagCells(EBAMRTags& a_tags) override
-  {
-    const RealVect probLo   = m_amr->getProbLo();
-    int            haveTags = 0;
-
-    // Tags on a level ask for the next finer level, so there are none on the finest allowed level.
-    const int numTagLevels = std::min(static_cast<int>(a_tags.size()), m_amr->getMaxAmrDepth());
-
-    for (int lvl = 0; lvl < numTagLevels; lvl++) {
-      const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
-      const Real               dx   = m_amr->getDx()[lvl];
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(max : haveTags)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din  = dit[mybox];
-        DenseIntVectSet& tags = (*a_tags[lvl])[din];
-
-        for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
-          const RealVect pos = probLo + (RealVect(bit()) + 0.5 * RealVect::Unit) * dx;
-
-          if (this->getManualRefinementLevel(pos) > lvl) {
-            tags |= bit();
-
-            haveTags = 1;
-          }
-        }
-      }
-    }
-
-    return ParallelOps::max(haveTags) > 0;
-  }
-
-protected:
-  /**
-   * @brief AMR mesh.
-   */
-  RefCountedPtr<AmrMesh> m_amr;
-
-  /**
-   * @brief Realm.
-   */
-  std::string m_realm;
-};
 
 /**
  * @brief Set up a field solver on an existing mesh, as FieldStepper does.
