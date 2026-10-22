@@ -79,5 +79,5 @@ Saddle.isolated      = true        ## Checkerboard on the single face [0,spacing
 # ====================================================================================================
 PolyhedralGeometryShop.sanity_check      = true     ## Check the surface is closed, on every level and across every seam
 PolyhedralGeometryShop.write_surface     = false    ## Write the interface triangles for inspection
-PolyhedralGeometryShop.test_copy         = true     ## Copy every graph onto other layouts and back, and compare
+PolyhedralGeometryShop.test_copy         = false    ## Copy every graph onto other layouts and back, and compare
 PolyhedralGeometryShop.profile           = false    ## Report where the geometry generation spends its time

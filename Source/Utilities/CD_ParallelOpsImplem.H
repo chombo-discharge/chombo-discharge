@@ -604,6 +604,25 @@ ParallelOps::gather(const long long& a_localValue) noexcept
 #endif
 }
 
+inline void
+ParallelOps::rankOffset(long long& a_offset, long long& a_total, const long long a_mine) noexcept
+{
+  CH_TIME("ParallelOps::rankOffset");
+
+  a_offset = 0;
+  a_total  = a_mine;
+
+#ifdef CH_MPI
+  MPI_Exscan(&a_mine, &a_offset, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+
+  if (procID() == 0) {
+    a_offset = 0;
+  }
+
+  MPI_Allreduce(&a_mine, &a_total, 1, MPI_LONG_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

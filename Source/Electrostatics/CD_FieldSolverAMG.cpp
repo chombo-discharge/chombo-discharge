@@ -78,7 +78,21 @@ FieldSolverAMG::parseSolverSettings()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("ksp_type", m_kspType);
+  // The Krylov solver is given by our name for it, and stored as the PETSc type.
+  std::string kspType;
+
+  pp.get("ksp_type", kspType);
+
+  if (kspType == "bicgstab") {
+    m_kspType = KSPBCGS;
+  }
+  else if (kspType == "gmres") {
+    m_kspType = KSPGMRES;
+  }
+  else {
+    MayDay::Abort("FieldSolverAMG::parseSolverSettings -- 'ksp_type' must be 'bicgstab' or 'gmres'");
+  }
+
   pp.get("pc_type", m_pcType);
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);
@@ -105,7 +119,7 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
-  // Right-hand side rho/eps0, with the constant part of the domain boundary fluxes moved into it. There are no
+  // Right-hand side rho/eps0, with the boundary data part of the domain boundary fluxes moved into it. There are no
   // embedded boundaries yet, so the surface charge does not enter.
   MFAMRCellData rhoByEps0;
   m_amr->allocate(rhoByEps0, m_realm, m_nComp);

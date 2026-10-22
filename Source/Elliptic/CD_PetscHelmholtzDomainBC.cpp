@@ -14,10 +14,10 @@
 
 // Chombo includes
 #include <CH_Timer.H>
-#include <MayDay.H>
 
 // Our includes
 #include <CD_PetscHelmholtzDomainBC.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 PetscHelmholtzDomainBC::PetscHelmholtzDomainBC() : m_isDefined(false)
@@ -31,39 +31,43 @@ PetscHelmholtzDomainBC::~PetscHelmholtzDomainBC()
 }
 
 void
-PetscHelmholtzDomainBC::define(const Location::Cell       a_dataLocation,
-                               const Vector<EBLevelGrid>& a_eblg,
-                               const RealVect&            a_probLo,
-                               const Vector<Real>&        a_dx)
+PetscHelmholtzDomainBC::define(const RefCountedPtr<PetscGrid>& a_petscGrid,
+                               const RealVect&                 a_probLo,
+                               const Vector<Real>&             a_dx)
 {
   CH_TIME("PetscHelmholtzDomainBC::define");
 
-  CH_assert(a_eblg.size() > 0);
-  CH_assert(a_dx.size() >= a_eblg.size());
+  CH_assert(!a_petscGrid.isNull());
+  CH_assert(a_petscGrid->isDefined());
+  CH_assert(a_dx.size() >= a_petscGrid->getMFLevelGrids().size());
 
-  if (a_dataLocation != Location::Cell::Center) {
-    MayDay::Abort("PetscHelmholtzDomainBC::define -- only cell-centered data is supported");
-  }
-
-  m_dataLocation = a_dataLocation;
-  m_eblg         = a_eblg;
-  m_probLo       = a_probLo;
-  m_dx           = a_dx;
-  m_isDefined    = true;
+  m_petscGrid = a_petscGrid;
+  m_probLo    = a_probLo;
+  m_dx        = a_dx;
+  m_isDefined = true;
 }
 
 RealVect
-PetscHelmholtzDomainBC::getBoundaryPosition(const IntVect&       a_iv,
+PetscHelmholtzDomainBC::getBoundaryPosition(const int            a_phase,
+                                            const int            a_level,
+                                            const DataIndex&     a_din,
+                                            const VolIndex&      a_vof,
                                             const int            a_dir,
-                                            const Side::LoHiSide a_side,
-                                            const int            a_level) const noexcept
+                                            const Side::LoHiSide a_side) const noexcept
 {
   CH_assert(m_isDefined);
-  CH_assert(a_level >= 0 && a_level < m_dx.size());
+  CH_assert(a_level >= 0 && a_level < static_cast<int>(m_dx.size()));
 
-  const Real dx = m_dx[a_level];
+  const Vector<RefCountedPtr<MFLevelGrid>>& mflg    = m_petscGrid->getMFLevelGrids();
+  const EBLevelGrid&                        eblg    = mflg[a_level]->getEBLevelGrid(a_phase);
+  const EBISLayout&                         ebisl   = eblg.getEBISL();
+  const EBISBox&                            ebisbox = ebisl[a_din];
 
-  return m_probLo + (0.5 * RealVect::Unit + RealVect(a_iv)) * dx + 0.5 * dx * RealVect(BASISV(a_dir)) * sign(a_side);
+  const Vector<FaceIndex> faces = ebisbox.getFaces(a_vof, a_dir, a_side);
+
+  CH_assert(faces.size() == 1);
+
+  return m_probLo + Location::position(Location::Face::Centroid, faces[0], ebisbox, m_dx[a_level]);
 }
 
 #include <CD_NamespaceFooter.H>

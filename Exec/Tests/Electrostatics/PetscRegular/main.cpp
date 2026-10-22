@@ -136,13 +136,17 @@ public:
     const int numTagLevels = std::min(static_cast<int>(a_tags.size()), m_amr->getMaxAmrDepth());
 
     for (int lvl = 0; lvl < numTagLevels; lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const Real               dx  = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+      const Real               dx   = m_amr->getDx()[lvl];
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(max : haveTags)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din  = dit[mybox];
+        DenseIntVectSet& tags = (*a_tags[lvl])[din];
 
-        for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit) {
+        for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
           const RealVect pos = probLo + (RealVect(bit()) + 0.5 * RealVect::Unit) * dx;
 
           if (this->getManualRefinementLevel(pos) > lvl) {
@@ -171,6 +175,7 @@ protected:
 
 /**
  * @brief Set up a field solver on an existing mesh, as FieldStepper does.
+ * @tparam T Field solver class, e.g. FieldSolverAMG or FieldSolverGMG
  * @param[in] a_amr      AMR mesh
  * @param[in] a_compgeom Computational geometry
  * @param[in] a_realm    Realm
@@ -251,14 +256,18 @@ maxDifference(const AmrMesh&       a_amr,
   Real maxDiff = 0.0;
 
   for (int lvl = 0; lvl <= a_amr.getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = a_amr.getGrids(a_realm)[lvl];
-    const Real               dx  = a_amr.getDx()[lvl];
+    const DisjointBoxLayout& dbl  = a_amr.getGrids(a_realm)[lvl];
+    const Real               dx   = a_amr.getDx()[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const FArrayBox&     phi   = (*a_phi[lvl])[dit()].getPhase(phase::gas).getFArrayBox();
-      const BaseFab<bool>& valid = (*a_amr.getValidCells(a_realm)[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(max : maxDiff)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&     din   = dit[mybox];
+      const FArrayBox&     phi   = (*a_phi[lvl])[din].getPhase(phase::gas).getFArrayBox();
+      const BaseFab<bool>& valid = (*a_amr.getValidCells(a_realm)[lvl])[din];
 
-      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit) {
+      for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
         const IntVect iv = bit();
 
         if (!valid(iv)) {
@@ -267,7 +276,7 @@ maxDifference(const AmrMesh&       a_amr,
 
         const RealVect pos   = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
         const Real     other = (a_other == nullptr) ? exactPhi(pos)
-                                                    : (*(*a_other)[lvl])[dit()].getPhase(phase::gas).getFArrayBox()(iv, 0);
+                                                    : (*(*a_other)[lvl])[din].getPhase(phase::gas).getFArrayBox()(iv, 0);
 
         maxDiff = std::max(maxDiff, std::abs(phi(iv, 0) - other));
       }
@@ -334,7 +343,7 @@ main(int argc, char* argv[])
       MayDay::Abort("PetscRegular -- FieldSolverGMG did not converge");
     }
     if (diff > maxAllowedDifference) {
-      MayDay::Abort("PetscRegular -- FieldSolverAMG and FieldSolverGMG differ by more than the solver tolerance");
+      MayDay::Abort("PetscRegular -- FieldSolverAMG and FieldSolverGMG differ by more than max_difference");
     }
     if (errorAMG > maxErrorConstant * dx * dx) {
       MayDay::Abort("PetscRegular -- the error is larger than expected for second order");

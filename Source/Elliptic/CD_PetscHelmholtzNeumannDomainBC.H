@@ -67,36 +67,49 @@ public:
   setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /**
-   * @brief Get the stencil of the face flux through a domain face. This is empty.
-   * @param[in] a_vof  Cell adjacent to the domain face
-   * @param[in] a_dir  Coordinate direction of the face
-   * @param[in] a_side Domain side of the face
-   * @param[in] a_level Level of the cell
-   * @param[in] a_din  Grid index of the cell
-   * @return Two empty stencils.
+   * @brief Get the stencil of the face flux through a domain face. The stencil is empty and w_B = -s, with s = -1 on
+   * the low side and +1 on the high side: a positive dphi/dn is a flux into the domain, as in
+   * EBHelmholtzNeumannDomainBC.
+   * @param[out] a_boundaryWeight Weight w_B of the boundary data in the flux, see getBoundaryData
+   * @param[out] a_stencilCoar Stencil over cells on level a_level - 1
+   * @param[out] a_stencil     Stencil over cells on level a_level
+   * @param[out] a_stencilFine Stencil over cells on level a_level + 1
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cell adjacent to the domain face
+   * @param[in] a_dir   Coordinate direction of the face
+   * @param[in] a_side  Domain side of the face
    */
-  std::pair<VoFStencil, VoFStencil>
-  getFaceFluxStencil(const VolIndex&      a_vof,
-                     const int            a_dir,
-                     const Side::LoHiSide a_side,
+  void
+  getFaceFluxStencil(Real&                a_boundaryWeight,
+                     VoFStencil&          a_stencilCoar,
+                     VoFStencil&          a_stencil,
+                     VoFStencil&          a_stencilFine,
+                     const int            a_phase,
                      const int            a_level,
-                     const DataIndex&     a_din) const override;
+                     const DataIndex&     a_din,
+                     const VolIndex&      a_vof,
+                     const int            a_dir,
+                     const Side::LoHiSide a_side) const override;
 
   /**
-   * @brief Get the constant part of the face flux through a domain face.
-   * @param[in] a_vof  Cell adjacent to the domain face
-   * @param[in] a_dir  Coordinate direction of the face
-   * @param[in] a_side Domain side of the face
-   * @param[in] a_level Level of the cell
-   * @param[in] a_din  Grid index of the cell
-   * @return The flux, -s * dphi/dn with s = -1 on the low side and +1 on the high side.
+   * @brief Get the boundary data, i.e. dphi/dn on the boundary.
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cell adjacent to the domain face
+   * @param[in] a_dir   Coordinate direction of the face
+   * @param[in] a_side  Domain side of the face
+   * @return dphi/dn on the boundary.
    */
   Real
-  getFaceFluxConstant(const VolIndex&      a_vof,
-                      const int            a_dir,
-                      const Side::LoHiSide a_side,
-                      const int            a_level,
-                      const DataIndex&     a_din) const override;
+  getBoundaryData(const int            a_phase,
+                  const int            a_level,
+                  const DataIndex&     a_din,
+                  const VolIndex&      a_vof,
+                  const int            a_dir,
+                  const Side::LoHiSide a_side) const override;
 
 protected:
   /**

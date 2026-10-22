@@ -25,7 +25,10 @@
 /**
  * @brief Robin domain boundary condition A*phi + B*dphi/dn = C for PetscHelmholtzOp.
  * @details As in EBHelmholtzRobinDomainBC, phi is extrapolated linearly to the face from the cell and its interior
- * neighbor, and the flux is C/B + s*A*phi_face/B with s = -1 on the low side and +1 on the high side.
+ * neighbor, and the flux is C/B + s*A*phi_face/B with s = -1 on the low side and +1 on the high side. The interior
+ * neighbor must be a cell on the same level, i.e. not covered by the EB or by a finer grid. Where it is not, the
+ * extrapolation needs a least-squares reconstruction over the valid cells on this level and the next finer level,
+ * which is not implemented yet and aborts.
  */
 class PetscHelmholtzRobinDomainBC : public PetscHelmholtzDomainBC
 {
@@ -62,35 +65,46 @@ public:
 
   /**
    * @brief Get the stencil of the face flux through a domain face.
-   * @param[in] a_vof  Cell adjacent to the domain face
-   * @param[in] a_dir  Coordinate direction of the face
-   * @param[in] a_side Domain side of the face
-   * @param[in] a_level Level of the cell
-   * @param[in] a_din  Grid index of the cell
-   * @return The stencil as (cells on this level, cells on the next finer level).
+   * @param[out] a_boundaryWeight Weight w_B of the boundary data in the flux, see getBoundaryData
+   * @param[out] a_stencilCoar Stencil over cells on level a_level - 1
+   * @param[out] a_stencil     Stencil over cells on level a_level
+   * @param[out] a_stencilFine Stencil over cells on level a_level + 1
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cell adjacent to the domain face
+   * @param[in] a_dir   Coordinate direction of the face
+   * @param[in] a_side  Domain side of the face
    */
-  std::pair<VoFStencil, VoFStencil>
-  getFaceFluxStencil(const VolIndex&      a_vof,
-                     const int            a_dir,
-                     const Side::LoHiSide a_side,
+  void
+  getFaceFluxStencil(Real&                a_boundaryWeight,
+                     VoFStencil&          a_stencilCoar,
+                     VoFStencil&          a_stencil,
+                     VoFStencil&          a_stencilFine,
+                     const int            a_phase,
                      const int            a_level,
-                     const DataIndex&     a_din) const override;
+                     const DataIndex&     a_din,
+                     const VolIndex&      a_vof,
+                     const int            a_dir,
+                     const Side::LoHiSide a_side) const override;
 
   /**
-   * @brief Get the constant part of the face flux through a domain face.
-   * @param[in] a_vof  Cell adjacent to the domain face
-   * @param[in] a_dir  Coordinate direction of the face
-   * @param[in] a_side Domain side of the face
-   * @param[in] a_level Level of the cell
-   * @param[in] a_din  Grid index of the cell
-   * @return The constant part of the flux, C/B.
+   * @brief Get the boundary data, i.e. the coefficient C.
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cell adjacent to the domain face
+   * @param[in] a_dir   Coordinate direction of the face
+   * @param[in] a_side  Domain side of the face
+   * @return C at the face.
    */
   Real
-  getFaceFluxConstant(const VolIndex&      a_vof,
-                      const int            a_dir,
-                      const Side::LoHiSide a_side,
-                      const int            a_level,
-                      const DataIndex&     a_din) const override;
+  getBoundaryData(const int            a_phase,
+                  const int            a_level,
+                  const DataIndex&     a_din,
+                  const VolIndex&      a_vof,
+                  const int            a_dir,
+                  const Side::LoHiSide a_side) const override;
 
 protected:
   /**
@@ -138,19 +152,23 @@ protected:
    * @param[out] a_A    Coefficient on phi
    * @param[out] a_B    Coefficient on dphi/dn
    * @param[out] a_C    Right-hand side
-   * @param[in]  a_iv   Cell adjacent to the domain face
-   * @param[in]  a_dir  Coordinate direction of the face
-   * @param[in]  a_side Domain side of the face
-   * @param[in]  a_level Level of the cell
+   * @param[in]  a_phase Phase
+   * @param[in]  a_level Grid level
+   * @param[in]  a_din   Grid index on the level
+   * @param[in]  a_vof   Cell adjacent to the domain face
+   * @param[in]  a_dir   Coordinate direction of the face
+   * @param[in]  a_side  Domain side of the face
    */
   void
   getCoefficients(Real&                a_A,
                   Real&                a_B,
                   Real&                a_C,
-                  const IntVect&       a_iv,
+                  const int            a_phase,
+                  const int            a_level,
+                  const DataIndex&     a_din,
+                  const VolIndex&      a_vof,
                   const int            a_dir,
-                  const Side::LoHiSide a_side,
-                  const int            a_level) const;
+                  const Side::LoHiSide a_side) const;
 };
 
 #include <CD_NamespaceFooter.H>

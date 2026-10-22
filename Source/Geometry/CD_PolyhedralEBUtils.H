@@ -14,6 +14,10 @@
 #define CD_POLYHEDRALEBUTILS_H
 
 // Chombo includes
+#include <BaseFab.H>
+#include <BaseIF.H>
+#include <Box.H>
+#include <IntVect.H>
 #include <RealVect.H>
 
 // Our includes
@@ -218,7 +222,246 @@ constexpr Real s_weldTolerance = 1.0E-10;
 inline bool
 sameVertex(const RealVect& a_a, const RealVect& a_b) noexcept;
 
+/**
+ * @brief Distance below which two vertices of a body cut from another are one, since they then differ only by the
+ * round-off of the arithmetic that placed them. Far below the weld tolerance, so fluid thinner than the weld keeps its
+ * vertices, and far below the tolerance to which a cut reproduces its parent's moments.
+ */
+constexpr Real s_roundOffTolerance = 1.0E-13;
+
+/**
+ * @brief Whether two vertices differ only by round-off.
+ * @param[in] a_a One vertex.
+ * @param[in] a_b The other.
+ * @return True if they are within s_roundOffTolerance.
+ */
+inline bool
+sameToRoundOff(const RealVect& a_a, const RealVect& a_b) noexcept;
+
+/**
+ * @brief Where the segment between two vertices crosses the plane x[a_dir] = 0, the same to the bit whichever way
+ * round the segment is given.
+ * @details An endpoint on the plane is the crossing itself. Otherwise the crossing is interpolated from the endpoint
+ * below the plane and placed on it exactly, so the two children either side of a cut, and two polygons sharing the
+ * segment, put the vertex in one place.
+ * @param[in] a_a   One endpoint.
+ * @param[in] a_b   The other endpoint, on the other side of the plane or on it.
+ * @param[in] a_dir The direction normal to the plane.
+ * @return The crossing.
+ */
+inline RealVect
+crossing(const RealVect& a_a, const RealVect& a_b, const int a_dir) noexcept;
+
 } // namespace detail
+
+class CutCellBody;
+
+/**
+ * @brief Whether a cut body holds nothing at all and is therefore a regular cell.
+ * @details A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut
+ * from their corners while their bodies hold no solid and no interface whatsoever -- the reconstruction finds
+ * an empty polyhedron. Those cells are regular, and dropping them discards nothing, since there is no surface
+ * in them for a neighbour to meet. Emptiness is exact rather than thresholded: a body with any solid in it,
+ * however little, keeps its cell, because its interface is what closes the surface against its neighbours, and
+ * a rule that discarded it by size would leave a hole the size of what it discarded. A cell whose interface
+ * lies in one of its faces has no solid volume either, but it does have boundary area, and it is not dust.
+ * @param[in] a_body Body of the cell.
+ * @return True if the cell should be treated as regular.
+ */
+bool
+isDust(const PolyhedralEB::CutCellBody& a_body) noexcept;
+
+/**
+ * @brief Evaluate the implicit function at every node of a region.
+ * @details One evaluation per node rather than per cell corner, since the cells meeting at a node share it and must
+ * agree on its value. Values are read through snappedValue.
+ * @param[out] a_nodeValues Node-centred values over a_region
+ * @param[in]  a_function   Implicit function
+ * @param[in]  a_region     Cell-centred region whose nodes are wanted
+ * @param[in]  a_probLo     Lower-left corner of computational domain
+ * @param[in]  a_dx         Grid resolution
+ */
+void
+fillNodeValues(BaseFab<Real>&  a_nodeValues,
+               const BaseIF&   a_function,
+               const Box&      a_region,
+               const RealVect& a_probLo,
+               const Real&     a_dx);
+
+/**
+ * @brief Size the edge-crossing cache for a region and mark every edge as not yet bisected.
+ * @details One fab per direction, over the edges of the region's cells, addressed by the node at the low end of the
+ * edge as edgeCrossing addresses them.
+ * @param[out] a_intercept Edge-centred cache, one fab per direction
+ * @param[in]  a_region    Cell-centred region whose edges are wanted
+ */
+void
+defineIntercepts(BaseFab<Real> a_intercept[SpaceDim], const Box& a_region);
+
+/**
+ * @brief Find where the implicit function changes sign along a cell edge.
+ * @details Bisection between the two endpoints, looked up in a cache first. Every cut edge is reached from both of
+ * its adjoining faces and from each neighbouring cell, always with the same endpoints, so the root is found
+ * once and reused. That is what makes two cells agree on a shared aperture bit for bit.
+ * @param[in]     a_function  Implicit function
+ * @param[in,out] a_intercept Edge-centred cache, one component per direction
+ * @param[in]     a_cell      Cell the edge is being read from
+ * @param[in]     a_edge      Edge index within the cell
+ * @param[in]     a_lo        Implicit function at the edge's low corner
+ * @param[in]     a_hi        Implicit function at the edge's high corner
+ * @param[in]     a_probLo    Lower-left corner of computational domain
+ * @param[in]     a_dx        Grid resolution
+ * @return Position along the edge, parameterised from its low corner.
+ */
+Real
+edgeCrossing(const BaseIF&   a_function,
+             BaseFab<Real>   a_intercept[SpaceDim],
+             const IntVect&  a_cell,
+             const int       a_edge,
+             const Real      a_lo,
+             const Real      a_hi,
+             const RealVect& a_probLo,
+             const Real&     a_dx);
+
+/**
+ * @brief Read one cell's corner values off the node values.
+ * @details Corner c of the cell is the node offset by ((c >> d) & 1) in each direction d.
+ * @param[out] a_surface    Surface whose corners are filled. Its crossings are left alone.
+ * @param[in]  a_nodeValues Node-centred implicit function values
+ * @param[in]  a_cell       The cell
+ */
+void
+fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_nodeValues, const IntVect& a_cell);
+
+/**
+ * @brief Gather the corner values and edge crossings one cell's surface is built from.
+ * @details The corners come from the shared node values and every edge whose ends disagree gets its crossing through
+ * the shared cache, so every caller that reconstructs a cell -- the graph, the surface pass and the grid
+ * builder's curvature test -- builds the same cell.
+ * @param[in,out] a_intercept  Edge-centred crossing cache
+ * @param[out]    a_surface    The values the cell's body is reconstructed from
+ * @param[in]     a_function   Implicit function
+ * @param[in]     a_nodeValues Node-centred implicit function values
+ * @param[in]     a_cell       The cell
+ * @param[in]     a_probLo     Lower-left corner of computational domain
+ * @param[in]     a_dx         Grid resolution
+ */
+void
+buildSurface(BaseFab<Real>                 a_intercept[SpaceDim],
+             PolyhedralEB::CutCellSurface& a_surface,
+             const BaseIF&                 a_function,
+             const BaseFab<Real>&          a_nodeValues,
+             const IntVect&                a_cell,
+             const RealVect&               a_probLo,
+             const Real&                   a_dx);
+
+/**
+ * @brief Decide, for every face of a cell whose corners alternate in sign, whether its fluid corners or its solid
+ * ones meet across it.
+ * @details Four alternating corners admit both readings, and the bilinear interpolant of the corners picks the one
+ * its saddle falls on, which for a feature thinner than the face is the wrong one: the large values at two corners
+ * outweigh the small ones of a thin plate at the other two, and the chords pierce the plate. The implicit function
+ * at the centre of the face is read instead, with the value snap of a grid twice as fine, so that it is the very
+ * node a finer level holds there. Every cell sharing the face reads the same point. A centre that reads exactly
+ * zero falls back to the bilinear saddle. In two dimensions the face is the cell itself.
+ * @param[in,out] a_surface  Surface whose corners are filled; its face decisions are set.
+ * @param[in]     a_function Implicit function.
+ * @param[in]     a_cell     The cell.
+ * @param[in]     a_probLo   Lower-left corner of the domain.
+ * @param[in]     a_dx       Grid spacing.
+ */
+void
+decideFaces(PolyhedralEB::CutCellSurface& a_surface,
+            const BaseIF&                 a_function,
+            const IntVect&                a_cell,
+            const RealVect&               a_probLo,
+            const Real                    a_dx) noexcept;
+
+/**
+ * @brief Bisect one cell edge for the crossing on it.
+ * @details An endpoint at exactly zero is not taken to be the crossing: the function may be zero along a stretch of
+ * the edge (a face of the geometry lying in the edge's plane), and the crossing is where it leaves that
+ * stretch. The bisection walks through zeros, which the fluid predicate reads as solid, and a root that
+ * lands within s_snapTolerance of an endpoint that is exactly zero is put exactly on it.
+ * @param[in] a_function Implicit function.
+ * @param[in] a_edgeIV   Node at the low end of the edge.
+ * @param[in] a_dir      Direction the edge runs in.
+ * @param[in] a_loValue  Implicit function at the low end.
+ * @param[in] a_hiValue  Implicit function at the high end.
+ * @param[in] a_probLo   Lower-left corner of the domain.
+ * @param[in] a_dx       Grid spacing.
+ * @return Position along the edge, in [0,1].
+ */
+Real
+edgeRoot(const BaseIF&   a_function,
+         const IntVect&  a_edgeIV,
+         const int       a_dir,
+         const Real      a_loValue,
+         const Real      a_hiValue,
+         const RealVect& a_probLo,
+         const Real      a_dx) noexcept;
+
+/**
+ * @brief Fraction of a cell width within which an implicit-function value is read as exactly zero.
+ */
+constexpr Real s_snapTolerance = 1.0E-12;
+
+/**
+ * @brief Distance along an edge, from an endpoint that is exactly zero, within which a root is put on it.
+ * @details A surface tangent to a node reads as zero for a stretch either side of it under the value snap, of length
+ * about sqrt(2 R tol / dx) for a radius of curvature R -- a few parts in 1e6 of an edge for any R that is
+ * not itself below the cell width. A root that close to a corner the surface passes through is that
+ * stretch's end, not a second crossing; a genuine second crossing within 1e-4 of a cell width of the first
+ * would be a feature no cell resolves.
+ */
+constexpr Real s_rootSnap = 1.0E-4;
+
+/**
+ * @brief Fraction of a cell width the implicit function is read at either side of a point, to tell a surface
+ * through the point from a zero no surface passes through.
+ * @details Large enough that a function of unit gradient reads well clear of s_snapTolerance beside the point, and
+ * small enough that the reading belongs to the point rather than to its neighbourhood.
+ */
+constexpr Real s_probeSpacing = 1.0E-6;
+
+/**
+ * @brief Read the implicit function at a point, with a value within s_snapTolerance of a cell width of
+ * zero read as exactly zero, and a zero that is a tangency read from beside the point instead.
+ * @details A face of the geometry lying in a node plane evaluates to zero there only up to round-off: the same face
+ * comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring nodes, and cells on either
+ * side of it would then be classified by which of those they were handed. Reading everything within a fixed
+ * fraction of the cell width of zero as zero puts every such node on one side by rule, in the corner values
+ * and in the bisection alike. A zero that no surface passes through is then read through resolveTangency, so
+ * that nothing downstream sees it.
+ * @param[in] a_function Implicit function.
+ * @param[in] a_point    Point to evaluate at.
+ * @param[in] a_dx       Grid spacing that sets the scale.
+ * @return The value, or exactly zero.
+ */
+Real
+snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
+
+/**
+ * @brief Read the implicit function beside a point where it is zero, when no surface passes through the point.
+ * @details A composite function can be zero over a whole region that is not its surface: a difference of two bodies
+ * sharing a face evaluates to the maximum of zero and something negative over the whole of that face. Taken
+ * at face value such a zero is material by the fluid rule, and it invents an interface where the geometry
+ * has none and displaces the interfaces of whatever else the cell holds. It is told apart from a surface by
+ * the function's sign a probe spacing off the point, along each axis in turn. A surface through the point
+ * changes the sign across it along any axis the surface is not parallel to, and since a surface has a normal
+ * there is always such an axis, so one sign change is enough to leave the zero alone. The zero is read
+ * through only on the evidence of an axis whose two readings are both away from zero and of the same sign,
+ * which is what a function that touches zero without a surface being there looks like; the largest such
+ * reading stands in for the zero. One reading of zero is not evidence of anything -- it is the point's own
+ * zero again, which is what an axis along a face of the geometry returns, and what both axes along the
+ * faces meeting at a convex edge return.
+ * @param[in] a_function Implicit function.
+ * @param[in] a_point    Point the function is zero at.
+ * @param[in] a_dx       Grid spacing that sets the probe spacing.
+ * @return The reading beside the point, or exactly zero if a surface passes through it.
+ */
+Real
+resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
 } // namespace PolyhedralEB
 
 #include <CD_NamespaceFooter.H>

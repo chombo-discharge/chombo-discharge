@@ -160,7 +160,7 @@ public:
   setupSolver() override;
 
   /**
-   * @brief Change the permittivities used by the solver, and reassemble the operator.
+   * @brief Change the permittivities used by the solver. Not supported yet, and aborts.
    * @param[in] a_permittivityCell Cell-centered permittivity
    * @param[in] a_permittivityFace Face-centered permittivity
    * @param[in] a_permittivityEB   EB-centered permittivity
@@ -187,7 +187,7 @@ protected:
   bool m_isSolverSetup;
 
   /**
-   * @brief PETSc Krylov solver type, e.g. 'cg' or 'gmres'.
+   * @brief PETSc Krylov solver type, KSPBCGS or KSPGMRES, from the 'bicgstab' or 'gmres' option.
    */
   std::string m_kspType;
 

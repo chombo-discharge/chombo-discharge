@@ -20,7 +20,17 @@
 
 // Chombo includes
 #include <BaseFab.H>
+#include <BaseIF.H>
+#include <EBData.H>
+#include <EBGraph.H>
+#include <FArrayBox.H>
 #include <IntVectSet.H>
+#include <IrregNode.H>
+#include <LevelData.H>
+
+#ifdef CH_USE_HDF5
+#include <hdf5.h>
+#endif
 
 // Our includes
 #include <CD_AMRPolyhedralEBGraph.H>
@@ -140,6 +150,33 @@ public:
   PolyhedralGeometryShop&
   operator=(const PolyhedralGeometryShop& a_other) = delete;
 
+  using ScanShop::InsideOutside;
+
+  /**
+   * @brief Whether a box is all regular, all covered or holds the surface, as EBISLevel asks it of a region.
+   * @details Answered from the boxes the geometry's grids classify (ComputationalGeometry::classify), which the
+   * graph's cut tiles come from, so the index space treats as uniform exactly what the graph does. The scan
+   * ScanShop answers from samples the implicit function at each level's own spacing and reads it as a distance, so it
+   * can call a coarse box covered while the coarsened finer cells hold fluid. EBISLevel fills a ghost graph from that
+   * answer before it copies the coarsened graph over it, and then reads a regular cell beside a cell with no face
+   * toward it. EBISLevel also passes a region of the level above or below on a domain, so the region is classified
+   * as lying on the domain, one level finer and one level coarser, and is uniform only if all three agree. A domain
+   * coarser than every level the grids describe is answered as irregular, which is always safe. Before setGrids,
+   * ScanShop answers.
+   * @param[in] a_region Region to classify.
+   * @param[in] a_domain Domain of the region.
+   * @param[in] a_probLo Lower-left corner of the domain.
+   * @param[in] a_dx     Grid spacing.
+   * @param[in] a_dit    Grid index.
+   * @return Regular, covered or irregular.
+   */
+  GeometryService::InOut
+  InsideOutside(const Box&           a_region,
+                const ProblemDomain& a_domain,
+                const RealVect&      a_probLo,
+                const Real&          a_dx,
+                const DataIndex&     a_dit) const override;
+
   /**
    * @brief Fill the graph and the nodes for one box.
    * @details Classifies the cells, reuses GeometryShop's fix-up for the regular cells bordering a covered one, and then
@@ -189,6 +226,55 @@ public:
    */
   const PolyhedralEBGraph&
   getGraph(const int a_level) const noexcept;
+
+  /**
+   * @brief Compute the index-space data on the geometry's own grids, from the graph and nothing else.
+   * @details One LevelData<EBGraph> and one LevelData<EBData> per level, over every box the geometry built on it, as
+   * EBISLevel keeps them: the graph with one ghost cell, the moments with none. The graph is copied onto the grids
+   * first, so that every box holds what it needs. Finest level first: a level's own cells take what the graph says --
+   * regular, covered, or the moments of the stitched body -- and its cells under the next finer level are coarsened
+   * from that level by Chombo's coarsening (coarsenLevel), then joined to the level's own (assembleLevel). Under
+   * PolyhedralGeometryShop.test_copy every coarsened cell is checked against the sums over its children. Collective.
+   * Requires buildGraphs.
+   */
+  void
+  buildMoments();
+
+  /**
+   * @brief The index-space graph buildMoments made for a level.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The graph, over the level's boxes.
+   */
+  const LevelData<EBGraph>&
+  getEBGraph(const int a_level) const;
+
+  /**
+   * @brief The index-space moments buildMoments made for a level.
+   * @param[in] a_level Level, 0 being the coarsest of the geometry's levels.
+   * @return The moments, over the level's boxes.
+   */
+  const LevelData<EBData>&
+  getEBData(const int a_level) const;
+
+  /**
+   * @brief Fill any layout on any level with its index space: graph and first moments, ghost cells included.
+   * @details The graph is copied onto the layout, and then each cell in the geometry's boxes on the level takes what
+   * buildMoments made there, and each cell outside them is cut from the coarser cell it lies in. Nothing evaluates the
+   * implicit function. Collective. Requires buildMoments.
+   * @param[out] a_graph      The graph, defined here over the layout with a_graphGhost ghost cells.
+   * @param[out] a_data       The moments, defined here over the layout with a_dataGhost ghost cells.
+   * @param[in]  a_grids      The layout.
+   * @param[in]  a_domain     Its domain: one of the geometry's, or one refined from the finest by two per level.
+   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
+   * @param[in]  a_dataGhost  Ghost width of the moments.
+   */
+  void
+  fillLayout(LevelData<EBGraph>&      a_graph,
+             LevelData<EBData>&       a_data,
+             const DisjointBoxLayout& a_grids,
+             const ProblemDomain&     a_domain,
+             const int                a_graphGhost,
+             const int                a_dataGhost) const;
 
   /**
    * @brief Build the polyhedra over the grids, check that they form a surface, and write it if asked.
@@ -423,6 +509,98 @@ public:
   testCopyBodies() const;
 
   /**
+   * @brief Check the index-space data buildMoments made against the graph it came from.
+   * @details On every level built, each cell is what the graph says it is, and each VoF of a cut cell carries the
+   * moments of the cell's stitched body exactly: volume fraction and centroid, boundary centroid, and per face the
+   * aperture and centroid. Collective. Switched by PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testMoments() const;
+
+  /**
+   * @brief Check fillLayout on every level of the geometry and one past the finest, onto the level's boxes in octants
+   * and onto the boxes of the level below refined.
+   * @details The cells the geometry's level holds must arrive bit for bit, every ghost cell must equal the cell its own
+   * box holds to round-off, every face must read the same aperture from its two sides, and every cell of the level
+   * below must be the sum of the cells it holds, to round-off. Collective. Switched by
+   * PolyhedralGeometryShop.test_copy.
+   */
+  void
+  testFill() const;
+
+  /**
+   * @brief Fill a destination level of a copied graph with its index space: graph and first moments, ghost cells
+   * included.
+   * @details A cell in the geometry's boxes on the level takes what buildMoments made there -- its own body, or the
+   * VoFs coarsened from the finer level -- and a cell outside them is cut from the coarser cell it lies in, from the
+   * copied graph. A regular cell beside a multi-valued one is written as a full cut cell. A cut cell a finer level owns
+   * outside the geometry's boxes on the level stops the run. Collective.
+   * @param[out] a_graph      The graph, defined here over the level's layout with a_graphGhost ghost cells.
+   * @param[out] a_data       The moments, defined here over the level's layout with a_dataGhost ghost cells.
+   * @param[in]  a_copy       The graph copied onto a destination hierarchy, with a ghost width above a_graphGhost.
+   * @param[in]  a_level      Destination level to fill.
+   * @param[in]  a_graphGhost Ghost width of the graph, above a_dataGhost.
+   * @param[in]  a_dataGhost  Ghost width of the moments.
+   */
+  void
+  fillLevel(LevelData<EBGraph>&         a_graph,
+            LevelData<EBData>&          a_data,
+            const AMRPolyhedralEBGraph& a_copy,
+            const int                   a_level,
+            const int                   a_graphGhost,
+            const int                   a_dataGhost) const;
+
+  /**
+   * @brief Coarsen a level of the index space onto its coarsened layout.
+   * @details Reads the finished fine level only. The children of a coarse cell are all inside the fine boxes, which
+   * are blocked by two. Each coarse cell's VoFs are the pieces its children's VoFs fall into when joined through the
+   * fine faces between sibling cells, and each carries the sums of its fine VoFs' volumes and first moments, and its
+   * boundary centroid weighted by their boundary areas. A coarse face is split by the VoF across that its fine faces
+   * lead into: a piece of the coarse cell across when that cell is coarsened too, the one VoF of a cell the level owns,
+   * or the domain boundary; its aperture is the scaled sum of those fine apertures, and its centroid their
+   * aperture-weighted mean. Every sum runs in an order fixed by the fine level, so every box writes a coarse face with
+   * the same bits. Coarse nodes are written for the valid cells only. Under PolyhedralGeometryShop.test_copy every
+   * coarse cell's volume, first moment and apertures are compared with the sums over its children, and a cell differing
+   * by more than round-off is counted.
+   * @param[out] a_coarGraph  Coarsened graph, defined here over the coarsened fine layout.
+   * @param[out] a_coarData   Coarsened moments, defined here over the coarsened fine layout.
+   * @param[out] a_numInexact Incremented for every coarse cell that is not the sum of its children.
+   * @param[in]  a_grids      The geometry's grids.
+   * @param[in]  a_domains    Their domains.
+   * @param[in]  a_fineLevel  Level to coarsen, already built.
+   */
+  void
+  coarsenLevel(LevelData<EBGraph>&                   a_coarGraph,
+               LevelData<EBData>&                    a_coarData,
+               long long&                            a_numInexact,
+               const std::vector<DisjointBoxLayout>& a_grids,
+               const std::vector<ProblemDomain>&     a_domains,
+               const int                             a_fineLevel) const;
+
+  /**
+   * @brief Build a level of the index space from its own cells and the cells coarsened from the level above.
+   * @details The level's own cells take what the copied graph says. Its cells under the next finer level take the
+   * coarsened VoFs, and an own cell beside one takes the faces between them from the coarsened side, which knows which
+   * VoF each leads into. A regular cell, own or coarsened, beside a cell of more than one VoF is written as a full cut
+   * cell, since a regular cell connects to one VoF only; this changes no moment.
+   * @param[out] a_numPromoted     Incremented for every regular cell written as a full cut cell.
+   * @param[in]  a_copy            The graph copied onto the geometry's grids.
+   * @param[in]  a_coarsenedGraph  coarsenLevel's graph for the level above, or null on the finest level.
+   * @param[in]  a_coarsenedData   coarsenLevel's moments for the level above, or null on the finest level.
+   * @param[in]  a_grids           The geometry's grids.
+   * @param[in]  a_domains         Their domains.
+   * @param[in]  a_level           Level to build.
+   */
+  void
+  assembleLevel(long long&                            a_numPromoted,
+                const AMRPolyhedralEBGraph&           a_copy,
+                const LevelData<EBGraph>*             a_coarsenedGraph,
+                const LevelData<EBData>*              a_coarsenedData,
+                const std::vector<DisjointBoxLayout>& a_grids,
+                const std::vector<ProblemDomain>&     a_domains,
+                const int                             a_level);
+
+  /**
    * @brief A layout over given boxes with the ranks shuffled: they walk the rank list with a stride coprime to its
    * length, so that no rank holds what a load balance would have given it. For the copy tests.
    * @param[in] a_boxes  The boxes.
@@ -433,235 +611,41 @@ public:
   shuffledLayout(const Vector<Box>& a_boxes, const ProblemDomain& a_domain);
 
   /**
-   * @brief Whether a cut body holds nothing at all and is therefore a regular cell.
-   * @details A node that lands exactly on the interface is solid by rule, so the cells around it classify as cut
-   * from their corners while their bodies hold no solid and no interface whatsoever -- the reconstruction finds
-   * an empty polyhedron. Those cells are regular, and dropping them discards nothing, since there is no surface
-   * in them for a neighbour to meet. Emptiness is exact rather than thresholded: a body with any solid in it,
-   * however little, keeps its cell, because its interface is what closes the surface against its neighbours, and
-   * a rule that discarded it by size would leave a hole the size of what it discarded. A cell whose interface
-   * lies in one of its faces has no solid volume either, but it does have boundary area, and it is not dust.
-   * @param[in] a_body Body of the cell.
-   * @return True if the cell should be treated as regular.
-   */
-  static bool
-  isDust(const PolyhedralEB::CutCellBody& a_body) noexcept;
-
-  /**
-   * @brief Evaluate the implicit function at every node of a region.
-   * @details One evaluation per node rather than per cell corner, since the cells meeting at a node share it and must
-   * agree on its value. Values are read through snappedValue.
-   * @param[in]  a_function   Implicit function
-   * @param[out] a_nodeValues Node-centred values over a_region
-   * @param[in]  a_region     Cell-centred region whose nodes are wanted
-   * @param[in]  a_probLo     Lower-left corner of computational domain
-   * @param[in]  a_dx         Grid resolution
+   * @brief Write a cut cell's node from its body.
+   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
+   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come
+   * from the body. Reads nothing of the shop, so the copied graph writes its nodes with it too.
+   * @param[out] a_node             The node to fill
+   * @param[in]  a_body             The cell's assembled polyhedron
+   * @param[in]  a_regIrregCovered  Regular/Covered/Irregular cells
+   * @param[in]  a_cell             The cell
+   * @param[in]  a_domain           Domain
    */
   static void
-  fillNodeValues(const BaseIF&   a_function,
-                 BaseFab<Real>&  a_nodeValues,
-                 const Box&      a_region,
-                 const RealVect& a_probLo,
-                 const Real&     a_dx);
-
-  /**
-   * @brief Size the edge-crossing cache for a region and mark every edge as not yet bisected.
-   * @details One fab per direction, over the edges of the region's cells, addressed by the node at the low end of the
-   * edge as edgeCrossing addresses them.
-   * @param[out] a_intercept Edge-centred cache, one fab per direction
-   * @param[in]  a_region    Cell-centred region whose edges are wanted
-   */
-  static void
-  defineIntercepts(BaseFab<Real> a_intercept[SpaceDim], const Box& a_region);
-
-  /**
-   * @brief Find where the implicit function changes sign along a cell edge.
-   * @details Bisection between the two endpoints, looked up in a cache first. Every cut edge is reached from both of
-   * its adjoining faces and from each neighbouring cell, always with the same endpoints, so the root is found
-   * once and reused. That is what makes two cells agree on a shared aperture bit for bit.
-   * @param[in]     a_function  Implicit function
-   * @param[in,out] a_intercept Edge-centred cache, one component per direction
-   * @param[in]     a_cell      Cell the edge is being read from
-   * @param[in]     a_edge      Edge index within the cell
-   * @param[in]     a_lo        Implicit function at the edge's low corner
-   * @param[in]     a_hi        Implicit function at the edge's high corner
-   * @param[in]     a_probLo    Lower-left corner of computational domain
-   * @param[in]     a_dx        Grid resolution
-   * @return Position along the edge, parameterised from its low corner.
-   */
-  static Real
-  edgeCrossing(const BaseIF&   a_function,
-               BaseFab<Real>   a_intercept[SpaceDim],
-               const IntVect&  a_cell,
-               const int       a_edge,
-               const Real      a_lo,
-               const Real      a_hi,
-               const RealVect& a_probLo,
-               const Real&     a_dx);
-
-  /**
-   * @brief Read one cell's corner values off the node values.
-   * @details Corner c of the cell is the node offset by ((c >> d) & 1) in each direction d.
-   * @param[out] a_surface    Surface whose corners are filled. Its crossings are left alone.
-   * @param[in]  a_nodeValues Node-centred implicit function values
-   * @param[in]  a_cell       The cell
-   */
-  static void
-  fillCorners(PolyhedralEB::CutCellSurface& a_surface, const BaseFab<Real>& a_nodeValues, const IntVect& a_cell);
-
-  /**
-   * @brief Gather the corner values and edge crossings one cell's surface is built from.
-   * @details The corners come from the shared node values and every edge whose ends disagree gets its crossing through
-   * the shared cache, so every caller that reconstructs a cell -- the graph, the surface pass and the grid
-   * builder's curvature test -- builds the same cell.
-   * @param[in]     a_function   Implicit function
-   * @param[in,out] a_intercept  Edge-centred crossing cache
-   * @param[out]    a_surface    The values the cell's body is reconstructed from
-   * @param[in]     a_nodeValues Node-centred implicit function values
-   * @param[in]     a_cell       The cell
-   * @param[in]     a_probLo     Lower-left corner of computational domain
-   * @param[in]     a_dx         Grid resolution
-   */
-  static void
-  buildSurface(const BaseIF&                 a_function,
-               BaseFab<Real>                 a_intercept[SpaceDim],
-               PolyhedralEB::CutCellSurface& a_surface,
-               const BaseFab<Real>&          a_nodeValues,
-               const IntVect&                a_cell,
-               const RealVect&               a_probLo,
-               const Real&                   a_dx);
-
-  /**
-   * @brief Decide, for every face of a cell whose corners alternate in sign, whether its fluid corners or its solid
-   * ones meet across it.
-   * @details Four alternating corners admit both readings, and the bilinear interpolant of the corners picks the one
-   * its saddle falls on, which for a feature thinner than the face is the wrong one: the large values at two corners
-   * outweigh the small ones of a thin plate at the other two, and the chords pierce the plate. The implicit function
-   * at the centre of the face is read instead, with the value snap of a grid twice as fine, so that it is the very
-   * node a finer level holds there. Every cell sharing the face reads the same point. A centre that reads exactly
-   * zero falls back to the bilinear saddle. In two dimensions the face is the cell itself.
-   * @param[in]     a_function Implicit function.
-   * @param[in,out] a_surface  Surface whose corners are filled; its face decisions are set.
-   * @param[in]     a_cell     The cell.
-   * @param[in]     a_probLo   Lower-left corner of the domain.
-   * @param[in]     a_dx       Grid spacing.
-   */
-  static void
-  decideFaces(const BaseIF&                 a_function,
-              PolyhedralEB::CutCellSurface& a_surface,
-              const IntVect&                a_cell,
-              const RealVect&               a_probLo,
-              const Real                    a_dx) noexcept;
-
-  /**
-   * @brief Bisect one cell edge for the crossing on it.
-   * @details An endpoint at exactly zero is not taken to be the crossing: the function may be zero along a stretch of
-   * the edge (a face of the geometry lying in the edge's plane), and the crossing is where it leaves that
-   * stretch. The bisection walks through zeros, which the fluid predicate reads as solid, and a root that
-   * lands within s_snapTolerance of an endpoint that is exactly zero is put exactly on it.
-   * @param[in] a_function Implicit function.
-   * @param[in] a_edgeIV   Node at the low end of the edge.
-   * @param[in] a_dir      Direction the edge runs in.
-   * @param[in] a_loValue  Implicit function at the low end.
-   * @param[in] a_hiValue  Implicit function at the high end.
-   * @param[in] a_probLo   Lower-left corner of the domain.
-   * @param[in] a_dx       Grid spacing.
-   * @return Position along the edge, in [0,1].
-   */
-  static Real
-  edgeRoot(const BaseIF&   a_function,
-           const IntVect&  a_edgeIV,
-           const int       a_dir,
-           const Real      a_loValue,
-           const Real      a_hiValue,
-           const RealVect& a_probLo,
-           const Real      a_dx) noexcept;
-
-  /**
-   * @brief Fraction of a cell width within which an implicit-function value is read as exactly zero.
-   */
-  static constexpr Real s_snapTolerance = 1.0E-12;
-
-  /**
-   * @brief Distance along an edge, from an endpoint that is exactly zero, within which a root is put on it.
-   * @details A surface tangent to a node reads as zero for a stretch either side of it under the value snap, of length
-   * about sqrt(2 R tol / dx) for a radius of curvature R -- a few parts in 1e6 of an edge for any R that is
-   * not itself below the cell width. A root that close to a corner the surface passes through is that
-   * stretch's end, not a second crossing; a genuine second crossing within 1e-4 of a cell width of the first
-   * would be a feature no cell resolves.
-   */
-  static constexpr Real s_rootSnap = 1.0E-4;
-
-  /**
-   * @brief Fraction of a cell width the implicit function is read at either side of a point, to tell a surface
-   * through the point from a zero no surface passes through.
-   * @details Large enough that a function of unit gradient reads well clear of s_snapTolerance beside the point, and
-   * small enough that the reading belongs to the point rather than to its neighbourhood.
-   */
-  static constexpr Real s_probeSpacing = 1.0E-6;
-
-  /**
-   * @brief Read the implicit function at a point, with a value within s_snapTolerance of a cell width of
-   * zero read as exactly zero, and a zero that is a tangency read from beside the point instead.
-   * @details A face of the geometry lying in a node plane evaluates to zero there only up to round-off: the same face
-   * comes back as plus zero, minus zero and a few parts in 1e19 at neighbouring nodes, and cells on either
-   * side of it would then be classified by which of those they were handed. Reading everything within a fixed
-   * fraction of the cell width of zero as zero puts every such node on one side by rule, in the corner values
-   * and in the bisection alike. A zero that no surface passes through is then read through resolveTangency, so
-   * that nothing downstream sees it.
-   * @param[in] a_function Implicit function.
-   * @param[in] a_point    Point to evaluate at.
-   * @param[in] a_dx       Grid spacing that sets the scale.
-   * @return The value, or exactly zero.
-   */
-  static Real
-  snappedValue(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
-
-  /**
-   * @brief Read the implicit function beside a point where it is zero, when no surface passes through the point.
-   * @details A composite function can be zero over a whole region that is not its surface: a difference of two bodies
-   * sharing a face evaluates to the maximum of zero and something negative over the whole of that face. Taken
-   * at face value such a zero is material by the fluid rule, and it invents an interface where the geometry
-   * has none and displaces the interfaces of whatever else the cell holds. It is told apart from a surface by
-   * the function's sign a probe spacing off the point, along each axis in turn. A surface through the point
-   * changes the sign across it along any axis the surface is not parallel to, and since a surface has a normal
-   * there is always such an axis, so one sign change is enough to leave the zero alone. The zero is read
-   * through only on the evidence of an axis whose two readings are both away from zero and of the same sign,
-   * which is what a function that touches zero without a surface being there looks like; the largest such
-   * reading stands in for the zero. One reading of zero is not evidence of anything -- it is the point's own
-   * zero again, which is what an axis along a face of the geometry returns, and what both axes along the
-   * faces meeting at a convex edge return.
-   * @param[in] a_function Implicit function.
-   * @param[in] a_point    Point the function is zero at.
-   * @param[in] a_dx       Grid spacing that sets the probe spacing.
-   * @return The reading beside the point, or exactly zero if a surface passes through it.
-   */
-  static Real
-  resolveTangency(const BaseIF& a_function, const RealVect& a_point, const Real a_dx) noexcept;
-
-  /**
-   * @brief Whether the graph filled a cell: covered, with corners that disagree, and not carried by the finer level.
-   * @details The one kind of covered neighbour a cut cell's face has to be closed onto. A covered cell whose corners
-   * agree closes the face by its corners already, and a cell the finer level carries is described up there.
-   * @param[in] a_states      Cell states around the cell.
-   * @param[in] a_refined     Refined mask around the cell.
-   * @param[in] a_withSurface Cells around the cell that hold a surface.
-   * @param[in] a_surfaces    Their surfaces.
-   * @param[in] a_cell        The cell.
-   * @return True if the cell was filled.
-   */
-  static bool
-  isFilled(const BaseFab<signed char>&                 a_states,
-           const BaseFab<signed char>&                 a_refined,
-           const IntVectSet&                           a_withSurface,
-           const IVSFAB<PolyhedralEB::CutCellSurface>& a_surfaces,
-           const IntVect&                              a_cell);
+  fillNode(IrregNode&                       a_node,
+           const PolyhedralEB::CutCellBody& a_body,
+           const BaseFab<int>&              a_regIrregCovered,
+           const IntVect&                   a_cell,
+           const ProblemDomain&             a_domain);
 
 protected:
   /**
    * @brief Vertices of one element of the written surface: a triangle in three dimensions, a segment in two.
    */
   static constexpr int s_elementVertices = SpaceDim;
+
+  /**
+   * @brief Width of the ring the graph is copied onto the geometry's grids with for buildMoments.
+   * @details assembleLevel builds each box with one ghost cell, fillNodes writes nodes one cell short of the copied
+   * ring, and a node's face toward a cut cell below it reads that cell's body, one cell further out. Nothing to do with
+   * the ghost cells a solver asks of the index space.
+   */
+  static constexpr int s_momentRing = 2;
+
+  /**
+   * @brief Number of components cellSignature writes: the VoF count, the volume, the first moment and the apertures.
+   */
+  static constexpr int s_signatureComps = 2 + 3 * SpaceDim;
 
   /**
    * @brief Kind of a node of the written graph: a cut cell, at its fluid's centroid.
@@ -719,6 +703,16 @@ protected:
   Vector<RefCountedPtr<PolyhedralEBGraph>> m_graphs;
 
   /**
+   * @brief Index-space graph of every level buildMoments built, over the geometry's boxes; null where it built none.
+   */
+  Vector<RefCountedPtr<LevelData<EBGraph>>> m_ebGraphs;
+
+  /**
+   * @brief Index-space moments of every level buildMoments built, over the geometry's boxes; null where it built none.
+   */
+  Vector<RefCountedPtr<LevelData<EBData>>> m_ebData;
+
+  /**
    * @brief Phase this generator serves on those grids.
    */
   phase::which_phase m_phase;
@@ -765,6 +759,12 @@ protected:
    * default.
    */
   UnresolvedAction m_unresolvedAction;
+
+  /**
+   * @brief Whether a cell whose fluid falls into more than one piece is always filled (true), or only when its fluid is
+   * the larger part of it (false). PolyhedralGeometryShop.fill_split_fluid, always by default, or majority.
+   */
+  bool m_fillSplitFluid;
 
   /**
    * @brief Whether verifySurface runs testGraphCopy. PolyhedralGeometryShop.test_copy, off by default.
@@ -833,6 +833,7 @@ protected:
    * crossed edge stops the run.
    * @param[out]    a_body        The body.
    * @param[in,out] a_surface     The cell's surface; its refined edges' crossings are rewritten.
+   * @param[in,out] a_overrides   Overrides to record the changed faces in, with the cell begun; null records nothing.
    * @param[in]     a_children    The cell's eight children in corner order, which must be given when any edge is
    * refined and describe at least the cell's refined faces and edges; null otherwise.
    * @param[in]     a_edgeRefined Which edges are refined, from edgesRefined.
@@ -843,20 +844,19 @@ protected:
    * the finer level's fills.
    * @param[in]     a_domain      Domain box of the cell's level.
    * @param[in]     a_cell        The cell.
-   * @param[in,out] a_overrides   Overrides to record the changed faces in, with the cell begun; null records nothing.
    * @return Number of quadrants closed onto filled finer cells.
    */
   static int
   stitchBody(PolyhedralEB::CutCellBody&          a_body,
              PolyhedralEB::CutCellSurface&       a_surface,
+             PolyhedralEB::CutCellFaceOverrides* a_overrides,
              const PolyhedralEB::CutCellSurface* a_children,
              const bool*                         a_edgeRefined,
              const BaseFab<signed char>&         a_filled,
              const BaseFab<signed char>&         a_refined,
              const BaseFab<signed char>*         a_fineFilled,
              const Box&                          a_domain,
-             const IntVect&                      a_cell,
-             PolyhedralEB::CutCellFaceOverrides* a_overrides);
+             const IntVect&                      a_cell);
 
   /**
    * @brief Stitch a cut cell's body with its children reconstructed from the implicit function.
@@ -939,22 +939,22 @@ protected:
    * @details The cell states, a mask of the cells that hold a surface, the sets of those cells and their surfaces --
    * everything a cell of the finer level is rebuilt from, apart from faces it restricts to a level above it. Cells
    * the finer level does not hold read s_absent. Collective.
-   * @param[in]  a_fine     The finer level.
-   * @param[in]  a_grids    The coarser level's layout.
-   * @param[in]  a_ring     Width of the ring around every box, in cells of the coarser level.
    * @param[out] a_states   Cell states.
    * @param[out] a_mask     One where a cell holds a surface.
    * @param[out] a_sets     The cells that hold a surface, per box.
    * @param[out] a_surfaces Their surfaces.
+   * @param[in]  a_fine     The finer level.
+   * @param[in]  a_grids    The coarser level's layout.
+   * @param[in]  a_ring     Width of the ring around every box, in cells of the coarser level.
    */
   static void
-  copyFinerCells(const PolyhedralEBGraph&                         a_fine,
-                 const DisjointBoxLayout&                         a_grids,
-                 const int                                        a_ring,
-                 LevelData<BaseFab<signed char>>&                 a_states,
+  copyFinerCells(LevelData<BaseFab<signed char>>&                 a_states,
                  LevelData<BaseFab<signed char>>&                 a_mask,
                  LayoutData<IntVectSet>&                          a_sets,
-                 LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces);
+                 LevelData<IVSFAB<PolyhedralEB::CutCellSurface>>& a_surfaces,
+                 const PolyhedralEBGraph&                         a_fine,
+                 const DisjointBoxLayout&                         a_grids,
+                 const int                                        a_ring);
 
   /**
    * @brief Stitch one level: take its refined edges' crossings and its seam faces from the finer level's stored cells,
@@ -964,11 +964,12 @@ protected:
    * A quadrant of a seam face across which the finer level filled a cell is closed. A regular or covered cell beside
    * the finer level is made cut where the finer level describes the face between them otherwise than the cell's
    * corners do -- the node at the middle of the face on the other side, or a filled cell across a quadrant of a regular
-   * one -- and stitched like any other; a node at the middle of such a face's edge that disagrees with the edge's ends
-   * is an edge the finer level crosses twice, which is counted and reported rather than acted on. Every stitched
-   * surface carries its role. Under sanity_check each body is also built from the stored data, and from the implicit
-   * function where its children can say the same, and they must agree bit for bit. Collective.
-   * A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
+   * one -- and stitched like any other. A cell pierced at the middle of such a face should have been refined by
+   * ComputationalGeometry, so each one is listed in pout and warned about. A node at the middle of such a face's edge
+   * that disagrees with the edge's ends is an edge the finer level crosses twice, which is counted and reported rather
+   * than acted on. Every stitched surface carries its role. Under sanity_check each body is also built from the stored
+   * data, and from the implicit function where its children can say the same, and they must agree bit for bit.
+   * Collective. A face onto a cell the coarser level filled is closed like a face onto a cell this level filled.
    * @param[in,out] a_coarse  The level.
    * @param[in]     a_fine    The finer level, or null where there is none.
    * @param[in]     a_coarser The coarser level, or null where there is none.
@@ -1016,16 +1017,16 @@ protected:
    * the tolerance a position falls in and the twenty-six around it, which is what keeps this out of the quadratic
    * scan a surface meeting the mesh squarely would otherwise provoke, with every candidate still measured against
    * so that two positions either side of a lattice wall are not told apart.
-   * @param[in]  a_facets       Triangles, nine reals each.
-   * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
    * @param[out] a_vertices     The vertices, three reals each.
    * @param[out] a_connectivity Three vertex indices per triangle.
+   * @param[in]  a_facets       Triangles, nine reals each.
+   * @param[in]  a_tolerance    Distance within which two positions are the same vertex.
    */
   static void
-  indexFacets(const Vector<Real>& a_facets,
-              const Real          a_tolerance,
-              std::vector<Real>&  a_vertices,
-              std::vector<int>&   a_connectivity);
+  indexFacets(std::vector<Real>&  a_vertices,
+              std::vector<int>&   a_connectivity,
+              const Vector<Real>& a_facets,
+              const Real          a_tolerance);
 
   /**
    * @brief Residual above which the stored moments and the ones PolyGeom recomputes disagree.
@@ -1042,23 +1043,128 @@ protected:
    */
   Real m_volumeThreshold;
 
+private:
   /**
-   * @brief Write a cut cell's node from its body.
-   * @details The arcs come from the covered set and the domain rather than from the moments, so the graph this produces
-   * is the one GeometryShop would have produced. The apertures, the centroids and the volume fraction come
-   * from the body.
-   * @param[out] a_node             The node to fill
-   * @param[in]  a_body             The cell's assembled polyhedron
-   * @param[in]  a_regIrregCovered  Regular/Covered/Irregular cells
-   * @param[in]  a_cell             The cell
-   * @param[in]  a_domain           Domain
+   * @brief An implicit function that stops the run if it is ever evaluated.
+   * @details Put in place of the shop's own function while a test copies the graph and rebuilds bodies from the copy,
+   * which must be done from the graph's data alone.
    */
-  void
-  fillNode(IrregNode&                       a_node,
-           const PolyhedralEB::CutCellBody& a_body,
-           const BaseFab<int>&              a_regIrregCovered,
-           const IntVect&                   a_cell,
-           const ProblemDomain&             a_domain) const;
+  class AbortingIF : public BaseIF
+  {
+  public:
+    /**
+     * @brief Stop the run.
+     * @param[in] a_point Where the function was asked for.
+     * @return Nothing; it does not return.
+     */
+    Real
+    value(const RealVect& a_point) const override;
+
+    /**
+     * @brief A copy.
+     * @return A new aborting function.
+     */
+    BaseIF*
+    newImplicitFunction() const override;
+  };
+
+#ifdef CH_USE_HDF5
+  /**
+   * @brief Write one attribute, a scalar or a short array.
+   * @param[in] a_where Group or file to attach it to.
+   * @param[in] a_name  Name of the attribute.
+   * @param[in] a_type  HDF5 type of its elements.
+   * @param[in] a_count Number of elements, one for a scalar.
+   * @param[in] a_data  The elements.
+   */
+  static void
+  writeH5Attribute(const hid_t        a_where,
+                   const std::string& a_name,
+                   const hid_t        a_type,
+                   const hsize_t      a_count,
+                   const void*        a_data);
+
+  /**
+   * @brief Write one dataset, sized by what every rank holds together, with this rank's rows in its own stretch.
+   * @details A rank with nothing to write selects nothing and takes part in the call all the same. It describes that
+   * with the null dataspace: a simple dataspace of zero extent is not one, the call fails, and a rank that fails on its
+   * way into a collective write leaves every other rank waiting in it.
+   * @param[in] a_where    Group or file to put it in.
+   * @param[in] a_name     Name of the dataset.
+   * @param[in] a_type     HDF5 type of its elements.
+   * @param[in] a_rows     Rows this rank writes.
+   * @param[in] a_offset   Row this rank's stretch starts at.
+   * @param[in] a_total    Rows over all ranks; nothing is written when there are none.
+   * @param[in] a_columns  Columns per row; one makes the dataset one-dimensional.
+   * @param[in] a_data     This rank's rows.
+   * @param[in] a_transfer Transfer property list.
+   */
+  static void
+  writeH5Slab(const hid_t        a_where,
+              const std::string& a_name,
+              const hid_t        a_type,
+              const hsize_t      a_rows,
+              const hsize_t      a_offset,
+              const hsize_t      a_total,
+              const hsize_t      a_columns,
+              const void*        a_data,
+              const hid_t        a_transfer);
+#endif
+
+  /**
+   * @brief Append the nodes of a cell's VoFs as an index space holds them, so that a graph can be built from them
+   * again.
+   * @details Each VoF's arcs come from its faces -- the VoF across, or the domain boundary -- with their apertures and
+   * centroids. Where the moments hold no data for the cell, the moments are left at zero: a graph is built from arcs
+   * alone.
+   * @param[in,out] a_nodes The nodes, appended to.
+   * @param[in]     a_graph Graph holding the cell.
+   * @param[in]     a_data  Moments over some part of the graph's region.
+   * @param[in]     a_cell  The cell, irregular in the graph.
+   * @param[in]     a_withMoments Whether the moments hold data for the cell.
+   */
+  static void
+  appendNodes(Vector<IrregNode>& a_nodes,
+              const EBGraph&     a_graph,
+              const EBData&      a_data,
+              const IntVect&     a_cell,
+              const bool         a_withMoments);
+
+  /**
+   * @brief Make each regular cell beside a multi-valued one a cut cell of volume one.
+   * @details Chombo's coarsening reads the face of a regular cell as leading to the first VoF of the cell across, so a
+   * regular cell's face into any other VoF of a multi-valued neighbour is lost. EBISLevel::fixRegularNextToMultiValued
+   * makes such cells full cut cells and divides the face evenly among the VoFs across; here each face into a VoF across
+   * is the face that VoF holds toward the cell, with its aperture and centroid. The nodes of a cell must be contiguous,
+   * and a cell at the region's edge sees only the neighbours inside it.
+   * @param[in,out] a_flags  Regular (1), cut (0) or covered (-1) for the region's cells. The cells made cut are set to
+   * 0.
+   * @param[in,out] a_nodes  Nodes of the region's cut cells. A node is appended for each cell made cut.
+   * @param[in]     a_region Region the flags describe.
+   * @param[in]     a_valid  Part of the region whose cells made cut are counted.
+   * @param[in]     a_domain Domain the region lies in.
+   * @return The number of cells in a_valid made cut.
+   */
+  static long long
+  cutRegularNextToMultiValued(BaseFab<int>&        a_flags,
+                              Vector<IrregNode>&   a_nodes,
+                              const Box&           a_region,
+                              const Box&           a_valid,
+                              const ProblemDomain& a_domain);
+
+  /**
+   * @brief Write the index space of each cell of a region as numbers, summed over the cell's VoFs: the number of VoFs,
+   * the volume fraction, the first moment of volume and the aperture of every face.
+   * @details Component 0 is the number of VoFs, 1 the volume fraction, 2 to 1 + SpaceDim the first moment about the
+   * cell centre in units of the cell, and 2 + SpaceDim + 2 * dir + side the aperture on that side. A regular cell reads
+   * as a single VoF of volume one with every face open, so a full cut cell reads the same.
+   * @param[in,out] a_signature At least s_signatureComps components over the region.
+   * @param[in]     a_graph     The graph.
+   * @param[in]     a_data      The moments, over the region.
+   * @param[in]     a_region    The cells to write.
+   */
+  static void
+  cellSignature(FArrayBox& a_signature, const EBGraph& a_graph, const EBData& a_data, const Box& a_region);
 };
 
 #include <CD_NamespaceFooter.H>

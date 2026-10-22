@@ -16,9 +16,9 @@ USE_MF         = TRUE
 USE_HDF        = FALSE
 USE_MT         = FALSE
 OPENMPCC       = FALSE
-HDFINCFLAGS    = -I/usr/lib/x86_64-linux-gnu/hdf5/serial/include
+HDFINCFLAGS    = -I/usr/lib/x86_64-linux-gnu/hdf5/serial/include -DH5_USE_110_API
 HDFLIBFLAGS    = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/lib -lhdf5 -lz
-HDFMPIINCFLAGS = -I/usr/lib/x86_64-linux-gnu/hdf5/openmpi/include
+HDFMPIINCFLAGS = -I/usr/lib/x86_64-linux-gnu/hdf5/openmpi/include -DH5_USE_110_API
 HDFMPILIBFLAGS = -L/usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib -lhdf5 -lz
 cxxoptflags    = -O3 -march=x86-64-v2
 cxxdbgflags    = -O0

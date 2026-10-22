@@ -18,6 +18,7 @@
 // Std includes
 #include <map>
 #include <memory>
+#include <utility>
 
 // Our includes
 #include <CD_PetscHelmholtzDomainBC.H>
@@ -27,7 +28,7 @@
 /**
  * @brief Domain boundary conditions for PetscHelmholtzOp, taken from ElectrostaticDomainBc.
  * @details This mirrors EBHelmholtzElectrostaticDomainBC: it holds a Dirichlet or Neumann BC object on each domain side
- * and routes the calls to it. The BC values are evaluated whenever getFaceFluxConstant is called, so time-dependent
+ * and routes the calls to it. The BC values are evaluated whenever getBoundaryData is called, so time-dependent
  * values (FieldSolver captures its time by reference) enter through the right-hand side.
  */
 class PetscHelmholtzElectrostaticDomainBC : public PetscHelmholtzDomainBC
@@ -79,48 +80,57 @@ public:
 
   /**
    * @brief Define the BC objects on every domain side.
-   * @param[in] a_dataLocation Data location
-   * @param[in] a_eblg         Grids on each level
-   * @param[in] a_probLo       Lower-left corner of the computational domain
-   * @param[in] a_dx           Grid resolution on each level
+   * @param[in] a_petscGrid PETSc grid
+   * @param[in] a_probLo    Lower-left corner of the computational domain
+   * @param[in] a_dx        Grid resolution on each level
    */
   void
-  define(const Location::Cell       a_dataLocation,
-         const Vector<EBLevelGrid>& a_eblg,
-         const RealVect&            a_probLo,
-         const Vector<Real>&        a_dx) override final;
+  define(const RefCountedPtr<PetscGrid>& a_petscGrid,
+         const RealVect&                 a_probLo,
+         const Vector<Real>&             a_dx) override final;
 
   /**
    * @brief Get the face flux stencil from the BC object on the domain side.
-   * @param[in] a_vof  Cell adjacent to the domain face
-   * @param[in] a_dir  Coordinate direction of the face
-   * @param[in] a_side Domain side of the face
-   * @param[in] a_level Level of the cell
-   * @param[in] a_din  Grid index of the cell
-   * @return The stencil as (cells on this level, cells on the next finer level).
+   * @param[out] a_boundaryWeight Weight w_B of the boundary data in the flux, see getBoundaryData
+   * @param[out] a_stencilCoar Stencil over cells on level a_level - 1
+   * @param[out] a_stencil     Stencil over cells on level a_level
+   * @param[out] a_stencilFine Stencil over cells on level a_level + 1
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cell adjacent to the domain face
+   * @param[in] a_dir   Coordinate direction of the face
+   * @param[in] a_side  Domain side of the face
    */
-  std::pair<VoFStencil, VoFStencil>
-  getFaceFluxStencil(const VolIndex&      a_vof,
-                     const int            a_dir,
-                     const Side::LoHiSide a_side,
+  void
+  getFaceFluxStencil(Real&                a_boundaryWeight,
+                     VoFStencil&          a_stencilCoar,
+                     VoFStencil&          a_stencil,
+                     VoFStencil&          a_stencilFine,
+                     const int            a_phase,
                      const int            a_level,
-                     const DataIndex&     a_din) const override final;
+                     const DataIndex&     a_din,
+                     const VolIndex&      a_vof,
+                     const int            a_dir,
+                     const Side::LoHiSide a_side) const override final;
 
   /**
-   * @brief Get the constant part of the face flux from the BC object on the domain side.
-   * @param[in] a_vof  Cell adjacent to the domain face
-   * @param[in] a_dir  Coordinate direction of the face
-   * @param[in] a_side Domain side of the face
-   * @param[in] a_level Level of the cell
-   * @param[in] a_din  Grid index of the cell
-   * @return The constant part of the flux.
+   * @brief Get the boundary data from the BC object on the domain side.
+   * @param[in] a_phase Phase
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @param[in] a_vof   Cell adjacent to the domain face
+   * @param[in] a_dir   Coordinate direction of the face
+   * @param[in] a_side  Domain side of the face
+   * @return The boundary data.
    */
   Real
-  getFaceFluxConstant(const VolIndex&      a_vof,
-                      const int            a_dir,
-                      const Side::LoHiSide a_side,
-                      const int            a_level,
-                      const DataIndex&     a_din) const override final;
+  getBoundaryData(const int            a_phase,
+                  const int            a_level,
+                  const DataIndex&     a_din,
+                  const VolIndex&      a_vof,
+                  const int            a_dir,
+                  const Side::LoHiSide a_side) const override final;
 
 protected:
   /**
