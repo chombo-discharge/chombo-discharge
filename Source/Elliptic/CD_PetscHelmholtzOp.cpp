@@ -75,10 +75,10 @@ PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&                       a
 
   const int numLevels = a_petscGrid->getMFLevelGrids().size();
 
-  CH_assert(a_dx.size() >= numLevels);
-  CH_assert(a_interpolators.size() >= numLevels);
-  CH_assert(a_aCoef.size() >= numLevels);
-  CH_assert(a_bCoef.size() >= numLevels);
+  // Checked in every build: the operator indexes these per level. The coefficients are checked in fillMatrix.
+  if (a_dx.size() < numLevels || a_interpolators.size() < numLevels) {
+    MayDay::Abort("PetscHelmholtzOp::define -- dx or the interpolators do not cover every level");
+  }
 
   m_petscGrid     = a_petscGrid;
   m_interpolators = a_interpolators;
@@ -351,6 +351,21 @@ PetscHelmholtzOp::fillMatrix() noexcept
 
   const int numLevels = mflg.size();
 
+  // The coefficients are indexed with the grid indices of the PetscGrid, so they must be defined on its grids, e.g. not
+  // on another realm's grids or on the grids from before a regrid. Checked in every build.
+  if (m_aCoef.size() < numLevels || m_bCoef.size() < numLevels) {
+    MayDay::Abort("PetscHelmholtzOp::fillMatrix -- the coefficients do not cover every level");
+  }
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
+    const DisjointBoxLayout& dbl = mflg[lvl]->getGrids();
+
+    if (m_aCoef[lvl].isNull() || m_bCoef[lvl].isNull() || !(m_aCoef[lvl]->disjointBoxLayout() == dbl) ||
+        !(m_bCoef[lvl]->disjointBoxLayout() == dbl)) {
+      MayDay::Abort("PetscHelmholtzOp::fillMatrix -- the coefficients are not defined on the grids of the PetscGrid");
+    }
+  }
+
   // Zero the entries of a matrix that has been filled before. A refill keeps the sparsity pattern. The entries are
   // added (ADD_VALUES), since a coarse row also gets the refluxing contributions of the fine faces across it.
   PetscBool isAssembled = PETSC_FALSE;
@@ -434,10 +449,13 @@ PetscHelmholtzOp::fillMatrix() noexcept
                                              dir,
                                              side);
 
-              // Without embedded boundaries the cell has exactly one face on the domain side.
+              // Without embedded boundaries the cell has exactly one face on the domain side. Checked in every build:
+              // using only the first of several faces would silently drop flux.
               const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
-              CH_assert(faces.size() == 1);
+              if (faces.size() != 1) {
+                MayDay::Abort("PetscHelmholtzOp::fillMatrix -- a cell must have exactly one face on the domain side");
+              }
 
               boundaryWeights(dir, side)(faces[0], 0) = bcWeight;
 
@@ -488,7 +506,10 @@ PetscHelmholtzOp::fillMatrix() noexcept
               const IntVect                ivCoar    = coarsen(ivNeigh, refRat);
               const BaseFab<PetscAMRCell>& cellsCoFi = (*m_petscGrid->getAMRToPetscCoFi()[lvl - 1])[din];
 
-              CH_assert(cellsCoFi.box().contains(ivCoar));
+              if (!cellsCoFi.box().contains(ivCoar)) {
+                MayDay::Abort("PetscHelmholtzOp::fillMatrix -- the coarse cell across a refinement boundary is outside "
+                              "the coarsened grid map");
+              }
 
               const PetscInt rowCoar = cellsCoFi(ivCoar).getPetscRow(phase);
 
@@ -516,11 +537,20 @@ PetscHelmholtzOp::fillMatrix() noexcept
 
         rowStencil += m_petscGrid->getPetscStencil(stencil, lvl, din, phase);
 
+        // Checked in every build: there is no coarser level below level 0, and no finer level above the finest.
         if (stencilCoar.size() > 0) {
+          if (lvl == 0) {
+            MayDay::Abort("PetscHelmholtzOp::fillMatrix -- a stencil reaches a coarser level from level 0");
+          }
+
           rowStencil += m_petscGrid->getPetscStencilWithCoarserLevel(VoFStencil(), stencilCoar, lvl, din, phase);
         }
 
         if (stencilFine.size() > 0) {
+          if (lvl == numLevels - 1) {
+            MayDay::Abort("PetscHelmholtzOp::fillMatrix -- a stencil reaches a finer level from the finest level");
+          }
+
           rowStencil += m_petscGrid->getPetscStencilWithFinerLevel(VoFStencil(), stencilFine, lvl, din, phase);
         }
 
@@ -610,7 +640,10 @@ PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
             const VolIndex          vof(iv, 0);
             const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
-            CH_assert(faces.size() == 1);
+            if (faces.size() != 1) {
+              MayDay::Abort("PetscHelmholtzOp::addBoundaryConditionsToRHS -- a cell must have exactly one face on the "
+                            "domain side");
+            }
 
             const Real weight = boundaryWeights(dir, side)(faces[0], 0);
             const Real data   = m_domainBc->getBoundaryData(phase, lvl, din, vof, dir, side);

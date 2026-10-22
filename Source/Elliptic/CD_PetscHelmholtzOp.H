@@ -81,6 +81,12 @@
  * sparsity pattern, so the AMG preconditioner can keep its interpolation (PCGAMGSetReuseInterpolation) and only
  * recompute its coarse operators.
  *
+ * After any change of alpha, beta, a or b, the caller must call fillMatrix and then rebuild the right-hand side
+ * (addBoundaryConditionsToRHS) before solving. The stencils can be reused, but the weights must be redone, and both the
+ * matrix and the right-hand side carry them. addBoundaryConditionsToRHS uses the current beta and b, so a right-hand
+ * side built after a coefficient change, against a matrix filled before it, gives a matrix and a right-hand side that
+ * do not belong together. That is a user error, and it is not detected.
+ *
  * Faces between two valid cells on one level have two-point stencils, which fillMatrix computes as it goes. The other
  * faces have stencils that are expensive to compute, so they are computed once per define and stored without beta and
  * b; fillMatrix then only multiplies them by beta and the b-coefficient on the face. The stored stencils are over PETSc
@@ -165,6 +171,8 @@ public:
 
   /**
    * @brief Set alpha and beta. The matrix is not changed until fillMatrix is called.
+   * @details Before solving, the caller must call fillMatrix and rebuild the right-hand side, see the class
+   * documentation.
    * @param[in] a_alpha Operator alpha
    * @param[in] a_beta  Operator beta
    */
@@ -173,7 +181,10 @@ public:
 
   /**
    * @brief Point the operator to other a- and b-coefficients. The matrix is not changed until fillMatrix is called.
-   * @details The coefficients are held by reference, so later changes to their values are seen by fillMatrix.
+   * @details The coefficients are held by reference, so later changes to their values are seen by fillMatrix. After
+   * this call, or after changing the values in place, the caller must call fillMatrix and rebuild the right-hand side
+   * before solving, see the class documentation. The coefficients must be defined on the grids of the PetscGrid;
+   * fillMatrix aborts otherwise.
    * @param[in] a_aCoef Cell-centered a-coefficient
    * @param[in] a_bCoef Face-centered b-coefficient
    */
@@ -183,7 +194,8 @@ public:
   /**
    * @brief Fill the matrix from the current alpha, beta, and a- and b-coefficients.
    * @details This refills the existing matrix, keeping its preallocation and sparsity pattern. It also stores the
-   * boundary weights used by addBoundaryConditionsToRHS.
+   * boundary weights used by addBoundaryConditionsToRHS. Call it after every change of alpha, beta, a or b, and rebuild
+   * the right-hand side afterwards. Aborts if the a- or b-coefficient is not defined on the grids of the PetscGrid.
    */
   virtual void
   fillMatrix() noexcept;
@@ -201,7 +213,8 @@ public:
    * scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this
    * subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly. Only
    * boundary terms are added: the domain boundary data now, and the EB boundary data and surface charge later. The
-   * caller supplies the volume source in a_rhs, kappa-weighted as described for the class.
+   * caller supplies the volume source in a_rhs, kappa-weighted as described for the class. The scaling uses the
+   * current beta and b, so call this after the fillMatrix that matches them.
    * @param[in,out] a_rhs Right-hand side, on the rows of the PETSc grid
    */
   virtual void
