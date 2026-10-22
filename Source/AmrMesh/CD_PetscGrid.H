@@ -59,7 +59,7 @@ public:
    * @brief Main define function. Puts object in usable state.
    * @details Note that a_levelGridsCoFi must be coarsened from finer grids. That is, entry lvl
    * in levelGridsCoFi must be a coarsened version of a_levelGrids[lvl+1]. Similarly, a_levelGridsFiCo
-   * must be a refinement, i.e., a_levelGridsFiCo[lvl] must be a refinemetn of a_levelGrids[lvl].
+   * must be refined from coarser grids, i.e., a_levelGridsFiCo[lvl] must be a refinement of a_levelGrids[lvl-1].
    * @param[in] a_levelGrids chombo-discharge AMR grids
    * @param[in] a_levelGridsCoFi Coarsened grids.
    * @param[in] a_levelGridsFiCo Refined grids.
@@ -104,6 +104,20 @@ public:
    */
   virtual int
   getNumPhases() const noexcept;
+
+  /**
+   * @brief Get the number of PETSc rows owned by this rank.
+   * @return m_numLocalRows
+   */
+  virtual PetscInt
+  getNumLocalRows() const noexcept;
+
+  /**
+   * @brief Get the total number of PETSc rows over all ranks.
+   * @return m_numGlobalRows
+   */
+  virtual PetscInt
+  getNumGlobalRows() const noexcept;
 
   /**
    * @brief Get the grids on each level.

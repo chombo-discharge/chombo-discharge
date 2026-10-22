@@ -447,6 +447,22 @@ jobs:
           mpirun --oversubscribe -np ${{ env.CORES }} ./main${{ matrix.dim }}d.*.ex regression${{ matrix.dim }}d.inputs
           grep -q "PetscMapping -- all tests passed" pout.0
 
+      - name: Build PETSc regular-grid solver test
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscRegular
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
+
+      - name: Run PETSc regular-grid solver test
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Tests/Electrostatics/PetscRegular
+        run: |
+          # Two resolutions: the test bounds the error by a constant times dx^2 at each, which checks second order.
+          if [ "${{ matrix.dim }}" = "2" ]; then resolutions="32 64"; else resolutions="16 32"; fi
+          for n in $resolutions; do
+            domain=$(printf "$n %.0s" $(seq ${{ matrix.dim }}))
+            mpirun --oversubscribe -np ${{ env.CORES }} ./main${{ matrix.dim }}d.*.ex regression${{ matrix.dim }}d.inputs AmrMesh.coarsest_domain="$domain"
+            grep -q "PetscRegular -- all tests passed" pout.0
+          done
+
   Build-documentation:
     needs: Formatting
     runs-on : ubuntu-latest

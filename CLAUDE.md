@@ -245,6 +245,32 @@ lines to group statements, so a few readability conventions are maintained by ha
   directly against an enclosing closing brace (a loop that is the last statement in its block needs
   no blank line between it and that closing brace).
 
+### Loops over boxes (OpenMP)
+
+The code is built with OpenMP as well as MPI, so loops over the boxes of a layout are OpenMP index
+loops, never serial `for (DataIterator dit = ...; dit.ok(); ++dit)` loops:
+
+```cpp
+const DataIterator& dit  = dbl.dataIterator();
+const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+for (int mybox = 0; mybox < nbox; mybox++) {
+  const DataIndex& din = dit[mybox];
+
+  // ...
+}
+```
+
+- **Accumulate across boxes with a `reduction` clause**, e.g. `reduction(max : maxDiff)`, never by
+  writing to a shared variable from the loop body.
+- **The body must be thread safe.** Writing to per-box data is safe. Calls into libraries that are
+  not thread safe, such as PETSc's `MatSetValues` and `VecSetValue(s)`, go in a named
+  `#pragma omp critical(<name>)` section. Where each thread writes distinct entries, writing through
+  the local array (`VecGetArray`/`VecRestoreArray`) avoids the lock altogether.
+- **No `return` out of a critical section.** Error macros that return, such as `PetscCallVoid`,
+  cannot be used inside one; use `PetscCallAbort` there.
+
 ### Header guards
 
 Header guards must be fully uppercased. A file `CD_FooBar.H` uses:
