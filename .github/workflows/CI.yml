@@ -466,6 +466,11 @@ jobs:
             done
           done
 
+      - name: Build PETSc example
+        working-directory: ${{ env.DISCHARGE_HOME }}/Exec/Examples/Electrostatics/PETSc
+        run: |
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} MPI=TRUE USE_PETSC=TRUE
+
   Build-documentation:
     needs: Formatting
     runs-on : ubuntu-latest
