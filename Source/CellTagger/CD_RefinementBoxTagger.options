@@ -4,6 +4,6 @@
 RefinementBoxTagger.verbosity         = -1             ## Class verbosity
 RefinementBoxTagger.buffer            = 0              ## Grow tagged cells
 RefinementBoxTagger.num_ref_boxes     = 0              ## Number of refinement boxes. 0 gives a single level.
-RefinementBoxTagger.ref_box1_lo       = 0.0 0.0 0.0    ## Refine region between
-RefinementBoxTagger.ref_box1_hi       = 0.0 0.0 0.0    ## these two corners
+RefinementBoxTagger.ref_box1_lo       = 0.0 0.0 0.0    ## Refine the cells whose centers lie between
+RefinementBoxTagger.ref_box1_hi       = 0.0 0.0 0.0    ## these two corners, edges included
 RefinementBoxTagger.ref_box1_lvl      = 0              ## to this level

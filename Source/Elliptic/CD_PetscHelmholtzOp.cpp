@@ -370,8 +370,11 @@ PetscHelmholtzOp::fillMatrix() noexcept
 
     const LevelData<BaseFab<PetscAMRCell>>& amrToPetsc = *m_petscGrid->getAMRToPetsc()[lvl];
 
-    // Refinement ratio to the coarser level, for the coarse side of the refinement boundary.
-    const int refRat = (lvl > 0) ? std::lround(m_dx[lvl - 1] / dx) : 1;
+    // Refinement ratio to the coarser level, for the coarse side of the refinement boundary. The coarse cell sees a
+    // fine face through an area fraction 1/refRat^(SpaceDim-1) and with its own dx = refRat * dx, hence
+    // 1/refRat^SpaceDim.
+    const int  refRat      = (lvl > 0) ? std::lround(m_dx[lvl - 1] / dx) : 1;
+    const Real refluxScale = 1.0 / std::pow(refRat, SpaceDim);
 
     const DataIterator& dit  = dbl.dataIterator();
     const int           nbox = dit.size();
@@ -495,7 +498,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
               }
 
               PetscStencil coarContribution = flux;
-              coarContribution *= -factor / std::pow(refRat, SpaceDim);
+              coarContribution *= -factor * refluxScale;
 
               this->addToMatrix(rowCoar, coarContribution);
             }
