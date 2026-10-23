@@ -57,8 +57,11 @@ void
 PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
                          const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators,
                          const RefCountedPtr<PetscHelmholtzDomainBC>&          a_domainBc,
+                         const RefCountedPtr<PetscHelmholtzEBBC>&              a_ebBc,
+                         const RefCountedPtr<PetscHelmholtzJumpBC>&            a_jumpBc,
                          const MFAMRCellData&                                  a_aCoef,
                          const MFAMRFluxData&                                  a_bCoef,
+                         const MFAMRIVData&                                    a_bCoefIrreg,
                          const RealVect&                                       a_probLo,
                          const Vector<Real>&                                   a_dx,
                          const Real                                            a_alpha,
@@ -83,8 +86,11 @@ PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&                       a
   m_petscGrid     = a_petscGrid;
   m_interpolators = a_interpolators;
   m_domainBc      = a_domainBc;
+  m_ebBc          = a_ebBc;
+  m_jumpBc        = a_jumpBc;
   m_aCoef         = a_aCoef;
   m_bCoef         = a_bCoef;
+  m_bCoefIrreg    = a_bCoefIrreg;
   m_probLo        = a_probLo;
   m_dx            = a_dx;
   m_alpha         = a_alpha;
@@ -114,15 +120,18 @@ PetscHelmholtzOp::setAlphaAndBeta(const Real a_alpha, const Real a_beta) noexcep
 }
 
 void
-PetscHelmholtzOp::setCoefficients(const MFAMRCellData& a_aCoef, const MFAMRFluxData& a_bCoef) noexcept
+PetscHelmholtzOp::setCoefficients(const MFAMRCellData& a_aCoef,
+                                  const MFAMRFluxData& a_bCoef,
+                                  const MFAMRIVData&   a_bCoefIrreg) noexcept
 {
   CH_TIME("PetscHelmholtzOp::setCoefficients");
   if (m_verbose) {
     pout() << "PetscHelmholtzOp::setCoefficients" << endl;
   }
 
-  m_aCoef = a_aCoef;
-  m_bCoef = a_bCoef;
+  m_aCoef      = a_aCoef;
+  m_bCoef      = a_bCoef;
+  m_bCoefIrreg = a_bCoefIrreg;
 }
 
 const Mat&
@@ -590,7 +599,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
 }
 
 void
-PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept
+PetscHelmholtzOp::addBoundaryConditionsToRHS(Vec& a_rhs, const EBAMRIVData& /*a_sigma*/) const noexcept
 {
   CH_TIME("PetscHelmholtzOp::addBoundaryConditionsToRHS");
   if (m_verbose) {
@@ -692,17 +701,6 @@ PetscHelmholtzOp::defineDomainFluxStencils() noexcept
   }
 
   MayDay::Abort("PetscHelmholtzOp::defineDomainFluxStencils -- not implemented yet");
-}
-
-void
-PetscHelmholtzOp::defineEBFluxStencils() noexcept
-{
-  CH_TIME("PetscHelmholtzOp::defineEBFluxStencils");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::defineEBFluxStencils" << endl;
-  }
-
-  MayDay::Abort("PetscHelmholtzOp::defineEBFluxStencils -- not implemented yet");
 }
 
 void
