@@ -218,6 +218,19 @@ PetscGrid::getMFLevelGridsFiCo() const noexcept
   return m_levelGridsFiCo;
 }
 
+const Vector<int>&
+PetscGrid::getRefinementRatios() const noexcept
+{
+  CH_TIME("PetscGrid::getRefinementRatios");
+  if (m_verbose) {
+    pout() << "PetscGrid::getRefinementRatios" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  return m_refRat;
+}
+
 const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
 PetscGrid::getAMRToPetsc() const noexcept
 {

@@ -166,36 +166,40 @@ PetscHelmholtzOp::checkSupported() const noexcept
     }
   }
 
-  // No embedded boundaries: the gas phase must be regular everywhere, and any other phase must have no cells (which is
-  // what a geometry without dielectrics gives).
-  int hasEB = 0;
+  // Embedded boundaries and multiple phases are not supported yet. This check must be removed once the EB and
+  // multifluid features land.
+  {
+    // No embedded boundaries: the gas phase must be regular everywhere, and any other phase must have no cells (which
+    // is what a geometry without dielectrics gives).
+    int hasEB = 0;
 
-  for (int lvl = 0; lvl < mflg.size(); lvl++) {
-    const DisjointBoxLayout& dbl = mflg[lvl]->getGrids();
+    for (int lvl = 0; lvl < mflg.size(); lvl++) {
+      const DisjointBoxLayout& dbl = mflg[lvl]->getGrids();
 
-    for (int iphase = 0; iphase < m_petscGrid->getNumPhases(); iphase++) {
-      const EBLevelGrid&  eblg  = mflg[lvl]->getEBLevelGrid(iphase);
-      const EBISLayout&   ebisl = eblg.getEBISL();
-      const DataIterator& dit   = dbl.dataIterator();
-      const int           nbox  = dit.size();
+      for (int iphase = 0; iphase < m_petscGrid->getNumPhases(); iphase++) {
+        const EBLevelGrid&  eblg  = mflg[lvl]->getEBLevelGrid(iphase);
+        const EBISLayout&   ebisl = eblg.getEBISL();
+        const DataIterator& dit   = dbl.dataIterator();
+        const int           nbox  = dit.size();
 
 #pragma omp parallel for schedule(runtime) reduction(max : hasEB)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din     = dit[mybox];
-        const Box&       box     = dbl[din];
-        const EBISBox&   ebisbox = ebisl[din];
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din     = dit[mybox];
+          const Box&       box     = dbl[din];
+          const EBISBox&   ebisbox = ebisl[din];
 
-        const bool isSupported = (iphase == 0) ? ebisbox.isAllRegular() : ebisbox.isCovered(box);
+          const bool isSupported = (iphase == 0) ? ebisbox.isAllRegular() : ebisbox.isCovered(box);
 
-        if (!isSupported) {
-          hasEB = 1;
+          if (!isSupported) {
+            hasEB = 1;
+          }
         }
       }
     }
-  }
 
-  if (ParallelOps::max(hasEB) > 0) {
-    MayDay::Abort("PetscHelmholtzOp -- embedded boundaries and multiple phases are not supported for now");
+    if (ParallelOps::max(hasEB) > 0) {
+      MayDay::Abort("PetscHelmholtzOp -- embedded boundaries and multiple phases are not supported for now");
+    }
   }
 }
 
@@ -207,6 +211,11 @@ PetscHelmholtzOp::getBcoef(const IntVect&       a_iv,
                            const DataIndex&     a_din,
                            const int            a_phase) const noexcept
 {
+  CH_TIME("PetscHelmholtzOp::getBcoef");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::getBcoef" << endl;
+  }
+
   CH_assert(a_dir >= 0 && a_dir < SpaceDim);
 
   // The face on the low side of cell iv has index iv, the face on the high side has index iv + BASISV(dir).
@@ -276,6 +285,11 @@ PetscHelmholtzOp::createMatrix() noexcept
 void
 PetscHelmholtzOp::addToMatrix(const PetscInt a_row, const PetscStencil& a_stencil) noexcept
 {
+  CH_TIME("PetscHelmholtzOp::addToMatrix");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::addToMatrix" << endl;
+  }
+
   CH_assert(a_row >= 0);
 
   const PetscInt numEntries = a_stencil.size();
@@ -304,6 +318,14 @@ PetscHelmholtzOp::replaceGhostCells(VoFStencil&      a_stencil,
                                     const int        a_level,
                                     const DataIndex& a_din) const noexcept
 {
+  CH_TIME("PetscHelmholtzOp::replaceGhostCells");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::replaceGhostCells" << endl;
+  }
+
+  // The interpolation stencils that replace the ghost cells must be over PETSc rows, i.e. valid cells on this level and
+  // the coarser level, not other ghost cells or covered cells. That is not checked here: the stencils are mapped to
+  // rows through PetscGrid, whose mapping aborts on any entry that is not a row, in every build.
   const BaseFab<PetscAMRCell>& cells = (*m_petscGrid->getAMRToPetsc()[a_level])[a_din];
 
   VoFStencil kept;
@@ -388,7 +410,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
     // Refinement ratio to the coarser level, for the coarse side of the refinement boundary. The coarse cell sees a
     // fine face through an area fraction 1/refRat^(SpaceDim-1) and with its own dx = refRat * dx, hence
     // 1/refRat^SpaceDim.
-    const int  refRat      = (lvl > 0) ? std::lround(m_dx[lvl - 1] / dx) : 1;
+    const int  refRat      = (lvl > 0) ? m_petscGrid->getRefinementRatios()[lvl - 1] : 1;
     const Real refluxScale = 1.0 / std::pow(refRat, SpaceDim);
 
     const DataIterator& dit  = dbl.dataIterator();
