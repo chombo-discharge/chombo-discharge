@@ -1,13 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$classEBHelmholtzDomainBCFactory.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp." alt="" coords="5,143,227,171"/>
 <area shape="rect" id="Node000001" href="$classEBHelmholtzDirichletDomainBCFactory.html" title="Factory class for passing Dirichlet domain boundary conditions into EBHelmholtzOp." alt="" coords="301,5,512,50"/>
-<area shape="poly" id="edge79_Node000000_Node000001" title=" " alt="" coords="148,132,205,95,274,60,309,49,304,52,276,65,208,100,151,136"/>
+<area shape="poly" id="edge80_Node000000_Node000001" title=" " alt="" coords="148,132,205,95,274,60,309,49,304,52,276,65,208,100,151,136"/>
 <area shape="rect" id="Node000002" href="$classEBHelmholtzEddingtonSP1DomainBCFactory.html" title="Base class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp." alt="" coords="284,75,530,119"/>
-<area shape="poly" id="edge80_Node000000_Node000002" title=" " alt="" coords="201,137,297,119,293,121,202,142"/>
+<area shape="poly" id="edge81_Node000000_Node000002" title=" " alt="" coords="201,137,297,119,293,121,202,142"/>
 <area shape="rect" id="Node000003" href="$classEBHelmholtzLarsenDomainBCFactory.html" title="Class for making Larsen boundary conditions." alt="" coords="275,143,539,171"/>
-<area shape="poly" id="edge81_Node000000_Node000003" title=" " alt="" coords="242,154,277,156,272,158,243,160"/>
+<area shape="poly" id="edge82_Node000000_Node000003" title=" " alt="" coords="242,154,277,156,272,158,243,160"/>
 <area shape="rect" id="Node000004" href="$classEBHelmholtzNeumannDomainBCFactory.html" title="Class for passing Neumann boundary domain boundary conditions into EBHelmholtzOp." alt="" coords="297,195,516,239"/>
-<area shape="poly" id="edge82_Node000000_Node000004" title=" " alt="" coords="201,172,299,193,294,195,201,177"/>
+<area shape="poly" id="edge83_Node000000_Node000004" title=" " alt="" coords="201,172,299,193,294,195,201,177"/>
 <area shape="rect" id="Node000005" href="$classEBHelmholtzRobinDomainBCFactory.html" title="Base class for making Robin domain boundary conditions with EBHelmholtzOp." alt="" coords="278,263,536,291"/>
-<area shape="poly" id="edge83_Node000000_Node000005" title=" " alt="" coords="149,178,207,215,276,249,312,263,307,262,274,254,204,220,148,183"/>
+<area shape="poly" id="edge84_Node000000_Node000005" title=" " alt="" coords="149,178,207,215,276,249,312,263,307,262,274,254,204,220,148,183"/>
 </map>

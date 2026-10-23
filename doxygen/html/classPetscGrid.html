@@ -118,6 +118,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscGrid</b> () 
 <tr class="memdesc:a02373035186af86a5d0a32fc36f7b3ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened fine grids.  <br /></td></tr>
 <tr class="memitem:a4d509866da615f3848d2a23b7e994165" id="r_a4d509866da615f3848d2a23b7e994165"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d509866da615f3848d2a23b7e994165">getMFLevelGridsFiCo</a> () const noexcept</td></tr>
 <tr class="memdesc:a4d509866da615f3848d2a23b7e994165"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refined coarse grids.  <br /></td></tr>
+<tr class="memitem:ac8e1696de9d776d1ec813b80abda507c" id="r_ac8e1696de9d776d1ec813b80abda507c"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8e1696de9d776d1ec813b80abda507c">getRefinementRatios</a> () const noexcept</td></tr>
+<tr class="memdesc:ac8e1696de9d776d1ec813b80abda507c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refinement ratios.  <br /></td></tr>
 <tr class="memitem:aa887fb49fe67ee5d2445de1dd0fe320e" id="r_aa887fb49fe67ee5d2445de1dd0fe320e"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; <a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa887fb49fe67ee5d2445de1dd0fe320e">getAMRToPetsc</a> () const noexcept</td></tr>
 <tr class="memdesc:aa887fb49fe67ee5d2445de1dd0fe320e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the map from AMR cells to PETSc rows, on the grids of each level.  <br /></td></tr>
 <tr class="memitem:a46b3537de181f9318320a27f353cb889" id="r_a46b3537de181f9318320a27f353cb889"><td class="memItemLeft" align="right" valign="top">virtual const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; <a class="el" href="classPetscAMRCell.html">PetscAMRCell</a> &gt; &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46b3537de181f9318320a27f353cb889">getAMRToPetscCoFi</a> () const noexcept</td></tr>
@@ -1025,6 +1027,34 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx<
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The sum of both stencils, over global PETSc rows, compressed (unique, ascending rows). </dd></dl>
+
+</div>
+</div>
+<a id="ac8e1696de9d776d1ec813b80abda507c" name="ac8e1696de9d776d1ec813b80abda507c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8e1696de9d776d1ec813b80abda507c">&#9670;&#160;</a></span>getRefinementRatios()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; int &gt; &amp; PetscGrid::getRefinementRatios </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the refinement ratios. </p>
+<p>Entry lvl is the refinement ratio between level lvl and level lvl+1. </p><dl class="section return"><dt>Returns</dt><dd>m_refRat </dd></dl>
 
 </div>
 </div>

@@ -108,8 +108,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a52c9bf643574607b03ad67d22faa3c5f" id="r_a52c9bf643574607b03ad67d22faa3c5f"><td class="memItemLeft" align="right" valign="top"><a id="a52c9bf643574607b03ad67d22faa3c5f" name="a52c9bf643574607b03ad67d22faa3c5f"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscHelmholtzOp</b> () noexcept</td></tr>
 <tr class="memdesc:a52c9bf643574607b03ad67d22faa3c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Destroys the matrix. <br /></td></tr>
-<tr class="memitem:ab6507215ccbe0dfaf4f2959b676cf0d5" id="r_ab6507215ccbe0dfaf4f2959b676cf0d5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab6507215ccbe0dfaf4f2959b676cf0d5">define</a> (const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp;a_petscGrid, const RefCountedPtr&lt; <a class="el" href="classPetscHelmholtzDomainBC.html">PetscHelmholtzDomainBC</a> &gt; &amp;a_domainBc, const MFAMRCellData &amp;a_aCoef, const MFAMRFluxData &amp;a_bCoef, const RealVect &amp;a_probLo, const Vector&lt; Real &gt; &amp;a_dx, const Real a_alpha, const Real a_beta) noexcept</td></tr>
-<tr class="memdesc:ab6507215ccbe0dfaf4f2959b676cf0d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the operator.  <br /></td></tr>
+<tr class="memitem:a36d9ec38234aafcade759a1eac24f171" id="r_a36d9ec38234aafcade759a1eac24f171"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36d9ec38234aafcade759a1eac24f171">define</a> (const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp;a_petscGrid, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &gt; &amp;a_interpolators, const RefCountedPtr&lt; <a class="el" href="classPetscHelmholtzDomainBC.html">PetscHelmholtzDomainBC</a> &gt; &amp;a_domainBc, const MFAMRCellData &amp;a_aCoef, const MFAMRFluxData &amp;a_bCoef, const RealVect &amp;a_probLo, const Vector&lt; Real &gt; &amp;a_dx, const Real a_alpha, const Real a_beta) noexcept</td></tr>
+<tr class="memdesc:a36d9ec38234aafcade759a1eac24f171"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the operator.  <br /></td></tr>
 <tr class="memitem:aceb544b82b5b0f9e6493d188baa55dcd" id="r_aceb544b82b5b0f9e6493d188baa55dcd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aceb544b82b5b0f9e6493d188baa55dcd">setAlphaAndBeta</a> (const Real a_alpha, const Real a_beta) noexcept</td></tr>
 <tr class="memdesc:aceb544b82b5b0f9e6493d188baa55dcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set alpha and beta. The matrix is not changed until fillMatrix is called.  <br /></td></tr>
 <tr class="memitem:aabdeed97087273daeecb3cf04838c283" id="r_aabdeed97087273daeecb3cf04838c283"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aabdeed97087273daeecb3cf04838c283">setCoefficients</a> (const MFAMRCellData &amp;a_aCoef, const MFAMRFluxData &amp;a_bCoef) noexcept</td></tr>
@@ -125,7 +125,11 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscHelmholtzOp<
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a48bd42339be9cbabf5d8560a900054f3" id="r_a48bd42339be9cbabf5d8560a900054f3"><td class="memItemLeft" align="right" valign="top"><a id="a48bd42339be9cbabf5d8560a900054f3" name="a48bd42339be9cbabf5d8560a900054f3"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>checkSupported</b> () const noexcept</td></tr>
-<tr class="memdesc:a48bd42339be9cbabf5d8560a900054f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort unless the grids are supported by this operator: one level, no periodic directions, no embedded boundaries, and no cells in any phase other than the gas phase. <br /></td></tr>
+<tr class="memdesc:a48bd42339be9cbabf5d8560a900054f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort unless the grids are supported by this operator: an interpolator on every level above the coarsest, no periodic directions, no embedded boundaries, and no cells in any phase other than the gas phase. <br /></td></tr>
+<tr class="memitem:a69661c22022f7d6da77681c18b9fcb51" id="r_a69661c22022f7d6da77681c18b9fcb51"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a69661c22022f7d6da77681c18b9fcb51">addToMatrix</a> (const PetscInt a_row, const <a class="el" href="classPetscStencil.html">PetscStencil</a> &amp;a_stencil) noexcept</td></tr>
+<tr class="memdesc:a69661c22022f7d6da77681c18b9fcb51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a stencil to a row of the matrix, with ADD_VALUES.  <br /></td></tr>
+<tr class="memitem:ac670ceaa14433ab0ba34644be7103280" id="r_ac670ceaa14433ab0ba34644be7103280"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac670ceaa14433ab0ba34644be7103280">replaceGhostCells</a> (VoFStencil &amp;a_stencil, VoFStencil &amp;a_stencilCoar, const int a_level, const DataIndex &amp;a_din) const noexcept</td></tr>
+<tr class="memdesc:ac670ceaa14433ab0ba34644be7103280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils.  <br /></td></tr>
 <tr class="memitem:aa7fe3dffa371b375459267ff680765e4" id="r_aa7fe3dffa371b375459267ff680765e4"><td class="memItemLeft" align="right" valign="top"><a id="aa7fe3dffa371b375459267ff680765e4" name="aa7fe3dffa371b375459267ff680765e4"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>createMatrix</b> () noexcept</td></tr>
 <tr class="memdesc:aa7fe3dffa371b375459267ff680765e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the matrix, with its preallocation, and allocate the boundary weights. <br /></td></tr>
@@ -154,6 +158,9 @@ RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt;&#1
 <tr class="memitem:a4c26819911fab4901c0d4479d834eaf4" id="r_a4c26819911fab4901c0d4479d834eaf4"><td class="memItemLeft" align="right" valign="top"><a id="a4c26819911fab4901c0d4479d834eaf4" name="a4c26819911fab4901c0d4479d834eaf4"></a>
 RefCountedPtr&lt; <a class="el" href="classPetscHelmholtzDomainBC.html">PetscHelmholtzDomainBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainBc</b></td></tr>
 <tr class="memdesc:a4c26819911fab4901c0d4479d834eaf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain boundary conditions. <br /></td></tr>
+<tr class="memitem:a1f75b468a7a88cc55c5e5b0569f821a9" id="r_a1f75b468a7a88cc55c5e5b0569f821a9"><td class="memItemLeft" align="right" valign="top"><a id="a1f75b468a7a88cc55c5e5b0569f821a9" name="a1f75b468a7a88cc55c5e5b0569f821a9"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_interpolators</b></td></tr>
+<tr class="memdesc:a1f75b468a7a88cc55c5e5b0569f821a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-fine ghost cell interpolators on each level. Entry 0 is not used. <br /></td></tr>
 <tr class="memitem:aaacf9ea64184bf1dfd3a51c59f7c6133" id="r_aaacf9ea64184bf1dfd3a51c59f7c6133"><td class="memItemLeft" align="right" valign="top"><a id="aaacf9ea64184bf1dfd3a51c59f7c6133" name="aaacf9ea64184bf1dfd3a51c59f7c6133"></a>
 MFAMRCellData&#160;</td><td class="memItemRight" valign="bottom"><b>m_aCoef</b></td></tr>
 <tr class="memdesc:aaacf9ea64184bf1dfd3a51c59f7c6133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell-centered a-coefficient. <br /></td></tr>
@@ -191,15 +198,16 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Helmholtz operator alpha*a*phi + beta*div(b*grad(phi)), assembled as a PETSc matrix over the rows of a <a class="el" href="classPetscGrid.html" title="Class which maps a multifluid cut-cell AMR hierarchy to PETSc.">PetscGrid</a>. </p>
 <p>Unlike <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>, which applies the operator to data, this class assembles the operator once as a matrix so that it can be solved with PETSc. The domain boundary conditions enter through <a class="el" href="classPetscHelmholtzDomainBC.html" title="Base class for domain boundary conditions of PetscHelmholtzOp.">PetscHelmholtzDomainBC</a>, which gives the flux through a domain face as w_B * g + sum_i w_i * phi_i with g the boundary data. The w_i go into the matrix. The w_B are kept per domain face when the matrix is assembled, and w_B * g goes into the right-hand side, see addBoundaryConditionsToRHS. The boundary data can thus change without the matrix being reassembled.</p>
-<p>Supported so far: a single level, no embedded boundaries, no periodic directions. Anything else aborts.</p>
-<p>The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim and kappa-weighted, as in <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a>: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell (including the EB face), of the face area fraction (the boundary area on the EB face) times b times s*F. Here F is the face flux, the derivative of phi in the +dir direction on the face, which is a stencil over PETSc rows, and s = -1 on the low side of the cell and +1 on the high side. The right-hand side must use the same weighting: a volume source is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Without embedded boundaries kappa and the area fractions are 1, and are not applied yet. Cells covered by a finer level have no row. Multilevel assembly is not implemented yet; it follows this scheme:</p>
+<p>The operator is composite: it spans all AMR levels, and its rows are the valid cells of every level. Supported so far: one phase, no embedded boundaries, no periodic directions. Anything else aborts.</p>
+<p>The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim and kappa-weighted, as in <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a>: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell (including the EB face), of the face area fraction (the boundary area on the EB face) times b times s*F. Here F is the face flux, the derivative of phi in the +dir direction on the face, which is a stencil over PETSc rows, and s = -1 on the low side of the cell and +1 on the high side. The right-hand side must use the same weighting: a volume source is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Without embedded boundaries kappa and the area fractions are 1, and are not applied yet. Cells covered by a finer level have no row. The faces are assembled as follows:</p>
 <ul>
 <li>Face between two valid cells on the same level: the two-point flux, as on a single level.</li>
 <li>Domain face: the stencils and the boundary weight w_B from <a class="el" href="classPetscHelmholtzDomainBC.html#ab259e68968772808854be11060fa03e8" title="Get the stencil of the face flux through a domain face, and the weight of the boundary data.">PetscHelmholtzDomainBC::getFaceFluxStencil</a>. The stencil has parts on the next coarser level, this level, and the next finer level. The part on this level may contain coarse-fine ghost cells, which are replaced as on the fine side of a refinement boundary below. Any other entry that is not a PETSc row, e.g. a cell covered by a finer grid, aborts, as do entries outside the ghost cells of the <a class="el" href="classPetscGrid.html" title="Class which maps a multifluid cut-cell AMR hierarchy to PETSc.">PetscGrid</a> maps.</li>
 <li>Fine side of a refinement boundary: the two-point flux between the fine cell and the ghost cell across the face. The ghost cell is not a PETSc row, so it is replaced by its interpolation stencil from <a class="el" href="classEBMultigridInterpolator.html#a81fde242c42296b15cb7117ddbc52d26" title="Get the stencil that coarseFineInterp uses to fill a ghost cell.">EBMultigridInterpolator::getGhostStencil</a>, which is over cells on the fine level and the next coarser level, and mapped with <a class="el" href="classPetscGrid.html#a21761b7ab8e2f5ac22478e1feda59f48" title="Rewrite a two-level stencil, over cells on a level and the next coarser level, as a stencil over glob...">PetscGrid::getPetscStencilWithCoarserLevel</a>.</li>
-<li>Coarse side of a refinement boundary: the flux through the coarse face is the area-weighted average of the fine face fluxes that cover it, using the same fine-face stencils as the fine rows. The coarse and fine rows thus see the same flux through the interface, which makes the composite operator conservative.</li>
+<li>Coarse side of a refinement boundary: the flux through the coarse face is the area-weighted average of the fine face fluxes that cover it, using the same fine-face stencils as the fine rows. The coarse and fine rows thus see the same flux through the interface, which makes the composite operator conservative. Each fine face adds its flux to the coarse cell across it, through the coarsened fine grids (<a class="el" href="classPetscGrid.html#a46b3537de181f9318320a27f353cb889" title="Get the map from AMR cells to PETSc rows, on the coarsened fine grids.">PetscGrid::getAMRToPetscCoFi</a>), with the weight -1/refRat^SpaceDim relative to the fine row. The coarse cell skips its own faces onto cells covered by the finer level. The coarse row may be on another rank.</li>
 </ul>
 <p>The coefficients alpha, beta, a and b are multiplied into the matrix entries, so changing any of them means refilling the matrix. The a- and b-coefficients are held by reference, so the caller can change their values in place; setCoefficients points the operator to other data, and setAlphaAndBeta changes alpha and beta. Neither touches the matrix: fillMatrix is the only function that does. It refills the existing matrix, keeping its preallocation and sparsity pattern, so the AMG preconditioner can keep its interpolation (PCGAMGSetReuseInterpolation) and only recompute its coarse operators.</p>
+<p>After any change of alpha, beta, a or b, the caller must call fillMatrix and then rebuild the right-hand side (addBoundaryConditionsToRHS) before solving. The stencils can be reused, but the weights must be redone, and both the matrix and the right-hand side carry them. addBoundaryConditionsToRHS uses the current beta and b, so a right-hand side built after a coefficient change, against a matrix filled before it, gives a matrix and a right-hand side that do not belong together. That is a user error, and it is not detected.</p>
 <p>Faces between two valid cells on one level have two-point stencils, which fillMatrix computes as it goes. The other faces have stencils that are expensive to compute, so they are computed once per define and stored without beta and b; fillMatrix then only multiplies them by beta and the b-coefficient on the face. The stored stencils are over PETSc rows, with ghost cells already replaced, and are held per category so that fillMatrix iterates over each category on its own:</p>
 <ul>
 <li>Domain faces: m_domainFluxStencils, with their boundary weights in m_boundaryWeights.</li>
@@ -207,7 +215,7 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 <li>Fine side of a refinement boundary: m_fineCFFluxStencils, multiplied by the fine-face b.</li>
 <li>Coarse side of a refinement boundary: m_coarCFFluxStencils, one stencil per fine face under the coarse face. Each is multiplied by the b-coefficient on its fine face, which fillMatrix first copies from the fine level into the index space of the coarse level (m_bCoefFiCo).</li>
 </ul>
-<p>Only the domain faces are handled so far, and their stencils are computed in fillMatrix rather than stored; the other categories, and the functions that define them, are placeholders. </p>
+<p>So far the stencils of the domain faces and of both sides of the refinement boundaries are computed in fillMatrix rather than stored; the holders, and the functions that define them, are placeholders. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a43511ecfc1be2004abcf93aebc7f0016" name="a43511ecfc1be2004abcf93aebc7f0016"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a43511ecfc1be2004abcf93aebc7f0016">&#9670;&#160;</a></span>PetscHelmholtzOp() <span class="overload">[1/2]</span></h2>
@@ -300,9 +308,47 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 </div><div class="memdoc">
 
 <p>Move the boundary data part of the domain boundary fluxes into a right-hand side. </p>
-<p>The operator is A*phi + c, where A is the matrix and c holds the w_B * g parts of the boundary fluxes, scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly. Only boundary terms are added: the domain boundary data now, and the EB boundary data and surface charge later. The caller supplies the volume source in a_rhs, kappa-weighted as described for the class. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The operator is A*phi + c, where A is the matrix and c holds the w_B * g parts of the boundary fluxes, scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly. Only boundary terms are added: the domain boundary data now, and the EB boundary data and surface charge later. The caller supplies the volume source in a_rhs, kappa-weighted as described for the class. The scaling uses the current beta and b, so call this after the fillMatrix that matches them. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_rhs</td><td>Right-hand side, on the rows of the PETSc grid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a69661c22022f7d6da77681c18b9fcb51" name="a69661c22022f7d6da77681c18b9fcb51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69661c22022f7d6da77681c18b9fcb51">&#9670;&#160;</a></span>addToMatrix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PetscHelmholtzOp::addToMatrix </td>
+          <td>(</td>
+          <td class="paramtype">const PetscInt</td>          <td class="paramname"><span class="paramname"><em>a_row</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classPetscStencil.html">PetscStencil</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencil</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a stencil to a row of the matrix, with ADD_VALUES. </p>
+<p>Thread safe: MatSetValues is called in a named critical section. The row may be on another rank. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_row</td><td>Global PETSc row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stencil</td><td>Stencil over global PETSc rows </td></tr>
   </table>
   </dd>
 </dl>
@@ -337,8 +383,8 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 
 </div>
 </div>
-<a id="ab6507215ccbe0dfaf4f2959b676cf0d5" name="ab6507215ccbe0dfaf4f2959b676cf0d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6507215ccbe0dfaf4f2959b676cf0d5">&#9670;&#160;</a></span>define()</h2>
+<a id="a36d9ec38234aafcade759a1eac24f171" name="a36d9ec38234aafcade759a1eac24f171"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36d9ec38234aafcade759a1eac24f171">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -350,6 +396,11 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
           <td class="memname">void PetscHelmholtzOp::define </td>
           <td>(</td>
           <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classPetscGrid.html">PetscGrid</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_petscGrid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_interpolators</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -398,6 +449,7 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 <p>This defines the domain BC, creates the matrix, and fills it. The a- and b-coefficients are held by reference, see setCoefficients. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_petscGrid</td><td>PETSc grid (rows) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpolators</td><td>Coarse-fine ghost cell interpolators on each level. Entry 0 is not used. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domainBc</td><td>Domain boundary conditions </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_aCoef</td><td>Cell-centered a-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bCoef</td><td>Face-centered b-coefficient </td></tr>
@@ -519,7 +571,7 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 </div><div class="memdoc">
 
 <p>Fill the matrix from the current alpha, beta, and a- and b-coefficients. </p>
-<p>This refills the existing matrix, keeping its preallocation and sparsity pattern. It also stores the boundary weights used by addBoundaryConditionsToRHS. </p>
+<p>This refills the existing matrix, keeping its preallocation and sparsity pattern. It also stores the boundary weights used by addBoundaryConditionsToRHS. Call it after every change of alpha, beta, a or b, and rebuild the right-hand side afterwards. Aborts if the a- or b-coefficient is not defined on the grids of the <a class="el" href="classPetscGrid.html" title="Class which maps a multifluid cut-cell AMR hierarchy to PETSc.">PetscGrid</a>. </p>
 
 </div>
 </div>
@@ -682,6 +734,56 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 
 </div>
 </div>
+<a id="ac670ceaa14433ab0ba34644be7103280" name="ac670ceaa14433ab0ba34644be7103280"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac670ceaa14433ab0ba34644be7103280">&#9670;&#160;</a></span>replaceGhostCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PetscHelmholtzOp::replaceGhostCells </td>
+          <td>(</td>
+          <td class="paramtype">VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencil</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencilCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils. </p>
+<p>Each ghost cell entry is removed from a_stencil, and its stencil from <a class="el" href="classEBMultigridInterpolator.html#a81fde242c42296b15cb7117ddbc52d26" title="Get the stencil that coarseFineInterp uses to fill a ghost cell.">EBMultigridInterpolator::getGhostStencil</a>, times the entry's weight, is added to a_stencil (the part on level a_level) and a_stencilCoar (the part on level a_level - 1, in the index space of grid a_din coarsened). Entries that are not ghost cells are kept. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_stencil</td><td>Stencil over cells on level a_level </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_stencilCoar</td><td>Stencil over cells on level a_level - 1 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on the level </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="aceb544b82b5b0f9e6493d188baa55dcd" name="aceb544b82b5b0f9e6493d188baa55dcd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aceb544b82b5b0f9e6493d188baa55dcd">&#9670;&#160;</a></span>setAlphaAndBeta()</h2>
 
@@ -710,7 +812,7 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 </div><div class="memdoc">
 
 <p>Set alpha and beta. The matrix is not changed until fillMatrix is called. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Before solving, the caller must call fillMatrix and rebuild the right-hand side, see the class documentation. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_alpha</td><td>Operator alpha </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_beta</td><td>Operator beta </td></tr>
@@ -748,7 +850,7 @@ Mat&#160;</td><td class="memItemRight" valign="bottom"><b>m_matrix</b></td></tr>
 </div><div class="memdoc">
 
 <p>Point the operator to other a- and b-coefficients. The matrix is not changed until fillMatrix is called. </p>
-<p>The coefficients are held by reference, so later changes to their values are seen by fillMatrix. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The coefficients are held by reference, so later changes to their values are seen by fillMatrix. After this call, or after changing the values in place, the caller must call fillMatrix and rebuild the right-hand side before solving, see the class documentation. The coefficients must be defined on the grids of the <a class="el" href="classPetscGrid.html" title="Class which maps a multifluid cut-cell AMR hierarchy to PETSc.">PetscGrid</a>; fillMatrix aborts otherwise. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_aCoef</td><td>Cell-centered a-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_bCoef</td><td>Face-centered b-coefficient </td></tr>

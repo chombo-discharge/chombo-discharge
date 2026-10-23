@@ -1,11 +1,11 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="5,118,230,146"/>
 <area shape="rect" id="Node000001" href="$classMFHelmholtzDirichletDomainBCFactory.html" title="Factory class for passing Dirichlet domain boundary conditions into MFHelmholtzOp." alt="" coords="301,5,516,50"/>
-<area shape="poly" id="edge109_Node000000_Node000001" title=" " alt="" coords="161,108,277,60,317,49,312,52,279,65,163,113"/>
+<area shape="poly" id="edge110_Node000000_Node000001" title=" " alt="" coords="161,108,277,60,317,49,312,52,279,65,163,113"/>
 <area shape="rect" id="Node000002" href="$classMFHelmholtzElectrostaticDomainBCFactory.html" title="Class for passing electrostatic boundary conditions into MFHelmholtzOp." alt="" coords="314,75,503,119"/>
-<area shape="poly" id="edge110_Node000000_Node000002" title=" " alt="" coords="245,114,316,107,311,109,246,119"/>
+<area shape="poly" id="edge111_Node000000_Node000002" title=" " alt="" coords="245,114,316,107,311,109,246,119"/>
 <area shape="rect" id="Node000003" href="$classMFHelmholtzNeumannDomainBCFactory.html" title="Class for passing Neumann boundary domain boundary conditions into MFHelmholtzOp." alt="" coords="297,144,520,189"/>
-<area shape="poly" id="edge111_Node000000_Node000003" title=" " alt="" coords="245,144,299,153,294,154,245,150"/>
+<area shape="poly" id="edge112_Node000000_Node000003" title=" " alt="" coords="245,144,299,153,294,154,245,150"/>
 <area shape="rect" id="Node000004" href="$classMFHelmholtzRobinDomainBCFactory.html" title="Base class for making Robin domain boundary conditions with MFHelmholtzOp." alt="" coords="278,212,539,240"/>
-<area shape="poly" id="edge112_Node000000_Node000004" title=" " alt="" coords="161,150,216,175,278,198,322,212,317,212,277,204,214,180,160,155"/>
+<area shape="poly" id="edge113_Node000000_Node000004" title=" " alt="" coords="161,150,216,175,278,198,322,212,317,212,277,204,214,180,160,155"/>
 </map>

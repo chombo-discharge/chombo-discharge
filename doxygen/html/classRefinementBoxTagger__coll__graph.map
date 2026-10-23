@@ -1,0 +1,5 @@
+<map id="RefinementBoxTagger" name="RefinementBoxTagger">
+<area shape="rect" id="Node000001" title="Cell tagger that only refines the boxes given as RefinementBoxTagger.ref_box* in the input file." alt="" coords="5,81,170,109"/>
+<area shape="rect" id="Node000002" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="43,5,132,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,47,90,82,85,80,86,51"/>
+</map>

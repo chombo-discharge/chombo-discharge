@@ -1,19 +1,19 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="5,84,146,112"/>
 <area shape="rect" id="Node000001" href="$classEBHelmholtzDirichletEBBC.html" title="Base class for passing Dirichlet EB boundary conditions into EBHelmholtzOp." alt="" coords="198,5,393,33"/>
-<area shape="poly" id="edge84_Node000000_Node000001" title=" " alt="" coords="118,75,193,43,236,32,231,35,195,48,121,79"/>
+<area shape="poly" id="edge85_Node000000_Node000001" title=" " alt="" coords="118,75,193,43,236,32,231,35,195,48,121,79"/>
 <area shape="rect" id="Node000002" href="$classEBHelmholtzNeumannEBBC.html" title="Base class for passing Neumann EB boundary conditions into EBHelmholtzOp." alt="" coords="194,57,397,85"/>
-<area shape="poly" id="edge85_Node000000_Node000002" title=" " alt="" coords="160,85,196,82,191,85,162,90"/>
+<area shape="poly" id="edge86_Node000000_Node000002" title=" " alt="" coords="160,85,196,82,191,85,162,90"/>
 <area shape="rect" id="Node000003" href="$classEBHelmholtzRobinEBBC.html" title="Base class for passing Robin EB boundary conditions into EBHelmholtzOp." alt="" coords="207,109,384,137"/>
-<area shape="poly" id="edge86_Node000000_Node000003" title=" " alt="" coords="161,105,209,112,204,114,162,110"/>
+<area shape="poly" id="edge87_Node000000_Node000003" title=" " alt="" coords="161,105,209,112,204,114,162,110"/>
 <area shape="rect" id="Node000004" href="$classMFHelmholtzEBBC.html" title="Class for making boundary conditions on the EB in a multifluid context." alt="" coords="224,161,367,189"/>
-<area shape="poly" id="edge87_Node000000_Node000004" title=" " alt="" coords="120,116,195,146,236,160,231,161,193,151,120,121"/>
+<area shape="poly" id="edge88_Node000000_Node000004" title=" " alt="" coords="120,116,195,146,236,160,231,161,193,151,120,121"/>
 <area shape="rect" id="Node000005" href="$classMFHelmholtzDirichletEBBC.html" title="Class for making Dirichlet boundary conditions on the EB in a multifluid context." alt="" coords="458,83,656,110"/>
-<area shape="poly" id="edge88_Node000004_Node000005" title=" " alt="" coords="373,154,396,146,420,133,444,121,487,110,482,112,446,126,422,138,398,151,375,159"/>
+<area shape="poly" id="edge89_Node000004_Node000005" title=" " alt="" coords="373,154,396,146,420,133,444,121,487,110,482,112,446,126,422,138,398,151,375,159"/>
 <area shape="rect" id="Node000006" href="$classMFHelmholtzElectrostaticEBBC.html" title="Class for making Electrostatic boundary conditions on the EB in a multifluid context." alt="" coords="445,135,669,162"/>
-<area shape="poly" id="edge89_Node000004_Node000006" title=" " alt="" coords="382,164,447,159,442,160,383,169"/>
+<area shape="poly" id="edge90_Node000004_Node000006" title=" " alt="" coords="382,164,447,159,442,160,383,169"/>
 <area shape="rect" id="Node000007" href="$classMFHelmholtzNeumannEBBC.html" title="Base class for passing Neumann MF boundary conditions into MFHelmholtzOp." alt="" coords="454,187,660,214"/>
-<area shape="poly" id="edge90_Node000004_Node000007" title=" " alt="" coords="382,181,456,190,451,191,382,186"/>
+<area shape="poly" id="edge91_Node000004_Node000007" title=" " alt="" coords="382,181,456,190,451,191,382,186"/>
 <area shape="rect" id="Node000008" href="$classMFHelmholtzRobinEBBC.html" title="Base class for passing Robin MF boundary conditions into MFHelmholtzOp." alt="" coords="467,239,647,266"/>
-<area shape="poly" id="edge91_Node000004_Node000008" title=" " alt="" coords="350,192,446,223,494,238,489,238,444,228,349,197"/>
+<area shape="poly" id="edge92_Node000004_Node000008" title=" " alt="" coords="350,192,446,223,494,238,489,238,444,228,349,197"/>
 </map>

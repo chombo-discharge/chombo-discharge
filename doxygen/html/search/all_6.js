@@ -380,7 +380,7 @@ var searchData=
   ['getredistributionradius_377',['getRedistributionRadius',['../classAmrMesh.html#af0797ec9054cf1b463a3202f99409651',1,'AmrMesh']]],
   ['getrefinedmask_378',['getRefinedMask',['../classPolyhedralEBGraph.html#a2d612d0d06d0b5cdf1f043330d2a36a5',1,'PolyhedralEBGraph']]],
   ['getrefinementratio_379',['getRefinementRatio',['../classAmrMesh.html#ab7a316dd3977e3f60c27c0e2f71cf4fc',1,'AmrMesh']]],
-  ['getrefinementratios_380',['getRefinementRatios',['../classAmrMesh.html#aea9e442e363ef5f63143d438619cd334',1,'AmrMesh::getRefinementRatios()'],['../classPhaseRealm.html#aaef3284d6f7864beabe6afec2d5592c2',1,'PhaseRealm::getRefinementRatios()'],['../classRealm.html#aa15c8504901f5828ae514c2ee481687d',1,'Realm::getRefinementRatios()']]],
+  ['getrefinementratios_380',['getRefinementRatios',['../classAmrMesh.html#aea9e442e363ef5f63143d438619cd334',1,'AmrMesh::getRefinementRatios()'],['../classPetscGrid.html#ac8e1696de9d776d1ec813b80abda507c',1,'PetscGrid::getRefinementRatios()'],['../classPhaseRealm.html#aaef3284d6f7864beabe6afec2d5592c2',1,'PhaseRealm::getRefinementRatios()'],['../classRealm.html#aa15c8504901f5828ae514c2ee481687d',1,'Realm::getRefinementRatios()']]],
   ['getregridparticles_381',['getRegridParticles',['../classItoSolver.html#aefad2d8ea074246c7fb5ebfa3bf9c4cc',1,'ItoSolver']]],
   ['getregularcells_382',['getRegularCells',['../classAmrMesh.html#abc4fb75176df58edfe11097280c3ee54',1,'AmrMesh::getRegularCells()'],['../classPhaseRealm.html#a9399b73ac7c1a20089f9239198785d97',1,'PhaseRealm::getRegularCells()'],['../classRealm.html#ad97570c40a2f76be778f34d69ce0c0a1',1,'Realm::getRegularCells()']]],
   ['getrelaxationcoeff_383',['getRelaxationCoeff',['../classEBHelmholtzOp.html#af7b310f56af8bc0fd708b220929b01f9',1,'EBHelmholtzOp']]],

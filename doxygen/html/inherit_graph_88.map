@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" title=" " alt="" coords="5,32,142,60"/>
 <area shape="rect" id="Node000001" href="$classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="191,5,314,33"/>
-<area shape="poly" id="edge104_Node000000_Node000001" title=" " alt="" coords="156,31,193,28,188,29,158,36"/>
+<area shape="poly" id="edge105_Node000000_Node000001" title=" " alt="" coords="156,31,193,28,188,29,158,36"/>
 <area shape="rect" id="Node000002" href="$classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level." alt="" coords="190,57,316,85"/>
-<area shape="poly" id="edge105_Node000000_Node000002" title=" " alt="" coords="157,55,192,62,186,62,157,60"/>
+<area shape="poly" id="edge106_Node000000_Node000002" title=" " alt="" coords="157,55,192,62,186,62,157,60"/>
 </map>
