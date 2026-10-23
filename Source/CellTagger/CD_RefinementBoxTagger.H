@@ -28,8 +28,9 @@
  * @brief Cell tagger that only refines the boxes given as RefinementBoxTagger.ref_box* in the input file.
  * @details This gives static refinement where neither geometric refinement nor a physics tagger applies, e.g. on a
  * geometry without embedded boundaries. A cell is tagged on level lvl if its center lies in a refinement box that asks
- * for a level finer than lvl. The box edges are included (CellTagger::getManualRefinementLevel). The boxes, and the tag
- * buffer, are parsed as in CellTagger.
+ * for a level finer than lvl. The box edges are included (CellTagger::getManualRefinementLevel), but an edge that
+ * coincides exactly with a cell center is decided by floating-point rounding, so place the edges between cell centers.
+ * The boxes, and the tag buffer, are parsed as in CellTagger.
  */
 class RefinementBoxTagger : public CellTagger
 {
