@@ -6,11 +6,12 @@
 
 /**
  * @file   main.cpp
- * @brief  Test of FieldSolverAMG on a single level without embedded boundaries.
+ * @brief  Test of FieldSolverAMG without embedded boundaries, on one level or with static refinement.
  * @author Robert Marskar
  */
 
 // Std includes
+#include <algorithm>
 #include <cmath>
 #include <functional>
 
@@ -19,6 +20,7 @@
 
 // Our includes
 #include <CD_Driver.H>
+#include <CD_RefinementBoxTagger.H>
 #include <CD_FieldSolverGMG.H>
 #include <CD_FieldSolverAMG.H>
 #include <CD_RegularGeometry.H>
@@ -156,7 +158,7 @@ makeSolver(const RefCountedPtr<AmrMesh>&               a_amr,
  * @param[in] a_realm Realm
  * @param[in] a_phi   Potential
  * @param[in] a_other Other potential. If null, the exact solution is used.
- * @return Max-norm difference over the gas-phase cells on level 0.
+ * @return Max-norm difference over the gas-phase cells that are not covered by a finer level, on all levels.
  */
 static Real
 maxDifference(const AmrMesh&       a_amr,
@@ -164,29 +166,35 @@ maxDifference(const AmrMesh&       a_amr,
               const MFAMRCellData& a_phi,
               const MFAMRCellData* a_other)
 {
-  constexpr int lvl = 0;
-
-  const DisjointBoxLayout& dbl    = a_amr.getGrids(a_realm)[lvl];
-  const Real               dx     = a_amr.getDx()[lvl];
-  const RealVect           probLo = a_amr.getProbLo();
+  const RealVect probLo = a_amr.getProbLo();
 
   Real maxDiff = 0.0;
 
-  const DataIterator& dit  = dbl.dataIterator();
-  const int           nbox = dit.size();
+  for (int lvl = 0; lvl <= a_amr.getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl  = a_amr.getGrids(a_realm)[lvl];
+    const Real               dx   = a_amr.getDx()[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime) reduction(max : maxDiff)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-    const FArrayBox& phi = (*a_phi[lvl])[din].getPhase(phase::gas).getFArrayBox();
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&     din   = dit[mybox];
+      const FArrayBox&     phi   = (*a_phi[lvl])[din].getPhase(phase::gas).getFArrayBox();
+      const BaseFab<bool>& valid = (*a_amr.getValidCells(a_realm)[lvl])[din];
 
-    for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
-      const IntVect  iv    = bit();
-      const RealVect pos   = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
-      const Real     other = (a_other == nullptr) ? exactPhi(pos)
-                                                  : (*(*a_other)[lvl])[din].getPhase(phase::gas).getFArrayBox()(iv, 0);
+      for (BoxIterator bit(dbl[din]); bit.ok(); ++bit) {
+        const IntVect iv = bit();
 
-      maxDiff = std::max(maxDiff, std::abs(phi(iv, 0) - other));
+        if (!valid(iv)) {
+          continue;
+        }
+
+        const RealVect pos   = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+        const Real     other = (a_other == nullptr) ? exactPhi(pos)
+                                                    : (*(*a_other)[lvl])[din].getPhase(phase::gas).getFArrayBox()(iv, 0);
+
+        maxDiff = std::max(maxDiff, std::abs(phi(iv, 0) - other));
+      }
     }
   }
 
@@ -202,20 +210,21 @@ main(int argc, char* argv[])
   // Scoped so that the PETSc objects are destroyed before ChomboDischarge::finalize finalizes PETSc and MPI.
   {
     // The driver sets up the mesh. Its FieldStepper uses FieldSolverGMG, so the operators GMG needs are registered.
-    auto compgeom    = RefCountedPtr<ComputationalGeometry>(new RegularGeometry());
-    auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
-    auto tagger      = RefCountedPtr<CellTagger>(nullptr);
+    auto        compgeom = RefCountedPtr<ComputationalGeometry>(new RegularGeometry());
+    auto        amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
+    std::string realm;
+
+    ParmParse ppStepper("FieldStepper");
+    ppStepper.get("realm", realm);
+
+    auto tagger      = RefCountedPtr<CellTagger>(new RefinementBoxTagger(amr, realm));
     auto timestepper = RefCountedPtr<FieldStepper<FieldSolverGMG>>(new FieldStepper<FieldSolverGMG>());
     auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
     engine->setupAndRun();
 
-    std::string realm;
-    Real        maxErrorConstant;
-    Real        maxAllowedDifference;
-
-    ParmParse ppStepper("FieldStepper");
-    ppStepper.get("realm", realm);
+    Real maxErrorConstant;
+    Real maxAllowedDifference;
 
     ParmParse pp("PetscRegular");
     pp.get("max_error_constant", maxErrorConstant);
@@ -232,13 +241,15 @@ main(int argc, char* argv[])
     const bool amgConverged = amg->solve(amg->getPotential(), amg->getRho(), sigma, true);
     const bool gmgConverged = gmg->solve(gmg->getPotential(), gmg->getRho(), sigma, true);
 
+    // The error is set by the coarsest level, which also covers the domain boundary.
     const Real dx       = amr->getDx()[0];
     const Real errorAMG = maxDifference(*amr, realm, amg->getPotential(), nullptr);
     const Real errorGMG = maxDifference(*amr, realm, gmg->getPotential(), nullptr);
     const Real diff     = maxDifference(*amr, realm, amg->getPotential(), &gmg->getPotential());
 
-    pout() << "PetscRegular -- dx = " << dx << ", max error AMG = " << errorAMG << ", max error GMG = " << errorGMG
-           << ", max |AMG - GMG| = " << diff << ", error/dx^2 = " << errorAMG / (dx * dx) << endl;
+    pout() << "PetscRegular -- levels = " << 1 + amr->getFinestLevel() << ", coarsest dx = " << dx
+           << ", max error AMG = " << errorAMG << ", max error GMG = " << errorGMG << ", max |AMG - GMG| = " << diff
+           << ", error/dx^2 = " << errorAMG / (dx * dx) << endl;
 
     if (!amgConverged) {
       MayDay::Abort("PetscRegular -- FieldSolverAMG did not converge");

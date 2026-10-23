@@ -31,6 +31,7 @@
 // Our includes
 #include <CD_PetscGrid.H>
 #include <CD_PetscHelmholtzDomainBC.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
 
@@ -43,7 +44,8 @@
  * The w_B are kept per domain face when the matrix is assembled, and w_B * g goes into the right-hand side, see
  * addBoundaryConditionsToRHS. The boundary data can thus change without the matrix being reassembled.
  *
- * Supported so far: a single level, no embedded boundaries, no periodic directions. Anything else aborts.
+ * The operator is composite: it spans all AMR levels, and its rows are the valid cells of every level. Supported so
+ * far: one phase, no embedded boundaries, no periodic directions. Anything else aborts.
  *
  * The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim
  * and kappa-weighted, as in FieldSolverGMG: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell
@@ -53,7 +55,7 @@
  * source is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also
  * multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Without embedded
  * boundaries kappa and the area fractions are 1, and are not applied yet. Cells covered by a finer level have no row.
- * Multilevel assembly is not implemented yet; it follows this scheme:
+ * The faces are assembled as follows:
  *
  * - Face between two valid cells on the same level: the two-point flux, as on a single level.
  * - Domain face: the stencils and the boundary weight w_B from PetscHelmholtzDomainBC::getFaceFluxStencil. The
@@ -67,7 +69,10 @@
  *   mapped with PetscGrid::getPetscStencilWithCoarserLevel.
  * - Coarse side of a refinement boundary: the flux through the coarse face is the area-weighted average of the fine
  *   face fluxes that cover it, using the same fine-face stencils as the fine rows. The coarse and fine rows thus see
- *   the same flux through the interface, which makes the composite operator conservative.
+ *   the same flux through the interface, which makes the composite operator conservative. Each fine face adds its flux
+ *   to the coarse cell across it, through the coarsened fine grids (PetscGrid::getAMRToPetscCoFi), with the weight
+ *   -1/refRat^SpaceDim relative to the fine row. The coarse cell skips its own faces onto cells covered by the finer
+ *   level. The coarse row may be on another rank.
  *
  * The coefficients alpha, beta, a and b are multiplied into the matrix entries, so changing any of them means refilling
  * the matrix. The a- and b-coefficients are held by reference, so the caller can change their values in place;
@@ -75,6 +80,12 @@
  * matrix: fillMatrix is the only function that does. It refills the existing matrix, keeping its preallocation and
  * sparsity pattern, so the AMG preconditioner can keep its interpolation (PCGAMGSetReuseInterpolation) and only
  * recompute its coarse operators.
+ *
+ * After any change of alpha, beta, a or b, the caller must call fillMatrix and then rebuild the right-hand side
+ * (addBoundaryConditionsToRHS) before solving. The stencils can be reused, but the weights must be redone, and both the
+ * matrix and the right-hand side carry them. addBoundaryConditionsToRHS uses the current beta and b, so a right-hand
+ * side built after a coefficient change, against a matrix filled before it, gives a matrix and a right-hand side that
+ * do not belong together. That is a user error, and it is not detected.
  *
  * Faces between two valid cells on one level have two-point stencils, which fillMatrix computes as it goes. The other
  * faces have stencils that are expensive to compute, so they are computed once per define and stored without beta and
@@ -89,8 +100,8 @@
  *   Each is multiplied by the b-coefficient on its fine face, which fillMatrix first copies from the fine level into
  *   the index space of the coarse level (m_bCoefFiCo).
  *
- * Only the domain faces are handled so far, and their stencils are computed in fillMatrix rather than stored; the
- * other categories, and the functions that define them, are placeholders.
+ * So far the stencils of the domain faces and of both sides of the refinement boundaries are computed in fillMatrix
+ * rather than stored; the holders, and the functions that define them, are placeholders.
  */
 class PetscHelmholtzOp
 {
@@ -137,27 +148,31 @@ public:
    * @brief Define the operator.
    * @details This defines the domain BC, creates the matrix, and fills it.
    * The a- and b-coefficients are held by reference, see setCoefficients.
-   * @param[in] a_petscGrid PETSc grid (rows)
-   * @param[in] a_domainBc  Domain boundary conditions
-   * @param[in] a_aCoef     Cell-centered a-coefficient
-   * @param[in] a_bCoef     Face-centered b-coefficient
-   * @param[in] a_probLo    Lower-left corner of the computational domain
-   * @param[in] a_dx        Grid resolution on each level
-   * @param[in] a_alpha     Operator alpha
-   * @param[in] a_beta      Operator beta
+   * @param[in] a_petscGrid     PETSc grid (rows)
+   * @param[in] a_interpolators Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
+   * @param[in] a_domainBc      Domain boundary conditions
+   * @param[in] a_aCoef         Cell-centered a-coefficient
+   * @param[in] a_bCoef         Face-centered b-coefficient
+   * @param[in] a_probLo        Lower-left corner of the computational domain
+   * @param[in] a_dx            Grid resolution on each level
+   * @param[in] a_alpha         Operator alpha
+   * @param[in] a_beta          Operator beta
    */
   virtual void
-  define(const RefCountedPtr<PetscGrid>&              a_petscGrid,
-         const RefCountedPtr<PetscHelmholtzDomainBC>& a_domainBc,
-         const MFAMRCellData&                         a_aCoef,
-         const MFAMRFluxData&                         a_bCoef,
-         const RealVect&                              a_probLo,
-         const Vector<Real>&                          a_dx,
-         const Real                                   a_alpha,
-         const Real                                   a_beta) noexcept;
+  define(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
+         const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators,
+         const RefCountedPtr<PetscHelmholtzDomainBC>&          a_domainBc,
+         const MFAMRCellData&                                  a_aCoef,
+         const MFAMRFluxData&                                  a_bCoef,
+         const RealVect&                                       a_probLo,
+         const Vector<Real>&                                   a_dx,
+         const Real                                            a_alpha,
+         const Real                                            a_beta) noexcept;
 
   /**
    * @brief Set alpha and beta. The matrix is not changed until fillMatrix is called.
+   * @details Before solving, the caller must call fillMatrix and rebuild the right-hand side, see the class
+   * documentation.
    * @param[in] a_alpha Operator alpha
    * @param[in] a_beta  Operator beta
    */
@@ -166,7 +181,10 @@ public:
 
   /**
    * @brief Point the operator to other a- and b-coefficients. The matrix is not changed until fillMatrix is called.
-   * @details The coefficients are held by reference, so later changes to their values are seen by fillMatrix.
+   * @details The coefficients are held by reference, so later changes to their values are seen by fillMatrix. After
+   * this call, or after changing the values in place, the caller must call fillMatrix and rebuild the right-hand side
+   * before solving, see the class documentation. The coefficients must be defined on the grids of the PetscGrid;
+   * fillMatrix aborts otherwise.
    * @param[in] a_aCoef Cell-centered a-coefficient
    * @param[in] a_bCoef Face-centered b-coefficient
    */
@@ -176,7 +194,8 @@ public:
   /**
    * @brief Fill the matrix from the current alpha, beta, and a- and b-coefficients.
    * @details This refills the existing matrix, keeping its preallocation and sparsity pattern. It also stores the
-   * boundary weights used by addBoundaryConditionsToRHS.
+   * boundary weights used by addBoundaryConditionsToRHS. Call it after every change of alpha, beta, a or b, and rebuild
+   * the right-hand side afterwards. Aborts if the a- or b-coefficient is not defined on the grids of the PetscGrid.
    */
   virtual void
   fillMatrix() noexcept;
@@ -194,7 +213,8 @@ public:
    * scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this
    * subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly. Only
    * boundary terms are added: the domain boundary data now, and the EB boundary data and surface charge later. The
-   * caller supplies the volume source in a_rhs, kappa-weighted as described for the class.
+   * caller supplies the volume source in a_rhs, kappa-weighted as described for the class. The scaling uses the
+   * current beta and b, so call this after the fillMatrix that matches them.
    * @param[in,out] a_rhs Right-hand side, on the rows of the PETSc grid
    */
   virtual void
@@ -220,6 +240,11 @@ protected:
    * @brief Domain boundary conditions.
    */
   RefCountedPtr<PetscHelmholtzDomainBC> m_domainBc;
+
+  /**
+   * @brief Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
+   */
+  Vector<RefCountedPtr<EBMultigridInterpolator>> m_interpolators;
 
   /**
    * @brief Cell-centered a-coefficient.
@@ -305,11 +330,37 @@ protected:
   EBAMRFluxData m_bCoefFiCo;
 
   /**
-   * @brief Abort unless the grids are supported by this operator: one level, no periodic directions, no embedded
-   * boundaries, and no cells in any phase other than the gas phase.
+   * @brief Abort unless the grids are supported by this operator: an interpolator on every level above the coarsest, no
+   * periodic directions, no embedded boundaries, and no cells in any phase other than the gas phase.
    */
   virtual void
   checkSupported() const noexcept;
+
+  /**
+   * @brief Add a stencil to a row of the matrix, with ADD_VALUES.
+   * @details Thread safe: MatSetValues is called in a named critical section. The row may be on another rank.
+   * @param[in] a_row     Global PETSc row
+   * @param[in] a_stencil Stencil over global PETSc rows
+   */
+  virtual void
+  addToMatrix(const PetscInt a_row, const PetscStencil& a_stencil) noexcept;
+
+  /**
+   * @brief Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils.
+   * @details Each ghost cell entry is removed from a_stencil, and its stencil from
+   * EBMultigridInterpolator::getGhostStencil, times the entry's weight, is added to a_stencil (the part on level
+   * a_level) and a_stencilCoar (the part on level a_level - 1, in the index space of grid a_din coarsened). Entries
+   * that are not ghost cells are kept.
+   * @param[in,out] a_stencil     Stencil over cells on level a_level
+   * @param[in,out] a_stencilCoar Stencil over cells on level a_level - 1
+   * @param[in]     a_level       Grid level
+   * @param[in]     a_din         Grid index on the level
+   */
+  virtual void
+  replaceGhostCells(VoFStencil&      a_stencil,
+                    VoFStencil&      a_stencilCoar,
+                    const int        a_level,
+                    const DataIndex& a_din) const noexcept;
 
   /**
    * @brief Create the matrix, with its preallocation, and allocate the boundary weights.

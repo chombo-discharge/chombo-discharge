@@ -30,8 +30,8 @@
  * @brief Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc Krylov
  * method, preconditioned by algebraic multigrid.
  * @details This is the PETSc counterpart of FieldSolverGMG, with the same inputs and outputs. The operator is
- * -div(eps * grad(phi)) = rho/eps0, assembled by PetscHelmholtzOp. Supported so far: a single level, a single phase,
- * no embedded boundaries.
+ * -div(eps * grad(phi)) = rho/eps0, assembled by PetscHelmholtzOp. The operator spans all AMR levels. Supported so far:
+ * a single phase, no embedded boundaries.
  */
 class FieldSolverAMG : public FieldSolver
 {

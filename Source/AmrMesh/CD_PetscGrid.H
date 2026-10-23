@@ -145,6 +145,14 @@ public:
   getMFLevelGridsFiCo() const noexcept;
 
   /**
+   * @brief Get the refinement ratios.
+   * @details Entry lvl is the refinement ratio between level lvl and level lvl+1.
+   * @return m_refRat
+   */
+  virtual const Vector<int>&
+  getRefinementRatios() const noexcept;
+
+  /**
    * @brief Get the map from AMR cells to PETSc rows, on the grids of each level.
    * @details Valid cells and ghost cells both hold global PETSc rows.
    * @return m_amrToPetsc

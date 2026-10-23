@@ -13,6 +13,6 @@ dependencies:
 	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) electrostatics
 
-# Make advection-diffusion headers and library visible. 
+# Make electrostatics headers and library visible.
 XTRACPPFLAGS += $(ELECTROSTATICS_INCLUDE)
 XTRALIBFLAGS += $(addprefix -l, $(ELECTROSTATICS_LIB))$(config)

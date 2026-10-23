@@ -234,6 +234,14 @@ for test in config.sections():
             do_test = False
 
     # --------------------------------------------------
+    # Tests marked with petsc = true need a PETSc build,
+    # so they only run when PETSc is enabled
+    # --------------------------------------------------
+    if do_test and config.has_option(str(test), 'petsc') and config.getboolean(str(test), 'petsc'):
+        if args.petsc is None or str(args.petsc).lower() != "true":
+            do_test = False
+
+    # --------------------------------------------------
     # If we're not running all tests, check that the test string equals args.test
     # --------------------------------------------------
     if do_test and args.tests:
