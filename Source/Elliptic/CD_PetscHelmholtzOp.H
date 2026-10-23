@@ -26,11 +26,12 @@
 #include <RealVect.H>
 #include <LayoutData.H>
 #include <BaseFab.H>
-#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_PetscGrid.H>
 #include <CD_PetscHelmholtzDomainBC.H>
+#include <CD_PetscHelmholtzEBBC.H>
+#include <CD_PetscHelmholtzJumpBC.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
@@ -94,7 +95,7 @@
  * on its own:
  *
  * - Domain faces: m_domainFluxStencils, with their boundary weights in m_boundaryWeights.
- * - EB faces: m_ebFluxStencils.
+ * - EB faces: in the EB and jump boundary conditions, see below.
  * - Fine side of a refinement boundary: m_fineCFFluxStencils, multiplied by the fine-face b.
  * - Coarse side of a refinement boundary: m_coarCFFluxStencils, one stencil per fine face under the coarse face.
  *   Each is multiplied by the b-coefficient on its fine face, which fillMatrix first copies from the fine level into
@@ -102,6 +103,34 @@
  *
  * So far the stencils of the domain faces and of both sides of the refinement boundaries are computed in fillMatrix
  * rather than stored; the holders, and the functions that define them, are placeholders.
+ *
+ * Embedded boundaries and multiphase interfaces are not implemented yet; they follow this plan:
+ *
+ * - Rows: every cut cell of each phase is a row. Multi-valued cells are a hard error (PetscGrid aborts on them).
+ * - The flux through the EB face of a cut cell is F = w_B * g + sum_j w_j * phi_j, where the stencil is a PetscStencil
+ *   over PETSc rows of any phase and any level, built from valid cells only. The shared primitive, in
+ *   PetscHelmholtzEBStencils, is the one-sided normal derivative of phi over the valid cells of the cell's phase,
+ *   dphi/dn = w_B * phi_B + sum_i w_i * phi_i. It takes cells from the cell's level and at most one neighbouring level
+ *   (the coarser level on the fine side of a refinement boundary, the finer level next to covered cells), with
+ *   LeastSquares (getBndryGradSten, computeDualLevelStencils). It searches the half-circle, quadrant and radius
+ *   neighbourhoods, each from the requested order down to 1, and aborts if none gives a stencil. One order and one
+ *   weight, set by the solver, apply to all EB face stencils.
+ * - Electrode faces: PetscHelmholtzEBBC, with Dirichlet (g = phi_B) and Neumann (g = dphi/dn) subclasses, and
+ *   PetscHelmholtzElectrostaticEBBC (Source/Electrostatics), which takes g from the electrodes.
+ * - Interface cells, where both phases have a VoF: PetscHelmholtzJumpBC. The one-sided derivatives of both phases are
+ *   combined by a closure that eliminates phi_B, so that the flux into each side is a linear form over the rows of
+ *   both phases plus w_g * g. The closure is the subclass: the natural jump b_1 D_1 + b_2 D_2 = sigma (g = sigma), and
+ *   the saturation charge jump D_gas = 0 (Source/Electrostatics), for which sigma is an output. A virtual hook computes
+ *   the jump data from the solution after the solve.
+ * - The operator: kappa * alpha * a on the diagonal, each face flux times its area fraction, and the EB face flux
+ *   times the boundary area and the b-coefficient on the EB. The flux through a cut face, and through the domain face
+ *   of a cut cell, is the face-center fluxes of the neighbouring faces interpolated to the face centroid, as in
+ *   EBHelmholtzOp. The b-coefficient on the EB is a third coefficient in define and setCoefficients.
+ * - The one-sided least-squares stencils are computed once per define and stored in the boundary condition objects
+ *   (PetscHelmholtzEBStencils). fillMatrix multiplies the electrode fluxes by beta and the b-coefficient on the EB, and
+ *   fetches the interface fluxes, whose weights depend on the b-coefficients of both phases, with those coefficients.
+ *   addBoundaryConditionsToRHS adds w_B * g for the electrode faces and w_g * g for the interface faces, and takes
+ *   sigma as an argument.
  */
 class PetscHelmholtzOp
 {
@@ -146,13 +175,16 @@ public:
 
   /**
    * @brief Define the operator.
-   * @details This defines the domain BC, creates the matrix, and fills it.
+   * @details This defines the domain, EB and jump BCs, creates the matrix, and fills it.
    * The a- and b-coefficients are held by reference, see setCoefficients.
    * @param[in] a_petscGrid     PETSc grid (rows)
    * @param[in] a_interpolators Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
    * @param[in] a_domainBc      Domain boundary conditions
+   * @param[in] a_ebBc          Boundary conditions on the EB faces of cut cells that are not interface cells
+   * @param[in] a_jumpBc        Conditions on the EB faces of interface cells
    * @param[in] a_aCoef         Cell-centered a-coefficient
    * @param[in] a_bCoef         Face-centered b-coefficient
+   * @param[in] a_bCoefIrreg    b-coefficient on the EB faces
    * @param[in] a_probLo        Lower-left corner of the computational domain
    * @param[in] a_dx            Grid resolution on each level
    * @param[in] a_alpha         Operator alpha
@@ -162,8 +194,11 @@ public:
   define(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
          const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators,
          const RefCountedPtr<PetscHelmholtzDomainBC>&          a_domainBc,
+         const RefCountedPtr<PetscHelmholtzEBBC>&              a_ebBc,
+         const RefCountedPtr<PetscHelmholtzJumpBC>&            a_jumpBc,
          const MFAMRCellData&                                  a_aCoef,
          const MFAMRFluxData&                                  a_bCoef,
+         const MFAMRIVData&                                    a_bCoefIrreg,
          const RealVect&                                       a_probLo,
          const Vector<Real>&                                   a_dx,
          const Real                                            a_alpha,
@@ -185,11 +220,12 @@ public:
    * this call, or after changing the values in place, the caller must call fillMatrix and rebuild the right-hand side
    * before solving, see the class documentation. The coefficients must be defined on the grids of the PetscGrid;
    * fillMatrix aborts otherwise.
-   * @param[in] a_aCoef Cell-centered a-coefficient
-   * @param[in] a_bCoef Face-centered b-coefficient
+   * @param[in] a_aCoef      Cell-centered a-coefficient
+   * @param[in] a_bCoef      Face-centered b-coefficient
+   * @param[in] a_bCoefIrreg b-coefficient on the EB faces
    */
   virtual void
-  setCoefficients(const MFAMRCellData& a_aCoef, const MFAMRFluxData& a_bCoef) noexcept;
+  setCoefficients(const MFAMRCellData& a_aCoef, const MFAMRFluxData& a_bCoef, const MFAMRIVData& a_bCoefIrreg) noexcept;
 
   /**
    * @brief Fill the matrix from the current alpha, beta, and a- and b-coefficients.
@@ -212,13 +248,14 @@ public:
    * @details The operator is A*phi + c, where A is the matrix and c holds the w_B * g parts of the boundary fluxes,
    * scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this
    * subtracts c from a_rhs. It evaluates the boundary data but not the stencils, using the w_B kept from assembly. Only
-   * boundary terms are added: the domain boundary data now, and the EB boundary data and surface charge later. The
-   * caller supplies the volume source in a_rhs, kappa-weighted as described for the class. The scaling uses the
-   * current beta and b, so call this after the fillMatrix that matches them.
-   * @param[in,out] a_rhs Right-hand side, on the rows of the PETSc grid
+   * boundary terms are added: the domain boundary data, the electrode data, and the jump data (e.g. the surface charge
+   * density). The caller supplies the volume source in a_rhs, kappa-weighted as described for the class. The scaling
+   * uses the current beta and b, so call this after the fillMatrix that matches them.
+   * @param[in,out] a_rhs   Right-hand side, on the rows of the PETSc grid
+   * @param[in]     a_sigma Surface charge density on the interface between the phases
    */
   virtual void
-  addBoundaryConditionsToRHS(Vec& a_rhs) const noexcept;
+  addBoundaryConditionsToRHS(Vec& a_rhs, const EBAMRIVData& a_sigma) const noexcept;
 
 protected:
   /**
@@ -242,6 +279,16 @@ protected:
   RefCountedPtr<PetscHelmholtzDomainBC> m_domainBc;
 
   /**
+   * @brief Boundary conditions on the EB faces of cut cells that are not interface cells.
+   */
+  RefCountedPtr<PetscHelmholtzEBBC> m_ebBc;
+
+  /**
+   * @brief Conditions on the EB faces of interface cells.
+   */
+  RefCountedPtr<PetscHelmholtzJumpBC> m_jumpBc;
+
+  /**
    * @brief Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
    */
   Vector<RefCountedPtr<EBMultigridInterpolator>> m_interpolators;
@@ -255,6 +302,11 @@ protected:
    * @brief Face-centered b-coefficient.
    */
   MFAMRFluxData m_bCoef;
+
+  /**
+   * @brief b-coefficient on the EB faces.
+   */
+  MFAMRIVData m_bCoefIrreg;
 
   /**
    * @brief Lower-left corner of the computational domain.
@@ -295,12 +347,6 @@ protected:
    * Placeholder: not defined or used yet.
    */
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscStencil>>>> m_domainFluxStencils[SpaceDim][2];
-
-  /**
-   * @brief Flux stencils through the EB faces, without beta and b, over PETSc rows.
-   * @details Indexed by level, with one stencil per cut cell. Placeholder: not defined or used yet.
-   */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<PetscStencil>>>> m_ebFluxStencils;
 
   /**
    * @brief Flux stencils through the fine faces on a refinement boundary, seen from the fine side.
@@ -374,13 +420,6 @@ protected:
    */
   virtual void
   defineDomainFluxStencils() noexcept;
-
-  /**
-   * @brief Define the flux stencils through the EB faces, m_ebFluxStencils.
-   * @details Placeholder: not implemented yet, and aborts.
-   */
-  virtual void
-  defineEBFluxStencils() noexcept;
 
   /**
    * @brief Define the flux stencils through the refinement boundaries, m_fineCFFluxStencils and m_coarCFFluxStencils.

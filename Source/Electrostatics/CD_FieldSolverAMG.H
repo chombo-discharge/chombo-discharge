@@ -24,6 +24,8 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_PetscHelmholtzOp.H>
+#include <CD_PetscHelmholtzEBBC.H>
+#include <CD_PetscHelmholtzJumpBC.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -78,7 +80,7 @@ public:
    * @brief Solve the Poisson equation.
    * @param[in,out] a_potential Potential
    * @param[in]     a_rho       Space charge density
-   * @param[in]     a_sigma     Surface charge density. Not used, since there are no embedded boundaries yet.
+   * @param[in]     a_sigma     Surface charge density on the interface between the gas and the dielectrics
    * @param[in]     a_zeroPhi   Use zero as the initial guess or not
    * @return True if the solver converged.
    */
@@ -210,6 +212,40 @@ protected:
    * @brief Maximum number of Krylov iterations.
    */
   int m_kspMaxIter;
+
+  /**
+   * @brief Conditions on the interface between the gas and the dielectrics.
+   */
+  enum class JumpBCType
+  {
+    Natural,
+    SaturationCharge
+  };
+
+  /**
+   * @brief Interface condition.
+   */
+  JumpBCType m_jumpBcType;
+
+  /**
+   * @brief Highest order of the EB face stencils, for the electrode and the interface faces.
+   */
+  int m_ebOrder;
+
+  /**
+   * @brief Least-squares weighting of the EB face stencils.
+   */
+  int m_ebWeight;
+
+  /**
+   * @brief Boundary conditions on the electrode faces.
+   */
+  RefCountedPtr<PetscHelmholtzEBBC> m_petscEbBc;
+
+  /**
+   * @brief Conditions on the interface between the gas and the dielectrics.
+   */
+  RefCountedPtr<PetscHelmholtzJumpBC> m_petscJumpBc;
 
   /**
    * @brief The operator.

@@ -19,6 +19,9 @@
 // Our includes
 #include <CD_FieldSolverAMG.H>
 #include <CD_PetscHelmholtzElectrostaticDomainBC.H>
+#include <CD_PetscHelmholtzElectrostaticEBBC.H>
+#include <CD_PetscHelmholtzNaturalJumpBC.H>
+#include <CD_PetscHelmholtzSaturationChargeJumpBC.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
@@ -97,13 +100,30 @@ FieldSolverAMG::parseSolverSettings()
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);
   pp.get("ksp_max_iter", m_kspMaxIter);
+
+  // EB face stencils, for the electrodes and the interface between the gas and the dielectrics.
+  std::string jumpBc;
+
+  pp.get("eb_order", m_ebOrder);
+  pp.get("eb_weight", m_ebWeight);
+  pp.get("jump_bc", jumpBc);
+
+  if (jumpBc == "natural") {
+    m_jumpBcType = JumpBCType::Natural;
+  }
+  else if (jumpBc == "saturation_charge") {
+    m_jumpBcType = JumpBCType::SaturationCharge;
+  }
+  else {
+    MayDay::Abort("FieldSolverAMG::parseSolverSettings -- 'jump_bc' must be 'natural' or 'saturation_charge'");
+  }
 }
 
 bool
 FieldSolverAMG::solve(MFAMRCellData&       a_potential,
                       const MFAMRCellData& a_rho,
-                      const EBAMRIVData& /*a_sigma*/,
-                      const bool a_zeroPhi)
+                      const EBAMRIVData&   a_sigma,
+                      const bool           a_zeroPhi)
 {
   CH_TIME("FieldSolverAMG::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)");
   if (m_verbosity > 5) {
@@ -119,8 +139,8 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
-  // Right-hand side rho/eps0, with the boundary data part of the domain boundary fluxes moved into it. There are no
-  // embedded boundaries yet, so the surface charge does not enter.
+  // Right-hand side rho/eps0, with the boundary data parts of the domain, electrode and interface fluxes moved into
+  // it. The surface charge enters through the interface fluxes.
   MFAMRCellData rhoByEps0;
   m_amr->allocate(rhoByEps0, m_realm, m_nComp);
   DataOps::copy(rhoByEps0, a_rho);
@@ -135,7 +155,7 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   petscGrid->create(r);
 
   petscGrid->putChomboInPetsc(b, rhoByEps0);
-  m_petscOp->addBoundaryConditionsToRHS(b);
+  m_petscOp->addBoundaryConditionsToRHS(b, a_sigma);
 
   if (a_zeroPhi) {
     petscGrid->setValue(x, 0.0);
@@ -169,6 +189,9 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
            << ", max-norm right-hand side = " << rhsNorm << endl;
   }
 
+  // Closures whose jump data is an output (saturation charge) compute it from the solution and keep it.
+  m_petscJumpBc->updateJumpData(x, m_permittivityEB);
+
   petscGrid->putPetscInChombo(a_potential, x);
   petscGrid->putPetscInChombo(m_residue, r);
 
@@ -197,12 +220,41 @@ FieldSolverAMG::setupSolver()
 
   auto domainBc = RefCountedPtr<PetscHelmholtzDomainBC>(new PetscHelmholtzElectrostaticDomainBC(m_domainBc));
 
+  // Electrode and interface conditions. One order and one weight apply to all EB face stencils.
+  m_petscEbBc = RefCountedPtr<PetscHelmholtzEBBC>(new PetscHelmholtzElectrostaticEBBC(m_ebBc));
+
+  switch (m_jumpBcType) {
+  case JumpBCType::Natural: {
+    m_petscJumpBc = RefCountedPtr<PetscHelmholtzJumpBC>(new PetscHelmholtzNaturalJumpBC());
+
+    break;
+  }
+  case JumpBCType::SaturationCharge: {
+    m_petscJumpBc = RefCountedPtr<PetscHelmholtzJumpBC>(new PetscHelmholtzSaturationChargeJumpBC(phase::gas));
+
+    break;
+  }
+  default: {
+    MayDay::Abort("FieldSolverAMG::setupSolver -- logic bust");
+
+    break;
+  }
+  }
+
+  m_petscEbBc->setOrder(m_ebOrder);
+  m_petscEbBc->setWeight(m_ebWeight);
+  m_petscJumpBc->setOrder(m_ebOrder);
+  m_petscJumpBc->setWeight(m_ebWeight);
+
   m_petscOp = RefCountedPtr<PetscHelmholtzOp>(new PetscHelmholtzOp());
   m_petscOp->define(m_amr->getPetscGrid(m_realm),
                     m_amr->getMultigridInterpolator(m_realm, phase::gas),
                     domainBc,
+                    m_petscEbBc,
+                    m_petscJumpBc,
                     m_permittivityCell,
                     m_permittivityFace,
+                    m_permittivityEB,
                     m_amr->getProbLo(),
                     m_amr->getDx(),
                     m_alpha,
@@ -244,6 +296,8 @@ FieldSolverAMG::destroySolver()
   }
 
   m_petscOp       = RefCountedPtr<PetscHelmholtzOp>();
+  m_petscEbBc     = RefCountedPtr<PetscHelmholtzEBBC>();
+  m_petscJumpBc   = RefCountedPtr<PetscHelmholtzJumpBC>();
   m_isSolverSetup = false;
 }
 
