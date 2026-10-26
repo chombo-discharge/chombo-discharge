@@ -35,6 +35,19 @@ PetscHelmholtzSaturationChargeJumpBC::~PetscHelmholtzSaturationChargeJumpBC() no
 }
 
 void
+PetscHelmholtzSaturationChargeJumpBC::clear() noexcept
+{
+  CH_TIME("PetscHelmholtzSaturationChargeJumpBC::clear");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzSaturationChargeJumpBC::clear" << endl;
+  }
+
+  m_sigma.clear();
+
+  PetscHelmholtzJumpBC::clear();
+}
+
+void
 PetscHelmholtzSaturationChargeJumpBC::getInterfaceFluxStencil(Real& /*a_dataWeight*/,
                                                               PetscStencil& /*a_stencil*/,
                                                               const int /*a_phase*/,

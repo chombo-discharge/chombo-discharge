@@ -174,9 +174,16 @@ public:
   virtual ~PetscHelmholtzOp() noexcept;
 
   /**
+   * @brief Release the matrix, the boundary conditions, the coefficients and all per-level data, so that the operator
+   * can be defined again, e.g. after a regrid.
+   */
+  virtual void
+  clear() noexcept;
+
+  /**
    * @brief Define the operator.
-   * @details This defines the domain, EB and jump BCs, creates the matrix, and fills it.
-   * The a- and b-coefficients are held by reference, see setCoefficients.
+   * @details This clears any previous definition, defines the domain, EB and jump BCs, creates the matrix, and fills
+   * it. The a- and b-coefficients are held by reference, see setCoefficients.
    * @param[in] a_petscGrid     PETSc grid (rows)
    * @param[in] a_interpolators Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
    * @param[in] a_domainBc      Domain boundary conditions

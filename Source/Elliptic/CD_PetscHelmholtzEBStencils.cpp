@@ -65,6 +65,26 @@ PetscHelmholtzEBStencils::setWeight(const int a_weight) noexcept
 }
 
 void
+PetscHelmholtzEBStencils::clear() noexcept
+{
+  CH_TIME("PetscHelmholtzEBStencils::clear");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzEBStencils::clear" << endl;
+  }
+
+  for (int iphase = 0; iphase < 2; iphase++) {
+    m_derivStencils[iphase].resize(0);
+    m_derivWeights[iphase].resize(0);
+  }
+
+  m_petscGrid = RefCountedPtr<PetscGrid>();
+  m_probLo    = RealVect::Zero;
+  m_isDefined = false;
+
+  m_dx.resize(0);
+}
+
+void
 PetscHelmholtzEBStencils::define(const RefCountedPtr<PetscGrid>& /*a_petscGrid*/,
                                  const RealVect& /*a_probLo*/,
                                  const Vector<Real>& /*a_dx*/) noexcept
@@ -73,6 +93,8 @@ PetscHelmholtzEBStencils::define(const RefCountedPtr<PetscGrid>& /*a_petscGrid*/
   if (m_verbose) {
     pout() << "PetscHelmholtzEBStencils::define" << endl;
   }
+
+  this->clear();
 
   MayDay::Abort("PetscHelmholtzEBStencils::define -- not implemented yet");
 }

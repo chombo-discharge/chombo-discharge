@@ -295,6 +295,10 @@ FieldSolverAMG::destroySolver()
     PetscCallAbort(Chombo_MPI::comm, KSPDestroy(&m_ksp));
   }
 
+  if (!m_petscOp.isNull()) {
+    m_petscOp->clear();
+  }
+
   m_petscOp       = RefCountedPtr<PetscHelmholtzOp>();
   m_petscEbBc     = RefCountedPtr<PetscHelmholtzEBBC>();
   m_petscJumpBc   = RefCountedPtr<PetscHelmholtzJumpBC>();

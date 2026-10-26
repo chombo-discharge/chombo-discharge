@@ -48,8 +48,42 @@ PetscHelmholtzOp::~PetscHelmholtzOp() noexcept
     pout() << "PetscHelmholtzOp::~PetscHelmholtzOp" << endl;
   }
 
+  this->clear();
+}
+
+void
+PetscHelmholtzOp::clear() noexcept
+{
+  CH_TIME("PetscHelmholtzOp::clear");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::clear" << endl;
+  }
+
   if (m_matrix != nullptr) {
     PetscCallVoid(MatDestroy(&m_matrix));
+  }
+
+  m_petscGrid = RefCountedPtr<PetscGrid>();
+  m_domainBc  = RefCountedPtr<PetscHelmholtzDomainBC>();
+  m_ebBc      = RefCountedPtr<PetscHelmholtzEBBC>();
+  m_jumpBc    = RefCountedPtr<PetscHelmholtzJumpBC>();
+  m_probLo    = RealVect::Zero;
+  m_isDefined = false;
+
+  m_interpolators.resize(0);
+  m_dx.resize(0);
+  m_aCoef.clear();
+  m_bCoef.clear();
+  m_bCoefIrreg.clear();
+  m_boundaryWeights.clear();
+  m_bCoefFiCo.clear();
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (int iside = 0; iside < 2; iside++) {
+      m_domainFluxStencils[dir][iside].resize(0);
+      m_fineCFFluxStencils[dir][iside].resize(0);
+      m_coarCFFluxStencils[dir][iside].resize(0);
+    }
   }
 }
 
@@ -82,6 +116,8 @@ PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&                       a
   if (a_dx.size() < numLevels || a_interpolators.size() < numLevels) {
     MayDay::Abort("PetscHelmholtzOp::define -- dx or the interpolators do not cover every level");
   }
+
+  this->clear();
 
   m_petscGrid     = a_petscGrid;
   m_interpolators = a_interpolators;

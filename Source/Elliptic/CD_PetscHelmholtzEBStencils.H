@@ -99,8 +99,15 @@ public:
   setWeight(const int a_weight) noexcept;
 
   /**
+   * @brief Release the stored stencils and the grids, so that the object can be defined again, e.g. after a regrid.
+   * @details The order and the weight are settings, and are kept.
+   */
+  virtual void
+  clear() noexcept;
+
+  /**
    * @brief Define over the AMR hierarchy, and compute the one-sided normal derivative stencils of every cut cell.
-   * @details The order and the weight must be set first.
+   * @details The order and the weight must be set first. Clears any previous definition first.
    * @param[in] a_petscGrid PETSc grid. Holds the grids on every level, their coarsenings and refinements, and the
    * per-cell AMR information.
    * @param[in] a_probLo    Lower-left corner of the computational domain

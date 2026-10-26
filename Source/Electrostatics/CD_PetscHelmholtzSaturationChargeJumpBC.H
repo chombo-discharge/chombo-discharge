@@ -47,6 +47,12 @@ public:
   virtual ~PetscHelmholtzSaturationChargeJumpBC() noexcept;
 
   /**
+   * @brief Release the computed surface charge density, the stored stencils and the grids.
+   */
+  virtual void
+  clear() noexcept override;
+
+  /**
    * @brief Get the flux into one side of an interface cell, b_k * D_k, as a linear form.
    * @param[out] a_dataWeight   Weight w_g of the jump data, which is zero
    * @param[out] a_stencil      Stencil over PETSc rows of both phases
