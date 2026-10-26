@@ -178,5 +178,5 @@ FieldSolverAMG.jump_bc               = natural      ## Interface condition: 'nat
 # ====================================================================================================
 # PetscElectrode test options
 # ====================================================================================================
-PetscElectrode.max_difference       = 1.E-3    ## Fail if AMG and GMG differ by more than this (max norm)
+PetscElectrode.max_difference       = 1.E-6    ## Fail if AMG and GMG differ by more than this (max norm)
 PetscElectrode.write_plot_files     = true     ## Write the plot files of both solvers

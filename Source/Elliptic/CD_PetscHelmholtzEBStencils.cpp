@@ -358,26 +358,8 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
     }
   }
 
-  // Keep the cells closest to the EB face centroid, at most 2*M on each level.
+  // As in FieldSolverGMG, every cell of the neighbourhood enters the fit.
   const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1;
-
-  const RealVect x0 = Location::position(Location::Cell::Boundary, a_vof, ebisbox, dx);
-
-  auto trim = [&](Vector<VolIndex>& a_vofs, const Real a_dx) -> void {
-    auto closer = [&](const VolIndex& a, const VolIndex& b) -> bool {
-      const RealVect da = (RealVect(a.gridIndex()) + 0.5 * RealVect::Unit) * a_dx - x0;
-      const RealVect db = (RealVect(b.gridIndex()) + 0.5 * RealVect::Unit) * a_dx - x0;
-
-      return da.vectorLength() < db.vectorLength();
-    };
-
-    std::stable_sort(a_vofs.stdVector().begin(), a_vofs.stdVector().end(), closer);
-
-    a_vofs.resize(std::min(2 * numUnknowns, static_cast<int>(a_vofs.size())));
-  };
-
-  trim(vofsThis, dx);
-  trim(vofsFine, dxFine);
 
   if (static_cast<int>(vofsThis.size() + vofsFine.size()) <= numUnknowns) {
     return false;

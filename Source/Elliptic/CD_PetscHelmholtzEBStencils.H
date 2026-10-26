@@ -48,10 +48,10 @@
  *   that radius.
  * - Cells covered by the next finer level are replaced by the finer cells under them that are PETSc rows.
  *
- * On each level, only the 2*M cells closest to the EB face centroid are kept, with M the number of unknowns in the
- * fit. The search tries the half-circle, quadrant and radius neighbourhoods, each from the order down to 1, and aborts
- * if none gives a stencil. A cut cell without an EB normal has no EB face; its stencil is empty with w_B = 0. The
- * stencils are computed once, in define, and contain neither the b-coefficient nor the face area.
+ * Every cell of the neighbourhood enters the fit, as in FieldSolverGMG. The search tries the half-circle, quadrant and
+ * radius neighbourhoods, each from the order down to 1, and aborts if none gives a stencil. A cut cell without an EB
+ * normal has no EB face; its stencil is empty with w_B = 0. The stencils are computed once, in define, and contain
+ * neither the b-coefficient nor the face area.
  *
  * PetscHelmholtzEBBC (electrode faces) and PetscHelmholtzJumpBC (interface faces) derive from this class and build
  * their fluxes from these stencils.
