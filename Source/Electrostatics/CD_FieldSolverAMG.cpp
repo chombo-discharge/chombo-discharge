@@ -81,22 +81,22 @@ FieldSolverAMG::parseSolverSettings()
 
   ParmParse pp(m_className.c_str());
 
-  // The Krylov solver is given by our name for it, and stored as the PETSc type.
-  std::string kspType;
+  // The outer Krylov solver is any PETSc KSP type (checked by PETSc in setupSolver), with 'bicgstab' accepted for
+  // PETSc's 'bcgs'.
+  pp.get("ksp_type", m_kspType);
 
-  pp.get("ksp_type", kspType);
-
-  if (kspType == "bicgstab") {
+  if (m_kspType == "bicgstab") {
     m_kspType = KSPBCGS;
   }
-  else if (kspType == "gmres") {
-    m_kspType = KSPGMRES;
-  }
-  else {
-    MayDay::Abort("FieldSolverAMG::parseSolverSettings -- 'ksp_type' must be 'bicgstab' or 'gmres'");
-  }
 
+  pp.get("ksp_gmres_restart", m_kspGmresRestart);
   pp.get("pc_type", m_pcType);
+
+  // The smoother on each level of a multigrid preconditioner (e.g. gamg): its KSP and PC types, and the number of
+  // smoothing steps.
+  pp.get("amg_smoother_ksp", m_amgSmootherKsp);
+  pp.get("amg_smoother_pc", m_amgSmootherPc);
+  pp.get("amg_smoother_its", m_amgSmootherIts);
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);
   pp.get("ksp_max_iter", m_kspMaxIter);
@@ -325,6 +325,27 @@ FieldSolverAMG::setupSolver()
 #endif
 
   PetscCallAbort(Chombo_MPI::comm, KSPSetTolerances(m_ksp, m_kspRtol, m_kspAtol, keepDivergenceTol, m_kspMaxIter));
+
+  // No effect unless the KSP is GMRES or FGMRES.
+  PetscCallAbort(Chombo_MPI::comm, KSPGMRESSetRestart(m_ksp, m_kspGmresRestart));
+
+  // The level smoothers of a multigrid preconditioner are only created when the preconditioner is set up, so their
+  // settings go into the options database, where KSPSetFromOptions picks them up. A setting already given on the
+  // command line is kept. Preconditioners that are not multigrid ignore them.
+  auto setDefaultOption = [](const std::string& a_name, const std::string& a_value) -> void {
+    PetscBool isSet = PETSC_FALSE;
+
+    PetscCallAbort(Chombo_MPI::comm, PetscOptionsHasName(nullptr, nullptr, a_name.c_str(), &isSet));
+
+    if (!isSet) {
+      PetscCallAbort(Chombo_MPI::comm, PetscOptionsSetValue(nullptr, a_name.c_str(), a_value.c_str()));
+    }
+  };
+
+  setDefaultOption("-fieldsolveramg_mg_levels_ksp_type", m_amgSmootherKsp);
+  setDefaultOption("-fieldsolveramg_mg_levels_pc_type", m_amgSmootherPc);
+  setDefaultOption("-fieldsolveramg_mg_levels_ksp_max_it", std::to_string(m_amgSmootherIts));
+
   PetscCallAbort(Chombo_MPI::comm, KSPSetOptionsPrefix(m_ksp, "fieldsolveramg_"));
   PetscCallAbort(Chombo_MPI::comm, KSPSetFromOptions(m_ksp));
 

@@ -192,9 +192,29 @@ protected:
   bool m_isSolverSetup;
 
   /**
-   * @brief PETSc Krylov solver type, KSPBCGS or KSPGMRES, from the 'bicgstab' or 'gmres' option.
+   * @brief PETSc Krylov solver type, e.g. 'gmres', 'fgmres', 'bcgs' (also given as 'bicgstab') or 'cg'.
    */
   std::string m_kspType;
+
+  /**
+   * @brief Restart length of GMRES and FGMRES.
+   */
+  int m_kspGmresRestart;
+
+  /**
+   * @brief KSP type of the smoother on each level of a multigrid preconditioner, e.g. 'chebyshev' or 'richardson'.
+   */
+  std::string m_amgSmootherKsp;
+
+  /**
+   * @brief PC type of the smoother on each level of a multigrid preconditioner, e.g. 'sor' or 'jacobi'.
+   */
+  std::string m_amgSmootherPc;
+
+  /**
+   * @brief Number of smoothing steps on each level of a multigrid preconditioner.
+   */
+  int m_amgSmootherIts;
 
   /**
    * @brief PETSc preconditioner type, e.g. 'gamg' or 'hypre'.
