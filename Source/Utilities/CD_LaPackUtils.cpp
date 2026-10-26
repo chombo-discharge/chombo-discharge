@@ -162,10 +162,13 @@ LaPackUtils::computeSVD(std::vector<float>&       a_linU,
 
 bool
 LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
+                                  int&                       a_rank,
                                   const std::vector<double>& a_linA,
                                   const int&                 a_M,
                                   const int&                 a_N)
 {
+  a_rank = 0;
+
   // Compute the singular value decomposition
   std::vector<double> linU, linSigma, linVT;
   const bool          foundSVD = LaPackUtils::computeSVD(linU, linSigma, linVT, a_linA, a_M, a_N);
@@ -194,6 +197,8 @@ LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     for (int i = 0; i < linSigma.size(); i++) {
       if (std::abs(linSigma[i]) > tol) {
         SigmaReciprocal[i] = 1. / linSigma[i];
+
+        a_rank++;
       }
       else {
         SigmaReciprocal[i] = 0.0;
@@ -260,10 +265,13 @@ LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
 
 bool
 LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
+                                  int&                      a_rank,
                                   const std::vector<float>& a_linA,
                                   const int&                a_M,
                                   const int&                a_N)
 {
+  a_rank = 0;
+
   // Compute the singular value decomposition
   std::vector<float> linU, linSigma, linVT;
   const bool         foundSVD = LaPackUtils::computeSVD(linU, linSigma, linVT, a_linA, a_M, a_N);
@@ -292,6 +300,8 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     for (int i = 0; i < linSigma.size(); i++) {
       if (std::abs(linSigma[i]) > tol) {
         SigmaReciprocal[i] = static_cast<float>(1.) / linSigma[i];
+
+        a_rank++;
       }
       else {
         SigmaReciprocal[i] = 0.0;

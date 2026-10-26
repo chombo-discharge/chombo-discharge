@@ -166,7 +166,10 @@ computeSVD(std::vector<float>&       a_linU,
 
 /**
  * @brief Compute the pseudoinverse of matrix through singular value decomposition
+ * @details Singular values below eps * max(M, N) * sigma_max are treated as zero. The numerical rank is the number of
+ * singular values above that tolerance; it is smaller than min(M, N) when the pseudoinverse drops directions.
  * @param[out] a_linAplus Pseudoinverse in column major Fortran order.
+ * @param[out] a_rank Numerical rank of A. Zero if the singular value decomposition failed.
  * @param[in]  a_linA Input matrix in column major Fortran order
  * @param[in]  a_M Number of rows in A
  * @param[in]  a_N Number of columns in A
@@ -174,20 +177,28 @@ computeSVD(std::vector<float>&       a_linU,
  */
 bool
 computePseudoInverse(std::vector<double>&       a_linAplus,
+                     int&                       a_rank,
                      const std::vector<double>& a_linA,
                      const int&                 a_M,
                      const int&                 a_N);
 
 /**
  * @brief Compute the pseudoinverse of matrix through singular value decomposition
+ * @details Singular values below eps * max(M, N) * sigma_max are treated as zero. The numerical rank is the number of
+ * singular values above that tolerance; it is smaller than min(M, N) when the pseudoinverse drops directions.
  * @param[out] a_linAplus Pseudoinverse in column major Fortran order.
+ * @param[out] a_rank Numerical rank of A. Zero if the singular value decomposition failed.
  * @param[in]  a_linA Input matrix in column major Fortran order
  * @param[in]  a_M Number of rows in A
  * @param[in]  a_N Number of columns in A
  * @return Computed pseudo inverse
  */
 bool
-computePseudoInverse(std::vector<float>& a_linAplus, const std::vector<float>& a_linA, const int& a_M, const int& a_N);
+computePseudoInverse(std::vector<float>&       a_linAplus,
+                     int&                      a_rank,
+                     const std::vector<float>& a_linA,
+                     const int&                a_M,
+                     const int&                a_N);
 
 /**
  * @brief Linearize a matrix to column major Fortran form by assuming row or major column format of the input matrix.

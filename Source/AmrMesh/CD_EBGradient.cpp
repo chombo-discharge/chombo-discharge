@@ -1029,11 +1029,18 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy.
     // We fetch those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable
     // (in a_stencilFine) and a_stencilCoar.
+    // The stencils are empty if the system was rank deficient, in which case the caller drops order.
+    foundStencil = true;
+
     for (int dir = 0; dir < SpaceDim; dir++) {
       const IntVect deriv = BASISV(dir);
 
       const VoFStencil& fineDerivStencil = stencils.at(deriv).first;
       const VoFStencil& coarDerivStencil = stencils.at(deriv).second;
+
+      if (fineDerivStencil.size() + coarDerivStencil.size() == 0) {
+        foundStencil = false;
+      }
 
       for (int i = 0; i < fineDerivStencil.size(); i++) {
         const VolIndex& vof    = fineDerivStencil.vof(i);
@@ -1084,7 +1091,10 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
       a_stencilCoar.add(a_vofCoar, -1.0 * coarVofWeight, dir);
     }
 
-    foundStencil = true;
+    if (!foundStencil) {
+      a_stencilCoar.clear();
+      a_stencilFine.clear();
+    }
   }
   else {
     foundStencil = false;

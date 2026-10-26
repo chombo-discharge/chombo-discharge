@@ -25,8 +25,8 @@ LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int
   Vector<Real> ret(a_displacements.size(), 1.0);
 
   if (a_pow > 0) {
-    // Figure out the min distance, and normalize every weight with this distance. We do not use physical
-    // distances when weighting the equations :)
+    // Figure out the max distance, and normalize every distance with it. We do not use physical distances when
+    // weighting the equations.
     Real normDist = 0.0;
     for (int i = 0; i < a_displacements.size(); i++) {
       normDist = std::max(normDist, a_displacements[i].vectorLength());
@@ -144,6 +144,11 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
     // system. This will also correspond to a modification of the right-hand side, but the required modifications are
     // not accessible in this routine, and so the user will have to make sense of them.
 
+    // The system is built from the displacements in units of the largest displacement on either level, L, so that the
+    // columns of A are O(1); see computeSingleLevelStencils. The stencil for a term of order n is divided by L^n below.
+    const Real lengthScale = std::max(LeastSquares::getLengthScale(a_fineDisplacements),
+                                      LeastSquares::getLengthScale(a_coarDisplacements));
+
     int       i = 0;                // Exists just because we fill memory linearly.
     Vector<T> linA(K * M, 0.0);     // Equal to (w*A)
     Vector<T> linAplus(M * K, 0.0); // Equal to (w*A)^+
@@ -155,20 +160,24 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
         // Fill column, write the system using the fine vofs first, then the coarse vofs.
         for (int k = 0; k < K; k++) {
           if (k < Kfine) {
-            linA[i] = a_fineWeights[k] * mi.pow(a_fineDisplacements[k]) / mi.factorial();
+            linA[i] = a_fineWeights[k] * mi.pow(a_fineDisplacements[k] / lengthScale) / mi.factorial();
           }
           else {
-            linA[i] = a_coarWeights[k - Kfine] * mi.pow(a_coarDisplacements[k - Kfine]) / mi.factorial();
+            linA[i] = a_coarWeights[k - Kfine] * mi.pow(a_coarDisplacements[k - Kfine] / lengthScale) / mi.factorial();
           }
           i++;
         }
       }
     }
 
-    // Compute the pseudo-inverse.
-    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
+    // Compute the pseudo-inverse. No stencil is returned if A is rank deficient; see computeSingleLevelStencils.
+    int        rank     = 0;
+    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), rank, linA.stdVector(), K, M);
 
-    if (foundSVD) {
+    if (!foundSVD) {
+      MayDay::Warning("LeastSquares::computeDualLevelStencils - could not perform singular value decomposition");
+    }
+    else if (rank == M) {
       // When we have eliminated rows in the linear system we can't use MultiIndex to map directly, this occurs because
       // if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)):
       //
@@ -212,19 +221,18 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
         // Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want
         // the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also
         // weighted).
+        const Real scale = std::pow(lengthScale, -deriv.sum());
+
         for (int k = 0; k < K; k++) {
           const int idx = row + k * M;
           if (k < Kfine) {
-            sten.first.add(a_fineVofs[k], a_fineWeights[k] * linAplus[idx]);
+            sten.first.add(a_fineVofs[k], scale * a_fineWeights[k] * linAplus[idx]);
           }
           else {
-            sten.second.add(a_coarVofs[k - Kfine], a_coarWeights[k - Kfine] * linAplus[idx]);
+            sten.second.add(a_coarVofs[k - Kfine], scale * a_coarWeights[k - Kfine] * linAplus[idx]);
           }
         }
       }
-    }
-    else {
-      MayDay::Warning("LeastSquares::computeDualLevelStencils - could not perform singular value decomposition");
     }
   }
 

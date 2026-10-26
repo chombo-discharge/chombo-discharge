@@ -282,7 +282,7 @@ public:
 
   /**
    * @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The
-   * weights are given as 1/||x1-x0||^a where a is the power.
+   * weights are given as 1/(1 + ||xi-x0||/d)^a where a is the power and d is the largest of the distances ||xi-x0||.
    * @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T.
    * @return Return value
    * @param[in] a_pow Pow
@@ -339,6 +339,16 @@ public:
    */
   static int
   getTaylorExpansionSize(int a_order);
+
+  /**
+   * @brief Get the length scale that the least squares systems are built in.
+   * @details The displacements are divided by this length so that the columns of the system matrix are O(1) for any
+   * grid resolution.
+   * @param[in] a_displacements Displacement vectors
+   * @return The largest length of the displacements, or 1 if there are none or all are zero.
+   */
+  static Real
+  getLengthScale(const Vector<RealVect>& a_displacements) noexcept;
 
   /**
    * @brief Compute an interpolation stencil to specified order by solving a least squares system
@@ -417,8 +427,9 @@ public:
    * @param[in] a_order         Order of the returned interpolation.
    * @return Stencils for each of the derivatives specified in the input argument.
    * @note This will throw an error if you don't have enough equations for obtaining the specified order.
-   * @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned
-   * stencils are all empty.
+   * @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, or the system
+   * is rank deficient (the vofs do not determine every term of the Taylor series to a_order), the returned stencils are
+   * all empty.
    */
   static std::map<IntVect, VoFStencil>
   computeSingleLevelStencils(const IntVectSet&       a_derivs,
@@ -450,8 +461,9 @@ public:
    * @return Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains
    * fine-grid vofs only, and the second entry contains the coar vofs.
    * @note This will throw an error if you don't have enough equations for obtaining the specified order.
-   * @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned
-   * stencils are all empty.
+   * @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, or the system
+   * is rank deficient (the vofs do not determine every term of the Taylor series to a_order), the returned stencils are
+   * all empty.
    * @note T is the precision used by LAPACK
    */
   template <typename T>
@@ -488,8 +500,9 @@ public:
    * @return Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains
    * fine-grid vofs only, and the second entry contains the coar vofs.
    * @note This will throw an error if you don't have enough equations for obtaining the specified order.
-   * @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned
-   * stencils are all empty.
+   * @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, or the system
+   * is rank deficient (the vofs do not determine every term of the Taylor series to a_order), the returned stencils are
+   * all empty.
    * @note T is the precision used by LAPACK
    */
   template <typename T>
