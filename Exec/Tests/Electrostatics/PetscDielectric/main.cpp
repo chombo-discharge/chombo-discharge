@@ -175,6 +175,48 @@ main(int argc, char* argv[])
       MayDay::Abort("PetscDielectric -- FieldSolverAMG and FieldSolverGMG differ by more than max_difference");
     }
 
+    // Change the permittivities of the set-up solvers, as the semi-implicit schemes of CdrPlasma and ItoKMC do: reset
+    // them, double the gas-phase permittivity on the faces and the EB, and hand them back with setSolverPermittivities.
+    // This refills the AMG matrix and rebuilds its preconditioner.
+    auto changePermittivities = [&](RefCountedPtr<FieldSolver>& a_solver) -> void {
+      a_solver->setPermittivities();
+
+      MFAMRCellData& permCell = a_solver->getPermittivityCell();
+      MFAMRFluxData& permFace = a_solver->getPermittivityFace();
+      MFAMRIVData&   permEB   = a_solver->getPermittivityEB();
+
+      EBAMRFluxData permFaceGas = amr->alias(phase::gas, permFace);
+      EBAMRIVData   permEBGas   = amr->alias(phase::gas, permEB);
+
+      DataOps::incr(permFaceGas, permFaceGas, 1.0);
+      DataOps::incr(permEBGas, permEBGas, 1.0);
+
+      amr->arithmeticAverage(permFaceGas, realm, phase::gas);
+      amr->arithmeticAverage(permEBGas, realm, phase::gas);
+
+      a_solver->setSolverPermittivities(permCell, permFace, permEB);
+    };
+
+    changePermittivities(amg);
+    changePermittivities(gmg);
+
+    const bool amgConvergedChanged = amg->solve(amg->getPotential(), amg->getRho(), sigma, true);
+    const bool gmgConvergedChanged = gmg->solve(gmg->getPotential(), gmg->getRho(), sigma, true);
+
+    const Real diffChanged = maxDifference(*amr, realm, amg->getPotential(), gmg->getPotential());
+
+    pout() << "PetscDielectric -- with the gas permittivity doubled through setSolverPermittivities, max |AMG - GMG| = "
+           << diffChanged << endl;
+
+    if (!amgConvergedChanged || !gmgConvergedChanged) {
+      MayDay::Abort("PetscDielectric -- a solver did not converge after setSolverPermittivities");
+    }
+    if (diffChanged > maxAllowedDifference) {
+      MayDay::Abort(
+        "PetscDielectric -- after setSolverPermittivities, FieldSolverAMG and FieldSolverGMG differ by more "
+        "than max_difference");
+    }
+
     pout() << "PetscDielectric -- all tests passed" << endl;
   }
 #else

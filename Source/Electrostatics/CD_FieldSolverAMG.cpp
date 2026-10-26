@@ -354,16 +354,26 @@ FieldSolverAMG::destroySolver()
 }
 
 void
-FieldSolverAMG::setSolverPermittivities(const MFAMRCellData& /*a_permittivityCell*/,
-                                        const MFAMRFluxData& /*a_permittivityFace*/,
-                                        const MFAMRIVData& /*a_permittivityEB*/)
+FieldSolverAMG::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                        const MFAMRFluxData& a_permittivityFace,
+                                        const MFAMRIVData&   a_permittivityEB)
 {
   CH_TIME("FieldSolverAMG::setSolverPermittivities()");
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::setSolverPermittivities()" << endl;
   }
 
-  MayDay::Abort("FieldSolverAMG::setSolverPermittivities -- not supported yet");
+  // As in FieldSolverGMG, the solver must be set up first; the coefficients then replace the ones it was set up with
+  // until the next setup (e.g. after a regrid). The matrix is refilled with the same sparsity pattern, which depends on
+  // the geometry only, and handing it to the KSP again makes PETSc rebuild the preconditioner at the next solve.
+  if (!m_isSolverSetup) {
+    MayDay::Error("FieldSolverAMG::setSolverPermittivities -- must set up solver first!");
+  }
+
+  m_petscOp->setCoefficients(a_permittivityCell, a_permittivityFace, a_permittivityEB);
+  m_petscOp->fillMatrix();
+
+  PetscCallAbort(Chombo_MPI::comm, KSPSetOperators(m_ksp, m_petscOp->getMatrix(), m_petscOp->getMatrix()));
 }
 
 void

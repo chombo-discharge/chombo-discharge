@@ -162,7 +162,10 @@ public:
   setupSolver() override;
 
   /**
-   * @brief Change the permittivities used by the solver. Not supported yet, and aborts.
+   * @brief Change the permittivities used by the solver, e.g. for a semi-implicit scheme.
+   * @details The solver must be set up first. The operator is refilled with the new coefficients, and the
+   * preconditioner is rebuilt at the next solve. The coefficients stay in use until the solver is set up again, e.g.
+   * after a regrid.
    * @param[in] a_permittivityCell Cell-centered permittivity
    * @param[in] a_permittivityFace Face-centered permittivity
    * @param[in] a_permittivityEB   EB-centered permittivity
