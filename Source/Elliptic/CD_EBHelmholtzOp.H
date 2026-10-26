@@ -920,16 +920,11 @@ public:
           Real                        a_scale) override final;
 
   /**
-   * @brief Allocate m_flux
+   * @brief Allocate m_flux if it is not already allocated.
+   * @details The storage is kept for the lifetime of the operator so that refluxing does not allocate on every call.
    */
   void
   allocateFlux() const noexcept;
-
-  /**
-   * @brief Deallocate m_flux
-   */
-  void
-  deallocateFlux() const noexcept;
 
   /**
    * @brief Returns m_flux. This is used in refluxing routines.
@@ -1237,9 +1232,11 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /**
-   * @brief For holding fluxes
+   * @brief For holding fluxes. Allocated and zeroed on first use by allocateFlux().
+   * @details reflux() computes only the faces on the refinement boundary. All other faces hold zero or values from
+   * earlier calls and must not be read.
    */
-  mutable LevelData<EBFluxFAB>* m_flux;
+  mutable LevelData<EBFluxFAB> m_flux;
 
   /**
    * @brief Interpolant for when we want centroid fluxes
@@ -1520,6 +1517,44 @@ protected:
    */
   void
   computeFlux(const LevelData<EBCellFAB>& a_phi);
+
+  /**
+   * @brief Compute the fluxes on this level through the faces that border the finer level.
+   * @details Only the faces read by EBReflux::reflux are computed.
+   * @param[in] a_phi Cell-centered data on this level. Must have updated ghost cells.
+   */
+  void
+  computeCoarseFineFlux(const LevelData<EBCellFAB>& a_phi);
+
+  /**
+   * @brief Compute the fluxes on this level through the faces on the refinement boundary with the coarser level.
+   * @details Computes the faces on side (dir, side) of each patch within the bounding box of the part of that side that
+   * lies on the refinement boundary. This includes every fine face whose flux reaches the coarse level in
+   * EBReflux::reflux.
+   * @param[in] a_phi         Cell-centered data on this level. Must have updated ghost cells.
+   * @param[in] a_coarFluxReg Flux register between the coarser level and this level.
+   */
+  void
+  computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EBReflux& a_coarFluxReg);
+
+  /**
+   * @brief Compute the flux through a single face.
+   * @details Gives the face the value computeFlux(LD<EBCellFAB>) gives it: the centroid stencil if either of its cells
+   * lies in a_cellBox and has stencils, and centered differencing otherwise.
+   * @param[in,out] a_flux    Fluxes in direction a_dir
+   * @param[in]     a_phi     Cell-centered data. Must have updated ghost cells.
+   * @param[in]     a_face    Face
+   * @param[in]     a_cellBox Grid box
+   * @param[in]     a_dit     Data index
+   * @param[in]     a_dir     Face direction
+   */
+  void
+  computeFaceFlux(EBFaceFAB&       a_flux,
+                  const EBCellFAB& a_phi,
+                  const FaceIndex& a_face,
+                  const Box&       a_cellBox,
+                  const DataIndex& a_dit,
+                  const int        a_dir) const noexcept;
 
   /**
    * @brief Reflux algorithm.

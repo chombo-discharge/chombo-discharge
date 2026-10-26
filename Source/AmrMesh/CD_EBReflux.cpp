@@ -80,6 +80,7 @@ EBReflux::defineRegionsCF() noexcept
   CH_START(t1);
   m_regularCoarseFineRegions.define(dbl);
   m_irregularCoarseFineRegions.define(dbl);
+  m_fineCoarseFineBoxes.define(dblCoFi);
 
   Copier copier;
   copier.ghostDefine(dblCoFi, dbl, domain, IntVect::Unit);
@@ -116,6 +117,8 @@ EBReflux::defineRegionsCF() noexcept
         const Box boxCoFi     = dblCoFi[din];
         const Box sideBoxCoFi = adjCellBox(boxCoFi, dir, sit(), 1);
 
+        Box fineBox = Box();
+
         if (domain.contains(sideBoxCoFi)) {
           DenseIntVectSet cfivs = DenseIntVectSet(sideBoxCoFi, true);
 
@@ -127,7 +130,15 @@ EBReflux::defineRegionsCF() noexcept
           for (DenseIntVectSetIterator ivsIt(cfivs); ivsIt.ok(); ++ivsIt) {
             coFiMask[din](ivsIt(), 0) = 1.0;
           }
+
+          // The fine cells just inside the fine patch, across the refinement boundary from the coarse cells above.
+          cfivs.recalcMinBox();
+          if (!cfivs.isEmpty()) {
+            fineBox = adjCellBox(refine(cfivs.mBox(), m_refRat), dir, flip(sit()), 1);
+          }
         }
+
+        m_fineCoarseFineBoxes[din][std::make_pair(dir, sit())] = fineBox;
       }
 
       // Copy the data to the coarse grid.
@@ -263,6 +274,50 @@ EBReflux::defineBuffers() noexcept
 
   // Note: MUST have the same number of ghost cells as the buffers being defined.
   m_copier.define(m_eblgCoFi.getDBL(), m_eblg.getDBL(), IntVect::Unit);
+
+  m_fluxCoFi.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBFluxFactory(m_eblgCoFi.getEBISL()));
+  m_fluxCoar.define(m_eblg.getDBL(), 1, IntVect::Unit, EBFluxFactory(m_eblg.getEBISL()));
+
+  // reflux() only writes part of these buffers. Zero them once so the rest hold defined values.
+  const DataIterator& ditCoFi = m_fluxCoFi.dataIterator();
+  const DataIterator& ditCoar = m_fluxCoar.dataIterator();
+
+  const int nboxCoFi = ditCoFi.size();
+  const int nboxCoar = ditCoar.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoFi; mybox++) {
+    m_fluxCoFi[ditCoFi[mybox]].setVal(0.0);
+  }
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nboxCoar; mybox++) {
+    m_fluxCoar[ditCoar[mybox]].setVal(0.0);
+  }
+}
+
+const LayoutData<std::map<std::pair<int, Side::LoHiSide>, DenseIntVectSet>>&
+EBReflux::getRegularCoarseFineRegions() const noexcept
+{
+  CH_assert(m_isDefined);
+
+  return m_regularCoarseFineRegions;
+}
+
+LayoutData<std::map<std::pair<int, Side::LoHiSide>, VoFIterator>>&
+EBReflux::getIrregularCoarseFineRegions() noexcept
+{
+  CH_assert(m_isDefined);
+
+  return m_irregularCoarseFineRegions;
+}
+
+const LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box>>&
+EBReflux::getFineCoarseFineBoxes() const noexcept
+{
+  CH_assert(m_isDefined);
+
+  return m_fineCoarseFineBoxes;
 }
 
 void
@@ -273,36 +328,26 @@ EBReflux::reflux(LevelData<EBCellFAB>&       a_Lphi,
                  const Real                  a_scaleCoarFlux,
                  const Real                  a_scaleFineFlux) const noexcept
 {
-  CH_TIMERS("EBReflux::reflux");
-  CH_TIMER("EBReflux::reflux::define_buffers", t1);
+  CH_TIME("EBReflux::reflux");
 
   CH_assert(m_isDefined);
   CH_assert(a_Lphi.nComp() > a_variables.end());
   CH_assert(a_flux.nComp() > a_variables.end());
   CH_assert(a_fineFlux.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dbl     = m_eblg.getDBL();
-  const DisjointBoxLayout& dblCoFi = m_eblgCoFi.getDBL();
-
-  const EBISLayout& ebisl     = m_eblg.getEBISL();
-  const EBISLayout& ebislCoFi = m_eblgCoFi.getEBISL();
-
-  LevelData<EBFluxFAB> fluxCoFi(dblCoFi, 1, IntVect::Zero, EBFluxFactory(ebislCoFi));
-  LevelData<EBFluxFAB> fluxCoar(dbl, 1, IntVect::Unit, EBFluxFactory(ebisl));
-
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
 
     // Coarsen fluxes
-    this->coarsenFluxesCF(fluxCoFi, a_fineFlux, 0, ivar);
+    this->coarsenFluxesCF(m_fluxCoFi, a_fineFlux, 0, ivar);
 
     // Copy fluxes to coarse grids
     const Interval srcInterv = Interval(0, 0);
     const Interval dstInterv = Interval(0, 0);
 
-    fluxCoFi.copyTo(srcInterv, fluxCoar, dstInterv, m_copier);
+    m_fluxCoFi.copyTo(srcInterv, m_fluxCoar, dstInterv, m_copier);
 
     // Reflux the coarse level.
-    this->refluxIntoCoarse(a_Lphi, a_flux, fluxCoar, ivar, 0, ivar, a_scaleCoarFlux, a_scaleFineFlux);
+    this->refluxIntoCoarse(a_Lphi, a_flux, m_fluxCoar, ivar, 0, ivar, a_scaleCoarFlux, a_scaleFineFlux);
   }
 }
 
