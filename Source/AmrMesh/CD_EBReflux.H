@@ -96,6 +96,34 @@ public:
          const Real                  a_scaleCoarFlux,
          const Real                  a_scaleFineFlux) const noexcept;
 
+  /**
+   * @brief Get the regular coarse-grid cells on the refinement boundary.
+   * @details For each coarse patch and each (direction, side) of the coarsened fine patches, these are the regular
+   * coarse cells just outside the fine patch on that side, i.e. the cells whose face in the direction of the fine
+   * patch is refluxed.
+   * @return m_regularCoarseFineRegions
+   */
+  const LayoutData<std::map<std::pair<int, Side::LoHiSide>, DenseIntVectSet>>&
+  getRegularCoarseFineRegions() const noexcept;
+
+  /**
+   * @brief Get the cut coarse-grid cells on the refinement boundary.
+   * @details As getRegularCoarseFineRegions(), but for the cut cells.
+   * @return m_irregularCoarseFineRegions
+   */
+  LayoutData<std::map<std::pair<int, Side::LoHiSide>, VoFIterator>>&
+  getIrregularCoarseFineRegions() const noexcept;
+
+  /**
+   * @brief Get the fine-grid cells on the refinement boundary.
+   * @details For each fine patch and each (direction, side), this is the bounding box of the fine cells just inside
+   * the patch whose face on that side lies on the refinement boundary. The box is empty if no part of that side
+   * borders the coarse level. The fine fluxes through these faces are the only ones reflux() reads.
+   * @return m_fineCoarseFineBoxes
+   */
+  const LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box>>&
+  getFineCoarseFineBoxes() const noexcept;
+
 protected:
   /**
    * @brief Is defined or not
@@ -147,6 +175,22 @@ protected:
    * @note Defined over the coarse grids
    */
   mutable LayoutData<std::map<std::pair<int, Side::LoHiSide>, VoFIterator>> m_irregularCoarseFineRegions;
+
+  /**
+   * @brief Bounding boxes of the fine cells whose faces lie on the refinement boundary
+   * @note Defined over the fine grids (equivalently, the coarsened fine grids)
+   */
+  LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box>> m_fineCoarseFineBoxes;
+
+  /**
+   * @brief Buffer for the fine-grid fluxes coarsened onto the coarsened fine grids
+   */
+  mutable LevelData<EBFluxFAB> m_fluxCoFi;
+
+  /**
+   * @brief Buffer for the coarsened fine-grid fluxes copied to the coarse grids
+   */
+  mutable LevelData<EBFluxFAB> m_fluxCoar;
 
   /**
    * @brief Define coarse-fine interface regions so that we can compute things later.

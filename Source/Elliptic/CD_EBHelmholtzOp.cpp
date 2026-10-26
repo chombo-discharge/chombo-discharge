@@ -263,15 +263,19 @@ EBHelmholtzOp::allocateFlux() const noexcept
 {
   CH_TIME("EBHelmholtzOp::allocateFlux");
 
-  m_flux = new LevelData<EBFluxFAB>(m_eblg.getDBL(), m_nComp, IntVect::Zero, EBFluxFactory(m_eblg.getEBISL()));
-}
+  if (!m_flux.isDefined()) {
+    m_flux.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, EBFluxFactory(m_eblg.getEBISL()));
 
-void
-EBHelmholtzOp::deallocateFlux() const noexcept
-{
-  CH_TIME("EBHelmholtzOp::deallocateFlux");
+    // Refluxing only computes the faces on the refinement boundary, but EBReflux coarsens a wider band of fine faces.
+    // Zero the storage once so that the faces which are never computed hold defined values.
+    const DataIterator& dit  = m_flux.dataIterator();
+    const int           nbox = dit.size();
 
-  delete m_flux;
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      m_flux[dit[mybox]].setVal(0.0);
+    }
+  }
 }
 
 LevelData<EBFluxFAB>&
@@ -279,7 +283,7 @@ EBHelmholtzOp::getFlux() const
 {
   CH_TIME("EBHelmholtzOp::getFlux()");
 
-  return *m_flux;
+  return m_flux;
 }
 
 const LevelData<EBCellFAB>&
@@ -1028,9 +1032,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     fineOp->inhomogeneousCFInterp(phiFine, a_phi);
 
     fineOp->computeFlux(a_phiFine);
-    fineOp->coarsenFlux(*m_flux, fineOp->getFlux());
-
-    fineOp->deallocateFlux();
+    fineOp->coarsenFlux(m_flux, fineOp->getFlux());
   }
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
@@ -1044,7 +1046,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    this->fillDomainFlux((*m_flux)[din], a_phi[din], dbl[din], din, a_homogeneousPhysBC);
+    this->fillDomainFlux(m_flux[din], a_phi[din], dbl[din], din, a_homogeneousPhysBC);
   }
 
   // The above calls replaced the fluxes on this level by (conservative) averages of the fluxes on
@@ -1063,7 +1065,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     const EBCellFAB& phi  = a_phi[din];
     const EBCellFAB& Aco  = (*m_Acoef)[din];
     const EBFluxFAB& Bco  = (*m_Bcoef)[din];
-    const EBFluxFAB& flux = (*m_flux)[din];
+    const EBFluxFAB& flux = m_flux[din];
 
     const BaseIVFAB<Real>&       BcoIrreg      = (*m_BcoefIrreg)[din];
     const BaseIVFAB<VoFStencil>& ebFluxStencil = m_ebBc->getGradPhiStencils()[din];
@@ -1144,8 +1146,6 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
     // Finally, add in the inhomogeneous EB flux.
     m_ebBc->applyEBFlux(m_vofIterIrreg[din], Lphi, phi, BcoIrreg, din, m_beta, a_homogeneousPhysBC);
   }
-
-  this->deallocateFlux();
 }
 
 void
@@ -2603,8 +2603,6 @@ EBHelmholtzOp::computeFlux(EBFaceFAB&       a_fluxCentroid,
   // faces can be irregular but nonetheless require an explicit stencil.
   this->computeFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
   this->computeFaceCentroidFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
-
-  a_fluxCentroid *= m_beta;
 }
 
 void
@@ -2620,14 +2618,14 @@ EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
   const BaseFab<Real>& regBco  = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
 
-  // This kernel does centered differencing, setting the face flux to flux = B*(phi(high) - phi(lo))/dx. Recall that
-  // regFlux is face centered but phi lives on in the cell.
+  // This kernel does centered differencing, setting the face flux to flux = beta*B*(phi(high) - phi(lo))/dx. Recall
+  // that regFlux is face centered but phi lives on in the cell.
   const Real    inverseDx = 1. / m_dx;
   const IntVect shift     = BASISV(a_dir); // Hoisted so the offset is loop-invariant (a runtime
                                            // BASISV(a_dir) inside the kernel blocks vectorization).
 
   auto regularKernel = [&](const IntVect& iv) -> void {
-    regFlux(iv, m_comp) = regBco(iv, m_comp) * inverseDx * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp));
+    regFlux(iv, m_comp) = m_beta * (regBco(iv, m_comp) * inverseDx * (regPhi(iv, m_comp) - regPhi(iv - shift, m_comp)));
   };
 
   // Kernel region. All interior faces in compCellBox
@@ -2660,13 +2658,15 @@ EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
   auto kernel = [&](const FaceIndex& face) -> void {
     const VoFStencil& sten = fluxStencils(face, m_comp);
 
-    a_flux(face, m_comp) = 0.0;
+    Real flux = 0.0;
     for (int i = 0; i < sten.size(); i++) {
       const VolIndex& ivof    = sten.vof(i);
       const Real&     iweight = sten.weight(i);
 
-      a_flux(face, m_comp) += iweight * a_phi(ivof, m_comp);
+      flux += iweight * a_phi(ivof, m_comp);
     }
+
+    a_flux(face, m_comp) = m_beta * flux;
   };
 
   BoxLoops::loop(faceIt, kernel);
@@ -2686,7 +2686,84 @@ EBHelmholtzOp::computeFlux(const LevelData<EBCellFAB>& a_phi)
     const DataIndex& din = dit[mybox];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
-      this->computeFlux((*m_flux)[din][dir], a_phi[din], dbl[din], din, dir);
+      this->computeFlux(m_flux[din][dir], a_phi[din], dbl[din], din, dir);
+    }
+  }
+}
+
+void
+EBHelmholtzOp::computeCoarseFineFlux(const LevelData<EBCellFAB>& a_phi)
+{
+  CH_TIME("EBHelmholtzOp::computeCoarseFineFlux(LD<EBCellFAB>)");
+
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const auto& regularRegions   = m_fluxReg->getRegularCoarseFineRegions();
+  auto&       irregularRegions = m_fluxReg->getIrregularCoarseFineRegions();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const std::pair<int, Side::LoHiSide> dirSide = std::make_pair(dir, sit());
+
+        // Bounding box of the coarse cells just outside the fine patch on side sit().
+        Box computeBox = regularRegions[din].at(dirSide).mBox();
+
+        BoxLoops::loop(irregularRegions[din].at(dirSide), [&](const VolIndex& vof) -> void {
+          computeBox.minBox(Box(vof.gridIndex(), vof.gridIndex()));
+        });
+
+        if (!computeBox.isEmpty()) {
+          // The fine patch lies on the other side of these cells. Include the covered cells across the refluxed faces
+          // so that a face takes its centroid stencil if either of its cells has one.
+          if (sit() == Side::Lo) {
+            computeBox.growHi(dir, 1);
+          }
+          else {
+            computeBox.growLo(dir, 1);
+          }
+
+          computeBox &= dbl[din];
+
+          this->computeFlux(m_flux[din][dir], a_phi[din], computeBox, din, dir);
+        }
+      }
+    }
+  }
+}
+
+void
+EBHelmholtzOp::computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EBReflux& a_coarFluxReg)
+{
+  CH_TIME("EBHelmholtzOp::computeFineCoarseFlux(LD<EBCellFAB>, EBReflux)");
+
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const auto& fineBoxes = a_coarFluxReg.getFineCoarseFineBoxes();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit) {
+        Box computeBox = fineBoxes[din].at(std::make_pair(dir, sit()));
+
+        computeBox &= dbl[din];
+
+        if (!computeBox.isEmpty()) {
+          this->computeFlux(m_flux[din][dir], a_phi[din], computeBox, din, dir);
+        }
+      }
     }
   }
 }
@@ -2713,21 +2790,18 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
   this->allocateFlux();
   finerOp.allocateFlux();
 
-  // Compute flux on both levels and then reflux into this level.
+  // Compute the fluxes through the refinement boundary on both levels and then reflux into this level.
   CH_START(t1);
-  this->computeFlux(a_phi);
+  this->computeCoarseFineFlux(a_phi);
   CH_STOP(t1);
 
   CH_START(t2);
-  finerOp.computeFlux(a_phiFine);
+  finerOp.computeFineCoarseFlux(a_phiFine, *m_fluxReg);
   CH_STOP(t2);
 
   const Real scale = 1.0 / m_dx;
 
-  m_fluxReg->reflux(a_Lphi, *m_flux, finerOp.getFlux(), Interval(0, 0), scale, scale);
-
-  finerOp.deallocateFlux();
-  this->deallocateFlux();
+  m_fluxReg->reflux(a_Lphi, m_flux, finerOp.getFlux(), Interval(0, 0), scale, scale);
 }
 
 void

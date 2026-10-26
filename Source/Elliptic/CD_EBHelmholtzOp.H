@@ -920,16 +920,11 @@ public:
           Real                        a_scale) override final;
 
   /**
-   * @brief Allocate m_flux
+   * @brief Allocate m_flux if it is not already allocated.
+   * @details The storage is kept for the lifetime of the operator so that refluxing does not allocate on every call.
    */
   void
   allocateFlux() const noexcept;
-
-  /**
-   * @brief Deallocate m_flux
-   */
-  void
-  deallocateFlux() const noexcept;
 
   /**
    * @brief Returns m_flux. This is used in refluxing routines.
@@ -1237,9 +1232,9 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /**
-   * @brief For holding fluxes
+   * @brief For holding fluxes. Allocated on first use by allocateFlux().
    */
-  mutable LevelData<EBFluxFAB>* m_flux;
+  mutable LevelData<EBFluxFAB> m_flux;
 
   /**
    * @brief Interpolant for when we want centroid fluxes
@@ -1520,6 +1515,24 @@ protected:
    */
   void
   computeFlux(const LevelData<EBCellFAB>& a_phi);
+
+  /**
+   * @brief Compute the fluxes on this level through the faces that border the finer level.
+   * @details Only the faces read by EBReflux::reflux are guaranteed to be correct. The compute region covers the cells
+   * on both sides of each such face, so a face takes its centroid stencil exactly when computeFlux would give it one.
+   * @param[in] a_phi Cell-centered data on this level. Must have updated ghost cells.
+   */
+  void
+  computeCoarseFineFlux(const LevelData<EBCellFAB>& a_phi);
+
+  /**
+   * @brief Compute the fluxes on this level through the faces on the refinement boundary with the coarser level.
+   * @details Only the faces read by EBReflux::reflux are guaranteed to be correct.
+   * @param[in] a_phi         Cell-centered data on this level. Must have updated ghost cells.
+   * @param[in] a_coarFluxReg Flux register between the coarser level and this level.
+   */
+  void
+  computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EBReflux& a_coarFluxReg);
 
   /**
    * @brief Reflux algorithm.
