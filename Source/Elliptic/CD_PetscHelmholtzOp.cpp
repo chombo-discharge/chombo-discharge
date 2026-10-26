@@ -634,8 +634,9 @@ PetscHelmholtzOp::fillMatrix() noexcept
                   stencilFine += bcStencilFine;
                 }
 
-                // The boundary data enter the right-hand side through the same interpolation, see
-                // addBoundaryConditionsToRHS.
+                // The boundary data of a cut cell enter the right-hand side through the same interpolation, which
+                // addBoundaryConditionsToRHS recomputes, so the stored weight of this face is not used. It is zeroed so
+                // that the storage holds no stale value.
                 boundaryWeights(dir, side)(face, 0) = 0.0;
               }
               else if (!domain.contains(ivNeigh)) {

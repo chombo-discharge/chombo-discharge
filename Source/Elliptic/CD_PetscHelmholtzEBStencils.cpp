@@ -341,6 +341,9 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
       vofsThis.push_back(vofs[i]);
     }
     else if (cell.isCoveredByFinerGrid() && hasFine) {
+      // The refined grids of this level (FiCo) share this level's DataIndex, so a_din indexes them. Their map holds the
+      // finer level's rows within its ghost cells; finer cells under a covered cell further out than that are not
+      // used, like any cell outside the map on this level.
       const BaseFab<PetscAMRCell>& cellsFine = (*m_petscGrid->getAMRToPetscFiCo()[a_level + 1])[a_din];
 
       const Box fineBox = refine(Box(iv, iv), refRat);

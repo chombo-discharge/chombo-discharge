@@ -103,8 +103,12 @@ CoarseInterpQuadCF::defineValidCells(const EBISBox& a_ebisBoxCoar) noexcept
 
   m_validCells &= m_domainCoar;
 
-  // Coarse cells covered by the EB, where the geometry is known.
+  // Coarse cells covered by the EB. Only cells where the EB geometry is known can be checked, so the others are not
+  // used either. The stencils only read cells within m_ghostVectorCoFi of the coarsened fine box, where the coarsened
+  // fine data, and hence the geometry, are defined, so in practice this removes nothing they need.
   const Box ebRegion = region & a_ebisBoxCoar.getRegion();
+
+  m_validCells &= ebRegion;
 
   if (!ebRegion.isEmpty()) {
     for (BoxIterator bit(ebRegion); bit.ok(); ++bit) {

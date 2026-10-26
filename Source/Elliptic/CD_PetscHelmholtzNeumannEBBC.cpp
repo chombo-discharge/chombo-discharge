@@ -64,6 +64,27 @@ PetscHelmholtzNeumannEBBC::setDphiDn(const std::function<Real(const RealVect& a_
 }
 
 void
+PetscHelmholtzNeumannEBBC::define(const RefCountedPtr<PetscGrid>& a_petscGrid,
+                                  const Vector<MFMultigridInterpolator>& /*a_interpolators*/,
+                                  const RealVect&     a_probLo,
+                                  const Vector<Real>& a_dx) noexcept
+{
+  CH_TIME("PetscHelmholtzNeumannEBBC::define");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzNeumannEBBC::define" << endl;
+  }
+
+  CH_assert(!a_petscGrid.isNull());
+
+  this->clear();
+
+  m_petscGrid = a_petscGrid;
+  m_probLo    = a_probLo;
+  m_dx        = a_dx;
+  m_isDefined = true;
+}
+
+void
 PetscHelmholtzNeumannEBBC::getEBFluxStencil(Real&         a_boundaryWeight,
                                             PetscStencil& a_stencil,
                                             const int /*a_phase*/,

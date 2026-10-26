@@ -278,7 +278,13 @@ PetscHelmholtzSaturationChargeJumpBC::updateJumpData(const Vec& a_phi, const MFA
           this->getNormalDerivativeStencil(w[k], S[k], k, lvl, din, vof);
         }
 
-        const Real bco   = (*a_bCoefIrreg[lvl])[din].getIVFAB(o)(vof, 0);
+        const Real bco = (*a_bCoefIrreg[lvl])[din].getIVFAB(o)(vof, 0);
+        // Checked in every build, as in getInterfaceFluxStencil: phi_B is not determined without it.
+        if (w[z] == 0.0) {
+          MayDay::Abort("PetscHelmholtzSaturationChargeJumpBC::updateJumpData -- w_B is zero on the side with zero "
+                        "normal derivative");
+        }
+
         const Real phiB  = -apply(S[z]) / w[z];
         const Real sigma = bco * (w[o] * phiB + apply(S[o]));
 

@@ -264,8 +264,8 @@ protected:
   /**
    * @brief Compute m_validCells.
    * @details The fine boxes under the region are taken from the spatial index of the fine layout, since the region
-   * reaches further than the neighbors of the fine box. Cells covered by the EB are removed where a_ebisBoxCoar has
-   * geometry; elsewhere a cell counts as uncovered.
+   * reaches further than the neighbors of the fine box. Cells outside the region of a_ebisBoxCoar, whose geometry is
+   * unknown, and cells covered by the EB are removed.
    * @param[in] a_ebisBoxCoar EB geometry of the coarsened fine grid
    */
   virtual void

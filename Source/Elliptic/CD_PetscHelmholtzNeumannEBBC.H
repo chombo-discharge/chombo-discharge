@@ -55,6 +55,21 @@ public:
   setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn) noexcept;
 
   /**
+   * @brief Define over the AMR hierarchy.
+   * @details The flux is the given normal derivative, so the one-sided normal derivative stencils are not computed;
+   * only the grids are kept, for getBoundaryPosition.
+   * @param[in] a_petscGrid     PETSc grid
+   * @param[in] a_interpolators Coarse-fine ghost cell interpolators of both phases, on each level. Not used.
+   * @param[in] a_probLo        Lower-left corner of the computational domain
+   * @param[in] a_dx            Grid resolution on each level
+   */
+  virtual void
+  define(const RefCountedPtr<PetscGrid>&        a_petscGrid,
+         const Vector<MFMultigridInterpolator>& a_interpolators,
+         const RealVect&                        a_probLo,
+         const Vector<Real>&                    a_dx) noexcept override;
+
+  /**
    * @brief Get the flux through the EB face of a cut cell. The stencil is empty and w_B = 1.
    * @param[out] a_boundaryWeight Weight w_B of the boundary data
    * @param[out] a_stencil        Stencil over PETSc rows
