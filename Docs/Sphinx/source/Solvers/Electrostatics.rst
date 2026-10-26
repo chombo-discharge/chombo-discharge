@@ -538,8 +538,14 @@ With ``verbosity`` above 1, each solve ends with a summary in the same form as `
 
 where ``rel.res`` is the true residual :math:`|b - Ax|_2` relative to the zero-residual :math:`|b|_2`.
 
-Any other PETSc option can be given on the command line with the prefix ``fieldsolveramg_``, e.g. ``-fieldsolveramg_ksp_monitor`` or ``-fieldsolveramg_pc_gamg_threshold 0.02``.
-Options given on the command line take precedence over the input file.
+Any other PETSc option can be given with the prefix ``fieldsolveramg_`` through the ``PETSC_OPTIONS`` environment variable, e.g.
+
+.. code-block:: bash
+
+   PETSC_OPTIONS="-fieldsolveramg_pc_gamg_threshold 0.02 -fieldsolveramg_ksp_view_mat binary:A.bin" mpirun -x PETSC_OPTIONS -np 4 ./main2d.*.ex example2d.inputs
+
+PETSc options given this way take precedence over the input file.
+Options without a value, e.g. ``-fieldsolveramg_ksp_monitor``, can also be given on the command line, but options with a value cannot, because ``ParmParse`` reads the command line too and aborts on them.
 
 Limitations
 ___________

@@ -332,8 +332,9 @@ FieldSolverAMG::setupSolver()
                     m_alpha,
                     m_beta);
 
-  // The settings from the input file are the defaults. They can be overridden with command-line options that carry
-  // the prefix 'fieldsolveramg_', e.g. -fieldsolveramg_ksp_monitor.
+  // The settings from the input file are the defaults. They can be overridden with PETSc options that carry the prefix
+  // 'fieldsolveramg_', given through the PETSC_OPTIONS environment variable (or, for options without a value, on the
+  // command line), e.g. -fieldsolveramg_ksp_monitor.
   PC pc;
 
   PetscCallAbort(Chombo_MPI::comm, KSPCreate(Chombo_MPI::comm, &m_ksp));
@@ -355,12 +356,13 @@ FieldSolverAMG::setupSolver()
 
   // The level smoothers of a multigrid preconditioner are only created when the preconditioner is set up, so their
   // settings go into the options database, where they are picked up from. They are written on every setup, so that a
-  // change of the input options takes effect, except where the user gave the option on the command line, which is
-  // recorded before this class first writes it. All FieldSolverAMG instances share the 'fieldsolveramg_' prefix, and
-  // the smoothers read the options when the preconditioner is set up, at the first solve. So with two instances whose
-  // amg_smoother_* inputs differ, the last setupSolver before a solve decides: last writer wins. With identical inputs,
-  // the normal case, this does not matter. Preconditioners that are not multigrid ignore these options.
-  auto isOnCommandLine = [](const char* a_name) -> bool {
+  // change of the input options takes effect, except where the user gave the option to PETSc (PETSC_OPTIONS or the
+  // command line), which is recorded before this class first writes it. All FieldSolverAMG instances share the
+  // 'fieldsolveramg_' prefix, and the smoothers read the options when the preconditioner is set up, at the first solve.
+  // So with two instances whose amg_smoother_* inputs differ, the last setupSolver before a solve decides: last writer
+  // wins. With identical inputs, the normal case, this does not matter. Preconditioners that are not multigrid ignore
+  // these options.
+  auto isUserOption = [](const char* a_name) -> bool {
     PetscBool isSet = PETSC_FALSE;
 
     PetscCallAbort(Chombo_MPI::comm, PetscOptionsHasName(nullptr, nullptr, a_name, &isSet));
@@ -368,9 +370,9 @@ FieldSolverAMG::setupSolver()
     return isSet == PETSC_TRUE;
   };
 
-  static const bool userSmootherKsp = isOnCommandLine("-fieldsolveramg_mg_levels_ksp_type");
-  static const bool userSmootherPc  = isOnCommandLine("-fieldsolveramg_mg_levels_pc_type");
-  static const bool userSmootherIts = isOnCommandLine("-fieldsolveramg_mg_levels_ksp_max_it");
+  static const bool userSmootherKsp = isUserOption("-fieldsolveramg_mg_levels_ksp_type");
+  static const bool userSmootherPc  = isUserOption("-fieldsolveramg_mg_levels_pc_type");
+  static const bool userSmootherIts = isUserOption("-fieldsolveramg_mg_levels_ksp_max_it");
 
   if (!userSmootherKsp) {
     PetscCallAbort(Chombo_MPI::comm,

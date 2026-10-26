@@ -27,8 +27,13 @@ To run it, type
 The `regression2d.inputs` and `regression3d.inputs` files are coarser versions of the same problem, for the test suite.
 
 The solver settings are `FieldSolverAMG.*` in the inputs file. `FieldSolverAMG.petsc_verbosity` prints the residual
-at every Krylov iteration (1), the true residual as well (2), and the solver and preconditioner (3). PETSc options can
-also be given on the command line with the prefix `-fieldsolveramg_`, e.g. `-fieldsolveramg_pc_gamg_threshold 0.02`.
+at every Krylov iteration (1), the true residual as well (2), and the solver and preconditioner (3). Other PETSc options can
+be given with the prefix `-fieldsolveramg_` through the `PETSC_OPTIONS` environment variable, e.g.
+
+```PETSC_OPTIONS="-fieldsolveramg_pc_gamg_threshold 0.02" mpirun -x PETSC_OPTIONS -np <num_proc> main2d.*.ex example2d.inputs```
+
+Options without a value, e.g. `-fieldsolveramg_ksp_monitor`, can also be given on the command line. Options with a
+value cannot, because `ParmParse` reads the command line too and aborts on them.
 
 # Output
 
