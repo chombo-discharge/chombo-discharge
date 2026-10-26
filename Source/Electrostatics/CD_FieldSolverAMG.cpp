@@ -332,9 +332,10 @@ FieldSolverAMG::setupSolver()
   // The level smoothers of a multigrid preconditioner are only created when the preconditioner is set up, so their
   // settings go into the options database, where they are picked up from. They are written on every setup, so that a
   // change of the input options takes effect, except where the user gave the option on the command line, which is
-  // recorded before this class first writes it. All FieldSolverAMG instances share the 'fieldsolveramg_' prefix, so
-  // they share these settings, as they share any command-line option. Preconditioners that are not multigrid ignore
-  // them.
+  // recorded before this class first writes it. All FieldSolverAMG instances share the 'fieldsolveramg_' prefix, and
+  // the smoothers read the options when the preconditioner is set up, at the first solve. So with two instances whose
+  // amg_smoother_* inputs differ, the last setupSolver before a solve decides: last writer wins. With identical inputs,
+  // the normal case, this does not matter. Preconditioners that are not multigrid ignore these options.
   auto isOnCommandLine = [](const char* a_name) -> bool {
     PetscBool isSet = PETSC_FALSE;
 
