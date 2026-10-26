@@ -103,6 +103,11 @@ FieldSolverAMG::parseSolverSettings()
   pp.get("amg_smoother_ksp", m_amgSmootherKsp);
   pp.get("amg_smoother_pc", m_amgSmootherPc);
   pp.get("amg_smoother_its", m_amgSmootherIts);
+
+  // GAMG's coarsening: the graph threshold below which weak connections are dropped, and the number of levels that
+  // are coarsened aggressively. Other preconditioners ignore them.
+  pp.get("gamg_threshold", m_gamgThreshold);
+  pp.get("gamg_aggressive_coarsening", m_gamgAggressiveCoarsening);
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);
   pp.get("ksp_max_iter", m_kspMaxIter);
@@ -377,9 +382,9 @@ FieldSolverAMG::setupSolver()
   // change of the input options takes effect, except where the user gave the option to PETSc (PETSC_OPTIONS or the
   // command line), which is recorded before this class first writes it. All FieldSolverAMG instances share the
   // 'fieldsolveramg_' prefix, and the smoothers read the options when the preconditioner is set up, at the first solve.
-  // So with two instances whose amg_smoother_* inputs differ, the last setupSolver before a solve decides: last writer
-  // wins. With identical inputs, the normal case, this does not matter. Preconditioners that are not multigrid ignore
-  // these options.
+  // So with two instances whose amg_smoother_* or gamg_* inputs differ, the last setupSolver before a solve decides:
+  // last writer wins. With identical inputs, the normal case, this does not matter. Preconditioners that are not
+  // multigrid ignore these options.
   auto isUserOption = [](const char* a_name) -> bool {
     PetscBool isSet = PETSC_FALSE;
 
@@ -391,6 +396,8 @@ FieldSolverAMG::setupSolver()
   static const bool userSmootherKsp = isUserOption("-fieldsolveramg_mg_levels_ksp_type");
   static const bool userSmootherPc  = isUserOption("-fieldsolveramg_mg_levels_pc_type");
   static const bool userSmootherIts = isUserOption("-fieldsolveramg_mg_levels_ksp_max_it");
+  static const bool userThreshold   = isUserOption("-fieldsolveramg_pc_gamg_threshold");
+  static const bool userAggressive  = isUserOption("-fieldsolveramg_pc_gamg_aggressive_coarsening");
 
   if (!userSmootherKsp) {
     PetscCallAbort(Chombo_MPI::comm,
@@ -404,6 +411,17 @@ FieldSolverAMG::setupSolver()
     PetscCallAbort(
       Chombo_MPI::comm,
       PetscOptionsSetValue(nullptr, "-fieldsolveramg_mg_levels_ksp_max_it", std::to_string(m_amgSmootherIts).c_str()));
+  }
+  if (!userThreshold) {
+    PetscCallAbort(
+      Chombo_MPI::comm,
+      PetscOptionsSetValue(nullptr, "-fieldsolveramg_pc_gamg_threshold", std::to_string(m_gamgThreshold).c_str()));
+  }
+  if (!userAggressive) {
+    PetscCallAbort(Chombo_MPI::comm,
+                   PetscOptionsSetValue(nullptr,
+                                        "-fieldsolveramg_pc_gamg_aggressive_coarsening",
+                                        std::to_string(m_gamgAggressiveCoarsening).c_str()));
   }
 
   PetscCallAbort(Chombo_MPI::comm, KSPSetOptionsPrefix(m_ksp, "fieldsolveramg_"));

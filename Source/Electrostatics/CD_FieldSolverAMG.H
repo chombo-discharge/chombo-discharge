@@ -218,6 +218,16 @@ protected:
   int m_amgSmootherIts;
 
   /**
+   * @brief GAMG graph threshold: connections weaker than this are dropped when aggregating. Negative keeps them all.
+   */
+  Real m_gamgThreshold;
+
+  /**
+   * @brief Number of levels that GAMG coarsens aggressively (square graph).
+   */
+  int m_gamgAggressiveCoarsening;
+
+  /**
    * @brief PETSc preconditioner type, e.g. 'gamg' or 'hypre'.
    */
   std::string m_pcType;
