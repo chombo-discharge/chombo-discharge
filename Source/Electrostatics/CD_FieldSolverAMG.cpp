@@ -29,7 +29,13 @@
 constexpr Real FieldSolverAMG::m_alpha;
 constexpr Real FieldSolverAMG::m_beta;
 
-FieldSolverAMG::FieldSolverAMG() : m_isSolverSetup(false), m_ksp(nullptr)
+FieldSolverAMG::FieldSolverAMG()
+  : m_isSolverSetup(false),
+    m_ksp(nullptr),
+    m_petscVerbosity(-1),
+    m_monitorZeroResidNorm(0.0),
+    m_monitorFirstNorm(0.0),
+    m_monitorPreviousNorm(0.0)
 {
   CH_TIME("FieldSolverAMG::FieldSolverAMG()");
 
@@ -100,6 +106,7 @@ FieldSolverAMG::parseSolverSettings()
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);
   pp.get("ksp_max_iter", m_kspMaxIter);
+  pp.get("petsc_verbosity", m_petscVerbosity);
   pp.get("kappa_source", m_kappaSource);
 
   // EB face stencils, for the electrodes and the interface between the gas and the dielectrics.
@@ -179,6 +186,16 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
     petscGrid->putChomboInPetsc(x, a_potential);
   }
 
+  // Residual r = b - A*x. As in FieldSolverGMG's Krylov solvers, the residual is reported in the 2-norm and relative
+  // to the zero-residual b - A*0 = b, which does not depend on the initial guess. This is the true residual of the
+  // matrix, not the (possibly preconditioned) residual that the KSP tests convergence on.
+  PetscReal residNorm;
+  PetscReal zeroResidNorm;
+
+  PetscCallAbort(Chombo_MPI::comm, VecNorm(b, NORM_2, &zeroResidNorm));
+
+  m_monitorZeroResidNorm = zeroResidNorm;
+
   PetscCallAbort(Chombo_MPI::comm, KSPSetInitialGuessNonzero(m_ksp, a_zeroPhi ? PETSC_FALSE : PETSC_TRUE));
   PetscCallAbort(Chombo_MPI::comm, KSPSolve(m_ksp, b, x));
 
@@ -190,18 +207,25 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const bool converged = (reason > 0);
 
-  // Residual r = b - A*x, in the max norm, which is what FieldSolverGMG reports.
-  PetscReal residNorm;
-  PetscReal rhsNorm;
-
   PetscCallAbort(Chombo_MPI::comm, MatResidual(m_petscOp->getMatrix(), b, x, r));
-  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_INFINITY, &residNorm));
-  PetscCallAbort(Chombo_MPI::comm, VecNorm(b, NORM_INFINITY, &rhsNorm));
+  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNorm));
 
   if (m_verbosity > 1) {
-    pout() << "FieldSolverAMG::solve -- " << (converged ? "converged" : "did not converge") << " in " << numIter
-           << " iterations (reason = " << reason << "), max-norm residual = " << residNorm
-           << ", max-norm right-hand side = " << rhsNorm << endl;
+    KSPType kspType;
+
+    PetscCallAbort(Chombo_MPI::comm, KSPGetType(m_ksp, &kspType));
+
+    const Real relResid = (zeroResidNorm > 0.0) ? residNorm / zeroResidNorm : residNorm;
+
+    pout() << "FieldSolverAMG - " << kspType << (converged ? " converged" : " did NOT converge")
+           << " (rel.res = " << relResid << ", |r| = " << residNorm << ", |r_zero| = " << zeroResidNorm
+           << ", iters = " << numIter << ", reason = " << KSPConvergedReasons[reason] << ")" << endl;
+  }
+
+  // The solver and the preconditioner, e.g. the levels of the algebraic multigrid hierarchy. PETSc writes this to
+  // standard output.
+  if (m_petscVerbosity >= 3) {
+    PetscCallAbort(Chombo_MPI::comm, KSPView(m_ksp, PETSC_VIEWER_STDOUT_(Chombo_MPI::comm)));
   }
 
   // Closures whose jump data is an output (saturation charge) compute it from the solution and keep it.
@@ -365,7 +389,53 @@ FieldSolverAMG::setupSolver()
   PetscCallAbort(Chombo_MPI::comm, KSPSetOptionsPrefix(m_ksp, "fieldsolveramg_"));
   PetscCallAbort(Chombo_MPI::comm, KSPSetFromOptions(m_ksp));
 
+  if (m_petscVerbosity >= 1) {
+    PetscCallAbort(Chombo_MPI::comm, KSPMonitorSet(m_ksp, FieldSolverAMG::monitorResidual, this, nullptr));
+  }
+
   m_isSolverSetup = true;
+}
+
+PetscErrorCode
+FieldSolverAMG::monitorResidual(KSP a_ksp, PetscInt a_iteration, PetscReal a_residualNorm, void* a_context)
+{
+  CH_TIME("FieldSolverAMG::monitorResidual");
+
+  FieldSolverAMG* solver = static_cast<FieldSolverAMG*>(a_context);
+
+  if (a_iteration == 0) {
+    solver->m_monitorFirstNorm    = a_residualNorm;
+    solver->m_monitorPreviousNorm = a_residualNorm;
+  }
+
+  const Real scale = (solver->m_monitorFirstNorm > 0.0) ? solver->m_monitorFirstNorm : 1.0;
+
+  pout() << "      FieldSolverAMG:: iteration = " << a_iteration << ", rel. residual = " << a_residualNorm / scale;
+
+  if (a_iteration > 0) {
+    pout() << ", rate = " << ((a_residualNorm > 0.0) ? solver->m_monitorPreviousNorm / a_residualNorm : 0.0);
+  }
+
+  // The true residual is built from the current solution, which for GMRES costs a solution update and a matrix-vector
+  // product.
+  if (solver->m_petscVerbosity >= 2) {
+    Vec       residual = nullptr;
+    PetscReal trueNorm;
+
+    PetscCall(KSPBuildResidual(a_ksp, nullptr, nullptr, &residual));
+    PetscCall(VecNorm(residual, NORM_2, &trueNorm));
+    PetscCall(VecDestroy(&residual));
+
+    const Real zeroResid = solver->m_monitorZeroResidNorm;
+
+    pout() << ", true rel. residual = " << ((zeroResid > 0.0) ? trueNorm / zeroResid : trueNorm);
+  }
+
+  pout() << endl;
+
+  solver->m_monitorPreviousNorm = a_residualNorm;
+
+  return PETSC_SUCCESS;
 }
 
 void

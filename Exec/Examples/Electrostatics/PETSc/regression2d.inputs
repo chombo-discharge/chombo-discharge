@@ -1,28 +1,27 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner               = 0 0            ## Low corner of problem domain
-AmrMesh.hi_corner               = 1 1            ## High corner of problem domain
+AmrMesh.lo_corner               = -0.04  0.
+AmrMesh.hi_corner               = 0.04  0.04
 AmrMesh.verbosity               = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain         = 64 64          ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth           = 1              ## Maximum amr depth
+AmrMesh.coarsest_domain         = 128 64         ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth           = 3              ## Maximum amr depth
 AmrMesh.max_sim_depth           = -1             ## Maximum simulation depth
-AmrMesh.mg_coarsen              = 4              ## Pre-coarsening of MG levels, useful for deeper bottom solves
 AmrMesh.fill_ratio              = 1.0            ## Fill ratio for grid generation
-AmrMesh.buffer_size             = 2              ## Number of cells between grid levels
-AmrMesh.grid_algorithm          = tiled          ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting             = morton         ## Box sorting algorithm
+AmrMesh.buffer_size             = 4              ## Number of cells between grid levels
+AmrMesh.grid_algorithm          = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting             = morton         ## 'none', 'standardSort', 'shuffle', or 'morton'
 AmrMesh.min_block_size          = 8              ## Default blocking factor (16 in 3D)
 AmrMesh.max_block_size          = 16             ## Maximum allowed box size
 AmrMesh.max_ebis_box            = 16             ## Maximum allowed box size
 AmrMesh.eb_min_block_size       = 8              ## Smallest box the geometry grids are tiled with.
 AmrMesh.eb_max_block_size       = 8              ## Largest such box, a whole number of eb_min_block_size.
 AmrMesh.ref_rat                 = 2 2 2 2 2 2    ## Refinement ratios
-AmrMesh.lsf_ghost               = 3              ## Number of ghost cells when writing level-set to grid
-AmrMesh.num_ghost               = 3              ## Number of ghost cells. Default is 3
-AmrMesh.eb_ghost                = 4              ## Set number of of ghost cells for EB stuff
+AmrMesh.num_ghost               = 2              ## Number of ghost cells. Default is 3
+AmrMesh.lsf_ghost               = 0              ## Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost                = 2              ## Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order         = 2              ## Multigrid interpolation order
-AmrMesh.mg_interp_radius        = 3              ## Multigrid interpolation radius
+AmrMesh.mg_interp_radius        = 2              ## Multigrid interpolation radius
 AmrMesh.mg_interp_weight        = 2              ## Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_interp         = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
 AmrMesh.eb_interp               = minmod         ## EB interp stencils. linear, taylor, minmod, etc
@@ -32,56 +31,57 @@ AmrMesh.mirror_cond_tol         = 1.E-3          ## Mirror deposition: min eigen
 AmrMesh.mirror_crease_tol       = 1.E-1          ## Mirror deposition: max dimensionless fit residual before falling back to J = 1.
 AmrMesh.mirror_max_jacobian     = 1.E4           ## Mirror deposition: refuse (J = 1) above this. Must exceed ~500.
 AmrMesh.mirror_min_denom        = 1.E-4          ## Mirror deposition: refuse (J = 1) below this. Must be under ~4E-3.
-AmrMesh.load_balance            = volume         ## Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-Driver.verbosity                    = 2                   ## Engine verbosity
-Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
-Driver.plot_interval                = 1                   ## Plot interval
-Driver.regrid_interval              = 10                  ## Regrid interval
-Driver.checkpoint_interval          = -1                  ## Checkpoint interval
-Driver.write_regrid_files           = false               ## Don't write regrid files.
-Driver.write_restart_files          = false               ## Write restart files or not
-Driver.initial_regrids              = 2                   ## Number of initial regrids
-Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
-Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 1.0                 ## Stop time
-Driver.max_steps                    = 0                   ## Maximum number of steps
-Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
-Driver.ebis_memory_load_balance     = false               ## Use memory as loads for EBIS generation
-Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
-Driver.write_memory                 = false               ## Write MPI memory report
-Driver.write_loads                  = false               ## Write (accumulated) computational loads
-Driver.output_directory             = ./                  ## Output directory
-Driver.output_names                 = petscexample2d      ## Simulation output names
-Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                  ## Restrict checkpoint depth (-1 => finest simulation level)
-Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
-Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank'
-Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
-Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes            = -1                  ## Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics           = -1                  ## Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.verbosity                    = 2                    ## Engine verbosity
+Driver.geometry_generation          = chombo-discharge     ## Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_scan_level          = 0                    ## Geometry scan level for chombo-discharge geometry generator
+Driver.plot_interval                = 10                   ## Plot interval
+Driver.checkpoint_interval          = 10                   ## Checkpoint interval
+Driver.regrid_interval              = 10                   ## Regrid interval
+Driver.write_regrid_files           = false                ## Write regrid files or not.
+Driver.write_restart_files          = false                ## Write restart files or not
+Driver.initial_regrids              = 0                    ## Number of initial regrids
+Driver.do_init_load_balance         = false                ## If true, load balance the first step in a fresh simulation.
+Driver.start_time                   = 0                    ## Start time (fresh simulations only)
+Driver.stop_time                    = 1.0                  ## Stop time
+Driver.max_steps                    = 0                    ## Maximum number of steps
+Driver.geometry_only                = false                ## Special option that ONLY plots the geometry
+Driver.ebis_memory_load_balance     = false                ## Use memory as loads for EBIS generation
+Driver.output_dt                    = -1.0                 ## Output interval (values <= 0 enforces step-based output)
+Driver.write_memory                 = false                ## Write MPI memory report
+Driver.write_loads                  = false                ## Write (accumulated) computational loads
+Driver.output_directory             = ./                   ## Output directory
+Driver.output_names                 = petscexample2d       ## Simulation output names
+Driver.max_plot_depth               = -1                   ## Restrict maximum plot depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                   ## Restrict checkpoint depth (-1 => finest simulation level)
+Driver.num_plot_ghost               = 1                    ## Number of ghost cells to include in plots
+Driver.plt_vars                     = levelset mpi_rank    ## 'tags', 'mpi_rank'
+Driver.restart                      = 0                    ## Restart step (less or equal to 0 implies fresh simulation)
+Driver.allow_coarsening             = true                 ## Allows removal of grid levels according to CellTagger
+Driver.grow_geo_tags                = 0                    ## How much to grow tags when using geometry-based refinement.
+Driver.refine_angles                = 15.                  ## Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes            = 2                    ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics           = 0                    ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-FieldSolverGMG.verbosity             = -1                 ## Class verbosity
-FieldSolverGMG.jump_bc               = natural            ## Jump BC type ('natural' or 'saturation_charge')
-FieldSolverGMG.bc.x.lo               = dirichlet 1.0      ## Bc type.
-FieldSolverGMG.bc.x.hi               = dirichlet 0.0      ## Bc type.
-FieldSolverGMG.bc.y.lo               = neumann 0.0        ## Bc type.
-FieldSolverGMG.bc.y.hi               = neumann 0.0        ## Bc type.
-FieldSolverGMG.plt_vars              = phi rho E resid    ## Plot variables: 'phi', 'rho', 'E', 'resid', 'perm', 'sigma', 'Esol'
-FieldSolverGMG.use_regrid_slopes     = true               ## Use slopes when regridding or not
-FieldSolverGMG.kappa_source          = false              ## Volume weighted space charge density or not (depends on algorithm)
-FieldSolverGMG.filter_rho            = 0                  ## Number of filterings of space charge before Poisson solve
-FieldSolverGMG.filter_potential      = 0                  ## Number of filterings of potential after Poisson solve
+FieldSolverGMG.verbosity             = -1                      ## Class verbosity
+FieldSolverGMG.jump_bc               = natural                 ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverGMG.bc.x.lo               = dirichlet 0.0           ## Bc type.
+FieldSolverGMG.bc.x.hi               = dirichlet 0.0           ## Bc type.
+FieldSolverGMG.bc.y.lo               = dirichlet 0.0           ## Bc type.
+FieldSolverGMG.bc.y.hi               = neumann 0.0             ## Bc type.
+FieldSolverGMG.bc.z.lo               = neumann 0.0             ## Bc type.
+FieldSolverGMG.bc.z.hi               = neumann 0.0             ## Bc type.
+FieldSolverGMG.plt_vars              = phi rho E Esol sigma    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverGMG.use_regrid_slopes     = true                    ## Use slopes when regridding or not
+FieldSolverGMG.kappa_source          = true                    ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverGMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
+FieldSolverGMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
 FieldSolverGMG.solver                       = gmg gmres    ## Solver(s), tried in order. 'gmg', 'gmres', 'bicgstab'. List = fallback chain
 FieldSolverGMG.krylov_eps                   = 1.E-10       ## Outer Krylov relative residual tolerance (gmres/bicgstab)
@@ -92,37 +92,38 @@ FieldSolverGMG.krylov_retry_interval        = 1            ## Re-probe GMG every
 FieldSolverGMG.krylov_reprobe_iters         = 0            ## Re-probe GMG early when the Krylov fallback converges in <= this many iterations (0 = disabled)
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
-FieldSolverGMG.gmg_pre_smooth               = 10           ## Number of relaxations in downsweep
-FieldSolverGMG.gmg_post_smooth              = 10           ## Number of relaxations in upsweep
-FieldSolverGMG.gmg_bott_smooth              = 10           ## NUmber of relaxations before dropping to bottom solver
+FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
+FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
+FieldSolverGMG.gmg_bott_smooth              = 12           ## NUmber of relaxations before dropping to bottom solver
 FieldSolverGMG.gmg_precond_smooth           = 10           ## Number of smoothing steps in the preconditioner
 FieldSolverGMG.gmg_min_iter                 = 5            ## Minimum number of iterations
-FieldSolverGMG.gmg_max_iter                 = 30           ## Maximum number of iterations
+FieldSolverGMG.gmg_max_iter                 = 32           ## Maximum number of iterations
 FieldSolverGMG.gmg_exit_tol                 = 1.E-10       ## Residue tolerance
 FieldSolverGMG.gmg_exit_hang                = 0.2          ## Solver hang
 FieldSolverGMG.gmg_min_cells                = 8            ## Bottom drop
 FieldSolverGMG.gmg_drop_order               = 0            ## Drop stencil order to 1 if domain is coarser than this.
-FieldSolverGMG.gmg_bc_order                 = 2            ## Boundary condition order for multigrid
-FieldSolverGMG.gmg_bc_weight                = 2            ## Boundary condition weights (for least squares)
-FieldSolverGMG.gmg_jump_order               = 2            ## Boundary condition order for jump conditions
-FieldSolverGMG.gmg_jump_weight              = 2            ## Boundary condition weight for jump conditions (for least squares)
+FieldSolverGMG.gmg_bc_order                 = 1            ## Boundary condition order for multigrid
+FieldSolverGMG.gmg_bc_weight                = 1            ## Boundary condition weights (for least squares)
+FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
+FieldSolverGMG.gmg_jump_weight              = 1            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverGMG.gmg_reduce_order             = false        ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
+FieldSolverGMG.gmg_reflux_free              = false        ## If true, use reflux-free AMR operator
 
 # ====================================================================================================
 # FieldSolverAMG class options
 # ====================================================================================================
-FieldSolverAMG.verbosity             = 2                  ## Class verbosity
-FieldSolverAMG.bc.x.lo               = dirichlet 1.0      ## Bc type (see docs)
-FieldSolverAMG.bc.x.hi               = dirichlet 0.0      ## Bc type (see docs)
-FieldSolverAMG.bc.y.lo               = neumann 0.0        ## Bc type (see docs)
-FieldSolverAMG.bc.y.hi               = neumann 0.0        ## Bc type (see docs)
-FieldSolverAMG.plt_vars              = phi rho E resid    ## Plot variables: 'phi', 'rho', 'E', 'resid', 'perm', 'sigma', 'Esol'
-FieldSolverAMG.use_regrid_slopes     = true               ## Use slopes when regridding or not
+FieldSolverAMG.verbosity             = -1                      ## Class verbosity
+FieldSolverAMG.bc.x.lo               = dirichlet 0.0           ## Bc type (see docs)
+FieldSolverAMG.bc.x.hi               = dirichlet 0.0           ## Bc type (see docs)
+FieldSolverAMG.bc.y.lo               = dirichlet 0.0           ## Bc type (see docs)
+FieldSolverAMG.bc.y.hi               = neumann 0.0             ## Bc type (see docs)
+FieldSolverAMG.plt_vars              = phi rho E Esol sigma    ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverAMG.use_regrid_slopes     = true                    ## Use slopes when regridding or not
 
 FieldSolverAMG.ksp_type              = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'
 FieldSolverAMG.ksp_gmres_restart     = 30           ## Restart length of GMRES and FGMRES
@@ -133,7 +134,8 @@ FieldSolverAMG.amg_smoother_its      = 2            ## Multigrid level smoother:
 FieldSolverAMG.ksp_rtol              = 1.E-10       ## Relative residual tolerance, in the KSP's norm (preconditioned for left-preconditioned KSPs)
 FieldSolverAMG.ksp_atol              = 1.E-50       ## Absolute residual tolerance
 FieldSolverAMG.ksp_max_iter          = 200          ## Maximum number of Krylov iterations
-FieldSolverAMG.kappa_source          = false        ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverAMG.petsc_verbosity       = 1            ## PETSc solve verbosity: residual per iteration (1), true residual (2), solver view (3)
+FieldSolverAMG.kappa_source          = true         ## Volume weighted space charge density or not (depends on algorithm)
 FieldSolverAMG.eb_order              = 1            ## Highest order of the EB face stencils (electrodes and interfaces)
 FieldSolverAMG.eb_weight             = 4            ## Least-squares weighting of the EB face stencils
 FieldSolverAMG.jump_bc               = natural      ## Interface condition: 'natural' or 'saturation_charge'
@@ -141,7 +143,8 @@ FieldSolverAMG.jump_bc               = natural      ## Interface condition: 'nat
 # ====================================================================================================
 # PETSc example options
 # ====================================================================================================
-PETScExample.field_solver      = amg             ## Field solver: 'amg' (FieldSolverAMG) or 'gmg' (FieldSolverGMG)
+PETScExample.field_solver     = amg    ## Field solver: 'amg' (FieldSolverAMG) or 'gmg' (FieldSolverGMG)
+
 # ====================================================================================================
 # SurfaceODESolver solver settings.
 # ====================================================================================================
@@ -150,31 +153,42 @@ SurfaceODESolver.regrid        = conservative    ## Regrid method. 'conservative
 SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid arguments are 'phi' and 'rhs'
 
 # ====================================================================================================
-# RefinementBoxTagger class options
+# DiskProfiledPlane class options
 # ====================================================================================================
-RefinementBoxTagger.verbosity         = -1         ## Class verbosity
-RefinementBoxTagger.buffer            = 0          ## Grow tagged cells
-RefinementBoxTagger.num_ref_boxes     = 4          ## Number of refinement boxes. 0 gives a single level.
-RefinementBoxTagger.ref_box1_lo       = 0.3 0.3    ## Refine region between
-RefinementBoxTagger.ref_box1_hi       = 0.7 0.7    ## these two corners
-RefinementBoxTagger.ref_box1_lvl      = 1          ## to this level
-RefinementBoxTagger.ref_box2_lo       = 0.4 0.4    ## Refine region between
-RefinementBoxTagger.ref_box2_hi       = 0.6 0.6    ## these two corners
-RefinementBoxTagger.ref_box2_lvl      = 2          ## to this level
-RefinementBoxTagger.ref_box3_lo       = 0.0 0.0    ## Bottom-left corner, against the 1 V and Neumann sides
-RefinementBoxTagger.ref_box3_hi       = 0.2 0.2    ## these two corners
-RefinementBoxTagger.ref_box3_lvl      = 2          ## to this level
-RefinementBoxTagger.ref_box4_lo       = 0.8 0.8    ## Top-right corner, against the grounded and Neumann sides
-RefinementBoxTagger.ref_box4_hi       = 1.0 1.0    ## these two corners
-RefinementBoxTagger.ref_box4_lvl      = 2          ## to this level
+DiskProfiledPlane.use_electrode      = true    ## Turn on/off electrode
+DiskProfiledPlane.use_dielectric     = true    ## Turn on/off dielectric
+
+DiskProfiledPlane.wheel_live                = true          ## Live electrode or not
+DiskProfiledPlane.wheel_radius              = 3E-2          ## Wheel radius
+DiskProfiledPlane.wheel_center              = 0 3.7E-2 0    ## Wheel center
+DiskProfiledPlane.wheel_curvature           = 500E-6        ## Wheel curvature (thickness)
+DiskProfiledPlane.wheel_stem_radius         = -1
+DiskProfiledPlane.wheel_smooth              = 1E-3
+DiskProfiledPlane.wheel_extra_thickness     = 0.0           ## Extra wheel thickness
+
+DiskProfiledPlane.box_dimensions       = 7.2000123E-2 0.020012 1    ## Box dimensions
+DiskProfiledPlane.box_translate        = 0 5.0123E-3 0              ## Box translation
+DiskProfiledPlane.box_permittivity     = 3.0                        ## Dielectric box permittivity
+DiskProfiledPlane.box_curvature        = 50E-6                      ## Corner curvatures
+
+DiskProfiledPlane.profile_type              = square        ## Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_translate         = 0 0 0         ## Profile translation
+DiskProfiledPlane.profile_repetition_lo     = 100 0 0       ## Repetition pattern in low coordinate direction
+DiskProfiledPlane.profile_repetition_hi     = 100 0 0       ## Repetition pattern in high coordinate direction
+DiskProfiledPlane.profile_period            = 500E-6 1 1    ## Repetition period
+
+DiskProfiledPlane.square_dimensions     = 251E-6 502E-6 10    ## Dimensions for squares/square channels
+DiskProfiledPlane.sphere_radius         = 1E-3                ## Radius for sphere profiles
+DiskProfiledPlane.cylinder_radius       = 1E-3                ## Radius for cylinder profiles
+
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
-FieldStepper.verbosity                = 2          ## Verbosity, also of the field solver
-FieldStepper.realm                    = primal     ## Primal Realm
-FieldStepper.load_balance             = false      ## Load balance or not
-FieldStepper.box_sorting              = morton     ## Box sorting algorithm
-FieldStepper.init_rho                 = 1E-9       ## Space charge density
-FieldStepper.init_sigma               = 0.0        ## Surface charge density
-FieldStepper.rho_center               = 0.5 0.5    ## Space charge blob center
-FieldStepper.rho_radius               = 0.05       ## Space charge blob radius
+FieldStepper.verbosity        = 2         ## Verbosity, also of the field solver
+FieldStepper.realm            = primal    ## Primal Realm
+FieldStepper.load_balance     = false     ## Load balance or not.
+FieldStepper.box_sorting      = morton    ## If you load balance you can redo the box sorting.
+FieldStepper.init_rho         = 0.E-5     ## Space charge density
+FieldStepper.init_sigma       = 0.0       ## Surface charge density
+FieldStepper.rho_center       = 0 5E-3    ## Space charge blob center
+FieldStepper.rho_radius       = 1.E-3     ## Space charge blob radius

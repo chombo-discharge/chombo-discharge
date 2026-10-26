@@ -287,10 +287,48 @@ protected:
   KSP m_ksp;
 
   /**
+   * @brief Verbosity of the PETSc solve.
+   * @details At 1 and above, the residual is printed at every Krylov iteration. At 2 and above, the true residual is
+   * printed too. At 3 and above, the solver and the preconditioner are viewed after each solve.
+   */
+  int m_petscVerbosity;
+
+  /**
+   * @brief The 2-norm of the zero-residual b - A*0 = b of the current solve, which the true residual is printed
+   * relative to.
+   */
+  Real m_monitorZeroResidNorm;
+
+  /**
+   * @brief Residual norm of the KSP at its first iteration of the current solve.
+   */
+  Real m_monitorFirstNorm;
+
+  /**
+   * @brief Residual norm of the KSP at the previous iteration of the current solve.
+   */
+  Real m_monitorPreviousNorm;
+
+  /**
    * @brief Parse the PETSc solver settings.
    */
   virtual void
   parseSolverSettings();
+
+  /**
+   * @brief KSP monitor that prints the residual at every iteration, as the Krylov solvers of FieldSolverGMG do.
+   * @details The residual is in the norm the KSP tests convergence on (the preconditioned residual for
+   * left-preconditioned KSPs), relative to that norm at the first iteration. The rate is the reduction factor since
+   * the previous iteration. With petsc_verbosity 2 and above the true residual b - A*x is also printed, relative to the
+   * zero-residual b.
+   * @param[in] a_ksp          The KSP
+   * @param[in] a_iteration    Iteration number
+   * @param[in] a_residualNorm Residual norm of the KSP
+   * @param[in] a_context      The FieldSolverAMG instance
+   * @return PETSc error code
+   */
+  static PetscErrorCode
+  monitorResidual(KSP a_ksp, PetscInt a_iteration, PetscReal a_residualNorm, void* a_context);
 
   /**
    * @brief Destroy the PETSc solver and the operator.

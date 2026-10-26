@@ -524,9 +524,18 @@ The remaining options configure PETSc:
 
 * ``ksp_type`` is the outer Krylov solver, any PETSc KSP type (e.g. ``gmres``, ``fgmres``, ``bicgstab``, ``cg``), and ``ksp_gmres_restart`` its restart length for GMRES and FGMRES.
 * ``ksp_rtol``, ``ksp_atol`` and ``ksp_max_iter`` are its exit criteria. Note that GMRES measures the relative tolerance in the preconditioned norm, so the true residual can be larger than ``ksp_rtol`` suggests.
+* ``petsc_verbosity`` controls the output of the solve. At 1 and above the residual is printed at every Krylov iteration, in the norm the KSP tests convergence on and relative to its first iteration. At 2 and above the true residual :math:`b - Ax`, relative to :math:`b`, is printed too, at the cost of computing it every iteration. At 3 and above the solver and the preconditioner (e.g. the levels of the algebraic multigrid hierarchy) are printed to standard output after each solve.
 * ``pc_type`` is the PETSc preconditioner.
 * ``amg_smoother_ksp``, ``amg_smoother_pc`` and ``amg_smoother_its`` set the smoother on each level of a multigrid preconditioner. The default, Chebyshev with SOR, is more robust than PETSc's default (Chebyshev with Jacobi) for the rows of small cut cells.
 * ``eb_order`` and ``eb_weight`` are the order and the least-squares weight of the embedded-boundary stencils. ``eb_order`` must not exceed ``AmrMesh.mg_interp_radius``.
+
+With ``verbosity`` above 1, each solve ends with a summary in the same form as ``FieldSolverGMG``'s Krylov solvers, e.g.
+
+.. code-block:: text
+
+   FieldSolverAMG - gmres converged (rel.res = 3.57062e-10, |r| = 0.406968, |r_zero| = 1.13977e+09, iters = 25, reason = CONVERGED_RTOL)
+
+where ``rel.res`` is the true residual :math:`|b - Ax|_2` relative to the zero-residual :math:`|b|_2`.
 
 Any other PETSc option can be given on the command line with the prefix ``fieldsolveramg_``, e.g. ``-fieldsolveramg_ksp_monitor`` or ``-fieldsolveramg_pc_gamg_threshold 0.02``.
 Options given on the command line take precedence over the input file.
