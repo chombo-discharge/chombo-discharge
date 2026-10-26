@@ -497,7 +497,7 @@ EBLeastSquaresMultigridInterpolator::defineCoarseInterp() noexcept
 
         CoarseInterpQuadCF& interp = (side == Side::Lo) ? m_loCoarseInterpCF[dir][din] : m_hiCoarseInterpCF[dir][din];
 
-        interp.define(dblFine, domainCoar, din, interpBox, m_refRat, dir);
+        interp.define(dblFine, domainCoar, din, interpBox, m_refRat, dir, m_eblgCoFi.getEBISL()[din]);
       }
     }
   }
@@ -572,14 +572,19 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
       // allowed to use these cells.
       const Box fineOverlap = ghostedFineBox & neighborBoxFine;
       validFineCells |= DenseIntVectSet(fineOverlap, true);
+    }
 
-      // validCoarCells are NOT allowed to use the region the fine box.
-      Box neighborBoxCoar = neighborBoxFine;
-      neighborBoxCoar.coarsen(m_refRat);
-      neighborBoxCoar &= grownCoarBox;
+    // The coarse cells under any fine box are not valid. The neighbors above are only the fine boxes that touch this
+    // one, while grownCoarBox reaches refRat times further at fine resolution, so every fine box under grownCoarBox is
+    // taken from the layout's spatial index instead.
+    Vector<int> fineBoxesUnderCoar;
 
-      //      validCoarCells -= DenseIntVectSet(neighborBoxCoar, true);
-      validCoarCells -= neighborBoxCoar;
+    dblFine.intersecting(refine(grownCoarBox, m_refRat), fineBoxesUnderCoar);
+
+    for (int i = 0; i < fineBoxesUnderCoar.size(); i++) {
+      const Box coveredCoar = coarsen((*dblFine.rawPtr())[fineBoxesUnderCoar[i]].box, m_refRat) & grownCoarBox;
+
+      validCoarCells -= coveredCoar;
     }
 
     // Restrict to domain

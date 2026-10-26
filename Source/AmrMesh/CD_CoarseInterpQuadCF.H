@@ -19,6 +19,8 @@
 #include <LoHiSide.H>
 #include <DerivStencil.H>
 #include <DisjointBoxLayout.H>
+#include <DenseIntVectSet.H>
+#include <EBISBox.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -77,6 +79,8 @@ public:
    * @param[in] a_refRat Refinement factor between coarse and fine
    * @param[in] a_ignoreDir Coordinate to ignore when doing the interpolation. I.e., we interpolate
    * in all coordinates except this one.
+   * @param[in] a_ebisBoxCoar EB geometry of the coarsened fine grid a_dit, so that the stencils do not use coarse
+   * cells covered by the EB.
    */
   virtual void
   define(const DisjointBoxLayout& a_dblFine,
@@ -84,7 +88,8 @@ public:
          const DataIndex&         a_dit,
          const Box&               a_fineGhostCells,
          int                      a_refRat,
-         int                      a_ignoreDir) noexcept;
+         int                      a_ignoreDir,
+         const EBISBox&           a_ebisBoxCoar) noexcept;
 
   /**
    * @brief Compute first-derivative Taylor term in direction a_dir.
@@ -205,6 +210,12 @@ protected:
   DataIndex m_dit;
 
   /**
+   * @brief The coarse cells the stencils may use: within two cells of the stencil box, in the domain, not under any
+   * fine box, and not covered by the EB.
+   */
+  DenseIntVectSet m_validCells;
+
+  /**
    * @brief Interpolation direction to ignore.
    */
   int m_ignoreDir;
@@ -249,6 +260,16 @@ protected:
    * @brief Mixed-derivative stencil. Only defined in 3D.
    */
   BaseFab<DerivStencil> m_explicitMixedDerivStencils;
+
+  /**
+   * @brief Compute m_validCells.
+   * @details The fine boxes under the region are taken from the spatial index of the fine layout, since the region
+   * reaches further than the neighbors of the fine box. Cells covered by the EB are removed where a_ebisBoxCoar has
+   * geometry; elsewhere a cell counts as uncovered.
+   * @param[in] a_ebisBoxCoar EB geometry of the coarsened fine grid
+   */
+  virtual void
+  defineValidCells(const EBISBox& a_ebisBoxCoar) noexcept;
 
   /**
    * @brief Compute all first-derivative stencils in the coarse grid cells.
