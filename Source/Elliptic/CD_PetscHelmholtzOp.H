@@ -410,7 +410,9 @@ protected:
   addToMatrix(const PetscInt a_row, const PetscStencil& a_stencil) noexcept;
 
   /**
-   * @brief Create the matrix, with its preallocation, and allocate the boundary weights.
+   * @brief Allocate the boundary weights, and create the matrix with an exact preallocation.
+   * @details The preallocation comes from assembling the operator once into a MATPREALLOCATOR, with fillMatrix. The
+   * matrix entries are zero afterwards; fillMatrix must be called to fill them.
    */
   virtual void
   createMatrix() noexcept;

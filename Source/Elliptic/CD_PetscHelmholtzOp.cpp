@@ -147,10 +147,10 @@ PetscHelmholtzOp::define(const RefCountedPtr<PetscGrid>&              a_petscGri
     m_jumpBc->define(m_petscGrid, m_interpolators, m_probLo, m_dx);
   }
 
-  this->createMatrix();
-
+  // fillMatrix runs twice: into the preallocator in createMatrix, and then into the matrix.
   m_isDefined = true;
 
+  this->createMatrix();
   this->fillMatrix();
 }
 
@@ -394,60 +394,8 @@ PetscHelmholtzOp::createMatrix() noexcept
   const int numLevels = mflg.size();
   const int numPhases = m_petscGrid->getNumPhases();
 
-  // On one level a row has the cell and at most one neighbor per face; the Robin BC references the interior neighbor,
-  // which is a neighbor already. Rows next to a refinement boundary also hold the coarse-fine interpolation stencils,
-  // whose size is not known in advance, so on several levels the preallocation is an estimate and PETSc may have to
-  // allocate more. Neighbors in other boxes can be on other ranks.
-  //
-  // The rows of cut cells, and of the cells next to them, also hold the EB face stencils and the interpolations of the
-  // cut-face fluxes to their centroids, whose sizes are not known in advance either. With cut cells the preallocation
-  // is the same estimate as on several levels.
-  int hasCutCells = 0;
-
-  for (int phase = 0; phase < numPhases; phase++) {
-    for (int lvl = 0; lvl < numLevels; lvl++) {
-      const EBLevelGrid&       eblgLvl = mflg[lvl]->getEBLevelGrid(phase);
-      const DisjointBoxLayout& dbl     = eblgLvl.getDBL();
-      const DataIterator&      dit     = dbl.dataIterator();
-      const int                nbox    = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(max : hasCutCells)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
-
-        if (!(eblgLvl.getEBISL()[din].isAllRegular())) {
-          hasCutCells = 1;
-        }
-      }
-    }
-  }
-
-  const bool isEstimate = (numLevels > 1) || (ParallelOps::max(hasCutCells) > 0);
-
-  const PetscInt numLocalRows   = m_petscGrid->getNumLocalRows();
-  const PetscInt numLevelPoints = 2 * SpaceDim + 1;
-  const PetscInt numDiagonal    = isEstimate ? 4 * numLevelPoints : numLevelPoints;
-  const PetscInt numOffDiagonal = numDiagonal - 1;
-
-  if (m_matrix != nullptr) {
-    PetscCallVoid(MatDestroy(&m_matrix));
-  }
-
-  PetscCallVoid(MatCreateAIJ(Chombo_MPI::comm,
-                             numLocalRows,
-                             numLocalRows,
-                             PETSC_DETERMINE,
-                             PETSC_DETERMINE,
-                             numDiagonal,
-                             nullptr,
-                             numOffDiagonal,
-                             nullptr,
-                             &m_matrix));
-
-  // On one level without cut cells the preallocation is exact, so fail loudly if it is exceeded.
-  PetscCallVoid(MatSetOption(m_matrix, MAT_NEW_NONZERO_ALLOCATION_ERR, isEstimate ? PETSC_FALSE : PETSC_TRUE));
-
-  // Storage for the weights of the boundary data on the domain faces, per phase.
+  // Storage for the weights of the boundary data on the domain faces, per phase. fillMatrix writes them, so they are
+  // allocated before the matrix.
   for (int phase = 0; phase < numPhases; phase++) {
     m_boundaryWeights[phase].resize(numLevels);
 
@@ -461,6 +409,39 @@ PetscHelmholtzOp::createMatrix() noexcept
                                        DomainFluxIFFABFactory(eblgLvl.getEBISL(), eblgLvl.getDomain())));
     }
   }
+
+  // The preallocation is exact: the operator is assembled once into a MATPREALLOCATOR, which only records where the
+  // entries go, including the entries that the refluxing adds to coarse rows on other ranks, and the matrix is
+  // preallocated from that. fillMatrix is the only writer of the pattern, so the pattern and the preallocation cannot
+  // disagree, and any entry outside the pattern is an error.
+  const PetscInt numLocalRows = m_petscGrid->getNumLocalRows();
+
+  if (m_matrix != nullptr) {
+    PetscCallVoid(MatDestroy(&m_matrix));
+  }
+
+  Mat preallocator = nullptr;
+
+  PetscCallVoid(MatCreate(Chombo_MPI::comm, &preallocator));
+  PetscCallVoid(MatSetType(preallocator, MATPREALLOCATOR));
+  PetscCallVoid(MatSetSizes(preallocator, numLocalRows, numLocalRows, PETSC_DETERMINE, PETSC_DETERMINE));
+  PetscCallVoid(MatSetUp(preallocator));
+
+  m_matrix = preallocator;
+
+  this->fillMatrix();
+
+  Mat matrix = nullptr;
+
+  PetscCallVoid(MatCreate(Chombo_MPI::comm, &matrix));
+  PetscCallVoid(MatSetType(matrix, MATAIJ));
+  PetscCallVoid(MatSetSizes(matrix, numLocalRows, numLocalRows, PETSC_DETERMINE, PETSC_DETERMINE));
+  PetscCallVoid(MatPreallocatorPreallocate(preallocator, PETSC_TRUE, matrix));
+  PetscCallVoid(MatDestroy(&preallocator));
+
+  m_matrix = matrix;
+
+  PetscCallVoid(MatSetOption(m_matrix, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE));
 }
 
 void
