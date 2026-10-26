@@ -2696,8 +2696,9 @@ EBHelmholtzOp::computeCoarseFineFlux(const LevelData<EBCellFAB>& a_phi)
 {
   CH_TIME("EBHelmholtzOp::computeCoarseFineFlux(LD<EBCellFAB>)");
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const DataIterator&      dit = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const auto& regularRegions   = m_fluxReg->getRegularCoarseFineRegions();
   auto&       irregularRegions = m_fluxReg->getIrregularCoarseFineRegions();
@@ -2708,31 +2709,30 @@ EBHelmholtzOp::computeCoarseFineFlux(const LevelData<EBCellFAB>& a_phi)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisBox = ebisl[din];
+
     for (int dir = 0; dir < SpaceDim; dir++) {
+      EBFaceFAB& flux = m_flux[din][dir];
+
       for (SideIterator sit; sit.ok(); ++sit) {
         const std::pair<int, Side::LoHiSide> dirSide = std::make_pair(dir, sit());
 
-        // Bounding box of the coarse cells just outside the fine patch on side sit().
-        Box computeBox = regularRegions[din].at(dirSide).mBox();
+        // These are the coarse cells just outside the fine patch on side sit(). The refluxed faces are the faces of
+        // these cells that point towards the fine patch.
+        auto kernel = [&](const VolIndex& vof) -> void {
+          const Vector<FaceIndex> faces = ebisBox.getFaces(vof, dir, flip(sit()));
 
-        BoxLoops::loop(irregularRegions[din].at(dirSide), [&](const VolIndex& vof) -> void {
-          computeBox.minBox(Box(vof.gridIndex(), vof.gridIndex()));
+          for (int iface = 0; iface < faces.size(); iface++) {
+            this->computeFaceFlux(flux, a_phi[din], faces[iface], cellBox, din, dir);
+          }
+        };
+
+        BoxLoops::loop(regularRegions[din].at(dirSide), [&](const IntVect& iv) -> void {
+          kernel(VolIndex(iv, 0));
         });
 
-        if (!computeBox.isEmpty()) {
-          // The fine patch lies on the other side of these cells. Include the covered cells across the refluxed faces
-          // so that a face takes its centroid stencil if either of its cells has one.
-          if (sit() == Side::Lo) {
-            computeBox.growHi(dir, 1);
-          }
-          else {
-            computeBox.growLo(dir, 1);
-          }
-
-          computeBox &= dbl[din];
-
-          this->computeFlux(m_flux[din][dir], a_phi[din], computeBox, din, dir);
-        }
+        BoxLoops::loop(irregularRegions[din].at(dirSide), kernel);
       }
     }
   }
@@ -2743,8 +2743,9 @@ EBHelmholtzOp::computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EB
 {
   CH_TIME("EBHelmholtzOp::computeFineCoarseFlux(LD<EBCellFAB>, EBReflux)");
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const DataIterator&      dit = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   const auto& fineBoxes = a_coarFluxReg.getFineCoarseFineBoxes();
 
@@ -2754,17 +2755,78 @@ EBHelmholtzOp::computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EB
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisBox = ebisl[din];
+
     for (int dir = 0; dir < SpaceDim; dir++) {
+      EBFaceFAB& flux = m_flux[din][dir];
+
       for (SideIterator sit; sit.ok(); ++sit) {
-        Box computeBox = fineBoxes[din].at(std::make_pair(dir, sit()));
+        Box boundaryCells = fineBoxes[din].at(std::make_pair(dir, sit()));
 
-        computeBox &= dbl[din];
+        boundaryCells &= cellBox;
 
-        if (!computeBox.isEmpty()) {
-          this->computeFlux(m_flux[din][dir], a_phi[din], computeBox, din, dir);
-        }
+        // These are the cells just inside the patch on side sit(); their faces on that side lie on the refinement
+        // boundary.
+        auto kernel = [&](const IntVect& iv) -> void {
+          const Vector<VolIndex> vofs = ebisBox.getVoFs(iv);
+
+          for (int ivof = 0; ivof < vofs.size(); ivof++) {
+            const Vector<FaceIndex> faces = ebisBox.getFaces(vofs[ivof], dir, sit());
+
+            for (int iface = 0; iface < faces.size(); iface++) {
+              this->computeFaceFlux(flux, a_phi[din], faces[iface], cellBox, din, dir);
+            }
+          }
+        };
+
+        BoxLoops::loop<D_DECL(1, 1, 1)>(boundaryCells, kernel);
       }
     }
+  }
+}
+
+void
+EBHelmholtzOp::computeFaceFlux(EBFaceFAB&       a_flux,
+                               const EBCellFAB& a_phi,
+                               const FaceIndex& a_face,
+                               const Box&       a_cellBox,
+                               const DataIndex& a_dit,
+                               const int        a_dir) const noexcept
+{
+  // computeFaceCenteredFlux sets every face by centered differencing, and computeFaceCentroidFlux then overwrites the
+  // faces of the cells in a_cellBox that have centroid stencils. Do the same, for one face. The centered value is
+  // always written to the single-valued data, because EBReflux reads it there even where the face also holds a
+  // centroid value.
+  BaseFab<Real>&       regFlux = a_flux.getSingleValuedFAB();
+  const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
+  const BaseFab<Real>& regBco  = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
+
+  const Real inverseDx = 1. / m_dx;
+
+  const IntVect ivLo = a_face.gridIndex(Side::Lo);
+  const IntVect ivHi = a_face.gridIndex(Side::Hi);
+
+  regFlux(ivHi, m_comp) = m_beta * (regBco(ivHi, m_comp) * inverseDx * (regPhi(ivHi, m_comp) - regPhi(ivLo, m_comp)));
+
+  const BaseIFFAB<VoFStencil>& fluxStencils = m_centroidFluxStencil[a_dir][a_dit];
+  const IntVectSet&            stencilCells = fluxStencils.getIVS();
+
+  const bool useStencil = !a_face.isBoundary() && ((a_cellBox.contains(ivLo) && stencilCells.contains(ivLo)) ||
+                                                   (a_cellBox.contains(ivHi) && stencilCells.contains(ivHi)));
+
+  if (useStencil) {
+    const VoFStencil& sten = fluxStencils(a_face, m_comp);
+
+    Real flux = 0.0;
+    for (int i = 0; i < sten.size(); i++) {
+      const VolIndex& ivof    = sten.vof(i);
+      const Real&     iweight = sten.weight(i);
+
+      flux += iweight * a_phi(ivof, m_comp);
+    }
+
+    a_flux(a_face, m_comp) = m_beta * flux;
   }
 }
 

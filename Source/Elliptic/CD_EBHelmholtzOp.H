@@ -1518,8 +1518,7 @@ protected:
 
   /**
    * @brief Compute the fluxes on this level through the faces that border the finer level.
-   * @details Only the faces read by EBReflux::reflux are guaranteed to be correct. The compute region covers the cells
-   * on both sides of each such face, so a face takes its centroid stencil exactly when computeFlux would give it one.
+   * @details Only the faces read by EBReflux::reflux are computed.
    * @param[in] a_phi Cell-centered data on this level. Must have updated ghost cells.
    */
   void
@@ -1527,12 +1526,32 @@ protected:
 
   /**
    * @brief Compute the fluxes on this level through the faces on the refinement boundary with the coarser level.
-   * @details Only the faces read by EBReflux::reflux are guaranteed to be correct.
+   * @details Only the faces on the refinement boundary are computed; these include all the faces EBReflux::reflux
+   * reads.
    * @param[in] a_phi         Cell-centered data on this level. Must have updated ghost cells.
    * @param[in] a_coarFluxReg Flux register between the coarser level and this level.
    */
   void
   computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EBReflux& a_coarFluxReg);
+
+  /**
+   * @brief Compute the flux through a single face.
+   * @details Gives the face the value computeFlux(LD<EBCellFAB>) gives it: the centroid stencil if either of its cells
+   * lies in a_cellBox and has stencils, and centered differencing otherwise.
+   * @param[in,out] a_flux    Fluxes in direction a_dir
+   * @param[in]     a_phi     Cell-centered data. Must have updated ghost cells.
+   * @param[in]     a_face    Face
+   * @param[in]     a_cellBox Grid box
+   * @param[in]     a_dit     Data index
+   * @param[in]     a_dir     Face direction
+   */
+  void
+  computeFaceFlux(EBFaceFAB&       a_flux,
+                  const EBCellFAB& a_phi,
+                  const FaceIndex& a_face,
+                  const Box&       a_cellBox,
+                  const DataIndex& a_dit,
+                  const int        a_dir) const noexcept;
 
   /**
    * @brief Reflux algorithm.
