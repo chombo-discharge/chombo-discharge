@@ -64,35 +64,51 @@ PetscHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect& a
 }
 
 void
-PetscHelmholtzDirichletEBBC::getEBFluxStencil(Real& /*a_boundaryWeight*/,
-                                              PetscStencil& /*a_stencil*/,
-                                              const int /*a_phase*/,
-                                              const int /*a_level*/,
-                                              const DataIndex& /*a_din*/,
-                                              const VolIndex& /*a_vof*/) const noexcept
+PetscHelmholtzDirichletEBBC::getEBFluxStencil(Real&            a_boundaryWeight,
+                                              PetscStencil&    a_stencil,
+                                              const int        a_phase,
+                                              const int        a_level,
+                                              const DataIndex& a_din,
+                                              const VolIndex&  a_vof) const noexcept
 {
   CH_TIME("PetscHelmholtzDirichletEBBC::getEBFluxStencil");
   if (m_verbose) {
     pout() << "PetscHelmholtzDirichletEBBC::getEBFluxStencil" << endl;
   }
 
-  MayDay::Abort("PetscHelmholtzDirichletEBBC::getEBFluxStencil -- not implemented yet");
+  CH_assert(m_isDefined);
+
+  // The flux is the one-sided normal derivative itself, with g = phi_B.
+  this->getNormalDerivativeStencil(a_boundaryWeight, a_stencil, a_phase, a_level, a_din, a_vof);
 }
 
 Real
-PetscHelmholtzDirichletEBBC::getBoundaryData(const int /*a_phase*/,
-                                             const int /*a_level*/,
-                                             const DataIndex& /*a_din*/,
-                                             const VolIndex& /*a_vof*/) const noexcept
+PetscHelmholtzDirichletEBBC::getBoundaryData(const int        a_phase,
+                                             const int        a_level,
+                                             const DataIndex& a_din,
+                                             const VolIndex&  a_vof) const noexcept
 {
   CH_TIME("PetscHelmholtzDirichletEBBC::getBoundaryData");
   if (m_verbose) {
     pout() << "PetscHelmholtzDirichletEBBC::getBoundaryData" << endl;
   }
 
-  MayDay::Abort("PetscHelmholtzDirichletEBBC::getBoundaryData -- not implemented yet");
+  CH_assert(m_isDefined);
 
-  return 0.0;
+  Real value = 0.0;
+
+  if (m_useConstant) {
+    value = m_constantValue;
+  }
+  else if (m_useFunction) {
+    value = m_functionValue(this->getBoundaryPosition(a_phase, a_level, a_din, a_vof));
+  }
+  else {
+    // Checked in every build: without a value the right-hand side would silently use phi_B = 0.
+    MayDay::Abort("PetscHelmholtzDirichletEBBC::getBoundaryData -- the value has not been set");
+  }
+
+  return value;
 }
 
 #include <CD_NamespaceFooter.H>

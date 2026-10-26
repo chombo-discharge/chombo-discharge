@@ -64,8 +64,8 @@ PetscHelmholtzNeumannEBBC::setDphiDn(const std::function<Real(const RealVect& a_
 }
 
 void
-PetscHelmholtzNeumannEBBC::getEBFluxStencil(Real& /*a_boundaryWeight*/,
-                                            PetscStencil& /*a_stencil*/,
+PetscHelmholtzNeumannEBBC::getEBFluxStencil(Real&         a_boundaryWeight,
+                                            PetscStencil& a_stencil,
                                             const int /*a_phase*/,
                                             const int /*a_level*/,
                                             const DataIndex& /*a_din*/,
@@ -76,23 +76,38 @@ PetscHelmholtzNeumannEBBC::getEBFluxStencil(Real& /*a_boundaryWeight*/,
     pout() << "PetscHelmholtzNeumannEBBC::getEBFluxStencil" << endl;
   }
 
-  MayDay::Abort("PetscHelmholtzNeumannEBBC::getEBFluxStencil -- not implemented yet");
+  // The flux is the given normal derivative g.
+  a_boundaryWeight = 1.0;
+  a_stencil.clear();
 }
 
 Real
-PetscHelmholtzNeumannEBBC::getBoundaryData(const int /*a_phase*/,
-                                           const int /*a_level*/,
-                                           const DataIndex& /*a_din*/,
-                                           const VolIndex& /*a_vof*/) const noexcept
+PetscHelmholtzNeumannEBBC::getBoundaryData(const int        a_phase,
+                                           const int        a_level,
+                                           const DataIndex& a_din,
+                                           const VolIndex&  a_vof) const noexcept
 {
   CH_TIME("PetscHelmholtzNeumannEBBC::getBoundaryData");
   if (m_verbose) {
     pout() << "PetscHelmholtzNeumannEBBC::getBoundaryData" << endl;
   }
 
-  MayDay::Abort("PetscHelmholtzNeumannEBBC::getBoundaryData -- not implemented yet");
+  CH_assert(m_isDefined);
 
-  return 0.0;
+  Real DphiDn = 0.0;
+
+  if (m_useConstant) {
+    DphiDn = m_constantDphiDn;
+  }
+  else if (m_useFunction) {
+    DphiDn = m_functionDphiDn(this->getBoundaryPosition(a_phase, a_level, a_din, a_vof));
+  }
+  else {
+    // Checked in every build: without a value the right-hand side would silently use dphi/dn = 0.
+    MayDay::Abort("PetscHelmholtzNeumannEBBC::getBoundaryData -- the normal derivative has not been set");
+  }
+
+  return DphiDn;
 }
 
 #include <CD_NamespaceFooter.H>
