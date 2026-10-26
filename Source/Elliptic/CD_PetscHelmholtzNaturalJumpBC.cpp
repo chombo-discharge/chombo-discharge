@@ -14,7 +14,6 @@
 
 // Chombo includes
 #include <CH_Timer.H>
-#include <MayDay.H>
 
 // Our includes
 #include <CD_PetscHelmholtzNaturalJumpBC.H>
@@ -62,9 +61,13 @@ PetscHelmholtzNaturalJumpBC::getInterfaceFluxStencil(Real&            a_dataWeig
   const Real b[2] = {a_bCoefPhase0, a_bCoefPhase1};
   const Real den  = b[0] * w[0] + b[1] * w[1];
 
-  // Checked in every build: phi_B is not determined without it.
+  // The weights are positive, or zero on a side without a stencil. Without a stencil on either side there is no flux
+  // through the interface, as in FieldSolverGMG.
   if (den == 0.0) {
-    MayDay::Abort("PetscHelmholtzNaturalJumpBC::getInterfaceFluxStencil -- b_0 * w_0 + b_1 * w_1 is zero");
+    a_dataWeight = 0.0;
+    a_stencil.clear();
+
+    return;
   }
 
   // b_0 D_0 + b_1 D_1 = sigma gives phi_B = (sigma - b_0 S_0 - b_1 S_1)/den, and then, with o the other side,

@@ -94,7 +94,6 @@ MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     const VoFStencil& derivStenPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     const Real& denomPhase0 = m_denom[a_dit].getIVFAB(firstPhase)(vof0, vofComp);
-    const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     const Real& weightPhase0 = m_avgWeights[a_dit].getIVFAB(firstPhase)(vof0, vofComp);
     const Real& weightPhase1 = m_avgWeights[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
@@ -102,23 +101,34 @@ MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     const Real contribPhase0 = this->applyStencil(derivStenPhase0, phiPhase0);
     const Real contribPhase1 = this->applyStencil(derivStenPhase1, phiPhase1);
 
+    // The side with zero normal derivative (z) and the other side (o). The stencils were multiplied by the denominator,
+    // so divide it back out. The denominator is zero only if neither side has a stencil, and then there is no flux.
+    const bool zIsPhase0 = (m_phase == phase::gas);
+
+    const Real weightZ  = zIsPhase0 ? weightPhase0 : weightPhase1;
+    const Real weightO  = zIsPhase0 ? weightPhase1 : weightPhase0;
+    const Real contribZ = zIsPhase0 ? contribPhase0 : contribPhase1;
+    const Real contribO = zIsPhase0 ? contribPhase1 : contribPhase0;
+
     Real phiBndry = 0.0;
     Real jump     = 0.0;
-    if (m_phase == phase::gas) {
-      phiBndry = contribPhase0 / denomPhase0; // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)
-      phiBndry *= -1. / weightPhase0;         // Divide by boundary weight, which is actually bq*wq.
 
-      // BC is b*dphi/dn = sigma so compute the jump from that. Recall that the stencil is denominator-weighted so
-      // divide that out.
-      jump += weightPhase1 * phiBndry;
-      jump += contribPhase1 / denomPhase0;
-    }
-    else {
-      phiBndry = contribPhase1 / (denomPhase1); // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)
-      phiBndry *= -1. / weightPhase1;           // Divide by boundary weight, which is actually bq*wq.
+    if (denomPhase0 != 0.0) {
+      if (weightZ > 0.0) {
+        // Zero normal derivative on side z: phiB = -sum(wi*phi(i))/wb, with the weights divided by bq*wq. BC is
+        // b*dphi/dn = sigma on the other side, so compute the jump from that.
+        phiBndry = contribZ / denomPhase0; // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)
+        phiBndry *= -1. / weightZ;         // Divide by boundary weight, which is actually bq*wq.
 
-      jump += weightPhase0 * phiBndry;
-      jump += contribPhase0 / denomPhase0;
+        jump += weightO * phiBndry;
+        jump += contribO / denomPhase0;
+      }
+      else {
+        // Side z has no stencil. Impose zero normal derivative on the other side instead, so that there is no flux
+        // through the interface and no surface charge.
+        phiBndry = contribO / denomPhase0;
+        phiBndry *= -1. / weightO;
+      }
     }
 
     // Copy the result to the individual phase data holders

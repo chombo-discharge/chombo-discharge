@@ -49,9 +49,10 @@
  * - Cells covered by the next finer level are replaced by the finer cells under them that are PETSc rows.
  *
  * Every cell of the neighbourhood enters the fit, as in FieldSolverGMG. The search tries the half-circle, quadrant and
- * radius neighbourhoods, each from the order down to 1, and aborts if none gives a stencil. A cut cell without an EB
- * normal has no EB face; its stencil is empty with w_B = 0. The stencils are computed once, in define, and contain
- * neither the b-coefficient nor the face area.
+ * radius neighbourhoods, each from the order down to 1. A fit is accepted only if w_B > 0, i.e. if the normal
+ * derivative increases with the boundary value, as in FieldSolverGMG. If no fit is accepted, or if a cut cell has no EB
+ * normal, the cell has no flux through its EB face: its stencil is empty with w_B = 0. The stencils are computed once,
+ * in define, and contain neither the b-coefficient nor the face area.
  *
  * PetscHelmholtzEBBC (electrode faces) and PetscHelmholtzJumpBC (interface faces) derive from this class and build
  * their fluxes from these stencils.
@@ -207,7 +208,8 @@ protected:
 
   /**
    * @brief Compute the one-sided normal derivative at the EB face of a cut cell.
-   * @details Runs the neighbourhood and order search described for the class, and aborts if no stencil is found.
+   * @details Runs the neighbourhood and order search described for the class. If no stencil is found, w_B = 0 and the
+   * stencil is empty.
    * @param[out] a_boundaryWeight Weight w_B of the boundary value phi_B
    * @param[out] a_stencil        Stencil over PETSc rows of the cell's phase
    * @param[in]  a_phase          Phase
@@ -235,8 +237,8 @@ protected:
    * @param[in]  a_vof            Cut cell
    * @param[in]  a_neighborhood   Neighbourhood of the cut cell to take cells from
    * @param[in]  a_order          Order of the fit. Also the radius of the neighbourhood.
-   * @return True if there were enough cells for the fit and it succeeded, in which case a_boundaryWeight and a_stencil
-   * are set.
+   * @return True if there were enough cells for the fit, it succeeded and w_B > 0, in which case a_boundaryWeight and
+   * a_stencil are set.
    */
   virtual bool
   getLeastSquaresStencil(Real&                        a_boundaryWeight,

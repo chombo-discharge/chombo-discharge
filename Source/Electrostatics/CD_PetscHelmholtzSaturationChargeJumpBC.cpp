@@ -18,7 +18,6 @@
 
 // Chombo includes
 #include <CH_Timer.H>
-#include <MayDay.H>
 #include <BaseIVFactory.H>
 
 // Our includes
@@ -91,10 +90,10 @@ PetscHelmholtzSaturationChargeJumpBC::getInterfaceFluxStencil(Real&            a
     this->getNormalDerivativeStencil(w[k], S[k], k, a_level, a_din, VolIndex(a_iv, 0));
   }
 
-  // Checked in every build: phi_B is not determined without it.
+  // Without a stencil on side z, the normal derivative is zero on the other side too, as in FieldSolverGMG: there is no
+  // flux through the interface.
   if (w[z] == 0.0) {
-    MayDay::Abort("PetscHelmholtzSaturationChargeJumpBC::getInterfaceFluxStencil -- w_B is zero on the side with zero "
-                  "normal derivative");
+    return;
   }
 
   const Real b[2] = {a_bCoefPhase0, a_bCoefPhase1};
@@ -279,14 +278,15 @@ PetscHelmholtzSaturationChargeJumpBC::updateJumpData(const Vec& a_phi, const MFA
         }
 
         const Real bco = (*a_bCoefIrreg[lvl])[din].getIVFAB(o)(vof, 0);
-        // Checked in every build, as in getInterfaceFluxStencil: phi_B is not determined without it.
-        if (w[z] == 0.0) {
-          MayDay::Abort("PetscHelmholtzSaturationChargeJumpBC::updateJumpData -- w_B is zero on the side with zero "
-                        "normal derivative");
-        }
+        // Without a stencil on side z there is no flux through the interface, and no surface charge (see
+        // getInterfaceFluxStencil).
+        Real sigma = 0.0;
 
-        const Real phiB  = -apply(S[z]) / w[z];
-        const Real sigma = bco * (w[o] * phiB + apply(S[o]));
+        if (w[z] > 0.0) {
+          const Real phiB = -apply(S[z]) / w[z];
+
+          sigma = bco * (w[o] * phiB + apply(S[o]));
+        }
 
         (*m_sigma[lvl])[din](vof, 0) = sigma;
       }

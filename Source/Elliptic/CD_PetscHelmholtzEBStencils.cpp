@@ -12,10 +12,6 @@
 
 #ifdef CH_USE_PETSC
 
-// Std includes
-#include <algorithm>
-#include <sstream>
-
 // Chombo includes
 #include <CH_Timer.H>
 #include <MayDay.H>
@@ -246,12 +242,10 @@ PetscHelmholtzEBStencils::computeNormalDerivativeStencil(Real&            a_boun
     }
   }
 
-  // Checked in every build: a cut cell without a stencil would have no flux through its EB face.
-  std::stringstream msg;
-  msg << "PetscHelmholtzEBStencils::computeNormalDerivativeStencil -- no stencil found for the cut cell "
-      << a_vof.gridIndex() << " on level " << a_level << " and phase " << a_phase;
-
-  MayDay::Abort(msg.str().c_str());
+  // No stencil was found. As in FieldSolverGMG, the cell then has no flux through its EB face: w_B = 0 and an empty
+  // stencil.
+  a_boundaryWeight = 0.0;
+  a_stencil.clear();
 }
 
 bool
@@ -429,6 +423,15 @@ PetscHelmholtzEBStencils::getLeastSquaresStencil(Real&                        a_
   }
 
   a_boundaryWeight = -(LeastSquares::sumAllWeights(stencilThis) + LeastSquares::sumAllWeights(stencilFine));
+
+  // The normal derivative must increase with the boundary value. As in FieldSolverGMG, a fit with w_B <= 0, e.g. from
+  // cells that lie nearly in the plane of the boundary, is rejected so that another neighbourhood or a lower order is
+  // tried. On an interface, w_B <= 0 on one side can make b_0 w_0 + b_1 w_1 vanish.
+  if (a_boundaryWeight <= 0.0) {
+    a_boundaryWeight = 0.0;
+
+    return false;
+  }
 
   const RefCountedPtr<EBMultigridInterpolator> interpolator = (a_level > 0)
                                                                 ? m_interpolators[a_level].getInterpolator(a_phase)
