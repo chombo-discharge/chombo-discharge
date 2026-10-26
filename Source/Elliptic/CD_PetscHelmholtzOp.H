@@ -68,7 +68,9 @@
  *   face centroid in the same way, as EBHelmholtzDomainBC does. On the right-hand side the boundary data of each of
  *   these faces enters with its own w_B.
  * - EB face: the flux from PetscHelmholtzEBBC::getEBFluxStencil, times the boundary area and the b-coefficient on the
- *   EB, and w_B * g on the right-hand side.
+ *   EB, and w_B * g on the right-hand side. On an interface cell, which is cut in both phases, the flux comes from
+ *   PetscHelmholtzJumpBC::getInterfaceFluxStencil instead; it already contains the b-coefficients, so it is only
+ *   multiplied by the boundary area, and w_g * g goes on the right-hand side.
  * - Domain face: the stencils and the boundary weight w_B from PetscHelmholtzDomainBC::getFaceFluxStencil. The
  *   stencil has parts on the next coarser level, this level, and the next finer level. The part on this level may
  *   contain coarse-fine ghost cells, which are replaced as on the fine side of a refinement boundary below. Any other
@@ -121,10 +123,10 @@
  *   over PETSc rows of any phase and any level. The shared primitive, in PetscHelmholtzEBStencils, is the one-sided
  *   normal derivative of phi over the cells of the cell's phase, dphi/dn = w_B * phi_B + sum_i w_i * phi_i, from a
  *   least-squares fit (LeastSquares::computeDualLevelStencils) over the cell's level and the next finer one.
- * Coarse-fine ghost cells in it are replaced by their interpolation stencils, as for the domain faces, and cells
- * covered by the finer level by the finer cells under them. It searches the half-circle, quadrant and radius
- * neighbourhoods, each from the requested order down to 1, and aborts if none gives a stencil. One order and one
- * weight, set by the solver, apply to all EB face stencils.
+ *   Coarse-fine ghost cells in it are replaced by their interpolation stencils, as for the domain faces, and cells
+ *   covered by the finer level by the finer cells under them. It searches the half-circle, quadrant and radius
+ *   neighbourhoods, each from the requested order down to 1, and aborts if none gives a stencil. One order and one
+ *   weight, set by the solver, apply to all EB face stencils.
  * - Electrode faces: PetscHelmholtzEBBC, with Dirichlet (g = phi_B) and Neumann (g = dphi/dn) subclasses, and
  *   PetscHelmholtzElectrostaticEBBC (Source/Electrostatics), which takes g from the electrodes.
  * - Interface cells, where both phases have a VoF: PetscHelmholtzJumpBC. The one-sided derivatives of both phases are
