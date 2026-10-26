@@ -513,6 +513,11 @@ The embedded-boundary stencils use the same neighbourhoods and least-squares fit
 With the same order and weight, the two solvers mostly agree to the solver tolerance.
 The largest differences seen in the tests, about one percent of the potential, are in cut cells with very small volume fractions.
 
+The rows of the matrix are volume-weighted: the kappa-weighted divergence of each cell is multiplied by :math:`(\Delta x_l/\Delta x_0)^D` on level :math:`l`, and the right-hand side carries the same weights.
+This does not change the solution, but without it the row scale grows by :math:`r^2` per level (:math:`r` the refinement ratio), and a flux through a refinement boundary enters the fine and the coarse row with weights that differ by the volume ratio.
+Algebraic multigrid, which assumes a nearly symmetric matrix, converges much more slowly on such a matrix; in ``Exec/Examples/Electrostatics/PETSc`` the weighting cut the number of GMRES iterations by a factor of about three.
+The matrix is still not symmetric: the coarse-fine interpolation stencils and the embedded-boundary stencils are one-sided.
+
 Solver configuration
 ____________________
 
@@ -524,25 +529,28 @@ The domain boundary conditions (``bc.coord.side``), ``jump_bc``, ``kappa_source`
 The remaining options configure PETSc:
 
 * ``ksp_type`` is the outer Krylov solver, any PETSc KSP type (e.g. ``gmres``, ``fgmres``, ``bicgstab``, ``cg``), and ``ksp_gmres_restart`` its restart length for GMRES and FGMRES.
-* ``ksp_rtol``, ``ksp_atol`` and ``ksp_max_iter`` are its exit criteria. Note that GMRES measures the relative tolerance in the preconditioned norm, so the true residual can be larger than ``ksp_rtol`` suggests.
+* ``ksp_rtol``, ``ksp_atol`` and ``ksp_max_iter`` are its exit criteria. They apply to the volume-weighted system, so fine-level residuals count less than coarse-level ones. Note also that GMRES measures the relative tolerance in the preconditioned norm, so the true residual can be larger than ``ksp_rtol`` suggests.
 * ``petsc_verbosity`` controls the output of the solve. At 1 and above the residual is printed at every Krylov iteration, in the norm the KSP tests convergence on and relative to its first iteration. At 2 and above the true residual :math:`b - Ax`, relative to :math:`b`, is printed too, at the cost of computing it every iteration. At 3 and above the solver and the preconditioner (e.g. the levels of the algebraic multigrid hierarchy) are printed to standard output after each solve.
 * ``pc_type`` is the PETSc preconditioner.
 * ``amg_smoother_ksp``, ``amg_smoother_pc`` and ``amg_smoother_its`` set the smoother on each level of a multigrid preconditioner. The default, Chebyshev with SOR, is more robust than PETSc's default (Chebyshev with Jacobi) for the rows of small cut cells.
+* ``gamg_threshold`` and ``gamg_aggressive_coarsening`` control how GAMG builds its coarse levels; other preconditioners ignore them. GAMG groups each unknown with its strongly connected neighbours, and each group becomes one unknown on the next coarser level. Connections weaker than ``gamg_threshold``, relative to the diagonal, are not followed when forming the groups (a negative value follows all of them). A threshold of 0.01--0.02 keeps groups from forming across the weak couplings of small cut cells and refinement boundaries, which speeds up convergence, at the cost of smaller groups and thus more memory in the hierarchy; larger values can make the setup very expensive. ``gamg_aggressive_coarsening`` is the number of levels, from the finest, that are coarsened aggressively, i.e. grouped over neighbours of neighbours. This makes the hierarchy much smaller but each coarse level cruder, so the solve takes more iterations.
 * ``eb_order`` and ``eb_weight`` are the order and the least-squares weight of the embedded-boundary stencils. ``eb_order`` must not exceed ``AmrMesh.mg_interp_radius``.
 
 With ``verbosity`` above 1, each solve ends with a summary in the same form as ``FieldSolverGMG``'s Krylov solvers, e.g.
 
 .. code-block:: text
 
-   FieldSolverAMG - gmres converged (rel.res = 3.57062e-10, |r| = 0.406968, |r_zero| = 1.13977e+09, iters = 25, reason = CONVERGED_RTOL)
+   FieldSolverAMG - gmres converged (rel.res = 3.96903e-10, unweighted rel.res = 5.36091e-10, |r| = 0.0169176, |r_zero| = 4.26241e+07, iters = 13, reason = CONVERGED_RTOL)
 
-where ``rel.res`` is the true residual :math:`|b - Ax|_2` relative to the zero-residual :math:`|b|_2`.
+where ``rel.res`` is the true residual :math:`|b - Ax|_2` of the volume-weighted system relative to the zero-residual :math:`|b|_2`, and ``unweighted rel.res`` the same with the row weights removed from both.
+``|r|`` and ``|r_zero|`` are the weighted norms.
+The residual that is plotted (``res``) is unweighted.
 
 Any other PETSc option can be given with the prefix ``fieldsolveramg_`` through the ``PETSC_OPTIONS`` environment variable, e.g.
 
 .. code-block:: bash
 
-   PETSC_OPTIONS="-fieldsolveramg_pc_gamg_threshold 0.02 -fieldsolveramg_ksp_view_mat binary:A.bin" mpirun -x PETSC_OPTIONS -np 4 ./main2d.*.ex example2d.inputs
+   PETSC_OPTIONS="-fieldsolveramg_pc_gamg_agg_nsmooths 1 -fieldsolveramg_ksp_view_mat binary:A.bin" mpirun -x PETSC_OPTIONS -np 4 ./main2d.*.ex example2d.inputs
 
 PETSc options given this way take precedence over the input file.
 Options without a value, e.g. ``-fieldsolveramg_ksp_monitor``, can also be given on the command line, but options with a value cannot, because ``ParmParse`` reads the command line too and aborts on them.

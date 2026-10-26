@@ -51,13 +51,15 @@
  * and abort.
  *
  * The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim
- * and kappa-weighted, as in FieldSolverGMG: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell
- * (including the EB face), of the face area fraction (the boundary area on the EB face) times b times s*F. Here F is
- * the face flux, the derivative of phi in the +dir direction on the face, which is a stencil over PETSc rows, and
- * s = -1 on the low side of the cell and +1 on the high side. The right-hand side must use the same weighting: a volume
- * source is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also
- * multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Cells covered by
- * a finer level have no row. The faces are assembled as follows:
+ * and kappa-weighted, as in FieldSolverGMG, and then multiplied by the row weight (dx/dx_0)^SpaceDim of its level (see
+ * getRowWeight): kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell (including the EB face), of
+ * the face area fraction (the boundary area on the EB face) times b times s*F. Here F is the face flux, the derivative
+ * of phi in the +dir direction on the face, which is a stencil over PETSc rows, and s = -1 on the low side of the cell
+ * and +1 on the high side. The right-hand side must use the same weighting: a volume source is multiplied by kappa,
+ * every factor that multiplies the stencil part of a face flux in the matrix also multiplies its boundary data part
+ * w_B * g on the right-hand side (see addBoundaryConditionsToRHS), and the whole right-hand side is then multiplied by
+ * the row weights (scaleRows; addBoundaryConditionsToRHS does not apply them). Cells covered by a finer level have no
+ * row. The faces are assembled as follows:
  *
  * - Face between two valid cells on the same level: the two-point flux, as on a single level.
  * - Face of a cut cell: as in EBHelmholtzOp, the two-point fluxes b * dphi/dx through the face and its neighbouring
@@ -84,8 +86,8 @@
  *   face fluxes that cover it, using the same fine-face stencils as the fine rows. The coarse and fine rows thus see
  *   the same flux through the interface, which makes the composite operator conservative. Each fine face adds its flux
  *   to the coarse cell across it, through the coarsened fine grids (PetscGrid::getAMRToPetscCoFi), with the weight
- *   -1/refRat^SpaceDim relative to the fine row. The coarse cell skips its own faces onto cells covered by the finer
- *   level. The coarse row may be on another rank.
+ *   -1/refRat^SpaceDim relative to the fine row before the row weights, and -1 after them. The coarse cell skips
+ *   its own faces onto cells covered by the finer level. The coarse row may be on another rank.
  *
  * The coefficients alpha, beta, a and b are multiplied into the matrix entries, so changing any of them means refilling
  * the matrix. The a- and b-coefficients are held by reference, so the caller can change their values in place;

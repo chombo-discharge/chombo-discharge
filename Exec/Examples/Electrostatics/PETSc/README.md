@@ -30,7 +30,7 @@ The solver settings are `FieldSolverAMG.*` in the inputs file. `FieldSolverAMG.p
 at every Krylov iteration (1), the true residual as well (2), and the solver and preconditioner (3). Other PETSc options can
 be given with the prefix `-fieldsolveramg_` through the `PETSC_OPTIONS` environment variable, e.g.
 
-```PETSC_OPTIONS="-fieldsolveramg_pc_gamg_threshold 0.02" mpirun -x PETSC_OPTIONS -np <num_proc> main2d.*.ex example2d.inputs```
+```PETSC_OPTIONS="-fieldsolveramg_ksp_view" mpirun -x PETSC_OPTIONS -np <num_proc> main2d.*.ex example2d.inputs```
 
 Options without a value, e.g. `-fieldsolveramg_ksp_monitor`, can also be given on the command line. Options with a
 value cannot, because `ParmParse` reads the command line too and aborts on them.
