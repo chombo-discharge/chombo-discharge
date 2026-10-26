@@ -6,8 +6,8 @@
 
 /**
  * @file   main.cpp
- * @brief  Test of FieldSolverAMG with an electrode and a dielectric, against FieldSolverGMG, on the DiskProfiledPlane
- *         geometry.
+ * @brief  Test of FieldSolverAMG with an electrode and a dielectric, against FieldSolverGMG, on the RodSphere test
+ * setup.
  * @author Robert Marskar
  */
 
@@ -20,10 +20,9 @@
 
 // Our includes
 #include <CD_Driver.H>
-#include <CD_RefinementBoxTagger.H>
 #include <CD_FieldSolverGMG.H>
 #include <CD_FieldSolverAMG.H>
-#include <CD_DiskProfiledPlane.H>
+#include <CD_RodDielectric.H>
 #include <CD_FieldStepper.H>
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
@@ -119,14 +118,14 @@ main(int argc, char* argv[])
   // Scoped so that the PETSc objects are destroyed before ChomboDischarge::finalize finalizes PETSc and MPI.
   {
     // The driver sets up the mesh. Its FieldStepper uses FieldSolverGMG, so the operators GMG needs are registered.
-    auto        compgeom = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
+    auto        compgeom = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
     auto        amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
     std::string realm;
 
     ParmParse ppStepper("FieldStepper");
     ppStepper.get("realm", realm);
 
-    auto tagger      = RefCountedPtr<CellTagger>(new RefinementBoxTagger(amr, realm));
+    auto tagger      = RefCountedPtr<CellTagger>(nullptr);
     auto timestepper = RefCountedPtr<FieldStepper<FieldSolverGMG>>(new FieldStepper<FieldSolverGMG>());
     auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
