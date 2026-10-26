@@ -33,6 +33,7 @@
 #include <CD_PetscHelmholtzEBBC.H>
 #include <CD_PetscHelmholtzJumpBC.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_MFMultigridInterpolator.H>
 #include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
 
@@ -46,7 +47,7 @@
  * addBoundaryConditionsToRHS. The boundary data can thus change without the matrix being reassembled.
  *
  * The operator is composite: it spans all AMR levels, and its rows are the valid cells of every level. Supported so
- * far: one phase, no embedded boundaries, no periodic directions. Anything else aborts.
+ * far: one phase, with embedded boundaries (electrodes) on it, and no periodic directions. Anything else aborts.
  *
  * The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim
  * and kappa-weighted, as in FieldSolverGMG: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell
@@ -54,11 +55,19 @@
  * the face flux, the derivative of phi in the +dir direction on the face, which is a stencil over PETSc rows, and
  * s = -1 on the low side of the cell and +1 on the high side. The right-hand side must use the same weighting: a volume
  * source is multiplied by kappa, and every factor that multiplies the stencil part of a face flux in the matrix also
- * multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Without embedded
- * boundaries kappa and the area fractions are 1, and are not applied yet. Cells covered by a finer level have no row.
- * The faces are assembled as follows:
+ * multiplies its boundary data part w_B * g on the right-hand side, see addBoundaryConditionsToRHS. Cells covered by
+ * a finer level have no row. The faces are assembled as follows:
  *
  * - Face between two valid cells on the same level: the two-point flux, as on a single level.
+ * - Face of a cut cell: as in EBHelmholtzOp, the two-point fluxes b * dphi/dx through the face and its neighbouring
+ *   face are interpolated to the face centroid (EBArith::getInterpStencil), with b on each face. The interpolation
+ *   falls back to the face itself if it would use a cell covered by the finer level. Coarse-fine ghost cells in it are
+ *   replaced by their interpolation stencils.
+ * - Domain face of a cut cell: the domain BC fluxes of the face and its neighbouring domain face, interpolated to the
+ *   face centroid in the same way, as EBHelmholtzDomainBC does. On the right-hand side the boundary data of each of
+ *   these faces enters with its own w_B.
+ * - EB face: the flux from PetscHelmholtzEBBC::getEBFluxStencil, times the boundary area and the b-coefficient on the
+ *   EB, and w_B * g on the right-hand side.
  * - Domain face: the stencils and the boundary weight w_B from PetscHelmholtzDomainBC::getFaceFluxStencil. The
  *   stencil has parts on the next coarser level, this level, and the next finer level. The part on this level may
  *   contain coarse-fine ghost cells, which are replaced as on the fine side of a refinement boundary below. Any other
@@ -104,7 +113,7 @@
  * So far the stencils of the domain faces and of both sides of the refinement boundaries are computed in fillMatrix
  * rather than stored; the holders, and the functions that define them, are placeholders.
  *
- * Embedded boundaries and multiphase interfaces are not implemented yet; they follow this plan:
+ * Embedded boundaries follow this design; the multiphase (jump) parts are not implemented yet:
  *
  * - Rows: every cut cell of each phase is a row. Multi-valued cells are a hard error (PetscGrid aborts on them).
  * - The flux through the EB face of a cut cell is F = w_B * g + sum_j w_j * phi_j, where the stencil is a PetscStencil
@@ -185,7 +194,7 @@ public:
    * @details This clears any previous definition, defines the domain, EB and jump BCs, creates the matrix, and fills
    * it. The a- and b-coefficients are held by reference, see setCoefficients.
    * @param[in] a_petscGrid     PETSc grid (rows)
-   * @param[in] a_interpolators Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
+   * @param[in] a_interpolators Coarse-fine ghost cell interpolators of each phase, on each level. Entry 0 is not used.
    * @param[in] a_domainBc      Domain boundary conditions
    * @param[in] a_ebBc          Boundary conditions on the EB faces of cut cells that are not interface cells
    * @param[in] a_jumpBc        Conditions on the EB faces of interface cells
@@ -198,18 +207,18 @@ public:
    * @param[in] a_beta          Operator beta
    */
   virtual void
-  define(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
-         const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_interpolators,
-         const RefCountedPtr<PetscHelmholtzDomainBC>&          a_domainBc,
-         const RefCountedPtr<PetscHelmholtzEBBC>&              a_ebBc,
-         const RefCountedPtr<PetscHelmholtzJumpBC>&            a_jumpBc,
-         const MFAMRCellData&                                  a_aCoef,
-         const MFAMRFluxData&                                  a_bCoef,
-         const MFAMRIVData&                                    a_bCoefIrreg,
-         const RealVect&                                       a_probLo,
-         const Vector<Real>&                                   a_dx,
-         const Real                                            a_alpha,
-         const Real                                            a_beta) noexcept;
+  define(const RefCountedPtr<PetscGrid>&              a_petscGrid,
+         const Vector<MFMultigridInterpolator>&       a_interpolators,
+         const RefCountedPtr<PetscHelmholtzDomainBC>& a_domainBc,
+         const RefCountedPtr<PetscHelmholtzEBBC>&     a_ebBc,
+         const RefCountedPtr<PetscHelmholtzJumpBC>&   a_jumpBc,
+         const MFAMRCellData&                         a_aCoef,
+         const MFAMRFluxData&                         a_bCoef,
+         const MFAMRIVData&                           a_bCoefIrreg,
+         const RealVect&                              a_probLo,
+         const Vector<Real>&                          a_dx,
+         const Real                                   a_alpha,
+         const Real                                   a_beta) noexcept;
 
   /**
    * @brief Set alpha and beta. The matrix is not changed until fillMatrix is called.
@@ -296,9 +305,9 @@ protected:
   RefCountedPtr<PetscHelmholtzJumpBC> m_jumpBc;
 
   /**
-   * @brief Coarse-fine ghost cell interpolators on each level. Entry 0 is not used.
+   * @brief Coarse-fine ghost cell interpolators of each phase, on each level. Entry 0 is not used.
    */
-  Vector<RefCountedPtr<EBMultigridInterpolator>> m_interpolators;
+  Vector<MFMultigridInterpolator> m_interpolators;
 
   /**
    * @brief Cell-centered a-coefficient.
@@ -384,7 +393,7 @@ protected:
 
   /**
    * @brief Abort unless the grids are supported by this operator: an interpolator on every level above the coarsest, no
-   * periodic directions, no embedded boundaries, and no cells in any phase other than the gas phase.
+   * periodic directions, and no cells in any phase other than the gas phase.
    */
   virtual void
   checkSupported() const noexcept;
@@ -424,6 +433,61 @@ protected:
    */
   virtual void
   copyFineBcoefToCoarse() noexcept;
+
+  /**
+   * @brief Get the coarse-fine interpolator of a level and phase.
+   * @param[in] a_level Grid level
+   * @param[in] a_phase Phase
+   * @return The interpolator, or null on level 0.
+   */
+  virtual RefCountedPtr<EBMultigridInterpolator>
+  getInterpolator(const int a_level, const int a_phase) const noexcept;
+
+  /**
+   * @brief Get the cells around a grid that are covered by the finer level.
+   * @details These are the cells that the interpolation of a cut-face flux to its centroid must not use. Empty on the
+   * finest level and on grids without cut cells.
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @return The covered cells within two cells of the grid.
+   */
+  virtual IntVectSet
+  getCoveredCells(const int a_level, const DataIndex& a_din) const noexcept;
+
+  /**
+   * @brief Get the flux b * dphi/dx through the centroid of an interior cut face, as in EBHelmholtzOp.
+   * @details The two-point fluxes through the face and its neighbouring face, with b on each, interpolated to the face
+   * centroid. The stencil is over cells on the level, and may contain coarse-fine ghost cells.
+   * @param[in] a_face         Face
+   * @param[in] a_coveredCells Cells that the interpolation must not use, see getCoveredCells
+   * @param[in] a_level        Grid level
+   * @param[in] a_din          Grid index on the level
+   * @param[in] a_phase        Phase
+   * @return The flux stencil, including the b-coefficients but not the area fraction.
+   */
+  virtual VoFStencil
+  getCutFaceFluxStencil(const FaceIndex&  a_face,
+                        const IntVectSet& a_coveredCells,
+                        const int         a_level,
+                        const DataIndex&  a_din,
+                        const int         a_phase) const noexcept;
+
+  /**
+   * @brief Get the row of the coarse cell across a refinement boundary from a fine cell.
+   * @details Aborts if the coarse cell is not a row.
+   * @param[in] a_ivGhost Coarse-fine ghost cell on level a_level, across the refinement boundary
+   * @param[in] a_refRat  Refinement ratio between level a_level - 1 and level a_level
+   * @param[in] a_level   Grid level of the fine cell
+   * @param[in] a_din     Grid index on level a_level
+   * @param[in] a_phase   Phase
+   * @return The global PETSc row of the coarse cell under a_ivGhost.
+   */
+  virtual PetscInt
+  getCoarseRow(const IntVect&   a_ivGhost,
+               const int        a_refRat,
+               const int        a_level,
+               const DataIndex& a_din,
+               const int        a_phase) const noexcept;
 
   /**
    * @brief Get the b-coefficient on a face.

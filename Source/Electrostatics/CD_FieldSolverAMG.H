@@ -238,6 +238,11 @@ protected:
   int m_ebWeight;
 
   /**
+   * @brief Weight the space charge density by the volume fraction in solve, or not, as in FieldSolverGMG.
+   */
+  bool m_kappaSource;
+
+  /**
    * @brief Boundary conditions on the electrode faces.
    */
   RefCountedPtr<PetscHelmholtzEBBC> m_petscEbBc;

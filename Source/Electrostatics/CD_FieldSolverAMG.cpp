@@ -100,6 +100,7 @@ FieldSolverAMG::parseSolverSettings()
   pp.get("ksp_rtol", m_kspRtol);
   pp.get("ksp_atol", m_kspAtol);
   pp.get("ksp_max_iter", m_kspMaxIter);
+  pp.get("kappa_source", m_kappaSource);
 
   // EB face stencils, for the electrodes and the interface between the gas and the dielectrics.
   std::string jumpBc;
@@ -145,6 +146,14 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   m_amr->allocate(rhoByEps0, m_realm, m_nComp);
   DataOps::copy(rhoByEps0, a_rho);
   DataOps::scale(rhoByEps0, 1.0 / Units::eps0);
+
+  // The operator rows are kappa-weighted, so the right-hand side must be too. As in FieldSolverGMG, the space charge
+  // is either kappa-weighted already or weighted here.
+  if (m_kappaSource) {
+    DataOps::kappaScale(rhoByEps0,
+                        m_amr->getVofIterator(m_realm, phase::gas),
+                        m_amr->getVofIterator(m_realm, phase::solid));
+  }
 
   Vec b;
   Vec x;
@@ -246,9 +255,31 @@ FieldSolverAMG::setupSolver()
   m_petscJumpBc->setOrder(m_ebOrder);
   m_petscJumpBc->setWeight(m_ebWeight);
 
+  // The coarse-fine interpolators of both phases on each level, in the phase order of the PetscGrid.
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+  const int finestLevel = m_amr->getFinestLevel();
+  const int numPhases   = m_multifluidIndexSpace->numPhases();
+
+  Vector<MFMultigridInterpolator> interpolators(1 + finestLevel);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    Vector<RefCountedPtr<EBMultigridInterpolator>> interpPhases(numPhases);
+
+    if (!(ebisGas.isNull())) {
+      interpPhases[phase::gas] = m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl];
+    }
+    if (!(ebisSol.isNull())) {
+      interpPhases[phase::solid] = m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl];
+    }
+
+    interpolators[lvl].define(interpPhases);
+  }
+
   m_petscOp = RefCountedPtr<PetscHelmholtzOp>(new PetscHelmholtzOp());
   m_petscOp->define(m_amr->getPetscGrid(m_realm),
-                    m_amr->getMultigridInterpolator(m_realm, phase::gas),
+                    interpolators,
                     domainBc,
                     m_petscEbBc,
                     m_petscJumpBc,
