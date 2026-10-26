@@ -358,51 +358,6 @@ PetscHelmholtzOp::addToMatrix(const PetscInt a_row, const PetscStencil& a_stenci
 }
 
 void
-PetscHelmholtzOp::replaceGhostCells(VoFStencil&      a_stencil,
-                                    VoFStencil&      a_stencilCoar,
-                                    const int        a_level,
-                                    const DataIndex& a_din) const noexcept
-{
-  CH_TIME("PetscHelmholtzOp::replaceGhostCells");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzOp::replaceGhostCells" << endl;
-  }
-
-  // The interpolation stencils that replace the ghost cells must be over PETSc rows, i.e. valid cells on this level and
-  // the coarser level, not other ghost cells or covered cells. That is not checked here: the stencils are mapped to
-  // rows through PetscGrid, whose mapping aborts on any entry that is not a row, in every build.
-  const BaseFab<PetscAMRCell>& cells = (*m_petscGrid->getAMRToPetsc()[a_level])[a_din];
-
-  VoFStencil kept;
-
-  for (int i = 0; i < a_stencil.size(); i++) {
-    const VolIndex& vof    = a_stencil.vof(i);
-    const Real      weight = a_stencil.weight(i);
-    const IntVect&  iv     = vof.gridIndex();
-
-    if (cells.box().contains(iv) && cells(iv).isGhostCF()) {
-      CH_assert(a_level > 0);
-
-      const std::pair<VoFStencil, VoFStencil> ghost = m_interpolators[a_level]->getGhostStencil(vof, a_din);
-
-      VoFStencil ghostFine = ghost.first;
-      VoFStencil ghostCoar = ghost.second;
-
-      ghostFine *= weight;
-      ghostCoar *= weight;
-
-      kept += ghostFine;
-      a_stencilCoar += ghostCoar;
-    }
-    else {
-      kept.add(vof, weight);
-    }
-  }
-
-  a_stencil = kept;
-}
-
-void
 PetscHelmholtzOp::fillMatrix() noexcept
 {
   CH_TIME("PetscHelmholtzOp::fillMatrix");
@@ -526,7 +481,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
 
               boundaryWeights(dir, side)(faces[0], 0) = bcWeight;
 
-              this->replaceGhostCells(bcStencil, bcStencilCoar, lvl, din);
+              m_petscGrid->replaceGhostCells(bcStencil, bcStencilCoar, m_interpolators[lvl], lvl, din);
 
               bcStencilCoar *= factor;
               bcStencil *= factor;

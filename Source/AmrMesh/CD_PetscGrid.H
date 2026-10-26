@@ -30,6 +30,7 @@
 // Our includes
 #include <CD_DischargeIO.H>
 #include <CD_EBAMRData.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_PetscDOF.H>
 #include <CD_PetscAMRCell.H>
@@ -244,6 +245,51 @@ public:
                                   const int         a_level,
                                   const DataIndex&  a_din,
                                   const int         a_phase) const noexcept;
+
+  /**
+   * @brief Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils.
+   * @details Each ghost cell entry is removed from a_stencil, and its stencil from
+   * EBMultigridInterpolator::getGhostStencil, times the entry's weight, is added to a_stencil (the part on level
+   * a_level) and a_stencilCoar (the part on level a_level - 1, in the index space of grid a_din coarsened). Entries
+   * that are not ghost cells are kept. Aborts if a_stencil has a ghost cell and a_interpolator is null.
+   * @param[in,out] a_stencil      Stencil over cells on level a_level
+   * @param[in,out] a_stencilCoar  Stencil over cells on level a_level - 1
+   * @param[in]     a_interpolator Coarse-fine interpolator of level a_level, for the phase of the stencil. Null on
+   * level 0.
+   * @param[in]     a_level        Grid level
+   * @param[in]     a_din          Grid index on the level
+   */
+  virtual void
+  replaceGhostCells(VoFStencil&                                   a_stencil,
+                    VoFStencil&                                   a_stencilCoar,
+                    const RefCountedPtr<EBMultigridInterpolator>& a_interpolator,
+                    const int                                     a_level,
+                    const DataIndex&                              a_din) const noexcept;
+
+  /**
+   * @brief Rewrite a stencil over three levels, whose part on the middle level may contain coarse-fine ghost cells, as
+   * a stencil over global PETSc rows.
+   * @details The ghost cells in a_stencil are replaced as in replaceGhostCells. The parts then resolve as in
+   * getPetscStencilWithCoarserLevel and getPetscStencilWithFinerLevel: a_stencilCoar is in the index space of grid
+   * a_din coarsened, and a_stencilFine in the index space of grid a_din refined. Aborts if the coarse part is not empty
+   * on level 0, or the fine part on the finest level.
+   * @param[in] a_stencilCoar  Stencil over cells on level a_level - 1
+   * @param[in] a_stencil      Stencil over cells on level a_level, possibly with coarse-fine ghost cells
+   * @param[in] a_stencilFine  Stencil over cells on level a_level + 1
+   * @param[in] a_interpolator Coarse-fine interpolator of level a_level, for phase a_phase. Null on level 0.
+   * @param[in] a_level        Grid level of a_stencil
+   * @param[in] a_din          Grid index on level a_level
+   * @param[in] a_phase        Phase
+   * @return The sum of the three stencils, over global PETSc rows, compressed (unique, ascending rows).
+   */
+  virtual PetscStencil
+  getPetscStencilWithGhostCells(const VoFStencil&                             a_stencilCoar,
+                                const VoFStencil&                             a_stencil,
+                                const VoFStencil&                             a_stencilFine,
+                                const RefCountedPtr<EBMultigridInterpolator>& a_interpolator,
+                                const int                                     a_level,
+                                const DataIndex&                              a_din,
+                                const int                                     a_phase) const noexcept;
 
   /**
    * @brief Create a PETSc vector.

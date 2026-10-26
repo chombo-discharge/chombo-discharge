@@ -108,13 +108,13 @@
  *
  * - Rows: every cut cell of each phase is a row. Multi-valued cells are a hard error (PetscGrid aborts on them).
  * - The flux through the EB face of a cut cell is F = w_B * g + sum_j w_j * phi_j, where the stencil is a PetscStencil
- *   over PETSc rows of any phase and any level, built from valid cells only. The shared primitive, in
- *   PetscHelmholtzEBStencils, is the one-sided normal derivative of phi over the valid cells of the cell's phase,
- *   dphi/dn = w_B * phi_B + sum_i w_i * phi_i. It takes cells from the cell's level and at most one neighbouring level
- *   (the coarser level on the fine side of a refinement boundary, the finer level next to covered cells), with
- *   LeastSquares (getBndryGradSten, computeDualLevelStencils). It searches the half-circle, quadrant and radius
- *   neighbourhoods, each from the requested order down to 1, and aborts if none gives a stencil. One order and one
- *   weight, set by the solver, apply to all EB face stencils.
+ *   over PETSc rows of any phase and any level. The shared primitive, in PetscHelmholtzEBStencils, is the one-sided
+ *   normal derivative of phi over the cells of the cell's phase, dphi/dn = w_B * phi_B + sum_i w_i * phi_i, from a
+ *   least-squares fit (LeastSquares::computeDualLevelStencils) over the cell's level and the next finer one.
+ * Coarse-fine ghost cells in it are replaced by their interpolation stencils, as for the domain faces, and cells
+ * covered by the finer level by the finer cells under them. It searches the half-circle, quadrant and radius
+ * neighbourhoods, each from the requested order down to 1, and aborts if none gives a stencil. One order and one
+ * weight, set by the solver, apply to all EB face stencils.
  * - Electrode faces: PetscHelmholtzEBBC, with Dirichlet (g = phi_B) and Neumann (g = dphi/dn) subclasses, and
  *   PetscHelmholtzElectrostaticEBBC (Source/Electrostatics), which takes g from the electrodes.
  * - Interface cells, where both phases have a VoF: PetscHelmholtzJumpBC. The one-sided derivatives of both phases are
@@ -397,23 +397,6 @@ protected:
    */
   virtual void
   addToMatrix(const PetscInt a_row, const PetscStencil& a_stencil) noexcept;
-
-  /**
-   * @brief Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils.
-   * @details Each ghost cell entry is removed from a_stencil, and its stencil from
-   * EBMultigridInterpolator::getGhostStencil, times the entry's weight, is added to a_stencil (the part on level
-   * a_level) and a_stencilCoar (the part on level a_level - 1, in the index space of grid a_din coarsened). Entries
-   * that are not ghost cells are kept.
-   * @param[in,out] a_stencil     Stencil over cells on level a_level
-   * @param[in,out] a_stencilCoar Stencil over cells on level a_level - 1
-   * @param[in]     a_level       Grid level
-   * @param[in]     a_din         Grid index on the level
-   */
-  virtual void
-  replaceGhostCells(VoFStencil&      a_stencil,
-                    VoFStencil&      a_stencilCoar,
-                    const int        a_level,
-                    const DataIndex& a_din) const noexcept;
 
   /**
    * @brief Create the matrix, with its preallocation, and allocate the boundary weights.

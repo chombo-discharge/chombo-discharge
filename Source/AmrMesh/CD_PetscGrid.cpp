@@ -363,6 +363,105 @@ PetscGrid::getPetscStencilWithCoarserLevel(const VoFStencil& a_stencil,
 }
 
 void
+PetscGrid::replaceGhostCells(VoFStencil&                                   a_stencil,
+                             VoFStencil&                                   a_stencilCoar,
+                             const RefCountedPtr<EBMultigridInterpolator>& a_interpolator,
+                             const int                                     a_level,
+                             const DataIndex&                              a_din) const noexcept
+{
+  CH_TIME("PetscGrid::replaceGhostCells");
+  if (m_verbose) {
+    pout() << "PetscGrid::replaceGhostCells" << endl;
+  }
+
+  CH_assert(m_isDefined);
+  CH_assert(a_level >= 0 && a_level <= m_finestLevel);
+
+  // The interpolation stencils that replace the ghost cells must be over PETSc rows, i.e. valid cells on this level and
+  // the coarser level, not other ghost cells or covered cells. That is not checked here: the stencils are mapped to
+  // rows through addRows, which aborts on any entry that is not a row, in every build.
+  const BaseFab<PetscAMRCell>& cells = (*m_amrToPetsc[a_level])[a_din];
+
+  VoFStencil kept;
+
+  for (int i = 0; i < a_stencil.size(); i++) {
+    const VolIndex& vof    = a_stencil.vof(i);
+    const Real      weight = a_stencil.weight(i);
+    const IntVect&  iv     = vof.gridIndex();
+
+    if (cells.box().contains(iv) && cells(iv).isGhostCF()) {
+      // Checked in every build: there is no interpolator on level 0.
+      if (a_interpolator.isNull()) {
+        MayDay::Abort("PetscGrid::replaceGhostCells -- a stencil has a ghost cell but there is no interpolator");
+      }
+
+      const std::pair<VoFStencil, VoFStencil> ghost = a_interpolator->getGhostStencil(vof, a_din);
+
+      VoFStencil ghostFine = ghost.first;
+      VoFStencil ghostCoar = ghost.second;
+
+      ghostFine *= weight;
+      ghostCoar *= weight;
+
+      kept += ghostFine;
+      a_stencilCoar += ghostCoar;
+    }
+    else {
+      kept.add(vof, weight);
+    }
+  }
+
+  a_stencil = kept;
+}
+
+PetscStencil
+PetscGrid::getPetscStencilWithGhostCells(const VoFStencil&                             a_stencilCoar,
+                                         const VoFStencil&                             a_stencil,
+                                         const VoFStencil&                             a_stencilFine,
+                                         const RefCountedPtr<EBMultigridInterpolator>& a_interpolator,
+                                         const int                                     a_level,
+                                         const DataIndex&                              a_din,
+                                         const int                                     a_phase) const noexcept
+{
+  CH_TIME("PetscGrid::getPetscStencilWithGhostCells");
+  if (m_verbose) {
+    pout() << "PetscGrid::getPetscStencilWithGhostCells" << endl;
+  }
+
+  CH_assert(m_isDefined);
+  CH_assert(a_level >= 0 && a_level <= m_finestLevel);
+  CH_assert(a_phase >= 0 && a_phase < m_numPhases);
+
+  VoFStencil stencilCoar = a_stencilCoar;
+  VoFStencil stencil     = a_stencil;
+
+  this->replaceGhostCells(stencil, stencilCoar, a_interpolator, a_level, a_din);
+
+  // Checked in every build: there is no coarser level below level 0, and no finer level above the finest.
+  if (stencilCoar.size() > 0 && a_level == 0) {
+    MayDay::Abort("PetscGrid::getPetscStencilWithGhostCells -- a stencil reaches a coarser level from level 0");
+  }
+  if (a_stencilFine.size() > 0 && a_level == m_finestLevel) {
+    MayDay::Abort("PetscGrid::getPetscStencilWithGhostCells -- a stencil reaches a finer level from the finest level");
+  }
+
+  PetscStencil petscStencil;
+
+  this->addRows(petscStencil, stencil, (*m_amrToPetsc[a_level])[a_din], a_phase, "stencil");
+
+  if (stencilCoar.size() > 0) {
+    this->addRows(petscStencil, stencilCoar, (*m_amrToPetscCoFi[a_level - 1])[a_din], a_phase, "coarse stencil");
+  }
+  if (a_stencilFine.size() > 0) {
+    this->addRows(petscStencil, a_stencilFine, (*m_amrToPetscFiCo[a_level + 1])[a_din], a_phase, "fine stencil");
+  }
+
+  petscStencil.compress();
+
+  return petscStencil;
+}
+
+void
 PetscGrid::addRows(PetscStencil&                a_petscStencil,
                    const VoFStencil&            a_stencil,
                    const BaseFab<PetscAMRCell>& a_map,

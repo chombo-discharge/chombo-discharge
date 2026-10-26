@@ -25,6 +25,8 @@
 // Our includes
 #include <CD_PetscGrid.H>
 #include <CD_PetscStencil.H>
+#include <CD_MFMultigridInterpolator.H>
+#include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
 /**
@@ -33,12 +35,23 @@
  *
  *   dphi/dn = w_B * phi_B + sum_i w_i * phi_i,
  *
- * where phi_B is the value on the EB face, n points out of the cell (into the boundary), and the stencil is over PETSc
- * rows of the cell's phase. The stencil uses valid cells only: no coarse-fine ghost cells and no cells covered by a
- * finer grid. It takes cells from the cell's level and at most one neighbouring level (the coarser level on the fine
- * side of a refinement boundary, the finer level next to covered cells). The search tries the half-circle, quadrant and
- * radius neighbourhoods, each from the order down to 1, and aborts if none gives a stencil. The stencils are computed
- * once, in define, and do not contain the b-coefficient or the face area.
+ * where phi_B is the value on the EB face, n points out of the cell (into the boundary, i.e. minus the EB normal), and
+ * the stencil is over PETSc rows of the cell's phase. phi is cell-centered.
+ *
+ * The stencil is a weighted least-squares fit at the EB face centroid, with phi_B known, over the cells in a
+ * neighbourhood of the cut cell on its own level, within a radius equal to the order:
+ *
+ * - Cells that are PETSc rows are used as they are.
+ * - Coarse-fine ghost cells are used as well, and are replaced by their interpolation stencils from the
+ *   EBMultigridInterpolator (PetscGrid::getPetscStencilWithGhostCells), which are over rows on this level and the next
+ *   coarser one. The interpolator fills the ghost cells within its radius of a cut cell, so the order must not exceed
+ *   that radius.
+ * - Cells covered by the next finer level are replaced by the finer cells under them that are PETSc rows.
+ *
+ * On each level, only the 2*M cells closest to the EB face centroid are kept, with M the number of unknowns in the
+ * fit. The search tries the half-circle, quadrant and radius neighbourhoods, each from the order down to 1, and aborts
+ * if none gives a stencil. A cut cell without an EB normal has no EB face; its stencil is empty with w_B = 0. The
+ * stencils are computed once, in define, and contain neither the b-coefficient nor the face area.
  *
  * PetscHelmholtzEBBC (electrode faces) and PetscHelmholtzJumpBC (interface faces) derive from this class and build
  * their fluxes from these stencils.
@@ -99,7 +112,8 @@ public:
   setWeight(const int a_weight) noexcept;
 
   /**
-   * @brief Release the stored stencils and the grids, so that the object can be defined again, e.g. after a regrid.
+   * @brief Release the stored stencils, the grids and the interpolators, so that the object can be defined again, e.g.
+   * after a regrid.
    * @details The order and the weight are settings, and are kept.
    */
   virtual void
@@ -107,14 +121,19 @@ public:
 
   /**
    * @brief Define over the AMR hierarchy, and compute the one-sided normal derivative stencils of every cut cell.
-   * @details The order and the weight must be set first. Clears any previous definition first.
-   * @param[in] a_petscGrid PETSc grid. Holds the grids on every level, their coarsenings and refinements, and the
+   * @details The order and the weight must be set first. Clears any previous definition first. Aborts if the order
+   * exceeds the radius within which the interpolators fill the ghost cells.
+   * @param[in] a_petscGrid     PETSc grid. Holds the grids on every level, their coarsenings and refinements, and the
    * per-cell AMR information.
-   * @param[in] a_probLo    Lower-left corner of the computational domain
-   * @param[in] a_dx        Grid resolution on each level
+   * @param[in] a_interpolators Coarse-fine ghost cell interpolators of both phases, on each level. Entry 0 is not used.
+   * @param[in] a_probLo        Lower-left corner of the computational domain
+   * @param[in] a_dx            Grid resolution on each level
    */
   virtual void
-  define(const RefCountedPtr<PetscGrid>& a_petscGrid, const RealVect& a_probLo, const Vector<Real>& a_dx) noexcept;
+  define(const RefCountedPtr<PetscGrid>&        a_petscGrid,
+         const Vector<MFMultigridInterpolator>& a_interpolators,
+         const RealVect&                        a_probLo,
+         const Vector<Real>&                    a_dx) noexcept;
 
 protected:
   /**
@@ -141,6 +160,11 @@ protected:
    * @brief PETSc grid.
    */
   RefCountedPtr<PetscGrid> m_petscGrid;
+
+  /**
+   * @brief Coarse-fine ghost cell interpolators of both phases, on each level.
+   */
+  Vector<MFMultigridInterpolator> m_interpolators;
 
   /**
    * @brief Lower-left corner of the computational domain.
@@ -182,7 +206,7 @@ protected:
                              const VolIndex&  a_vof) const noexcept;
 
   /**
-   * @brief Compute the one-sided normal derivative at the EB face of a cut cell, from valid cells only.
+   * @brief Compute the one-sided normal derivative at the EB face of a cut cell.
    * @details Runs the neighbourhood and order search described for the class, and aborts if no stencil is found.
    * @param[out] a_boundaryWeight Weight w_B of the boundary value phi_B
    * @param[out] a_stencil        Stencil over PETSc rows of the cell's phase
@@ -198,6 +222,31 @@ protected:
                                  const int        a_level,
                                  const DataIndex& a_din,
                                  const VolIndex&  a_vof) const noexcept;
+
+  /**
+   * @brief Try to compute the one-sided normal derivative at the EB face of a cut cell, for one neighbourhood and one
+   * order.
+   * @details Gathers the cells of the neighbourhood as described for the class, and fits them by least squares.
+   * @param[out] a_boundaryWeight Weight w_B of the boundary value phi_B
+   * @param[out] a_stencil        Stencil over PETSc rows of the cell's phase
+   * @param[in]  a_phase          Phase
+   * @param[in]  a_level          Grid level
+   * @param[in]  a_din            Grid index on the level
+   * @param[in]  a_vof            Cut cell
+   * @param[in]  a_neighborhood   Neighbourhood of the cut cell to take cells from
+   * @param[in]  a_order          Order of the fit. Also the radius of the neighbourhood.
+   * @return True if there were enough cells for the fit and it succeeded, in which case a_boundaryWeight and a_stencil
+   * are set.
+   */
+  virtual bool
+  getLeastSquaresStencil(Real&                        a_boundaryWeight,
+                         PetscStencil&                a_stencil,
+                         const int                    a_phase,
+                         const int                    a_level,
+                         const DataIndex&             a_din,
+                         const VolIndex&              a_vof,
+                         const VofUtils::Neighborhood a_neighborhood,
+                         const int                    a_order) const noexcept;
 
   /**
    * @brief Get the physical position of the centroid of the EB face of a cut cell.
