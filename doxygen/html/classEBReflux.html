@@ -109,6 +109,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EBReflux</b> () n
 <tr class="memdesc:a15297578586adb374b8736527db48093"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define method. Puts object in usable state.  <br /></td></tr>
 <tr class="memitem:a7d81ed09af06eef461a237a117f065eb" id="r_a7d81ed09af06eef461a237a117f065eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d81ed09af06eef461a237a117f065eb">reflux</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBFluxFAB &gt; &amp;a_flux, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineFlux, const Interval a_variables, const Real a_scaleCoarFlux, const Real a_scaleFineFlux) const noexcept</td></tr>
 <tr class="memdesc:a7d81ed09af06eef461a237a117f065eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflux into the coarse data.  <br /></td></tr>
+<tr class="memitem:a6f2fb27dc88eb0695f55cdce872a1fb8" id="r_a6f2fb27dc88eb0695f55cdce872a1fb8"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, DenseIntVectSet &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f2fb27dc88eb0695f55cdce872a1fb8">getRegularCoarseFineRegions</a> () const noexcept</td></tr>
+<tr class="memdesc:a6f2fb27dc88eb0695f55cdce872a1fb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the regular coarse-grid cells on the refinement boundary.  <br /></td></tr>
+<tr class="memitem:a6f497f932ea451a8db2a54809f9700c0" id="r_a6f497f932ea451a8db2a54809f9700c0"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, VoFIterator &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f497f932ea451a8db2a54809f9700c0">getIrregularCoarseFineRegions</a> () noexcept</td></tr>
+<tr class="memdesc:a6f497f932ea451a8db2a54809f9700c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the cut coarse-grid cells on the refinement boundary.  <br /></td></tr>
+<tr class="memitem:a7b1b4493450b2aa19d3d43463d391068" id="r_a7b1b4493450b2aa19d3d43463d391068"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, Box &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b1b4493450b2aa19d3d43463d391068">getFineCoarseFineBoxes</a> () const noexcept</td></tr>
+<tr class="memdesc:a7b1b4493450b2aa19d3d43463d391068"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the fine-grid cells on the refinement boundary.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -157,6 +163,14 @@ LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, FaceIterator
 <tr class="memdesc:adbce171d7708ee6e283a5f86254868f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for conservatively coarsening fine-grid fluxes onto the coarse grid. <br /></td></tr>
 <tr class="memitem:a0de9e97587a8bc9168a3e382d2ee8f23" id="r_a0de9e97587a8bc9168a3e382d2ee8f23"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, VoFIterator &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0de9e97587a8bc9168a3e382d2ee8f23">m_irregularCoarseFineRegions</a></td></tr>
 <tr class="memdesc:a0de9e97587a8bc9168a3e382d2ee8f23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cut-cells in each patch that lie on the coarse-fine interface.  <br /></td></tr>
+<tr class="memitem:a53c082428fb7e2eafcf09f978f52aa67" id="r_a53c082428fb7e2eafcf09f978f52aa67"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, Box &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53c082428fb7e2eafcf09f978f52aa67">m_fineCoarseFineBoxes</a></td></tr>
+<tr class="memdesc:a53c082428fb7e2eafcf09f978f52aa67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bounding boxes of the fine cells whose faces lie on the refinement boundary.  <br /></td></tr>
+<tr class="memitem:a807a570842a0b81eda7ce562a45a7803" id="r_a807a570842a0b81eda7ce562a45a7803"><td class="memItemLeft" align="right" valign="top"><a id="a807a570842a0b81eda7ce562a45a7803" name="a807a570842a0b81eda7ce562a45a7803"></a>
+LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluxCoFi</b></td></tr>
+<tr class="memdesc:a807a570842a0b81eda7ce562a45a7803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for the fine-grid fluxes coarsened onto the coarsened fine grids. <br /></td></tr>
+<tr class="memitem:a92eb902bf26cebd7b66474e0c17ad9a4" id="r_a92eb902bf26cebd7b66474e0c17ad9a4"><td class="memItemLeft" align="right" valign="top"><a id="a92eb902bf26cebd7b66474e0c17ad9a4" name="a92eb902bf26cebd7b66474e0c17ad9a4"></a>
+LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_fluxCoar</b></td></tr>
+<tr class="memdesc:a92eb902bf26cebd7b66474e0c17ad9a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for the coarsened fine-grid fluxes copied to the coarse grids. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class which can do refluxing across a coarse-fine interface. </p>
@@ -314,6 +328,91 @@ LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, FaceIterator
 
 </div>
 </div>
+<a id="a7b1b4493450b2aa19d3d43463d391068" name="a7b1b4493450b2aa19d3d43463d391068"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b1b4493450b2aa19d3d43463d391068">&#9670;&#160;</a></span>getFineCoarseFineBoxes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, Box &gt; &gt; &amp; EBReflux::getFineCoarseFineBoxes </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the fine-grid cells on the refinement boundary. </p>
+<p>For each fine patch and each (direction, side), this is the bounding box of the fine cells just inside the patch whose face on that side lies on the refinement boundary. The box is empty if no part of that side borders the coarse level. Of the fine fluxes, only those through these faces reach the coarse cells that <a class="el" href="#a7d81ed09af06eef461a237a117f065eb" title="Reflux into the coarse data.">reflux()</a> updates. </p><dl class="section return"><dt>Returns</dt><dd>m_fineCoarseFineBoxes </dd></dl>
+
+</div>
+</div>
+<a id="a6f497f932ea451a8db2a54809f9700c0" name="a6f497f932ea451a8db2a54809f9700c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f497f932ea451a8db2a54809f9700c0">&#9670;&#160;</a></span>getIrregularCoarseFineRegions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, VoFIterator &gt; &gt; &amp; EBReflux::getIrregularCoarseFineRegions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the cut coarse-grid cells on the refinement boundary. </p>
+<p>As <a class="el" href="#a6f2fb27dc88eb0695f55cdce872a1fb8" title="Get the regular coarse-grid cells on the refinement boundary.">getRegularCoarseFineRegions()</a>, but for the cut cells. </p><dl class="section note"><dt>Note</dt><dd>Non-const because iterating a VoFIterator modifies it. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>m_irregularCoarseFineRegions </dd></dl>
+
+</div>
+</div>
+<a id="a6f2fb27dc88eb0695f55cdce872a1fb8" name="a6f2fb27dc88eb0695f55cdce872a1fb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f2fb27dc88eb0695f55cdce872a1fb8">&#9670;&#160;</a></span>getRegularCoarseFineRegions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, DenseIntVectSet &gt; &gt; &amp; EBReflux::getRegularCoarseFineRegions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the regular coarse-grid cells on the refinement boundary. </p>
+<p>For each coarse patch and each (direction, side) of the coarsened fine patches, these are the regular coarse cells just outside the fine patch on that side, i.e. the cells whose face in the direction of the fine patch is refluxed. </p><dl class="section return"><dt>Returns</dt><dd>m_regularCoarseFineRegions </dd></dl>
+
+</div>
+</div>
 <a id="a7d81ed09af06eef461a237a117f065eb" name="a7d81ed09af06eef461a237a117f065eb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7d81ed09af06eef461a237a117f065eb">&#9670;&#160;</a></span>reflux()</h2>
 
@@ -451,6 +550,31 @@ LayoutData&lt; std::map&lt; std::pair&lt; int, Side::LoHiSide &gt;, FaceIterator
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a53c082428fb7e2eafcf09f978f52aa67" name="a53c082428fb7e2eafcf09f978f52aa67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53c082428fb7e2eafcf09f978f52aa67">&#9670;&#160;</a></span>m_fineCoarseFineBoxes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LayoutData&lt;std::map&lt;std::pair&lt;int, Side::LoHiSide&gt;, Box&gt; &gt; EBReflux::m_fineCoarseFineBoxes</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Bounding boxes of the fine cells whose faces lie on the refinement boundary. </p>
+<dl class="section note"><dt>Note</dt><dd>Defined over the fine grids (equivalently, the coarsened fine grids) </dd></dl>
+
+</div>
+</div>
 <a id="a0de9e97587a8bc9168a3e382d2ee8f23" name="a0de9e97587a8bc9168a3e382d2ee8f23"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0de9e97587a8bc9168a3e382d2ee8f23">&#9670;&#160;</a></span>m_irregularCoarseFineRegions</h2>
 

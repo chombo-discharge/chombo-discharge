@@ -287,12 +287,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>turnOnCFInterp</b> ()
 <tr class="memdesc:a62790e1666fb3ddf2b17c426586ee85f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Not called, I think.  <br /></td></tr>
 <tr class="memitem:a164212e03d6b1e80cfd79135b9e08fac" id="r_a164212e03d6b1e80cfd79135b9e08fac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a164212e03d6b1e80cfd79135b9e08fac">getFlux</a> (EBFluxFAB &amp;a_flux, const LevelData&lt; EBCellFAB &gt; &amp;a_data, const Box &amp;a_grid, const DataIndex &amp;a_dit, Real a_scale) override final</td></tr>
 <tr class="memdesc:a164212e03d6b1e80cfd79135b9e08fac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill flux.  <br /></td></tr>
-<tr class="memitem:a2b045e06a6416b48da9ce6d514c34ba6" id="r_a2b045e06a6416b48da9ce6d514c34ba6"><td class="memItemLeft" align="right" valign="top"><a id="a2b045e06a6416b48da9ce6d514c34ba6" name="a2b045e06a6416b48da9ce6d514c34ba6"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>allocateFlux</b> () const noexcept</td></tr>
-<tr class="memdesc:a2b045e06a6416b48da9ce6d514c34ba6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate m_flux. <br /></td></tr>
-<tr class="memitem:a92f3c231c5b3def2eecf565810f646de" id="r_a92f3c231c5b3def2eecf565810f646de"><td class="memItemLeft" align="right" valign="top"><a id="a92f3c231c5b3def2eecf565810f646de" name="a92f3c231c5b3def2eecf565810f646de"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocateFlux</b> () const noexcept</td></tr>
-<tr class="memdesc:a92f3c231c5b3def2eecf565810f646de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deallocate m_flux. <br /></td></tr>
+<tr class="memitem:a2b045e06a6416b48da9ce6d514c34ba6" id="r_a2b045e06a6416b48da9ce6d514c34ba6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b045e06a6416b48da9ce6d514c34ba6">allocateFlux</a> () const noexcept</td></tr>
+<tr class="memdesc:a2b045e06a6416b48da9ce6d514c34ba6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate m_flux if it is not already allocated.  <br /></td></tr>
 <tr class="memitem:a0482b62c5ea81f59ef58c0065cef3617" id="r_a0482b62c5ea81f59ef58c0065cef3617"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0482b62c5ea81f59ef58c0065cef3617">getFlux</a> () const</td></tr>
 <tr class="memdesc:a0482b62c5ea81f59ef58c0065cef3617"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns m_flux. This is used in refluxing routines.  <br /></td></tr>
 <tr class="memitem:af7b310f56af8bc0fd708b220929b01f9" id="r_af7b310f56af8bc0fd708b220929b01f9"><td class="memItemLeft" align="right" valign="top">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7b310f56af8bc0fd708b220929b01f9">getRelaxationCoeff</a> () const noexcept</td></tr>
@@ -351,6 +347,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>defineStencils</b> ()
 <tr class="memdesc:a1ef10fff10e74c67de808c5ef081b590"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute face-centroid fluxes.  <br /></td></tr>
 <tr class="memitem:adaacce511ffcf17c35c8feec84b24a22" id="r_adaacce511ffcf17c35c8feec84b24a22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adaacce511ffcf17c35c8feec84b24a22">computeFlux</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_phi)</td></tr>
 <tr class="memdesc:adaacce511ffcf17c35c8feec84b24a22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill face centroid-centered fluxes on this level.  <br /></td></tr>
+<tr class="memitem:a67de78cd95536fcca5b8c30358982062" id="r_a67de78cd95536fcca5b8c30358982062"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a67de78cd95536fcca5b8c30358982062">computeCoarseFineFlux</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_phi)</td></tr>
+<tr class="memdesc:a67de78cd95536fcca5b8c30358982062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the fluxes on this level through the faces that border the finer level.  <br /></td></tr>
+<tr class="memitem:a9fc3c903ef41c2b2abb50364b37ee20e" id="r_a9fc3c903ef41c2b2abb50364b37ee20e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9fc3c903ef41c2b2abb50364b37ee20e">computeFineCoarseFlux</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const <a class="el" href="classEBReflux.html">EBReflux</a> &amp;a_coarFluxReg)</td></tr>
+<tr class="memdesc:a9fc3c903ef41c2b2abb50364b37ee20e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the fluxes on this level through the faces on the refinement boundary with the coarser level.  <br /></td></tr>
+<tr class="memitem:aac335735d32d793eade6db44dca0a7c4" id="r_aac335735d32d793eade6db44dca0a7c4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac335735d32d793eade6db44dca0a7c4">computeFaceFlux</a> (EBFaceFAB &amp;a_flux, const EBCellFAB &amp;a_phi, const FaceIndex &amp;a_face, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const int a_dir) const noexcept</td></tr>
+<tr class="memdesc:aac335735d32d793eade6db44dca0a7c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the flux through a single face.  <br /></td></tr>
 <tr class="memitem:a03635190d89fc51022238d1feac234a9" id="r_a03635190d89fc51022238d1feac234a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03635190d89fc51022238d1feac234a9">reflux</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;a_finerOp)</td></tr>
 <tr class="memdesc:a03635190d89fc51022238d1feac234a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflux algorithm.  <br /></td></tr>
 </table><table class="memberdecls">
@@ -495,9 +497,8 @@ RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt;&#160;</td><td 
 <tr class="memitem:aaa57ce5aac50371b34c0e88fc00518da" id="r_aaa57ce5aac50371b34c0e88fc00518da"><td class="memItemLeft" align="right" valign="top"><a id="aaa57ce5aac50371b34c0e88fc00518da" name="aaa57ce5aac50371b34c0e88fc00518da"></a>
 LevelData&lt; EBCellFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_relCoef</b></td></tr>
 <tr class="memdesc:aaa57ce5aac50371b34c0e88fc00518da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relaxation coefficient. <br /></td></tr>
-<tr class="memitem:a552fb9a66bb15602681a14d385deffde" id="r_a552fb9a66bb15602681a14d385deffde"><td class="memItemLeft" align="right" valign="top"><a id="a552fb9a66bb15602681a14d385deffde" name="a552fb9a66bb15602681a14d385deffde"></a>
-LevelData&lt; EBFluxFAB &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>m_flux</b></td></tr>
-<tr class="memdesc:a552fb9a66bb15602681a14d385deffde"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding fluxes. <br /></td></tr>
+<tr class="memitem:ac6584b7ba7010960671c6cc836189e27" id="r_ac6584b7ba7010960671c6cc836189e27"><td class="memItemLeft" align="right" valign="top">LevelData&lt; EBFluxFAB &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6584b7ba7010960671c6cc836189e27">m_flux</a></td></tr>
+<tr class="memdesc:ac6584b7ba7010960671c6cc836189e27"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding fluxes. Allocated and zeroed on first use by <a class="el" href="#a2b045e06a6416b48da9ce6d514c34ba6" title="Allocate m_flux if it is not already allocated.">allocateFlux()</a>.  <br /></td></tr>
 <tr class="memitem:ab8fbde9adb894d1c3912530898448de2" id="r_ab8fbde9adb894d1c3912530898448de2"><td class="memItemLeft" align="right" valign="top"><a id="ab8fbde9adb894d1c3912530898448de2" name="ab8fbde9adb894d1c3912530898448de2"></a>
 LayoutData&lt; BaseIFFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_interpolant</b> [SpaceDim]</td></tr>
 <tr class="memdesc:ab8fbde9adb894d1c3912530898448de2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolant for when we want centroid fluxes. <br /></td></tr>
@@ -831,6 +832,34 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a2b045e06a6416b48da9ce6d514c34ba6" name="a2b045e06a6416b48da9ce6d514c34ba6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b045e06a6416b48da9ce6d514c34ba6">&#9670;&#160;</a></span>allocateFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::allocateFlux </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Allocate m_flux if it is not already allocated. </p>
+<p>The storage is kept for the lifetime of the operator so that refluxing does not allocate on every call. </p>
+
+</div>
+</div>
 <a id="ad710b5a75874216c79afff2454c793fe" name="ad710b5a75874216c79afff2454c793fe"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad710b5a75874216c79afff2454c793fe">&#9670;&#160;</a></span>AMROperator()</h2>
 
@@ -2114,6 +2143,39 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 </div>
 </div>
+<a id="a67de78cd95536fcca5b8c30358982062" name="a67de78cd95536fcca5b8c30358982062"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67de78cd95536fcca5b8c30358982062">&#9670;&#160;</a></span>computeCoarseFineFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::computeCoarseFineFlux </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_phi</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the fluxes on this level through the faces that border the finer level. </p>
+<p>Only the faces read by <a class="el" href="classEBReflux.html#a7d81ed09af06eef461a237a117f065eb" title="Reflux into the coarse data.">EBReflux::reflux</a> are computed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data on this level. Must have updated ghost cells. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6da44f2e73bc14bf78d04067635c8460" name="a6da44f2e73bc14bf78d04067635c8460"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6da44f2e73bc14bf78d04067635c8460">&#9670;&#160;</a></span>computeFaceCenteredFlux()</h2>
 
@@ -2225,6 +2287,106 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. </dd></dl>
+
+</div>
+</div>
+<a id="aac335735d32d793eade6db44dca0a7c4" name="aac335735d32d793eade6db44dca0a7c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac335735d32d793eade6db44dca0a7c4">&#9670;&#160;</a></span>computeFaceFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::computeFaceFlux </td>
+          <td>(</td>
+          <td class="paramtype">EBFaceFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_flux</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;</td>          <td class="paramname"><span class="paramname"><em>a_phi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const FaceIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_face</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Box &amp;</td>          <td class="paramname"><span class="paramname"><em>a_cellBox</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_dit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_dir</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the flux through a single face. </p>
+<p>Gives the face the value computeFlux(LD&lt;EBCellFAB&gt;) gives it: the centroid stencil if either of its cells lies in a_cellBox and has stencils, and centered differencing otherwise. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_flux</td><td>Fluxes in direction a_dir </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data. Must have updated ghost cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_face</td><td>Face </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Grid box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Face direction </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9fc3c903ef41c2b2abb50364b37ee20e" name="a9fc3c903ef41c2b2abb50364b37ee20e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fc3c903ef41c2b2abb50364b37ee20e">&#9670;&#160;</a></span>computeFineCoarseFlux()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::computeFineCoarseFlux </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_phi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBReflux.html">EBReflux</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a_coarFluxReg</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the fluxes on this level through the faces on the refinement boundary with the coarser level. </p>
+<p>Computes the faces on side (dir, side) of each patch within the bounding box of the part of that side that lies on the refinement boundary. This includes every fine face whose flux reaches the coarse level in <a class="el" href="classEBReflux.html#a7d81ed09af06eef461a237a117f065eb" title="Reflux into the coarse data.">EBReflux::reflux</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data on this level. Must have updated ghost cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarFluxReg</td><td>Flux register between the coarser level and this level. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -4610,6 +4772,31 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_com
 
 <p>Precomputed domain-boundary boxes for each grid patch. </p>
 <p>Filled in <a class="el" href="#af1e883965165f53ff42eb0312c835788" title="Define stencils.">EBHelmholtzOp::defineStencils</a> and consumed by applyDomainFlux/fillDomainFlux. </p>
+
+</div>
+</div>
+<a id="ac6584b7ba7010960671c6cc836189e27" name="ac6584b7ba7010960671c6cc836189e27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6584b7ba7010960671c6cc836189e27">&#9670;&#160;</a></span>m_flux</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LevelData&lt;EBFluxFAB&gt; EBHelmholtzOp::m_flux</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel mutable">mutable</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>For holding fluxes. Allocated and zeroed on first use by <a class="el" href="#a2b045e06a6416b48da9ce6d514c34ba6" title="Allocate m_flux if it is not already allocated.">allocateFlux()</a>. </p>
+<p><a class="el" href="#a03635190d89fc51022238d1feac234a9" title="Reflux algorithm.">reflux()</a> computes only the faces on the refinement boundary. All other faces hold zero or values from earlier calls and must not be read. </p>
 
 </div>
 </div>
