@@ -6,7 +6,7 @@
 
 /**
  * @file   main.cpp
- * @brief  Test of FieldSolverAMG with an electrode, against FieldSolverGMG.
+ * @brief  Test of FieldSolverAMG with an electrode, against FieldSolverGMG, on the DiskProfiledPlane geometry.
  * @author Robert Marskar
  */
 
@@ -22,7 +22,7 @@
 #include <CD_RefinementBoxTagger.H>
 #include <CD_FieldSolverGMG.H>
 #include <CD_FieldSolverAMG.H>
-#include <CD_Rod.H>
+#include <CD_DiskProfiledPlane.H>
 #include <CD_FieldStepper.H>
 #include <CD_ParallelOps.H>
 #include <CD_DataOps.H>
@@ -32,7 +32,7 @@ using namespace Physics::Electrostatics;
 
 /**
  * @brief Set up a field solver on an existing mesh, as FieldStepper does.
- * @details The electrode is at potential 1, the domain sides are grounded, and there is no space charge.
+ * @details The electrode is at potential 1, the domain sides are as in the input file, and there is no space charge.
  * @tparam T Field solver class, e.g. FieldSolverAMG or FieldSolverGMG
  * @param[in] a_amr      AMR mesh
  * @param[in] a_compgeom Computational geometry
@@ -116,7 +116,7 @@ main(int argc, char* argv[])
   // Scoped so that the PETSc objects are destroyed before ChomboDischarge::finalize finalizes PETSc and MPI.
   {
     // The driver sets up the mesh. Its FieldStepper uses FieldSolverGMG, so the operators GMG needs are registered.
-    auto        compgeom = RefCountedPtr<ComputationalGeometry>(new Rod());
+    auto        compgeom = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
     auto        amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
     std::string realm;
 
@@ -130,9 +130,11 @@ main(int argc, char* argv[])
     engine->setupAndRun();
 
     Real maxAllowedDifference;
+    bool writePlotFiles;
 
     ParmParse pp("PetscElectrode");
     pp.get("max_difference", maxAllowedDifference);
+    pp.get("write_plot_files", writePlotFiles);
 
     RefCountedPtr<FieldSolver> amg = makeSolver<FieldSolverAMG>(amr, compgeom, realm);
     RefCountedPtr<FieldSolver> gmg = makeSolver<FieldSolverGMG>(amr, compgeom, realm);
@@ -146,6 +148,13 @@ main(int argc, char* argv[])
     const bool gmgConverged = gmg->solve(gmg->getPotential(), gmg->getRho(), sigma, true);
 
     const Real diff = maxDifference(*amr, realm, amg->getPotential(), gmg->getPotential());
+
+    // FieldSolverAMG.step0000000.<dim>d.hdf5 and FieldSolverGMG.step0000000.<dim>d.hdf5, with the plot variables of
+    // each solver.
+    if (writePlotFiles) {
+      amg->writePlotFile();
+      gmg->writePlotFile();
+    }
 
     pout() << "PetscElectrode -- levels = " << 1 + amr->getFinestLevel() << ", coarsest dx = " << amr->getDx()[0]
            << ", max |AMG - GMG| = " << diff << endl;
