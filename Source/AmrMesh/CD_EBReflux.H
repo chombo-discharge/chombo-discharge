@@ -109,10 +109,11 @@ public:
   /**
    * @brief Get the cut coarse-grid cells on the refinement boundary.
    * @details As getRegularCoarseFineRegions(), but for the cut cells.
+   * @note Non-const because iterating a VoFIterator modifies it.
    * @return m_irregularCoarseFineRegions
    */
   LayoutData<std::map<std::pair<int, Side::LoHiSide>, VoFIterator>>&
-  getIrregularCoarseFineRegions() const noexcept;
+  getIrregularCoarseFineRegions() noexcept;
 
   /**
    * @brief Get the fine-grid cells on the refinement boundary.

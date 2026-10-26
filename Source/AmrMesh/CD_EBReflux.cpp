@@ -305,7 +305,7 @@ EBReflux::getRegularCoarseFineRegions() const noexcept
 }
 
 LayoutData<std::map<std::pair<int, Side::LoHiSide>, VoFIterator>>&
-EBReflux::getIrregularCoarseFineRegions() const noexcept
+EBReflux::getIrregularCoarseFineRegions() noexcept
 {
   CH_assert(m_isDefined);
 

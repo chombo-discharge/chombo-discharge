@@ -1232,7 +1232,9 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /**
-   * @brief For holding fluxes. Allocated on first use by allocateFlux().
+   * @brief For holding fluxes. Allocated and zeroed on first use by allocateFlux().
+   * @details reflux() computes only the faces on the refinement boundary. All other faces hold zero or values from
+   * earlier calls and must not be read.
    */
   mutable LevelData<EBFluxFAB> m_flux;
 
