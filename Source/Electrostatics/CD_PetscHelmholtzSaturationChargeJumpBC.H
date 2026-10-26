@@ -95,6 +95,15 @@ public:
   virtual void
   updateJumpData(const Vec& a_phi, const MFAMRIVData& a_bCoefIrreg) noexcept override;
 
+  /**
+   * @brief Get the surface charge density computed by the last call to updateJumpData.
+   * @details In the units of the jump condition, i.e. b * dphi/dn. Defined on the cut cells of the first phase, and
+   * zero on those that are not interface cells.
+   * @return m_sigma
+   */
+  virtual const EBAMRIVData&
+  getSigma() const noexcept;
+
 protected:
   /**
    * @brief Phase on whose side the normal derivative is zero.

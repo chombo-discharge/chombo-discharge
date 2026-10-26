@@ -46,8 +46,9 @@
  * The w_B are kept per domain face when the matrix is assembled, and w_B * g goes into the right-hand side, see
  * addBoundaryConditionsToRHS. The boundary data can thus change without the matrix being reassembled.
  *
- * The operator is composite: it spans all AMR levels, and its rows are the valid cells of every level. Supported so
- * far: one phase, with embedded boundaries (electrodes) on it, and no periodic directions. Anything else aborts.
+ * The operator is composite: it spans all AMR levels, and its rows are the valid cells of every level, in each phase.
+ * Embedded boundaries (electrodes) and the interface between two phases are supported; periodic directions are not,
+ * and abort.
  *
  * The operator is assembled finite-volume style. The row of a cell is its finite-volume balance divided by dx^SpaceDim
  * and kappa-weighted, as in FieldSolverGMG: kappa*alpha*a*phi plus beta/dx times the sum, over the faces of the cell
@@ -113,7 +114,7 @@
  * So far the stencils of the domain faces and of both sides of the refinement boundaries are computed in fillMatrix
  * rather than stored; the holders, and the functions that define them, are placeholders.
  *
- * Embedded boundaries follow this design; the multiphase (jump) parts are not implemented yet:
+ * Embedded boundaries and interfaces follow this design:
  *
  * - Rows: every cut cell of each phase is a row. Multi-valued cells are a hard error (PetscGrid aborts on them).
  * - The flux through the EB face of a cut cell is F = w_B * g + sum_j w_j * phi_j, where the stencil is a PetscStencil
@@ -268,7 +269,8 @@ public:
    * density). The caller supplies the volume source in a_rhs, kappa-weighted as described for the class. The scaling
    * uses the current beta and b, so call this after the fillMatrix that matches them.
    * @param[in,out] a_rhs   Right-hand side, on the rows of the PETSc grid
-   * @param[in]     a_sigma Surface charge density on the interface between the phases
+   * @param[in]     a_sigma Surface charge density on the interface between the phases, on the cut cells of the first
+   * phase, in the units of the jump condition b_0 * D_0 + b_1 * D_1 = sigma
    */
   virtual void
   addBoundaryConditionsToRHS(Vec& a_rhs, const EBAMRIVData& a_sigma) const noexcept;
@@ -354,7 +356,7 @@ protected:
    * @details From PetscHelmholtzDomainBC::getFaceFluxStencil, filled by fillMatrix. Defined on the phase that is
    * assembled.
    */
-  EBAMRIFData m_boundaryWeights;
+  EBAMRIFData m_boundaryWeights[2];
 
   /**
    * @brief Flux stencils through the domain faces, without beta and b, over PETSc rows.
@@ -392,8 +394,8 @@ protected:
   EBAMRFluxData m_bCoefFiCo;
 
   /**
-   * @brief Abort unless the grids are supported by this operator: an interpolator on every level above the coarsest, no
-   * periodic directions, and no cells in any phase other than the gas phase.
+   * @brief Abort unless the grids are supported by this operator: an interpolator for each phase on every level above
+   * the coarsest, and no periodic directions.
    */
   virtual void
   checkSupported() const noexcept;
@@ -449,10 +451,21 @@ protected:
    * finest level and on grids without cut cells.
    * @param[in] a_level Grid level
    * @param[in] a_din   Grid index on the level
+   * @param[in] a_phase Phase
    * @return The covered cells within two cells of the grid.
    */
   virtual IntVectSet
-  getCoveredCells(const int a_level, const DataIndex& a_din) const noexcept;
+  getCoveredCells(const int a_level, const DataIndex& a_din, const int a_phase) const noexcept;
+
+  /**
+   * @brief Check if a cell is an interface cell, i.e. cut in both phases.
+   * @param[in] a_iv    Cell
+   * @param[in] a_level Grid level
+   * @param[in] a_din   Grid index on the level
+   * @return True if both phases are cut in a_iv.
+   */
+  virtual bool
+  isInterfaceCell(const IntVect& a_iv, const int a_level, const DataIndex& a_din) const noexcept;
 
   /**
    * @brief Get the flux b * dphi/dx through the centroid of an interior cut face, as in EBHelmholtzOp.

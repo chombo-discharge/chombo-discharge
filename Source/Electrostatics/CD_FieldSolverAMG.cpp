@@ -163,8 +163,14 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   petscGrid->create(x);
   petscGrid->create(r);
 
+  // The jump condition is eps_0 * D_0 + eps_1 * D_1 = sigma/eps0, as in FieldSolverGMG.
+  EBAMRIVData sigmaByEps0;
+  m_amr->allocate(sigmaByEps0, m_realm, phase::gas, m_nComp);
+  DataOps::copy(sigmaByEps0, a_sigma);
+  DataOps::scale(sigmaByEps0, 1.0 / Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
+
   petscGrid->putChomboInPetsc(b, rhoByEps0);
-  m_petscOp->addBoundaryConditionsToRHS(b, a_sigma);
+  m_petscOp->addBoundaryConditionsToRHS(b, sigmaByEps0);
 
   if (a_zeroPhi) {
     petscGrid->setValue(x, 0.0);
@@ -213,6 +219,17 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   m_amr->interpGhostPwl(a_potential, m_realm);
 
   this->computeElectricField(m_electricField, a_potential);
+
+  // With the saturation charge the surface charge density is an output of the solve, which FieldSolverGMG also copies
+  // into m_sigma.
+  if (m_jumpBcType == JumpBCType::SaturationCharge) {
+    const auto& jumpBc = static_cast<const PetscHelmholtzSaturationChargeJumpBC&>(*m_petscJumpBc);
+
+    DataOps::copy(m_sigma, jumpBc.getSigma());
+    DataOps::scale(m_sigma, Units::eps0, m_amr->getVofIterator(m_realm, phase::gas));
+
+    m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
+  }
 
   return converged;
 }
