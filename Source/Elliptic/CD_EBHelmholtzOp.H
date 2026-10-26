@@ -1526,8 +1526,9 @@ protected:
 
   /**
    * @brief Compute the fluxes on this level through the faces on the refinement boundary with the coarser level.
-   * @details Only the faces on the refinement boundary are computed; these include all the faces EBReflux::reflux
-   * reads.
+   * @details Computes the faces on side (dir, side) of each patch within the bounding box of the part of that side that
+   * lies on the refinement boundary. This includes every fine face whose flux reaches the coarse level in
+   * EBReflux::reflux.
    * @param[in] a_phi         Cell-centered data on this level. Must have updated ghost cells.
    * @param[in] a_coarFluxReg Flux register between the coarser level and this level.
    */

@@ -2659,6 +2659,7 @@ EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
     const VoFStencil& sten = fluxStencils(face, m_comp);
 
     Real flux = 0.0;
+
     for (int i = 0; i < sten.size(); i++) {
       const VolIndex& ivof    = sten.vof(i);
       const Real&     iweight = sten.weight(i);
@@ -2766,8 +2767,7 @@ EBHelmholtzOp::computeFineCoarseFlux(const LevelData<EBCellFAB>& a_phi, const EB
 
         boundaryCells &= cellBox;
 
-        // These are the cells just inside the patch on side sit(); their faces on that side lie on the refinement
-        // boundary.
+        // The bounding box of the cells just inside the patch whose faces on side sit() lie on the refinement boundary.
         auto kernel = [&](const IntVect& iv) -> void {
           const Vector<VolIndex> vofs = ebisBox.getVoFs(iv);
 
@@ -2795,9 +2795,9 @@ EBHelmholtzOp::computeFaceFlux(EBFaceFAB&       a_flux,
                                const int        a_dir) const noexcept
 {
   // computeFaceCenteredFlux sets every face by centered differencing, and computeFaceCentroidFlux then overwrites the
-  // faces of the cells in a_cellBox that have centroid stencils. Do the same, for one face. The centered value is
-  // always written to the single-valued data, because EBReflux reads it there even where the face also holds a
-  // centroid value.
+  // faces of the cells in a_cellBox that have centroid stencils. Do the same, for one face: the single-valued data
+  // always receives the centered value, and the centroid value, where there is one, is then written through the
+  // EBFaceFAB accessor.
   BaseFab<Real>&       regFlux = a_flux.getSingleValuedFAB();
   const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
   const BaseFab<Real>& regBco  = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
@@ -2819,6 +2819,7 @@ EBHelmholtzOp::computeFaceFlux(EBFaceFAB&       a_flux,
     const VoFStencil& sten = fluxStencils(a_face, m_comp);
 
     Real flux = 0.0;
+
     for (int i = 0; i < sten.size(); i++) {
       const VolIndex& ivof    = sten.vof(i);
       const Real&     iweight = sten.weight(i);

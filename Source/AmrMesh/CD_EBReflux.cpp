@@ -278,7 +278,7 @@ EBReflux::defineBuffers() noexcept
   m_fluxCoFi.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, EBFluxFactory(m_eblgCoFi.getEBISL()));
   m_fluxCoar.define(m_eblg.getDBL(), 1, IntVect::Unit, EBFluxFactory(m_eblg.getEBISL()));
 
-  // Only the faces along the refinement boundary are ever written. Zero the rest once so they hold defined values.
+  // reflux() only writes part of these buffers. Zero them once so the rest hold defined values.
   const DataIterator& ditCoFi = m_fluxCoFi.dataIterator();
   const DataIterator& ditCoar = m_fluxCoar.dataIterator();
 

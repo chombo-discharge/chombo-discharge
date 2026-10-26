@@ -118,7 +118,8 @@ public:
    * @brief Get the fine-grid cells on the refinement boundary.
    * @details For each fine patch and each (direction, side), this is the bounding box of the fine cells just inside
    * the patch whose face on that side lies on the refinement boundary. The box is empty if no part of that side
-   * borders the coarse level. The fine fluxes through these faces are the only ones reflux() reads.
+   * borders the coarse level. Of the fine fluxes, only those through these faces reach the coarse cells that reflux()
+   * updates.
    * @return m_fineCoarseFineBoxes
    */
   const LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box>>&
