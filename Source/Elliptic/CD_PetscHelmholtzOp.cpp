@@ -194,6 +194,72 @@ PetscHelmholtzOp::getMatrix() const noexcept
   return m_matrix;
 }
 
+Real
+PetscHelmholtzOp::getRowWeight(const int a_level) const noexcept
+{
+  CH_TIME("PetscHelmholtzOp::getRowWeight");
+
+  CH_assert(a_level >= 0 && a_level < m_dx.size());
+
+  return std::pow(m_dx[a_level] / m_dx[0], SpaceDim);
+}
+
+void
+PetscHelmholtzOp::scaleRows(Vec& a_vec, const bool a_inverse) const noexcept
+{
+  CH_TIME("PetscHelmholtzOp::scaleRows");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzOp::scaleRows" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  const Vector<RefCountedPtr<MFLevelGrid>>& mflg = m_petscGrid->getMFLevelGrids();
+
+  const int numLevels = mflg.size();
+  const int numPhases = m_petscGrid->getNumPhases();
+
+  PetscInt     rowBegin = -1;
+  PetscInt     rowEnd   = -1;
+  PetscScalar* vec      = nullptr;
+
+  PetscCallVoid(VecGetOwnershipRange(a_vec, &rowBegin, &rowEnd));
+  PetscCallVoid(VecGetArray(a_vec, &vec));
+
+  for (int phase = 0; phase < numPhases; phase++) {
+    for (int lvl = 0; lvl < numLevels; lvl++) {
+      const Real w     = this->getRowWeight(lvl);
+      const Real scale = a_inverse ? 1.0 / w : w;
+
+      const DisjointBoxLayout&                dbl        = mflg[lvl]->getGrids();
+      const LevelData<BaseFab<PetscAMRCell>>& amrToPetsc = *m_petscGrid->getAMRToPetsc()[lvl];
+
+      const DataIterator& dit  = dbl.dataIterator();
+      const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex&             din   = dit[mybox];
+        const BaseFab<PetscAMRCell>& cells = amrToPetsc[din];
+
+        auto kernel = [&](const IntVect& iv) -> void {
+          const PetscInt row = cells(iv).getPetscRow(phase);
+
+          if (row >= 0) {
+            CH_assert(row >= rowBegin && row < rowEnd);
+
+            vec[row - rowBegin] *= scale;
+          }
+        };
+
+        BoxLoops::loop(dbl[din], kernel);
+      }
+    }
+  }
+
+  PetscCallVoid(VecRestoreArray(a_vec, &vec));
+}
+
 void
 PetscHelmholtzOp::checkSupported() const noexcept
 {
@@ -531,6 +597,10 @@ PetscHelmholtzOp::fillMatrix() noexcept
       const int  refRat      = (lvl > 0) ? m_petscGrid->getRefinementRatios()[lvl - 1] : 1;
       const Real refluxScale = 1.0 / std::pow(refRat, SpaceDim);
 
+      // Row weights of this level and of the coarser level, which the refluxing writes into. See getRowWeight.
+      const Real rowWeight     = this->getRowWeight(lvl);
+      const Real coarRowWeight = (lvl > 0) ? this->getRowWeight(lvl - 1) : 0.0;
+
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
 
@@ -709,7 +779,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
                   rowStencil += fineContribution;
 
                   PetscStencil coarContribution = petscFlux;
-                  coarContribution *= -factor * refluxScale;
+                  coarContribution *= -factor * refluxScale * coarRowWeight;
 
                   this->addToMatrix(this->getCoarseRow(ivNeigh, refRat, lvl, din, phase), coarContribution);
                 }
@@ -757,7 +827,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
                 // Refluxing: the coarse cell sees this face on its opposite side, through an area fraction
                 // 1/refRat^(SpaceDim-1) and with its own dx, so its weight is -factor/refRat^SpaceDim.
                 PetscStencil coarContribution = flux;
-                coarContribution *= -factor * refluxScale;
+                coarContribution *= -factor * refluxScale * coarRowWeight;
 
                 this->addToMatrix(this->getCoarseRow(ivNeigh, refRat, lvl, din, phase), coarContribution);
               }
@@ -817,6 +887,7 @@ PetscHelmholtzOp::fillMatrix() noexcept
           }
 
           rowStencil.compress();
+          rowStencil *= rowWeight;
 
           this->addToMatrix(row, rowStencil);
         };

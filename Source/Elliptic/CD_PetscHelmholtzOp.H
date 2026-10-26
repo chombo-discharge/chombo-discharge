@@ -263,6 +263,27 @@ public:
   getMatrix() const noexcept;
 
   /**
+   * @brief Get the weight that the rows of a level are multiplied by.
+   * @details The rows are volume-weighted, (dx/dx_0)^SpaceDim times the kappa-weighted divergence, so that a flux
+   * through a refinement boundary enters the coarse and fine rows with the same weight, and the row scale does not grow
+   * by refRat^2 per level. The weight is 1 on level 0. The right-hand side must carry the same weights, see scaleRows.
+   * @param[in] a_level Grid level
+   * @return (dx[a_level]/dx[0])^SpaceDim
+   */
+  virtual Real
+  getRowWeight(const int a_level) const noexcept;
+
+  /**
+   * @brief Multiply, or divide, each local row of a vector by its row weight.
+   * @details Use it to weight a right-hand side built from cell data and addBoundaryConditionsToRHS before the solve,
+   * and to remove the weight from a residual afterwards.
+   * @param[in,out] a_vec     Vector over the PETSc rows
+   * @param[in]     a_inverse If true, divide by the weights instead
+   */
+  virtual void
+  scaleRows(Vec& a_vec, const bool a_inverse) const noexcept;
+
+  /**
    * @brief Move the boundary data part of the domain boundary fluxes into a right-hand side.
    * @details The operator is A*phi + c, where A is the matrix and c holds the w_B * g parts of the boundary fluxes,
    * scaled like the rest of the face flux. Solving A*phi + c = rhs is the same as solving A*phi = rhs - c, so this

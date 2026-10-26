@@ -179,6 +179,14 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   petscGrid->putChomboInPetsc(b, rhoByEps0);
   m_petscOp->addBoundaryConditionsToRHS(b, sigmaByEps0);
 
+  // The matrix rows are weighted per level (PetscHelmholtzOp::getRowWeight), and the right-hand side must be too. The
+  // unweighted norm of b is kept for reporting the residual as it was before the weighting.
+  PetscReal zeroResidNormUnweighted;
+
+  PetscCallAbort(Chombo_MPI::comm, VecNorm(b, NORM_2, &zeroResidNormUnweighted));
+
+  m_petscOp->scaleRows(b, false);
+
   if (a_zeroPhi) {
     petscGrid->setValue(x, 0.0);
   }
@@ -207,19 +215,29 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   const bool converged = (reason > 0);
 
+  PetscReal residNormUnweighted;
+
   PetscCallAbort(Chombo_MPI::comm, MatResidual(m_petscOp->getMatrix(), b, x, r));
   PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNorm));
+
+  // Remove the row weights, so that the residual is that of the unweighted divergence.
+  m_petscOp->scaleRows(r, true);
+
+  PetscCallAbort(Chombo_MPI::comm, VecNorm(r, NORM_2, &residNormUnweighted));
 
   if (m_verbosity > 1) {
     KSPType kspType;
 
     PetscCallAbort(Chombo_MPI::comm, KSPGetType(m_ksp, &kspType));
 
-    const Real relResid = (zeroResidNorm > 0.0) ? residNorm / zeroResidNorm : residNorm;
+    const Real relResid           = (zeroResidNorm > 0.0) ? residNorm / zeroResidNorm : residNorm;
+    const Real relResidUnweighted = (zeroResidNormUnweighted > 0.0) ? residNormUnweighted / zeroResidNormUnweighted
+                                                                    : residNormUnweighted;
 
     pout() << "FieldSolverAMG - " << kspType << (converged ? " converged" : " did NOT converge")
-           << " (rel.res = " << relResid << ", |r| = " << residNorm << ", |r_zero| = " << zeroResidNorm
-           << ", iters = " << numIter << ", reason = " << KSPConvergedReasons[reason] << ")" << endl;
+           << " (rel.res = " << relResid << ", unweighted rel.res = " << relResidUnweighted << ", |r| = " << residNorm
+           << ", |r_zero| = " << zeroResidNorm << ", iters = " << numIter
+           << ", reason = " << KSPConvergedReasons[reason] << ")" << endl;
   }
 
   // The solver and the preconditioner, e.g. the levels of the algebraic multigrid hierarchy. PETSc writes this to
