@@ -176,7 +176,7 @@ var searchData=
   ['getfinestdx_173',['getFinestDx',['../classAmrMesh.html#a13dad5645ed0341ada0681607da1d600',1,'AmrMesh']]],
   ['getfinestlevel_174',['getFinestLevel',['../classAmrMesh.html#aff00899eeda16c714410146ecc2c8af7',1,'AmrMesh::getFinestLevel()'],['../classParticleContainer.html#a5f8af8d0aece940c7e14692009bf9917',1,'ParticleContainer::getFinestLevel()']]],
   ['getfinesttaglevel_175',['getFinestTagLevel',['../classDriver.html#a0539d9687fe6840da428beebc72ce384',1,'Driver']]],
-  ['getfinitedifferencestencil_176',['getFiniteDifferenceStencil',['../classEBGradient.html#adb5ae7aa4ce8184a2bf33e83709d169d',1,'EBGradient']]],
+  ['getfinitedifferencestencil_176',['getFiniteDifferenceStencil',['../classEBGradient.html#a61aea47461129163733acb39a17e956b',1,'EBGradient']]],
   ['getfirstderivstencil_177',['getFirstDerivStencil',['../classCoarseInterpQuadCF.html#ad26e27a350e3ed9deea19c92f86a0f29',1,'CoarseInterpQuadCF']]],
   ['getflux_178',['getFlux',['../classEBHelmholtzOp.html#a164212e03d6b1e80cfd79135b9e08fac',1,'EBHelmholtzOp::getFlux(EBFluxFAB &amp;a_flux, const LevelData&lt; EBCellFAB &gt; &amp;a_data, const Box &amp;a_grid, const DataIndex &amp;a_dit, Real a_scale) override final'],['../classEBHelmholtzOp.html#a0482b62c5ea81f59ef58c0065cef3617',1,'EBHelmholtzOp::getFlux() const'],['../classMFHelmholtzOp.html#a28471752b1036c1a0a095e47e114b5b5',1,'MFHelmholtzOp::getFlux()']]],
   ['getfluxreg_179',['getFluxReg',['../classMFReflux.html#aed93caa7c95cb9ac268e68c6d65c7815',1,'MFReflux::getFluxReg(const int a_phase)'],['../classMFReflux.html#a6336c24f28376d199bc358863e666c7d',1,'MFReflux::getFluxReg(const int a_phase) const']]],
