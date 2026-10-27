@@ -25,12 +25,9 @@ LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int
   Vector<Real> ret(a_displacements.size(), 1.0);
 
   if (a_pow > 0) {
-    // Figure out the max distance, and normalize every distance with it. We do not use physical distances when
-    // weighting the equations.
-    Real normDist = 0.0;
-    for (int i = 0; i < a_displacements.size(); i++) {
-      normDist = std::max(normDist, a_displacements[i].vectorLength());
-    }
+    // Normalize every distance with the largest one, which is 1 if all displacements are zero. We do not use physical
+    // distances when weighting the equations.
+    const Real normDist = LeastSquares::getLengthScale(a_displacements);
 
     // Set weightings = 1/(1 + |displacement|/normDist)^a_pow
     for (int i = 0; i < a_displacements.size(); i++) {
