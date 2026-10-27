@@ -49,6 +49,9 @@
  * the finite difference stencils and to the fine cells under the covered ones.
  * @note This class requires at least one ghost cell. The second order one-sided differences require two ghost cells,
  * both in the data and in the EBISLayout; with fewer, the one-sided differences are first order.
+ * @note The second order one-sided differences are only as accurate as the data near the EB. With a first order EB
+ * boundary condition in the solver that produced the data (e.g. FieldSolverGMG with gmg_bc_order = 1), they can amplify
+ * its error; second order boundary conditions give the most accurate gradients.
  */
 class EBGradient
 {

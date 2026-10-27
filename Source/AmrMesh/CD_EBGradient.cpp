@@ -743,6 +743,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
       // Use finite differences on valid cells if that does not lower the order.
       IntVectSet* invalidCells = ebisBox.isIrregular(vof.gridIndex()) ? &coveredCells : &coveredCutCells;
 
+      // A finite difference stencil uses coarse cells only, so the fine stencil stays empty.
       if (this->getFiniteDifferenceStencil(coarStencil, vof, ebisBox, invalidCells)) {
         return;
       }
