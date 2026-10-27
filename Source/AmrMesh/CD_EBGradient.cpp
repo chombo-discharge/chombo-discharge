@@ -74,6 +74,9 @@ EBGradient::define(const EBLevelGrid& a_eblg,
   m_hasFine      = a_hasFine;
   m_hasEBCF      = false;
 
+  // Second order one-sided differences reach two cells away, which must exist both in the data and in the EBISBox.
+  m_stencilWidth = (m_ghostVector.min() >= 2 && m_eblg.getEBISL().getGhost() >= 2) ? 2 : 1;
+
   if (m_hasFine) {
     m_dxFine = m_dx / m_refRat;
   }
@@ -399,18 +402,7 @@ EBGradient::defineLevelStencils() noexcept
 
     CH_START(t4);
     auto kernel = [&](const VolIndex& vof) -> void {
-      VoFStencil& stencil = bndryStencils(vof, m_comp);
-
-      stencil.clear();
-
-      // Get derivative in each direction. Note that EBArith might decide to drop order.
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        VoFStencil derivDirStencil;
-
-        EBArith::getFirstDerivStencilWidthOne(derivDirStencil, vof, ebisbox, dir, m_dx, nullptr, dir);
-
-        stencil += derivDirStencil;
-      }
+      this->getFiniteDifferenceStencil(bndryStencils(vof, m_comp), vof, ebisbox, nullptr);
     };
 
     BoxLoops::loop(bndryIterator, kernel);
@@ -442,12 +434,14 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
   const ProblemDomain& domainCoar = m_eblg.getDomain();
 
   // Create some temporary storage. We coarsen the fine grid and create a Level<FArrayBox> object where each
-  // Box is grown by one. We do this because we want to put some data in the ghost cells outside the valid region
-  // of the fine level.
+  // Box is grown by the stencil width. We do this because we want to put some data in the ghost cells outside the valid
+  // region of the fine level.
   DisjointBoxLayout dblCoFi;
   coarsen(dblCoFi, dblFine, m_refRat);
 
-  LevelData<FArrayBox> coFiMaskCF(dblCoFi, m_nComp, IntVect::Unit);
+  const IntVect width = m_stencilWidth * IntVect::Unit;
+
+  LevelData<FArrayBox> coFiMaskCF(dblCoFi, m_nComp, width);
   LevelData<FArrayBox> coFiMaskInvalid(dblCoFi, m_nComp, IntVect::Zero);
 
   const DataIterator& ditCoFi  = dblCoFi.dataIterator();
@@ -485,11 +479,11 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
     maskInvalid.setVal(one, cellBox, m_comp, m_nComp);
   }
 
-  // Define the input masks. After this, coarMaskCF will have a value of 1 in all cells that abut the fine level.
-  // Likewise, coarMaskInvalid will have a value of 1 in all cells that are covered by a finer level, including one
-  // layer of ghost cells.
-  a_coarMaskCF.define(dblCoar, m_nComp, IntVect::Zero);      // Does not need ghost cells
-  a_coarMaskInvalid.define(dblCoar, m_nComp, IntVect::Unit); // Needs one ghost cell.
+  // Define the input masks. After this, coarMaskCF will have a value of 1 in all cells within the stencil width of the
+  // fine level. Likewise, coarMaskInvalid will have a value of 1 in all cells that are covered by a finer level,
+  // including the ghost cells that the stencils reach.
+  a_coarMaskCF.define(dblCoar, m_nComp, IntVect::Zero); // Does not need ghost cells
+  a_coarMaskInvalid.define(dblCoar, m_nComp, width);
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nboxCoar; mybox++) {
@@ -503,8 +497,8 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
   Copier copierCF;
   Copier copierInvalid;
 
-  copierCF.ghostDefine(dblCoFi, dblCoar, domainCoar, IntVect::Unit);
-  copierInvalid.ghostDefine(dblCoFi, dblCoar, domainCoar, IntVect::Zero, IntVect::Unit);
+  copierCF.ghostDefine(dblCoFi, dblCoar, domainCoar, width);
+  copierInvalid.ghostDefine(dblCoFi, dblCoar, domainCoar, IntVect::Zero, width);
 
   coFiMaskCF.copyTo(interv, a_coarMaskCF, interv, copierCF, LDaddOp<FArrayBox>());
   coFiMaskInvalid.copyTo(interv, a_coarMaskInvalid, interv, copierInvalid, LDaddOp<FArrayBox>());
@@ -517,28 +511,27 @@ EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
 {
   CH_TIME("EBGradient::isFiniteDifferenceStencilValid");
 
-  // TLDR: Routine which checks if a finite difference stencil is "valid" in the sense that
-  //       it does not reach into cut-cells in invalid regions. That is, the stencil is not allowed to reach
-  //       into coarse-grid cut-cells that lie underneath the fine grid.
+  // TLDR: Routine which checks if the level finite difference stencil is "valid" in the sense that it does not reach
+  //       into invalid regions. A stencil in a cut-cell may not reach into any coarse-grid cell that lies underneath
+  //       the fine grid. A stencil in a regular cell may reach into covered regular cells, whose data is the average
+  //       of the fine cells, but not into covered cut-cells, for which there is no consistent way of coarsening.
 
   constexpr Real zero = 0.0;
 
   bool validStencil = true;
+
+  const bool isCutCell = a_ebisBox.isIrregular(a_ivCoar);
 
   // Get all VoFs in the input cell
   Vector<VolIndex> coarVoFs = a_ebisBox.getVoFs(a_ivCoar);
 
   for (const auto& coarVoF : coarVoFs.stdVector()) {
 
-    // Build a finite difference stencil.
+    // Build the finite difference stencil that the level uses.
     VoFStencil gradSten;
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      VoFStencil derivSten;
-      EBArith::getFirstDerivStencilWidthOne(derivSten, coarVoF, a_ebisBox, dir, 1.0, nullptr, dir);
-      gradSten += derivSten;
-    }
+    this->getFiniteDifferenceStencil(gradSten, coarVoF, a_ebisBox, nullptr);
 
-    // Check if the stencil is OK, i.e. that it does not reach into cut-cells.
+    // Check if the stencil is OK, i.e. that it does not reach into invalid cells.
     for (int i = 0; i < gradSten.size(); i++) {
       const VolIndex& ivof = gradSten.vof(i);
       const IntVect   iv   = ivof.gridIndex();
@@ -546,7 +539,7 @@ EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
       const bool isCoveredByFinerCell = a_invalidRegion(iv, m_comp) > zero;
       const bool isIrregularCell      = a_ebisBox.isIrregular(iv);
 
-      if (isCoveredByFinerCell && isIrregularCell) {
+      if (isCoveredByFinerCell && (isCutCell || isIrregularCell)) {
         validStencil = false;
       }
     }
@@ -619,10 +612,12 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
     if (isIrregular) {
 
       // Iterate through the coarse-fine region and check if the finite difference stencil reaches into a cut-cell.
+      // Cells covered by the finer level are skipped: the coarse-fine mask is built from the neighbor lists of the
+      // fine grid, which need not include every box within the stencil width of the coarsened grid.
       // Not auto-vectorizable: this is a one-time setup loop with a data-dependent branch, an
       // out-of-line stencil-validity query, and IntVectSet insertion.
       auto kernel = [&](const IntVect& ivCoar) -> void {
-        if (coarseFineRegion(ivCoar, m_comp) > zero) {
+        if (coarseFineRegion(ivCoar, m_comp) > zero && invalidRegion(ivCoar, m_comp) == zero) {
           const bool hasStencil = this->isFiniteDifferenceStencilValid(ivCoar, ebisBox, invalidRegion);
 
           // Ok, found a stencil that won't work.
@@ -662,11 +657,12 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
 
   CH_assert(m_hasFine);
   CH_assert(m_hasEBCF);
-  CH_assert(a_coarMaskInvalid.ghostVect() == IntVect::Unit);
+  CH_assert(a_coarMaskInvalid.ghostVect() == m_stencilWidth * IntVect::Unit);
 
-  // TLDR: This code iterates through the buffer grids and defines least squares stencils in the
-  //       various cells that need it. The input mask is used to determine which cells we can use
-  //       on the fine/coarse levels.
+  // TLDR: This code iterates through the cells whose level stencils reach into invalid cells, and defines new stencils
+  //       for them. If a finite difference stencil that only uses valid cells is as accurate as the level stencil, we
+  //       use that. Otherwise we use a two-level least squares stencil. The input mask is used to determine which cells
+  //       we can use on the fine/coarse levels.
 
   const DisjointBoxLayout& dbl     = m_eblg.getDBL();
   const DisjointBoxLayout& dblFine = m_eblgFiCo.getDBL();
@@ -684,7 +680,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     const DataIndex& din = dit[mybox];
 
     const Box cellBox      = dbl[din];
-    const Box grownBox     = grow(cellBox, 1) & domain;
+    const Box grownBox     = grow(cellBox, m_stencilWidth) & domain;
     const Box grownBoxFine = refine(grownBox, m_refRat);
 
     const EBISBox& ebisBox = ebisl[din];
@@ -716,8 +712,24 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
       }
     };
 
+    // Covered cells that the finite difference stencils can reach. Stencils in cut-cells may not use any of them, and
+    // stencils in regular cells may not use the cut-cells among them.
+    IntVectSet coveredCells;
+    IntVectSet coveredCutCells;
+
+    auto coveredKernel = [&](const IntVect& iv) -> void {
+      if (coarMaskInvalid(iv, m_comp) > 0.0) {
+        coveredCells |= iv;
+
+        if (ebisBox.isIrregular(iv)) {
+          coveredCutCells |= iv;
+        }
+      }
+    };
+
     CH_START(t2);
     BoxLoops::loop<D_DECL(1, 1, 1)>(grownBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(grow(cellBox, m_stencilWidth) & domain, coveredKernel);
     CH_STOP(t2);
 
     // Compute the stencils. Try to achieve the highest order we can.
@@ -727,6 +739,16 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
 
       coarStencil.clear();
       fineStencil.clear();
+
+      // Use finite differences on valid cells if that does not lower the order.
+      IntVectSet* invalidCells = ebisBox.isIrregular(vof.gridIndex()) ? &coveredCells : &coveredCutCells;
+
+      // A finite difference stencil uses coarse cells only, so the fine stencil stays empty.
+      if (this->getFiniteDifferenceStencil(coarStencil, vof, ebisBox, invalidCells)) {
+        return;
+      }
+
+      coarStencil.clear();
 
       int  order        = m_order;
       bool foundStencil = false;
@@ -778,89 +800,57 @@ EBGradient::defineBuffers() noexcept
 }
 
 bool
-EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
-                                       const VolIndex&        a_vof,
-                                       const EBISBox&         a_ebisBox,
-                                       const DenseIntVectSet& a_validRegion,
-                                       const Real             a_dx) const noexcept
+EBGradient::getFiniteDifferenceStencil(VoFStencil&     a_stencil,
+                                       const VolIndex& a_vof,
+                                       const EBISBox&  a_ebisBox,
+                                       IntVectSet*     a_invalidCells) const noexcept
 {
   CH_TIME("EBGradient::getFiniteDifferenceStencil");
 
   // clang-format off
-  // TLDR: This routine computes a finite difference stencil. If it does not have any valid cells to use (defined by a_validRegion)
-  //       it will not return a stencil.
+  // TLDR: This routine computes a finite difference stencil, in each direction a centered difference if possible and a
+  //       one-sided difference otherwise. EBArith drops order if it does not find enough cells, and treats the cells in
+  //       a_invalidCells as unavailable. If we exclude cells, we compare against the stencil without exclusions to see
+  //       if excluding them cost us order.
   // clang-format on
 
   a_stencil.clear();
 
-  bool foundStencil = false;
-
-  const IntVect iv = a_vof.gridIndex();
+  bool keptOrder = true;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
+    auto derivative = [&](VoFStencil& a_derivStencil, IntVectSet* a_excludedCells) -> int {
+      if (m_stencilWidth > 1) {
+        return EBArith::getFirstDerivStencil(a_derivStencil, a_vof, a_ebisBox, dir, m_dx, a_excludedCells, dir);
+      }
+
+      return EBArith::getFirstDerivStencilWidthOne(a_derivStencil, a_vof, a_ebisBox, dir, m_dx, a_excludedCells, dir);
+    };
+
     VoFStencil derivStencil;
 
-    // Check for cells to the low/high side of this one.
-    const IntVect ivLo = iv - BASISV(dir);
-    const IntVect ivHi = iv + BASISV(dir);
+    const int order = derivative(derivStencil, a_invalidCells);
 
-    const bool isLoCellCovered = a_validRegion[ivLo];
-    const bool isHiCellCovered = a_validRegion[ivHi];
-
-    const bool isLoCellIrregular = a_ebisBox.isIrregular(ivLo);
-    const bool isHiCellIrregular = a_ebisBox.isIrregular(ivHi);
-
-    const Vector<VolIndex> loVoFs = a_ebisBox.getVoFs(a_vof, dir, Side::Lo, 1);
-    const Vector<VolIndex> hiVoFs = a_ebisBox.getVoFs(a_vof, dir, Side::Hi, 1);
-
-    const int numLoVoFs = static_cast<int>(loVoFs.size());
-    const int numHiVoFs = static_cast<int>(hiVoFs.size());
-
-    const bool useLoCell = (numLoVoFs > 0) && !(isLoCellIrregular && isLoCellCovered);
-    const bool useHiCell = (numHiVoFs > 0) && !(isHiCellIrregular && isHiCellCovered);
-
-    // Use centered differencing in dir-direction if we can. Otherwise, drop order to forward/backward differences.
-    if (useLoCell && useHiCell) {
-      for (int i = 0; i < numHiVoFs; i++) {
-        derivStencil.add(hiVoFs[i], 1. / numHiVoFs, dir);
+    // With exclusions, a direction without a stencil counts as lost order even if the unrestricted stencil has none
+    // either, so that the caller does not use a zero derivative. The unrestricted stencil is only needed when cells
+    // were actually excluded.
+    if (a_invalidCells != nullptr) {
+      if (order <= 0) {
+        keptOrder = false;
       }
+      else if (!(a_invalidCells->isEmpty())) {
+        VoFStencil unrestrictedStencil;
 
-      for (int i = 0; i < numLoVoFs; i++) {
-        derivStencil.add(loVoFs[i], -1. / numLoVoFs, dir);
+        if (order < derivative(unrestrictedStencil, nullptr)) {
+          keptOrder = false;
+        }
       }
-
-      derivStencil *= 1. / (2.0 * a_dx);
-    }
-    else if (useLoCell) {
-      derivStencil.add(a_vof, 1.0, dir);
-
-      for (int i = 0; i < numLoVoFs; i++) {
-        derivStencil.add(loVoFs[i], -1. / numLoVoFs, dir);
-      }
-
-      derivStencil *= 1. / a_dx;
-    }
-    else if (useHiCell) {
-      derivStencil.add(a_vof, -1.0, dir);
-
-      for (int i = 0; i < numHiVoFs; i++) {
-        derivStencil.add(hiVoFs[i], 1. / numHiVoFs, dir);
-      }
-
-      derivStencil *= 1. / a_dx;
     }
 
-    if (useLoCell || useHiCell) {
-      foundStencil = true;
-
-      a_stencil += derivStencil;
-    }
-    else {
-      foundStencil = false;
-    }
+    a_stencil += derivStencil;
   }
 
-  return foundStencil;
+  return keptOrder;
 }
 
 bool
@@ -897,8 +887,9 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
   const EBISBox& ebisBoxCoar = a_ebislCoar[a_dit];
   const EBISBox& ebisBoxFine = a_ebislFine[a_dit];
 
-  // Get all coarse cells within radius 1.
-  const int coarRadius = 1;
+  // Get all coarse cells within the reach of the finite difference stencils, so that the fine cells under the covered
+  // cells that those stencils could not use are included.
+  const int coarRadius = m_stencilWidth;
 
   // Get coar vofs in range. The fine VoFs are defined as the VoFs that are available through refinement of the coarse
   // vofs.
