@@ -57,7 +57,7 @@ public:
   /**
    * @brief Define over the AMR hierarchy.
    * @details The flux is the given normal derivative, so the one-sided normal derivative stencils are not computed;
-   * only the grids are kept, for getBoundaryPosition.
+   * only the grids are kept, for getBoundaryPosition. For the same reason, getNumCellsWithoutStencil returns 0.
    * @param[in] a_petscGrid     PETSc grid
    * @param[in] a_interpolators Coarse-fine ghost cell interpolators of both phases, on each level. Not used.
    * @param[in] a_probLo        Lower-left corner of the computational domain

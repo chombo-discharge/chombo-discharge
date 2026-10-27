@@ -561,7 +561,7 @@ ___________
 * Periodic domains are not supported.
 * Multi-valued cells are not supported, and abort.
 * With the saturation charge condition, the AMG solve can converge slowly on complex geometries.
-* As in ``FieldSolverGMG``, a cut cell where no least-squares fit is accepted (see :ref:`Chap:LinearSolverDirichletBC`) has no flux through its EB face, and its potential is determined by its other faces only. With ``verbosity`` above 0, ``FieldSolverAMG`` prints the number of such cells when it sets up the solver.
+* As in ``FieldSolverGMG``, a cut cell where no least-squares fit is accepted (see :ref:`Chap:LinearSolverDirichletBC`) has no flux through its EB face, and its potential is determined by its other faces only. With ``verbosity`` above 0, ``FieldSolverAMG`` prints the number of such cells, counted per phase, when it sets up the solver.
 * With the saturation charge condition, an interface cell without a stencil on the gas side gets a zero normal derivative on both sides, and hence no surface charge, in both solvers.
 
 Frequency dependent permittivity

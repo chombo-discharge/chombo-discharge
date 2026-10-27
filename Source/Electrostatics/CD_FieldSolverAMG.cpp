@@ -362,7 +362,7 @@ FieldSolverAMG::setupSolver()
 
   if (numWithoutStencil > 0 && m_verbosity > 0) {
     pout() << "FieldSolverAMG::setupSolver -- " << numWithoutStencil
-           << " cut cells have no EB stencil, and no flux through their EB face" << endl;
+           << " cut cells (counted per phase) have no EB stencil, and no flux through their EB face" << endl;
   }
 
   // The settings from the input file are the defaults. They can be overridden with PETSc options that carry the prefix
