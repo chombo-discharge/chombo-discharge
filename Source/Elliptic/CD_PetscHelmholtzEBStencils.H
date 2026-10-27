@@ -99,6 +99,14 @@ public:
   operator=(const PetscHelmholtzEBStencils&& a_other) = delete;
 
   /**
+   * @brief Get the number of cut cells, summed over phases, levels and ranks, that have an EB face but no stencil.
+   * @details These cells have no flux through their EB face. Set by define.
+   * @return The number of cut cells without a stencil.
+   */
+  virtual long long
+  getNumCellsWithoutStencil() const noexcept;
+
+  /**
    * @brief Set the order of the stencils.
    * @param[in] a_order Highest order of the stencils. The search falls back to lower orders, down to 1.
    */
@@ -141,6 +149,11 @@ protected:
    * @brief Is defined or not.
    */
   bool m_isDefined;
+
+  /**
+   * @brief Number of cut cells, summed over phases, levels and ranks, that have an EB face but no stencil.
+   */
+  long long m_numCellsWithoutStencil;
 
   /**
    * @brief Verbose output or not.

@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_PetscHelmholtzEBStencils.H>
+#include <CD_ParallelOps.H>
 #include <CD_LeastSquares.H>
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
@@ -28,10 +29,11 @@ PetscHelmholtzEBStencils::PetscHelmholtzEBStencils() noexcept
 {
   CH_TIME("PetscHelmholtzEBStencils::PetscHelmholtzEBStencils");
 
-  m_isDefined = false;
-  m_verbose   = false;
-  m_order     = -1;
-  m_weight    = -1;
+  m_isDefined              = false;
+  m_verbose                = false;
+  m_order                  = -1;
+  m_weight                 = -1;
+  m_numCellsWithoutStencil = 0;
 
   ParmParse pp("PetscHelmholtzEBStencils");
   pp.query("verbose", m_verbose);
@@ -80,9 +82,10 @@ PetscHelmholtzEBStencils::clear() noexcept
     m_derivWeights[iphase].resize(0);
   }
 
-  m_petscGrid = RefCountedPtr<PetscGrid>();
-  m_probLo    = RealVect::Zero;
-  m_isDefined = false;
+  m_petscGrid              = RefCountedPtr<PetscGrid>();
+  m_probLo                 = RealVect::Zero;
+  m_numCellsWithoutStencil = 0;
+  m_isDefined              = false;
 
   m_interpolators.resize(0);
   m_dx.resize(0);
@@ -129,6 +132,9 @@ PetscHelmholtzEBStencils::define(const RefCountedPtr<PetscGrid>&        a_petscG
   m_probLo        = a_probLo;
   m_dx            = a_dx;
 
+  // Cut cells with an EB face but no accepted fit, which have no flux through their EB face.
+  long long numWithoutStencil = 0;
+
   for (int iphase = 0; iphase < numPhases; iphase++) {
     m_derivStencils[iphase].resize(numLevels);
     m_derivWeights[iphase].resize(numLevels);
@@ -146,7 +152,7 @@ PetscHelmholtzEBStencils::define(const RefCountedPtr<PetscGrid>&        a_petscG
       const DataIterator& dit  = dbl.dataIterator();
       const int           nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime) reduction(+ : numWithoutStencil)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex&             din     = dit[mybox];
         const Box                    box     = dbl[din];
@@ -170,13 +176,18 @@ PetscHelmholtzEBStencils::define(const RefCountedPtr<PetscGrid>&        a_petscG
 
           if (cells(vof.gridIndex()).getPetscRow(iphase) >= 0) {
             this->computeNormalDerivativeStencil(weights(vof, 0), stencils(vof, 0), iphase, lvl, din, vof);
+
+            if (weights(vof, 0) == 0.0 && ebisbox.normal(vof) != RealVect::Zero) {
+              numWithoutStencil++;
+            }
           }
         }
       }
     }
   }
 
-  m_isDefined = true;
+  m_numCellsWithoutStencil = ParallelOps::sum(numWithoutStencil);
+  m_isDefined              = true;
 }
 
 void
@@ -464,6 +475,19 @@ PetscHelmholtzEBStencils::getBoundaryPosition(const int        a_phase,
   const EBISBox& ebisbox = m_petscGrid->getMFLevelGrids()[a_level]->getEBLevelGrid(a_phase).getEBISL()[a_din];
 
   return m_probLo + Location::position(Location::Cell::Boundary, a_vof, ebisbox, m_dx[a_level]);
+}
+
+long long
+PetscHelmholtzEBStencils::getNumCellsWithoutStencil() const noexcept
+{
+  CH_TIME("PetscHelmholtzEBStencils::getNumCellsWithoutStencil");
+  if (m_verbose) {
+    pout() << "PetscHelmholtzEBStencils::getNumCellsWithoutStencil" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  return m_numCellsWithoutStencil;
 }
 
 #include <CD_NamespaceFooter.H>

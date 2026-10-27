@@ -355,6 +355,16 @@ FieldSolverAMG::setupSolver()
                     m_alpha,
                     m_beta);
 
+  // Cut cells whose least-squares fits were all rejected have no flux through their EB face, and their potential
+  // floats. The electrode and the interface conditions compute the stencils of the same cells, so one count covers
+  // both.
+  const long long numWithoutStencil = m_petscEbBc->getNumCellsWithoutStencil();
+
+  if (numWithoutStencil > 0 && m_verbosity > 0) {
+    pout() << "FieldSolverAMG::setupSolver -- " << numWithoutStencil
+           << " cut cells have no EB stencil, and no flux through their EB face" << endl;
+  }
+
   // The settings from the input file are the defaults. They can be overridden with PETSc options that carry the prefix
   // 'fieldsolveramg_', given through the PETSC_OPTIONS environment variable (or, for options without a value, on the
   // command line), e.g. -fieldsolveramg_ksp_monitor.
