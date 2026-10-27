@@ -416,6 +416,18 @@ LeastSquares::sumAllWeights(const VoFStencil& a_stencil)
   return ret;
 }
 
+Real
+LeastSquares::getLengthScale(const Vector<RealVect>& a_displacements) noexcept
+{
+  Real lengthScale = 0.0;
+
+  for (int i = 0; i < a_displacements.size(); i++) {
+    lengthScale = std::max(lengthScale, a_displacements[i].vectorLength());
+  }
+
+  return (lengthScale > 0.0) ? lengthScale : 1.0;
+}
+
 int
 LeastSquares::getTaylorExpansionSize(const int a_order)
 {
@@ -544,6 +556,11 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
     // system. This will also correspond to a modification of the right-hand side, but the required modifications are
     // not accessible in this routine, and so the user will have to make sense of them.
 
+    // The system is built from the displacements in units of the largest displacement, L, so that the columns of A
+    // are O(1). In physical units the column of a term of order n scales as dx^n, and the pseudoinverse would drop the
+    // high-order columns as rank deficient once dx is small. The stencil for a term of order n is divided by L^n below.
+    const Real lengthScale = LeastSquares::getLengthScale(a_displacements);
+
     int          i = 0;                // Exists just because we fill memory linearly.
     Vector<Real> linA(K * M, 0.0);     // Equal to (w*A)
     Vector<Real> linAplus(M * K, 0.0); // Equal to (w*A)^+
@@ -554,16 +571,22 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
       // Add column if it is an unknown in the lsq system.
       if (!a_knownTerms.contains(mi.getCurrentIndex())) {
         for (int k = 0; k < K; k++) {
-          linA[i] = a_weights[k] * mi.pow(a_displacements[k]) / mi.factorial();
+          linA[i] = a_weights[k] * mi.pow(a_displacements[k] / lengthScale) / mi.factorial();
           i++;
         }
       }
     }
 
-    // Compute the pseudo-inverse.
-    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
+    // Compute the pseudo-inverse. If A is rank deficient the neighborhood does not determine every term of the Taylor
+    // series to this order, and the pseudoinverse would silently drop some of them. No stencil is returned then, so
+    // that the caller can try a lower order or a different neighborhood.
+    int        rank     = 0;
+    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), rank, linA.stdVector(), K, M);
 
-    if (foundSVD) {
+    if (!foundSVD) {
+      MayDay::Warning("LeastSquares::computeSingleLevelStencils - could not perform singular value decomposition");
+    }
+    else if (rank == M) {
       // When we have eliminated rows in the linear system we can't use MultiIndex to map directly, this occurs because
       // if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)):
       //
@@ -605,14 +628,13 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
         // Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want
         // the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also
         // weighted).
+        const Real scale = std::pow(lengthScale, -deriv.sum());
+
         for (int k = 0; k < K; k++) {
           const int idx = row + k * M;
-          sten.add(a_allVofs[k], a_weights[k] * linAplus[idx]);
+          sten.add(a_allVofs[k], scale * a_weights[k] * linAplus[idx]);
         }
       }
-    }
-    else {
-      MayDay::Warning("LeastSquares::computeSingleLevelStencils - could not perform singular value decomposition");
     }
   }
 

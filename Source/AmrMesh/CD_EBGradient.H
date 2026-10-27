@@ -41,10 +41,17 @@
  *
  * i.e., the gradient is a two-level stencil.
  *
- * Near the domain boundaries this routine switches to first order stencils.
- * @note If there is no finer level, this class will compute regular second-order stencils away from the EB and switch
- * to compact width-one stencils if there are not enough cells available near the EB.
- * @note This class requires at least one ghost cell.
+ * In cut cells and next to the domain boundary, the derivative in a direction is a centered difference if the cells on
+ * both sides are available, and otherwise a second order one-sided difference that reaches two cells away. Only if the
+ * second cell is not available does the stencil drop to a first order one-sided difference. Near the refinement
+ * boundary these stencils only use valid cells, i.e. cells that are not covered by the finer level. If that costs
+ * order, the cell gets a two-level least squares stencil instead, fitted to the valid coarse cells within the reach of
+ * the finite difference stencils and to the fine cells under the covered ones.
+ * @note This class requires at least one ghost cell. The second order one-sided differences require two ghost cells,
+ * both in the data and in the EBISLayout; with fewer, the one-sided differences are first order.
+ * @note The second order one-sided differences are only as accurate as the data near the EB. With a first order EB
+ * boundary condition in the solver that produced the data (e.g. FieldSolverGMG with gmg_bc_order = 1), they can amplify
+ * its error; second order boundary conditions give the most accurate gradients.
  */
 class EBGradient
 {
@@ -221,6 +228,13 @@ protected:
   IntVect m_ghostVector;
 
   /**
+   * @brief Reach of the finite difference stencils in cut cells and next to the domain boundary.
+   * @details Two if the data and the EBISLayout have at least two ghost cells, in which case one-sided differences are
+   * second order. Otherwise one, in which case one-sided differences are first order.
+   */
+  int m_stencilWidth;
+
+  /**
    * @brief Pre-built copier for making copying from m_eblg to m_eblgFiCo go faster
    */
   Copier m_copier;
@@ -274,8 +288,10 @@ protected:
 
   /**
    * @brief Make masks
-   * @param[out] a_coarMaskCF      Mask holding a value of 1 in coarse cells that live on the refinement boundary.
-   * @param[out] a_coarMaskInvalid Mask holding a value of 1 in coarse cells that are covered by a finer grid level.
+   * @param[out] a_coarMaskCF      Mask holding a value of 1 in coarse cells within m_stencilWidth cells of the
+   * refinement boundary, outside the finer level.
+   * @param[out] a_coarMaskInvalid Mask holding a value of 1 in coarse cells that are covered by a finer grid level. It
+   * has m_stencilWidth ghost cells.
    */
   virtual void
   defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
@@ -302,20 +318,22 @@ protected:
   defineBuffers() noexcept;
 
   /**
-   * @brief Get a finite difference stencil, assuming that the data is cell-centered
-   * @param[out] a_stencil      Finite difference stencil.
+   * @brief Get the finite difference stencil for the gradient in a cell, assuming that the data is cell-centered.
+   * @details In each direction this is a centered difference if the cells on both sides are available. Otherwise it is
+   * a one-sided difference, second order if m_stencilWidth is two and the second cell is available, and first order if
+   * not. Cells in a_invalidCells are treated as unavailable.
+   * @param[out] a_stencil      Finite difference stencil. Component dir holds the derivative in direction dir.
    * @param[in]  a_vof          Grid cell
    * @param[in]  a_ebisBox      EBISBox
-   * @param[in]  a_validRegion  Map of cells that can/can't be used.
-   * @param[in]  a_dx           Grid resolution
-   * @return Finite difference stencil
+   * @param[in]  a_invalidCells Cells that the stencil may not use. If nullptr, all cells can be used.
+   * @return True if leaving out a_invalidCells did not lower the order of the derivative in any direction, and every
+   * direction has a stencil. Always true when a_invalidCells is null.
    */
   virtual bool
-  getFiniteDifferenceStencil(VoFStencil&            a_stencil,
-                             const VolIndex&        a_vof,
-                             const EBISBox&         a_ebisBox,
-                             const DenseIntVectSet& a_validRegion,
-                             const Real             a_dx) const noexcept;
+  getFiniteDifferenceStencil(VoFStencil&     a_stencil,
+                             const VolIndex& a_vof,
+                             const EBISBox&  a_ebisBox,
+                             IntVectSet*     a_invalidCells) const noexcept;
 
   /**
    * @brief Build a gradient stencil using least squares.
@@ -350,8 +368,10 @@ protected:
                          const int&             a_weight) const noexcept;
 
   /**
-   * @brief Check if a cell can produce valid finite difference stencils
-   * @details This will check for stencils for all vofs in a_ivCoar.
+   * @brief Check if the level finite difference stencils in a cell only reach into valid cells.
+   * @details This will check the stencils for all vofs in a_ivCoar. Stencils in cut cells may not reach into any
+   * covered cell. Stencils in regular cells may reach into covered regular cells, whose data is the average of the
+   * finer cells, but not into covered cut cells.
    * @param[in] a_ivCoar        Coarse grid cell.
    * @param[in] a_ebisBox       EBISBox
    * @param[in] a_invalidRegion Map of cells that are covered by a finer cell.
