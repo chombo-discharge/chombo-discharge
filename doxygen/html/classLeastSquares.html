@@ -143,13 +143,15 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a7181441b4c886b4a1aad17d8300917f9" id="r_a7181441b4c886b4a1aad17d8300917f9"><td class="memItemLeft" align="right" valign="top">static Vector&lt; RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7181441b4c886b4a1aad17d8300917f9">getDisplacements</a> (<a class="el" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">FaceLocation</a> a_fromLoc, <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">CellLocation</a> a_to, const FaceIndex &amp;a_fromFace, const Vector&lt; VolIndex &gt; &amp;a_toVofs, const EBISBox &amp;a_ebisbox, const Real &amp;a_dx)</td></tr>
 <tr class="memdesc:a7181441b4c886b4a1aad17d8300917f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).  <br /></td></tr>
 <tr class="memitem:a81fecd00e40723aa4ef380c34e8a6f31" id="r_a81fecd00e40723aa4ef380c34e8a6f31"><td class="memItemLeft" align="right" valign="top">static Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81fecd00e40723aa4ef380c34e8a6f31">makeDiagWeights</a> (const Vector&lt; RealVect &gt; &amp;a_displacements, int a_pow)</td></tr>
-<tr class="memdesc:a81fecd00e40723aa4ef380c34e8a6f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights are given as 1/||x1-x0||^a where a is the power.  <br /></td></tr>
+<tr class="memdesc:a81fecd00e40723aa4ef380c34e8a6f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights are given as 1/(1 + ||xi-x0||/d)^a where a is the power and d is the largest of the distances ||xi-x0||.  <br /></td></tr>
 <tr class="memitem:a4dc63cf494f7addcea03a0034f70e3db" id="r_a4dc63cf494f7addcea03a0034f70e3db"><td class="memItemLeft" align="right" valign="top">static VoFStencil&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4dc63cf494f7addcea03a0034f70e3db">computeGradSten</a> (const Vector&lt; VolIndex &gt; &amp;a_allVofs, const Vector&lt; RealVect &gt; &amp;a_displacements, int a_p, int a_order, const IntVectSet &amp;a_knownTerms)</td></tr>
 <tr class="memdesc:a4dc63cf494f7addcea03a0034f70e3db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a least squares gradient stencil solution for computing the gradient at a point. This routine eliminates the value in the point where the gradient is computed (which is assumed to be known.).  <br /></td></tr>
 <tr class="memitem:a4df27e0d661624ef2931fc32c57a258b" id="r_a4df27e0d661624ef2931fc32c57a258b"><td class="memItemLeft" align="right" valign="top">static VoFStencil&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4df27e0d661624ef2931fc32c57a258b">computeGradSten</a> (const Vector&lt; VolIndex &gt; &amp;a_allVofs, const Vector&lt; RealVect &gt; &amp;a_displacements, const Vector&lt; Real &gt; &amp;a_weights, int a_order, const IntVectSet &amp;a_knownTerms)</td></tr>
 <tr class="memdesc:a4df27e0d661624ef2931fc32c57a258b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.  <br /></td></tr>
 <tr class="memitem:afe6279f94eaed33fda908f40540513a4" id="r_afe6279f94eaed33fda908f40540513a4"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afe6279f94eaed33fda908f40540513a4">getTaylorExpansionSize</a> (int a_order)</td></tr>
 <tr class="memdesc:afe6279f94eaed33fda908f40540513a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the size of a Taylor expansion for a given order.  <br /></td></tr>
+<tr class="memitem:a8ec58041a698d3164fd0ce3282816acf" id="r_a8ec58041a698d3164fd0ce3282816acf"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ec58041a698d3164fd0ce3282816acf">getLengthScale</a> (const Vector&lt; RealVect &gt; &amp;a_displacements) noexcept</td></tr>
+<tr class="memdesc:a8ec58041a698d3164fd0ce3282816acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length scale that the least squares systems are built in.  <br /></td></tr>
 <tr class="memitem:a73667579bc1af78597fe3ab2fd4fdf63" id="r_a73667579bc1af78597fe3ab2fd4fdf63"><td class="memItemLeft" align="right" valign="top">static VoFStencil&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73667579bc1af78597fe3ab2fd4fdf63">computeInterpolationStencil</a> (const Vector&lt; VolIndex &gt; &amp;a_allVofs, const Vector&lt; RealVect &gt; &amp;a_displacements, int a_pow, int a_order)</td></tr>
 <tr class="memdesc:a73667579bc1af78597fe3ab2fd4fdf63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute an interpolation stencil to specified order by solving a least squares system.  <br /></td></tr>
 <tr class="memitem:a8b56ec7c658a2da7617bece87bd46802" id="r_a8b56ec7c658a2da7617bece87bd46802"><td class="memItemLeft" align="right" valign="top">static VoFStencil&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b56ec7c658a2da7617bece87bd46802">computeInterpolationStencil</a> (const Vector&lt; VolIndex &gt; &amp;a_allVofs, const Vector&lt; RealVect &gt; &amp;a_displacements, const Vector&lt; Real &gt; &amp;a_weights, int a_order)</td></tr>
@@ -250,7 +252,7 @@ template&lt;typename T&gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains fine-grid vofs only, and the second entry contains the coar vofs. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This will throw an error if you don't have enough equations for obtaining the specified order. </dd>
 <dd>
-The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. </dd>
+The return map is always initialized with empty stencils. If computing the pseudoinverse fails, or the system is rank deficient (the vofs do not determine every term of the Taylor series to a_order), the returned stencils are all empty. </dd>
 <dd>
 T is the precision used by LAPACK </dd></dl>
 
@@ -332,7 +334,7 @@ template&lt;typename T&gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains fine-grid vofs only, and the second entry contains the coar vofs. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This will throw an error if you don't have enough equations for obtaining the specified order. </dd>
 <dd>
-The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. </dd>
+The return map is always initialized with empty stencils. If computing the pseudoinverse fails, or the system is rank deficient (the vofs do not determine every term of the Taylor series to a_order), the returned stencils are all empty. </dd>
 <dd>
 T is the precision used by LAPACK </dd></dl>
 
@@ -642,7 +644,7 @@ This will throw an error if you don't have enough equations for obtaining the sp
 <dl class="section return"><dt>Returns</dt><dd>Stencils for each of the derivatives specified in the input argument. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This will throw an error if you don't have enough equations for obtaining the specified order. </dd>
 <dd>
-The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. </dd></dl>
+The return map is always initialized with empty stencils. If computing the pseudoinverse fails, or the system is rank deficient (the vofs do not determine every term of the Taylor series to a_order), the returned stencils are all empty. </dd></dl>
 
 </div>
 </div>
@@ -1392,6 +1394,40 @@ The return map is always initialized with empty stencils. If computing the pseud
 
 </div>
 </div>
+<a id="a8ec58041a698d3164fd0ce3282816acf" name="a8ec58041a698d3164fd0ce3282816acf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ec58041a698d3164fd0ce3282816acf">&#9670;&#160;</a></span>getLengthScale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real LeastSquares::getLengthScale </td>
+          <td>(</td>
+          <td class="paramtype">const Vector&lt; RealVect &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_displacements</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the length scale that the least squares systems are built in. </p>
+<p>The displacements are divided by this length so that the columns of the system matrix are O(1) for any grid resolution. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_displacements</td><td>Displacement vectors </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The largest length of the displacements, or 1 if there are none or all are zero. </dd></dl>
+
+</div>
+</div>
 <a id="afe6279f94eaed33fda908f40540513a4" name="afe6279f94eaed33fda908f40540513a4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afe6279f94eaed33fda908f40540513a4">&#9670;&#160;</a></span>getTaylorExpansionSize()</h2>
 
@@ -1453,7 +1489,7 @@ The return map is always initialized with empty stencils. If computing the pseud
 </table>
 </div><div class="memdoc">
 
-<p>Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights are given as 1/||x1-x0||^a where a is the power. </p>
+<p>Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights are given as 1/(1 + ||xi-x0||/d)^a where a is the power and d is the largest of the distances ||xi-x0||. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_displacements</td><td>Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. </td></tr>

@@ -95,10 +95,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:abda1be55d4517de413a554bbda06d0d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the singular value decomposition of a matrix.  <br /></td></tr>
 <tr class="memitem:a0ceda4b662b0df38bae763f698403f30" id="r_a0ceda4b662b0df38bae763f698403f30"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ceda4b662b0df38bae763f698403f30">computeSVD</a> (std::vector&lt; float &gt; &amp;a_linU, std::vector&lt; float &gt; &amp;a_linSigma, std::vector&lt; float &gt; &amp;a_linVtran, const std::vector&lt; float &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
 <tr class="memdesc:a0ceda4b662b0df38bae763f698403f30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the singular value decomposition of a matrix.  <br /></td></tr>
-<tr class="memitem:ae451bcb5403e96788e9081886e16e342" id="r_ae451bcb5403e96788e9081886e16e342"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae451bcb5403e96788e9081886e16e342">computePseudoInverse</a> (std::vector&lt; double &gt; &amp;a_linAplus, const std::vector&lt; double &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
-<tr class="memdesc:ae451bcb5403e96788e9081886e16e342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the pseudoinverse of matrix through singular value decomposition.  <br /></td></tr>
-<tr class="memitem:a4903a60b3ab9b7fe09362a4db55859b1" id="r_a4903a60b3ab9b7fe09362a4db55859b1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4903a60b3ab9b7fe09362a4db55859b1">computePseudoInverse</a> (std::vector&lt; float &gt; &amp;a_linAplus, const std::vector&lt; float &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
-<tr class="memdesc:a4903a60b3ab9b7fe09362a4db55859b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the pseudoinverse of matrix through singular value decomposition.  <br /></td></tr>
+<tr class="memitem:ada98f5d55882ae959cc4a8e42b5c81f7" id="r_ada98f5d55882ae959cc4a8e42b5c81f7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada98f5d55882ae959cc4a8e42b5c81f7">computePseudoInverse</a> (std::vector&lt; double &gt; &amp;a_linAplus, int &amp;a_rank, const std::vector&lt; double &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
+<tr class="memdesc:ada98f5d55882ae959cc4a8e42b5c81f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the pseudoinverse of matrix through singular value decomposition.  <br /></td></tr>
+<tr class="memitem:a0da604e8523edebf02300e667854f98c" id="r_a0da604e8523edebf02300e667854f98c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0da604e8523edebf02300e667854f98c">computePseudoInverse</a> (std::vector&lt; float &gt; &amp;a_linAplus, int &amp;a_rank, const std::vector&lt; float &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</td></tr>
+<tr class="memdesc:a0da604e8523edebf02300e667854f98c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the pseudoinverse of matrix through singular value decomposition.  <br /></td></tr>
 <tr class="memitem:a88a00f76a295f0bfafdcdb395dfe2089" id="r_a88a00f76a295f0bfafdcdb395dfe2089"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88a00f76a295f0bfafdcdb395dfe2089">linearizeMatrix</a> (std::vector&lt; double &gt; &amp;a_linA, int &amp;a_M, int &amp;a_N, const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A, const char &amp;a_format)</td></tr>
 <tr class="memdesc:a88a00f76a295f0bfafdcdb395dfe2089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize a matrix to column major Fortran form by assuming row or major column format of the input matrix.  <br /></td></tr>
 <tr class="memitem:acad6e09189914ea71e18ce1c88888c5d" id="r_acad6e09189914ea71e18ce1c88888c5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acad6e09189914ea71e18ce1c88888c5d">linearizeColumnMajorMatrix</a> (std::vector&lt; double &gt; &amp;a_linA, int &amp;a_M, int &amp;a_N, const std::vector&lt; std::vector&lt; double &gt; &gt; &amp;a_A)</td></tr>
@@ -115,8 +115,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Namespace containing various useful linear algebra routines using LaPACK. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="ae451bcb5403e96788e9081886e16e342" name="ae451bcb5403e96788e9081886e16e342"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae451bcb5403e96788e9081886e16e342">&#9670;&#160;</a></span>computePseudoInverse() <span class="overload">[1/2]</span></h2>
+<a id="ada98f5d55882ae959cc4a8e42b5c81f7" name="ada98f5d55882ae959cc4a8e42b5c81f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada98f5d55882ae959cc4a8e42b5c81f7">&#9670;&#160;</a></span>computePseudoInverse() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -125,6 +125,11 @@ Functions</h2></td></tr>
           <td class="memname">bool LaPackUtils::computePseudoInverse </td>
           <td>(</td>
           <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_linAplus</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_rank</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -145,9 +150,10 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Compute the pseudoinverse of matrix through singular value decomposition. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Singular values below eps * max(M, N) * sigma_max are treated as zero. The numerical rank is the number of singular values above that tolerance; it is smaller than min(M, N) when the pseudoinverse drops directions. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_linAplus</td><td>Pseudoinverse in column major Fortran order. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_rank</td><td>Numerical rank of A. Zero if the singular value decomposition failed. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_linA</td><td>Input matrix in column major Fortran order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_M</td><td>Number of rows in A </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_N</td><td>Number of columns in A </td></tr>
@@ -158,8 +164,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a4903a60b3ab9b7fe09362a4db55859b1" name="a4903a60b3ab9b7fe09362a4db55859b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4903a60b3ab9b7fe09362a4db55859b1">&#9670;&#160;</a></span>computePseudoInverse() <span class="overload">[2/2]</span></h2>
+<a id="a0da604e8523edebf02300e667854f98c" name="a0da604e8523edebf02300e667854f98c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0da604e8523edebf02300e667854f98c">&#9670;&#160;</a></span>computePseudoInverse() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -168,6 +174,11 @@ Functions</h2></td></tr>
           <td class="memname">bool LaPackUtils::computePseudoInverse </td>
           <td>(</td>
           <td class="paramtype">std::vector&lt; float &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_linAplus</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;</td>          <td class="paramname"><span class="paramname"><em>a_rank</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -188,9 +199,10 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Compute the pseudoinverse of matrix through singular value decomposition. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Singular values below eps * max(M, N) * sigma_max are treated as zero. The numerical rank is the number of singular values above that tolerance; it is smaller than min(M, N) when the pseudoinverse drops directions. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_linAplus</td><td>Pseudoinverse in column major Fortran order. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_rank</td><td>Numerical rank of A. Zero if the singular value decomposition failed. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_linA</td><td>Input matrix in column major Fortran order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_M</td><td>Number of rows in A </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_N</td><td>Number of columns in A </td></tr>
