@@ -805,7 +805,8 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
 
-    foundStencil = true;
+    // The stencils are empty if the system was rank deficient, in which case the caller drops order.
+    foundStencil = (a_stencilFine.size() + a_stencilCoar.size()) > 0;
     CH_STOP(t4);
   }
   else {
