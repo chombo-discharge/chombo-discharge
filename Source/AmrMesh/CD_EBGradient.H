@@ -323,7 +323,8 @@ protected:
    * @param[in]  a_vof          Grid cell
    * @param[in]  a_ebisBox      EBISBox
    * @param[in]  a_invalidCells Cells that the stencil may not use. If nullptr, all cells can be used.
-   * @return True if leaving out a_invalidCells did not lower the order of the derivative in any direction.
+   * @return True if leaving out a_invalidCells did not lower the order of the derivative in any direction, and every
+   * direction has a stencil. Always true when a_invalidCells is null.
    */
   virtual bool
   getFiniteDifferenceStencil(VoFStencil&     a_stencil,

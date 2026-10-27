@@ -830,11 +830,19 @@ EBGradient::getFiniteDifferenceStencil(VoFStencil&     a_stencil,
 
     const int order = derivative(derivStencil, a_invalidCells);
 
+    // With exclusions, a direction without a stencil counts as lost order even if the unrestricted stencil has none
+    // either, so that the caller does not use a zero derivative. The unrestricted stencil is only needed when cells
+    // were actually excluded.
     if (a_invalidCells != nullptr) {
-      VoFStencil unrestrictedStencil;
-
-      if (order < derivative(unrestrictedStencil, nullptr)) {
+      if (order <= 0) {
         keptOrder = false;
+      }
+      else if (!(a_invalidCells->isEmpty())) {
+        VoFStencil unrestrictedStencil;
+
+        if (order < derivative(unrestrictedStencil, nullptr)) {
+          keptOrder = false;
+        }
       }
     }
 
