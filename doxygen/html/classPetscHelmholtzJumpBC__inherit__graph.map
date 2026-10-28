@@ -1,0 +1,9 @@
+<map id="PetscHelmholtzJumpBC" name="PetscHelmholtzJumpBC">
+<area shape="rect" id="Node000001" title="Base class for the conditions on the interface between two phases, for PetscHelmholtzOp." alt="" coords="144,81,318,109"/>
+<area shape="rect" id="Node000003" href="$classPetscHelmholtzNaturalJumpBC.html" title="The natural jump condition b_0 * D_0 + b_1 * D_1 = sigma on the interface between two phases." alt="" coords="5,165,228,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,117,136,167,134,162,198,118"/>
+<area shape="rect" id="Node000004" href="$classPetscHelmholtzSaturationChargeJumpBC.html" title="The saturation charge condition D_p = 0 on the interface, on the side of one phase p,..." alt="" coords="252,157,442,201"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="263,115,319,156,314,156,261,121"/>
+<area shape="rect" id="Node000002" href="$classPetscHelmholtzEBStencils.html" title="Shared one&#45;sided EB face stencils for the EB and jump boundary conditions of PetscHelmholtzOp." alt="" coords="136,5,327,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,47,234,82,229,79,230,51"/>
+</map>

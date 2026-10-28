@@ -6,11 +6,12 @@ var searchData=
   ['updatediffusioncoefficients_3',['updateDiffusionCoefficients',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a86043e0fb89a6cf0f20b9c81c24ebb54',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper']]],
   ['updatefield_4',['updateField',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a83f8c4d38f72f48241b8cbfd1c008f5f',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::updateField()'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a123ff8c9a0822f857bf0fc914fb90c6b',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::updateField(const Vector&lt; EBAMRCellData * &gt; &amp;a_densities, const EBAMRIVData &amp;a_sigma)']]],
   ['updatejumpbc_5',['updateJumpBC',['../classMFHelmholtzOp.html#ac5dbe918878cb995d225f687b2cda7f2',1,'MFHelmholtzOp']]],
-  ['updatemobilities_6',['updateMobilities',['../classItoSolver.html#a877960fbdde4e57f9ce3061fc0bb703f',1,'ItoSolver::updateMobilities()'],['../classItoSolver.html#a90bf0e29b083ce56fc805c3e806f12d3',1,'ItoSolver::updateMobilities(int a_level, const DataIndex &amp;a_dit)']]],
-  ['updatereactionrates_7',['updateReactionRates',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a12a370f24d9e421357c28631595be4b4',1,'Physics::ItoKMC::ItoKMCPhysics::updateReactionRates()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4e3309066e93b4e53d7eacd98e2becfe',1,'Physics::ItoKMC::ItoKMCJSON::updateReactionRates()']]],
-  ['upwind_8',['upwind',['../classCdrCTU.html#a0354dc596336d973c1abb8b2b326ad62',1,'CdrCTU']]],
-  ['usechomboshop_9',['useChomboShop',['../classComputationalGeometry.html#a39698e3e356d6c6546253998e68112e3',1,'ComputationalGeometry']]],
-  ['usepolyhedralshop_10',['usePolyhedralShop',['../classComputationalGeometry.html#a41425a7b9a260e4aa0899120021e29ca',1,'ComputationalGeometry']]],
-  ['usescanshop_11',['useScanShop',['../classComputationalGeometry.html#a36b52e3f1ca2a169bfcb92af1ad98b5e',1,'ComputationalGeometry']]],
-  ['useskrylov_12',['usesKrylov',['../structEllipticSolverChain_1_1Settings.html#a39b3855e73b3ea76ac52e5449d789f85',1,'EllipticSolverChain::Settings']]]
+  ['updatejumpdata_6',['updateJumpData',['../classPetscHelmholtzSaturationChargeJumpBC.html#a456bc20f26b5d0a9773d949e4ee46831',1,'PetscHelmholtzSaturationChargeJumpBC::updateJumpData()'],['../classPetscHelmholtzJumpBC.html#ae733656dc4bdc0a2baa1e947db0abf55',1,'PetscHelmholtzJumpBC::updateJumpData()'],['../classPetscHelmholtzNaturalJumpBC.html#ac220f7cf7a57aa9e38c315c9101ce495',1,'PetscHelmholtzNaturalJumpBC::updateJumpData()']]],
+  ['updatemobilities_7',['updateMobilities',['../classItoSolver.html#a877960fbdde4e57f9ce3061fc0bb703f',1,'ItoSolver::updateMobilities()'],['../classItoSolver.html#a90bf0e29b083ce56fc805c3e806f12d3',1,'ItoSolver::updateMobilities(int a_level, const DataIndex &amp;a_dit)']]],
+  ['updatereactionrates_8',['updateReactionRates',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a12a370f24d9e421357c28631595be4b4',1,'Physics::ItoKMC::ItoKMCPhysics::updateReactionRates()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4e3309066e93b4e53d7eacd98e2becfe',1,'Physics::ItoKMC::ItoKMCJSON::updateReactionRates()']]],
+  ['upwind_9',['upwind',['../classCdrCTU.html#a0354dc596336d973c1abb8b2b326ad62',1,'CdrCTU']]],
+  ['usechomboshop_10',['useChomboShop',['../classComputationalGeometry.html#a39698e3e356d6c6546253998e68112e3',1,'ComputationalGeometry']]],
+  ['usepolyhedralshop_11',['usePolyhedralShop',['../classComputationalGeometry.html#a41425a7b9a260e4aa0899120021e29ca',1,'ComputationalGeometry']]],
+  ['usescanshop_12',['useScanShop',['../classComputationalGeometry.html#a36b52e3f1ca2a169bfcb92af1ad98b5e',1,'ComputationalGeometry']]],
+  ['useskrylov_13',['usesKrylov',['../structEllipticSolverChain_1_1Settings.html#a39b3855e73b3ea76ac52e5449d789f85',1,'EllipticSolverChain::Settings']]]
 ];

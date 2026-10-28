@@ -1,0 +1,11 @@
+<map id="PetscHelmholtzEBBC" name="PetscHelmholtzEBBC">
+<area shape="rect" id="Node000001" title="Base class for the boundary conditions on the EB faces of cut cells that are not interface cells (ele..." alt="" coords="166,81,324,109"/>
+<area shape="rect" id="Node000003" href="$classPetscHelmholtzDirichletEBBC.html" title="Dirichlet boundary condition phi = phi_B on the EB faces, for PetscHelmholtzOp." alt="" coords="18,157,232,184"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,119,148,158,145,154,213,115"/>
+<area shape="rect" id="Node000005" href="$classPetscHelmholtzNeumannEBBC.html" title="Neumann boundary condition dphi/dn = g on the EB faces, for PetscHelmholtzOp." alt="" coords="256,157,477,184"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="280,114,347,156,342,156,279,120"/>
+<area shape="rect" id="Node000002" href="$classPetscHelmholtzEBStencils.html" title="Shared one&#45;sided EB face stencils for the EB and jump boundary conditions of PetscHelmholtzOp." alt="" coords="149,5,341,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,47,247,82,243,80,244,51"/>
+<area shape="rect" id="Node000004" href="$classPetscHelmholtzElectrostaticEBBC.html" title="Electrode boundary conditions on the EB faces for PetscHelmholtzOp, taken from ElectrostaticEbBc." alt="" coords="5,232,245,260"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="127,198,127,233,123,231,123,202"/>
+</map>

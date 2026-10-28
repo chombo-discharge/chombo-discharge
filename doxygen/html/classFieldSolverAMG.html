@@ -80,7 +80,9 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-types">Protected Types</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classFieldSolverAMG-members.html">List of all members</a>  </div>
@@ -154,7 +156,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~FieldSolverAMG</b
 <tr class="memitem:a75d298d461fae4d61f14bc9a3318a831" id="r_a75d298d461fae4d61f14bc9a3318a831"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75d298d461fae4d61f14bc9a3318a831">setupSolver</a> () override</td></tr>
 <tr class="memdesc:a75d298d461fae4d61f14bc9a3318a831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assemble the operator and set up the PETSc solver.  <br /></td></tr>
 <tr class="memitem:a8939b933db60c46495f82b2a86b4ddc4" id="r_a8939b933db60c46495f82b2a86b4ddc4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8939b933db60c46495f82b2a86b4ddc4">setSolverPermittivities</a> (const MFAMRCellData &amp;a_permittivityCell, const MFAMRFluxData &amp;a_permittivityFace, const MFAMRIVData &amp;a_permittivityEB) override</td></tr>
-<tr class="memdesc:a8939b933db60c46495f82b2a86b4ddc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change the permittivities used by the solver. Not supported yet, and aborts.  <br /></td></tr>
+<tr class="memdesc:a8939b933db60c46495f82b2a86b4ddc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change the permittivities used by the solver, e.g. for a semi-implicit scheme.  <br /></td></tr>
 <tr class="inherit_header pub_methods_classFieldSolver"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classFieldSolver')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classFieldSolver.html">FieldSolver</a></td></tr>
 <tr class="memitem:a5d3bfee325ccfbe1f0951c9c3840c6cf inherit pub_methods_classFieldSolver" id="r_a5d3bfee325ccfbe1f0951c9c3840c6cf"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>FieldSolver</b> ()</td></tr>
@@ -261,6 +263,13 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocate</b
 <tr class="memitem:a37f560df4bb28e832891a74893bd115c inherit pub_methods_classFieldSolver" id="r_a37f560df4bb28e832891a74893bd115c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a37f560df4bb28e832891a74893bd115c">getDataLocation</a> () const</td></tr>
 <tr class="memdesc:a37f560df4bb28e832891a74893bd115c inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get data location.  <br /></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-types" class="groupheader"><a id="pro-types" name="pro-types"></a>
+Protected Types</h2></td></tr>
+<tr class="memitem:a11e0eea7cae3a959fc9d32cdfaed34cc" id="r_a11e0eea7cae3a959fc9d32cdfaed34cc"><td class="memItemLeft" align="right" valign="top"><a id="a11e0eea7cae3a959fc9d32cdfaed34cc" name="a11e0eea7cae3a959fc9d32cdfaed34cc"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11e0eea7cae3a959fc9d32cdfaed34cc">JumpBCType</a> { <b>Natural</b>
+, <b>SaturationCharge</b>
+ }</td></tr>
+<tr class="memdesc:a11e0eea7cae3a959fc9d32cdfaed34cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conditions on the interface between the gas and the dielectrics. <br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:af547deb58b31e0e1cd4bafcbb82c41ed" id="r_af547deb58b31e0e1cd4bafcbb82c41ed"><td class="memItemLeft" align="right" valign="top"><a id="af547deb58b31e0e1cd4bafcbb82c41ed" name="af547deb58b31e0e1cd4bafcbb82c41ed"></a>
@@ -302,6 +311,11 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setDefaultDom
 <tr class="memitem:a13fd859a86309a25f10cbee4b610fb42 inherit pro_methods_classFieldSolver" id="r_a13fd859a86309a25f10cbee4b610fb42"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a13fd859a86309a25f10cbee4b610fb42">fillCoveredPotential</a> (MFAMRCellData &amp;a_phi) const noexcept</td></tr>
 <tr class="memdesc:a13fd859a86309a25f10cbee4b610fb42 inherit pro_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility routine that fills the gas-side covered cells by the potential from the closest electrode.  <br /></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-static-methods" class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a9fefa953821f48f141cc539f3b668a71" id="r_a9fefa953821f48f141cc539f3b668a71"><td class="memItemLeft" align="right" valign="top">static PetscErrorCode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9fefa953821f48f141cc539f3b668a71">monitorResidual</a> (KSP a_ksp, PetscInt a_iteration, PetscReal a_residualNorm, void *a_context)</td></tr>
+<tr class="memdesc:a9fefa953821f48f141cc539f3b668a71"><td class="mdescLeft">&#160;</td><td class="mdescRight">KSP monitor that prints the residual at every iteration, as the Krylov solvers of <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> do.  <br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:ad7ae3477209b4935df095b1333266935" id="r_ad7ae3477209b4935df095b1333266935"><td class="memItemLeft" align="right" valign="top"><a id="ad7ae3477209b4935df095b1333266935" name="ad7ae3477209b4935df095b1333266935"></a>
@@ -309,7 +323,25 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_isSolverSetup</b></
 <tr class="memdesc:ad7ae3477209b4935df095b1333266935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is the solver set up or not. <br /></td></tr>
 <tr class="memitem:a7afdb271cca1322368050453beceb4ff" id="r_a7afdb271cca1322368050453beceb4ff"><td class="memItemLeft" align="right" valign="top"><a id="a7afdb271cca1322368050453beceb4ff" name="a7afdb271cca1322368050453beceb4ff"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_kspType</b></td></tr>
-<tr class="memdesc:a7afdb271cca1322368050453beceb4ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">PETSc Krylov solver type, KSPBCGS or KSPGMRES, from the 'bicgstab' or 'gmres' option. <br /></td></tr>
+<tr class="memdesc:a7afdb271cca1322368050453beceb4ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">PETSc Krylov solver type, e.g. 'gmres', 'fgmres', 'bcgs' (also given as 'bicgstab') or 'cg'. <br /></td></tr>
+<tr class="memitem:a66dae2ffa5d11ef865087743e55ee781" id="r_a66dae2ffa5d11ef865087743e55ee781"><td class="memItemLeft" align="right" valign="top"><a id="a66dae2ffa5d11ef865087743e55ee781" name="a66dae2ffa5d11ef865087743e55ee781"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_kspGmresRestart</b></td></tr>
+<tr class="memdesc:a66dae2ffa5d11ef865087743e55ee781"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart length of GMRES and FGMRES. <br /></td></tr>
+<tr class="memitem:a4217cafb3e59804e599b07fe04775909" id="r_a4217cafb3e59804e599b07fe04775909"><td class="memItemLeft" align="right" valign="top"><a id="a4217cafb3e59804e599b07fe04775909" name="a4217cafb3e59804e599b07fe04775909"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_amgSmootherKsp</b></td></tr>
+<tr class="memdesc:a4217cafb3e59804e599b07fe04775909"><td class="mdescLeft">&#160;</td><td class="mdescRight">KSP type of the smoother on each level of a multigrid preconditioner, e.g. 'chebyshev' or 'richardson'. <br /></td></tr>
+<tr class="memitem:abd6deffce626532aa4dbfdfca71f68de" id="r_abd6deffce626532aa4dbfdfca71f68de"><td class="memItemLeft" align="right" valign="top"><a id="abd6deffce626532aa4dbfdfca71f68de" name="abd6deffce626532aa4dbfdfca71f68de"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_amgSmootherPc</b></td></tr>
+<tr class="memdesc:abd6deffce626532aa4dbfdfca71f68de"><td class="mdescLeft">&#160;</td><td class="mdescRight">PC type of the smoother on each level of a multigrid preconditioner, e.g. 'sor' or 'jacobi'. <br /></td></tr>
+<tr class="memitem:a6ba19593ffd8784c18eafb55f25d59c5" id="r_a6ba19593ffd8784c18eafb55f25d59c5"><td class="memItemLeft" align="right" valign="top"><a id="a6ba19593ffd8784c18eafb55f25d59c5" name="a6ba19593ffd8784c18eafb55f25d59c5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_amgSmootherIts</b></td></tr>
+<tr class="memdesc:a6ba19593ffd8784c18eafb55f25d59c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of smoothing steps on each level of a multigrid preconditioner. <br /></td></tr>
+<tr class="memitem:a864b45f27f053e2f06e9f8372e263647" id="r_a864b45f27f053e2f06e9f8372e263647"><td class="memItemLeft" align="right" valign="top"><a id="a864b45f27f053e2f06e9f8372e263647" name="a864b45f27f053e2f06e9f8372e263647"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_gamgThreshold</b></td></tr>
+<tr class="memdesc:a864b45f27f053e2f06e9f8372e263647"><td class="mdescLeft">&#160;</td><td class="mdescRight">GAMG graph threshold: connections weaker than this are dropped when aggregating. Negative keeps them all. <br /></td></tr>
+<tr class="memitem:a466ed669a183d176843978983b627a23" id="r_a466ed669a183d176843978983b627a23"><td class="memItemLeft" align="right" valign="top"><a id="a466ed669a183d176843978983b627a23" name="a466ed669a183d176843978983b627a23"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_gamgAggressiveCoarsening</b></td></tr>
+<tr class="memdesc:a466ed669a183d176843978983b627a23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of levels that GAMG coarsens aggressively (square graph). <br /></td></tr>
 <tr class="memitem:a723906fa98e889b0f7ec0e846797fd95" id="r_a723906fa98e889b0f7ec0e846797fd95"><td class="memItemLeft" align="right" valign="top"><a id="a723906fa98e889b0f7ec0e846797fd95" name="a723906fa98e889b0f7ec0e846797fd95"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>m_pcType</b></td></tr>
 <tr class="memdesc:a723906fa98e889b0f7ec0e846797fd95"><td class="mdescLeft">&#160;</td><td class="mdescRight">PETSc preconditioner type, e.g. 'gamg' or 'hypre'. <br /></td></tr>
@@ -322,12 +354,41 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_kspAtol</b></td></t
 <tr class="memitem:a1997af2b1f9a9429c56222937b82b4c8" id="r_a1997af2b1f9a9429c56222937b82b4c8"><td class="memItemLeft" align="right" valign="top"><a id="a1997af2b1f9a9429c56222937b82b4c8" name="a1997af2b1f9a9429c56222937b82b4c8"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_kspMaxIter</b></td></tr>
 <tr class="memdesc:a1997af2b1f9a9429c56222937b82b4c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of Krylov iterations. <br /></td></tr>
+<tr class="memitem:a500516a6fd19742a85a3286ddaf7a2fd" id="r_a500516a6fd19742a85a3286ddaf7a2fd"><td class="memItemLeft" align="right" valign="top"><a id="a500516a6fd19742a85a3286ddaf7a2fd" name="a500516a6fd19742a85a3286ddaf7a2fd"></a>
+<a class="el" href="#a11e0eea7cae3a959fc9d32cdfaed34cc">JumpBCType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_jumpBcType</b></td></tr>
+<tr class="memdesc:a500516a6fd19742a85a3286ddaf7a2fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface condition. <br /></td></tr>
+<tr class="memitem:ae30a39b2c5a47f592f113ea2731506f6" id="r_ae30a39b2c5a47f592f113ea2731506f6"><td class="memItemLeft" align="right" valign="top"><a id="ae30a39b2c5a47f592f113ea2731506f6" name="ae30a39b2c5a47f592f113ea2731506f6"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebOrder</b></td></tr>
+<tr class="memdesc:ae30a39b2c5a47f592f113ea2731506f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Highest order of the EB face stencils, for the electrode and the interface faces. <br /></td></tr>
+<tr class="memitem:abd912668dc1614e395ca9a0e49d5e40e" id="r_abd912668dc1614e395ca9a0e49d5e40e"><td class="memItemLeft" align="right" valign="top"><a id="abd912668dc1614e395ca9a0e49d5e40e" name="abd912668dc1614e395ca9a0e49d5e40e"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ebWeight</b></td></tr>
+<tr class="memdesc:abd912668dc1614e395ca9a0e49d5e40e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Least-squares weighting of the EB face stencils. <br /></td></tr>
+<tr class="memitem:a5afa75f03986af9e4d8061ffe98f6bed" id="r_a5afa75f03986af9e4d8061ffe98f6bed"><td class="memItemLeft" align="right" valign="top"><a id="a5afa75f03986af9e4d8061ffe98f6bed" name="a5afa75f03986af9e4d8061ffe98f6bed"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>m_kappaSource</b></td></tr>
+<tr class="memdesc:a5afa75f03986af9e4d8061ffe98f6bed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight the space charge density by the volume fraction in solve, or not, as in <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a>. <br /></td></tr>
+<tr class="memitem:ab6bf42d63933f921ecb020bc244b053b" id="r_ab6bf42d63933f921ecb020bc244b053b"><td class="memItemLeft" align="right" valign="top"><a id="ab6bf42d63933f921ecb020bc244b053b" name="ab6bf42d63933f921ecb020bc244b053b"></a>
+RefCountedPtr&lt; <a class="el" href="classPetscHelmholtzEBBC.html">PetscHelmholtzEBBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_petscEbBc</b></td></tr>
+<tr class="memdesc:ab6bf42d63933f921ecb020bc244b053b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boundary conditions on the electrode faces. <br /></td></tr>
+<tr class="memitem:a914eb0834cfc9b08e1c50e8c545e1743" id="r_a914eb0834cfc9b08e1c50e8c545e1743"><td class="memItemLeft" align="right" valign="top"><a id="a914eb0834cfc9b08e1c50e8c545e1743" name="a914eb0834cfc9b08e1c50e8c545e1743"></a>
+RefCountedPtr&lt; <a class="el" href="classPetscHelmholtzJumpBC.html">PetscHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_petscJumpBc</b></td></tr>
+<tr class="memdesc:a914eb0834cfc9b08e1c50e8c545e1743"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conditions on the interface between the gas and the dielectrics. <br /></td></tr>
 <tr class="memitem:a66ffbdc64cef815ef2cfaa022b27c3a0" id="r_a66ffbdc64cef815ef2cfaa022b27c3a0"><td class="memItemLeft" align="right" valign="top"><a id="a66ffbdc64cef815ef2cfaa022b27c3a0" name="a66ffbdc64cef815ef2cfaa022b27c3a0"></a>
 RefCountedPtr&lt; <a class="el" href="classPetscHelmholtzOp.html">PetscHelmholtzOp</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_petscOp</b></td></tr>
 <tr class="memdesc:a66ffbdc64cef815ef2cfaa022b27c3a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The operator. <br /></td></tr>
 <tr class="memitem:aa21d3e3eeb1c60e359527d114d324df0" id="r_aa21d3e3eeb1c60e359527d114d324df0"><td class="memItemLeft" align="right" valign="top"><a id="aa21d3e3eeb1c60e359527d114d324df0" name="aa21d3e3eeb1c60e359527d114d324df0"></a>
 KSP&#160;</td><td class="memItemRight" valign="bottom"><b>m_ksp</b></td></tr>
 <tr class="memdesc:aa21d3e3eeb1c60e359527d114d324df0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The PETSc solver. <br /></td></tr>
+<tr class="memitem:a7d5d45de5fcf47ef4e1d070f0421dc06" id="r_a7d5d45de5fcf47ef4e1d070f0421dc06"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d5d45de5fcf47ef4e1d070f0421dc06">m_petscVerbosity</a></td></tr>
+<tr class="memdesc:a7d5d45de5fcf47ef4e1d070f0421dc06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbosity of the PETSc solve.  <br /></td></tr>
+<tr class="memitem:a21aa55c10ba81b125a9fc2f9a7505206" id="r_a21aa55c10ba81b125a9fc2f9a7505206"><td class="memItemLeft" align="right" valign="top"><a id="a21aa55c10ba81b125a9fc2f9a7505206" name="a21aa55c10ba81b125a9fc2f9a7505206"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_monitorZeroResidNorm</b></td></tr>
+<tr class="memdesc:a21aa55c10ba81b125a9fc2f9a7505206"><td class="mdescLeft">&#160;</td><td class="mdescRight">The 2-norm of the zero-residual b - A*0 = b of the current solve, which the true residual is printed relative to. <br /></td></tr>
+<tr class="memitem:a3367fb100f4964e743330a635af29f47" id="r_a3367fb100f4964e743330a635af29f47"><td class="memItemLeft" align="right" valign="top"><a id="a3367fb100f4964e743330a635af29f47" name="a3367fb100f4964e743330a635af29f47"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_monitorFirstNorm</b></td></tr>
+<tr class="memdesc:a3367fb100f4964e743330a635af29f47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Residual norm of the KSP at its first iteration of the current solve. <br /></td></tr>
+<tr class="memitem:aa48db0fb1e7725cf69b8061f7bf77078" id="r_aa48db0fb1e7725cf69b8061f7bf77078"><td class="memItemLeft" align="right" valign="top"><a id="aa48db0fb1e7725cf69b8061f7bf77078" name="aa48db0fb1e7725cf69b8061f7bf77078"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><b>m_monitorPreviousNorm</b></td></tr>
+<tr class="memdesc:aa48db0fb1e7725cf69b8061f7bf77078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Residual norm of the KSP at the previous iteration of the current solve. <br /></td></tr>
 <tr class="inherit_header pro_attribs_classFieldSolver"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classFieldSolver')"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classFieldSolver.html">FieldSolver</a></td></tr>
 <tr class="memitem:a29440a493a6844cb639f080fa023ffd6 inherit pro_attribs_classFieldSolver" id="r_a29440a493a6844cb639f080fa023ffd6"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dataLocation</b></td></tr>
@@ -452,7 +513,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc Krylov method, preconditioned by algebraic multigrid. </p>
-<p>This is the PETSc counterpart of <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a>, with the same inputs and outputs. The operator is -div(eps * grad(phi)) = rho/eps0, assembled by <a class="el" href="classPetscHelmholtzOp.html" title="Helmholtz operator alpha*a*phi + beta*div(b*grad(phi)), assembled as a PETSc matrix over the rows of ...">PetscHelmholtzOp</a>. The operator spans all AMR levels. Supported so far: a single phase, no embedded boundaries. </p>
+<p>This is the PETSc counterpart of <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a>, with the same inputs and outputs. The operator is -div(eps * grad(phi)) = rho/eps0, assembled by <a class="el" href="classPetscHelmholtzOp.html" title="Helmholtz operator alpha*a*phi + beta*div(b*grad(phi)), assembled as a PETSc matrix over the rows of ...">PetscHelmholtzOp</a>. The operator spans all AMR levels and both phases, with electrodes on the EB (<a class="el" href="classPetscHelmholtzElectrostaticEBBC.html" title="Electrode boundary conditions on the EB faces for PetscHelmholtzOp, taken from ElectrostaticEbBc.">PetscHelmholtzElectrostaticEBBC</a>) and the natural or saturation-charge condition on the interface between the gas and the dielectrics. Periodic domains and multi-valued cells are not supported. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af8294b926fb7766de43c85c59a73da69" name="af8294b926fb7766de43c85c59a73da69"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af8294b926fb7766de43c85c59a73da69">&#9670;&#160;</a></span>FieldSolverAMG() <span class="overload">[1/2]</span></h2>
@@ -693,6 +754,57 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 
 </div>
 </div>
+<a id="a9fefa953821f48f141cc539f3b668a71" name="a9fefa953821f48f141cc539f3b668a71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fefa953821f48f141cc539f3b668a71">&#9670;&#160;</a></span>monitorResidual()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PetscErrorCode FieldSolverAMG::monitorResidual </td>
+          <td>(</td>
+          <td class="paramtype">KSP</td>          <td class="paramname"><span class="paramname"><em>a_ksp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PetscInt</td>          <td class="paramname"><span class="paramname"><em>a_iteration</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">PetscReal</td>          <td class="paramname"><span class="paramname"><em>a_residualNorm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>a_context</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>KSP monitor that prints the residual at every iteration, as the Krylov solvers of <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> do. </p>
+<p>The residual is in the norm the KSP tests convergence on (the preconditioned residual for left-preconditioned KSPs), relative to that norm at the first iteration. The rate is the reduction factor since the previous iteration. With petsc_verbosity 2 and above the true residual b - A*x is also printed, relative to the zero-residual b. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ksp</td><td>The KSP </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_iteration</td><td>Iteration number </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_residualNorm</td><td>Residual norm of the KSP </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_context</td><td>The <a class="el" href="classFieldSolverAMG.html" title="Electrostatic field solver that assembles the operator as a PETSc matrix and solves it with a PETSc K...">FieldSolverAMG</a> instance </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>PETSc error code </dd></dl>
+
+</div>
+</div>
 <a id="af2a4b9dcf8e171066bccaa80dbce9640" name="af2a4b9dcf8e171066bccaa80dbce9640"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af2a4b9dcf8e171066bccaa80dbce9640">&#9670;&#160;</a></span>operator=() <span class="overload">[1/2]</span></h2>
 
@@ -926,8 +1038,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </table>
 </div><div class="memdoc">
 
-<p>Change the permittivities used by the solver. Not supported yet, and aborts. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Change the permittivities used by the solver, e.g. for a semi-implicit scheme. </p>
+<p>The solver must be set up first. The operator is refilled with the new coefficients, and the preconditioner is rebuilt at the next solve. The coefficients stay in use until the solver is set up again, e.g. after a regrid. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_permittivityCell</td><td>Cell-centered permittivity </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_permittivityFace</td><td>Face-centered permittivity </td></tr>
@@ -1011,7 +1123,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_potential</td><td>Potential </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_rho</td><td>Space charge density </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_sigma</td><td>Surface charge density. Not used, since there are no embedded boundaries yet. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_sigma</td><td>Surface charge density on the interface between the gas and the dielectrics </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_zeroPhi</td><td>Use zero as the initial guess or not </td></tr>
   </table>
   </dd>
@@ -1019,6 +1131,32 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <dl class="section return"><dt>Returns</dt><dd>True if the solver converged. </dd></dl>
 
 <p>Implements <a class="el" href="classFieldSolver.html#a34597bb394dc4eaf8dc20a08e5c25801">FieldSolver</a>.</p>
+
+</div>
+</div>
+<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a7d5d45de5fcf47ef4e1d070f0421dc06" name="a7d5d45de5fcf47ef4e1d070f0421dc06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d5d45de5fcf47ef4e1d070f0421dc06">&#9670;&#160;</a></span>m_petscVerbosity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int FieldSolverAMG::m_petscVerbosity</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Verbosity of the PETSc solve. </p>
+<p>At 1 and above, the residual is printed at every Krylov iteration. At 2 and above, the true residual is printed too. At 3 and above, the solver and the preconditioner are viewed after each solve. </p>
 
 </div>
 </div>

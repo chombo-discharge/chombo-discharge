@@ -134,6 +134,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~PetscGrid</b> () 
 <tr class="memdesc:afacd075ae958cbf527feb3adcbb0ca42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rewrite a two-level stencil, over cells on a level and the next finer level, as a stencil over global PETSc rows.  <br /></td></tr>
 <tr class="memitem:a21761b7ab8e2f5ac22478e1feda59f48" id="r_a21761b7ab8e2f5ac22478e1feda59f48"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classPetscStencil.html">PetscStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a21761b7ab8e2f5ac22478e1feda59f48">getPetscStencilWithCoarserLevel</a> (const VoFStencil &amp;a_stencil, const VoFStencil &amp;a_coarStencil, const int a_level, const DataIndex &amp;a_din, const int a_phase) const noexcept</td></tr>
 <tr class="memdesc:a21761b7ab8e2f5ac22478e1feda59f48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rewrite a two-level stencil, over cells on a level and the next coarser level, as a stencil over global PETSc rows.  <br /></td></tr>
+<tr class="memitem:aec6813e1c29f44ae2fd6989f378526df" id="r_aec6813e1c29f44ae2fd6989f378526df"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec6813e1c29f44ae2fd6989f378526df">replaceGhostCells</a> (VoFStencil &amp;a_stencil, VoFStencil &amp;a_stencilCoar, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const int a_level, const DataIndex &amp;a_din) const noexcept</td></tr>
+<tr class="memdesc:aec6813e1c29f44ae2fd6989f378526df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils.  <br /></td></tr>
+<tr class="memitem:a2858251422880e1ef8476535089c9c11" id="r_a2858251422880e1ef8476535089c9c11"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classPetscStencil.html">PetscStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2858251422880e1ef8476535089c9c11">getPetscStencilWithGhostCells</a> (const VoFStencil &amp;a_stencilCoar, const VoFStencil &amp;a_stencil, const VoFStencil &amp;a_stencilFine, const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;a_interpolator, const int a_level, const DataIndex &amp;a_din, const int a_phase) const noexcept</td></tr>
+<tr class="memdesc:a2858251422880e1ef8476535089c9c11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rewrite a stencil over three levels, whose part on the middle level may contain coarse-fine ghost cells, as a stencil over global PETSc rows.  <br /></td></tr>
 <tr class="memitem:a9f1afd99e3dce5e968011b1da2cf6d6f" id="r_a9f1afd99e3dce5e968011b1da2cf6d6f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f1afd99e3dce5e968011b1da2cf6d6f">create</a> (Vec &amp;a_x) noexcept</td></tr>
 <tr class="memdesc:a9f1afd99e3dce5e968011b1da2cf6d6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a PETSc vector.  <br /></td></tr>
 <tr class="memitem:aaf673687d1c0f47eedfbc83309859baf" id="r_aaf673687d1c0f47eedfbc83309859baf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf673687d1c0f47eedfbc83309859baf">destroy</a> (Vec &amp;a_x) noexcept</td></tr>
@@ -1030,6 +1034,75 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx<
 
 </div>
 </div>
+<a id="a2858251422880e1ef8476535089c9c11" name="a2858251422880e1ef8476535089c9c11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2858251422880e1ef8476535089c9c11">&#9670;&#160;</a></span>getPetscStencilWithGhostCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPetscStencil.html">PetscStencil</a> PetscGrid::getPetscStencilWithGhostCells </td>
+          <td>(</td>
+          <td class="paramtype">const VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencilCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencil</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencilFine</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_interpolator</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_phase</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Rewrite a stencil over three levels, whose part on the middle level may contain coarse-fine ghost cells, as a stencil over global PETSc rows. </p>
+<p>The ghost cells in a_stencil are replaced as in replaceGhostCells. The parts then resolve as in getPetscStencilWithCoarserLevel and getPetscStencilWithFinerLevel: a_stencilCoar is in the index space of grid a_din coarsened, and a_stencilFine in the index space of grid a_din refined. Aborts if the coarse part is not empty on level 0, or the fine part on the finest level. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stencilCoar</td><td>Stencil over cells on level a_level - 1 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stencil</td><td>Stencil over cells on level a_level, possibly with coarse-fine ghost cells </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_stencilFine</td><td>Stencil over cells on level a_level + 1 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpolator</td><td>Coarse-fine interpolator of level a_level, for phase a_phase. Null on level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level of a_stencil </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on level a_level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The sum of the three stencils, over global PETSc rows, compressed (unique, ascending rows). </dd></dl>
+
+</div>
+</div>
 <a id="ac8e1696de9d776d1ec813b80abda507c" name="ac8e1696de9d776d1ec813b80abda507c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac8e1696de9d776d1ec813b80abda507c">&#9670;&#160;</a></span>getRefinementRatios()</h2>
 
@@ -1190,6 +1263,62 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_dx<
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_y</td><td>chombo-discharge data holder </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>PETSc vector </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aec6813e1c29f44ae2fd6989f378526df" name="aec6813e1c29f44ae2fd6989f378526df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec6813e1c29f44ae2fd6989f378526df">&#9670;&#160;</a></span>replaceGhostCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PetscGrid::replaceGhostCells </td>
+          <td>(</td>
+          <td class="paramtype">VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencil</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VoFStencil &amp;</td>          <td class="paramname"><span class="paramname"><em>a_stencilCoar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>a_interpolator</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int</td>          <td class="paramname"><span class="paramname"><em>a_level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const DataIndex &amp;</td>          <td class="paramname"><span class="paramname"><em>a_din</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Replace the coarse-fine ghost cells in a stencil over level a_level cells by their interpolation stencils. </p>
+<p>Each ghost cell entry is removed from a_stencil, and its stencil from <a class="el" href="classEBMultigridInterpolator.html#a81fde242c42296b15cb7117ddbc52d26" title="Get the stencil that coarseFineInterp uses to fill a ghost cell.">EBMultigridInterpolator::getGhostStencil</a>, times the entry's weight, is added to a_stencil (the part on level a_level) and a_stencilCoar (the part on level a_level - 1, in the index space of grid a_din coarsened). Entries that are not ghost cells are kept. Aborts if a_stencil has a ghost cell and a_interpolator is null. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_stencil</td><td>Stencil over cells on level a_level </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_stencilCoar</td><td>Stencil over cells on level a_level - 1 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interpolator</td><td>Coarse-fine interpolator of level a_level, for the phase of the stencil. Null on level 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index on the level </td></tr>
   </table>
   </dd>
 </dl>

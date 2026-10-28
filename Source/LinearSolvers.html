@@ -237,6 +237,11 @@ The result of the least squares computation is represented as a stencil:</p>
 <div class="math notranslate nohighlight" id="eq-dirichletelliptic">
 \[\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Phi_{\textrm{B}}\)</span> is the value on the boundary, the <span class="math notranslate nohighlight">\(w\)</span> are weights for grid points <span class="math notranslate nohighlight">\(\mathbf{i}\)</span>, and the sum runs over cells in the domain.</p>
+<p>A stencil is only accepted if <span class="math notranslate nohighlight">\(w_{\textrm{B}} &gt; 0\)</span>, i.e. if the normal derivative increases with the boundary value.
+Where the geometry is poorly resolved, e.g. on coarse multigrid levels, the cells of a neighborhood can lie nearly in the plane of the boundary, and the least squares fit can then give <span class="math notranslate nohighlight">\(w_{\textrm{B}} \leq 0\)</span>.
+Such a stencil is rejected, and the next neighborhood or a lower order is tried.
+If no stencil is accepted, there is no flux through the EB face of the cell.
+On the interface between two phases, this also keeps <span class="math notranslate nohighlight">\(b_1w_{\textrm{B},1} + b_2w_{\textrm{B},2}\)</span> positive, which the boundary value is divided by (see <a class="reference internal" href="#chap-jumpcondition"><span class="std std-ref">Jump conditions</span></a>).</p>
 <p>Note that the gradient reconstruction can end up requiring more than one ghost cell layer near the embedded boundaries.
 For example, <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 19</span></a> shows a typical stencil region which is built when using second order gradient reconstruction on the EB.
 In this case the gradient reconstruction requires a stencil with a radius of 2, but as the cut-cell lies on the refinement boundary the stencil reaches into two layers of ghost cells.

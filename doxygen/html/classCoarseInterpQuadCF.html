@@ -112,8 +112,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~CoarseInterpQuadC
 <tr class="memdesc:a5bd818d8f028abb2b587b9c3b8db0b33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move constructor. <br /></td></tr>
 <tr class="memitem:a9f645376e4fdb01e598953d1f4ca52c9" id="r_a9f645376e4fdb01e598953d1f4ca52c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f645376e4fdb01e598953d1f4ca52c9">operator=</a> (<a class="el" href="classCoarseInterpQuadCF.html">CoarseInterpQuadCF</a> &amp;&amp;) noexcept=default</td></tr>
 <tr class="memdesc:a9f645376e4fdb01e598953d1f4ca52c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move assignment.  <br /></td></tr>
-<tr class="memitem:a7310fe46025888ca0415d3c78ce59584" id="r_a7310fe46025888ca0415d3c78ce59584"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7310fe46025888ca0415d3c78ce59584">define</a> (const DisjointBoxLayout &amp;a_dblFine, const ProblemDomain &amp;a_domainCoar, const DataIndex &amp;a_dit, const Box &amp;a_fineGhostCells, int a_refRat, int a_ignoreDir) noexcept</td></tr>
-<tr class="memdesc:a7310fe46025888ca0415d3c78ce59584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
+<tr class="memitem:ae13f69c103a2cd1401979c20c23efe7f" id="r_ae13f69c103a2cd1401979c20c23efe7f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae13f69c103a2cd1401979c20c23efe7f">define</a> (const DisjointBoxLayout &amp;a_dblFine, const ProblemDomain &amp;a_domainCoar, const DataIndex &amp;a_dit, const Box &amp;a_fineGhostCells, int a_refRat, int a_ignoreDir, const EBISBox &amp;a_ebisBoxCoar) noexcept</td></tr>
+<tr class="memdesc:ae13f69c103a2cd1401979c20c23efe7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function. Puts object in usable state.  <br /></td></tr>
 <tr class="memitem:a7c7a21cda335eaff7f5b95eebf23caf8" id="r_a7c7a21cda335eaff7f5b95eebf23caf8"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c7a21cda335eaff7f5b95eebf23caf8">computeFirstDeriv</a> (const FArrayBox &amp;a_coarPhi, const IntVect &amp;a_ivCoar, int a_dir, int a_coarVar) const noexcept</td></tr>
 <tr class="memdesc:a7c7a21cda335eaff7f5b95eebf23caf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute first-derivative Taylor term in direction a_dir.  <br /></td></tr>
 <tr class="memitem:a24c2a8f9eb6d5bf3703b25ba072f8377" id="r_a24c2a8f9eb6d5bf3703b25ba072f8377"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a24c2a8f9eb6d5bf3703b25ba072f8377">computeSecondDeriv</a> (const FArrayBox &amp;a_coarPhi, const IntVect &amp;a_ivCoar, int a_dir, int a_coarVar) const noexcept</td></tr>
@@ -153,6 +153,8 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:af1f117c50a1ca1aaaef637705a34cc49" id="r_af1f117c50a1ca1aaaef637705a34cc49"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af1f117c50a1ca1aaaef637705a34cc49">defineValidCells</a> (const EBISBox &amp;a_ebisBoxCoar) noexcept</td></tr>
+<tr class="memdesc:af1f117c50a1ca1aaaef637705a34cc49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute m_validCells.  <br /></td></tr>
 <tr class="memitem:af19236675fcf8b8a92640c54bbf3582f" id="r_af19236675fcf8b8a92640c54bbf3582f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af19236675fcf8b8a92640c54bbf3582f">defineStencils</a> () noexcept</td></tr>
 <tr class="memdesc:af19236675fcf8b8a92640c54bbf3582f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute all first-derivative stencils in the coarse grid cells.  <br /></td></tr>
 <tr class="memitem:af2af226a28df58b39a0d0746701ca1f8" id="r_af2af226a28df58b39a0d0746701ca1f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2af226a28df58b39a0d0746701ca1f8">defineMixedDerivStencils</a> () noexcept</td></tr>
@@ -172,6 +174,9 @@ ProblemDomain&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainCoar
 <tr class="memitem:a8eb774aed0e3b27a05b4a7c4d6885dca" id="r_a8eb774aed0e3b27a05b4a7c4d6885dca"><td class="memItemLeft" align="right" valign="top"><a id="a8eb774aed0e3b27a05b4a7c4d6885dca" name="a8eb774aed0e3b27a05b4a7c4d6885dca"></a>
 DataIndex&#160;</td><td class="memItemRight" valign="bottom"><b>m_dit</b></td></tr>
 <tr class="memdesc:a8eb774aed0e3b27a05b4a7c4d6885dca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data index in the fine grid. <br /></td></tr>
+<tr class="memitem:af5b3067720b0df89b010a5b54c55b09b" id="r_af5b3067720b0df89b010a5b54c55b09b"><td class="memItemLeft" align="right" valign="top"><a id="af5b3067720b0df89b010a5b54c55b09b" name="af5b3067720b0df89b010a5b54c55b09b"></a>
+DenseIntVectSet&#160;</td><td class="memItemRight" valign="bottom"><b>m_validCells</b></td></tr>
+<tr class="memdesc:af5b3067720b0df89b010a5b54c55b09b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The coarse cells the stencils may use: within two cells of the stencil box, in the domain, not under any fine box, and not covered by the EB. <br /></td></tr>
 <tr class="memitem:a589ebe2555b224ee710daa77da109553" id="r_a589ebe2555b224ee710daa77da109553"><td class="memItemLeft" align="right" valign="top"><a id="a589ebe2555b224ee710daa77da109553" name="a589ebe2555b224ee710daa77da109553"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>m_ignoreDir</b></td></tr>
 <tr class="memdesc:a589ebe2555b224ee710daa77da109553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolation direction to ignore. <br /></td></tr>
@@ -350,8 +355,8 @@ BaseFab&lt; DerivStencil &gt;&#160;</td><td class="memItemRight" valign="bottom"
 
 </div>
 </div>
-<a id="a7310fe46025888ca0415d3c78ce59584" name="a7310fe46025888ca0415d3c78ce59584"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7310fe46025888ca0415d3c78ce59584">&#9670;&#160;</a></span>define()</h2>
+<a id="ae13f69c103a2cd1401979c20c23efe7f" name="ae13f69c103a2cd1401979c20c23efe7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae13f69c103a2cd1401979c20c23efe7f">&#9670;&#160;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -387,7 +392,12 @@ BaseFab&lt; DerivStencil &gt;&#160;</td><td class="memItemRight" valign="bottom"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>a_ignoreDir</em></span>&#160;)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>a_ignoreDir</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBISBox &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebisBoxCoar</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -406,6 +416,7 @@ BaseFab&lt; DerivStencil &gt;&#160;</td><td class="memItemRight" valign="bottom"
     <tr><td class="paramdir">[in]</td><td class="paramname">a_fineGhostCells</td><td>Ghost cells to interpolate (on the fine level) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement factor between coarse and fine </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ignoreDir</td><td>Coordinate to ignore when doing the interpolation. I.e., we interpolate in all coordinates except this one. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisBoxCoar</td><td>EB geometry of the coarsened fine grid a_dit, so that the stencils do not use coarse cells covered by the EB. </td></tr>
   </table>
   </dd>
 </dl>
@@ -465,6 +476,39 @@ BaseFab&lt; DerivStencil &gt;&#160;</td><td class="memItemRight" valign="bottom"
 
 <p>Compute all first-derivative stencils in the coarse grid cells. </p>
 <dl class="section note"><dt>Note</dt><dd>Must be accurate to O(h^2). </dd></dl>
+
+</div>
+</div>
+<a id="af1f117c50a1ca1aaaef637705a34cc49" name="af1f117c50a1ca1aaaef637705a34cc49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1f117c50a1ca1aaaef637705a34cc49">&#9670;&#160;</a></span>defineValidCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CoarseInterpQuadCF::defineValidCells </td>
+          <td>(</td>
+          <td class="paramtype">const EBISBox &amp;</td>          <td class="paramname"><span class="paramname"><em>a_ebisBoxCoar</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute m_validCells. </p>
+<p>The fine boxes under the region are taken from the spatial index of the fine layout, since the region reaches further than the neighbors of the fine box. Cells outside the region of a_ebisBoxCoar, whose geometry is unknown, and cells covered by the EB are removed. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisBoxCoar</td><td>EB geometry of the coarsened fine grid </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

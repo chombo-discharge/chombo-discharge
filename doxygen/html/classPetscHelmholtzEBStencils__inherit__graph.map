@@ -1,0 +1,17 @@
+<map id="PetscHelmholtzEBStencils" name="PetscHelmholtzEBStencils">
+<area shape="rect" id="Node000001" title="Shared one&#45;sided EB face stencils for the EB and jump boundary conditions of PetscHelmholtzOp." alt="" coords="5,84,197,112"/>
+<area shape="rect" id="Node000002" href="$classPetscHelmholtzEBBC.html" title="Base class for the boundary conditions on the EB faces of cut cells that are not interface cells (ele..." alt="" coords="253,57,411,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,82,255,79,250,81,213,88"/>
+<area shape="rect" id="Node000006" href="$classPetscHelmholtzJumpBC.html" title="Base class for the conditions on the interface between two phases, for PetscHelmholtzOp." alt="" coords="245,109,419,137"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="212,107,247,113,241,114,212,113"/>
+<area shape="rect" id="Node000003" href="$classPetscHelmholtzDirichletEBBC.html" title="Dirichlet boundary condition phi = phi_B on the EB faces, for PetscHelmholtzOp." alt="" coords="472,5,685,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,51,511,33,506,34,417,56"/>
+<area shape="rect" id="Node000005" href="$classPetscHelmholtzNeumannEBBC.html" title="Neumann boundary condition dphi/dn = g on the EB faces, for PetscHelmholtzOp." alt="" coords="468,57,689,85"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="426,69,470,71,464,72,427,74"/>
+<area shape="rect" id="Node000004" href="$classPetscHelmholtzElectrostaticEBBC.html" title="Electrode boundary conditions on the EB faces for PetscHelmholtzOp, taken from ElectrostaticEbBc." alt="" coords="737,5,977,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="700,17,740,19,734,20,701,22"/>
+<area shape="rect" id="Node000007" href="$classPetscHelmholtzNaturalJumpBC.html" title="The natural jump condition b_0 * D_0 + b_1 * D_1 = sigma on the interface between two phases." alt="" coords="467,109,689,137"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="434,121,469,123,464,123,435,126"/>
+<area shape="rect" id="Node000008" href="$classPetscHelmholtzSaturationChargeJumpBC.html" title="The saturation charge condition D_p = 0 on the interface, on the side of one phase p,..." alt="" coords="483,161,673,206"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="407,139,486,160,481,160,406,144"/>
+</map>

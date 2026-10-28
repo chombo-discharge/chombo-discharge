@@ -109,12 +109,19 @@
 <li class="toctree-l3"><a class="reference internal" href="#saturation-charge-bc">Saturation charge BC</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#fieldsolveramg">FieldSolverAMG</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#discretization">Discretization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Solver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#limitations">Limitations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#frequency-dependent-permittivity">Frequency dependent permittivity</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#convolution-approach">Convolution approach</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auxiliary-differential-equation">Auxiliary differential equation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#limitations">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Limitations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-application-s">Example application(s)</a></li>
 </ul>
 </li>
@@ -199,7 +206,7 @@ The code for the electrostatics solver is given in <code class="file docutils li
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
 <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> can solve over three phases, gas, dielectric, and electrode, and thus it uses <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code> functionality where data is defined over multiple phases (see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>).</p>
 <p>Note that in order to separate the electrostatic solver interface from the implementation, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is a pure class without knowledge of numerical discretizations.
-Currently, our only supported subclass is <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a>, which supplies a finite-volume discretization that is solved with geometric multigrid.</p>
+There are two subclasses, which discretize the problem in the same way but solve it differently: <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a> solves it with geometric multigrid, and <a class="reference internal" href="#chap-fieldsolveramg"><span class="std std-ref">FieldSolverAMG</span></a> assembles it as a matrix and solves it with algebraic multigrid from PETSc.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classFieldSolver.html">FieldSolver C++ API</a> for the complete interface.</p>
@@ -525,7 +532,7 @@ This is encapsulated by the pure member function</p>
 </section>
 <section id="fieldsolvergmg">
 <span id="chap-fieldsolvergmg"></span><h2>FieldSolverGMG<a class="headerlink" href="#fieldsolvergmg" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 7</a>, and is currently the only implementation of <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 7</a>.</p>
 <p>The discretization used by <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> is described in <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
 The underlying solver type is a Helmholtz solver, but <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> considers only the Laplacian term.
 For further details on the spatial discretization, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.</p>
@@ -534,8 +541,8 @@ For further details on the spatial discretization, see <a class="reference inter
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> has a number of switches for determining how it operates.
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below</p>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-number">Listing 26 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-number">Listing 26 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
 # FieldSolverGMG class options
 # ====================================================================================================
@@ -635,6 +642,99 @@ Support for setting <span class="math notranslate nohighlight">\(\partial_n\Phi\
 </div>
 </section>
 </section>
+<section id="fieldsolveramg">
+<span id="chap-fieldsolveramg"></span><h2>FieldSolverAMG<a class="headerlink" href="#fieldsolveramg" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> solves the same problem as <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, but assembles it as one PETSc matrix over all AMR levels and both phases, and solves it with a PETSc Krylov solver preconditioned by algebraic multigrid (GAMG by default).
+It requires a build with <code class="docutils literal notranslate"><span class="pre">USE_PETSC</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> (see <a class="reference internal" href="../Base/Installation.html#chap-installation"><span class="std std-ref">Installation</span></a>), and is used like any other <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>, e.g. as <code class="docutils literal notranslate"><span class="pre">FieldStepper&lt;FieldSolverAMG&gt;</span></code>; <code class="docutils literal notranslate"><span class="pre">Exec/Examples/Electrostatics/PETSc</span></code> selects between the two solvers with an input option.</p>
+<section id="when-to-use-it">
+<h3>When to use it<a class="headerlink" href="#when-to-use-it" title="Permalink to this heading"></a></h3>
+<p>Geometric multigrid needs coarsened versions of the geometry, and loses accuracy when features of the embedded boundary are smaller than the coarse grid cells.
+Algebraic multigrid builds its coarse levels from the matrix, so it does not depend on how the geometry coarsens, and is the choice for geometries where <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> converges slowly or not at all.
+Its setup is more expensive than that of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> (the matrix and the AMG hierarchy are built once per regrid), and on simple geometries <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> can be faster.</p>
+</section>
+<section id="discretization">
+<h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading"></a></h3>
+<p>The discretization is that of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> (see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>): a cell-centered finite-volume scheme, weighted by the volume fraction, with face fluxes interpolated to the face centroids on cut cells, least-squares stencils for the normal derivative on the embedded boundary, and the natural or saturation-charge condition on the interface between the gas and the dielectrics.
+The embedded-boundary stencils use the same neighbourhoods and least-squares fits as those of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, but are built from PETSc rows only (cells on the same level, coarse-fine ghost cells through their interpolation stencils, and cells on the next finer level in place of cells covered by it), and use one order and one weight (<code class="docutils literal notranslate"><span class="pre">eb_order</span></code>, <code class="docutils literal notranslate"><span class="pre">eb_weight</span></code>) for both electrodes and interfaces.
+With the same order and weight, the two solvers mostly agree to the solver tolerance.
+The largest differences seen in the tests, about one percent of the potential, are in cut cells with very small volume fractions.</p>
+<p>The rows of the matrix are volume-weighted: the kappa-weighted divergence of each cell is multiplied by <span class="math notranslate nohighlight">\((\Delta x_l/\Delta x_0)^D\)</span> on level <span class="math notranslate nohighlight">\(l\)</span>, and the right-hand side carries the same weights.
+This does not change the solution, but without it the row scale grows by <span class="math notranslate nohighlight">\(r^2\)</span> per level (<span class="math notranslate nohighlight">\(r\)</span> the refinement ratio), and a flux through a refinement boundary enters the fine and the coarse row with weights that differ by the volume ratio.
+Algebraic multigrid, which assumes a nearly symmetric matrix, converges much more slowly on such a matrix; in <code class="docutils literal notranslate"><span class="pre">Exec/Examples/Electrostatics/PETSc</span></code> the weighting cut the number of GMRES iterations by a factor of about three.
+The matrix is still not symmetric: the coarse-fine interpolation stencils and the embedded-boundary stencils are one-sided.</p>
+</section>
+<section id="id1">
+<h3>Solver configuration<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-number">Listing 27 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> class.</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# FieldSolverAMG class options
+# ====================================================================================================
+FieldSolverAMG.verbosity             = -1               ## Class verbosity
+FieldSolverAMG.bc.x.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverAMG.bc.x.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverAMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverAMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverAMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverAMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverAMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverAMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
+
+FieldSolverAMG.ksp_type                       = gmres        ## Outer Krylov solver: a PETSc KSP type, e.g. 'gmres', 'fgmres', 'bicgstab', 'cg'
+FieldSolverAMG.ksp_gmres_restart              = 30           ## Restart length of GMRES and FGMRES
+FieldSolverAMG.pc_type                        = gamg         ## PETSc preconditioner, e.g. 'gamg', 'hypre'
+FieldSolverAMG.amg_smoother_ksp               = chebyshev    ## Multigrid level smoother: PETSc KSP type, e.g. 'chebyshev', 'richardson'
+FieldSolverAMG.amg_smoother_pc                = sor          ## Multigrid level smoother: PETSc PC type, e.g. 'sor', 'jacobi'
+FieldSolverAMG.amg_smoother_its               = 2            ## Multigrid level smoother: number of smoothing steps
+FieldSolverAMG.gamg_threshold                 = 0.02         ## GAMG graph threshold for dropping weak connections (negative keeps all)
+FieldSolverAMG.gamg_aggressive_coarsening     = 1            ## GAMG: number of levels coarsened aggressively (0 = none)
+FieldSolverAMG.ksp_rtol                       = 1.E-10       ## Relative residual tolerance, in the KSP's norm (preconditioned for left-preconditioned KSPs)
+FieldSolverAMG.ksp_atol                       = 1.E-50       ## Absolute residual tolerance
+FieldSolverAMG.ksp_max_iter                   = 200          ## Maximum number of Krylov iterations
+FieldSolverAMG.petsc_verbosity                = -1           ## PETSc solve verbosity: residual per iteration (1), true residual (2), solver view (3)
+FieldSolverAMG.kappa_source                   = true         ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverAMG.eb_order                       = 1            ## Highest order of the EB face stencils (electrodes and interfaces)
+FieldSolverAMG.eb_weight                      = 4            ## Least-squares weighting of the EB face stencils
+FieldSolverAMG.jump_bc                        = natural      ## Interface condition: 'natural' or 'saturation_charge'
+</pre></div>
+</div>
+</div>
+<p>The domain boundary conditions (<code class="docutils literal notranslate"><span class="pre">bc.coord.side</span></code>), <code class="docutils literal notranslate"><span class="pre">jump_bc</span></code>, <code class="docutils literal notranslate"><span class="pre">kappa_source</span></code> and <code class="docutils literal notranslate"><span class="pre">plt_vars</span></code> are as for <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>.
+The remaining options configure PETSc:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ksp_type</span></code> is the outer Krylov solver, any PETSc KSP type (e.g. <code class="docutils literal notranslate"><span class="pre">gmres</span></code>, <code class="docutils literal notranslate"><span class="pre">fgmres</span></code>, <code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>, <code class="docutils literal notranslate"><span class="pre">cg</span></code>), and <code class="docutils literal notranslate"><span class="pre">ksp_gmres_restart</span></code> its restart length for GMRES and FGMRES.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ksp_rtol</span></code>, <code class="docutils literal notranslate"><span class="pre">ksp_atol</span></code> and <code class="docutils literal notranslate"><span class="pre">ksp_max_iter</span></code> are its exit criteria. They apply to the volume-weighted system, so fine-level residuals count less than coarse-level ones. Note also that GMRES measures the relative tolerance in the preconditioned norm, so the true residual can be larger than <code class="docutils literal notranslate"><span class="pre">ksp_rtol</span></code> suggests.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">petsc_verbosity</span></code> controls the output of the solve. At 1 and above the residual is printed at every Krylov iteration, in the norm the KSP tests convergence on and relative to its first iteration. At 2 and above the true residual <span class="math notranslate nohighlight">\(b - Ax\)</span>, relative to <span class="math notranslate nohighlight">\(b\)</span>, is printed too, at the cost of computing it every iteration. At 3 and above the solver and the preconditioner (e.g. the levels of the algebraic multigrid hierarchy) are printed to standard output after each solve.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pc_type</span></code> is the PETSc preconditioner.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amg_smoother_ksp</span></code>, <code class="docutils literal notranslate"><span class="pre">amg_smoother_pc</span></code> and <code class="docutils literal notranslate"><span class="pre">amg_smoother_its</span></code> set the smoother on each level of a multigrid preconditioner. The default, Chebyshev with SOR, is more robust than PETSc’s default (Chebyshev with Jacobi) for the rows of small cut cells.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gamg_threshold</span></code> and <code class="docutils literal notranslate"><span class="pre">gamg_aggressive_coarsening</span></code> control how GAMG builds its coarse levels; other preconditioners ignore them. GAMG groups each unknown with its strongly connected neighbours, and each group becomes one unknown on the next coarser level. Connections weaker than <code class="docutils literal notranslate"><span class="pre">gamg_threshold</span></code>, relative to the diagonal, are not followed when forming the groups (a negative value follows all of them). A threshold of 0.01–0.02 keeps groups from forming across the weak couplings of small cut cells and refinement boundaries, which speeds up convergence, at the cost of smaller groups and thus more memory in the hierarchy; larger values can make the setup very expensive. <code class="docutils literal notranslate"><span class="pre">gamg_aggressive_coarsening</span></code> is the number of levels, from the finest, that are coarsened aggressively, i.e. grouped over neighbours of neighbours. This makes the hierarchy much smaller but each coarse level cruder, so the solve takes more iterations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eb_order</span></code> and <code class="docutils literal notranslate"><span class="pre">eb_weight</span></code> are the order and the least-squares weight of the embedded-boundary stencils. <code class="docutils literal notranslate"><span class="pre">eb_order</span></code> must not exceed <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_radius</span></code>.</p></li>
+</ul>
+<p>With <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> above 1, each solve ends with a summary in the same form as <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>’s Krylov solvers, e.g.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverAMG - gmres converged (rel.res = 3.96903e-10, unweighted rel.res = 5.36091e-10, |r| = 0.0169176, |r_zero| = 4.26241e+07, iters = 13, reason = CONVERGED_RTOL)
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">rel.res</span></code> is the true residual <span class="math notranslate nohighlight">\(|b - Ax|_2\)</span> of the volume-weighted system relative to the zero-residual <span class="math notranslate nohighlight">\(|b|_2\)</span>, and <code class="docutils literal notranslate"><span class="pre">unweighted</span> <span class="pre">rel.res</span></code> the same with the row weights removed from both.
+<code class="docutils literal notranslate"><span class="pre">|r|</span></code> and <code class="docutils literal notranslate"><span class="pre">|r_zero|</span></code> are the weighted norms.
+The residual that is plotted (<code class="docutils literal notranslate"><span class="pre">res</span></code>) is unweighted.</p>
+<p>Any other PETSc option can be given with the prefix <code class="docutils literal notranslate"><span class="pre">fieldsolveramg_</span></code> through the <code class="docutils literal notranslate"><span class="pre">PETSC_OPTIONS</span></code> environment variable, e.g.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PETSC_OPTIONS</span><span class="o">=</span><span class="s2">"-fieldsolveramg_pc_gamg_agg_nsmooths 1 -fieldsolveramg_ksp_view_mat binary:A.bin"</span><span class="w"> </span>mpirun<span class="w"> </span>-x<span class="w"> </span>PETSC_OPTIONS<span class="w"> </span>-np<span class="w"> </span><span class="m">4</span><span class="w"> </span>./main2d.*.ex<span class="w"> </span>example2d.inputs
+</pre></div>
+</div>
+<p>PETSc options given this way take precedence over the input file.
+Options without a value, e.g. <code class="docutils literal notranslate"><span class="pre">-fieldsolveramg_ksp_monitor</span></code>, can also be given on the command line, but options with a value cannot, because <code class="docutils literal notranslate"><span class="pre">ParmParse</span></code> reads the command line too and aborts on them.</p>
+</section>
+<section id="limitations">
+<h3>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Periodic domains are not supported.</p></li>
+<li><p>Multi-valued cells are not supported, and abort.</p></li>
+<li><p>With the saturation charge condition, the AMG solve can converge slowly on complex geometries.</p></li>
+<li><p>As in <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, a cut cell where no least-squares fit is accepted (see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolverdirichletbc"><span class="std std-ref">Dirichlet</span></a>) has no flux through its EB face, and its potential is determined by its other faces only. With <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> above 0, <code class="docutils literal notranslate"><span class="pre">FieldSolverAMG</span></code> prints the number of such cells, counted per phase, when it sets up the solver.</p></li>
+<li><p>With the saturation charge condition, an interface cell without a stencil on the gas side gets a zero normal derivative on both sides, and hence no surface charge, in both solvers.</p></li>
+</ul>
+</section>
+</section>
 <section id="frequency-dependent-permittivity">
 <h2>Frequency dependent permittivity<a class="headerlink" href="#frequency-dependent-permittivity" title="Permalink to this heading"></a></h2>
 <p>Frequency-dependent permittivities are fundamentally supported by the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> elliptic discretization but none of the solvers implement it.
@@ -689,8 +789,8 @@ This depends both on the order of the ADE, as well as its discretization.
 Normally, the ADE is a low-order PDE and a few terms are sufficient.</p>
 </section>
 </section>
-<section id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h2>
+<section id="id2">
+<h2>Limitations<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>There is currently a bug where having a dielectric interface align <em>completely</em> with a grid face will cause the cell to be identified as an electrode EB.

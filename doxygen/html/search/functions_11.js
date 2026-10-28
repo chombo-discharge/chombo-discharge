@@ -84,7 +84,7 @@ var searchData=
   ['removeparticles_81',['removeParticles',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7470e40fd0da1ee7d7481bf9b879deca',1,'Physics::ItoKMC::ItoKMCPhysics']]],
   ['removephysicalparticles_82',['removePhysicalParticles',['../namespaceParticleManagement.html#a3101a3eb71695c1270e934df28b8af22',1,'ParticleManagement']]],
   ['replaceface_83',['replaceFace',['../classPolyhedralEB_1_1CutCellBody.html#a8e63cb0422cf7448d14fcc75c0dac50f',1,'PolyhedralEB::CutCellBody']]],
-  ['replaceghostcells_84',['replaceGhostCells',['../classPetscHelmholtzOp.html#ac670ceaa14433ab0ba34644be7103280',1,'PetscHelmholtzOp']]],
+  ['replaceghostcells_84',['replaceGhostCells',['../classPetscGrid.html#aec6813e1c29f44ae2fd6989f378526df',1,'PetscGrid']]],
   ['reportgrids_85',['reportGrids',['../classComputationalGeometry.html#a040d0757e4a146bd103572dad38ed987',1,'ComputationalGeometry']]],
   ['reportunresolvedrefinement_86',['reportUnresolvedRefinement',['../classPolyhedralGeometryShop.html#af1c0efc683e3416080c368cda00af46a',1,'PolyhedralGeometryShop']]],
   ['reseed_87',['reseed',['../classPerlinSdf.html#a706a95a264292fd6ae652950f2a56cf8',1,'PerlinSdf']]],

@@ -4,7 +4,7 @@ var searchData=
   ['accumulatemoments_1',['accumulateMoments',['../classPolyhedralEB_1_1CutCellBody.html#a1990616c12b246cc662672c47ddac6e8',1,'PolyhedralEB::CutCellBody']]],
   ['adaptivereport_2',['adaptiveReport',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a849b6622fec0b850b87ff6e7f4ac0042',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper']]],
   ['add_3',['add',['../classPetscStencil.html#a4d55d8d5e61fca2e4e00e2704385ae95',1,'PetscStencil::add()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html#a1ce2828017d41be6ec7278e33295c663',1,'Physics::ItoKMC::ItoKMCSurfaceReactions::add()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html#a79c7553f090519bc7c6d17276692185a',1,'Physics::ItoKMC::ItoKMCSurfaceReactionSet::add()']]],
-  ['addboundaryconditionstorhs_4',['addBoundaryConditionsToRHS',['../classPetscHelmholtzOp.html#a5e6bb739f15088b764ad942b0ef74fbc',1,'PetscHelmholtzOp']]],
+  ['addboundaryconditionstorhs_4',['addBoundaryConditionsToRHS',['../classPetscHelmholtzOp.html#a79172f1a06503f37a0f36b77b3cd2957',1,'PetscHelmholtzOp']]],
   ['addbytes_5',['addBytes',['../namespaceParticleMemory.html#aa9e457fca57722f19d1cfb8b3a716812',1,'ParticleMemory']]],
   ['adddata_6',['addData',['../classLookupTable1D.html#a43e01ecb6aca129be36421736eac1ad1',1,'LookupTable1D::addData(const Ts &amp;... x) noexcept'],['../classLookupTable1D.html#acdd32bcc3cbd49e0fdd650014777443e',1,'LookupTable1D::addData(const std::array&lt; T, N+1 &gt; &amp;x) noexcept']]],
   ['adddielectric_7',['addDielectric',['../classWireWire.html#a2160f5f78182f037df1c7566553c6d13',1,'WireWire']]],
