@@ -215,9 +215,13 @@ MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>&
     const VoFStencil DphiDnStencil  = LeastSquares::projectGradSten(gradStencil, -normal);
     const Real       boundaryWeight = -LeastSquares::sumAllWeights(DphiDnStencil);
 
-    a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
+    // The normal derivative must increase with the boundary value. A fit with wb <= 0, e.g. from cells that lie nearly
+    // in the plane of the boundary, is rejected so that the caller tries another neighborhood or a lower order.
+    if (boundaryWeight > 0.0) {
+      a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
 
-    foundStencil = true;
+      foundStencil = true;
+    }
   }
 
   return foundStencil;

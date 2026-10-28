@@ -98,6 +98,12 @@ The result of the least squares computation is represented as a stencil:
 
 where :math:`\Phi_{\textrm{B}}` is the value on the boundary, the :math:`w` are weights for grid points :math:`\mathbf{i}`, and the sum runs over cells in the domain.
 
+A stencil is only accepted if :math:`w_{\textrm{B}} > 0`, i.e. if the normal derivative increases with the boundary value.
+Where the geometry is poorly resolved, e.g. on coarse multigrid levels, the cells of a neighborhood can lie nearly in the plane of the boundary, and the least squares fit can then give :math:`w_{\textrm{B}} \leq 0`.
+Such a stencil is rejected, and the next neighborhood or a lower order is tried.
+If no stencil is accepted, there is no flux through the EB face of the cell.
+On the interface between two phases, this also keeps :math:`b_1w_{\textrm{B},1} + b_2w_{\textrm{B},2}` positive, which the boundary value is divided by (see :ref:`Chap:JumpCondition`).
+
 Note that the gradient reconstruction can end up requiring more than one ghost cell layer near the embedded boundaries.
 For example, :numref:`Fig:StencilRegion` shows a typical stencil region which is built when using second order gradient reconstruction on the EB.
 In this case the gradient reconstruction requires a stencil with a radius of 2, but as the cut-cell lies on the refinement boundary the stencil reaches into two layers of ghost cells.

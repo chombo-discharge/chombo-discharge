@@ -28,7 +28,7 @@ FieldSolver
 ``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
-Currently, our only supported subclass is :ref:`Chap:FieldSolverGMG`, which supplies a finite-volume discretization that is solved with geometric multigrid.
+There are two subclasses, which discretize the problem in the same way but solve it differently: :ref:`Chap:FieldSolverGMG` solves it with geometric multigrid, and :ref:`Chap:FieldSolverAMG` assembles it as a matrix and solves it with algebraic multigrid from PETSc.
 
 .. tip::
    
@@ -410,7 +410,7 @@ where ``a_phi`` is the resulting potential that was computed with the space char
 FieldSolverGMG
 --------------------
 
-``FieldSolverGMG`` implements a multigrid routine for solving :eq:`Poisson`, and is currently the only implementation of ``FieldSolver``.
+``FieldSolverGMG`` implements a multigrid routine for solving :eq:`Poisson`.
 
 The discretization used by ``FieldSolverGMG`` is described in :ref:`Chap:LinearSolvers`.
 The underlying solver type is a Helmholtz solver, but ``FieldSolverGMG`` considers only the Laplacian term.
@@ -489,6 +489,80 @@ To use the other format (in which one of the fluxes is specified), use
    
    The ``saturation_charge`` option will set the derivative of :math:`\partial_n\Phi` to zero on the gas side.
    Support for setting :math:`\partial_n\Phi` to a specified (e.g., non-zero) value on either side is missing, but is straightforward to implement.
+
+.. _Chap:FieldSolverAMG:
+
+FieldSolverAMG
+--------------
+
+``FieldSolverAMG`` solves the same problem as ``FieldSolverGMG``, but assembles it as one PETSc matrix over all AMR levels and both phases, and solves it with a PETSc Krylov solver preconditioned by algebraic multigrid (GAMG by default).
+It requires a build with ``USE_PETSC = TRUE`` (see :ref:`Chap:Installation`), and is used like any other ``FieldSolver``, e.g. as ``FieldStepper<FieldSolverAMG>``; ``Exec/Examples/Electrostatics/PETSc`` selects between the two solvers with an input option.
+
+When to use it
+______________
+
+Geometric multigrid needs coarsened versions of the geometry, and loses accuracy when features of the embedded boundary are smaller than the coarse grid cells.
+Algebraic multigrid builds its coarse levels from the matrix, so it does not depend on how the geometry coarsens, and is the choice for geometries where ``FieldSolverGMG`` converges slowly or not at all.
+Its setup is more expensive than that of ``FieldSolverGMG`` (the matrix and the AMG hierarchy are built once per regrid), and on simple geometries ``FieldSolverGMG`` can be faster.
+
+Discretization
+______________
+
+The discretization is that of ``FieldSolverGMG`` (see :ref:`Chap:LinearSolvers`): a cell-centered finite-volume scheme, weighted by the volume fraction, with face fluxes interpolated to the face centroids on cut cells, least-squares stencils for the normal derivative on the embedded boundary, and the natural or saturation-charge condition on the interface between the gas and the dielectrics.
+The embedded-boundary stencils use the same neighbourhoods and least-squares fits as those of ``FieldSolverGMG``, but are built from PETSc rows only (cells on the same level, coarse-fine ghost cells through their interpolation stencils, and cells on the next finer level in place of cells covered by it), and use one order and one weight (``eb_order``, ``eb_weight``) for both electrodes and interfaces.
+With the same order and weight, the two solvers mostly agree to the solver tolerance.
+The largest differences seen in the tests, about one percent of the potential, are in cut cells with very small volume fractions.
+
+The rows of the matrix are volume-weighted: the kappa-weighted divergence of each cell is multiplied by :math:`(\Delta x_l/\Delta x_0)^D` on level :math:`l`, and the right-hand side carries the same weights.
+This does not change the solution, but without it the row scale grows by :math:`r^2` per level (:math:`r` the refinement ratio), and a flux through a refinement boundary enters the fine and the coarse row with weights that differ by the volume ratio.
+Algebraic multigrid, which assumes a nearly symmetric matrix, converges much more slowly on such a matrix; in ``Exec/Examples/Electrostatics/PETSc`` the weighting cut the number of GMRES iterations by a factor of about three.
+The matrix is still not symmetric: the coarse-fine interpolation stencils and the embedded-boundary stencils are one-sided.
+
+Solver configuration
+____________________
+
+.. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolverAMG.options
+   :language: text
+   :caption: Input options for the ``FieldSolverAMG`` class.
+
+The domain boundary conditions (``bc.coord.side``), ``jump_bc``, ``kappa_source`` and ``plt_vars`` are as for ``FieldSolverGMG``.
+The remaining options configure PETSc:
+
+* ``ksp_type`` is the outer Krylov solver, any PETSc KSP type (e.g. ``gmres``, ``fgmres``, ``bicgstab``, ``cg``), and ``ksp_gmres_restart`` its restart length for GMRES and FGMRES.
+* ``ksp_rtol``, ``ksp_atol`` and ``ksp_max_iter`` are its exit criteria. They apply to the volume-weighted system, so fine-level residuals count less than coarse-level ones. Note also that GMRES measures the relative tolerance in the preconditioned norm, so the true residual can be larger than ``ksp_rtol`` suggests.
+* ``petsc_verbosity`` controls the output of the solve. At 1 and above the residual is printed at every Krylov iteration, in the norm the KSP tests convergence on and relative to its first iteration. At 2 and above the true residual :math:`b - Ax`, relative to :math:`b`, is printed too, at the cost of computing it every iteration. At 3 and above the solver and the preconditioner (e.g. the levels of the algebraic multigrid hierarchy) are printed to standard output after each solve.
+* ``pc_type`` is the PETSc preconditioner.
+* ``amg_smoother_ksp``, ``amg_smoother_pc`` and ``amg_smoother_its`` set the smoother on each level of a multigrid preconditioner. The default, Chebyshev with SOR, is more robust than PETSc's default (Chebyshev with Jacobi) for the rows of small cut cells.
+* ``gamg_threshold`` and ``gamg_aggressive_coarsening`` control how GAMG builds its coarse levels; other preconditioners ignore them. GAMG groups each unknown with its strongly connected neighbours, and each group becomes one unknown on the next coarser level. Connections weaker than ``gamg_threshold``, relative to the diagonal, are not followed when forming the groups (a negative value follows all of them). A threshold of 0.01--0.02 keeps groups from forming across the weak couplings of small cut cells and refinement boundaries, which speeds up convergence, at the cost of smaller groups and thus more memory in the hierarchy; larger values can make the setup very expensive. ``gamg_aggressive_coarsening`` is the number of levels, from the finest, that are coarsened aggressively, i.e. grouped over neighbours of neighbours. This makes the hierarchy much smaller but each coarse level cruder, so the solve takes more iterations.
+* ``eb_order`` and ``eb_weight`` are the order and the least-squares weight of the embedded-boundary stencils. ``eb_order`` must not exceed ``AmrMesh.mg_interp_radius``.
+
+With ``verbosity`` above 1, each solve ends with a summary in the same form as ``FieldSolverGMG``'s Krylov solvers, e.g.
+
+.. code-block:: text
+
+   FieldSolverAMG - gmres converged (rel.res = 3.96903e-10, unweighted rel.res = 5.36091e-10, |r| = 0.0169176, |r_zero| = 4.26241e+07, iters = 13, reason = CONVERGED_RTOL)
+
+where ``rel.res`` is the true residual :math:`|b - Ax|_2` of the volume-weighted system relative to the zero-residual :math:`|b|_2`, and ``unweighted rel.res`` the same with the row weights removed from both.
+``|r|`` and ``|r_zero|`` are the weighted norms.
+The residual that is plotted (``res``) is unweighted.
+
+Any other PETSc option can be given with the prefix ``fieldsolveramg_`` through the ``PETSC_OPTIONS`` environment variable, e.g.
+
+.. code-block:: bash
+
+   PETSC_OPTIONS="-fieldsolveramg_pc_gamg_agg_nsmooths 1 -fieldsolveramg_ksp_view_mat binary:A.bin" mpirun -x PETSC_OPTIONS -np 4 ./main2d.*.ex example2d.inputs
+
+PETSc options given this way take precedence over the input file.
+Options without a value, e.g. ``-fieldsolveramg_ksp_monitor``, can also be given on the command line, but options with a value cannot, because ``ParmParse`` reads the command line too and aborts on them.
+
+Limitations
+___________
+
+* Periodic domains are not supported.
+* Multi-valued cells are not supported, and abort.
+* With the saturation charge condition, the AMG solve can converge slowly on complex geometries.
+* As in ``FieldSolverGMG``, a cut cell where no least-squares fit is accepted (see :ref:`Chap:LinearSolverDirichletBC`) has no flux through its EB face, and its potential is determined by its other faces only. With ``verbosity`` above 0, ``FieldSolverAMG`` prints the number of such cells, counted per phase, when it sets up the solver.
+* With the saturation charge condition, an interface cell without a stencil on the gas side gets a zero normal derivative on both sides, and hence no surface charge, in both solvers.
 
 Frequency dependent permittivity
 --------------------------------

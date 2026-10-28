@@ -13,7 +13,7 @@
 // Chombo includes
 #include <CH_Timer.H>
 #include <DenseIntVectSet.H>
-#include <NeighborIterator.H>
+#include <BoxIterator.H>
 
 // Our includes
 #include <CD_CoarseInterpQuadCF.H>
@@ -36,7 +36,8 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
                            const DataIndex&         a_dit,
                            const Box&               a_fineGhostCells,
                            const int                a_refRat,
-                           const int                a_ignoreDir) noexcept
+                           const int                a_ignoreDir,
+                           const EBISBox&           a_ebisBoxCoar) noexcept
 {
   CH_TIME("CoarseInterpQuadCF::define");
 
@@ -74,6 +75,7 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
 #endif
 
   // Compute stencils.
+  this->defineValidCells(a_ebisBoxCoar);
   this->defineStencils();
   this->defineMixedDerivStencils();
 
@@ -81,18 +83,48 @@ CoarseInterpQuadCF::define(const DisjointBoxLayout& a_dblFine,
 }
 
 void
+CoarseInterpQuadCF::defineValidCells(const EBISBox& a_ebisBoxCoar) noexcept
+{
+  CH_TIME("CoarseInterpQuadCF::defineValidCells");
+
+  // Stencils have a radius of 2.
+  const Box region = grow(m_stencilBox, 2);
+
+  m_validCells = DenseIntVectSet(region, true);
+
+  // Coarse cells under any fine box, from the spatial index of the fine layout.
+  Vector<int> fineBoxes;
+
+  m_dblFine.intersecting(refine(region, m_refRat), fineBoxes);
+
+  for (int i = 0; i < fineBoxes.size(); i++) {
+    m_validCells -= coarsen((*m_dblFine.rawPtr())[fineBoxes[i]].box, m_refRat) & region;
+  }
+
+  m_validCells &= m_domainCoar;
+
+  // Coarse cells covered by the EB. Only cells where the EB geometry is known can be checked, so the others are not
+  // used either. The stencils only read cells within m_ghostVectorCoFi of the coarsened fine box, where the coarsened
+  // fine data, and hence the geometry, are defined, so in practice this removes nothing they need.
+  const Box ebRegion = region & a_ebisBoxCoar.getRegion();
+
+  m_validCells &= ebRegion;
+
+  if (!ebRegion.isEmpty()) {
+    for (BoxIterator bit(ebRegion); bit.ok(); ++bit) {
+      if (a_ebisBoxCoar.isCovered(bit())) {
+        m_validCells -= bit();
+      }
+    }
+  }
+}
+
+void
 CoarseInterpQuadCF::defineStencils() noexcept
 {
   CH_TIME("CoarseInterpQuadCF::defineStencils");
 
-  // Stencils will have a radius of 2, so figure out which cells we are allowed to use.
-  DenseIntVectSet validCells(grow(m_stencilBox, 2), true);
-  validCells -= coarsen(m_dblFine[m_dit], m_refRat);
-  NeighborIterator nit(m_dblFine);
-  for (nit.begin(m_dit); nit.ok(); ++nit) {
-    validCells -= coarsen(m_dblFine[nit()], m_refRat);
-  }
-  validCells &= m_domainCoar;
+  const DenseIntVectSet& validCells = m_validCells;
 
   // Go through the cells and figure out which FD approximation we will use.
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -146,14 +178,7 @@ CoarseInterpQuadCF::defineMixedDerivStencils() noexcept
 #if CH_SPACEDIM == 3
   CH_TIME("CoarseInterpQuadCF::defineMixedDerivStencils");
 
-  // Stencils will have a radius of 2, so figure out which cells we are allowed to use.
-  DenseIntVectSet validCells(grow(m_stencilBox, 2), true);
-  validCells -= coarsen(m_dblFine[m_dit], m_refRat);
-  NeighborIterator nit(m_dblFine);
-  for (nit.begin(m_dit); nit.ok(); ++nit) {
-    validCells -= coarsen(m_dblFine[nit()], m_refRat);
-  }
-  validCells &= m_domainCoar;
+  const DenseIntVectSet& validCells = m_validCells;
 
   constexpr Real factor = 1. / 16.;
 

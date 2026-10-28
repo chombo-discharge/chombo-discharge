@@ -392,7 +392,10 @@ MFHelmholtzJumpBC::buildAverageStencils()
       Real& denomPhase0 = m_denom[din].getIVFAB(firstPhase)(vof0, vofComp);
       Real& denomPhase1 = m_denom[din].getIVFAB(secondPhase)(vof0, vofComp);
 
-      const Real denom = 1. / (weightPhase0 + weightPhase1);
+      // The weights are positive, or zero on a side without a stencil. Without a stencil on either side there is no
+      // flux through the interface, and phiB is not used.
+      const Real sumWeights = weightPhase0 + weightPhase1;
+      const Real denom      = (sumWeights > 0.0) ? 1. / sumWeights : 0.0;
 
       denomPhase0 = denom;
       denomPhase1 = denom;
@@ -546,9 +549,14 @@ MFHelmholtzJumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil
     const VoFStencil DphiDnStencil  = LeastSquares::projectGradSten(gradStencil, -normal);
     const Real       boundaryWeight = -LeastSquares::sumAllWeights(DphiDnStencil);
 
-    a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
+    // The normal derivative must increase with the boundary value. A fit with wb <= 0, e.g. from cells that lie nearly
+    // in the plane of the interface, is rejected so that the caller tries another neighborhood or a lower order. With
+    // wb <= 0 on one side, bp*wp + bq*wq can vanish, which makes phiB unbounded and the relaxation diverge.
+    if (boundaryWeight > 0.0) {
+      a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
 
-    foundStencil = true;
+      foundStencil = true;
+    }
   }
 
   return foundStencil;

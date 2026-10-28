@@ -6,7 +6,7 @@
 
 /**
  * @file   main.cpp
- * @brief  Example of FieldSolverAMG: a potential difference and a space charge blob in a box, on three AMR levels.
+ * @brief  Example of FieldSolverAMG: the ProfiledSurface problem, a live electrode above a profiled dielectric.
  * @author Robert Marskar
  */
 
@@ -18,8 +18,7 @@
 
 // Our includes
 #include <CD_Driver.H>
-#include <CD_RegularGeometry.H>
-#include <CD_RefinementBoxTagger.H>
+#include <CD_DiskProfiledPlane.H>
 #include <CD_FieldStepper.H>
 #include <CD_FieldSolverAMG.H>
 #include <CD_FieldSolverGMG.H>
@@ -36,13 +35,10 @@ main(int argc, char* argv[])
   // Scoped so that the PETSc objects are destroyed before ChomboDischarge::finalize finalizes PETSc and MPI.
   {
     std::string fieldSolver;
-    std::string realm;
 
     ParmParse ppExample("PETScExample");
-    ParmParse ppStepper("FieldStepper");
 
     ppExample.get("field_solver", fieldSolver);
-    ppStepper.get("realm", realm);
 
     // The same problem can be solved with FieldSolverGMG, for comparing the plot files.
     RefCountedPtr<TimeStepper> timestepper;
@@ -57,10 +53,11 @@ main(int argc, char* argv[])
       MayDay::Abort("PETScExample -- 'field_solver' must be 'amg' or 'gmg'");
     }
 
-    // There is no embedded boundary, so the refinement comes from the boxes given to RefinementBoxTagger.
-    auto compgeom = RefCountedPtr<ComputationalGeometry>(new RegularGeometry());
+    // The mesh is refined only around the geometry (Driver.refine_electrodes, refine_dielectrics), so there is no
+    // tagger.
+    auto compgeom = RefCountedPtr<ComputationalGeometry>(new DiskProfiledPlane());
     auto amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
-    auto tagger   = RefCountedPtr<CellTagger>(new RefinementBoxTagger(amr, realm));
+    auto tagger   = RefCountedPtr<CellTagger>(nullptr);
     auto driver   = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
     driver->setupAndRun();
