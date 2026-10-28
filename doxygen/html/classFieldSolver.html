@@ -1917,9 +1917,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 </div><div class="memdoc">
 
 <p>Set the permittivities. </p>
-<p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB. </p>
-
-<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a1809fbefa9d47cdb160536ca6d70971a">FieldSolverGMG</a>.</p>
+<p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB, including the ghost cells and one layer of tangential ghost faces of each phase, which the face-centroid flux interpolation of cut faces reads. </p>
 
 </div>
 </div>

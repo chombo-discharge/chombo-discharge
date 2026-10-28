@@ -240,7 +240,6 @@ In addition, the user must set up a voltage curve and associated boundary condit
 <span class="cm"> * setElectrodeDirichletFunction.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setVoltage</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_voltage</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This allows setting a time-dependent voltage on electrodes and domain boundaries.
@@ -472,7 +471,6 @@ The member function that does this is</p>
 <span class="cm"> * @param[in] a_function  Voltage on the electrode.</span>
 <span class="cm"> */</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">setElectrodeDirichletFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_electrode</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ElectrostaticEbBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_function</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, the type <code class="docutils literal notranslate"><span class="pre">ElectrostaticEbBc::BcFunction</span></code> is just an alias of <code class="docutils literal notranslate"><span class="pre">std::function&lt;Real(const</span> <span class="pre">RealVect</span> <span class="pre">a_position,</span> <span class="pre">const</span> <span class="pre">Real</span> <span class="pre">a_time)&gt;</span></code>.
@@ -656,8 +654,7 @@ Its setup is more expensive than that of <code class="docutils literal notransla
 <h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading"></a></h3>
 <p>The discretization is that of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> (see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>): a cell-centered finite-volume scheme, weighted by the volume fraction, with face fluxes interpolated to the face centroids on cut cells, least-squares stencils for the normal derivative on the embedded boundary, and the natural or saturation-charge condition on the interface between the gas and the dielectrics.
 The embedded-boundary stencils use the same neighbourhoods and least-squares fits as those of <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code>, but are built from PETSc rows only (cells on the same level, coarse-fine ghost cells through their interpolation stencils, and cells on the next finer level in place of cells covered by it), and use one order and one weight (<code class="docutils literal notranslate"><span class="pre">eb_order</span></code>, <code class="docutils literal notranslate"><span class="pre">eb_weight</span></code>) for both electrodes and interfaces.
-With the same order and weight, the two solvers mostly agree to the solver tolerance.
-The largest differences seen in the tests, about one percent of the potential, are in cut cells with very small volume fractions.</p>
+With the same order and weight, the two solvers agree to the solver tolerance.</p>
 <p>The rows of the matrix are volume-weighted: the kappa-weighted divergence of each cell is multiplied by <span class="math notranslate nohighlight">\((\Delta x_l/\Delta x_0)^D\)</span> on level <span class="math notranslate nohighlight">\(l\)</span>, and the right-hand side carries the same weights.
 This does not change the solution, but without it the row scale grows by <span class="math notranslate nohighlight">\(r^2\)</span> per level (<span class="math notranslate nohighlight">\(r\)</span> the refinement ratio), and a flux through a refinement boundary enters the fine and the coarse row with weights that differ by the volume ratio.
 Algebraic multigrid, which assumes a nearly symmetric matrix, converges much more slowly on such a matrix; in <code class="docutils literal notranslate"><span class="pre">Exec/Examples/Electrostatics/PETSc</span></code> the weighting cut the number of GMRES iterations by a factor of about three.

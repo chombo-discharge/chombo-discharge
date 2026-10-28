@@ -226,6 +226,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocate</b
 <tr class="memdesc:ab8c78cf97497e7b05f1fc255f774f133 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <br /></td></tr>
 <tr class="memitem:a1bc3d0208cbf3ccd782f603db7295c4b inherit pub_methods_classFieldSolver" id="r_a1bc3d0208cbf3ccd782f603db7295c4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a1bc3d0208cbf3ccd782f603db7295c4b">setAmr</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amr)</td></tr>
 <tr class="memdesc:a1bc3d0208cbf3ccd782f603db7295c4b inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the amr object.  <br /></td></tr>
+<tr class="memitem:aa8372b83812dada88c651e69c13d823e inherit pub_methods_classFieldSolver" id="r_aa8372b83812dada88c651e69c13d823e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">setPermittivities</a> ()</td></tr>
+<tr class="memdesc:aa8372b83812dada88c651e69c13d823e inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the permittivities.  <br /></td></tr>
 <tr class="memitem:a4b2386198f31e61c4f04f5b27e6325e4 inherit pub_methods_classFieldSolver" id="r_a4b2386198f31e61c4f04f5b27e6325e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a4b2386198f31e61c4f04f5b27e6325e4">writePlotFile</a> ()</td></tr>
 <tr class="memdesc:a4b2386198f31e61c4f04f5b27e6325e4 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <br /></td></tr>
 <tr class="memitem:a83d7523f112723ad7b036527589375b3 inherit pub_methods_classFieldSolver" id="r_a83d7523f112723ad7b036527589375b3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a83d7523f112723ad7b036527589375b3">postCheckpoint</a> ()</td></tr>
@@ -312,8 +314,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseKappaSou
 <tr class="memitem:a9c5f3768b91047db66086c161e054229" id="r_a9c5f3768b91047db66086c161e054229"><td class="memItemLeft" align="right" valign="top"><a id="a9c5f3768b91047db66086c161e054229" name="a9c5f3768b91047db66086c161e054229"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseJumpBC</b> ()</td></tr>
 <tr class="memdesc:a9c5f3768b91047db66086c161e054229"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse JumpBC type. <br /></td></tr>
-<tr class="memitem:a1809fbefa9d47cdb160536ca6d70971a" id="r_a1809fbefa9d47cdb160536ca6d70971a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1809fbefa9d47cdb160536ca6d70971a">setPermittivities</a> () override</td></tr>
-<tr class="memdesc:a1809fbefa9d47cdb160536ca6d70971a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the permittivities.  <br /></td></tr>
 <tr class="memitem:a82da2f983c82c8706babf69779d86b28" id="r_a82da2f983c82c8706babf69779d86b28"><td class="memItemLeft" align="right" valign="top"><a id="a82da2f983c82c8706babf69779d86b28" name="a82da2f983c82c8706babf69779d86b28"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setupHelmholtzFactory</b> ()</td></tr>
 <tr class="memdesc:a82da2f983c82c8706babf69779d86b28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the multigrid operator factory. <br /></td></tr>
@@ -1133,36 +1133,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>m_nCo
 <p>This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). </p>
 
 <p>Reimplemented from <a class="el" href="classFieldSolver.html#a3dc5a56250e5391f959a67e55e854b97">FieldSolver</a>.</p>
-
-</div>
-</div>
-<a id="a1809fbefa9d47cdb160536ca6d70971a" name="a1809fbefa9d47cdb160536ca6d70971a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1809fbefa9d47cdb160536ca6d70971a">&#9670;&#160;</a></span>setPermittivities()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void FieldSolverGMG::setPermittivities </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel protected">protected</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the permittivities. </p>
-<p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills necessary ghost faces/cells. </p>
-
-<p>Reimplemented from <a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">FieldSolver</a>.</p>
 
 </div>
 </div>

@@ -102,6 +102,7 @@ Some example programs for this module are given in
 * :file:`$DISCHARGE_HOME/Exec/Examples/Electrostatics/Armadillo`
 * :file:`$DISCHARGE_HOME/Exec/Examples/Electrostatics/Mechshaft`
 * :file:`$DISCHARGE_HOME/Exec/Examples/Electrostatics/ProfiledSurface`  
+* :file:`$DISCHARGE_HOME/Exec/Examples/Electrostatics/DielectricVoid`, a gas void in a dielectric, which compares the potential, its gradient, and the gradient interpolated to the cell centroids with the exact solution
 
 
 Verification
