@@ -513,9 +513,6 @@ PetscHelmholtzEBStencils::getExpansionShift(const int        a_phase,
                                             const VolIndex&  a_vof) const noexcept
 {
   CH_TIME("PetscHelmholtzEBStencils::getExpansionShift");
-  if (m_verbose) {
-    pout() << "PetscHelmholtzEBStencils::getExpansionShift" << endl;
-  }
 
   RealVect shift = RealVect::Zero;
 

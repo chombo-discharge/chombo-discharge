@@ -323,7 +323,8 @@ There the two one-sided expansions of the potential differ by that distance time
 The electric field in the cut cells is then first order.
 
 When the implicit function of the dielectrics is given to the operator (``FieldSolverGMG.gmg_interface_points`` and ``FieldSolverAMG.interface_points``, see :ref:`Chap:FieldSolverGMG`), both gradient reconstructions are instead expanded about the point on the interface closest to the EB face centroid.
-The point is found with Newton iterations along the gradient of the implicit function, and the EB face centroid is kept where they fail or move the point by half a cell or more.
+The point is found with Newton iterations along the gradient of the implicit function, and the EB face centroid is kept where they fail to converge or move the point by half a cell or more.
+The normal in the jump condition is still the normal of the EB face; for a smooth surface it differs from the surface normal at the interface point by an angle of second order in :math:`\Delta x`, which does not reduce the order of the flux.
 In ``Exec/Examples/Electrostatics/DielectricVoid`` (a gas void in a dielectric, second-order stencils) this makes the electric field in the cut cells second order in 2D.
 In ``FieldSolverGMG`` the interface points are used on the AMR levels only, and the coarsened multigrid levels keep the EB face centroids.
 

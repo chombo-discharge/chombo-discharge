@@ -305,11 +305,12 @@ PolyUtils::projectOntoSurface(const RefCountedPtr<BaseIF>& a_impFunc,
     x += step;
 
     if (step.vectorLength() < a_tolerance) {
-      break;
+      return x;
     }
   }
 
-  return x;
+  // The iterations did not converge.
+  return a_point;
 }
 
 #include <CD_NamespaceFooter.H>
