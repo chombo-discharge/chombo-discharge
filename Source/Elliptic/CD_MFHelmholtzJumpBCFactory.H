@@ -88,6 +88,7 @@ public:
    * @brief Set the implicit function whose zero level set is the interface.
    * @details On AMR levels, i.e. when the valid cells are given, the jump conditions are then imposed at the points on
    * the interface closest to the boundary centroids. A null implicit function imposes them at the boundary centroids.
+   * The implicit function is evaluated concurrently from OpenMP threads, so BaseIF::value must be thread safe.
    * @param[in] a_probLo    Lower left corner of the domain
    * @param[in] a_interface Implicit function
    */

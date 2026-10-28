@@ -125,6 +125,7 @@ public:
    * @brief Set the implicit function whose zero level set is the boundary.
    * @details When it is not null, the stencils for the normal derivative are expanded about the point on the boundary
    * closest to the EB face centroid rather than about the EB face centroid itself. Takes effect at the next define().
+   * The implicit function is evaluated concurrently from OpenMP threads, so BaseIF::value must be thread safe.
    * @param[in] a_interface Implicit function, or null.
    */
   virtual void

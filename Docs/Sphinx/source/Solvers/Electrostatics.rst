@@ -443,6 +443,9 @@ The flag ``gmg_interface_points`` selects where the jump condition is imposed.
 If it is ``false``, it is imposed at the centroids of the EB faces of the cut cells.
 If it is ``true``, it is imposed at the points on the dielectric surface closest to them, which are found from the implicit function of the dielectrics.
 With second-order jump stencils (``gmg_jump_order = 2``) this makes the electric field in the cut cells more accurate, see :ref:`Chap:JumpCondition`.
+The implicit function is that of all the dielectrics together, and each point is projected onto its nearest zero.
+Where two dielectric surfaces come within a cell of each other, that need not be the surface that cuts the cell; points that would move by half a cell or more keep the EB face centroid.
+The option has been verified on a single dielectric body (``Exec/Examples/Electrostatics/DielectricVoid``).
 
 .. note::
    
